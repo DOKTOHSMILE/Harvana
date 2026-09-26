@@ -1,10 +1,10 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.application' version '8.2.2'
 }
 
 android {
     namespace 'com.ajoo.app'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.ajoo.app"
@@ -12,7 +12,6 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -30,24 +29,15 @@ android {
 }
 
 dependencies {
-    // Core Android & UI
     implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.core:core:1.18.0'
-    implementation 'androidx.appcompat:appcompat-resources:1.7.1'
-    implementation 'com.google.android.material:material:1.14.0'
+    implementation 'androidx.core:core:1.13.0'
+    implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.biometric:biometric:1.1.0'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
-    
-    // Utilities & Scanners
-    implementation 'org.bouncycastle:bcprov-jdk18on:1.86'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.77'
     implementation 'com.github.yuriy-budiyev:code-scanner:2.3.2'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    
-    // Glide
-    implementation 'com.github.bumptech.glide:glide:5.0.7'
-    annotationProcessor 'com.github.bumptech.glide:compiler:5.0.7'
-    
-    // Firebase & Play Services (Aligned)
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
     implementation 'com.google.firebase:firebase-auth:22.3.1'
     implementation 'com.google.firebase:firebase-storage:20.3.0'
     implementation 'com.google.firebase:firebase-database:20.3.0'

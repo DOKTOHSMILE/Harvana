@@ -1,0 +1,731 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/_coordinator"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<com.google.android.material.appbar.AppBarLayout
+		android:id="@+id/_app_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay">
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/_toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/colorPrimary"
+			app:popupTheme="@style/AppTheme.PopupOverlay" />
+	</com.google.android.material.appbar.AppBarLayout>
+	<androidx.core.widget.NestedScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@color/colorP2pBg"
+		android:fillViewport="true"
+		android:clipToPadding="false"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<LinearLayout
+			android:id="@+id/express_root"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingTop="16dp"
+			android:paddingBottom="35dp"
+			android:orientation="vertical"
+			android:paddingStart="18dp"
+			android:paddingEnd="18dp">
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_express_membership"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				app:cardBackgroundColor="@color/colorP2pSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorAmber"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear380"
+					android:layout_width="match_parent"
+					android:layout_height="130dp"
+					android:padding="17dp"
+					android:background="@drawable/golden_bkg"
+					android:gravity="center_horizontal|center_vertical"
+					android:orientation="vertical">
+					<LinearLayout
+						android:id="@+id/linear381"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<LinearLayout
+							android:id="@+id/linear382"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_express_tier"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="PREMIUM TRADER"
+								android:textSize="10sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/tv_express_tier_description"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="4dp"
+								android:text="Express access is available to eligible high-tier P2P traders."
+								android:textSize="10sp" />
+						</LinearLayout>
+						<TextView
+							android:id="@+id/tv_express_tier_level"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="TIER 5"
+							android:textSize="11sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/linear383"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="15dp"
+						android:orientation="horizontal">
+						<LinearLayout
+							android:id="@+id/linear384"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_express_trust"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="98%"
+								android:textSize="16sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview228"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Trust score"
+								android:textSize="9sp" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/linear385"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_express_completed"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="1,248"
+								android:textSize="16sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview229"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Trades completed"
+								android:textSize="9sp" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/linear386"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_express_limit"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="₦5M"
+								android:textSize="16sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview230"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Express limit"
+								android:textSize="9sp" />
+						</LinearLayout>
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<LinearLayout
+				android:id="@+id/express_trade_selector"
+				android:layout_width="match_parent"
+				android:layout_height="48dp"
+				android:layout_marginTop="18dp"
+				android:padding="4dp"
+				android:background="@color/colorP2pSurfaceAlt"
+				android:orientation="horizontal">
+				<TextView
+					android:id="@+id/express_buy_tab"
+					android:layout_width="0dp"
+					android:layout_height="match_parent"
+					android:background="@color/colorP2pSurface"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Buy AJC"
+					android:textSize="12sp"
+					android:textStyle="bold"
+					android:layout_weight="1" />
+				<TextView
+					android:id="@+id/express_sell_tab"
+					android:layout_width="0dp"
+					android:layout_height="match_parent"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Sell AJC"
+					android:textSize="12sp"
+					android:layout_weight="1" />
+			</LinearLayout>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_express_match"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="14dp"
+				app:cardBackgroundColor="@color/colorP2pSurface"
+				app:cardCornerRadius="22dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear387"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/tv_express_action_title"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Buy AJC instantly"
+						android:textSize="17sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/tv_express_action_description"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="4dp"
+						android:text="Enter your target amount and Express will search eligible premium traders for a suitable match."
+						android:textSize="11sp"
+						android:lineSpacingExtra="2dp" />
+					<TextView
+						android:id="@+id/textview231"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="19dp"
+						android:text="AJC amount"
+						android:textSize="10sp" />
+					<LinearLayout
+						android:id="@+id/layout_express_amount"
+						android:layout_width="match_parent"
+						android:layout_height="58dp"
+						android:layout_marginTop="6dp"
+						android:background="@color/colorP2pSurfaceAlt"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingStart="15dp"
+						android:paddingEnd="15dp">
+						<TextView
+							android:id="@+id/textview232"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="AJC"
+							android:textSize="12sp"
+							android:textStyle="bold" />
+						<EditText
+							android:id="@+id/et_express_amount"
+							android:layout_width="0dp"
+							android:layout_height="match_parent"
+							android:background="@android:color/transparent"
+							android:textSize="19sp"
+							android:textStyle="bold"
+							android:hint="0.00"
+							android:inputType="numberDecimal"
+							android:layout_weight="1"
+							android:gravity="center_vertical|end"
+							android:layout_marginStart="10dp" />
+					</LinearLayout>
+					<HorizontalScrollView
+						android:id="@+id/hscroll5"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="9dp"
+						android:scrollbars="none">
+						<LinearLayout
+							android:id="@+id/linear388"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:orientation="horizontal">
+							<TextView
+								android:id="@+id/express_quick_1"
+								android:layout_width="wrap_content"
+								android:layout_height="32dp"
+								android:background="@color/colorP2pSurfaceAlt"
+								android:gravity="center_horizontal|center_vertical"
+								android:text="10 AJC"
+								android:textSize="9sp"
+								android:layout_weight="1"
+								android:paddingStart="13dp"
+								android:paddingEnd="13dp" />
+							<TextView
+								android:id="@+id/express_quick_2"
+								android:layout_width="wrap_content"
+								android:layout_height="32dp"
+								android:background="@color/colorP2pSurfaceAlt"
+								android:gravity="center_horizontal|center_vertical"
+								android:text="25 AJC"
+								android:textSize="9sp"
+								android:layout_weight="1"
+								android:layout_marginStart="6dp"
+								android:paddingStart="13dp"
+								android:paddingEnd="13dp" />
+							<TextView
+								android:id="@+id/express_quick_3"
+								android:layout_width="wrap_content"
+								android:layout_height="32dp"
+								android:background="@color/colorP2pSurfaceAlt"
+								android:gravity="center_horizontal|center_vertical"
+								android:text="50 AJC"
+								android:textSize="9sp"
+								android:layout_weight="1"
+								android:layout_marginStart="6dp"
+								android:paddingStart="13dp"
+								android:paddingEnd="13dp" />
+							<TextView
+								android:id="@+id/express_quick_4"
+								android:layout_width="wrap_content"
+								android:layout_height="32dp"
+								android:background="@color/colorP2pSurfaceAlt"
+								android:gravity="center_horizontal|center_vertical"
+								android:text="100 AJC"
+								android:textSize="9sp"
+								android:layout_weight="1"
+								android:layout_marginStart="6dp"
+								android:paddingStart="13dp"
+								android:paddingEnd="13dp" />
+						</LinearLayout>
+					</HorizontalScrollView>
+					<TextView
+						android:id="@+id/textview233"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="17dp"
+						android:text="Payment method"
+						android:textSize="10sp" />
+					<LinearLayout
+						android:id="@+id/layout_express_payment_method"
+						android:layout_width="match_parent"
+						android:layout_height="52dp"
+						android:layout_marginTop="6dp"
+						android:background="@color/colorP2pSurfaceAlt"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingStart="14dp"
+						android:paddingEnd="14dp">
+						<TextView
+							android:id="@+id/tv_express_payment_method"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Bank Transfer"
+							android:textSize="12sp"
+							android:textStyle="bold"
+							android:layout_weight="1" />
+						<TextView
+							android:id="@+id/tv_express_payment_arrow"
+							android:layout_width="35dp"
+							android:layout_height="35dp"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="&gt;"
+							android:textSize="22sp" />
+					</LinearLayout>
+					<com.google.android.material.card.MaterialCardView
+						android:id="@+id/card_express_quote"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="15dp"
+						app:cardBackgroundColor="@color/colorP2pSurface"
+						app:cardCornerRadius="16dp"
+						app:cardElevation="0dp"
+						app:strokeColor="@color/colorP2pBorder"
+						app:strokeWidth="1dp">
+						<LinearLayout
+							android:id="@+id/linear389"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:orientation="vertical">
+							<LinearLayout
+								android:id="@+id/linear390"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:orientation="horizontal">
+								<TextView
+									android:id="@+id/textview234"
+									android:layout_width="0dp"
+									android:layout_height="wrap_content"
+									android:text="Indicative rate"
+									android:textSize="10sp"
+									android:layout_weight="1" />
+								<TextView
+									android:id="@+id/tv_express_rate"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="₦1,250 / AJC"
+									android:textSize="11sp"
+									android:textStyle="bold" />
+							</LinearLayout>
+							<LinearLayout
+								android:id="@+id/linear391"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="9dp"
+								android:orientation="horizontal">
+								<TextView
+									android:id="@+id/textview235"
+									android:layout_width="0dp"
+									android:layout_height="wrap_content"
+									android:text="Estimated fiat"
+									android:textSize="10sp"
+									android:layout_weight="1" />
+								<TextView
+									android:id="@+id/tv_express_fiat"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="₦0"
+									android:textSize="11sp"
+									android:textStyle="bold" />
+							</LinearLayout>
+							<LinearLayout
+								android:id="@+id/linear392"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="9dp"
+								android:orientation="horizontal">
+								<TextView
+									android:id="@+id/textview236"
+									android:layout_width="0dp"
+									android:layout_height="wrap_content"
+									android:text="Maker / Express fee"
+									android:textSize="10sp"
+									android:layout_weight="1" />
+								<TextView
+									android:id="@+id/tv_express_fee"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Calculated at match"
+									android:textSize="10sp" />
+							</LinearLayout>
+						</LinearLayout>
+					</com.google.android.material.card.MaterialCardView>
+					<LinearLayout
+						android:id="@+id/layout_express_match_status"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:padding="12dp"
+						android:background="@color/colorP2pSurfaceAlt"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/tv_express_match_indicator"
+							android:layout_width="10dp"
+							android:layout_height="10dp"
+							android:background="@color/colorP2pAccent"
+							android:textSize="12sp" />
+						<LinearLayout
+							android:id="@+id/linear393"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1"
+							android:layout_marginStart="9dp">
+							<TextView
+								android:id="@+id/tv_express_match_title"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Ready for Express matching"
+								android:textSize="11sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/tv_express_match_description"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Your request will be matched against eligible available liquidity."
+								android:textSize="9sp" />
+						</LinearLayout>
+					</LinearLayout>
+					<TextView
+						android:id="@+id/btn_express_find_match"
+						android:layout_width="match_parent"
+						android:layout_height="52dp"
+						android:layout_marginTop="16dp"
+						android:background="@color/colorP2pAccent"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="Find Express Match"
+						android:textSize="12sp"
+						android:textStyle="bold" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:id="@+id/textview237"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="21dp"
+				android:text="Express advantages"
+				android:textSize="15sp"
+				android:textStyle="bold" />
+			<LinearLayout
+				android:id="@+id/linear394"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:orientation="horizontal">
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/card_express_fast"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorP2pSurface"
+					android:layout_weight="1"
+					android:layout_marginEnd="5dp"
+					app:cardCornerRadius="17dp"
+					app:cardElevation="0dp"
+					app:strokeColor="@color/colorP2pBorder"
+					app:strokeWidth="1dp">
+					<LinearLayout
+						android:id="@+id/linear395"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="13dp"
+						android:orientation="vertical">
+						<TextView
+							android:id="@+id/textview238"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="FAST"
+							android:textSize="9sp"
+							android:textStyle="bold" />
+						<TextView
+							android:id="@+id/textview239"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="6dp"
+							android:text="Skip manual listing search and request a direct match."
+							android:textSize="9sp"
+							android:lineSpacingExtra="2dp" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/card_express_premium"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorP2pSurface"
+					android:layout_weight="1"
+					android:layout_marginStart="5dp"
+					app:cardCornerRadius="17dp"
+					app:cardElevation="0dp"
+					app:strokeColor="@color/colorP2pBorder"
+					app:strokeWidth="1dp">
+					<LinearLayout
+						android:id="@+id/linear396"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="13dp"
+						android:orientation="vertical">
+						<TextView
+							android:id="@+id/textview240"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="PREMIUM"
+							android:textSize="9sp"
+							android:textStyle="bold" />
+						<TextView
+							android:id="@+id/textview241"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="6dp"
+							android:text="Access eligible high-tier counterparties and liquidity."
+							android:textSize="9sp"
+							android:lineSpacingExtra="2dp" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+			</LinearLayout>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_express_liquidity"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="12dp"
+				app:cardBackgroundColor="@color/colorP2pSurface"
+				app:cardCornerRadius="19dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear397"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="15dp"
+					android:orientation="vertical">
+					<LinearLayout
+						android:id="@+id/linear398"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/textview242"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Express liquidity"
+							android:textSize="13sp"
+							android:textStyle="bold"
+							android:layout_weight="1" />
+						<TextView
+							android:id="@+id/tv_express_liquidity_status"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="LIVE"
+							android:textSize="9sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/linear399"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="13dp"
+						android:orientation="horizontal">
+						<LinearLayout
+							android:id="@+id/linear400"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_express_available_ajc"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="18,420 AJC"
+								android:textSize="14sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview243"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Available liquidity"
+								android:textSize="9sp" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/linear401"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_express_counterparties"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="24"
+								android:textSize="14sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview244"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Eligible traders"
+								android:textSize="9sp" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/linear402"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_express_average_time"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Less than 1 min"
+								android:textSize="14sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview245"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Avg. match time"
+								android:textSize="9sp" />
+						</LinearLayout>
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_express_security"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="12dp"
+				app:cardBackgroundColor="@color/colorP2pSurface"
+				app:cardCornerRadius="18dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear403"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="15dp"
+					android:orientation="horizontal">
+					<TextView
+						android:id="@+id/textview246"
+						android:layout_width="34dp"
+						android:layout_height="34dp"
+						android:background="@color/colorP2pSurfaceAlt"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="OK"
+						android:textSize="10sp"
+						android:textStyle="bold" />
+					<LinearLayout
+						android:id="@+id/linear404"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:orientation="vertical"
+						android:layout_weight="1"
+						android:layout_marginStart="10dp">
+						<TextView
+							android:id="@+id/textview247"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Protected P2P execution"
+							android:textSize="12sp"
+							android:textStyle="bold" />
+						<TextView
+							android:id="@+id/tv_express_security"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="Matching does not complete a trade by itself. The selected transaction must still pass the normal order, escrow, payment and blockchain verification flow."
+							android:textSize="10sp"
+							android:lineSpacingExtra="2dp" />
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:id="@+id/tv_express_footer"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="15dp"
+				android:gravity="center_horizontal|center_vertical"
+				android:text="Express matches are subject to eligibility, available liquidity, limits and current market conditions."
+				android:textSize="9sp"
+				android:lineSpacingExtra="2dp" />
+		</LinearLayout>
+	</androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

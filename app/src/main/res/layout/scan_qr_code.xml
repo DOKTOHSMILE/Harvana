@@ -1,0 +1,59 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/_coordinator"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<com.google.android.material.appbar.AppBarLayout
+		android:id="@+id/_app_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay">
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/_toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/colorPrimary"
+			app:popupTheme="@style/AppTheme.PopupOverlay" />
+	</com.google.android.material.appbar.AppBarLayout>
+	<FrameLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="#000000"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<com.budiyev.android.codescanner.CodeScannerView
+			android:id="@+id/scanner_view"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			app:autoFocusButtonColor="#FFFFFF"
+			app:flashButtonColor="#FFFFFF"
+			app:frameColor="#00D9A5"
+			app:maskColor="#77000000" />
+		<ImageButton
+			android:id="@+id/btn_pick_from_gallery"
+			android:layout_width="56dp"
+			android:layout_height="56dp"
+			android:layout_margin="24dp"
+			android:padding="14dp"
+			android:background="@drawable/circle_button_bg_accent"
+			android:src="@drawable/icon_gallery"
+			android:scaleType="center"
+			android:layout_gravity="bottom|end"
+			android:contentDescription="PickQRcodeimagefromgallery" />
+		<TextView
+			android:id="@+id/tv_scan_error"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="48dp"
+			android:paddingTop="10dp"
+			android:paddingBottom="10dp"
+			android:background="#000000"
+			android:textSize="14sp"
+			android:textColor="#FFFFFF"
+			android:layout_gravity="center_horizontal|bottom"
+			android:paddingStart="16dp"
+			android:paddingEnd="16dp"
+			android:visibility="gone" />
+	</FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

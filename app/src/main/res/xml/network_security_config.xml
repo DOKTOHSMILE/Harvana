@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  All node traffic (REST + mining WebSocket) now runs over TLS using a
+  self-signed certificate for the node's raw IP (no domain available yet).
+  Since it's self-signed, it isn't in any device's system trust store by
+  default — this file is what makes the connection trusted, but ONLY to
+  this exact certificate, not to any CA-issued cert for this IP an attacker
+  might present. That's a pin, not a blanket "trust this IP" rule.
+
+  If the node's certificate/key is ever rotated, ajoo_node_cert.pem below
+  must be updated and the app rebuilt/redeployed in lockstep — an old app
+  install will otherwise refuse to connect to the node at all, by design.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">5.75.163.65</domain>
+        <trust-anchors>
+            <certificates src="@raw/ajoo_node_cert" />
+        </trust-anchors>
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

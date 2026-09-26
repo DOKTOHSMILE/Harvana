@@ -1,0 +1,780 @@
+<androidx.core.widget.NestedScrollView
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:fillViewport="true"
+	android:overScrollMode="never"
+	android:background="@color/colorSurface"
+	android:id="@+id/_main">
+	<LinearLayout
+		android:id="@+id/linear60"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="24dp"
+		android:orientation="vertical"
+		android:paddingHorizontal="24dp">
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/card_group_wallet"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<LinearLayout
+				android:id="@+id/linear76"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="16dp"
+				android:orientation="vertical">
+				<LinearLayout
+					android:id="@+id/linear17"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center_vertical"
+					android:orientation="horizontal">
+					<ImageView
+						android:id="@+id/imageview15"
+						android:layout_width="38dp"
+						android:layout_height="38dp"
+						android:padding="9dp"
+						android:background="@drawable/bg_settings_icon_badge"
+						android:src="@drawable/ic_wallet"
+						android:scaleType="centerInside"
+						app:tint="@color/colorAccent" />
+					<TextView
+						android:id="@+id/textview50"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:text="Group wallet"
+						android:textStyle="bold"
+						android:layout_weight="1"
+						android:textSize="15.5sp"
+						android:layout_marginStart="14dp" />
+					<TextView
+						android:id="@+id/tv_group_wallet_balance"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="0 AJC"
+						android:textSize="17sp"
+						android:textStyle="bold" />
+				</LinearLayout>
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview22"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="12dp"
+					app:cardBackgroundColor="@color/colorSurfaceAlt"
+					app:cardElevation="0dp"
+					app:cardCornerRadius="12dp"
+					app:strokeColor="@color/colorCardStroke"
+					app:strokeWidth="1dp">
+					<LinearLayout
+						android:id="@+id/linear96"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="12dp"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/tv_group_wallet_address"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="AJ0x…"
+							android:layout_weight="1"
+							android:textSize="13.5sp"
+							android:textIsSelectable="true"
+							android:fontFamily="monospace" />
+						<ImageView
+							android:id="@+id/imageview16"
+							android:layout_width="20dp"
+							android:layout_height="20dp"
+							android:src="@drawable/icon_content_copy_twotone"
+							android:scaleType="centerInside"
+							android:focusable="false"
+							android:layout_marginStart="12dp"
+							android:contentDescription="CopyAddress"
+							app:tint="@color/colorTextSecondary" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<View
+					android:id="@+id/view18"
+					android:layout_width="match_parent"
+					android:layout_height="1dp"
+					android:layout_marginTop="14dp"
+					android:layout_marginBottom="14dp"
+					android:background="@color/colorDivider" />
+				<LinearLayout
+					android:id="@+id/linear19"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center_vertical"
+					android:orientation="horizontal">
+					<TextView
+						android:id="@+id/tv_cycle_status"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:text="Slot 1 of 10"
+						android:textStyle="bold"
+						android:layout_weight="1"
+						android:textSize="13.5sp" />
+					<TextView
+						android:id="@+id/tv_cycle_percent"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="10%"
+						android:textSize="13sp"
+						android:textStyle="bold" />
+				</LinearLayout>
+				<FrameLayout
+					android:id="@+id/frame_layout86"
+					android:layout_width="match_parent"
+					android:layout_height="8dp"
+					android:layout_marginTop="10dp"
+					android:background="@drawable/bg_progress_track">
+					<View
+						android:id="@+id/view_cycle_progress"
+						android:layout_width="40dp"
+						android:layout_height="match_parent"
+						android:background="@drawable/bg_progress_fill" />
+				</FrameLayout>
+				<TextView
+					android:id="@+id/tv_cycle_hint"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="10dp"
+					android:text="Current payout goes to the member holding this slot."
+					android:textSize="11.5sp" />
+				<TextView
+					android:id="@+id/tv_group_wallet_hint"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:text="Contributions settle into this wallet. Payouts and loans leave from here."
+					android:textSize="11.5sp" />
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+		<TextView
+			android:id="@+id/textview52"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="20dp"
+			android:layout_marginBottom="8dp"
+			android:text="FINANCIAL TERMS"
+			android:textStyle="bold"
+			android:textSize="10.5sp"
+			android:letterSpacing="0.06" />
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/cardview18"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<LinearLayout
+				android:id="@+id/linear20"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical">
+				<LinearLayout
+					android:id="@+id/linear78"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal">
+					<LinearLayout
+						android:id="@+id/linear79"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:padding="14dp"
+						android:orientation="vertical"
+						android:layout_weight="1">
+						<TextView
+							android:id="@+id/textview7"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="TYPE"
+							android:textStyle="bold"
+							android:textSize="10.5sp"
+							android:letterSpacing="0.06" />
+						<TextView
+							android:id="@+id/tv_rule_type"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="—"
+							android:textStyle="bold"
+							android:textSize="13.5sp" />
+					</LinearLayout>
+					<View
+						android:id="@+id/view14"
+						android:layout_width="1dp"
+						android:layout_height="match_parent"
+						android:background="@color/colorDivider" />
+					<LinearLayout
+						android:id="@+id/linear15"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:padding="14dp"
+						android:orientation="vertical"
+						android:layout_weight="1">
+						<TextView
+							android:id="@+id/textview8"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="CONTRIBUTION"
+							android:textStyle="bold"
+							android:textSize="10.5sp"
+							android:letterSpacing="0.06" />
+						<TextView
+							android:id="@+id/tv_rule_contribution"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="—"
+							android:textStyle="bold"
+							android:textSize="13.5sp" />
+					</LinearLayout>
+				</LinearLayout>
+				<View
+					android:id="@+id/view16"
+					android:layout_width="match_parent"
+					android:layout_height="1dp"
+					android:background="@color/colorDivider" />
+				<LinearLayout
+					android:id="@+id/linear18"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal">
+					<LinearLayout
+						android:id="@+id/linear21"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:padding="14dp"
+						android:orientation="vertical"
+						android:layout_weight="1">
+						<TextView
+							android:id="@+id/textview9"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="LOCATION"
+							android:textStyle="bold"
+							android:textSize="10.5sp"
+							android:letterSpacing="0.06" />
+						<TextView
+							android:id="@+id/tv_rule_location"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="—"
+							android:textStyle="bold"
+							android:textSize="13.5sp" />
+					</LinearLayout>
+					<View
+						android:id="@+id/view22"
+						android:layout_width="1dp"
+						android:layout_height="match_parent"
+						android:background="@color/colorDivider" />
+					<LinearLayout
+						android:id="@+id/linear23"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:padding="14dp"
+						android:orientation="vertical"
+						android:layout_weight="1">
+						<TextView
+							android:id="@+id/tv_label_admin_or_interest"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="ADMIN / INTEREST"
+							android:textStyle="bold"
+							android:textSize="10.5sp"
+							android:letterSpacing="0.06" />
+						<TextView
+							android:id="@+id/tv_rule_admin_fee"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="—"
+							android:textStyle="bold"
+							android:textSize="13.5sp" />
+					</LinearLayout>
+				</LinearLayout>
+				<View
+					android:id="@+id/view24"
+					android:layout_width="match_parent"
+					android:layout_height="1dp"
+					android:background="@color/colorDivider" />
+				<LinearLayout
+					android:id="@+id/linear25"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal">
+					<LinearLayout
+						android:id="@+id/linear26"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:padding="14dp"
+						android:orientation="vertical"
+						android:layout_weight="1">
+						<TextView
+							android:id="@+id/textview11"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="GRACE PERIOD"
+							android:textStyle="bold"
+							android:textSize="10.5sp"
+							android:letterSpacing="0.06" />
+						<TextView
+							android:id="@+id/tv_rule_grace_period"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="—"
+							android:textStyle="bold"
+							android:textSize="13.5sp" />
+					</LinearLayout>
+					<View
+						android:id="@+id/view27"
+						android:layout_width="1dp"
+						android:layout_height="match_parent"
+						android:background="@color/colorDivider" />
+					<LinearLayout
+						android:id="@+id/linear28"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:padding="14dp"
+						android:orientation="vertical"
+						android:layout_weight="1">
+						<TextView
+							android:id="@+id/textview12"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="DISTRIBUTION"
+							android:textStyle="bold"
+							android:textSize="10.5sp"
+							android:letterSpacing="0.06" />
+						<TextView
+							android:id="@+id/tv_rule_distribution"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="—"
+							android:textStyle="bold"
+							android:textSize="13.5sp" />
+					</LinearLayout>
+				</LinearLayout>
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+		<LinearLayout
+			android:id="@+id/linear75"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="20dp"
+			android:orientation="vertical">
+			<TextView
+				android:id="@+id/textview49"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="ABOUT THIS GROUP"
+				android:textStyle="bold"
+				android:textSize="10.5sp"
+				android:letterSpacing="0.06" />
+			<TextView
+				android:id="@+id/tv_overview_description"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="6dp"
+				android:text="No description yet."
+				android:textSize="13.5sp"
+				android:lineSpacingExtra="3dp" />
+		</LinearLayout>
+		<TextView
+			android:id="@+id/tv_rules_header"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="20dp"
+			android:layout_marginBottom="8dp"
+			android:text="CODE OF CONDUCT"
+			android:textStyle="bold"
+			android:textSize="10.5sp"
+			android:visibility="gone"
+			android:letterSpacing="0.06" />
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/card_code_of_conduct"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			android:visibility="gone"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<LinearLayout
+				android:id="@+id/layout_rules_container"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="16dp"
+				android:orientation="vertical" />
+		</com.google.android.material.card.MaterialCardView>
+		<TextView
+			android:id="@+id/textview21"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="20dp"
+			android:layout_marginBottom="8dp"
+			android:text="PAYMENT SLOTS THIS ROUND"
+			android:textStyle="bold"
+			android:textSize="10.5sp"
+			android:letterSpacing="0.06" />
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/cardview10"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<LinearLayout
+				android:id="@+id/linear29"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="16dp"
+				android:orientation="vertical">
+				<androidx.recyclerview.widget.RecyclerView
+					android:id="@+id/recycler_payment_slots"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:nestedScrollingEnabled="false"
+					android:overScrollMode="never" />
+				<LinearLayout
+					android:id="@+id/linear30"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="14dp"
+					android:orientation="vertical">
+					<LinearLayout
+						android:id="@+id/linear2"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<View
+							android:id="@+id/view31"
+							android:layout_width="10dp"
+							android:layout_height="10dp"
+							android:background="@color/colorTextMuted" />
+						<TextView
+							android:id="@+id/textview22"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Not paid"
+							android:textSize="11.5sp"
+							android:layout_marginStart="6dp"
+							android:layout_marginEnd="16dp" />
+						<View
+							android:id="@+id/view32"
+							android:layout_width="10dp"
+							android:layout_height="10dp"
+							android:background="@color/colorAccent" />
+						<TextView
+							android:id="@+id/textview23"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Paid this round"
+							android:textSize="11.5sp"
+							android:layout_marginStart="6dp" />
+					</LinearLayout>
+					<TextView
+						android:id="@+id/tv_slot_grid_helper_hint"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="8dp"
+						android:text="Tracks unique member slots participating in Round 1"
+						android:textSize="11sp"
+						android:alpha="0.6" />
+				</LinearLayout>
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/panel_rotating"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			android:visibility="gone"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<LinearLayout
+				android:id="@+id/linear87"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="16dp"
+				android:orientation="vertical">
+				<TextView
+					android:id="@+id/textview58"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Rotation Board"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+				<TextView
+					android:id="@+id/tv_rotating_current"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:text="Current slot: —"
+					android:textSize="13.5sp" />
+				<TextView
+					android:id="@+id/tv_rotating_next"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:text="Next recipient: —"
+					android:textSize="13.5sp" />
+				<TextView
+					android:id="@+id/tv_rotating_method"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:text="Order: —"
+					android:textSize="12.5sp" />
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/panel_fixed"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			android:visibility="gone"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<LinearLayout
+				android:id="@+id/linear88"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="16dp"
+				android:orientation="vertical">
+				<TextView
+					android:id="@+id/textview59"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Savings Goal"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+				<TextView
+					android:id="@+id/tv_fixed_goal"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:text="Target: — AJC"
+					android:textSize="13.5sp" />
+				<TextView
+					android:id="@+id/tv_fixed_progress"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:text="Raised: — / —"
+					android:textStyle="bold"
+					android:textSize="13.5sp" />
+				<TextView
+					android:id="@+id/tv_fixed_rule"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:text="Disbursement: —"
+					android:textSize="12.5sp" />
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/panel_accumulative"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			android:visibility="gone"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<LinearLayout
+				android:id="@+id/linear89"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="16dp"
+				android:orientation="vertical">
+				<TextView
+					android:id="@+id/textview60"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Loan Facility"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+				<TextView
+					android:id="@+id/tv_loan_rate"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:text="Interest: —%"
+					android:textSize="13.5sp" />
+				<TextView
+					android:id="@+id/tv_loan_withdrawal"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:text="Withdrawal rule: —"
+					android:textSize="12.5sp" />
+				<TextView
+					android:id="@+id/tv_loan_active_count"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:text="Active loans: 0"
+					android:textSize="13.5sp" />
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+		<TextView
+			android:id="@+id/textview61"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="20dp"
+			android:layout_marginBottom="8dp"
+			android:text="POOL SUMMARY"
+			android:textStyle="bold"
+			android:textSize="10.5sp"
+			android:letterSpacing="0.06" />
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/cardview21"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<LinearLayout
+				android:id="@+id/linear90"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="16dp"
+				android:orientation="vertical">
+				<LinearLayout
+					android:id="@+id/linear91"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center_vertical"
+					android:orientation="horizontal">
+					<TextView
+						android:id="@+id/textview62"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:text="Per contribution"
+						android:layout_weight="1"
+						android:textSize="13.5sp" />
+					<TextView
+						android:id="@+id/tv_pool_contribution"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="0 AJC"
+						android:textStyle="bold"
+						android:textSize="13.5sp" />
+				</LinearLayout>
+				<LinearLayout
+					android:id="@+id/linear92"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="10dp"
+					android:gravity="center_vertical"
+					android:orientation="horizontal">
+					<TextView
+						android:id="@+id/textview63"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:text="Full cycle pot"
+						android:layout_weight="1"
+						android:textSize="13.5sp" />
+					<TextView
+						android:id="@+id/tv_pool_total"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="0 AJC"
+						android:textStyle="bold"
+						android:textSize="13.5sp" />
+				</LinearLayout>
+				<LinearLayout
+					android:id="@+id/linear93"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="10dp"
+					android:gravity="center_vertical"
+					android:orientation="horizontal">
+					<TextView
+						android:id="@+id/textview64"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:text="Paid this round"
+						android:layout_weight="1"
+						android:textSize="13.5sp" />
+					<TextView
+						android:id="@+id/tv_pool_paid"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="0 / 0"
+						android:textStyle="bold"
+						android:textSize="13.5sp" />
+				</LinearLayout>
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/panel_payout_requests"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			android:visibility="gone"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<LinearLayout
+				android:id="@+id/linear94"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="16dp"
+				android:orientation="vertical">
+				<TextView
+					android:id="@+id/textview65"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Payout Requests"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+				<androidx.recyclerview.widget.RecyclerView
+					android:id="@+id/recycler_payout_requests"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="10dp"
+					android:nestedScrollingEnabled="false"
+					android:overScrollMode="never" />
+				<TextView
+					android:id="@+id/tv_payout_requests_empty"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:paddingTop="8dp"
+					android:text="No pending payout requests."
+					android:textSize="13sp" />
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+	</LinearLayout>
+</androidx.core.widget.NestedScrollView>

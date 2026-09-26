@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- colorPrimary MUST be the accent, never the surface. Mapping it
+             to colorSurface made Material dialog/sheet button text identical
+             to the background — Confirm / Cancel / I've Paid vanished. -->
+        <item name="colorPrimary">@color/colorAccent</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnPrimary">@color/colorTextOnAccent</item>
+        <item name="colorOnSurface">@color/colorTextPrimary</item>
+        <item name="colorOnBackground">@color/colorTextPrimary</item>
+        <item name="colorOnSurfaceVariant">@color/colorTextSecondary</item>
+        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
+        <item name="android:textColorSecondary">@color/colorTextSecondary</item>
+        <item name="android:textColorHint">@color/colorTextTertiary</item>
+        <item name="android:statusBarColor">@color/colorSurface</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
+        <item name="alertDialogTheme">@style/AjooAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/AjooAlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/AjooBottomSheetDialog</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Dark" />
+    <style name="AppTheme.DebugActivity" parent="AppTheme" />
+
+    <style name="WhiteSpinnerTheme" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:textSize">20sp</item>
+        <item name="colorControlNormal">@color/colorTextPrimary</item>
+    </style>
+
+</resources>

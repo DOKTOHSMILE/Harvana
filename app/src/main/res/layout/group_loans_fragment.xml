@@ -1,0 +1,251 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	android:background="@color/colorBackground"
+	android:id="@+id/_main">
+	<androidx.core.widget.NestedScrollView
+		android:id="@+id/vscroll2"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:overScrollMode="never"
+		android:fillViewport="true">
+		<LinearLayout
+			android:id="@+id/linear53"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="20dp"
+			android:orientation="vertical">
+			<LinearLayout
+				android:id="@+id/linear54"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal">
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview11"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorSurface"
+					android:layout_weight="1"
+					android:layout_marginEnd="4dp"
+					app:cardCornerRadius="14dp"
+					app:cardElevation="0dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
+					<LinearLayout
+						android:id="@+id/linear55"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="12dp"
+						android:orientation="vertical">
+						<TextView
+							android:id="@+id/textview15"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="LOANED"
+							android:textSize="10sp"
+							android:textColor="@color/colorTextTertiary"
+							android:letterSpacing="0.06" />
+						<TextView
+							android:id="@+id/tv_total_loaned"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="0 AJC"
+							android:textSize="14sp"
+							android:textStyle="bold"
+							android:textColor="@color/colorTextPrimary" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview12"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorSurface"
+					android:layout_weight="1"
+					android:layout_marginHorizontal="4dp"
+					app:cardCornerRadius="14dp"
+					app:cardElevation="0dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
+					<LinearLayout
+						android:id="@+id/linear56"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="12dp"
+						android:orientation="vertical">
+						<TextView
+							android:id="@+id/textview16"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="REPAID"
+							android:textSize="10sp"
+							android:textColor="@color/colorTextTertiary"
+							android:letterSpacing="0.06" />
+						<TextView
+							android:id="@+id/tv_total_repaid"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="0 AJC"
+							android:textSize="14sp"
+							android:textStyle="bold"
+							android:textColor="@color/colorTextPrimary" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview13"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorSurface"
+					android:layout_weight="1"
+					android:layout_marginStart="4dp"
+					app:cardCornerRadius="14dp"
+					app:cardElevation="0dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
+					<LinearLayout
+						android:id="@+id/linear57"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="12dp"
+						android:orientation="vertical">
+						<TextView
+							android:id="@+id/textview17"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="OUTSTANDING"
+							android:textSize="10sp"
+							android:textColor="@color/colorTextTertiary"
+							android:letterSpacing="0.06" />
+						<TextView
+							android:id="@+id/tv_total_outstanding"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="0 AJC"
+							android:textSize="14sp"
+							android:textStyle="bold"
+							android:textColor="@color/colorTextPrimary" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+			</LinearLayout>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/cardview14"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeWidth="1dp"
+				app:strokeColor="@color/colorCardStroke">
+				<LinearLayout
+					android:id="@+id/linear58"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="16dp"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/textview18"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Group Loans"
+						android:textSize="15sp"
+						android:textStyle="bold"
+						android:textColor="@color/colorTextPrimary" />
+					<TextView
+						android:id="@+id/tv_loan_terms"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="6dp"
+						android:text="Internal loans from the group pot."
+						android:textColor="@color/colorTextSecondary"
+						android:textSize="12.5sp"
+						android:lineSpacingExtra="2dp" />
+					<TextView
+						android:id="@+id/tv_wallet_available"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="10dp"
+						android:text="Group wallet available: — AJC"
+						android:textSize="13sp"
+						android:textStyle="bold"
+						android:textColor="@color/colorTextPrimary" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_apply_loan"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				app:cardBackgroundColor="@color/colorAccent"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeWidth="0dp">
+				<LinearLayout
+					android:id="@+id/linear59"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:paddingLeft="16dp"
+					android:paddingTop="13dp"
+					android:paddingRight="16dp"
+					android:paddingBottom="13dp"
+					android:gravity="center_vertical"
+					android:orientation="horizontal">
+					<TextView
+						android:id="@+id/textview19"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:text="Apply for a Loan"
+						android:textSize="15sp"
+						android:textStyle="bold"
+						android:textColor="@color/colorTextPrimaryWhite"
+						android:layout_weight="1" />
+					<TextView
+						android:id="@+id/btn_apply_loan"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Apply"
+						android:textStyle="bold"
+						android:textColor="@color/colorAccent"
+						android:textSize="12.5sp"
+						android:backgroundTint="@color/colorSurface"
+						android:paddingHorizontal="16dp"
+						android:paddingVertical="8dp" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:id="@+id/textview20"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="22dp"
+				android:layout_marginBottom="10dp"
+				android:text="ALL LOANS"
+				android:textStyle="bold"
+				android:textColor="@color/colorTextTertiary"
+				android:textSize="10.5sp"
+				android:letterSpacing="0.06" />
+			<androidx.recyclerview.widget.RecyclerView
+				android:id="@+id/recycler_loans"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:nestedScrollingEnabled="false"
+				android:overScrollMode="never" />
+			<TextView
+				android:id="@+id/tv_loans_empty"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="24dp"
+				android:gravity="center_horizontal|center_vertical"
+				android:text="No loans yet."
+				android:textSize="13sp"
+				android:textColor="@color/colorTextTertiary"
+				android:visibility="gone" />
+		</LinearLayout>
+	</androidx.core.widget.NestedScrollView>
+</LinearLayout>

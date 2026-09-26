@@ -1,0 +1,723 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/_coordinator"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<com.google.android.material.appbar.AppBarLayout
+		android:id="@+id/_app_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay">
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/_toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/colorPrimary"
+			app:popupTheme="@style/AppTheme.PopupOverlay" />
+	</com.google.android.material.appbar.AppBarLayout>
+	<androidx.core.widget.NestedScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@color/colorP2pBg"
+		android:fillViewport="true"
+		android:overScrollMode="never"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<LinearLayout
+			android:id="@+id/create_buy_offer_root"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="24dp"
+			android:orientation="vertical">
+			<LinearLayout
+				android:id="@+id/panel_buy_step_1"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:visibility="visible">
+				<TextView
+					android:id="@+id/tv_buy_step_label"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginBottom="24dp"
+					android:text="Step 1 of 3 · Amount &amp; Price"
+					android:textSize="14sp"
+					android:textStyle="bold"
+					android:textColor="#001A3F" />
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/card_buy_info"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginBottom="24dp"
+					app:cardBackgroundColor="@color/colorP2pSurface"
+					app:cardCornerRadius="12dp"
+					app:cardElevation="0dp"
+					app:strokeColor="@color/colorP2pBorder"
+					app:strokeWidth="1dp">
+					<LinearLayout
+						android:id="@+id/layout_buy_info"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="16dp"
+						android:orientation="horizontal">
+						<ImageView
+							android:id="@+id/imageview_buy_info"
+							android:layout_width="20dp"
+							android:layout_height="20dp"
+							android:layout_marginTop="2dp"
+							android:src="@drawable/ic_info"
+							android:scaleType="centerInside"
+							android:layout_marginEnd="12dp"
+							app:tint="#001A3F" />
+						<TextView
+							android:id="@+id/tv_buy_info"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Set the amount and price you are willing to pay. Sellers will see your offer and can sell their AJC to you."
+							android:textSize="14sp"
+							android:layout_weight="1"
+							android:lineSpacingExtra="4dp" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/tv_buy_amount_section"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginBottom="12dp"
+					android:text="① AMOUNT TO BUY"
+					android:textSize="12sp"
+					android:textStyle="bold"
+					android:textColor="#001A3F"
+					android:letterSpacing="0.05" />
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/card_buy_amount"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorP2pSurface"
+					app:cardCornerRadius="12dp"
+					app:cardElevation="0dp"
+					app:strokeColor="@color/colorP2pBorder"
+					app:strokeWidth="1dp">
+					<LinearLayout
+						android:id="@+id/layout_buy_amount"
+						android:layout_width="match_parent"
+						android:layout_height="56dp"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<EditText
+							android:id="@+id/et_buy_amount"
+							android:layout_width="0dp"
+							android:layout_height="match_parent"
+							android:background="@android:color/transparent"
+							android:textSize="18sp"
+							android:textStyle="bold"
+							android:hint="0.00"
+							android:inputType="numberDecimal"
+							android:layout_weight="1"
+							android:paddingStart="16dp"
+							android:paddingEnd="8dp" />
+						<TextView
+							android:id="@+id/tv_buy_amount_currency"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="AJC"
+							android:textSize="16sp"
+							android:textStyle="bold"
+							android:paddingEnd="16dp" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/tv_buy_amount_note"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:text="Enter the total amount of AJC you want to acquire."
+					android:textSize="12sp"
+					android:alpha="0.8" />
+				<TextView
+					android:id="@+id/tv_buy_price_section"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="32dp"
+					android:layout_marginBottom="12dp"
+					android:text="② PRICE PER 1 AJC"
+					android:textSize="12sp"
+					android:textStyle="bold"
+					android:textColor="#001A3F"
+					android:letterSpacing="0.05" />
+				<com.google.android.material.button.MaterialButtonToggleGroup
+					android:id="@+id/toggle_buy_pricing_mode"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginBottom="12dp"
+					app:singleSelection="true"
+					app:selectionRequired="true">
+					<com.google.android.material.button.MaterialButton
+						android:id="@+id/btn_buy_price_fixed"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:text="Fixed Price"
+						android:textSize="12sp"
+						android:layout_weight="1"
+						style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+						android:textAllCaps="false" />
+					<com.google.android.material.button.MaterialButton
+						android:id="@+id/btn_buy_price_floating"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:text="Floating Price"
+						android:textSize="12sp"
+						android:layout_weight="1"
+						style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+						android:textAllCaps="false" />
+				</com.google.android.material.button.MaterialButtonToggleGroup>
+				<LinearLayout
+					android:id="@+id/group_buy_price_fixed"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical">
+					<com.google.android.material.card.MaterialCardView
+						android:id="@+id/card_buy_price"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						app:cardBackgroundColor="@color/colorP2pSurface"
+						app:cardCornerRadius="12dp"
+						app:cardElevation="0dp"
+						app:strokeColor="@color/colorP2pBorder"
+						app:strokeWidth="1dp">
+						<LinearLayout
+							android:id="@+id/layout_buy_price"
+							android:layout_width="match_parent"
+							android:layout_height="56dp"
+							android:gravity="center_vertical"
+							android:orientation="horizontal">
+							<EditText
+								android:id="@+id/et_buy_price"
+								android:layout_width="0dp"
+								android:layout_height="match_parent"
+								android:background="@android:color/transparent"
+								android:textSize="18sp"
+								android:textStyle="bold"
+								android:hint="0.00"
+								android:inputType="numberDecimal"
+								android:layout_weight="1"
+								android:paddingStart="16dp"
+								android:paddingEnd="8dp" />
+							<TextView
+								android:id="@+id/tv_buy_price_currency"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="NGN"
+								android:textSize="16sp"
+								android:textStyle="bold"
+								android:paddingEnd="16dp" />
+						</LinearLayout>
+					</com.google.android.material.card.MaterialCardView>
+					<TextView
+						android:id="@+id/tv_buy_price_note"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="8dp"
+						android:text="This is the NGN amount you are willing to pay for each 1 AJC."
+						android:textSize="12sp"
+						android:alpha="0.8" />
+				</LinearLayout>
+				<LinearLayout
+					android:id="@+id/group_buy_price_floating"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:visibility="gone">
+					<com.google.android.material.card.MaterialCardView
+						android:id="@+id/card_buy_margin"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						app:cardBackgroundColor="@color/colorP2pSurface"
+						app:cardCornerRadius="12dp"
+						app:cardElevation="0dp"
+						app:strokeColor="@color/colorP2pBorder"
+						app:strokeWidth="1dp">
+						<LinearLayout
+							android:id="@+id/linear4"
+							android:layout_width="match_parent"
+							android:layout_height="56dp"
+							android:gravity="center_vertical"
+							android:orientation="horizontal">
+							<EditText
+								android:id="@+id/et_buy_margin"
+								android:layout_width="0dp"
+								android:layout_height="match_parent"
+								android:background="@android:color/transparent"
+								android:textSize="18sp"
+								android:textStyle="bold"
+								android:hint="0.0"
+								android:inputType="numberSigned|numberDecimal"
+								android:layout_weight="1"
+								android:paddingStart="16dp"
+								android:paddingEnd="8dp" />
+							<TextView
+								android:id="@+id/tv_buy_margin_percent_label"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="% margin"
+								android:textSize="16sp"
+								android:textStyle="bold"
+								android:paddingEnd="16dp" />
+						</LinearLayout>
+					</com.google.android.material.card.MaterialCardView>
+					<TextView
+						android:id="@+id/tv_buy_calculated_price"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="8dp"
+						android:text="Enter a margin above or below the current best price."
+						android:textSize="13sp"
+						android:textStyle="bold" />
+				</LinearLayout>
+				<TextView
+					android:id="@+id/tv_buy_payment_section"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="32dp"
+					android:layout_marginBottom="12dp"
+					android:text="③ PAYMENT METHODS"
+					android:textSize="12sp"
+					android:textStyle="bold"
+					android:textColor="#001A3F"
+					android:letterSpacing="0.05" />
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/card_buy_payment_methods"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorP2pSurface"
+					app:cardCornerRadius="12dp"
+					app:cardElevation="0dp"
+					app:strokeColor="@color/colorP2pBorder"
+					app:strokeWidth="1dp">
+					<LinearLayout
+						android:id="@+id/layout_buy_payment_methods"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="16dp"
+						android:orientation="vertical" />
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/tv_buy_settings_section"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="32dp"
+					android:layout_marginBottom="12dp"
+					android:text="④ ADDITIONAL SETTINGS"
+					android:textSize="12sp"
+					android:textStyle="bold"
+					android:textColor="#001A3F"
+					android:letterSpacing="0.05" />
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/card_buy_settings"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorP2pSurface"
+					app:cardCornerRadius="12dp"
+					app:cardElevation="0dp"
+					app:strokeColor="@color/colorP2pBorder"
+					app:strokeWidth="1dp">
+					<LinearLayout
+						android:id="@+id/layout_buy_settings"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical">
+						<LinearLayout
+							android:id="@+id/row_buy_trade_limit"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="16dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<TextView
+								android:id="@+id/tv_buy_trade_limit_label"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:text="Trade limit (per trade)"
+								android:textSize="14sp"
+								android:layout_weight="1" />
+							<TextView
+								android:id="@+id/tv_buy_trade_limit_value"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Min 5 · Max 25"
+								android:textSize="14sp"
+								android:textStyle="bold" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view10"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorP2pBorder" />
+						<LinearLayout
+							android:id="@+id/row_buy_offer_duration"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="16dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<TextView
+								android:id="@+id/tv_buy_offer_duration_label"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:text="Offer duration"
+								android:textSize="14sp"
+								android:layout_weight="1" />
+							<TextView
+								android:id="@+id/tv_buy_offer_duration_value"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="1 Day"
+								android:textSize="14sp"
+								android:textStyle="bold" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view_buy_payment_window_divider"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorP2pBorder" />
+						<LinearLayout
+							android:id="@+id/row_buy_payment_window"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="16dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<TextView
+								android:id="@+id/tv_buy_payment_window_label"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:text="Payment window"
+								android:textSize="14sp"
+								android:layout_weight="1" />
+							<TextView
+								android:id="@+id/tv_buy_payment_window_value"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="15 Minutes"
+								android:textSize="14sp"
+								android:textStyle="bold" />
+						</LinearLayout>
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/tv_buy_terms_section"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="32dp"
+					android:layout_marginBottom="12dp"
+					android:text="⑤ TERMS OF TRADE (OPTIONAL)"
+					android:textSize="12sp"
+					android:textStyle="bold"
+					android:letterSpacing="0.05" />
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/card_buy_terms"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorP2pSurface"
+					app:cardCornerRadius="12dp"
+					app:cardElevation="0dp"
+					app:strokeColor="@color/colorP2pBorder"
+					app:strokeWidth="1dp">
+					<EditText
+						android:id="@+id/et_buy_terms"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="16dp"
+						android:background="@android:color/transparent"
+						android:textSize="14sp"
+						android:hint="E.g., No third-party payments. I will ask for ID verification. Do not put crypto terms in bank narration."
+						android:gravity="top|start"
+						android:inputType="textMultiLine|textCapSentences"
+						android:minLines="3"
+						android:maxLength="500" />
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/tv_buy_terms_counter"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:text="0/500"
+					android:textSize="11sp"
+					android:gravity="end"
+					android:alpha="0.6" />
+				<TextView
+					android:id="@+id/tv_buy_step1_error"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="16dp"
+					android:textSize="14sp"
+					android:visibility="gone" />
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_preview_buy_offer"
+					android:layout_width="match_parent"
+					android:layout_height="56dp"
+					android:layout_marginTop="32dp"
+					android:text="Preview Buy Offer"
+					android:textSize="16sp"
+					android:textStyle="bold"
+					app:backgroundTint="#001A3F"
+					app:cornerRadius="12dp"
+					app:elevation="0dp" />
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/panel_buy_step_2"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:visibility="gone">
+				<TextView
+					android:id="@+id/tv_buy_summary_title"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginBottom="16dp"
+					android:text="STEP 2 OF 3 · REVIEW"
+					android:textSize="12sp"
+					android:textStyle="bold"
+					android:textColor="#001A3F"
+					android:letterSpacing="0.05" />
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/card_buy_review"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorP2pSurface"
+					app:cardCornerRadius="12dp"
+					app:cardElevation="0dp"
+					app:strokeColor="@color/colorP2pBorder"
+					app:strokeWidth="1dp">
+					<LinearLayout
+						android:id="@+id/layout_buy_review"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="20dp"
+						android:orientation="vertical">
+						<LinearLayout
+							android:id="@+id/linear11"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:orientation="horizontal"
+							android:paddingVertical="8dp">
+							<TextView
+								android:id="@+id/textview11"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:text="Amount to buy"
+								android:textSize="14sp"
+								android:layout_weight="1" />
+							<TextView
+								android:id="@+id/tv_buy_review_amount"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:textSize="14sp"
+								android:textStyle="bold" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/linear12"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:orientation="horizontal"
+							android:paddingVertical="8dp">
+							<TextView
+								android:id="@+id/textview12"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:text="Price per AJC"
+								android:textSize="14sp"
+								android:layout_weight="1" />
+							<TextView
+								android:id="@+id/tv_buy_review_unit_price"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:textSize="14sp"
+								android:textStyle="bold" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view13"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorP2pBorder"
+							android:layout_marginVertical="12dp" />
+						<LinearLayout
+							android:id="@+id/linear14"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:orientation="horizontal"
+							android:paddingVertical="8dp">
+							<TextView
+								android:id="@+id/textview13"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:text="You will pay (est.)"
+								android:textSize="16sp"
+								android:textStyle="bold"
+								android:layout_weight="1" />
+							<TextView
+								android:id="@+id/tv_buy_review_total_price"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:textSize="16sp"
+								android:textStyle="bold"
+								android:textColor="#001A3F" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/linear15"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:orientation="horizontal"
+							android:paddingVertical="8dp">
+							<TextView
+								android:id="@+id/textview14"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:text="Maker fee"
+								android:textSize="14sp"
+								android:layout_weight="1" />
+							<TextView
+								android:id="@+id/tv_buy_review_fee"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:textSize="14sp" />
+						</LinearLayout>
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/card_buy_review_note"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="24dp"
+					app:cardBackgroundColor="@color/colorAmberSoft"
+					app:cardCornerRadius="12dp"
+					app:cardElevation="0dp"
+					app:strokeColor="@color/colorAmber"
+					app:strokeWidth="1dp">
+					<LinearLayout
+						android:id="@+id/linear16"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="20dp"
+						android:orientation="vertical">
+						<TextView
+							android:id="@+id/textview15"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:gravity="center_vertical"
+							android:text="Please note"
+							android:textSize="14sp"
+							android:textStyle="bold"
+							android:drawableStart="@drawable/ic_info"
+							android:drawablePadding="8dp"
+							app:drawableTint="@color/colorAmber" />
+						<TextView
+							android:id="@+id/textview16"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="12dp"
+							android:text="• Sellers will see your offer and can accept it to sell you AJC.\n• Payment and escrow begin only after a specific trade is started.\n• You can edit or cancel your offer anytime."
+							android:textSize="13sp"
+							android:lineSpacingExtra="4dp" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/tv_buy_step2_error"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="16dp"
+					android:textSize="14sp"
+					android:visibility="gone" />
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_publish_buy_offer"
+					android:layout_width="match_parent"
+					android:layout_height="56dp"
+					android:layout_marginTop="32dp"
+					android:text="Publish Buy Offer"
+					android:textSize="16sp"
+					android:textStyle="bold"
+					app:backgroundTint="#001A3F"
+					app:cornerRadius="12dp"
+					app:elevation="0dp" />
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_buy_back_to_step1"
+					android:layout_width="match_parent"
+					android:layout_height="56dp"
+					android:layout_marginTop="12dp"
+					android:text="Back to Edit"
+					android:textSize="16sp"
+					android:textStyle="bold"
+					style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+					app:backgroundTint="@color/colorP2pSurfaceAlt"
+					app:cornerRadius="12dp"
+					app:strokeColor="@color/colorP2pBorder"
+					app:strokeWidth="1dp" />
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/panel_buy_step_3"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingTop="32dp"
+				android:gravity="center_horizontal"
+				android:orientation="vertical"
+				android:visibility="gone">
+				<ImageView
+					android:id="@+id/imageview2"
+					android:layout_width="80dp"
+					android:layout_height="80dp"
+					android:src="@drawable/ic_check_circle"
+					android:scaleType="centerInside"
+					app:tint="#001A3F" />
+				<TextView
+					android:id="@+id/textview17"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="24dp"
+					android:text="Buy Offer Published!"
+					android:textSize="22sp"
+					android:textStyle="bold"
+					android:textColor="#001A3F" />
+				<TextView
+					android:id="@+id/textview18"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Your buy offer is now live on the P2P market."
+					android:textSize="16sp"
+					android:alpha="0.8" />
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_buy_view_my_offers"
+					android:layout_width="match_parent"
+					android:layout_height="56dp"
+					android:layout_marginTop="40dp"
+					android:text="View My Offers"
+					android:textSize="16sp"
+					android:textStyle="bold"
+					app:backgroundTint="#001A3F"
+					app:cornerRadius="12dp"
+					app:elevation="0dp" />
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_buy_create_another"
+					android:layout_width="match_parent"
+					android:layout_height="56dp"
+					android:layout_marginTop="12dp"
+					android:text="Create Another"
+					android:textSize="16sp"
+					android:textStyle="bold"
+					style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+					app:backgroundTint="@color/colorP2pSurfaceAlt"
+					app:cornerRadius="12dp"
+					app:strokeColor="@color/colorP2pBorder"
+					app:strokeWidth="1dp" />
+			</LinearLayout>
+		</LinearLayout>
+	</androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

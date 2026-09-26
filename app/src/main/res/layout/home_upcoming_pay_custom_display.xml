@@ -1,0 +1,96 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+	<com.google.android.material.card.MaterialCardView
+		android:id="@+id/cardview1"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		app:cardBackgroundColor="@color/colorSurface"
+		app:cardElevation="1dp"
+		app:strokeWidth="1dp"
+		app:strokeColor="@color/colorCardStroke"
+		app:cardCornerRadius="0dp">
+		<LinearLayout
+			android:id="@+id/linear2"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="14dp"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+			<androidx.cardview.widget.CardView
+				android:id="@+id/cardview2"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="8dp"
+				app:cardElevation="0dp"
+				app:cardCornerRadius="360dp">
+				<ImageView
+					android:id="@+id/imageview1"
+					android:layout_width="45dp"
+					android:layout_height="45dp"
+					android:src="@drawable/main_app_logo_1"
+					android:scaleType="centerInside"
+					android:focusable="false" />
+			</androidx.cardview.widget.CardView>
+			<LinearLayout
+				android:id="@+id/linear6"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:layout_weight="1">
+				<TextView
+					android:id="@+id/textview2"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:text="Group name"
+					android:textSize="15sp"
+					android:textStyle="bold"
+					android:focusable="false" />
+				<TextView
+					android:id="@+id/textview3"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="3dp"
+					android:text="0 AJC · Weekly"
+					android:textSize="12.5sp"
+					android:focusable="false" />
+			</LinearLayout>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/cardview3"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="30dp"
+				app:cardElevation="0dp"
+				app:strokeWidth="1dp"
+				app:strokeColor="@color/colorWarning"
+				app:cardCornerRadius="30dp">
+				<TextView
+					android:id="@+id/textview4"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:paddingLeft="8dp"
+					android:paddingTop="5dp"
+					android:paddingRight="8dp"
+					android:paddingBottom="5dp"
+					android:text="Pending"
+					android:textSize="8sp"
+					android:textColor="@color/colorWarning"
+					android:focusable="false" />
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/materialbutton1"
+				android:layout_width="65dp"
+				android:layout_height="40dp"
+				android:gravity="center_horizontal|center_vertical"
+				android:text="Pay"
+				android:textSize="12sp"
+				android:textColor="@color/colorButtonText"
+				app:backgroundTint="@color/colorButtonBackground"
+				app:cornerRadius="30dp" />
+		</LinearLayout>
+	</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

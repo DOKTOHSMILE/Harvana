@@ -1,0 +1,1344 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/_coordinator"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<com.google.android.material.appbar.AppBarLayout
+		android:id="@+id/_app_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay">
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/_toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/colorPrimary"
+			app:popupTheme="@style/AppTheme.PopupOverlay" />
+	</com.google.android.material.appbar.AppBarLayout>
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical"
+		android:background="@color/colorSurface"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<androidx.core.widget.NestedScrollView
+			android:id="@+id/vscroll1"
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="1"
+			android:overScrollMode="never"
+			android:fillViewport="true">
+			<LinearLayout
+				android:id="@+id/linear2"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingBottom="24dp"
+				android:orientation="vertical">
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview1"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorSurfaceRaised"
+					android:layout_marginStart="16dp"
+					android:layout_marginEnd="16dp"
+					app:cardCornerRadius="16dp"
+					app:cardElevation="0dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
+					<LinearLayout
+						android:id="@+id/rowEditProfile"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="16dp"
+						android:background="?attr/selectableItemBackground"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:focusable="true">
+						<ImageView
+							android:id="@+id/ivSettingsAvatar"
+							android:layout_width="52dp"
+							android:layout_height="52dp"
+							android:padding="12dp"
+							android:background="@drawable/bg_settings_icon_badge"
+							android:src="@drawable/ic_person"
+							android:scaleType="fitCenter" />
+						<LinearLayout
+							android:id="@+id/linear3"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1"
+							android:layout_marginStart="14dp">
+							<TextView
+								android:id="@+id/tvSettingsName"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Loading…"
+								android:textSize="16sp"
+								android:textStyle="bold"
+								android:textColor="@color/colorTextPrimary" />
+							<TextView
+								android:id="@+id/tvSettingsHandle"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="1dp"
+								android:text="@@handle"
+								android:textColor="@color/colorTextTertiary"
+								android:textSize="12.5sp" />
+							<TextView
+								android:id="@+id/tvSettingsVerified"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="6dp"
+								android:paddingTop="4dp"
+								android:paddingBottom="4dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:text="✓ Verified Member"
+								android:textStyle="bold"
+								android:textColor="@color/colorTextOnAccent"
+								android:textSize="10.5sp"
+								android:paddingStart="10dp"
+								android:paddingEnd="10dp"
+								android:visibility="gone" />
+						</LinearLayout>
+						<TextView
+							android:id="@+id/tvEditProfileLink"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:gravity="center_vertical"
+							android:text="Edit Profile"
+							android:textSize="13sp"
+							android:textStyle="bold"
+							android:textColor="@color/colorAccent"
+							android:drawableEnd="@drawable/ic_arrow_right"
+							android:drawablePadding="2dp" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/textview2"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="24dp"
+					android:layout_marginBottom="8dp"
+					android:text="Account &amp; Security"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextTertiary"
+					android:textSize="10.5sp"
+					android:layout_marginStart="22dp"
+					android:letterSpacing="0.06" />
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview2"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorSurfaceRaised"
+					android:layout_marginStart="16dp"
+					android:layout_marginEnd="16dp"
+					app:cardCornerRadius="16dp"
+					app:cardElevation="0dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
+					<LinearLayout
+						android:id="@+id/linear4"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical">
+						<LinearLayout
+							android:id="@+id/rowAccountInfo"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview1"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_person"
+								android:scaleType="center"
+								android:tag="badge_green" />
+							<LinearLayout
+								android:id="@+id/linear5"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview3"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Account Information"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview4"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Personal details and verification"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview2"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view6"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowSecurityPrivacy"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview3"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_shield"
+								android:scaleType="center"
+								android:tag="badge_green" />
+							<LinearLayout
+								android:id="@+id/linear7"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview5"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Security &amp; Privacy"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview6"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Password, PIN, biometrics"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview4"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view8"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowWalletAssets"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview5"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_wallet"
+								android:scaleType="center"
+								android:tag="badge_green" />
+							<LinearLayout
+								android:id="@+id/linear9"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview7"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Wallet &amp; Assets"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview8"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Manage your crypto wallet and assets"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview6"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view10"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowBackupRecovery"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview7"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_restore"
+								android:scaleType="center"
+								android:tag="badge_green" />
+							<LinearLayout
+								android:id="@+id/linear11"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview9"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Backup &amp; Recovery"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview10"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Backup your data and recovery phrase"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview8"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/textview11"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="24dp"
+					android:layout_marginBottom="8dp"
+					android:text="Finance &amp; Payments"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextTertiary"
+					android:textSize="10.5sp"
+					android:layout_marginStart="22dp"
+					android:letterSpacing="0.06" />
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview3"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorSurfaceRaised"
+					android:layout_marginStart="16dp"
+					android:layout_marginEnd="16dp"
+					app:cardCornerRadius="16dp"
+					app:cardElevation="0dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
+					<LinearLayout
+						android:id="@+id/linear12"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical">
+						<LinearLayout
+							android:id="@+id/rowPaymentMethods"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview9"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_credit_card"
+								android:scaleType="center"
+								android:tag="badge_amber" />
+							<LinearLayout
+								android:id="@+id/linear13"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview12"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Payment Methods"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview13"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Manage payment and withdrawal methods"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview10"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view14"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowTransactionHistory"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview11"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_receipt"
+								android:scaleType="center"
+								android:tag="badge_amber" />
+							<LinearLayout
+								android:id="@+id/linear15"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview14"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Transaction History"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview15"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="View your transactions and activities"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview12"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view16"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowLimitsFees"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview13"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_pie_chart"
+								android:scaleType="center"
+								android:tag="badge_amber" />
+							<LinearLayout
+								android:id="@+id/linear17"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview16"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Limits &amp; Fees"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview17"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="View limits and applicable fees"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview14"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view18"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowTaxReports"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview15"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_description"
+								android:scaleType="center"
+								android:tag="badge_amber" />
+							<LinearLayout
+								android:id="@+id/linear19"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview18"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Tax Reports"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview19"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Download your tax documents"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview16"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/textview20"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="24dp"
+					android:layout_marginBottom="8dp"
+					android:text="Community &amp; Social"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextTertiary"
+					android:textSize="10.5sp"
+					android:layout_marginStart="22dp"
+					android:letterSpacing="0.06" />
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview4"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorSurfaceRaised"
+					android:layout_marginStart="16dp"
+					android:layout_marginEnd="16dp"
+					app:cardCornerRadius="16dp"
+					app:cardElevation="0dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
+					<LinearLayout
+						android:id="@+id/linear20"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical">
+						<LinearLayout
+							android:id="@+id/rowGroupsCircles"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview17"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_groups"
+								android:scaleType="center"
+								android:tag="badge_blue" />
+							<LinearLayout
+								android:id="@+id/linear21"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview21"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Groups &amp; Circles"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview22"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Manage your groups and circles"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview18"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view22"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowPrivacyVisibility"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview19"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_visibility"
+								android:scaleType="center"
+								android:tag="badge_blue" />
+							<LinearLayout
+								android:id="@+id/linear23"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview23"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Privacy &amp; Visibility"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview24"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Control who can see your activity"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview20"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view24"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowNotifications"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview21"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_notifications"
+								android:scaleType="center"
+								android:tag="badge_blue" />
+							<LinearLayout
+								android:id="@+id/linear25"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview25"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Notifications"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview26"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Customize your notification preferences"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview22"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view26"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowBlockedUsers"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview23"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_block"
+								android:scaleType="center"
+								android:tag="badge_blue" />
+							<LinearLayout
+								android:id="@+id/linear27"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview27"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Blocked Users"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview28"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Manage blocked users and content"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview24"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/textview29"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="24dp"
+					android:layout_marginBottom="8dp"
+					android:text="App Preferences"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextTertiary"
+					android:textSize="10.5sp"
+					android:layout_marginStart="22dp"
+					android:letterSpacing="0.06" />
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview5"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorSurfaceRaised"
+					android:layout_marginStart="16dp"
+					android:layout_marginEnd="16dp"
+					app:cardCornerRadius="16dp"
+					app:cardElevation="0dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
+					<LinearLayout
+						android:id="@+id/linear28"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical">
+						<LinearLayout
+							android:id="@+id/rowThemeAppearance"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview25"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_dark_mode"
+								android:scaleType="center"
+								android:tag="badge_violet" />
+							<LinearLayout
+								android:id="@+id/linear29"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview30"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Theme &amp; Appearance"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/tvThemeValue"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Choose your theme and display preferences"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview26"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view30"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowLanguage"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview27"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_language"
+								android:scaleType="center"
+								android:tag="badge_violet" />
+							<LinearLayout
+								android:id="@+id/linear31"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview31"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Language"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview32"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Change app language"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview28"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view32"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowCurrency"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview29"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_attach_money"
+								android:scaleType="center"
+								android:tag="badge_violet" />
+							<LinearLayout
+								android:id="@+id/linear33"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview33"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Currency"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/tvCurrencyValue"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Select your preferred currency"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview30"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view34"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowDataStorage"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview31"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_storage"
+								android:scaleType="center"
+								android:tag="badge_violet" />
+							<LinearLayout
+								android:id="@+id/linear35"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview34"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Data &amp; Storage"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview35"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Manage data usage and storage"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview32"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/textview36"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="24dp"
+					android:layout_marginBottom="8dp"
+					android:text="Support &amp; About"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextTertiary"
+					android:textSize="10.5sp"
+					android:layout_marginStart="22dp"
+					android:letterSpacing="0.06" />
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview6"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorSurfaceRaised"
+					android:layout_marginStart="16dp"
+					android:layout_marginEnd="16dp"
+					app:cardCornerRadius="16dp"
+					app:cardElevation="0dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
+					<LinearLayout
+						android:id="@+id/linear36"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical">
+						<LinearLayout
+							android:id="@+id/rowHelpSupport"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview33"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_help"
+								android:scaleType="center"
+								android:tag="badge_muted" />
+							<LinearLayout
+								android:id="@+id/linear37"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview37"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Help &amp; Support"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview38"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Get help or contact support"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview34"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view38"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowAboutAjoo"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview35"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_info"
+								android:scaleType="center"
+								android:tag="badge_muted" />
+							<LinearLayout
+								android:id="@+id/linear39"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview39"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="About Ajoo"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview40"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Learn more about Ajoo"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview36"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view40"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowTermsConditions"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview37"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_gavel"
+								android:scaleType="center"
+								android:tag="badge_muted" />
+							<LinearLayout
+								android:id="@+id/linear41"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview41"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Terms &amp; Conditions"
+									android:textStyle="bold"
+									android:textColor="@color/colorTextPrimary"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview42"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Read our terms and privacy policy"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+							<ImageView
+								android:id="@+id/imageview38"
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_arrow_right"
+								android:scaleType="center"
+								android:tint="@color/colorTextTertiary" />
+						</LinearLayout>
+						<View
+							android:id="@+id/view42"
+							android:layout_width="match_parent"
+							android:layout_height="1dp"
+							android:background="@color/colorDivider"
+							android:layout_marginStart="66dp" />
+						<LinearLayout
+							android:id="@+id/rowLogOut"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:padding="14dp"
+							android:background="?attr/selectableItemBackground"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:focusable="true">
+							<ImageView
+								android:id="@+id/imageview39"
+								android:layout_width="38dp"
+								android:layout_height="38dp"
+								android:padding="9dp"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_logout"
+								android:scaleType="center"
+								android:tag="badge_red" />
+							<LinearLayout
+								android:id="@+id/linear43"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:orientation="vertical"
+								android:layout_weight="1"
+								android:layout_marginStart="14dp">
+								<TextView
+									android:id="@+id/textview43"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Log Out"
+									android:textStyle="bold"
+									android:textColor="@color/colorError"
+									android:textSize="14.5sp" />
+								<TextView
+									android:id="@+id/textview44"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:text="Sign out of your account"
+									android:textColor="@color/colorTextTertiary"
+									android:textSize="11.5sp" />
+							</LinearLayout>
+						</LinearLayout>
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/textview45"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="20dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Ajoo"
+					android:textColor="@color/colorTextTertiary"
+					android:textSize="11.5sp" />
+			</LinearLayout>
+		</androidx.core.widget.NestedScrollView>
+	</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

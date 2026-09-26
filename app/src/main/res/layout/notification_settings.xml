@@ -1,0 +1,335 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/_coordinator"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<com.google.android.material.appbar.AppBarLayout
+		android:id="@+id/_app_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay">
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/_toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/colorPrimary"
+			app:popupTheme="@style/AppTheme.PopupOverlay" />
+	</com.google.android.material.appbar.AppBarLayout>
+	<androidx.core.widget.NestedScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:fillViewport="true"
+		android:overScrollMode="never"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<LinearLayout
+			android:id="@+id/linear62"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="20dp"
+			android:orientation="vertical">
+			<TextView
+				android:id="@+id/textview74"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Notifications"
+				android:textSize="22sp"
+				android:textStyle="bold"
+				android:textColor="@color/colorTextPrimary" />
+			<TextView
+				android:id="@+id/textview75"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="4dp"
+				android:layout_marginBottom="24dp"
+				android:text="Choose what Ajoo notifies you about."
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13.5sp"
+				android:lineSpacingExtra="3dp" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/cardview14"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="16dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear63"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:gravity="center_vertical"
+					android:orientation="horizontal">
+					<LinearLayout
+						android:id="@+id/linear64"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:orientation="vertical"
+						android:layout_weight="1">
+						<TextView
+							android:id="@+id/textview76"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Transaction Alerts"
+							android:textStyle="bold"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14.5sp" />
+						<TextView
+							android:id="@+id/textview77"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="3dp"
+							android:text="Notify me when money moves in or out of my wallet"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12.5sp"
+							android:lineSpacingExtra="2dp" />
+					</LinearLayout>
+					<Switch
+						android:id="@+id/switchTransactionAlerts"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textSize="12sp"
+						android:layout_marginStart="12dp" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/cardview15"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="16dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear65"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:gravity="center_vertical"
+					android:orientation="horizontal">
+					<LinearLayout
+						android:id="@+id/linear66"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:orientation="vertical"
+						android:layout_weight="1">
+						<TextView
+							android:id="@+id/textview78"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Payment Reminders"
+							android:textStyle="bold"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14.5sp" />
+						<TextView
+							android:id="@+id/textview79"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="3dp"
+							android:text="Remind me before my next group contribution is due"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12.5sp"
+							android:lineSpacingExtra="2dp" />
+					</LinearLayout>
+					<Switch
+						android:id="@+id/switchPaymentReminders"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textSize="12sp"
+						android:layout_marginStart="12dp" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/cardview16"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="16dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear67"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:gravity="center_vertical"
+					android:orientation="horizontal">
+					<LinearLayout
+						android:id="@+id/linear68"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:orientation="vertical"
+						android:layout_weight="1">
+						<TextView
+							android:id="@+id/textview80"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Loan Reminders"
+							android:textStyle="bold"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14.5sp" />
+						<TextView
+							android:id="@+id/textview81"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="3dp"
+							android:text="Remind me before a loan repayment is due"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12.5sp"
+							android:lineSpacingExtra="2dp" />
+					</LinearLayout>
+					<Switch
+						android:id="@+id/switchLoanReminders"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textSize="12sp"
+						android:layout_marginStart="12dp" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/cardview17"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="24dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear69"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:gravity="center_vertical"
+					android:orientation="horizontal">
+					<LinearLayout
+						android:id="@+id/linear70"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:orientation="vertical"
+						android:layout_weight="1">
+						<TextView
+							android:id="@+id/textview82"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Group Notices"
+							android:textStyle="bold"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14.5sp" />
+						<TextView
+							android:id="@+id/textview83"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="3dp"
+							android:text="Notify me about new announcements in my groups"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12.5sp"
+							android:lineSpacingExtra="2dp" />
+					</LinearLayout>
+					<Switch
+						android:id="@+id/switchGroupNotices"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textSize="12sp"
+						android:layout_marginStart="12dp" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:id="@+id/textview84"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="8dp"
+				android:text="ALERT STYLE"
+				android:textStyle="bold"
+				android:textColor="@color/colorTextTertiary"
+				android:textSize="10.5sp"
+				android:layout_marginStart="4dp"
+				android:letterSpacing="0.06" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/cardview18"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="16dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear71"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical">
+					<LinearLayout
+						android:id="@+id/linear72"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="18dp"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/textview85"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Sound"
+							android:textColor="@color/colorTextPrimary"
+							android:layout_weight="1"
+							android:textSize="14.5sp" />
+						<Switch
+							android:id="@+id/switchSound"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textSize="12sp"
+							android:layout_marginStart="12dp" />
+					</LinearLayout>
+					<View
+						android:id="@+id/view73"
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:background="@color/colorDivider"
+						android:layout_marginStart="18dp" />
+					<LinearLayout
+						android:id="@+id/linear74"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="18dp"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/textview86"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Vibrate"
+							android:textColor="@color/colorTextPrimary"
+							android:layout_weight="1"
+							android:textSize="14.5sp" />
+						<Switch
+							android:id="@+id/switchVibrate"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textSize="12sp"
+							android:layout_marginStart="12dp" />
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:id="@+id/textview87"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="These control whether Ajoo shows you a notification for each type of event. Turning one off doesn't cancel the underlying reminder — it just won't appear as a push notification."
+				android:textSize="12sp"
+				android:textColor="@color/colorTextTertiary"
+				android:layout_marginStart="4dp"
+				android:lineSpacingExtra="3dp" />
+		</LinearLayout>
+	</androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

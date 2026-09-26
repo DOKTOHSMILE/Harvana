@@ -1,0 +1,49 @@
+version = 2
+
+[module]
+type = "android-app"
+name = "app"
+languageLevel = "JAVA_21"
+output = "build/classes"
+
+[sourceSets.debug]
+scope = "IMPLEMENTATION"
+aidl = ["src/debug/aidl"]
+assets = ["src/debug/assets"]
+java = ["src/debug/java", "src/debug/kotlin"]
+jniLibs = ["src/debug/jniLibs"]
+res = ["src/debug/res"]
+resources = ["src/debug/resources"]
+
+[sourceSets.main]
+scope = "IMPLEMENTATION"
+aidl = ["src/main/aidl"]
+assets = ["src/main/assets"]
+java = ["src/main/java", "src/main/kotlin"]
+jniLibs = ["src/main/jniLibs"]
+res = ["src/main/res"]
+resources = ["src/main/resources"]
+
+[sourceSets.release]
+scope = "IMPLEMENTATION"
+aidl = ["src/release/aidl"]
+assets = ["src/release/assets"]
+java = ["src/release/java", "src/release/kotlin"]
+jniLibs = ["src/release/jniLibs"]
+res = ["src/release/res"]
+resources = ["src/release/resources"]
+
+[dependencies]
+implementation = ["org.bouncycastle:bcprov-jdk18on:1.86", "com.github.yuriy-budiyev:code-scanner:2.3.2", "de.hdodenhof:circleimageview:3.1.0", "androidx.biometric:biometric:1.1.0", "androidx.appcompat:appcompat:1.7.0", "androidx.core:core:1.18.0", "androidx.appcompat:appcompat-resources:1.7.1", "com.google.android.material:material:1.14.0", "com.github.bumptech.glide:glide:5.0.7", "com.github.bumptech.glide:compiler:5.0.7", "com.squareup.okhttp3:okhttp:4.12.0", "com.google.firebase:firebase-auth:22.3.1", "com.google.firebase:firebase-storage:20.3.0", "com.google.firebase:firebase-database:20.3.0", "com.google.android.gms:play-services-auth:21.0.0", "org.jetbrains.kotlin:kotlin-stdlib:2.1.20", "com.google.android.gms:play-services-auth-api-phone:18.0.2", "com.google.android.gms:play-services-basement:18.2.0", "com.google.android.gms:play-services-tasks:18.0.2", "com.google.firebase:firebase-auth-interop:20.0.0"]
+
+[android]
+namespace = "com.ajoo.app"
+compileSdk = 33
+minSdk = 23
+targetSdk = 34
+manifest = "src/main/AndroidManifest.xml"
+versionCode = 1
+versionName = "1.0"
+isApplication = true
+manifestPlaceholders = []
+buildTypes = [{ name = "release", debuggable = false, minifyEnabled = true, shrinkResources = false, proguardFiles = ["proguard-android-optimize.txt", "proguard-rules.pro"] }]

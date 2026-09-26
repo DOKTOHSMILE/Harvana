@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Active Tab Color (Emerald Green) -->
+    <item android:state_checked="true" android:color="#10B881" />
+    
+    <!-- Inactive Tab Color (High-contrast slate gray for day mode visibility) -->
+    <item android:state_checked="false" android:color="#FF64748B" />
+</selector>

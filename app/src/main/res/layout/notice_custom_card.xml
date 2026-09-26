@@ -1,0 +1,77 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+	<com.google.android.material.card.MaterialCardView
+		android:id="@+id/cardview10"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		app:cardBackgroundColor="@color/colorSurface"
+		android:layout_marginHorizontal="4dp"
+		android:layout_marginVertical="6dp"
+		app:cardCornerRadius="16dp"
+		app:cardElevation="0dp"
+		app:strokeWidth="1dp"
+		app:strokeColor="@color/colorCardStroke">
+		<LinearLayout
+			android:id="@+id/linear64"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="16dp"
+			android:orientation="vertical">
+			<TextView
+				android:id="@+id/tv_notice_title"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Notice Title"
+				android:textSize="15sp"
+				android:textStyle="bold"
+				android:textColor="@color/colorTextPrimary"
+				android:focusable="false" />
+			<TextView
+				android:id="@+id/tv_notice_body"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="6dp"
+				android:text="Notice message body goes here..."
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13.5sp"
+				android:lineSpacingExtra="3dp"
+				android:focusable="false" />
+			<View
+				android:id="@+id/view65"
+				android:layout_width="match_parent"
+				android:layout_height="1dp"
+				android:layout_marginTop="12dp"
+				android:layout_marginBottom="10dp"
+				android:background="@color/colorDivider" />
+			<LinearLayout
+				android:id="@+id/linear66"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<TextView
+					android:id="@+id/tv_notice_author"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:text="Admin"
+					android:textColor="@color/colorTextTertiary"
+					android:layout_weight="1"
+					android:textSize="11.5sp"
+					android:focusable="false" />
+				<TextView
+					android:id="@+id/tv_notice_date"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="—"
+					android:textColor="@color/colorTextTertiary"
+					android:textSize="11.5sp"
+					android:focusable="false" />
+			</LinearLayout>
+		</LinearLayout>
+	</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

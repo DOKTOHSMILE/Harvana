@@ -1,0 +1,263 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/sheet_root"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:background="?attr/colorSurface">
+	<LinearLayout
+		android:id="@+id/linear18"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="24dp"
+		android:paddingTop="28dp"
+		android:paddingRight="24dp"
+		android:paddingBottom="28dp"
+		android:orientation="vertical">
+		<TextView
+			android:id="@+id/tv_progress_title"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_horizontal"
+			android:text="Sending Payment"
+			android:textSize="20sp"
+			android:textStyle="bold"
+			android:focusable="false" />
+		<TextView
+			android:id="@+id/tv_progress_amount"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="4dp"
+			android:gravity="center_horizontal"
+			android:text="0.0000 AJC"
+			android:textSize="13.5sp"
+			android:focusable="false" />
+		<LinearLayout
+			android:id="@+id/linear19"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="28dp"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+			<FrameLayout
+				android:id="@+id/frame_layout20"
+				android:layout_width="28dp"
+				android:layout_height="28dp">
+				<ProgressBar
+					android:id="@+id/pb_stage_1"
+					android:layout_width="20dp"
+					android:layout_height="20dp"
+					android:indeterminate="false"
+					style="?android:progressBarStyleHorizontal"
+					android:layout_gravity="center_horizontal|center_vertical"
+					android:focusable="false"
+					android:visibility="gone" />
+				<ImageView
+					android:id="@+id/iv_stage_1_check"
+					android:layout_width="22dp"
+					android:layout_height="22dp"
+					android:src="@drawable/icon_check_round"
+					android:scaleType="centerInside"
+					android:layout_gravity="center_horizontal|center_vertical"
+					app:tint="@color/colorAccent"
+					android:focusable="false"
+					android:visibility="gone" />
+				<View
+					android:id="@+id/dot_stage_1"
+					android:layout_width="10dp"
+					android:layout_height="10dp"
+					android:background="@drawable/dot_pending"
+					android:layout_gravity="center_horizontal|center_vertical" />
+			</FrameLayout>
+			<TextView
+				android:id="@+id/tv_stage_1"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:text="Signing transaction"
+				android:textSize="14sp"
+				android:layout_weight="1"
+				android:focusable="false"
+				android:layout_marginStart="14dp" />
+		</LinearLayout>
+		<View
+			android:id="@+id/view21"
+			android:layout_width="1dp"
+			android:layout_height="20dp"
+			android:background="@color/colorDivider"
+			android:layout_marginStart="13dp" />
+		<LinearLayout
+			android:id="@+id/linear22"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+			<FrameLayout
+				android:id="@+id/frame_layout23"
+				android:layout_width="28dp"
+				android:layout_height="28dp">
+				<ProgressBar
+					android:id="@+id/pb_stage_2"
+					android:layout_width="20dp"
+					android:layout_height="20dp"
+					android:indeterminate="false"
+					style="?android:progressBarStyleHorizontal"
+					android:layout_gravity="center_horizontal|center_vertical"
+					android:focusable="false"
+					android:visibility="gone" />
+				<ImageView
+					android:id="@+id/iv_stage_2_check"
+					android:layout_width="22dp"
+					android:layout_height="22dp"
+					android:src="@drawable/icon_check_round"
+					android:scaleType="centerInside"
+					android:layout_gravity="center_horizontal|center_vertical"
+					app:tint="@color/colorAccent"
+					android:focusable="false"
+					android:visibility="gone" />
+				<View
+					android:id="@+id/dot_stage_2"
+					android:layout_width="10dp"
+					android:layout_height="10dp"
+					android:background="@drawable/dot_pending"
+					android:layout_gravity="center_horizontal|center_vertical" />
+			</FrameLayout>
+			<TextView
+				android:id="@+id/tv_stage_2"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:text="Broadcasting to network"
+				android:textSize="14sp"
+				android:layout_weight="1"
+				android:focusable="false"
+				android:layout_marginStart="14dp" />
+		</LinearLayout>
+		<View
+			android:id="@+id/view24"
+			android:layout_width="1dp"
+			android:layout_height="20dp"
+			android:background="@color/colorDivider"
+			android:layout_marginStart="13dp" />
+		<LinearLayout
+			android:id="@+id/linear25"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+			<FrameLayout
+				android:id="@+id/frame_layout26"
+				android:layout_width="28dp"
+				android:layout_height="28dp">
+				<ProgressBar
+					android:id="@+id/pb_stage_3"
+					android:layout_width="20dp"
+					android:layout_height="20dp"
+					android:indeterminate="false"
+					style="?android:progressBarStyleHorizontal"
+					android:layout_gravity="center_horizontal|center_vertical"
+					android:focusable="false"
+					android:visibility="gone" />
+				<ImageView
+					android:id="@+id/iv_stage_3_check"
+					android:layout_width="22dp"
+					android:layout_height="22dp"
+					android:src="@drawable/icon_check_round"
+					android:scaleType="centerInside"
+					android:layout_gravity="center_horizontal|center_vertical"
+					app:tint="@color/colorAccent"
+					android:focusable="false"
+					android:visibility="gone" />
+				<View
+					android:id="@+id/dot_stage_3"
+					android:layout_width="10dp"
+					android:layout_height="10dp"
+					android:background="@drawable/dot_pending"
+					android:layout_gravity="center_horizontal|center_vertical" />
+			</FrameLayout>
+			<TextView
+				android:id="@+id/tv_stage_3"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:text="Waiting for confirmation"
+				android:textSize="14sp"
+				android:layout_weight="1"
+				android:focusable="false"
+				android:layout_marginStart="14dp" />
+		</LinearLayout>
+		<View
+			android:id="@+id/view27"
+			android:layout_width="1dp"
+			android:layout_height="20dp"
+			android:background="@color/colorDivider"
+			android:layout_marginStart="13dp" />
+		<LinearLayout
+			android:id="@+id/linear28"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+			<FrameLayout
+				android:id="@+id/frame_layout29"
+				android:layout_width="28dp"
+				android:layout_height="28dp">
+				<ImageView
+					android:id="@+id/iv_stage_4_check"
+					android:layout_width="22dp"
+					android:layout_height="22dp"
+					android:src="@drawable/icon_check_round"
+					android:scaleType="centerInside"
+					android:layout_gravity="center_horizontal|center_vertical"
+					app:tint="@color/colorAccent"
+					android:focusable="false"
+					android:visibility="gone" />
+				<View
+					android:id="@+id/dot_stage_4"
+					android:layout_width="10dp"
+					android:layout_height="10dp"
+					android:background="@drawable/dot_pending"
+					android:layout_gravity="center_horizontal|center_vertical" />
+			</FrameLayout>
+			<TextView
+				android:id="@+id/tv_stage_4"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:text="Confirmed"
+				android:textSize="14sp"
+				android:layout_weight="1"
+				android:focusable="false"
+				android:layout_marginStart="14dp" />
+		</LinearLayout>
+		<TextView
+			android:id="@+id/tv_progress_error"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="20dp"
+			android:textSize="13sp"
+			android:focusable="false"
+			android:visibility="gone" />
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/card_progress_close"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="24dp"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeWidth="0dp"
+			android:visibility="gone">
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_progress_close"
+				android:layout_width="match_parent"
+				android:layout_height="52dp"
+				android:text="Done"
+				android:textSize="15sp"
+				android:textStyle="bold"
+				android:textColor="@color/colorTextOnAccent"
+				app:backgroundTint="@color/colorAccent"
+				app:cornerRadius="16dp"
+				app:elevation="0dp"
+				android:textAllCaps="false" />
+		</com.google.android.material.card.MaterialCardView>
+	</LinearLayout>
+</LinearLayout>

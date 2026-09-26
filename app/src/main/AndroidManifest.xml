@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	package="com.ajoo.app"
+	android:versionName="1.0"
+	tools:replace="android:versionName">
+	
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.VIBRATE" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_NOTIFICATIONS" />
+	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+	<uses-permission android:name="android.permission.CAMERA" />
+	<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+	<uses-permission android:name="android.permission.USE_FINGERPRINT" />
+	
+	<application
+		android:allowBackup="true"
+		android:icon="@mipmap/ic_launcher"
+		android:label="@string/app_name"
+		android:name=".SketchApplication"
+		android:requestLegacyExternalStorage="true"
+		android:usesCleartextTraffic="true"
+		android:networkSecurityConfig="@xml/network_security_config"
+		android:theme="@style/AppTheme" >
+		
+		<provider
+			android:name="androidx.core.content.FileProvider"
+			android:authorities="com.ajoo.app.fileprovider"
+			android:exported="false"
+			android:grantUriPermissions="true">
+			<meta-data
+				android:name="android.support.FILE_PROVIDER_PATHS"
+				android:resource="@xml/file_paths" />
+		</provider>
+		<activity
+			android:name=".MainActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".SplashScreenActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:screenOrientation="portrait"
+			android:windowSoftInputMode="stateHidden"
+			android:exported="true">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity
+			android:name=".GroupDetailsActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".LoginActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:screenOrientation="portrait"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".CreateNewGroupActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".CoinDetailActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".TransactionDetailActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".ProfileActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".SendAssetActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".GroupJoinRequestActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".CreateLearnhubContentActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".GroupSettingsActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".SecurityPinSettingsActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".AppRulesActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".DocumentViewerActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".EditProfileActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".P2pMarketplaceActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".GuardianConsoleActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".CreateP2pBuyOfferActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".P2pInsuranceDepositActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".CreateP2pSellOfferActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".P2pExpressActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".P2pBuyOrderActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".P2pSellOrderActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".P2pBuyTradeActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".P2pSellTradeActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".P2pMerchantManagerActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".P2pMyTradesActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".ComfirmSellOfferActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".CreateAjooCardActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".RestoreWalletActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".CreateWalletActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".ScanQrCodeActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".WalletListActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".AboutActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".BackupRecoveryActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".BlockedUsersActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".HelpSupportActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".NotificationSettingsActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode" />
+		<activity
+			android:name=".PaymentMethodsActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".PrivacySettingsActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".SettingsActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".ReceiveActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".CreateP2pListingActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".DebugActivity"
+			android:screenOrientation="portrait"
+			android:theme="@style/AppTheme.DebugActivity" />
+		
+		<meta-data
+			android:name="com.google.android.gms.version"
+			android:value="@integer/google_play_services_version" />
+		
+		<provider
+			android:name="com.google.firebase.provider.FirebaseInitProvider"
+			android:authorities="com.ajoo.app.firebaseinitprovider"
+			android:exported="false"
+			android:initOrder="100" />
+		
+		<service
+			android:name="com.google.firebase.components.ComponentDiscoveryService"
+			android:exported="false">
+			<meta-data
+				android:name="com.google.firebase.components:com.google.firebase.auth.FirebaseAuthRegistrar"
+				android:value="com.google.firebase.components.ComponentRegistrar" />
+			<meta-data
+				android:name="com.google.firebase.components:com.google.firebase.database.DatabaseRegistrar"
+				android:value="com.google.firebase.components.ComponentRegistrar" />
+		</service>
+		
+		<activity
+			android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+			android:excludeFromRecents="true"
+			android:exported="false"
+			android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+		
+		<service
+			android:name="com.google.android.gms.auth.api.signin.RevocationBoundService"
+			android:exported="true"
+			android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION" />
+		
+		<uses-library
+			android:name="org.apache.http.legacy"
+			android:required="false" />
+	</application>
+</manifest>

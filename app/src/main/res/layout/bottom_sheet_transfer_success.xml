@@ -1,0 +1,217 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	android:background="?attr/colorSurface">
+	<LinearLayout
+		android:id="@+id/linear6"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:padding="20dp"
+		android:gravity="end">
+		<TextView
+			android:id="@+id/tv_success_need_help"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Need Help\\?"
+			android:textStyle="bold"
+			android:textSize="13.5sp"
+			android:focusable="false" />
+	</LinearLayout>
+	<LinearLayout
+		android:id="@+id/linear7"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:paddingTop="16dp"
+		android:gravity="center_horizontal"
+		android:orientation="vertical"
+		android:layout_weight="1">
+		<FrameLayout
+			android:id="@+id/frame_layout8"
+			android:layout_width="200dp"
+			android:layout_height="140dp">
+			<TextView
+				android:id="@+id/textview7"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="4dp"
+				android:text="✦"
+				android:textSize="18sp"
+				android:layout_gravity="top|start"
+				android:focusable="false"
+				android:layout_marginStart="24dp" />
+			<TextView
+				android:id="@+id/textview8"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				android:text="✦"
+				android:textSize="13sp"
+				android:layout_gravity="top|end"
+				android:focusable="false"
+				android:layout_marginEnd="16dp" />
+			<TextView
+				android:id="@+id/textview9"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="20dp"
+				android:text="✦"
+				android:textSize="13sp"
+				android:layout_gravity="bottom|start"
+				android:focusable="false"
+				android:layout_marginStart="16dp" />
+			<TextView
+				android:id="@+id/textview10"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="24dp"
+				android:text="✦"
+				android:textSize="18sp"
+				android:layout_gravity="bottom|end"
+				android:focusable="false"
+				android:layout_marginEnd="20dp" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/cardview6"
+				android:layout_width="100dp"
+				android:layout_height="100dp"
+				app:cardBackgroundColor="@color/colorAccentSoft"
+				android:layout_gravity="center_horizontal|center_vertical"
+				app:cardCornerRadius="50dp"
+				app:cardElevation="0dp"
+				app:strokeWidth="0dp">
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview7"
+					android:layout_width="72dp"
+					android:layout_height="72dp"
+					app:cardBackgroundColor="@color/colorAccent"
+					app:cardCornerRadius="36dp"
+					app:cardElevation="0dp"
+					app:strokeWidth="0dp">
+					<ImageView
+						android:id="@+id/imageview2"
+						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						android:src="@drawable/icon_check_round"
+						android:scaleType="center"
+						app:tint="@color/colorTextOnAccent"
+						android:focusable="false" />
+				</com.google.android.material.card.MaterialCardView>
+			</com.google.android.material.card.MaterialCardView>
+		</FrameLayout>
+		<TextView
+			android:id="@+id/textview12"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:text="Transfer Successful"
+			android:textSize="22sp"
+			android:textStyle="bold"
+			android:focusable="false" />
+		<TextView
+			android:id="@+id/tv_success_subtitle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="6dp"
+			android:gravity="center_horizontal|center_vertical"
+			android:text="Your transfer is confirmed on-chain."
+			android:textSize="13.5sp"
+			android:focusable="false"
+			android:layout_marginHorizontal="32dp" />
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/cardview8"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="24dp"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			android:layout_marginHorizontal="20dp"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<LinearLayout
+				android:id="@+id/linear9"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="20dp"
+				android:gravity="center_horizontal|center_vertical"
+				android:orientation="vertical">
+				<TextView
+					android:id="@+id/tv_success_amount"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="0 AJC"
+					android:textSize="24sp"
+					android:textStyle="bold"
+					android:focusable="false" />
+				<TextView
+					android:id="@+id/tv_success_recipient_label"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="12dp"
+					android:text="To —"
+					android:textSize="14sp"
+					android:textStyle="bold"
+					android:focusable="false" />
+				<TextView
+					android:id="@+id/tv_success_recipient_address"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="2dp"
+					android:text="AJ0x…"
+					android:textSize="12sp"
+					android:focusable="false"
+					android:fontFamily="monospace" />
+				<TextView
+					android:id="@+id/tv_success_datetime"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="12dp"
+					android:text="—"
+					android:textSize="11.5sp"
+					android:focusable="false" />
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+	</LinearLayout>
+	<LinearLayout
+		android:id="@+id/linear10"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:padding="20dp"
+		android:orientation="horizontal">
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_success_share"
+			android:layout_width="0dp"
+			android:layout_height="52dp"
+			android:text="Share Receipt"
+			android:textSize="15sp"
+			android:textStyle="bold"
+			android:textColor="@color/colorTextPrimary"
+			android:layout_weight="1"
+			android:layout_marginEnd="8dp"
+			app:backgroundTint="@color/colorSurfaceRaised"
+			app:cornerRadius="16dp"
+			app:elevation="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke"
+			android:textAllCaps="false"
+			android:focusable="false" />
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_success_done"
+			android:layout_width="0dp"
+			android:layout_height="52dp"
+			android:text="Done"
+			android:textSize="15sp"
+			android:textStyle="bold"
+			android:textColor="@color/colorTextOnAccent"
+			android:layout_weight="1"
+			android:layout_marginStart="8dp"
+			app:backgroundTint="@color/colorAccent"
+			app:cornerRadius="16dp"
+			app:elevation="0dp"
+			android:textAllCaps="false"
+			android:focusable="false" />
+	</LinearLayout>
+</LinearLayout>

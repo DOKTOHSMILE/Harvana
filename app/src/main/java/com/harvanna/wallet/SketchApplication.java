@@ -29,6 +29,16 @@ public class SketchApplication extends Application {
         // EXPLICIT INITIALIZATION: Forces Firebase to wake up early
         FirebaseApp.initializeApp(this);
         
+        // Firestore offline persistence, enabled explicitly (must run before any other Firestore use)
+        try {
+            com.google.firebase.firestore.FirebaseFirestore.getInstance().setFirestoreSettings(
+                new com.google.firebase.firestore.FirebaseFirestoreSettings.Builder()
+                    .setPersistenceEnabled(true)
+                    .build());
+        } catch (Exception e) {
+            Log.w("SketchApplication", "Firestore settings already applied", e);
+        }
+        
         // One-time AJ0x -> HV0x wallet address migration (idempotent)
         com.harvanna.wallet.wallet.AddressMigration.run(this);
         

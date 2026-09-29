@@ -142,7 +142,7 @@ public class CircleCreateActivity extends AppCompatActivity {
         blp.topMargin = CircleUi.dp(this, 16);
         root.addView(btnCreate, blp);
 
-        setContentView(scroll);
+        setContentView(CircleUi.withToolbar(this, "New circle", scroll));
         refresh();
         loadBalance();
     }
@@ -173,7 +173,9 @@ public class CircleCreateActivity extends AppCompatActivity {
           + "• Your bond (2× a member's): " + CircleUi.harv(creatorBond) + "\n"
           + "• Creation fee (non-refundable): " + CircleUi.harv(CREATION_FEE_RAW) + "\n\n"
           + "Total locked from you now: " + CircleUi.harv(total) + "\n"
-          + "Network fees are extra.");
+          + "Network fees are extra.\n\n"
+          + "Who is paid when: the order follows when people join (you join first), with some early slots kept for members with a track record. "
+          + "A circle that doesn't fill within 72 hours is cancelled and bonds are returned.");
         boolean enough = availableRaw < 0 || availableRaw >= total;
         tvError.setText(enough ? "" : "Your available balance is less than the " + CircleUi.harv(total) + " needed.");
         btnCreate.setEnabled(enough);

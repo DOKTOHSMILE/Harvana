@@ -134,42 +134,28 @@ public class GroupsFragmentActivity extends Fragment {
 		return _view;
 	}
 	
-	// Entry to the node-backed Circles (source of truth = the Harvanna node). Additive; guarded so a
-	// layout change can never crash the tab.
+	// One create entry (the existing button) opens the type picker; circles can also be opened by ID.
+	// Guarded so a layout change can never crash the tab.
 	private void _addCircleEntry(View root) {
 		try {
+			cardview1.setOnClickListener(v -> com.harvanna.app.group.CreateGroupSheet.show(getContext()));
+			
 			View header = root.findViewById(R.id.linear2);
 			if (header == null || !(header.getParent() instanceof LinearLayout)) return;
 			LinearLayout parent = (LinearLayout) header.getParent();
 			if (parent.getOrientation() != LinearLayout.VERTICAL) return;
 			final float d = getResources().getDisplayMetrics().density;
 			
-			LinearLayout row = new LinearLayout(getContext());
-			row.setOrientation(LinearLayout.HORIZONTAL);
-			row.setPadding((int) (22 * d), 0, (int) (22 * d), (int) (12 * d));
-			
-			row.addView(_circleButton("New on-chain circle", true, v ->
-					startActivity(new Intent(getContext(), com.harvanna.app.circle.CircleCreateActivity.class))),
-					new LinearLayout.LayoutParams(0, (int) (48 * d), 1f));
-			LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(0, (int) (48 * d), 1f);
-			lp2.leftMargin = (int) (10 * d);
-			row.addView(_circleButton("Open by ID", false, v -> _promptCircleId()), lp2);
-			
-			parent.addView(row, parent.indexOfChild(header) + 1);
+			TextView link = new TextView(getContext());
+			link.setText("Have a circle ID? Open it");
+			link.setTextSize(13);
+			link.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorAccentStrong));
+			link.setPadding((int) (22 * d), 0, (int) (22 * d), (int) (10 * d));
+			link.setOnClickListener(v -> _promptCircleId());
+			parent.addView(link, parent.indexOfChild(header) + 1);
 		} catch (Exception e) {
-			android.util.Log.w("GroupsFragment", "Circle entry not added", e);
+			android.util.Log.w("GroupsFragment", "Create entry not wired", e);
 		}
-	}
-	
-	private Button _circleButton(String label, boolean primary, View.OnClickListener l) {
-		Button b = new Button(getContext());
-		b.setText(label);
-		b.setAllCaps(false);
-		b.setTextSize(13);
-		b.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), primary ? R.color.colorTextOnAccent : R.color.colorAccentStrong));
-		b.setBackgroundResource(primary ? R.drawable.bg_btn_primary : R.drawable.bg_btn_outline_accent);
-		b.setOnClickListener(l);
-		return b;
 	}
 	
 	private void _promptCircleId() {

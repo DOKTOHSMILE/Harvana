@@ -1,6 +1,8 @@
 package com.harvanna.app.circle;
 
+import android.app.Activity;
 import android.content.Context;
+import android.util.TypedValue;
 import android.graphics.Typeface;
 import android.view.Gravity;
 import android.view.View;
@@ -111,5 +113,36 @@ final class CircleUi {
         if (e.contains("INVALID_NONCE")) return "Your request was out of sequence. Pull to refresh and try again.";
         if (e.contains("INVALID_SIGNATURE")) return "Couldn't verify your signature. Please try again.";
         return error;
+    }
+
+    /** Toolbar (theme appBarColor, back arrow) above the body, plus a status bar that matches it. */
+    static LinearLayout withToolbar(Activity a, String title, View body) {
+        TypedValue bar = new TypedValue();
+        TypedValue on = new TypedValue();
+        a.getTheme().resolveAttribute(R.attr.appBarColor, bar, true);
+        a.getTheme().resolveAttribute(R.attr.onAppBarColor, on, true);
+        TypedValue h = new TypedValue();
+        a.getTheme().resolveAttribute(androidx.appcompat.R.attr.actionBarSize, h, true);
+        int height = TypedValue.complexToDimensionPixelSize(h.data, a.getResources().getDisplayMetrics());
+
+        androidx.appcompat.widget.Toolbar tb = new androidx.appcompat.widget.Toolbar(a);
+        tb.setBackgroundColor(bar.data);
+        tb.setTitle(title);
+        tb.setTitleTextColor(on.data);
+        android.graphics.drawable.Drawable back = androidx.core.content.ContextCompat.getDrawable(a, R.drawable.ic_arrow_back);
+        if (back != null) {
+            back = androidx.core.graphics.drawable.DrawableCompat.wrap(back.mutate());
+            androidx.core.graphics.drawable.DrawableCompat.setTint(back, on.data);
+            tb.setNavigationIcon(back);
+        }
+        tb.setNavigationContentDescription("Back");
+        tb.setNavigationOnClickListener(v -> a.finish());
+
+        LinearLayout root = new LinearLayout(a);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.addView(tb, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+        root.addView(body, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        com.harvanna.app.utils.StatusBarUtil.matchToolbar(a);
+        return root;
     }
 }

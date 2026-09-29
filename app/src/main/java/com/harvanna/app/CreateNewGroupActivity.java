@@ -335,6 +335,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		// Opened from the "Create a group" picker with the type already chosen.
+		String preselected = getIntent().getStringExtra("groupType");
+		if (preselected != null && !preselected.isEmpty()) {
+			_selectGroupType(preselected);
+		}
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {

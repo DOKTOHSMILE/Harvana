@@ -40,7 +40,7 @@ public final class BalanceFormatter {
      * Example: 1,234.56789000 AJC
      */
     public static String full(double ajcAmount) {
-        return decimal(ajcAmount, 8) + " AJC";
+        return decimal(ajcAmount, 8) + " HARV";
     }
 
     /**
@@ -48,7 +48,7 @@ public final class BalanceFormatter {
      * Example: 1,234.5679 AJC
      */
     public static String short4(double ajcAmount) {
-        return decimal(ajcAmount, 4) + " AJC";
+        return decimal(ajcAmount, 4) + " HARV";
     }
 
     /**
@@ -56,7 +56,7 @@ public final class BalanceFormatter {
      * Example: 0.00 AJC
      */
     public static String fee(double ajcAmount) {
-        return decimal(ajcAmount, 6) + " AJC";
+        return decimal(ajcAmount, 6) + " HARV";
     }
 
     /**
@@ -66,7 +66,7 @@ public final class BalanceFormatter {
      * Examples: 2.0000 -> "2 AJC", 2.5000 -> "2.5 AJC", 2.5678 -> "2.5678 AJC"
      */
     public static String smart(double ajcAmount) {
-        return smartDecimal(ajcAmount) + " AJC";
+        return smartDecimal(ajcAmount) + " HARV";
     }
 
     /** Same trimming, without the " AJC" suffix — for places that need the

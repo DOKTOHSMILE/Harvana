@@ -18,7 +18,7 @@ import okhttp3.WebSocketListener;
  * WebSocket client for the AJC node wallet channel — live push updates so
  * balance/history don't wait for the next manual refresh.
  *
- * Connect: wss://5.75.163.65:8080/ws/wallet?address=AJ0x<40hex>&token=<node auth token>
+ * Connect: wss://harvannaprotocol.com/ws/wallet?address=HV0x<40hex>&token=<node auth token>
  * Requires a valid NodeAuthManager token — same one used by every REST
  * call in AjooNodeClient, fetched fresh via getValidToken() before the
  * socket opens (and again on every reconnect attempt).
@@ -29,7 +29,7 @@ import okhttp3.WebSocketListener;
  */
 public class WalletSocketClient {
 
-    private static final String WS_BASE = "wss://5.75.163.65:8080";
+    private static final String WS_BASE = "wss://harvannaprotocol.com";
     private static final String TAG     = "WalletSocket";
 
     // Reconnect: exponential backoff 1s → 2s → 4s → … → 60s max

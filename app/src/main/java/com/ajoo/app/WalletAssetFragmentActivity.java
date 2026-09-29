@@ -293,9 +293,9 @@ public class WalletAssetFragmentActivity extends Fragment {
 				final String walletAddress =
 				com.ajoo.app.wallet.WalletGenerator.deriveAddressFromMnemonic(mnemonic);
 				if (walletAddress == null
-				|| !walletAddress.startsWith("AJ0x")
+				|| !walletAddress.startsWith("HV0x")
 				|| walletAddress.length() != 44) {
-					postToUi(() -> SketchwareUtil.showMessage(context, "Failed to derive valid AJ0x address."));
+					postToUi(() -> SketchwareUtil.showMessage(context, "Failed to derive valid HV0x address."));
 					return;
 				}
 				

@@ -80,12 +80,12 @@ public final class AjooCardRenderer {
 		addrPaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD));
 		addrPaint.setLetterSpacing(0.04f); // Adds luxurious horizontal spread
 		
-		// Case-insensitive strip of any existing AJ0x variation
-		String cleanAddress = walletAddress != null ? walletAddress.replaceAll("(?i)^AJ0X", "").toUpperCase() : "";
+		// Case-insensitive strip of any existing HV0x variation
+		String cleanAddress = walletAddress != null ? walletAddress.replaceAll("(?i)^HV0X", "").toUpperCase() : "";
 		
 		if (cleanAddress.length() == 40) {
 			// New 3-Row format, well-spaced
-			String row1 = String.format("AJ0x    %s   %s",
+			String row1 = String.format("HV0x    %s   %s",
 			cleanAddress.substring(0, 5), cleanAddress.substring(5, 10));
 			String row2 = String.format("%s   %s   %s",
 			cleanAddress.substring(10, 15), cleanAddress.substring(15, 20), cleanAddress.substring(20, 25));
@@ -97,7 +97,7 @@ public final class AjooCardRenderer {
 			canvas.drawText(row3, margin, 380f, addrPaint);
 		} else {
 			// Fallback
-			canvas.drawText("AJ0x " + cleanAddress, margin, 270f, addrPaint);
+			canvas.drawText("HV0x " + cleanAddress, margin, 270f, addrPaint);
 		}
 		
 		// Card Owner

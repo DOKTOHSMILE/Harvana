@@ -134,7 +134,7 @@ public class ScanQrCodeActivity extends AppCompatActivity {
 	public static final String EXTRA_MODE = "scan_mode";
 	/** Accept anything (no validation) — the default if EXTRA_MODE is omitted. */
 	public static final String MODE_ANY = "any";
-	/** Accept only a well-formed AJ0x wallet address (AddressUtil.isValidAddress). */
+	/** Accept only a well-formed HV0x wallet address (AddressUtil.isValidAddress). */
 	public static final String MODE_WALLET_ADDRESS = "wallet_address";
 	/** Accept only an Ajoo Access Card QR (AjooCardCrypto.FORMAT_PREFIX). */
 	public static final String MODE_AJOO_CARD = "ajoo_card";

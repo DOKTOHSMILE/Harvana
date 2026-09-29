@@ -421,7 +421,7 @@ public final class GroupPayoutManager {
     }
 
     private static boolean isValidAjcWallet(String address) {
-        return address != null && address.trim().startsWith("AJ0x") && address.trim().length() >= 10;
+        return address != null && address.trim().startsWith("HV0x") && address.trim().length() >= 10;
     }
 
     private static String shortAddr(String a) {

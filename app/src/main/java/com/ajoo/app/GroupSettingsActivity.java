@@ -1139,7 +1139,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _refreshKeyStatus() {
-		if (expectedWallet.isEmpty() || !expectedWallet.startsWith("AJ0x")) {
+		if (expectedWallet.isEmpty() || !expectedWallet.startsWith("HV0x")) {
 			cardWalletWarning.setVisibility(View.GONE);
 			btnRestoreWallet.setVisibility(View.GONE);
 			return;

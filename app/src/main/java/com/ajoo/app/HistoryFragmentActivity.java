@@ -181,7 +181,7 @@ public class HistoryFragmentActivity extends Fragment {
 			groupType = str(cached, "groupType", "");
 			groupLocation = _extractLocation(cached);
 			
-			if (groupWalletAddress != null && groupWalletAddress.startsWith("AJ0x")) {
+			if (groupWalletAddress != null && groupWalletAddress.startsWith("HV0x")) {
 				_paintCachedHistory();
 				_loadWalletActivity();
 			}
@@ -206,7 +206,7 @@ public class HistoryFragmentActivity extends Fragment {
 	}
 	
 	private void _loadWalletActivity() {
-		if (groupWalletAddress == null || !groupWalletAddress.startsWith("AJ0x")) return;
+		if (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x")) return;
 		com.ajoo.app.group.MemberNameResolver.preloadGroupWallets(getContext(), groupId, () -> {
 			if (getActivity() == null) return;
 			getActivity().runOnUiThread(this::_fetchAndBindWalletActivity);
@@ -214,7 +214,7 @@ public class HistoryFragmentActivity extends Fragment {
 	}
 	
 	private void _paintCachedHistory() {
-		if (groupWalletAddress == null || !groupWalletAddress.startsWith("AJ0x")) return;
+		if (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x")) return;
 		List<HashMap<String, Object>> cached = com.ajoo.app.offline.OfflineCacheManager.loadList(
 		getContext(), "wallet_history_" + groupWalletAddress);
 		
@@ -226,7 +226,7 @@ public class HistoryFragmentActivity extends Fragment {
 	}
 	
 	private void _fetchAndBindWalletActivity() {
-		if (groupWalletAddress == null || !groupWalletAddress.startsWith("AJ0x")) return;
+		if (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x")) return;
 		_paintCachedHistory();
 		AjooNodeClient.getHistory(groupWalletAddress, new AjooNodeClient.JsonCallback() {
 			@Override

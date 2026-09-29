@@ -361,7 +361,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 	}
 	
 	private void _loadWalletAvailable() {
-		if (groupWalletAddress == null || !groupWalletAddress.startsWith("AJ0x")) return;
+		if (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x")) return;
 		
 		Map<String, Object> cachedBalance = com.ajoo.app.offline.OfflineCacheManager.load(
 		getContext(), "wallet_balance_" + groupWalletAddress);
@@ -792,12 +792,12 @@ public class GroupLoansFragmentActivity extends Fragment {
 	double principal, double interestRate, String interestPeriod,
 	long disbursedAt, double remainingDue, double alreadyRepaid) {
 		if (getContext() == null || getActivity() == null) return;
-		if (groupWalletAddress == null || !groupWalletAddress.startsWith("AJ0x")) {
+		if (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x")) {
 			SketchwareUtil.showMessage(getContext(), "Group wallet not loaded.");
 			return;
 		}
 		String myWallet = com.ajoo.app.wallet.WalletManager.getActiveWalletAddress(getContext());
-		if (myWallet == null || !myWallet.startsWith("AJ0x")) {
+		if (myWallet == null || !myWallet.startsWith("HV0x")) {
 			SketchwareUtil.showMessage(getContext(), "Link your AJC wallet first.");
 			return;
 		}

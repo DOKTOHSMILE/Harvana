@@ -714,7 +714,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	}
 	
 	private void _loadGroupWalletBalance(String address) {
-		if (address == null || !address.startsWith("AJ0x")) {
+		if (address == null || !address.startsWith("HV0x")) {
 			if (tv_group_wallet_balance != null) tv_group_wallet_balance.setText("0 AJC");
 			return;
 		}

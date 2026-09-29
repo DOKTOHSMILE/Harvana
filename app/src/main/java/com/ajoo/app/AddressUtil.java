@@ -6,10 +6,10 @@ package com.ajoo.app;
 public class AddressUtil {
 
     private static final java.util.regex.Pattern ADDRESS_PATTERN =
-            java.util.regex.Pattern.compile("^AJ0x[0-9a-f]{40}$");
+            java.util.regex.Pattern.compile("^HV0x[0-9a-f]{40}$");
 
     private static final java.util.regex.Pattern BLOCK_HASH_PATTERN =
-            java.util.regex.Pattern.compile("^AJ0x[0-9a-f]{64}$");
+            java.util.regex.Pattern.compile("^HV0x[0-9a-f]{64}$");
 
     public static boolean isValidBlockHash(String hash) {
         if (hash == null) return false;
@@ -18,7 +18,7 @@ public class AddressUtil {
 
     /**
      * Validates if the provided string is a properly formatted Ajoo Chain address.
-     * Enforces the mandatory "AJ0x" prefix rule.
+     * Enforces the mandatory "HV0x" prefix rule.
      */
     public static boolean isValidAddress(String address) {
         if (address == null) return false;
@@ -27,7 +27,7 @@ public class AddressUtil {
 
     /**
      * Truncates a long wallet address for cleaner UI display.
-     * Example: "AJ0x1234567890abcdef1234567890abcdef123456" -> "AJ0x1234...3456"
+     * Example: "HV0x1234567890abcdef1234567890abcdef123456" -> "HV0x1234...3456"
      */
     public static String truncateAddress(String address) {
         if (address == null || address.trim().isEmpty()) {
@@ -40,13 +40,13 @@ public class AddressUtil {
             return normalized;
         }
         
-        // Keep the AJ0x + first 4 chars, add ellipsis, keep last 4 chars
+        // Keep the HV0x + first 4 chars, add ellipsis, keep last 4 chars
         return normalized.substring(0, 8) + "..." + normalized.substring(normalized.length() - 4);
     }
     
     /**
      * Helper to safely format a token and address together for UI display.
-     * Example: "AJUSD (AJ0xABCD...1234)"
+     * Example: "AJUSD (HV0xABCD...1234)"
      */
     public static String formatTokenWithAddress(String symbol, String contractAddress) {
         String tokenSymbol = (symbol != null) ? symbol : "Unknown";

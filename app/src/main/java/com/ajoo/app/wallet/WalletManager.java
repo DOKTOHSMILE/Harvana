@@ -55,7 +55,7 @@ public class WalletManager {
 	/**
 	 * PRIMARY method used by WalletAssetFragmentActivity.
 	 * Accepts a 12-word mnemonic OR a Base64 raw seed.
-	 * Always returns a valid AJ0x… address or null.
+	 * Always returns a valid HV0x… address or null.
 	 */	
 	public static String deriveAddressFromSeed(String seed) {
 		if (seed == null || seed.trim().isEmpty()) return null;

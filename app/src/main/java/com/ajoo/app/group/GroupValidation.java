@@ -13,11 +13,11 @@ public final class GroupValidation {
         return s == null || s.trim().isEmpty();
     }
 
-    /** AJC wallet addresses must start with AJ0x and be reasonably long. */
+    /** AJC wallet addresses must start with HV0x and be reasonably long. */
     public static boolean isValidAjcWallet(String address) {
         if (address == null) return false;
         String a = address.trim();
-        return a.startsWith("AJ0x") && a.length() >= 10;
+        return a.startsWith("HV0x") && a.length() >= 10;
     }
 
     public static String requireUid(String uid, String fallbackError) {
@@ -37,7 +37,7 @@ public final class GroupValidation {
 
     public static String requireValidWallet(String address, String role) {
         if (!isValidAjcWallet(address)) {
-            return (role != null ? role : "Wallet") + " must be a valid AJ0x address.";
+            return (role != null ? role : "Wallet") + " must be a valid HV0x address.";
         }
         return null;
     }

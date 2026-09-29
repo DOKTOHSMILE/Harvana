@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *     (userdb/{uid}) instead of Firestore, which is the actual source of
  *     truth post-migration — dual-write-only RTDB isn't guaranteed to have
  *     first_name/last_name for every user going forward.
- *   - HistoryFragmentActivity showed the raw AJ0x... wallet address for
+ *   - HistoryFragmentActivity showed the raw HV0x... wallet address for
  *     every row, member or not — the "crazy characters" complaint.
  *   - GroupNoticeHelper hardcoded the literal string "Admin" as the sender
  *     of every announcement instead of the actual poster's name.

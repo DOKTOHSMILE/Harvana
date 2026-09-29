@@ -10,7 +10,7 @@ import com.ajoo.app.sync.AjooNodeClient;
  * Fetches live balance and nonce from the AJC node.
  *
  * SERVER RESPONSE FORMAT (as of node v1.0.0):
- *   { "address": "AJ0x...", "balance": <long raw units>, "nonce": <long>, "blockHeight": <long> }
+ *   { "address": "HV0x...", "balance": <long raw units>, "nonce": <long>, "blockHeight": <long> }
  *
  * "balance" is raw units (long), NOT a "balance_ajc" double.
  * Use AjooNodeClient.toAjcDisplay() to convert for UI.
@@ -32,7 +32,7 @@ public final class WalletNodeBridge {
      * Balance displayed to the user = rawBalance / AJC_UNITS_PER_TOKEN.
      *
      * @param context   not used currently, kept for API compatibility
-     * @param address   AJ0x wallet address
+     * @param address   HV0x wallet address
      * @param callback  delivered on main thread
      */
     public static void fetchLiveBalance(Context context, String address, BalanceCallback callback) {
@@ -40,8 +40,8 @@ public final class WalletNodeBridge {
             callback.onError("Invalid wallet address");
             return;
         }
-        if (!address.startsWith("AJ0x") || address.length() != 44) {
-            callback.onError("Address must be 44 chars starting with AJ0x");
+        if (!address.startsWith("HV0x") || address.length() != 44) {
+            callback.onError("Address must be 44 chars starting with HV0x");
             return;
         }
 

@@ -74,7 +74,7 @@ public class AjooChainSdk {
 */	
 	public static void fetchWalletData(String walletAddress, final NodeDataCallback callback) {
 		if (!AddressUtil.isValidAddress(walletAddress)) {
-			callback.onError("Invalid AJ0x address format.");
+			callback.onError("Invalid HV0x address format.");
 			return;
 		}
 		
@@ -113,7 +113,7 @@ public class AjooChainSdk {
 	final TransactionRouter.ExecutionCallback callback) {
 		
 		if (!AddressUtil.isValidAddress(recipientAddress)) {
-			callback.onError("Invalid recipient AJ0x address format.");
+			callback.onError("Invalid recipient HV0x address format.");
 			return;
 		}
 		

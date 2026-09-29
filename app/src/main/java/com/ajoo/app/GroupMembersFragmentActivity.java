@@ -534,7 +534,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 		// Fixed groups: admin can close the month when member has paid all 31 days.
 		boolean isFixedGroup = groupType != null && groupType.toLowerCase(java.util.Locale.US).contains("fixed");
 		if (isAdmin && !isPending && isFixedGroup && contributionAmount > 0
-		&& groupWalletAddress.startsWith("AJ0x") && !memberUid.isEmpty()) {
+		&& groupWalletAddress.startsWith("HV0x") && !memberUid.isEmpty()) {
 			String monthKey = com.ajoo.app.group.FixedPaymentEngine.currentMonthKey();
 			java.util.List<Integer> daysPaid = com.ajoo.app.group.FixedPaymentEngine.daysPaidFromMember(member, monthKey);
 			if (com.ajoo.app.group.FixedPaymentEngine.monthComplete(daysPaid)) {
@@ -598,9 +598,9 @@ public class GroupMembersFragmentActivity extends Fragment {
 		// no fetch needed for this part.
 		String memberWallet = str(member, "walletAddress", str(member, "wallet_address", ""));
 		if (wallet != null) {
-			wallet.setText(memberWallet.startsWith("AJ0x") ? memberWallet : "No wallet linked");
+			wallet.setText(memberWallet.startsWith("HV0x") ? memberWallet : "No wallet linked");
 		}
-		if (memberWallet.startsWith("AJ0x") && balance != null) {
+		if (memberWallet.startsWith("HV0x") && balance != null) {
 			com.ajoo.app.wallet.WalletNodeBalanceHelper.load(memberWallet,
 			(bal, avail, pin, pout, pending, err) -> {
 				if (getActivity() == null) return;
@@ -724,11 +724,11 @@ public class GroupMembersFragmentActivity extends Fragment {
 	private void _startFixedMonthClose(String memberUid, String memberWallet,
 	java.util.List<Integer> daysPaid) {
 		if (getContext() == null || getActivity() == null) return;
-		if (memberWallet == null || !memberWallet.startsWith("AJ0x")) {
+		if (memberWallet == null || !memberWallet.startsWith("HV0x")) {
 			SketchwareUtil.showMessage(getContext(), "Member has no linked AJC wallet.");
 			return;
 		}
-		if (!groupWalletAddress.startsWith("AJ0x")) {
+		if (!groupWalletAddress.startsWith("HV0x")) {
 			SketchwareUtil.showMessage(getContext(), "Group wallet not loaded.");
 			return;
 		}
@@ -964,7 +964,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 			
 			if (h.wallet != null) {
 				String memberWallet = str(member, "walletAddress", str(member, "wallet_address", ""));
-				if (memberWallet.startsWith("AJ0x")) {
+				if (memberWallet.startsWith("HV0x")) {
 					h.wallet.setText(_shortAddr(memberWallet));
 					_fetchBalance(memberWallet, h.balance);
 				} else {

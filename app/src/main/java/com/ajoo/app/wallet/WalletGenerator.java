@@ -20,7 +20,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 /**
- * BIP-39 standard mnemonic + AJ0x address derivation.
+ * BIP-39 standard mnemonic + HV0x address derivation.
  * Safe for Sketchware: never throws on missing assets — returns null instead.
  */
 public class WalletGenerator {
@@ -178,8 +178,8 @@ public class WalletGenerator {
     }
     
     /**
-     * Derive a deterministic AJ0x… address from a 12-word mnemonic.
-     * Always returns 44-char "AJ0x" + 40 hex, or null on failure.
+     * Derive a deterministic HV0x… address from a 12-word mnemonic.
+     * Always returns 44-char "HV0x" + 40 hex, or null on failure.
      */    
     public static String deriveAddressFromMnemonic(String mnemonic) {
         if (mnemonic == null || mnemonic.trim().isEmpty()) return null;

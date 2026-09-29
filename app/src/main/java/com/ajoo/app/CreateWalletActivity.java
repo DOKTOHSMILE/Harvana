@@ -210,9 +210,9 @@ public class CreateWalletActivity extends AppCompatActivity {
 				}
 				
 				final String walletAddress = com.ajoo.app.wallet.WalletGenerator.deriveAddressFromMnemonic(mnemonic);
-				if (walletAddress == null || !walletAddress.startsWith("AJ0x") || walletAddress.length() != 44) {
+				if (walletAddress == null || !walletAddress.startsWith("HV0x") || walletAddress.length() != 44) {
 					runOnUiThread(() -> {
-						SketchwareUtil.showMessage(context, "Failed to derive valid AJ0x address.");
+						SketchwareUtil.showMessage(context, "Failed to derive valid HV0x address.");
 						finish();
 					});
 					return;

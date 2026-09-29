@@ -20,7 +20,7 @@ public final class WalletNodeBalanceHelper {
 
 	public static void load(String address, Callback cb) {
 		if (cb == null) return;
-		if (address == null || !address.startsWith("AJ0x")) {
+		if (address == null || !address.startsWith("HV0x")) {
 			cb.onResult(0, 0, 0, 0, new JSONArray(), "bad address");
 			return;
 		}

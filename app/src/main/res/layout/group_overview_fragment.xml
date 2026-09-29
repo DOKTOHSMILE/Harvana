@@ -84,7 +84,7 @@
 							android:id="@+id/tv_group_wallet_address"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:text="AJ0x…"
+							android:text="HV0x…"
 							android:layout_weight="1"
 							android:textSize="13.5sp"
 							android:textIsSelectable="true"

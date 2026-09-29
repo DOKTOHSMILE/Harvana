@@ -286,7 +286,7 @@ public class GroupDetailsLogic {
                     @Override
                     public void onClick(View v) {
                         dialog.dismiss();
-                        if (toWallet.isEmpty() || !toWallet.startsWith("AJ0x")) {
+                        if (toWallet.isEmpty() || !toWallet.startsWith("HV0x")) {
                             promptWalletAndApprove(reqId, amt);
                             return;
                         }
@@ -316,7 +316,7 @@ public class GroupDetailsLogic {
         if (activity == null || activity.isFinishing()) return;
         final EditText input = new EditText(activity);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
-        input.setHint("Member AJ0x wallet");
+        input.setHint("Member HV0x wallet");
         LinearLayout wrap = new LinearLayout(activity);
         wrap.setPadding(48, 24, 48, 0);
         wrap.addView(input);
@@ -526,7 +526,7 @@ public class GroupDetailsLogic {
     // ── Group wallet balance from node ───────────────────────────────────
 
     public void refreshGroupWalletBalance(final TextView balanceView) {
-        if (groupWalletAddress.isEmpty() || !groupWalletAddress.startsWith("AJ0x")) return;
+        if (groupWalletAddress.isEmpty() || !groupWalletAddress.startsWith("HV0x")) return;
         AjooNodeClient.getWallet(groupWalletAddress, new AjooNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject json) {

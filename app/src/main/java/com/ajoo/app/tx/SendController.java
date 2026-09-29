@@ -154,7 +154,7 @@ public class SendController {
     /**
      * Validates inputs, fetches live balance and fee from node, builds preview.
      *
-     * @param recipient       recipient AJ0x address
+     * @param recipient       recipient HV0x address
      * @param amountInput     user-typed amount string (e.g. "1.5" or "1,500")
      * @param contractAddress null or "" for native AJC; contract address for tokens
      * @param tokenSymbol     "AJC" for native; token symbol for tokens

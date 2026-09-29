@@ -80,7 +80,7 @@
 						android:id="@+id/tv_confirm_recipient"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="AJ0x…"
+						android:text="HV0x…"
 						android:textSize="13.5sp"
 						android:focusable="false"
 						android:fontFamily="monospace" />

@@ -22,11 +22,7 @@ import java.util.concurrent.Executors;
 /**
 * HTTP client for AJC Node — the source of truth for all AJC chain data.
 *
-* Runs over TLS with the node's self-signed certificate pinned via
-* network_security_config.xml (res/raw/ajoo_node_cert.pem) — same
-* certificate and pinning setup as com.ajoo.node.miner. If the node's
-* cert/key is ever rotated, that file must be updated and this app
-* rebuilt in lockstep, or it will refuse to connect entirely, by design.
+* Runs over TLS to https://harvannaprotocol.com using the system trust store.
 *
 * UNIT CONVENTION:
 *   The node stores and transmits balances, amounts and fees as raw long units.
@@ -35,7 +31,7 @@ import java.util.concurrent.Executors;
 */
 public final class AjooNodeClient {
 	
-	public static final String BASE = "https://5.75.163.65:8080";
+	public static final String BASE = "https://harvannaprotocol.com";
 	
 	/** 1 AJC = 100,000,000 raw units (same ratio as 1 BTC = 1e8 satoshis). */
 	public static final long AJC_UNITS_PER_TOKEN = 100_000_000L;
@@ -472,7 +468,7 @@ public final class AjooNodeClient {
 							return;
 						}
 						if (canonical.isEmpty()) {
-							canonical = "AJOO_AUTH|" + address + "|" + challenge + "|"
+							canonical = "HARVANNA_AUTH|" + address + "|" + challenge + "|"
 							+ (clientId == null ? "" : clientId) + "|ajoo-app";
 						}
 						String pkB64 = SecureWalletStorage.loadPrivateKey(context, address);

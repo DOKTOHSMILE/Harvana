@@ -968,7 +968,7 @@
 									android:id="@+id/tvWalletAddress"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="AJ0x..."
+									android:text="HV0x..."
 									android:textSize="12sp"
 									android:fontFamily="monospace"
 									android:maxLines="1"

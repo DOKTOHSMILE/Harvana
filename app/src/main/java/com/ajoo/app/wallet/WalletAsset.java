@@ -8,7 +8,7 @@ package com.ajoo.app.wallet;
  */
 public class WalletAsset {
 
-    private String  contract;   // AJ0x... token contract address
+    private String  contract;   // HV0x... token contract address
     private String  symbol;     // e.g. "USDT"
     private double  balance;    // token balance held
     private int     decimals;   // token decimal precision

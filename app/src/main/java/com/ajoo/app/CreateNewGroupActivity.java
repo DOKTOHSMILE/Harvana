@@ -1074,6 +1074,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private double ajc_balance = 0;
 	private static final double GROUP_CREATION_FEE = 5;
 	private String activeAddress = "";
+	// TODO(observations): unused legacy AJ0x fee collector address; needs a real HV0x address if ever used.
 	private static final String FEE_COLLECTOR_ADDRESS = "AJ0xc41061d9f595b3fbc0dc11a0f4811964eeda5bf1";
 	private String stateString = "";
 	private String countryString = "";
@@ -1180,8 +1181,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			}
 			
 			final String groupWalletAddress = com.ajoo.app.wallet.WalletGenerator.deriveAddressFromMnemonic(mnemonic);
-			if (groupWalletAddress == null || !groupWalletAddress.startsWith("AJ0x") || groupWalletAddress.length() != 44) {
-				SketchwareUtil.showMessage(context, "Failed to derive valid AJ0x address.");
+			if (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x") || groupWalletAddress.length() != 44) {
+				SketchwareUtil.showMessage(context, "Failed to derive valid HV0x address.");
 				return;
 			}
 			
@@ -1994,4 +1995,4 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			return _view;
 		}
 	}
-}
+}

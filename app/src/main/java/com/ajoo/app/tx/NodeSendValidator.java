@@ -46,8 +46,8 @@ public final class NodeSendValidator {
         if (addr.length() != 44) {
             return Result.fail("Address must be exactly 44 characters");
         }
-        if (!addr.startsWith("AJ0x")) {
-            return Result.fail("Address must start with AJ0x");
+        if (!addr.startsWith("HV0x")) {
+            return Result.fail("Address must start with HV0x");
         }
         if (!addr.substring(4).matches("[0-9a-f]{40}")) {
             return Result.fail("Address contains invalid characters");
@@ -110,7 +110,7 @@ public final class NodeSendValidator {
     public static boolean isValidAddress(String address) {
         return address != null
             && address.length() == 44
-            && address.startsWith("AJ0x")
+            && address.startsWith("HV0x")
             && address.substring(4).matches("[0-9a-f]{40}");
     }
 }

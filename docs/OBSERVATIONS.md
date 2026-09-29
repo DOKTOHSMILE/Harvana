@@ -37,3 +37,10 @@
   the auth email, and prefills the name from the display name. Phone number is entered manually there.
 - Email and Google sign-ins create separate Firebase accounts; account linking is not implemented.
 - Firebase console: enable Email/Password and Google providers, register SHA fingerprints; T0-5 still open.
+
+## Firebase setup (T0-5)
+- Package name for the Firebase Android app: `com.ajoo.app`.
+- `com.google.gms.google-services` plugin (4.4.1) added to `app/build.gradle`. The build fails until
+  `app/google-services.json` is added (download from Firebase console after registering the app + SHA fingerprints).
+- App has never been on Play, so `versionCode 1` is fine (T2-2 resolved). Keystore (T2-1) still open.
+- Testing is deferred to the final phase, done manually by the owner.

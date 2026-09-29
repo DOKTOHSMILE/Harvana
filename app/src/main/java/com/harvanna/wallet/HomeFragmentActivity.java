@@ -67,7 +67,8 @@ import com.harvanna.wallet.wallet.WalletManager;
 import com.harvanna.wallet.wallet.WalletNodeBalanceHelper;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.shape.CornerFamily;
-import com.google.android.material.bottomnavigation.BottomNavigationView.OnNavigationItemSelectedListener;
+import com.google.android.material.bottomnavigation.BottomNavigationView.OnNavigationItemSelectedListener;
+
 
 public class HomeFragmentActivity extends Fragment {
 	
@@ -210,6 +211,7 @@ public class HomeFragmentActivity extends Fragment {
 		initialize(_savedInstanceState, _view);
 		FirebaseApp.initializeApp(getContext());
 		initializeLogic();
+		_addQuickActions(_view);
 		return _view;
 	}
 	
@@ -1163,4 +1165,65 @@ public class HomeFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+
+	// ── Quick actions (Send / Receive / Buy) ─────────────────────────────
+	// Additive UI: a row under the greeting so the wallet's core actions are one tap
+	// from Home instead of buried in the Assets tab. Uses existing activities only.
+	private void _addQuickActions(View root) {
+		try {
+			final android.widget.LinearLayout content = root.findViewById(R.id.linear2);
+			if (content == null || getContext() == null) return;
+			final float d = getResources().getDisplayMetrics().density;
+			
+			android.widget.LinearLayout row = new android.widget.LinearLayout(getContext());
+			row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+			row.setPadding((int) (22 * d), 0, (int) (22 * d), (int) (12 * d));
+			
+			row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
+			row.addView(_quickAction(R.drawable.ic_action_receive, "Receive", ReceiveActivity.class), _quickActionParams(d, true));
+			row.addView(_quickAction(R.drawable.ic_action_buy, "Buy HARV", P2pMarketplaceActivity.class), _quickActionParams(d, true));
+			
+			content.addView(row, Math.min(1, content.getChildCount()));
+		} catch (Exception e) {
+			android.util.Log.w("HomeFragment", "Quick actions not added", e);
+		}
+	}
+	
+	private android.widget.LinearLayout.LayoutParams _quickActionParams(float d, boolean leftGap) {
+		android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+		if (leftGap) lp.leftMargin = (int) (10 * d);
+		return lp;
+	}
+	
+	private View _quickAction(int iconRes, String label, final Class<?> target) {
+		final float d = getResources().getDisplayMetrics().density;
+		android.widget.LinearLayout cell = new android.widget.LinearLayout(getContext());
+		cell.setOrientation(android.widget.LinearLayout.VERTICAL);
+		cell.setGravity(android.view.Gravity.CENTER);
+		cell.setPadding(0, (int) (14 * d), 0, (int) (12 * d));
+		cell.setBackgroundResource(R.drawable.bg_quick_action);
+		cell.setClickable(true);
+		cell.setFocusable(true);
+		cell.setMinimumHeight((int) (84 * d));
+		
+		android.widget.ImageView icon = new android.widget.ImageView(getContext());
+		icon.setImageResource(iconRes);
+		icon.setColorFilter(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextOnAccent));
+		icon.setBackgroundResource(R.drawable.bg_quick_action_icon);
+		int pad = (int) (10 * d);
+		icon.setPadding(pad, pad, pad, pad);
+		cell.addView(icon, new android.widget.LinearLayout.LayoutParams((int) (44 * d), (int) (44 * d)));
+		
+		TextView tv = new TextView(getContext());
+		tv.setText(label);
+		tv.setTextSize(12.5f);
+		tv.setTypeface(null, android.graphics.Typeface.BOLD);
+		tv.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextPrimary));
+		tv.setPadding(0, (int) (8 * d), 0, 0);
+		cell.addView(tv);
+		
+		cell.setContentDescription(label);
+		cell.setOnClickListener(v -> startActivity(new Intent(getContext(), target)));
+		return cell;
+	}
+}

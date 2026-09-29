@@ -443,7 +443,7 @@ public class MainActivity extends AppCompatActivity {
 			window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 			window.setStatusBarColor(resolvedPrimaryColor);
 			new androidx.core.view.WindowInsetsControllerCompat(window, window.getDecorView())
-			.setAppearanceLightStatusBars(resolvedPrimaryColor == android.graphics.Color.WHITE);
+			.setAppearanceLightStatusBars(androidx.core.graphics.ColorUtils.calculateLuminance(resolvedPrimaryColor) > 0.4);
 		}
 		
 		androidx.appcompat.app.ActionBar.LayoutParams params = new androidx.appcompat.app.ActionBar.LayoutParams(

@@ -51,7 +51,8 @@ import com.harvanna.wallet.wallet.PinPromptHelper;
 import com.harvanna.wallet.wallet.WalletManager;
 import com.harvanna.wallet.p2p.P2pIds;
 import com.harvanna.wallet.p2p.P2pMoney;
-import com.harvanna.wallet.p2p.ThemedDialogs;
+import com.harvanna.wallet.p2p.ThemedDialogs;
+
 
 public class P2pMerchantManagerActivity extends AppCompatActivity {
 	
@@ -158,7 +159,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			final Window window = this.getWindow();
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			window.setStatusBarColor(backgroundColor);
+			com.harvanna.wallet.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
 		myAddress = WalletManager.getActiveWalletAddress(this);
@@ -187,7 +188,8 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 		super.onResume();
 		if (!allListings.isEmpty() || !allOrders.isEmpty()) _loadMine();
 	}
-	
+	
+
 	public void _MORE() {
 	}
 	private String myAddress = "";
@@ -548,4 +550,4 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

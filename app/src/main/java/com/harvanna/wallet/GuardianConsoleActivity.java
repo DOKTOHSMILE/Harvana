@@ -42,7 +42,8 @@ import org.json.*;
 import java.util.Locale;
 import android.util.Base64;
 import com.harvanna.wallet.crypto.Ed25519;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.StandardCharsets;
+
 
 public class GuardianConsoleActivity extends AppCompatActivity {
 	
@@ -109,7 +110,7 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 			final Window window = this.getWindow();
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			window.setStatusBarColor(backgroundColor);
+			com.harvanna.wallet.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
 		btnUnlockConsole.setOnClickListener(v -> _unlock());
@@ -345,4 +346,4 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

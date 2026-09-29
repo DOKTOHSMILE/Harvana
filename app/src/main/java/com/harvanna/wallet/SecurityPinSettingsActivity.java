@@ -41,7 +41,8 @@ import java.util.regex.*;
 import org.json.*;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
-import androidx.core.content.ContextCompat;
+import androidx.core.content.ContextCompat;
+
 
 public class SecurityPinSettingsActivity extends AppCompatActivity {
 	
@@ -124,7 +125,7 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 			final Window window = this.getWindow();
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			window.setStatusBarColor(backgroundColor);
+			com.harvanna.wallet.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
 		_refreshUi();
@@ -295,4 +296,4 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

@@ -48,7 +48,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.*;
 import org.json.*;
-
+
+
 
 public class P2pExpressActivity extends AppCompatActivity {
 	
@@ -265,7 +266,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 			final Window window = this.getWindow();
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			window.setStatusBarColor(backgroundColor);
+			com.harvanna.wallet.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
 		myAddress = WalletManager.getActiveWalletAddress(this);
@@ -338,7 +339,8 @@ public class P2pExpressActivity extends AppCompatActivity {
 		
 		return super.onCreateOptionsMenu(menu);
 	}
-	
+	
+
 	public void _MORE() {
 	}
 	private String myAddress = "";
@@ -752,4 +754,4 @@ public class P2pExpressActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

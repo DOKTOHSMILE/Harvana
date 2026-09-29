@@ -43,7 +43,8 @@ import org.json.*;
 import com.google.android.material.card.MaterialCardView;
 import com.harvanna.wallet.wallet.WalletListManager;
 import java.util.List;
-
+
+
 
 public class WalletListActivity extends AppCompatActivity {
 	
@@ -84,7 +85,7 @@ public class WalletListActivity extends AppCompatActivity {
 	
 	private void initializeLogic() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			final Window window = this.getWindow(); window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS); window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS); window.setStatusBarColor(getResources().getColor(R.color.colorPrimary));
+			final Window window = this.getWindow(); window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS); window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS); com.harvanna.wallet.utils.StatusBarUtil.matchToolbar(this);
 		}
 		androidx.appcompat.app.ActionBar ab = getSupportActionBar();
 		if (ab != null) {
@@ -270,4 +271,4 @@ public class WalletListActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

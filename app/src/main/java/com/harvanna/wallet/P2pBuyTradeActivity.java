@@ -52,7 +52,8 @@ import com.harvanna.wallet.p2p.P2pMoney;
 import com.harvanna.wallet.p2p.ThemedDialogs;
 import com.google.firebase.auth.FirebaseAuth;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.activity.result.contract.ActivityResultContracts;
+
 
 public class P2pBuyTradeActivity extends AppCompatActivity {
 	
@@ -359,7 +360,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 			final Window window = this.getWindow();
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			window.setStatusBarColor(backgroundColor);
+			com.harvanna.wallet.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
 		if (getSupportActionBar() != null) {
@@ -896,4 +897,4 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

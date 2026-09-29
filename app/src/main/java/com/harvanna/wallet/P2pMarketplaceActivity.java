@@ -47,7 +47,8 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.core.widget.CompoundButtonCompat;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.color.MaterialColors;
+import com.google.android.material.color.MaterialColors;
+
 
 public class P2pMarketplaceActivity extends AppCompatActivity {
 	
@@ -142,7 +143,7 @@ public class P2pMarketplaceActivity extends AppCompatActivity {
 			final Window window = this.getWindow();
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			window.setStatusBarColor(backgroundColor);
+			com.harvanna.wallet.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
 		setupMarketFragments();
@@ -328,4 +329,4 @@ public class P2pMarketplaceActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

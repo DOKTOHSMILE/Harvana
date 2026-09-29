@@ -59,7 +59,8 @@ import java.util.HashMap;
 import java.util.regex.*;
 import org.json.*;
 import com.bumptech.glide.Glide;
-import com.harvanna.wallet.TrustScoreEngine;
+import com.harvanna.wallet.TrustScoreEngine;
+
 
 public class ProfileActivity extends AppCompatActivity {
 	
@@ -460,7 +461,7 @@ public class ProfileActivity extends AppCompatActivity {
 			final Window window = this.getWindow();
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			window.setStatusBarColor(backgroundColor);
+			com.harvanna.wallet.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
 		uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -707,4 +708,4 @@ public class ProfileActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

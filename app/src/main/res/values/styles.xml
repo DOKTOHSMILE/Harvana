@@ -26,7 +26,7 @@
         <item name="android:textColorPrimary">@color/colorTextPrimary</item>
         <item name="android:textColorSecondary">@color/colorTextSecondary</item>
         <item name="android:textColorHint">@color/colorTextTertiary</item>
-        <item name="android:statusBarColor">@color/colorAccent</item>
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowBackground">@color/colorBackground</item>
         <item name="alertDialogTheme">@style/AjooAlertDialog</item>
@@ -34,7 +34,13 @@
         <item name="bottomSheetDialogTheme">@style/AjooBottomSheetDialog</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Light">
+        <!-- Toolbar is filled with the accent (orange); charcoal text and icons keep contrast -->
+        <item name="android:textColorPrimary">@color/colorTextOnAccent</item>
+        <item name="android:textColorSecondary">@color/colorTextOnAccent</item>
+        <item name="colorControlNormal">@color/colorTextOnAccent</item>
+        <item name="colorOnSurface">@color/colorTextOnAccent</item>
+    </style>
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
     <style name="AppTheme.DebugActivity" parent="AppTheme" />
 
@@ -93,8 +99,8 @@
     <!-- P2P stays on the dark fintech board even in light mode. -->
     <style name="P2pTheme" parent="AppTheme">
         <item name="android:windowBackground">@color/colorP2pBg</item>
-        <item name="android:statusBarColor">@color/colorP2pBg</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="colorSurface">@color/colorP2pSurface</item>
         <item name="colorOnSurface">@color/colorP2pTextPrimary</item>
         <item name="colorOnBackground">@color/colorP2pTextPrimary</item>

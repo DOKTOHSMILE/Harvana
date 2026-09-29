@@ -54,7 +54,8 @@ import com.harvanna.wallet.wallet.PinPromptHelper;
 import org.json.JSONObject;
 
 import java.util.Locale;
-
+
+
 
 public class P2pInsuranceDepositActivity extends AppCompatActivity {
 	
@@ -285,7 +286,7 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 			final Window window = this.getWindow();
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			window.setStatusBarColor(backgroundColor);
+			com.harvanna.wallet.utils.StatusBarUtil.matchToolbar(this);
 		}
 		traderAddress = WalletManager.getActiveWalletAddress(this);
 		
@@ -510,4 +511,4 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

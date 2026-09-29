@@ -51,7 +51,8 @@ import com.harvanna.wallet.wallet.PinPromptHelper;
 import com.harvanna.wallet.wallet.WalletManager;
 import com.harvanna.wallet.p2p.P2pMoney;
 import com.harvanna.wallet.p2p.ThemedDialogs;
-import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuth;
+
 
 public class P2pSellTradeActivity extends AppCompatActivity {
 	
@@ -286,7 +287,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			final Window window = this.getWindow();
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			window.setStatusBarColor(backgroundColor);
+			com.harvanna.wallet.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
 		if (getSupportActionBar() != null) {
@@ -761,4 +762,4 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

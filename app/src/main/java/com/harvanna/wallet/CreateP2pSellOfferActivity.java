@@ -42,7 +42,8 @@ import java.text.*;
 import java.util.*;
 import java.util.regex.*;
 import org.json.*;
-
+
+
 
 public class CreateP2pSellOfferActivity extends AppCompatActivity {
 	
@@ -293,7 +294,7 @@ public class CreateP2pSellOfferActivity extends AppCompatActivity {
 			final Window window = this.getWindow();
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			window.setStatusBarColor(backgroundColor);
+			com.harvanna.wallet.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
 		com.harvanna.wallet.p2p.P2pOfferWizard.attachSell(this);
@@ -309,4 +310,4 @@ public class CreateP2pSellOfferActivity extends AppCompatActivity {
 		
 	}
 	
-}
+}

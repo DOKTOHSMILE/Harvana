@@ -49,7 +49,8 @@ import com.harvanna.wallet.tx.P2PTradeRouter;
 import com.harvanna.wallet.wallet.BalanceFormatter;
 import com.harvanna.wallet.wallet.WalletManager;
 import com.harvanna.wallet.p2p.P2pIds;
-import com.harvanna.wallet.p2p.P2pMoney;
+import com.harvanna.wallet.p2p.P2pMoney;
+
 
 public class P2pMyTradesActivity extends AppCompatActivity {
 	
@@ -168,7 +169,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 			final Window window = this.getWindow();
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			window.setStatusBarColor(backgroundColor);
+			com.harvanna.wallet.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
 		if (getSupportActionBar() != null) {
@@ -547,4 +548,4 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

@@ -23,4 +23,4 @@ jobs:
       # Proves: Java compiles, resources resolve, Gradle build completes.
       # Does NOT prove: CodeAssist compatibility, or any runtime behavior.
       - name: Assemble debug and release (release runs R8 shrinking)
-        run: gradle --no-daemon --stacktrace assembleDebug assembleRelease
+        run: gradle --no-daemon --stacktrace testDebugUnitTest assembleDebug assembleRelease

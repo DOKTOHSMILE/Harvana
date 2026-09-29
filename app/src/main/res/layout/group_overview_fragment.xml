@@ -59,7 +59,7 @@
 						android:id="@+id/tv_group_wallet_balance"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="0 AJC"
+						android:text="0 HARV"
 						android:textSize="17sp"
 						android:textStyle="bold" />
 				</LinearLayout>
@@ -578,7 +578,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:layout_marginTop="8dp"
-					android:text="Target: — AJC"
+					android:text="Target: — HARV"
 					android:textSize="13.5sp" />
 				<TextView
 					android:id="@+id/tv_fixed_progress"
@@ -686,7 +686,7 @@
 						android:id="@+id/tv_pool_contribution"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="0 AJC"
+						android:text="0 HARV"
 						android:textStyle="bold"
 						android:textSize="13.5sp" />
 				</LinearLayout>
@@ -708,7 +708,7 @@
 						android:id="@+id/tv_pool_total"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="0 AJC"
+						android:text="0 HARV"
 						android:textStyle="bold"
 						android:textSize="13.5sp" />
 				</LinearLayout>

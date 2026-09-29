@@ -1,5 +1,6 @@
 package com.harvanna.wallet;
 
+import com.harvanna.wallet.utils.UiColors;
 import android.animation.*;
 import android.app.*;
 import android.content.*;
@@ -54,7 +55,8 @@ import androidx.core.content.ContextCompat;
 import com.harvanna.wallet.wallet.AjooCardCrypto;
 import com.harvanna.wallet.wallet.SecureWalletStorage;
 import com.harvanna.wallet.wallet.WalletGenerator;
-import com.harvanna.wallet.wallet.WalletManager;
+import com.harvanna.wallet.wallet.WalletManager;
+
 
 public class RestoreWalletActivity extends AppCompatActivity {
 	
@@ -249,7 +251,7 @@ public class RestoreWalletActivity extends AppCompatActivity {
 				float radius = 24f * getResources().getDisplayMetrics().density;
 				GradientDrawable background = new GradientDrawable();
 				background.setShape(GradientDrawable.RECTANGLE);
-				background.setColor(Color.parseColor("#0f1623"));
+				background.setColor(UiColors.surface());
 				background.setCornerRadii(new float[]{radius, radius, radius, radius, 0f, 0f, 0f, 0f});
 				sheetView.setBackground(background);
 				
@@ -428,4 +430,4 @@ public class RestoreWalletActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

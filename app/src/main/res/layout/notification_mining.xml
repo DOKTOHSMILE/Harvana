@@ -61,7 +61,7 @@
 						android:layout_marginTop="2dp"
 						android:text="Solo · Shares 0 · Battery —"
 						android:textSize="12sp"
-						android:textColor="#000000"
+						android:textColor="@color/colorTextPrimary"
 						android:focusable="false"
 						android:maxLines="1" />
 				</LinearLayout>
@@ -87,7 +87,7 @@
 				style="?android:progressBarStyleHorizontal"
 				android:focusable="false"
 				android:progressTint="@color/colorAccent"
-				android:progressBackgroundTint="#1F2A3A" />
+				android:progressBackgroundTint="@color/colorSurfaceRaised" />
 			<LinearLayout
 				android:id="@+id/linear6"
 				android:layout_width="match_parent"
@@ -99,7 +99,7 @@
 					android:layout_height="wrap_content"
 					android:text="Battery 80%"
 					android:textSize="11sp"
-					android:textColor="#000000"
+					android:textColor="@color/colorTextPrimary"
 					android:layout_weight="1"
 					android:focusable="false" />
 				<TextView

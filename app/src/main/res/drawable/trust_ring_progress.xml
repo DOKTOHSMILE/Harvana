@@ -4,7 +4,7 @@
 			android:innerRadiusRatio="3.2"
 			android:thickness="7dp"
 			android:useLevel="false">
-			<solid android:color="#1E2A3D" />
+			<solid android:color="@color/colorSurfaceRaised" />
 		</shape>
 	</item>
 	<item android:id="@android:id/progress">
@@ -17,7 +17,7 @@
 				android:innerRadiusRatio="3.2"
 				android:thickness="7dp"
 				android:useLevel="true">
-				<solid android:color="#F0B429" />
+				<solid android:color="@color/colorAccent" />
 			</shape>
 		</rotate>
 	</item>

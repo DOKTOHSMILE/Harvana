@@ -143,7 +143,7 @@
 							android:id="@+id/textview68"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
-							android:text="What is AJC and how do I get more\?"
+							android:text="What is HARV and how do I get more\?"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
 							android:textSize="14.5sp" />
@@ -152,7 +152,7 @@
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="6dp"
-							android:text="AJC (Ajoocoin) is Ajoo's own token, used for contributions and payouts inside the app. You can deposit into your wallet, or mine AJC directly using the separate Ajoo Node Miner app."
+							android:text="HARV (HARV) is Harvanna's own token, used for contributions and payouts inside the app. You can deposit into your wallet, or mine HARV directly using the separate Harvanna Node Miner app."
 							android:textSize="13sp"
 							android:textColor="@color/colorTextSecondary"
 							android:lineSpacingExtra="3dp" />
@@ -182,7 +182,7 @@
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="6dp"
-							android:text="Your group's own rules and penalty bylaws apply — check Ajoo Rules &amp; Guidelines from a group's settings for its specific terms. Missed payments also affect your trust score."
+							android:text="Your group's own rules and penalty bylaws apply — check Harvanna Rules &amp; Guidelines from a group's settings for its specific terms. Missed payments also affect your trust score."
 							android:textSize="13sp"
 							android:textColor="@color/colorTextSecondary"
 							android:lineSpacingExtra="3dp" />

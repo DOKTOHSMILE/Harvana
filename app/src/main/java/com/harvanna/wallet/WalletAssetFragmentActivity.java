@@ -1,5 +1,6 @@
 package com.harvanna.wallet;
 
+import com.harvanna.wallet.utils.UiColors;
 import android.animation.*;
 import android.app.*;
 import android.app.Activity;
@@ -53,7 +54,8 @@ import java.net.URL;
 import com.bumptech.glide.Glide;
 import com.harvanna.wallet.sync.FirestoreSyncManager;
 import com.harvanna.wallet.wallet.WalletNodeBalanceHelper;
-import java.net.HttpURLConnection;
+import java.net.HttpURLConnection;
+
 
 public class WalletAssetFragmentActivity extends Fragment {
 	
@@ -161,7 +163,8 @@ public class WalletAssetFragmentActivity extends Fragment {
 		}
 		
 	}
-	
+	
+
 	public void _MORE() {
 	}
 	private static final int RC_RESTORE_WALLET = 7301;
@@ -231,7 +234,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 		
 		GradientDrawable bg = new GradientDrawable();
 		bg.setShape(GradientDrawable.RECTANGLE);
-		bg.setColor(Color.parseColor("#FF0F1623"));
+		bg.setColor(UiColors.surface());
 		bg.setCornerRadii(new float[]{48, 48, 48, 48, 0, 0, 0, 0});
 		sheetView.setBackground(bg);
 		bottomSheetDialog.setContentView(sheetView);
@@ -400,7 +403,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 		
 		GradientDrawable bgDrawable = new GradientDrawable();
 		bgDrawable.setShape(GradientDrawable.RECTANGLE);
-		bgDrawable.setColor(Color.parseColor("#FF0F1623"));
+		bgDrawable.setColor(UiColors.surface());
 		bgDrawable.setCornerRadii(new float[]{48, 48, 48, 48, 0, 0, 0, 0});
 		sheetView.setBackground(bgDrawable);
 		bottomSheetDialog.setContentView(sheetView);
@@ -773,4 +776,4 @@ public class WalletAssetFragmentActivity extends Fragment {
 			}
 		}
 	}
-}
+}

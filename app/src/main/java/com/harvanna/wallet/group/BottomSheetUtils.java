@@ -1,5 +1,6 @@
 package com.harvanna.wallet.group;
 
+import com.harvanna.wallet.utils.UiColors;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -59,6 +60,6 @@ public final class BottomSheetUtils {
 	/** Convenience overload matching the dark fintech background (#0F1623)
 	 *  used by every other full-screen sheet in the app. */
 	public static void expandFullScreen(BottomSheetDialog dialog, View sheetView) {
-		expandFullScreen(dialog, sheetView, 24, Color.parseColor("#0F1623"));
+		expandFullScreen(dialog, sheetView, 24, UiColors.surface());
 	}
 }

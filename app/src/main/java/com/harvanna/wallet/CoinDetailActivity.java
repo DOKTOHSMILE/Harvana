@@ -1,5 +1,6 @@
 package com.harvanna.wallet;
 
+import com.harvanna.wallet.utils.UiColors;
 import android.Manifest;
 import android.animation.*;
 import android.app.*;
@@ -531,7 +532,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 				float radius = 24f * getResources().getDisplayMetrics().density;
 				GradientDrawable background = new GradientDrawable();
 				background.setShape(GradientDrawable.RECTANGLE);
-				background.setColor(Color.parseColor("#0f1623"));
+				background.setColor(UiColors.surface());
 				background.setCornerRadii(new float[]{radius, radius, radius, radius, 0f, 0f, 0f, 0f});
 				sheetView.setBackground(background);
 				BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheetInternal);
@@ -598,7 +599,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 				tv.setTextColor(Color.WHITE);
 				tv.setTextSize(16);
 				tv.setPadding(32, 28, 32, 28);
-				tv.setBackgroundColor(Color.parseColor("#0f1623"));
+				tv.setBackgroundColor(UiColors.surface());
 				return tv;
 			}
 		};
@@ -830,7 +831,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 				float radius = 24f * getResources().getDisplayMetrics().density;
 				android.graphics.drawable.GradientDrawable background = new android.graphics.drawable.GradientDrawable();
 				background.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
-				background.setColor(android.graphics.Color.parseColor("#0f1623"));
+				background.setColor(UiColors.surface());
 				background.setCornerRadii(new float[]{radius, radius, radius, radius, 0f, 0f, 0f, 0f});
 				bottomSheetView.setBackground(background);
 				com.google.android.material.bottomsheet.BottomSheetBehavior<android.widget.FrameLayout> behavior = 
@@ -884,4 +885,4 @@ public class CoinDetailActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

@@ -1,5 +1,6 @@
 package com.harvanna.wallet;
 
+import com.harvanna.wallet.utils.UiColors;
 import android.animation.*;
 import android.app.*;
 import android.content.*;
@@ -360,7 +361,7 @@ public class CreateAjooCardActivity extends AppCompatActivity {
     if (longEnough) {
       tv_char_count.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
     } else {
-      tv_char_count.setTextColor(Color.parseColor("#888888"));
+      tv_char_count.setTextColor(UiColors.textTertiary());
     }
 
     if (!longEnough) {

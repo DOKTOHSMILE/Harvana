@@ -3,38 +3,38 @@
     <color name="colorPrimary">#FFFFFF</color>
     <!--White Headers-->
     <color name="colorPrimaryDark">#FFFFFF</color>
-    <color name="colorAccent">#FF6115</color>
+    <color name="colorAccent">#FF9030</color>
     <!--Neon Orange for Actions-->
-    <color name="colorControlNormal">#FF5722</color>
+    <color name="colorControlNormal">#6B7280</color>
     <!--Accent Variations for smaller elements-->
-    <color name="colorControlHighlight">#FFCCBC</color>
-    <color name="colorAccentDark">#D84D0B</color>
-    <color name="colorAccentStrong">#B34409</color>
-    <color name="colorAccentStroke">#33FF6115</color>
-    <color name="colorAccentRipple">#1AFF6115</color>
+    <color name="colorControlHighlight">#FFE0C2</color>
+    <color name="colorAccentDark">#E57A14</color>
+    <color name="colorAccentStrong">#B85F0A</color>
+    <color name="colorAccentStroke">#33FF9030</color>
+    <color name="colorAccentRipple">#1AFF9030</color>
     <!--Background & Surfaces-->
-    <color name="colorBackground">#FFFCF4</color>
+    <color name="colorBackground">#FFF8F0</color>
     <!--Porcelain Body-->
-    <color name="colorBackgroundDark">#F5F2EA</color>
+    <color name="colorBackgroundDark">#F7EFE4</color>
     <color name="colorSurface">#FFFFFF</color>
-    <color name="colorSurfaceAlt">#FAFAFA</color>
-    <color name="colorSurfaceRaised">#F0F0F0</color>
-    <color name="colorSurfaceDeep">#E0E0E0</color>
+    <color name="colorSurfaceAlt">#FFF3E6</color>
+    <color name="colorSurfaceRaised">#F3E9DC</color>
+    <color name="colorSurfaceDeep">#E8DCCB</color>
     <!--Buttons-->
-    <color name="colorButtonText">#FFFFFF</color>
-    <color name="colorButtonBackground">#D84D0B</color>
-    <color name="colorButtonBorderLine">#000000</color>
+    <color name="colorButtonText">#111827</color>
+    <color name="colorButtonBackground">#FF9030</color>
+    <color name="colorButtonBorderLine">#111827</color>
     <!--Typography-->
     <color name="colorTextPrimaryWhite">#FFFFFF</color>
-    <color name="colorTextPrimary">#1A1A1A</color>
+    <color name="colorTextPrimary">#111827</color>
     <color name="colorTextLight">#FFFFFF</color>
-    <color name="colorTextDark">#121212</color>
-    <color name="colorTextSecondary">#4A4A4A</color>
-    <color name="colorTextTertiary">#757575</color>
-    <color name="colorTextMuted">#9E9E9E</color>
-    <color name="colorTextOnAccent">#FFFFFF</color>
-    <color name="colorTextOnAccentMuted">#FFCCBC</color>
-    <color name="colorAddressText">#0878D1</color>
+    <color name="colorTextDark">#111827</color>
+    <color name="colorTextSecondary">#4B5563</color>
+    <color name="colorTextTertiary">#6B7280</color>
+    <color name="colorTextMuted">#9CA3AF</color>
+    <color name="colorTextOnAccent">#111827</color>
+    <color name="colorTextOnAccentMuted">#5A3510</color>
+    <color name="colorAddressText">#B85F0A</color>
     <!--Semantic Colors-->
     <color name="colorSuccess">#00B98F</color>
     <color name="colorSuccessAlt">#009674</color>
@@ -53,9 +53,9 @@
     <color name="colorPurple">#6655D9</color>
     <color name="colorAmber">#F59E0B</color>
     <color name="colorSecondaryAccent">#6655D9</color>
-    <color name="colorDivider">#E5E7EB</color>
-    <color name="colorFieldBorder">#D1D5DB</color>
-    <color name="colorCardStroke">#E5E7EB</color>
+    <color name="colorDivider">#EADFD0</color>
+    <color name="colorFieldBorder">#D9CBB8</color>
+    <color name="colorCardStroke">#EADFD0</color>
     <color name="colorOverlayLight">#B3FFFFFF</color>
     <color name="colorOverlayDark">#4D000000</color>
     <color name="colorQrBackground">#FFFFFF</color>
@@ -69,14 +69,16 @@
     <color name="colorMutedSoft">#1A9E9E9E</color>
     <color name="colorErrorSoft">#1AEF4444</color>
     <!--P2P Section-->
-    <color name="colorP2pBg">#FFFCF4</color>
+    <color name="colorP2pBg">#FFF8F0</color>
     <color name="colorP2pSurface">#FFFFFF</color>
-    <color name="colorP2pSurfaceAlt">#F9FAFB</color>
-    <color name="colorP2pBorder">#F1F5F9</color>
-    <color name="colorP2pTextPrimary">#1E293B</color>
-    <color name="colorP2pTextSecondary">#64748B</color>
-    <color name="colorP2pTextMuted">#94A3B8</color>
-    <color name="colorP2pAccent">#FF6115</color>
-    <color name="colorP2pOnAccent">#FFFFFF</color>
+    <color name="colorP2pSurfaceAlt">#FFF3E6</color>
+    <color name="colorP2pBorder">#EADFD0</color>
+    <color name="colorP2pTextPrimary">#111827</color>
+    <color name="colorP2pTextSecondary">#4B5563</color>
+    <color name="colorP2pTextMuted">#6B7280</color>
+    <color name="colorP2pAccent">#FF9030</color>
+    <color name="colorP2pOnAccent">#111827</color>
     <color name="colorP2pWarningBg">#1AF59E0B</color>
+    <color name="colorSuccessSoft">#1A00B98F</color>
+    <color name="colorWarningSoft">#1AF59E0B</color>
 </resources>

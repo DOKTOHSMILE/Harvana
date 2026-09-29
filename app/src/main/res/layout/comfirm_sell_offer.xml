@@ -170,7 +170,7 @@
 							android:id="@+id/tv_confirm_amount"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="0.00 AJC"
+							android:text="0.00 HARV"
 							android:textStyle="bold"
 							android:textSize="13.5sp" />
 					</LinearLayout>
@@ -184,7 +184,7 @@
 							android:id="@+id/textview8"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:text="Price per 1 AJC"
+							android:text="Price per 1 HARV"
 							android:layout_weight="1"
 							android:textSize="13.5sp" />
 						<TextView
@@ -239,7 +239,7 @@
 							android:id="@+id/tv_confirm_trade_limit"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="Min 0.00 AJC • Max 0.00 AJC"
+							android:text="Min 0.00 HARV • Max 0.00 HARV"
 							android:textSize="13sp" />
 					</LinearLayout>
 					<LinearLayout
@@ -351,7 +351,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="8dp"
-						android:text="• Buyers will see your offer and can place orders.\n• AJC will be held in escrow and released after you confirm payment.\n• You can edit or cancel your offer anytime before it is matched."
+						android:text="• Buyers will see your offer and can place orders.\n• HARV will be held in escrow and released after you confirm payment.\n• You can edit or cancel your offer anytime before it is matched."
 						android:textSize="13sp"
 						android:lineSpacingExtra="4dp" />
 				</LinearLayout>
@@ -572,7 +572,7 @@
 								android:layout_height="wrap_content"
 								android:layout_marginTop="2dp"
 								android:gravity="center_horizontal|center_vertical"
-								android:text="AJC goes to buyer"
+								android:text="HARV goes to buyer"
 								android:textSize="10sp" />
 						</LinearLayout>
 					</LinearLayout>

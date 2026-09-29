@@ -1,5 +1,6 @@
 package com.harvanna.wallet;
 
+import com.harvanna.wallet.utils.UiColors;
 import com.harvanna.wallet.SplashScreenActivity;
 import android.animation.*;
 import android.app.*;
@@ -53,7 +54,8 @@ import org.json.*;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import androidx.core.content.ContextCompat;
-import com.google.android.material.shape.CornerFamily;
+import com.google.android.material.shape.CornerFamily;
+
 
 public class MainActivity extends AppCompatActivity {
 	
@@ -417,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
 		
 		TextView subtitleView = new TextView(this);
 		subtitleView.setText("capital oracle projects");
-		subtitleView.setTextColor(android.graphics.Color.parseColor("#888888"));
+		subtitleView.setTextColor(UiColors.textTertiary());
 		subtitleView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12);
 		
 		textContainer.addView(titleView);
@@ -970,4 +972,4 @@ public class MainActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

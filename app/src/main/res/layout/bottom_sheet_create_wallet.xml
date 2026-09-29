@@ -29,7 +29,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginBottom="16dp"
-			android:text="Create Your Ajoo Wallet"
+			android:text="Create Your Harvanna Wallet"
 			android:textSize="20sp"
 			android:textStyle="bold"
 			android:focusable="false" />
@@ -76,7 +76,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginBottom="24dp"
-			android:text="This generates your unique Ajoocoin address to securely manage your AJC balance and make wallet-based contributions. This wallet is fully non-custodial: you have absolute control over your private keys, and Ajoo never holds or has access to your funds."
+			android:text="This generates your unique HARV address to securely manage your HARV balance and make wallet-based contributions. This wallet is fully non-custodial: you have absolute control over your private keys, and Harvanna never holds or has access to your funds."
 			android:textSize="13.5sp"
 			android:focusable="false"
 			android:lineSpacingExtra="4dp" />

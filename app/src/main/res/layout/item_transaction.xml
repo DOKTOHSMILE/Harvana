@@ -52,7 +52,7 @@
 					android:id="@+id/tv_tx_type"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="Sent AJC"
+					android:text="Sent HARV"
 					android:textStyle="bold"
 					android:textSize="14.5sp"
 					android:focusable="false" />
@@ -78,7 +78,7 @@
 					android:id="@+id/tv_tx_amount"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="- 50.00 AJC"
+					android:text="- 50.00 HARV"
 					android:textStyle="bold"
 					android:textSize="13.5sp"
 					android:focusable="false" />

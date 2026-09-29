@@ -46,7 +46,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:layout_marginTop="2dp"
-					android:text="Ajoo block miner"
+					android:text="Harvanna block miner"
 					android:textSize="12sp"
 					android:textColor="@color/colorTextDark"
 					android:focusable="false" />
@@ -73,7 +73,7 @@
 			style="?android:progressBarStyleHorizontal"
 			android:focusable="false"
 			android:progressTint="@color/colorAccent"
-			android:progressBackgroundTint="#1F2A3A" />
+			android:progressBackgroundTint="@color/colorSurfaceRaised" />
 		<LinearLayout
 			android:id="@+id/linear12"
 			android:layout_width="match_parent"

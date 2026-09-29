@@ -1204,7 +1204,7 @@
 									android:id="@+id/textview39"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="About Ajoo"
+									android:text="About Harvanna"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
 									android:textSize="14.5sp" />
@@ -1212,7 +1212,7 @@
 									android:id="@+id/textview40"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="Learn more about Ajoo"
+									android:text="Learn more about Harvanna"
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
@@ -1335,7 +1335,7 @@
 					android:layout_height="wrap_content"
 					android:layout_marginTop="20dp"
 					android:gravity="center_horizontal|center_vertical"
-					android:text="Ajoo"
+					android:text="Harvanna"
 					android:textColor="@color/colorTextTertiary"
 					android:textSize="11.5sp" />
 			</LinearLayout>

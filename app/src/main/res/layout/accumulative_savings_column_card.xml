@@ -13,7 +13,7 @@
 		android:background="@android:color/transparent"
 		android:gravity="center_horizontal|center_vertical"
 		android:textSize="12sp"
-		android:textColor="#000000"
+		android:textColor="@color/colorTextPrimary"
 		android:enabled="false"
 		android:focusable="false" />
 </LinearLayout>

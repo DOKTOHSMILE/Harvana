@@ -120,7 +120,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="8dp"
 				android:layout_marginBottom="24dp"
-				android:text="Scan to send AJC to this address"
+				android:text="Scan to send HARV to this address"
 				android:textSize="12sp"
 				android:layout_gravity="center_horizontal"
 				android:alpha="0.7" />

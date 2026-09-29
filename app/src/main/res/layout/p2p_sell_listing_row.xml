@@ -72,7 +72,7 @@
 							android:id="@+id/seller_name"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="AJC Trader"
+							android:text="HARV Trader"
 							android:textSize="15sp"
 							android:textStyle="bold"
 							android:focusable="false" />
@@ -174,7 +174,7 @@
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="2dp"
-						android:text="₦1,250 / AJC"
+						android:text="₦1,250 / HARV"
 						android:textSize="18sp"
 						android:textStyle="bold"
 						android:focusable="false" />
@@ -198,7 +198,7 @@
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="2dp"
-						android:text="5,000 AJC"
+						android:text="5,000 HARV"
 						android:textSize="16sp"
 						android:textStyle="bold"
 						android:focusable="false" />
@@ -240,7 +240,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="16dp"
-				android:text="Sell AJC"
+				android:text="Sell HARV"
 				android:textSize="14sp"
 				android:textStyle="bold"
 				android:textColor="@color/colorP2pOnAccent"

@@ -31,7 +31,7 @@
 					android:id="@+id/tv_my_trade_type"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="BUY AJC"
+					android:text="BUY HARV"
 					android:textSize="10sp"
 					android:textStyle="bold"
 					android:focusable="false" />
@@ -69,7 +69,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="4dp"
-				android:text="Order #AJC-82F41"
+				android:text="Order #HARV-82F41"
 				android:textSize="10sp"
 				android:focusable="false" />
 			<LinearLayout
@@ -131,7 +131,7 @@
 						android:id="@+id/textview158"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="AJC amount"
+						android:text="HARV amount"
 						android:textSize="10sp"
 						android:focusable="false" />
 					<TextView
@@ -139,7 +139,7 @@
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="3dp"
-						android:text="40.00 AJC"
+						android:text="40.00 HARV"
 						android:textSize="15sp"
 						android:textStyle="bold"
 						android:textColor="@color/colorP2pTextPrimary"

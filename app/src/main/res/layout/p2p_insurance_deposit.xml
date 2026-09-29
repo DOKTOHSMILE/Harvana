@@ -43,7 +43,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="6dp"
 				android:layout_marginBottom="16dp"
-				android:text="Lock AJC collateral to unlock buyer trust, higher trading visibility, and verified merchant privileges on the Ajoo P2P market."
+				android:text="Lock HARV collateral to unlock buyer trust, higher trading visibility, and verified merchant privileges on the Harvanna P2P market."
 				android:textSize="13sp"
 				android:textColor="@color/colorP2pTextMuted"
 				android:lineSpacingExtra="3dp" />
@@ -129,7 +129,7 @@
 							android:id="@+id/tv_current_deposit"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="0.00 AJC"
+							android:text="0.00 HARV"
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:textColor="@android:color/white" />
@@ -152,7 +152,7 @@
 							android:id="@+id/tv_required_minimum"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="0.00 AJC"
+							android:text="0.00 HARV"
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:textColor="@android:color/white" />
@@ -209,7 +209,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="8dp"
-						android:text="• Instant Buyer Trust: Users prefer trading with insured merchants because your collateral protects them against bad faith actors.\n\n• Isolated Security: Your collateral is locked safely on-chain via Ajoochain and remains separate from your routine available trading funds.\n\n• Withdrawal Flexibility: You can unlock and withdraw your collateral anytime you have zero active offers or pending trades."
+						android:text="• Instant Buyer Trust: Users prefer trading with insured merchants because your collateral protects them against bad faith actors.\n\n• Isolated Security: Your collateral is locked safely on-chain via Harvanna Protocol and remains separate from your routine available trading funds.\n\n• Withdrawal Flexibility: You can unlock and withdraw your collateral anytime you have zero active offers or pending trades."
 						android:textColor="@color/colorP2pTextMuted"
 						android:textSize="12.5sp"
 						android:lineSpacingExtra="4dp" />
@@ -432,7 +432,7 @@
 						android:id="@+id/textview11"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:text="Specify the amount of AJC to lock into the on-chain insurance vault."
+						android:text="Specify the amount of HARV to lock into the on-chain insurance vault."
 						android:textColor="@color/colorP2pTextMuted"
 						android:textSize="12.5sp" />
 					<LinearLayout
@@ -460,7 +460,7 @@
 							android:id="@+id/textview12"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="AJC"
+							android:text="HARV"
 							android:textSize="14sp"
 							android:textStyle="bold"
 							android:textColor="@android:color/white"
@@ -509,7 +509,7 @@
 				android:layout_marginBottom="32dp"
 				android:background="@drawable/bg_p2p_button_primary"
 				android:gravity="center_horizontal|center_vertical"
-				android:text="Deposit AJC"
+				android:text="Deposit HARV"
 				android:textSize="16sp"
 				android:textStyle="bold"
 				android:textColor="@color/colorTextOnAccent" />

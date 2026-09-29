@@ -49,14 +49,14 @@
 						app:civ_border_color="@color/colorInfo"
 						app:civ_border_overlay="true"
 						app:civ_border_width="2dp"
-						app:civ_circle_background_color="#FFFFFF" />
+						app:civ_circle_background_color="@color/colorSurface" />
 					<com.google.android.material.textview.MaterialTextView
 						android:id="@+id/textview1"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginLeft="6dp"
 						android:layout_marginRight="6dp"
-						android:text="AJC"
+						android:text="HARV"
 						android:textSize="12sp"
 						android:textStyle="bold" />
 					<ImageView

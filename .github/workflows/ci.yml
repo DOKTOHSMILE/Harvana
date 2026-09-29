@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   build:
-    name: gradle assembleDebug (Java 17)
+    name: gradle assembleDebug + assembleRelease (Java 17)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,5 +22,5 @@ jobs:
           gradle-version: '8.5'
       # Proves: Java compiles, resources resolve, Gradle build completes.
       # Does NOT prove: CodeAssist compatibility, or any runtime behavior.
-      - name: Assemble debug
-        run: gradle --no-daemon --stacktrace assembleDebug
+      - name: Assemble debug and release (release runs R8 shrinking)
+        run: gradle --no-daemon --stacktrace testDebugUnitTest assembleDebug assembleRelease

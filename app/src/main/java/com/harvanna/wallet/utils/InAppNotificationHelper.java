@@ -36,12 +36,12 @@ public class InAppNotificationHelper {
                     cardView.setLayoutParams(params);
                     cardView.setRadius(16f);
                     cardView.setCardElevation(12f);
-                    cardView.setCardBackgroundColor(Color.parseColor("#0f1623"));
+                    cardView.setCardBackgroundColor(UiColors.surface());
 
                     // Add 1dp solid border/stroke
                     int strokeWidthPx = (int) (1 * activity.getResources().getDisplayMetrics().density);
                     cardView.setStrokeWidth(strokeWidthPx);
-                    cardView.setStrokeColor(Color.parseColor("#10b881"));
+                    cardView.setStrokeColor(UiColors.accent());
 
                     LinearLayout layout = new LinearLayout(activity);
                     layout.setOrientation(LinearLayout.HORIZONTAL);
@@ -63,7 +63,7 @@ public class InAppNotificationHelper {
                     tvTitle.setText(title + " from: " + displaySender);
                     tvTitle.setTextSize(14f);
                     tvTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-                    tvTitle.setTextColor(Color.parseColor("#ffffff"));
+                    tvTitle.setTextColor(UiColors.textPrimary());
                     tvTitle.setSingleLine(true);
                     tvTitle.setEllipsize(TextUtils.TruncateAt.END);
 

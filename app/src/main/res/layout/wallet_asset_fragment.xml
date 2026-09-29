@@ -40,7 +40,7 @@
 					android:layout_margin="10dp"
 					android:padding="8dp"
 					android:gravity="center_horizontal|center_vertical"
-					android:text="Set up a non-custodial wallet to hold AJC, ETH, USDT, USDC, XRP and your AJC rewards."
+					android:text="Set up a non-custodial wallet to hold HARV, ETH, USDT, USDC, XRP and your HARV rewards."
 					android:textSize="15sp"
 					android:textColor="@color/colorTextSecondary" />
 				<com.google.android.material.button.MaterialButton
@@ -65,7 +65,7 @@
 					android:textColor="@color/colorQrBackground"
 					app:backgroundTint="@color/colorOverlayDark"
 					app:cornerRadius="10dp"
-					app:strokeColor="#E2E8F0"
+					app:strokeColor="@color/colorCardStroke"
 					app:strokeWidth="2dp" />
 			</LinearLayout>
 		</androidx.cardview.widget.CardView>

@@ -104,7 +104,7 @@
 								android:id="@+id/tv_summary_locked"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:text="0 AJC"
+								android:text="0 HARV"
 								android:textSize="18sp"
 								android:textStyle="bold" />
 							<TextView
@@ -292,7 +292,7 @@
 						android:id="@+id/tv_manager_info"
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
-						android:text="Only eligible listings can be paused or cancelled. A listing with AJC committed to an active trade remains subject to the trade lifecycle."
+						android:text="Only eligible listings can be paused or cancelled. A listing with HARV committed to an active trade remains subject to the trade lifecycle."
 						android:textSize="11sp"
 						android:layout_weight="1"
 						android:layout_marginStart="9dp"

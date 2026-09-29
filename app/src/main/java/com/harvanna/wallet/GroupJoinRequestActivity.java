@@ -1,5 +1,6 @@
 package com.harvanna.wallet;
 
+import com.harvanna.wallet.utils.UiColors;
 import android.animation.*;
 import android.app.*;
 import android.app.Activity;
@@ -50,7 +51,8 @@ import java.text.*;
 import java.util.*;
 import java.util.regex.*;
 import org.json.*;
-
+
+
 
 public class GroupJoinRequestActivity extends AppCompatActivity {
 	
@@ -543,7 +545,7 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 			rules.add("Leaving mid-cycle may forfeit pending payouts for that cycle.");
 		}
 		
-		int accent = Color.parseColor("#2F80ED");
+		int accent = UiColors.accent();
 		float density = getResources().getDisplayMetrics().density;
 		for (int i = 0; i < rules.size(); i++) {
 			LinearLayout row = new LinearLayout(this);
@@ -848,4 +850,4 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

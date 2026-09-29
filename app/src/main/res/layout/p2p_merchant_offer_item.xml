@@ -64,7 +64,7 @@
 					android:id="@+id/tv_offer_id"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="AJ0x…"
+					android:text="HV0x…"
 					android:textSize="11sp"
 					android:focusable="false" />
 			</LinearLayout>

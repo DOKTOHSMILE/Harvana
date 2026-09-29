@@ -28,7 +28,7 @@
 		
 		<provider
 			android:name="androidx.core.content.FileProvider"
-			android:authorities="com.ajoo.app.fileprovider"
+			android:authorities="com.harvanna.wallet.fileprovider"
 			android:exported="false"
 			android:grantUriPermissions="true">
 			<meta-data
@@ -229,7 +229,7 @@
 		
 		<provider
 			android:name="com.google.firebase.provider.FirebaseInitProvider"
-			android:authorities="com.ajoo.app.firebaseinitprovider"
+			android:authorities="com.harvanna.wallet.firebaseinitprovider"
 			android:exported="false"
 			android:initOrder="100" />
 		

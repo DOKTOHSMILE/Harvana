@@ -1,13 +1,14 @@
 plugins {
     id 'com.android.application' version '8.2.2'
+    id 'com.google.gms.google-services' version '4.4.1'
 }
 
 android {
-    namespace 'com.ajoo.app'
+    namespace 'com.harvanna.wallet'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.ajoo.app"
+        applicationId "com.harvanna.wallet"
         minSdk 23
         targetSdk 34
         versionCode 1

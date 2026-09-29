@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "92873857858",
+    "firebase_url": "https://capital-oracle-project-default-rtdb.firebaseio.com",
+    "project_id": "capital-oracle-project",
+    "storage_bucket": "capital-oracle-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:92873857858:android:1bb47c27b226de3f65c6db",
+        "android_client_info": {
+          "package_name": "com.harvanna.wallet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "92873857858-jgtl0u04g8m5fgdqkoc041n50a7tit96.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBD5UbBOBYlsNMYwL84h1ZP7nlW39YPMXA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "92873857858-jgtl0u04g8m5fgdqkoc041n50a7tit96.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

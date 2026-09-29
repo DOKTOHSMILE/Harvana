@@ -107,7 +107,7 @@
 							android:id="@+id/tv_confirm_seller_name"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="AJ0x…"
+							android:text="HV0x…"
 							android:textStyle="bold"
 							android:textSize="14.5sp"
 							android:fontFamily="monospace" />

@@ -74,7 +74,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="6dp"
-				android:text="Seller: AJ0x…"
+				android:text="Seller: HV0x…"
 				android:textSize="11.5sp"
 				android:fontFamily="monospace"
 				android:focusable="false" />

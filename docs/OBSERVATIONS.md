@@ -96,4 +96,6 @@ breaking reflection at runtime, Firestore offline persistence syncing after a re
   placeholder (orange square, charcoal H).
 - "Home activity" UX/UI redesign, and per-group-type screens: NOT done yet. See docs/GROUP_ENGINE_MAP.md.
 - R8: first release build ran out of memory (512 MB default heap) - raised via gradle.properties. CI evidence:
-  Java compiles for debug and release with the Firestore migration; R8 result pending at time of writing.
+  run 9 (commit 3833e05) passed the full pipeline: 58 canonical unit tests, debug build, and minified release build
+  (R8) with the Firestore migration, rebrand/palette, splash fixes and AJ0x migration included. Later commits
+  (group client, quick actions, palette-everywhere) are verified by their own runs; see the Actions tab.

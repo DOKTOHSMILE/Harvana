@@ -18,7 +18,7 @@ Scope of this pass: signed-action canonical messages and endpoint paths for what
 | `P2P_INSURANCE_DEPOSIT` | same | same | MATCH |
 | `P2P_RESOLVE_DISPUTE` (guardian) | same | same | MATCH |
 | **`P2P_CREATE_LISTING`** | `addr:side:total:minOrder:durationHours:nonce` | `addr:side:total:minOrder:maxOrder:durationHours:paymentWindowMinutes:unitPricePerHarvRaw:nonce` | **MISMATCH - not fixed** |
-| `P2P_GET_ORDER` | not implemented (app uses GET `/order/{id}`) | signed `POST /order/fetch` exists | NOT CHECKED - confirm GET is still permitted |
+| `P2P_GET_ORDER` | not implemented (app uses public GET `/order/{id}`) | GET still exists but returns a public view with bank/payout fields stripped; signed `POST /order/fetch` returns the full party view | GET works; app only gets the public view (payment details come from Firestore). Adopting the signed fetch is optional |
 
 `P2P_CREATE_LISTING` fix needs product input: the node now requires a max order amount, payment window and a
 per-HARV price (`unitPricePerHarvRaw`, the mark/unit-of-account work the prompt says is in progress). The seller
@@ -34,8 +34,10 @@ protocol at all. That is a feature build, not a fix, and needs a decision on sco
 ## Endpoints
 App paths checked against node mappings: `/tx/send`, `/tx/status/*`, `/tx/estimate-fee`, `/wallet/balance|
 transactions|pending`, `/node/status`, `/supply`, `/mining/challenge|auth`, and all `/p2p/*` paths listed in
-the app exist on the node. Not yet checked: request/response field names, `/blocks/latest`, and the WebSocket auth
-(node expects `Authorization: Bearer` for `/ws/wallet`; app puts `token` in the query string - verify).
+the app exist on the node. **WebSocket auth: MISMATCH, fixed.** The node closes `/ws/wallet` if a token is in the query string; the app sent
+both. The app now sends the token only in the `Authorization: Bearer` header. BALANCE_UPDATE / TX_CONFIRMED payload
+shapes are compatible (app reads optional fields with defaults).
+Not yet checked: request/response field names, `/blocks/latest`.
 
 ## Not done
 Request/response shape comparison, tenure/participation gates, vouching, referral rewards.

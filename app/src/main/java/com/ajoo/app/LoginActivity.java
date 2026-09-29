@@ -205,6 +205,12 @@ public class LoginActivity extends AppCompatActivity {
 		// does set it correctly, but this shouldn't depend on that holding 
 		// forever. 
 		if (directory != null && directory.equals("complete")) { 
+			if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+				// Profile form requires a signed-in Firebase user; send back to the router.
+				startActivity(new Intent(this, SplashScreenActivity.class));
+				finish();
+				return;
+			}
 			setTitle("Create account"); 		
 			showFragment(complete); 
 		} else if (directory != null && directory.equals("eLogin")) {
@@ -214,9 +220,8 @@ public class LoginActivity extends AppCompatActivity {
 			setTitle("Create account");
 			showFragment(EmailAuthFragment.newInstance(true));
 		} else if (directory != null && directory.equals("pLogin")) {
-			Toast.makeText(this, "Phone login is not available yet. Please use email.", Toast.LENGTH_LONG).show();
 			setTitle("Sign in");
-			showFragment(EmailAuthFragment.newInstance(false));
+			showFragment(new PhoneAuthFragment());
 		}
 		
 	}

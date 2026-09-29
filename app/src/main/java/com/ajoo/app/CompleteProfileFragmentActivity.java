@@ -48,7 +48,8 @@ import java.util.regex.*;
 import org.json.*;
 import com.ajoo.app.firestore.UserProfileManager;
 import androidx.core.content.ContextCompat;
-import android.content.pm.PackageManager;
+import android.content.pm.PackageManager;
+
 
 public class CompleteProfileFragmentActivity extends Fragment {
 	
@@ -105,6 +106,7 @@ public class CompleteProfileFragmentActivity extends Fragment {
 	private EditText et_email;
 	private MaterialCardView cardview50;
 	private MaterialCardView cardview51;
+	private boolean phoneLocked = false;
 	private EditText et_phone_code;
 	private EditText et_phone_number;
 	private Spinner spinner_country;
@@ -336,7 +338,7 @@ public class CompleteProfileFragmentActivity extends Fragment {
 				helper.setSpinnerData(spinner_kin_state, helper.getStateNames(country));
 				helper.setSpinnerData(spinner_kin_city, new ArrayList<>());
 				String code = _phoneCodeFor(country);
-				if (!code.isEmpty() && et_phone_code.getText().toString().trim().isEmpty()) {
+				if (!phoneLocked && !code.isEmpty() && et_phone_code.getText().toString().trim().isEmpty()) {
 					et_phone_code.setText(code);
 				}
 			}
@@ -365,6 +367,31 @@ public class CompleteProfileFragmentActivity extends Fragment {
 		
 		if (!authsp.getString("gmail", "").isEmpty()) {
 			et_email.setText(authsp.getString("gmail", ""));
+		}
+		
+		// Sync with whichever sign-in method created this session: values Firebase
+		// already verified are pre-filled and locked so they match the auth account.
+		com.google.firebase.auth.FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+		if (fbUser != null) {
+			String authEmail = fbUser.getEmail();
+			if (authEmail != null && !authEmail.isEmpty()) {
+				et_email.setText(authEmail);
+				et_email.setEnabled(false);
+			}
+			String authPhone = fbUser.getPhoneNumber();
+			if (authPhone != null && !authPhone.isEmpty()) {
+				phoneLocked = true;
+				et_phone_code.setText("");
+				if (et_phone_code.getParent() instanceof View) ((View) et_phone_code.getParent()).setVisibility(View.GONE);
+				et_phone_number.setText(authPhone);
+				et_phone_number.setEnabled(false);
+			}
+			String display = fbUser.getDisplayName();
+			if (display != null && !display.trim().isEmpty() && et_first_name.getText().toString().isEmpty()) {
+				String[] parts = display.trim().split("\\s+", 2);
+				et_first_name.setText(parts[0]);
+				if (parts.length > 1 && et_last_name.getText().toString().isEmpty()) et_last_name.setText(parts[1]);
+			}
 		}
 		
 		if (!authsp.getString("first_name", "").isEmpty()) {
@@ -478,23 +505,17 @@ public class CompleteProfileFragmentActivity extends Fragment {
 			SketchwareUtil.showMessage(getContext(), "Please agree to the Privacy Policy");
 			return;
 		}
-		// NOTE: EnterOtpFragmentActivity's current verification path checks
-		// against a hardcoded test code ("246810") with the real
-		// FirebaseAuth.signInWithCredential() call commented out - meaning
-		// FirebaseAuth.getCurrentUser() may genuinely be null here, not just
-		// in edge cases. Falls back to the uid OTP verification actually
-		// stores in authsp (a random UUID in the current flow) rather than
-		// hard-blocking signup on an auth state that may never be populated
-		// as things currently stand. This is the same gap the original
-		// FinishSignupFragmentActivity had - not something new introduced
-		// by this merge, but worth fixing at the source, separately.
-		String currentFirebaseUid = FirebaseAuth.getInstance().getCurrentUser() != null
-		? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
-		String effectiveUid = currentFirebaseUid != null ? currentFirebaseUid : authsp.getString("uid", "");
-		if (effectiveUid.isEmpty()) {
-			SketchwareUtil.showMessage(getContext(), "Session expired - please verify your phone number again.");
+		// The profile is keyed to the real Firebase Auth uid; there is no fallback.
+		com.google.firebase.auth.FirebaseUser signedIn = FirebaseAuth.getInstance().getCurrentUser();
+		if (signedIn == null) {
+			SketchwareUtil.showMessage(getContext(), "Session expired - please sign in again.");
+			android.content.Intent back = new android.content.Intent(getActivity(), SplashScreenActivity.class);
+			back.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			startActivity(back);
+			if (getActivity() != null) getActivity().finish();
 			return;
 		}
+		String effectiveUid = signedIn.getUid();
 		
 		btn_submit_profile.setEnabled(false);
 		btn_submit_profile.setText("Creating account…");
@@ -633,4 +654,4 @@ public class CompleteProfileFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

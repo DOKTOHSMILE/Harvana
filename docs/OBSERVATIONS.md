@@ -28,3 +28,16 @@
 - Requires Firebase console: enable Email/Password provider, and T0-5 (`google-services.json`) still open;
   auth cannot work at runtime without it.
 - Not compiled (no Android SDK here); needs a build check.
+
+## Phone / OTP auth and profile sync
+- Added `PhoneAuthFragment`: real Firebase SMS OTP (send, verify, auto-verification, 60s resend, change number).
+  Replaces the earlier hardcoded-test-code stub (which no longer exists in the code).
+- Every sign-in method (email, phone, Google) ends at `SplashScreenActivity`, which looks up the profile by
+  Firebase uid: exists -> MainActivity; missing -> `LoginActivity(page=complete)` (the sign-up form).
+- Complete-profile form now prefills and locks the email and/or phone that Firebase already verified, prefills
+  name from the display name, and requires a real signed-in Firebase uid (removed the random-UUID fallback).
+  `LoginActivity` bounces to Splash if the form is opened with no signed-in user.
+- Email, phone and Google sign-ins create separate Firebase accounts (separate uids/profiles); account linking
+  is not implemented.
+- Firebase console needs: Phone provider enabled, app SHA-1/SHA-256 registered, and Play Integrity/reCAPTCHA
+  configured, plus T0-5 `google-services.json`. Not compiled or tested on device.

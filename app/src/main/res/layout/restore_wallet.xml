@@ -16,7 +16,7 @@
 		<androidx.appcompat.widget.Toolbar
 			android:id="@+id/toolbar"
 			android:layout_width="match_parent"
-			android:background="?attr/colorPrimary"
+			android:background="?attr/appBarColor"
 			android:layout_height="?attr/actionBarSize"
 			app:title="RestoreWallet"
 			app:popupTheme="@style/AppTheme.PopupOverlay" />

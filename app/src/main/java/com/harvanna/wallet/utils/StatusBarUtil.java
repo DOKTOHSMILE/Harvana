@@ -10,7 +10,7 @@ import androidx.core.view.WindowCompat;
 
 /**
  * Makes the system status bar the same color as the action bar / toolbar.
- * Toolbars are filled with ?attr/colorPrimary, so that attribute is what is resolved here - it follows the
+ * Toolbars are filled with ?attr/appBarColor, so that attribute is what is resolved here - it follows the
  * active theme (light, dark, P2P) automatically. Icon contrast is chosen from the color's luminance.
  */
 public final class StatusBarUtil {
@@ -20,7 +20,7 @@ public final class StatusBarUtil {
     public static void matchToolbar(Activity activity) {
         if (activity == null) return;
         TypedValue tv = new TypedValue();
-        if (!activity.getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, tv, true)) return;
+        if (!activity.getTheme().resolveAttribute(com.harvanna.wallet.R.attr.appBarColor, tv, true)) return;
         int color = tv.data;
         Window w = activity.getWindow();
         w.setStatusBarColor(color);

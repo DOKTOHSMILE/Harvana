@@ -412,14 +412,20 @@ public class MainActivity extends AppCompatActivity {
 		textContainer.setLayoutParams(textContainerLp);
 		
 		TextView titleView = new TextView(this);
-		titleView.setText("Ajoo");
-		titleView.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorTextPrimary));
+		android.util.TypedValue tvBar = new android.util.TypedValue();
+		android.util.TypedValue tvOn = new android.util.TypedValue();
+		getTheme().resolveAttribute(R.attr.appBarColor, tvBar, true);
+		getTheme().resolveAttribute(R.attr.onAppBarColor, tvOn, true);
+		final int appBarColor = tvBar.data;
+		final int onAppBarColor = tvOn.data;
+		titleView.setText("Harvanna Wallet");
+		titleView.setTextColor(onAppBarColor);
 		titleView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 18);
 		titleView.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
 		
 		TextView subtitleView = new TextView(this);
 		subtitleView.setText("capital oracle projects");
-		subtitleView.setTextColor(UiColors.textTertiary());
+		subtitleView.setTextColor((onAppBarColor & 0x00FFFFFF) | 0xB3000000);
 		subtitleView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12);
 		
 		textContainer.addView(titleView);
@@ -436,14 +442,14 @@ public class MainActivity extends AppCompatActivity {
 		avatarCard.setOnClickListener(openProfile);
 		logoView.setOnClickListener(openProfile);
 		
-		ab.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(resolvedPrimaryColor));
+		ab.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(appBarColor));
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
 			android.view.Window window = getWindow();
 			window.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 			window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-			window.setStatusBarColor(resolvedPrimaryColor);
+			window.setStatusBarColor(appBarColor);
 			new androidx.core.view.WindowInsetsControllerCompat(window, window.getDecorView())
-			.setAppearanceLightStatusBars(androidx.core.graphics.ColorUtils.calculateLuminance(resolvedPrimaryColor) > 0.4);
+			.setAppearanceLightStatusBars(androidx.core.graphics.ColorUtils.calculateLuminance(appBarColor) > 0.4);
 		}
 		
 		androidx.appcompat.app.ActionBar.LayoutParams params = new androidx.appcompat.app.ActionBar.LayoutParams(

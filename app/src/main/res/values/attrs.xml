@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Action bar / toolbar fill and its status bar: orange in the day theme, charcoal in the night theme.
+         colorPrimary stays the accent in both themes (buttons, dialogs, progress), so the bar gets its own attribute. -->
+    <attr name="appBarColor" format="color|reference" />
+    <!-- Text and icon color drawn on top of appBarColor. -->
+    <attr name="onAppBarColor" format="color|reference" />
+</resources>

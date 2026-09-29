@@ -245,7 +245,8 @@ public final class AjooNodeClient {
 	}
 	
 	public static void submitP2PCreateListing(String posterAddress, String side, long totalAmount, long minOrderAmount,
-	long durationHours, long nonce, String signatureB64, String publicKeyB64,
+	long maxOrderAmount, long durationHours, long paymentWindowMinutes, long unitPricePerHarvRaw,
+	long nonce, String signatureB64, String publicKeyB64,
 	JsonCallback cb) {
 		try {
 			JSONObject body = new JSONObject();
@@ -253,7 +254,10 @@ public final class AjooNodeClient {
 			body.put("side",            side);
 			body.put("totalAmount",     totalAmount);
 			body.put("minOrderAmount",  minOrderAmount);
+			body.put("maxOrderAmount",  maxOrderAmount);
 			body.put("durationHours",   durationHours);
+			body.put("paymentWindowMinutes", paymentWindowMinutes);
+			body.put("unitPricePerHarvRaw",  unitPricePerHarvRaw);
 			body.put("nonce",           nonce);
 			body.put("signature",       signatureB64);
 			body.put("publicKey",       publicKeyB64);

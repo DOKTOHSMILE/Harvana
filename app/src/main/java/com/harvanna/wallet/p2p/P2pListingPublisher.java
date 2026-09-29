@@ -15,6 +15,9 @@ import java.util.List;
 
 public final class P2pListingPublisher {
 	
+	/** Minimum value (in HARV) of the per-trade maximum, unless the whole listing is smaller. */
+	public static final double MAX_ORDER_FLOOR_HARV = 500;
+	
 	private P2pListingPublisher() {}
 	
 	public interface Callback {
@@ -58,11 +61,11 @@ public final class P2pListingPublisher {
 			return;
 		}
 		if (amountAjc < 10 || amountAjc > 5000) {
-			cb.onError("A listing must be between 10 and 5,000 AJC in total.");
+			cb.onError("A listing must be between 10 and 5,000 HARV in total.");
 			return;
 		}
 		if (minOrderAjc < 1 || minOrderAjc > amountAjc) {
-			cb.onError("The minimum trade amount must be at least 1 AJC and no more than the total you're listing.");
+			cb.onError("The minimum trade amount must be at least 1 HARV and no more than the total you're listing.");
 			return;
 		}
 		if (maxOrderAjc > amountAjc) {
@@ -71,6 +74,19 @@ public final class P2pListingPublisher {
 		}
 		if (minOrderAjc > maxOrderAjc) {
 			cb.onError("The minimum trade amount can't be more than the maximum.");
+			return;
+		}
+		// Product rule: the maximum per trade must be at least MAX_ORDER_FLOOR_HARV, or the whole listing
+		// when the listing itself is smaller than that (the node also requires min <= max <= total).
+		final double maxFloor = Math.min(MAX_ORDER_FLOOR_HARV, amountAjc);
+		if (maxOrderAjc < maxFloor) {
+			cb.onError("The maximum trade amount must be at least " + (long) maxFloor + " HARV.");
+			return;
+		}
+		// The node prices in kobo (Naira) per HARV; other currencies can't be signed on-chain.
+		final String priceCurrency = currency == null || currency.isEmpty() ? P2pCurrencyFilterState.getCurrency() : currency;
+		if (!"NGN".equalsIgnoreCase(priceCurrency)) {
+			cb.onError("Offers are priced in Naira (NGN). Switch the currency to NGN to publish.");
 			return;
 		}
 		
@@ -111,7 +127,9 @@ public final class P2pListingPublisher {
 		long amountRaw = com.harvanna.wallet.sync.AjooNodeClient.toRawUnits(amountAjc);
 		long minRaw = com.harvanna.wallet.sync.AjooNodeClient.toRawUnits(minOrderAjc);
 		
-		PinPromptHelper.verifyPinThenProceed(activity, () -> {
+		final long maxRaw = com.harvanna.wallet.sync.AjooNodeClient.toRawUnits(maxOrderAjc);
+		final long[] priceKobo = new long[1];
+		final Runnable startPublish = () -> PinPromptHelper.verifyPinThenProceed(activity, () -> {
 			final ProgressDialog progress = new ProgressDialog(activity, com.harvanna.wallet.R.style.AjooP2pAlertDialog);
 			progress.setMessage("SELL".equals(listingSide) ? "Publishing offer…" : "Publishing request…");
 			progress.setCancelable(false);
@@ -119,7 +137,7 @@ public final class P2pListingPublisher {
 			
 			// 1. Send the liquidity lock request to Ajoochain
 			P2PTradeRouter.createListing(activity.getApplicationContext(), address, listingSide,
-			amountRaw, minRaw, durationHours, new P2PTradeRouter.Callback() {
+			amountRaw, minRaw, maxRaw, durationHours, paymentWindowMinutes, priceKobo[0], new P2PTradeRouter.Callback() {
 				
 				@Override
 				public void onSuccess(org.json.JSONObject result) {
@@ -184,15 +202,37 @@ public final class P2pListingPublisher {
 				}
 			});
 		});
+		
+		if ("MARGIN".equals(pricingType)) {
+			// Resolve the floating margin to a fixed signed price against the market reference.
+			P2pPriceReference.fetch((medianKobo, samples) -> {
+				if (medianKobo <= 0) {
+					activity.runOnUiThread(() -> cb.onError("Margin pricing needs a market reference and none is available yet. Use a fixed price."));
+					return;
+				}
+				priceKobo[0] = Math.max(1L, Math.round(medianKobo * (1.0 + marginPercent / 100.0)));
+				activity.runOnUiThread(startPublish);
+			});
+		} else {
+			priceKobo[0] = P2pPriceReference.nairaToKobo(unitPrice);
+			if (priceKobo[0] < 1) {
+				cb.onError("Enter a unit price greater than zero.");
+				return;
+			}
+			startPublish.run();
+		}
 	}
 	
 	public static String friendly(String rawError) {
 		if (rawError == null) return "Unknown error.";
-		if (rawError.contains("AMOUNT_OUT_OF_BOUNDS")) return "A listing must be between 10 and 5,000 AJC in total.";
-		if (rawError.contains("INVALID_MIN_ORDER_AMOUNT")) return "The minimum trade amount must be at least 1 AJC and no more than the total you're listing.";
+		if (rawError.contains("AMOUNT_OUT_OF_BOUNDS")) return "A listing must be between 10 and 5,000 HARV in total.";
+		if (rawError.contains("INVALID_MAX_ORDER_AMOUNT")) return "The maximum trade amount must be between the minimum and the total you're listing.";
+		if (rawError.contains("INVALID_PAYMENT_WINDOW")) return "Payment window must be 15, 30, 45 or 60 minutes.";
+		if (rawError.contains("INVALID_UNIT_PRICE")) return "That price isn't valid. Enter a price per HARV in Naira.";
+		if (rawError.contains("INVALID_MIN_ORDER_AMOUNT")) return "The minimum trade amount must be at least 1 HARV and no more than the total you're listing.";
 		if (rawError.contains("INVALID_DURATION")) return "Offer duration must be between 1 hour and 30 days.";
 		if (rawError.contains("SENDER_ADDRESS_FROZEN")) return "This wallet is currently frozen and can't post listings.";
-		if (rawError.contains("COIN_PAUSED")) return "AJC trading is temporarily paused network-wide. Try again later.";
+		if (rawError.contains("COIN_PAUSED")) return "HARV trading is temporarily paused network-wide. Try again later.";
 		if (rawError.contains("INVALID_SIGNATURE") || rawError.contains("INVALID_NONCE")) return "Something went wrong verifying your request — please try again.";
 		return rawError;
 	}

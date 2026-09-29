@@ -48,7 +48,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.*;
 import org.json.*;
-
+
+
 
 public class ComfirmSellOfferActivity extends AppCompatActivity {
 	
@@ -362,6 +363,7 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 		
 		tv_confirm_amount.setText(BalanceFormatter.smartDecimal(amount) + " AJC");
 		tv_confirm_unit_price.setText(P2pMoney.perAjc(unitPrice, currency));
+		_showPriceReference();
 		tv_confirm_buyers_pay.setText(P2pMoney.fiat(amount * unitPrice, currency));
 		tv_confirm_trade_limit.setText(String.format(Locale.US, "Min %s AJC • Max %s AJC",
 		BalanceFormatter.smartDecimal(minOrderAmount), BalanceFormatter.smartDecimal(maxOrderAmount)));
@@ -380,6 +382,39 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 			row.setTextSize(13.5f);
 			layout_confirm_payment_methods.addView(row);
 		}
+	}
+	
+	/** Shows the market reference (median of open listings, NOT the node mark - see P2pPriceReference) and
+	 *  flags, without blocking, a price that deviates from it by more than 15%. */
+	private void _showPriceReference() {
+		if (!"NGN".equalsIgnoreCase(currency) || !"FIXED".equals(pricingType) || unitPrice <= 0) return;
+		final long myKobo = com.harvanna.wallet.p2p.P2pPriceReference.nairaToKobo(unitPrice);
+		final TextView note = new TextView(this);
+		note.setTextSize(12.5f);
+		note.setPadding(0, (int) (6 * getResources().getDisplayMetrics().density), 0, 0);
+		note.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorP2pTextSecondary));
+		note.setText("Checking market reference…");
+		android.view.ViewGroup parent = (android.view.ViewGroup) tv_confirm_subtitle.getParent();
+		parent.addView(note, parent.indexOfChild(tv_confirm_subtitle) + 1);
+		
+		com.harvanna.wallet.p2p.P2pPriceReference.fetch((medianKobo, samples) -> {
+			if (isFinishing() || isDestroyed()) return;
+			if (medianKobo <= 0) {
+				note.setText("No market reference yet (not enough open listings). Your price is used as entered.");
+				return;
+			}
+			double dev = com.harvanna.wallet.p2p.P2pPriceReference.deviation(myKobo, medianKobo);
+			String ref = "Market reference: " + P2pMoney.perAjc(medianKobo / 100.0, "NGN")
+					+ " (median of " + samples + " open listing" + (samples == 1 ? "" : "s") + ")";
+			if (Math.abs(dev) > com.harvanna.wallet.p2p.P2pPriceReference.DEVIATION_FLAG) {
+				note.setText(ref + "\nYour price is " + Math.round(Math.abs(dev) * 100) + "% "
+						+ (dev > 0 ? "above" : "below")
+						+ " it. You can still publish, but a price this far from the market may be rejected or ignored by buyers.");
+				note.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorWarning));
+			} else {
+				note.setText(ref);
+			}
+		});
 	}
 	
 	private String _formatMoney(double value) {
@@ -461,4 +496,4 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

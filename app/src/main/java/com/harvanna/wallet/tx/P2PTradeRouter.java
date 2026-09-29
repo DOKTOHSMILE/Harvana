@@ -37,32 +37,27 @@ public final class P2PTradeRouter {
 	}
 	
 	// ── Create listing ──────────────────────────────────────────────────────
-	// Canonical (P2PListingCreateRequest.getCanonicalMessage()):
-	//   "P2P_CREATE_LISTING:" + sellerAddress + ":" + totalAmount + ":" + unitPrice
-	//   + ":" + minOrderAmount + ":" + currency + ":" + bankName + ":" + accountNumber + ":" + accountName + ":" + nonce
+	// Canonical (P2PListingCreateRequest.getCanonicalMessage()) - node format, byte for byte:
+	//   "P2P_CREATE_LISTING:" + poster + ":" + side + ":" + totalAmount + ":" + minOrderAmount + ":" + maxOrderAmount
+	//   + ":" + durationHours + ":" + paymentWindowMinutes + ":" + unitPricePerHarvRaw + ":" + nonce
+	// unitPricePerHarvRaw is the seller's price in KOBO per 1 HARV (1 Naira = 100 kobo).
+	// The request nonce is the wallet's nextRequestNonce.
 	
 	public static void createListing(Context context, String posterAddress, String side, long totalAmountRaw,
-	long minOrderAmountRaw, long durationHours,
-	Callback callback) {
+	long minOrderAmountRaw, long maxOrderAmountRaw, long durationHours, long paymentWindowMinutes,
+	long unitPricePerHarvRaw, Callback callback) {
 		AjooNodeClient.getWallet(posterAddress, new AjooNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
 				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
-				// THE UPGRADE: unitPrice and currency removed entirely —
-				// the chain should only ever hold coin data. Fiat price
-				// and currency are metadata about a human-to-human deal,
-				// not the asset movement itself, and now live only in
-				// Firestore (P2PPaymentDetailsManager.save()), never
-				// signed into this canonical message. Matches
-				// P2PListingCreateRequest.getCanonicalMessage() on the
-				// node exactly — field order and formatting must agree
-				// byte-for-byte or every signature verification fails.
 				String canonical = "P2P_CREATE_LISTING:" + posterAddress + ":" + side + ":" + totalAmountRaw
-				+ ":" + minOrderAmountRaw + ":" + durationHours + ":" + nonce;
+				+ ":" + minOrderAmountRaw + ":" + maxOrderAmountRaw + ":" + durationHours
+				+ ":" + paymentWindowMinutes + ":" + unitPricePerHarvRaw + ":" + nonce;
 				
 				_signAndSubmit(context, posterAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
 				AjooNodeClient.submitP2PCreateListing(posterAddress, side, totalAmountRaw, minOrderAmountRaw,
-				durationHours, nonce, sigB64, pubKeyB64,
+				maxOrderAmountRaw, durationHours, paymentWindowMinutes, unitPricePerHarvRaw,
+				nonce, sigB64, pubKeyB64,
 				_wrap(cb)));
 			}
 			
@@ -73,7 +68,6 @@ public final class P2PTradeRouter {
 		});
 	}
 	
-	// ── Claim payment (buyer takes some or all of a listing's remaining amount) ──
 	// Canonical (P2PClaimPaymentRequest.getCanonicalMessage()):
 	//   "P2P_CLAIM_PAYMENT:" + listingId + ":" + buyerAddress + ":" + amount + ":" + nonce
 	

@@ -99,6 +99,23 @@ public final class WalletListManager {
         saveList(context, filtered);
     }
 
+    /** Rewrites an entry's address in place (label and createdAt preserved). */
+    public static void replaceAddress(Context context, String oldAddress, String newAddress) {
+        List<WalletEntry> updated = new ArrayList<>();
+        boolean hasNew = false;
+        for (WalletEntry entry : getWalletList(context)) {
+            if (entry.address.equals(newAddress)) hasNew = true;
+        }
+        for (WalletEntry entry : getWalletList(context)) {
+            if (entry.address.equals(oldAddress)) {
+                if (!hasNew) updated.add(new WalletEntry(newAddress, entry.label, entry.createdAt));
+            } else {
+                updated.add(entry);
+            }
+        }
+        saveList(context, updated);
+    }
+
     public static void renameWallet(Context context, String address, String newLabel) {
         if (newLabel == null || newLabel.trim().isEmpty()) return;
         List<WalletEntry> list = getWalletList(context);

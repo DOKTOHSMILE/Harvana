@@ -29,6 +29,9 @@ public class SketchApplication extends Application {
         // EXPLICIT INITIALIZATION: Forces Firebase to wake up early
         FirebaseApp.initializeApp(this);
         
+        // One-time AJ0x -> HV0x wallet address migration (idempotent)
+        com.harvanna.wallet.wallet.AddressMigration.run(this);
+        
         // GLOBAL CRASH INTERCEPTOR (File Writer + Debug Screen)
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override

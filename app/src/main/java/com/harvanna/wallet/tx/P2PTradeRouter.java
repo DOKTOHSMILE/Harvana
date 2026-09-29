@@ -47,7 +47,7 @@ public final class P2PTradeRouter {
 		AjooNodeClient.getWallet(posterAddress, new AjooNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
-				long nonce = walletJson.optLong("nonce", 0) + 1;
+				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				// THE UPGRADE: unitPrice and currency removed entirely —
 				// the chain should only ever hold coin data. Fiat price
 				// and currency are metadata about a human-to-human deal,
@@ -81,7 +81,7 @@ public final class P2PTradeRouter {
 		AjooNodeClient.getWallet(buyerAddress, new AjooNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
-				long nonce = walletJson.optLong("nonce", 0) + 1;
+				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String canonical = "P2P_CLAIM_PAYMENT:" + listingId + ":" + buyerAddress + ":" + amountRaw + ":" + nonce;
 				
 				_signAndSubmit(context, buyerAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
@@ -104,7 +104,7 @@ public final class P2PTradeRouter {
 		AjooNodeClient.getWallet(buyerAddress, new AjooNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
-				long nonce = walletJson.optLong("nonce", 0) + 1;
+				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String canonical = "P2P_MARK_PAID:" + orderId + ":" + buyerAddress + ":" + nonce;
 				
 				_signAndSubmit(context, buyerAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
@@ -123,7 +123,7 @@ public final class P2PTradeRouter {
 		AjooNodeClient.getWallet(sellerAddress, new AjooNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
-				long nonce = walletJson.optLong("nonce", 0) + 1;
+				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String canonical = "P2P_CONFIRM_RECEIVED:" + orderId + ":" + sellerAddress + ":" + nonce;
 				
 				_signAndSubmit(context, sellerAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
@@ -147,7 +147,7 @@ public final class P2PTradeRouter {
 		AjooNodeClient.getWallet(sellerAddress, new AjooNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
-				long nonce = walletJson.optLong("nonce", 0) + 1;
+				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String canonical = "P2P_CANCEL_LISTING:" + listingId + ":" + sellerAddress + ":" + nonce;
 				
 				_signAndSubmit(context, sellerAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
@@ -174,7 +174,7 @@ public final class P2PTradeRouter {
 		AjooNodeClient.getWallet(raiserAddress, new AjooNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
-				long nonce = walletJson.optLong("nonce", 0) + 1;
+				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String safeReason = reason != null ? reason : "";
 				String canonical = "P2P_RAISE_DISPUTE:" + orderId + ":" + raiserAddress + ":" + safeReason + ":" + nonce;
 				
@@ -214,7 +214,7 @@ public final class P2PTradeRouter {
 		AjooNodeClient.getWallet(traderAddress, new AjooNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
-				long nonce = walletJson.optLong("nonce", 0) + 1;
+				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String canonical = "P2P_INSURANCE_DEPOSIT:" + traderAddress + ":" + amountRaw + ":" + nonce;
 				
 				_signAndSubmit(context, traderAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->

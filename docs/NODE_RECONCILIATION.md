@@ -41,3 +41,13 @@ Not yet checked: request/response field names, `/blocks/latest`.
 
 ## Not done
 Request/response shape comparison, tenure/participation gates, vouching, referral rewards.
+
+## Update: request nonces (fixed)
+The node's `/wallet/balance/{address}` returns `nextRequestNonce`, the nonce every signed group/P2P request must
+carry. In today's legacy mode (`forbid-off-block-nonce=false`) it equals chain nonce + 1, but in strict mode it is
+`requestNonce + 1` and diverges. The app computed `nonce + 1` for all seven P2P actions; they now use
+`nextRequestNonce` (falling back to `nonce + 1` if absent). Native transfers still use the chain nonce.
+
+## Update: native transfer request/response contract (matches)
+`/tx/send` body fields (`from,to,amount,gas,nonce,memo,signature,publicKey`) match `TransactionPayload`;
+`/tx/estimate-fee` returns `estimatedGas`, which the app reads.

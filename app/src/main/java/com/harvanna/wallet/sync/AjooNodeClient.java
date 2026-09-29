@@ -399,6 +399,12 @@ public final class AjooNodeClient {
 *  requested if missing/expired) and attached as a Bearer header
 *  before the actual request goes out. Nothing above this point in
 *  the file needs to know auth exists at all. */	
+	/** Authenticated GET for callers outside this class (group engines etc.). */
+	public static void nodeGet(String path, JsonCallback cb) { get(path, cb); }
+	
+	/** Authenticated POST for callers outside this class (group engines etc.). */
+	public static void nodePost(String path, String json, JsonCallback cb) { post(path, json, cb); }
+	
 	private static void get(String path, JsonCallback cb) {
 		NodeAuthManager.getValidToken(new NodeAuthManager.TokenCallback() {
 			@Override

@@ -33,7 +33,9 @@ by `isSelf`, so **the new-user sign-up profile save should work** against these 
 1. Close A1/A6 now: members may self-create only if the group does not require approval (`requireApprovalToJoin == false`)
    or their join request is APPROVED, with `role == 'MEMBER'`. See `docs/firestore.rules.proposed`.
 2. Close A5: `TRANSACTIONS` client writes off.
-3. A3: only the creator may change `joinRequests.status`; members may only add their own vote.
+3. A3: only the creator may change `joinRequests.status`; members may only add their own vote. NOTE: this stops the client-side
+   vote-approval flow from flipping status (nothing else resolves it until the node or a Cloud Function does), so apply it together
+   with the group rewire, or accept that member-vote joins pause.
 4. Fix B1-B3 the durable way: **move admissions, votes and counts to the node** (it is the source of truth; the
    Circle/Accum/Fixed engines already do weighted voting and membership). Until then, either deploy the Cloud Functions or
    loosen rules narrowly (`membersCount` only). This is the group-rewire work already planned, starting with Circle.

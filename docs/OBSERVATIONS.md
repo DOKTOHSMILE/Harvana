@@ -99,3 +99,22 @@ breaking reflection at runtime, Firestore offline persistence syncing after a re
   run 9 (commit 3833e05) passed the full pipeline: 58 canonical unit tests, debug build, and minified release build
   (R8) with the Firestore migration, rebrand/palette, splash fixes and AJ0x migration included. Later commits
   (group client, quick actions, palette-everywhere) are verified by their own runs; see the Actions tab.
+
+## P2P seller screen (owner decisions of 29 Sep 2026) - what was done and where the node differs
+Done: the listing is now signed and sent with `maxOrderAmount`, `paymentWindowMinutes` and `unitPricePerHarvRaw`
+(kobo per HARV) using the wallet's `nextRequestNonce`; the canonical string is a pure builder checked against the node's
+own class (2 golden cases). Seller sees a market reference and a non-blocking flag when their price is >15% away.
+Max order: must be >= min(500 HARV, total), between min and total.
+
+Differences from the decisions as stated (found while reading the node; NOT changed on the node):
+1. **Payment window**: the node accepts 15-60 minutes (default 45) and REJECTS anything above 60 (`INVALID_PAYMENT_WINDOW`).
+   `MINIMUM_P2P_ESCROW_TIME_MS` does not exist anywhere in the node repo. 1h/2h/4h presets would be rejected for 2h and 4h.
+   The app keeps the existing 15/30/45/60 presets (which the node's own comment says match the UI). If a 1h minimum is really
+   wanted, that is a node change (owner's decision) and the presets change with it.
+2. **The mark is not reachable from the app**: `HarvannaProtocolManager.getMarkStatus()` exists but no controller exposes it.
+   So the screen shows the MEDIAN of open-listing prices as a clearly-labelled reference, not the accepted mark. Needs a node
+   endpoint (e.g. `GET /api/v1/mark`) - node-side follow-up. When it exists, swap it into `P2pPriceReference.fetch`.
+3. **Currency**: the node prices in kobo (Naira). Non-NGN offers are refused in the app with a clear message.
+4. **Margin pricing** is resolved to a fixed signed price against the same reference; if no reference exists it asks for a fixed price.
+5. Whether `/listings/open` includes `unitPricePerHarvRaw` per listing was not verified against a running node; if it is
+   redacted the reference shows "No market reference yet".

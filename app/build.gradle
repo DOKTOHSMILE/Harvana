@@ -16,6 +16,18 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        // Fixed, non-secret DEBUG key so every debug build (local or CI) has the same signing
+        // fingerprint. Register its SHA-1/SHA-256 in Firebase for Google sign-in.
+        // Never use this for a release build.
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled true

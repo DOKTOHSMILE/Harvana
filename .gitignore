@@ -7,3 +7,5 @@ local.properties
 *.jks
 *.keystore
 .DS_Store
+# Debug-only, non-secret signing key (fixed so the Firebase SHA fingerprint stays stable). Real release keys stay ignored.
+!app/debug.keystore

@@ -646,10 +646,10 @@
 		android:layout_marginTop="8dp"
 		android:text="Remove from group"
 		android:textStyle="bold"
-		android:textColor="#C62828"
+		android:textColor="@color/colorErrorAlt"
 		android:textSize="14.5sp"
 		android:layout_marginHorizontal="20dp"
-		app:backgroundTint="#FDECEC"
+		app:backgroundTint="@color/colorErrorSoft"
 		app:cornerRadius="16dp"
 		app:elevation="0dp"
 		android:visibility="gone" />

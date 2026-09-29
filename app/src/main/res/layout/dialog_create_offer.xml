@@ -29,7 +29,7 @@
 				android:text="Create Offer"
 				android:textSize="20sp"
 				android:textStyle="bold"
-				android:textColor="#0055FF"
+				android:textColor="@color/colorAccentStrong"
 				android:textAlignment="center" />
 			<LinearLayout
 				android:id="@+id/btn_sell_offer"
@@ -46,14 +46,14 @@
 					android:text="Sell HARV (I have HARV to sell)"
 					android:textSize="16sp"
 					android:textStyle="bold"
-					android:textColor="#E53935"
+					android:textColor="@color/colorError"
 					android:textAlignment="center" />
 			</LinearLayout>
 			<View
 				android:id="@+id/view2"
 				android:layout_width="match_parent"
 				android:layout_height="1dp"
-				android:background="#E0E0E0" />
+				android:background="@color/colorDivider" />
 			<LinearLayout
 				android:id="@+id/btn_buy_offer"
 				android:layout_width="match_parent"
@@ -69,7 +69,7 @@
 					android:text="Buy HARV (I want to acquire HARV)"
 					android:textSize="16sp"
 					android:textStyle="bold"
-					android:textColor="#10B881"
+					android:textColor="@color/colorSuccess"
 					android:textAlignment="center" />
 			</LinearLayout>
 		</LinearLayout>

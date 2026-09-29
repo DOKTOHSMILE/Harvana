@@ -1,5 +1,6 @@
 package com.harvanna.wallet;
 
+import com.harvanna.wallet.utils.UiColors;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -72,7 +73,7 @@ public class EmailAuthFragment extends Fragment {
 		TextView title = new TextView(requireContext());
 		title.setText(createMode ? "Create your account" : "Welcome back");
 		title.setTextSize(24f);
-		title.setTextColor(Color.parseColor("#222222"));
+		title.setTextColor(UiColors.textPrimary());
 		title.setPadding(0, dp(8), 0, dp(4));
 		root.addView(title);
 		

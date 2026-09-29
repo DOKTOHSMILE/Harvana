@@ -1,5 +1,6 @@
 package com.harvanna.wallet;
 
+import com.harvanna.wallet.utils.UiColors;
 import android.animation.*;
 import android.app.*;
 import android.content.*;
@@ -56,7 +57,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.zxing.Result;
 import android.content.ClipboardManager;
 import java.math.BigDecimal;
-import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.card.MaterialCardView;
+
 
 public class SendAssetActivity extends AppCompatActivity {
 	
@@ -332,7 +334,7 @@ public class SendAssetActivity extends AppCompatActivity {
 				tv.setTextColor(Color.WHITE);
 				tv.setTextSize(18);
 				tv.setPadding(24, 24, 24, 24);
-				tv.setBackgroundColor(Color.parseColor("#0f1623"));
+				tv.setBackgroundColor(UiColors.surface());
 				return tv;
 			}
 		};
@@ -720,7 +722,7 @@ public class SendAssetActivity extends AppCompatActivity {
 				float radius = 24f * getResources().getDisplayMetrics().density;
 				GradientDrawable background = new GradientDrawable();
 				background.setShape(GradientDrawable.RECTANGLE);
-				background.setColor(Color.parseColor("#0f1623"));
+				background.setColor(UiColors.surface());
 				background.setCornerRadii(new float[]{radius, radius, radius, radius, 0f, 0f, 0f, 0f});
 				bottomSheetView.setBackground(background);
 				
@@ -935,4 +937,4 @@ public class SendAssetActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

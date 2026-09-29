@@ -85,7 +85,7 @@ public class TransactionNotification {
 		.setContentTitle(title)
 		.setContentText(body)
 		.setSmallIcon(iconRes)
-		.setColor(Color.parseColor("#10B881"))
+		.setColor(UiColors.accent())
 		.setContentIntent(pi)
 		.setAutoCancel(true)
 		.setOnlyAlertOnce(true)

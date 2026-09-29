@@ -1,5 +1,6 @@
 package com.harvanna.wallet;
 
+import com.harvanna.wallet.utils.UiColors;
 import android.animation.*;
 import android.app.*;
 import android.content.*;
@@ -40,7 +41,8 @@ import java.util.*;
 import java.util.regex.*;
 import org.json.*;
 import android.content.ClipData;
-import android.content.ClipboardManager;
+import android.content.ClipboardManager;
+
 
 public class TransactionDetailActivity extends AppCompatActivity {
 	
@@ -220,22 +222,22 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		// Status rendering logic
 		if (status != null && status.equalsIgnoreCase("pending")) {
 			tv_tx_status.setText("PENDING");
-			tv_tx_status.setTextColor(Color.parseColor("#FF9800"));
+			tv_tx_status.setTextColor(UiColors.warning());
 			img_status_icon.setImageResource(R.drawable.icon_access_time_outline);
-			img_status_icon.setColorFilter(Color.parseColor("#FF9800"));
+			img_status_icon.setColorFilter(UiColors.warning());
 			
 		} else if (status != null && (status.equalsIgnoreCase("confirmed") || status.equalsIgnoreCase("success"))) {
 			tv_tx_status.setText("CONFIRMED");
-			tv_tx_status.setTextColor(Color.parseColor("#4CAF50"));
+			tv_tx_status.setTextColor(UiColors.success());
 			
 			img_status_icon.setImageResource(isIncoming ? R.drawable.icon_call_received_twotone : R.drawable.icon_call_made_twotone);
-			img_status_icon.setColorFilter(isIncoming ? Color.parseColor("#4CAF50") : Color.parseColor("#F44336"));
+			img_status_icon.setColorFilter(isIncoming ? UiColors.success() : UiColors.error());
 		} else {
 			tv_tx_status.setText(status != null ? status.toUpperCase() : "FAILED");
-			tv_tx_status.setTextColor(Color.parseColor("#F44336")); 
+			tv_tx_status.setTextColor(UiColors.error()); 
 			
 			img_status_icon.setImageResource(isIncoming ? R.drawable.icon_call_received_twotone : R.drawable.icon_call_made_twotone);
-			img_status_icon.setColorFilter(Color.parseColor("#F44336")); 
+			img_status_icon.setColorFilter(UiColors.error()); 
 		}
 		
 		tv_from_address.setText(sender != null && !sender.isEmpty() ? sender : "Unknown Address");
@@ -243,10 +245,10 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		
 		if (memo == null || memo.trim().isEmpty()) {
 			tv_memo.setText("None");
-			tv_memo.setTextColor(Color.parseColor("#9E9E9E"));
+			tv_memo.setTextColor(UiColors.textTertiary());
 		} else {
 			tv_memo.setText(memo);
-			tv_memo.setTextColor(Color.parseColor("#E0E0E0"));
+			tv_memo.setTextColor(UiColors.textSecondary());
 		}
 		
 		// APPLIED FIX
@@ -304,7 +306,8 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		} catch (Exception ignored) {}
 		
 	}
-	
+	
+
 	public void _inAppNotification() {
 	}
 	
@@ -902,4 +905,4 @@ public class TransactionDetailActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

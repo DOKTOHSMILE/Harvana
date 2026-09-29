@@ -1,5 +1,6 @@
 package com.harvanna.wallet;
 
+import com.harvanna.wallet.utils.UiColors;
 import android.animation.*;
 import android.app.*;
 import android.app.Activity;
@@ -610,7 +611,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				for (String ruleText : parsedRules) {
 					TextView tvRule = new TextView(getContext());
 					tvRule.setText("•  " + ruleText);
-					tvRule.setTextColor(Color.parseColor("#B0BEC5")); 
+					tvRule.setTextColor(UiColors.textSecondary()); 
 					tvRule.setTextSize(13.5f);
 					tvRule.setPadding(0, 8, 0, 8);
 					layout_rules_container.addView(tvRule);
@@ -620,7 +621,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				if (!consequence.isEmpty()) {
 					TextView tvConsequence = new TextView(getContext());
 					tvConsequence.setText("Penalty for violation: " + consequence);
-					tvConsequence.setTextColor(Color.parseColor("#EF5350")); 
+					tvConsequence.setTextColor(UiColors.error()); 
 					tvConsequence.setPadding(0, 16, 0, 0);
 					tvConsequence.setTypeface(null, Typeface.BOLD);
 					tvConsequence.setTextSize(13f);
@@ -977,4 +978,4 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

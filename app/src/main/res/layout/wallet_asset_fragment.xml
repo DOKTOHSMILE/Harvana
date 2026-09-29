@@ -65,7 +65,7 @@
 					android:textColor="@color/colorQrBackground"
 					app:backgroundTint="@color/colorOverlayDark"
 					app:cornerRadius="10dp"
-					app:strokeColor="#E2E8F0"
+					app:strokeColor="@color/colorCardStroke"
 					app:strokeWidth="2dp" />
 			</LinearLayout>
 		</androidx.cardview.widget.CardView>

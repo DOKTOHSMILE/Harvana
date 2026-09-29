@@ -1,5 +1,6 @@
 package com.harvanna.wallet;
 
+import com.harvanna.wallet.utils.UiColors;
 import android.animation.*;
 import android.app.*;
 import android.content.*;
@@ -71,7 +72,8 @@ import java.util.Locale;
 import java.util.Map;
 import android.util.Base64;
 import android.content.ClipData;
-import android.content.ClipboardManager;
+import android.content.ClipboardManager;
+
 
 public class GroupSettingsActivity extends AppCompatActivity {
 	
@@ -1158,14 +1160,14 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			cardWalletWarning.setVisibility(View.GONE);
 			btnRestoreWallet.setText("Restore again (replace key)");
 			btnRestoreWallet.setIconResource(R.drawable.ic_refresh);
-			btnRestoreWallet.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#33448AFF")));
-			btnRestoreWallet.setTextColor(Color.parseColor("#448AFF"));
+			btnRestoreWallet.setBackgroundTintList(ColorStateList.valueOf(com.harvanna.wallet.utils.UiColors.accent() & 0x33FFFFFF | 0x33000000));
+			btnRestoreWallet.setTextColor(UiColors.accent());
 			btnRestoreWallet.setIconTintResource(R.color.colorInfo);
 		} else {
 			cardWalletWarning.setVisibility(View.VISIBLE);
 			btnRestoreWallet.setText("Restore group wallet");
 			btnRestoreWallet.setIconResource(R.drawable.ic_shield);
-			btnRestoreWallet.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#1DE9B6")));
+			btnRestoreWallet.setBackgroundTintList(ColorStateList.valueOf(UiColors.success()));
 			btnRestoreWallet.setTextColor(Color.WHITE);
 		}
 	}
@@ -1198,4 +1200,4 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

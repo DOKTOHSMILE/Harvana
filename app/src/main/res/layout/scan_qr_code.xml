@@ -28,7 +28,7 @@
 			android:layout_height="match_parent"
 			app:autoFocusButtonColor="#FFFFFF"
 			app:flashButtonColor="#FFFFFF"
-			app:frameColor="#00D9A5"
+			app:frameColor="@color/colorAccent"
 			app:maskColor="#77000000" />
 		<ImageButton
 			android:id="@+id/btn_pick_from_gallery"

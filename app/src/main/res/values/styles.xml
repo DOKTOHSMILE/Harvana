@@ -2,6 +2,19 @@
 <resources>
 
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorOnSecondary">@color/colorTextOnAccent</item>
+        <item name="colorPrimaryVariant">@color/colorAccentDark</item>
+        <item name="colorSecondaryVariant">@color/colorAccentDark</item>
+        <item name="colorError">@color/colorError</item>
+        <item name="colorOnError">@color/colorTextPrimaryWhite</item>
+        <item name="colorControlActivated">@color/colorAccent</item>
+        <item name="colorControlNormal">@color/colorControlNormal</item>
+        <item name="colorControlHighlight">@color/colorAccentRipple</item>
+        <item name="android:textColorHighlight">@color/colorAccentStroke</item>
+        <item name="android:textColorLink">@color/colorAccentStrong</item>
+        <item name="android:editTextColor">@color/colorTextPrimary</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
         <item name="colorPrimary">@color/colorAccent</item>
         <item name="colorPrimaryDark">@color/colorAccentStrong</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -91,6 +104,10 @@
         <item name="android:textColorHint">@color/colorP2pTextMuted</item>
         <item name="colorPrimary">@color/colorP2pAccent</item>
         <item name="colorAccent">@color/colorP2pAccent</item>
+        <item name="colorSecondary">@color/colorP2pAccent</item>
+        <item name="colorOnSecondary">@color/colorP2pOnAccent</item>
+        <item name="colorControlActivated">@color/colorP2pAccent</item>
+        <item name="android:navigationBarColor">@color/colorP2pBg</item>
         <item name="colorOnPrimary">@color/colorP2pOnAccent</item>
         <item name="alertDialogTheme">@style/AjooP2pAlertDialog</item>
         <item name="materialAlertDialogTheme">@style/AjooP2pAlertDialog</item>

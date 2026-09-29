@@ -418,7 +418,7 @@ public class MainActivity extends AppCompatActivity {
 		getTheme().resolveAttribute(R.attr.onAppBarColor, tvOn, true);
 		final int appBarColor = tvBar.data;
 		final int onAppBarColor = tvOn.data;
-		titleView.setText("Harvanna Wallet");
+		titleView.setText("Harvanna");
 		titleView.setTextColor(onAppBarColor);
 		titleView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 18);
 		titleView.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);

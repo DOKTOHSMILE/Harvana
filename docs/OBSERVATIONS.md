@@ -125,3 +125,11 @@ All sources, tests, manifest authorities, Gradle `applicationId`/`namespace` and
 the Gradle plugin accepts the build; the `mobilesdk_app_id` and OAuth entries still belong to the OLD Firebase app. Register a new Android app
 `com.harvanna.app` in the Firebase console (with SHA-1/SHA-256 from README/this file's debug key), download the new `google-services.json`, and
 replace this one. Until then email/password may work but Google sign-in will not.
+
+## App name and Firebase file (29 Sep 2026)
+- App name is now just "Harvanna" (launcher label, main header, about screen).
+- `app/google-services.json` replaced with the owner's file that has a client for `com.harvanna.app`
+  (`1:92873857858:android:7edea0b3ad5cf38d65c6db`). It has NO Android OAuth client (`client_type: 1`) for `com.harvanna.app` yet:
+  the debug SHA-1 (bff2f88297ff53dd1f21bca9e5a36e49011fc55a) was registered on the OLD `com.harvanna.wallet` app entry.
+  Register SHA-1 + SHA-256 on the `com.harvanna.app` entry, re-download, replace this file. Google sign-in stays broken until then.
+  The old `com.harvanna.wallet` entry can be deleted in the console afterwards.

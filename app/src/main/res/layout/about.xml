@@ -43,7 +43,7 @@
 					android:layout_height="72dp"
 					android:scaleType="center"
 					android:src="@mipmap/ic_launcher"
-					android:contentDescription="Harvanna Wallet logo" />
+					android:contentDescription="Harvanna logo" />
 				<TextView
 					android:id="@+id/textview46"
 					android:layout_width="wrap_content"

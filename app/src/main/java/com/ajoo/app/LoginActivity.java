@@ -219,9 +219,6 @@ public class LoginActivity extends AppCompatActivity {
 		} else if (directory != null && directory.equals("eCreate")) {
 			setTitle("Create account");
 			showFragment(EmailAuthFragment.newInstance(true));
-		} else if (directory != null && directory.equals("pLogin")) {
-			setTitle("Sign in");
-			showFragment(new PhoneAuthFragment());
 		}
 		
 	}

@@ -106,7 +106,6 @@ public class CompleteProfileFragmentActivity extends Fragment {
 	private EditText et_email;
 	private MaterialCardView cardview50;
 	private MaterialCardView cardview51;
-	private boolean phoneLocked = false;
 	private EditText et_phone_code;
 	private EditText et_phone_number;
 	private Spinner spinner_country;
@@ -338,7 +337,7 @@ public class CompleteProfileFragmentActivity extends Fragment {
 				helper.setSpinnerData(spinner_kin_state, helper.getStateNames(country));
 				helper.setSpinnerData(spinner_kin_city, new ArrayList<>());
 				String code = _phoneCodeFor(country);
-				if (!phoneLocked && !code.isEmpty() && et_phone_code.getText().toString().trim().isEmpty()) {
+				if (!code.isEmpty() && et_phone_code.getText().toString().trim().isEmpty()) {
 					et_phone_code.setText(code);
 				}
 			}
@@ -369,22 +368,13 @@ public class CompleteProfileFragmentActivity extends Fragment {
 			et_email.setText(authsp.getString("gmail", ""));
 		}
 		
-		// Sync with whichever sign-in method created this session: values Firebase
-		// already verified are pre-filled and locked so they match the auth account.
+		// Sync with the sign-in account (email / Google): the auth email is pre-filled and locked.
 		com.google.firebase.auth.FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
 		if (fbUser != null) {
 			String authEmail = fbUser.getEmail();
 			if (authEmail != null && !authEmail.isEmpty()) {
 				et_email.setText(authEmail);
 				et_email.setEnabled(false);
-			}
-			String authPhone = fbUser.getPhoneNumber();
-			if (authPhone != null && !authPhone.isEmpty()) {
-				phoneLocked = true;
-				et_phone_code.setText("");
-				if (et_phone_code.getParent() instanceof View) ((View) et_phone_code.getParent()).setVisibility(View.GONE);
-				et_phone_number.setText(authPhone);
-				et_phone_number.setEnabled(false);
 			}
 			String display = fbUser.getDisplayName();
 			if (display != null && !display.trim().isEmpty() && et_first_name.getText().toString().isEmpty()) {

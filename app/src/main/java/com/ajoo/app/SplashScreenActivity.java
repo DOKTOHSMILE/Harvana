@@ -75,7 +75,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import androidx.core.content.ContextCompat;
+
 
 public class SplashScreenActivity extends AppCompatActivity {
 	
@@ -188,11 +189,6 @@ public class SplashScreenActivity extends AppCompatActivity {
 			startActivityForResult(signInIntent, REQ_CD_GAUTH);
 		});
 		
-		button3.setOnClickListener(_v -> {
-			i.setClass(getApplicationContext(), LoginActivity.class);
-			i.putExtra("page", "pLogin");
-			startActivity(i);
-		});
 		
 		button1.setOnClickListener(_v -> {
 			i.putExtra("page", "eLogin");
@@ -600,4 +596,4 @@ public class SplashScreenActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

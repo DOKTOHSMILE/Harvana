@@ -37,7 +37,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="match_parent"
 					android:padding="10dp"
-					android:src="@drawable/main_app_logo"
+					android:src="@drawable/ic_coin_harv"
 					android:scaleType="centerInside"
 					android:focusable="false" />
 			</androidx.cardview.widget.CardView>

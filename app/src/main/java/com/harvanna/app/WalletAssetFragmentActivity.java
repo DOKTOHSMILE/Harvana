@@ -708,10 +708,10 @@ public class WalletAssetFragmentActivity extends Fragment {
 				if (!logoUrl.isEmpty()) {
 					Glide.with(_view.getContext().getApplicationContext())
 					.load(android.net.Uri.parse(logoUrl))
-					.error(R.drawable.main_app_logo)
+					.error(R.drawable.ic_coin_harv)
 					.into(iv_asset_logo);
 				} else {
-					iv_asset_logo.setImageResource(R.drawable.main_app_logo);
+					iv_asset_logo.setImageResource(R.drawable.ic_coin_harv);
 				}
 			}
 			

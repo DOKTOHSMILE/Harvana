@@ -24,3 +24,15 @@ jobs:
       # Does NOT prove: CodeAssist compatibility, or any runtime behavior.
       - name: Assemble debug and release (release runs R8 shrinking)
         run: gradle --no-daemon --stacktrace testDebugUnitTest assembleDebug assembleRelease
+      # Install THIS file to test: its debug signing fingerprint is the one to register in Firebase
+      # (Project settings -> Your apps -> SHA certificate fingerprints) for Google sign-in.
+      - name: Upload APKs
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harvanna-wallet-apks
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/release/*.apk
+          if-no-files-found: warn
+          retention-days: 14

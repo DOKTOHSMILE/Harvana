@@ -55,7 +55,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="4dp"
-							android:text="0 AJC"
+							android:text="0 HARV"
 							android:textSize="14sp"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary" />
@@ -91,7 +91,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="4dp"
-							android:text="0 AJC"
+							android:text="0 HARV"
 							android:textSize="14sp"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary" />
@@ -127,7 +127,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="4dp"
-							android:text="0 AJC"
+							android:text="0 HARV"
 							android:textSize="14sp"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary" />
@@ -172,7 +172,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="10dp"
-						android:text="Group wallet available: — AJC"
+						android:text="Group wallet available: — HARV"
 						android:textSize="13sp"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary" />

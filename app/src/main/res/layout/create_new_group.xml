@@ -572,7 +572,7 @@
 									android:id="@+id/textview80"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="Contribution (AJC)"
+									android:text="Contribution (HARV)"
 									android:textSize="13sp"
 									android:textStyle="bold" />
 								<EditText
@@ -1218,7 +1218,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="18dp"
-							android:text="Contribution per Member (AJC)"
+							android:text="Contribution per Member (HARV)"
 							android:textSize="13sp"
 							android:textStyle="bold" />
 						<EditText
@@ -1258,7 +1258,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="18dp"
-							android:text="Target Goal Amount (AJC)"
+							android:text="Target Goal Amount (HARV)"
 							android:textSize="13sp"
 							android:textStyle="bold" />
 						<TextView
@@ -1357,7 +1357,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="18dp"
-							android:text="Contribution per Member (AJC)"
+							android:text="Contribution per Member (HARV)"
 							android:textSize="13sp"
 							android:textStyle="bold" />
 						<EditText
@@ -1875,7 +1875,7 @@
 							android:id="@+id/textview131"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:text="Creating this circle costs 5 AJC, deducted from your wallet right away. Your group starts the moment payment confirms."
+							android:text="Creating this circle costs 5 HARV, deducted from your wallet right away. Your group starts the moment payment confirms."
 							android:textSize="12sp"
 							android:layout_weight="1"
 							android:layout_marginStart="12dp"
@@ -1923,7 +1923,7 @@
 							android:layout_height="45dp"
 							android:background="@color/colorAccent"
 							android:gravity="center_horizontal|center_vertical"
-							android:text="Create Group — Pay 5 AJC"
+							android:text="Create Group — Pay 5 HARV"
 							android:textSize="14sp"
 							android:textStyle="bold"
 							app:cornerRadius="16dp" />

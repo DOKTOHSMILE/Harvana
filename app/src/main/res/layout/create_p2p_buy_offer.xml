@@ -44,7 +44,7 @@
 					android:text="Step 1 of 3 · Amount &amp; Price"
 					android:textSize="14sp"
 					android:textStyle="bold"
-					android:textColor="#001A3F" />
+					android:textColor="@color/colorTextPrimary" />
 				<com.google.android.material.card.MaterialCardView
 					android:id="@+id/card_buy_info"
 					android:layout_width="match_parent"
@@ -69,12 +69,12 @@
 							android:src="@drawable/ic_info"
 							android:scaleType="centerInside"
 							android:layout_marginEnd="12dp"
-							app:tint="#001A3F" />
+							app:tint="@color/colorTextPrimary" />
 						<TextView
 							android:id="@+id/tv_buy_info"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:text="Set the amount and price you are willing to pay. Sellers will see your offer and can sell their AJC to you."
+							android:text="Set the amount and price you are willing to pay. Sellers will see your offer and can sell their HARV to you."
 							android:textSize="14sp"
 							android:layout_weight="1"
 							android:lineSpacingExtra="4dp" />
@@ -88,7 +88,7 @@
 					android:text="① AMOUNT TO BUY"
 					android:textSize="12sp"
 					android:textStyle="bold"
-					android:textColor="#001A3F"
+					android:textColor="@color/colorTextPrimary"
 					android:letterSpacing="0.05" />
 				<com.google.android.material.card.MaterialCardView
 					android:id="@+id/card_buy_amount"
@@ -121,7 +121,7 @@
 							android:id="@+id/tv_buy_amount_currency"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="AJC"
+							android:text="HARV"
 							android:textSize="16sp"
 							android:textStyle="bold"
 							android:paddingEnd="16dp" />
@@ -132,7 +132,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:layout_marginTop="8dp"
-					android:text="Enter the total amount of AJC you want to acquire."
+					android:text="Enter the total amount of HARV you want to acquire."
 					android:textSize="12sp"
 					android:alpha="0.8" />
 				<TextView
@@ -141,10 +141,10 @@
 					android:layout_height="wrap_content"
 					android:layout_marginTop="32dp"
 					android:layout_marginBottom="12dp"
-					android:text="② PRICE PER 1 AJC"
+					android:text="② PRICE PER 1 HARV"
 					android:textSize="12sp"
 					android:textStyle="bold"
-					android:textColor="#001A3F"
+					android:textColor="@color/colorTextPrimary"
 					android:letterSpacing="0.05" />
 				<com.google.android.material.button.MaterialButtonToggleGroup
 					android:id="@+id/toggle_buy_pricing_mode"
@@ -219,7 +219,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="8dp"
-						android:text="This is the NGN amount you are willing to pay for each 1 AJC."
+						android:text="This is the NGN amount you are willing to pay for each 1 HARV."
 						android:textSize="12sp"
 						android:alpha="0.8" />
 				</LinearLayout>
@@ -284,7 +284,7 @@
 					android:text="③ PAYMENT METHODS"
 					android:textSize="12sp"
 					android:textStyle="bold"
-					android:textColor="#001A3F"
+					android:textColor="@color/colorTextPrimary"
 					android:letterSpacing="0.05" />
 				<com.google.android.material.card.MaterialCardView
 					android:id="@+id/card_buy_payment_methods"
@@ -311,7 +311,7 @@
 					android:text="④ ADDITIONAL SETTINGS"
 					android:textSize="12sp"
 					android:textStyle="bold"
-					android:textColor="#001A3F"
+					android:textColor="@color/colorTextPrimary"
 					android:letterSpacing="0.05" />
 				<com.google.android.material.card.MaterialCardView
 					android:id="@+id/card_buy_settings"
@@ -467,7 +467,7 @@
 					android:text="Preview Buy Offer"
 					android:textSize="16sp"
 					android:textStyle="bold"
-					app:backgroundTint="#001A3F"
+					app:backgroundTint="@color/colorTextPrimary"
 					app:cornerRadius="12dp"
 					app:elevation="0dp" />
 			</LinearLayout>
@@ -485,7 +485,7 @@
 					android:text="STEP 2 OF 3 · REVIEW"
 					android:textSize="12sp"
 					android:textStyle="bold"
-					android:textColor="#001A3F"
+					android:textColor="@color/colorTextPrimary"
 					android:letterSpacing="0.05" />
 				<com.google.android.material.card.MaterialCardView
 					android:id="@+id/card_buy_review"
@@ -532,7 +532,7 @@
 								android:id="@+id/textview12"
 								android:layout_width="0dp"
 								android:layout_height="wrap_content"
-								android:text="Price per AJC"
+								android:text="Price per HARV"
 								android:textSize="14sp"
 								android:layout_weight="1" />
 							<TextView
@@ -568,7 +568,7 @@
 								android:layout_height="wrap_content"
 								android:textSize="16sp"
 								android:textStyle="bold"
-								android:textColor="#001A3F" />
+								android:textColor="@color/colorTextPrimary" />
 						</LinearLayout>
 						<LinearLayout
 							android:id="@+id/linear15"
@@ -623,7 +623,7 @@
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="12dp"
-							android:text="• Sellers will see your offer and can accept it to sell you AJC.\n• Payment and escrow begin only after a specific trade is started.\n• You can edit or cancel your offer anytime."
+							android:text="• Sellers will see your offer and can accept it to sell you HARV.\n• Payment and escrow begin only after a specific trade is started.\n• You can edit or cancel your offer anytime."
 							android:textSize="13sp"
 							android:lineSpacingExtra="4dp" />
 					</LinearLayout>
@@ -643,7 +643,7 @@
 					android:text="Publish Buy Offer"
 					android:textSize="16sp"
 					android:textStyle="bold"
-					app:backgroundTint="#001A3F"
+					app:backgroundTint="@color/colorTextPrimary"
 					app:cornerRadius="12dp"
 					app:elevation="0dp" />
 				<com.google.android.material.button.MaterialButton
@@ -674,7 +674,7 @@
 					android:layout_height="80dp"
 					android:src="@drawable/ic_check_circle"
 					android:scaleType="centerInside"
-					app:tint="#001A3F" />
+					app:tint="@color/colorTextPrimary" />
 				<TextView
 					android:id="@+id/textview17"
 					android:layout_width="wrap_content"
@@ -683,7 +683,7 @@
 					android:text="Buy Offer Published!"
 					android:textSize="22sp"
 					android:textStyle="bold"
-					android:textColor="#001A3F" />
+					android:textColor="@color/colorTextPrimary" />
 				<TextView
 					android:id="@+id/textview18"
 					android:layout_width="match_parent"
@@ -701,7 +701,7 @@
 					android:text="View My Offers"
 					android:textSize="16sp"
 					android:textStyle="bold"
-					app:backgroundTint="#001A3F"
+					app:backgroundTint="@color/colorTextPrimary"
 					app:cornerRadius="12dp"
 					app:elevation="0dp" />
 				<com.google.android.material.button.MaterialButton

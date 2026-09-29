@@ -24,7 +24,7 @@
 				android:innerRadiusRatio="2.5"
 				android:thicknessRatio="20"
 				android:useLevel="true">
-				<solid android:color="#00C853" />
+				<solid android:color="@color/colorAccent" />
 			</shape>
 		</rotate>
 	</item>

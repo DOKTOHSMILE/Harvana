@@ -355,6 +355,21 @@ public class SplashScreenActivity extends AppCompatActivity {
 			requestAllPermissions();
 		}
 		
+		// Safety net: never leave the user on an endless spinner.
+		new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+			if (isFinishing() || isDestroyed()) return;
+			if (progressbar1 != null && progressbar1.getVisibility() == View.VISIBLE
+					&& linear6 != null && linear6.getVisibility() != View.VISIBLE) {
+				if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+					linear6.setVisibility(View.VISIBLE);
+					progressbar1.setVisibility(View.GONE);
+					if (textview6 != null) textview6.setText("");
+				} else {
+					_showOfflineRetryState();
+				}
+			}
+		}, 12000);
+		
 		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
 			final Window window = SplashScreenActivity.this.getWindow();
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -448,7 +463,22 @@ public class SplashScreenActivity extends AppCompatActivity {
 				
 			}
 			else {
-				
+				// RESULT_CANCELED covers both "user backed out" and real failures. A failure
+				// (e.g. DEVELOPER_ERROR / code 10 when this build's SHA-1 isn't registered in
+				// Firebase) returns no account and makes no network call, so it looked like
+				// the button did nothing. Surface the actual status code.
+				try {
+					GoogleSignIn.getSignedInAccountFromIntent(_data).getResult(ApiException.class);
+				} catch (ApiException ae) {
+					int code = ae.getStatusCode();
+					if (code == 10) {
+						Toast.makeText(this, "Google sign-in isn't set up for this build yet (SHA-1 not registered in Firebase). Use email for now.", Toast.LENGTH_LONG).show();
+					} else if (code == 7) {
+						Toast.makeText(this, "No internet connection.", Toast.LENGTH_LONG).show();
+					} else if (code != 12501) { // 12501 = user cancelled
+						Toast.makeText(this, "Google sign-in failed (code " + code + ").", Toast.LENGTH_LONG).show();
+					}
+				} catch (Exception ignored) { }
 			}
 			break;
 			default:

@@ -410,7 +410,7 @@
 									android:id="@+id/textview65"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="Contribution (AJC)"
+									android:text="Contribution (HARV)"
 									android:textStyle="bold"
 									android:textSize="14.5sp" />
 								<TextView
@@ -671,7 +671,7 @@
 									android:id="@+id/textview14"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="Target goal (AJC)"
+									android:text="Target goal (HARV)"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
 									android:textSize="14.5sp" />

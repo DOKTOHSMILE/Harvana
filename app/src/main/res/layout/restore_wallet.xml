@@ -50,7 +50,7 @@
 						android:id="@+id/textview3"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:text="Restore from Ajoo Access Card"
+						android:text="Restore from Harvanna Access Card"
 						android:textSize="17sp"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary" />
@@ -67,7 +67,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="52dp"
 						android:layout_marginTop="14dp"
-						android:text="Scan Ajoo Card"
+						android:text="Scan Harvanna Card"
 						android:textSize="12sp"
 						android:textColor="@color/colorTextOnAccent"
 						android:backgroundTint="@color/colorAccent" />

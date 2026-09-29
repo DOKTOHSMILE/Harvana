@@ -146,7 +146,7 @@
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="2dp"
-						android:text="28,500 AJC"
+						android:text="28,500 HARV"
 						android:textSize="12sp"
 						android:textStyle="bold"
 						android:textColor="@color/colorP2pTextPrimary"
@@ -226,7 +226,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_marginBottom="3dp"
-							android:text="per AJC"
+							android:text="per HARV"
 							android:textSize="10sp"
 							android:textColor="@color/colorP2pTextMuted"
 							android:focusable="false"
@@ -295,7 +295,7 @@
 							android:layout_height="wrap_content"
 							android:text="Bank"
 							android:textSize="9sp"
-							android:textColor="#9AA7BA"
+							android:textColor="@color/colorTextTertiary"
 							android:focusable="false" />
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>
@@ -329,7 +329,7 @@
 							android:layout_height="wrap_content"
 							android:text="USDT"
 							android:textSize="9sp"
-							android:textColor="#9AA7BA"
+							android:textColor="@color/colorTextTertiary"
 							android:focusable="false" />
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>

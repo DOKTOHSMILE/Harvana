@@ -146,7 +146,7 @@
 											android:layout_width="match_parent"
 											android:layout_height="wrap_content"
 											android:padding="3dp"
-											android:text="0 AJC"
+											android:text="0 HARV"
 											android:textSize="18sp"
 											android:textStyle="bold"
 											android:singleLine="true" />
@@ -506,7 +506,7 @@
 														android:id="@+id/textview208"
 														android:layout_width="wrap_content"
 														android:layout_height="wrap_content"
-														android:text="Ajoocoin Balance"
+														android:text="HARV Balance"
 														android:textSize="8sp"
 														android:textStyle="bold" />
 													<LinearLayout
@@ -520,7 +520,7 @@
 															android:layout_width="wrap_content"
 															android:layout_height="wrap_content"
 															android:gravity="center_vertical"
-															android:text="0.00 AJC"
+															android:text="0.00 HARV"
 															android:textSize="25sp"
 															android:textStyle="bold"
 															android:textColor="@color/colorTextPrimaryWhite"
@@ -632,7 +632,7 @@
 												android:id="@+id/textview219"
 												android:layout_width="wrap_content"
 												android:layout_height="wrap_content"
-												android:text="Buy AJC (P2P)"
+												android:text="Buy HARV (P2P)"
 												android:textSize="12sp"
 												android:textStyle="bold"
 												android:textColor="@color/colorButtonText" />

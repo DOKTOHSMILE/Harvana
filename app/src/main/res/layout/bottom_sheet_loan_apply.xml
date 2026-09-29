@@ -169,7 +169,7 @@
 				android:id="@+id/textview5"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="AMOUNT (AJC)"
+				android:text="AMOUNT (HARV)"
 				android:textStyle="bold"
 				android:textSize="10.5sp"
 				android:letterSpacing="0.06"

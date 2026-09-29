@@ -45,7 +45,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="4dp"
 				android:layout_marginBottom="24dp"
-				android:text="Your recovery phrase is the only way to restore your Ajoo wallet if you lose this device."
+				android:text="Your recovery phrase is the only way to restore your Harvanna wallet if you lose this device."
 				android:textColor="@color/colorTextSecondary"
 				android:textSize="13.5sp"
 				android:lineSpacingExtra="3dp" />

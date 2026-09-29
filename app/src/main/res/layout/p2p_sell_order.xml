@@ -67,7 +67,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="4dp"
-							android:text="0.00 AJC"
+							android:text="0.00 HARV"
 							android:textSize="20sp"
 							android:textStyle="bold" />
 					</LinearLayout>
@@ -129,7 +129,7 @@
 							android:id="@+id/textview113"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="AJC"
+							android:text="HARV"
 							android:textSize="14sp"
 							android:textStyle="bold" />
 					</LinearLayout>
@@ -242,7 +242,7 @@
 							android:id="@+id/textview116"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="/ AJC"
+							android:text="/ HARV"
 							android:textSize="13sp" />
 					</LinearLayout>
 					<TextView
@@ -357,14 +357,14 @@
 							android:id="@+id/textview119"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:text="AJC amount"
+							android:text="HARV amount"
 							android:textSize="13sp"
 							android:layout_weight="1" />
 						<TextView
 							android:id="@+id/tv_sell_preview_ajc"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="0.00 AJC"
+							android:text="0.00 HARV"
 							android:textSize="13sp"
 							android:textStyle="bold" />
 					</LinearLayout>
@@ -385,7 +385,7 @@
 							android:id="@+id/tv_sell_preview_price"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="₦0.00 / AJC"
+							android:text="₦0.00 / HARV"
 							android:textSize="13sp" />
 					</LinearLayout>
 					<LinearLayout
@@ -485,7 +485,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="12dp"
-						android:text="Minimum order: 0 AJC\nMaximum order: 0 AJC"
+						android:text="Minimum order: 0 HARV\nMaximum order: 0 HARV"
 						android:textSize="12sp"
 						android:lineSpacingExtra="4dp" />
 					<TextView
@@ -540,7 +540,7 @@
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="4dp"
-							android:text="When a trade is created, the required AJC is secured through the escrow process before the transaction proceeds."
+							android:text="When a trade is created, the required HARV is secured through the escrow process before the transaction proceeds."
 							android:textSize="11sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>

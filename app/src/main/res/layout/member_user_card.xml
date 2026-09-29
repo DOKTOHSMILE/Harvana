@@ -113,7 +113,7 @@
 					android:id="@+id/tv_member_balance"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="0 AJC"
+					android:text="0 HARV"
 					android:textSize="13sp"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextPrimary"

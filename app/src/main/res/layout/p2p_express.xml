@@ -172,7 +172,7 @@
 					android:layout_height="match_parent"
 					android:background="@color/colorP2pSurface"
 					android:gravity="center_horizontal|center_vertical"
-					android:text="Buy AJC"
+					android:text="Buy HARV"
 					android:textSize="12sp"
 					android:textStyle="bold"
 					android:layout_weight="1" />
@@ -181,7 +181,7 @@
 					android:layout_width="0dp"
 					android:layout_height="match_parent"
 					android:gravity="center_horizontal|center_vertical"
-					android:text="Sell AJC"
+					android:text="Sell HARV"
 					android:textSize="12sp"
 					android:layout_weight="1" />
 			</LinearLayout>
@@ -205,7 +205,7 @@
 						android:id="@+id/tv_express_action_title"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="Buy AJC instantly"
+						android:text="Buy HARV instantly"
 						android:textSize="17sp"
 						android:textStyle="bold" />
 					<TextView
@@ -221,7 +221,7 @@
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="19dp"
-						android:text="AJC amount"
+						android:text="HARV amount"
 						android:textSize="10sp" />
 					<LinearLayout
 						android:id="@+id/layout_express_amount"
@@ -237,7 +237,7 @@
 							android:id="@+id/textview232"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="AJC"
+							android:text="HARV"
 							android:textSize="12sp"
 							android:textStyle="bold" />
 						<EditText
@@ -270,7 +270,7 @@
 								android:layout_height="32dp"
 								android:background="@color/colorP2pSurfaceAlt"
 								android:gravity="center_horizontal|center_vertical"
-								android:text="10 AJC"
+								android:text="10 HARV"
 								android:textSize="9sp"
 								android:layout_weight="1"
 								android:paddingStart="13dp"
@@ -281,7 +281,7 @@
 								android:layout_height="32dp"
 								android:background="@color/colorP2pSurfaceAlt"
 								android:gravity="center_horizontal|center_vertical"
-								android:text="25 AJC"
+								android:text="25 HARV"
 								android:textSize="9sp"
 								android:layout_weight="1"
 								android:layout_marginStart="6dp"
@@ -293,7 +293,7 @@
 								android:layout_height="32dp"
 								android:background="@color/colorP2pSurfaceAlt"
 								android:gravity="center_horizontal|center_vertical"
-								android:text="50 AJC"
+								android:text="50 HARV"
 								android:textSize="9sp"
 								android:layout_weight="1"
 								android:layout_marginStart="6dp"
@@ -305,7 +305,7 @@
 								android:layout_height="32dp"
 								android:background="@color/colorP2pSurfaceAlt"
 								android:gravity="center_horizontal|center_vertical"
-								android:text="100 AJC"
+								android:text="100 HARV"
 								android:textSize="9sp"
 								android:layout_weight="1"
 								android:layout_marginStart="6dp"
@@ -378,7 +378,7 @@
 									android:id="@+id/tv_express_rate"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="₦1,250 / AJC"
+									android:text="₦1,250 / HARV"
 									android:textSize="11sp"
 									android:textStyle="bold" />
 							</LinearLayout>
@@ -611,7 +611,7 @@
 								android:id="@+id/tv_express_available_ajc"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:text="18,420 AJC"
+								android:text="18,420 HARV"
 								android:textSize="14sp"
 								android:textStyle="bold" />
 							<TextView

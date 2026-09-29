@@ -230,7 +230,7 @@
 							android:id="@+id/textview29"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:text="Price per AJC"
+							android:text="Price per HARV"
 							android:textSize="12sp"
 							android:layout_weight="1" />
 						<TextView
@@ -259,7 +259,7 @@
 							android:id="@+id/offer_available"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="500 AJC"
+							android:text="500 HARV"
 							android:textSize="13sp" />
 					</LinearLayout>
 					<LinearLayout
@@ -280,7 +280,7 @@
 							android:id="@+id/offer_limits"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="10 – 500 AJC"
+							android:text="10 – 500 HARV"
 							android:textSize="13sp" />
 					</LinearLayout>
 					<LinearLayout
@@ -310,7 +310,7 @@
 				android:id="@+id/amount_section_title"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="How much AJC do you want\\\?"
+				android:text="How much HARV do you want\\\?"
 				android:textSize="16sp"
 				android:textStyle="bold" />
 			<TextView
@@ -319,7 +319,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="4dp"
 				android:layout_marginBottom="10dp"
-				android:text="Enter the amount of AJC you want to purchase."
+				android:text="Enter the amount of HARV you want to purchase."
 				android:textSize="12sp" />
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/amount_input_card"
@@ -353,7 +353,7 @@
 						android:id="@+id/amount_currency"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="AJC"
+						android:text="HARV"
 						android:textSize="16sp"
 						android:textStyle="bold" />
 				</LinearLayout>
@@ -373,7 +373,7 @@
 						android:id="@+id/quick_25"
 						android:layout_width="wrap_content"
 						android:layout_height="38dp"
-						android:text="25 AJC"
+						android:text="25 HARV"
 						android:textSize="11sp"
 						android:layout_marginEnd="8dp"
 						android:textAllCaps="false"
@@ -385,7 +385,7 @@
 						android:id="@+id/quick_50"
 						android:layout_width="wrap_content"
 						android:layout_height="38dp"
-						android:text="50 AJC"
+						android:text="50 HARV"
 						android:textSize="11sp"
 						android:layout_marginEnd="8dp"
 						android:textAllCaps="false"
@@ -397,7 +397,7 @@
 						android:id="@+id/quick_100"
 						android:layout_width="wrap_content"
 						android:layout_height="38dp"
-						android:text="100 AJC"
+						android:text="100 HARV"
 						android:textSize="11sp"
 						android:layout_marginEnd="8dp"
 						android:textAllCaps="false"
@@ -453,14 +453,14 @@
 							android:id="@+id/textview33"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:text="AJC amount"
+							android:text="HARV amount"
 							android:textSize="12sp"
 							android:layout_weight="1" />
 						<TextView
 							android:id="@+id/calculation_ajc"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="0.00 AJC"
+							android:text="0.00 HARV"
 							android:textSize="13sp"
 							android:textStyle="bold" />
 					</LinearLayout>
@@ -482,7 +482,7 @@
 							android:id="@+id/calculation_price"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="₦0.00 / AJC"
+							android:text="₦0.00 / HARV"
 							android:textSize="13sp" />
 					</LinearLayout>
 					<View
@@ -532,7 +532,7 @@
 							android:id="@+id/calculation_maker_fee"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="0.00 AJC"
+							android:text="0.00 HARV"
 							android:textSize="12sp" />
 					</LinearLayout>
 					<LinearLayout
@@ -554,7 +554,7 @@
 							android:id="@+id/calculation_network_fee"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="0.00 AJC"
+							android:text="0.00 HARV"
 							android:textSize="12sp" />
 					</LinearLayout>
 					<LinearLayout
@@ -576,7 +576,7 @@
 							android:id="@+id/calculation_receive"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="0.00 AJC"
+							android:text="0.00 HARV"
 							android:textSize="16sp"
 							android:textStyle="bold" />
 					</LinearLayout>
@@ -593,7 +593,7 @@
 				android:id="@+id/create_order_button"
 				android:layout_width="match_parent"
 				android:layout_height="54dp"
-				android:text="Buy AJC"
+				android:text="Buy HARV"
 				android:textSize="15sp"
 				android:textStyle="bold"
 				android:textAllCaps="false"
@@ -641,7 +641,7 @@
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="4dp"
-							android:text="The seller's AJC is secured through the escrow process. Release occurs only after the required conditions are satisfied and the blockchain transaction is verified."
+							android:text="The seller's HARV is secured through the escrow process. Release occurs only after the required conditions are satisfied and the blockchain transaction is verified."
 							android:textSize="11sp" />
 					</LinearLayout>
 				</LinearLayout>

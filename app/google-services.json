@@ -15,39 +15,10 @@
       },
       "oauth_client": [
         {
-          "client_id": "92873857858-jgtl0u04g8m5fgdqkoc041n50a7tit96.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBD5UbBOBYlsNMYwL84h1ZP7nlW39YPMXA"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "92873857858-jgtl0u04g8m5fgdqkoc041n50a7tit96.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:92873857858:android:1bb47c27b226de3f65c6db",
-        "android_client_info": {
-          "package_name": "com.harvanna.wallet"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "92873857858-hhr8j5v9lkr6ocm43en159vps7f12b15.apps.googleusercontent.com",
+          "client_id": "92873857858-bmrpt2v6uue4g4c6arlpd73hpho6eap4.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.harvanna.wallet",
+            "package_name": "com.harvanna.app",
             "certificate_hash": "bff2f88297ff53dd1f21bca9e5a36e49011fc55a"
           }
         },

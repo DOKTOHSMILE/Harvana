@@ -133,3 +133,9 @@ replace this one. Until then email/password may work but Google sign-in will not
   the debug SHA-1 (bff2f88297ff53dd1f21bca9e5a36e49011fc55a) was registered on the OLD `com.harvanna.wallet` app entry.
   Register SHA-1 + SHA-256 on the `com.harvanna.app` entry, re-download, replace this file. Google sign-in stays broken until then.
   The old `com.harvanna.wallet` entry can be deleted in the console afterwards.
+
+## Firebase file finalised (29 Sep 2026)
+`app/google-services.json` now contains only `com.harvanna.app` (`1:92873857858:android:7edea0b3ad5cf38d65c6db`) with the Android OAuth client
+for the debug SHA-1 (bff2f88297ff53dd1f21bca9e5a36e49011fc55a) and the web client used by `requestIdToken`. This is the config Google sign-in needs.
+Whether the SHA-256 is also registered is not visible in this file. Still to verify on a device: Google sign-in, and that Email/Password + Google
+providers are enabled in Authentication.

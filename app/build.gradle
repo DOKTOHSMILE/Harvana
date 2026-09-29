@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.harvanna.wallet'
+    namespace 'com.harvanna.app'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.harvanna.wallet"
+        applicationId "com.harvanna.app"
         minSdk 23
         targetSdk 34
         versionCode 1

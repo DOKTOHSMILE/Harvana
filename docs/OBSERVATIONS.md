@@ -39,7 +39,7 @@
 - Firebase console: enable Email/Password and Google providers, register SHA fingerprints; T0-5 still open.
 
 ## Firebase setup (T0-5)
-- Package renamed `com.ajoo.app` -> `com.harvanna.wallet` (applicationId, namespace, sources, manifest authorities). Register `com.harvanna.wallet` in Firebase.
+- Package renamed `com.ajoo.app` -> `com.harvanna.app` (applicationId, namespace, sources, manifest authorities). Register `com.harvanna.app` in Firebase.
 - `com.ajoo.node.miner` (separate miner app) is still referenced by WalletEarnFragmentActivity; update if the miner is renamed.
 - `com.google.gms.google-services` plugin (4.4.1) added to `app/build.gradle`. The build fails until
   `app/google-services.json` is added (download from Firebase console after registering the app + SHA fingerprints).
@@ -118,3 +118,10 @@ Differences from the decisions as stated (found while reading the node; NOT chan
 4. **Margin pricing** is resolved to a fixed signed price against the same reference; if no reference exists it asks for a fixed price.
 5. Whether `/listings/open` includes `unitPricePerHarvRaw` per listing was not verified against a running node; if it is
    redacted the reference shows "No market reference yet".
+
+## Package renamed again (29 Sep 2026, urgent): com.harvanna.wallet -> com.harvanna.app
+All sources, tests, manifest authorities, Gradle `applicationId`/`namespace` and docs updated (history: com.ajoo.app -> com.harvanna.wallet -> com.harvanna.app).
+**Firebase action required:** `app/google-services.json` was registered for `com.harvanna.wallet`. I only edited its `package_name` field so
+the Gradle plugin accepts the build; the `mobilesdk_app_id` and OAuth entries still belong to the OLD Firebase app. Register a new Android app
+`com.harvanna.app` in the Firebase console (with SHA-1/SHA-256 from README/this file's debug key), download the new `google-services.json`, and
+replace this one. Until then email/password may work but Google sign-in will not.

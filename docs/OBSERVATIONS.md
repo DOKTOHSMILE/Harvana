@@ -79,3 +79,21 @@ breaking reflection at runtime, Firestore offline persistence syncing after a re
   unless you install the CI-built APK itself - then its fingerprint could be read from that APK).
 - P2P listing creation: node now signs maxOrder/paymentWindow/unitPrice; app UI has none of these (owner decision).
 - On-chain group/staking/referral/identity-link actions: not implemented in the app (scope decision).
+
+## Update: splash / "cannot log in" diagnosis and rebrand (29 Sep 2026)
+- Root cause found statically (device not available): `splash_screen.xml` had the **Email Login and Create Account
+  cards `visibility="gone"` and their buttons `enabled="false"`**, so only the Google button was usable. Google
+  sign-in cannot succeed until a SHA-1 is registered; that failure returns RESULT_CANCELED with no message and no
+  network traffic - i.e. "nothing happens" and 0 B data usage, exactly as reported. Fixed: email buttons are
+  visible and enabled; Google failures now show a message (code 10 = SHA-1 not registered); a 12 s spinner safety net.
+  This is inferred from the code and screenshots, not reproduced on a device. An older installed build (pre-fix
+  node URL / no google-services.json) could also contribute; reinstall from the latest build.
+- Palette: Neon Orange #FF9030 + Charcoal #111827, light and dark (values/ and values-night/), drawable hardcoded
+  greens/navys moved to tokens. Text on orange is charcoal (white on #FF9030 is only ~2.2:1). Visual result not
+  reviewed on a device.
+- App renamed "Harvanna Wallet"; layout text rebranded (Ajoo -> Harvanna, AJC/Ajoocoin -> HARV). Java string
+  literals still say "AJC"/"Ajoo" in places (not changed; user-visible follow-up). The launcher icon is a generated
+  placeholder (orange square, charcoal H).
+- "Home activity" UX/UI redesign, and per-group-type screens: NOT done yet. See docs/GROUP_ENGINE_MAP.md.
+- R8: first release build ran out of memory (512 MB default heap) - raised via gradle.properties. CI evidence:
+  Java compiles for debug and release with the Firestore migration; R8 result pending at time of writing.

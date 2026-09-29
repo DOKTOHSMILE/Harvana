@@ -1,0 +1,144 @@
+package com.harvanna.app.utils;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+
+import com.harvanna.app.ChainConstants;
+import com.harvanna.app.sync.FirestoreSyncManager;
+import com.harvanna.app.wallet.WalletManager;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+* Polls TRANSACTIONS for incoming transfers (Sketchware-safe, no native Firestore).
+*/
+public final class IncomingTxWatcher {
+	
+	private static final String TAG = "IncomingTxWatcher";
+	private static final String PREF = "ajoo_incoming_tx";
+	private static final String KEY_LAST_TS = "last_seen_ts";
+	private static final long POLL_MS = 60_000L;
+	
+	private static final Handler handler = new Handler(Looper.getMainLooper());
+	private static final Set<String> notified = new HashSet<>();
+	private static Context appCtx;
+	private static String wallet;
+	private static boolean running;
+	
+	private static final Runnable pollRunnable = new Runnable() {
+		@Override
+		public void run() {
+			if (!running || appCtx == null) return;
+			pollOnce();
+			handler.postDelayed(this, POLL_MS);
+		}
+	};
+	
+	private IncomingTxWatcher() {}
+	
+	public static synchronized void start(Context context) {
+		if (context == null) return;
+		appCtx = context.getApplicationContext();
+		wallet = WalletManager.getActiveWalletAddress(appCtx);
+		if (wallet == null || wallet.trim().isEmpty()) {
+			Log.w(TAG, "No active wallet");
+			return;
+		}
+		wallet = wallet.trim();
+		if (running) return;
+		running = true;
+		handler.post(pollRunnable);
+		Log.i(TAG, "Polling incoming txs for " + wallet);
+	}
+	
+	public static synchronized void stop() {
+		running = false;
+		handler.removeCallbacks(pollRunnable);
+	}
+	
+	private static void pollOnce() {
+		final String me = wallet;
+		if (me == null) return;
+		
+		final SharedPreferences prefs = appCtx.getSharedPreferences(PREF, Context.MODE_PRIVATE);
+		final long lastSeen = prefs.getLong(KEY_LAST_TS, System.currentTimeMillis() - 60_000L);
+		
+		FirestoreSyncManager.getWalletTransactionHistory(me, new FirestoreSyncManager.CollectionCallback() {
+			@Override
+			public void onSuccess(List<Map<String, Object>> docs) {
+				if (docs == null) return;
+				long newest = lastSeen;
+				for (Map<String, Object> doc : docs) {
+					if (doc == null) continue;
+					
+					String to = str(doc.get("to"));
+					if (!me.equalsIgnoreCase(to)) continue;
+					
+					String from = str(doc.get("from"));
+					if (me.equalsIgnoreCase(from)) continue; // skip outgoing
+					
+					String txHash = str(doc.get("txHash"));
+					if (txHash.isEmpty()) txHash = str(doc.get("_documentId"));
+					if (txHash.isEmpty()) continue;
+					
+					long ts = toLong(doc.get("timestamp"));
+					if (ts > 0 && ts <= lastSeen) continue;
+					
+					if (!markNotifiedIfNew(txHash)) continue; // already shown via another path
+					if (ts > newest) newest = ts;
+					
+					double amount = toDouble(doc.get("value"));
+					String symbol = str(doc.get("tokenSymbol"));
+					if (symbol.isEmpty()) symbol = "AJC";
+					String amountStr = String.format(java.util.Locale.US, "%.4f", amount);
+					
+					TransactionNotification.showReceived(appCtx, amountStr, symbol, from, txHash);
+					Log.i(TAG, "Incoming: " + amountStr + " " + symbol + " from " + from);
+				}
+				if (newest > lastSeen) {
+					prefs.edit().putLong(KEY_LAST_TS, newest).apply();
+				}
+			}
+			
+			@Override
+			public void onError(String error) {
+				Log.w(TAG, "Poll failed: " + error);
+			}
+		});
+	}
+	
+	private static String str(Object o) {
+		return o == null ? "" : String.valueOf(o).trim();
+	}
+	
+	private static long toLong(Object o) {
+		if (o instanceof Number) return ((Number) o).longValue();
+		try { return Long.parseLong(String.valueOf(o)); } catch (Exception e) { return 0L; }
+	}
+	
+	private static double toDouble(Object o) {
+		if (o instanceof Number) return ((Number) o).doubleValue();
+		try { return Double.parseDouble(String.valueOf(o)); } catch (Exception e) { return 0.0; }
+	}
+	/**
+* Cross-system dedup — both this watcher's own poll and
+* WalletController's live socket-triggered notification call this
+* before actually showing anything, so the same incoming transaction
+* can never trigger both a system notification and an in-app banner.
+* Whichever path checks first wins; the other silently skips.
+*/	
+	public static synchronized boolean markNotifiedIfNew(String txHash) {
+		if (txHash == null || txHash.isEmpty()) return false;
+		if (notified.contains(txHash)) return false;
+		notified.add(txHash);
+		if (notified.size() > 200) notified.clear();
+		return true;
+	}
+	
+}

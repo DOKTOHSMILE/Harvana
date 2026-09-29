@@ -39,7 +39,7 @@
 - Firebase console: enable Email/Password and Google providers, register SHA fingerprints; T0-5 still open.
 
 ## Firebase setup (T0-5)
-- Package renamed `com.ajoo.app` -> `com.harvanna.wallet` (applicationId, namespace, sources, manifest authorities). Register `com.harvanna.wallet` in Firebase.
+- Package renamed `com.ajoo.app` -> `com.harvanna.app` (applicationId, namespace, sources, manifest authorities). Register `com.harvanna.app` in Firebase.
 - `com.ajoo.node.miner` (separate miner app) is still referenced by WalletEarnFragmentActivity; update if the miner is renamed.
 - `com.google.gms.google-services` plugin (4.4.1) added to `app/build.gradle`. The build fails until
   `app/google-services.json` is added (download from Firebase console after registering the app + SHA fingerprints).
@@ -99,3 +99,43 @@ breaking reflection at runtime, Firestore offline persistence syncing after a re
   run 9 (commit 3833e05) passed the full pipeline: 58 canonical unit tests, debug build, and minified release build
   (R8) with the Firestore migration, rebrand/palette, splash fixes and AJ0x migration included. Later commits
   (group client, quick actions, palette-everywhere) are verified by their own runs; see the Actions tab.
+
+## P2P seller screen (owner decisions of 29 Sep 2026) - what was done and where the node differs
+Done: the listing is now signed and sent with `maxOrderAmount`, `paymentWindowMinutes` and `unitPricePerHarvRaw`
+(kobo per HARV) using the wallet's `nextRequestNonce`; the canonical string is a pure builder checked against the node's
+own class (2 golden cases). Seller sees a market reference and a non-blocking flag when their price is >15% away.
+Max order: must be >= min(500 HARV, total), between min and total.
+
+Differences from the decisions as stated (found while reading the node; NOT changed on the node):
+1. **Payment window**: the node accepts 15-60 minutes (default 45) and REJECTS anything above 60 (`INVALID_PAYMENT_WINDOW`).
+   `MINIMUM_P2P_ESCROW_TIME_MS` does not exist anywhere in the node repo. 1h/2h/4h presets would be rejected for 2h and 4h.
+   The app keeps the existing 15/30/45/60 presets (which the node's own comment says match the UI). If a 1h minimum is really
+   wanted, that is a node change (owner's decision) and the presets change with it.
+2. **The mark is not reachable from the app**: `HarvannaProtocolManager.getMarkStatus()` exists but no controller exposes it.
+   So the screen shows the MEDIAN of open-listing prices as a clearly-labelled reference, not the accepted mark. Needs a node
+   endpoint (e.g. `GET /api/v1/mark`) - node-side follow-up. When it exists, swap it into `P2pPriceReference.fetch`.
+3. **Currency**: the node prices in kobo (Naira). Non-NGN offers are refused in the app with a clear message.
+4. **Margin pricing** is resolved to a fixed signed price against the same reference; if no reference exists it asks for a fixed price.
+5. Whether `/listings/open` includes `unitPricePerHarvRaw` per listing was not verified against a running node; if it is
+   redacted the reference shows "No market reference yet".
+
+## Package renamed again (29 Sep 2026, urgent): com.harvanna.wallet -> com.harvanna.app
+All sources, tests, manifest authorities, Gradle `applicationId`/`namespace` and docs updated (history: com.ajoo.app -> com.harvanna.wallet -> com.harvanna.app).
+**Firebase action required:** `app/google-services.json` was registered for `com.harvanna.wallet`. I only edited its `package_name` field so
+the Gradle plugin accepts the build; the `mobilesdk_app_id` and OAuth entries still belong to the OLD Firebase app. Register a new Android app
+`com.harvanna.app` in the Firebase console (with SHA-1/SHA-256 from README/this file's debug key), download the new `google-services.json`, and
+replace this one. Until then email/password may work but Google sign-in will not.
+
+## App name and Firebase file (29 Sep 2026)
+- App name is now just "Harvanna" (launcher label, main header, about screen).
+- `app/google-services.json` replaced with the owner's file that has a client for `com.harvanna.app`
+  (`1:92873857858:android:7edea0b3ad5cf38d65c6db`). It has NO Android OAuth client (`client_type: 1`) for `com.harvanna.app` yet:
+  the debug SHA-1 (bff2f88297ff53dd1f21bca9e5a36e49011fc55a) was registered on the OLD `com.harvanna.wallet` app entry.
+  Register SHA-1 + SHA-256 on the `com.harvanna.app` entry, re-download, replace this file. Google sign-in stays broken until then.
+  The old `com.harvanna.wallet` entry can be deleted in the console afterwards.
+
+## Firebase file finalised (29 Sep 2026)
+`app/google-services.json` now contains only `com.harvanna.app` (`1:92873857858:android:7edea0b3ad5cf38d65c6db`) with the Android OAuth client
+for the debug SHA-1 (bff2f88297ff53dd1f21bca9e5a36e49011fc55a) and the web client used by `requestIdToken`. This is the config Google sign-in needs.
+Whether the SHA-256 is also registered is not visible in this file. Still to verify on a device: Google sign-in, and that Email/Password + Google
+providers are enabled in Authentication.

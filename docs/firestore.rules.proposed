@@ -1,0 +1,31 @@
+// PROPOSED, NOT DEPLOYED, NOT TESTED IN THE EMULATOR. Only the blocks that differ from the deployed rules are shown.
+// Test in the Firebase Emulator / Rules Playground before publishing.
+
+// A1 + A6: members
+match /members/{memberUid} {
+  allow read: if signedIn();
+  allow create: if signedIn() && request.resource.data.status == 'ACTIVE' && (
+      isGroupCreator(groupId)
+      || ( request.auth.uid == memberUid
+           && request.resource.data.role == 'MEMBER'
+           && ( groupDoc(groupId).requireApprovalToJoin == false
+                || ( exists(/databases/$(database)/documents/GROUPS/$(groupId)/joinRequests/$(memberUid))
+                     && get(/databases/$(database)/documents/GROUPS/$(groupId)/joinRequests/$(memberUid)).data.status == 'APPROVED' ) ) ) );
+  // update / delete unchanged
+}
+
+// A3: join requests - members may only add votes; status is creator-only
+match /joinRequests/{requesterUid} {
+  allow read: if signedIn();
+  allow create: if isSelf(requesterUid) && request.resource.data.status == 'PENDING';
+  allow update: if isGroupCreator(groupId)
+      || (isActiveMember(groupId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']));
+  allow delete: if isGroupCreator(groupId) || isSelf(requesterUid);
+}
+
+// A5: transactions are written by the node only
+match /TRANSACTIONS/{txId} {
+  allow read: if signedIn();
+  allow create, update, delete: if false;
+}

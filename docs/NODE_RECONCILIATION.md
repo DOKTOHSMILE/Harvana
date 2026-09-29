@@ -17,10 +17,10 @@ Scope of this pass: signed-action canonical messages and endpoint paths for what
 | `P2P_LIST_MINE` | same | same | MATCH |
 | `P2P_INSURANCE_DEPOSIT` | same | same | MATCH |
 | `P2P_RESOLVE_DISPUTE` (guardian) | same | same | MATCH |
-| **`P2P_CREATE_LISTING`** | `addr:side:total:minOrder:durationHours:nonce` | `addr:side:total:minOrder:maxOrder:durationHours:paymentWindowMinutes:unitPricePerHarvRaw:nonce` | **MISMATCH - not fixed** |
+| `P2P_CREATE_LISTING` | now `chain/P2pCanonical.createListing` (golden-tested against the node class) | `addr:side:total:minOrder:maxOrder:durationHours:paymentWindowMinutes:unitPricePerHarvRaw:nonce` | MATCH (fixed 29 Sep 2026) |
 | `P2P_GET_ORDER` | not implemented (app uses public GET `/order/{id}`) | GET still exists but returns a public view with bank/payout fields stripped; signed `POST /order/fetch` returns the full party view | GET works; app only gets the public view (payment details come from Firestore). Adopting the signed fetch is optional |
 
-`P2P_CREATE_LISTING` fix needs product input: the node now requires a max order amount, payment window and a
+(Historical note, now resolved) `P2P_CREATE_LISTING` fix needed product input: the node now requires a max order amount, payment window and a
 per-HARV price (`unitPricePerHarvRaw`, the mark/unit-of-account work the prompt says is in progress). The seller
 UI has no fields for these. Listing creation will fail signature verification until they are added.
 Not guessed.

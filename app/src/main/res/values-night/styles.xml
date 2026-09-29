@@ -2,6 +2,8 @@
 <resources>
 
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="appBarColor">@color/colorSurface</item>
+        <item name="onAppBarColor">@color/colorTextPrimary</item>
         <item name="colorSecondary">@color/colorAccent</item>
         <item name="colorOnSecondary">@color/colorTextOnAccent</item>
         <item name="colorPrimaryVariant">@color/colorAccentDark</item>
@@ -29,7 +31,7 @@
         <item name="android:textColorPrimary">@color/colorTextPrimary</item>
         <item name="android:textColorSecondary">@color/colorTextSecondary</item>
         <item name="android:textColorHint">@color/colorTextTertiary</item>
-        <item name="android:statusBarColor">@color/colorSurface</item>
+        <item name="android:statusBarColor">?attr/appBarColor</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowBackground">@color/colorBackground</item>
         <item name="alertDialogTheme">@style/AjooAlertDialog</item>
@@ -37,7 +39,13 @@
         <item name="bottomSheetDialogTheme">@style/AjooBottomSheetDialog</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Light">
+        <!-- text and icons follow the bar color (charcoal on orange by day, light on charcoal by night) -->
+        <item name="android:textColorPrimary">?attr/onAppBarColor</item>
+        <item name="android:textColorSecondary">?attr/onAppBarColor</item>
+        <item name="colorControlNormal">?attr/onAppBarColor</item>
+        <item name="colorOnSurface">?attr/onAppBarColor</item>
+    </style>
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Dark" />
     <style name="AppTheme.DebugActivity" parent="AppTheme" />
 

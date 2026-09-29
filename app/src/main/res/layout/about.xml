@@ -14,7 +14,7 @@
 			android:id="@+id/_toolbar"
 			android:layout_width="match_parent"
 			android:layout_height="?attr/actionBarSize"
-			android:background="?attr/colorPrimary"
+			android:background="?attr/appBarColor"
 			app:popupTheme="@style/AppTheme.PopupOverlay" />
 	</com.google.android.material.appbar.AppBarLayout>
 	<androidx.core.widget.NestedScrollView
@@ -43,7 +43,7 @@
 					android:layout_height="72dp"
 					android:scaleType="center"
 					android:src="@mipmap/ic_launcher"
-					android:contentDescription="Harvanna Wallet logo" />
+					android:contentDescription="Harvanna logo" />
 				<TextView
 					android:id="@+id/textview46"
 					android:layout_width="wrap_content"

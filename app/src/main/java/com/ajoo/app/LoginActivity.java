@@ -207,6 +207,16 @@ public class LoginActivity extends AppCompatActivity {
 		if (directory != null && directory.equals("complete")) { 
 			setTitle("Create account"); 		
 			showFragment(complete); 
+		} else if (directory != null && directory.equals("eLogin")) {
+			setTitle("Sign in");
+			showFragment(EmailAuthFragment.newInstance(false));
+		} else if (directory != null && directory.equals("eCreate")) {
+			setTitle("Create account");
+			showFragment(EmailAuthFragment.newInstance(true));
+		} else if (directory != null && directory.equals("pLogin")) {
+			Toast.makeText(this, "Phone login is not available yet. Please use email.", Toast.LENGTH_LONG).show();
+			setTitle("Sign in");
+			showFragment(EmailAuthFragment.newInstance(false));
 		}
 		
 	}
@@ -220,4 +230,4 @@ public class LoginActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

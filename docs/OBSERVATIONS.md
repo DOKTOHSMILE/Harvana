@@ -18,3 +18,13 @@
 - Existing wallets holding `AJ0x` addresses: HV0x is derived from the same key, so addresses
   should be re-derived from stored keys; stored `AJ0x` strings in prefs/Firestore are not migrated here.
 - Tiers 3-5 need device/CodeAssist testing and a dedicated reconciliation pass.
+
+## Email/password auth
+- Added `EmailAuthFragment` (sign in, create account, forgot password, verification email on signup) using
+  Firebase Auth; `LoginActivity` routes `eLogin`/`eCreate` (and `pLogin`, which falls back to email) to it.
+  On success it hands off to `SplashScreenActivity`, which routes to Main or the profile form.
+- Settings "Log Out" previously never called `FirebaseAuth.signOut()`; it now does, and returns to Splash.
+- Phone/OTP login is still a stub (hardcoded test code) - not fixed here.
+- Requires Firebase console: enable Email/Password provider, and T0-5 (`google-services.json`) still open;
+  auth cannot work at runtime without it.
+- Not compiled (no Android SDK here); needs a build check.

@@ -46,7 +46,8 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
 import com.ajoo.app.firestore.UserProfileManager;
 import com.ajoo.app.utils.ThemeManager;
-import java.util.Map;
+import java.util.Map;
+
 
 public class SettingsActivity extends AppCompatActivity {
 	
@@ -693,7 +694,9 @@ public class SettingsActivity extends AppCompatActivity {
 	
 	private void _performLogOut() {
 		authsp.edit().clear().apply();
-		Intent intent = new Intent(this, LoginActivity.class);
+		try { com.google.firebase.auth.FirebaseAuth.getInstance().signOut(); } catch (Exception ignored) {}
+		com.ajoo.app.sync.AuthTokenProvider.clear();
+		Intent intent = new Intent(this, SplashScreenActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		startActivity(intent);
 		finish();
@@ -702,4 +705,4 @@ public class SettingsActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

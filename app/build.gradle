@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.ajoo.app'
+    namespace 'com.harvanna.wallet'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.ajoo.app"
+        applicationId "com.harvanna.wallet"
         minSdk 23
         targetSdk 34
         versionCode 1

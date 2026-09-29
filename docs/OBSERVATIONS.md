@@ -39,7 +39,8 @@
 - Firebase console: enable Email/Password and Google providers, register SHA fingerprints; T0-5 still open.
 
 ## Firebase setup (T0-5)
-- Package name for the Firebase Android app: `com.ajoo.app`.
+- Package renamed `com.ajoo.app` -> `com.harvanna.wallet` (applicationId, namespace, sources, manifest authorities). Register `com.harvanna.wallet` in Firebase.
+- `com.ajoo.node.miner` (separate miner app) is still referenced by WalletEarnFragmentActivity; update if the miner is renamed.
 - `com.google.gms.google-services` plugin (4.4.1) added to `app/build.gradle`. The build fails until
   `app/google-services.json` is added (download from Firebase console after registering the app + SHA fingerprints).
 - App has never been on Play, so `versionCode 1` is fine (T2-2 resolved). Keystore (T2-1) still open.

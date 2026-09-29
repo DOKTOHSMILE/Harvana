@@ -343,7 +343,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 		order_calculation_card.setVisibility(View.GONE);
 		validation_message.setVisibility(View.GONE);
 		create_order_button.setEnabled(false);
-		create_order_button.setText("Buy AJC");
+		create_order_button.setText(("Buy " + com.harvanna.app.CoinInfo.ticker()));
 		
 		seller_name.setText("Loading trader…");
 		seller_initial.setVisibility(View.VISIBLE);
@@ -420,10 +420,10 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 				minOrderAjc = AjooNodeClient.toAjcDisplay(listing.optLong("minOrderAmount", 0));
 				
 				runOnUiThread(() -> {
-					offer_available.setText(String.format(Locale.US, "%.4f AJC", remainingAjc));
-					offer_limits.setText(String.format(Locale.US, "Min %.4f · Max %.4f AJC", minOrderAjc, remainingAjc));
+					offer_available.setText(String.format(Locale.US, ("%.4f " + com.harvanna.app.CoinInfo.ticker()), remainingAjc));
+					offer_limits.setText(String.format(Locale.US, ("Min %.4f · Max %.4f " + com.harvanna.app.CoinInfo.ticker()), minOrderAjc, remainingAjc));
 					amount_section_hint.setText(String.format(Locale.US,
-					"Available %.4f AJC · Minimum %.4f AJC", remainingAjc, minOrderAjc));
+					("Available %.4f " + com.harvanna.app.CoinInfo.ticker() + " · Minimum %.4f " + com.harvanna.app.CoinInfo.ticker()), remainingAjc, minOrderAjc));
 					quick_25.setText(BalanceFormatter.smartDecimal(remainingAjc * 0.25));
 					quick_50.setText(BalanceFormatter.smartDecimal(remainingAjc * 0.50));
 					quick_100.setText(BalanceFormatter.smartDecimal(remainingAjc * 0.75));
@@ -562,11 +562,11 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 			return;
 		}
 		if (amount < minOrderAjc) {
-			_showValidationError(String.format(Locale.US, "Minimum order is %.4f AJC.", minOrderAjc));
+			_showValidationError(String.format(Locale.US, ("Minimum order is %.4f " + com.harvanna.app.CoinInfo.ticker() + "."), minOrderAjc));
 			return;
 		}
 		if (amount > remainingAjc) {
-			_showValidationError(String.format(Locale.US, "Only %.4f AJC available.", remainingAjc));
+			_showValidationError(String.format(Locale.US, ("Only %.4f " + com.harvanna.app.CoinInfo.ticker() + " available."), remainingAjc));
 			return;
 		}
 		if (myAddress == null || myAddress.isEmpty()) {
@@ -610,15 +610,15 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 					calculation_ajc.setText(BalanceFormatter.smart(amountAjc));
 					calculation_price.setText(unitPrice >= 0 ? P2pMoney.fiat(unitPrice, listingCurrency) : "—");
 					calculation_fiat.setText(fiatTotal >= 0 ? P2pMoney.fiat(fiatTotal, listingCurrency) : "—");
-					calculation_maker_fee.setText(String.format(Locale.US, "-%s AJC", BalanceFormatter.smartDecimal(feeAjc)));
-					calculation_network_fee.setText(String.format(Locale.US, "-%s AJC", BalanceFormatter.smartDecimal(networkFeeAjc)));
+					calculation_maker_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(feeAjc)));
+					calculation_network_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(networkFeeAjc)));
 					calculation_receive.setText(BalanceFormatter.smart(netAjc));
 					create_order_button.setEnabled(true);
 				});
 			}
 			@Override
 			public void onError(String error) {
-				runOnUiThread(() -> _showValidationError("Couldn't check this order with AjooChain: " + error));
+				runOnUiThread(() -> _showValidationError("Couldn't check this order with Harvanna Protocol: " + error));
 			}
 		});
 	}
@@ -661,7 +661,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 							finish();
 						} else {
 							create_order_button.setEnabled(true);
-							create_order_button.setText("Buy AJC");
+							create_order_button.setText(("Buy " + com.harvanna.app.CoinInfo.ticker()));
 							_showValidationError("Order created, but couldn't open the trade automatically. Check My Trades.");
 						}
 					});
@@ -670,7 +670,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 				public void onError(String error) {
 					runOnUiThread(() -> {
 						create_order_button.setEnabled(true);
-						create_order_button.setText("Buy AJC");
+						create_order_button.setText(("Buy " + com.harvanna.app.CoinInfo.ticker()));
 						_showValidationError("Couldn't create this order — the listing may have just changed: " + error);
 					});
 				}

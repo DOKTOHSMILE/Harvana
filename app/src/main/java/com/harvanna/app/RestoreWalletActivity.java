@@ -207,7 +207,7 @@ public class RestoreWalletActivity extends AppCompatActivity {
 	
 	private void onScanCardClicked() {
 		Intent scanIntent = new Intent(this, com.harvanna.app.ScanQrCodeActivity.class);
-		scanIntent.putExtra(com.harvanna.app.ScanQrCodeActivity.EXTRA_TITLE, "Scan Ajoo Card");
+		scanIntent.putExtra(com.harvanna.app.ScanQrCodeActivity.EXTRA_TITLE, "Scan Harvanna Card");
 		scanIntent.putExtra(com.harvanna.app.ScanQrCodeActivity.EXTRA_REQUIRED_PREFIX, AjooCardCrypto.FORMAT_PREFIX);
 		startActivityForResult(scanIntent, RC_SCAN_QR);
 	}
@@ -236,7 +236,7 @@ public class RestoreWalletActivity extends AppCompatActivity {
 							pendingScannedPayload = text;
 							showPasswordBottomSheet(false);
 						} else {
-							SketchwareUtil.showMessage(getApplicationContext(), "That QR code isn't an Ajoo Access Card.");
+							SketchwareUtil.showMessage(getApplicationContext(), "That QR code isn't an Harvanna Access Card.");
 						}
 					});
 				}

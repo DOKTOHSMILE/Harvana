@@ -27,6 +27,6 @@ public final class P2pMoney {
 	}
 
 	public static String perAjc(double price, String code) {
-		return fiat(price, code) + " / AJC";
+		return fiat(price, code) + (" / " + com.harvanna.app.CoinInfo.ticker());
 	}
 }

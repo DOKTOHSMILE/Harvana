@@ -116,7 +116,7 @@ public class TransactionNotification {
 			CHANNEL_NAME,
 			NotificationManager.IMPORTANCE_HIGH
 			);
-			channel.setDescription("Incoming and outgoing AJC / token transfers");
+			channel.setDescription(("Incoming and outgoing " + com.harvanna.app.CoinInfo.ticker() + " / token transfers"));
 			channel.enableVibration(true);
 			channel.setShowBadge(true);
 			nm.createNotificationChannel(channel);

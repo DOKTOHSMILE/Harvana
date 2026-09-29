@@ -235,7 +235,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 		}
 		
 		if (getSupportActionBar() != null) {
-			getSupportActionBar().setTitle("Sell AJC");
+			getSupportActionBar().setTitle(("Sell " + com.harvanna.app.CoinInfo.ticker()));
 			getSupportActionBar().setSubtitle("Set the amount and price you want to sell.");
 		}
 		
@@ -243,7 +243,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 		myAddress = WalletManager.getActiveWalletAddress(this);
 		if (getSupportActionBar() != null) {
 			getSupportActionBar().setTitle("Sell Order");
-			getSupportActionBar().setSubtitle("Review and confirm — you'll be providing the AJC");
+			getSupportActionBar().setSubtitle(("Review and confirm — you'll be providing the " + com.harvanna.app.CoinInfo.ticker()));
 		}
 		
 		// GROUND-UP FIX: price is locked from the buyer's listing, never
@@ -258,8 +258,8 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 		card_sell_preview.setVisibility(View.GONE);
 		tv_sell_amount_error.setVisibility(View.GONE);
 		btn_create_sell_order.setEnabled(false);
-		btn_create_sell_order.setText("Sell AJC");
-		tv_sell_protection_description.setText("Your AJC is held in escrow the moment this order is created — it only releases to the buyer once you confirm you've received their payment.");
+		btn_create_sell_order.setText(("Sell " + com.harvanna.app.CoinInfo.ticker()));
+		tv_sell_protection_description.setText(("Your " + com.harvanna.app.CoinInfo.ticker() + " is held in escrow the moment this order is created — it only releases to the buyer once you confirm you've received their payment."));
 		
 		if (listingId == null || listingId.isEmpty()) {
 			_showFatalError("No listing specified.");
@@ -362,7 +362,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 				
 				runOnUiThread(() -> {
 					tv_sell_condition_limits.setText(String.format(Locale.US,
-					"Min %.4f · Max %.4f AJC", minOrderAjc, remainingAjc));
+					("Min %.4f · Max %.4f " + com.harvanna.app.CoinInfo.ticker()), minOrderAjc, remainingAjc));
 					tv_sell_condition_window.setText("You'll have 45 minutes to confirm receipt once the buyer marks payment sent.");
 					_refreshPresets();
 				});
@@ -479,15 +479,15 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 			return;
 		}
 		if (amount < minOrderAjc) {
-			_showAmountError(String.format(Locale.US, "Minimum order is %.4f AJC.", minOrderAjc));
+			_showAmountError(String.format(Locale.US, ("Minimum order is %.4f " + com.harvanna.app.CoinInfo.ticker() + "."), minOrderAjc));
 			return;
 		}
 		if (amount > remainingAjc) {
-			_showAmountError(String.format(Locale.US, "The buyer only wants %.4f AJC.", remainingAjc));
+			_showAmountError(String.format(Locale.US, ("The buyer only wants %.4f " + com.harvanna.app.CoinInfo.ticker() + "."), remainingAjc));
 			return;
 		}
 		if (amount > walletBalanceAjc) {
-			_showAmountError(String.format(Locale.US, "You only have %.4f AJC available.", walletBalanceAjc));
+			_showAmountError(String.format(Locale.US, ("You only have %.4f " + com.harvanna.app.CoinInfo.ticker() + " available."), walletBalanceAjc));
 			return;
 		}
 		if (myAddress == null || myAddress.isEmpty()) {
@@ -529,7 +529,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 					tv_sell_preview_ajc.setText(BalanceFormatter.smart(amountAjc));
 					tv_sell_preview_price.setText(unitPrice >= 0 ? P2pMoney.fiat(unitPrice, listingCurrency) : "—");
 					tv_sell_preview_gross.setText(fiatTotal >= 0 ? P2pMoney.fiat(fiatTotal, listingCurrency) : "—");
-					tv_sell_preview_fee.setText(String.format(Locale.US, "%s AJC", BalanceFormatter.smartDecimal(feeAjc)));
+					tv_sell_preview_fee.setText(String.format(Locale.US, ("%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(feeAjc)));
 					tv_sell_preview_receive.setText(fiatTotal >= 0 ? P2pMoney.fiat(fiatTotal, listingCurrency) : "—");
 					btn_create_sell_order.setEnabled(selectedMethod != null);
 					if (selectedMethod == null) {
@@ -540,7 +540,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 			}
 			@Override
 			public void onError(String error) {
-				runOnUiThread(() -> _showAmountError("Couldn't check this order with AjooChain: " + error));
+				runOnUiThread(() -> _showAmountError("Couldn't check this order with Harvanna Protocol: " + error));
 			}
 		});
 	}
@@ -573,7 +573,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 					if (myUid == null || newOrderId.isEmpty()) {
 						runOnUiThread(() -> {
 							btn_create_sell_order.setEnabled(true);
-							btn_create_sell_order.setText("Sell AJC");
+							btn_create_sell_order.setText(("Sell " + com.harvanna.app.CoinInfo.ticker()));
 							_showAmountError("Order created, but couldn't finish setup. Check My Trades.");
 						});
 						return;
@@ -598,7 +598,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 				public void onError(String error) {
 					runOnUiThread(() -> {
 						btn_create_sell_order.setEnabled(true);
-						btn_create_sell_order.setText("Sell AJC");
+						btn_create_sell_order.setText(("Sell " + com.harvanna.app.CoinInfo.ticker()));
 						_showAmountError("Couldn't create this order — the offer may have just changed: " + error);
 					});
 				}

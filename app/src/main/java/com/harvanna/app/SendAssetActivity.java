@@ -354,14 +354,14 @@ public class SendAssetActivity extends AppCompatActivity {
 					
 					HashMap<String, Object> native_ = new HashMap<>();
 					native_.put("contractAddress", "");
-					native_.put("symbol", "AJC");
+					native_.put("symbol", com.harvanna.app.CoinInfo.ticker());
 					native_.put("name", "Ajoocoin");
 					native_.put("balance", BigDecimal.valueOf(ajcBalance));
 					native_.put("decimals", 8);
 					native_.put("isNative", true);
 					native_.put("isListed", true);
 					walletAssets.add(native_);
-					assetDisplayNames.add("Ajoocoin (AJC)");
+					assetDisplayNames.add((com.harvanna.app.CoinInfo.name() + " (" + com.harvanna.app.CoinInfo.ticker() + ")"));
 					
 					assetAdapter.notifyDataSetChanged();
 					if (spAsset != null && !walletAssets.isEmpty()) spAsset.setSelection(0);
@@ -375,14 +375,14 @@ public class SendAssetActivity extends AppCompatActivity {
 					assetDisplayNames.clear();
 					HashMap<String, Object> native_ = new HashMap<>();
 					native_.put("contractAddress", "");
-					native_.put("symbol", "AJC");
+					native_.put("symbol", com.harvanna.app.CoinInfo.ticker());
 					native_.put("name", "Ajoocoin");
 					native_.put("balance", BigDecimal.ZERO);
 					native_.put("decimals", 8);
 					native_.put("isNative", true);
 					native_.put("isListed", true);
 					walletAssets.add(native_);
-					assetDisplayNames.add("Ajoocoin (AJC)");
+					assetDisplayNames.add((com.harvanna.app.CoinInfo.name() + " (" + com.harvanna.app.CoinInfo.ticker() + ")"));
 					assetAdapter.notifyDataSetChanged();
 					SketchwareUtil.showMessage(getApplicationContext(), "Could not fetch balance: " + error);
 				});

@@ -201,7 +201,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		timestamp = getIntent().getLongExtra("timestamp", System.currentTimeMillis());
 		
 		String tokenSymbol = getIntent().getStringExtra("tokenSymbol");
-		if (tokenSymbol == null || tokenSymbol.trim().isEmpty()) tokenSymbol = "AJC";
+		if (tokenSymbol == null || tokenSymbol.trim().isEmpty()) tokenSymbol = com.harvanna.app.CoinInfo.ticker();
 		
 		confirmations = getIntent().getLongExtra("confirmations", 0);
 		
@@ -252,8 +252,8 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		}
 		
 		// APPLIED FIX
-		tv_network_fee.setText(_formatUIBalance(ajcFee) + " AJC");
-		tv_burn_amount.setText(_formatUIBalance(burnAmount) + " AJC");
+		tv_network_fee.setText(_formatUIBalance(ajcFee) + (" " + com.harvanna.app.CoinInfo.ticker()));
+		tv_burn_amount.setText(_formatUIBalance(burnAmount) + (" " + com.harvanna.app.CoinInfo.ticker()));
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
 		sdf.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));
@@ -322,7 +322,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 				com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
 				TransactionDetailActivity.this, // Replace with your current Activity
 				"Incoming Transfer", 
-				"Received " + String.format(Locale.US, "%.5f", amount) + " AJC",
+				"Received " + String.format(Locale.US, "%.5f", amount) + (" " + com.harvanna.app.CoinInfo.ticker()),
 				sender
 				);
 			}
@@ -448,7 +448,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		paint.setTextSize(11f);
 		paint.setFakeBoldText(false);
 		paint.setColor(Color.DKGRAY);
-		canvas.drawText("Network: AjooChain", textX, y + 35, paint);
+		canvas.drawText("Network: Harvanna Protocol", textX, y + 35, paint);
 		canvas.drawText("Generated: " + genDate, textX, y + 55, paint);
 		
 		paint.setColor(Color.LTGRAY);
@@ -502,7 +502,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			
 			String safeStatus = (status == null) ? "UNKNOWN" : status.toUpperCase();
 			String tokenSymbol = getIntent().getStringExtra("tokenSymbol");
-			if (tokenSymbol == null || tokenSymbol.isEmpty()) tokenSymbol = "AJC";
+			if (tokenSymbol == null || tokenSymbol.isEmpty()) tokenSymbol = com.harvanna.app.CoinInfo.ticker();
 			
 			// Replace commas in memo with spaces so it doesn't break the CSV columns
 			String safeMemo = (memo == null || memo.trim().isEmpty()) ? "None" : memo.replace(",", " "); 
@@ -568,7 +568,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			paint.setTextSize(16f);
 			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
 			String genDate = new SimpleDateFormat("MMM dd, yyyy · HH:mm", Locale.getDefault()).format(new Date());
-			canvas.drawText("AjooChain Network  ·  Generated: " + genDate, 130, 100, paint);
+			canvas.drawText("Harvanna Protocol Network  ·  Generated: " + genDate, 130, 100, paint);
 			
 			// Header Separator Line
 			paint.setColor(Color.parseColor("#1C2A4A"));
@@ -588,7 +588,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			
 			String valuePrefix = isIncoming ? "+ " : "- ";
 			String tokenSymbol = getIntent().getStringExtra("tokenSymbol");
-			if (tokenSymbol == null || tokenSymbol.isEmpty()) tokenSymbol = "AJC";
+			if (tokenSymbol == null || tokenSymbol.isEmpty()) tokenSymbol = com.harvanna.app.CoinInfo.ticker();
 			
 			// APPLIED FIX
 			String amountStr = valuePrefix + _formatUIBalance(value) + " " + tokenSymbol;
@@ -636,8 +636,8 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			y += 45;
 			
 			// APPLIED FIX
-			y = _drawCanvasRow(canvas, paint, "Network Fee", _formatUIBalance(ajcFee) + " AJC", paddingX, y);
-			y = _drawCanvasRow(canvas, paint, "Amount Burned", _formatUIBalance(burnAmount) + " AJC", paddingX, y);
+			y = _drawCanvasRow(canvas, paint, "Network Fee", _formatUIBalance(ajcFee) + (" " + com.harvanna.app.CoinInfo.ticker()), paddingX, y);
+			y = _drawCanvasRow(canvas, paint, "Amount Burned", _formatUIBalance(burnAmount) + (" " + com.harvanna.app.CoinInfo.ticker()), paddingX, y);
 			
 			SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
 			sdf.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));
@@ -685,7 +685,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			
 			String safeStatus = (status == null) ? "UNKNOWN" : status.toUpperCase();
 			String tokenSymbol = getIntent().getStringExtra("tokenSymbol");
-			if (tokenSymbol == null || tokenSymbol.isEmpty()) tokenSymbol = "AJC";
+			if (tokenSymbol == null || tokenSymbol.isEmpty()) tokenSymbol = com.harvanna.app.CoinInfo.ticker();
 			
 			SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
 			sdf.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));
@@ -707,8 +707,8 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			
 			doc.append("-------------- NETWORK DATA ----------------------\n");
 			// APPLIED FIX
-			doc.append("NETWORK FEE : ").append(_formatUIBalance(ajcFee)).append(" AJC\n");
-			doc.append("BURN AMOUNT : ").append(_formatUIBalance(burnAmount)).append(" AJC\n\n");
+			doc.append("NETWORK FEE : ").append(_formatUIBalance(ajcFee)).append((" " + com.harvanna.app.CoinInfo.ticker() + "\n"));
+			doc.append("BURN AMOUNT : ").append(_formatUIBalance(burnAmount)).append((" " + com.harvanna.app.CoinInfo.ticker() + "\n\n"));
 			
 			doc.append("----------- BLOCKCHAIN DETAILS -------------------\n");
 			doc.append("TX HASH     : ").append(txHash).append("\n");
@@ -765,7 +765,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			paint.setTextSize(12f);
 			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
 			String genDate = new SimpleDateFormat("MMM dd, yyyy · HH:mm", Locale.getDefault()).format(new Date());
-			canvas.drawText("AjooChain Network  ·  Generated: " + genDate, 100, 75, paint);
+			canvas.drawText("Harvanna Protocol Network  ·  Generated: " + genDate, 100, 75, paint);
 			
 			paint.setColor(Color.parseColor("#1C2A4A"));
 			paint.setStrokeWidth(1.5f);
@@ -784,7 +784,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			
 			String valuePrefix = isIncoming ? "+ " : "- ";
 			String tokenSymbol = getIntent().getStringExtra("tokenSymbol");
-			if (tokenSymbol == null || tokenSymbol.isEmpty()) tokenSymbol = "AJC";
+			if (tokenSymbol == null || tokenSymbol.isEmpty()) tokenSymbol = com.harvanna.app.CoinInfo.ticker();
 			
 			// APPLIED FIX
 			String amountStr = valuePrefix + _formatUIBalance(value) + " " + tokenSymbol;
@@ -832,8 +832,8 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			y += 35;
 			
 			// APPLIED FIX
-			y = _drawPdfRow(canvas, paint, "Network Fee", _formatUIBalance(ajcFee) + " AJC", paddingX, y);
-			y = _drawPdfRow(canvas, paint, "Amount Burned", _formatUIBalance(burnAmount) + " AJC", paddingX, y);
+			y = _drawPdfRow(canvas, paint, "Network Fee", _formatUIBalance(ajcFee) + (" " + com.harvanna.app.CoinInfo.ticker()), paddingX, y);
+			y = _drawPdfRow(canvas, paint, "Amount Burned", _formatUIBalance(burnAmount) + (" " + com.harvanna.app.CoinInfo.ticker()), paddingX, y);
 			
 			SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
 			sdf.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));

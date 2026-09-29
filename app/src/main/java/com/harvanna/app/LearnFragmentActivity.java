@@ -340,9 +340,9 @@ public class LearnFragmentActivity extends Fragment {
 			Object authorUidObj = item.get("authorUid");
 			String authorUid = authorUidObj != null ? authorUidObj.toString() : "";
 			if (!authorUid.isEmpty()) {
-				com.harvanna.app.group.MemberNameResolver.resolveInto(getContext(), authorUid, "Ajoo Community", holder.textview_author);
+				com.harvanna.app.group.MemberNameResolver.resolveInto(getContext(), authorUid, "Harvanna Community", holder.textview_author);
 			} else {
-				holder.textview_author.setText("Ajoo Community");
+				holder.textview_author.setText("Harvanna Community");
 			}
 		}
 		
@@ -381,4 +381,4 @@ public class LearnFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

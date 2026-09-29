@@ -48,7 +48,8 @@ import java.util.ArrayList;
 import java.util.List;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import androidx.core.content.FileProvider;
+import androidx.core.content.FileProvider;
+
 
 public class ReceiveActivity extends AppCompatActivity {
 	
@@ -129,7 +130,7 @@ public class ReceiveActivity extends AppCompatActivity {
 			}
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 			if (clipboard != null) {
-				ClipData clip = ClipData.newPlainText("Ajoo Wallet Address", activeAddress);
+				ClipData clip = ClipData.newPlainText("Harvanna Wallet Address", activeAddress);
 				clipboard.setPrimaryClip(clip);
 				SketchwareUtil.showMessage(this, "Address copied!");
 			}
@@ -189,7 +190,7 @@ public class ReceiveActivity extends AppCompatActivity {
 	
 	private void _setupAssetSpinner() {
 		final List<String> assetList = new ArrayList<>();
-		assetList.add("Ajoocoin (AJC)");
+		assetList.add((com.harvanna.app.CoinInfo.name() + " (" + com.harvanna.app.CoinInfo.ticker() + ")"));
 		
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
 		this, android.R.layout.simple_spinner_item, assetList) {
@@ -257,4 +258,4 @@ public class ReceiveActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

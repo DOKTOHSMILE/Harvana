@@ -131,7 +131,7 @@ public class FirestoreSyncManager {
 						|| err.contains("timeout")
 						|| err.contains("ETIMEDOUT");
 				if (nodeDown) {
-					callback.onError("AJC node unreachable: " + error);
+					callback.onError((com.harvanna.app.CoinInfo.ticker() + " node unreachable: ") + error);
 					return;
 				}
 				Map<String, Object> wallet = new HashMap<>();
@@ -299,7 +299,7 @@ public class FirestoreSyncManager {
 		txData.put("status", "confirmed");
 		txData.put("timestamp", System.currentTimeMillis());
 		txData.put("to", recipientAddress);
-		txData.put("tokenSymbol", "AJC");
+		txData.put("tokenSymbol", com.harvanna.app.CoinInfo.ticker());
 		txData.put("txHash", txHash);
 		txData.put("value", amountAjc);
 		

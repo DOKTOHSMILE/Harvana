@@ -177,7 +177,7 @@ public class SendController {
         boolean isNative       = (contractAddress == null || contractAddress.trim().isEmpty());
         final String finalContract = isNative ? "" : contractAddress.trim();
         final String finalSymbol   = (tokenSymbol == null || tokenSymbol.trim().isEmpty())
-                                     ? "AJC" : tokenSymbol.trim();
+                                     ? com.harvanna.app.CoinInfo.ticker() : tokenSymbol.trim();
 
         listener.onPreviewLoading();
 
@@ -286,7 +286,7 @@ public class SendController {
 
                                         if (ajcBalanceForGas < feeAjc) {
                                             listener.onValidationError(
-                                                "Insufficient AJC for gas fee ("
+                                                ("Insufficient " + com.harvanna.app.CoinInfo.ticker() + " for gas fee (")
                                                 + BalanceFormatter.fee(feeAjc) + " needed)");
                                             return;
                                         }
@@ -316,7 +316,7 @@ public class SendController {
                     @Override
                     public void onError(String error) {
                         if (destroyed || listener == null) return;
-                        listener.onValidationError("Could not fetch AJC balance for gas check.");
+                        listener.onValidationError(("Could not fetch " + com.harvanna.app.CoinInfo.ticker() + " balance for gas check."));
                     }
                 });
     }
@@ -406,7 +406,7 @@ public class SendController {
             case "ERR_WALLET_NOT_FOUND":
                 return "Wallet keys not found on this device. Please restore your wallet.";
             case "ERR_RECIPIENT":
-                return "Recipient wallet does not exist yet. Ask them to create an Ajoo wallet first.";
+                return "Recipient wallet does not exist yet. Ask them to create an Harvanna wallet first.";
             default:
                 return message != null ? message : "Transaction failed (" + code + ")";
         }

@@ -431,7 +431,7 @@ public class GroupDetailsLogic {
         // Amount card -> editable principal input.
         final EditText amountInput = new EditText(activity);
         amountInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        amountInput.setHint("Amount in AJC");
+        amountInput.setHint(("Amount in " + com.harvanna.app.CoinInfo.ticker()));
         amountInput.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
         amountInput.setTextSize(20);
         amountInput.setBackground(null);

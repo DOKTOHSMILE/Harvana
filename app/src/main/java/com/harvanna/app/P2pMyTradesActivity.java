@@ -295,7 +295,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 		layout_my_trades_empty.setVisibility(empty ? View.VISIBLE : View.GONE);
 		if (empty) {
 			tv_empty_trades_description.setText(allOrders.isEmpty()
-			? "Once you buy or sell AJC through P2P, your trades will show up here."
+			? ("Once you buy or sell " + com.harvanna.app.CoinInfo.ticker() + " through P2P, your trades will show up here.")
 			: "No trades match this filter right now.");
 		}
 	}

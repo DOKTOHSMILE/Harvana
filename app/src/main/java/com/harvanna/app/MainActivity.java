@@ -588,7 +588,7 @@ public class MainActivity extends AppCompatActivity {
 			communityMechanicsList.add(a);
 			HashMap<String, Object> b = new HashMap<>();
 			b.put("title", "Invite friends");
-			b.put("desc", "Share Ajoo with someone");
+			b.put("desc", "Share Harvanna with someone");
 			communityMechanicsList.add(b);
 		}
 		if (securityFinanceList.isEmpty()) {
@@ -614,11 +614,11 @@ public class MainActivity extends AppCompatActivity {
 			systemLifecycleList.add(a);
 			HashMap<String, Object> b = new HashMap<>();
 			b.put("title", "Terms");
-			b.put("desc", "How Ajoo works");
+			b.put("desc", "How Harvanna works");
 			systemLifecycleList.add(b);
 			HashMap<String, Object> c = new HashMap<>();
 			c.put("title", "About");
-			c.put("desc", "Ajoo and AJC");
+			c.put("desc", ("Harvanna and " + com.harvanna.app.CoinInfo.ticker()));
 			systemLifecycleList.add(c);
 		}
 	}
@@ -865,7 +865,7 @@ public class MainActivity extends AppCompatActivity {
 				com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
 				MainActivity.this, // Replace with your current Activity
 				"Incoming Transfer", 
-				"Received " + String.format(Locale.US, "%.5f", amount) + " AJC",
+				"Received " + String.format(Locale.US, "%.5f", amount) + (" " + com.harvanna.app.CoinInfo.ticker()),
 				sender
 				);
 			}

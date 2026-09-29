@@ -64,7 +64,8 @@ import com.harvanna.app.sync.AjooNodeClient;
 import java.util.concurrent.TimeUnit;
 import com.harvanna.app.group.GroupPaymentHelper;
 import com.harvanna.app.group.GroupValidation;
-import android.os.CountDownTimer;
+import android.os.CountDownTimer;
+
 
 public class GroupPaymentFragmentActivity extends Fragment {
 	
@@ -327,7 +328,8 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		super.onDestroy();
 		if (countdownTimer != null) countdownTimer.cancel();
 	}
-	
+	
+
 	public void _MORE() {
 	}
 	private boolean hasPaidThisCycle = false;
@@ -787,7 +789,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 			if (via != null && !via.isEmpty()) from = via;
 		} catch (Throwable ignored) {}
 		if (from.isEmpty() || !from.startsWith("HV0x")) {
-			SketchwareUtil.showMessage(getContext(), "Link your AJC wallet first");
+			SketchwareUtil.showMessage(getContext(), ("Link your " + com.harvanna.app.CoinInfo.ticker() + " wallet first"));
 			return;
 		}
 		final String fromAddr = from;
@@ -1062,4 +1064,4 @@ public class GroupPaymentFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

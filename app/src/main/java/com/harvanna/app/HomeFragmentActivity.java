@@ -652,7 +652,7 @@ public class HomeFragmentActivity extends Fragment {
 		final String currencyCode = com.harvanna.app.wallet.FiatValueHelper.symbolToCurrencyCode(currencySymbol);
 		
 		if (addr == null || addr.isEmpty()) {
-			if (tv_ajc_balance != null) tv_ajc_balance.setText("0.00 AJC");
+			if (tv_ajc_balance != null) tv_ajc_balance.setText(("0.00 " + com.harvanna.app.CoinInfo.ticker()));
 			if (tv_local_currency_eqv != null) tv_local_currency_eqv.setText("≈ " + currencySymbol + "0.00");
 			return;
 		}
@@ -962,7 +962,7 @@ public class HomeFragmentActivity extends Fragment {
 		
 		if (group_map_list.isEmpty()) {
 			if (cachedTotal == null && getActivity() != null) getActivity().runOnUiThread(() -> {
-				text_val_saved.setText("0 AJC");
+				text_val_saved.setText(("0 " + com.harvanna.app.CoinInfo.ticker()));
 				if (text_sub_saved != null) text_sub_saved.setText("No group savings yet");
 			});
 			return;
@@ -1133,9 +1133,9 @@ public class HomeFragmentActivity extends Fragment {
 	private static String _fmtAjc(double v) {
 		try {
 			java.text.DecimalFormat df = new java.text.DecimalFormat("0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
-			return df.format(v) + " AJC";
+			return df.format(v) + (" " + com.harvanna.app.CoinInfo.ticker());
 		} catch (Exception e) {
-			return String.valueOf(v) + " AJC";
+			return String.valueOf(v) + (" " + com.harvanna.app.CoinInfo.ticker());
 		}
 	}
 	

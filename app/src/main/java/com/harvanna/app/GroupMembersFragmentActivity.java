@@ -53,7 +53,8 @@ import java.util.HashMap;
 import java.util.regex.*;
 import org.json.*;
 import com.harvanna.app.group.JoinRequestManager;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+
 
 public class GroupMembersFragmentActivity extends Fragment {
 	
@@ -270,7 +271,8 @@ public class GroupMembersFragmentActivity extends Fragment {
 		}
 		
 	}
-	
+	
+
 	public void _MORE() {
 	}
 	private String groupId = "";
@@ -725,7 +727,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 	java.util.List<Integer> daysPaid) {
 		if (getContext() == null || getActivity() == null) return;
 		if (memberWallet == null || !memberWallet.startsWith("HV0x")) {
-			SketchwareUtil.showMessage(getContext(), "Member has no linked AJC wallet.");
+			SketchwareUtil.showMessage(getContext(), ("Member has no linked " + com.harvanna.app.CoinInfo.ticker() + " wallet."));
 			return;
 		}
 		if (!groupWalletAddress.startsWith("HV0x")) {
@@ -1037,7 +1039,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 			(bal, avail, pin, pout, pending, err) -> {
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() ->
-				target.setText(String.format(Locale.US, "%.2f AJC", avail >= 0 ? avail : bal)));
+				target.setText(String.format(Locale.US, ("%.2f " + com.harvanna.app.CoinInfo.ticker()), avail >= 0 ? avail : bal)));
 			});
 		}
 		
@@ -1273,4 +1275,4 @@ public class GroupMembersFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

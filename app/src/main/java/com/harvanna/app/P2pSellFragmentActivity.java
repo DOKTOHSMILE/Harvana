@@ -54,7 +54,8 @@ import com.google.android.material.color.MaterialColors;
 import com.harvanna.app.p2p.P2pCurrencyFilterState;
 import com.harvanna.app.p2p.P2pMoney;
 import com.harvanna.app.p2p.ThemedDialogs;
-import androidx.core.widget.CompoundButtonCompat;
+import androidx.core.widget.CompoundButtonCompat;
+
 
 public class P2pSellFragmentActivity extends Fragment {
 	
@@ -131,7 +132,7 @@ public class P2pSellFragmentActivity extends Fragment {
 		btn_fragment_empty_cta.setVisibility(View.VISIBLE);
 		btn_fragment_empty_cta.setOnClickListener(v ->
 		startActivity(new Intent(requireContext(), CreateP2pSellOfferActivity.class)));
-		if (textview1 != null) textview1.setText("AJC");
+		if (textview1 != null) textview1.setText(com.harvanna.app.CoinInfo.ticker());
 		
 		_main.setOnRefreshListener(this::_loadListings);
 		
@@ -393,7 +394,7 @@ public class P2pSellFragmentActivity extends Fragment {
 		
 		LinearLayout row = _sheetRow();
 		MaterialTextView label = new MaterialTextView(requireContext());
-		label.setText("AJC — AjooChain");
+		label.setText((com.harvanna.app.CoinInfo.ticker() + " — Harvanna Protocol"));
 		label.setTextColor(colorOnSurface);
 		label.setTextSize(15f);
 		MaterialTextView check = new MaterialTextView(requireContext());
@@ -404,7 +405,7 @@ public class P2pSellFragmentActivity extends Fragment {
 		row.addView(_spacer());
 		row.addView(check);
 		row.setOnClickListener(v -> {
-			if (textview1 != null) textview1.setText("AJC");
+			if (textview1 != null) textview1.setText(com.harvanna.app.CoinInfo.ticker());
 			dialog.dismiss();
 		});
 		root.addView(row);
@@ -431,7 +432,7 @@ public class P2pSellFragmentActivity extends Fragment {
 		int colorOnPrimary = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorOnPrimary, Color.WHITE);
 		
 		EditText input = new EditText(requireContext());
-		input.setHint("Enter AJC amount");
+		input.setHint(("Enter " + com.harvanna.app.CoinInfo.ticker() + " amount"));
 		input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		input.setTextColor(colorOnSurface);
 		input.setHintTextColor(colorOnSurfaceVariant);
@@ -766,8 +767,8 @@ public class P2pSellFragmentActivity extends Fragment {
 			trust_score.setText(e.trustScore >= 0 ? String.valueOf(e.trustScore) : "—");
 			trades_and_unique.setText(e.completedTrades + " trades · " + e.uniqueCounterparties + " unique");
 			sell_price.setText(e.unitPrice >= 0 ? P2pMoney.perAjc(e.unitPrice, e.currency) : "Unavailable");
-			available_amount.setText(String.format(Locale.US, "%.4f AJC", e.remainingAjc));
-			trade_limits.setText(String.format(Locale.US, "Min %.4f · Max %.4f AJC", e.minOrderAjc, e.remainingAjc));
+			available_amount.setText(String.format(Locale.US, ("%.4f " + com.harvanna.app.CoinInfo.ticker()), e.remainingAjc));
+			trade_limits.setText(String.format(Locale.US, ("Min %.4f · Max %.4f " + com.harvanna.app.CoinInfo.ticker()), e.minOrderAjc, e.remainingAjc));
 			
 			payment_method.setVisibility(View.GONE);
 			payment_method_two.setVisibility(View.GONE);
@@ -875,4 +876,4 @@ public class P2pSellFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

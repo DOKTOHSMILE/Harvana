@@ -67,7 +67,7 @@ public final class NodeSendValidator {
             return Result.fail("Amount must be greater than zero");
         }
         if (amount < 0.00000001) {
-            return Result.fail("Amount is below the minimum (0.00000001 AJC)");
+            return Result.fail(("Amount is below the minimum (0.00000001 " + com.harvanna.app.CoinInfo.ticker() + ")"));
         }
 
         return Result.ok();
@@ -99,7 +99,7 @@ public final class NodeSendValidator {
             double shortfall = total - confirmedBalanceAjc;
             return Result.fail(String.format(
                 java.util.Locale.US,
-                "Insufficient balance. Need %.6f AJC more (amount + fee = %.6f AJC)",
+                ("Insufficient balance. Need %.6f " + com.harvanna.app.CoinInfo.ticker() + " more (amount + fee = %.6f " + com.harvanna.app.CoinInfo.ticker() + ")"),
                 shortfall, total));
         }
 

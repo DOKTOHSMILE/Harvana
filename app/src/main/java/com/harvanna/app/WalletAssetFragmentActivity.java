@@ -371,8 +371,8 @@ public class WalletAssetFragmentActivity extends Fragment {
 							
 							new androidx.appcompat.app.AlertDialog.Builder(context)
 							.setTitle("Back up this wallet?")
-							.setMessage("A printable Ajoo Access Card is a physical backup that doesn't depend on remembering 12 words. You can also do this later from Settings.")
-							.setPositiveButton("Create Ajoo Card", (d, w) -> {
+							.setMessage("A printable Harvanna Access Card is a physical backup that doesn't depend on remembering 12 words. You can also do this later from Settings.")
+							.setPositiveButton("Create Harvanna Card", (d, w) -> {
 								Intent cardIntent = new Intent(context, com.harvanna.app.CreateAjooCardActivity.class);
 								startActivity(cardIntent);
 							})
@@ -603,8 +603,8 @@ public class WalletAssetFragmentActivity extends Fragment {
 				// Removed the "#,##" so it no longer generates commas
 				java.text.DecimalFormat df = new java.text.DecimalFormat("0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
 				
-				nativeCoin.put("coin_name", "Ajoo Coin");
-				nativeCoin.put("coin_symbol", "AJC");
+				nativeCoin.put("coin_name", com.harvanna.app.CoinInfo.name());
+				nativeCoin.put("coin_symbol", com.harvanna.app.CoinInfo.ticker());
 				nativeCoin.put("coin_balance", df.format(show));
 				nativeCoin.put("coin_balance_confirmed", df.format(bal));
 				nativeCoin.put("coin_pending_in", df.format(pin));

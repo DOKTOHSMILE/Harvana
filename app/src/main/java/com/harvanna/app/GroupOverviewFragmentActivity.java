@@ -716,7 +716,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	
 	private void _loadGroupWalletBalance(String address) {
 		if (address == null || !address.startsWith("HV0x")) {
-			if (tv_group_wallet_balance != null) tv_group_wallet_balance.setText("0 AJC");
+			if (tv_group_wallet_balance != null) tv_group_wallet_balance.setText(("0 " + com.harvanna.app.CoinInfo.ticker()));
 			return;
 		}
 		final String cacheKey = "wallet_balance_" + address;

@@ -354,9 +354,9 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 						_refreshOverallBadge();
 						return;
 					}
-					tv_current_deposit.setText(String.format(Locale.US, "%s AJC",
+					tv_current_deposit.setText(String.format(Locale.US, ("%s " + com.harvanna.app.CoinInfo.ticker()),
 					BalanceFormatter.smartDecimal(AjooNodeClient.toAjcDisplay(depositRaw))));
-					tv_required_minimum.setText(String.format(Locale.US, "%s AJC",
+					tv_required_minimum.setText(String.format(Locale.US, ("%s " + com.harvanna.app.CoinInfo.ticker()),
 					BalanceFormatter.smartDecimal(AjooNodeClient.toAjcDisplay(minRequiredRaw))));
 					_refreshOverallBadge();
 				});
@@ -466,11 +466,11 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 	private void _submitDeposit() {
 		double amount = BalanceFormatter.parseUserInput(et_deposit_amount.getText().toString());
 		if (amount <= 0) {
-			_showError("Enter a valid AJC deposit amount.");
+			_showError(("Enter a valid " + com.harvanna.app.CoinInfo.ticker() + " deposit amount."));
 			return;
 		}
 		if (amount > availableBalanceAjc) {
-			_showError(String.format(Locale.US, "Insufficient balance. You only have %s AJC available.", BalanceFormatter.smartDecimal(availableBalanceAjc)));
+			_showError(String.format(Locale.US, ("Insufficient balance. You only have %s " + com.harvanna.app.CoinInfo.ticker() + " available."), BalanceFormatter.smartDecimal(availableBalanceAjc)));
 			return;
 		}
 		
@@ -485,7 +485,7 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 				public void onSuccess(JSONObject result) {
 					runOnUiThread(() -> {
 						btn_submit_deposit.setEnabled(true);
-						btn_submit_deposit.setText("Deposit AJC");
+						btn_submit_deposit.setText(("Deposit " + com.harvanna.app.CoinInfo.ticker()));
 						et_deposit_amount.setText("");
 						_loadInsuranceStatus();
 						_loadBalance();
@@ -495,7 +495,7 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 				public void onError(String error) {
 					runOnUiThread(() -> {
 						btn_submit_deposit.setEnabled(true);
-						btn_submit_deposit.setText("Deposit AJC");
+						btn_submit_deposit.setText(("Deposit " + com.harvanna.app.CoinInfo.ticker()));
 						_showError("Deposit failed: " + error);
 					});
 				}

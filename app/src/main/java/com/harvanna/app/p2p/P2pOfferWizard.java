@@ -52,7 +52,7 @@ public final class P2pOfferWizard {
 
 	private static final Map<AppCompatActivity, Runnable> PAYMENT_REFRESH = new WeakHashMap<>();
 
-	private static final String INSUFFICIENT_BALANCE_ERROR = "You don't have that much AJC available.";
+	private static final String INSUFFICIENT_BALANCE_ERROR = ("You don't have that much " + com.harvanna.app.CoinInfo.ticker() + " available.");
 
 	private P2pOfferWizard() {}
 
@@ -133,7 +133,7 @@ public final class P2pOfferWizard {
 
 		if (tvPriceCurrency != null) tvPriceCurrency.setText(currency);
 		if (tvDuration != null) tvDuration.setText("7 days");
-		if (tvLimit != null) tvLimit.setText("Min 1 · Max — AJC");
+		if (tvLimit != null) tvLimit.setText(("Min 1 · Max — " + com.harvanna.app.CoinInfo.ticker()));
 		if (tvError1 != null) tvError1.setVisibility(View.GONE);
 		if (tvError2 != null) tvError2.setVisibility(View.GONE);
 
@@ -198,7 +198,7 @@ public final class P2pOfferWizard {
 				if (minOrder[0] > amount && amount > 0) minOrder[0] = Math.max(1, amount);
 				if (minOrder[0] > maxOrder[0]) minOrder[0] = maxOrder[0];
 				if (tvLimit != null && amount > 0) {
-					tvLimit.setText(String.format(Locale.US, "Min %s · Max %s AJC",
+					tvLimit.setText(String.format(Locale.US, ("Min %s · Max %s " + com.harvanna.app.CoinInfo.ticker()),
 						BalanceFormatter.smartDecimal(minOrder[0]), BalanceFormatter.smartDecimal(maxOrder[0])));
 				}
 				_refreshPricingDisplay(floatingMode[0], etPrice, etMargin, tvPriceNote,
@@ -223,7 +223,7 @@ public final class P2pOfferWizard {
 			rowLimit.setOnClickListener(v -> showLimitSheet(a, parse(etAmount), minOrder[0], maxOrder[0], (chosenMin, chosenMax) -> {
 				minOrder[0] = chosenMin;
 				maxOrder[0] = chosenMax;
-				if (tvLimit != null) tvLimit.setText(String.format(Locale.US, "Min %s · Max %s AJC",
+				if (tvLimit != null) tvLimit.setText(String.format(Locale.US, ("Min %s · Max %s " + com.harvanna.app.CoinInfo.ticker()),
 					BalanceFormatter.smartDecimal(chosenMin), BalanceFormatter.smartDecimal(chosenMax)));
 			}));
 		}
@@ -399,17 +399,17 @@ public final class P2pOfferWizard {
 	private static String validate(boolean sell, double amount, double price, double minOrder, double maxOrder,
 	                               List<PaymentMethod> methods, double available,
 	                               boolean floating, double marginPercent, double indexPrice) {
-		if (amount < 10 || amount > 5000) return "A listing must be between 10 and 5,000 AJC.";
+		if (amount < 10 || amount > 5000) return ("A listing must be between 10 and 5,000 " + com.harvanna.app.CoinInfo.ticker() + ".");
 		if (floating) {
 			if (indexPrice <= 0) return "No market rate available yet — floating pricing needs at least one open listing to price against. Use Fixed Price instead.";
 			if (marginPercent < -20 || marginPercent > 20) return "Floating margin must be between -20% and +20%.";
 		}
 		if (price <= 0) return "Enter a unit price greater than zero.";
-		if (minOrder < 1) return "Minimum trade must be at least 1 AJC.";
+		if (minOrder < 1) return ("Minimum trade must be at least 1 " + com.harvanna.app.CoinInfo.ticker() + ".");
 		if (maxOrder > amount) return "Maximum trade can't be more than the total you're listing.";
 		if (minOrder > maxOrder) return "Minimum trade can't be more than the maximum trade.";
 		if (sell && methods.isEmpty()) return "Pick at least one payment method so buyers know where to pay you.";
-		if (sell && available < 0) return "Couldn't load your AJC balance — go back and try again.";
+		if (sell && available < 0) return ("Couldn't load your " + com.harvanna.app.CoinInfo.ticker() + " balance — go back and try again.");
 		if (sell && amount > available) return INSUFFICIENT_BALANCE_ERROR;
 		return null;
 	}
@@ -564,14 +564,14 @@ public final class P2pOfferWizard {
 		minInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		minInput.setTextColor(ThemedDialogs.onSurface(a));
 		minInput.setHintTextColor(ThemedDialogs.onSurfaceVariant(a));
-		minInput.setHint("Min AJC");
+		minInput.setHint(("Min " + com.harvanna.app.CoinInfo.ticker()));
 		if (currentMin > 0) minInput.setText(BalanceFormatter.smartDecimal(currentMin));
 		root.addView(minInput);
 		EditText maxInput = new EditText(a);
 		maxInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		maxInput.setTextColor(ThemedDialogs.onSurface(a));
 		maxInput.setHintTextColor(ThemedDialogs.onSurfaceVariant(a));
-		maxInput.setHint("Max AJC");
+		maxInput.setHint(("Max " + com.harvanna.app.CoinInfo.ticker()));
 		double initialMax = currentMax > 0 ? currentMax : amount;
 		if (initialMax > 0) maxInput.setText(BalanceFormatter.smartDecimal(initialMax));
 		root.addView(maxInput);

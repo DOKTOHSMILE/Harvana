@@ -448,10 +448,10 @@ public class P2pExpressActivity extends AppCompatActivity {
 		buyMode = buy;
 		express_buy_tab.setAlpha(buy ? 1f : 0.6f);
 		express_sell_tab.setAlpha(!buy ? 1f : 0.6f);
-		tv_express_action_title.setText(buy ? "Buy AJC instantly" : "Sell AJC instantly");
+		tv_express_action_title.setText(buy ? ("Buy " + com.harvanna.app.CoinInfo.ticker() + " instantly") : ("Sell " + com.harvanna.app.CoinInfo.ticker() + " instantly"));
 		tv_express_action_description.setText(buy
-		? "Matches you with the best-priced Insured Trader selling AJC right now."
-		: "Matches you with the best-priced Insured Trader buying AJC right now.");
+		? ("Matches you with the best-priced Insured Trader selling " + com.harvanna.app.CoinInfo.ticker() + " right now.")
+		: ("Matches you with the best-priced Insured Trader buying " + com.harvanna.app.CoinInfo.ticker() + " right now."));
 		et_express_amount.setText("");
 		layout_express_payment_method.setVisibility(buy ? View.GONE : View.VISIBLE);
 		tv_express_payment_method.setText(buy ? "Any payment method" : (selectedMethod != null ? selectedMethod.primaryField : "Select receiving account"));
@@ -543,7 +543,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 						}
 						if (remaining.decrementAndGet() == 0) {
 							runOnUiThread(() -> {
-								tv_express_available_ajc.setText(BalanceFormatter.smartDecimal(totalLiquidity.get()) + " AJC");
+								tv_express_available_ajc.setText(BalanceFormatter.smartDecimal(totalLiquidity.get()) + (" " + com.harvanna.app.CoinInfo.ticker()));
 								tv_express_counterparties.setText(String.valueOf(qualifyingCount.get()));
 								tv_express_liquidity_status.setText(qualifyingCount.get() > 0 ? "Live" : "None right now");
 							});
@@ -555,7 +555,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 			@Override
 			public void onError(String error) {
 				runOnUiThread(() -> {
-					tv_express_match_title.setText("Couldn't reach AjooChain");
+					tv_express_match_title.setText("Couldn't reach Harvanna Protocol");
 					tv_express_match_description.setText(error);
 					btn_express_find_match.setEnabled(true);
 					btn_express_find_match.setText("Find Match");
@@ -652,15 +652,15 @@ public class P2pExpressActivity extends AppCompatActivity {
 			double ajcAmount = AjooNodeClient.toAjcDisplay(matchedAjcAmountRaw);
 			String ccy = P2pCurrencyFilterState.getCurrency();
 			card_express_quote.setVisibility(View.VISIBLE);
-			tv_express_rate.setText("1 AJC ≈ " + P2pMoney.fiat(matchedPrice, ccy));
+			tv_express_rate.setText(("1 " + com.harvanna.app.CoinInfo.ticker() + " ≈ ") + P2pMoney.fiat(matchedPrice, ccy));
 			tv_express_fiat.setText(P2pMoney.fiat(ajcAmount * matchedPrice, ccy));
 			tv_express_fee.setText("Shown after confirming — set by the node, never estimated here.");
 			
 			tv_express_match_indicator.setText("✓");
 			tv_express_match_title.setText("Matched — best available price found");
 			tv_express_match_description.setText(buyMode
-			? "You'll receive " + BalanceFormatter.smart(ajcAmount) + " AJC."
-			: "You'll provide " + BalanceFormatter.smart(ajcAmount) + " AJC.");
+			? "You'll receive " + BalanceFormatter.smart(ajcAmount) + (" " + com.harvanna.app.CoinInfo.ticker() + ".")
+			: "You'll provide " + BalanceFormatter.smart(ajcAmount) + (" " + com.harvanna.app.CoinInfo.ticker() + "."));
 			btn_express_find_match.setText("Confirm & Trade");
 			_startFreshnessCountdown();
 		});

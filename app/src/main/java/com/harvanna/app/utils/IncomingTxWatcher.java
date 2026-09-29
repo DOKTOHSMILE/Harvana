@@ -95,7 +95,7 @@ public final class IncomingTxWatcher {
 					
 					double amount = toDouble(doc.get("value"));
 					String symbol = str(doc.get("tokenSymbol"));
-					if (symbol.isEmpty()) symbol = "AJC";
+					if (symbol.isEmpty()) symbol = com.harvanna.app.CoinInfo.ticker();
 					String amountStr = String.format(java.util.Locale.US, "%.4f", amount);
 					
 					TransactionNotification.showReceived(appCtx, amountStr, symbol, from, txHash);

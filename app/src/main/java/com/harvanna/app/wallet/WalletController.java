@@ -199,7 +199,7 @@ public class WalletController {
                                 ? ((Number) tx.get("amount")).longValue() : 0L;
                         double amountAjc = AjooNodeClient.toAjcDisplay(rawAmount);
                         String symbol    = tx.get("tokenSymbol") != null
-                                ? tx.get("tokenSymbol").toString() : "AJC";
+                                ? tx.get("tokenSymbol").toString() : com.harvanna.app.CoinInfo.ticker();
 
                         // UI work (notification banner) must happen on the main
                         // thread — this callback's thread isn't guaranteed, so
@@ -210,7 +210,7 @@ public class WalletController {
 
                             Listener currentListener = listener; // avoid a null race
                             if (currentListener instanceof android.app.Activity) {
-                                String title   = "AJC Received";
+                                String title   = (com.harvanna.app.CoinInfo.ticker() + " Received");
                                 String message = com.harvanna.app.wallet.BalanceFormatter
                                         .short4(amountAjc) + " received";
                                 com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
@@ -311,7 +311,7 @@ public class WalletController {
                             item.put("recipientAddress", tx.optString("to", ""));
                             item.put("value", AjooNodeClient.toAjcDisplay(tx.optLong("amount", 0L)));
                             item.put("ajcFee", AjooNodeClient.toAjcDisplay(tx.optLong("gas", 0L)));
-                            item.put("tokenSymbol", "AJC");
+                            item.put("tokenSymbol", com.harvanna.app.CoinInfo.ticker());
                             item.put("txHash", tx.optString("txHash", ""));
                             item.put("status", tx.optString("status", "confirmed"));
                             item.put("blockNumber", tx.optLong("blockHeight", 0L));

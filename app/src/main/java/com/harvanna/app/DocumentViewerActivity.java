@@ -42,7 +42,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import androidx.core.content.FileProvider;
+import androidx.core.content.FileProvider;
+
 
 public class DocumentViewerActivity extends AppCompatActivity {
 	
@@ -92,14 +93,14 @@ public class DocumentViewerActivity extends AppCompatActivity {
 		if (docType == null) docType = "terms";
 		
 		if ("privacy".equals(docType)) {
-			assetFileName = "Ajoo-Privacy-Policy.docx";
+			assetFileName = "Harvanna-Privacy-Policy.docx";
 			if (getSupportActionBar() != null) {
 				getSupportActionBar().setTitle("Privacy Policy");
 				getSupportActionBar().setSubtitle("");
 			}
 			getSupportActionBar().setTitle("Privacy Policy");
 		} else {
-			assetFileName = "Ajoo-Terms-of-Service.docx";
+			assetFileName = "Harvanna-Terms-of-Service.docx";
 			if (getSupportActionBar() != null) {
 				getSupportActionBar().setTitle("Terms of Service");
 				getSupportActionBar().setSubtitle("");
@@ -153,4 +154,4 @@ public class DocumentViewerActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

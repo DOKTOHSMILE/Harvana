@@ -640,7 +640,7 @@ public class DiscoverFragmentActivity extends Fragment {
 				tv_members.setText(String.valueOf((long) _safeDouble(group, "membersCount")));
 			}
 			if (tv_slotAmount != null) {
-				tv_slotAmount.setText(String.format(Locale.US, "%.4f AJC", _safeDouble(group, "contributionAmount")));
+				tv_slotAmount.setText(String.format(Locale.US, ("%.4f " + com.harvanna.app.CoinInfo.ticker()), _safeDouble(group, "contributionAmount")));
 			}
 			
 			double trustScore = _safeDouble(group, "trustScore");
@@ -686,4 +686,4 @@ public class DiscoverFragmentActivity extends Fragment {
 			return _view;
 		}
 	}
-}
+}

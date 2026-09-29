@@ -242,8 +242,8 @@ public class AssetFragmentActivity extends Fragment {
 		}
 		
 		// 2. Other non-sensitive metadata
-		String network = prefs.getString("network", "Ajoocoin Testnet");
-		String nativeSymbol = prefs.getString("native_symbol", "AJC");
+		String network = prefs.getString("network", (com.harvanna.app.CoinInfo.name() + " Testnet"));
+		String nativeSymbol = prefs.getString("native_symbol", com.harvanna.app.CoinInfo.ticker());
 		boolean isWalletCreated = prefs.getBoolean("is_wallet_created", false);
 		long createdTimestamp = prefs.getLong("wallet_created_timestamp", 0L);
 		
@@ -542,8 +542,8 @@ public class AssetFragmentActivity extends Fragment {
 				final ArrayList<HashMap<String, Object>> loadedCoins = new ArrayList<>();
 				
 				HashMap<String, Object> nativeCoin = new HashMap<>();
-				nativeCoin.put("coin_name",       "Ajoo Coin");
-				nativeCoin.put("coin_symbol",      "AJC");
+				nativeCoin.put("coin_name",       com.harvanna.app.CoinInfo.name());
+				nativeCoin.put("coin_symbol",      com.harvanna.app.CoinInfo.ticker());
 				nativeCoin.put("coin_balance",
 				String.format(java.util.Locale.US, "%.8f", ajcBalance));
 				nativeCoin.put("coin_value", rateAvailable
@@ -581,7 +581,7 @@ public class AssetFragmentActivity extends Fragment {
 				com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
 				requireActivity(), // Replace with your current Activity
 				"Incoming Transfer", 
-				"Received " + String.format(Locale.US, "%.5f", amount) + " AJC",
+				"Received " + String.format(Locale.US, "%.5f", amount) + (" " + com.harvanna.app.CoinInfo.ticker()),
 				sender
 				);
 			}
@@ -697,4 +697,4 @@ public class AssetFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

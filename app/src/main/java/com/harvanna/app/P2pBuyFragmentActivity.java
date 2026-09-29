@@ -57,7 +57,8 @@ import com.google.android.material.color.MaterialColors;
 import com.harvanna.app.p2p.P2pCurrencyFilterState;
 import com.harvanna.app.p2p.P2pMoney;
 import com.harvanna.app.p2p.ThemedDialogs;
-
+
+
 
 public class P2pBuyFragmentActivity extends Fragment {
 	
@@ -134,7 +135,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		btn_fragment_empty_cta.setVisibility(View.VISIBLE);
 		btn_fragment_empty_cta.setOnClickListener(v ->
 		startActivity(new Intent(requireContext(), CreateP2pBuyOfferActivity.class)));
-		if (textview1 != null) textview1.setText("AJC");
+		if (textview1 != null) textview1.setText(com.harvanna.app.CoinInfo.ticker());
 		
 		_main.setOnRefreshListener(this::_loadListings);
 		
@@ -411,7 +412,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		});
 		
 		MaterialTextView label = new MaterialTextView(requireContext());
-		label.setText("AJC — AjooChain");
+		label.setText((com.harvanna.app.CoinInfo.ticker() + " — Harvanna Protocol"));
 		label.setTextColor(colorOnSurface);
 		label.setTextSize(16f);
 		label.setTypeface(null, Typeface.BOLD); // Bolder text for main assets improves readability
@@ -453,7 +454,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		int colorOnPrimary = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorOnPrimary, Color.WHITE);
 		
 		EditText input = new EditText(requireContext());
-		input.setHint("Enter AJC amount");
+		input.setHint(("Enter " + com.harvanna.app.CoinInfo.ticker() + " amount"));
 		input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		
 		input.setTextColor(colorOnSurface);
@@ -877,9 +878,9 @@ public class P2pBuyFragmentActivity extends Fragment {
 			txt_rating.setText(e.trustScore >= 0 ? String.format(Locale.US, "Trust %d", e.trustScore) : "—");
 			txt_trades.setText(e.completedTrades + " trades");
 			txt_unique.setText("• " + e.uniqueCounterparties + " unique");
-			txt_available.setText(String.format(Locale.US, "%.4f AJC", e.remainingAjc));
-			txt_min.setText(String.format(Locale.US, "Min %.4f AJC", e.minOrderAjc));
-			txt_max.setText(String.format(Locale.US, "Max %.4f AJC", e.remainingAjc));
+			txt_available.setText(String.format(Locale.US, ("%.4f " + com.harvanna.app.CoinInfo.ticker()), e.remainingAjc));
+			txt_min.setText(String.format(Locale.US, ("Min %.4f " + com.harvanna.app.CoinInfo.ticker()), e.minOrderAjc));
+			txt_max.setText(String.format(Locale.US, ("Max %.4f " + com.harvanna.app.CoinInfo.ticker()), e.remainingAjc));
 			txt_price.setText(e.unitPrice >= 0 ? String.format(Locale.US, "%,.2f", e.unitPrice) : "Unavailable");
 			
 			payment_one.setVisibility(View.INVISIBLE);
@@ -920,4 +921,4 @@ public class P2pBuyFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

@@ -139,3 +139,16 @@ replace this one. Until then email/password may work but Google sign-in will not
 for the debug SHA-1 (bff2f88297ff53dd1f21bca9e5a36e49011fc55a) and the web client used by `requestIdToken`. This is the config Google sign-in needs.
 Whether the SHA-256 is also registered is not visible in this file. Still to verify on a device: Google sign-in, and that Email/Password + Google
 providers are enabled in Authentication.
+
+## Coin ticker and name from the node (29 Sep 2026)
+- New `CoinInfo` (ticker/name), loaded from cache at startup and refreshed from `GET /api/v1/chain/info` (`ticker`). Defaults: HARV / Harvanna.
+  The node publishes NO coin name and NO decimals; `CoinInfo` will pick up `coinName`/`name` if the node adds it. Node-side suggestion:
+  add `coinName` and `decimals` to `/chain/info`.
+- 194 user-visible string literals in 51 Java files no longer hardcode AJC/Ajoo/Ajoocoin/AjooChain: they use `CoinInfo.ticker()`/`name()` or "Harvanna" / "Harvanna Protocol".
+  Left on purpose: class/identifier names, log tags, file-system folder names (`Ajoo`, `Ajoo/media/documents`, so nothing saved by older code is orphaned),
+  and "Ajoo Node Miner" (a separate app with its own package/name).
+- Static text in XML layouts says HARV (set earlier); it is not fetched dynamically. If the node ever changes the ticker, Java-built text follows, layout text does not.
+- **Found, not fixed:** `HomeFragmentActivity` and `GroupPaymentFragmentActivity` use a hardcoded `AJC_TO_NGN = 150.0` to show a Naira value. That is a made-up
+  rate, so the "NGN" totals (e.g. the asset screen) are not real. The node's mark is the right source but no endpoint exposes it yet; until then these should show no
+  Naira value (or the open-listing median labelled as approximate). Needs an owner decision.
+- **Found, not fixed:** the transaction detail screen shows an "Amount Burned" row; the node's fee model (87% miner / 3% good-behaviour / 10% staking) has no burn.

@@ -46,7 +46,8 @@ import java.util.*;
 import java.util.regex.*;
 import org.json.*;
 import com.harvanna.app.sync.AjooNodeClient;
-import androidx.core.content.FileProvider;
+import androidx.core.content.FileProvider;
+
 
 public class HistoryFragmentActivity extends Fragment {
 	
@@ -138,12 +139,13 @@ public class HistoryFragmentActivity extends Fragment {
 			_loadWalletActivity();
 		}
 	}
-	
+	
+
 	public void _MORE() {
 	}
 	private String groupId = "";
 	private String groupWalletAddress = "";
-	private String groupName = "Ajoo Group";
+	private String groupName = "Harvanna Group";
 	private String groupType = "Rotating";
 	private String groupLocation = "";
 	private List<HashMap<String, Object>> allTransactions = new ArrayList<>();
@@ -177,7 +179,7 @@ public class HistoryFragmentActivity extends Fragment {
 			if (w == null) w = cached.get("group_wallet");
 			if (w != null) groupWalletAddress = w.toString();
 			
-			groupName = str(cached, "groupName", str(cached, "name", "Ajoo Group"));
+			groupName = str(cached, "groupName", str(cached, "name", "Harvanna Group"));
 			groupType = str(cached, "groupType", "");
 			groupLocation = _extractLocation(cached);
 			
@@ -194,7 +196,7 @@ public class HistoryFragmentActivity extends Fragment {
 				Object walletObj = data.get("groupWalletAddress");
 				groupWalletAddress = walletObj != null ? walletObj.toString() : "";
 				
-				groupName = str(data, "groupName", str(data, "name", "Ajoo Group"));
+				groupName = str(data, "groupName", str(data, "name", "Harvanna Group"));
 				groupType = str(data, "groupType", "");
 				groupLocation = _extractLocation(data);
 				
@@ -477,7 +479,7 @@ public class HistoryFragmentActivity extends Fragment {
 			writer.append("Group Name: ").append(groupName).append("\n");
 			writer.append("Group Type: ").append(groupType).append("\n");
 			writer.append("Location: ").append(groupLocation).append("\n\n");
-			writer.append("Date,TxHash,Type,Amount(AJC),Counterparty,Memo,Status\n");
+			writer.append(("Date,TxHash,Type,Amount(" + com.harvanna.app.CoinInfo.ticker() + "),Counterparty,Memo,Status\n"));
 			
 			// APPLIED FIX: Data layer formatter for CSV (NO COMMAS)
 			java.text.DecimalFormat dataDf = new java.text.DecimalFormat("0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
@@ -555,7 +557,7 @@ public class HistoryFragmentActivity extends Fragment {
 				paint.setTextSize(11f);
 				paint.setFakeBoldText(true);
 				// APPLIED FIX
-				canvas.drawText(date + "  |  " + type + "  |  " + _formatUIBalance(amt) + " AJC  |  " + status, 40, y, paint);
+				canvas.drawText(date + "  |  " + type + "  |  " + _formatUIBalance(amt) + (" " + com.harvanna.app.CoinInfo.ticker() + "  |  ") + status, 40, y, paint);
 				
 				paint.setFakeBoldText(false);
 				paint.setColor(Color.DKGRAY);
@@ -620,7 +622,7 @@ public class HistoryFragmentActivity extends Fragment {
 				String status = ((long) num(tx, "confirmations") > 0) ? "Confirmed" : "Pending";
 				
 				// APPLIED FIX
-				docContent.append("• ").append(date).append(" | ").append(type).append(" | ").append(_formatUIBalance(amt)).append(" AJC | ").append(status).append("\n");
+				docContent.append("• ").append(date).append(" | ").append(type).append(" | ").append(_formatUIBalance(amt)).append((" " + com.harvanna.app.CoinInfo.ticker() + " | ")).append(status).append("\n");
 				docContent.append("    Wallet: ").append(counterparty).append("\n");
 				docContent.append("    TxHash: ").append(hash).append("\n");
 				if (!memo.isEmpty()) {
@@ -692,7 +694,7 @@ public class HistoryFragmentActivity extends Fragment {
 				paint.setTextSize(11f);
 				paint.setFakeBoldText(true);
 				// APPLIED FIX
-				canvas.drawText(date + "  |  " + type + "  |  " + _formatUIBalance(amt) + " AJC  |  " + status, 40, y, paint);
+				canvas.drawText(date + "  |  " + type + "  |  " + _formatUIBalance(amt) + (" " + com.harvanna.app.CoinInfo.ticker() + "  |  ") + status, 40, y, paint);
 				
 				paint.setFakeBoldText(false);
 				paint.setColor(Color.DKGRAY);
@@ -765,7 +767,7 @@ public class HistoryFragmentActivity extends Fragment {
 				String prefix = isOut ? "Sent out · " : "Received · ";
 				// APPLIED FIX
 				String amountText = _formatUIBalance(amountAjc);
-				h.name.setText(prefix + amountText + " AJC");
+				h.name.setText(prefix + amountText + (" " + com.harvanna.app.CoinInfo.ticker()));
 				h.name.setTextColor(isOut ? 0xFFF44336 : 0xFF4CAF50);
 			}
 			
@@ -797,7 +799,7 @@ public class HistoryFragmentActivity extends Fragment {
 				intent.putExtra("status", status);
 				intent.putExtra("senderAddress", from);
 				intent.putExtra("recipientAddress", to);
-				intent.putExtra("tokenSymbol", "AJC");
+				intent.putExtra("tokenSymbol", com.harvanna.app.CoinInfo.ticker());
 				intent.putExtra("value", amountAjc);
 				intent.putExtra("timestamp", ts);
 				intent.putExtra("memo", memo);
@@ -857,4 +859,4 @@ public class HistoryFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

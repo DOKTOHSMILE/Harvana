@@ -82,7 +82,7 @@ public class TransactionRouter {
 
         // Token transfers — not implemented (see class doc above).
         callback.onError("ERR_TOKEN_UNSUPPORTED",
-                "Sending tokens other than AJC isn't supported yet.");
+                ("Sending tokens other than " + com.harvanna.app.CoinInfo.ticker() + " isn't supported yet."));
     }
 
     public static void routeTransaction(String sender, String recipient, BigDecimal amount,

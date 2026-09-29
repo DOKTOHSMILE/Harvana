@@ -518,7 +518,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		if (getContext() == null) return;
 		String myWallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(getContext());
 		if (myWallet == null || myWallet.isEmpty()) {
-			SketchwareUtil.showMessage(getContext(), "Link your AJC wallet first.");
+			SketchwareUtil.showMessage(getContext(), ("Link your " + com.harvanna.app.CoinInfo.ticker() + " wallet first."));
 			return;
 		}
 		
@@ -798,7 +798,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		}
 		String myWallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(getContext());
 		if (myWallet == null || !myWallet.startsWith("HV0x")) {
-			SketchwareUtil.showMessage(getContext(), "Link your AJC wallet first.");
+			SketchwareUtil.showMessage(getContext(), ("Link your " + com.harvanna.app.CoinInfo.ticker() + " wallet first."));
 			return;
 		}
 		if (remainingDue <= 0.0001) {
@@ -1325,13 +1325,13 @@ public class GroupLoansFragmentActivity extends Fragment {
 	private String _formatUIBalance(double v) {
 		try {
 			java.text.DecimalFormat uiDf = new java.text.DecimalFormat("#,##0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
-			return uiDf.format(v) + " AJC";
+			return uiDf.format(v) + (" " + com.harvanna.app.CoinInfo.ticker());
 		} catch (Exception e) {
-			return String.valueOf(v) + " AJC";
+			return String.valueOf(v) + (" " + com.harvanna.app.CoinInfo.ticker());
 		}
 	}
 	
 	{
 	}
 	
-}
+}

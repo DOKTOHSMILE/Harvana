@@ -1273,7 +1273,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	final String finalPersonalAddress,
 	final String finalPersonalSeed) {
 		runOnUiThread(() -> {
-			progress.setMessage("Checking balance for 5 AJC fee...");
+			progress.setMessage(("Checking balance for 5 " + com.harvanna.app.CoinInfo.ticker() + " fee..."));
 			com.harvanna.app.wallet.WalletNodeBridge.fetchLiveBalance(CreateNewGroupActivity.this, finalPersonalAddress,
 			new com.harvanna.app.wallet.WalletNodeBridge.BalanceCallback() {
 				@Override
@@ -1283,7 +1283,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 						java.math.BigDecimal requiredAmount = new java.math.BigDecimal("5.005");
 						if (balance.compareTo(requiredAmount) < 0) {
 							if (!isFinishing() && progress.isShowing()) progress.dismiss();
-							SketchwareUtil.showMessage(context, "Insufficient balance. You need at least 5.005 AJC.");
+							SketchwareUtil.showMessage(context, ("Insufficient balance. You need at least 5.005 " + com.harvanna.app.CoinInfo.ticker() + "."));
 							return;
 						}
 						
@@ -1302,7 +1302,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 							return;
 						}
 						
-						progress.setMessage("Transferring 5 AJC to group wallet...");
+						progress.setMessage(("Transferring 5 " + com.harvanna.app.CoinInfo.ticker() + " to group wallet..."));
 						// THE FIX: this moved 5 AJC with zero PIN/biometric
 						// confirmation — the only money-moving screen in the
 						// app besides Send/P2P that had no gate at all.
@@ -1353,13 +1353,13 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 										_submitNewGroupData(groupWalletAddress);
 										bottomSheetDialog.dismiss();
 										SketchwareUtil.showMessage(context,
-										"Group Created — 5 AJC transfer submitted!");
+										("Group Created — 5 " + com.harvanna.app.CoinInfo.ticker() + " transfer submitted!"));
 										
 										final String createdGroupName = group_name_edittext1.getText().toString().trim();
 										new androidx.appcompat.app.AlertDialog.Builder(context)
 										.setTitle("Back up this group's wallet?")
-										.setMessage("As the group's admin, you're the one holding its wallet key. An Ajoo Access Card is a physical backup for it — recommended for any group holding real funds.")
-										.setPositiveButton("Create Ajoo Card", (d, w) -> {
+										.setMessage("As the group's admin, you're the one holding its wallet key. An Harvanna Access Card is a physical backup for it — recommended for any group holding real funds.")
+										.setPositiveButton("Create Harvanna Card", (d, w) -> {
 											Intent cardIntent = new Intent(context, com.harvanna.app.CreateAjooCardActivity.class);
 											cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
 											cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_LABEL, createdGroupName);
@@ -1712,7 +1712,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
 				CreateNewGroupActivity.this,
 				"Incoming Transfer",
-				"Received " + String.format(Locale.US, "%.5f", amount) + " AJC",
+				"Received " + String.format(Locale.US, "%.5f", amount) + (" " + com.harvanna.app.CoinInfo.ticker()),
 				sender
 				);
 			}
@@ -1908,7 +1908,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		final String finalPersonalAddress = resolvedAddress;
 		final String finalPersonalSeed = personalSeed;
 		
-		progress.setMessage("Connecting to AJC node...");
+		progress.setMessage(("Connecting to " + com.harvanna.app.CoinInfo.ticker() + " node..."));
 		com.harvanna.app.sync.AjooNodeClient.getWallet(groupWalletAddress,
 		new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
 			@Override
@@ -1929,7 +1929,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				if (nodeDown) {
 					CreateNewGroupActivity.this.runOnUiThread(() -> {
 						if (!CreateNewGroupActivity.this.isFinishing() && progress.isShowing()) progress.dismiss();
-						SketchwareUtil.showMessage(context, "AJC node unreachable: " + error);
+						SketchwareUtil.showMessage(context, (com.harvanna.app.CoinInfo.ticker() + " node unreachable: ") + error);
 					});
 					return;
 				}

@@ -153,7 +153,7 @@ public final class AjooCardCrypto {
 
     public static DecryptResult decryptCardPayload(Context context, String scannedText, String password) {
         if (scannedText == null || !scannedText.startsWith(FORMAT_PREFIX)) {
-            return DecryptResult.fail("This QR code isn't an Ajoo Access Card.");
+            return DecryptResult.fail("This QR code isn't an Harvanna Access Card.");
         }
         try {
             byte[] raw = Base64.decode(scannedText.substring(FORMAT_PREFIX.length()), Base64.NO_WRAP);

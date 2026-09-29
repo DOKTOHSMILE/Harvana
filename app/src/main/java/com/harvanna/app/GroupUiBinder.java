@@ -93,7 +93,7 @@ public final class GroupUiBinder {
 
     private static String formatAjc(double v) {
         if (Math.abs(v - Math.rint(v)) < 0.0001) {
-            return String.format(Locale.US, "%.0f AJC", v);
+            return String.format(Locale.US, ("%.0f " + com.harvanna.app.CoinInfo.ticker()), v);
         }
         return com.harvanna.app.wallet.BalanceFormatter.smart(v);
     }

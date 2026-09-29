@@ -41,7 +41,8 @@ import java.util.regex.*;
 import org.json.*;
 import com.harvanna.app.wallet.WalletManager;
 import java.net.URL;
-import java.net.HttpURLConnection;
+import java.net.HttpURLConnection;
+
 
 public class WalletActivityFragmentActivity extends Fragment {
 	
@@ -113,7 +114,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 		_loadTransactionHistory();
 		
 	}
-	
+	
+
 	public void _MORE() {
 	}
 	public void _loadTransactionHistory() {
@@ -195,7 +197,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 							entry.put("recipientAddress", tx.optString("to", ""));
 							entry.put("memo", tx.optString("memo", "")); 
 							entry.put("value", com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(tx.optLong("amount", 0L)));
-							entry.put("tokenSymbol", "AJC");
+							entry.put("tokenSymbol", com.harvanna.app.CoinInfo.ticker());
 							entry.put("status", "pending");
 							entry.put("timestamp", System.currentTimeMillis());
 							knownPending.add(entry);
@@ -264,7 +266,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 								}
 								item.put("value", displayValue);
 								
-								item.put("tokenSymbol", tx.optString("tokenSymbol", tx.optString("token", "AJC")));
+								item.put("tokenSymbol", tx.optString("tokenSymbol", tx.optString("token", com.harvanna.app.CoinInfo.ticker())));
 								item.put("txHash", tx.optString("txHash", ""));
 								item.put("status", tx.optString("status", "confirmed"));
 								
@@ -409,8 +411,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 			String recipient = safeAddress(item.get("recipientAddress"));
 			
 			String asset = item.get("tokenSymbol") != null 
-			? item.get("tokenSymbol").toString().toUpperCase() : "AJC";
-			if (asset.isEmpty() || "NULL".equals(asset)) asset = "AJC";
+			? item.get("tokenSymbol").toString().toUpperCase() : com.harvanna.app.CoinInfo.ticker();
+			if (asset.isEmpty() || "NULL".equals(asset)) asset = com.harvanna.app.CoinInfo.ticker();
 			
 			double amount = 0.0;
 			Object valObj = item.get("value");
@@ -612,4 +614,4 @@ public class WalletActivityFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

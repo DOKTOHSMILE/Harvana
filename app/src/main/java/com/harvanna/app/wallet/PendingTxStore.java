@@ -35,7 +35,7 @@ public final class PendingTxStore {
 		entry.put("senderAddress", walletAddress);
 		entry.put("recipientAddress", recipient);
 		entry.put("value", amount);
-		entry.put("tokenSymbol", symbol != null ? symbol : "AJC");
+		entry.put("tokenSymbol", symbol != null ? symbol : com.harvanna.app.CoinInfo.ticker());
 		entry.put("status", "pending");
 		entry.put("timestamp", System.currentTimeMillis());
 		
@@ -53,7 +53,7 @@ public final class PendingTxStore {
 		entry.put("senderAddress", walletAddress);
 		entry.put("recipientAddress", recipient);
 		entry.put("value", amount);
-		entry.put("tokenSymbol", symbol != null ? symbol : "AJC");
+		entry.put("tokenSymbol", symbol != null ? symbol : com.harvanna.app.CoinInfo.ticker());
 		entry.put("status", "failed");
 		entry.put("errorMessage", errorMessage != null ? errorMessage : "Send failed");
 		entry.put("timestamp", System.currentTimeMillis());

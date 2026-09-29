@@ -213,7 +213,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 			tv_wallet_address.setText("No Wallet Address Found");
 		}
 		
-		setTitle("Ajoo Coin");
+		setTitle(com.harvanna.app.CoinInfo.name());
 		_loadTokenomicsInfo();
 		
 	}
@@ -270,7 +270,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		_setStatRow(R.id.row_block_height, "Block Height", "Loading…");
 		_setStatRow(R.id.row_block_reward, "Block Reward", "Loading…");
 		_setStatRow(R.id.row_halving, "Next Halving", "Loading…");
-		_setStatRow(R.id.row_network, "Network", "AjooChain testnet");
+		_setStatRow(R.id.row_network, "Network", "Harvanna Protocol testnet");
 		
 		// Total Holders — was hardcoded to "Not available" with nothing
 		// ever calling the node for it. Independent of the genesis/tip
@@ -452,7 +452,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 				com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
 				CoinDetailActivity.this,
 				"Incoming Transfer", 
-				"Received " + String.format(Locale.US, "%.5f", amount) + " AJC",
+				"Received " + String.format(Locale.US, "%.5f", amount) + (" " + com.harvanna.app.CoinInfo.ticker()),
 				sender
 				);
 			}
@@ -485,8 +485,8 @@ public class CoinDetailActivity extends AppCompatActivity {
 				com.harvanna.app.wallet.FiatValueHelper.convertAjcToFiat(ajcBalance, currencyCode, (fiatValue, rateAvailable) -> {
 					final ArrayList<HashMap<String, Object>> loadedCoins = new ArrayList<>();
 					HashMap<String, Object> nativeCoin = new HashMap<>();
-					nativeCoin.put("coin_name",       "Ajoo Coin");
-					nativeCoin.put("coin_symbol",      "AJC");
+					nativeCoin.put("coin_name",       com.harvanna.app.CoinInfo.name());
+					nativeCoin.put("coin_symbol",      com.harvanna.app.CoinInfo.ticker());
 					nativeCoin.put("coin_balance",
 					String.format(java.util.Locale.US, "%.8f", ajcBalance));
 					// THE FIX: hardcoded "0.00", plus a pre-existing bug
@@ -581,7 +581,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		}
 		
 		final List<String> assetList = new ArrayList<>();
-		assetList.add("Ajoocoin (AJC)");
+		assetList.add((com.harvanna.app.CoinInfo.name() + " (" + com.harvanna.app.CoinInfo.ticker() + ")"));
 		
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, assetList) {
 			@NonNull
@@ -613,7 +613,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 			}
 			android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 			if (clipboard != null) {
-				ClipData clip = ClipData.newPlainText("Ajoo Wallet Address", activeAddress);
+				ClipData clip = ClipData.newPlainText("Harvanna Wallet Address", activeAddress);
 				clipboard.setPrimaryClip(clip);
 				SketchwareUtil.showMessage(CoinDetailActivity.this, "Address copied!");
 			}

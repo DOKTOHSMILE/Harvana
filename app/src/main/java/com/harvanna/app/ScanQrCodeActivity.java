@@ -50,7 +50,8 @@ import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 
-import com.harvanna.app.wallet.AjooCardCrypto;
+import com.harvanna.app.wallet.AjooCardCrypto;
+
 
 public class ScanQrCodeActivity extends AppCompatActivity {
 	
@@ -257,7 +258,7 @@ public class ScanQrCodeActivity extends AppCompatActivity {
 			? null : "That doesn't look like a wallet address. Try again.";
 			case MODE_AJOO_CARD:
 			return text.startsWith(AjooCardCrypto.FORMAT_PREFIX)
-			? null : "That's not an Ajoo Access Card QR code.";
+			? null : "That's not an Harvanna Access Card QR code.";
 			case MODE_ANY:
 			default:
 			return null;
@@ -279,4 +280,4 @@ public class ScanQrCodeActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

@@ -312,7 +312,7 @@ public class CreateAjooCardActivity extends AppCompatActivity {
       return;
     }
     new AlertDialog.Builder(this).setTitle("Skip the backup card?").setMessage(
-        "Without a saved Ajoo Access Card, this wallet has no backup yet. If you lose this device, the funds are gone. Are you sure you want to cancel wallet creation?")
+        "Without a saved Harvanna Access Card, this wallet has no backup yet. If you lose this device, the funds are gone. Are you sure you want to cancel wallet creation?")
         .setPositiveButton("Cancel Wallet Creation", (d, w) -> {
           setResult(RESULT_CANCELED);
           super.onBackPressed();

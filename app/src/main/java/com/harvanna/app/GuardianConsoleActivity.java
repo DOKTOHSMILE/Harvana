@@ -200,7 +200,7 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 		Button btnReturnSeller = card.findViewById(R.id.btn_card_return_seller);
 		
 		tvOrderId.setText("Order " + _shortKey(orderId));
-		tvAmount.setText(String.format(Locale.US, "%.4f AJC  \u00b7  %,d %s",
+		tvAmount.setText(String.format(Locale.US, ("%.4f " + com.harvanna.app.CoinInfo.ticker() + "  \u00b7  %,d %s"),
 		amount, priceForAmount, currency));
 		tvParties.setText("Seller: " + _shortKey(sellerAddress) + "   Buyer: " + _shortKey(buyerAddress));
 		tvReason.setText(reason);
@@ -236,7 +236,7 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 	
 	private void _confirmAndSign(String orderId, String resolution, TextView tvSigCounts,
 	Button btnReleaseBuyer, Button btnReturnSeller) {
-		String actionLabel = "RELEASE_TO_BUYER".equals(resolution) ? "release this trade's AJC to the buyer" : "return this trade's AJC to the seller";
+		String actionLabel = "RELEASE_TO_BUYER".equals(resolution) ? ("release this trade's " + com.harvanna.app.CoinInfo.ticker() + " to the buyer") : ("return this trade's " + com.harvanna.app.CoinInfo.ticker() + " to the seller");
 		new androidx.appcompat.app.AlertDialog.Builder(this)
 		.setTitle("Confirm your vote")
 		.setMessage("You're about to " + actionLabel + ". This adds your signature toward resolving this dispute \u2014 it only takes effect once enough guardians agree.")

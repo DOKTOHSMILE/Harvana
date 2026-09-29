@@ -134,7 +134,7 @@ public class HelpSupportActivity extends AppCompatActivity {
 		rowContactEmail.setOnClickListener(v -> {
 			Intent intent = new Intent(Intent.ACTION_SENDTO);
 			intent.setData(Uri.parse("mailto:support@ajoo.app"));
-			intent.putExtra(Intent.EXTRA_SUBJECT, "Ajoo Support Request");
+			intent.putExtra(Intent.EXTRA_SUBJECT, "Harvanna Support Request");
 			try {
 				startActivity(intent);
 			} catch (Exception e) {
@@ -144,4 +144,4 @@ public class HelpSupportActivity extends AppCompatActivity {
 		});
 	}
 	
-}
+}

@@ -468,7 +468,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 				com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
 				GroupDetailsActivity.this,
 				"Incoming Transfer", 
-				"Received " + String.format(Locale.US, "%.5f", amount) + " AJC",
+				"Received " + String.format(Locale.US, "%.5f", amount) + (" " + com.harvanna.app.CoinInfo.ticker()),
 				sender
 				);
 			}

@@ -391,7 +391,7 @@ public final class GroupLoanManager {
                         
                         if (amountAjc > remainingDue + 0.0001) {
                             callback.onError("Amount exceeds what's owed ("
-                                    + com.harvanna.app.wallet.BalanceFormatter.smart(remainingDue) + " AJC remaining).");
+                                    + com.harvanna.app.wallet.BalanceFormatter.smart(remainingDue) + (" " + com.harvanna.app.CoinInfo.ticker() + " remaining)."));
                             return;
                         }
 

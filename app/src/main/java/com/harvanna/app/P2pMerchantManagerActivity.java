@@ -392,7 +392,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			String stateLabel = !isOpen ? "Closed" : (hasOrders ? "Matched" : "Active");
 			tv_offer_status.setText(stateLabel);
 			tv_offer_id.setText(_shortId(listingId));
-			tv_offer_amount.setText(String.format(Locale.US, "%.4f / %.4f AJC", remainingAjc, totalAjc));
+			tv_offer_amount.setText(String.format(Locale.US, ("%.4f / %.4f " + com.harvanna.app.CoinInfo.ticker()), remainingAjc, totalAjc));
 			tv_offer_price.setText("Loading…");
 			tv_offer_fiat_value.setText("Loading…");
 			tv_offer_orders_count.setText(myOrderCount + " order" + (myOrderCount == 1 ? "" : "s"));

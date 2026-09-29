@@ -510,7 +510,7 @@ public class SettingsActivity extends AppCompatActivity {
 		double trustScore = _num(data, "trust_score");
 		
 		String fullName = (firstName + " " + lastName).trim();
-		tvSettingsName.setText(fullName.isEmpty() ? "Ajoo Member" : fullName);
+		tvSettingsName.setText(fullName.isEmpty() ? "Harvanna Member" : fullName);
 		
 		if (!firstName.isEmpty()) {
 			tvSettingsHandle.setText("@" + firstName.toLowerCase());

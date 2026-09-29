@@ -365,7 +365,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		
 		if (getSupportActionBar() != null) {
 			getSupportActionBar().setTitle("P2P Trade");
-			getSupportActionBar().setSubtitle("Order #AJC-8F42D1");
+			getSupportActionBar().setSubtitle(("Order #" + com.harvanna.app.CoinInfo.ticker() + "-8F42D1"));
 		}
 		
 		
@@ -661,8 +661,8 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		String ccy = listingCurrency != null ? listingCurrency : com.harvanna.app.p2p.P2pCurrencyFilterState.getCurrency();
 		fiat_amount_large.setText(unitPrice >= 0 ? com.harvanna.app.p2p.P2pMoney.fiat(claimedAjc * unitPrice, ccy) : "—");
 		unit_price.setText(unitPrice >= 0 ? com.harvanna.app.p2p.P2pMoney.perAjc(unitPrice, ccy) : "—");
-		maker_fee.setText(String.format(Locale.US, "-%s AJC", BalanceFormatter.smartDecimal(feeAjc)));
-		network_fee.setText(String.format(Locale.US, "-%s AJC", BalanceFormatter.smartDecimal(networkFeeAjc)));
+		maker_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(feeAjc)));
+		network_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(networkFeeAjc)));
 		payment_amount.setText(unitPrice >= 0 ? com.harvanna.app.p2p.P2pMoney.fiat(claimedAjc * unitPrice, ccy) : "—");
 	}
 	
@@ -708,7 +708,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 			_setStatusBadge("Completed");
 			completed_card.setVisibility(View.VISIBLE);
 			completed_title.setText("Trade completed");
-			completed_description.setText("The seller confirmed your payment and the AJC has been released to your wallet.");
+			completed_description.setText(("The seller confirmed your payment and the " + com.harvanna.app.CoinInfo.ticker() + " has been released to your wallet."));
 			completed_transaction.setText(releaseTxHashValue.isEmpty() ? "—" : releaseTxHashValue);
 			blockchain_card.setVisibility(View.VISIBLE);
 			blockchain_status.setText("Verified");
@@ -730,7 +730,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 			case "CANCELLED":
 			_setStatusBadge("Cancelled");
 			current_action_title.setText("This order was cancelled");
-			current_action_description.setText("No AJC moved for this order.");
+			current_action_description.setText(("No " + com.harvanna.app.CoinInfo.ticker() + " moved for this order."));
 			action_status_card.setVisibility(View.VISIBLE);
 			timeline_card.setVisibility(View.VISIBLE);
 			break;

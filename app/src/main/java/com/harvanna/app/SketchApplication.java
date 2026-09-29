@@ -42,6 +42,10 @@ public class SketchApplication extends Application {
         // One-time AJ0x -> HV0x wallet address migration (idempotent)
         com.harvanna.app.wallet.AddressMigration.run(this);
         
+        // Coin ticker/name come from the node (cached; defaults HARV / Harvanna)
+        CoinInfo.init(this);
+        CoinInfo.refresh(this);
+        
         // GLOBAL CRASH INTERCEPTOR (File Writer + Debug Screen)
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override

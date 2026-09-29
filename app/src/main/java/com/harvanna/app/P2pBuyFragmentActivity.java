@@ -44,7 +44,7 @@ import org.json.*;
 import com.harvanna.app.firestore.P2PPaymentDetailsManager;
 import com.harvanna.app.firestore.P2PTradeStatsManager;
 import com.harvanna.app.firestore.UserProfileManager;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.wallet.BalanceFormatter;
 import com.harvanna.app.wallet.WalletManager;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -170,7 +170,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		String listingId = "";
 		String posterAddress = "";
 		String sellerUid = "";
-		double remainingAjc, minOrderAjc, unitPrice = -1;
+		double remainingHarv, minOrderHarv, unitPrice = -1;
 		Set<String> paymentLabels = new LinkedHashSet<>();
 		String displayName = "Trader";
 		String currency = "NGN";
@@ -199,7 +199,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 	private final P2pCurrencyFilterState.Listener currencyListener = code -> _applyFilters();
 	
 	private void _loadListings() {
-		AjooNodeClient.getP2POpenListings(0, 50, "SELL", new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getP2POpenListings(0, 50, "SELL", new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject result) {
 				List<JSONObject> raws = new ArrayList<>();
@@ -246,8 +246,8 @@ public class P2pBuyFragmentActivity extends Fragment {
 		e.posterAddress = "BUY".equals(raw.optString("side", ""))
 		? raw.optString("buyerAddress", "")
 		: raw.optString("sellerAddress", "");
-		e.remainingAjc = AjooNodeClient.toAjcDisplay(raw.optLong("remainingAmount", 0));
-		e.minOrderAjc = AjooNodeClient.toAjcDisplay(raw.optLong("minOrderAmount", 0));
+		e.remainingHarv = HarvannaNodeClient.toHarvDisplay(raw.optLong("remainingAmount", 0));
+		e.minOrderHarv = HarvannaNodeClient.toHarvDisplay(raw.optLong("minOrderAmount", 0));
 		
 		if (e.listingId.isEmpty() || e.posterAddress.isEmpty()) { done.onDone(e); return; }
 		
@@ -305,7 +305,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 						e.trustScore = result.overallScore;
 						int reportCount = result.reportCount;
 						
-						AjooNodeClient.getP2PInsuranceStatus(e.posterAddress, new AjooNodeClient.JsonCallback() {
+						HarvannaNodeClient.getP2PInsuranceStatus(e.posterAddress, new HarvannaNodeClient.JsonCallback() {
 							@Override
 							public void onSuccess(JSONObject insuranceJson) {
 								boolean meetsDeposit = insuranceJson.optBoolean("meetsInsuranceThreshold", false);
@@ -353,7 +353,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		visible.clear();
 		for (EnrichedListing e : allEnriched) {
 			if (!e.currency.equalsIgnoreCase(P2pCurrencyFilterState.getCurrency())) continue;
-			if (targetAmount != null && !(e.minOrderAjc <= targetAmount && targetAmount <= e.remainingAjc)) continue;
+			if (targetAmount != null && !(e.minOrderHarv <= targetAmount && targetAmount <= e.remainingHarv)) continue;
 			if (!selectedPaymentLabels.isEmpty() && Collections.disjoint(e.paymentLabels, selectedPaymentLabels)) continue;
 			if (verifiedOnly && !e.verified) continue;
 			if (insuredOnly && !e.insured) continue;
@@ -878,9 +878,9 @@ public class P2pBuyFragmentActivity extends Fragment {
 			txt_rating.setText(e.trustScore >= 0 ? String.format(Locale.US, "Trust %d", e.trustScore) : "—");
 			txt_trades.setText(e.completedTrades + " trades");
 			txt_unique.setText("• " + e.uniqueCounterparties + " unique");
-			txt_available.setText(String.format(Locale.US, ("%.4f " + com.harvanna.app.CoinInfo.ticker()), e.remainingAjc));
-			txt_min.setText(String.format(Locale.US, ("Min %.4f " + com.harvanna.app.CoinInfo.ticker()), e.minOrderAjc));
-			txt_max.setText(String.format(Locale.US, ("Max %.4f " + com.harvanna.app.CoinInfo.ticker()), e.remainingAjc));
+			txt_available.setText(String.format(Locale.US, ("%.4f " + com.harvanna.app.CoinInfo.ticker()), e.remainingHarv));
+			txt_min.setText(String.format(Locale.US, ("Min %.4f " + com.harvanna.app.CoinInfo.ticker()), e.minOrderHarv));
+			txt_max.setText(String.format(Locale.US, ("Max %.4f " + com.harvanna.app.CoinInfo.ticker()), e.remainingHarv));
 			txt_price.setText(e.unitPrice >= 0 ? String.format(Locale.US, "%,.2f", e.unitPrice) : "Unavailable");
 			
 			payment_one.setVisibility(View.INVISIBLE);

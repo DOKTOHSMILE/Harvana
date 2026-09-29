@@ -34,9 +34,9 @@
         <item name="android:statusBarColor">?attr/appBarColor</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowBackground">@color/colorBackground</item>
-        <item name="alertDialogTheme">@style/AjooAlertDialog</item>
-        <item name="materialAlertDialogTheme">@style/AjooAlertDialog</item>
-        <item name="bottomSheetDialogTheme">@style/AjooBottomSheetDialog</item>
+        <item name="alertDialogTheme">@style/HarvannaAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/HarvannaAlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/HarvannaBottomSheetDialog</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Light">

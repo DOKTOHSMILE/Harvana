@@ -173,7 +173,7 @@ public class ReceiveActivity extends AppCompatActivity {
 		new Thread(() -> {
 			Bitmap qr = null;
 			try {
-				qr = AJCQRCodeGenerator.generateQRCode(activeAddress, 512);
+				qr = HARVQRCodeGenerator.generateQRCode(activeAddress, 512);
 			} catch (Exception ignored) {}
 			
 			final Bitmap finalQr = qr;

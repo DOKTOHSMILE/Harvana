@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 
 import org.json.JSONObject;
 
@@ -60,7 +60,7 @@ public final class CoinInfo {
         new Thread(() -> {
             HttpURLConnection c = null;
             try {
-                c = (HttpURLConnection) new URL(AjooNodeClient.BASE + "/api/v1/chain/info").openConnection();
+                c = (HttpURLConnection) new URL(HarvannaNodeClient.BASE + "/api/v1/chain/info").openConnection();
                 c.setConnectTimeout(10_000);
                 c.setReadTimeout(10_000);
                 int code = c.getResponseCode();

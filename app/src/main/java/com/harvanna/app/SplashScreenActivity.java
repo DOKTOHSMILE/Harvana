@@ -557,7 +557,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 							com.harvanna.app.offline.OfflineCacheManager.save(
 							getApplicationContext(), "profile_" + uid, data);
 						} catch (Exception e) {
-							android.util.Log.e("AjooCrashFix", "Failed to save offline cache", e);
+							android.util.Log.e("HarvannaCrashFix", "Failed to save offline cache", e);
 						}
 						
 						i.setClass(getApplicationContext(), MainActivity.class);
@@ -581,7 +581,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 								return; // Exit here so we don't hit the retry state below
 							}
 						} catch (Exception e) {
-							android.util.Log.e("AjooCrashFix", "Failed to load offline cache", e);
+							android.util.Log.e("HarvannaCrashFix", "Failed to load offline cache", e);
 						}
 						_showOfflineRetryState();
 					} else {

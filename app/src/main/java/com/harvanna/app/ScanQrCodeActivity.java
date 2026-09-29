@@ -50,7 +50,7 @@ import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 
-import com.harvanna.app.wallet.AjooCardCrypto;
+import com.harvanna.app.wallet.HarvannaCardCrypto;
 
 
 public class ScanQrCodeActivity extends AppCompatActivity {
@@ -137,8 +137,8 @@ public class ScanQrCodeActivity extends AppCompatActivity {
 	public static final String MODE_ANY = "any";
 	/** Accept only a well-formed HV0x wallet address (AddressUtil.isValidAddress). */
 	public static final String MODE_WALLET_ADDRESS = "wallet_address";
-	/** Accept only an Ajoo Access Card QR (AjooCardCrypto.FORMAT_PREFIX). */
-	public static final String MODE_AJOO_CARD = "ajoo_card";
+	/** Accept only an Harvanna Access Card QR (HarvannaCardCrypto.FORMAT_PREFIX). */
+	public static final String MODE_HARVANNA_CARD = "harvanna_card";
 	
 	/** Legacy — still honored if a caller passes it instead of EXTRA_MODE,
 *  but EXTRA_MODE is the preferred way to express intent going forward. */
@@ -256,8 +256,8 @@ public class ScanQrCodeActivity extends AppCompatActivity {
 			case MODE_WALLET_ADDRESS:
 			return com.harvanna.app.AddressUtil.isValidAddress(text)
 			? null : "That doesn't look like a wallet address. Try again.";
-			case MODE_AJOO_CARD:
-			return text.startsWith(AjooCardCrypto.FORMAT_PREFIX)
+			case MODE_HARVANNA_CARD:
+			return text.startsWith(HarvannaCardCrypto.FORMAT_PREFIX)
 			? null : "That's not an Harvanna Access Card QR code.";
 			case MODE_ANY:
 			default:

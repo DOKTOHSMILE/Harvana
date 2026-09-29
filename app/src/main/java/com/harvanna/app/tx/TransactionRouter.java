@@ -5,7 +5,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.harvanna.app.crypto.Ed25519;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.wallet.WalletManager;
 import com.harvanna.app.wallet.WalletNodeBridge;
 
@@ -15,22 +15,22 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Main transaction router for Ajoo Chain.
+ * Main transaction router for Harvanna Chain.
  *
  * ROUTING RULES:
- *   Native AJC transfer  → signed locally → POST to node /api/v1/tx/send
+ *   Native HARV transfer  → signed locally → POST to node /api/v1/tx/send
  *                          Node handles: validation, mempool, balance in RocksDB, Firestore bridge
  *
  *   Listed/unlisted token transfer → NOT IMPLEMENTED. This app has never
  *   actually offered a non-native asset to send (every send screen's asset
- *   picker only ever lists AJC), so the old Firestore-simulated token path
+ *   picker only ever lists HARV), so the old Firestore-simulated token path
  *   (gas.GasCalculator, gas.GasFee, tx.CompleteFeeEngine, model.Transaction,
  *   network.BlockProducer, treasury.TreasuryManager.distributeFees) was
  *   dead code and has been removed rather than left half-wired. A
  *   non-empty contractAddress here now fails fast with a clear error
  *   instead of silently going nowhere.
  *
- * CANONICAL MESSAGE (native AJC):
+ * CANONICAL MESSAGE (native HARV):
  *   The wallet signs exactly:  from + to + rawAmount + nonce
  *   This matches server TransactionPayload.getCanonicalMessage() — no separators.
  */
@@ -67,9 +67,9 @@ public class TransactionRouter {
         req.setContractAddress(contractAddress);
         req.setMemo(memo);
 
-        // Native AJC — route through node
+        // Native HARV — route through node
         if (contractAddress == null || contractAddress.trim().isEmpty()) {
-            routeNativeAjcThroughNode(req, new ExecutionCallback() {
+            routeNativeHarvThroughNode(req, new ExecutionCallback() {
                 @Override public void onSuccess(ExecutionResult result) {
                     callback.onSuccess(result != null ? result.txHash : "");
                 }
@@ -90,17 +90,17 @@ public class TransactionRouter {
         routeTransaction(null, sender, recipient, amount, contractAddress, callback);
     }
 
-    // ── Native AJC through node ───────────────────────────────────────────────
+    // ── Native HARV through node ───────────────────────────────────────────────
 
     /**
-     * Node-integrated AJC transfer pipeline:
+     * Node-integrated HARV transfer pipeline:
      *   1. Fetch current nonce from node
      *   2. Fetch fee estimate from node
      *   3. Sign canonically: from + to + rawAmount + nonce
      *   4. POST signed payload to /api/v1/tx/send
      *   5. Return txHash on success
      */
-    private static void routeNativeAjcThroughNode(TransactionRequest req,
+    private static void routeNativeHarvThroughNode(TransactionRequest req,
                                                     ExecutionCallback callback) {
         prepareNativeTransfer(req, new PrepareCallback() {
             @Override
@@ -132,7 +132,7 @@ public class TransactionRouter {
         void onError(String error);
     }
 
-    /** Everything needed to review and then sign a native AJC transfer -
+    /** Everything needed to review and then sign a native HARV transfer -
      *  the exact nonce and fee the confirmation sheet shows are the exact
      *  values later used to sign, not re-fetched and potentially
      *  different by the time the user taps Accept. */
@@ -140,14 +140,14 @@ public class TransactionRouter {
         public final TransactionRequest req;
         public final long nonce;
         public final long estimatedGasRaw;
-        public final double feeAjc;
+        public final double feeHarv;
         public final long blockHeight;
 
-        public PreparedTransfer(TransactionRequest req, long nonce, long estimatedGasRaw, double feeAjc, long blockHeight) {
+        public PreparedTransfer(TransactionRequest req, long nonce, long estimatedGasRaw, double feeHarv, long blockHeight) {
             this.req = req;
             this.nonce = nonce;
             this.estimatedGasRaw = estimatedGasRaw;
-            this.feeAjc = feeAjc;
+            this.feeHarv = feeHarv;
             this.blockHeight = blockHeight;
         }
     }
@@ -159,16 +159,16 @@ public class TransactionRouter {
         }
 
         String senderAddress = req.from;
-        long   rawAmount     = AjooNodeClient.toRawUnits(req.amount);
+        long   rawAmount     = HarvannaNodeClient.toRawUnits(req.amount);
 
         // Step 1: current confirmed nonce + blockHeight, in one call
         WalletNodeBridge.fetchLiveBalance(req.context, senderAddress, new WalletNodeBridge.BalanceCallback() {
             @Override
-            public void onSuccess(double balanceAjc, long confirmedNonce, long blockHeight) {
+            public void onSuccess(double balanceHarv, long confirmedNonce, long blockHeight) {
                 // Same pending-count fix as the original single-method flow:
                 // the node's real validation is confirmedNonce + 1 +
                 // pendingCount, not just confirmedNonce + 1.
-                AjooNodeClient.getPending(senderAddress, new AjooNodeClient.JsonCallback() {
+                HarvannaNodeClient.getPending(senderAddress, new HarvannaNodeClient.JsonCallback() {
                     @Override
                     public void onSuccess(JSONObject pendingJson) {
                         long pendingOutCount = 0;
@@ -210,12 +210,12 @@ public class TransactionRouter {
         // validates and processes the transaction, so it owns the real
         // fee number; the app displays what the node says, it doesn't
         // decide independently.
-        AjooNodeClient.getFee(senderAddress, req.to, rawAmount, new AjooNodeClient.JsonCallback() {
+        HarvannaNodeClient.getFee(senderAddress, req.to, rawAmount, new HarvannaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject feeJson) {
                 long estimatedGas = feeJson.optLong("estimatedGas", 1000L);
-                double feeAjc = AjooNodeClient.toAjcDisplay(estimatedGas);
-                callback.onPrepared(new PreparedTransfer(req, nonce, estimatedGas, feeAjc, blockHeight));
+                double feeHarv = HarvannaNodeClient.toHarvDisplay(estimatedGas);
+                callback.onPrepared(new PreparedTransfer(req, nonce, estimatedGas, feeHarv, blockHeight));
             }
 
             @Override
@@ -231,7 +231,7 @@ public class TransactionRouter {
     public static void executeNativeTransfer(PreparedTransfer prepared, ExecutionCallback callback) {
         TransactionRequest req = prepared.req;
         String senderAddress = req.from;
-        long rawAmount = AjooNodeClient.toRawUnits(req.amount);
+        long rawAmount = HarvannaNodeClient.toRawUnits(req.amount);
         long nonce = prepared.nonce;
         long estimatedGas = prepared.estimatedGasRaw;
 
@@ -245,7 +245,7 @@ public class TransactionRouter {
 
             // Canonical: from + to + rawAmount + nonce + memo (matches the
             // server's TransactionPayload.getCanonicalMessage() exactly)
-            String canonical = AjooNodeClient.buildCanonicalMessage(
+            String canonical = HarvannaNodeClient.buildCanonicalMessage(
                     senderAddress, req.to, rawAmount, nonce, req.memo);
             byte[] sig = Ed25519.sign(seed, canonical.getBytes(StandardCharsets.UTF_8));
             String signatureB64 = Base64.encodeToString(sig, Base64.NO_WRAP);
@@ -256,10 +256,10 @@ public class TransactionRouter {
                 return;
             }
 
-            AjooNodeClient.submitSignedTx(
+            HarvannaNodeClient.submitSignedTx(
                     senderAddress, req.to, rawAmount, estimatedGas,
                     nonce, signatureB64, publicKeyB64, req.memo,
-                    new AjooNodeClient.JsonCallback() {
+                    new HarvannaNodeClient.JsonCallback() {
                         @Override
                         public void onSuccess(JSONObject result) {
                             try {

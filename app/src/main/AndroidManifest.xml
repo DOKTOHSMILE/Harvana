@@ -167,7 +167,7 @@
 			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
-			android:name=".CreateAjooCardActivity"
+			android:name=".CreateHarvannaCardActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
 			android:windowSoftInputMode="stateHidden" />
 		<activity

@@ -655,7 +655,7 @@ public class MainActivity extends AppCompatActivity {
 		Button button1 = popupView.findViewById(R.id.button1);
 		
 		// Mining settings removed from this app (mining now lives in the
-		// standalone Ajoo Node Miner app) — miningSettingsList is always
+		// standalone Harvanna Node Miner app) — miningSettingsList is always
 		// empty, so this row group is hidden entirely rather than shown
 		// with zero items. listview1 is also absent from custom_right_dropdown.
 		if (popupListView1 != null) popupListView1.setVisibility(View.GONE);

@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.harvanna.app.firestore.GroupFirestoreManager;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -42,8 +42,8 @@ public class GroupDetailsLogic {
         void showMessage(String msg);
         void openLoansTab();
         void showAdminTransferSheet();
-        /** Sign+broadcast AJC from group wallet using SecureWalletStorage keys. */
-        void transferFromGroupWallet(String from, String to, double amountAjc,
+        /** Sign+broadcast HARV from group wallet using SecureWalletStorage keys. */
+        void transferFromGroupWallet(String from, String to, double amountHarv,
                                      GroupPayoutManager.Callback cb);
         String getMemberWalletAddress();
         int getMySlot();
@@ -262,7 +262,7 @@ public class GroupDetailsLogic {
         public void onBindViewHolder(@NonNull final VH h, int pos) {
             Map<String, Object> req = data.get(pos);
             final String toWallet = str(req, "requesterWallet", "");
-            final double amt = num(req, "amountAjc", 0);
+            final double amt = num(req, "amountHarv", 0);
             final String reqId = str(req, "_docId", "");
             final String requesterUid = str(req, "requesterUid", "");
             long slot = (long) num(req, "slot", 0);
@@ -339,7 +339,7 @@ public class GroupDetailsLogic {
     // real guarantee; this is the fast, local first line of defense.
     private final java.util.Set<String> payoutRequestsInFlight = new java.util.HashSet<>();
 
-    private void doApproveTransfer(String reqId, String toWallet, double amountAjc) {
+    private void doApproveTransfer(String reqId, String toWallet, double amountHarv) {
         if (groupWalletAddress.isEmpty()) {
             ui.showMessage("Group wallet not loaded.");
             return;
@@ -349,7 +349,7 @@ public class GroupDetailsLogic {
             return;
         }
         GroupPayoutManager.approvePayoutAndTransfer(
-                appCtx, groupId, reqId, groupWalletAddress, toWallet, amountAjc,
+                appCtx, groupId, reqId, groupWalletAddress, toWallet, amountHarv,
                 new GroupPayoutManager.GroupWalletTransfer() {
                     @Override
                     public void transfer(String from, String to, double amt, GroupPayoutManager.Callback cb) {
@@ -527,16 +527,16 @@ public class GroupDetailsLogic {
 
     public void refreshGroupWalletBalance(final TextView balanceView) {
         if (groupWalletAddress.isEmpty() || !groupWalletAddress.startsWith("HV0x")) return;
-        AjooNodeClient.getWallet(groupWalletAddress, new AjooNodeClient.JsonCallback() {
+        HarvannaNodeClient.getWallet(groupWalletAddress, new HarvannaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject json) {
                 long raw = json.optLong("balance", 0L);
-                final double ajc = AjooNodeClient.toAjcDisplay(raw);
+                final double harv = HarvannaNodeClient.toHarvDisplay(raw);
                 ui.runOnUi(new Runnable() {
                     @Override
                     public void run() {
                         if (balanceView != null) {
-                            balanceView.setText(com.harvanna.app.wallet.BalanceFormatter.smart(ajc));
+                            balanceView.setText(com.harvanna.app.wallet.BalanceFormatter.smart(harv));
                         }
                     }
                 });

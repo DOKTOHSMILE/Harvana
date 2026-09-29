@@ -142,7 +142,7 @@
 						android:textSize="10sp"
 						android:focusable="false" />
 					<TextView
-						android:id="@+id/tv_trade_ajc_amount"
+						android:id="@+id/tv_trade_harv_amount"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="3dp"

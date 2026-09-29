@@ -341,8 +341,8 @@ public class SendAssetActivity extends AppCompatActivity {
 		assetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		if (spAsset != null) spAsset.setAdapter(assetAdapter);
 		
-		com.harvanna.app.sync.AjooNodeClient.getWallet(myAddress,
-		new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getWallet(myAddress,
+		new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject json) {
 				runOnUiThread(() -> {
@@ -350,13 +350,13 @@ public class SendAssetActivity extends AppCompatActivity {
 					assetDisplayNames.clear();
 					
 					long rawBalance = json.optLong("balance", 0L);
-					double ajcBalance = com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(rawBalance);
+					double harvBalance = com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(rawBalance);
 					
 					HashMap<String, Object> native_ = new HashMap<>();
 					native_.put("contractAddress", "");
 					native_.put("symbol", com.harvanna.app.CoinInfo.ticker());
-					native_.put("name", "Ajoocoin");
-					native_.put("balance", BigDecimal.valueOf(ajcBalance));
+					native_.put("name", "Harvannacoin");
+					native_.put("balance", BigDecimal.valueOf(harvBalance));
 					native_.put("decimals", 8);
 					native_.put("isNative", true);
 					native_.put("isListed", true);
@@ -376,7 +376,7 @@ public class SendAssetActivity extends AppCompatActivity {
 					HashMap<String, Object> native_ = new HashMap<>();
 					native_.put("contractAddress", "");
 					native_.put("symbol", com.harvanna.app.CoinInfo.ticker());
-					native_.put("name", "Ajoocoin");
+					native_.put("name", "Harvannacoin");
 					native_.put("balance", BigDecimal.ZERO);
 					native_.put("decimals", 8);
 					native_.put("isNative", true);
@@ -564,7 +564,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		: recipient;
 		
 		double reqAmount = prepared.req != null ? prepared.req.amount : 0.0;
-		double total = reqAmount + prepared.feeAjc;
+		double total = reqAmount + prepared.feeHarv;
 		
 		// APPLIED FIXES
 		if (tvAmount != null) tvAmount.setText(_formatUIBalance(reqAmount));
@@ -573,7 +573,7 @@ public class SendAssetActivity extends AppCompatActivity {
 			if (rowMemo != null) rowMemo.setVisibility(View.VISIBLE);
 			if (tvMemo != null) tvMemo.setText(prepared.req.memo);
 		}
-		if (tvGasFee != null) tvGasFee.setText(_formatUIBalance(prepared.feeAjc));
+		if (tvGasFee != null) tvGasFee.setText(_formatUIBalance(prepared.feeHarv));
 		if (tvTotal != null) tvTotal.setText(_formatUIBalance(total));
 		if (tvNonce != null) tvNonce.setText(String.valueOf(prepared.nonce));
 		if (tvBlockHeight != null) tvBlockHeight.setText(String.valueOf(prepared.blockHeight));

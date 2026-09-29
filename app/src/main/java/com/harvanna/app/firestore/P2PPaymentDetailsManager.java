@@ -75,7 +75,7 @@ public class P2PPaymentDetailsManager {
 *  listingId — writes the payment details and pricing structure the 
 *  listing's buyer will need, entirely outside anything the node sees. */	
 	public void save(String listingId, java.util.List<com.harvanna.app.wallet.PaymentMethod> paymentMethods,
-	String pricingType, double unitPrice, double marginPercent, int paymentWindowMinutes, String termsOfTrade, int reqAccountAgeDays, double maxOrderAjc, String currency, String sellerUid, SimpleCallback callback) {
+	String pricingType, double unitPrice, double marginPercent, int paymentWindowMinutes, String termsOfTrade, int reqAccountAgeDays, double maxOrderHarv, String currency, String sellerUid, SimpleCallback callback) {
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("listingId", listingId);
 		fields.put("pricingType", pricingType);
@@ -92,7 +92,7 @@ public class P2PPaymentDetailsManager {
 		// checked against Firebase Auth's own account-creation timestamp,
 		// which needs no new tracking infrastructure at all.
 		fields.put("reqAccountAgeDays", reqAccountAgeDays);
-		// ⚠️ maxOrderAjc is DISPLAY-ONLY right now, not enforced. The
+		// ⚠️ maxOrderHarv is DISPLAY-ONLY right now, not enforced. The
 		// node's createListing signed message and claim logic (see
 		// P2PTradeRouter.createListing) only ever carried a MIN order
 		// amount — there is no max field anywhere in the node's listing
@@ -101,7 +101,7 @@ public class P2PPaymentDetailsManager {
 		// buyer can still claim up to the full remaining listing amount
 		// today; real liquidity protection needs a node-side change
 		// (new schema field + claim-time check), not just this.
-		fields.put("maxOrderAjc", maxOrderAjc);
+		fields.put("maxOrderHarv", maxOrderHarv);
 		fields.put("currency", currency);
 		
 		java.util.List<Map<String, Object>> methodMaps = new java.util.ArrayList<>();

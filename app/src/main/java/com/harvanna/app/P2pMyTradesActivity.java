@@ -44,7 +44,7 @@ import java.util.regex.*;
 import org.json.*;
 import com.harvanna.app.firestore.P2PPaymentDetailsManager;
 import com.harvanna.app.firestore.UserProfileManager;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.tx.P2PTradeRouter;
 import com.harvanna.app.wallet.BalanceFormatter;
 import com.harvanna.app.wallet.WalletManager;
@@ -329,7 +329,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 			final TextView tv_my_trade_avatar = _view.findViewById(R.id.tv_my_trade_avatar);
 			final TextView tv_my_trade_counterparty = _view.findViewById(R.id.tv_my_trade_counterparty);
 			final TextView tv_my_trade_counterparty_meta = _view.findViewById(R.id.tv_my_trade_counterparty_meta);
-			final TextView tv_my_trade_ajc = _view.findViewById(R.id.tv_my_trade_ajc);
+			final TextView tv_my_trade_harv = _view.findViewById(R.id.tv_my_trade_harv);
 			final TextView tv_my_trade_fiat = _view.findViewById(R.id.tv_my_trade_fiat);
 			final TextView tv_my_trade_state_title = _view.findViewById(R.id.tv_my_trade_state_title);
 			final TextView tv_my_trade_state_description = _view.findViewById(R.id.tv_my_trade_state_description);
@@ -342,7 +342,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 			String sellerAddress = order.optString("sellerAddress", "");
 			String status = order.optString("status", "");
 			long claimedRaw = order.optLong("amount", order.optLong("netAmountToBuyer", order.optLong("buyerEntitlementRaw", 0)));
-			double ajcAmount = AjooNodeClient.toAjcDisplay(claimedRaw);
+			double harvAmount = HarvannaNodeClient.toHarvDisplay(claimedRaw);
 			long createdAt = order.optLong("createdTimestamp", 0);
 			String releaseTxHash = order.optString("releaseTxHash", "");
 			boolean iWasBuyer = myAddress.equals(buyerAddress);
@@ -350,7 +350,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 			tv_my_trade_type.setText(iWasBuyer ? "Bought" : "Sold");
 			tv_my_trade_status.setText(_statusLabel(status));
 			tv_my_trade_order_id.setText(_shortId(orderId));
-			tv_my_trade_ajc.setText(BalanceFormatter.smart(ajcAmount));
+			tv_my_trade_harv.setText(BalanceFormatter.smart(harvAmount));
 			tv_my_trade_fiat.setText("Loading…");
 			tv_my_trade_date.setText(_formatDate(createdAt));
 			tv_my_trade_tx_state.setText(releaseTxHash.isEmpty() ? "No release yet" : _shortId(releaseTxHash));
@@ -403,7 +403,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 							? String.valueOf(currencyObj).trim() : com.harvanna.app.p2p.P2pCurrencyFilterState.getCurrency();
 							runOnUiThread(() -> {
 								if (!orderId.equals(_view.getTag())) return;
-								tv_my_trade_fiat.setText(price >= 0 ? P2pMoney.fiat(ajcAmount * price, ccy) : "Unavailable");
+								tv_my_trade_fiat.setText(price >= 0 ? P2pMoney.fiat(harvAmount * price, ccy) : "Unavailable");
 							});
 							Object uidObj = data.get("sellerUid");
 							String sellerUid = uidObj != null ? String.valueOf(uidObj) : "";
@@ -446,7 +446,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 							? String.valueOf(currencyObj).trim() : com.harvanna.app.p2p.P2pCurrencyFilterState.getCurrency();
 							runOnUiThread(() -> {
 								if (!orderId.equals(_view.getTag())) return;
-								tv_my_trade_fiat.setText(price >= 0 ? P2pMoney.fiat(ajcAmount * price, ccy) : "Unavailable");
+								tv_my_trade_fiat.setText(price >= 0 ? P2pMoney.fiat(harvAmount * price, ccy) : "Unavailable");
 							});
 						}
 						@Override

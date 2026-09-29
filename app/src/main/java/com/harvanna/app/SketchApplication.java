@@ -65,7 +65,7 @@ public class SketchApplication extends Application {
                 
                 try {
                     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-                    String fileName = "Ajoo_Crash_" + timeStamp + ".txt";
+                    String fileName = "Harvanna_Crash_" + timeStamp + ".txt";
                     
                     File downloadDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS);
                     File publicCrashFile = new File(downloadDir, fileName);

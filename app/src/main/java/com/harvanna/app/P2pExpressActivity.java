@@ -31,7 +31,7 @@ import com.harvanna.app.p2p.P2pCurrencyFilterState;
 import com.harvanna.app.p2p.P2pIds;
 import com.harvanna.app.p2p.P2pMoney;
 import com.harvanna.app.p2p.ThemedDialogs;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.tx.P2PTradeRouter;
 import com.harvanna.app.wallet.*;
 import com.budiyev.android.codescanner.*;
@@ -134,7 +134,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 	private LinearLayout linear400;
 	private LinearLayout linear401;
 	private LinearLayout linear402;
-	private TextView tv_express_available_ajc;
+	private TextView tv_express_available_harv;
 	private TextView textview243;
 	private TextView tv_express_counterparties;
 	private TextView textview244;
@@ -245,7 +245,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 		linear400 = findViewById(R.id.linear400);
 		linear401 = findViewById(R.id.linear401);
 		linear402 = findViewById(R.id.linear402);
-		tv_express_available_ajc = findViewById(R.id.tv_express_available_ajc);
+		tv_express_available_harv = findViewById(R.id.tv_express_available_harv);
 		textview243 = findViewById(R.id.textview243);
 		tv_express_counterparties = findViewById(R.id.tv_express_counterparties);
 		textview244 = findViewById(R.id.textview244);
@@ -347,7 +347,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 	private String myUid = "";
 	private boolean buyMode = true;
 	private boolean iAmEligible = false;
-	private double walletBalanceAjc = 0;
+	private double walletBalanceHarv = 0;
 	private PaymentMethod selectedMethod = null;
 	private List<PaymentMethod> myMethods = new ArrayList<>();
 	
@@ -358,7 +358,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 	private String matchedListingId = null;
 	private String matchedPosterAddress = null;
 	private String matchedSellerUid = null;
-	private long matchedAjcAmountRaw = 0;
+	private long matchedHarvAmountRaw = 0;
 	private double matchedPrice = 0;
 	private double lastSpend = 0;
 	
@@ -366,8 +366,8 @@ public class P2pExpressActivity extends AppCompatActivity {
 		if (myAddress == null || myAddress.isEmpty()) return;
 		WalletNodeBridge.fetchLiveBalance(this, myAddress, new WalletNodeBridge.BalanceCallback() {
 			@Override
-			public void onSuccess(double balanceAjc, long nonce, long blockHeight) {
-				walletBalanceAjc = balanceAjc;
+			public void onSuccess(double balanceHarv, long nonce, long blockHeight) {
+				walletBalanceHarv = balanceHarv;
 			}
 			@Override
 			public void onError(String error) { }
@@ -388,7 +388,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 				tv_express_trust.setText(String.valueOf(result.overallScore));
 				tv_express_tier_level.setText(result.tier != null ? result.tier : "Unranked");
 				
-				AjooNodeClient.getP2PInsuranceStatus(myAddress, new AjooNodeClient.JsonCallback() {
+				HarvannaNodeClient.getP2PInsuranceStatus(myAddress, new HarvannaNodeClient.JsonCallback() {
 					@Override
 					public void onSuccess(JSONObject insuranceJson) {
 						boolean meetsDeposit = insuranceJson.optBoolean("meetsInsuranceThreshold", false);
@@ -481,7 +481,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 	
 	private void _resetMatch() {
 		matchedListingId = null;
-		matchedAjcAmountRaw = 0;
+		matchedHarvAmountRaw = 0;
 		matchedPrice = 0;
 		if (previewTimer != null) previewTimer.cancel();
 		btn_express_find_match.setText("Find Match");
@@ -512,7 +512,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 		tv_express_match_description.setText("");
 		
 		String side = buyMode ? "SELL" : "BUY";
-		AjooNodeClient.getP2POpenListings(0, 50, side, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getP2POpenListings(0, 50, side, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject result) {
 				List<JSONObject> listings = new ArrayList<>();
@@ -543,7 +543,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 						}
 						if (remaining.decrementAndGet() == 0) {
 							runOnUiThread(() -> {
-								tv_express_available_ajc.setText(BalanceFormatter.smartDecimal(totalLiquidity.get()) + (" " + com.harvanna.app.CoinInfo.ticker()));
+								tv_express_available_harv.setText(BalanceFormatter.smartDecimal(totalLiquidity.get()) + (" " + com.harvanna.app.CoinInfo.ticker()));
 								tv_express_counterparties.setText(String.valueOf(qualifyingCount.get()));
 								tv_express_liquidity_status.setText(qualifyingCount.get() > 0 ? "Live" : "None right now");
 							});
@@ -577,7 +577,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 		if (myAddress != null && myAddress.equals(posterAddress)) { callback.onResult(null, null); return; }
 		if (myAddress != null && myAddress.equals(posterAddress)) { callback.onResult(null, null); return; }
 		
-		AjooNodeClient.getP2PInsuranceStatus(posterAddress, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getP2PInsuranceStatus(posterAddress, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject insuranceJson) {
 				if (!insuranceJson.optBoolean("meetsInsuranceThreshold", false)) { callback.onResult(null, null); return; }
@@ -603,11 +603,11 @@ public class P2pExpressActivity extends AppCompatActivity {
 								boolean qualifies = r.verified && r.reportCount == 0;
 								if (!qualifies) { callback.onResult(null, null); return; }
 								
-								double liquidity = AjooNodeClient.toAjcDisplay(Math.min(remainingRaw, insuranceDepositRaw));
-								double candidateAjc = buyMode ? (spend / price) : spend;
-								long candidateAjcRaw = AjooNodeClient.toRawUnits(candidateAjc);
-								boolean fits = candidateAjcRaw >= minOrderRaw && candidateAjcRaw <= remainingRaw && candidateAjcRaw <= insuranceDepositRaw;
-								callback.onResult(fits ? new Object[]{listingId, price, candidateAjcRaw, posterAddress, uid} : null, liquidity);
+								double liquidity = HarvannaNodeClient.toHarvDisplay(Math.min(remainingRaw, insuranceDepositRaw));
+								double candidateHarv = buyMode ? (spend / price) : spend;
+								long candidateHarvRaw = HarvannaNodeClient.toRawUnits(candidateHarv);
+								boolean fits = candidateHarvRaw >= minOrderRaw && candidateHarvRaw <= remainingRaw && candidateHarvRaw <= insuranceDepositRaw;
+								callback.onResult(fits ? new Object[]{listingId, price, candidateHarvRaw, posterAddress, uid} : null, liquidity);
 							}
 							@Override
 							public void onError(String error) { callback.onResult(null, null); }
@@ -645,22 +645,22 @@ public class P2pExpressActivity extends AppCompatActivity {
 			}
 			matchedListingId = (String) best[0];
 			matchedPrice = (double) best[1];
-			matchedAjcAmountRaw = (long) best[2];
+			matchedHarvAmountRaw = (long) best[2];
 			matchedPosterAddress = (String) best[3];
 			matchedSellerUid = (String) best[4];
 			
-			double ajcAmount = AjooNodeClient.toAjcDisplay(matchedAjcAmountRaw);
+			double harvAmount = HarvannaNodeClient.toHarvDisplay(matchedHarvAmountRaw);
 			String ccy = P2pCurrencyFilterState.getCurrency();
 			card_express_quote.setVisibility(View.VISIBLE);
 			tv_express_rate.setText(("1 " + com.harvanna.app.CoinInfo.ticker() + " ≈ ") + P2pMoney.fiat(matchedPrice, ccy));
-			tv_express_fiat.setText(P2pMoney.fiat(ajcAmount * matchedPrice, ccy));
+			tv_express_fiat.setText(P2pMoney.fiat(harvAmount * matchedPrice, ccy));
 			tv_express_fee.setText("Shown after confirming — set by the node, never estimated here.");
 			
 			tv_express_match_indicator.setText("✓");
 			tv_express_match_title.setText("Matched — best available price found");
 			tv_express_match_description.setText(buyMode
-			? "You'll receive " + BalanceFormatter.smart(ajcAmount) + (" " + com.harvanna.app.CoinInfo.ticker() + ".")
-			: "You'll provide " + BalanceFormatter.smart(ajcAmount) + (" " + com.harvanna.app.CoinInfo.ticker() + "."));
+			? "You'll receive " + BalanceFormatter.smart(harvAmount) + (" " + com.harvanna.app.CoinInfo.ticker() + ".")
+			: "You'll provide " + BalanceFormatter.smart(harvAmount) + (" " + com.harvanna.app.CoinInfo.ticker() + "."));
 			btn_express_find_match.setText("Confirm & Trade");
 			_startFreshnessCountdown();
 		});
@@ -698,7 +698,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 			btn_express_find_match.setEnabled(false);
 			btn_express_find_match.setText("Confirming…");
 			
-			P2PTradeRouter.claimPayment(getApplicationContext(), matchedListingId, myAddress, matchedAjcAmountRaw, new P2PTradeRouter.Callback() {
+			P2PTradeRouter.claimPayment(getApplicationContext(), matchedListingId, myAddress, matchedHarvAmountRaw, new P2PTradeRouter.Callback() {
 				@Override
 				public void onSuccess(JSONObject result) {
 					String newOrderId = P2pIds.orderId(result);

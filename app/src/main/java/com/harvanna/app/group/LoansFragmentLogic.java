@@ -97,7 +97,7 @@ public class LoansFragmentLogic {
 		public void onBindViewHolder(@NonNull VH h, int pos) {
 			Map<String, Object> loan = items.get(pos);
 			String status = str(loan, "status", "PENDING");
-			double principal = num(loan, "principalAjc", num(loan, "amount", 0));
+			double principal = num(loan, "principalHarv", num(loan, "amount", 0));
 			String wallet = str(loan, "borrowerWallet", "");
 			final String loanId = str(loan, "_docId", "");
 			h.tv.setText(status + " · " + com.harvanna.app.wallet.BalanceFormatter.smart(principal) + "\n" + shortAddr(wallet));

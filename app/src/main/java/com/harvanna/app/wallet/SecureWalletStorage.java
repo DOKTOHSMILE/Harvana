@@ -37,18 +37,18 @@ public final class SecureWalletStorage {
 
     // ── Keystore ─────────────────────────────────────────────────────────────
     private static final String ANDROID_KEYSTORE = "AndroidKeyStore";
-    private static final String KEY_ALIAS = "ajoo_wallet_master_key_v2";
+    private static final String KEY_ALIAS = "harvanna_wallet_master_key_v2";
     private static final int GCM_IV_LENGTH = 12;          // 96 bits (recommended for GCM)
     private static final int GCM_TAG_LENGTH = 128;        // bits
 
     // ── Preferences ──────────────────────────────────────────────────────────
-    private static final String PREFS_NAME = "ajoo_secure_wallet_v2";
-    private static final String LEGACY_ENC_PREFS = "ajoo_secure_wallet_enc";   // previous weak AES
-    private static final String LEGACY_MNEMONIC_PREFS = "ajc_wallet_prefs";
-    private static final String LEGACY_KEYS_PREFS = "ajoo_secure_wallet";
+    private static final String PREFS_NAME = "harvanna_secure_wallet_v2";
+    private static final String LEGACY_ENC_PREFS = "harvanna_secure_wallet_enc";   // previous weak AES
+    private static final String LEGACY_MNEMONIC_PREFS = "harv_wallet_prefs";
+    private static final String LEGACY_KEYS_PREFS = "harvanna_secure_wallet";
 
     // Old weak secret (only used for one-time migration)
-    private static final String LEGACY_APP_SECRET = "AjooWalletSecureKey#2026!";
+    private static final String LEGACY_APP_SECRET = "HarvannaWalletSecureKey#2026!";
 
     private SecureWalletStorage() {}
 

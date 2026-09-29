@@ -4,16 +4,16 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import org.json.JSONObject;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 
 /**
- * Fetches live balance and nonce from the AJC node.
+ * Fetches live balance and nonce from the HARV node.
  *
  * SERVER RESPONSE FORMAT (as of node v1.0.0):
  *   { "address": "HV0x...", "balance": <long raw units>, "nonce": <long>, "blockHeight": <long> }
  *
- * "balance" is raw units (long), NOT a "balance_ajc" double.
- * Use AjooNodeClient.toAjcDisplay() to convert for UI.
+ * "balance" is raw units (long), NOT a "balance_harv" double.
+ * Use HarvannaNodeClient.toHarvDisplay() to convert for UI.
  */
 public final class WalletNodeBridge {
 
@@ -22,14 +22,14 @@ public final class WalletNodeBridge {
     private WalletNodeBridge() {}
 
     public interface BalanceCallback {
-        /** @param balanceAjc human-readable AJC amount (raw units / 1e8) */
-        void onSuccess(double balanceAjc, long nonce, long blockHeight);
+        /** @param balanceHarv human-readable HARV amount (raw units / 1e8) */
+        void onSuccess(double balanceHarv, long nonce, long blockHeight);
         void onError(String error);
     }
 
     /**
      * Fetches live confirmed balance from the node.
-     * Balance displayed to the user = rawBalance / AJC_UNITS_PER_TOKEN.
+     * Balance displayed to the user = rawBalance / HARV_UNITS_PER_TOKEN.
      *
      * @param context   not used currently, kept for API compatibility
      * @param address   HV0x wallet address
@@ -45,19 +45,19 @@ public final class WalletNodeBridge {
             return;
         }
 
-        AjooNodeClient.getWallet(address, new AjooNodeClient.JsonCallback() {
+        HarvannaNodeClient.getWallet(address, new HarvannaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject json) {
                 try {
-                    // Server returns raw units as long — NOT "balance_ajc" double
+                    // Server returns raw units as long — NOT "balance_harv" double
                     long rawBalance  = json.optLong("balance", 0L);
                     long nonce       = json.optLong("nonce", 0L);
                     long blockHeight = json.optLong("blockHeight", -1L);
 
-                    // Convert to human-readable AJC for display
-                    double balanceAjc = AjooNodeClient.toAjcDisplay(rawBalance);
+                    // Convert to human-readable HARV for display
+                    double balanceHarv = HarvannaNodeClient.toHarvDisplay(rawBalance);
 
-                    MAIN.post(() -> callback.onSuccess(balanceAjc, nonce, blockHeight));
+                    MAIN.post(() -> callback.onSuccess(balanceHarv, nonce, blockHeight));
                 } catch (Exception e) {
                     MAIN.post(() -> callback.onError("Failed to parse balance: " + e.getMessage()));
                 }
@@ -76,7 +76,7 @@ public final class WalletNodeBridge {
      *   nonce_to_sign = returned_nonce + 1
      */
     public static void fetchNonce(String address, NonceCallback callback) {
-        AjooNodeClient.getWallet(address, new AjooNodeClient.JsonCallback() {
+        HarvannaNodeClient.getWallet(address, new HarvannaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject json) {
                 long nonce = json.optLong("nonce", 0L);

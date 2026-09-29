@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Ajoo"
+rootProject.name = "Harvanna"
 include ':app'

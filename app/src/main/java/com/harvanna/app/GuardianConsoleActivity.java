@@ -157,7 +157,7 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 		layoutDisputeCards.removeAllViews();
 		tvNoDisputes.setVisibility(View.GONE);
 		
-		com.harvanna.app.sync.AjooNodeClient.getDisputedOrders(new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getDisputedOrders(new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject result) {
 				runOnUiThread(() -> {
@@ -185,7 +185,7 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 		String orderId = order.optString("orderId", "");
 		String sellerAddress = order.optString("sellerAddress", "");
 		String buyerAddress = order.optString("buyerAddress", "");
-		double amount = com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(order.optLong("amount", 0));
+		double amount = com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(order.optLong("amount", 0));
 		String currency = order.optString("currency", "");
 		long priceForAmount = order.optLong("priceForAmount", 0);
 		String reason = order.optString("disputeReason", "No reason provided.");
@@ -216,7 +216,7 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 	}
 	
 	private void _refreshCardStatus(String orderId, TextView tvSigCounts, Button btnReleaseBuyer, Button btnReturnSeller) {
-		com.harvanna.app.sync.AjooNodeClient.getDisputeStatus(orderId, new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getDisputeStatus(orderId, new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject result) {
 				runOnUiThread(() -> {
@@ -258,7 +258,7 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 		// when the card was first drawn — another guardian's resolution
 		// on a different order could have advanced the shared guardian
 		// nonce counter in the meantime.
-		com.harvanna.app.sync.AjooNodeClient.getDisputeStatus(orderId, new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getDisputeStatus(orderId, new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject statusResult) {
 				long actionNonce = statusResult.optLong("nextActionNonce", 0);
@@ -267,8 +267,8 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 					byte[] sig = Ed25519.sign(guardianSeed, canonical.getBytes(StandardCharsets.UTF_8));
 					String signatureB64 = Base64.encodeToString(sig, Base64.NO_WRAP);
 					
-					com.harvanna.app.sync.AjooNodeClient.submitGuardianSignature(orderId, resolution, actionNonce,
-					guardianPublicKeyB64, signatureB64, new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+					com.harvanna.app.sync.HarvannaNodeClient.submitGuardianSignature(orderId, resolution, actionNonce,
+					guardianPublicKeyB64, signatureB64, new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 						@Override
 						public void onSuccess(JSONObject result) {
 							runOnUiThread(() -> {
@@ -322,9 +322,9 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 	
 	private String _shortKey(String s) {
 		// THE UPGRADE: threshold raised from 12 to 20 — order IDs are
-		// now short, human-readable references (AJC-P2P-00000001, 17
+		// now short, human-readable references (HARV-P2P-00000001, 17
 		// chars) rather than 64-char hashes, and would otherwise get
-		// needlessly truncated to "AJC-P2P-…0001" for no real
+		// needlessly truncated to "HARV-P2P-…0001" for no real
 		// readability benefit. A guardian's public key (still a long
 		// base64 string, the other thing this same helper truncates)
 		// stays comfortably above this threshold either way.

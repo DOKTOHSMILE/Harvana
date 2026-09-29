@@ -7,11 +7,11 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 /**
- * OkHttp REST client for direct AJC node calls.
+ * OkHttp REST client for direct HARV node calls.
  * Endpoint corrected to /api/v1/tx/send (was /v1/transactions).
  * Payload now matches server TransactionPayload exactly.
  */
-public final class AjooApiClient {
+public final class HarvannaApiClient {
 
     private static String baseUrl;
     private static final OkHttpClient CLIENT = new OkHttpClient();
@@ -19,7 +19,7 @@ public final class AjooApiClient {
     // FIX 1: Added a Main Thread Handler so UI updates don't crash the app.
     private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    private AjooApiClient() {}
+    private HarvannaApiClient() {}
 
     public interface Callback {
         void onSuccess(String body);
@@ -42,12 +42,12 @@ public final class AjooApiClient {
      *   from, to, amount (raw long), gas (raw long), nonce,
      *   signature (Base64), publicKey (Base64)
      *
-     * Build the payload JSON using AjooNodeClient.buildCanonicalMessage() for signing.
+     * Build the payload JSON using HarvannaNodeClient.buildCanonicalMessage() for signing.
      */
     public static void submitSignedTransaction(JSONObject payload, Callback cb) {
         if (baseUrl == null || baseUrl.isEmpty()) {
             // Immediately route configuration errors to the callback
-            mainHandler.post(() -> cb.onError("AjooApiClient not configured. Call configure(url) first."));
+            mainHandler.post(() -> cb.onError("HarvannaApiClient not configured. Call configure(url) first."));
             return;
         }
             
@@ -89,7 +89,7 @@ public final class AjooApiClient {
      */
     public static void getTxStatus(String txHash, Callback cb) {
         if (baseUrl == null || baseUrl.isEmpty()) {
-            mainHandler.post(() -> cb.onError("AjooApiClient not configured."));
+            mainHandler.post(() -> cb.onError("HarvannaApiClient not configured."));
             return;
         }
             

@@ -44,7 +44,7 @@ import org.json.*;
 import com.harvanna.app.firestore.P2PPaymentDetailsManager;
 import com.harvanna.app.firestore.P2PTradeStatsManager;
 import com.harvanna.app.firestore.UserProfileManager;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.tx.P2PTradeRouter;
 import com.harvanna.app.wallet.BalanceFormatter;
 import com.harvanna.app.wallet.PinPromptHelper;
@@ -82,7 +82,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	private TextView tv_sell_timer;
 	private LinearLayout linear136;
 	private TextView textview66;
-	private TextView tv_sell_ajc_amount;
+	private TextView tv_sell_harv_amount;
 	private TextView tv_sell_value_caption;
 	private View view137;
 	private LinearLayout linear138;
@@ -202,7 +202,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		tv_sell_timer = findViewById(R.id.tv_sell_timer);
 		linear136 = findViewById(R.id.linear136);
 		textview66 = findViewById(R.id.textview66);
-		tv_sell_ajc_amount = findViewById(R.id.tv_sell_ajc_amount);
+		tv_sell_harv_amount = findViewById(R.id.tv_sell_harv_amount);
 		tv_sell_value_caption = findViewById(R.id.tv_sell_value_caption);
 		view137 = findViewById(R.id.view137);
 		linear138 = findViewById(R.id.linear138);
@@ -410,7 +410,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	}
 	
 	private void _loadOrder() {
-		AjooNodeClient.getP2POrder(orderId, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getP2POrder(orderId, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject order) {
 				listingId = order.optString("listingId", "");
@@ -570,15 +570,15 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	}
 	
 	private void _renderValueCard() {
-		double claimedAjc = AjooNodeClient.toAjcDisplay(amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
-		double feeAjc = AjooNodeClient.toAjcDisplay(platformFeeRaw);
-		tv_sell_ajc_amount.setText(BalanceFormatter.smart(claimedAjc));
+		double claimedHarv = HarvannaNodeClient.toHarvDisplay(amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
+		double feeHarv = HarvannaNodeClient.toHarvDisplay(platformFeeRaw);
+		tv_sell_harv_amount.setText(BalanceFormatter.smart(claimedHarv));
 		tv_sell_value_caption.setText(("You're providing this " + com.harvanna.app.CoinInfo.ticker()));
 		String ccy = listingCurrency != null ? listingCurrency : com.harvanna.app.p2p.P2pCurrencyFilterState.getCurrency();
-		tv_sell_fiat_amount.setText(unitPrice >= 0 ? P2pMoney.fiat(claimedAjc * unitPrice, ccy) : "—");
-		tv_sell_price.setText(unitPrice >= 0 ? P2pMoney.perAjc(unitPrice, ccy) : "—");
-		tv_sell_maker_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(feeAjc)));
-		tv_sell_payment_received_amount.setText(unitPrice >= 0 ? P2pMoney.fiat(claimedAjc * unitPrice, ccy) : "—");
+		tv_sell_fiat_amount.setText(unitPrice >= 0 ? P2pMoney.fiat(claimedHarv * unitPrice, ccy) : "—");
+		tv_sell_price.setText(unitPrice >= 0 ? P2pMoney.perHarv(unitPrice, ccy) : "—");
+		tv_sell_maker_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(feeHarv)));
+		tv_sell_payment_received_amount.setText(unitPrice >= 0 ? P2pMoney.fiat(claimedHarv * unitPrice, ccy) : "—");
 	}
 	
 	// ── Status-driven rendering ──────────────────────────────────────────

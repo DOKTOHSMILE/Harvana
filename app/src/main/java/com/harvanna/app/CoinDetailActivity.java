@@ -275,7 +275,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		// Total Holders — was hardcoded to "Not available" with nothing
 		// ever calling the node for it. Independent of the genesis/tip
 		// fetch below since it doesn't depend on either.
-		com.harvanna.app.sync.AjooNodeClient.getSupply(new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getSupply(new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject supplyJson) {
 				long holderCount = supplyJson.optLong("holderCount", -1L);
@@ -296,7 +296,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		// what produced a wrong max supply before (ChainConstants had
 		// 50.0/210_000 hardcoded - the node's real values are 1.25/
 		// 23_260_000, confirmed directly against the live node).
-		com.harvanna.app.sync.AjooNodeClient.getNodeStatus(new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getNodeStatus(new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject statusJson) {
 				long rawGenesisReward = statusJson.optLong("genesisReward", -1L);
@@ -307,13 +307,13 @@ public class CoinDetailActivity extends AppCompatActivity {
 					return;
 				}
 				
-				double genesisReward = com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(rawGenesisReward);
+				double genesisReward = com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(rawGenesisReward);
 				
 				runOnUiThread(() -> _setStatRow(R.id.row_max_supply, "Max Supply",
 				com.harvanna.app.wallet.BalanceFormatter.smart(
 				ChainMath.calculateMaxSupply(genesisReward, halvingInterval))));
 				
-				com.harvanna.app.sync.AjooNodeClient.getTip(new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+				com.harvanna.app.sync.HarvannaNodeClient.getTip(new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 					@Override
 					public void onSuccess(org.json.JSONObject tipJson) {
 						long height = tipJson.optLong("blockHeight", -1L);
@@ -325,7 +325,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 						// locally-recomputed one when it's present - the real,
 						// authoritative figure rather than a client-side guess.
 						double blockReward = rawReward > 0
-						? com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(rawReward)
+						? com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(rawReward)
 						: ChainMath.currentBlockReward(height, genesisReward, halvingInterval);
 						long blocksLeft = ChainMath.blocksUntilNextHalving(height, halvingInterval);
 						int era = ChainMath.currentHalvingEra(height, halvingInterval);
@@ -424,13 +424,13 @@ public class CoinDetailActivity extends AppCompatActivity {
 	
 	public void _getBallance(final String _wallet, final TextView _tv_balance) {
 		if (_wallet == null || _wallet.trim().isEmpty()) return;
-		com.harvanna.app.sync.AjooNodeClient.getWallet(_wallet, new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getWallet(_wallet, new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject json) {
 				runOnUiThread(() -> {
 					long rawBalance = json.optLong("balance", 0L);
-					double ajcBalance = com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(rawBalance);
-					String formattedBalance = com.harvanna.app.wallet.BalanceFormatter.short4(ajcBalance);
+					double harvBalance = com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(rawBalance);
+					String formattedBalance = com.harvanna.app.wallet.BalanceFormatter.short4(harvBalance);
 					_tv_balance.setText(formattedBalance);
 				});
 			}
@@ -475,20 +475,20 @@ public class CoinDetailActivity extends AppCompatActivity {
 		SharedPreferences currencySp = getSharedPreferences("currencysp", Context.MODE_PRIVATE);
 		final String currencySymbol = currencySp.getString("currency", "\u20a6");
 		final String currencyCode = com.harvanna.app.wallet.FiatValueHelper.symbolToCurrencyCode(currencySymbol);
-		com.harvanna.app.sync.AjooNodeClient.getWallet(wallet_address,
-		new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getWallet(wallet_address,
+		new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject json) {
 				long   rawBalance = json.optLong("balance", 0L);
-				double ajcBalance = com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(rawBalance);
+				double harvBalance = com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(rawBalance);
 				
-				com.harvanna.app.wallet.FiatValueHelper.convertAjcToFiat(ajcBalance, currencyCode, (fiatValue, rateAvailable) -> {
+				com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(harvBalance, currencyCode, (fiatValue, rateAvailable) -> {
 					final ArrayList<HashMap<String, Object>> loadedCoins = new ArrayList<>();
 					HashMap<String, Object> nativeCoin = new HashMap<>();
 					nativeCoin.put("coin_name",       com.harvanna.app.CoinInfo.name());
 					nativeCoin.put("coin_symbol",      com.harvanna.app.CoinInfo.ticker());
 					nativeCoin.put("coin_balance",
-					String.format(java.util.Locale.US, "%.8f", ajcBalance));
+					String.format(java.util.Locale.US, "%.8f", harvBalance));
 					// THE FIX: hardcoded "0.00", plus a pre-existing bug
 					// independent of that — this was symbol-prefixed
 					// ("₦0.00") while WalletAssetFragmentActivity reads
@@ -566,7 +566,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 				new Thread(() -> {
 					Bitmap qr = null;
 					try {
-						qr = AJCQRCodeGenerator.generateQRCode(activeAddress, 512);
+						qr = HARVQRCodeGenerator.generateQRCode(activeAddress, 512);
 					} catch (Exception ignored) {}
 					final Bitmap finalQr = qr;
 					runOnUiThread(() -> {

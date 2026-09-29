@@ -21,7 +21,7 @@ import java.util.Set;
 public final class IncomingTxWatcher {
 	
 	private static final String TAG = "IncomingTxWatcher";
-	private static final String PREF = "ajoo_incoming_tx";
+	private static final String PREF = "harvanna_incoming_tx";
 	private static final String KEY_LAST_TS = "last_seen_ts";
 	private static final long POLL_MS = 60_000L;
 	

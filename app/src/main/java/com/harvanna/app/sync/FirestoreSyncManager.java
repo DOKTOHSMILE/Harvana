@@ -8,7 +8,7 @@ import android.os.Looper;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.harvanna.app.AddressUtil;
-import com.harvanna.app.AjooConfig;
+import com.harvanna.app.HarvannaConfig;
 import com.harvanna.app.ChainConstants;
 import com.harvanna.app.ChainMath;
 
@@ -37,7 +37,7 @@ import okhttp3.ResponseBody;
 public class FirestoreSyncManager {
 	
 	public static final String PROJECT_ID = "capital-oracle-project";
-	public static final String API_KEY = AjooConfig.FIREBASE_API_KEY;
+	public static final String API_KEY = HarvannaConfig.FIREBASE_API_KEY;
 	public static final String BASE_URL =
 	"https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents/";
 	
@@ -88,10 +88,10 @@ public class FirestoreSyncManager {
 	// ── Wallet ───────────────────────────────────────────────────────────────
 	
 	/**
-	 * @deprecated Wallets live on the AJC node (RocksDB), not Firestore.
+	 * @deprecated Wallets live on the HARV node (RocksDB), not Firestore.
 	 * This method no longer writes COL_WALLETS. It soft-checks the node and
 	 * returns a local stub map so legacy callers do not break.
-	 * Prefer AjooNodeClient.getWallet(address, …) directly.
+	 * Prefer HarvannaNodeClient.getWallet(address, …) directly.
 	 */
 	@Deprecated
 	public void getOrCreateWallet(final String address, final WalletCallback callback) {
@@ -102,12 +102,12 @@ public class FirestoreSyncManager {
 		}
 		final String normalized = address.trim();
 		// Node is source of truth — never create a Firestore WALLETS doc.
-		AjooNodeClient.getWallet(normalized, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getWallet(normalized, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject json) {
 				Map<String, Object> wallet = new HashMap<>();
 				wallet.put("address", normalized);
-				wallet.put("balance_ajc", 0.0);
+				wallet.put("balance_harv", 0.0);
 				wallet.put("nonce", 0L);
 				wallet.put("source", "node");
 				try {
@@ -136,7 +136,7 @@ public class FirestoreSyncManager {
 				}
 				Map<String, Object> wallet = new HashMap<>();
 				wallet.put("address", normalized);
-				wallet.put("balance_ajc", 0.0);
+				wallet.put("balance_harv", 0.0);
 				wallet.put("nonce", 0L);
 				wallet.put("source", "node");
 				callback.onSuccess(wallet);
@@ -286,7 +286,7 @@ public class FirestoreSyncManager {
 	}
 	
 	public static void recordTransaction(Context context, String senderAddress, String recipientAddress,
-	double amountAjc, String txHash, String blockHash,
+	double amountHarv, String txHash, String blockHash,
 	long blockHeight, long nonce, SyncCallback callback) {
 		Map<String, Object> txData = new HashMap<>();
 		txData.put("blockHash", blockHash != null ? blockHash : "");
@@ -301,7 +301,7 @@ public class FirestoreSyncManager {
 		txData.put("to", recipientAddress);
 		txData.put("tokenSymbol", com.harvanna.app.CoinInfo.ticker());
 		txData.put("txHash", txHash);
-		txData.put("value", amountAjc);
+		txData.put("value", amountHarv);
 		
 		String docId = (txHash != null && !txHash.isEmpty()) ? txHash : "TX-" + System.currentTimeMillis();
 		
@@ -312,7 +312,7 @@ public class FirestoreSyncManager {
 				if (context != null) {
 					Intent intent = new Intent("com.harvanna.app.ACTION_WALLET_RECEIVED");
 					intent.putExtra("sender", senderAddress);
-					intent.putExtra("amount", amountAjc);
+					intent.putExtra("amount", amountHarv);
 					LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 				}
 			}

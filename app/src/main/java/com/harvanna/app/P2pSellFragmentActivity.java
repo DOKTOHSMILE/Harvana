@@ -44,7 +44,7 @@ import org.json.*;
 import com.harvanna.app.firestore.P2PPaymentDetailsManager;
 import com.harvanna.app.firestore.P2PTradeStatsManager;
 import com.harvanna.app.firestore.UserProfileManager;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.wallet.BalanceFormatter;
 import com.harvanna.app.wallet.WalletManager;
 import com.google.firebase.auth.FirebaseAuth;
@@ -168,7 +168,7 @@ public class P2pSellFragmentActivity extends Fragment {
 		String listingId = "";
 		String posterAddress = "";
 		String posterUid = "";
-		double remainingAjc, minOrderAjc, unitPrice = -1;
+		double remainingHarv, minOrderHarv, unitPrice = -1;
 		Set<String> paymentLabels = new LinkedHashSet<>();
 		String displayName = "Trader";
 		String currency = "NGN";
@@ -195,7 +195,7 @@ public class P2pSellFragmentActivity extends Fragment {
 	private int sortMode = 0;
 	
 	private void _loadListings() {
-		AjooNodeClient.getP2POpenListings(0, 50, "BUY", new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getP2POpenListings(0, 50, "BUY", new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject result) {
 				List<JSONObject> raws = new ArrayList<>();
@@ -238,8 +238,8 @@ public class P2pSellFragmentActivity extends Fragment {
 		e.listingId = raw.optString("listingId", "");
 		// This is always a BUY listing here, so the poster is the buyer.
 		e.posterAddress = raw.optString("buyerAddress", raw.optString("sellerAddress", ""));
-		e.remainingAjc = AjooNodeClient.toAjcDisplay(raw.optLong("remainingAmount", 0));
-		e.minOrderAjc = AjooNodeClient.toAjcDisplay(raw.optLong("minOrderAmount", 0));
+		e.remainingHarv = HarvannaNodeClient.toHarvDisplay(raw.optLong("remainingAmount", 0));
+		e.minOrderHarv = HarvannaNodeClient.toHarvDisplay(raw.optLong("minOrderAmount", 0));
 		
 		if (e.listingId.isEmpty() || e.posterAddress.isEmpty()) { done.onDone(e); return; }
 		
@@ -252,7 +252,7 @@ public class P2pSellFragmentActivity extends Fragment {
 				Object currencyObj = data.get("currency");
 				if (currencyObj != null && !String.valueOf(currencyObj).trim().isEmpty()) e.currency = String.valueOf(currencyObj).trim();
 				// On a BUY listing, the person who posted it (wanting to
-				// buy AJC) is stored under sellerUid in this collection —
+				// buy HARV) is stored under sellerUid in this collection —
 				// same field name reused for "the poster's uid" on both
 				// listing types, since P2P_PAYMENT_DETAILS was designed
 				// around SELL listings first. Real data, just a field
@@ -303,7 +303,7 @@ public class P2pSellFragmentActivity extends Fragment {
 						e.trustScore = result.overallScore;
 						int reportCount = result.reportCount;
 						
-						AjooNodeClient.getP2PInsuranceStatus(e.posterAddress, new AjooNodeClient.JsonCallback() {
+						HarvannaNodeClient.getP2PInsuranceStatus(e.posterAddress, new HarvannaNodeClient.JsonCallback() {
 							@Override
 							public void onSuccess(JSONObject insuranceJson) {
 								boolean meetsDeposit = insuranceJson.optBoolean("meetsInsuranceThreshold", false);
@@ -351,7 +351,7 @@ public class P2pSellFragmentActivity extends Fragment {
 			if (myAddress != null && !myAddress.isEmpty() && myAddress.equals(e.posterAddress)) continue;
 			if (e.unitPrice < 0) continue;
 			if (!e.currency.equalsIgnoreCase(P2pCurrencyFilterState.getCurrency())) continue;
-			if (targetAmount != null && !(e.minOrderAjc <= targetAmount && targetAmount <= e.remainingAjc)) continue;
+			if (targetAmount != null && !(e.minOrderHarv <= targetAmount && targetAmount <= e.remainingHarv)) continue;
 			if (!selectedPaymentLabels.isEmpty() && Collections.disjoint(e.paymentLabels, selectedPaymentLabels)) continue;
 			if (verifiedOnly && !e.verified) continue;
 			if (insuredOnly && !e.insured) continue;
@@ -766,9 +766,9 @@ public class P2pSellFragmentActivity extends Fragment {
 			seller_trusted_badge.setText(e.premium ? "Premium Trader" : (e.insured ? "Insured Trader" : ""));
 			trust_score.setText(e.trustScore >= 0 ? String.valueOf(e.trustScore) : "—");
 			trades_and_unique.setText(e.completedTrades + " trades · " + e.uniqueCounterparties + " unique");
-			sell_price.setText(e.unitPrice >= 0 ? P2pMoney.perAjc(e.unitPrice, e.currency) : "Unavailable");
-			available_amount.setText(String.format(Locale.US, ("%.4f " + com.harvanna.app.CoinInfo.ticker()), e.remainingAjc));
-			trade_limits.setText(String.format(Locale.US, ("Min %.4f · Max %.4f " + com.harvanna.app.CoinInfo.ticker()), e.minOrderAjc, e.remainingAjc));
+			sell_price.setText(e.unitPrice >= 0 ? P2pMoney.perHarv(e.unitPrice, e.currency) : "Unavailable");
+			available_amount.setText(String.format(Locale.US, ("%.4f " + com.harvanna.app.CoinInfo.ticker()), e.remainingHarv));
+			trade_limits.setText(String.format(Locale.US, ("Min %.4f · Max %.4f " + com.harvanna.app.CoinInfo.ticker()), e.minOrderHarv, e.remainingHarv));
 			
 			payment_method.setVisibility(View.GONE);
 			payment_method_two.setVisibility(View.GONE);

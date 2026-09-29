@@ -328,7 +328,7 @@ public final class NodeGroupClient {
     }
 
     private static void read(String path, Callback cb) {
-        AjooNodeClient.nodeGet(path, new AjooNodeClient.JsonCallback() {
+        HarvannaNodeClient.nodeGet(path, new HarvannaNodeClient.JsonCallback() {
             @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }
             @Override public void onError(String error) { cb.onError(error); }
         });
@@ -336,7 +336,7 @@ public final class NodeGroupClient {
 
     /** Fetch nextRequestNonce → build canonical → sign with the wallet key → POST. */
     private static void act(Context context, String address, String path, Spec spec, Callback cb) {
-        AjooNodeClient.getWallet(address, new AjooNodeClient.JsonCallback() {
+        HarvannaNodeClient.getWallet(address, new HarvannaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject wallet) {
                 try {
@@ -354,7 +354,7 @@ public final class NodeGroupClient {
                     body.put("nonce", nonce)
                         .put("signature", Base64.encodeToString(sig, Base64.NO_WRAP))
                         .put("publicKey", pubB64);
-                    AjooNodeClient.nodePost(path, body.toString(), new AjooNodeClient.JsonCallback() {
+                    HarvannaNodeClient.nodePost(path, body.toString(), new HarvannaNodeClient.JsonCallback() {
                         @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }
                         @Override public void onError(String error) { cb.onError(error); }
                     });

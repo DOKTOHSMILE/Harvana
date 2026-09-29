@@ -43,7 +43,7 @@ import org.json.*;
 import com.harvanna.app.firestore.P2PPaymentDetailsManager;
 import com.harvanna.app.firestore.P2PTradeStatsManager;
 import com.harvanna.app.firestore.UserProfileManager;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.tx.P2PTradeRouter;
 import com.harvanna.app.wallet.BalanceFormatter;
 import com.harvanna.app.wallet.PinPromptHelper;
@@ -85,7 +85,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	private TextView current_action_description;
 	private LinearLayout linear82;
 	private TextView value_title;
-	private TextView ajc_amount_large;
+	private TextView harv_amount_large;
 	private TextView fiat_amount_large;
 	private TextView value_direction;
 	private View view83;
@@ -241,7 +241,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		current_action_description = findViewById(R.id.current_action_description);
 		linear82 = findViewById(R.id.linear82);
 		value_title = findViewById(R.id.value_title);
-		ajc_amount_large = findViewById(R.id.ajc_amount_large);
+		harv_amount_large = findViewById(R.id.harv_amount_large);
 		fiat_amount_large = findViewById(R.id.fiat_amount_large);
 		value_direction = findViewById(R.id.value_direction);
 		view83 = findViewById(R.id.view83);
@@ -489,7 +489,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	// ── Load order + render ──────────────────────────────────────────────
 	
 	private void _loadOrder() {
-		AjooNodeClient.getP2POrder(orderId, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getP2POrder(orderId, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject order) {
 				listingId = order.optString("listingId", "");
@@ -654,16 +654,16 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	}
 	
 	private void _renderValueCard() {
-		double claimedAjc = AjooNodeClient.toAjcDisplay(amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
-		double feeAjc = AjooNodeClient.toAjcDisplay(platformFeeRaw);
-		double networkFeeAjc = AjooNodeClient.toAjcDisplay(releaseGasRaw);
-		ajc_amount_large.setText(BalanceFormatter.smart(claimedAjc));
+		double claimedHarv = HarvannaNodeClient.toHarvDisplay(amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
+		double feeHarv = HarvannaNodeClient.toHarvDisplay(platformFeeRaw);
+		double networkFeeHarv = HarvannaNodeClient.toHarvDisplay(releaseGasRaw);
+		harv_amount_large.setText(BalanceFormatter.smart(claimedHarv));
 		String ccy = listingCurrency != null ? listingCurrency : com.harvanna.app.p2p.P2pCurrencyFilterState.getCurrency();
-		fiat_amount_large.setText(unitPrice >= 0 ? com.harvanna.app.p2p.P2pMoney.fiat(claimedAjc * unitPrice, ccy) : "—");
-		unit_price.setText(unitPrice >= 0 ? com.harvanna.app.p2p.P2pMoney.perAjc(unitPrice, ccy) : "—");
-		maker_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(feeAjc)));
-		network_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(networkFeeAjc)));
-		payment_amount.setText(unitPrice >= 0 ? com.harvanna.app.p2p.P2pMoney.fiat(claimedAjc * unitPrice, ccy) : "—");
+		fiat_amount_large.setText(unitPrice >= 0 ? com.harvanna.app.p2p.P2pMoney.fiat(claimedHarv * unitPrice, ccy) : "—");
+		unit_price.setText(unitPrice >= 0 ? com.harvanna.app.p2p.P2pMoney.perHarv(unitPrice, ccy) : "—");
+		maker_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(feeHarv)));
+		network_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(networkFeeHarv)));
+		payment_amount.setText(unitPrice >= 0 ? com.harvanna.app.p2p.P2pMoney.fiat(claimedHarv * unitPrice, ccy) : "—");
 	}
 	
 	// ── Status-driven rendering ──────────────────────────────────────────

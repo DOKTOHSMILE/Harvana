@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.View;
 
 import com.harvanna.app.firestore.GroupFirestoreManager;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 
 import org.json.JSONObject;
 
@@ -75,26 +75,26 @@ public class OverviewFragmentLogic {
 		Map<String, Object> cachedBalance = com.harvanna.app.offline.OfflineCacheManager.load(
 				ctx, "wallet_balance_" + address);
 		if (cachedBalance != null && cachedBalance.get("show") instanceof Number) {
-			final double cachedAjc = ((Number) cachedBalance.get("show")).doubleValue();
+			final double cachedHarv = ((Number) cachedBalance.get("show")).doubleValue();
 			root.post(new Runnable() {
 				@Override
 				public void run() {
-					GroupTypeUiController.setGroupWalletBalance(root, cachedAjc);
+					GroupTypeUiController.setGroupWalletBalance(root, cachedHarv);
 				}
 			});
 		}
 
-		AjooNodeClient.getWallet(address, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getWallet(address, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject json) {
-				final double ajc = AjooNodeClient.toAjcDisplay(json.optLong("balance", 0L));
+				final double harv = HarvannaNodeClient.toHarvDisplay(json.optLong("balance", 0L));
 				Map<String, Object> toCache = new java.util.HashMap<>();
-				toCache.put("show", ajc);
+				toCache.put("show", harv);
 				com.harvanna.app.offline.OfflineCacheManager.save(ctx, "wallet_balance_" + address, toCache);
 				root.post(new Runnable() {
 					@Override
 					public void run() {
-						GroupTypeUiController.setGroupWalletBalance(root, ajc);
+						GroupTypeUiController.setGroupWalletBalance(root, harv);
 					}
 				});
 			}

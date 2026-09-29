@@ -14,7 +14,7 @@ import java.util.Map;
  *
  * Ensures every money movement related to a group lands in
  * GROUPS/{groupId}/payments with the correct contract fields:
- *   type, status, amountAjc, from, to, memberUid, slot, txRef, timestamp
+ *   type, status, amountHarv, from, to, memberUid, slot, txRef, timestamp
  *
  * Use this instead of writing payment maps ad-hoc from activities.
  */
@@ -35,14 +35,14 @@ public final class GroupPaymentHelper {
 	String groupId,
 	String memberUid,
 	int slot,
-	double amountAjc,
+	double amountHarv,
 	String fromWallet,
 	String groupWallet,
 	String txRef,
 	Callback callback) {
 		String err = GroupValidation.firstError(
 		GroupValidation.requireGroupId(groupId),
-		GroupValidation.requirePositiveAmount(amountAjc),
+		GroupValidation.requirePositiveAmount(amountHarv),
 		GroupValidation.requireValidWallet(fromWallet, "Member wallet"),
 		GroupValidation.requireValidWallet(groupWallet, "Group wallet")
 		);
@@ -56,7 +56,7 @@ public final class GroupPaymentHelper {
 		payment.put("status", "PENDING");
 		payment.put("memberUid", memberUid != null ? memberUid : currentUid());
 		payment.put("slot", slot);
-		payment.put("amountAjc", amountAjc);
+		payment.put("amountHarv", amountHarv);
 		payment.put("from", fromWallet.trim());
 		payment.put("to", groupWallet.trim());
 		payment.put("txRef", txRef != null ? txRef : "");
@@ -80,14 +80,14 @@ public final class GroupPaymentHelper {
 	String groupId,
 	String memberUid,
 	int slot,
-	double amountAjc,
+	double amountHarv,
 	String fromWallet,
 	String groupWallet,
 	String txRef,
 	Callback callback) {
 		String err = GroupValidation.firstError(
 		GroupValidation.requireGroupId(groupId),
-		GroupValidation.requirePositiveAmount(amountAjc),
+		GroupValidation.requirePositiveAmount(amountHarv),
 		GroupValidation.requireValidWallet(fromWallet, "Member wallet"),
 		GroupValidation.requireValidWallet(groupWallet, "Group wallet")
 		);
@@ -103,7 +103,7 @@ public final class GroupPaymentHelper {
 		GroupOnChainGate.requireConfirmedTx(txRef, new GroupOnChainGate.Callback() {
 			@Override
 			public void onConfirmed(String hash, long blockHeight) {
-				writeConfirmedContribution(context, groupId, memberUid, slot, amountAjc,
+				writeConfirmedContribution(context, groupId, memberUid, slot, amountHarv,
 						fromWallet, groupWallet, hash, callback);
 			}
 			@Override
@@ -114,14 +114,14 @@ public final class GroupPaymentHelper {
 	}
 
 	private static void writeConfirmedContribution(Context context,
-			String groupId, String memberUid, int slot, double amountAjc,
+			String groupId, String memberUid, int slot, double amountHarv,
 			String fromWallet, String groupWallet, String txRef, Callback callback) {
 		Map<String, Object> payment = new HashMap<>();
 		payment.put("type", "CONTRIBUTION");
 		payment.put("status", "CONFIRMED");
 		payment.put("memberUid", memberUid != null ? memberUid : currentUid());
 		payment.put("slot", slot);
-		payment.put("amountAjc", amountAjc);
+		payment.put("amountHarv", amountHarv);
 		payment.put("from", fromWallet.trim());
 		payment.put("to", groupWallet.trim());
 		payment.put("txRef", txRef != null ? txRef : "");
@@ -135,7 +135,7 @@ public final class GroupPaymentHelper {
 				GroupFirestoreManager.getInstance(context)
 				.postSystemNotice(groupId, "Contribution received",
 				"A contribution of "
-				+ com.harvanna.app.wallet.BalanceFormatter.smart(amountAjc)
+				+ com.harvanna.app.wallet.BalanceFormatter.smart(amountHarv)
 				+ " was confirmed.");
 				if (callback != null) callback.onSuccess(id);
 			}
@@ -267,12 +267,12 @@ public final class GroupPaymentHelper {
         String memberUid = _s(payload, "memberUid");
         String memberName = _s(payload, "memberName");
         int slot = payload.get("slot") instanceof Number ? ((Number) payload.get("slot")).intValue() : 0;
-        double amountAjc = payload.get("amountAjc") instanceof Number ? ((Number) payload.get("amountAjc")).doubleValue() : 0;
+        double amountHarv = payload.get("amountHarv") instanceof Number ? ((Number) payload.get("amountHarv")).doubleValue() : 0;
         String from = _s(payload, "from");
         String groupWallet = _s(payload, "groupWallet");
         String txRef = _s(payload, "txRef");
 
-        recordContributionPending(context, groupId, memberUid, slot, amountAjc, from, groupWallet, txRef, new Callback() {
+        recordContributionPending(context, groupId, memberUid, slot, amountHarv, from, groupWallet, txRef, new Callback() {
             @Override 
             public void onSuccess(String paymentDocId) {
                 if (memberName != null && !memberName.isEmpty()) {

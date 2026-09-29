@@ -2,14 +2,14 @@ package com.harvanna.app.sdk;
 
 import android.content.Context;
 import com.harvanna.app.AddressUtil;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.tx.TransactionRouter;
 import com.harvanna.app.wallet.WalletGenerator;
 import com.harvanna.app.wallet.WalletManager;
 
 import org.json.JSONObject;
 
-public class AjooChainSdk {
+public class HarvannaChainSdk {
 	
 	// ==================== CALLBACKS ====================
 	
@@ -78,7 +78,7 @@ public class AjooChainSdk {
 			return;
 		}
 		
-		AjooNodeClient.getWallet(walletAddress, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getWallet(walletAddress, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject json) {
 				callback.onSuccess(json);
@@ -94,7 +94,7 @@ public class AjooChainSdk {
 	// ==================== TRANSFER METHOD ====================
 	
 	/**
-	 * Main transfer method for native Ajoocoin (AJC).
+	 * Main transfer method for native Harvannacoin (HARV).
 	 * Secondary token parameters have been removed to enforce native-only transactions.
 	 *
 	 * Previously bridged the node's wallet JSON into sender/recipient Maps

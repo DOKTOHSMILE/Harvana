@@ -60,7 +60,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import com.harvanna.app.group.FixedDayGridAdapter;
 import com.harvanna.app.group.FixedPaymentEngine;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import java.util.concurrent.TimeUnit;
 import com.harvanna.app.group.GroupPaymentHelper;
 import com.harvanna.app.group.GroupValidation;
@@ -337,8 +337,8 @@ public class GroupPaymentFragmentActivity extends Fragment {
 	private String groupWalletAddress = "";
 	private String groupId = "";
 	private int mySlot = 0;
-	private static final String PREF_PAY = "ajoo_group_pay_state";
-	private static final double AJC_TO_NGN = 150.0;
+	private static final String PREF_PAY = "harvanna_group_pay_state";
+	private static final double HARV_TO_NGN = 150.0;
 	private String myUid = "";
 	private String groupType = "";
 	private long totalSlots = 1;
@@ -583,7 +583,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 			String txRef = str(p, "txRef", "");
 			String docId = str(p, "_docId", "");
 			
-			com.harvanna.app.sync.AjooNodeClient.getTxStatus(txRef, new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+			com.harvanna.app.sync.HarvannaNodeClient.getTxStatus(txRef, new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 				@Override
 				public void onSuccess(org.json.JSONObject json) {
 					String status = json.optString("status", "");
@@ -622,31 +622,31 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		Map<String, Object> cachedBalance = com.harvanna.app.offline.OfflineCacheManager.load(
 		getContext(), "wallet_balance_" + groupWalletAddress);
 		if (cachedBalance != null && cachedBalance.containsKey("show")) {
-			double cachedAjc = num(cachedBalance, "show");
+			double cachedHarv = num(cachedBalance, "show");
 			if (tv_group_wallet_balance != null) {
 				// APPLIED FIX
-				tv_group_wallet_balance.setText(_formatUIBalance(cachedAjc));
+				tv_group_wallet_balance.setText(_formatUIBalance(cachedHarv));
 			}
 			if (tv_group_wallet_ngn != null) {
-				tv_group_wallet_ngn.setText(String.format(Locale.US, "≈ ₦%,.2f", cachedAjc * AJC_TO_NGN));
+				tv_group_wallet_ngn.setText(String.format(Locale.US, "≈ ₦%,.2f", cachedHarv * HARV_TO_NGN));
 			}
 		}
 		
-		AjooNodeClient.getWallet(groupWalletAddress, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getWallet(groupWalletAddress, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject json) {
-				double ajc = AjooNodeClient.toAjcDisplay(json.optLong("balance", 0L));
+				double harv = HarvannaNodeClient.toHarvDisplay(json.optLong("balance", 0L));
 				Map<String, Object> toCache = new HashMap<>();
-				toCache.put("show", ajc);
+				toCache.put("show", harv);
 				com.harvanna.app.offline.OfflineCacheManager.save(getContext(), "wallet_balance_" + groupWalletAddress, toCache);
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> {
 					if (tv_group_wallet_balance != null) {
 						// APPLIED FIX
-						tv_group_wallet_balance.setText(_formatUIBalance(ajc));
+						tv_group_wallet_balance.setText(_formatUIBalance(harv));
 					}
 					if (tv_group_wallet_ngn != null) {
-						tv_group_wallet_ngn.setText(String.format(Locale.US, "≈ ₦%,.2f", ajc * AJC_TO_NGN));
+						tv_group_wallet_ngn.setText(String.format(Locale.US, "≈ ₦%,.2f", harv * HARV_TO_NGN));
 					}
 				});
 			}
@@ -781,7 +781,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		SharedPreferences prefs = getContext().getSharedPreferences("wallet", Activity.MODE_PRIVATE);
 		String from = prefs.getString("wallet_address", "").trim();
 		if (from.isEmpty()) {
-			prefs = getContext().getSharedPreferences("ajc_wallet_prefs", Activity.MODE_PRIVATE);
+			prefs = getContext().getSharedPreferences("harv_wallet_prefs", Activity.MODE_PRIVATE);
 			from = prefs.getString("active_wallet_address", "").trim();
 		}
 		try {
@@ -947,7 +947,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 							payload.put("memberUid", myUid);
 							payload.put("memberName", name);
 							payload.put("slot", mySlot);
-							payload.put("amountAjc", contributionAmount);
+							payload.put("amountHarv", contributionAmount);
 							payload.put("from", from);
 							payload.put("groupWallet", groupWalletAddress);
 							payload.put("txRef", txHash);
@@ -998,7 +998,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 			HashMap<String, Object> p = data.get(pos);
 			String memberUid = str(p, "memberUid", "");
 			String amountFallback = str(p, "memberName", "Member");
-			double amt = num(p, "amountAjc");
+			double amt = num(p, "amountHarv");
 			long ts = (long) num(p, "timestamp");
 			String time = ts > 0 ? new SimpleDateFormat("dd MMM · HH:mm", Locale.getDefault()).format(new Date(ts)) : "—";
 			String st = str(p, "status", "PENDING");

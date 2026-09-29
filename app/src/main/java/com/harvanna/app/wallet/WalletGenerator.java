@@ -73,7 +73,7 @@ public class WalletGenerator {
     }
 
     /**
-     * ADDED for the Ajoo Access Card digit-code feature: builds a mnemonic
+     * ADDED for the Harvanna Access Card digit-code feature: builds a mnemonic
      * from GIVEN 16-byte entropy instead of generating fresh random entropy.
      * This is the exact same bit-packing generateMnemonic() already used —
      * factored out so the card system can encrypt just the 16-byte entropy
@@ -124,7 +124,7 @@ public class WalletGenerator {
     }
 
     /**
-     * ADDED for the Ajoo Access Card digit-code feature: the inverse of
+     * ADDED for the Harvanna Access Card digit-code feature: the inverse of
      * mnemonicFromEntropy() — extracts the original 16-byte entropy back
      * out of a valid 12-word mnemonic. Validates the BIP-39 checksum in
      * the process (same check as isValidMnemonic()) and returns null if
@@ -216,7 +216,7 @@ public class WalletGenerator {
         Map<String, Object> doc = new HashMap<>();
         doc.put("address", address);
         doc.put("nonce", 0L);
-        doc.put("balance_ajc", 0.0);
+        doc.put("balance_harv", 0.0);
         doc.put("assets", new ArrayList<Object>());
         doc.put("createdAt", System.currentTimeMillis());
         doc.put("isContract", false);

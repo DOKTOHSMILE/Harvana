@@ -2,7 +2,7 @@
 
 ## Done in this pass (Tier 0 / Tier 1 constants)
 - T0-1: node base URL and WS base -> `https://harvannaprotocol.com` / `wss://harvannaprotocol.com`.
-  Removed the self-signed IP pin from `network_security_config.xml` and deleted `ajoo_node_cert.pem`
+  Removed the self-signed IP pin from `network_security_config.xml` and deleted `harvanna_node_cert.pem`
   (the live host uses a CA cert). No stored-URL migration exists in this app (URL is a constant).
 - T0-2: `AJ0x` -> `HV0x` everywhere (constants, regex validators, layouts hints).
   Left unchanged: `CreateNewGroupActivity.FEE_COLLECTOR_ADDRESS` (unused legacy hex; real HV0x address unknown).
@@ -39,8 +39,8 @@
 - Firebase console: enable Email/Password and Google providers, register SHA fingerprints; T0-5 still open.
 
 ## Firebase setup (T0-5)
-- Package renamed `com.ajoo.app` -> `com.harvanna.app` (applicationId, namespace, sources, manifest authorities). Register `com.harvanna.app` in Firebase.
-- `com.ajoo.node.miner` (separate miner app) is still referenced by WalletEarnFragmentActivity; update if the miner is renamed.
+- Package renamed `com.harvanna.app` -> `com.harvanna.app` (applicationId, namespace, sources, manifest authorities). Register `com.harvanna.app` in Firebase.
+- `com.harvanna.node.miner` (separate miner app) is still referenced by WalletEarnFragmentActivity; update if the miner is renamed.
 - `com.google.gms.google-services` plugin (4.4.1) added to `app/build.gradle`. The build fails until
   `app/google-services.json` is added (download from Firebase console after registering the app + SHA fingerprints).
 - App has never been on Play, so `versionCode 1` is fine (T2-2 resolved). Keystore (T2-1) still open.
@@ -91,8 +91,8 @@ breaking reflection at runtime, Firestore offline persistence syncing after a re
 - Palette: Neon Orange #FF9030 + Charcoal #111827, light and dark (values/ and values-night/), drawable hardcoded
   greens/navys moved to tokens. Text on orange is charcoal (white on #FF9030 is only ~2.2:1). Visual result not
   reviewed on a device.
-- App renamed "Harvanna Wallet"; layout text rebranded (Ajoo -> Harvanna, AJC/Ajoocoin -> HARV). Java string
-  literals still say "AJC"/"Ajoo" in places (not changed; user-visible follow-up). The launcher icon is a generated
+- App renamed "Harvanna Wallet"; layout text rebranded (Harvanna -> Harvanna, HARV/Harvannacoin -> HARV). Java string
+  literals still say "HARV"/"Harvanna" in places (not changed; user-visible follow-up). The launcher icon is a generated
   placeholder (orange square, charcoal H).
 - "Home activity" UX/UI redesign, and per-group-type screens: NOT done yet. See docs/GROUP_ENGINE_MAP.md.
 - R8: first release build ran out of memory (512 MB default heap) - raised via gradle.properties. CI evidence:
@@ -120,7 +120,7 @@ Differences from the decisions as stated (found while reading the node; NOT chan
    redacted the reference shows "No market reference yet".
 
 ## Package renamed again (29 Sep 2026, urgent): com.harvanna.wallet -> com.harvanna.app
-All sources, tests, manifest authorities, Gradle `applicationId`/`namespace` and docs updated (history: com.ajoo.app -> com.harvanna.wallet -> com.harvanna.app).
+All sources, tests, manifest authorities, Gradle `applicationId`/`namespace` and docs updated (history: com.harvanna.app -> com.harvanna.wallet -> com.harvanna.app).
 **Firebase action required:** `app/google-services.json` was registered for `com.harvanna.wallet`. I only edited its `package_name` field so
 the Gradle plugin accepts the build; the `mobilesdk_app_id` and OAuth entries still belong to the OLD Firebase app. Register a new Android app
 `com.harvanna.app` in the Firebase console (with SHA-1/SHA-256 from README/this file's debug key), download the new `google-services.json`, and
@@ -144,11 +144,25 @@ providers are enabled in Authentication.
 - New `CoinInfo` (ticker/name), loaded from cache at startup and refreshed from `GET /api/v1/chain/info` (`ticker`). Defaults: HARV / Harvanna.
   The node publishes NO coin name and NO decimals; `CoinInfo` will pick up `coinName`/`name` if the node adds it. Node-side suggestion:
   add `coinName` and `decimals` to `/chain/info`.
-- 194 user-visible string literals in 51 Java files no longer hardcode AJC/Ajoo/Ajoocoin/AjooChain: they use `CoinInfo.ticker()`/`name()` or "Harvanna" / "Harvanna Protocol".
-  Left on purpose: class/identifier names, log tags, file-system folder names (`Ajoo`, `Ajoo/media/documents`, so nothing saved by older code is orphaned),
-  and "Ajoo Node Miner" (a separate app with its own package/name).
+- 194 user-visible string literals in 51 Java files no longer hardcode HARV/Harvanna/Harvannacoin/HarvannaChain: they use `CoinInfo.ticker()`/`name()` or "Harvanna" / "Harvanna Protocol".
+  Left on purpose: class/identifier names, log tags, file-system folder names (`Harvanna`, `Harvanna/media/documents`, so nothing saved by older code is orphaned),
+  and "Harvanna Node Miner" (a separate app with its own package/name).
 - Static text in XML layouts says HARV (set earlier); it is not fetched dynamically. If the node ever changes the ticker, Java-built text follows, layout text does not.
-- **Found, not fixed:** `HomeFragmentActivity` and `GroupPaymentFragmentActivity` use a hardcoded `AJC_TO_NGN = 150.0` to show a Naira value. That is a made-up
+- **Found, not fixed:** `HomeFragmentActivity` and `GroupPaymentFragmentActivity` use a hardcoded `HARV_TO_NGN = 150.0` to show a Naira value. That is a made-up
   rate, so the "NGN" totals (e.g. the asset screen) are not real. The node's mark is the right source but no endpoint exposes it yet; until then these should show no
   Naira value (or the open-listing median labelled as approximate). Needs an owner decision.
 - **Found, not fixed:** the transaction detail screen shows an "Amount Burned" row; the node's fee model (87% miner / 3% good-behaviour / 10% staking) has no burn.
+
+## The old brand and ticker were removed everywhere (29 Sep 2026)
+Every class, file, resource id/style/layout, string, log tag, preference/database/keystore name, comment, doc, CI artifact name and the Gradle project
+name now use Harvanna / HARV. The two legal documents in `assets` (Privacy Policy, Terms of Service) were renamed and their text rewritten - **the owner
+or counsel should review them**, since a mechanical brand swap changes legal wording. The countries data file was deliberately left alone: it contains the letters
+"ajc" inside real place names.
+
+Consequences to know:
+- **Local storage names changed** (preferences files, keystore alias, offline database, etc.). A device that already has the previous build installed keeps its old
+  data on disk but the new build cannot see it: the wallet must be restored from its recovery phrase / Access Card. Do not uninstall or clear data on a device holding
+  a wallet you have not backed up.
+- Mechanical name results that need the owner to confirm they exist: the support address is now `support@harvanna.app`; the separate miner app is now expected at package
+  `com.harvanna.node.miner` (the Earn screen launches it); saved-file folder is `Harvanna`.
+- The repository is still called "Ajoo" on GitHub and git history contains the old names; neither is part of the app.

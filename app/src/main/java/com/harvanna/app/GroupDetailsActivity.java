@@ -511,9 +511,9 @@ public class GroupDetailsActivity extends AppCompatActivity {
 			}
 			
 			@Override
-			public void transferFromGroupWallet(String from, String to, double amountAjc,
+			public void transferFromGroupWallet(String from, String to, double amountHarv,
 			com.harvanna.app.group.GroupPayoutManager.Callback cb) {
-				_executeGroupWalletTransfer(from, to, amountAjc, cb);
+				_executeGroupWalletTransfer(from, to, amountHarv, cb);
 			}
 			
 			@Override
@@ -521,7 +521,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 				SharedPreferences prefs = getSharedPreferences("wallet", MODE_PRIVATE);
 				String addr = prefs.getString("wallet_address", "").trim();
 				if (addr.isEmpty()) {
-					prefs = getSharedPreferences("ajc_wallet_prefs", MODE_PRIVATE);
+					prefs = getSharedPreferences("harv_wallet_prefs", MODE_PRIVATE);
 					addr = prefs.getString("active_wallet_address", "").trim();
 				}
 				return addr;
@@ -668,11 +668,11 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		}
 	}
 	
-	private void _executeGroupWalletTransfer(String from, String to, double amountAjc,
+	private void _executeGroupWalletTransfer(String from, String to, double amountHarv,
 	com.harvanna.app.group.GroupPayoutManager.Callback cb) {
 		com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(GroupDetailsActivity.this, () -> {
 			try {
-				java.math.BigDecimal amount = java.math.BigDecimal.valueOf(amountAjc);
+				java.math.BigDecimal amount = java.math.BigDecimal.valueOf(amountHarv);
 				com.harvanna.app.tx.TransactionRouter.routeTransaction(
 				GroupDetailsActivity.this,
 				from,
@@ -769,7 +769,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 						|| "PAYMENT".equals(type);
 						if (!contribution) continue;
 						
-						double amt = _asDouble(pay.get("amountAjc"));
+						double amt = _asDouble(pay.get("amountHarv"));
 						if (amt <= 0) amt = _asDouble(pay.get("amount"));
 						if (amt > 0) total += amt;
 					}

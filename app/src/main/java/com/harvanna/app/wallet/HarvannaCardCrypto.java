@@ -18,10 +18,10 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Ajoo Access Card — password-encrypted wallet backup, deliberately
+ * Harvanna Access Card — password-encrypted wallet backup, deliberately
  * INDEPENDENT of the device's Android Keystore (unlike SecureWalletStorage).
  * A physical card must be decryptable on ANY device by anyone who knows the
- * password — Ajoo itself must never be able to decrypt it.
+ * password — Harvanna itself must never be able to decrypt it.
  *
  * KEY DERIVATION — combined PBKDF2 + Argon2id (added Sept 2026 for extra
  * hardening on a system protecting real financial wallets): the same
@@ -41,12 +41,12 @@ import javax.crypto.spec.SecretKeySpec;
  * raw 16-byte BIP-39 entropy — the words are 100% deterministically
  * reconstructible from entropy via WalletGenerator.mnemonicFromEntropy().
  * Payload is still 44 bytes: salt(8) || iv(12) || entropy_ciphertext+tag(16+8).
- *   QR code    — "AJOOCARD2:" + Base64(44 bytes)  -> ~70 characters
+ *   QR code    — "HARVANNACARD2:" + Base64(44 bytes)  -> ~70 characters
  *   Digit code — 106 decimal digits, grouped by 5 -> printable QR-damage fallback
  */
-public final class AjooCardCrypto {
+public final class HarvannaCardCrypto {
 
-    public static final String FORMAT_PREFIX = "AJOOCARD2:";
+    public static final String FORMAT_PREFIX = "HARVANNACARD2:";
 
     public static final int MIN_PASSWORD_LENGTH = 20;
 
@@ -65,7 +65,7 @@ public final class AjooCardCrypto {
     // Argon2id cost parameters — OWASP's minimum recommended profile for an
     // interactive (user-waiting) context: memory=19 MiB, iterations=2,
     // parallelism=1. This already runs alongside PBKDF2's 300k iterations
-    // on a background thread (see CreateAjooCardActivity/RestoreWalletActivity),
+    // on a background thread (see CreateHarvannaCardActivity/RestoreWalletActivity),
     // so combined cost is roughly 2-4 seconds on a modern phone — acceptable
     // for a deliberate, rare action like creating or restoring a wallet card.
     private static final int ARGON2_MEMORY_KB = 19_456;
@@ -73,7 +73,7 @@ public final class AjooCardCrypto {
     private static final int ARGON2_PARALLELISM = 1;
     private static final int ARGON2_OUTPUT_BYTES = 32; // 256 bits
 
-    private AjooCardCrypto() {}
+    private HarvannaCardCrypto() {}
 
     public static final class ValidationException extends Exception {
         public ValidationException(String message) { super(message); }

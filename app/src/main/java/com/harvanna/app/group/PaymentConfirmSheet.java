@@ -22,7 +22,7 @@ public final class PaymentConfirmSheet {
 
 	private PaymentConfirmSheet() {}
 
-	public static void show(Context context, String title, double amountAjc,
+	public static void show(Context context, String title, double amountHarv,
 	                         String recipientAddress, String memo, String feeDisplay,
 	                         OnConfirm onConfirm) {
 		if (context == null) return;
@@ -42,7 +42,7 @@ public final class PaymentConfirmSheet {
 		View btnSend = sheetView.findViewById(idOf(context, "btn_confirm_send"));
 
 		if (tvTitle != null && title != null) tvTitle.setText(title);
-		if (tvAmount != null) tvAmount.setText(com.harvanna.app.wallet.BalanceFormatter.smart(amountAjc));
+		if (tvAmount != null) tvAmount.setText(com.harvanna.app.wallet.BalanceFormatter.smart(amountHarv));
 		if (tvRecipient != null) tvRecipient.setText(_shortAddr(recipientAddress));
 		if (tvFee != null) tvFee.setText(feeDisplay != null && !feeDisplay.isEmpty() ? feeDisplay : "—");
 		if (memo != null && !memo.trim().isEmpty()) {

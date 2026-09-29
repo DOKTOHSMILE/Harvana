@@ -956,7 +956,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		
 		setTitle("CREATE NEW GROUP");
 		// Load active wallet address
-		SharedPreferences walletPrefs = getSharedPreferences("ajc_wallet_prefs", MODE_PRIVATE);
+		SharedPreferences walletPrefs = getSharedPreferences("harv_wallet_prefs", MODE_PRIVATE);
 		String savedSeed = walletPrefs.getString("seed_phrase", walletPrefs.getString("mnemonic", ""));
 		
 		if (savedSeed != null && !savedSeed.trim().isEmpty()) {
@@ -1076,7 +1076,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private HashMap<String, Object> p_tracker_map = new HashMap<>();
 	private String distributionString = "";
 	private String cityString = "";
-	private double ajc_balance = 0;
+	private double harv_balance = 0;
 	private static final double GROUP_CREATION_FEE = 5;
 	private String activeAddress = "";
 	// TODO(observations): unused legacy AJ0x fee collector address; needs a real HV0x address if ever used.
@@ -1240,11 +1240,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					pendingGroupMnemonic = mnemonic;
 					pendingGroupWalletAddress = groupWalletAddress;
 					pendingGroupBottomSheetDialog = bottomSheetDialog;
-					Intent cardIntent = new Intent(context, com.harvanna.app.CreateAjooCardActivity.class);
-					cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_MANDATORY, true);
-					cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_RAW_MNEMONIC, mnemonic);
-					cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
-					cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_LABEL, group_name_edittext1.getText().toString().trim());
+					Intent cardIntent = new Intent(context, com.harvanna.app.CreateHarvannaCardActivity.class);
+					cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_MANDATORY, true);
+					cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RAW_MNEMONIC, mnemonic);
+					cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
+					cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_LABEL, group_name_edittext1.getText().toString().trim());
 					startActivityForResult(cardIntent, RC_MANDATORY_GROUP_CARD);
 				}
 			});
@@ -1259,7 +1259,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	}
 	
 	/**
-* After node is confirmed reachable: check personal balance, transfer 5 AJC
+* After node is confirmed reachable: check personal balance, transfer 5 HARV
 * creation fee to the new group wallet address, persist keys locally, then
 * write the group doc. Wallet is created on-chain by the first credit —
 * no Firestore WALLETS write.
@@ -1277,9 +1277,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			com.harvanna.app.wallet.WalletNodeBridge.fetchLiveBalance(CreateNewGroupActivity.this, finalPersonalAddress,
 			new com.harvanna.app.wallet.WalletNodeBridge.BalanceCallback() {
 				@Override
-				public void onSuccess(double ajcBalance, long nonce, long blockHeight) {
+				public void onSuccess(double harvBalance, long nonce, long blockHeight) {
 					runOnUiThread(() -> {
-						java.math.BigDecimal balance = java.math.BigDecimal.valueOf(ajcBalance);
+						java.math.BigDecimal balance = java.math.BigDecimal.valueOf(harvBalance);
 						java.math.BigDecimal requiredAmount = new java.math.BigDecimal("5.005");
 						if (balance.compareTo(requiredAmount) < 0) {
 							if (!isFinishing() && progress.isShowing()) progress.dismiss();
@@ -1303,7 +1303,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 						}
 						
 						progress.setMessage(("Transferring 5 " + com.harvanna.app.CoinInfo.ticker() + " to group wallet..."));
-						// THE FIX: this moved 5 AJC with zero PIN/biometric
+						// THE FIX: this moved 5 HARV with zero PIN/biometric
 						// confirmation — the only money-moving screen in the
 						// app besides Send/P2P that had no gate at all.
 						com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(CreateNewGroupActivity.this, () ->
@@ -1360,9 +1360,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 										.setTitle("Back up this group's wallet?")
 										.setMessage("As the group's admin, you're the one holding its wallet key. An Harvanna Access Card is a physical backup for it — recommended for any group holding real funds.")
 										.setPositiveButton("Create Harvanna Card", (d, w) -> {
-											Intent cardIntent = new Intent(context, com.harvanna.app.CreateAjooCardActivity.class);
-											cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
-											cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_LABEL, createdGroupName);
+											Intent cardIntent = new Intent(context, com.harvanna.app.CreateHarvannaCardActivity.class);
+											cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
+											cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_LABEL, createdGroupName);
 											context.startActivity(cardIntent);
 										})
 										.setNegativeButton("Not now", null)
@@ -1885,7 +1885,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		String personalSeed = com.harvanna.app.wallet.SecureWalletStorage.getActiveMnemonic(CreateNewGroupActivity.this);
 		if (personalSeed == null) personalSeed = "";
 		
-		SharedPreferences prefs = getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+		SharedPreferences prefs = getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 		String resolvedAddress = prefs.getString("active_wallet_address", "").trim();
 		if (resolvedAddress.isEmpty()) {
 			resolvedAddress = prefs.getString("wallet_address", "").trim();
@@ -1909,8 +1909,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		final String finalPersonalSeed = personalSeed;
 		
 		progress.setMessage(("Connecting to " + com.harvanna.app.CoinInfo.ticker() + " node..."));
-		com.harvanna.app.sync.AjooNodeClient.getWallet(groupWalletAddress,
-		new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getWallet(groupWalletAddress,
+		new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject json) {
 				_continueGroupCreationFee(progress, context, prefs, bottomSheetDialog,

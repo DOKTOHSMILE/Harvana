@@ -10,9 +10,9 @@ import com.harvanna.app.sync.FirestoreSyncManager;
  * around a model.Transaction object — that was only ever reachable from
  * TransactionRouter's Firestore-simulated token-transfer branch
  * (executeTransaction), which no UI screen actually exercises: every send
- * flow only ever offers native AJC. Native transfers sign and submit
+ * flow only ever offers native HARV. Native transfers sign and submit
  * directly in TransactionRouter.executeNativeTransfer() using Ed25519 and
- * AjooNodeClient - they never touched this class. Removed together with
+ * HarvannaNodeClient - they never touched this class. Removed together with
  * the rest of that dead cluster (model.Transaction, gas.GasCalculator,
  * gas.GasFee, tx.CompleteFeeEngine) rather than leaving it half-wired.
  *

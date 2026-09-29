@@ -45,7 +45,7 @@ import java.text.*;
 import java.util.*;
 import java.util.regex.*;
 import org.json.*;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import androidx.core.content.FileProvider;
 
 
@@ -230,7 +230,7 @@ public class HistoryFragmentActivity extends Fragment {
 	private void _fetchAndBindWalletActivity() {
 		if (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x")) return;
 		_paintCachedHistory();
-		AjooNodeClient.getHistory(groupWalletAddress, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getHistory(groupWalletAddress, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject json) {
 				ArrayList<HashMap<String, Object>> rows = new ArrayList<>();
@@ -383,7 +383,7 @@ public class HistoryFragmentActivity extends Fragment {
 	}
 	
 	private File _getSafeExportFile(String fileName) throws IOException {
-		File primaryDir = new File(Environment.getExternalStorageDirectory(), "Ajoo/media/documents");
+		File primaryDir = new File(Environment.getExternalStorageDirectory(), "Harvanna/media/documents");
 		if (!primaryDir.exists()) primaryDir.mkdirs();
 		File file = new File(primaryDir, fileName);
 		try {
@@ -391,7 +391,7 @@ public class HistoryFragmentActivity extends Fragment {
 			if (file.canWrite()) return file;
 		} catch (Exception ignored) {}
 		
-		File secondaryDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "Ajoo");
+		File secondaryDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "Harvanna");
 		if (!secondaryDir.exists()) secondaryDir.mkdirs();
 		file = new File(secondaryDir, fileName);
 		try {
@@ -399,7 +399,7 @@ public class HistoryFragmentActivity extends Fragment {
 			if (file.canWrite()) return file;
 		} catch (Exception ignored) {}
 		
-		File fallbackDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Ajoo");
+		File fallbackDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Harvanna");
 		if (!fallbackDir.exists()) fallbackDir.mkdirs();
 		file = new File(fallbackDir, fileName);
 		if (!file.exists()) file.createNewFile();
@@ -493,7 +493,7 @@ public class HistoryFragmentActivity extends Fragment {
 				boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
 				String type = isOut ? "Sent" : "Received";
 				String counterparty = isOut ? to : from;
-				double amt = AjooNodeClient.toAjcDisplay((long) num(tx, "amount"));
+				double amt = HarvannaNodeClient.toHarvDisplay((long) num(tx, "amount"));
 				String memo = str(tx, "memo", "").replace(",", " ");
 				long conf = (long) num(tx, "confirmations");
 				String status = conf > 0 ? "Confirmed" : "Pending";
@@ -549,7 +549,7 @@ public class HistoryFragmentActivity extends Fragment {
 				boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
 				String type = isOut ? "Sent" : "Received";
 				String counterparty = isOut ? to : from;
-				double amt = AjooNodeClient.toAjcDisplay((long) num(tx, "amount"));
+				double amt = HarvannaNodeClient.toHarvDisplay((long) num(tx, "amount"));
 				String memo = str(tx, "memo", "");
 				String status = ((long) num(tx, "confirmations") > 0) ? "Confirmed" : "Pending";
 				
@@ -602,7 +602,7 @@ public class HistoryFragmentActivity extends Fragment {
 		if (!_checkStoragePermission()) return;
 		
 		try {
-			StringBuilder docContent = new StringBuilder("AJOO NETWORK - OFFICIAL TRANSACTION STATEMENT\n\n");
+			StringBuilder docContent = new StringBuilder("HARVANNA NETWORK - OFFICIAL TRANSACTION STATEMENT\n\n");
 			docContent.append("Group Name: ").append(groupName).append("\n");
 			docContent.append("Group Type: ").append(groupType).append("\n");
 			docContent.append("Location: ").append(groupLocation).append("\n");
@@ -617,7 +617,7 @@ public class HistoryFragmentActivity extends Fragment {
 				boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
 				String type = isOut ? "Sent" : "Received";
 				String counterparty = isOut ? to : from;
-				double amt = AjooNodeClient.toAjcDisplay((long) num(tx, "amount"));
+				double amt = HarvannaNodeClient.toHarvDisplay((long) num(tx, "amount"));
 				String memo = str(tx, "memo", "");
 				String status = ((long) num(tx, "confirmations") > 0) ? "Confirmed" : "Pending";
 				
@@ -686,7 +686,7 @@ public class HistoryFragmentActivity extends Fragment {
 				boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
 				String type = isOut ? "Sent" : "Received";
 				String counterparty = isOut ? to : from;
-				double amt = AjooNodeClient.toAjcDisplay((long) num(tx, "amount"));
+				double amt = HarvannaNodeClient.toHarvDisplay((long) num(tx, "amount"));
 				String memo = str(tx, "memo", "");
 				String status = ((long) num(tx, "confirmations") > 0) ? "Confirmed" : "Pending";
 				
@@ -749,7 +749,7 @@ public class HistoryFragmentActivity extends Fragment {
 			String to = str(tx, "to", "");
 			boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
 			String counterparty = isOut ? to : from;
-			double amountAjc = AjooNodeClient.toAjcDisplay((long) num(tx, "amount"));
+			double amountHarv = HarvannaNodeClient.toHarvDisplay((long) num(tx, "amount"));
 			long ts = (long) num(tx, "timestamp");
 			long confirmations = (long) num(tx, "confirmations");
 			String memo = str(tx, "memo", "");
@@ -766,7 +766,7 @@ public class HistoryFragmentActivity extends Fragment {
 			if (h.name != null) {
 				String prefix = isOut ? "Sent out · " : "Received · ";
 				// APPLIED FIX
-				String amountText = _formatUIBalance(amountAjc);
+				String amountText = _formatUIBalance(amountHarv);
 				h.name.setText(prefix + amountText + (" " + com.harvanna.app.CoinInfo.ticker()));
 				h.name.setTextColor(isOut ? 0xFFF44336 : 0xFF4CAF50);
 			}
@@ -800,13 +800,13 @@ public class HistoryFragmentActivity extends Fragment {
 				intent.putExtra("senderAddress", from);
 				intent.putExtra("recipientAddress", to);
 				intent.putExtra("tokenSymbol", com.harvanna.app.CoinInfo.ticker());
-				intent.putExtra("value", amountAjc);
+				intent.putExtra("value", amountHarv);
 				intent.putExtra("timestamp", ts);
 				intent.putExtra("memo", memo);
 				intent.putExtra("confirmations", confirmations);
 				
 				// Pass optional node telemetry if available in the HashMap
-				intent.putExtra("ajcFee", num(tx, "fee")); 
+				intent.putExtra("harvFee", num(tx, "fee")); 
 				intent.putExtra("blockNumber", (long) num(tx, "blockHeight"));
 				intent.putExtra("nonce", (long) num(tx, "nonce"));
 				

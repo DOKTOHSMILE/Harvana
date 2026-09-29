@@ -130,8 +130,8 @@ public final class PendingTxStore {
 			String txHash = String.valueOf(entry.get("txHash"));
 			if (txHash == null || txHash.startsWith("local-failed-")) continue;
 			
-			com.harvanna.app.sync.AjooNodeClient.getTxStatus(txHash,
-			new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+			com.harvanna.app.sync.HarvannaNodeClient.getTxStatus(txHash,
+			new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 				@Override
 				public void onSuccess(org.json.JSONObject json) {
 					String nodeStatus = json.optString("status", "");

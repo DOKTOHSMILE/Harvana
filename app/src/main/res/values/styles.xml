@@ -31,9 +31,9 @@
         <item name="android:statusBarColor">?attr/appBarColor</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowBackground">@color/colorBackground</item>
-        <item name="alertDialogTheme">@style/AjooAlertDialog</item>
-        <item name="materialAlertDialogTheme">@style/AjooAlertDialog</item>
-        <item name="bottomSheetDialogTheme">@style/AjooBottomSheetDialog</item>
+        <item name="alertDialogTheme">@style/HarvannaAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/HarvannaAlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/HarvannaBottomSheetDialog</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Light">
@@ -55,7 +55,7 @@
 
     <!-- colorPrimary is ALWAYS the accent. Night used to map it to
          colorSurface so Material Confirm/Cancel text vanished. -->
-    <style name="AjooAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+    <style name="HarvannaAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
         <item name="colorPrimary">@color/colorAccent</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorSurface">@color/colorSurface</item>
@@ -64,17 +64,17 @@
         <item name="android:textColorPrimary">@color/colorTextPrimary</item>
         <item name="android:textColor">@color/colorTextPrimary</item>
         <item name="android:windowBackground">@color/colorSurface</item>
-        <item name="buttonBarPositiveButtonStyle">@style/AjooDialogButton</item>
-        <item name="buttonBarNegativeButtonStyle">@style/AjooDialogButton</item>
-        <item name="buttonBarNeutralButtonStyle">@style/AjooDialogButton</item>
+        <item name="buttonBarPositiveButtonStyle">@style/HarvannaDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/HarvannaDialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/HarvannaDialogButton</item>
     </style>
 
-    <style name="AjooDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+    <style name="HarvannaDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
         <item name="android:textColor">@color/colorAccent</item>
         <item name="android:minHeight">48dp</item>
     </style>
 
-    <style name="AjooBottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+    <style name="HarvannaBottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
         <item name="colorPrimary">@color/colorAccent</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorSurface">@color/colorSurface</item>
@@ -82,15 +82,15 @@
         <item name="colorOnSurface">@color/colorTextPrimary</item>
         <item name="colorOnSurfaceVariant">@color/colorTextSecondary</item>
         <item name="android:textColorPrimary">@color/colorTextPrimary</item>
-        <item name="bottomSheetStyle">@style/AjooBottomSheetStyle</item>
+        <item name="bottomSheetStyle">@style/HarvannaBottomSheetStyle</item>
     </style>
 
-    <style name="AjooBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
+    <style name="HarvannaBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
         <item name="backgroundTint">?attr/colorSurface</item>
-        <item name="shapeAppearanceOverlay">@style/AjooBottomSheetShape</item>
+        <item name="shapeAppearanceOverlay">@style/HarvannaBottomSheetShape</item>
     </style>
 
-    <style name="AjooBottomSheetShape" parent="">
+    <style name="HarvannaBottomSheetShape" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopLeft">20dp</item>
         <item name="cornerSizeTopRight">20dp</item>
@@ -117,12 +117,12 @@
         <item name="colorControlActivated">@color/colorP2pAccent</item>
         <item name="android:navigationBarColor">@color/colorP2pBg</item>
         <item name="colorOnPrimary">@color/colorP2pOnAccent</item>
-        <item name="alertDialogTheme">@style/AjooP2pAlertDialog</item>
-        <item name="materialAlertDialogTheme">@style/AjooP2pAlertDialog</item>
-        <item name="bottomSheetDialogTheme">@style/AjooP2pBottomSheetDialog</item>
+        <item name="alertDialogTheme">@style/HarvannaP2pAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/HarvannaP2pAlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/HarvannaP2pBottomSheetDialog</item>
     </style>
 
-    <style name="AjooP2pAlertDialog" parent="AjooAlertDialog">
+    <style name="HarvannaP2pAlertDialog" parent="HarvannaAlertDialog">
         <item name="colorPrimary">@color/colorP2pAccent</item>
         <item name="colorAccent">@color/colorP2pAccent</item>
         <item name="colorSurface">@color/colorP2pSurface</item>
@@ -130,17 +130,17 @@
         <item name="colorOnSurface">@color/colorP2pTextPrimary</item>
         <item name="android:textColorPrimary">@color/colorP2pTextPrimary</item>
         <item name="android:windowBackground">@color/colorP2pSurface</item>
-        <item name="buttonBarPositiveButtonStyle">@style/AjooP2pDialogButton</item>
-        <item name="buttonBarNegativeButtonStyle">@style/AjooP2pDialogButton</item>
-        <item name="buttonBarNeutralButtonStyle">@style/AjooP2pDialogButton</item>
+        <item name="buttonBarPositiveButtonStyle">@style/HarvannaP2pDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/HarvannaP2pDialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/HarvannaP2pDialogButton</item>
     </style>
 
-    <style name="AjooP2pDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+    <style name="HarvannaP2pDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
         <item name="android:textColor">@color/colorP2pAccent</item>
         <item name="android:minHeight">48dp</item>
     </style>
 
-    <style name="AjooP2pBottomSheetDialog" parent="AjooBottomSheetDialog">
+    <style name="HarvannaP2pBottomSheetDialog" parent="HarvannaBottomSheetDialog">
         <item name="colorPrimary">@color/colorP2pAccent</item>
         <item name="colorAccent">@color/colorP2pAccent</item>
         <item name="colorSurface">@color/colorP2pSurface</item>
@@ -148,12 +148,12 @@
         <item name="colorOnSurface">@color/colorP2pTextPrimary</item>
         <item name="colorOnSurfaceVariant">@color/colorP2pTextSecondary</item>
         <item name="android:textColorPrimary">@color/colorP2pTextPrimary</item>
-        <item name="bottomSheetStyle">@style/AjooP2pBottomSheetStyle</item>
+        <item name="bottomSheetStyle">@style/HarvannaP2pBottomSheetStyle</item>
     </style>
 
-    <style name="AjooP2pBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
+    <style name="HarvannaP2pBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
         <item name="backgroundTint">@color/colorP2pSurface</item>
-        <item name="shapeAppearanceOverlay">@style/AjooBottomSheetShape</item>
+        <item name="shapeAppearanceOverlay">@style/HarvannaBottomSheetShape</item>
     </style>
 
     <style name="P2pSectionLabel">

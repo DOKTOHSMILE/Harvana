@@ -124,7 +124,7 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="24dp"
 						android:layout_marginBottom="8dp"
-						android:text="ABOUT AJOO COIN"
+						android:text="ABOUT HARVANNA COIN"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextTertiary"
 						android:gravity="start"

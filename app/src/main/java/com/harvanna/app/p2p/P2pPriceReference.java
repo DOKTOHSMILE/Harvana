@@ -1,6 +1,6 @@
 package com.harvanna.app.p2p;
 
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,7 +32,7 @@ public final class P2pPriceReference {
     private P2pPriceReference() {}
 
     public static void fetch(Callback cb) {
-        AjooNodeClient.nodeGet("/api/v1/p2p/listings/open?page=0&size=100", new AjooNodeClient.JsonCallback() {
+        HarvannaNodeClient.nodeGet("/api/v1/p2p/listings/open?page=0&size=100", new HarvannaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject json) {
                 List<Long> prices = new ArrayList<>();

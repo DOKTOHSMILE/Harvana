@@ -19,7 +19,7 @@ import com.harvanna.app.R;
 */
 public class TransactionNotification {
 	
-	private static final String CHANNEL_ID = "ajoo_transactions";
+	private static final String CHANNEL_ID = "harvanna_transactions";
 	private static final String CHANNEL_NAME = "Transactions";
 	private static final int BASE_NOTIFICATION_ID = 3001;
 	
@@ -29,7 +29,7 @@ public class TransactionNotification {
 * @param context   any Context (Activity or Application)
 * @param isIncoming true = received, false = sent
 * @param amount    amount string e.g. "12.5000"
-* @param symbol    token symbol e.g. "AJC"
+* @param symbol    token symbol e.g. "HARV"
 * @param counterparty short address or name of the other party
 * @param txHash    optional tx hash (can be null)
 */	

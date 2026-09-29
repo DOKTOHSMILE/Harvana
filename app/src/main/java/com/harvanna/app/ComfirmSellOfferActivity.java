@@ -362,7 +362,7 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 		tv_confirm_seller_rating.setText("No rating yet");
 		
 		tv_confirm_amount.setText(BalanceFormatter.smartDecimal(amount) + (" " + com.harvanna.app.CoinInfo.ticker()));
-		tv_confirm_unit_price.setText(P2pMoney.perAjc(unitPrice, currency));
+		tv_confirm_unit_price.setText(P2pMoney.perHarv(unitPrice, currency));
 		_showPriceReference();
 		tv_confirm_buyers_pay.setText(P2pMoney.fiat(amount * unitPrice, currency));
 		tv_confirm_trade_limit.setText(String.format(Locale.US, ("Min %s " + com.harvanna.app.CoinInfo.ticker() + " • Max %s " + com.harvanna.app.CoinInfo.ticker()),
@@ -404,7 +404,7 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 				return;
 			}
 			double dev = com.harvanna.app.p2p.P2pPriceReference.deviation(myKobo, medianKobo);
-			String ref = "Market reference: " + P2pMoney.perAjc(medianKobo / 100.0, "NGN")
+			String ref = "Market reference: " + P2pMoney.perHarv(medianKobo / 100.0, "NGN")
 					+ " (median of " + samples + " open listing" + (samples == 1 ? "" : "s") + ")";
 			if (Math.abs(dev) > com.harvanna.app.p2p.P2pPriceReference.DEVIATION_FLAG) {
 				note.setText(ref + "\nYour price is " + Math.round(Math.abs(dev) * 100) + "% "

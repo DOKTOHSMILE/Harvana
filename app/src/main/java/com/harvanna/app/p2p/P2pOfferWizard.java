@@ -106,8 +106,8 @@ public final class P2pOfferWizard {
 		TextView tvPriceNote = a.findViewById(id(a, "tv_" + p + "_price_note"));
 		EditText etTerms = a.findViewById(id(a, "et_" + p + "_terms"));
 		TextView tvTermsCounter = a.findViewById(id(a, "tv_" + p + "_terms_counter"));
-		View btnDeposit1 = a.findViewById(id(a, "btn_" + p + "_deposit_ajc_1"));
-		View btnDeposit2 = a.findViewById(id(a, "btn_" + p + "_deposit_ajc_2"));
+		View btnDeposit1 = a.findViewById(id(a, "btn_" + p + "_deposit_harv_1"));
+		View btnDeposit2 = a.findViewById(id(a, "btn_" + p + "_deposit_harv_2"));
 		View rowMinAccountAge = a.findViewById(id(a, "row_" + p + "_min_account_age"));
 		TextView tvMinAccountAge = a.findViewById(id(a, "tv_" + p + "_min_account_age_value"));
 		final int[] minAccountAgeDays = {0};
@@ -138,8 +138,8 @@ public final class P2pOfferWizard {
 		if (tvError2 != null) tvError2.setVisibility(View.GONE);
 
 		// The "index price" is honestly sourced from FiatValueHelper's own
-		// definition of AJC's market rate — the cheapest currently-open
-		// SELL listing in this currency (see that class's own comment: AJC
+		// definition of HARV's market rate — the cheapest currently-open
+		// SELL listing in this currency (see that class's own comment: HARV
 		// has no real external exchange listing anywhere, so a fabricated
 		// Binance/CMC-style feed would be dishonest). Both the fat-finger
 		// guardrail (Fixed mode) and the margin calculation (Floating
@@ -168,9 +168,9 @@ public final class P2pOfferWizard {
 		if (sell && tvAvailable != null) {
 			tvAvailable.setText("…");
 			WalletNodeBridge.fetchLiveBalance(a, address, new WalletNodeBridge.BalanceCallback() {
-				@Override public void onSuccess(double balanceAjc, long nonce, long blockHeight) {
-					available[0] = balanceAjc;
-					tvAvailable.setText(BalanceFormatter.smart(balanceAjc));
+				@Override public void onSuccess(double balanceHarv, long nonce, long blockHeight) {
+					available[0] = balanceHarv;
+					tvAvailable.setText(BalanceFormatter.smart(balanceHarv));
 				}
 				@Override public void onError(String error) {
 					available[0] = -1;
@@ -334,7 +334,7 @@ public final class P2pOfferWizard {
 
 	// Margin needs a sign (a discount is a negative margin), which
 	// BalanceFormatter.parseUserInput deliberately rejects (it's built for
-	// AJC amounts, which are never negative) — so this gets its own parser.
+	// HARV amounts, which are never negative) — so this gets its own parser.
 	private static double parseMargin(EditText etMargin) {
 		if (etMargin == null) return 0;
 		String raw = etMargin.getText().toString().trim();
@@ -369,7 +369,7 @@ public final class P2pOfferWizard {
 				if (diffPct > 10) {
 					tvNote.setText(String.format(Locale.US,
 						"Your price is significantly different from the market rate of %s.",
-						P2pMoney.perAjc(indexPrice, currency)));
+						P2pMoney.perHarv(indexPrice, currency)));
 					tvNote.setTextColor(0xFFF59E0B); // colorWarning
 					return;
 				}
@@ -390,7 +390,7 @@ public final class P2pOfferWizard {
 				tvCalculatedPrice.setTextColor(0xFFEF4444); // colorError
 			} else {
 				tvCalculatedPrice.setText(String.format(Locale.US, "Current price: %s (market %s)",
-					P2pMoney.perAjc(calculated, currency), P2pMoney.perAjc(indexPrice, currency)));
+					P2pMoney.perHarv(calculated, currency), P2pMoney.perHarv(indexPrice, currency)));
 				tvCalculatedPrice.setTextColor(tvCalculatedPrice.getContext().getResources().getColor(R.color.colorAccent));
 			}
 		}
@@ -487,7 +487,7 @@ public final class P2pOfferWizard {
 	                               List<PaymentMethod> methods) {
 		String p = sell ? "sell" : "buy";
 		setText(a, "tv_" + p + "_review_amount", BalanceFormatter.smart(amount));
-		setText(a, "tv_" + p + "_review_unit_price", P2pMoney.perAjc(price, currency));
+		setText(a, "tv_" + p + "_review_unit_price", P2pMoney.perHarv(price, currency));
 		setText(a, "tv_" + p + "_review_total_price", P2pMoney.fiat(amount * price, currency));
 		setText(a, "tv_" + p + "_review_fee", "Set by the node at match time");
 		setText(a, "tv_" + p + "_review_trade_limit",
@@ -676,7 +676,7 @@ public final class P2pOfferWizard {
 	}
 
 	private interface DurationPick { void onPicked(long hours, String label); }
-	private interface LimitPick { void onPicked(double minAjc, double maxAjc); }
+	private interface LimitPick { void onPicked(double minHarv, double maxHarv); }
 	private interface PaymentWindowPick { void onPicked(int minutes, String label); }
 	private interface MinAccountAgePick { void onPicked(int days, String label); }
 

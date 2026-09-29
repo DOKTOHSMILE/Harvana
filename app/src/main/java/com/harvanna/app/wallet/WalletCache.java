@@ -23,7 +23,7 @@ import java.util.Map;
 */
 public final class WalletCache {
 	
-	private static final String PREF_NAME = "ajoo_wallet_cache";
+	private static final String PREF_NAME = "harvanna_wallet_cache";
 	
 	private WalletCache() {}
 	
@@ -33,7 +33,7 @@ public final class WalletCache {
 *
 * @param context   any context
 * @param address   wallet address, used as the cache key
-* @param walletDoc the wallet fields to cache (balance_ajc, assets, etc.)
+* @param walletDoc the wallet fields to cache (balance_harv, assets, etc.)
 */	
 	public static void save(Context context, String address, Map<String, Object> walletDoc) {
 		if (context == null || address == null || walletDoc == null) return;

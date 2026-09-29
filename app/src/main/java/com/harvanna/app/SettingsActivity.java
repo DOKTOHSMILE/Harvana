@@ -191,7 +191,7 @@ public class SettingsActivity extends AppCompatActivity {
 	private LinearLayout linear36;
 	private LinearLayout rowHelpSupport;
 	private View view38;
-	private LinearLayout rowAboutAjoo;
+	private LinearLayout rowAboutHarvanna;
 	private View view40;
 	private LinearLayout rowTermsConditions;
 	private View view42;
@@ -376,7 +376,7 @@ public class SettingsActivity extends AppCompatActivity {
 		linear36 = findViewById(R.id.linear36);
 		rowHelpSupport = findViewById(R.id.rowHelpSupport);
 		view38 = findViewById(R.id.view38);
-		rowAboutAjoo = findViewById(R.id.rowAboutAjoo);
+		rowAboutHarvanna = findViewById(R.id.rowAboutHarvanna);
 		view40 = findViewById(R.id.view40);
 		rowTermsConditions = findViewById(R.id.rowTermsConditions);
 		view42 = findViewById(R.id.view42);
@@ -459,7 +459,7 @@ public class SettingsActivity extends AppCompatActivity {
 		_tintRowIcon(rowDataStorage, violet);
 		
 		_tintRowIcon(rowHelpSupport, muted);
-		_tintRowIcon(rowAboutAjoo, muted);
+		_tintRowIcon(rowAboutHarvanna, muted);
 		_tintRowIcon(rowTermsConditions, muted);
 		
 		_tintRowIcon(rowLogOut, red);
@@ -576,7 +576,7 @@ public class SettingsActivity extends AppCompatActivity {
 		rowEditProfile.setOnClickListener(v -> _openActivity(EditProfileActivity.class));
 		rowAccountInfo.setOnClickListener(v -> _openActivity(EditProfileActivity.class));
 		rowSecurityPrivacy.setOnClickListener(v -> _openActivity(SecurityPinSettingsActivity.class));
-		rowAboutAjoo.setOnClickListener(v -> _openActivity(AboutActivity.class));
+		rowAboutHarvanna.setOnClickListener(v -> _openActivity(AboutActivity.class));
 		rowTermsConditions.setOnClickListener(v -> _openActivity(DocumentViewerActivity.class));
 		
 		rowGroupsCircles.setOnClickListener(v -> {

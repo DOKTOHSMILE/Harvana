@@ -739,17 +739,17 @@ public class GroupMembersFragmentActivity extends Fragment {
 		getContext(), groupId, memberUid, contributionAmount, daysPaid,
 		new com.harvanna.app.group.FixedMonthCloseHelper.Callback() {
 			@Override
-			public void onReady(double memberPayoutAjc, double adminFeeAjc, String message) {
+			public void onReady(double memberPayoutHarv, double adminFeeHarv, String message) {
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> {
 					new android.app.AlertDialog.Builder(getActivity())
 					.setTitle("Close Fixed Month")
 					.setMessage(message + "\n\nTransfer "
-					+ com.harvanna.app.wallet.BalanceFormatter.smart(memberPayoutAjc)
+					+ com.harvanna.app.wallet.BalanceFormatter.smart(memberPayoutHarv)
 					+ " from group wallet to member?")
 					.setPositiveButton("Transfer & close", (d, w) ->
 					_executeFixedMonthTransfer(memberUid, memberWallet,
-					memberPayoutAjc, adminFeeAjc))
+					memberPayoutHarv, adminFeeHarv))
 					.setNegativeButton("Cancel", null)
 					.show();
 				});
@@ -765,11 +765,11 @@ public class GroupMembersFragmentActivity extends Fragment {
 	}
 	
 	private void _executeFixedMonthTransfer(String memberUid, String memberWallet,
-	double memberPayoutAjc, double adminFeeAjc) {
+	double memberPayoutHarv, double adminFeeHarv) {
 		if (getActivity() == null) return;
 		final com.harvanna.app.group.TransactionProgressSheet progress =
 		com.harvanna.app.group.TransactionProgressSheet.show(
-		getActivity(), "Closing Fixed Month", memberPayoutAjc);
+		getActivity(), "Closing Fixed Month", memberPayoutHarv);
 		progress.advanceTo(2);
 		
 		// THE FIX: this moved a real fixed-month payout with zero PIN/
@@ -781,7 +781,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 				getActivity(),
 				groupWalletAddress,
 				memberWallet,
-				java.math.BigDecimal.valueOf(memberPayoutAjc),
+				java.math.BigDecimal.valueOf(memberPayoutHarv),
 				null,
 				"Fixed month close · return to member",
 				new com.harvanna.app.tx.TransactionRouter.RouterCallback() {
@@ -792,7 +792,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 							progress.advanceTo(3);
 							com.harvanna.app.group.FixedMonthCloseHelper.recordClose(
 							getContext(), groupId, memberUid,
-							memberPayoutAjc, adminFeeAjc,
+							memberPayoutHarv, adminFeeHarv,
 							groupWalletAddress, memberWallet, txHash,
 							new com.harvanna.app.group.FixedMonthCloseHelper.CloseCallback() {
 								@Override

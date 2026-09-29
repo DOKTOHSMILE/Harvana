@@ -40,13 +40,14 @@ import java.text.*;
 import java.util.*;
 import java.util.regex.*;
 import org.json.*;
-
+
+
 
 public class WalletEarnFragmentActivity extends Fragment {
 	
-	private static final String PREF_MINING = "ajoo_mining_rewards";
-	private static final String KEY_TOTAL_MINED = "total_mined_ajc";
-	private static final double AJC_TO_NGN = 150.0;
+	private static final String PREF_MINING = "harvanna_mining_rewards";
+	private static final String KEY_TOTAL_MINED = "total_mined_harv";
+	private static final double HARV_TO_NGN = 150.0;
 	private String walletAddress = "";
 	
 	private NestedScrollView vscroll1;
@@ -102,7 +103,7 @@ public class WalletEarnFragmentActivity extends Fragment {
 			
 			if (targetContext != null) {
 				try {
-					targetContext.getPackageManager().getPackageInfo("com.ajoo.node.miner", 0);
+					targetContext.getPackageManager().getPackageInfo("com.harvanna.node.miner", 0);
 					isInstalled = true;
 				} catch (Exception e) {
 					isInstalled = false;
@@ -110,17 +111,17 @@ public class WalletEarnFragmentActivity extends Fragment {
 			}
 			
 			if (isInstalled && targetContext != null) {
-				Intent launchIntent = targetContext.getPackageManager().getLaunchIntentForPackage("com.ajoo.node.miner");
+				Intent launchIntent = targetContext.getPackageManager().getLaunchIntentForPackage("com.harvanna.node.miner");
 				if (launchIntent != null) {
 					try {
 						startActivity(launchIntent);
 					} catch (Exception e) {
-						Toast.makeText(targetContext, "Unable to launch Ajoo Node Miner", Toast.LENGTH_LONG).show();
+						Toast.makeText(targetContext, "Unable to launch Harvanna Node Miner", Toast.LENGTH_LONG).show();
 					}
 				}
 			} else {
 				if (targetContext != null) {
-					Toast.makeText(targetContext, "Ajoo Node Miner app is not installed — opening download link", Toast.LENGTH_LONG).show();
+					Toast.makeText(targetContext, "Harvanna Node Miner app is not installed — opening download link", Toast.LENGTH_LONG).show();
 				}
 				String downloadUrl = "https://t.me/+yay9a20_6M4wZGZk";
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl));
@@ -141,10 +142,11 @@ public class WalletEarnFragmentActivity extends Fragment {
 		super.onStart();
 		
 	}
-	
+	
+
 	public void _MORE() {
 	}
 	{
 	}
 	
-}
+}

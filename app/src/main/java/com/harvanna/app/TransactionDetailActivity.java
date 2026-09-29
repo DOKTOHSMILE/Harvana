@@ -54,7 +54,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 	private String sender = "";
 	private String recipient = "";
 	private double value = 0;
-	private double ajcFee = 0;
+	private double harvFee = 0;
 	private double burnAmount = 0;
 	long blockNumber;
 	long nonce;
@@ -194,7 +194,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		recipient = getIntent().getStringExtra("recipientAddress");
 		memo = getIntent().getStringExtra("memo"); 
 		value = getIntent().getDoubleExtra("value", 0.0);
-		ajcFee = getIntent().getDoubleExtra("ajcFee", 0.0);
+		harvFee = getIntent().getDoubleExtra("harvFee", 0.0);
 		burnAmount = getIntent().getDoubleExtra("burnAmount", 0.0);
 		blockNumber = getIntent().getLongExtra("blockNumber", 0);
 		nonce = getIntent().getLongExtra("nonce", 0);
@@ -206,7 +206,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		confirmations = getIntent().getLongExtra("confirmations", 0);
 		
 		// Resolve active wallet
-		SharedPreferences prefs = getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+		SharedPreferences prefs = getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 		String activeAddress = prefs.getString("active_wallet_address", "").trim();
 		if (activeAddress.isEmpty()) {
 			activeAddress = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
@@ -252,7 +252,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		}
 		
 		// APPLIED FIX
-		tv_network_fee.setText(_formatUIBalance(ajcFee) + (" " + com.harvanna.app.CoinInfo.ticker()));
+		tv_network_fee.setText(_formatUIBalance(harvFee) + (" " + com.harvanna.app.CoinInfo.ticker()));
 		tv_burn_amount.setText(_formatUIBalance(burnAmount) + (" " + com.harvanna.app.CoinInfo.ticker()));
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
@@ -375,7 +375,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 	}
 	
 	private File _getSafeExportFile(String fileName) throws IOException {
-		File primaryDir = new File(Environment.getExternalStorageDirectory(), "Ajoo/media/documents");
+		File primaryDir = new File(Environment.getExternalStorageDirectory(), "Harvanna/media/documents");
 		if (!primaryDir.exists()) primaryDir.mkdirs();
 		File file = new File(primaryDir, fileName);
 		try {
@@ -383,7 +383,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			if (file.canWrite()) return file;
 		} catch (Exception ignored) {}
 		
-		File secondaryDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "Ajoo");
+		File secondaryDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "Harvanna");
 		if (!secondaryDir.exists()) secondaryDir.mkdirs();
 		file = new File(secondaryDir, fileName);
 		try {
@@ -391,7 +391,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			if (file.canWrite()) return file;
 		} catch (Exception ignored) {}
 		
-		File fallbackDir = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Ajoo");
+		File fallbackDir = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Harvanna");
 		if (!fallbackDir.exists()) fallbackDir.mkdirs();
 		file = new File(fallbackDir, fileName);
 		if (!file.exists()) file.createNewFile();
@@ -520,7 +520,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			.append(tokenSymbol).append(",")
 			.append(sender != null ? sender : "Unknown").append(",")
 			.append(recipient != null ? recipient : "Unknown").append(",")
-			.append(dataDf.format(ajcFee)).append(",") // APPLIED FIX
+			.append(dataDf.format(harvFee)).append(",") // APPLIED FIX
 			.append(dataDf.format(burnAmount)).append(",") // APPLIED FIX
 			.append(safeMemo).append(",")
 			.append(blockStr).append(",")
@@ -578,7 +578,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			int y = 220;
 			
 			// 3. Draw Main Value & Status
-			SharedPreferences prefs = getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+			SharedPreferences prefs = getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 			String activeAddress = prefs.getString("active_wallet_address", "").trim();
 			if (activeAddress.isEmpty()) {
 				activeAddress = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
@@ -636,7 +636,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			y += 45;
 			
 			// APPLIED FIX
-			y = _drawCanvasRow(canvas, paint, "Network Fee", _formatUIBalance(ajcFee) + (" " + com.harvanna.app.CoinInfo.ticker()), paddingX, y);
+			y = _drawCanvasRow(canvas, paint, "Network Fee", _formatUIBalance(harvFee) + (" " + com.harvanna.app.CoinInfo.ticker()), paddingX, y);
 			y = _drawCanvasRow(canvas, paint, "Amount Burned", _formatUIBalance(burnAmount) + (" " + com.harvanna.app.CoinInfo.ticker()), paddingX, y);
 			
 			SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
@@ -680,7 +680,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		try {
 			StringBuilder doc = new StringBuilder();
 			doc.append("==================================================\n");
-			doc.append("            AJOO NETWORK TRANSACTION              \n");
+			doc.append("            HARVANNA NETWORK TRANSACTION              \n");
 			doc.append("==================================================\n\n");
 			
 			String safeStatus = (status == null) ? "UNKNOWN" : status.toUpperCase();
@@ -707,7 +707,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			
 			doc.append("-------------- NETWORK DATA ----------------------\n");
 			// APPLIED FIX
-			doc.append("NETWORK FEE : ").append(_formatUIBalance(ajcFee)).append((" " + com.harvanna.app.CoinInfo.ticker() + "\n"));
+			doc.append("NETWORK FEE : ").append(_formatUIBalance(harvFee)).append((" " + com.harvanna.app.CoinInfo.ticker() + "\n"));
 			doc.append("BURN AMOUNT : ").append(_formatUIBalance(burnAmount)).append((" " + com.harvanna.app.CoinInfo.ticker() + "\n\n"));
 			
 			doc.append("----------- BLOCKCHAIN DETAILS -------------------\n");
@@ -774,7 +774,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			int y = 170;
 			
 			// 3. Draw Main Value & Status
-			SharedPreferences prefs = getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+			SharedPreferences prefs = getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 			String activeAddress = prefs.getString("active_wallet_address", "").trim();
 			if (activeAddress.isEmpty()) {
 				activeAddress = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
@@ -832,7 +832,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			y += 35;
 			
 			// APPLIED FIX
-			y = _drawPdfRow(canvas, paint, "Network Fee", _formatUIBalance(ajcFee) + (" " + com.harvanna.app.CoinInfo.ticker()), paddingX, y);
+			y = _drawPdfRow(canvas, paint, "Network Fee", _formatUIBalance(harvFee) + (" " + com.harvanna.app.CoinInfo.ticker()), paddingX, y);
 			y = _drawPdfRow(canvas, paint, "Amount Burned", _formatUIBalance(burnAmount) + (" " + com.harvanna.app.CoinInfo.ticker()), paddingX, y);
 			
 			SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);

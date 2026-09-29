@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatDelegate;
  */
 public final class ThemeManager {
 
-    private static final String PREF = "ajoo_theme_prefs";
+    private static final String PREF = "harvanna_theme_prefs";
     private static final String KEY_MODE = "theme_mode"; // "light" | "dark" | "system"
 
     private ThemeManager() {}

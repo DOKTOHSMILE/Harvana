@@ -568,8 +568,8 @@ public class ProfileActivity extends AppCompatActivity {
 				toCache.put("tenurePercent", r.tenurePercent);
 				toCache.put("totalGroups", r.totalGroups);
 				toCache.put("totalCyclesCompleted", r.totalCyclesCompleted);
-				toCache.put("totalAmountSavedAjc", r.totalAmountSavedAjc);
-				toCache.put("totalLoansTakenAjc", r.totalLoansTakenAjc);
+				toCache.put("totalAmountSavedHarv", r.totalAmountSavedHarv);
+				toCache.put("totalLoansTakenHarv", r.totalLoansTakenHarv);
 				toCache.put("tier", r.tier);
 				com.harvanna.app.offline.OfflineCacheManager.save(getApplicationContext(), "trust_score_" + uid, toCache);
 				
@@ -603,8 +603,8 @@ public class ProfileActivity extends AppCompatActivity {
 		int tenurePercent = r.get("tenurePercent") instanceof Number ? ((Number) r.get("tenurePercent")).intValue() : 0;
 		int totalGroups = r.get("totalGroups") instanceof Number ? ((Number) r.get("totalGroups")).intValue() : 0;
 		int totalCyclesCompleted = r.get("totalCyclesCompleted") instanceof Number ? ((Number) r.get("totalCyclesCompleted")).intValue() : 0;
-		double totalAmountSavedAjc = r.get("totalAmountSavedAjc") instanceof Number ? ((Number) r.get("totalAmountSavedAjc")).doubleValue() : 0;
-		double totalLoansTakenAjc = r.get("totalLoansTakenAjc") instanceof Number ? ((Number) r.get("totalLoansTakenAjc")).doubleValue() : 0;
+		double totalAmountSavedHarv = r.get("totalAmountSavedHarv") instanceof Number ? ((Number) r.get("totalAmountSavedHarv")).doubleValue() : 0;
+		double totalLoansTakenHarv = r.get("totalLoansTakenHarv") instanceof Number ? ((Number) r.get("totalLoansTakenHarv")).doubleValue() : 0;
 		String tier = r.get("tier") != null ? String.valueOf(r.get("tier")) : "Bronze";
 		
 		user_trust_score_textview5.setText(overallScore + "/100");
@@ -628,10 +628,10 @@ public class ProfileActivity extends AppCompatActivity {
 		TextView tvLoans = findViewById(R.id.tv_total_loans);
 		TextView tvSavedFiat = findViewById(R.id.tv_total_saved_fiat);
 		TextView tvLoansFiat = findViewById(R.id.tv_total_loans_fiat);
-		if (tvSaved != null) tvSaved.setText(com.harvanna.app.wallet.BalanceFormatter.smart(totalAmountSavedAjc));
-		if (tvLoans != null) tvLoans.setText(com.harvanna.app.wallet.BalanceFormatter.smart(totalLoansTakenAjc));
+		if (tvSaved != null) tvSaved.setText(com.harvanna.app.wallet.BalanceFormatter.smart(totalAmountSavedHarv));
+		if (tvLoans != null) tvLoans.setText(com.harvanna.app.wallet.BalanceFormatter.smart(totalLoansTakenHarv));
 		
-		// New — these figures previously showed AJC only, with no fiat
+		// New — these figures previously showed HARV only, with no fiat
 		// equivalent attempted at all. Real value now comes from
 		// FiatValueHelper's cheapest-open-P2P-listing rate, same source
 		// every other fiat display in the app uses.
@@ -640,14 +640,14 @@ public class ProfileActivity extends AppCompatActivity {
 		String currencyCode = com.harvanna.app.wallet.FiatValueHelper.symbolToCurrencyCode(currencySymbol);
 		
 		if (tvSavedFiat != null) {
-			com.harvanna.app.wallet.FiatValueHelper.convertAjcToFiat(totalAmountSavedAjc, currencyCode, (fiatValue, rateAvailable) -> {
+			com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(totalAmountSavedHarv, currencyCode, (fiatValue, rateAvailable) -> {
 				runOnUiThread(() -> tvSavedFiat.setText(rateAvailable
 				? String.format(java.util.Locale.US, "≈ %s%,.2f", currencySymbol, fiatValue)
 				: ""));
 			});
 		}
 		if (tvLoansFiat != null) {
-			com.harvanna.app.wallet.FiatValueHelper.convertAjcToFiat(totalLoansTakenAjc, currencyCode, (fiatValue, rateAvailable) -> {
+			com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(totalLoansTakenHarv, currencyCode, (fiatValue, rateAvailable) -> {
 				runOnUiThread(() -> tvLoansFiat.setText(rateAvailable
 				? String.format(java.util.Locale.US, "≈ %s%,.2f", currencySymbol, fiatValue)
 				: ""));

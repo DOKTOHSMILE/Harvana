@@ -27,9 +27,9 @@ public final class P2pListingPublisher {
 	}
 	
 	// FIX 1: Added pricingType and marginPercent to the method signature
-	public static void publish(Activity activity, String side, double amountAjc, 
+	public static void publish(Activity activity, String side, double amountHarv, 
 	String pricingType, double unitPrice, double marginPercent,
-	double minOrderAjc, double maxOrderAjc, long durationHours, int paymentWindowMinutes, String termsOfTrade, int reqAccountAgeDays, String currency,
+	double minOrderHarv, double maxOrderHarv, long durationHours, int paymentWindowMinutes, String termsOfTrade, int reqAccountAgeDays, String currency,
 	List<PaymentMethod> methods, Callback callback) {
 		
 		final Callback cb = callback != null ? callback : new Callback() {
@@ -60,26 +60,26 @@ public final class P2pListingPublisher {
 			cb.onError("Pick at least one payment method so buyers know where to pay you.");
 			return;
 		}
-		if (amountAjc < 10 || amountAjc > 5000) {
+		if (amountHarv < 10 || amountHarv > 5000) {
 			cb.onError("A listing must be between 10 and 5,000 HARV in total.");
 			return;
 		}
-		if (minOrderAjc < 1 || minOrderAjc > amountAjc) {
+		if (minOrderHarv < 1 || minOrderHarv > amountHarv) {
 			cb.onError("The minimum trade amount must be at least 1 HARV and no more than the total you're listing.");
 			return;
 		}
-		if (maxOrderAjc > amountAjc) {
+		if (maxOrderHarv > amountHarv) {
 			cb.onError("The maximum trade amount can't be more than the total you're listing.");
 			return;
 		}
-		if (minOrderAjc > maxOrderAjc) {
+		if (minOrderHarv > maxOrderHarv) {
 			cb.onError("The minimum trade amount can't be more than the maximum.");
 			return;
 		}
 		// Product rule: the maximum per trade must be at least MAX_ORDER_FLOOR_HARV, or the whole listing
 		// when the listing itself is smaller than that (the node also requires min <= max <= total).
-		final double maxFloor = Math.min(MAX_ORDER_FLOOR_HARV, amountAjc);
-		if (maxOrderAjc < maxFloor) {
+		final double maxFloor = Math.min(MAX_ORDER_FLOOR_HARV, amountHarv);
+		if (maxOrderHarv < maxFloor) {
 			cb.onError("The maximum trade amount must be at least " + (long) maxFloor + " HARV.");
 			return;
 		}
@@ -124,18 +124,18 @@ public final class P2pListingPublisher {
 		final String listingSide = side == null || side.isEmpty() ? "SELL" : side;
 		final String fiatCode = currency == null || currency.isEmpty() ? P2pCurrencyFilterState.getCurrency() : currency;
 		
-		long amountRaw = com.harvanna.app.sync.AjooNodeClient.toRawUnits(amountAjc);
-		long minRaw = com.harvanna.app.sync.AjooNodeClient.toRawUnits(minOrderAjc);
+		long amountRaw = com.harvanna.app.sync.HarvannaNodeClient.toRawUnits(amountHarv);
+		long minRaw = com.harvanna.app.sync.HarvannaNodeClient.toRawUnits(minOrderHarv);
 		
-		final long maxRaw = com.harvanna.app.sync.AjooNodeClient.toRawUnits(maxOrderAjc);
+		final long maxRaw = com.harvanna.app.sync.HarvannaNodeClient.toRawUnits(maxOrderHarv);
 		final long[] priceKobo = new long[1];
 		final Runnable startPublish = () -> PinPromptHelper.verifyPinThenProceed(activity, () -> {
-			final ProgressDialog progress = new ProgressDialog(activity, com.harvanna.app.R.style.AjooP2pAlertDialog);
+			final ProgressDialog progress = new ProgressDialog(activity, com.harvanna.app.R.style.HarvannaP2pAlertDialog);
 			progress.setMessage("SELL".equals(listingSide) ? "Publishing offer…" : "Publishing request…");
 			progress.setCancelable(false);
 			progress.show();
 			
-			// 1. Send the liquidity lock request to Ajoochain
+			// 1. Send the liquidity lock request to Harvannachain
 			P2PTradeRouter.createListing(activity.getApplicationContext(), address, listingSide,
 			amountRaw, minRaw, maxRaw, durationHours, paymentWindowMinutes, priceKobo[0], new P2PTradeRouter.Callback() {
 				
@@ -153,7 +153,7 @@ public final class P2pListingPublisher {
 					// 2. Save the non-crypto metadata to Firestore
 					// Updated to pass the pricingType and marginPercent
 					com.harvanna.app.firestore.P2PPaymentDetailsManager.getInstance(activity.getApplicationContext())
-					.save(listingId, safe, pricingType, unitPrice, marginPercent, paymentWindowMinutes, termsOfTrade, reqAccountAgeDays, maxOrderAjc, fiatCode, firebaseUid,
+					.save(listingId, safe, pricingType, unitPrice, marginPercent, paymentWindowMinutes, termsOfTrade, reqAccountAgeDays, maxOrderHarv, fiatCode, firebaseUid,
 					new com.harvanna.app.firestore.P2PPaymentDetailsManager.SimpleCallback() {
 						
 						@Override

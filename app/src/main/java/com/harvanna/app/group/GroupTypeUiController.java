@@ -113,9 +113,9 @@ public final class GroupTypeUiController {
         }
     }
 
-    public static void setGroupWalletBalance(View root, double balanceAjc) {
+    public static void setGroupWalletBalance(View root, double balanceHarv) {
         setText(root, "tv_group_wallet_balance",
-                com.harvanna.app.wallet.BalanceFormatter.smart(balanceAjc));
+                com.harvanna.app.wallet.BalanceFormatter.smart(balanceHarv));
     }
 
     private static void setVisible(View root, String idName, boolean visible) {

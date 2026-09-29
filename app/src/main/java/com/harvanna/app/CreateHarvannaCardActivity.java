@@ -47,7 +47,7 @@ import java.util.Map;
 import java.util.regex.*;
 import org.json.*;
 
-public class CreateAjooCardActivity extends AppCompatActivity {
+public class CreateHarvannaCardActivity extends AppCompatActivity {
 
   private AppBarLayout app_bar_layout1;
   private NestedScrollView vscroll1;
@@ -89,7 +89,7 @@ public class CreateAjooCardActivity extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle _savedInstanceState) {
     super.onCreate(_savedInstanceState);
-    setContentView(R.layout.create_ajoo_card);
+    setContentView(R.layout.create_harvanna_card);
     initialize(_savedInstanceState);
     FirebaseApp.initializeApp(this);
     initializeLogic();
@@ -350,9 +350,9 @@ public class CreateAjooCardActivity extends AppCompatActivity {
   private void updateGenerateButtonState() {
     String password = et_sentence.getText().toString();
     int len = password.trim().length();
-    tv_char_count.setText(len + " / " + AjooCardCrypto.MIN_PASSWORD_LENGTH + " characters minimum");
+    tv_char_count.setText(len + " / " + HarvannaCardCrypto.MIN_PASSWORD_LENGTH + " characters minimum");
 
-    boolean longEnough = len >= AjooCardCrypto.MIN_PASSWORD_LENGTH;
+    boolean longEnough = len >= HarvannaCardCrypto.MIN_PASSWORD_LENGTH;
     boolean matches = password.equals(et_confirm_sentence.getText().toString())
         && !et_confirm_sentence.getText().toString().isEmpty();
 
@@ -365,7 +365,7 @@ public class CreateAjooCardActivity extends AppCompatActivity {
     }
 
     if (!longEnough) {
-      tv_error.setText("Keep going — needs to be at least " + AjooCardCrypto.MIN_PASSWORD_LENGTH
+      tv_error.setText("Keep going — needs to be at least " + HarvannaCardCrypto.MIN_PASSWORD_LENGTH
           + " characters.");
       tv_error.setVisibility(View.VISIBLE);
     } else if (!matches) {
@@ -383,12 +383,12 @@ public class CreateAjooCardActivity extends AppCompatActivity {
 
     new Thread(() -> {
       try {
-        String qrPayload = AjooCardCrypto.encryptToQrString(this, mnemonic, password);
-        String digitCode = AjooCardCrypto.encryptToDigitCode(this, mnemonic, password);
+        String qrPayload = HarvannaCardCrypto.encryptToQrString(this, mnemonic, password);
+        String digitCode = HarvannaCardCrypto.encryptToDigitCode(this, mnemonic, password);
 
-        Bitmap front = AjooCardRenderer.renderFront(this, selectedTemplate, walletAddress,
+        Bitmap front = HarvannaCardRenderer.renderFront(this, selectedTemplate, walletAddress,
             cardOwnerName);
-        Bitmap back = AjooCardRenderer.renderBack(this, selectedTemplate, qrPayload, digitCode);
+        Bitmap back = HarvannaCardRenderer.renderBack(this, selectedTemplate, qrPayload, digitCode);
 
         runOnUiThread(() -> {
           generatedFrontBitmap = front;
@@ -404,14 +404,14 @@ public class CreateAjooCardActivity extends AppCompatActivity {
           SketchwareUtil.showMessage(getApplicationContext(),
               "Card ready. Save it now — you'll need the password to restore later.");
         });
-      } catch (AjooCardCrypto.ValidationException ve) {
+      } catch (HarvannaCardCrypto.ValidationException ve) {
         runOnUiThread(() -> {
           btn_generate.setEnabled(true);
           btn_generate.setText("GENERATE CARD");
           SketchwareUtil.showMessage(getApplicationContext(), ve.getMessage());
         });
       } catch (Exception e) {
-        Log.e("CreateAjooCard", "Card generation failed", e);
+        Log.e("CreateHarvannaCard", "Card generation failed", e);
         final String detail = e.getMessage() != null ? e.getMessage()
             : e.getClass().getSimpleName();
         runOnUiThread(() -> {
@@ -437,12 +437,12 @@ public class CreateAjooCardActivity extends AppCompatActivity {
       return;
     long stamp = System.currentTimeMillis();
 
-    AjooCardRenderer.saveAsPng(this, generatedFrontBitmap, "ajoo-card-front-" + stamp,
-        new AjooCardRenderer.ExportCallback() {
+    HarvannaCardRenderer.saveAsPng(this, generatedFrontBitmap, "harvanna-card-front-" + stamp,
+        new HarvannaCardRenderer.ExportCallback() {
           @Override
           public void onSuccess(android.net.Uri savedUri) {
             runOnUiThread(() -> {
-              SketchwareUtil.showMessage(getApplicationContext(), "Front saved to Pictures/Ajoo");
+              SketchwareUtil.showMessage(getApplicationContext(), "Front saved to Pictures/Harvanna");
               markSavedAndUnlockDone();
             });
           }
@@ -454,12 +454,12 @@ public class CreateAjooCardActivity extends AppCompatActivity {
           }
         });
 
-    AjooCardRenderer.saveAsPng(this, generatedBackBitmap, "ajoo-card-back-" + stamp,
-        new AjooCardRenderer.ExportCallback() {
+    HarvannaCardRenderer.saveAsPng(this, generatedBackBitmap, "harvanna-card-back-" + stamp,
+        new HarvannaCardRenderer.ExportCallback() {
           @Override
           public void onSuccess(android.net.Uri savedUri) {
             runOnUiThread(() -> {
-              SketchwareUtil.showMessage(getApplicationContext(), "Back saved to Pictures/Ajoo");
+              SketchwareUtil.showMessage(getApplicationContext(), "Back saved to Pictures/Harvanna");
               markSavedAndUnlockDone();
             });
           }
@@ -475,14 +475,14 @@ public class CreateAjooCardActivity extends AppCompatActivity {
   private void onSavePdfClicked() {
     if (generatedFrontBitmap == null || generatedBackBitmap == null)
       return;
-    String name = "ajoo-access-card-" + System.currentTimeMillis();
-    AjooCardRenderer.saveAsPdf(this, generatedFrontBitmap, generatedBackBitmap, name,
-        new AjooCardRenderer.ExportCallback() {
+    String name = "harvanna-access-card-" + System.currentTimeMillis();
+    HarvannaCardRenderer.saveAsPdf(this, generatedFrontBitmap, generatedBackBitmap, name,
+        new HarvannaCardRenderer.ExportCallback() {
           @Override
           public void onSuccess(android.net.Uri savedUri) {
             runOnUiThread(() -> {
               SketchwareUtil.showMessage(getApplicationContext(),
-                  "Saved to Downloads/Ajoo — 2 pages");
+                  "Saved to Downloads/Harvanna — 2 pages");
               markSavedAndUnlockDone();
             });
           }

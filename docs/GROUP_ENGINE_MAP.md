@@ -30,7 +30,7 @@ vouching, staking (unstake/claim signed; stake is a plain transfer to the vault)
    deposit modes; fixed `disbursementRule` (4 values), beneficiary, milestones/grants. The app's Fixed type (day-grid
    monthly payments, `FixedPaymentEngine`) does not exist on the node.
 4. **Voting**: node uses weighted votes with quorum; app uses its own thresholds in Firestore.
-5. **Units/naming**: app labels still say AJC in Java strings (layouts were rebranded to HARV).
+5. **Units/naming**: app labels still say HARV in Java strings (layouts were rebranded to HARV).
 
 ## Delivered so far
 - `chain/GroupCanonical` + `GroupCanonicalTest` (58 golden cases, run in CI).

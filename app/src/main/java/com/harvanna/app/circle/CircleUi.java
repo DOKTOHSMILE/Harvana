@@ -13,7 +13,7 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 
 import com.harvanna.app.R;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.wallet.BalanceFormatter;
 
 import java.math.BigDecimal;
@@ -83,7 +83,7 @@ final class CircleUi {
 
     /** Raw units (1 HARV = 1e8) to a trimmed display string, without the unit. */
     static String harv(long raw) {
-        return BalanceFormatter.smartDecimal(AjooNodeClient.toAjcDisplay(raw)) + " HARV";
+        return BalanceFormatter.smartDecimal(HarvannaNodeClient.toHarvDisplay(raw)) + " HARV";
     }
 
     /** Exact HARV text to raw units (no floating point). Returns -1 when invalid. */

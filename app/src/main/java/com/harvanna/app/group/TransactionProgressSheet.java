@@ -32,7 +32,7 @@ public final class TransactionProgressSheet {
 	private final View root;
 	private int currentStage = 0;
 
-	private TransactionProgressSheet(Context context, String title, double amountAjc) {
+	private TransactionProgressSheet(Context context, String title, double amountHarv) {
 		this.context = context;
 		dialog = new BottomSheetDialog(context);
 		root = LayoutInflater.from(context).inflate(R_layout("bottom_sheet_transaction_progress"), null);
@@ -44,14 +44,14 @@ public final class TransactionProgressSheet {
 		TextView tvTitle = findId("tv_progress_title");
 		TextView tvAmount = findId("tv_progress_amount");
 		if (tvTitle != null && title != null) tvTitle.setText(title);
-		if (tvAmount != null) tvAmount.setText(com.harvanna.app.wallet.BalanceFormatter.smart(amountAjc));
+		if (tvAmount != null) tvAmount.setText(com.harvanna.app.wallet.BalanceFormatter.smart(amountHarv));
 
 		View btnClose = root.findViewById(idOf("btn_progress_close"));
 		if (btnClose != null) btnClose.setOnClickListener(v -> dialog.dismiss());
 	}
 
-	public static TransactionProgressSheet show(Context context, String title, double amountAjc) {
-		TransactionProgressSheet sheet = new TransactionProgressSheet(context, title, amountAjc);
+	public static TransactionProgressSheet show(Context context, String title, double amountHarv) {
+		TransactionProgressSheet sheet = new TransactionProgressSheet(context, title, amountHarv);
 		sheet.dialog.show();
 		sheet.advanceTo(1);
 		return sheet;

@@ -25,7 +25,7 @@ public final class GroupUiBinder {
         setText(root, "tv_group_meta", freq + " · " + slots + " slots · " + vis);
 
         double amount = num(group, "contributionAmount", num(group, "amount", 0));
-        setText(root, "tv_header_amount", formatAjc(amount));
+        setText(root, "tv_header_amount", formatHarv(amount));
         setText(root, "tv_header_members", memberCount + " / " + slots);
 
         Object next = group.get("nextPayoutLabel");
@@ -75,8 +75,8 @@ public final class GroupUiBinder {
         }
 
         double amount = num(group, "contributionAmount", num(group, "amount", 0));
-        setText(root, "tv_pool_contribution", formatAjc(amount));
-        setText(root, "tv_pool_total", formatAjc(amount * totalSlots));
+        setText(root, "tv_pool_contribution", formatHarv(amount));
+        setText(root, "tv_pool_total", formatHarv(amount * totalSlots));
         setText(root, "tv_pool_paid", paidThisRound + " / " + totalSlots);
     }
 
@@ -91,7 +91,7 @@ public final class GroupUiBinder {
 
     // ── helpers ──────────────────────────────────────────────────────────
 
-    private static String formatAjc(double v) {
+    private static String formatHarv(double v) {
         if (Math.abs(v - Math.rint(v)) < 0.0001) {
             return String.format(Locale.US, ("%.0f " + com.harvanna.app.CoinInfo.ticker()), v);
         }

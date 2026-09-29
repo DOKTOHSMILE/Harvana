@@ -18,7 +18,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.harvanna.app.R;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.sync.NodeGroupClient;
 import com.harvanna.app.wallet.PinPromptHelper;
 import com.harvanna.app.wallet.WalletManager;
@@ -184,7 +184,7 @@ public class CircleCreateActivity extends AppCompatActivity {
 
     private void loadBalance() {
         if (address == null || address.isEmpty()) { tvAvailable.setText("No active wallet."); return; }
-        AjooNodeClient.getWallet(address, new AjooNodeClient.JsonCallback() {
+        HarvannaNodeClient.getWallet(address, new HarvannaNodeClient.JsonCallback() {
             @Override public void onSuccess(JSONObject json) {
                 availableRaw = json.optLong("available", json.optLong("balance", 0L));
                 tvAvailable.setText("Available: " + CircleUi.harv(availableRaw));

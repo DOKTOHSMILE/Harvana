@@ -76,7 +76,7 @@ public class HomeFragmentActivity extends Fragment {
 	
 	private HashMap<String, Object> user_v_map = new HashMap<>();
 	private String mySeedPhrase = "";
-	private static final double AJC_TO_NGN = 150.0;
+	private static final double HARV_TO_NGN = 150.0;
 	
 	private ArrayList<HashMap<String, Object>> lmap_custom_button = new ArrayList<>();
 	private ArrayList<HashMap<String, Object>> new_test_map = new ArrayList<>();
@@ -159,7 +159,7 @@ public class HomeFragmentActivity extends Fragment {
 	private LinearLayout linear227;
 	private TextView textview208;
 	private LinearLayout linear226;
-	private TextView tv_ajc_balance;
+	private TextView tv_harv_balance;
 	private ImageView imageview61;
 	private LinearLayout linear223;
 	private LinearLayout linear224;
@@ -290,7 +290,7 @@ public class HomeFragmentActivity extends Fragment {
 		linear227 = _view.findViewById(R.id.linear227);
 		textview208 = _view.findViewById(R.id.textview208);
 		linear226 = _view.findViewById(R.id.linear226);
-		tv_ajc_balance = _view.findViewById(R.id.tv_ajc_balance);
+		tv_harv_balance = _view.findViewById(R.id.tv_harv_balance);
 		imageview61 = _view.findViewById(R.id.imageview61);
 		linear223 = _view.findViewById(R.id.linear223);
 		linear224 = _view.findViewById(R.id.linear224);
@@ -652,7 +652,7 @@ public class HomeFragmentActivity extends Fragment {
 		final String currencyCode = com.harvanna.app.wallet.FiatValueHelper.symbolToCurrencyCode(currencySymbol);
 		
 		if (addr == null || addr.isEmpty()) {
-			if (tv_ajc_balance != null) tv_ajc_balance.setText(("0.00 " + com.harvanna.app.CoinInfo.ticker()));
+			if (tv_harv_balance != null) tv_harv_balance.setText(("0.00 " + com.harvanna.app.CoinInfo.ticker()));
 			if (tv_local_currency_eqv != null) tv_local_currency_eqv.setText("≈ " + currencySymbol + "0.00");
 			return;
 		}
@@ -661,10 +661,10 @@ public class HomeFragmentActivity extends Fragment {
 		getContext(), "wallet_balance_" + addr);
 		if (cachedBalance != null && cachedBalance.get("show") instanceof Number) {
 			double cachedShow = ((Number) cachedBalance.get("show")).doubleValue();
-			if (tv_ajc_balance != null) tv_ajc_balance.setText(_fmtAjc(cachedShow));
+			if (tv_harv_balance != null) tv_harv_balance.setText(_fmtHarv(cachedShow));
 			
 			if (tv_local_currency_eqv != null) {
-				com.harvanna.app.wallet.FiatValueHelper.convertAjcToFiat(cachedShow, currencyCode, (fiatValue, rateAvailable) -> {
+				com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(cachedShow, currencyCode, (fiatValue, rateAvailable) -> {
 					if (!isAdded() || getActivity() == null) return;
 					getActivity().runOnUiThread(() -> tv_local_currency_eqv.setText(rateAvailable
 					? String.format(Locale.US, "≈ %s%,.2f", currencySymbol, fiatValue)
@@ -686,10 +686,10 @@ public class HomeFragmentActivity extends Fragment {
 				com.harvanna.app.offline.OfflineCacheManager.save(getContext(), "wallet_balance_" + addr, toCache);
 			}
 			getActivity().runOnUiThread(() -> {
-				if (tv_ajc_balance != null)
-				tv_ajc_balance.setText(_fmtAjc(show));
+				if (tv_harv_balance != null)
+				tv_harv_balance.setText(_fmtHarv(show));
 				if (tv_local_currency_eqv != null) {
-					com.harvanna.app.wallet.FiatValueHelper.convertAjcToFiat(show, currencyCode, (fiatValue, rateAvailable) -> {
+					com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(show, currencyCode, (fiatValue, rateAvailable) -> {
 						if (!isAdded() || getActivity() == null) return;
 						getActivity().runOnUiThread(() -> tv_local_currency_eqv.setText(rateAvailable
 						? String.format(Locale.US, "≈ %s%,.2f", currencySymbol, fiatValue)
@@ -956,8 +956,8 @@ public class HomeFragmentActivity extends Fragment {
 		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
 		Map<String, Object> cachedTotal = com.harvanna.app.offline.OfflineCacheManager.load(
 		getContext(), "total_saved_" + myUid);
-		if (cachedTotal != null && cachedTotal.get("ajc") instanceof Number) {
-			_applyTotalSaved(((Number) cachedTotal.get("ajc")).doubleValue());
+		if (cachedTotal != null && cachedTotal.get("harv") instanceof Number) {
+			_applyTotalSaved(((Number) cachedTotal.get("harv")).doubleValue());
 		}
 		
 		if (group_map_list.isEmpty()) {
@@ -991,7 +991,7 @@ public class HomeFragmentActivity extends Fragment {
 							String uid = str(pay, "memberUid", str(pay, "uid", ""));
 							if (!ok) continue;
 							if (!myUid.equals(uid)) continue;
-							double amt = num(pay, "amountAjc");
+							double amt = num(pay, "amountHarv");
 							if (amt <= 0) amt = num(pay, "amount");
 							total[0] += amt;
 						}
@@ -1018,7 +1018,7 @@ public class HomeFragmentActivity extends Fragment {
 			return;
 		}
 		Map<String, Object> toCache = new HashMap<>();
-		toCache.put("ajc", total);
+		toCache.put("harv", total);
 		com.harvanna.app.offline.OfflineCacheManager.save(getContext(), "total_saved_" + myUid, toCache);
 		_applyTotalSaved(total);
 	}
@@ -1069,9 +1069,9 @@ public class HomeFragmentActivity extends Fragment {
 							if (!"ACTIVE".equalsIgnoreCase(st)) continue;
 							if (!myUid.equals(borrower)) continue;
 							openCount[0]++;
-							double principal = num(loan, "principalAjc");
-							if (principal <= 0) principal = num(loan, "amountAjc");
-							double repaid = num(loan, "repaidAmountAjc");
+							double principal = num(loan, "principalHarv");
+							if (principal <= 0) principal = num(loan, "amountHarv");
+							double repaid = num(loan, "repaidAmountHarv");
 							outstandingTotal[0] += Math.max(0, principal - repaid);
 						}
 					}
@@ -1107,21 +1107,21 @@ public class HomeFragmentActivity extends Fragment {
 		_applyOpenLoans(count, outstanding);
 	}
 	
-	private void _applyOpenLoans(int count, double outstandingAjc) {
+	private void _applyOpenLoans(int count, double outstandingHarv) {
 		if (!isAdded() || getActivity() == null || text_val_loans == null) return;
 		getActivity().runOnUiThread(() -> {
 			text_val_loans.setText(String.valueOf(count));
 			if (text_sub_loans != null) {
 				text_sub_loans.setText(count == 0 ? "No open loans"
-				: _fmtAjc(outstandingAjc) + " outstanding");
+				: _fmtHarv(outstandingHarv) + " outstanding");
 			}
 		});
 	}
 	
-	private void _applyTotalSaved(double ajc) {
+	private void _applyTotalSaved(double harv) {
 		if (!isAdded() || getActivity() == null || text_val_saved == null) return;
 		getActivity().runOnUiThread(() -> {
-			text_val_saved.setText(_fmtAjc(ajc));
+			text_val_saved.setText(_fmtHarv(harv));
 			if (text_sub_saved != null) {
 				int n = group_map_list.size();
 				text_sub_saved.setText(n <= 0 ? "No group savings yet"
@@ -1130,7 +1130,7 @@ public class HomeFragmentActivity extends Fragment {
 		});
 	}
 	
-	private static String _fmtAjc(double v) {
+	private static String _fmtHarv(double v) {
 		try {
 			java.text.DecimalFormat df = new java.text.DecimalFormat("0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
 			return df.format(v) + (" " + com.harvanna.app.CoinInfo.ticker());

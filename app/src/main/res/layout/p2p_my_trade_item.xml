@@ -135,7 +135,7 @@
 						android:textSize="10sp"
 						android:focusable="false" />
 					<TextView
-						android:id="@+id/tv_my_trade_ajc"
+						android:id="@+id/tv_my_trade_harv"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="3dp"

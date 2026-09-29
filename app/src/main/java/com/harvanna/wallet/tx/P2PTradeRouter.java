@@ -50,9 +50,8 @@ public final class P2PTradeRouter {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
 				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
-				String canonical = "P2P_CREATE_LISTING:" + posterAddress + ":" + side + ":" + totalAmountRaw
-				+ ":" + minOrderAmountRaw + ":" + maxOrderAmountRaw + ":" + durationHours
-				+ ":" + paymentWindowMinutes + ":" + unitPricePerHarvRaw + ":" + nonce;
+				String canonical = com.harvanna.wallet.chain.P2pCanonical.createListing(posterAddress, side, totalAmountRaw,
+				minOrderAmountRaw, maxOrderAmountRaw, durationHours, paymentWindowMinutes, unitPricePerHarvRaw, nonce);
 				
 				_signAndSubmit(context, posterAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
 				AjooNodeClient.submitP2PCreateListing(posterAddress, side, totalAmountRaw, minOrderAmountRaw,

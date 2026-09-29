@@ -246,7 +246,7 @@ public final class NodeGroupClient {
 
     public static void requestAdminRecovery(Context c, String requester, String groupId, String newAdmin, Callback cb) {
         act(c, requester, "/api/v1/admin-recovery/request", new Spec() {
-            public String canonical(long n) { return GroupCanonical.adminRecoveryRequest(groupId, newAdmin, n); }
+            public String canonical(long n) { return GroupCanonical.adminRecovery(groupId, newAdmin, n); }
             public void fill(JSONObject b, long n) throws JSONException { b.put("groupId", groupId).put("newAdminAddress", newAdmin); }
         }, cb);
     }

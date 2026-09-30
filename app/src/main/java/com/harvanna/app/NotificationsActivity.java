@@ -34,9 +34,6 @@ public class NotificationsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        StatusBarUtil.matchToolbar(this);
-        setTitle("Notifications");
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ScrollView sv = new ScrollView(this);
         sv.setBackgroundColor(UiColors.background());
         list = new LinearLayout(this);
@@ -44,7 +41,7 @@ public class NotificationsActivity extends AppCompatActivity {
         int p = dp(12);
         list.setPadding(p, p, p, p);
         sv.addView(list);
-        setContentView(sv);
+        com.harvanna.app.utils.AppBar.setContent(this, sv, "Notifications", "Group, payment and account updates");
     }
 
     @Override protected void onStart() {

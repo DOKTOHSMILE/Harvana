@@ -41,9 +41,6 @@ public class TrustScoreActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        StatusBarUtil.matchToolbar(this);
-        setTitle("Trust score");
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ScrollView sv = new ScrollView(this);
         sv.setBackgroundColor(UiColors.background());
         root = new LinearLayout(this);
@@ -51,7 +48,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         int p = dp(16);
         root.setPadding(p, p, p, p);
         sv.addView(root);
-        setContentView(sv);
+        com.harvanna.app.utils.AppBar.setContent(this, sv, "Trust score", "Built from what you do in your groups");
         root.addView(tv("Calculating your score…", 14, false, UiColors.textSecondary()));
     }
 

@@ -38,9 +38,6 @@ public class GroupWalletBackupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        StatusBarUtil.matchToolbar(this);
-        setTitle("Group wallet backup");
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         ScrollView sv = new ScrollView(this);
         sv.setBackgroundColor(UiColors.background());
@@ -49,7 +46,7 @@ public class GroupWalletBackupActivity extends AppCompatActivity {
         int p = dp(16);
         content.setPadding(p, p, p, p);
         sv.addView(content);
-        setContentView(sv);
+        com.harvanna.app.utils.AppBar.setContent(this, sv, "Group wallet backup", "Encrypted social backup card");
 
         addText("Social backup card", 20, true, UiColors.textPrimary());
         addText("This card is encrypted with a passphrase only the group admin holds. "

@@ -167,8 +167,9 @@ public class GroupPaymentFragmentActivity extends Fragment {
 					go.setText("Open payments and bond");
 					go.setAllCaps(false);
 					go.setOnClickListener(v -> {
-						Intent i = new Intent(getContext(), com.harvanna.app.circle.CircleActivity.class);
-						i.putExtra("circleId", circleId);
+						Intent i = new Intent(getContext(), com.harvanna.app.group.NodeGroupActivity.class);
+						i.putExtra("nodeGroupId", circleId);
+						i.putExtra("firestoreGroupId", gid);
 						startActivity(i);
 					});
 					box.addView(go);

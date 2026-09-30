@@ -23,15 +23,15 @@ public final class CircleUi {
 
     private CircleUi() {}
 
-    static int dp(Context c, int v) {
+    public static int dp(Context c, int v) {
         return Math.round(v * c.getResources().getDisplayMetrics().density);
     }
 
-    static int color(Context c, int res) {
+    public static int color(Context c, int res) {
         return ContextCompat.getColor(c, res);
     }
 
-    static TextView text(Context c, String s, float sp, int colorRes, boolean bold) {
+    public static TextView text(Context c, String s, float sp, int colorRes, boolean bold) {
         TextView t = new TextView(c);
         t.setText(s);
         t.setTextSize(sp);
@@ -40,7 +40,7 @@ public final class CircleUi {
         return t;
     }
 
-    static LinearLayout card(Context c) {
+    public static LinearLayout card(Context c) {
         LinearLayout l = new LinearLayout(c);
         l.setOrientation(LinearLayout.VERTICAL);
         l.setBackgroundResource(R.drawable.bg_quick_action);
@@ -52,7 +52,7 @@ public final class CircleUi {
     }
 
     /** "Label ........ value" row. */
-    static View row(Context c, String label, String value) {
+    public static View row(Context c, String label, String value) {
         LinearLayout r = new LinearLayout(c);
         r.setOrientation(LinearLayout.HORIZONTAL);
         r.setPadding(0, dp(c, 5), 0, dp(c, 5));
@@ -64,14 +64,14 @@ public final class CircleUi {
         return r;
     }
 
-    static TextView chip(Context c, String label, int fgColorRes) {
+    public static TextView chip(Context c, String label, int fgColorRes) {
         TextView t = text(c, label, 11.5f, fgColorRes, true);
         t.setPadding(dp(c, 10), dp(c, 3), dp(c, 10), dp(c, 3));
         t.setBackgroundResource(R.drawable.bg_chip_muted);
         return t;
     }
 
-    static int stateColor(String state) {
+    public static int stateColor(String state) {
         if (state == null) return R.color.colorTextSecondary;
         switch (state) {
             case "ACTIVE": case "COMPLETED": return R.color.colorSuccess;
@@ -129,7 +129,7 @@ public final class CircleUi {
     }
 
     /** Toolbar (theme appBarColor, back arrow) above the body, plus a status bar that matches it. */
-    static LinearLayout withToolbar(Activity a, String title, View body) {
+    public static LinearLayout withToolbar(Activity a, String title, View body) {
         TypedValue bar = new TypedValue();
         TypedValue on = new TypedValue();
         a.getTheme().resolveAttribute(R.attr.appBarColor, bar, true);

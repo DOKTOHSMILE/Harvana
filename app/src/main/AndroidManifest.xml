@@ -55,13 +55,6 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name=".circle.CircleCreateActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden"
-			android:windowSoftInputMode="adjustResize" />
-		<activity
-			android:name=".circle.CircleActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden" />
-		<activity
 			android:name=".GroupDetailsActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
@@ -182,6 +175,9 @@
 			android:configChanges="orientation|screenSize|keyboardHidden" />
 		<activity
 			android:name=".NotificationsActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden" />
+		<activity
+			android:name=".group.NodeGroupActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden" />
 		<activity
 			android:name=".InvitesActivity"

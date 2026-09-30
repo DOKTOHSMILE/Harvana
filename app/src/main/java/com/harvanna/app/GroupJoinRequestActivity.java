@@ -823,8 +823,9 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 				.setMessage("You're in the group. To secure your place in the payout order, lock your bond on the network now.")
 				.setCancelable(false)
 				.setPositiveButton("Continue", (dd, w) -> {
-					Intent ci = new Intent(this, com.harvanna.app.circle.CircleActivity.class);
-					ci.putExtra("circleId", circleId);
+					Intent ci = new Intent(this, com.harvanna.app.group.NodeGroupActivity.class);
+					ci.putExtra("nodeGroupId", circleId);
+					ci.putExtra("firestoreGroupId", groupId);
 					startActivity(ci);
 					finish();
 				}).show();

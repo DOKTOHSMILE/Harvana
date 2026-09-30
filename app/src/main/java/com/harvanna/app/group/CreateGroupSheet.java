@@ -15,7 +15,6 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.harvanna.app.CreateNewGroupActivity;
 import com.harvanna.app.R;
-import com.harvanna.app.circle.CircleCreateActivity;
 
 /**
  * The single "Create a group" entry. Pick what the group is FOR; each choice opens the right creation flow:

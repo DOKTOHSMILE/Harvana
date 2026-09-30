@@ -522,8 +522,7 @@ public class GroupFirestoreManager {
 		list(col("LEARN_CONTENT"), callback);
 	}
 
-<<<<<<< HEAD
-	/**
+ 	/**
 	 * Removes a group and everything under it (members, notices, payments, loans, joinRequests, payoutRequests,
 	 * private). The group document goes LAST because the security rules that authorise the sub-deletes look at
 	 * it. Only for app-only groups: a group that exists on the network is closed, never deleted.
@@ -635,8 +634,8 @@ public class GroupFirestoreManager {
 						DocumentReference group = d.getReference().getParent().getParent();
 						if (group != null) m.put("groupId", group.getId());
 					}
-=======
-	// ── SDK plumbing ────────────────────────────────────────────────────
+
+  // ── SDK plumbing ────────────────────────────────────────────────────
 
 	private static DocumentReference doc(String... path) {
 		return FirebaseFirestore.getInstance().document(join(path));
@@ -716,7 +715,6 @@ public class GroupFirestoreManager {
 						DocumentReference group = d.getReference().getParent().getParent();
 						if (group != null) m.put("groupId", group.getId());
 					}
->>>>>>> main
 					out.add(m);
 				}
 			}

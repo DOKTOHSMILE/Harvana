@@ -65,10 +65,6 @@ public class NodeGroupActivity extends AppCompatActivity {
         fsGroupId = orEmpty(getIntent().getStringExtra("firestoreGroupId"));
         family = NodeGroupClient.familyOf(nodeId);
         me = WalletManager.getActiveWalletAddress(this);
-<<<<<<< HEAD
-=======
-        setTitle(titleFor(family));
->>>>>>> main
 
         refresh = new SwipeRefreshLayout(this);
         ScrollView scroll = new ScrollView(this);
@@ -80,7 +76,6 @@ public class NodeGroupActivity extends AppCompatActivity {
         scroll.addView(content, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         refresh.addView(scroll);
         refresh.setOnRefreshListener(this::load);
-<<<<<<< HEAD
         com.harvanna.app.utils.AppBar.setContent(this, refresh, titleFor(family), nodeId);
         if (!fsGroupId.isEmpty()) {
             com.harvanna.app.firestore.GroupFirestoreManager.getInstance(this).getGroup(fsGroupId,
@@ -94,9 +89,7 @@ public class NodeGroupActivity extends AppCompatActivity {
                     @Override public void onError(String e) { }
                 });
         }
-=======
-        setContentView(CircleUi.withToolbar(this, titleFor(family), refresh));
->>>>>>> main
+        
         load();
     }
 

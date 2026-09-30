@@ -63,7 +63,7 @@ public final class NotificationSync {
         // 5. Wallet: money received, sent and payments signed (from the node's confirmed history)
         WalletTxNotifier.run(c, events -> finish.run());
 
-        // 4. Review verdicts on my Learn Hub submissions
+      // 4. Review verdicts on my Learn Hub submissions
         GroupFirestoreManager.getInstance(c).getMyLearnSubmissions(uid, new GroupFirestoreManager.ListCallback() {
             @Override public void onSuccess(List<Map<String, Object>> subs) {
                 for (Map<String, Object> sub : subs) {

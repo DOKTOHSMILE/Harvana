@@ -1,92 +1,4 @@
-package com.harvanna.app;
 
-import com.harvanna.app.utils.UiColors;
-import android.animation.*;
-import android.app.*;
-import android.content.*;
-import android.content.res.*;
-import android.graphics.*;
-import android.graphics.drawable.*;
-import android.media.*;
-import android.net.*;
-import android.os.*;
-import android.text.*;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.text.style.*;
-import android.util.*;
-import android.view.*;
-import android.view.View;
-import android.view.View.*;
-import android.view.animation.*;
-import android.widget.*;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
-import androidx.annotation.*;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.appcompat.widget.Toolbar;
-import androidx.biometric.*;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.widget.NestedScrollView;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import com.budiyev.android.codescanner.*;
-import com.bumptech.glide.*;
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.button.*;
-import com.google.android.material.card.*;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.storage.*;
-import java.io.*;
-import java.text.*;
-import java.util.*;
-import java.util.regex.*;
-import org.json.*;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
-
-import com.harvanna.app.crypto.Ed25519;
-import com.harvanna.app.firestore.GroupFirestoreManager;
-import com.harvanna.app.group.GroupCloser;
-import com.harvanna.app.group.GroupClosePolicy;
-import com.harvanna.app.group.JoinRequestManager;
-import com.harvanna.app.offline.OfflineCacheManager;
-import com.harvanna.app.p2p.ThemedDialogs;
-import com.harvanna.app.wallet.SecureWalletStorage;
-import com.harvanna.app.wallet.WalletGenerator;
-import com.harvanna.app.wallet.WalletManager;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
-import com.google.firebase.FirebaseApp;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import android.util.Base64;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-
-
-public class GroupSettingsActivity extends AppCompatActivity {
-	
-	private Toolbar _toolbar;
-	private AppBarLayout _app_bar;
-	private CoordinatorLayout _coordinator;
-	
-	private NestedScrollView vscroll2;
-	private LinearLayout linear74;
-	private LinearLayout linear39;
-	private MaterialCardView cardHero;
 	private MaterialCardView cardview11;
 	private MaterialCardView cardview13;
 	private MaterialCardView cardview15;
@@ -1307,7 +1219,6 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		});
 		if (!isRotating()) backupSection.addView(loanSw, 0);
 	}
-	
 	/** On-chain rotating groups hold money in a network escrow that has no private key: nothing to restore or back up. */
 	// ── Close / delete group ─────────────────────────────────────────────
 
@@ -1527,7 +1438,6 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		return "true".equalsIgnoreCase(String.valueOf(v));
 	}
 	
-	{
-	}
-	
 }
+
+

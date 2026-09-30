@@ -509,6 +509,7 @@ public class HomeFragmentActivity extends Fragment {
 		_loadWalletBalance();
 		_loadLearnHubPreview();
 		_loadTrendingGroups();
+		if (getContext() != null) com.harvanna.app.sync.NodeLinkManager.ensureLinked(getContext(), null);
 	}
 	public void _MORE() {
 	}

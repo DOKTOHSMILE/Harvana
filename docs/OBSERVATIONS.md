@@ -180,3 +180,9 @@ Consequences to know:
 - Loans: the node has loan machinery for Accumulative and Fixed groups only (Circle/Rotating has none), so the loan toggle exists only for those two types; Rotating is always loans-off.
 - Miner package: com.harvanna.mine (+ manifest <queries> so Android 11+ can detect it).
 - Full Firestore rules replacement: docs/firestore.rules. Note the rebrand renamed data fields (amountAjc->amountHarv, repaidAmountAjc->repaidAmountHarv); the rules use the new names, so any data written by an older build under old names would not match.
+
+## Trust score and wallet ownership on the node
+- Node has two mechanisms: `POST /api/v1/identity/link` (wallet signature + Firebase ID token; node stores only HMAC(pepper, uid); disabled unless `harvanna.identity.links-enabled=true`) and `POST /api/v1/personhood/bind` + `/vouch`, `GET /api/v1/personhood/{address}`.
+- The node's trust score is only 0..26: bound = 10, +2 per effective vouch up to 8. It is NOT the app's 0..100 score (TrustScoreEngine, computed client-side from Firestore). They are different measures; the profile now shows both, labelled separately. There is no node endpoint that takes the app score.
+- **One wallet per account and one wallet per device hash**: the node rejects a second wallet for the same user (`USER_ALREADY_LINKED`) and a second wallet on the same device (`DEVICE_ALREADY_BOUND`). "Various wallets per user" is therefore not possible without a node change; the app links the active wallet only and shows the node's message otherwise.
+- The device attestation hash is client-asserted (SHA-256 of ANDROID_ID + package); real attestation (Play Integrity) is future node work. Node deploy must set `harvanna.identity.links-enabled=true` and a real pepper.

@@ -548,7 +548,47 @@ public class ProfileActivity extends AppCompatActivity {
 		tv_dob.setText(_str(data, "dob"));
 	}
 	
+	private TextView networkTrustView;
+	
+	/** Shows the node's own view of this wallet next to the app score, and lets the user link the wallet. */
+	private void _attachNetworkTrust() {
+		try {
+			final String addr = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
+			if (trustScoreProgress5 == null || !(trustScoreProgress5.getParent() instanceof ViewGroup)) return;
+			ViewGroup host = (ViewGroup) trustScoreProgress5.getParent();
+			if (networkTrustView == null) {
+				networkTrustView = new TextView(this);
+				networkTrustView.setTextSize(12);
+				networkTrustView.setTextColor(com.harvanna.app.utils.UiColors.textSecondary());
+				networkTrustView.setPadding(0, (int) (10 * getResources().getDisplayMetrics().density), 0, 0);
+				host.addView(networkTrustView);
+			}
+			if (addr == null || addr.isEmpty()) { networkTrustView.setText("Network trust: create a wallet to build a trust record on the network."); return; }
+			networkTrustView.setText("Network trust: checking…");
+			com.harvanna.app.sync.NodeLinkManager.ensureLinked(this, status -> _showNetworkTrust(addr, status));
+			_showNetworkTrust(addr, com.harvanna.app.sync.NodeLinkManager.cachedStatus(this, addr));
+		} catch (Exception ignored) { }
+	}
+	
+	private void _showNetworkTrust(String addr, String status) {
+		com.harvanna.app.sync.NodeIdentityClient.lookup(addr, new com.harvanna.app.sync.NodeIdentityClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject j) {
+				String line = "Network trust: " + j.optInt("trustScore", 0) + " / 26"
+					+ (j.optBoolean("bound") ? " · verified person" : " · not verified yet")
+					+ " · " + j.optInt("effectiveVouchCount", 0) + " vouch(es)";
+				if (status != null && !status.isEmpty()) line += "\n" + status;
+				final String f = line;
+				runOnUiThread(() -> networkTrustView.setText(f));
+			}
+			@Override public void onError(String e) {
+				runOnUiThread(() -> networkTrustView.setText("Network trust unavailable right now."
+					+ (status != null && !status.isEmpty() ? "\n" + status : "")));
+			}
+		});
+	}
+	
 	private void _loadTrustScore() {
+		_attachNetworkTrust();
 		// Offline-first: render the last computed trust score/tier/totals
 		// immediately — this whole card (ring, 4 sub-metrics, group/cycle
 		// counts, Total Saved, Total Loans) previously had zero fallback

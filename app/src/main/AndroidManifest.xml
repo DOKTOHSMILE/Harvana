@@ -55,15 +55,12 @@
 			</intent-filter>
 		</activity>
 		<activity
-<<<<<<< HEAD
 			android:name=".WelcomeActivity"
 			android:label="Welcome"
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:screenOrientation="portrait"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
-=======
->>>>>>> main
 			android:name=".GroupDetailsActivity"
 			android:label="Group"
 			android:configChanges="orientation|screenSize|keyboardHidden"

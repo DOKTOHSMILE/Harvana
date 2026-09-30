@@ -1277,6 +1277,23 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		
 		int idx = host.indexOfChild(btnRestoreWallet);
 		host.addView(backupSection, idx + 1);
+		
+		// Loans on/off: turns the group's Loans tab on or off for everyone.
+		Object al = groupData.get("allowLoans");
+		boolean loansOn = !(al instanceof Boolean) || (Boolean) al;
+		androidx.appcompat.widget.SwitchCompat loanSw = new androidx.appcompat.widget.SwitchCompat(this);
+		loanSw.setText("Allow member loans");
+		loanSw.setTextColor(UiColors.textPrimary());
+		loanSw.setChecked(loansOn);
+		loanSw.setEnabled(isAdmin);
+		loanSw.setPadding(0, (int) (12 * d), 0, 0);
+		loanSw.setOnCheckedChangeListener((b, on) -> {
+			if (!b.isPressed()) return;
+			Map<String, Object> patch = new HashMap<>();
+			patch.put("allowLoans", on);
+			_patch(patch, on ? "Loans enabled" : "Loans disabled");
+		});
+		backupSection.addView(loanSw, 0);
 	}
 	
 	private void _refreshKeyStatus() {

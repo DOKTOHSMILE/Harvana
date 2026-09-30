@@ -357,15 +357,33 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		
 		public void setTabCount(int tabCount) {
 			this.tabCount = tabCount;
+			pages.clear();
+			for (int i = 0; i < tabCount; i++) pages.add(i);
 		}
+		
+		final java.util.List<Integer> pages = new java.util.ArrayList<>();
+		
+		/** Groups created with loans switched off don't get a Loans tab at all. */
+		void setLoansEnabled(boolean enabled) {
+			boolean has = pages.contains(3);
+			if (enabled == has) return;
+			if (enabled) pages.add(3, 3); else pages.remove(Integer.valueOf(3));
+			notifyDataSetChanged();
+		}
+		
+		int positionOfPage(int page) { return pages.indexOf(page); }
+		
+		@Override
+		public int getItemPosition(Object object) { return POSITION_NONE; }
 		
 		@Override
 		public int getCount() {
-			return tabCount;
+			return pages.size();
 		}
 		
 		@Override
-		public CharSequence getPageTitle(int _position) {
+		public CharSequence getPageTitle(int _index) {
+			int _position = pages.get(_index);
 			if (_position == 0) return "Overview";
 			if (_position == 1) return "Members";
 			if (_position == 2) return "Payments";
@@ -377,7 +395,8 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		
 		
 		@Override
-		public Fragment getItem(int _position) {
+		public Fragment getItem(int _index) {
+			int _position = pages.get(_index);
 			Bundle args = new Bundle();
 			args.putString("groupId", groupId);
 			
@@ -481,6 +500,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		FragmentAdapterComponentFragmentAdapter adapter =
 		new FragmentAdapterComponentFragmentAdapter(this, getSupportFragmentManager());
 		adapter.setTabCount(6);
+		pagerAdapter = adapter;
 		view_pager.setAdapter(adapter);
 		tab_layout.setupWithViewPager(view_pager);
 		tab_layout.setTabMode(TabLayout.MODE_SCROLLABLE);
@@ -504,7 +524,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
 			
 			@Override
 			public void openLoansTab() {
-				if (view_pager != null) view_pager.setCurrentItem(3);
+				if (view_pager == null) return;
+				int idx = pagerAdapter != null ? pagerAdapter.positionOfPage(3) : 3;
+				if (idx >= 0) view_pager.setCurrentItem(idx);
+				else SketchwareUtil.showMessage(getApplicationContext(), "Loans are turned off for this group.");
 			}
 			
 			@Override
@@ -629,8 +652,14 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		return loc;
 	}
 	
+	private FragmentAdapterComponentFragmentAdapter pagerAdapter;
+	
 	private void _bindHeader(Map<String, Object> data, boolean admin) {
 		if (data == null) return;
+		if (pagerAdapter != null) {
+			Object al = data.get("allowLoans");
+			pagerAdapter.setLoansEnabled(!(al instanceof Boolean) || (Boolean) al);
+		}
 		
 		String name = _safeString(data, "groupName", "Group");
 		String type = _safeString(data, "groupType", "");

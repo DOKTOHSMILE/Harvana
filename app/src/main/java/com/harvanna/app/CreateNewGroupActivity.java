@@ -78,6 +78,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private CardView card_rotating_details;
 	private CardView card_fixed_details;
 	private CardView card_accumulative_details;
+	private boolean allowLoans = false;
+	private final java.util.List<androidx.appcompat.widget.SwitchCompat> loanSwitches = new java.util.ArrayList<>();
 	private CardView cardview13;
 	private CardView card_permissions;
 	private CardView cardview14;
@@ -366,6 +368,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		card_rotating_details = findViewById(R.id.card_rotating_details);
 		card_fixed_details = findViewById(R.id.card_fixed_details);
 		card_accumulative_details = findViewById(R.id.card_accumulative_details);
+		_addLoanToggles();
 		cardview13 = findViewById(R.id.cardview13);
 		card_permissions = findViewById(R.id.card_permissions);
 		cardview14 = findViewById(R.id.cardview14);
@@ -1399,8 +1402,37 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		});
 	}
 	
+	/** One "Allow member loans" switch per type card, all bound to the same flag. */
+	private void _addLoanToggles() {
+		CardView[] cards = {card_rotating_details, card_fixed_details, card_accumulative_details};
+		for (CardView c : cards) {
+			if (c == null || c.getChildCount() == 0 || !(c.getChildAt(0) instanceof LinearLayout)) continue;
+			LinearLayout host = (LinearLayout) c.getChildAt(0);
+			androidx.appcompat.widget.SwitchCompat sw = new androidx.appcompat.widget.SwitchCompat(this);
+			sw.setText("Allow member loans (adds a Loans tab)");
+			sw.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
+			sw.setPadding(0, (int) (14 * getResources().getDisplayMetrics().density), 0, 0);
+			sw.setOnCheckedChangeListener((b, on) -> {
+				allowLoans = on;
+				for (androidx.appcompat.widget.SwitchCompat o : loanSwitches) if (o != b && o.isChecked() != on) o.setChecked(on);
+				_applyLoanFieldVisibility();
+			});
+			loanSwitches.add(sw);
+			host.addView(sw);
+		}
+	}
+	
+	private void _applyLoanFieldVisibility() {
+		View row = findViewById(R.id.linear97);
+		if (row != null) row.setVisibility(allowLoans ? View.VISIBLE : View.GONE);
+	}
+	
 	private void _selectGroupType(String type) {
 		groupTypeString = type;
+		boolean defaultLoans = "Accumulative Funds".equals(type);
+		for (androidx.appcompat.widget.SwitchCompat sw : loanSwitches) sw.setChecked(defaultLoans);
+		allowLoans = defaultLoans;
+		_applyLoanFieldVisibility();
 		
 		// Cross-fade the detail-card swap instead of a hard cut
 		TransitionManager.beginDelayedTransition(linear1, new AutoTransition().setDuration(220));
@@ -1619,7 +1651,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 		if (!_validatePositiveDecimal(contribution_amount_accumulative_edittext, "Please enter a valid contribution amount.")) return false;
 		if (!_validateMinInt(no_of_slots_accumulative_edittext, 2, "A group needs at least 2 members.")) return false;
-		if (!_validateRangeDecimal(loan_interest_rate_edittext, 0, 100, "Interest rate must be between 0% and 100%.")) return false;
+		if (allowLoans && !_validateRangeDecimal(loan_interest_rate_edittext, 0, 100, "Interest rate must be between 0% and 100%.")) return false;
 		if (withdrawalRuleString.trim().isEmpty()) {
 			SketchwareUtil.showMessage(getApplicationContext(), "Please select a withdrawal rule.");
 			return false;
@@ -1777,12 +1809,18 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		} else if ("Accumulative Funds".equals(groupTypeString)) {
 			newGroupMap.put("contributionAmount", Double.parseDouble(contribution_amount_accumulative_edittext.getText().toString()));
 			newGroupMap.put("totalSlots", Integer.parseInt(no_of_slots_accumulative_edittext.getText().toString()));
-			newGroupMap.put("loanInterestRate", Double.parseDouble(loan_interest_rate_edittext.getText().toString()));
+			newGroupMap.put("loanInterestRate", allowLoans ? Double.parseDouble(loan_interest_rate_edittext.getText().toString()) : 0.0);
 			newGroupMap.put("loanInterestPeriod",
 			spinner_loan_interest_period.getSelectedItem() != null
 			? spinner_loan_interest_period.getSelectedItem().toString().toUpperCase()
 			: "MONTHLY");
 			newGroupMap.put("withdrawalRule", withdrawalRuleString.trim());
+		}
+		
+		newGroupMap.put("allowLoans", allowLoans);
+		if (allowLoans && !newGroupMap.containsKey("loanInterestRate")) {
+			newGroupMap.put("loanInterestRate", 0.0);
+			newGroupMap.put("loanInterestPeriod", "MONTHLY");
 		}
 		
 		// members/notice/payments/loans are NOT part of the group document —

@@ -28,7 +28,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public final class OfflineDatabaseHelper extends SQLiteOpenHelper {
 
-    private static final String DB_NAME = "ajoo_offline_store.db";
+    private static final String DB_NAME = "harvanna_offline_store.db";
     private static final int DB_VERSION = 1;
 
     public static final String TABLE = "offline_cache";

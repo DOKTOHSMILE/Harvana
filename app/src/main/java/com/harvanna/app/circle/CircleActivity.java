@@ -58,7 +58,7 @@ public class CircleActivity extends AppCompatActivity {
         scroll.addView(content, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         refresh.addView(scroll);
         refresh.setOnRefreshListener(this::load);
-        setContentView(refresh);
+        setContentView(CircleUi.withToolbar(this, "Circle", refresh));
         load();
     }
 

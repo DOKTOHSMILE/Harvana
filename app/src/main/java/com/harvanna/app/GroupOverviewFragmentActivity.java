@@ -716,7 +716,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	
 	private void _loadGroupWalletBalance(String address) {
 		if (address == null || !address.startsWith("HV0x")) {
-			if (tv_group_wallet_balance != null) tv_group_wallet_balance.setText("0 AJC");
+			if (tv_group_wallet_balance != null) tv_group_wallet_balance.setText(("0 " + com.harvanna.app.CoinInfo.ticker()));
 			return;
 		}
 		final String cacheKey = "wallet_balance_" + address;
@@ -728,13 +728,13 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				tv_group_wallet_balance.setText(_formatUIBalance(((Number) show).doubleValue()));
 			}
 		}
-		com.harvanna.app.sync.AjooNodeClient.getWallet(address, new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getWallet(address, new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject json) {
 				long raw = json.optLong("balance", 0L);
-				double ajc = com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(raw);
+				double harv = com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(raw);
 				Map<String, Object> toCache = new HashMap<>();
-				toCache.put("show", ajc); // Saves safely as a raw double to the cache
+				toCache.put("show", harv); // Saves safely as a raw double to the cache
 				if (getContext() != null) {
 					com.harvanna.app.offline.OfflineCacheManager.save(getContext(), cacheKey, toCache);
 				}
@@ -742,7 +742,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				getActivity().runOnUiThread(() -> {
 					if (tv_group_wallet_balance != null) {
 						// APPLIED FIX
-						tv_group_wallet_balance.setText(_formatUIBalance(ajc));
+						tv_group_wallet_balance.setText(_formatUIBalance(harv));
 					}
 				});
 			}
@@ -839,7 +839,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				boolean confirmed = "CONFIRMED".equalsIgnoreCase(st) || "PAID".equalsIgnoreCase(st);
 				if (!confirmed) continue;
 				
-				double amt = _safeDouble(p, "amountAjc");
+				double amt = _safeDouble(p, "amountHarv");
 				if (amt <= 0) amt = _safeDouble(p, "amount");
 				totalRaisedAllTime += amt;
 				

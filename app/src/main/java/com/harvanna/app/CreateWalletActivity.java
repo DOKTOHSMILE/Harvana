@@ -292,11 +292,11 @@ public class CreateWalletActivity extends AppCompatActivity {
 	private MaterialButton btnFinish;
 	
 	private void launchMandatoryCardCreation() {
-		Intent cardIntent = new Intent(this, CreateAjooCardActivity.class);
-		cardIntent.putExtra(CreateAjooCardActivity.EXTRA_MANDATORY, true);
-		cardIntent.putExtra(CreateAjooCardActivity.EXTRA_RAW_MNEMONIC, pendingMnemonic);
-		cardIntent.putExtra(CreateAjooCardActivity.EXTRA_WALLET_ADDRESS, pendingWalletAddress);
-		cardIntent.putExtra(CreateAjooCardActivity.EXTRA_LABEL, "your new wallet");
+		Intent cardIntent = new Intent(this, CreateHarvannaCardActivity.class);
+		cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_MANDATORY, true);
+		cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_RAW_MNEMONIC, pendingMnemonic);
+		cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, pendingWalletAddress);
+		cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_LABEL, "your new wallet");
 		startActivityForResult(cardIntent, RC_MANDATORY_CARD);
 	}
 	
@@ -316,7 +316,7 @@ public class CreateWalletActivity extends AppCompatActivity {
 		try {
 			com.harvanna.app.wallet.WalletListManager.addWalletToList(this, pendingWalletAddress, null);
 			
-			SharedPreferences prefs = getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+			SharedPreferences prefs = getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 			prefs.edit()
 			.putString("active_wallet_address", pendingWalletAddress)
 			.putString("active_address", pendingWalletAddress)
@@ -351,4 +351,4 @@ public class CreateWalletActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

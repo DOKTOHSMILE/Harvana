@@ -18,7 +18,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.harvanna.app.R;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.sync.NodeGroupClient;
 import com.harvanna.app.wallet.PinPromptHelper;
 import com.harvanna.app.wallet.WalletManager;
@@ -142,7 +142,7 @@ public class CircleCreateActivity extends AppCompatActivity {
         blp.topMargin = CircleUi.dp(this, 16);
         root.addView(btnCreate, blp);
 
-        setContentView(scroll);
+        setContentView(CircleUi.withToolbar(this, "New circle", scroll));
         refresh();
         loadBalance();
     }
@@ -173,7 +173,9 @@ public class CircleCreateActivity extends AppCompatActivity {
           + "• Your bond (2× a member's): " + CircleUi.harv(creatorBond) + "\n"
           + "• Creation fee (non-refundable): " + CircleUi.harv(CREATION_FEE_RAW) + "\n\n"
           + "Total locked from you now: " + CircleUi.harv(total) + "\n"
-          + "Network fees are extra.");
+          + "Network fees are extra.\n\n"
+          + "Who is paid when: the order follows when people join (you join first), with some early slots kept for members with a track record. "
+          + "A circle that doesn't fill within 72 hours is cancelled and bonds are returned.");
         boolean enough = availableRaw < 0 || availableRaw >= total;
         tvError.setText(enough ? "" : "Your available balance is less than the " + CircleUi.harv(total) + " needed.");
         btnCreate.setEnabled(enough);
@@ -182,7 +184,7 @@ public class CircleCreateActivity extends AppCompatActivity {
 
     private void loadBalance() {
         if (address == null || address.isEmpty()) { tvAvailable.setText("No active wallet."); return; }
-        AjooNodeClient.getWallet(address, new AjooNodeClient.JsonCallback() {
+        HarvannaNodeClient.getWallet(address, new HarvannaNodeClient.JsonCallback() {
             @Override public void onSuccess(JSONObject json) {
                 availableRaw = json.optLong("available", json.optLong("balance", 0L));
                 tvAvailable.setText("Available: " + CircleUi.harv(availableRaw));

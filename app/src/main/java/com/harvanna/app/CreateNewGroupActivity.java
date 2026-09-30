@@ -78,6 +78,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private CardView card_rotating_details;
 	private CardView card_fixed_details;
 	private CardView card_accumulative_details;
+	private boolean allowLoans = false;
+	private final java.util.List<androidx.appcompat.widget.SwitchCompat> loanSwitches = new java.util.ArrayList<>();
 	private CardView cardview13;
 	private CardView card_permissions;
 	private CardView cardview14;
@@ -335,6 +337,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		// Opened from the "Create a group" picker with the type already chosen.
+		String preselected = getIntent().getStringExtra("groupType");
+		if (preselected != null && !preselected.isEmpty()) {
+			_selectGroupType(preselected);
+		}
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {
@@ -361,6 +368,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		card_rotating_details = findViewById(R.id.card_rotating_details);
 		card_fixed_details = findViewById(R.id.card_fixed_details);
 		card_accumulative_details = findViewById(R.id.card_accumulative_details);
+		_addLoanToggles();
 		cardview13 = findViewById(R.id.cardview13);
 		card_permissions = findViewById(R.id.card_permissions);
 		cardview14 = findViewById(R.id.cardview14);
@@ -951,7 +959,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		
 		setTitle("CREATE NEW GROUP");
 		// Load active wallet address
-		SharedPreferences walletPrefs = getSharedPreferences("ajc_wallet_prefs", MODE_PRIVATE);
+		SharedPreferences walletPrefs = getSharedPreferences("harv_wallet_prefs", MODE_PRIVATE);
 		String savedSeed = walletPrefs.getString("seed_phrase", walletPrefs.getString("mnemonic", ""));
 		
 		if (savedSeed != null && !savedSeed.trim().isEmpty()) {
@@ -1071,7 +1079,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private HashMap<String, Object> p_tracker_map = new HashMap<>();
 	private String distributionString = "";
 	private String cityString = "";
-	private double ajc_balance = 0;
+	private double harv_balance = 0;
 	private static final double GROUP_CREATION_FEE = 5;
 	private String activeAddress = "";
 	// TODO(observations): unused legacy AJ0x fee collector address; needs a real HV0x address if ever used.
@@ -1106,6 +1114,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	
 	private String pendingGroupMnemonic;
 	private String pendingGroupWalletAddress;
+	private String pendingCardQr, pendingCardDigits, pendingCardTemplate;
 	private com.google.android.material.bottomsheet.BottomSheetDialog pendingGroupBottomSheetDialog;
 	private static final int RC_MANDATORY_GROUP_CARD = 8803;
 	
@@ -1235,11 +1244,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					pendingGroupMnemonic = mnemonic;
 					pendingGroupWalletAddress = groupWalletAddress;
 					pendingGroupBottomSheetDialog = bottomSheetDialog;
-					Intent cardIntent = new Intent(context, com.harvanna.app.CreateAjooCardActivity.class);
-					cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_MANDATORY, true);
-					cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_RAW_MNEMONIC, mnemonic);
-					cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
-					cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_LABEL, group_name_edittext1.getText().toString().trim());
+					Intent cardIntent = new Intent(context, com.harvanna.app.CreateHarvannaCardActivity.class);
+					cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_MANDATORY, true);
+					cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RAW_MNEMONIC, mnemonic);
+					cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
+					cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_LABEL, group_name_edittext1.getText().toString().trim());
 					startActivityForResult(cardIntent, RC_MANDATORY_GROUP_CARD);
 				}
 			});
@@ -1254,7 +1263,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	}
 	
 	/**
-* After node is confirmed reachable: check personal balance, transfer 5 AJC
+* After node is confirmed reachable: check personal balance, transfer 5 HARV
 * creation fee to the new group wallet address, persist keys locally, then
 * write the group doc. Wallet is created on-chain by the first credit —
 * no Firestore WALLETS write.
@@ -1268,17 +1277,17 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	final String finalPersonalAddress,
 	final String finalPersonalSeed) {
 		runOnUiThread(() -> {
-			progress.setMessage("Checking balance for 5 AJC fee...");
+			progress.setMessage(("Checking balance for 5 " + com.harvanna.app.CoinInfo.ticker() + " fee..."));
 			com.harvanna.app.wallet.WalletNodeBridge.fetchLiveBalance(CreateNewGroupActivity.this, finalPersonalAddress,
 			new com.harvanna.app.wallet.WalletNodeBridge.BalanceCallback() {
 				@Override
-				public void onSuccess(double ajcBalance, long nonce, long blockHeight) {
+				public void onSuccess(double harvBalance, long nonce, long blockHeight) {
 					runOnUiThread(() -> {
-						java.math.BigDecimal balance = java.math.BigDecimal.valueOf(ajcBalance);
+						java.math.BigDecimal balance = java.math.BigDecimal.valueOf(harvBalance);
 						java.math.BigDecimal requiredAmount = new java.math.BigDecimal("5.005");
 						if (balance.compareTo(requiredAmount) < 0) {
 							if (!isFinishing() && progress.isShowing()) progress.dismiss();
-							SketchwareUtil.showMessage(context, "Insufficient balance. You need at least 5.005 AJC.");
+							SketchwareUtil.showMessage(context, ("Insufficient balance. You need at least 5.005 " + com.harvanna.app.CoinInfo.ticker() + "."));
 							return;
 						}
 						
@@ -1297,8 +1306,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 							return;
 						}
 						
-						progress.setMessage("Transferring 5 AJC to group wallet...");
-						// THE FIX: this moved 5 AJC with zero PIN/biometric
+						progress.setMessage(("Transferring 5 " + com.harvanna.app.CoinInfo.ticker() + " to group wallet..."));
+						// THE FIX: this moved 5 HARV with zero PIN/biometric
 						// confirmation — the only money-moving screen in the
 						// app besides Send/P2P that had no gate at all.
 						com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(CreateNewGroupActivity.this, () ->
@@ -1348,16 +1357,16 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 										_submitNewGroupData(groupWalletAddress);
 										bottomSheetDialog.dismiss();
 										SketchwareUtil.showMessage(context,
-										"Group Created — 5 AJC transfer submitted!");
+										("Group Created — 5 " + com.harvanna.app.CoinInfo.ticker() + " transfer submitted!"));
 										
 										final String createdGroupName = group_name_edittext1.getText().toString().trim();
 										new androidx.appcompat.app.AlertDialog.Builder(context)
 										.setTitle("Back up this group's wallet?")
-										.setMessage("As the group's admin, you're the one holding its wallet key. An Ajoo Access Card is a physical backup for it — recommended for any group holding real funds.")
-										.setPositiveButton("Create Ajoo Card", (d, w) -> {
-											Intent cardIntent = new Intent(context, com.harvanna.app.CreateAjooCardActivity.class);
-											cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
-											cardIntent.putExtra(com.harvanna.app.CreateAjooCardActivity.EXTRA_LABEL, createdGroupName);
+										.setMessage("As the group's admin, you're the one holding its wallet key. An Harvanna Access Card is a physical backup for it — recommended for any group holding real funds.")
+										.setPositiveButton("Create Harvanna Card", (d, w) -> {
+											Intent cardIntent = new Intent(context, com.harvanna.app.CreateHarvannaCardActivity.class);
+											cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
+											cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_LABEL, createdGroupName);
 											context.startActivity(cardIntent);
 										})
 										.setNegativeButton("Not now", null)
@@ -1393,8 +1402,37 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		});
 	}
 	
+	/** One "Allow member loans" switch per type card, all bound to the same flag. */
+	private void _addLoanToggles() {
+		CardView[] cards = {card_fixed_details, card_accumulative_details}; // node has no loan engine for circles/rotating
+		for (CardView c : cards) {
+			if (c == null || c.getChildCount() == 0 || !(c.getChildAt(0) instanceof LinearLayout)) continue;
+			LinearLayout host = (LinearLayout) c.getChildAt(0);
+			androidx.appcompat.widget.SwitchCompat sw = new androidx.appcompat.widget.SwitchCompat(this);
+			sw.setText("Allow member loans (adds a Loans tab)");
+			sw.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
+			sw.setPadding(0, (int) (14 * getResources().getDisplayMetrics().density), 0, 0);
+			sw.setOnCheckedChangeListener((b, on) -> {
+				allowLoans = on;
+				for (androidx.appcompat.widget.SwitchCompat o : loanSwitches) if (o != b && o.isChecked() != on) o.setChecked(on);
+				_applyLoanFieldVisibility();
+			});
+			loanSwitches.add(sw);
+			host.addView(sw);
+		}
+	}
+	
+	private void _applyLoanFieldVisibility() {
+		View row = findViewById(R.id.linear97);
+		if (row != null) row.setVisibility(allowLoans ? View.VISIBLE : View.GONE);
+	}
+	
 	private void _selectGroupType(String type) {
 		groupTypeString = type;
+		boolean defaultLoans = "Accumulative Funds".equals(type); // rotating: always off
+		for (androidx.appcompat.widget.SwitchCompat sw : loanSwitches) sw.setChecked(defaultLoans);
+		allowLoans = defaultLoans;
+		_applyLoanFieldVisibility();
 		
 		// Cross-fade the detail-card swap instead of a hard cut
 		TransitionManager.beginDelayedTransition(linear1, new AutoTransition().setDuration(220));
@@ -1613,7 +1651,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 		if (!_validatePositiveDecimal(contribution_amount_accumulative_edittext, "Please enter a valid contribution amount.")) return false;
 		if (!_validateMinInt(no_of_slots_accumulative_edittext, 2, "A group needs at least 2 members.")) return false;
-		if (!_validateRangeDecimal(loan_interest_rate_edittext, 0, 100, "Interest rate must be between 0% and 100%.")) return false;
+		if (allowLoans && !_validateRangeDecimal(loan_interest_rate_edittext, 0, 100, "Interest rate must be between 0% and 100%.")) return false;
 		if (withdrawalRuleString.trim().isEmpty()) {
 			SketchwareUtil.showMessage(getApplicationContext(), "Please select a withdrawal rule.");
 			return false;
@@ -1707,7 +1745,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
 				CreateNewGroupActivity.this,
 				"Incoming Transfer",
-				"Received " + String.format(Locale.US, "%.5f", amount) + " AJC",
+				"Received " + String.format(Locale.US, "%.5f", amount) + (" " + com.harvanna.app.CoinInfo.ticker()),
 				sender
 				);
 			}
@@ -1771,12 +1809,18 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		} else if ("Accumulative Funds".equals(groupTypeString)) {
 			newGroupMap.put("contributionAmount", Double.parseDouble(contribution_amount_accumulative_edittext.getText().toString()));
 			newGroupMap.put("totalSlots", Integer.parseInt(no_of_slots_accumulative_edittext.getText().toString()));
-			newGroupMap.put("loanInterestRate", Double.parseDouble(loan_interest_rate_edittext.getText().toString()));
+			newGroupMap.put("loanInterestRate", allowLoans ? Double.parseDouble(loan_interest_rate_edittext.getText().toString()) : 0.0);
 			newGroupMap.put("loanInterestPeriod",
 			spinner_loan_interest_period.getSelectedItem() != null
 			? spinner_loan_interest_period.getSelectedItem().toString().toUpperCase()
 			: "MONTHLY");
 			newGroupMap.put("withdrawalRule", withdrawalRuleString.trim());
+		}
+		
+		newGroupMap.put("allowLoans", allowLoans);
+		if (allowLoans && !newGroupMap.containsKey("loanInterestRate")) {
+			newGroupMap.put("loanInterestRate", 0.0);
+			newGroupMap.put("loanInterestPeriod", "MONTHLY");
 		}
 		
 		// members/notice/payments/loans are NOT part of the group document —
@@ -1823,6 +1867,13 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 						firestoreManager.postSystemNotice(newGroupId,
 						"Group launched",
 						"This group is now active. Welcome!");
+						
+						if (pendingCardQr != null && pendingCardDigits != null) {
+							com.harvanna.app.group.GroupCardStore.publish(getApplicationContext(), newGroupId,
+							_realGroupWalletAddress, group_name_edittext1.getText().toString().trim(),
+							pendingCardTemplate == null ? "CLASSIC" : pendingCardTemplate,
+							pendingCardQr, pendingCardDigits, creatorUid, null);
+						}
 						
 						com.harvanna.app.firestore.UserProfileManager.getInstance(getApplicationContext())
 						.addGroupToProfile(creatorUid, newGroupId, new com.harvanna.app.firestore.UserProfileManager.SimpleCallback() {
@@ -1880,7 +1931,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		String personalSeed = com.harvanna.app.wallet.SecureWalletStorage.getActiveMnemonic(CreateNewGroupActivity.this);
 		if (personalSeed == null) personalSeed = "";
 		
-		SharedPreferences prefs = getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+		SharedPreferences prefs = getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 		String resolvedAddress = prefs.getString("active_wallet_address", "").trim();
 		if (resolvedAddress.isEmpty()) {
 			resolvedAddress = prefs.getString("wallet_address", "").trim();
@@ -1903,9 +1954,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		final String finalPersonalAddress = resolvedAddress;
 		final String finalPersonalSeed = personalSeed;
 		
-		progress.setMessage("Connecting to AJC node...");
-		com.harvanna.app.sync.AjooNodeClient.getWallet(groupWalletAddress,
-		new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		progress.setMessage(("Connecting to " + com.harvanna.app.CoinInfo.ticker() + " node..."));
+		com.harvanna.app.sync.HarvannaNodeClient.getWallet(groupWalletAddress,
+		new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject json) {
 				_continueGroupCreationFee(progress, context, prefs, bottomSheetDialog,
@@ -1924,7 +1975,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				if (nodeDown) {
 					CreateNewGroupActivity.this.runOnUiThread(() -> {
 						if (!CreateNewGroupActivity.this.isFinishing() && progress.isShowing()) progress.dismiss();
-						SketchwareUtil.showMessage(context, "AJC node unreachable: " + error);
+						SketchwareUtil.showMessage(context, (com.harvanna.app.CoinInfo.ticker() + " node unreachable: ") + error);
 					});
 					return;
 				}
@@ -1938,6 +1989,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == RC_MANDATORY_GROUP_CARD && resultCode == Activity.RESULT_OK) {
+			if (data != null) {
+				pendingCardQr = data.getStringExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RESULT_QR);
+				pendingCardDigits = data.getStringExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RESULT_DIGITS);
+				pendingCardTemplate = data.getStringExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RESULT_TEMPLATE);
+			}
 			_proceedWithGroupWalletCreation();
 		}
 	}

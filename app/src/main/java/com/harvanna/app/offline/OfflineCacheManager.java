@@ -65,7 +65,7 @@ public final class OfflineCacheManager {
     private static final String TAG = "OfflineCacheManager";
 
     private static final String ANDROID_KEYSTORE = "AndroidKeyStore";
-    private static final String KEY_ALIAS = "ajoo_offline_cache_key_v1";
+    private static final String KEY_ALIAS = "harvanna_offline_cache_key_v1";
     private static final int GCM_IV_LENGTH = 12;
     private static final int GCM_TAG_LENGTH = 128;
 

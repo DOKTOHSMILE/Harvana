@@ -15,11 +15,11 @@ import java.util.List;
  * Node-wide authentication. Every request this app makes to the node —
  * wallet balance, history, fee estimates, sending funds, P2P listings,
  * everything — now requires a valid auth token, not just the transaction's
- * own signature. AjooNodeClient's get()/post() call here automatically
+ * own signature. HarvannaNodeClient's get()/post() call here automatically
  * before every request; nothing else in the app needs to know this exists.
  *
  * Reuses the exact same token contract already proven working against
- * this node by com.ajoo.node.miner's mining-auth flow: POST address +
+ * this node by com.harvanna.node.miner's mining-auth flow: POST address +
  * a device clientId to /api/v1/mining/auth, get back {token, expiresAt},
  * send the token back as "Authorization: Bearer <token>". The endpoint
  * path still says "mining" for historical reasons on the node side, but
@@ -34,7 +34,7 @@ import java.util.List;
  */
 public final class NodeAuthManager {
 
-    private static final String PREFS = "ajoo_node_auth";
+    private static final String PREFS = "harvanna_node_auth";
     private static final String KEY_TOKEN = "token";
     private static final String KEY_EXPIRES_AT = "expiresAt";
 
@@ -111,7 +111,7 @@ public final class NodeAuthManager {
 
     private static void _fetchWithRetry(Context context, SharedPreferences prefs,
                                          String address, String clientId, int attempt) {
-        AjooNodeClient.requestNodeToken(context, address, clientId, new AjooNodeClient.JsonCallback() {
+        HarvannaNodeClient.requestNodeToken(context, address, clientId, new HarvannaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject json) {
                 String token = json.optString("token", json.optString("miningToken", ""));

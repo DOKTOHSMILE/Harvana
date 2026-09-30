@@ -24,7 +24,7 @@ public final class FixedMonthCloseHelper {
     private static final String TAG = "FixedMonthCloseHelper";
 
     public interface Callback {
-        void onReady(double memberPayoutAjc, double adminFeeAjc, String message);
+        void onReady(double memberPayoutHarv, double adminFeeHarv, String message);
         void onError(String error);
     }
 
@@ -67,8 +67,8 @@ public final class FixedMonthCloseHelper {
     public static void recordClose(Context context,
                                    String groupId,
                                    String memberUid,
-                                   double memberPayoutAjc,
-                                   double adminFeeAjc,
+                                   double memberPayoutHarv,
+                                   double adminFeeHarv,
                                    String groupWallet,
                                    String memberWallet,
                                    String txRef,
@@ -83,7 +83,7 @@ public final class FixedMonthCloseHelper {
 
         // 1. Member payout ledger entry
         Map<String, Object> memberPayment = FixedPaymentEngine.monthCloseMemberPayout(
-                memberUid, memberPayoutAjc, groupWallet, memberWallet, txRef, monthKey);
+                memberUid, memberPayoutHarv, groupWallet, memberWallet, txRef, monthKey);
 
         GroupFirestoreManager.getInstance(context)
                 .addPayment(groupId, memberPayment, new GroupFirestoreManager.IdCallback() {
@@ -91,7 +91,7 @@ public final class FixedMonthCloseHelper {
                     public void onSuccess(String id) {
                         // 2. Admin fee ledger entry (no extra transfer needed)
                         Map<String, Object> feePayment = FixedPaymentEngine.monthCloseAdminFee(
-                                memberUid, adminFeeAjc, groupWallet, monthKey);
+                                memberUid, adminFeeHarv, groupWallet, monthKey);
 
                         GroupFirestoreManager.getInstance(context)
                                 .addPayment(groupId, feePayment, new GroupFirestoreManager.IdCallback() {
@@ -100,7 +100,7 @@ public final class FixedMonthCloseHelper {
                                         GroupFirestoreManager.getInstance(context)
                                                 .postSystemNotice(groupId, "Month closed",
                                                         "Fixed month closed for a member. "
-                                                                + com.harvanna.app.wallet.BalanceFormatter.smart(memberPayoutAjc)
+                                                                + com.harvanna.app.wallet.BalanceFormatter.smart(memberPayoutHarv)
                                                                 + " returned; admin fee retained.");
                                         callback.onSuccess("Month closed and recorded.");
                                     }
@@ -129,8 +129,8 @@ public final class FixedMonthCloseHelper {
         Map<String, Object> m = new HashMap<>();
         m.put("type", "FIXED_MONTH_CLOSE");
         m.put("memberUid", memberUid);
-        m.put("memberPayoutAjc", memberPayout);
-        m.put("adminFeeAjc", adminFee);
+        m.put("memberPayoutHarv", memberPayout);
+        m.put("adminFeeHarv", adminFee);
         m.put("monthKey", FixedPaymentEngine.currentMonthKey());
         m.put("timestamp", System.currentTimeMillis());
         m.put("status", "PENDING_ADMIN_TRANSFER");

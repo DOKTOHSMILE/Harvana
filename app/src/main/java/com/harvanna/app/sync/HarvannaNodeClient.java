@@ -20,23 +20,23 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
-* HTTP client for AJC Node — the source of truth for all AJC chain data.
+* HTTP client for HARV Node — the source of truth for all HARV chain data.
 *
 * Runs over TLS to https://harvannaprotocol.com using the system trust store.
 *
 * UNIT CONVENTION:
 *   The node stores and transmits balances, amounts and fees as raw long units.
-*   1 AJC = AJC_UNITS_PER_TOKEN raw units.
+*   1 HARV = HARV_UNITS_PER_TOKEN raw units.
 *   Always convert at the UI boundary — never store raw units in display fields.
 */
-public final class AjooNodeClient {
+public final class HarvannaNodeClient {
 	
 	public static final String BASE = "https://harvannaprotocol.com";
 	
-	/** 1 AJC = 100,000,000 raw units (same ratio as 1 BTC = 1e8 satoshis). */
-	public static final long AJC_UNITS_PER_TOKEN = 100_000_000L;
+	/** 1 HARV = 100,000,000 raw units (same ratio as 1 BTC = 1e8 satoshis). */
+	public static final long HARV_UNITS_PER_TOKEN = 100_000_000L;
 	
-	private static final String TAG = "AjooNode";
+	private static final String TAG = "HarvannaNode";
 	
 	// FIX 1: Use CachedThreadPool to avoid starvation if requests back up
 	private static final ExecutorService IO = Executors.newCachedThreadPool();
@@ -49,7 +49,7 @@ public final class AjooNodeClient {
 		void onError(String error);
 	}
 	
-	private AjooNodeClient() {}
+	private HarvannaNodeClient() {}
 	
 	// ── Wallet ───────────────────────────────────────────────────────────────
 	
@@ -373,12 +373,12 @@ public final class AjooNodeClient {
 	
 	// ── Conversion helpers ────────────────────────────────────────────────────
 	
-	public static long toRawUnits(double ajcAmount) {
-		return Math.round(ajcAmount * AJC_UNITS_PER_TOKEN);
+	public static long toRawUnits(double harvAmount) {
+		return Math.round(harvAmount * HARV_UNITS_PER_TOKEN);
 	}
 	
-	public static double toAjcDisplay(long rawUnits) {
-		return rawUnits / (double) AJC_UNITS_PER_TOKEN;
+	public static double toHarvDisplay(long rawUnits) {
+		return rawUnits / (double) HARV_UNITS_PER_TOKEN;
 	}
 	
 	public static String buildCanonicalMessage(String from, String to, long rawAmount, long nonce) {
@@ -442,8 +442,8 @@ public final class AjooNodeClient {
 *  private: NodeAuthManager (a different class, same package) calls
 *  this directly.
 *
-*  Includes "app": "ajoo-app" so the node can distinguish this app's
-*  traffic from com.ajoo.node.miner's, which hits the exact same
+*  Includes "app": "harvanna-app" so the node can distinguish this app's
+*  traffic from com.harvanna.node.miner's, which hits the exact same
 *  endpoint. Without this, a device running both apps on the same
 *  IP/address has no way to avoid sharing one rate-limit budget
 *  between mining traffic and ordinary wallet-app usage — this field
@@ -466,7 +466,7 @@ public final class AjooNodeClient {
 			JSONObject ch = new JSONObject();
 			ch.put("address", address);
 			ch.put("clientId", clientId != null ? clientId : "");
-			ch.put("app", "ajoo-app");
+			ch.put("app", "harvanna-app");
 			rawPost("/api/v1/mining/challenge", ch.toString(), null, new JsonCallback() {
 				@Override
 				public void onSuccess(JSONObject json) {
@@ -479,7 +479,7 @@ public final class AjooNodeClient {
 						}
 						if (canonical.isEmpty()) {
 							canonical = "HARVANNA_AUTH|" + address + "|" + challenge + "|"
-							+ (clientId == null ? "" : clientId) + "|ajoo-app";
+							+ (clientId == null ? "" : clientId) + "|harvanna-app";
 						}
 						String pkB64 = SecureWalletStorage.loadPrivateKey(context, address);
 						String pubB64 = SecureWalletStorage.loadPublicKey(context, address);
@@ -492,7 +492,7 @@ public final class AjooNodeClient {
 						JSONObject auth = new JSONObject();
 						auth.put("address", address);
 						auth.put("clientId", clientId != null ? clientId : "");
-						auth.put("app", "ajoo-app");
+						auth.put("app", "harvanna-app");
 						auth.put("challenge", challenge);
 						auth.put("publicKey", pubB64);
 						auth.put("signature", Base64.encodeToString(sig, Base64.NO_WRAP));
@@ -518,7 +518,7 @@ public final class AjooNodeClient {
 			JSONObject body = new JSONObject();
 			body.put("address", address);
 			body.put("clientId", clientId != null ? clientId : "");
-			body.put("app", "ajoo-app");
+			body.put("app", "harvanna-app");
 			rawPost("/api/v1/mining/auth", body.toString(), null, cb);
 		} catch (Exception e) {
 			String errorMsg = e.getMessage() != null ? e.getMessage() : "build auth request failed";

@@ -52,7 +52,7 @@ import com.google.zxing.Result;
 import android.util.Base64;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import com.harvanna.app.wallet.AjooCardCrypto;
+import com.harvanna.app.wallet.HarvannaCardCrypto;
 import com.harvanna.app.wallet.SecureWalletStorage;
 import com.harvanna.app.wallet.WalletGenerator;
 import com.harvanna.app.wallet.WalletManager;
@@ -176,11 +176,11 @@ public class RestoreWalletActivity extends AppCompatActivity {
 			pendingSeedB64 = WalletGenerator.derivePrivateKey(mnemonic);
 			pendingPubKeyB64 = Base64.encodeToString(pubKey, Base64.NO_WRAP);
 			
-			Intent cardIntent = new Intent(this, CreateAjooCardActivity.class);
-			cardIntent.putExtra(CreateAjooCardActivity.EXTRA_MANDATORY, true);
-			cardIntent.putExtra(CreateAjooCardActivity.EXTRA_RAW_MNEMONIC, pendingMnemonic);
-			cardIntent.putExtra(CreateAjooCardActivity.EXTRA_WALLET_ADDRESS, pendingAddress);
-			cardIntent.putExtra(CreateAjooCardActivity.EXTRA_LABEL,
+			Intent cardIntent = new Intent(this, CreateHarvannaCardActivity.class);
+			cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_MANDATORY, true);
+			cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_RAW_MNEMONIC, pendingMnemonic);
+			cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, pendingAddress);
+			cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_LABEL,
 			"this restored wallet — you only have the phrase backup so far");
 			startActivityForResult(cardIntent, RC_MANDATORY_CARD);
 		} catch (Exception e) {
@@ -201,14 +201,14 @@ public class RestoreWalletActivity extends AppCompatActivity {
 		}
 	}
 	
-	// ── Path B: restore from Ajoo Access Card QR — no gate ──────────────
+	// ── Path B: restore from Harvanna Access Card QR — no gate ──────────────
 	
 	private static final int RC_SCAN_QR = 4103;
 	
 	private void onScanCardClicked() {
 		Intent scanIntent = new Intent(this, com.harvanna.app.ScanQrCodeActivity.class);
-		scanIntent.putExtra(com.harvanna.app.ScanQrCodeActivity.EXTRA_TITLE, "Scan Ajoo Card");
-		scanIntent.putExtra(com.harvanna.app.ScanQrCodeActivity.EXTRA_REQUIRED_PREFIX, AjooCardCrypto.FORMAT_PREFIX);
+		scanIntent.putExtra(com.harvanna.app.ScanQrCodeActivity.EXTRA_TITLE, "Scan Harvanna Card");
+		scanIntent.putExtra(com.harvanna.app.ScanQrCodeActivity.EXTRA_REQUIRED_PREFIX, HarvannaCardCrypto.FORMAT_PREFIX);
 		startActivityForResult(scanIntent, RC_SCAN_QR);
 	}
 	
@@ -232,11 +232,11 @@ public class RestoreWalletActivity extends AppCompatActivity {
 					runOnUiThread(() -> {
 						String text = result.getText() != null ? result.getText().trim() : "";
 						if (scannerDialog != null && scannerDialog.isShowing()) scannerDialog.dismiss();
-						if (text.startsWith(AjooCardCrypto.FORMAT_PREFIX)) {
+						if (text.startsWith(HarvannaCardCrypto.FORMAT_PREFIX)) {
 							pendingScannedPayload = text;
 							showPasswordBottomSheet(false);
 						} else {
-							SketchwareUtil.showMessage(getApplicationContext(), "That QR code isn't an Ajoo Access Card.");
+							SketchwareUtil.showMessage(getApplicationContext(), "That QR code isn't an Harvanna Access Card.");
 						}
 					});
 				}
@@ -292,9 +292,9 @@ public class RestoreWalletActivity extends AppCompatActivity {
 		
 		btnContinue.setOnClickListener(v -> {
 			String raw = etCode.getText().toString().replaceAll("[^0-9]", "");
-			if (raw.length() != AjooCardCrypto.DIGIT_CODE_LENGTH) {
+			if (raw.length() != HarvannaCardCrypto.DIGIT_CODE_LENGTH) {
 				tvError.setText("That's " + raw.length() + " digits — should be exactly "
-				+ AjooCardCrypto.DIGIT_CODE_LENGTH + ". Check for a missing or extra digit.");
+				+ HarvannaCardCrypto.DIGIT_CODE_LENGTH + ". Check for a missing or extra digit.");
 				tvError.setVisibility(View.VISIBLE);
 				return;
 			}
@@ -338,9 +338,9 @@ public class RestoreWalletActivity extends AppCompatActivity {
 			btnUnlock.setText("Decrypting…");
 			
 			new Thread(() -> {
-				AjooCardCrypto.DecryptResult result = fromManualCode
-				? AjooCardCrypto.decryptDigitCode(this, pendingManualDigitCode, password)
-				: AjooCardCrypto.decryptCardPayload(this, pendingScannedPayload, password);
+				HarvannaCardCrypto.DecryptResult result = fromManualCode
+				? HarvannaCardCrypto.decryptDigitCode(this, pendingManualDigitCode, password)
+				: HarvannaCardCrypto.decryptCardPayload(this, pendingScannedPayload, password);
 				
 				runOnUiThread(() -> {
 					if (result.success) {
@@ -400,7 +400,7 @@ public class RestoreWalletActivity extends AppCompatActivity {
 			SecureWalletStorage.saveMnemonic(this, address, mnemonic);
 			WalletManager.saveKeysLocally(this, address, seedB64, pubKeyB64);
 			
-			getSharedPreferences("ajc_wallet_prefs", MODE_PRIVATE)
+			getSharedPreferences("harv_wallet_prefs", MODE_PRIVATE)
 			.edit()
 			.putString("active_wallet_address", address)
 			.putString("active_address", address)

@@ -35,7 +35,7 @@ public final class PendingTxStore {
 		entry.put("senderAddress", walletAddress);
 		entry.put("recipientAddress", recipient);
 		entry.put("value", amount);
-		entry.put("tokenSymbol", symbol != null ? symbol : "AJC");
+		entry.put("tokenSymbol", symbol != null ? symbol : com.harvanna.app.CoinInfo.ticker());
 		entry.put("status", "pending");
 		entry.put("timestamp", System.currentTimeMillis());
 		
@@ -53,7 +53,7 @@ public final class PendingTxStore {
 		entry.put("senderAddress", walletAddress);
 		entry.put("recipientAddress", recipient);
 		entry.put("value", amount);
-		entry.put("tokenSymbol", symbol != null ? symbol : "AJC");
+		entry.put("tokenSymbol", symbol != null ? symbol : com.harvanna.app.CoinInfo.ticker());
 		entry.put("status", "failed");
 		entry.put("errorMessage", errorMessage != null ? errorMessage : "Send failed");
 		entry.put("timestamp", System.currentTimeMillis());
@@ -130,8 +130,8 @@ public final class PendingTxStore {
 			String txHash = String.valueOf(entry.get("txHash"));
 			if (txHash == null || txHash.startsWith("local-failed-")) continue;
 			
-			com.harvanna.app.sync.AjooNodeClient.getTxStatus(txHash,
-			new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+			com.harvanna.app.sync.HarvannaNodeClient.getTxStatus(txHash,
+			new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 				@Override
 				public void onSuccess(org.json.JSONObject json) {
 					String nodeStatus = json.optString("status", "");

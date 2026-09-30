@@ -2,7 +2,7 @@
 
 ## Done in this pass (Tier 0 / Tier 1 constants)
 - T0-1: node base URL and WS base -> `https://harvannaprotocol.com` / `wss://harvannaprotocol.com`.
-  Removed the self-signed IP pin from `network_security_config.xml` and deleted `ajoo_node_cert.pem`
+  Removed the self-signed IP pin from `network_security_config.xml` and deleted `harvanna_node_cert.pem`
   (the live host uses a CA cert). No stored-URL migration exists in this app (URL is a constant).
 - T0-2: `AJ0x` -> `HV0x` everywhere (constants, regex validators, layouts hints).
   Left unchanged: `CreateNewGroupActivity.FEE_COLLECTOR_ADDRESS` (unused legacy hex; real HV0x address unknown).
@@ -39,8 +39,8 @@
 - Firebase console: enable Email/Password and Google providers, register SHA fingerprints; T0-5 still open.
 
 ## Firebase setup (T0-5)
-- Package renamed `com.ajoo.app` -> `com.harvanna.app` (applicationId, namespace, sources, manifest authorities). Register `com.harvanna.app` in Firebase.
-- `com.ajoo.node.miner` (separate miner app) is still referenced by WalletEarnFragmentActivity; update if the miner is renamed.
+- Package renamed `com.harvanna.app` -> `com.harvanna.app` (applicationId, namespace, sources, manifest authorities). Register `com.harvanna.app` in Firebase.
+- `com.harvanna.node.miner` (separate miner app) is still referenced by WalletEarnFragmentActivity; update if the miner is renamed.
 - `com.google.gms.google-services` plugin (4.4.1) added to `app/build.gradle`. The build fails until
   `app/google-services.json` is added (download from Firebase console after registering the app + SHA fingerprints).
 - App has never been on Play, so `versionCode 1` is fine (T2-2 resolved). Keystore (T2-1) still open.
@@ -91,8 +91,8 @@ breaking reflection at runtime, Firestore offline persistence syncing after a re
 - Palette: Neon Orange #FF9030 + Charcoal #111827, light and dark (values/ and values-night/), drawable hardcoded
   greens/navys moved to tokens. Text on orange is charcoal (white on #FF9030 is only ~2.2:1). Visual result not
   reviewed on a device.
-- App renamed "Harvanna Wallet"; layout text rebranded (Ajoo -> Harvanna, AJC/Ajoocoin -> HARV). Java string
-  literals still say "AJC"/"Ajoo" in places (not changed; user-visible follow-up). The launcher icon is a generated
+- App renamed "Harvanna Wallet"; layout text rebranded (Harvanna -> Harvanna, HARV/Harvannacoin -> HARV). Java string
+  literals still say "HARV"/"Harvanna" in places (not changed; user-visible follow-up). The launcher icon is a generated
   placeholder (orange square, charcoal H).
 - "Home activity" UX/UI redesign, and per-group-type screens: NOT done yet. See docs/GROUP_ENGINE_MAP.md.
 - R8: first release build ran out of memory (512 MB default heap) - raised via gradle.properties. CI evidence:
@@ -120,7 +120,7 @@ Differences from the decisions as stated (found while reading the node; NOT chan
    redacted the reference shows "No market reference yet".
 
 ## Package renamed again (29 Sep 2026, urgent): com.harvanna.wallet -> com.harvanna.app
-All sources, tests, manifest authorities, Gradle `applicationId`/`namespace` and docs updated (history: com.ajoo.app -> com.harvanna.wallet -> com.harvanna.app).
+All sources, tests, manifest authorities, Gradle `applicationId`/`namespace` and docs updated (history: com.harvanna.app -> com.harvanna.wallet -> com.harvanna.app).
 **Firebase action required:** `app/google-services.json` was registered for `com.harvanna.wallet`. I only edited its `package_name` field so
 the Gradle plugin accepts the build; the `mobilesdk_app_id` and OAuth entries still belong to the OLD Firebase app. Register a new Android app
 `com.harvanna.app` in the Firebase console (with SHA-1/SHA-256 from README/this file's debug key), download the new `google-services.json`, and
@@ -139,3 +139,66 @@ replace this one. Until then email/password may work but Google sign-in will not
 for the debug SHA-1 (bff2f88297ff53dd1f21bca9e5a36e49011fc55a) and the web client used by `requestIdToken`. This is the config Google sign-in needs.
 Whether the SHA-256 is also registered is not visible in this file. Still to verify on a device: Google sign-in, and that Email/Password + Google
 providers are enabled in Authentication.
+
+## Coin ticker and name from the node (29 Sep 2026)
+- New `CoinInfo` (ticker/name), loaded from cache at startup and refreshed from `GET /api/v1/chain/info` (`ticker`). Defaults: HARV / Harvanna.
+  The node publishes NO coin name and NO decimals; `CoinInfo` will pick up `coinName`/`name` if the node adds it. Node-side suggestion:
+  add `coinName` and `decimals` to `/chain/info`.
+- 194 user-visible string literals in 51 Java files no longer hardcode HARV/Harvanna/Harvannacoin/HarvannaChain: they use `CoinInfo.ticker()`/`name()` or "Harvanna" / "Harvanna Protocol".
+  Left on purpose: class/identifier names, log tags, file-system folder names (`Harvanna`, `Harvanna/media/documents`, so nothing saved by older code is orphaned),
+  and "Harvanna Node Miner" (a separate app with its own package/name).
+- Static text in XML layouts says HARV (set earlier); it is not fetched dynamically. If the node ever changes the ticker, Java-built text follows, layout text does not.
+- **Found, not fixed:** `HomeFragmentActivity` and `GroupPaymentFragmentActivity` use a hardcoded `HARV_TO_NGN = 150.0` to show a Naira value. That is a made-up
+  rate, so the "NGN" totals (e.g. the asset screen) are not real. The node's mark is the right source but no endpoint exposes it yet; until then these should show no
+  Naira value (or the open-listing median labelled as approximate). Needs an owner decision.
+- **Found, not fixed:** the transaction detail screen shows an "Amount Burned" row; the node's fee model (87% miner / 3% good-behaviour / 10% staking) has no burn.
+
+## The old brand and ticker were removed everywhere (29 Sep 2026)
+Every class, file, resource id/style/layout, string, log tag, preference/database/keystore name, comment, doc, CI artifact name and the Gradle project
+name now use Harvanna / HARV. The two legal documents in `assets` (Privacy Policy, Terms of Service) were renamed and their text rewritten - **the owner
+or counsel should review them**, since a mechanical brand swap changes legal wording. The countries data file was deliberately left alone: it contains the letters
+"ajc" inside real place names.
+
+Consequences to know:
+- **Local storage names changed** (preferences files, keystore alias, offline database, etc.). A device that already has the previous build installed keeps its old
+  data on disk but the new build cannot see it: the wallet must be restored from its recovery phrase / Access Card. Do not uninstall or clear data on a device holding
+  a wallet you have not backed up.
+- Mechanical name results that need the owner to confirm they exist: the support address is now `support@harvanna.app`; the separate miner app is now expected at package
+  `com.harvanna.node.miner` (the Earn screen launches it); saved-file folder is `Harvanna`.
+- The repository is still called "Ajoo" on GitHub and git history contains the old names; neither is part of the app.
+
+## Group wallet card sharing
+- The encrypted Access Card (ciphertext + digit code + address, never the passphrase) is published to `GROUPS/{gid}/private/walletCard` after group creation (or when the admin regenerates it from Group settings). Members view/print/save it in `GroupWalletBackupActivity`.
+- Needs the `private` rule in `docs/firestore.rules` deployed; until then publish 403s (kept locally and retried when the admin opens the backup screen) and members see an error.
+- Security note: members hold ciphertext, so the passphrase strength is the only protection (min 20 chars enforced by the card crypto). Admin should use a long random passphrase and never share it.
+- Node-derived on-chain Circle escrow has no private key, so no card exists for it; only personal-wallet backup applies.
+- Not implemented: per-type settings for GenLoan; a fuller rebuild of the settings screen (existing type panels for Rotating/Fixed/Accumulative kept, backup section added).
+
+## Owner decisions applied (30 Sep)
+- Removed the fake HARV_TO_NGN=150 rate everywhere; the group wallet's "≈ ₦" line is hidden (no real rate source).
+- Access Card passphrase minimum is now 24 characters (new cards only; existing cards still decrypt).
+- Loans: the node has loan machinery for Accumulative and Fixed groups only (Circle/Rotating has none), so the loan toggle exists only for those two types; Rotating is always loans-off.
+- Miner package: com.harvanna.mine (+ manifest <queries> so Android 11+ can detect it).
+- Full Firestore rules replacement: docs/firestore.rules. Note the rebrand renamed data fields (amountAjc->amountHarv, repaidAmountAjc->repaidAmountHarv); the rules use the new names, so any data written by an older build under old names would not match.
+
+## Trust score and wallet ownership on the node
+- Node has two mechanisms: `POST /api/v1/identity/link` (wallet signature + Firebase ID token; node stores only HMAC(pepper, uid); disabled unless `harvanna.identity.links-enabled=true`) and `POST /api/v1/personhood/bind` + `/vouch`, `GET /api/v1/personhood/{address}`.
+- The node's trust score is only 0..26: bound = 10, +2 per effective vouch up to 8. It is NOT the app's 0..100 score (TrustScoreEngine, computed client-side from Firestore). They are different measures; the profile now shows both, labelled separately. There is no node endpoint that takes the app score.
+- **One wallet per account and one wallet per device hash**: the node rejects a second wallet for the same user (`USER_ALREADY_LINKED`) and a second wallet on the same device (`DEVICE_ALREADY_BOUND`). "Various wallets per user" is therefore not possible without a node change; the app links the active wallet only and shows the node's message otherwise.
+- The device attestation hash is client-asserted (SHA-256 of ANDROID_ID + package); real attestation (Play Integrity) is future node work. Node deploy must set `harvanna.identity.links-enabled=true` and a real pepper.
+
+## Invites
+- Invites live in `INVITES/{groupId}_{emailKey}` (email-keyed so people without an account can be invited). Rules are in docs/firestore.rules and must be deployed. Invitees must have a VERIFIED email to see or answer invites (otherwise anyone could register a victim's email and read their invites).
+- The invitee is notified when the app is opened (Android notification + a Snackbar on Home). There is NO background push: that needs FCM plus a Cloud Function, which this project doesn't have.
+- The invite screen summarises the group and links to the join screen, which shows the rules, requires a wallet and a signed contract.
+
+## Group chat connector and presence
+- Chat is external by design: the admin saves an https WhatsApp/Telegram/Signal/Discord/Facebook link (validated by ChatLink) in `GROUPS/{gid}/private/chatLink` (members-only read via the existing private rule). The toolbar Chat icon opens it after a safety warning.
+- Presence bug found: `markSelfActiveNow` had no callers, so nobody ever appeared online. `PresenceHeartbeat` now writes `lastActiveAt` every 2 min while the app is in the foreground (respecting the privacy switch, which also writes `showActivityStatus=false`). Member avatars get a ring: green online (<5 min), amber away (<1 h), thin grey offline. Presence is self-reported, so it is approximate.
+- Profiles are readable by any signed-in user (open item A2), so presence is too.
+
+## Notification center
+- `NotificationsActivity` + `NotificationCenter` (per-user inbox, 200 cap, de-duplicated) is the single place for notifications. Sources: incoming transfers (WalletController), group notices addressed to you or posted by others, payment reminders targeted at you, payment-due (Home), invitations, join-request answers. Each also raises an Android notification if the user's Notification settings allow that category.
+- Bugs fixed: the toolbar bell (menu id 1) had no handler; MainActivity's receiver read `amount`/`sender` extras that the broadcaster never sets (`EXTRA_AMOUNT`/`EXTRA_SENDER`), so it always showed 0.00000.
+- Delivery is by polling (every ~90 s in the foreground, every ~15 min in the background via WorkManager, only while online). True instant push needs FCM + a Cloud Function or the node pushing; not built. Android may delay background work on battery saver / restricted phones.
+- Not yet connected: loan-due reminders and admin-side alerts (new join request, loan application) - the category switches exist; sources still to be added.

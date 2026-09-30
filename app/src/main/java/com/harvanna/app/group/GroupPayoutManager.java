@@ -45,7 +45,7 @@ public final class GroupPayoutManager {
      * that signs with group wallet keys from SecureWalletStorage.
      */
     public interface GroupWalletTransfer {
-        void transfer(String fromGroupWallet, String toMemberWallet, double amountAjc, Callback callback);
+        void transfer(String fromGroupWallet, String toMemberWallet, double amountHarv, Callback callback);
     }
 
     private GroupPayoutManager() {}
@@ -54,13 +54,13 @@ public final class GroupPayoutManager {
 
     /**
      * Member creates a payout request for the admin to review.
-     * amountAjc should typically equal one full cycle pot (contributionAmount × totalSlots)
+     * amountHarv should typically equal one full cycle pot (contributionAmount × totalSlots)
      * for rotating groups, or the fixed-month return for Fixed groups.
      */
     public static void requestPayout(Context context,
                                      String groupId,
                                      String requesterWallet,
-                                     double amountAjc,
+                                     double amountHarv,
                                      int slot,
                                      Callback callback) {
         if (callback == null) return;
@@ -69,7 +69,7 @@ public final class GroupPayoutManager {
                 GroupValidation.requireUid(currentUid(), "Not signed in."),
                 GroupValidation.requireGroupId(groupId),
                 GroupValidation.requireValidWallet(requesterWallet, "Member wallet"),
-                GroupValidation.requirePositiveAmount(amountAjc),
+                GroupValidation.requirePositiveAmount(amountHarv),
                 GroupValidation.requireSlot(slot)
         );
         if (err != null) {
@@ -83,11 +83,11 @@ public final class GroupPayoutManager {
         fields.put("status", "PENDING");
         fields.put("requesterUid", uid);
         fields.put("requesterWallet", requesterWallet.trim());
-        fields.put("amountAjc", amountAjc);
+        fields.put("amountHarv", amountHarv);
         fields.put("slot", slot);
         fields.put("createdAt", System.currentTimeMillis());
         fields.put("message", "Payout request: "
-                + com.harvanna.app.wallet.BalanceFormatter.smart(amountAjc)
+                + com.harvanna.app.wallet.BalanceFormatter.smart(amountHarv)
                 + " · slot " + slot);
 
         GroupFirestoreManager.getInstance(context)
@@ -99,7 +99,7 @@ public final class GroupPayoutManager {
                                 .postSystemNotice(groupId,
                                         "Payout requested",
                                         "A member requested a payout of "
-                                                + com.harvanna.app.wallet.BalanceFormatter.smart(amountAjc));
+                                                + com.harvanna.app.wallet.BalanceFormatter.smart(amountHarv));
                         callback.onSuccess("Payout request submitted.");
                     }
 
@@ -166,7 +166,7 @@ public final class GroupPayoutManager {
                                                 String requestId,
                                                 String groupWalletAddress,
                                                 String memberWalletAddress,
-                                                double amountAjc,
+                                                double amountHarv,
                                                 GroupWalletTransfer transferExecutor,
                                                 Callback callback) {
         if (callback == null) return;
@@ -184,11 +184,11 @@ public final class GroupPayoutManager {
             callback.onError("Missing payout request id.");
             return;
         }
-        if (!isValidAjcWallet(groupWalletAddress) || !isValidAjcWallet(memberWalletAddress)) {
+        if (!isValidHarvWallet(groupWalletAddress) || !isValidHarvWallet(memberWalletAddress)) {
             callback.onError("Invalid wallet addresses.");
             return;
         }
-        if (amountAjc <= 0) {
+        if (amountHarv <= 0) {
             callback.onError("Invalid amount.");
             return;
         }
@@ -221,7 +221,7 @@ public final class GroupPayoutManager {
                             return;
                         }
                         _executeTransferAndFinalize(context, groupId, requestId, groupWalletAddress,
-                                memberWalletAddress, amountAjc, adminUid, transferExecutor, callback);
+                                memberWalletAddress, amountHarv, adminUid, transferExecutor, callback);
                     }
 
                     @Override
@@ -236,11 +236,11 @@ public final class GroupPayoutManager {
                                                      String requestId,
                                                      String groupWalletAddress,
                                                      String memberWalletAddress,
-                                                     double amountAjc,
+                                                     double amountHarv,
                                                      String adminUid,
                                                      GroupWalletTransfer transferExecutor,
                                                      Callback callback) {
-        transferExecutor.transfer(groupWalletAddress, memberWalletAddress, amountAjc,
+        transferExecutor.transfer(groupWalletAddress, memberWalletAddress, amountHarv,
                 new Callback() {
                     @Override
                     public void onSuccess(String txHashOrMsg) {
@@ -260,7 +260,7 @@ public final class GroupPayoutManager {
                                             public void onSuccess() {
                                                 writePayoutLedgerAndNotify(context, groupId,
                                                         requestId, groupWalletAddress,
-                                                        memberWalletAddress, amountAjc,
+                                                        memberWalletAddress, amountHarv,
                                                         adminUid, txRef, callback);
                                             }
 
@@ -271,7 +271,7 @@ public final class GroupPayoutManager {
                                                 Log.w(TAG, "Payout request status update failed: " + error);
                                                 writePayoutLedgerAndNotify(context, groupId,
                                                         requestId, groupWalletAddress,
-                                                        memberWalletAddress, amountAjc,
+                                                        memberWalletAddress, amountHarv,
                                                         adminUid, txRef, callback);
                                             }
                                         });
@@ -289,7 +289,7 @@ public final class GroupPayoutManager {
                                                    String requestId,
                                                    String groupWallet,
                                                    String memberWallet,
-                                                   double amountAjc,
+                                                   double amountHarv,
                                                    String adminUid,
                                                    String txRef,
                                                    Callback callback) {
@@ -301,7 +301,7 @@ public final class GroupPayoutManager {
             @Override
             public void onConfirmed(String hash, long blockHeight) {
                 writeConfirmedPayoutRow(context, groupId, requestId, groupWallet,
-                        memberWallet, amountAjc, adminUid, hash, callback);
+                        memberWallet, amountHarv, adminUid, hash, callback);
             }
             @Override
             public void onError(String error) {
@@ -315,7 +315,7 @@ public final class GroupPayoutManager {
                                                    String requestId,
                                                    String groupWallet,
                                                    String memberWallet,
-                                                   double amountAjc,
+                                                   double amountHarv,
                                                    String adminUid,
                                                    String txRef,
                                                    Callback callback) {
@@ -324,7 +324,7 @@ public final class GroupPayoutManager {
         payment.put("status", "CONFIRMED");
         payment.put("from", groupWallet);
         payment.put("to", memberWallet);
-        payment.put("amountAjc", amountAjc);
+        payment.put("amountHarv", amountHarv);
         payment.put("requestId", requestId != null ? requestId : "");
         payment.put("adminUid", adminUid);
         payment.put("timestamp", System.currentTimeMillis());
@@ -337,7 +337,7 @@ public final class GroupPayoutManager {
                         GroupFirestoreManager.getInstance(context)
                                 .postSystemNotice(groupId, "Payout sent",
                                         "Admin paid out "
-                                                + com.harvanna.app.wallet.BalanceFormatter.smart(amountAjc)
+                                                + com.harvanna.app.wallet.BalanceFormatter.smart(amountHarv)
                                                 + " to " + shortAddr(memberWallet));
                         callback.onSuccess("Payout approved and sent.");
                     }
@@ -420,7 +420,7 @@ public final class GroupPayoutManager {
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
     }
 
-    private static boolean isValidAjcWallet(String address) {
+    private static boolean isValidHarvWallet(String address) {
         return address != null && address.trim().startsWith("HV0x") && address.trim().length() >= 10;
     }
 

@@ -237,7 +237,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="2dp"
-							android:text="support\@ajoo.app"
+							android:text="support\@harvanna.app"
 							android:textSize="13sp"
 							android:textColor="@color/colorAccent" />
 					</LinearLayout>

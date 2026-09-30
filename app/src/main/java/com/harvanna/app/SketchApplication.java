@@ -26,6 +26,10 @@ public class SketchApplication extends Application {
         super.onCreate();
         appContext = getApplicationContext();
         
+        // Saved theme (System / Light / Dark) must be applied before any screen is created.
+        com.harvanna.app.utils.ThemeManager.applySavedTheme(this);
+        com.harvanna.app.utils.ThemeManager.keepAppContextInSync(this);
+        
         // EXPLICIT INITIALIZATION: Forces Firebase to wake up early
         FirebaseApp.initializeApp(this);
         
@@ -41,6 +45,10 @@ public class SketchApplication extends Application {
         
         // One-time AJ0x -> HV0x wallet address migration (idempotent)
         com.harvanna.app.wallet.AddressMigration.run(this);
+        
+        // Coin ticker/name come from the node (cached; defaults HARV / Harvanna)
+        CoinInfo.init(this);
+        CoinInfo.refresh(this);
         
         // GLOBAL CRASH INTERCEPTOR (File Writer + Debug Screen)
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
@@ -61,7 +69,7 @@ public class SketchApplication extends Application {
                 
                 try {
                     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-                    String fileName = "Ajoo_Crash_" + timeStamp + ".txt";
+                    String fileName = "Harvanna_Crash_" + timeStamp + ".txt";
                     
                     File downloadDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS);
                     File publicCrashFile = new File(downloadDir, fileName);

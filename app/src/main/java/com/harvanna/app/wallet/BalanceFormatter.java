@@ -1,21 +1,21 @@
 package com.harvanna.app.wallet;
 
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 /**
- * Single source of truth for AJC balance display across the entire app.
+ * Single source of truth for HARV balance display across the entire app.
  *
  * UNIT RULE:
  *   Raw units (long)  = what the node stores and sends  (e.g. 150_000_000)
- *   AJC display (double) = what the user sees           (e.g. 1.5 AJC)
- *   Conversion: 1 AJC = 100,000,000 raw units (AjooNodeClient.AJC_UNITS_PER_TOKEN)
+ *   HARV display (double) = what the user sees           (e.g. 1.5 HARV)
+ *   Conversion: 1 HARV = 100,000,000 raw units (HarvannaNodeClient.HARV_UNITS_PER_TOKEN)
  *
  * NEVER call WalletManager.getNativeBalance() in new code — it reads the old
- * "balance_ajc" Firestore field which the node no longer writes to directly.
- * Use rawToAjc() or fetchAndFormat() from WalletNodeBridge instead.
+ * "balance_harv" Firestore field which the node no longer writes to directly.
+ * Use rawToHarv() or fetchAndFormat() from WalletNodeBridge instead.
  */
 public final class BalanceFormatter {
 
@@ -23,78 +23,78 @@ public final class BalanceFormatter {
 
     // ── Conversion ────────────────────────────────────────────────────────────
 
-    /** Convert raw node units to AJC display amount. */
-    public static double rawToAjc(long rawUnits) {
-        return AjooNodeClient.toAjcDisplay(rawUnits);
+    /** Convert raw node units to HARV display amount. */
+    public static double rawToHarv(long rawUnits) {
+        return HarvannaNodeClient.toHarvDisplay(rawUnits);
     }
 
-    /** Convert AJC display amount to raw node units for tx submission. */
-    public static long ajcToRaw(double ajcAmount) {
-        return AjooNodeClient.toRawUnits(ajcAmount);
+    /** Convert HARV display amount to raw node units for tx submission. */
+    public static long harvToRaw(double harvAmount) {
+        return HarvannaNodeClient.toRawUnits(harvAmount);
     }
 
     // ── Formatting ────────────────────────────────────────────────────────────
 
     /**
      * Full precision format — use on the wallet home screen.
-     * Example: 1,234.56789000 AJC
+     * Example: 1,234.56789000 HARV
      */
-    public static String full(double ajcAmount) {
-        return decimal(ajcAmount, 8) + " HARV";
+    public static String full(double harvAmount) {
+        return decimal(harvAmount, 8) + " HARV";
     }
 
     /**
      * Short format — use in lists and transaction rows.
-     * Example: 1,234.5679 AJC
+     * Example: 1,234.5679 HARV
      */
-    public static String short4(double ajcAmount) {
-        return decimal(ajcAmount, 4) + " HARV";
+    public static String short4(double harvAmount) {
+        return decimal(harvAmount, 4) + " HARV";
     }
 
     /**
      * Two decimal format — use for fee display.
-     * Example: 0.00 AJC
+     * Example: 0.00 HARV
      */
-    public static String fee(double ajcAmount) {
-        return decimal(ajcAmount, 6) + " HARV";
+    public static String fee(double harvAmount) {
+        return decimal(harvAmount, 6) + " HARV";
     }
 
     /**
      * Trims trailing zeros while keeping whatever precision is actually
      * meaningful, up to 4 decimal places — the general-purpose format for
      * anywhere a balance or amount is shown to a person, not a ledger.
-     * Examples: 2.0000 -> "2 AJC", 2.5000 -> "2.5 AJC", 2.5678 -> "2.5678 AJC"
+     * Examples: 2.0000 -> "2 HARV", 2.5000 -> "2.5 HARV", 2.5678 -> "2.5678 HARV"
      */
-    public static String smart(double ajcAmount) {
-        return smartDecimal(ajcAmount) + " HARV";
+    public static String smart(double harvAmount) {
+        return smartDecimal(harvAmount) + " HARV";
     }
 
-    /** Same trimming, without the " AJC" suffix — for places that need the
+    /** Same trimming, without the " HARV" suffix — for places that need the
      *  bare number (e.g. inside a larger formatted string). Falls back to
      *  more precision for genuinely non-zero small amounts (gas fees can be
-     *  a few millionths of an AJC) rather than misleadingly showing "0"
+     *  a few millionths of an HARV) rather than misleadingly showing "0"
      *  for something that isn't actually zero. */
-    public static String smartDecimal(double ajcAmount) {
-        if (!Double.isFinite(ajcAmount)) return "0";
+    public static String smartDecimal(double harvAmount) {
+        if (!Double.isFinite(harvAmount)) return "0";
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
-        if (ajcAmount != 0 && Math.abs(ajcAmount) < 0.0001) {
+        if (harvAmount != 0 && Math.abs(harvAmount) < 0.0001) {
             DecimalFormat small = new DecimalFormat("#,##0.########", symbols);
-            return small.format(ajcAmount);
+            return small.format(harvAmount);
         }
         DecimalFormat df = new DecimalFormat("#,##0.####", symbols);
-        return df.format(ajcAmount);
+        return df.format(harvAmount);
     }
 
     /**
      * From raw units — convenience for direct node values.
-     * Example: rawFull(150_000_000L) → "1.50000000 AJC"
+     * Example: rawFull(150_000_000L) → "1.50000000 HARV"
      */
     public static String rawFull(long rawUnits) {
-        return full(rawToAjc(rawUnits));
+        return full(rawToHarv(rawUnits));
     }
 
     public static String rawShort(long rawUnits) {
-        return short4(rawToAjc(rawUnits));
+        return short4(rawToHarv(rawUnits));
     }
 
     /**

@@ -233,7 +233,7 @@ public class AssetFragmentActivity extends Fragment {
 		Context context = getContext();
 		if (context == null) return;
 		
-		SharedPreferences prefs = getContext().getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+		SharedPreferences prefs = getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 		
 		// 1. Get active address (Fast Disk I/O)
 		activeAddress = prefs.getString("active_wallet_address", "").trim();
@@ -242,8 +242,8 @@ public class AssetFragmentActivity extends Fragment {
 		}
 		
 		// 2. Other non-sensitive metadata
-		String network = prefs.getString("network", "Ajoocoin Testnet");
-		String nativeSymbol = prefs.getString("native_symbol", "AJC");
+		String network = prefs.getString("network", (com.harvanna.app.CoinInfo.name() + " Testnet"));
+		String nativeSymbol = prefs.getString("native_symbol", com.harvanna.app.CoinInfo.ticker());
 		boolean isWalletCreated = prefs.getBoolean("is_wallet_created", false);
 		long createdTimestamp = prefs.getLong("wallet_created_timestamp", 0L);
 		
@@ -535,17 +535,17 @@ public class AssetFragmentActivity extends Fragment {
 				return; 
 			}
 			
-			double ajcBalance = avail >= 0 ? avail : bal;
+			double harvBalance = avail >= 0 ? avail : bal;
 			String currencyCode = com.harvanna.app.wallet.FiatValueHelper.symbolToCurrencyCode(currencySymbol);
 			
-			com.harvanna.app.wallet.FiatValueHelper.convertAjcToFiat(ajcBalance, currencyCode, (fiatValue, rateAvailable) -> {
+			com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(harvBalance, currencyCode, (fiatValue, rateAvailable) -> {
 				final ArrayList<HashMap<String, Object>> loadedCoins = new ArrayList<>();
 				
 				HashMap<String, Object> nativeCoin = new HashMap<>();
-				nativeCoin.put("coin_name",       "Ajoo Coin");
-				nativeCoin.put("coin_symbol",      "AJC");
+				nativeCoin.put("coin_name",       com.harvanna.app.CoinInfo.name());
+				nativeCoin.put("coin_symbol",      com.harvanna.app.CoinInfo.ticker());
 				nativeCoin.put("coin_balance",
-				String.format(java.util.Locale.US, "%.8f", ajcBalance));
+				String.format(java.util.Locale.US, "%.8f", harvBalance));
 				nativeCoin.put("coin_value", rateAvailable
 				? String.format(java.util.Locale.US, "%.2f", fiatValue)
 				: "0");
@@ -581,7 +581,7 @@ public class AssetFragmentActivity extends Fragment {
 				com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
 				requireActivity(), // Replace with your current Activity
 				"Incoming Transfer", 
-				"Received " + String.format(Locale.US, "%.5f", amount) + " AJC",
+				"Received " + String.format(Locale.US, "%.5f", amount) + (" " + com.harvanna.app.CoinInfo.ticker()),
 				sender
 				);
 			}
@@ -697,4 +697,4 @@ public class AssetFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

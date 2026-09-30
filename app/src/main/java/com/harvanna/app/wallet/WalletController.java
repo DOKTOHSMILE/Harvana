@@ -5,7 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.tx.TransactionManager;
 
 import org.json.JSONObject;
@@ -33,7 +33,7 @@ import java.util.Map;
  *             → UI updates with confirmed on-chain balance
  *             → WalletCache is updated for next open
  *
- * The node is the source of truth for AJC balance.
+ * The node is the source of truth for HARV balance.
  * Transaction history: tries the node's real ADDR_TX-indexed endpoint
  * first, falls back to Firestore only if the node genuinely returns none
  * (e.g. history that confirmed before that index existed).
@@ -68,27 +68,27 @@ public class WalletController {
          * Called immediately with last-known balance from cache (may be stale).
          * Show this instantly while the live fetch is in flight.
          *
-         * @param balanceAjc     last cached AJC balance
+         * @param balanceHarv     last cached HARV balance
          * @param cacheAgeMs     how old the cached data is (-1 = never cached)
          */
-        void onCachedBalance(double balanceAjc, long cacheAgeMs);
+        void onCachedBalance(double balanceHarv, long cacheAgeMs);
 
         /**
          * Called when the live node confirms the balance.
          * Update the UI with this — it's always authoritative.
          *
-         * @param balanceAjc  confirmed AJC balance from node
+         * @param balanceHarv  confirmed HARV balance from node
          * @param nonce       confirmed nonce (use nonce+1 when building a send tx)
          * @param blockHeight chain height at which this balance was confirmed
          */
-        void onLiveBalance(double balanceAjc, long nonce, long blockHeight);
+        void onLiveBalance(double balanceHarv, long nonce, long blockHeight);
 
         /** Called if the node is unreachable. Show cached balance with staleness label. */
         void onBalanceError(String error);
 
         /**
          * Called with the merged transaction history.
-         * AJC txs come from the node; token txs come from Firestore.
+         * HARV txs come from the node; token txs come from Firestore.
          */
         void onTransactionHistory(List<Map<String, Object>> transactions);
 
@@ -133,15 +133,15 @@ public class WalletController {
                     @Override
                     public void onBalanceUpdate(long rawBalance, long nonce, long blockHeight) {
                         if (destroyed) return;
-                        double balanceAjc = AjooNodeClient.toAjcDisplay(rawBalance);
+                        double balanceHarv = HarvannaNodeClient.toHarvDisplay(rawBalance);
 
                         Map<String, Object> toCache = new java.util.HashMap<>();
-                        toCache.put("balance_ajc", balanceAjc);
+                        toCache.put("balance_harv", balanceHarv);
                         toCache.put("nonce",       nonce);
                         toCache.put("blockHeight", blockHeight);
                         WalletCache.save(context, walletAddress, toCache);
 
-                        if (listener != null) listener.onLiveBalance(balanceAjc, nonce, blockHeight);
+                        if (listener != null) listener.onLiveBalance(balanceHarv, nonce, blockHeight);
                     }
 
                     @Override
@@ -197,9 +197,9 @@ public class WalletController {
 
                         long   rawAmount = tx.get("amount") instanceof Number
                                 ? ((Number) tx.get("amount")).longValue() : 0L;
-                        double amountAjc = AjooNodeClient.toAjcDisplay(rawAmount);
+                        double amountHarv = HarvannaNodeClient.toHarvDisplay(rawAmount);
                         String symbol    = tx.get("tokenSymbol") != null
-                                ? tx.get("tokenSymbol").toString() : "AJC";
+                                ? tx.get("tokenSymbol").toString() : com.harvanna.app.CoinInfo.ticker();
 
                         // UI work (notification banner) must happen on the main
                         // thread — this callback's thread isn't guaranteed, so
@@ -207,12 +207,17 @@ public class WalletController {
                         mainHandler.post(() -> {
                             if (destroyed) return;
                             if (!com.harvanna.app.utils.IncomingTxWatcher.markNotifiedIfNew(txHash)) return;
+                            com.harvanna.app.notify.NotificationCenter.post(context, com.harvanna.app.notify.NotificationCenter.TX,
+                                    "tx_" + txHash, com.harvanna.app.CoinInfo.ticker() + " received",
+                                    com.harvanna.app.wallet.BalanceFormatter.short4(amountHarv) + " " + symbol
+                                            + " from " + (from.length() > 12 ? from.substring(0, 8) + "…" + from.substring(from.length() - 4) : from),
+                                    "", -1);
 
                             Listener currentListener = listener; // avoid a null race
                             if (currentListener instanceof android.app.Activity) {
-                                String title   = "AJC Received";
+                                String title   = (com.harvanna.app.CoinInfo.ticker() + " Received");
                                 String message = com.harvanna.app.wallet.BalanceFormatter
-                                        .short4(amountAjc) + " received";
+                                        .short4(amountHarv) + " received";
                                 com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
                                         (android.app.Activity) currentListener, title, message, from);
                             }
@@ -222,7 +227,7 @@ public class WalletController {
                             // all have a globalTxReceiver for this action).
                             android.content.Intent received =
                                     new android.content.Intent("com.harvanna.app.ACTION_WALLET_RECEIVED");
-                            received.putExtra("EXTRA_AMOUNT", amountAjc);
+                            received.putExtra("EXTRA_AMOUNT", amountHarv);
                             received.putExtra("EXTRA_SENDER", from);
                             received.putExtra("EXTRA_SYMBOL", symbol);
                             androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -248,7 +253,7 @@ public class WalletController {
         // Phase 1 — instant cache
         Map<String, Object> cached = WalletCache.load(context, walletAddress);
         if (cached != null) {
-            double cachedBalance = toDouble(cached.get("balance_ajc"));
+            double cachedBalance = toDouble(cached.get("balance_harv"));
             long   cacheAgeMs   = WalletCache.ageMs(context, walletAddress);
             listener.onCachedBalance(cachedBalance, cacheAgeMs);
         } else {
@@ -260,18 +265,18 @@ public class WalletController {
         WalletNodeBridge.fetchLiveBalance(context, walletAddress,
                 new WalletNodeBridge.BalanceCallback() {
                     @Override
-                    public void onSuccess(double balanceAjc, long nonce, long blockHeight) {
+                    public void onSuccess(double balanceHarv, long nonce, long blockHeight) {
                         if (destroyed) return;
 
                         // Persist to WalletCache so next open is instant
                         java.util.Map<String, Object> toCache = new java.util.HashMap<>();
-                        toCache.put("balance_ajc", balanceAjc);
+                        toCache.put("balance_harv", balanceHarv);
                         toCache.put("nonce",       nonce);
                         toCache.put("blockHeight", blockHeight);
                         WalletCache.save(context, walletAddress, toCache);
 
                         if (listener != null) {
-                            listener.onLiveBalance(balanceAjc, nonce, blockHeight);
+                            listener.onLiveBalance(balanceHarv, nonce, blockHeight);
                         }
                     }
 
@@ -286,7 +291,7 @@ public class WalletController {
     }
 
     /**
-     * Loads AJC transaction history — tries the node's real, ADDR_TX-indexed
+     * Loads HARV transaction history — tries the node's real, ADDR_TX-indexed
      * endpoint first. If it returns actual records, uses them directly. Only
      * falls back to Firestore when the node genuinely has nothing (e.g. the
      * wallet's history entirely predates the ADDR_TX index existing).
@@ -294,7 +299,7 @@ public class WalletController {
     public void loadTransactionHistory() {
         if (destroyed || listener == null) return;
 
-        AjooNodeClient.getHistory(walletAddress, new AjooNodeClient.JsonCallback() {
+        HarvannaNodeClient.getHistory(walletAddress, new HarvannaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject json) {
                 if (destroyed || listener == null) return;
@@ -309,9 +314,9 @@ public class WalletController {
 
                             item.put("senderAddress", tx.optString("from", ""));
                             item.put("recipientAddress", tx.optString("to", ""));
-                            item.put("value", AjooNodeClient.toAjcDisplay(tx.optLong("amount", 0L)));
-                            item.put("ajcFee", AjooNodeClient.toAjcDisplay(tx.optLong("gas", 0L)));
-                            item.put("tokenSymbol", "AJC");
+                            item.put("value", HarvannaNodeClient.toHarvDisplay(tx.optLong("amount", 0L)));
+                            item.put("harvFee", HarvannaNodeClient.toHarvDisplay(tx.optLong("gas", 0L)));
+                            item.put("tokenSymbol", com.harvanna.app.CoinInfo.ticker());
                             item.put("txHash", tx.optString("txHash", ""));
                             item.put("status", tx.optString("status", "confirmed"));
                             item.put("blockNumber", tx.optLong("blockHeight", 0L));

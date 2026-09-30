@@ -35,7 +35,7 @@ public final class ThemedDialogs {
 
 	public static AlertDialog.Builder alert(Context context) {
 		TypedValue tv = new TypedValue();
-		int theme = R.style.AjooAlertDialog;
+		int theme = R.style.HarvannaAlertDialog;
 		if (context.getTheme().resolveAttribute(androidx.appcompat.R.attr.alertDialogTheme, tv, true) && tv.resourceId != 0) {
 			theme = tv.resourceId;
 		}
@@ -52,7 +52,7 @@ public final class ThemedDialogs {
 
 	public static BottomSheetDialog sheet(Context context) {
 		TypedValue tv = new TypedValue();
-		int theme = R.style.AjooBottomSheetDialog;
+		int theme = R.style.HarvannaBottomSheetDialog;
 		if (context.getTheme().resolveAttribute(com.google.android.material.R.attr.bottomSheetDialogTheme, tv, true)
 			&& tv.resourceId != 0) {
 			theme = tv.resourceId;

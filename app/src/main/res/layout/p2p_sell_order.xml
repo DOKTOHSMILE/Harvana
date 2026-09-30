@@ -63,7 +63,7 @@
 							android:text="Available to sell"
 							android:textSize="12sp" />
 						<TextView
-							android:id="@+id/tv_sell_available_ajc"
+							android:id="@+id/tv_sell_available_harv"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="4dp"
@@ -361,7 +361,7 @@
 							android:textSize="13sp"
 							android:layout_weight="1" />
 						<TextView
-							android:id="@+id/tv_sell_preview_ajc"
+							android:id="@+id/tv_sell_preview_harv"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="0.00 HARV"

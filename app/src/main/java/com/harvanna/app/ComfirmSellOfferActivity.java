@@ -361,11 +361,11 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 		tv_confirm_seller_name.setText(addr.isEmpty() ? "Your wallet" : addr);
 		tv_confirm_seller_rating.setText("No rating yet");
 		
-		tv_confirm_amount.setText(BalanceFormatter.smartDecimal(amount) + " AJC");
-		tv_confirm_unit_price.setText(P2pMoney.perAjc(unitPrice, currency));
+		tv_confirm_amount.setText(BalanceFormatter.smartDecimal(amount) + (" " + com.harvanna.app.CoinInfo.ticker()));
+		tv_confirm_unit_price.setText(P2pMoney.perHarv(unitPrice, currency));
 		_showPriceReference();
 		tv_confirm_buyers_pay.setText(P2pMoney.fiat(amount * unitPrice, currency));
-		tv_confirm_trade_limit.setText(String.format(Locale.US, "Min %s AJC • Max %s AJC",
+		tv_confirm_trade_limit.setText(String.format(Locale.US, ("Min %s " + com.harvanna.app.CoinInfo.ticker() + " • Max %s " + com.harvanna.app.CoinInfo.ticker()),
 		BalanceFormatter.smartDecimal(minOrderAmount), BalanceFormatter.smartDecimal(maxOrderAmount)));
 		tv_confirm_duration.setText(durationLabel != null ? durationLabel : (durationHours + " hours"));
 	}
@@ -404,7 +404,7 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 				return;
 			}
 			double dev = com.harvanna.app.p2p.P2pPriceReference.deviation(myKobo, medianKobo);
-			String ref = "Market reference: " + P2pMoney.perAjc(medianKobo / 100.0, "NGN")
+			String ref = "Market reference: " + P2pMoney.perHarv(medianKobo / 100.0, "NGN")
 					+ " (median of " + samples + " open listing" + (samples == 1 ? "" : "s") + ")";
 			if (Math.abs(dev) > com.harvanna.app.p2p.P2pPriceReference.DEVIATION_FLAG) {
 				note.setText(ref + "\nYour price is " + Math.round(Math.abs(dev) * 100) + "% "
@@ -484,11 +484,11 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 *  anticipated ones made readable. */
 	private String _friendlyPublishError(String rawError) {
 		if (rawError == null) return "Unknown error.";
-		if (rawError.contains("AMOUNT_OUT_OF_BOUNDS")) return "A listing must be between 10 and 5,000 AJC in total.";
-		if (rawError.contains("INVALID_MIN_ORDER_AMOUNT")) return "The minimum trade amount must be at least 1 AJC and no more than the total you're listing.";
+		if (rawError.contains("AMOUNT_OUT_OF_BOUNDS")) return ("A listing must be between 10 and 5,000 " + com.harvanna.app.CoinInfo.ticker() + " in total.");
+		if (rawError.contains("INVALID_MIN_ORDER_AMOUNT")) return ("The minimum trade amount must be at least 1 " + com.harvanna.app.CoinInfo.ticker() + " and no more than the total you're listing.");
 		if (rawError.contains("INVALID_DURATION")) return "Offer duration must be between 1 hour and 30 days.";
 		if (rawError.contains("SENDER_ADDRESS_FROZEN")) return "This wallet is currently frozen and can't post listings.";
-		if (rawError.contains("COIN_PAUSED")) return "AJC trading is temporarily paused network-wide. Try again later.";
+		if (rawError.contains("COIN_PAUSED")) return (com.harvanna.app.CoinInfo.ticker() + " trading is temporarily paused network-wide. Try again later.");
 		if (rawError.contains("INVALID_SIGNATURE") || rawError.contains("INVALID_NONCE")) return "Something went wrong verifying your request — please try again.";
 		return rawError;
 	}

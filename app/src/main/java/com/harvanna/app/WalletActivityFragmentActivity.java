@@ -41,7 +41,8 @@ import java.util.regex.*;
 import org.json.*;
 import com.harvanna.app.wallet.WalletManager;
 import java.net.URL;
-import java.net.HttpURLConnection;
+import java.net.HttpURLConnection;
+
 
 public class WalletActivityFragmentActivity extends Fragment {
 	
@@ -76,7 +77,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 	}
 	
 	private void initializeLogic() {
-		SharedPreferences prefs = getContext().getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+		SharedPreferences prefs = getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 		
 		String address = prefs.getString("active_wallet_address", "").trim();
 		
@@ -100,7 +101,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 	public void onResume() {
 		super.onResume();
 		if (getContext() != null) {
-			SharedPreferences prefs = getContext().getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+			SharedPreferences prefs = getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 			String freshAddress = prefs.getString("active_wallet_address", "").trim();
 			if (freshAddress.isEmpty()) {
 				freshAddress = WalletManager.getActiveWalletAddress(getContext());
@@ -113,7 +114,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 		_loadTransactionHistory();
 		
 	}
-	
+	
+
 	public void _MORE() {
 	}
 	public void _loadTransactionHistory() {
@@ -165,8 +167,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 		_fetchNodeHistoryPage();
 		
 		// Server-reported pending
-		com.harvanna.app.sync.AjooNodeClient.getPending(wallet_address,
-		new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getPending(wallet_address,
+		new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject json) {
 				if (!isAdded() || getActivity() == null) return;
@@ -194,8 +196,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 							entry.put("senderAddress", tx.optString("from", ""));
 							entry.put("recipientAddress", tx.optString("to", ""));
 							entry.put("memo", tx.optString("memo", "")); 
-							entry.put("value", com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(tx.optLong("amount", 0L)));
-							entry.put("tokenSymbol", "AJC");
+							entry.put("value", com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(tx.optLong("amount", 0L)));
+							entry.put("tokenSymbol", com.harvanna.app.CoinInfo.ticker());
 							entry.put("status", "pending");
 							entry.put("timestamp", System.currentTimeMillis());
 							knownPending.add(entry);
@@ -224,8 +226,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 		if (getContext() == null) return;
 		isLoadingMore = true;
 		
-		com.harvanna.app.sync.AjooNodeClient.getHistory(wallet_address, nodePage, PAGE_SIZE,
-		new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getHistory(wallet_address, nodePage, PAGE_SIZE,
+		new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			
 			@Override
 			public void onSuccess(final org.json.JSONObject json) {
@@ -258,23 +260,23 @@ public class WalletActivityFragmentActivity extends Fragment {
 								double displayValue;
 								if (tx.has("amount") && !tx.isNull("amount")) {
 									long rawAmount = tx.optLong("amount", 0L);
-									displayValue = com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(rawAmount);
+									displayValue = com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(rawAmount);
 								} else {
-									displayValue = tx.optDouble("value", tx.optDouble("value_ajc", 0.0));
+									displayValue = tx.optDouble("value", tx.optDouble("value_harv", 0.0));
 								}
 								item.put("value", displayValue);
 								
-								item.put("tokenSymbol", tx.optString("tokenSymbol", tx.optString("token", "AJC")));
+								item.put("tokenSymbol", tx.optString("tokenSymbol", tx.optString("token", com.harvanna.app.CoinInfo.ticker())));
 								item.put("txHash", tx.optString("txHash", ""));
 								item.put("status", tx.optString("status", "confirmed"));
 								
 								double displayFee;
 								if (tx.has("gas") && !tx.isNull("gas")) {
-									displayFee = com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(tx.optLong("gas", 0L));
+									displayFee = com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(tx.optLong("gas", 0L));
 								} else {
-									displayFee = tx.optDouble("ajcFee", tx.optDouble("fee_ajc", 0.0));
+									displayFee = tx.optDouble("harvFee", tx.optDouble("fee_harv", 0.0));
 								}
-								item.put("ajcFee", displayFee);
+								item.put("harvFee", displayFee);
 								item.put("burnAmount", tx.optDouble("burnAmount", 0.0));
 								item.put("blockNumber", tx.optLong("blockHeight", 0L));
 								item.put("nonce", tx.optLong("nonce", 0L));
@@ -409,8 +411,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 			String recipient = safeAddress(item.get("recipientAddress"));
 			
 			String asset = item.get("tokenSymbol") != null 
-			? item.get("tokenSymbol").toString().toUpperCase() : "AJC";
-			if (asset.isEmpty() || "NULL".equals(asset)) asset = "AJC";
+			? item.get("tokenSymbol").toString().toUpperCase() : com.harvanna.app.CoinInfo.ticker();
+			if (asset.isEmpty() || "NULL".equals(asset)) asset = com.harvanna.app.CoinInfo.ticker();
 			
 			double amount = 0.0;
 			Object valObj = item.get("value");
@@ -504,7 +506,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 					String passedMemo = item.get("memo") != null ? String.valueOf(item.get("memo")) : "";
 					intent.putExtra("memo", passedMemo);
 					
-					Object feeObj    = item.get("ajcFee");
+					Object feeObj    = item.get("harvFee");
 					Object burnObj   = item.get("burnAmount");
 					Object blockObj  = item.get("blockNumber");
 					Object nonceObj  = item.get("nonce");
@@ -514,7 +516,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 						intent.putExtra("confirmations", ((Number) confObj).longValue());
 					}
 					
-					if (feeObj instanceof Number)   intent.putExtra("ajcFee", ((Number) feeObj).doubleValue());
+					if (feeObj instanceof Number)   intent.putExtra("harvFee", ((Number) feeObj).doubleValue());
 					if (burnObj instanceof Number)  intent.putExtra("burnAmount", ((Number) burnObj).doubleValue());
 					if (blockObj instanceof Number) intent.putExtra("blockNumber", ((Number) blockObj).longValue());
 					if (nonceObj instanceof Number) intent.putExtra("nonce", ((Number) nonceObj).longValue());
@@ -612,4 +614,4 @@ public class WalletActivityFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

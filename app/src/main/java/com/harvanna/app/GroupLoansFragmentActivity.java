@@ -378,10 +378,10 @@ public class GroupLoansFragmentActivity extends Fragment {
 			}
 		}
 		
-		com.harvanna.app.sync.AjooNodeClient.getWallet(groupWalletAddress, new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		com.harvanna.app.sync.HarvannaNodeClient.getWallet(groupWalletAddress, new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject json) {
-				groupWalletAvailable = com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(json.optLong("balance", 0L));
+				groupWalletAvailable = com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(json.optLong("balance", 0L));
 				Map<String, Object> toCache = new java.util.HashMap<>();
 				toCache.put("show", groupWalletAvailable);
 				com.harvanna.app.offline.OfflineCacheManager.save(getContext(), "wallet_balance_" + groupWalletAddress, toCache);
@@ -452,7 +452,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 				String type = _safe(p, "type", "");
 				String st = _safe(p, "status", "");
 				boolean ok = "CONFIRMED".equalsIgnoreCase(st) || st.isEmpty();
-				double amt = _num(p, "amountAjc");
+				double amt = _num(p, "amountHarv");
 				String loanId = _safe(p, "loanId", "");
 				if ("LOAN_DISBURSE".equalsIgnoreCase(type) && ok) {
 					totalLoaned += amt;
@@ -473,15 +473,15 @@ public class GroupLoansFragmentActivity extends Fragment {
 				HashMap<String, Object> row = new HashMap<>();
 				row.putAll(loan);
 				String loanId = _safe(loan, "_docId", "");
-				double fromDoc = _num(loan, "repaidAmountAjc");
+				double fromDoc = _num(loan, "repaidAmountHarv");
 				double fromLedger = repaidByLoan.containsKey(loanId) ? repaidByLoan.get(loanId) : 0;
 				double repaidSoFar = Math.max(fromDoc, fromLedger);
-				row.put("repaidAmountAjc", repaidSoFar);
+				row.put("repaidAmountHarv", repaidSoFar);
 				loanRows.add(row);
 				
 				if (payments == null || payments.isEmpty()) {
 					String status = _safe(loan, "status", "");
-					double principal = _num(loan, "principalAjc");
+					double principal = _num(loan, "principalHarv");
 					if ("ACTIVE".equalsIgnoreCase(status) || "REPAID".equalsIgnoreCase(status)
 					|| "APPROVED".equalsIgnoreCase(status)) {
 						totalLoaned += principal;
@@ -518,7 +518,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		if (getContext() == null) return;
 		String myWallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(getContext());
 		if (myWallet == null || myWallet.isEmpty()) {
-			SketchwareUtil.showMessage(getContext(), "Link your AJC wallet first.");
+			SketchwareUtil.showMessage(getContext(), ("Link your " + com.harvanna.app.CoinInfo.ticker() + " wallet first."));
 			return;
 		}
 		
@@ -630,15 +630,15 @@ public class GroupLoansFragmentActivity extends Fragment {
 		}
 		if (tvFeeEstimate != null) {
 			String previewFrom = !groupWalletAddress.isEmpty() ? groupWalletAddress : myWallet;
-			com.harvanna.app.sync.AjooNodeClient.getFee(previewFrom, myWallet, 0L,
-			new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+			com.harvanna.app.sync.HarvannaNodeClient.getFee(previewFrom, myWallet, 0L,
+			new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 				@Override
 				public void onSuccess(org.json.JSONObject feeJson) {
 					if (getActivity() == null) return;
 					long rawFee = feeJson.optLong("estimatedGas", 1000L);
-					double feeAjc = com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(rawFee);
+					double feeHarv = com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(rawFee);
 					// APPLIED FIX
-					getActivity().runOnUiThread(() -> tvFeeEstimate.setText(_formatUIBalance(feeAjc)));
+					getActivity().runOnUiThread(() -> tvFeeEstimate.setText(_formatUIBalance(feeHarv)));
 				}
 				@Override
 				public void onError(String error) {}
@@ -694,15 +694,15 @@ public class GroupLoansFragmentActivity extends Fragment {
 	private void _approveLoan(String loanId, String borrowerWallet, double principal) {
 		if (getContext() == null || groupWalletAddress.isEmpty()) return;
 		
-		long rawAmount = com.harvanna.app.sync.AjooNodeClient.toRawUnits(principal);
-		com.harvanna.app.sync.AjooNodeClient.getFee(groupWalletAddress, borrowerWallet, rawAmount,
-		new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+		long rawAmount = com.harvanna.app.sync.HarvannaNodeClient.toRawUnits(principal);
+		com.harvanna.app.sync.HarvannaNodeClient.getFee(groupWalletAddress, borrowerWallet, rawAmount,
+		new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject feeJson) {
 				if (getActivity() == null) return;
 				long rawFee = feeJson.optLong("estimatedGas", 1000L);
-				double feeAjc = com.harvanna.app.sync.AjooNodeClient.toAjcDisplay(rawFee);
-				getActivity().runOnUiThread(() -> _showApproveLoanSheet(loanId, borrowerWallet, principal, feeAjc));
+				double feeHarv = com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(rawFee);
+				getActivity().runOnUiThread(() -> _showApproveLoanSheet(loanId, borrowerWallet, principal, feeHarv));
 			}
 			@Override
 			public void onError(String error) {
@@ -713,27 +713,27 @@ public class GroupLoansFragmentActivity extends Fragment {
 		});
 	}
 	
-	private void _showApproveLoanSheet(String loanId, String borrowerWallet, double principal, double feeAjc) {
+	private void _showApproveLoanSheet(String loanId, String borrowerWallet, double principal, double feeHarv) {
 		if (getContext() == null) return;
-		double netToBorrower = principal - feeAjc;
+		double netToBorrower = principal - feeHarv;
 		if (netToBorrower <= 0) {
 			SketchwareUtil.showMessage(getContext(), "Loan amount is too small to cover the network fee.");
 			return;
 		}
 		
 		// APPLIED FIX
-		String feeDisplay = com.harvanna.app.wallet.BalanceFormatter.fee(feeAjc) + " (deducted from principal — "
+		String feeDisplay = com.harvanna.app.wallet.BalanceFormatter.fee(feeHarv) + " (deducted from principal — "
 		+ "borrower receives " + _formatUIBalance(netToBorrower) + ")";
 		
 		com.harvanna.app.group.PaymentConfirmSheet.show(getContext(), "Approve & Disburse Loan",
 		principal, borrowerWallet, "Group wallet debit stays " + _formatUIBalance(principal) + " total",
-		feeDisplay, () -> _executeLoanDisbursement(loanId, borrowerWallet, principal, feeAjc));
+		feeDisplay, () -> _executeLoanDisbursement(loanId, borrowerWallet, principal, feeHarv));
 	}
 	
-	private void _executeLoanDisbursement(String loanId, String borrowerWallet, double principal, double feeAjc) {
+	private void _executeLoanDisbursement(String loanId, String borrowerWallet, double principal, double feeHarv) {
 		com.harvanna.app.group.GroupPayoutManager.GroupWalletTransfer transferExecutor =
-		(from, to, amountAjc, cb) -> {
-			double netAmount = amountAjc - feeAjc;
+		(from, to, amountHarv, cb) -> {
+			double netAmount = amountHarv - feeHarv;
 			if (netAmount <= 0) {
 				cb.onError("Loan amount too small to cover the network fee.");
 				return;
@@ -798,7 +798,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		}
 		String myWallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(getContext());
 		if (myWallet == null || !myWallet.startsWith("HV0x")) {
-			SketchwareUtil.showMessage(getContext(), "Link your AJC wallet first.");
+			SketchwareUtil.showMessage(getContext(), ("Link your " + com.harvanna.app.CoinInfo.ticker() + " wallet first."));
 			return;
 		}
 		if (remainingDue <= 0.0001) {
@@ -944,11 +944,11 @@ public class GroupLoansFragmentActivity extends Fragment {
 	}
 	
 	private void _executeLoanRepayment(String loanId, String fromWallet,
-	double amountAjc, boolean markFullyRepaid) {
+	double amountHarv, boolean markFullyRepaid) {
 		if (getActivity() == null) return;
 		final com.harvanna.app.group.TransactionProgressSheet progress =
 		com.harvanna.app.group.TransactionProgressSheet.show(
-		getActivity(), markFullyRepaid ? "Repaying loan" : "Partial repayment", amountAjc);
+		getActivity(), markFullyRepaid ? "Repaying loan" : "Partial repayment", amountHarv);
 		progress.advanceTo(2);
 		
 		com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(getActivity(), () -> {
@@ -957,7 +957,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 				getActivity(),
 				fromWallet,
 				groupWalletAddress,
-				java.math.BigDecimal.valueOf(amountAjc),
+				java.math.BigDecimal.valueOf(amountHarv),
 				null,
 				"Loan repayment",
 				new com.harvanna.app.tx.TransactionRouter.RouterCallback() {
@@ -968,7 +968,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 							progress.advanceTo(3);
 							com.harvanna.app.group.GroupLoanManager.recordRepayment(
 							getContext(), groupId, loanId,
-							fromWallet, groupWalletAddress, amountAjc, txHash,
+							fromWallet, groupWalletAddress, amountHarv, txHash,
 							markFullyRepaid,
 							new com.harvanna.app.group.GroupLoanManager.Callback() {
 								@Override
@@ -990,7 +990,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 										payload.put("loanId", loanId);
 										payload.put("fromWallet", fromWallet);
 										payload.put("groupWallet", groupWalletAddress);
-										payload.put("amountAjc", amountAjc);
+										payload.put("amountHarv", amountHarv);
 										payload.put("txRef", txHash);
 										payload.put("markFullyRepaid", markFullyRepaid);
 										com.harvanna.app.offline.OfflineActionQueue.enqueue(getContext(), "LOAN_REPAY", payload);
@@ -1049,15 +1049,15 @@ public class GroupLoansFragmentActivity extends Fragment {
 		public void onBindViewHolder(@NonNull VH h, int pos) {
 			HashMap<String, Object> loan = data.get(pos);
 			String status = _safe(loan, "status", "PENDING");
-			double principal = _num(loan, "principalAjc");
-			if (principal == 0) principal = _num(loan, "amountAjc");
+			double principal = _num(loan, "principalHarv");
+			if (principal == 0) principal = _num(loan, "amountHarv");
 			final String loanId = _safe(loan, "_docId", "");
 			final String borrowerWallet = _safe(loan, "borrowerWallet", "");
 			
 			if (h.status != null) h.status.setText(status);
 			// APPLIED FIX
 			if (h.amount != null) h.amount.setText(_formatUIBalance(principal));
-			double repaidSoFar = _num(loan, "repaidAmountAjc");
+			double repaidSoFar = _num(loan, "repaidAmountHarv");
 			if (h.meta != null) {
 				long disbursedAt = (long) _num(loan, "disbursedAt");
 				String interestPeriod = _safe(loan, "interestPeriod", "MONTHLY");
@@ -1113,7 +1113,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 			} else if (isMyActiveLoan) {
 				double accrued = com.harvanna.app.group.GroupLoanManager.computeAccruedTotalDue(
 				fPrincipal, fInterestRate, fInterestPeriod, fDisbursedAt);
-				repaidSoFar = _num(loan, "repaidAmountAjc");
+				repaidSoFar = _num(loan, "repaidAmountHarv");
 				double remaining = Math.max(0, accrued - repaidSoFar);
 				if (h.approve != null) {
 					h.approve.setVisibility(View.VISIBLE);
@@ -1185,12 +1185,12 @@ public class GroupLoansFragmentActivity extends Fragment {
 		if (btnClose != null) btnClose.setOnClickListener(v -> sheet.dismiss());
 		
 		String status = _safe(loan, "status", "PENDING");
-		double principal = _num(loan, "principalAjc");
-		if (principal == 0) principal = _num(loan, "amountAjc");
+		double principal = _num(loan, "principalHarv");
+		if (principal == 0) principal = _num(loan, "amountHarv");
 		double interestRate = _num(loan, "interestRate");
 		String interestPeriod = _safe(loan, "interestPeriod", "MONTHLY");
 		long disbursedAt = (long) _num(loan, "disbursedAt");
-		double repaidSoFar = _num(loan, "repaidAmountAjc");
+		double repaidSoFar = _num(loan, "repaidAmountHarv");
 		String borrowerUid = _safe(loan, "borrowerUid", "");
 		
 		double accruedDue = disbursedAt > 0
@@ -1291,7 +1291,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		if (emptyState != null) emptyState.setVisibility(View.GONE);
 		
 		for (Map<String, Object> payment : repayments) {
-			double amount = payment.get("amountAjc") instanceof Number ? ((Number) payment.get("amountAjc")).doubleValue() : 0;
+			double amount = payment.get("amountHarv") instanceof Number ? ((Number) payment.get("amountHarv")).doubleValue() : 0;
 			long timestamp = payment.get("timestamp") instanceof Number ? ((Number) payment.get("timestamp")).longValue() : 0L;
 			
 			LinearLayout row = new LinearLayout(getContext());
@@ -1325,13 +1325,13 @@ public class GroupLoansFragmentActivity extends Fragment {
 	private String _formatUIBalance(double v) {
 		try {
 			java.text.DecimalFormat uiDf = new java.text.DecimalFormat("#,##0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
-			return uiDf.format(v) + " AJC";
+			return uiDf.format(v) + (" " + com.harvanna.app.CoinInfo.ticker());
 		} catch (Exception e) {
-			return String.valueOf(v) + " AJC";
+			return String.valueOf(v) + (" " + com.harvanna.app.CoinInfo.ticker());
 		}
 	}
 	
 	{
 	}
 	
-}
+}

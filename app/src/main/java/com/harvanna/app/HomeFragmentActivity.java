@@ -76,7 +76,6 @@ public class HomeFragmentActivity extends Fragment {
 	
 	private HashMap<String, Object> user_v_map = new HashMap<>();
 	private String mySeedPhrase = "";
-	private static final double AJC_TO_NGN = 150.0;
 	
 	private ArrayList<HashMap<String, Object>> lmap_custom_button = new ArrayList<>();
 	private ArrayList<HashMap<String, Object>> new_test_map = new ArrayList<>();
@@ -159,7 +158,7 @@ public class HomeFragmentActivity extends Fragment {
 	private LinearLayout linear227;
 	private TextView textview208;
 	private LinearLayout linear226;
-	private TextView tv_ajc_balance;
+	private TextView tv_harv_balance;
 	private ImageView imageview61;
 	private LinearLayout linear223;
 	private LinearLayout linear224;
@@ -212,6 +211,8 @@ public class HomeFragmentActivity extends Fragment {
 		FirebaseApp.initializeApp(getContext());
 		initializeLogic();
 		_addQuickActions(_view);
+		if (card_trust_score != null) card_trust_score.setOnClickListener(v -> startActivity(new Intent(getContext(), TrustScoreActivity.class)));
+		if (card_open_loans != null) card_open_loans.setOnClickListener(v -> startActivity(new Intent(getContext(), OpenLoansActivity.class)));
 		return _view;
 	}
 	
@@ -290,7 +291,7 @@ public class HomeFragmentActivity extends Fragment {
 		linear227 = _view.findViewById(R.id.linear227);
 		textview208 = _view.findViewById(R.id.textview208);
 		linear226 = _view.findViewById(R.id.linear226);
-		tv_ajc_balance = _view.findViewById(R.id.tv_ajc_balance);
+		tv_harv_balance = _view.findViewById(R.id.tv_harv_balance);
 		imageview61 = _view.findViewById(R.id.imageview61);
 		linear223 = _view.findViewById(R.id.linear223);
 		linear224 = _view.findViewById(R.id.linear224);
@@ -510,6 +511,24 @@ public class HomeFragmentActivity extends Fragment {
 		_loadWalletBalance();
 		_loadLearnHubPreview();
 		_loadTrendingGroups();
+		if (getContext() != null) {
+			com.harvanna.app.sync.NodeLinkManager.ensureLinked(getContext(), null);
+			com.harvanna.app.group.InviteManager.checkAndNotify(getContext());
+			final android.content.Context ic = getContext().getApplicationContext();
+			com.harvanna.app.group.InviteManager.listMine(ic, new com.harvanna.app.group.InviteManager.ListCb() {
+				@Override public void onList(java.util.List<java.util.Map<String, Object>> invites) {
+					if (invites.isEmpty() || getActivity() == null || getView() == null) return;
+					getActivity().runOnUiThread(() -> {
+						if (getView() == null) return;
+						com.google.android.material.snackbar.Snackbar.make(getView(),
+							"You have " + invites.size() + " group invitation" + (invites.size() > 1 ? "s" : ""),
+							com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+							.setAction("View", v -> startActivity(new Intent(getContext(), InvitesActivity.class))).show();
+					});
+				}
+				@Override public void onError(String e) { }
+			});
+		}
 	}
 	public void _MORE() {
 	}
@@ -642,6 +661,7 @@ public class HomeFragmentActivity extends Fragment {
 		_loadUpcomingPayments();
 		_loadTotalSavedAcrossGroups();
 		_loadOpenLoansAcrossGroups();
+		_loadTrendingGroups(); // re-run now that we know which groups are ours
 	}
 	
 	private void _loadWalletBalance() {
@@ -652,7 +672,7 @@ public class HomeFragmentActivity extends Fragment {
 		final String currencyCode = com.harvanna.app.wallet.FiatValueHelper.symbolToCurrencyCode(currencySymbol);
 		
 		if (addr == null || addr.isEmpty()) {
-			if (tv_ajc_balance != null) tv_ajc_balance.setText("0.00 AJC");
+			if (tv_harv_balance != null) tv_harv_balance.setText(("0.00 " + com.harvanna.app.CoinInfo.ticker()));
 			if (tv_local_currency_eqv != null) tv_local_currency_eqv.setText("≈ " + currencySymbol + "0.00");
 			return;
 		}
@@ -661,10 +681,10 @@ public class HomeFragmentActivity extends Fragment {
 		getContext(), "wallet_balance_" + addr);
 		if (cachedBalance != null && cachedBalance.get("show") instanceof Number) {
 			double cachedShow = ((Number) cachedBalance.get("show")).doubleValue();
-			if (tv_ajc_balance != null) tv_ajc_balance.setText(_fmtAjc(cachedShow));
+			if (tv_harv_balance != null) tv_harv_balance.setText(_fmtHarv(cachedShow));
 			
 			if (tv_local_currency_eqv != null) {
-				com.harvanna.app.wallet.FiatValueHelper.convertAjcToFiat(cachedShow, currencyCode, (fiatValue, rateAvailable) -> {
+				com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(cachedShow, currencyCode, (fiatValue, rateAvailable) -> {
 					if (!isAdded() || getActivity() == null) return;
 					getActivity().runOnUiThread(() -> tv_local_currency_eqv.setText(rateAvailable
 					? String.format(Locale.US, "≈ %s%,.2f", currencySymbol, fiatValue)
@@ -686,10 +706,10 @@ public class HomeFragmentActivity extends Fragment {
 				com.harvanna.app.offline.OfflineCacheManager.save(getContext(), "wallet_balance_" + addr, toCache);
 			}
 			getActivity().runOnUiThread(() -> {
-				if (tv_ajc_balance != null)
-				tv_ajc_balance.setText(_fmtAjc(show));
+				if (tv_harv_balance != null)
+				tv_harv_balance.setText(_fmtHarv(show));
 				if (tv_local_currency_eqv != null) {
-					com.harvanna.app.wallet.FiatValueHelper.convertAjcToFiat(show, currencyCode, (fiatValue, rateAvailable) -> {
+					com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(show, currencyCode, (fiatValue, rateAvailable) -> {
 						if (!isAdded() || getActivity() == null) return;
 						getActivity().runOnUiThread(() -> tv_local_currency_eqv.setText(rateAvailable
 						? String.format(Locale.US, "≈ %s%,.2f", currencySymbol, fiatValue)
@@ -706,7 +726,7 @@ public class HomeFragmentActivity extends Fragment {
 		final String myUid = FirebaseAuth.getInstance().getCurrentUser() != null
 		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
 		List<HashMap<String, Object>> cachedRows = com.harvanna.app.offline.OfflineCacheManager.loadList(
-		getContext(), "upcoming_payments_" + myUid);
+		getContext(), "upcoming_payments_v2_" + myUid);
 		if (cachedRows != null && !cachedRows.isEmpty()) {
 			_renderUpcoming(new ArrayList<>(cachedRows));
 		} else {
@@ -714,31 +734,44 @@ public class HomeFragmentActivity extends Fragment {
 			if (linear7 != null) linear7.setVisibility(View.VISIBLE);
 		}
 		
-		if (group_map_list.isEmpty()) return;
+		if (group_map_list.isEmpty() || myUid.isEmpty()) return;
 		
 		final ArrayList<HashMap<String, Object>> rows = new ArrayList<>();
 		final int[] left = {group_map_list.size()};
 		final boolean[] hadConnectivityFailure = {false};
+		final Runnable oneDone = () -> {
+			left[0]--;
+			if (left[0] <= 0) _finishUpcoming(myUid, rows, hadConnectivityFailure[0], cachedRows);
+		};
 		
 		for (HashMap<String, Object> g : group_map_list) {
-			String gid = g.get("id") != null ? g.get("id").toString() : "";
-			if (gid.isEmpty()) {
-				left[0]--;
-				if (left[0] <= 0) _finishUpcoming(myUid, rows, hadConnectivityFailure[0], cachedRows);
-				continue;
-			}
-			com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext())
-			.getGroup(gid, new com.harvanna.app.firestore.GroupFirestoreManager.DocCallback() {
+			final String gid = g.get("id") != null ? g.get("id").toString() : "";
+			if (gid.isEmpty()) { oneDone.run(); continue; }
+			final com.harvanna.app.firestore.GroupFirestoreManager mgr =
+					com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext());
+			mgr.getGroup(gid, new com.harvanna.app.firestore.GroupFirestoreManager.DocCallback() {
 				@Override
 				public void onSuccess(Map<String, Object> data) {
-					HashMap<String, Object> row = new HashMap<>();
-					row.put("groupId", gid);
-					row.put("groupName", str(data, "groupName", str(data, "name", "Group")));
-					row.put("amount", num(data, "contributionAmount"));
-					row.put("frequency", str(data, "frequency", "Weekly"));
-					rows.add(row);
-					left[0]--;
-					if (left[0] <= 0) _finishUpcoming(myUid, rows, hadConnectivityFailure[0], cachedRows);
+					// members, then payments, then decide what this member should do
+					mgr.getMembers(gid, new com.harvanna.app.firestore.GroupFirestoreManager.ListCallback() {
+						@Override public void onSuccess(List<Map<String, Object>> members) {
+							mgr.getPayments(gid, new com.harvanna.app.firestore.GroupFirestoreManager.ListCallback() {
+								@Override public void onSuccess(List<Map<String, Object>> payments) {
+									_addUpcomingRow(rows, gid, data, members, payments, myUid);
+									oneDone.run();
+								}
+								@Override public void onError(String error) {
+									if (com.harvanna.app.offline.NetworkStatus.isConnectivityError(error)) hadConnectivityFailure[0] = true;
+									_addUpcomingRow(rows, gid, data, members, null, myUid);
+									oneDone.run();
+								}
+							});
+						}
+						@Override public void onError(String error) {
+							if (com.harvanna.app.offline.NetworkStatus.isConnectivityError(error)) hadConnectivityFailure[0] = true;
+							oneDone.run();
+						}
+					});
 				}
 				
 				@Override
@@ -746,11 +779,27 @@ public class HomeFragmentActivity extends Fragment {
 					if (com.harvanna.app.offline.NetworkStatus.isConnectivityError(error)) {
 						hadConnectivityFailure[0] = true;
 					}
-					left[0]--;
-					if (left[0] <= 0) _finishUpcoming(myUid, rows, hadConnectivityFailure[0], cachedRows);
+					oneDone.run();
 				}
 			});
 		}
+	}
+	
+	/** Works out this member's action for one group and appends a row (Pay / Remind / nothing due). */
+	private void _addUpcomingRow(ArrayList<HashMap<String, Object>> rows, String gid, Map<String, Object> data,
+	List<Map<String, Object>> members, List<Map<String, Object>> payments, String myUid) {
+		com.harvanna.app.group.PaymentDueResolver.Result r = com.harvanna.app.group.PaymentDueResolver.resolve(
+		data, members, payments, myUid, System.currentTimeMillis(), java.util.TimeZone.getDefault());
+		HashMap<String, Object> row = new HashMap<>();
+		row.put("groupId", gid);
+		row.put("groupName", str(data, "groupName", str(data, "name", "Group")));
+		row.put("amount", num(data, "contributionAmount"));
+		row.put("frequency", str(data, "frequency", ""));
+		row.put("action", r.action.name());
+		row.put("otherUid", r.otherMemberUid != null ? r.otherMemberUid : "");
+		row.put("statusLine", r.statusLine);
+		row.put("badge", r.badge);
+		synchronized (rows) { rows.add(row); }
 	}
 	
 	private void _finishUpcoming(String myUid, ArrayList<HashMap<String, Object>> rows,
@@ -759,15 +808,21 @@ public class HomeFragmentActivity extends Fragment {
 			if (cachedRows == null) _renderUpcoming(rows);
 			return;
 		}
-		com.harvanna.app.offline.OfflineCacheManager.saveList(getContext(), "upcoming_payments_" + myUid, rows);
+		// Rows that need action first: PAY, then REMIND, then nothing due.
+		java.util.Collections.sort(rows, (x, y) -> Integer.compare(rank(str(x, "action", "NONE")), rank(str(y, "action", "NONE"))));
+		com.harvanna.app.offline.OfflineCacheManager.saveList(getContext(), "upcoming_payments_v2_" + myUid, rows);
 		_renderUpcoming(rows);
+	}
+	
+	private static int rank(String action) {
+		return "PAY".equals(action) ? 0 : ("REMIND".equals(action) ? 1 : 2);
 	}
 	
 	private void _renderUpcoming(ArrayList<HashMap<String, Object>> rows) {
 		if (!isAdded() || linear_upcoming_payments == null || getActivity() == null) return;
 		getActivity().runOnUiThread(() -> {
 			linear_upcoming_payments.removeAllViews();
-			int show = Math.min(2, rows.size());
+			int show = Math.min(3, rows.size());
 			if (show == 0) {
 				if (linear7 != null) linear7.setVisibility(View.VISIBLE);
 				return;
@@ -775,34 +830,95 @@ public class HomeFragmentActivity extends Fragment {
 			if (linear7 != null) linear7.setVisibility(View.GONE);
 			LayoutInflater inf = LayoutInflater.from(getContext());
 			for (int i = 0; i < show; i++) {
-				HashMap<String, Object> row = rows.get(i);
+				final HashMap<String, Object> row = rows.get(i);
 				View item = inf.inflate(R.layout.home_upcoming_pay_custom_display,
 				linear_upcoming_payments, false);
 				TextView name = item.findViewById(R.id.textview2);
 				TextView meta = item.findViewById(R.id.textview3);
-				TextView action = item.findViewById(R.id.textview1);
+				TextView statusLine = item.findViewById(R.id.textview5);
+				TextView badge = item.findViewById(R.id.textview4);
+				com.google.android.material.card.MaterialCardView badgeCard = item.findViewById(R.id.cardview3);
+				com.google.android.material.button.MaterialButton button = item.findViewById(R.id.materialbutton1);
 				final String gid = str(row, "groupId", "");
-				if (name != null) {
-					name.setText(str(row, "groupName", "Group"));
-					try { name.setTextColor(getResources().getColor(R.color.colorTextPrimary)); } catch (Exception ignored) {}
-				}
-				if (meta != null)
-				meta.setText(com.harvanna.app.wallet.BalanceFormatter.smart(num(row, "amount"))
-				+ " · " + str(row, "frequency", ""));
-				if (action != null) {
-					action.setText("Pay");
-					try { action.setTextColor(getResources().getColor(R.color.colorAccent)); } catch (Exception ignored) {}
-					action.setOnClickListener(v -> _openGroup(gid));
-				}
+				final String action = str(row, "action", "NONE");
+				final String otherUid = str(row, "otherUid", "");
+				final String amountText = com.harvanna.app.wallet.BalanceFormatter.smart(num(row, "amount"));
+				
+				if (name != null) name.setText(str(row, "groupName", "Group"));
+				if (meta != null) meta.setText(amountText + (str(row, "frequency", "").isEmpty() ? "" : " · " + str(row, "frequency", "")));
+				if (statusLine != null) statusLine.setText(str(row, "statusLine", ""));
+				
+				int badgeColor = R.color.colorTextTertiary;
+				if ("PAY".equals(action)) badgeColor = R.color.colorWarning;
+				else if ("REMIND".equals(action)) badgeColor = R.color.colorInfo;
+				else if ("Paid".equals(str(row, "badge", ""))) badgeColor = R.color.colorSuccess;
+				int c = androidx.core.content.ContextCompat.getColor(requireContext(), badgeColor);
+				if (badge != null) { badge.setText(str(row, "badge", "")); badge.setTextColor(c); }
+				if (badgeCard != null) badgeCard.setStrokeColor(c);
+				
 				item.setOnClickListener(v -> _openGroup(gid));
+				
+				if ("PAY".equals(action) && getContext() != null) {
+					String day = new java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(new java.util.Date());
+					com.harvanna.app.notify.NotificationCenter.post(getContext(), com.harvanna.app.notify.NotificationCenter.PAYMENT,
+					"due_" + gid + "_" + day, "Payment due: " + str(row, "groupName", "Group"),
+					"Your payment of " + amountText + " " + com.harvanna.app.CoinInfo.ticker() + " is due.", gid, 2);
+				}
+				
+				if (button == null) { linear_upcoming_payments.addView(item); continue; }
+				if ("PAY".equals(action)) {
+					button.setText("Pay");
+					button.setEnabled(true);
+					button.setAlpha(1f);
+					button.setOnClickListener(v -> _openGroupPayments(gid));
+				} else if ("REMIND".equals(action) && !otherUid.isEmpty()) {
+					button.setText("Remind");
+					button.setEnabled(true);
+					button.setAlpha(1f);
+					// show WHO we are waiting on, resolved from their profile
+					com.harvanna.app.group.MemberNameResolver.resolve(getContext(), otherUid, "a member", who -> {
+						if (isAdded() && statusLine != null) statusLine.setText("Waiting on " + who);
+						button.setOnClickListener(v -> {
+							button.setEnabled(false);
+							com.harvanna.app.group.GroupReminders.remind(getContext(), gid, otherUid, who, amountText,
+							new com.harvanna.app.group.GroupReminders.Callback() {
+								@Override public void onSent() {
+									if (!isAdded()) return;
+									button.setText("Reminded");
+									android.widget.Toast.makeText(getContext(), "Reminder sent to " + who, android.widget.Toast.LENGTH_SHORT).show();
+								}
+								@Override public void onError(String error) {
+									if (!isAdded()) return;
+									button.setEnabled(true);
+									android.widget.Toast.makeText(getContext(), error, android.widget.Toast.LENGTH_LONG).show();
+								}
+							});
+						});
+					});
+				} else {
+					// nothing due: keep the button visible but dimmed and inert
+					button.setText("Pay");
+					button.setEnabled(false);
+					button.setAlpha(0.4f);
+					button.setOnClickListener(null);
+				}
 				linear_upcoming_payments.addView(item);
 			}
 		});
 	}
 	
+	private void _openGroupPayments(String gid) {
+		if (gid == null || gid.isEmpty()) return;
+		intent.setClass(getContext().getApplicationContext(), GroupDetailsActivity.class);
+		intent.putExtra("groupId", gid);
+		intent.putExtra("tab", 2);   // Payments tab
+		startActivity(intent);
+	}
+	
 	private void _openGroup(String gid) {
 		if (gid == null || gid.isEmpty()) return;
 		intent.setClass(getContext().getApplicationContext(), GroupDetailsActivity.class);
+		intent.removeExtra("tab");   // the shared Intent may still carry the Payments-tab extra
 		intent.putExtra("groupId", gid);
 		startActivity(intent);
 	}
@@ -875,14 +991,28 @@ public class HomeFragmentActivity extends Fragment {
 		linear_trending_groups.removeAllViews();
 		if (linear10 != null) linear10.setVisibility(View.VISIBLE);
 		
+		final String meUid = FirebaseAuth.getInstance().getCurrentUser() != null
+		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+		final java.util.Set<String> mine = new java.util.HashSet<>();
+		for (HashMap<String, Object> g : group_map_list) {
+			Object id = g.get("id");
+			if (id != null) mine.add(String.valueOf(id));
+		}
 		com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext())
-		.queryGroups("visibility", "Public", 20,
+		.queryGroups("visibility", "Public", 30,
 		new com.harvanna.app.firestore.GroupFirestoreManager.ListCallback() {
 			@Override
 			public void onSuccess(List<Map<String, Object>> list) {
 				if (!isAdded() || getActivity() == null) return;
 				ArrayList<Map<String, Object>> sorted = new ArrayList<>();
-				if (list != null) sorted.addAll(list);
+				if (list != null) {
+					for (Map<String, Object> g : list) {
+						String gid0 = str(g, "_docId", str(g, "groupId", str(g, "id", "")));
+						// Only groups the user hasn't joined and didn't create.
+						if (mine.contains(gid0) || (!meUid.isEmpty() && meUid.equals(str(g, "creatorId", "")))) continue;
+						sorted.add(g);
+					}
+				}
 				Collections.sort(sorted, (a, b) ->
 				Double.compare(num(b, "trustScore"), num(a, "trustScore")));
 				getActivity().runOnUiThread(() -> {
@@ -921,19 +1051,20 @@ public class HomeFragmentActivity extends Fragment {
 						trust.setText(String.format(Locale.US, "Trust %.0f%%", ts));
 						if (join != null) {
 							join.setText("View");
+							final String joinGid = gid;
 							join.setOnClickListener(v -> {
-								_openTab(new DiscoverFragmentActivity(), R.id.menu_discover);
+								if (joinGid.isEmpty()) { _openTab(new DiscoverFragmentActivity(), R.id.menu_discover); return; }
+								Intent ji = new Intent(getContext(), GroupJoinRequestActivity.class);
+								ji.putExtra("groupId", joinGid);
+								startActivity(ji);
 							});
 						}
+						final String openGid = gid;
 						item.setOnClickListener(v -> {
-							if (getActivity() != null) {
-								com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = 
-								getActivity().findViewById(R.id.bottomnavigation1);
-								
-								if (bottomNav != null) {
-									bottomNav.setSelectedItemId(R.id.menu_groups);
-								}
-							}
+							if (openGid.isEmpty()) return;
+							Intent ji = new Intent(getContext(), GroupJoinRequestActivity.class);
+							ji.putExtra("groupId", openGid);
+							startActivity(ji);
 						});
 						linear_trending_groups.addView(item);
 					}
@@ -956,13 +1087,13 @@ public class HomeFragmentActivity extends Fragment {
 		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
 		Map<String, Object> cachedTotal = com.harvanna.app.offline.OfflineCacheManager.load(
 		getContext(), "total_saved_" + myUid);
-		if (cachedTotal != null && cachedTotal.get("ajc") instanceof Number) {
-			_applyTotalSaved(((Number) cachedTotal.get("ajc")).doubleValue());
+		if (cachedTotal != null && cachedTotal.get("harv") instanceof Number) {
+			_applyTotalSaved(((Number) cachedTotal.get("harv")).doubleValue());
 		}
 		
 		if (group_map_list.isEmpty()) {
 			if (cachedTotal == null && getActivity() != null) getActivity().runOnUiThread(() -> {
-				text_val_saved.setText("0 AJC");
+				text_val_saved.setText(("0 " + com.harvanna.app.CoinInfo.ticker()));
 				if (text_sub_saved != null) text_sub_saved.setText("No group savings yet");
 			});
 			return;
@@ -991,7 +1122,7 @@ public class HomeFragmentActivity extends Fragment {
 							String uid = str(pay, "memberUid", str(pay, "uid", ""));
 							if (!ok) continue;
 							if (!myUid.equals(uid)) continue;
-							double amt = num(pay, "amountAjc");
+							double amt = num(pay, "amountHarv");
 							if (amt <= 0) amt = num(pay, "amount");
 							total[0] += amt;
 						}
@@ -1018,7 +1149,7 @@ public class HomeFragmentActivity extends Fragment {
 			return;
 		}
 		Map<String, Object> toCache = new HashMap<>();
-		toCache.put("ajc", total);
+		toCache.put("harv", total);
 		com.harvanna.app.offline.OfflineCacheManager.save(getContext(), "total_saved_" + myUid, toCache);
 		_applyTotalSaved(total);
 	}
@@ -1069,9 +1200,9 @@ public class HomeFragmentActivity extends Fragment {
 							if (!"ACTIVE".equalsIgnoreCase(st)) continue;
 							if (!myUid.equals(borrower)) continue;
 							openCount[0]++;
-							double principal = num(loan, "principalAjc");
-							if (principal <= 0) principal = num(loan, "amountAjc");
-							double repaid = num(loan, "repaidAmountAjc");
+							double principal = num(loan, "principalHarv");
+							if (principal <= 0) principal = num(loan, "amountHarv");
+							double repaid = num(loan, "repaidAmountHarv");
 							outstandingTotal[0] += Math.max(0, principal - repaid);
 						}
 					}
@@ -1107,21 +1238,21 @@ public class HomeFragmentActivity extends Fragment {
 		_applyOpenLoans(count, outstanding);
 	}
 	
-	private void _applyOpenLoans(int count, double outstandingAjc) {
+	private void _applyOpenLoans(int count, double outstandingHarv) {
 		if (!isAdded() || getActivity() == null || text_val_loans == null) return;
 		getActivity().runOnUiThread(() -> {
 			text_val_loans.setText(String.valueOf(count));
 			if (text_sub_loans != null) {
 				text_sub_loans.setText(count == 0 ? "No open loans"
-				: _fmtAjc(outstandingAjc) + " outstanding");
+				: _fmtHarv(outstandingHarv) + " outstanding");
 			}
 		});
 	}
 	
-	private void _applyTotalSaved(double ajc) {
+	private void _applyTotalSaved(double harv) {
 		if (!isAdded() || getActivity() == null || text_val_saved == null) return;
 		getActivity().runOnUiThread(() -> {
-			text_val_saved.setText(_fmtAjc(ajc));
+			text_val_saved.setText(_fmtHarv(harv));
 			if (text_sub_saved != null) {
 				int n = group_map_list.size();
 				text_sub_saved.setText(n <= 0 ? "No group savings yet"
@@ -1130,12 +1261,12 @@ public class HomeFragmentActivity extends Fragment {
 		});
 	}
 	
-	private static String _fmtAjc(double v) {
+	private static String _fmtHarv(double v) {
 		try {
 			java.text.DecimalFormat df = new java.text.DecimalFormat("0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
-			return df.format(v) + " AJC";
+			return df.format(v) + (" " + com.harvanna.app.CoinInfo.ticker());
 		} catch (Exception e) {
-			return String.valueOf(v) + " AJC";
+			return String.valueOf(v) + (" " + com.harvanna.app.CoinInfo.ticker());
 		}
 	}
 	
@@ -1171,19 +1302,29 @@ public class HomeFragmentActivity extends Fragment {
 	// from Home instead of buried in the Assets tab. Uses existing activities only.
 	private void _addQuickActions(View root) {
 		try {
-			final android.widget.LinearLayout content = root.findViewById(R.id.linear2);
-			if (content == null || getContext() == null) return;
+			final MaterialCardView card = root.findViewById(R.id.cardview4);
+			final View top = root.findViewById(R.id.linear30);
+			if (card == null || top == null || getContext() == null) return;
 			final float d = getResources().getDisplayMetrics().density;
 			
+			// The wallet card now carries Send / Receive / Buy, below the balance.
 			android.widget.LinearLayout row = new android.widget.LinearLayout(getContext());
 			row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-			row.setPadding((int) (22 * d), 0, (int) (22 * d), (int) (12 * d));
-			
-			row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
+			row.setPadding((int) (10 * d), 0, (int) (10 * d), (int) (12 * d));
+						row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
 			row.addView(_quickAction(R.drawable.ic_action_receive, "Receive", ReceiveActivity.class), _quickActionParams(d, true));
 			row.addView(_quickAction(R.drawable.ic_action_buy, "Buy HARV", P2pMarketplaceActivity.class), _quickActionParams(d, true));
 			
-			content.addView(row, Math.min(1, content.getChildCount()));
+			card.removeView(top);
+			android.widget.LinearLayout box = new android.widget.LinearLayout(getContext());
+			box.setOrientation(android.widget.LinearLayout.VERTICAL);
+			box.addView(top);
+			box.addView(row);
+			card.addView(box, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			
+			// "Buy HARV (P2P)" is now the Buy action in the row.
+			View oldBuy = root.findViewById(R.id.linear224);
+			if (oldBuy != null) oldBuy.setVisibility(View.GONE);
 		} catch (Exception e) {
 			android.util.Log.w("HomeFragment", "Quick actions not added", e);
 		}
@@ -1199,12 +1340,12 @@ public class HomeFragmentActivity extends Fragment {
 		final float d = getResources().getDisplayMetrics().density;
 		android.widget.LinearLayout cell = new android.widget.LinearLayout(getContext());
 		cell.setOrientation(android.widget.LinearLayout.VERTICAL);
-		cell.setGravity(android.view.Gravity.CENTER);
-		cell.setPadding(0, (int) (14 * d), 0, (int) (12 * d));
-		cell.setBackgroundResource(R.drawable.bg_quick_action);
+		cell.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
+		cell.setPadding(0, (int) (10 * d), 0, (int) (8 * d));
+		cell.setBackgroundResource(R.drawable.bg_quick_action_hero);
 		cell.setClickable(true);
 		cell.setFocusable(true);
-		cell.setMinimumHeight((int) (84 * d));
+		cell.setMinimumHeight((int) (72 * d));
 		
 		android.widget.ImageView icon = new android.widget.ImageView(getContext());
 		icon.setImageResource(iconRes);
@@ -1212,15 +1353,18 @@ public class HomeFragmentActivity extends Fragment {
 		icon.setBackgroundResource(R.drawable.bg_quick_action_icon);
 		int pad = (int) (10 * d);
 		icon.setPadding(pad, pad, pad, pad);
-		cell.addView(icon, new android.widget.LinearLayout.LayoutParams((int) (44 * d), (int) (44 * d)));
+		android.widget.LinearLayout.LayoutParams ilp = new android.widget.LinearLayout.LayoutParams((int) (44 * d), (int) (44 * d));
+		ilp.gravity = android.view.Gravity.CENTER_HORIZONTAL;
+		cell.addView(icon, ilp);
 		
 		TextView tv = new TextView(getContext());
 		tv.setText(label);
 		tv.setTextSize(12.5f);
 		tv.setTypeface(null, android.graphics.Typeface.BOLD);
-		tv.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextPrimary));
+		tv.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextPrimaryWhite));
+		tv.setGravity(android.view.Gravity.CENTER);
 		tv.setPadding(0, (int) (8 * d), 0, 0);
-		cell.addView(tv);
+		cell.addView(tv, new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 		
 		cell.setContentDescription(label);
 		cell.setOnClickListener(v -> startActivity(new Intent(getContext(), target)));

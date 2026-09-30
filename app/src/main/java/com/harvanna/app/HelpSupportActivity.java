@@ -133,15 +133,15 @@ public class HelpSupportActivity extends AppCompatActivity {
 		}
 		rowContactEmail.setOnClickListener(v -> {
 			Intent intent = new Intent(Intent.ACTION_SENDTO);
-			intent.setData(Uri.parse("mailto:support@ajoo.app"));
-			intent.putExtra(Intent.EXTRA_SUBJECT, "Ajoo Support Request");
+			intent.setData(Uri.parse("mailto:support@harvanna.app"));
+			intent.putExtra(Intent.EXTRA_SUBJECT, "Harvanna Support Request");
 			try {
 				startActivity(intent);
 			} catch (Exception e) {
 				android.widget.Toast.makeText(this,
-				"No email app found. Reach us at support@ajoo.app", android.widget.Toast.LENGTH_LONG).show();
+				"No email app found. Reach us at support@harvanna.app", android.widget.Toast.LENGTH_LONG).show();
 			}
 		});
 	}
 	
-}
+}

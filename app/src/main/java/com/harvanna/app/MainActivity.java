@@ -234,18 +234,24 @@ public class MainActivity extends AppCompatActivity {
 		MenuItem menu2 = menu.add(Menu.NONE, 1, Menu.NONE, "Notification");
 		menu2.setIcon(R.drawable.icon_notifications_outline);
 		menu2.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		notifMenuItem = menu2;
+		_updateNotifBadge();
 		
 		MenuItem menu3 = menu.add(Menu.NONE, 2, Menu.NONE, "More");
 		menu3.setIcon(R.drawable.icon_more_vert_round);
 		menu3.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		
 		// Fetch the theme's adaptive text color
-		int iconColor = androidx.core.content.ContextCompat.getColor(this, R.color.colorAccent);
+		// Icons must contrast with the app bar (orange by day, charcoal by night), so use the bar's own "on" colour.
+		android.util.TypedValue tvOnBar = new android.util.TypedValue();
+		getTheme().resolveAttribute(R.attr.onAppBarColor, tvOnBar, true);
+		int iconColor = tvOnBar.data;
 		
 		// Mutate and apply the dynamic tint to the Notification icon
 		if (menu1.getIcon() != null) {
 			menu1.getIcon().mutate().setColorFilter(iconColor, android.graphics.PorterDuff.Mode.SRC_IN);
 		}
+		_updateNotifBadge();
 		
 		// Mutate and apply the dynamic tint to the More (dropdown) icon
 		if (menu2.getIcon() != null) {
@@ -258,6 +264,45 @@ public class MainActivity extends AppCompatActivity {
 		return super.onCreateOptionsMenu(menu);
 	}
 	
+	private MenuItem notifMenuItem;
+	private final Handler notifHandler = new Handler(Looper.getMainLooper());
+	private Runnable notifTick;
+	private final BroadcastReceiver notifChanged = new BroadcastReceiver() {
+		@Override public void onReceive(Context context, Intent intent) { _updateNotifBadge(); }
+	};
+	
+	/** Bell icon with a small count of unread notifications. */
+	private void _updateNotifBadge() {
+		if (notifMenuItem == null) return;
+		int n = com.harvanna.app.notify.NotificationCenter.unreadCount(this);
+		notifMenuItem.setTitle(n > 0 ? "Notification (" + n + " new)" : "Notification");
+		android.widget.FrameLayout f = new android.widget.FrameLayout(this);
+		int pad = (int) (12 * getResources().getDisplayMetrics().density);
+		android.widget.ImageView iv = new android.widget.ImageView(this);
+		iv.setImageResource(R.drawable.icon_notifications_outline);
+		android.util.TypedValue tvOnBar2 = new android.util.TypedValue();
+		getTheme().resolveAttribute(R.attr.onAppBarColor, tvOnBar2, true);
+		iv.setColorFilter(tvOnBar2.data);
+		iv.setPadding(pad, pad, pad, pad);
+		f.addView(iv, new android.widget.FrameLayout.LayoutParams(pad * 4, pad * 4));
+		if (n > 0) {
+			TextView b = new TextView(this);
+			b.setText(n > 99 ? "99+" : String.valueOf(n));
+			b.setTextSize(9);
+			b.setTextColor(android.graphics.Color.WHITE);
+			b.setGravity(android.view.Gravity.CENTER);
+			b.setBackgroundResource(R.drawable.dot_online);
+			b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(this, R.color.colorError)));
+			b.setTypeface(null, android.graphics.Typeface.BOLD);
+			int sz = (int) (16 * getResources().getDisplayMetrics().density);
+			android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(sz, sz, android.view.Gravity.TOP | android.view.Gravity.END);
+			lp.topMargin = pad / 2; lp.rightMargin = pad / 2;
+			f.addView(b, lp);
+		}
+		f.setOnClickListener(v -> startActivity(new Intent(this, com.harvanna.app.NotificationsActivity.class)));
+		notifMenuItem.setActionView(f);
+	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		final int _id = item.getItemId();
@@ -268,6 +313,9 @@ public class MainActivity extends AppCompatActivity {
 			scanIntent.putExtra(com.harvanna.app.ScanQrCodeActivity.EXTRA_MODE, com.harvanna.app.ScanQrCodeActivity.MODE_WALLET_ADDRESS);
 			startActivityForResult(scanIntent, RC_SCAN_TO_SEND);
 			
+		}
+		if (_id == 1) {
+			startActivity(new Intent(this, com.harvanna.app.NotificationsActivity.class));
 		}
 		if (_id == 2) {
 			// Pass the view ID of the button being clicked to anchor the menu to the right side of it
@@ -303,6 +351,14 @@ public class MainActivity extends AppCompatActivity {
 	}
 	
 	@Override
+	public void onPause() {
+		super.onPause();
+		com.harvanna.app.utils.PresenceHeartbeat.stop();
+		if (notifTick != null) notifHandler.removeCallbacks(notifTick);
+		try { androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(notifChanged); } catch (Exception ignored) { }
+	}
+	
+	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		try {
@@ -323,6 +379,18 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
+		com.harvanna.app.utils.PresenceHeartbeat.start(getApplicationContext());
+		com.harvanna.app.notify.NotificationWorker.schedule(getApplicationContext());
+		androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
+		.registerReceiver(notifChanged, new android.content.IntentFilter(com.harvanna.app.notify.NotificationCenter.ACTION_CHANGED));
+		_updateNotifBadge();
+		notifTick = new Runnable() {
+			@Override public void run() {
+				com.harvanna.app.notify.NotificationSync.run(getApplicationContext(), null);
+				notifHandler.postDelayed(this, 90_000L);
+			}
+		};
+		notifHandler.post(notifTick);
 		// Keep the local offline database from growing unbounded with data
 		// from groups the user's since left, stale discover snapshots, etc.
 		// Cheap no-op most of the time (only deletes rows older than a week).
@@ -588,7 +656,7 @@ public class MainActivity extends AppCompatActivity {
 			communityMechanicsList.add(a);
 			HashMap<String, Object> b = new HashMap<>();
 			b.put("title", "Invite friends");
-			b.put("desc", "Share Ajoo with someone");
+			b.put("desc", "Share Harvanna with someone");
 			communityMechanicsList.add(b);
 		}
 		if (securityFinanceList.isEmpty()) {
@@ -614,11 +682,11 @@ public class MainActivity extends AppCompatActivity {
 			systemLifecycleList.add(a);
 			HashMap<String, Object> b = new HashMap<>();
 			b.put("title", "Terms");
-			b.put("desc", "How Ajoo works");
+			b.put("desc", "How Harvanna works");
 			systemLifecycleList.add(b);
 			HashMap<String, Object> c = new HashMap<>();
 			c.put("title", "About");
-			c.put("desc", "Ajoo and AJC");
+			c.put("desc", ("Harvanna and " + com.harvanna.app.CoinInfo.ticker()));
 			systemLifecycleList.add(c);
 		}
 	}
@@ -639,6 +707,15 @@ public class MainActivity extends AppCompatActivity {
 		listView.requestLayout();
 	}
 	
+	private void _showVersionDialog() {
+		String v = "unknown";
+		try { v = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception ignored) { }
+		new androidx.appcompat.app.AlertDialog.Builder(this)
+			.setTitle("Harvanna")
+			.setMessage("You are on version " + v + ".\n\nThis build is installed directly, so new versions arrive as a new install from the team, not through an app store update.")
+			.setPositiveButton("OK", null).show();
+	}
+	
 	// Master Right-Side Sheet Engine with 100% Reliable Background Dim Layer
 	public void showRightDropdownMenu(View anchorView) {
 		if (anchorView == null) {
@@ -655,7 +732,7 @@ public class MainActivity extends AppCompatActivity {
 		Button button1 = popupView.findViewById(R.id.button1);
 		
 		// Mining settings removed from this app (mining now lives in the
-		// standalone Ajoo Node Miner app) — miningSettingsList is always
+		// standalone Harvanna Node Miner app) — miningSettingsList is always
 		// empty, so this row group is hidden entirely rather than shown
 		// with zero items. listview1 is also absent from custom_right_dropdown.
 		if (popupListView1 != null) popupListView1.setVisibility(View.GONE);
@@ -698,16 +775,43 @@ public class MainActivity extends AppCompatActivity {
 		if (popupListView4 != null) {
 			popupListView4.setAdapter(new Listview4Adapter(systemLifecycleList));
 			popupListView4.setOnItemClickListener((parent, view, position, id) -> {
-				if (position == 0) {
-					try {
-						popupWindow.dismiss();
+				popupWindow.dismiss();
+				try {
+					if (position == 0) {
 						startActivity(new android.content.Intent(MainActivity.this, SettingsActivity.class));
-					} catch (Exception e) {
-						Toast.makeText(getApplicationContext(), "Settings unavailable", Toast.LENGTH_SHORT).show();
+					} else if (position == 1) {
+						_showVersionDialog();
+					} else if (position == 2) {
+						startActivity(new android.content.Intent(MainActivity.this, DocumentViewerActivity.class).putExtra("doc_type", "terms"));
+					} else if (position == 3) {
+						startActivity(new android.content.Intent(MainActivity.this, AboutActivity.class));
 					}
+				} catch (Exception e) {
+					Toast.makeText(getApplicationContext(), "Couldn't open that screen", Toast.LENGTH_SHORT).show();
 				}
 			});
 		}
+		
+		if (popupListView2 != null) popupListView2.setOnItemClickListener((parent, view, position, id) -> {
+			popupWindow.dismiss();
+			if (position == 0) {
+				bottomnavigation1.setSelectedItemId(R.id.menu_groups);
+			} else if (position == 1) {
+				android.content.Intent share = new android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain");
+				share.putExtra(android.content.Intent.EXTRA_TEXT, "Join me on Harvanna: save together in groups and manage your " + com.harvanna.app.CoinInfo.ticker() + " wallet.");
+				startActivity(android.content.Intent.createChooser(share, "Invite friends"));
+			}
+		});
+		if (popupListView3 != null) popupListView3.setOnItemClickListener((parent, view, position, id) -> {
+			popupWindow.dismiss();
+			if (position == 0) {
+				try {
+					startActivity(new android.content.Intent(MainActivity.this, SecurityPinSettingsActivity.class));
+				} catch (Exception e) {
+					Toast.makeText(getApplicationContext(), "Security settings unavailable", Toast.LENGTH_SHORT).show();
+				}
+			}
+		});
 		
 		// Generate curved left-side background dynamically
 		int cornerRadius = (int) android.util.TypedValue.applyDimension(
@@ -717,7 +821,7 @@ public class MainActivity extends AppCompatActivity {
 		);
 		
 		GradientDrawable backgroundShape = new GradientDrawable();
-		backgroundShape.setColor(0xFFF1F5F9); 
+		backgroundShape.setColor(com.harvanna.app.utils.UiColors.surface());
 		backgroundShape.setCornerRadii(new float[] {
 			cornerRadius, cornerRadius, 
 			0, 0,                       
@@ -858,14 +962,15 @@ public class MainActivity extends AppCompatActivity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent != null && "com.harvanna.app.ACTION_WALLET_RECEIVED".equals(intent.getAction())) {
-				double amount = intent.getDoubleExtra("amount", 0.0);
-				String sender = intent.getStringExtra("sender");
+				double amount = intent.getDoubleExtra("EXTRA_AMOUNT", intent.getDoubleExtra("amount", 0.0));
+				String sender = intent.getStringExtra("EXTRA_SENDER");
+				if (sender == null) sender = intent.getStringExtra("sender");
 				
 				// Pass 4 arguments: Activity, Title, Message, Sender
 				com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
 				MainActivity.this, // Replace with your current Activity
 				"Incoming Transfer", 
-				"Received " + String.format(Locale.US, "%.5f", amount) + " AJC",
+				"Received " + String.format(Locale.US, "%.5f", amount) + (" " + com.harvanna.app.CoinInfo.ticker()),
 				sender
 				);
 			}

@@ -22,11 +22,11 @@ import java.util.Map;
  */
 public class WalletManager {
 	
-	private static final String PREF_NAME = "ajoo_secure_wallet";
+	private static final String PREF_NAME = "harvanna_secure_wallet";
 	
 	/**
 	 * Delegates to WalletGenerator — single source of truth for the initial
-	 * wallet document shape. Kept here too since AjooChainSdk and other call
+	 * wallet document shape. Kept here too since HarvannaChainSdk and other call
 	 * sites already reference WalletManager.createInitialWalletDoc().
 	 */	
 	public static Map<String, Object> createInitialWalletDoc(String address) {
@@ -96,7 +96,7 @@ public class WalletManager {
 		return SecureWalletStorage.loadPublicKey(context, address);
 	}
 	
-	public static void getAJCBalance(String address, FirestoreSyncManager.SyncCallback callback) {
+	public static void getHARVBalance(String address, FirestoreSyncManager.SyncCallback callback) {
 		FirestoreSyncManager.getDocument("WALLETS", address, callback);
 	}
 	
@@ -213,7 +213,7 @@ public class WalletManager {
 	
 	public static double getNativeBalance(Map<String, Object> walletDoc) {
 		if (walletDoc == null) return 0.0;
-		return ChainMath.toDouble(walletDoc.get("balance_ajc"));
+		return ChainMath.toDouble(walletDoc.get("balance_harv"));
 	}
 	
 	public static void getTokenBalances(String address, FirestoreSyncManager.SyncCallback callback) {
@@ -258,7 +258,7 @@ public class WalletManager {
 		if (context == null) return "";
 		
 		android.content.SharedPreferences prefs =
-		context.getSharedPreferences("ajc_wallet_prefs", android.content.Context.MODE_PRIVATE);
+		context.getSharedPreferences("harv_wallet_prefs", android.content.Context.MODE_PRIVATE);
 		
 		String address = prefs.getString("active_wallet_address", "");
 		if (address == null || address.trim().isEmpty()) {

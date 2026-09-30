@@ -612,6 +612,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		
 		tvWalletAddress.setText(expectedWallet.isEmpty() ? "No group wallet" : expectedWallet);
 		_refreshKeyStatus();
+		_buildBackupSection();
 		
 		// Apply Admin States
 		btnSaveSettings.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
@@ -1138,6 +1139,169 @@ public class GroupSettingsActivity extends AppCompatActivity {
 				});
 			}
 		}).start();
+	}
+	
+	private LinearLayout backupSection;
+	
+	/** New-phone recovery: download the group's published encrypted card, decrypt with the admin passphrase. */
+	private void _restoreFromCard() {
+		final ProgressDialog pd = ProgressDialog.show(this, null, "Fetching backup card…", true, false);
+		com.harvanna.app.group.GroupCardStore.fetch(this, groupId, new com.harvanna.app.group.GroupCardStore.Callback() {
+			@Override public void onSuccess(Map<String, Object> card) {
+				runOnUiThread(() -> {
+					pd.dismiss();
+					_askCardPassphrase(String.valueOf(card.get("qrPayload")));
+				});
+			}
+			@Override public void onError(String error) {
+				runOnUiThread(() -> {
+					pd.dismiss();
+					Toast.makeText(GroupSettingsActivity.this,
+						"No backup card found online. Use \"Restore group wallet\" with your 12 words instead.",
+						Toast.LENGTH_LONG).show();
+				});
+			}
+		});
+	}
+	
+	private void _askCardPassphrase(final String qrPayload) {
+		final EditText pass = new EditText(this);
+		pass.setHint("Access Card passphrase");
+		pass.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+		new androidx.appcompat.app.AlertDialog.Builder(this)
+			.setTitle("Restore from Access Card")
+			.setMessage("Enter the passphrase you chose when the card was created.")
+			.setView(pass)
+			.setNegativeButton("Cancel", null)
+			.setPositiveButton("Restore", (dlg, w) -> {
+				final String pw = pass.getText().toString();
+				final ProgressDialog pd = ProgressDialog.show(this, null, "Decrypting…", true, false);
+				new Thread(() -> {
+					try {
+						com.harvanna.app.wallet.HarvannaCardCrypto.DecryptResult r =
+							com.harvanna.app.wallet.HarvannaCardCrypto.decryptCardPayload(this, qrPayload, pw);
+						if (!r.success) throw new Exception(r.errorMessage);
+						String mnemonic = r.mnemonic;
+						String derived = WalletGenerator.deriveAddressFromMnemonic(mnemonic);
+						if (derived == null || !derived.equalsIgnoreCase(expectedWallet))
+							throw new Exception("This card doesn't match this group wallet.");
+						String priv = WalletGenerator.derivePrivateKey(mnemonic);
+						byte[] pub = Ed25519.publicKeyFromSeed(Base64.decode(priv, Base64.NO_WRAP));
+						SecureWalletStorage.saveMnemonic(this, expectedWallet, mnemonic);
+						WalletManager.saveKeysLocally(this, expectedWallet, priv, Base64.encodeToString(pub, Base64.NO_WRAP));
+						runOnUiThread(() -> {
+							pd.dismiss();
+							_refreshKeyStatus();
+							Toast.makeText(this, "Group wallet restored on this phone", Toast.LENGTH_LONG).show();
+						});
+					} catch (Exception e) {
+						runOnUiThread(() -> {
+							pd.dismiss();
+							Toast.makeText(this, "Restore failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+						});
+					}
+				}).start();
+			}).show();
+	}
+	
+	/**
+	 * Wallet Access Card backup. The admin (who holds the passphrase) can
+	 * create/replace the card, which is published encrypted to every member;
+	 * members can view, print and save it as a social backup.
+	 */
+	private void _buildBackupSection() {
+		if (expectedWallet.isEmpty() || !expectedWallet.startsWith("HV0x")) return;
+		ViewGroup host = (ViewGroup) btnRestoreWallet.getParent();
+		if (backupSection != null && backupSection.getParent() != null) {
+			((ViewGroup) backupSection.getParent()).removeView(backupSection);
+		}
+		backupSection = new LinearLayout(this);
+		backupSection.setOrientation(LinearLayout.VERTICAL);
+		float d = getResources().getDisplayMetrics().density;
+		backupSection.setPadding(0, (int) (12 * d), 0, 0);
+		
+		TextView title = new TextView(this);
+		title.setText("Wallet backup card");
+		title.setTextSize(14);
+		title.setTypeface(null, android.graphics.Typeface.BOLD);
+		title.setTextColor(UiColors.textPrimary());
+		backupSection.addView(title);
+		
+		TextView info = new TextView(this);
+		info.setText(isAdmin
+			? "Create an encrypted Access Card for this wallet. Members receive it as a backup but can't open it: only you know the passphrase."
+			: "The admin's encrypted backup card for this wallet. Print or save a copy; it can't move funds without the admin's passphrase.");
+		info.setTextSize(12);
+		info.setTextColor(UiColors.textSecondary());
+		info.setPadding(0, (int) (4 * d), 0, (int) (8 * d));
+		backupSection.addView(info);
+		
+		if (isAdmin) {
+			MaterialButton create = new MaterialButton(this);
+			create.setText("Create / replace Access Card");
+			create.setAllCaps(false);
+			create.setOnClickListener(v -> {
+				String mn = SecureWalletStorage.loadMnemonic(this, expectedWallet);
+				if (mn == null || mn.isEmpty()) {
+					Toast.makeText(this, "The group phrase isn't on this phone. Restore the group wallet first.", Toast.LENGTH_LONG).show();
+					return;
+				}
+				Intent i = new Intent(this, CreateHarvannaCardActivity.class);
+				i.putExtra(CreateHarvannaCardActivity.EXTRA_RAW_MNEMONIC, mn);
+				i.putExtra(CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, expectedWallet);
+				i.putExtra(CreateHarvannaCardActivity.EXTRA_LABEL, str(groupData, "groupName", ""));
+				i.putExtra(CreateHarvannaCardActivity.EXTRA_GROUP_ID, groupId);
+				startActivity(i);
+			});
+			backupSection.addView(create);
+		}
+		
+		if (isAdmin) {
+			MaterialButton chat = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+			chat.setText("Group chat link (WhatsApp, Telegram...)");
+			chat.setAllCaps(false);
+			chat.setOnClickListener(v -> com.harvanna.app.group.GroupChatConnector.edit(this, groupId));
+			backupSection.addView(chat);
+		}
+		
+		if (isAdmin) {
+			MaterialButton fromCard = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+			fromCard.setText("Restore wallet from Access Card (new phone)");
+			fromCard.setAllCaps(false);
+			fromCard.setOnClickListener(v -> com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(
+				GroupSettingsActivity.this, () -> _restoreFromCard()));
+			backupSection.addView(fromCard);
+		}
+		
+		MaterialButton view = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+		view.setText(isAdmin ? "Preview member copy" : "View, print or save backup card");
+		view.setAllCaps(false);
+		view.setOnClickListener(v -> {
+			Intent i = new Intent(this, com.harvanna.app.group.GroupWalletBackupActivity.class);
+			i.putExtra(com.harvanna.app.group.GroupWalletBackupActivity.EXTRA_GROUP_ID, groupId);
+			startActivity(i);
+		});
+		backupSection.addView(view);
+		
+		int idx = host.indexOfChild(btnRestoreWallet);
+		host.addView(backupSection, idx + 1);
+		
+		// Loans on/off: turns the group's Loans tab on or off for everyone.
+		Object al = groupData.get("allowLoans");
+		boolean loansOn = !(al instanceof Boolean) || (Boolean) al;
+		androidx.appcompat.widget.SwitchCompat loanSw = new androidx.appcompat.widget.SwitchCompat(this);
+		loanSw.setText("Allow member loans");
+		loanSw.setTextColor(UiColors.textPrimary());
+		loanSw.setChecked(loansOn);
+		loanSw.setEnabled(isAdmin);
+		loanSw.setPadding(0, (int) (12 * d), 0, 0);
+		loanSw.setOnCheckedChangeListener((b, on) -> {
+			if (!b.isPressed()) return;
+			Map<String, Object> patch = new HashMap<>();
+			patch.put("allowLoans", on);
+			_patch(patch, on ? "Loans enabled" : "Loans disabled");
+		});
+		if (!isRotating()) backupSection.addView(loanSw, 0);
 	}
 	
 	private void _refreshKeyStatus() {

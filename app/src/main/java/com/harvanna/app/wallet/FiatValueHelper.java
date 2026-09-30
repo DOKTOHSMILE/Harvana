@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * AJC has no external market price anywhere — no exchange lists it, no
- * price feed exists for it. The only real, honest source of "what is AJC
+ * HARV has no external market price anywhere — no exchange lists it, no
+ * price feed exists for it. The only real, honest source of "what is HARV
  * worth" is the P2P marketplace itself: real sellers setting real rates,
  * real buyers accepting them. This class defines "the" displayed rate as
  * the CHEAPEST currently-open unit price per currency — the best price a
@@ -51,12 +51,12 @@ public final class FiatValueHelper {
         error -> callback.onRate(cachedRates != null ? cachedRates.get(currencyCode) : null));
     }
 
-    public static void convertAjcToFiat(double ajcAmount, String currencyCode, ConvertCallback callback) {
+    public static void convertHarvToFiat(double harvAmount, String currencyCode, ConvertCallback callback) {
         getCheapestRate(currencyCode, rate -> {
             if (rate == null) {
                 callback.onConverted(0, false);
             } else {
-                callback.onConverted(ajcAmount * rate, true);
+                callback.onConverted(harvAmount * rate, true);
             }
         });
     }
@@ -77,8 +77,8 @@ public final class FiatValueHelper {
         // THE UPGRADE: explicitly SELL-side only — that's genuine supply
         // being offered at a real price, the actual market rate. A BUY
         // listing's price is just someone's bid/demand, not a reliable
-        // signal for what AJC is actually trading at.
-        com.harvanna.app.sync.AjooNodeClient.getP2POpenListings(0, 200, "SELL", new com.harvanna.app.sync.AjooNodeClient.JsonCallback() {
+        // signal for what HARV is actually trading at.
+        com.harvanna.app.sync.HarvannaNodeClient.getP2POpenListings(0, 200, "SELL", new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject result) {
                 JSONArray listings = result.optJSONArray("listings");

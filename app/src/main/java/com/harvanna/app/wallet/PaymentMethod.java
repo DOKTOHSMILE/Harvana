@@ -5,7 +5,7 @@ import org.json.JSONObject;
 
 /**
  * A saved payment method a person can receive fiat through when
- * selling AJC on the P2P marketplace. Deliberately maps onto the same
+ * selling HARV on the P2P marketplace. Deliberately maps onto the same
  * three string fields P2PTradeRouter.createListing() already signs
  * and sends to the node (bankName/accountNumber/accountName) — adding
  * a real "type" field to the signed transaction format would mean

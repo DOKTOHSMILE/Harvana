@@ -72,7 +72,7 @@ public final class GroupLoanManager {
     public static void applyForLoan(Context context,
                                     String groupId,
                                     String borrowerWallet,
-                                    double principalAjc,
+                                    double principalHarv,
                                     double interestRatePercent,
                                     String interestPeriod,
                                     String note,
@@ -82,7 +82,7 @@ public final class GroupLoanManager {
         String err = GroupValidation.firstError(
                 GroupValidation.requireUid(currentUid(), "Not signed in."),
                 GroupValidation.requireGroupId(groupId),
-                GroupValidation.requirePositiveAmount(principalAjc),
+                GroupValidation.requirePositiveAmount(principalHarv),
                 GroupValidation.requireValidWallet(borrowerWallet, "Borrower wallet")
         );
         if (err != null) {
@@ -98,7 +98,7 @@ public final class GroupLoanManager {
         loan.put("status", "PENDING");
         loan.put("borrowerUid", uid);
         loan.put("borrowerWallet", borrowerWallet.trim());
-        loan.put("principalAjc", principalAjc);
+        loan.put("principalHarv", principalHarv);
         loan.put("interestRate", interestRatePercent);
         loan.put("interestPeriod", period);
         loan.put("note", note != null ? note : "");
@@ -112,7 +112,7 @@ public final class GroupLoanManager {
                             GroupFirestoreManager.getInstance(context)
                                     .postSystemNotice(groupId, "Loan applied",
                                             memberName + " applied for a loan of "
-                                                    + com.harvanna.app.wallet.BalanceFormatter.smart(principalAjc));
+                                                    + com.harvanna.app.wallet.BalanceFormatter.smart(principalHarv));
                             callback.onSuccess("Loan application submitted.");
                         }
 
@@ -122,7 +122,7 @@ public final class GroupLoanManager {
                                 Map<String, Object> payload = new HashMap<>();
                                 payload.put("groupId", groupId);
                                 payload.put("borrowerWallet", borrowerWallet);
-                                payload.put("principalAjc", principalAjc);
+                                payload.put("principalHarv", principalHarv);
                                 payload.put("interestRatePercent", interestRatePercent);
                                 payload.put("interestPeriod", period);
                                 payload.put("note", note);
@@ -150,7 +150,7 @@ public final class GroupLoanManager {
                                           String loanId,
                                           String groupWalletAddress,
                                           String borrowerWallet,
-                                          double principalAjc,
+                                          double principalHarv,
                                           GroupPayoutManager.GroupWalletTransfer transferExecutor,
                                           Callback callback) {
         if (callback == null) return;
@@ -162,7 +162,7 @@ public final class GroupLoanManager {
                 GroupValidation.isBlank(loanId) ? "Missing loan id." : null,
                 GroupValidation.requireValidWallet(groupWalletAddress, "Group wallet"),
                 GroupValidation.requireValidWallet(borrowerWallet, "Borrower wallet"),
-                GroupValidation.requirePositiveAmount(principalAjc)
+                GroupValidation.requirePositiveAmount(principalHarv)
         );
         if (err != null) {
             callback.onError(err);
@@ -178,7 +178,7 @@ public final class GroupLoanManager {
             public void onSuccess(Map<String, Object> loanData) {
                 String borrowerUid = loanData != null && loanData.containsKey("borrowerUid") ? loanData.get("borrowerUid").toString() : "";
 
-                transferExecutor.transfer(groupWalletAddress, borrowerWallet, principalAjc,
+                transferExecutor.transfer(groupWalletAddress, borrowerWallet, principalHarv,
                         new GroupPayoutManager.Callback() {
                             @Override
                             public void onSuccess(String txRef) {
@@ -191,7 +191,7 @@ public final class GroupLoanManager {
                                 payment.put("loanId", loanId);
                                 payment.put("from", groupWalletAddress);
                                 payment.put("to", borrowerWallet);
-                                payment.put("amountAjc", principalAjc);
+                                payment.put("amountHarv", principalHarv);
                                 payment.put("adminUid", adminUid);
                                 payment.put("txRef", ref);
                                 payment.put("timestamp", now);
@@ -326,7 +326,7 @@ public final class GroupLoanManager {
                                        String loanId,
                                        String fromMemberWallet,
                                        String groupWalletAddress,
-                                       double amountAjc,
+                                       double amountHarv,
                                        String txRef,
                                        boolean markFullyRepaid,
                                        Callback callback) {
@@ -337,7 +337,7 @@ public final class GroupLoanManager {
                 GroupValidation.isBlank(loanId) ? "Missing loan id." : null,
                 GroupValidation.requireValidWallet(fromMemberWallet, "Member wallet"),
                 GroupValidation.requireValidWallet(groupWalletAddress, "Group wallet"),
-                GroupValidation.requirePositiveAmount(amountAjc)
+                GroupValidation.requirePositiveAmount(amountHarv)
         );
         if (err != null) {
             callback.onError(err);
@@ -360,7 +360,7 @@ public final class GroupLoanManager {
                     return;
                 }
 
-                double principal = _asDouble(loan.get("principalAjc"));
+                double principal = _asDouble(loan.get("principalHarv"));
                 double interestRate = _asDouble(loan.get("interestRate"));
                 String interestPeriod = loan.get("interestPeriod") != null
                         ? String.valueOf(loan.get("interestPeriod")) : "MONTHLY";
@@ -377,7 +377,7 @@ public final class GroupLoanManager {
                                 Object stObj = p.get("status");
                                 String st = stObj != null ? String.valueOf(stObj) : "";
                                 if (!st.isEmpty() && !"CONFIRMED".equalsIgnoreCase(st)) continue;
-                                alreadyRepaid += _asDouble(p.get("amountAjc"));
+                                alreadyRepaid += _asDouble(p.get("amountHarv"));
                             }
                         }
 
@@ -389,15 +389,15 @@ public final class GroupLoanManager {
                             return;
                         }
                         
-                        if (amountAjc > remainingDue + 0.0001) {
+                        if (amountHarv > remainingDue + 0.0001) {
                             callback.onError("Amount exceeds what's owed ("
-                                    + com.harvanna.app.wallet.BalanceFormatter.smart(remainingDue) + " AJC remaining).");
+                                    + com.harvanna.app.wallet.BalanceFormatter.smart(remainingDue) + (" " + com.harvanna.app.CoinInfo.ticker() + " remaining)."));
                             return;
                         }
 
-                        boolean fullyRepaid = amountAjc >= remainingDue - 0.0001;
+                        boolean fullyRepaid = amountHarv >= remainingDue - 0.0001;
                         _writeRepayment(context, fs, groupId, loanId, fromMemberWallet, groupWalletAddress,
-                                amountAjc, txRef, fullyRepaid, callback);
+                                amountHarv, txRef, fullyRepaid, callback);
                     }
 
                     @Override
@@ -425,7 +425,7 @@ public final class GroupLoanManager {
                                         String loanId,
                                         String fromMemberWallet,
                                         String groupWalletAddress,
-                                        double amountAjc,
+                                        double amountHarv,
                                         String txRef,
                                         boolean markFullyRepaid,
                                         Callback callback) {
@@ -438,7 +438,7 @@ public final class GroupLoanManager {
         payment.put("loanId", loanId);
         payment.put("from", fromMemberWallet.trim());
         payment.put("to", groupWalletAddress.trim());
-        payment.put("amountAjc", amountAjc);
+        payment.put("amountHarv", amountHarv);
         payment.put("txRef", ref);
         payment.put("timestamp", now);
         payment.put("confirmedAt", now);
@@ -472,7 +472,7 @@ public final class GroupLoanManager {
                     } else {
                         fs.postSystemNotice(groupId, "Loan repayment",
                                 memberName + " made a partial loan repayment of "
-                                        + com.harvanna.app.wallet.BalanceFormatter.smart(amountAjc) + ".");
+                                        + com.harvanna.app.wallet.BalanceFormatter.smart(amountHarv) + ".");
                         callback.onSuccess("Repayment recorded.");
                     }
                 });
@@ -490,11 +490,11 @@ public final class GroupLoanManager {
                                        String loanId,
                                        String fromMemberWallet,
                                        String groupWalletAddress,
-                                       double amountAjc,
+                                       double amountHarv,
                                        String txRef,
                                        Callback callback) {
         recordRepayment(context, groupId, loanId, fromMemberWallet, groupWalletAddress,
-                amountAjc, txRef, false, callback);
+                amountHarv, txRef, false, callback);
     }
 
     // ── List ─────────────────────────────────────────────────────────────
@@ -531,11 +531,11 @@ public final class GroupLoanManager {
         String loanId = _s(payload, "loanId");
         String fromWallet = _s(payload, "fromWallet");
         String groupWallet = _s(payload, "groupWallet");
-        double amountAjc = payload.get("amountAjc") instanceof Number ? ((Number) payload.get("amountAjc")).doubleValue() : 0;
+        double amountHarv = payload.get("amountHarv") instanceof Number ? ((Number) payload.get("amountHarv")).doubleValue() : 0;
         String txRef = _s(payload, "txRef");
         boolean markFullyRepaid = Boolean.TRUE.equals(payload.get("markFullyRepaid"));
 
-        recordRepayment(context, groupId, loanId, fromWallet, groupWallet, amountAjc, txRef, markFullyRepaid,
+        recordRepayment(context, groupId, loanId, fromWallet, groupWallet, amountHarv, txRef, markFullyRepaid,
                 new Callback() {
                     @Override public void onSuccess(String message) { if (callback != null) callback.onSuccess(); }
                     @Override public void onError(String error) { if (callback != null) callback.onError(error); }
@@ -546,12 +546,12 @@ public final class GroupLoanManager {
                                                 com.harvanna.app.offline.OfflineActionQueue.FlushCallback callback) {
         String groupId = _s(payload, "groupId");
         String borrowerWallet = _s(payload, "borrowerWallet");
-        double principalAjc = payload.get("principalAjc") instanceof Number ? ((Number) payload.get("principalAjc")).doubleValue() : 0;
+        double principalHarv = payload.get("principalHarv") instanceof Number ? ((Number) payload.get("principalHarv")).doubleValue() : 0;
         double interestRatePercent = payload.get("interestRatePercent") instanceof Number ? ((Number) payload.get("interestRatePercent")).doubleValue() : 0;
         String interestPeriod = _s(payload, "interestPeriod");
         String note = _s(payload, "note");
 
-        applyForLoan(context, groupId, borrowerWallet, principalAjc, interestRatePercent, interestPeriod, note, new Callback() {
+        applyForLoan(context, groupId, borrowerWallet, principalHarv, interestRatePercent, interestPeriod, note, new Callback() {
             @Override public void onSuccess(String message) { if (callback != null) callback.onSuccess(); }
             @Override public void onError(String error) { if (callback != null) callback.onError(error); }
         });

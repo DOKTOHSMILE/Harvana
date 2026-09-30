@@ -5,7 +5,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.harvanna.app.crypto.Ed25519;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.wallet.WalletManager;
 
 import org.json.JSONObject;
@@ -46,7 +46,7 @@ public final class P2PTradeRouter {
 	public static void createListing(Context context, String posterAddress, String side, long totalAmountRaw,
 	long minOrderAmountRaw, long maxOrderAmountRaw, long durationHours, long paymentWindowMinutes,
 	long unitPricePerHarvRaw, Callback callback) {
-		AjooNodeClient.getWallet(posterAddress, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getWallet(posterAddress, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
 				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
@@ -54,7 +54,7 @@ public final class P2PTradeRouter {
 				minOrderAmountRaw, maxOrderAmountRaw, durationHours, paymentWindowMinutes, unitPricePerHarvRaw, nonce);
 				
 				_signAndSubmit(context, posterAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
-				AjooNodeClient.submitP2PCreateListing(posterAddress, side, totalAmountRaw, minOrderAmountRaw,
+				HarvannaNodeClient.submitP2PCreateListing(posterAddress, side, totalAmountRaw, minOrderAmountRaw,
 				maxOrderAmountRaw, durationHours, paymentWindowMinutes, unitPricePerHarvRaw,
 				nonce, sigB64, pubKeyB64,
 				_wrap(cb)));
@@ -71,14 +71,14 @@ public final class P2PTradeRouter {
 	//   "P2P_CLAIM_PAYMENT:" + listingId + ":" + buyerAddress + ":" + amount + ":" + nonce
 	
 	public static void claimPayment(Context context, String listingId, String buyerAddress, long amountRaw, Callback callback) {
-		AjooNodeClient.getWallet(buyerAddress, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getWallet(buyerAddress, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
 				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String canonical = "P2P_CLAIM_PAYMENT:" + listingId + ":" + buyerAddress + ":" + amountRaw + ":" + nonce;
 				
 				_signAndSubmit(context, buyerAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
-				AjooNodeClient.submitP2PClaimPayment(listingId, buyerAddress, amountRaw, nonce, sigB64, pubKeyB64,
+				HarvannaNodeClient.submitP2PClaimPayment(listingId, buyerAddress, amountRaw, nonce, sigB64, pubKeyB64,
 				_wrap(cb)));
 			}
 			
@@ -94,14 +94,14 @@ public final class P2PTradeRouter {
 	//   "P2P_CONFIRM_RECEIVED:" + orderId + ":" + sellerAddress + ":" + nonce
 	
 	public static void markOrderPaid(Context context, String orderId, String buyerAddress, Callback callback) {
-		AjooNodeClient.getWallet(buyerAddress, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getWallet(buyerAddress, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
 				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String canonical = "P2P_MARK_PAID:" + orderId + ":" + buyerAddress + ":" + nonce;
 				
 				_signAndSubmit(context, buyerAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
-				AjooNodeClient.submitP2PMarkPaid(orderId, buyerAddress, nonce, sigB64, pubKeyB64,
+				HarvannaNodeClient.submitP2PMarkPaid(orderId, buyerAddress, nonce, sigB64, pubKeyB64,
 				_wrap(cb)));
 			}
 			
@@ -113,14 +113,14 @@ public final class P2PTradeRouter {
 	}
 	
 	public static void confirmReceived(Context context, String orderId, String sellerAddress, Callback callback) {
-		AjooNodeClient.getWallet(sellerAddress, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getWallet(sellerAddress, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
 				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String canonical = "P2P_CONFIRM_RECEIVED:" + orderId + ":" + sellerAddress + ":" + nonce;
 				
 				_signAndSubmit(context, sellerAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
-				AjooNodeClient.submitP2PConfirmReceived(orderId, sellerAddress, nonce, sigB64, pubKeyB64,
+				HarvannaNodeClient.submitP2PConfirmReceived(orderId, sellerAddress, nonce, sigB64, pubKeyB64,
 				_wrap(cb)));
 			}
 			
@@ -137,14 +137,14 @@ public final class P2PTradeRouter {
 	//   "P2P_CANCEL_LISTING:" + listingId + ":" + sellerAddress + ":" + nonce
 	
 	public static void cancelListing(Context context, String listingId, String sellerAddress, Callback callback) {
-		AjooNodeClient.getWallet(sellerAddress, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getWallet(sellerAddress, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
 				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String canonical = "P2P_CANCEL_LISTING:" + listingId + ":" + sellerAddress + ":" + nonce;
 				
 				_signAndSubmit(context, sellerAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
-				AjooNodeClient.submitP2PCancelListing(listingId, sellerAddress, nonce, sigB64, pubKeyB64,
+				HarvannaNodeClient.submitP2PCancelListing(listingId, sellerAddress, nonce, sigB64, pubKeyB64,
 				_wrap(cb)));
 			}
 			
@@ -164,7 +164,7 @@ public final class P2PTradeRouter {
 	
 	public static void raiseDispute(Context context, String orderId, String raiserAddress, String reason,
 	Callback callback) {
-		AjooNodeClient.getWallet(raiserAddress, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getWallet(raiserAddress, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
 				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
@@ -172,7 +172,7 @@ public final class P2PTradeRouter {
 				String canonical = "P2P_RAISE_DISPUTE:" + orderId + ":" + raiserAddress + ":" + safeReason + ":" + nonce;
 				
 				_signAndSubmit(context, raiserAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
-				AjooNodeClient.submitP2PRaiseDispute(orderId, raiserAddress, safeReason, nonce, sigB64, pubKeyB64,
+				HarvannaNodeClient.submitP2PRaiseDispute(orderId, raiserAddress, safeReason, nonce, sigB64, pubKeyB64,
 				_wrap(cb)));
 			}
 			
@@ -196,7 +196,7 @@ public final class P2PTradeRouter {
 		String canonical = "P2P_LIST_MINE:" + address + ":" + timestamp;
 		
 		_signAndSubmit(context, address, canonical, callback, (sigB64, pubKeyB64, cb) ->
-		AjooNodeClient.submitP2PListMine(address, timestamp, sigB64, pubKeyB64, _wrap(cb)));
+		HarvannaNodeClient.submitP2PListMine(address, timestamp, sigB64, pubKeyB64, _wrap(cb)));
 	}
 	
 	// ── Insured Trader deposit ────────────────────────────────────────────
@@ -204,14 +204,14 @@ public final class P2PTradeRouter {
 	//   "P2P_INSURANCE_DEPOSIT:" + traderAddress + ":" + amount + ":" + nonce
 	
 	public static void depositInsurance(Context context, String traderAddress, long amountRaw, Callback callback) {
-		AjooNodeClient.getWallet(traderAddress, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getWallet(traderAddress, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
 				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String canonical = "P2P_INSURANCE_DEPOSIT:" + traderAddress + ":" + amountRaw + ":" + nonce;
 				
 				_signAndSubmit(context, traderAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
-				AjooNodeClient.submitP2PInsuranceDeposit(traderAddress, amountRaw, nonce, sigB64, pubKeyB64,
+				HarvannaNodeClient.submitP2PInsuranceDeposit(traderAddress, amountRaw, nonce, sigB64, pubKeyB64,
 				_wrap(cb)));
 			}
 			
@@ -254,8 +254,8 @@ public final class P2PTradeRouter {
 		}
 	}
 	
-	private static AjooNodeClient.JsonCallback _wrap(Callback callback) {
-		return new AjooNodeClient.JsonCallback() {
+	private static HarvannaNodeClient.JsonCallback _wrap(Callback callback) {
+		return new HarvannaNodeClient.JsonCallback() {
 			@Override public void onSuccess(JSONObject result) { callback.onSuccess(result); }
 			@Override public void onError(String error) { callback.onError(error); }
 		};

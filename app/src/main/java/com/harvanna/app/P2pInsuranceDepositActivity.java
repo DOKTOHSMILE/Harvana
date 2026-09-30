@@ -43,7 +43,7 @@ import java.text.*;
 import java.util.*;
 import java.util.regex.*;
 import org.json.*;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.firestore.P2PTradeStatsManager;
 import com.harvanna.app.tx.P2PTradeRouter;
 import com.harvanna.app.wallet.BalanceFormatter;
@@ -302,7 +302,7 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 	public void _MORE() {
 	}
 	private String traderAddress = "";
-	private double availableBalanceAjc = 0.0;
+	private double availableBalanceHarv = 0.0;
 	private boolean meetsDepositThreshold = false;
 	private boolean hasCleanTrustRecord = false;
 	private boolean isVerified = false;
@@ -324,10 +324,10 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 		if (traderAddress == null || traderAddress.isEmpty()) return;
 		WalletNodeBridge.fetchLiveBalance(this, traderAddress, new WalletNodeBridge.BalanceCallback() {
 			@Override
-			public void onSuccess(double balanceAjc, long nonce, long blockHeight) {
+			public void onSuccess(double balanceHarv, long nonce, long blockHeight) {
 				runOnUiThread(() -> {
-					availableBalanceAjc = balanceAjc;
-					tv_available_balance.setText(BalanceFormatter.smart(balanceAjc));
+					availableBalanceHarv = balanceHarv;
+					tv_available_balance.setText(BalanceFormatter.smart(balanceHarv));
 				});
 			}
 			@Override
@@ -339,7 +339,7 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 	
 	private void _loadInsuranceStatus() {
 		if (traderAddress == null || traderAddress.isEmpty()) return;
-		AjooNodeClient.getP2PInsuranceStatus(traderAddress, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getP2PInsuranceStatus(traderAddress, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject json) {
 				boolean featureEnabled = json.optBoolean("insuranceFeatureEnabled", false);
@@ -354,10 +354,10 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 						_refreshOverallBadge();
 						return;
 					}
-					tv_current_deposit.setText(String.format(Locale.US, "%s AJC",
-					BalanceFormatter.smartDecimal(AjooNodeClient.toAjcDisplay(depositRaw))));
-					tv_required_minimum.setText(String.format(Locale.US, "%s AJC",
-					BalanceFormatter.smartDecimal(AjooNodeClient.toAjcDisplay(minRequiredRaw))));
+					tv_current_deposit.setText(String.format(Locale.US, ("%s " + com.harvanna.app.CoinInfo.ticker()),
+					BalanceFormatter.smartDecimal(HarvannaNodeClient.toHarvDisplay(depositRaw))));
+					tv_required_minimum.setText(String.format(Locale.US, ("%s " + com.harvanna.app.CoinInfo.ticker()),
+					BalanceFormatter.smartDecimal(HarvannaNodeClient.toHarvDisplay(minRequiredRaw))));
 					_refreshOverallBadge();
 				});
 			}
@@ -466,11 +466,11 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 	private void _submitDeposit() {
 		double amount = BalanceFormatter.parseUserInput(et_deposit_amount.getText().toString());
 		if (amount <= 0) {
-			_showError("Enter a valid AJC deposit amount.");
+			_showError(("Enter a valid " + com.harvanna.app.CoinInfo.ticker() + " deposit amount."));
 			return;
 		}
-		if (amount > availableBalanceAjc) {
-			_showError(String.format(Locale.US, "Insufficient balance. You only have %s AJC available.", BalanceFormatter.smartDecimal(availableBalanceAjc)));
+		if (amount > availableBalanceHarv) {
+			_showError(String.format(Locale.US, ("Insufficient balance. You only have %s " + com.harvanna.app.CoinInfo.ticker() + " available."), BalanceFormatter.smartDecimal(availableBalanceHarv)));
 			return;
 		}
 		
@@ -479,13 +479,13 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 			btn_submit_deposit.setEnabled(false);
 			btn_submit_deposit.setText("Locking Collateral…");
 			
-			long amountRaw = BalanceFormatter.ajcToRaw(amount);
+			long amountRaw = BalanceFormatter.harvToRaw(amount);
 			P2PTradeRouter.depositInsurance(this, traderAddress, amountRaw, new P2PTradeRouter.Callback() {
 				@Override
 				public void onSuccess(JSONObject result) {
 					runOnUiThread(() -> {
 						btn_submit_deposit.setEnabled(true);
-						btn_submit_deposit.setText("Deposit AJC");
+						btn_submit_deposit.setText(("Deposit " + com.harvanna.app.CoinInfo.ticker()));
 						et_deposit_amount.setText("");
 						_loadInsuranceStatus();
 						_loadBalance();
@@ -495,7 +495,7 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 				public void onError(String error) {
 					runOnUiThread(() -> {
 						btn_submit_deposit.setEnabled(true);
-						btn_submit_deposit.setText("Deposit AJC");
+						btn_submit_deposit.setText(("Deposit " + com.harvanna.app.CoinInfo.ticker()));
 						_showError("Deposit failed: " + error);
 					});
 				}

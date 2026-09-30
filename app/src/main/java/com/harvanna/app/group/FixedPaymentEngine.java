@@ -123,7 +123,7 @@ public final class FixedPaymentEngine {
         m.put("status", "PENDING");
         m.put("memberUid", memberUid != null ? memberUid : "");
         m.put("memberName", memberName != null ? memberName : "Member");
-        m.put("amountAjc", dailyAmount);
+        m.put("amountHarv", dailyAmount);
         m.put("day", day);
         m.put("monthKey", monthKey != null ? monthKey : currentMonthKey());
         m.put("txRef", txHash != null ? txHash : "");
@@ -165,14 +165,14 @@ public final class FixedPaymentEngine {
      * Month-close ledger entry: records the return of 30 days to the member.
      * Written when admin executes the actual transfer.
      */
-    public static Map<String, Object> monthCloseMemberPayout(String memberUid, double amountAjc,
+    public static Map<String, Object> monthCloseMemberPayout(String memberUid, double amountHarv,
                                                              String fromGroupWallet, String toMemberWallet,
                                                              String txRef, String monthKey) {
         Map<String, Object> m = new HashMap<>();
         m.put("type", "FIXED_MONTH_CLOSE");
         m.put("status", "CONFIRMED");
         m.put("memberUid", memberUid != null ? memberUid : "");
-        m.put("amountAjc", amountAjc);
+        m.put("amountHarv", amountHarv);
         m.put("from", fromGroupWallet != null ? fromGroupWallet : "");
         m.put("to", toMemberWallet != null ? toMemberWallet : "");
         m.put("txRef", txRef != null ? txRef : "");
@@ -186,13 +186,13 @@ public final class FixedPaymentEngine {
      * Month-close ledger entry: records the 1-day admin fee retained in the group wallet.
      * No on-chain transfer is required (funds already sit in the group wallet).
      */
-    public static Map<String, Object> monthCloseAdminFee(String memberUid, double feeAjc,
+    public static Map<String, Object> monthCloseAdminFee(String memberUid, double feeHarv,
                                                          String groupWallet, String monthKey) {
         Map<String, Object> m = new HashMap<>();
         m.put("type", "ADMIN_FEE");
         m.put("status", "CONFIRMED");
         m.put("memberUid", memberUid != null ? memberUid : "");
-        m.put("amountAjc", feeAjc);
+        m.put("amountHarv", feeHarv);
         m.put("from", groupWallet != null ? groupWallet : "");
         m.put("to", groupWallet != null ? groupWallet : ""); // retained
         m.put("monthKey", monthKey != null ? monthKey : currentMonthKey());

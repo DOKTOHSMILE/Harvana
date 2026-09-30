@@ -548,7 +548,47 @@ public class ProfileActivity extends AppCompatActivity {
 		tv_dob.setText(_str(data, "dob"));
 	}
 	
+	private TextView networkTrustView;
+	
+	/** Shows the node's own view of this wallet next to the app score, and lets the user link the wallet. */
+	private void _attachNetworkTrust() {
+		try {
+			final String addr = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
+			if (trustScoreProgress5 == null || !(trustScoreProgress5.getParent() instanceof ViewGroup)) return;
+			ViewGroup host = (ViewGroup) trustScoreProgress5.getParent();
+			if (networkTrustView == null) {
+				networkTrustView = new TextView(this);
+				networkTrustView.setTextSize(12);
+				networkTrustView.setTextColor(com.harvanna.app.utils.UiColors.textSecondary());
+				networkTrustView.setPadding(0, (int) (10 * getResources().getDisplayMetrics().density), 0, 0);
+				host.addView(networkTrustView);
+			}
+			if (addr == null || addr.isEmpty()) { networkTrustView.setText("Network trust: create a wallet to build a trust record on the network."); return; }
+			networkTrustView.setText("Network trust: checking…");
+			com.harvanna.app.sync.NodeLinkManager.ensureLinked(this, status -> _showNetworkTrust(addr, status));
+			_showNetworkTrust(addr, com.harvanna.app.sync.NodeLinkManager.cachedStatus(this, addr));
+		} catch (Exception ignored) { }
+	}
+	
+	private void _showNetworkTrust(String addr, String status) {
+		com.harvanna.app.sync.NodeIdentityClient.lookup(addr, new com.harvanna.app.sync.NodeIdentityClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject j) {
+				String line = "Network trust: " + j.optInt("trustScore", 0) + " / 26"
+					+ (j.optBoolean("bound") ? " · verified person" : " · not verified yet")
+					+ " · " + j.optInt("effectiveVouchCount", 0) + " vouch(es)";
+				if (status != null && !status.isEmpty()) line += "\n" + status;
+				final String f = line;
+				runOnUiThread(() -> networkTrustView.setText(f));
+			}
+			@Override public void onError(String e) {
+				runOnUiThread(() -> networkTrustView.setText("Network trust unavailable right now."
+					+ (status != null && !status.isEmpty() ? "\n" + status : "")));
+			}
+		});
+	}
+	
 	private void _loadTrustScore() {
+		_attachNetworkTrust();
 		// Offline-first: render the last computed trust score/tier/totals
 		// immediately — this whole card (ring, 4 sub-metrics, group/cycle
 		// counts, Total Saved, Total Loans) previously had zero fallback
@@ -568,8 +608,8 @@ public class ProfileActivity extends AppCompatActivity {
 				toCache.put("tenurePercent", r.tenurePercent);
 				toCache.put("totalGroups", r.totalGroups);
 				toCache.put("totalCyclesCompleted", r.totalCyclesCompleted);
-				toCache.put("totalAmountSavedAjc", r.totalAmountSavedAjc);
-				toCache.put("totalLoansTakenAjc", r.totalLoansTakenAjc);
+				toCache.put("totalAmountSavedHarv", r.totalAmountSavedHarv);
+				toCache.put("totalLoansTakenHarv", r.totalLoansTakenHarv);
 				toCache.put("tier", r.tier);
 				com.harvanna.app.offline.OfflineCacheManager.save(getApplicationContext(), "trust_score_" + uid, toCache);
 				
@@ -603,8 +643,8 @@ public class ProfileActivity extends AppCompatActivity {
 		int tenurePercent = r.get("tenurePercent") instanceof Number ? ((Number) r.get("tenurePercent")).intValue() : 0;
 		int totalGroups = r.get("totalGroups") instanceof Number ? ((Number) r.get("totalGroups")).intValue() : 0;
 		int totalCyclesCompleted = r.get("totalCyclesCompleted") instanceof Number ? ((Number) r.get("totalCyclesCompleted")).intValue() : 0;
-		double totalAmountSavedAjc = r.get("totalAmountSavedAjc") instanceof Number ? ((Number) r.get("totalAmountSavedAjc")).doubleValue() : 0;
-		double totalLoansTakenAjc = r.get("totalLoansTakenAjc") instanceof Number ? ((Number) r.get("totalLoansTakenAjc")).doubleValue() : 0;
+		double totalAmountSavedHarv = r.get("totalAmountSavedHarv") instanceof Number ? ((Number) r.get("totalAmountSavedHarv")).doubleValue() : 0;
+		double totalLoansTakenHarv = r.get("totalLoansTakenHarv") instanceof Number ? ((Number) r.get("totalLoansTakenHarv")).doubleValue() : 0;
 		String tier = r.get("tier") != null ? String.valueOf(r.get("tier")) : "Bronze";
 		
 		user_trust_score_textview5.setText(overallScore + "/100");
@@ -628,10 +668,10 @@ public class ProfileActivity extends AppCompatActivity {
 		TextView tvLoans = findViewById(R.id.tv_total_loans);
 		TextView tvSavedFiat = findViewById(R.id.tv_total_saved_fiat);
 		TextView tvLoansFiat = findViewById(R.id.tv_total_loans_fiat);
-		if (tvSaved != null) tvSaved.setText(com.harvanna.app.wallet.BalanceFormatter.smart(totalAmountSavedAjc));
-		if (tvLoans != null) tvLoans.setText(com.harvanna.app.wallet.BalanceFormatter.smart(totalLoansTakenAjc));
+		if (tvSaved != null) tvSaved.setText(com.harvanna.app.wallet.BalanceFormatter.smart(totalAmountSavedHarv));
+		if (tvLoans != null) tvLoans.setText(com.harvanna.app.wallet.BalanceFormatter.smart(totalLoansTakenHarv));
 		
-		// New — these figures previously showed AJC only, with no fiat
+		// New — these figures previously showed HARV only, with no fiat
 		// equivalent attempted at all. Real value now comes from
 		// FiatValueHelper's cheapest-open-P2P-listing rate, same source
 		// every other fiat display in the app uses.
@@ -640,14 +680,14 @@ public class ProfileActivity extends AppCompatActivity {
 		String currencyCode = com.harvanna.app.wallet.FiatValueHelper.symbolToCurrencyCode(currencySymbol);
 		
 		if (tvSavedFiat != null) {
-			com.harvanna.app.wallet.FiatValueHelper.convertAjcToFiat(totalAmountSavedAjc, currencyCode, (fiatValue, rateAvailable) -> {
+			com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(totalAmountSavedHarv, currencyCode, (fiatValue, rateAvailable) -> {
 				runOnUiThread(() -> tvSavedFiat.setText(rateAvailable
 				? String.format(java.util.Locale.US, "≈ %s%,.2f", currencySymbol, fiatValue)
 				: ""));
 			});
 		}
 		if (tvLoansFiat != null) {
-			com.harvanna.app.wallet.FiatValueHelper.convertAjcToFiat(totalLoansTakenAjc, currencyCode, (fiatValue, rateAvailable) -> {
+			com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(totalLoansTakenHarv, currencyCode, (fiatValue, rateAvailable) -> {
 				runOnUiThread(() -> tvLoansFiat.setText(rateAvailable
 				? String.format(java.util.Locale.US, "≈ %s%,.2f", currencySymbol, fiatValue)
 				: ""));

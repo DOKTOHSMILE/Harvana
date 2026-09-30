@@ -15,13 +15,13 @@ import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 
 /**
- * WebSocket client for the AJC node wallet channel — live push updates so
+ * WebSocket client for the HARV node wallet channel — live push updates so
  * balance/history don't wait for the next manual refresh.
  *
  * Connect: wss://harvannaprotocol.com/ws/wallet?address=HV0x<40hex>  +  Authorization: Bearer <node auth token>
  * (the node closes the socket if a token appears in the query string)
  * Requires a valid NodeAuthManager token — same one used by every REST
- * call in AjooNodeClient, fetched fresh via getValidToken() before the
+ * call in HarvannaNodeClient, fetched fresh via getValidToken() before the
  * socket opens (and again on every reconnect attempt).
  *
  * Message flow:
@@ -42,7 +42,7 @@ public class WalletSocketClient {
     public interface WalletSocketListener {
         /**
          * @param rawBalance  raw units (long) — same format as the REST endpoint,
-         *                    convert with AjooNodeClient.toAjcDisplay()
+         *                    convert with HarvannaNodeClient.toHarvDisplay()
          */
         void onBalanceUpdate(long rawBalance, long nonce, long blockHeight);
 

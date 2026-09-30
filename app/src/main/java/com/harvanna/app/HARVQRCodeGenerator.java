@@ -20,14 +20,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Ajoo-styled QR code generator.
+ * Harvanna-styled QR code generator.
  * Dark theme + emerald modules + optional center logo.
  */
-public class AJCQRCodeGenerator {
+public class HARVQRCodeGenerator {
 
-	private static final String TAG = "AJCQRCodeGenerator";
+	private static final String TAG = "HARVQRCodeGenerator";
 
-	// Ajoo colors
+	// Harvanna colors
 	private static final int COLOR_BG       = Color.parseColor("#0F1623"); // dark navy
 	private static final int COLOR_MODULE   = Color.parseColor("#10B981"); // emerald
 	private static final int COLOR_WHITE    = Color.WHITE;
@@ -53,7 +53,7 @@ public class AJCQRCodeGenerator {
 	 * @param text          content to encode
 	 * @param sizePx        final bitmap size
 	 * @param logo          center logo (can be null)
-	 * @param useWhiteStyle true = classic black/white, false = Ajoo dark+emerald
+	 * @param useWhiteStyle true = classic black/white, false = Harvanna dark+emerald
 	 */
 	public static Bitmap generateQRCode(String text, int sizePx, Bitmap logo, boolean useWhiteStyle) {
 		if (text == null || text.trim().isEmpty()) {
@@ -106,7 +106,7 @@ public class AJCQRCodeGenerator {
 	}
 
 	/**
-	 * Convenience: generate Ajoo-styled QR with app logo in the center.
+	 * Convenience: generate Harvanna-styled QR with app logo in the center.
 	 * Pass your logo drawable resource id (e.g. R.drawable.app_main_logo_2).
 	 */
 	public static Bitmap generateQRCodeWithLogo(Context context, String text, int sizePx, int logoResId) {

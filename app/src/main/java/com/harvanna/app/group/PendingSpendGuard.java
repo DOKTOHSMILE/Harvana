@@ -15,7 +15,7 @@ import android.content.SharedPreferences;
  * Stale windows are short: pure double-tap protection, not a 15-minute ban.
  */
 public final class PendingSpendGuard {
-    private static final String PREF = "ajoo_pending_spend";
+    private static final String PREF = "harvanna_pending_spend";
 
     /** While still signing / about to broadcast — block rapid double-taps. */
     private static final long RESERVE_STALE_MS = 60 * 1000L;          // 60s
@@ -25,7 +25,7 @@ public final class PendingSpendGuard {
 
     private PendingSpendGuard() {}
 
-    public static boolean tryReserve(Context ctx, String address, double amountAjc) {
+    public static boolean tryReserve(Context ctx, String address, double amountHarv) {
         if (ctx == null || address == null) return false;
         SharedPreferences p = ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE);
         String key = address.toLowerCase() + "_amt";
@@ -38,7 +38,7 @@ public final class PendingSpendGuard {
             return false;
         }
         p.edit()
-                .putFloat(key, (float) amountAjc)
+                .putFloat(key, (float) amountHarv)
                 .putLong(address.toLowerCase() + "_ts", System.currentTimeMillis())
                 .putString(address.toLowerCase() + "_phase", "reserve")
                 .remove(address.toLowerCase() + "_tx")
@@ -46,10 +46,10 @@ public final class PendingSpendGuard {
         return true;
     }
 
-    public static void markBroadcast(Context ctx, String address, double amountAjc, String txHash) {
+    public static void markBroadcast(Context ctx, String address, double amountHarv, String txHash) {
         if (ctx == null || address == null) return;
         ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit()
-                .putFloat(address.toLowerCase() + "_amt", (float) amountAjc)
+                .putFloat(address.toLowerCase() + "_amt", (float) amountHarv)
                 .putString(address.toLowerCase() + "_tx", txHash != null ? txHash : "")
                 .putString(address.toLowerCase() + "_phase", "broadcast")
                 .putLong(address.toLowerCase() + "_ts", System.currentTimeMillis())
@@ -68,7 +68,7 @@ public final class PendingSpendGuard {
     }
 
     /** @deprecated Use release(ctx, address) — amount is ignored. */
-    public static void release(Context ctx, String address, double amountAjc) {
+    public static void release(Context ctx, String address, double amountHarv) {
         release(ctx, address);
     }
 

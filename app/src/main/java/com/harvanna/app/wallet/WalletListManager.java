@@ -19,7 +19,7 @@ import java.util.List;
  * is purely that index (a small JSON array in SharedPreferences — no new
  * storage dependency) plus which one is currently active.
  *
- * "Active wallet" reuses the existing ajc_wallet_prefs/active_wallet_address
+ * "Active wallet" reuses the existing harv_wallet_prefs/active_wallet_address
  * key that WalletManager.getActiveWalletAddress() already reads — this
  * class doesn't introduce a second source of truth for that.
  *
@@ -30,7 +30,7 @@ import java.util.List;
  */
 public final class WalletListManager {
 
-    private static final String PREFS = "ajc_wallet_list_prefs";
+    private static final String PREFS = "harv_wallet_list_prefs";
     private static final String KEY_LIST = "wallet_list_json";
 
     private WalletListManager() {}
@@ -135,7 +135,7 @@ public final class WalletListManager {
      *  existing screen that checks the active wallet keeps working
      *  unchanged once this is called. */
     public static void setActiveWallet(Context context, String address) {
-        context.getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE)
+        context.getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE)
                 .edit()
                 .putString("active_wallet_address", address)
                 .putString("active_address", address)

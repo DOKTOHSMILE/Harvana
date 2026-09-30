@@ -49,7 +49,7 @@ public final class AddressMigration {
 
     private static List<String> collectLegacyAddresses(Context app) {
         List<String> found = new ArrayList<>();
-        SharedPreferences w = app.getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+        SharedPreferences w = app.getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
         for (String k : new String[]{"active_wallet_address", "wallet_address", "active_address"}) {
             addIfLegacy(found, w.getString(k, ""));
         }
@@ -108,7 +108,7 @@ public final class AddressMigration {
         }
 
         // 2. repoint everything that stores the address
-        SharedPreferences w = app.getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+        SharedPreferences w = app.getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor we = w.edit();
         for (String k : new String[]{"active_wallet_address", "wallet_address", "active_address"}) {
             if (old.equals(w.getString(k, "").trim())) we.putString(k, fresh);
@@ -119,7 +119,7 @@ public final class AddressMigration {
             ws.edit().putString("wallet_address", fresh).apply();
         }
         WalletListManager.replaceAddress(app, old, fresh);
-        app.getSharedPreferences("ajoo_wallet_cache", Context.MODE_PRIVATE).edit().remove(old).apply();
+        app.getSharedPreferences("harvanna_wallet_cache", Context.MODE_PRIVATE).edit().remove(old).apply();
 
         // 3. drop old key entries
         SecureWalletStorage.deleteWalletKeys(app, old);

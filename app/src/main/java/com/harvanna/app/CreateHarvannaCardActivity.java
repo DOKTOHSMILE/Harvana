@@ -47,7 +47,7 @@ import java.util.Map;
 import java.util.regex.*;
 import org.json.*;
 
-public class CreateAjooCardActivity extends AppCompatActivity {
+public class CreateHarvannaCardActivity extends AppCompatActivity {
 
   private AppBarLayout app_bar_layout1;
   private NestedScrollView vscroll1;
@@ -89,7 +89,7 @@ public class CreateAjooCardActivity extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle _savedInstanceState) {
     super.onCreate(_savedInstanceState);
-    setContentView(R.layout.create_ajoo_card);
+    setContentView(R.layout.create_harvanna_card);
     initialize(_savedInstanceState);
     FirebaseApp.initializeApp(this);
     initializeLogic();
@@ -279,6 +279,11 @@ public class CreateAjooCardActivity extends AppCompatActivity {
   public static final String EXTRA_LABEL = "label";
   public static final String EXTRA_MANDATORY = "mandatory";
   public static final String EXTRA_RAW_MNEMONIC = "raw_mnemonic";
+  /** When set, the encrypted card is also published privately to the group's members. */
+  public static final String EXTRA_GROUP_ID = "group_id";
+  public static final String EXTRA_RESULT_QR = "result_qr_payload";
+  public static final String EXTRA_RESULT_DIGITS = "result_digit_code";
+  public static final String EXTRA_RESULT_TEMPLATE = "result_template";
   public static final String EXTRA_RESULT_CARD_SAVED = "card_saved";
 
   private String mnemonic;
@@ -288,11 +293,14 @@ public class CreateAjooCardActivity extends AppCompatActivity {
   private boolean cardHasBeenSaved = false;
   private CardTemplate selectedTemplate = CardTemplate.CLASSIC;
 
+  private String lastQrPayload;
+  private String lastDigitCode;
+
   private Bitmap generatedFrontBitmap;
   private Bitmap generatedBackBitmap;
 
   private void tintSwatches() {
-    swatch_classic.setColorFilter(Color.parseColor("#000E1F"), PorterDuff.Mode.SRC_IN);
+    swatch_classic.setColorFilter(Color.parseColor("#111827"), PorterDuff.Mode.SRC_IN);
     swatch_obsidian.setColorFilter(Color.parseColor("#0A0A0A"), PorterDuff.Mode.SRC_IN);
     swatch_gold.setColorFilter(Color.parseColor("#FFC107"), PorterDuff.Mode.SRC_IN);
     swatch_oasis.setColorFilter(Color.parseColor("#FFD180"), PorterDuff.Mode.SRC_IN);
@@ -312,7 +320,7 @@ public class CreateAjooCardActivity extends AppCompatActivity {
       return;
     }
     new AlertDialog.Builder(this).setTitle("Skip the backup card?").setMessage(
-        "Without a saved Ajoo Access Card, this wallet has no backup yet. If you lose this device, the funds are gone. Are you sure you want to cancel wallet creation?")
+        "Without a saved Harvanna Access Card, this wallet has no backup yet. If you lose this device, the funds are gone. Are you sure you want to cancel wallet creation?")
         .setPositiveButton("Cancel Wallet Creation", (d, w) -> {
           setResult(RESULT_CANCELED);
           super.onBackPressed();
@@ -322,6 +330,9 @@ public class CreateAjooCardActivity extends AppCompatActivity {
   private void finishSuccessfully() {
     Intent result = new Intent();
     result.putExtra(EXTRA_RESULT_CARD_SAVED, cardHasBeenSaved);
+    result.putExtra(EXTRA_RESULT_QR, lastQrPayload);
+    result.putExtra(EXTRA_RESULT_DIGITS, lastDigitCode);
+    result.putExtra(EXTRA_RESULT_TEMPLATE, selectedTemplate.name());
     setResult(RESULT_OK, result);
     finish();
   }
@@ -350,9 +361,9 @@ public class CreateAjooCardActivity extends AppCompatActivity {
   private void updateGenerateButtonState() {
     String password = et_sentence.getText().toString();
     int len = password.trim().length();
-    tv_char_count.setText(len + " / " + AjooCardCrypto.MIN_PASSWORD_LENGTH + " characters minimum");
+    tv_char_count.setText(len + " / " + HarvannaCardCrypto.MIN_PASSWORD_LENGTH + " characters minimum");
 
-    boolean longEnough = len >= AjooCardCrypto.MIN_PASSWORD_LENGTH;
+    boolean longEnough = len >= HarvannaCardCrypto.MIN_PASSWORD_LENGTH;
     boolean matches = password.equals(et_confirm_sentence.getText().toString())
         && !et_confirm_sentence.getText().toString().isEmpty();
 
@@ -365,7 +376,7 @@ public class CreateAjooCardActivity extends AppCompatActivity {
     }
 
     if (!longEnough) {
-      tv_error.setText("Keep going — needs to be at least " + AjooCardCrypto.MIN_PASSWORD_LENGTH
+      tv_error.setText("Keep going — needs to be at least " + HarvannaCardCrypto.MIN_PASSWORD_LENGTH
           + " characters.");
       tv_error.setVisibility(View.VISIBLE);
     } else if (!matches) {
@@ -383,12 +394,12 @@ public class CreateAjooCardActivity extends AppCompatActivity {
 
     new Thread(() -> {
       try {
-        String qrPayload = AjooCardCrypto.encryptToQrString(this, mnemonic, password);
-        String digitCode = AjooCardCrypto.encryptToDigitCode(this, mnemonic, password);
+        String qrPayload = HarvannaCardCrypto.encryptToQrString(this, mnemonic, password);
+        String digitCode = HarvannaCardCrypto.encryptToDigitCode(this, mnemonic, password);
 
-        Bitmap front = AjooCardRenderer.renderFront(this, selectedTemplate, walletAddress,
+        Bitmap front = HarvannaCardRenderer.renderFront(this, selectedTemplate, walletAddress,
             cardOwnerName);
-        Bitmap back = AjooCardRenderer.renderBack(this, selectedTemplate, qrPayload, digitCode);
+        Bitmap back = HarvannaCardRenderer.renderBack(this, selectedTemplate, qrPayload, digitCode);
 
         runOnUiThread(() -> {
           generatedFrontBitmap = front;
@@ -401,17 +412,20 @@ public class CreateAjooCardActivity extends AppCompatActivity {
           btn_save_pdf.setVisibility(View.VISIBLE);
           btn_generate.setEnabled(true);
           btn_generate.setText("REGENERATE CARD");
+          lastQrPayload = qrPayload;
+          lastDigitCode = digitCode;
+          publishToGroup(qrPayload, digitCode);
           SketchwareUtil.showMessage(getApplicationContext(),
               "Card ready. Save it now — you'll need the password to restore later.");
         });
-      } catch (AjooCardCrypto.ValidationException ve) {
+      } catch (HarvannaCardCrypto.ValidationException ve) {
         runOnUiThread(() -> {
           btn_generate.setEnabled(true);
           btn_generate.setText("GENERATE CARD");
           SketchwareUtil.showMessage(getApplicationContext(), ve.getMessage());
         });
       } catch (Exception e) {
-        Log.e("CreateAjooCard", "Card generation failed", e);
+        Log.e("CreateHarvannaCard", "Card generation failed", e);
         final String detail = e.getMessage() != null ? e.getMessage()
             : e.getClass().getSimpleName();
         runOnUiThread(() -> {
@@ -422,6 +436,19 @@ public class CreateAjooCardActivity extends AppCompatActivity {
         });
       }
     }).start();
+  }
+
+  private void publishToGroup(String qrPayload, String digitCode) {
+    String gid = getIntent().getStringExtra(EXTRA_GROUP_ID);
+    if (gid == null || gid.isEmpty()) return;
+    com.google.firebase.auth.FirebaseUser u =
+        com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+    com.harvanna.app.group.GroupCardStore.publish(this, gid, walletAddress,
+        getIntent().getStringExtra(EXTRA_LABEL), selectedTemplate.name(), qrPayload, digitCode,
+        u == null ? "" : u.getUid(), published -> runOnUiThread(() ->
+            SketchwareUtil.showMessage(getApplicationContext(), published
+                ? "Encrypted card shared with group members as a backup."
+                : "Couldn't share with members yet — will retry automatically.")));
   }
 
   private void markSavedAndUnlockDone() {
@@ -437,12 +464,12 @@ public class CreateAjooCardActivity extends AppCompatActivity {
       return;
     long stamp = System.currentTimeMillis();
 
-    AjooCardRenderer.saveAsPng(this, generatedFrontBitmap, "ajoo-card-front-" + stamp,
-        new AjooCardRenderer.ExportCallback() {
+    HarvannaCardRenderer.saveAsPng(this, generatedFrontBitmap, "harvanna-card-front-" + stamp,
+        new HarvannaCardRenderer.ExportCallback() {
           @Override
           public void onSuccess(android.net.Uri savedUri) {
             runOnUiThread(() -> {
-              SketchwareUtil.showMessage(getApplicationContext(), "Front saved to Pictures/Ajoo");
+              SketchwareUtil.showMessage(getApplicationContext(), "Front saved to Pictures/Harvanna");
               markSavedAndUnlockDone();
             });
           }
@@ -454,12 +481,12 @@ public class CreateAjooCardActivity extends AppCompatActivity {
           }
         });
 
-    AjooCardRenderer.saveAsPng(this, generatedBackBitmap, "ajoo-card-back-" + stamp,
-        new AjooCardRenderer.ExportCallback() {
+    HarvannaCardRenderer.saveAsPng(this, generatedBackBitmap, "harvanna-card-back-" + stamp,
+        new HarvannaCardRenderer.ExportCallback() {
           @Override
           public void onSuccess(android.net.Uri savedUri) {
             runOnUiThread(() -> {
-              SketchwareUtil.showMessage(getApplicationContext(), "Back saved to Pictures/Ajoo");
+              SketchwareUtil.showMessage(getApplicationContext(), "Back saved to Pictures/Harvanna");
               markSavedAndUnlockDone();
             });
           }
@@ -475,14 +502,14 @@ public class CreateAjooCardActivity extends AppCompatActivity {
   private void onSavePdfClicked() {
     if (generatedFrontBitmap == null || generatedBackBitmap == null)
       return;
-    String name = "ajoo-access-card-" + System.currentTimeMillis();
-    AjooCardRenderer.saveAsPdf(this, generatedFrontBitmap, generatedBackBitmap, name,
-        new AjooCardRenderer.ExportCallback() {
+    String name = "harvanna-access-card-" + System.currentTimeMillis();
+    HarvannaCardRenderer.saveAsPdf(this, generatedFrontBitmap, generatedBackBitmap, name,
+        new HarvannaCardRenderer.ExportCallback() {
           @Override
           public void onSuccess(android.net.Uri savedUri) {
             runOnUiThread(() -> {
               SketchwareUtil.showMessage(getApplicationContext(),
-                  "Saved to Downloads/Ajoo — 2 pages");
+                  "Saved to Downloads/Harvanna — 2 pages");
               markSavedAndUnlockDone();
             });
           }

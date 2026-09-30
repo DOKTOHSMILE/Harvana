@@ -191,7 +191,7 @@ public class SettingsActivity extends AppCompatActivity {
 	private LinearLayout linear36;
 	private LinearLayout rowHelpSupport;
 	private View view38;
-	private LinearLayout rowAboutAjoo;
+	private LinearLayout rowAboutHarvanna;
 	private View view40;
 	private LinearLayout rowTermsConditions;
 	private View view42;
@@ -376,7 +376,7 @@ public class SettingsActivity extends AppCompatActivity {
 		linear36 = findViewById(R.id.linear36);
 		rowHelpSupport = findViewById(R.id.rowHelpSupport);
 		view38 = findViewById(R.id.view38);
-		rowAboutAjoo = findViewById(R.id.rowAboutAjoo);
+		rowAboutHarvanna = findViewById(R.id.rowAboutHarvanna);
 		view40 = findViewById(R.id.view40);
 		rowTermsConditions = findViewById(R.id.rowTermsConditions);
 		view42 = findViewById(R.id.view42);
@@ -459,7 +459,7 @@ public class SettingsActivity extends AppCompatActivity {
 		_tintRowIcon(rowDataStorage, violet);
 		
 		_tintRowIcon(rowHelpSupport, muted);
-		_tintRowIcon(rowAboutAjoo, muted);
+		_tintRowIcon(rowAboutHarvanna, muted);
 		_tintRowIcon(rowTermsConditions, muted);
 		
 		_tintRowIcon(rowLogOut, red);
@@ -510,7 +510,7 @@ public class SettingsActivity extends AppCompatActivity {
 		double trustScore = _num(data, "trust_score");
 		
 		String fullName = (firstName + " " + lastName).trim();
-		tvSettingsName.setText(fullName.isEmpty() ? "Ajoo Member" : fullName);
+		tvSettingsName.setText(fullName.isEmpty() ? "Harvanna Member" : fullName);
 		
 		if (!firstName.isEmpty()) {
 			tvSettingsHandle.setText("@" + firstName.toLowerCase());
@@ -547,8 +547,7 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _bindCurrentValues() {
-		boolean isLight = ThemeManager.isLightMode(this);
-		tvThemeValue.setText(isLight ? "Light mode" : "Dark mode");
+		tvThemeValue.setText(ThemeManager.label(this));
 		
 		SharedPreferences currencySp = getSharedPreferences("currencysp", Activity.MODE_PRIVATE);
 		String currency = currencySp.getString("currency", "₦");
@@ -576,7 +575,7 @@ public class SettingsActivity extends AppCompatActivity {
 		rowEditProfile.setOnClickListener(v -> _openActivity(EditProfileActivity.class));
 		rowAccountInfo.setOnClickListener(v -> _openActivity(EditProfileActivity.class));
 		rowSecurityPrivacy.setOnClickListener(v -> _openActivity(SecurityPinSettingsActivity.class));
-		rowAboutAjoo.setOnClickListener(v -> _openActivity(AboutActivity.class));
+		rowAboutHarvanna.setOnClickListener(v -> _openActivity(AboutActivity.class));
 		rowTermsConditions.setOnClickListener(v -> _openActivity(DocumentViewerActivity.class));
 		
 		rowGroupsCircles.setOnClickListener(v -> {
@@ -667,17 +666,16 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _showThemePicker() {
+		String mode = ThemeManager.getMode(this);
+		int checked = "light".equals(mode) ? 1 : "dark".equals(mode) ? 2 : 0;
 		new androidx.appcompat.app.AlertDialog.Builder(this)
-		.setTitle("Theme")
-		.setSingleChoiceItems(new String[]{"Light", "Dark"},
-		ThemeManager.isLightMode(this) ? 0 : 1, (dialog, which) -> {
-			if (which == 0) {
-				ThemeManager.setLightMode(this);
-			} else {
-				ThemeManager.setDarkMode(this);
-			}
+		.setTitle("Appearance")
+		.setSingleChoiceItems(new String[]{"Follow system", "Light", "Dark"}, checked, (dialog, which) -> {
+			// The whole app re-themes immediately: AppCompat restarts every open screen in the new mode.
+			if (which == 1) ThemeManager.setLightMode(this);
+			else if (which == 2) ThemeManager.setDarkMode(this);
+			else ThemeManager.setSystemMode(this);
 			dialog.dismiss();
-			recreate();
 		})
 		.setNegativeButton("Cancel", null)
 		.show();

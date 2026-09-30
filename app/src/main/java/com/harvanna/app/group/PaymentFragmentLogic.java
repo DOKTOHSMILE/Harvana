@@ -30,7 +30,7 @@ public class PaymentFragmentLogic {
     }
 
     public void setGroupId(String id) { groupId = id != null ? id : ""; }
-    public void setContribution(double ajc) { contributionAmount = ajc; }
+    public void setContribution(double harv) { contributionAmount = harv; }
     public void setMySlot(int slot) { mySlot = slot; }
 
     public void load(TextView myLabel, TextView myAmount, TextView myDue,
@@ -87,7 +87,7 @@ public class PaymentFragmentLogic {
             Map<String, Object> p = items.get(pos);
             if (h.name != null) h.name.setText(str(p, "to", str(p, "memberName", "Member")));
             if (h.meta != null) h.meta.setText(str(p, "type", "PAYMENT") + " · " + str(p, "status", ""));
-            double amt = num(p, "amountAjc", 0);
+            double amt = num(p, "amountHarv", 0);
             if (h.amount != null) h.amount.setText(com.harvanna.app.wallet.BalanceFormatter.smart(amt));
             if (h.status != null) h.status.setText(str(p, "status", "—"));
         }

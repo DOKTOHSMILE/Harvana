@@ -49,8 +49,8 @@ public class TrustScoreEngine {
 		public int reportCount;
 		public int totalGroups;
 		public int totalCyclesCompleted;
-		public double totalLoansTakenAjc;
-		public double totalAmountSavedAjc;
+		public double totalLoansTakenHarv;
+		public double totalAmountSavedHarv;
 		public String tier; // Bronze/Silver/Gold/Platinum, derived from overallScore
 	}
 	
@@ -292,7 +292,7 @@ public class TrustScoreEngine {
 							boolean confirmed = "CONFIRMED".equalsIgnoreCase(status) || "PAID".equalsIgnoreCase(status);
 							if (confirmed) {
 								myConfirmed++;
-								double amt = _num(p, "amountAjc");
+								double amt = _num(p, "amountHarv");
 								synchronized (remaining) { totalAmountSaved[0] += amt; }
 								long round = (long) _num(p, "round");
 								if (round <= 0) round = (long) _num(p, "day");
@@ -339,7 +339,7 @@ public class TrustScoreEngine {
 							boolean actuallyTaken = "ACTIVE".equalsIgnoreCase(status)
 							|| "REPAID".equalsIgnoreCase(status);
 							if (!actuallyTaken) continue;
-							double principal = _num(l, "principalAjc");
+							double principal = _num(l, "principalHarv");
 							synchronized (remaining) { totalLoansTaken[0] += principal; }
 						}
 					}
@@ -357,8 +357,8 @@ public class TrustScoreEngine {
 	double totalAmountSaved, int cyclesCompleted) {
 		Result r = new Result();
 		r.totalGroups = totalGroups;
-		r.totalLoansTakenAjc = totalLoansTaken;
-		r.totalAmountSavedAjc = totalAmountSaved;
+		r.totalLoansTakenHarv = totalLoansTaken;
+		r.totalAmountSavedHarv = totalAmountSaved;
 		r.totalCyclesCompleted = cyclesCompleted;
 		r.verified = verified;
 		r.profileCompletenessPercent = profileCompletenessPercent;

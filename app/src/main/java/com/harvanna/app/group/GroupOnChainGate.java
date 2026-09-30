@@ -2,7 +2,7 @@ package com.harvanna.app.group;
 
 import android.util.Log;
 
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 
 import org.json.JSONObject;
 
@@ -33,7 +33,7 @@ public final class GroupOnChainGate {
             return;
         }
         final String hash = txRef.trim();
-        AjooNodeClient.getTxStatus(hash, new AjooNodeClient.JsonCallback() {
+        HarvannaNodeClient.getTxStatus(hash, new HarvannaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject json) {
                 String status = json.optString("status", json.optString("state", ""));

@@ -18,11 +18,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Calls Ajoo Cloud Functions for join approve / reject / vote.
+ * Calls Harvanna Cloud Functions for join approve / reject / vote.
  * Server runs admission + vote threshold inside transactions so
  * membersCount and race conditions stay correct.
  *
- * Deploy functions first (see ajoo_functions/). Until deploy succeeds,
+ * Deploy functions first (see harvanna_functions/). Until deploy succeeds,
  * callers should fall back to the local JoinRequestManager path.
  */
 public final class GroupCloudFunctions {

@@ -332,6 +332,8 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		
 		_setupTabs();
 		_wireGroupLogic();
+		int startTab = getIntent().getIntExtra("tab", -1);
+		if (startTab >= 0 && view_pager != null) view_pager.setCurrentItem(startTab);
 		if (btn_group_overflow != null) {
 			btn_group_overflow.setOnClickListener(v -> {
 				Intent i = new Intent(getApplicationContext(), GroupSettingsActivity.class);
@@ -355,15 +357,33 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		
 		public void setTabCount(int tabCount) {
 			this.tabCount = tabCount;
+			pages.clear();
+			for (int i = 0; i < tabCount; i++) pages.add(i);
 		}
+		
+		final java.util.List<Integer> pages = new java.util.ArrayList<>();
+		
+		/** Groups created with loans switched off don't get a Loans tab at all. */
+		void setLoansEnabled(boolean enabled) {
+			boolean has = pages.contains(3);
+			if (enabled == has) return;
+			if (enabled) pages.add(3, 3); else pages.remove(Integer.valueOf(3));
+			notifyDataSetChanged();
+		}
+		
+		int positionOfPage(int page) { return pages.indexOf(page); }
+		
+		@Override
+		public int getItemPosition(Object object) { return POSITION_NONE; }
 		
 		@Override
 		public int getCount() {
-			return tabCount;
+			return pages.size();
 		}
 		
 		@Override
-		public CharSequence getPageTitle(int _position) {
+		public CharSequence getPageTitle(int _index) {
+			int _position = pages.get(_index);
 			if (_position == 0) return "Overview";
 			if (_position == 1) return "Members";
 			if (_position == 2) return "Payments";
@@ -375,7 +395,8 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		
 		
 		@Override
-		public Fragment getItem(int _position) {
+		public Fragment getItem(int _index) {
+			int _position = pages.get(_index);
 			Bundle args = new Bundle();
 			args.putString("groupId", groupId);
 			
@@ -417,6 +438,12 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		final int _id = item.getItemId();
 		final String _title = (String) item.getTitle();
 		
+		if (_id == 0) {
+			String uid = FirebaseAuth.getInstance().getCurrentUser() != null
+			? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+			com.harvanna.app.group.GroupChatConnector.open(this, groupId, !uid.isEmpty() && uid.equals(groupCreatorId));
+			return true;
+		}
 		return super.onOptionsItemSelected(item);
 	}
 	
@@ -468,7 +495,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 				com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
 				GroupDetailsActivity.this,
 				"Incoming Transfer", 
-				"Received " + String.format(Locale.US, "%.5f", amount) + " AJC",
+				"Received " + String.format(Locale.US, "%.5f", amount) + (" " + com.harvanna.app.CoinInfo.ticker()),
 				sender
 				);
 			}
@@ -479,6 +506,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		FragmentAdapterComponentFragmentAdapter adapter =
 		new FragmentAdapterComponentFragmentAdapter(this, getSupportFragmentManager());
 		adapter.setTabCount(6);
+		pagerAdapter = adapter;
 		view_pager.setAdapter(adapter);
 		tab_layout.setupWithViewPager(view_pager);
 		tab_layout.setTabMode(TabLayout.MODE_SCROLLABLE);
@@ -502,7 +530,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
 			
 			@Override
 			public void openLoansTab() {
-				if (view_pager != null) view_pager.setCurrentItem(3);
+				if (view_pager == null) return;
+				int idx = pagerAdapter != null ? pagerAdapter.positionOfPage(3) : 3;
+				if (idx >= 0) view_pager.setCurrentItem(idx);
+				else SketchwareUtil.showMessage(getApplicationContext(), "Loans are turned off for this group.");
 			}
 			
 			@Override
@@ -511,9 +542,9 @@ public class GroupDetailsActivity extends AppCompatActivity {
 			}
 			
 			@Override
-			public void transferFromGroupWallet(String from, String to, double amountAjc,
+			public void transferFromGroupWallet(String from, String to, double amountHarv,
 			com.harvanna.app.group.GroupPayoutManager.Callback cb) {
-				_executeGroupWalletTransfer(from, to, amountAjc, cb);
+				_executeGroupWalletTransfer(from, to, amountHarv, cb);
 			}
 			
 			@Override
@@ -521,7 +552,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 				SharedPreferences prefs = getSharedPreferences("wallet", MODE_PRIVATE);
 				String addr = prefs.getString("wallet_address", "").trim();
 				if (addr.isEmpty()) {
-					prefs = getSharedPreferences("ajc_wallet_prefs", MODE_PRIVATE);
+					prefs = getSharedPreferences("harv_wallet_prefs", MODE_PRIVATE);
 					addr = prefs.getString("active_wallet_address", "").trim();
 				}
 				return addr;
@@ -627,8 +658,14 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		return loc;
 	}
 	
+	private FragmentAdapterComponentFragmentAdapter pagerAdapter;
+	
 	private void _bindHeader(Map<String, Object> data, boolean admin) {
 		if (data == null) return;
+		if (pagerAdapter != null) {
+			Object al = data.get("allowLoans");
+			pagerAdapter.setLoansEnabled(!(al instanceof Boolean) || (Boolean) al);
+		}
 		
 		String name = _safeString(data, "groupName", "Group");
 		String type = _safeString(data, "groupType", "");
@@ -668,11 +705,11 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		}
 	}
 	
-	private void _executeGroupWalletTransfer(String from, String to, double amountAjc,
+	private void _executeGroupWalletTransfer(String from, String to, double amountHarv,
 	com.harvanna.app.group.GroupPayoutManager.Callback cb) {
 		com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(GroupDetailsActivity.this, () -> {
 			try {
-				java.math.BigDecimal amount = java.math.BigDecimal.valueOf(amountAjc);
+				java.math.BigDecimal amount = java.math.BigDecimal.valueOf(amountHarv);
 				com.harvanna.app.tx.TransactionRouter.routeTransaction(
 				GroupDetailsActivity.this,
 				from,
@@ -769,7 +806,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 						|| "PAYMENT".equals(type);
 						if (!contribution) continue;
 						
-						double amt = _asDouble(pay.get("amountAjc"));
+						double amt = _asDouble(pay.get("amountHarv"));
 						if (amt <= 0) amt = _asDouble(pay.get("amount"));
 						if (amt > 0) total += amt;
 					}

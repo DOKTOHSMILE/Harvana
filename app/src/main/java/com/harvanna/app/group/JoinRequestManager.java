@@ -88,7 +88,7 @@ public final class JoinRequestManager {
                 mgr.updateJoinRequestFields(groupId, reqId, patch, new GroupFirestoreManager.SimpleCallback() {
                     @Override
                     public void onSuccess() {
-                        admitMember(ctx, mgr, groupId, requesterUid, resolvedSlot, newCount, cb);
+                        admitCarryingContract(ctx, mgr, groupId, requesterUid, resolvedSlot, newCount, cb);
                     }
 
                     @Override
@@ -113,7 +113,7 @@ public final class JoinRequestManager {
                 mgr.updateJoinRequestFields(groupId, reqId, patch, new GroupFirestoreManager.SimpleCallback() {
                     @Override
                     public void onSuccess() {
-                        admitMember(ctx, mgr, groupId, requesterUid, fallbackSlot, fallbackSlot, cb);
+                        admitCarryingContract(ctx, mgr, groupId, requesterUid, fallbackSlot, fallbackSlot, cb);
                     }
 
                     @Override
@@ -141,7 +141,39 @@ public final class JoinRequestManager {
                                    int slot,
                                    int newMembersCount,
                                    Callback cb) {
+        admitMember(ctx, mgr, groupId, newMemberUid, slot, newMembersCount, null, cb);
+    }
+
+    /** Admits a member, copying the signed-contract fields from their join request so the record is kept. */
+    private static void admitCarryingContract(Context ctx, GroupFirestoreManager mgr, String groupId,
+                                              String uid, int slot, int count, Callback cb) {
+        mgr.getJoinRequest(groupId, uid, new GroupFirestoreManager.DocCallback() {
+            @Override public void onSuccess(Map<String, Object> req) {
+                Map<String, Object> extras = new HashMap<>();
+                if (req != null) {
+                    for (String k : new String[]{"walletAddress", "contractHash", "contractSig", "contractSignedAt"}) {
+                        if (req.get(k) != null) extras.put(k, req.get(k));
+                    }
+                }
+                admitMember(ctx, mgr, groupId, uid, slot, count, extras, cb);
+            }
+            @Override public void onError(String error) {
+                admitMember(ctx, mgr, groupId, uid, slot, count, null, cb);
+            }
+        });
+    }
+
+    /** extras: signed-contract fields (walletAddress, contractHash, contractSig, contractSignedAt). */
+    public static void admitMember(Context ctx,
+                                   GroupFirestoreManager mgr,
+                                   String groupId,
+                                   String newMemberUid,
+                                   int slot,
+                                   int newMembersCount,
+                                   Map<String, Object> extras,
+                                   Callback cb) {
         Map<String, Object> member = new HashMap<>();
+        if (extras != null) member.putAll(extras);
         member.put("memberUid", newMemberUid);
         member.put("slot", slot > 0 ? slot : 1);
         member.put("joinedAt", System.currentTimeMillis());

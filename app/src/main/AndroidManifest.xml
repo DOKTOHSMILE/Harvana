@@ -16,6 +16,10 @@
 	<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 	<uses-permission android:name="android.permission.USE_FINGERPRINT" />
 	
+	<queries>
+		<package android:name="com.harvanna.mine" />
+	</queries>
+
 	<application
 		android:allowBackup="true"
 		android:icon="@mipmap/ic_launcher"
@@ -37,11 +41,11 @@
 		</provider>
 		<activity
 			android:name=".MainActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".SplashScreenActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:screenOrientation="portrait"
 			android:windowSoftInputMode="stateHidden"
 			android:exported="true">
@@ -52,178 +56,189 @@
 		</activity>
 		<activity
 			android:name=".circle.CircleCreateActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="adjustResize" />
 		<activity
 			android:name=".circle.CircleActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode" />
+			android:configChanges="orientation|screenSize|keyboardHidden" />
 		<activity
 			android:name=".GroupDetailsActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".LoginActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:screenOrientation="portrait"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".CreateNewGroupActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".CoinDetailActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".TransactionDetailActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".ProfileActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".SendAssetActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".GroupJoinRequestActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".CreateLearnhubContentActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".GroupSettingsActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".SecurityPinSettingsActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".AppRulesActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".DocumentViewerActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".EditProfileActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".P2pMarketplaceActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".GuardianConsoleActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".CreateP2pBuyOfferActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".P2pInsuranceDepositActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".CreateP2pSellOfferActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".P2pExpressActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".P2pBuyOrderActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".P2pSellOrderActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".P2pBuyTradeActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".P2pSellTradeActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".P2pMerchantManagerActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".P2pMyTradesActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".ComfirmSellOfferActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
-			android:name=".CreateAjooCardActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:name=".CreateHarvannaCardActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".TrustScoreActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden" />
+		<activity
+			android:name=".OpenLoansActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden" />
+		<activity
+			android:name=".NotificationsActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden" />
+		<activity
+			android:name=".InvitesActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden" />
+		<activity
+			android:name=".group.GroupWalletBackupActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden" />
 		<activity
 			android:name=".RestoreWalletActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".CreateWalletActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".ScanQrCodeActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".WalletListActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".AboutActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".BackupRecoveryActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".BlockedUsersActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".HelpSupportActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".NotificationSettingsActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode" />
+			android:configChanges="orientation|screenSize|keyboardHidden" />
 		<activity
 			android:name=".PaymentMethodsActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".PrivacySettingsActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".SettingsActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".ReceiveActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
-			android:windowSoftInputMode="stateHidden" />
-		<activity
-			android:name=".CreateP2pListingActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".DebugActivity"

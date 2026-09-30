@@ -13,8 +13,8 @@ public final class GroupValidation {
         return s == null || s.trim().isEmpty();
     }
 
-    /** AJC wallet addresses must start with HV0x and be reasonably long. */
-    public static boolean isValidAjcWallet(String address) {
+    /** HARV wallet addresses must start with HV0x and be reasonably long. */
+    public static boolean isValidHarvWallet(String address) {
         if (address == null) return false;
         String a = address.trim();
         return a.startsWith("HV0x") && a.length() >= 10;
@@ -30,13 +30,13 @@ public final class GroupValidation {
         return null;
     }
 
-    public static String requirePositiveAmount(double amountAjc) {
-        if (amountAjc <= 0) return "Amount must be greater than zero.";
+    public static String requirePositiveAmount(double amountHarv) {
+        if (amountHarv <= 0) return "Amount must be greater than zero.";
         return null;
     }
 
     public static String requireValidWallet(String address, String role) {
-        if (!isValidAjcWallet(address)) {
+        if (!isValidHarvWallet(address)) {
             return (role != null ? role : "Wallet") + " must be a valid HV0x address.";
         }
         return null;

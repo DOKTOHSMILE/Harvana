@@ -44,7 +44,7 @@ import org.json.*;
 import com.harvanna.app.firestore.P2PPaymentDetailsManager;
 import com.harvanna.app.firestore.P2PTradeStatsManager;
 import com.harvanna.app.firestore.UserProfileManager;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.tx.P2PTradeRouter;
 import com.harvanna.app.wallet.BalanceFormatter;
 import com.harvanna.app.wallet.PinPromptHelper;
@@ -82,7 +82,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	private TextView tv_sell_timer;
 	private LinearLayout linear136;
 	private TextView textview66;
-	private TextView tv_sell_ajc_amount;
+	private TextView tv_sell_harv_amount;
 	private TextView tv_sell_value_caption;
 	private View view137;
 	private LinearLayout linear138;
@@ -202,7 +202,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		tv_sell_timer = findViewById(R.id.tv_sell_timer);
 		linear136 = findViewById(R.id.linear136);
 		textview66 = findViewById(R.id.textview66);
-		tv_sell_ajc_amount = findViewById(R.id.tv_sell_ajc_amount);
+		tv_sell_harv_amount = findViewById(R.id.tv_sell_harv_amount);
 		tv_sell_value_caption = findViewById(R.id.tv_sell_value_caption);
 		view137 = findViewById(R.id.view137);
 		linear138 = findViewById(R.id.linear138);
@@ -291,8 +291,8 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		}
 		
 		if (getSupportActionBar() != null) {
-			getSupportActionBar().setTitle("Sell AJC");
-			getSupportActionBar().setSubtitle("Order #AJC-000000");
+			getSupportActionBar().setTitle(("Sell " + com.harvanna.app.CoinInfo.ticker()));
+			getSupportActionBar().setSubtitle(("Order #" + com.harvanna.app.CoinInfo.ticker() + "-000000"));
 		}
 		
 		
@@ -410,7 +410,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	}
 	
 	private void _loadOrder() {
-		AjooNodeClient.getP2POrder(orderId, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getP2POrder(orderId, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject order) {
 				listingId = order.optString("listingId", "");
@@ -570,15 +570,15 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	}
 	
 	private void _renderValueCard() {
-		double claimedAjc = AjooNodeClient.toAjcDisplay(amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
-		double feeAjc = AjooNodeClient.toAjcDisplay(platformFeeRaw);
-		tv_sell_ajc_amount.setText(BalanceFormatter.smart(claimedAjc));
-		tv_sell_value_caption.setText("You're providing this AJC");
+		double claimedHarv = HarvannaNodeClient.toHarvDisplay(amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
+		double feeHarv = HarvannaNodeClient.toHarvDisplay(platformFeeRaw);
+		tv_sell_harv_amount.setText(BalanceFormatter.smart(claimedHarv));
+		tv_sell_value_caption.setText(("You're providing this " + com.harvanna.app.CoinInfo.ticker()));
 		String ccy = listingCurrency != null ? listingCurrency : com.harvanna.app.p2p.P2pCurrencyFilterState.getCurrency();
-		tv_sell_fiat_amount.setText(unitPrice >= 0 ? P2pMoney.fiat(claimedAjc * unitPrice, ccy) : "—");
-		tv_sell_price.setText(unitPrice >= 0 ? P2pMoney.perAjc(unitPrice, ccy) : "—");
-		tv_sell_maker_fee.setText(String.format(Locale.US, "-%s AJC", BalanceFormatter.smartDecimal(feeAjc)));
-		tv_sell_payment_received_amount.setText(unitPrice >= 0 ? P2pMoney.fiat(claimedAjc * unitPrice, ccy) : "—");
+		tv_sell_fiat_amount.setText(unitPrice >= 0 ? P2pMoney.fiat(claimedHarv * unitPrice, ccy) : "—");
+		tv_sell_price.setText(unitPrice >= 0 ? P2pMoney.perHarv(unitPrice, ccy) : "—");
+		tv_sell_maker_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(feeHarv)));
+		tv_sell_payment_received_amount.setText(unitPrice >= 0 ? P2pMoney.fiat(claimedHarv * unitPrice, ccy) : "—");
 	}
 	
 	// ── Status-driven rendering ──────────────────────────────────────────
@@ -595,7 +595,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			_setStatusBadge("Awaiting Payment");
 			card_sell_action.setVisibility(View.VISIBLE);
 			tv_sell_action_title.setText("Waiting for the buyer to pay");
-			tv_sell_action_description.setText("Your AJC is already locked in escrow. Nothing to do until they mark payment sent.");
+			tv_sell_action_description.setText(("Your " + com.harvanna.app.CoinInfo.ticker() + " is already locked in escrow. Nothing to do until they mark payment sent."));
 			tv_sell_payment_status.setText("Not yet paid");
 			layout_sell_payment_received.setVisibility(View.GONE);
 			break;
@@ -604,7 +604,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			_setStatusBadge("Payment Submitted");
 			card_sell_action.setVisibility(View.VISIBLE);
 			tv_sell_action_title.setText("Confirm you've received payment");
-			tv_sell_action_description.setText("Check your account, then confirm below. AJC only releases after your confirmation.");
+			tv_sell_action_description.setText(("Check your account, then confirm below. " + com.harvanna.app.CoinInfo.ticker() + " only releases after your confirmation."));
 			tv_sell_payment_status.setText("Buyer marked as paid");
 			layout_sell_payment_received.setVisibility(View.VISIBLE);
 			card_sell_action_button.setVisibility(View.VISIBLE);
@@ -617,7 +617,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			_setStatusBadge("Completed");
 			card_sell_completed.setVisibility(View.VISIBLE);
 			tv_sell_completed_title.setText("Trade completed");
-			tv_sell_completed_description.setText("You confirmed payment and the AJC has been released to the buyer.");
+			tv_sell_completed_description.setText(("You confirmed payment and the " + com.harvanna.app.CoinInfo.ticker() + " has been released to the buyer."));
 			tv_sell_completed_tx_hash.setText(releaseTxHashValue.isEmpty() ? "—" : releaseTxHashValue);
 			tv_sell_release_status.setText("Verified");
 			tv_sell_release_tx_hash.setText(releaseTxHashValue.isEmpty() ? "—" : releaseTxHashValue);
@@ -632,7 +632,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			case "CANCELLED":
 			_setStatusBadge("Cancelled");
 			card_sell_warning.setVisibility(View.VISIBLE);
-			tv_sell_warning.setText("This order was cancelled. No AJC moved.");
+			tv_sell_warning.setText(("This order was cancelled. No " + com.harvanna.app.CoinInfo.ticker() + " moved."));
 			break;
 			
 			default:
@@ -693,7 +693,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	private void _confirmReceived() {
 		ThemedDialogs.show(ThemedDialogs.alert(this)
 		.setTitle("Confirm payment received")
-		.setMessage("Only confirm if you have genuinely verified the money is in your account. This releases the escrowed AJC to the buyer immediately and cannot be undone.")
+		.setMessage(("Only confirm if you have genuinely verified the money is in your account. This releases the escrowed " + com.harvanna.app.CoinInfo.ticker() + " to the buyer immediately and cannot be undone."))
 		.setPositiveButton("Confirm & Release", (dialog, which) -> {
 			PinPromptHelper.verifyPinThenProceed(this, () -> {
 				btn_sell_confirm_payment.setEnabled(false);

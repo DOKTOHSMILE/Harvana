@@ -49,7 +49,7 @@ import org.json.*;
 import com.harvanna.app.firestore.P2PPaymentDetailsManager;
 import com.harvanna.app.firestore.P2PTradeStatsManager;
 import com.harvanna.app.firestore.UserProfileManager;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.tx.P2PTradeRouter;
 import com.harvanna.app.wallet.BalanceFormatter;
 import com.harvanna.app.wallet.PinPromptHelper;
@@ -129,7 +129,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 	private LinearLayout calculation_network_fee_row;
 	private LinearLayout calculation_receive_row;
 	private TextView textview33;
-	private TextView calculation_ajc;
+	private TextView calculation_harv;
 	private TextView textview34;
 	private TextView calculation_price;
 	private TextView textview35;
@@ -245,7 +245,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 		calculation_network_fee_row = findViewById(R.id.calculation_network_fee_row);
 		calculation_receive_row = findViewById(R.id.calculation_receive_row);
 		textview33 = findViewById(R.id.textview33);
-		calculation_ajc = findViewById(R.id.calculation_ajc);
+		calculation_harv = findViewById(R.id.calculation_harv);
 		textview34 = findViewById(R.id.textview34);
 		calculation_price = findViewById(R.id.calculation_price);
 		textview35 = findViewById(R.id.textview35);
@@ -343,7 +343,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 		order_calculation_card.setVisibility(View.GONE);
 		validation_message.setVisibility(View.GONE);
 		create_order_button.setEnabled(false);
-		create_order_button.setText("Buy AJC");
+		create_order_button.setText(("Buy " + com.harvanna.app.CoinInfo.ticker()));
 		
 		seller_name.setText("Loading trader…");
 		seller_initial.setVisibility(View.VISIBLE);
@@ -360,10 +360,10 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 			@Override public void onTextChanged(CharSequence s, int a, int b, int c) { }
 			@Override public void afterTextChanged(Editable s) { _onAmountChanged(); }
 		});
-		quick_25.setOnClickListener(v -> _setAmount(remainingAjc * 0.25));
-		quick_50.setOnClickListener(v -> _setAmount(remainingAjc * 0.50));
-		quick_100.setOnClickListener(v -> _setAmount(remainingAjc * 0.75));
-		quick_max.setOnClickListener(v -> _setAmount(remainingAjc));
+		quick_25.setOnClickListener(v -> _setAmount(remainingHarv * 0.25));
+		quick_50.setOnClickListener(v -> _setAmount(remainingHarv * 0.50));
+		quick_100.setOnClickListener(v -> _setAmount(remainingHarv * 0.75));
+		quick_max.setOnClickListener(v -> _setAmount(remainingHarv));
 		create_order_button.setOnClickListener(v -> _confirmCreateOrder());
 		
 		_loadListing();
@@ -377,8 +377,8 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 	private String myAddress = "";
 	private double unitPrice = -1;
 	private String listingCurrency = "NGN";
-	private double remainingAjc = 0;
-	private double minOrderAjc = 0;
+	private double remainingHarv = 0;
+	private double minOrderHarv = 0;
 	private long lastPreviewedAmountRaw = -1;
 	private long lastPlatformFeeRaw = 0;
 	private long lastNetworkFeeRaw = 0;
@@ -397,7 +397,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 	// ── Load listing + Firestore metadata + seller trust ────────────────
 	
 	private void _loadListing() {
-		AjooNodeClient.getP2PListing(listingId, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.getP2PListing(listingId, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject listing) {
 				if (!"OPEN".equals(listing.optString("status", ""))) {
@@ -416,17 +416,17 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 					});
 					return;
 				}
-				remainingAjc = AjooNodeClient.toAjcDisplay(listing.optLong("remainingAmount", 0));
-				minOrderAjc = AjooNodeClient.toAjcDisplay(listing.optLong("minOrderAmount", 0));
+				remainingHarv = HarvannaNodeClient.toHarvDisplay(listing.optLong("remainingAmount", 0));
+				minOrderHarv = HarvannaNodeClient.toHarvDisplay(listing.optLong("minOrderAmount", 0));
 				
 				runOnUiThread(() -> {
-					offer_available.setText(String.format(Locale.US, "%.4f AJC", remainingAjc));
-					offer_limits.setText(String.format(Locale.US, "Min %.4f · Max %.4f AJC", minOrderAjc, remainingAjc));
+					offer_available.setText(String.format(Locale.US, ("%.4f " + com.harvanna.app.CoinInfo.ticker()), remainingHarv));
+					offer_limits.setText(String.format(Locale.US, ("Min %.4f · Max %.4f " + com.harvanna.app.CoinInfo.ticker()), minOrderHarv, remainingHarv));
 					amount_section_hint.setText(String.format(Locale.US,
-					"Available %.4f AJC · Minimum %.4f AJC", remainingAjc, minOrderAjc));
-					quick_25.setText(BalanceFormatter.smartDecimal(remainingAjc * 0.25));
-					quick_50.setText(BalanceFormatter.smartDecimal(remainingAjc * 0.50));
-					quick_100.setText(BalanceFormatter.smartDecimal(remainingAjc * 0.75));
+					("Available %.4f " + com.harvanna.app.CoinInfo.ticker() + " · Minimum %.4f " + com.harvanna.app.CoinInfo.ticker()), remainingHarv, minOrderHarv));
+					quick_25.setText(BalanceFormatter.smartDecimal(remainingHarv * 0.25));
+					quick_50.setText(BalanceFormatter.smartDecimal(remainingHarv * 0.50));
+					quick_100.setText(BalanceFormatter.smartDecimal(remainingHarv * 0.75));
 				});
 				
 				if (sellerAddress.isEmpty()) {
@@ -455,7 +455,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 				String sellerUid = sellerUidObj != null ? String.valueOf(sellerUidObj) : "";
 				
 				runOnUiThread(() -> {
-					offer_price.setText(unitPrice >= 0 ? P2pMoney.perAjc(unitPrice, listingCurrency) : "Unavailable");
+					offer_price.setText(unitPrice >= 0 ? P2pMoney.perHarv(unitPrice, listingCurrency) : "Unavailable");
 					_bindPaymentMethodsText(data);
 				});
 				
@@ -546,8 +546,8 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 	
 	// ── Amount entry + live fee preview ──────────────────────────────────
 	
-	private void _setAmount(double ajc) {
-		amount_input.setText(BalanceFormatter.smartDecimal(Math.min(ajc, remainingAjc)));
+	private void _setAmount(double harv) {
+		amount_input.setText(BalanceFormatter.smartDecimal(Math.min(harv, remainingHarv)));
 		amount_input.setSelection(amount_input.getText().length());
 	}
 	
@@ -561,12 +561,12 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 			create_order_button.setEnabled(false);
 			return;
 		}
-		if (amount < minOrderAjc) {
-			_showValidationError(String.format(Locale.US, "Minimum order is %.4f AJC.", minOrderAjc));
+		if (amount < minOrderHarv) {
+			_showValidationError(String.format(Locale.US, ("Minimum order is %.4f " + com.harvanna.app.CoinInfo.ticker() + "."), minOrderHarv));
 			return;
 		}
-		if (amount > remainingAjc) {
-			_showValidationError(String.format(Locale.US, "Only %.4f AJC available.", remainingAjc));
+		if (amount > remainingHarv) {
+			_showValidationError(String.format(Locale.US, ("Only %.4f " + com.harvanna.app.CoinInfo.ticker() + " available."), remainingHarv));
 			return;
 		}
 		if (myAddress == null || myAddress.isEmpty()) {
@@ -575,7 +575,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 		}
 		
 		validation_message.setVisibility(View.GONE);
-		long amountRaw = AjooNodeClient.toRawUnits(amount);
+		long amountRaw = HarvannaNodeClient.toRawUnits(amount);
 		pendingFeeFetch = () -> _fetchPreview(amountRaw);
 		debounceHandler.postDelayed(pendingFeeFetch, 400);
 	}
@@ -588,10 +588,10 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 	}
 	
 	private void _fetchPreview(long amountRaw) {
-		AjooNodeClient.previewP2PClaim(listingId, myAddress, amountRaw, new AjooNodeClient.JsonCallback() {
+		HarvannaNodeClient.previewP2PClaim(listingId, myAddress, amountRaw, new HarvannaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject result) {
-				long currentAmountRaw = AjooNodeClient.toRawUnits(BalanceFormatter.parseUserInput(amount_input.getText().toString()));
+				long currentAmountRaw = HarvannaNodeClient.toRawUnits(BalanceFormatter.parseUserInput(amount_input.getText().toString()));
 				if (currentAmountRaw != amountRaw) return; // stale — amount changed while this was in flight
 				
 				lastPreviewedAmountRaw = amountRaw;
@@ -599,26 +599,26 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 				lastNetworkFeeRaw = result.optLong("releaseGasRaw", 0);
 				lastNetAmountRaw = result.optLong("netAmountToBuyer", 0);
 				
-				double amountAjc = AjooNodeClient.toAjcDisplay(amountRaw);
-				double feeAjc = AjooNodeClient.toAjcDisplay(lastPlatformFeeRaw);
-				double networkFeeAjc = AjooNodeClient.toAjcDisplay(lastNetworkFeeRaw);
-				double netAjc = AjooNodeClient.toAjcDisplay(lastNetAmountRaw);
-				double fiatTotal = unitPrice >= 0 ? amountAjc * unitPrice : -1;
+				double amountHarv = HarvannaNodeClient.toHarvDisplay(amountRaw);
+				double feeHarv = HarvannaNodeClient.toHarvDisplay(lastPlatformFeeRaw);
+				double networkFeeHarv = HarvannaNodeClient.toHarvDisplay(lastNetworkFeeRaw);
+				double netHarv = HarvannaNodeClient.toHarvDisplay(lastNetAmountRaw);
+				double fiatTotal = unitPrice >= 0 ? amountHarv * unitPrice : -1;
 				
 				runOnUiThread(() -> {
 					order_calculation_card.setVisibility(View.VISIBLE);
-					calculation_ajc.setText(BalanceFormatter.smart(amountAjc));
+					calculation_harv.setText(BalanceFormatter.smart(amountHarv));
 					calculation_price.setText(unitPrice >= 0 ? P2pMoney.fiat(unitPrice, listingCurrency) : "—");
 					calculation_fiat.setText(fiatTotal >= 0 ? P2pMoney.fiat(fiatTotal, listingCurrency) : "—");
-					calculation_maker_fee.setText(String.format(Locale.US, "-%s AJC", BalanceFormatter.smartDecimal(feeAjc)));
-					calculation_network_fee.setText(String.format(Locale.US, "-%s AJC", BalanceFormatter.smartDecimal(networkFeeAjc)));
-					calculation_receive.setText(BalanceFormatter.smart(netAjc));
+					calculation_maker_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(feeHarv)));
+					calculation_network_fee.setText(String.format(Locale.US, ("-%s " + com.harvanna.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(networkFeeHarv)));
+					calculation_receive.setText(BalanceFormatter.smart(netHarv));
 					create_order_button.setEnabled(true);
 				});
 			}
 			@Override
 			public void onError(String error) {
-				runOnUiThread(() -> _showValidationError("Couldn't check this order with AjooChain: " + error));
+				runOnUiThread(() -> _showValidationError("Couldn't check this order with Harvanna Protocol: " + error));
 			}
 		});
 	}
@@ -627,7 +627,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 	
 	private void _confirmCreateOrder() {
 		double amount = BalanceFormatter.parseUserInput(amount_input.getText().toString());
-		long amountRaw = AjooNodeClient.toRawUnits(amount);
+		long amountRaw = HarvannaNodeClient.toRawUnits(amount);
 		if (lastPreviewedAmountRaw != amountRaw) {
 			_showValidationError("Still checking this order — try again in a moment.");
 			return;
@@ -661,7 +661,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 							finish();
 						} else {
 							create_order_button.setEnabled(true);
-							create_order_button.setText("Buy AJC");
+							create_order_button.setText(("Buy " + com.harvanna.app.CoinInfo.ticker()));
 							_showValidationError("Order created, but couldn't open the trade automatically. Check My Trades.");
 						}
 					});
@@ -670,7 +670,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 				public void onError(String error) {
 					runOnUiThread(() -> {
 						create_order_button.setEnabled(true);
-						create_order_button.setText("Buy AJC");
+						create_order_button.setText(("Buy " + com.harvanna.app.CoinInfo.ticker()));
 						_showValidationError("Couldn't create this order — the listing may have just changed: " + error);
 					});
 				}

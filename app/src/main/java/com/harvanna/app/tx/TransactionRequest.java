@@ -21,7 +21,7 @@ public class TransactionRequest {
     public void setSender(String v) { if (v == null || v.trim().isEmpty()) throw new IllegalArgumentException("from is required"); from = v.trim(); }
     public void setRecipient(String v) { if (v == null || v.trim().isEmpty()) throw new IllegalArgumentException("to is required"); to = v.trim(); }
     public void setContractAddress(String v) { tokenContractAddress = v == null ? "" : v.trim(); }
-    public void setTokenSymbol(String v) { tokenSymbol = v == null || v.trim().isEmpty() ? "AJC" : v.trim(); }
+    public void setTokenSymbol(String v) { tokenSymbol = v == null || v.trim().isEmpty() ? com.harvanna.app.CoinInfo.ticker() : v.trim(); }
     public void setAmount(java.math.BigDecimal v) { setAmount(v == null ? 0.0 : v.doubleValue()); }
     public void setAmount(double v) { if (!Double.isFinite(v) || v <= 0.0) throw new IllegalArgumentException("amount must be finite and greater than zero"); amount = v; }
     public void setMemo(String v) {

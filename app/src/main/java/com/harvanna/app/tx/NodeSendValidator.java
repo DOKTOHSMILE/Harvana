@@ -1,7 +1,7 @@
 package com.harvanna.app.tx;
 
 /**
- * Pre-send validation for native AJC transfers.
+ * Pre-send validation for native HARV transfers.
  *
  * All checks are synchronous — call on any thread.
  * Run validateInputs() immediately when the user types.
@@ -67,7 +67,7 @@ public final class NodeSendValidator {
             return Result.fail("Amount must be greater than zero");
         }
         if (amount < 0.00000001) {
-            return Result.fail("Amount is below the minimum (0.00000001 AJC)");
+            return Result.fail(("Amount is below the minimum (0.00000001 " + com.harvanna.app.CoinInfo.ticker() + ")"));
         }
 
         return Result.ok();
@@ -79,27 +79,27 @@ public final class NodeSendValidator {
      *
      * @param senderAddress       used for self-send check
      * @param recipientAddress    validated recipient
-     * @param amountAjc           requested send amount
-     * @param confirmedBalanceAjc live balance from WalletNodeBridge
-     * @param estimatedFeeAjc     fee from AjooNodeClient.getFee()
+     * @param amountHarv           requested send amount
+     * @param confirmedBalanceHarv live balance from WalletNodeBridge
+     * @param estimatedFeeHarv     fee from HarvannaNodeClient.getFee()
      */
     public static Result validateBalance(String senderAddress,
                                           String recipientAddress,
-                                          double amountAjc,
-                                          double confirmedBalanceAjc,
-                                          double estimatedFeeAjc) {
+                                          double amountHarv,
+                                          double confirmedBalanceHarv,
+                                          double estimatedFeeHarv) {
         // Self-send warning
         if (senderAddress != null && senderAddress.equalsIgnoreCase(recipientAddress)) {
             return Result.fail("You cannot send to your own address");
         }
 
-        double total = amountAjc + estimatedFeeAjc;
+        double total = amountHarv + estimatedFeeHarv;
 
-        if (confirmedBalanceAjc < total) {
-            double shortfall = total - confirmedBalanceAjc;
+        if (confirmedBalanceHarv < total) {
+            double shortfall = total - confirmedBalanceHarv;
             return Result.fail(String.format(
                 java.util.Locale.US,
-                "Insufficient balance. Need %.6f AJC more (amount + fee = %.6f AJC)",
+                ("Insufficient balance. Need %.6f " + com.harvanna.app.CoinInfo.ticker() + " more (amount + fee = %.6f " + com.harvanna.app.CoinInfo.ticker() + ")"),
                 shortfall, total));
         }
 

@@ -55,7 +55,7 @@
 							android:id="@+id/img_coin_logo"
 							android:layout_width="80dp"
 							android:layout_height="80dp"
-							android:src="@drawable/main_app_logo_1"
+							android:src="@drawable/ic_coin_harv"
 							android:scaleType="centerInside" />
 					</com.google.android.material.card.MaterialCardView>
 					<LinearLayout
@@ -124,7 +124,7 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="24dp"
 						android:layout_marginBottom="8dp"
-						android:text="ABOUT AJOO COIN"
+						android:text="ABOUT HARVANNA COIN"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextTertiary"
 						android:gravity="start"

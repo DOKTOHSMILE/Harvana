@@ -119,7 +119,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 	}
 	
 	private void initializeLogic() {
-		SharedPreferences prefs = getContext().getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+		SharedPreferences prefs = getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 		String address = prefs.getString("active_wallet_address", "").trim();
 		if (address.isEmpty()) {
 			address = WalletManager.getActiveWalletAddress(getContext());
@@ -142,7 +142,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 	public void onResume() {
 		super.onResume();
 		if (getContext() != null) {
-			SharedPreferences prefs = getContext().getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+			SharedPreferences prefs = getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 			String freshAddress = prefs.getString("active_wallet_address", "").trim();
 			if (freshAddress.isEmpty()) {
 				freshAddress = WalletManager.getActiveWalletAddress(getContext());
@@ -345,7 +345,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 							return;
 						}
 						try {
-							SharedPreferences prefs = getContext().getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+							SharedPreferences prefs = getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 							prefs.edit()
 							.putString("active_wallet_address", walletAddress)
 							.putString("active_address", walletAddress)
@@ -371,9 +371,9 @@ public class WalletAssetFragmentActivity extends Fragment {
 							
 							new androidx.appcompat.app.AlertDialog.Builder(context)
 							.setTitle("Back up this wallet?")
-							.setMessage("A printable Ajoo Access Card is a physical backup that doesn't depend on remembering 12 words. You can also do this later from Settings.")
-							.setPositiveButton("Create Ajoo Card", (d, w) -> {
-								Intent cardIntent = new Intent(context, com.harvanna.app.CreateAjooCardActivity.class);
+							.setMessage("A printable Harvanna Access Card is a physical backup that doesn't depend on remembering 12 words. You can also do this later from Settings.")
+							.setPositiveButton("Create Harvanna Card", (d, w) -> {
+								Intent cardIntent = new Intent(context, com.harvanna.app.CreateHarvannaCardActivity.class);
 								startActivity(cardIntent);
 							})
 							.setNegativeButton("Not now", null)
@@ -527,7 +527,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 					postToUi(() -> {
 						try {
 							SharedPreferences prefs =
-							getContext().getSharedPreferences("ajc_wallet_prefs", Context.MODE_PRIVATE);
+							getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 							prefs.edit()
 							.putString("active_wallet_address", walletAddress)
 							.putString("active_address", walletAddress)
@@ -595,7 +595,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 			String currencyCode = com.harvanna.app.wallet.FiatValueHelper.symbolToCurrencyCode(
 			currencySp.getString("currency", "₦"));
 			
-			com.harvanna.app.wallet.FiatValueHelper.convertAjcToFiat(show, currencyCode, (fiatValue, rateAvailable) -> {
+			com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(show, currencyCode, (fiatValue, rateAvailable) -> {
 				if (!isAdded() || getContext() == null) return;
 				final ArrayList<HashMap<String, Object>> loadedCoins = new ArrayList<>();
 				HashMap<String, Object> nativeCoin = new HashMap<>();
@@ -603,8 +603,8 @@ public class WalletAssetFragmentActivity extends Fragment {
 				// Removed the "#,##" so it no longer generates commas
 				java.text.DecimalFormat df = new java.text.DecimalFormat("0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
 				
-				nativeCoin.put("coin_name", "Ajoo Coin");
-				nativeCoin.put("coin_symbol", "AJC");
+				nativeCoin.put("coin_name", com.harvanna.app.CoinInfo.name());
+				nativeCoin.put("coin_symbol", com.harvanna.app.CoinInfo.ticker());
 				nativeCoin.put("coin_balance", df.format(show));
 				nativeCoin.put("coin_balance_confirmed", df.format(bal));
 				nativeCoin.put("coin_pending_in", df.format(pin));
@@ -708,10 +708,10 @@ public class WalletAssetFragmentActivity extends Fragment {
 				if (!logoUrl.isEmpty()) {
 					Glide.with(_view.getContext().getApplicationContext())
 					.load(android.net.Uri.parse(logoUrl))
-					.error(R.drawable.main_app_logo)
+					.error(R.drawable.ic_coin_harv)
 					.into(iv_asset_logo);
 				} else {
-					iv_asset_logo.setImageResource(R.drawable.main_app_logo);
+					iv_asset_logo.setImageResource(R.drawable.ic_coin_harv);
 				}
 			}
 			

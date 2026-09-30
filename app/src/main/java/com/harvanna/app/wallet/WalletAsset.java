@@ -3,8 +3,8 @@ package com.harvanna.app.wallet;
 /**
  * A single non-native token balance held by a wallet.
  * Stored as an entry in the wallet document's "assets" array.
- * Native AJC is NOT represented here — it stays in the wallet's
- * top-level "balance_ajc" field, unaffected by this class.
+ * Native HARV is NOT represented here — it stays in the wallet's
+ * top-level "balance_harv" field, unaffected by this class.
  */
 public class WalletAsset {
 

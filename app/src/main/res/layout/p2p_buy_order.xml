@@ -457,7 +457,7 @@
 							android:textSize="12sp"
 							android:layout_weight="1" />
 						<TextView
-							android:id="@+id/calculation_ajc"
+							android:id="@+id/calculation_harv"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="0.00 HARV"

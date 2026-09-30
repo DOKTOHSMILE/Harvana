@@ -1176,7 +1176,7 @@
 							android:background="@color/colorDivider"
 							android:layout_marginStart="66dp" />
 						<LinearLayout
-							android:id="@+id/rowAboutAjoo"
+							android:id="@+id/rowAboutHarvanna"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:padding="14dp"

@@ -31,7 +31,7 @@ by `isSelf`, so **the new-user sign-up profile save should work** against these 
 ## C. Proposed direction (owner decides; nothing applied)
 
 1. Close A1/A6 now: members may self-create only if the group does not require approval (`requireApprovalToJoin == false`)
-   or their join request is APPROVED, with `role == 'MEMBER'`. See `docs/firestore.rules.proposed`.
+   or their join request is APPROVED, with `role == 'MEMBER'`. See `docs/firestore.rules`.
 2. Close A5: `TRANSACTIONS` client writes off.
 3. A3: only the creator may change `joinRequests.status`; members may only add their own vote. NOTE: this stops the client-side
    vote-approval flow from flipping status (nothing else resolves it until the node or a Cloud Function does), so apply it together

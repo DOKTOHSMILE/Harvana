@@ -20,19 +20,19 @@ import android.provider.MediaStore;
 
 import androidx.core.content.ContextCompat;
 
-import com.harvanna.app.AJCQRCodeGenerator;
+import com.harvanna.app.HARVQRCodeGenerator;
 import com.harvanna.app.R;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
-public final class AjooCardRenderer {
+public final class HarvannaCardRenderer {
 	
 	private static final int CARD_WIDTH_PX = 1013;
 	private static final int CARD_HEIGHT_PX = 638;
 	private static final float CORNER_RADIUS_PX = 40f;
 	
-	private AjooCardRenderer() {}
+	private HarvannaCardRenderer() {}
 	
 	// ── FRONT ────────────────────────────────────────────────────────────
 	
@@ -111,7 +111,7 @@ public final class AjooCardRenderer {
 		ownerNamePaint.setTextSize(24f);
 		ownerNamePaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL));
 		
-		String finalName = (cardOwnerName != null && !cardOwnerName.trim().isEmpty()) ? cardOwnerName.toUpperCase() : "AJOO MEMBER";
+		String finalName = (cardOwnerName != null && !cardOwnerName.trim().isEmpty()) ? cardOwnerName.toUpperCase() : "HARVANNA MEMBER";
 		
 		// Safeguard: Truncate impossibly long names so they never bleed into the expiry date
 		if (finalName.length() > 24) {
@@ -136,7 +136,7 @@ public final class AjooCardRenderer {
 		Paint footerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		footerPaint.setColor(template.textSecondary);
 		footerPaint.setTextSize(16f);
-		canvas.drawText("AJOOCHAIN NETWORK", margin, CARD_HEIGHT_PX - 40f, footerPaint);
+		canvas.drawText("HARVANNACHAIN NETWORK", margin, CARD_HEIGHT_PX - 40f, footerPaint);
 		
 		// Draw the custom signature seal at the bottom right
 		drawSignatureStamp(canvas, CARD_WIDTH_PX - margin - 100f, CARD_HEIGHT_PX - margin - 100f);
@@ -183,7 +183,7 @@ public final class AjooCardRenderer {
 		digitLabelPaint.setTextSize(14f);
 		canvas.drawText("BACKUP CODE (if QR can't be scanned)", margin, 325f, digitLabelPaint);
 		
-		if (digitCode != null && digitCode.length() == AjooCardCrypto.DIGIT_CODE_LENGTH) {
+		if (digitCode != null && digitCode.length() == HarvannaCardCrypto.DIGIT_CODE_LENGTH) {
 			Paint digitPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			digitPaint.setColor(template.textPrimary);
 			digitPaint.setTextSize(17f);
@@ -212,7 +212,7 @@ public final class AjooCardRenderer {
 		
 		// QR code
 		int qrSize = 280;
-		Bitmap qr = AJCQRCodeGenerator.generateClassicQRCode(qrPayload, qrSize);
+		Bitmap qr = HARVQRCodeGenerator.generateClassicQRCode(qrPayload, qrSize);
 		if (qr != null) {
 			float qrLeft = CARD_WIDTH_PX - qrSize - margin - 16f;
 			float qrTop = 195f;
@@ -324,10 +324,10 @@ public final class AjooCardRenderer {
 		// Rotate the text slightly for that authentic stamp/seal look
 		canvas.rotate(-15f, x + (stampSize / 2), y + (stampSize / 2));
 		
-		// Fill the area with repeating "AJOOCHAIN"
+		// Fill the area with repeating "HARVANNACHAIN"
 		for (int row = -2; row < 8; row++) {
 			for (int col = -2; col < 5; col++) {
-				canvas.drawText("AJOOCHAIN ", x + (col * 70f), y + (row * 16f), textPaint);
+				canvas.drawText("HARVANNACHAIN ", x + (col * 70f), y + (row * 16f), textPaint);
 			}
 		}
 		
@@ -369,10 +369,10 @@ public final class AjooCardRenderer {
 				ContentValues values = new ContentValues();
 				values.put(MediaStore.Images.Media.DISPLAY_NAME, displayName + ".png");
 				values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
-				values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Ajoo");
+				values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Harvanna");
 				uri = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 			} else {
-				java.io.File dir = new java.io.File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Ajoo");
+				java.io.File dir = new java.io.File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Harvanna");
 				if (!dir.exists()) dir.mkdirs();
 				java.io.File file = new java.io.File(dir, displayName + ".png");
 				uri = Uri.fromFile(file);
@@ -404,10 +404,10 @@ public final class AjooCardRenderer {
 				ContentValues values = new ContentValues();
 				values.put(MediaStore.Downloads.DISPLAY_NAME, displayName + ".pdf");
 				values.put(MediaStore.Downloads.MIME_TYPE, "application/pdf");
-				values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Ajoo");
+				values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Harvanna");
 				uri = context.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
 			} else {
-				java.io.File dir = new java.io.File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Ajoo");
+				java.io.File dir = new java.io.File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Harvanna");
 				if (!dir.exists()) dir.mkdirs();
 				java.io.File file = new java.io.File(dir, displayName + ".pdf");
 				uri = Uri.fromFile(file);

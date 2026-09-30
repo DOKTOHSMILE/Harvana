@@ -44,7 +44,7 @@ import java.util.*;
 import java.util.regex.*;
 import org.json.*;
 import com.harvanna.app.firestore.P2PPaymentDetailsManager;
-import com.harvanna.app.sync.AjooNodeClient;
+import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.tx.P2PTradeRouter;
 import com.harvanna.app.wallet.BalanceFormatter;
 import com.harvanna.app.wallet.PinPromptHelper;
@@ -374,12 +374,12 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			String listingId = P2pIds.listingId(listing);
 			String side = listing.optString("side", "");
 			String status = listing.optString("status", "");
-			double totalAjc = AjooNodeClient.toAjcDisplay(listing.optLong("totalAmount", 0));
-			double remainingAjc = AjooNodeClient.toAjcDisplay(listing.optLong("remainingAmount", 0));
+			double totalHarv = HarvannaNodeClient.toHarvDisplay(listing.optLong("totalAmount", 0));
+			double remainingHarv = HarvannaNodeClient.toHarvDisplay(listing.optLong("remainingAmount", 0));
 			long createdAt = listing.optLong("createdTimestamp", 0);
 			long expiresAt = listing.optLong("expiresAt", 0);
 			boolean isOpen = "OPEN".equals(status);
-			boolean hasOrders = remainingAjc < totalAjc;
+			boolean hasOrders = remainingHarv < totalHarv;
 			boolean isSell = "SELL".equals(side);
 			
 			int myOrderCount = 0;
@@ -392,7 +392,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			String stateLabel = !isOpen ? "Closed" : (hasOrders ? "Matched" : "Active");
 			tv_offer_status.setText(stateLabel);
 			tv_offer_id.setText(_shortId(listingId));
-			tv_offer_amount.setText(String.format(Locale.US, "%.4f / %.4f AJC", remainingAjc, totalAjc));
+			tv_offer_amount.setText(String.format(Locale.US, ("%.4f / %.4f " + com.harvanna.app.CoinInfo.ticker()), remainingHarv, totalHarv));
 			tv_offer_price.setText("Loading…");
 			tv_offer_fiat_value.setText("Loading…");
 			tv_offer_orders_count.setText(myOrderCount + " order" + (myOrderCount == 1 ? "" : "s"));
@@ -406,8 +406,8 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			
 			tv_offer_details.setOnClickListener(v -> ThemedDialogs.show(ThemedDialogs.alert(P2pMerchantManagerActivity.this)
 			.setTitle(_shortId(listingId))
-			.setMessage("Side: " + side + "\nStatus: " + status + "\nTotal: " + BalanceFormatter.smart(totalAjc)
-			+ "\nRemaining: " + BalanceFormatter.smart(remainingAjc)
+			.setMessage("Side: " + side + "\nStatus: " + status + "\nTotal: " + BalanceFormatter.smart(totalHarv)
+			+ "\nRemaining: " + BalanceFormatter.smart(remainingHarv)
 			+ "\nListed: " + _formatDate(createdAt)
 			+ (expiresAt > 0 ? "\nExpires: " + _formatDate(expiresAt) : "")
 			+ "\nOrders against this listing: " + finalOrderCount)
@@ -441,8 +441,8 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 						}
 						runOnUiThread(() -> {
 							if (!listingId.equals(_view.getTag())) return;
-							tv_offer_price.setText(price >= 0 ? P2pMoney.perAjc(price, ccy) : "Unavailable");
-							tv_offer_fiat_value.setText(price >= 0 ? P2pMoney.fiat(remainingAjc * price, ccy) : "Unavailable");
+							tv_offer_price.setText(price >= 0 ? P2pMoney.perHarv(price, ccy) : "Unavailable");
+							tv_offer_fiat_value.setText(price >= 0 ? P2pMoney.fiat(remainingHarv * price, ccy) : "Unavailable");
 							if (labels.isEmpty()) {
 								tv_offer_payment_none.setVisibility(View.VISIBLE);
 							} else {

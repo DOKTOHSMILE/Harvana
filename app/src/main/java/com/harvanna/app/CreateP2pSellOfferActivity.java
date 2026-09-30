@@ -74,7 +74,7 @@ public class CreateP2pSellOfferActivity extends AppCompatActivity {
 	private TextView tv_sell_counterparty_section;
 	private MaterialCardView card_sell_counterparty;
 	private TextView tv_sell_step1_error;
-	private MaterialButton btn_sell_deposit_ajc_1;
+	private MaterialButton btn_sell_deposit_harv_1;
 	private MaterialButton btn_preview_sell_offer;
 	private LinearLayout layout_sell_info;
 	private ImageView imageview_sell_info;
@@ -131,7 +131,7 @@ public class CreateP2pSellOfferActivity extends AppCompatActivity {
 	private MaterialCardView card_sell_review;
 	private MaterialCardView card_sell_review_note;
 	private TextView tv_sell_step2_error;
-	private MaterialButton btn_sell_deposit_ajc_2;
+	private MaterialButton btn_sell_deposit_harv_2;
 	private MaterialButton btn_publish_sell_offer;
 	private MaterialButton btn_sell_back_to_step1;
 	private LinearLayout layout_sell_review;
@@ -202,7 +202,7 @@ public class CreateP2pSellOfferActivity extends AppCompatActivity {
 		tv_sell_counterparty_section = findViewById(R.id.tv_sell_counterparty_section);
 		card_sell_counterparty = findViewById(R.id.card_sell_counterparty);
 		tv_sell_step1_error = findViewById(R.id.tv_sell_step1_error);
-		btn_sell_deposit_ajc_1 = findViewById(R.id.btn_sell_deposit_ajc_1);
+		btn_sell_deposit_harv_1 = findViewById(R.id.btn_sell_deposit_harv_1);
 		btn_preview_sell_offer = findViewById(R.id.btn_preview_sell_offer);
 		layout_sell_info = findViewById(R.id.layout_sell_info);
 		imageview_sell_info = findViewById(R.id.imageview_sell_info);
@@ -259,7 +259,7 @@ public class CreateP2pSellOfferActivity extends AppCompatActivity {
 		card_sell_review = findViewById(R.id.card_sell_review);
 		card_sell_review_note = findViewById(R.id.card_sell_review_note);
 		tv_sell_step2_error = findViewById(R.id.tv_sell_step2_error);
-		btn_sell_deposit_ajc_2 = findViewById(R.id.btn_sell_deposit_ajc_2);
+		btn_sell_deposit_harv_2 = findViewById(R.id.btn_sell_deposit_harv_2);
 		btn_publish_sell_offer = findViewById(R.id.btn_publish_sell_offer);
 		btn_sell_back_to_step1 = findViewById(R.id.btn_sell_back_to_step1);
 		layout_sell_review = findViewById(R.id.layout_sell_review);

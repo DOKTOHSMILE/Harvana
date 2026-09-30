@@ -52,7 +52,7 @@ public final class P2pOfferWizard {
 
 	private static final Map<AppCompatActivity, Runnable> PAYMENT_REFRESH = new WeakHashMap<>();
 
-	private static final String INSUFFICIENT_BALANCE_ERROR = "You don't have that much AJC available.";
+	private static final String INSUFFICIENT_BALANCE_ERROR = ("You don't have that much " + com.harvanna.app.CoinInfo.ticker() + " available.");
 
 	private P2pOfferWizard() {}
 
@@ -106,8 +106,8 @@ public final class P2pOfferWizard {
 		TextView tvPriceNote = a.findViewById(id(a, "tv_" + p + "_price_note"));
 		EditText etTerms = a.findViewById(id(a, "et_" + p + "_terms"));
 		TextView tvTermsCounter = a.findViewById(id(a, "tv_" + p + "_terms_counter"));
-		View btnDeposit1 = a.findViewById(id(a, "btn_" + p + "_deposit_ajc_1"));
-		View btnDeposit2 = a.findViewById(id(a, "btn_" + p + "_deposit_ajc_2"));
+		View btnDeposit1 = a.findViewById(id(a, "btn_" + p + "_deposit_harv_1"));
+		View btnDeposit2 = a.findViewById(id(a, "btn_" + p + "_deposit_harv_2"));
 		View rowMinAccountAge = a.findViewById(id(a, "row_" + p + "_min_account_age"));
 		TextView tvMinAccountAge = a.findViewById(id(a, "tv_" + p + "_min_account_age_value"));
 		final int[] minAccountAgeDays = {0};
@@ -133,13 +133,13 @@ public final class P2pOfferWizard {
 
 		if (tvPriceCurrency != null) tvPriceCurrency.setText(currency);
 		if (tvDuration != null) tvDuration.setText("7 days");
-		if (tvLimit != null) tvLimit.setText("Min 1 · Max — AJC");
+		if (tvLimit != null) tvLimit.setText(("Min 1 · Max — " + com.harvanna.app.CoinInfo.ticker()));
 		if (tvError1 != null) tvError1.setVisibility(View.GONE);
 		if (tvError2 != null) tvError2.setVisibility(View.GONE);
 
 		// The "index price" is honestly sourced from FiatValueHelper's own
-		// definition of AJC's market rate — the cheapest currently-open
-		// SELL listing in this currency (see that class's own comment: AJC
+		// definition of HARV's market rate — the cheapest currently-open
+		// SELL listing in this currency (see that class's own comment: HARV
 		// has no real external exchange listing anywhere, so a fabricated
 		// Binance/CMC-style feed would be dishonest). Both the fat-finger
 		// guardrail (Fixed mode) and the margin calculation (Floating
@@ -168,9 +168,9 @@ public final class P2pOfferWizard {
 		if (sell && tvAvailable != null) {
 			tvAvailable.setText("…");
 			WalletNodeBridge.fetchLiveBalance(a, address, new WalletNodeBridge.BalanceCallback() {
-				@Override public void onSuccess(double balanceAjc, long nonce, long blockHeight) {
-					available[0] = balanceAjc;
-					tvAvailable.setText(BalanceFormatter.smart(balanceAjc));
+				@Override public void onSuccess(double balanceHarv, long nonce, long blockHeight) {
+					available[0] = balanceHarv;
+					tvAvailable.setText(BalanceFormatter.smart(balanceHarv));
 				}
 				@Override public void onError(String error) {
 					available[0] = -1;
@@ -198,7 +198,7 @@ public final class P2pOfferWizard {
 				if (minOrder[0] > amount && amount > 0) minOrder[0] = Math.max(1, amount);
 				if (minOrder[0] > maxOrder[0]) minOrder[0] = maxOrder[0];
 				if (tvLimit != null && amount > 0) {
-					tvLimit.setText(String.format(Locale.US, "Min %s · Max %s AJC",
+					tvLimit.setText(String.format(Locale.US, ("Min %s · Max %s " + com.harvanna.app.CoinInfo.ticker()),
 						BalanceFormatter.smartDecimal(minOrder[0]), BalanceFormatter.smartDecimal(maxOrder[0])));
 				}
 				_refreshPricingDisplay(floatingMode[0], etPrice, etMargin, tvPriceNote,
@@ -223,7 +223,7 @@ public final class P2pOfferWizard {
 			rowLimit.setOnClickListener(v -> showLimitSheet(a, parse(etAmount), minOrder[0], maxOrder[0], (chosenMin, chosenMax) -> {
 				minOrder[0] = chosenMin;
 				maxOrder[0] = chosenMax;
-				if (tvLimit != null) tvLimit.setText(String.format(Locale.US, "Min %s · Max %s AJC",
+				if (tvLimit != null) tvLimit.setText(String.format(Locale.US, ("Min %s · Max %s " + com.harvanna.app.CoinInfo.ticker()),
 					BalanceFormatter.smartDecimal(chosenMin), BalanceFormatter.smartDecimal(chosenMax)));
 			}));
 		}
@@ -334,7 +334,7 @@ public final class P2pOfferWizard {
 
 	// Margin needs a sign (a discount is a negative margin), which
 	// BalanceFormatter.parseUserInput deliberately rejects (it's built for
-	// AJC amounts, which are never negative) — so this gets its own parser.
+	// HARV amounts, which are never negative) — so this gets its own parser.
 	private static double parseMargin(EditText etMargin) {
 		if (etMargin == null) return 0;
 		String raw = etMargin.getText().toString().trim();
@@ -369,7 +369,7 @@ public final class P2pOfferWizard {
 				if (diffPct > 10) {
 					tvNote.setText(String.format(Locale.US,
 						"Your price is significantly different from the market rate of %s.",
-						P2pMoney.perAjc(indexPrice, currency)));
+						P2pMoney.perHarv(indexPrice, currency)));
 					tvNote.setTextColor(0xFFF59E0B); // colorWarning
 					return;
 				}
@@ -390,7 +390,7 @@ public final class P2pOfferWizard {
 				tvCalculatedPrice.setTextColor(0xFFEF4444); // colorError
 			} else {
 				tvCalculatedPrice.setText(String.format(Locale.US, "Current price: %s (market %s)",
-					P2pMoney.perAjc(calculated, currency), P2pMoney.perAjc(indexPrice, currency)));
+					P2pMoney.perHarv(calculated, currency), P2pMoney.perHarv(indexPrice, currency)));
 				tvCalculatedPrice.setTextColor(tvCalculatedPrice.getContext().getResources().getColor(R.color.colorAccent));
 			}
 		}
@@ -399,17 +399,17 @@ public final class P2pOfferWizard {
 	private static String validate(boolean sell, double amount, double price, double minOrder, double maxOrder,
 	                               List<PaymentMethod> methods, double available,
 	                               boolean floating, double marginPercent, double indexPrice) {
-		if (amount < 10 || amount > 5000) return "A listing must be between 10 and 5,000 AJC.";
+		if (amount < 10 || amount > 5000) return ("A listing must be between 10 and 5,000 " + com.harvanna.app.CoinInfo.ticker() + ".");
 		if (floating) {
 			if (indexPrice <= 0) return "No market rate available yet — floating pricing needs at least one open listing to price against. Use Fixed Price instead.";
 			if (marginPercent < -20 || marginPercent > 20) return "Floating margin must be between -20% and +20%.";
 		}
 		if (price <= 0) return "Enter a unit price greater than zero.";
-		if (minOrder < 1) return "Minimum trade must be at least 1 AJC.";
+		if (minOrder < 1) return ("Minimum trade must be at least 1 " + com.harvanna.app.CoinInfo.ticker() + ".");
 		if (maxOrder > amount) return "Maximum trade can't be more than the total you're listing.";
 		if (minOrder > maxOrder) return "Minimum trade can't be more than the maximum trade.";
 		if (sell && methods.isEmpty()) return "Pick at least one payment method so buyers know where to pay you.";
-		if (sell && available < 0) return "Couldn't load your AJC balance — go back and try again.";
+		if (sell && available < 0) return ("Couldn't load your " + com.harvanna.app.CoinInfo.ticker() + " balance — go back and try again.");
 		if (sell && amount > available) return INSUFFICIENT_BALANCE_ERROR;
 		return null;
 	}
@@ -487,7 +487,7 @@ public final class P2pOfferWizard {
 	                               List<PaymentMethod> methods) {
 		String p = sell ? "sell" : "buy";
 		setText(a, "tv_" + p + "_review_amount", BalanceFormatter.smart(amount));
-		setText(a, "tv_" + p + "_review_unit_price", P2pMoney.perAjc(price, currency));
+		setText(a, "tv_" + p + "_review_unit_price", P2pMoney.perHarv(price, currency));
 		setText(a, "tv_" + p + "_review_total_price", P2pMoney.fiat(amount * price, currency));
 		setText(a, "tv_" + p + "_review_fee", "Set by the node at match time");
 		setText(a, "tv_" + p + "_review_trade_limit",
@@ -564,14 +564,14 @@ public final class P2pOfferWizard {
 		minInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		minInput.setTextColor(ThemedDialogs.onSurface(a));
 		minInput.setHintTextColor(ThemedDialogs.onSurfaceVariant(a));
-		minInput.setHint("Min AJC");
+		minInput.setHint(("Min " + com.harvanna.app.CoinInfo.ticker()));
 		if (currentMin > 0) minInput.setText(BalanceFormatter.smartDecimal(currentMin));
 		root.addView(minInput);
 		EditText maxInput = new EditText(a);
 		maxInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		maxInput.setTextColor(ThemedDialogs.onSurface(a));
 		maxInput.setHintTextColor(ThemedDialogs.onSurfaceVariant(a));
-		maxInput.setHint("Max AJC");
+		maxInput.setHint(("Max " + com.harvanna.app.CoinInfo.ticker()));
 		double initialMax = currentMax > 0 ? currentMax : amount;
 		if (initialMax > 0) maxInput.setText(BalanceFormatter.smartDecimal(initialMax));
 		root.addView(maxInput);
@@ -676,7 +676,7 @@ public final class P2pOfferWizard {
 	}
 
 	private interface DurationPick { void onPicked(long hours, String label); }
-	private interface LimitPick { void onPicked(double minAjc, double maxAjc); }
+	private interface LimitPick { void onPicked(double minHarv, double maxHarv); }
 	private interface PaymentWindowPick { void onPicked(int minutes, String label); }
 	private interface MinAccountAgePick { void onPicked(int days, String label); }
 

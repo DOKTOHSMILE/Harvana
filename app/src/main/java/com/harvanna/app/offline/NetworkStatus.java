@@ -58,7 +58,7 @@ public final class NetworkStatus {
      *    - UserProfileManager/GroupFirestoreManager (OkHttp): prefix
      *      "Network error: " on IOException, "HTTP <code>: " on a real
      *      response.
-     *    - AjooNodeClient (HttpURLConnection): raw Java exception message
+     *    - HarvannaNodeClient (HttpURLConnection): raw Java exception message
      *      on a transport failure (e.g. "Unable to resolve host ...",
      *      "failed to connect to ...", "Connection timed out", or its own
      *      generic "network error" fallback when getMessage() is null),

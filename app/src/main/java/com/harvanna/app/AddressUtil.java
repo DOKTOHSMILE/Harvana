@@ -1,7 +1,7 @@
 package com.harvanna.app;
 
 /**
- * Utility class for handling, formatting, and validating Ajoo Chain wallet addresses.
+ * Utility class for handling, formatting, and validating Harvanna Chain wallet addresses.
  */
 public class AddressUtil {
 
@@ -17,7 +17,7 @@ public class AddressUtil {
     }
 
     /**
-     * Validates if the provided string is a properly formatted Ajoo Chain address.
+     * Validates if the provided string is a properly formatted Harvanna Chain address.
      * Enforces the mandatory "HV0x" prefix rule.
      */
     public static boolean isValidAddress(String address) {

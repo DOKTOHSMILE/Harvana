@@ -53,7 +53,8 @@ import java.util.HashMap;
 import java.util.regex.*;
 import org.json.*;
 import com.harvanna.app.group.JoinRequestManager;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+
 
 public class GroupMembersFragmentActivity extends Fragment {
 	
@@ -105,6 +106,9 @@ public class GroupMembersFragmentActivity extends Fragment {
 		tv_members_empty = _view.findViewById(R.id.tv_members_empty);
 		tv_members_count = _view.findViewById(R.id.tv_members_count);
 		btn_members_invite = _view.findViewById(R.id.btn_members_invite);
+		if (btn_members_invite != null) btn_members_invite.setOnClickListener(v -> {
+			if (getActivity() != null) com.harvanna.app.group.InviteMemberSheet.show(getActivity(), groupId, lastGroupData);
+		});
 		tv_pending_label = _view.findViewById(R.id.tv_pending_label);
 		recycler_pending_members = _view.findViewById(R.id.recycler_pending_members);
 		groupsp = getContext().getSharedPreferences("groupsp", Activity.MODE_PRIVATE);
@@ -270,7 +274,8 @@ public class GroupMembersFragmentActivity extends Fragment {
 		}
 		
 	}
-	
+	
+
 	public void _MORE() {
 	}
 	private String groupId = "";
@@ -281,6 +286,8 @@ public class GroupMembersFragmentActivity extends Fragment {
 	private HashMap<String, Object> user_data_v_map = new HashMap<>();
 	private String uid = "";
 	private boolean isAdmin = false;
+	private boolean canInvite = false;
+	private Map<String, Object> lastGroupData = new java.util.HashMap<>();
 	private int nextSlot = 1;
 	private int totalSlots = 0;
 	private String joinApprovalMethod = "ADMIN";
@@ -318,10 +325,12 @@ public class GroupMembersFragmentActivity extends Fragment {
 				String uid = FirebaseAuth.getInstance().getCurrentUser() != null
 				? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
 				isAdmin = !creatorId.isEmpty() && creatorId.equals(uid);
+				lastGroupData = new java.util.HashMap<>(data);
+				canInvite = isAdmin || Boolean.TRUE.equals(data.get("membersCanInvite"));
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> {
 					if (btn_members_invite != null)
-					btn_members_invite.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+					btn_members_invite.setVisibility(canInvite ? View.VISIBLE : View.GONE);
 					_loadMembers();
 				});
 			}
@@ -340,7 +349,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> {
 					if (btn_members_invite != null) {
-						btn_members_invite.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+						btn_members_invite.setVisibility(canInvite ? View.VISIBLE : View.GONE);
 					}
 					_loadMembers();
 				});
@@ -725,7 +734,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 	java.util.List<Integer> daysPaid) {
 		if (getContext() == null || getActivity() == null) return;
 		if (memberWallet == null || !memberWallet.startsWith("HV0x")) {
-			SketchwareUtil.showMessage(getContext(), "Member has no linked AJC wallet.");
+			SketchwareUtil.showMessage(getContext(), ("Member has no linked " + com.harvanna.app.CoinInfo.ticker() + " wallet."));
 			return;
 		}
 		if (!groupWalletAddress.startsWith("HV0x")) {
@@ -737,17 +746,17 @@ public class GroupMembersFragmentActivity extends Fragment {
 		getContext(), groupId, memberUid, contributionAmount, daysPaid,
 		new com.harvanna.app.group.FixedMonthCloseHelper.Callback() {
 			@Override
-			public void onReady(double memberPayoutAjc, double adminFeeAjc, String message) {
+			public void onReady(double memberPayoutHarv, double adminFeeHarv, String message) {
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> {
 					new android.app.AlertDialog.Builder(getActivity())
 					.setTitle("Close Fixed Month")
 					.setMessage(message + "\n\nTransfer "
-					+ com.harvanna.app.wallet.BalanceFormatter.smart(memberPayoutAjc)
+					+ com.harvanna.app.wallet.BalanceFormatter.smart(memberPayoutHarv)
 					+ " from group wallet to member?")
 					.setPositiveButton("Transfer & close", (d, w) ->
 					_executeFixedMonthTransfer(memberUid, memberWallet,
-					memberPayoutAjc, adminFeeAjc))
+					memberPayoutHarv, adminFeeHarv))
 					.setNegativeButton("Cancel", null)
 					.show();
 				});
@@ -763,11 +772,11 @@ public class GroupMembersFragmentActivity extends Fragment {
 	}
 	
 	private void _executeFixedMonthTransfer(String memberUid, String memberWallet,
-	double memberPayoutAjc, double adminFeeAjc) {
+	double memberPayoutHarv, double adminFeeHarv) {
 		if (getActivity() == null) return;
 		final com.harvanna.app.group.TransactionProgressSheet progress =
 		com.harvanna.app.group.TransactionProgressSheet.show(
-		getActivity(), "Closing Fixed Month", memberPayoutAjc);
+		getActivity(), "Closing Fixed Month", memberPayoutHarv);
 		progress.advanceTo(2);
 		
 		// THE FIX: this moved a real fixed-month payout with zero PIN/
@@ -779,7 +788,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 				getActivity(),
 				groupWalletAddress,
 				memberWallet,
-				java.math.BigDecimal.valueOf(memberPayoutAjc),
+				java.math.BigDecimal.valueOf(memberPayoutHarv),
 				null,
 				"Fixed month close · return to member",
 				new com.harvanna.app.tx.TransactionRouter.RouterCallback() {
@@ -790,7 +799,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 							progress.advanceTo(3);
 							com.harvanna.app.group.FixedMonthCloseHelper.recordClose(
 							getContext(), groupId, memberUid,
-							memberPayoutAjc, adminFeeAjc,
+							memberPayoutHarv, adminFeeHarv,
 							groupWalletAddress, memberWallet, txHash,
 							new com.harvanna.app.group.FixedMonthCloseHelper.CloseCallback() {
 								@Override
@@ -1007,6 +1016,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 							if (h.name != null) h.name.setText(full);
 							if (h.initials != null && full.length() > 0)
 							h.initials.setText(full.substring(0, 1).toUpperCase(Locale.US));
+							_applyPresence(h, data);
 						});
 					}
 					@Override
@@ -1031,13 +1041,30 @@ public class GroupMembersFragmentActivity extends Fragment {
 		@Override
 		public int getItemCount() { return data.size(); }
 		
+		/** Circular ring around the avatar: green = online now, amber = away, thin grey = offline. */
+		private void _applyPresence(VH h, Map<String, Object> profile) {
+			long now = System.currentTimeMillis();
+			com.harvanna.app.group.PresenceState st = com.harvanna.app.group.PresenceState.of(profile, now);
+			View ring = h.itemView.findViewById(R.id.view116);
+			View dot = h.itemView.findViewById(R.id.dot_member_online);
+			if (ring != null) {
+				int res = st == com.harvanna.app.group.PresenceState.ONLINE ? R.drawable.presence_ring_online
+				: st == com.harvanna.app.group.PresenceState.AWAY ? R.drawable.presence_ring_away
+				: R.drawable.presence_ring_offline;
+				ring.setBackgroundResource(res);
+			}
+			if (dot != null) dot.setVisibility(st == com.harvanna.app.group.PresenceState.ONLINE ? View.VISIBLE : View.GONE);
+			String label = com.harvanna.app.group.PresenceState.label(profile, now);
+			if (h.status != null && !label.isEmpty()) h.status.setText(label);
+		}
+		
 		private void _fetchBalance(String address, TextView target) {
 			if (target == null) return;
 			com.harvanna.app.wallet.WalletNodeBalanceHelper.load(address,
 			(bal, avail, pin, pout, pending, err) -> {
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() ->
-				target.setText(String.format(Locale.US, "%.2f AJC", avail >= 0 ? avail : bal)));
+				target.setText(String.format(Locale.US, ("%.2f " + com.harvanna.app.CoinInfo.ticker()), avail >= 0 ? avail : bal)));
 			});
 		}
 		
@@ -1273,4 +1300,4 @@ public class GroupMembersFragmentActivity extends Fragment {
 	{
 	}
 	
-}
+}

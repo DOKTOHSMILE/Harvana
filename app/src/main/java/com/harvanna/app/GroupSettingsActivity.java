@@ -34,10 +34,12 @@ import java.util.Map;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.app.ProgressDialog;
-import android.view.Window;
-import android.view.WindowManager;
 
 import com.google.firebase.FirebaseApp;
+import com.harvanna.app.utils.ThemedDialogs;
+import com.harvanna.app.utils.OfflineCacheManager;
+import com.harvanna.app.manager.GroupFirestoreManager;
+import com.harvanna.app.manager.JoinRequestManager;
 import com.harvanna.app.wallet.WalletGenerator;
 import com.harvanna.app.wallet.WalletManager;
 import com.harvanna.app.wallet.SecureWalletStorage;

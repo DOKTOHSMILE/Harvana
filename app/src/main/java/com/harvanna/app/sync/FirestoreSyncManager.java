@@ -15,7 +15,6 @@ import com.harvanna.app.ChainMath;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,35 +22,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.WriteBatch;
+import com.google.android.gms.tasks.Task;
 
 public class FirestoreSyncManager {
 	
-	public static final String PROJECT_ID = "capital-oracle-project";
-	public static final String API_KEY = HarvannaConfig.FIREBASE_API_KEY;
-	public static final String BASE_URL =
-	"https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents/";
+	private static final long WRITE_TIMEOUT_MS = 15_000L;
+	private static final String DOC_PREFIX = "projects/capital-oracle-project/databases/(default)/documents/";
 	
 	private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 	private static final FirestoreSyncManager INSTANCE = new FirestoreSyncManager();
-	
-	private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-	
-	private static final OkHttpClient HTTP = new OkHttpClient.Builder()
-	.connectTimeout(10, TimeUnit.SECONDS)
-	.readTimeout(12, TimeUnit.SECONDS)
-	.writeTimeout(12, TimeUnit.SECONDS)
-	.retryOnConnectionFailure(true)
-	.build();
 	
 	private FirestoreSyncManager() {}
 	
@@ -62,6 +52,8 @@ public class FirestoreSyncManager {
 	public interface SyncCallback {
 		void onSuccess(String result);
 		void onError(String error);
+		/** Error-only view of a callback, so shared helpers can report failures. */
+		interface ErrorSink { void onError(String error); }
 	}
 	
 	public interface WalletCallback {
@@ -146,88 +138,77 @@ public class FirestoreSyncManager {
 	
 	// ── CRUD ─────────────────────────────────────────────────────────────────
 	
+	/**
+	 * Document as a REST-shaped JSON string ({"name": ..., "fields": {...}}), the
+	 * shape parseFirestoreDocument() and the existing callers expect. The data
+	 * itself now comes from the native Firestore SDK.
+	 */
 	public static void getDocument(String collection, String documentId, SyncCallback callback) {
 		if (callback == null) return;
-		executeRequest("GET", BASE_URL + collection + "/" + documentId + "?key=" + API_KEY, null, callback);
-	}
-	
-	public static void getCollection(String collectionPath, final CollectionCallback callback) {
-		if (callback == null) return;
-		executeRequest("GET", BASE_URL + collectionPath + "?key=" + API_KEY, null, new SyncCallback() {
-			@Override
-			public void onSuccess(String json) {
-				List<Map<String, Object>> docs = new ArrayList<>();
-				try {
-					JSONObject root = new JSONObject(json);
-					JSONArray arr = root.optJSONArray("documents");
-					if (arr != null) {
-						for (int i = 0; i < arr.length(); i++) {
-							JSONObject d = arr.getJSONObject(i);
-							Map<String, Object> m = parseFirestoreDocument(d.toString());
-							if (m != null) {
-								String name = d.optString("name", "");
-								if (!name.isEmpty()) {
-									m.put("_documentId", name.substring(name.lastIndexOf('/') + 1));
-								}
-								docs.add(m);
-							}
-						}
-					}
-				} catch (Exception e) {
-					callback.onError("Failed to parse collection: " + e.getMessage());
-					return;
-				}
-				callback.onSuccess(docs);
-			}
-			
-			@Override
-			public void onError(String e) {
-				callback.onError(e);
+		DocumentReference ref = ref(collection, documentId, callback);
+		if (ref == null) return;
+		ref.get().addOnCompleteListener(task -> {
+			if (!task.isSuccessful()) { callback.onError(describe(task.getException())); return; }
+			DocumentSnapshot snap = task.getResult();
+			if (snap == null || !snap.exists()) { callback.onError("HTTP 404: document " + ref.getPath() + " not found"); return; }
+			try {
+				callback.onSuccess(docJson(ref.getPath(), snap.getData()).toString());
+			} catch (Exception e) {
+				callback.onError("Failed to read document: " + e.getMessage());
 			}
 		});
 	}
 	
-	public static void updateDocument(String collection, String documentId,
-	Map<String, Object> data, SyncCallback callback) {
-		executeRequest("PATCH",
-		BASE_URL + collection + "/" + documentId + "?key=" + API_KEY,
-		mapToFirestoreJson(data),
-		noopIfNull(callback));
+	public static void getCollection(String collectionPath, final CollectionCallback callback) {
+		if (callback == null) return;
+		if (!signedIn(callback::onError)) return;
+		FirebaseFirestore.getInstance().collection(collectionPath).get().addOnCompleteListener(task -> {
+			if (!task.isSuccessful()) { callback.onError(describe(task.getException())); return; }
+			List<Map<String, Object>> docs = new ArrayList<>();
+			if (task.getResult() != null) {
+				for (QueryDocumentSnapshot d : task.getResult()) {
+					Map<String, Object> m = readMap(d.getData());
+					m.put("_documentId", d.getId());
+					docs.add(m);
+				}
+			}
+			callback.onSuccess(docs);
+		});
 	}
 	
+	/** Replaces the whole document with data. */
+	public static void updateDocument(String collection, String documentId,
+	Map<String, Object> data, SyncCallback callback) {
+		SyncCallback cb = noopIfNull(callback);
+		DocumentReference ref = ref(collection, documentId, cb);
+		if (ref == null) return;
+		await(ref.set(writeMap(data)), cb);
+	}
+	
+	/** Field-masked merge: only the given top-level fields change. */
 	public static void patchFields(String collection, String documentId,
 	Map<String, Object> fields, SyncCallback callback) {
 		if (fields == null || fields.isEmpty()) {
 			if (callback != null) callback.onSuccess("{}");
 			return;
 		}
-		try {
-			StringBuilder url = new StringBuilder(BASE_URL)
-			.append(collection).append("/").append(documentId)
-			.append("?key=").append(API_KEY);
-			for (String key : fields.keySet()) {
-				url.append("&updateMask.fieldPaths=")
-				.append(java.net.URLEncoder.encode(key, "UTF-8"));
-			}
-			executeRequest("PATCH", url.toString(), mapToFirestoreJson(fields), noopIfNull(callback));
-		} catch (Exception e) {
-			if (callback != null) callback.onError(e.getMessage());
-		}
+		SyncCallback cb = noopIfNull(callback);
+		DocumentReference ref = ref(collection, documentId, cb);
+		if (ref == null) return;
+		await(ref.set(writeMap(fields), SetOptions.mergeFields(new ArrayList<>(fields.keySet()))), cb);
 	}
 	
 	public static void createDocument(String collection, String documentId,
 	Map<String, Object> data, SyncCallback callback) {
-		executeRequest("POST",
-		BASE_URL + collection + "?documentId=" + documentId + "&key=" + API_KEY,
-		mapToFirestoreJson(data),
-		noopIfNull(callback));
+		// Fixed document ids make this idempotent: a repeat writes the same content again.
+		updateDocument(collection, documentId, data, callback);
 	}
 	
 	public static void deleteDocument(String collection, String documentId, SyncCallback callback) {
-		executeRequest("DELETE",
-		BASE_URL + collection + "/" + documentId + "?key=" + API_KEY,
-		null,
-		noopIfNull(callback));
+		SyncCallback cb = noopIfNull(callback);
+		DocumentReference ref = ref(collection, documentId, cb);
+		if (ref == null) return;
+		await(ref.delete(), cb);
 	}
 	
 	public static void batchCommit(List<BatchWrite> writes, SyncCallback callback) {
@@ -235,54 +216,41 @@ public class FirestoreSyncManager {
 			if (callback != null) callback.onError("No writes supplied");
 			return;
 		}
+		SyncCallback cb = noopIfNull(callback);
+		if (!signedIn(cb::onError)) return;
 		try {
-			JSONArray arr = new JSONArray();
+			WriteBatch batch = FirebaseFirestore.getInstance().batch();
 			for (BatchWrite w : writes) {
-				JSONObject update = new JSONObject();
-				update.put("name", "projects/" + PROJECT_ID
-				+ "/databases/(default)/documents/" + w.collection + "/" + w.documentId);
-				update.put("fields", mapToFieldsJson(w.data));
-				JSONObject write = new JSONObject();
-				write.put("update", update);
-				arr.put(write);
+				batch.set(FirebaseFirestore.getInstance().collection(w.collection).document(w.documentId), writeMap(w.data));
 			}
-			JSONObject body = new JSONObject();
-			body.put("writes", arr);
-			String url = "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID
-			+ "/databases/(default)/documents:commit?key=" + API_KEY;
-			executeRequest("POST", url, body.toString(), callback);
+			await(batch.commit(), cb);
 		} catch (Exception e) {
-			if (callback != null) callback.onError(e.getMessage());
+			cb.onError(e.getMessage() != null ? e.getMessage() : "Batch failed");
 		}
 	}
 	
 	// ── Queries ──────────────────────────────────────────────────────────────
 	
+	/** Equality query, newest first (max 30); result is a REST-shaped JSON array of {"document": ...}. */
 	public static void runStructuredQuery(String collection, String field, String value,
 	final SyncCallback callback) {
 		if (callback == null) return;
-		try {
-			JSONObject fieldFilter = new JSONObject()
-			.put("field", new JSONObject().put("fieldPath", field))
-			.put("op", "EQUAL")
-			.put("value", new JSONObject().put("stringValue", value));
-			
-			JSONObject query = new JSONObject()
-			.put("from", new JSONArray().put(new JSONObject().put("collectionId", collection)))
-			.put("where", new JSONObject().put("fieldFilter", fieldFilter))
-			.put("orderBy", new JSONArray().put(
-			new JSONObject()
-			.put("field", new JSONObject().put("fieldPath", "timestamp"))
-			.put("direction", "DESCENDING")))
-			.put("limit", 30);
-			
-			JSONObject body = new JSONObject().put("structuredQuery", query);
-			String url = "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID
-			+ "/databases/(default)/documents:runQuery?key=" + API_KEY;
-			executeRequest("POST", url, body.toString(), callback);
-		} catch (Exception e) {
-			callback.onError(e.getMessage() != null ? e.getMessage() : "Query build failed");
-		}
+		if (!signedIn(callback::onError)) return;
+		FirebaseFirestore.getInstance().collection(collection).whereEqualTo(field, value)
+		.orderBy("timestamp", Query.Direction.DESCENDING).limit(30).get().addOnCompleteListener(task -> {
+			if (!task.isSuccessful()) { callback.onError(describe(task.getException())); return; }
+			try {
+				JSONArray arr = new JSONArray();
+				if (task.getResult() != null) {
+					for (QueryDocumentSnapshot d : task.getResult()) {
+						arr.put(new JSONObject().put("document", docJson(d.getReference().getPath(), d.getData())));
+					}
+				}
+				callback.onSuccess(arr.toString());
+			} catch (Exception e) {
+				callback.onError(e.getMessage() != null ? e.getMessage() : "Query failed");
+			}
+		});
 	}
 	
 	public static void recordTransaction(Context context, String senderAddress, String recipientAddress,
@@ -419,52 +387,29 @@ public class FirestoreSyncManager {
 		}
 		
 		final String addr = address.trim();
-		String url = BASE_URL + ChainConstants.COL_TRANSACTIONS
-		+ "?pageSize=80&orderBy=timestamp%20desc&key=" + API_KEY;
-		
-		executeRequest("GET", url, null, new SyncCallback() {
-			@Override
-			public void onSuccess(String json) {
-				List<Map<String, Object>> result = new ArrayList<>();
-				try {
-					JSONObject root = new JSONObject(json);
-					JSONArray arr = root.optJSONArray("documents");
-					if (arr != null) {
-						for (int i = 0; i < arr.length(); i++) {
-							JSONObject d = arr.getJSONObject(i);
-							Map<String, Object> m = parseFirestoreDocument(d.toString());
-							if (m == null) continue;
-							
-							String from = String.valueOf(m.get("from"));
-							String to = String.valueOf(m.get("to"));
-							String sender = String.valueOf(m.get("senderAddress"));
-							String recipient = String.valueOf(m.get("recipientAddress"));
-							
-							boolean match = addr.equalsIgnoreCase(from)
-							|| addr.equalsIgnoreCase(to)
-							|| addr.equalsIgnoreCase(sender)
-							|| addr.equalsIgnoreCase(recipient);
-							
-							if (match) {
-								String name = d.optString("name", "");
-								if (!name.isEmpty()) {
-									m.put("_documentId", name.substring(name.lastIndexOf('/') + 1));
-								}
-								result.add(m);
-							}
-						}
+		if (!signedIn(callback::onError)) return;
+		FirebaseFirestore.getInstance().collection(ChainConstants.COL_TRANSACTIONS)
+		.orderBy("timestamp", Query.Direction.DESCENDING).limit(80).get().addOnCompleteListener(task -> {
+			if (!task.isSuccessful()) { callback.onError(describe(task.getException())); return; }
+			List<Map<String, Object>> result = new ArrayList<>();
+			if (task.getResult() != null) {
+				for (QueryDocumentSnapshot d : task.getResult()) {
+					Map<String, Object> m = readMap(d.getData());
+					String from = String.valueOf(m.get("from"));
+					String to = String.valueOf(m.get("to"));
+					String sender = String.valueOf(m.get("senderAddress"));
+					String recipient = String.valueOf(m.get("recipientAddress"));
+					boolean match = addr.equalsIgnoreCase(from)
+					|| addr.equalsIgnoreCase(to)
+					|| addr.equalsIgnoreCase(sender)
+					|| addr.equalsIgnoreCase(recipient);
+					if (match) {
+						m.put("_documentId", d.getId());
+						result.add(m);
 					}
-				} catch (Exception e) {
-					callback.onError("Parse error: " + e.getMessage());
-					return;
 				}
-				callback.onSuccess(result);
 			}
-			
-			@Override
-			public void onError(String e) {
-				callback.onError(e);
-			}
+			callback.onSuccess(result);
 		});
 	}
 	
@@ -509,7 +454,7 @@ public class FirestoreSyncManager {
 		}
 	}
 	
-	// ── HTTP (OkHttp) ────────────────────────────────────────────────────────
+	// ── Helpers ────────────────────────────────────────────────────────────
 	
 	private static SyncCallback noopIfNull(SyncCallback cb) {
 		if (cb != null) return cb;
@@ -519,105 +464,67 @@ public class FirestoreSyncManager {
 		};
 	}
 	
-	private static void executeRequest(final String method, final String urlString,
-	final String body, final SyncCallback callback) {
-		if (callback == null) return;
-		
-		// Run on background so Tasks.await in AuthTokenProvider is safe
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				String token = AuthTokenProvider.getIdToken(false);
-				
-				Request.Builder rb = new Request.Builder().url(urlString);
-				if (token != null && !token.isEmpty()) {
-					rb.header("Authorization", "Bearer " + token);
-				}
-				
-				String m = method != null ? method.toUpperCase() : "GET";
-				if ("POST".equals(m) || "PATCH".equals(m) || "PUT".equals(m)) {
-					RequestBody reqBody = RequestBody.create(JSON, body != null ? body : "{}");
-					rb.method(m, reqBody);
-				} else if ("DELETE".equals(m)) {
-					rb.delete();
-				} else {
-					rb.get();
-				}
-				
-				HTTP.newCall(rb.build()).enqueue(new Callback() {
-					@Override
-					public void onFailure(Call call, final IOException e) {
-						mainHandler.post(new Runnable() {
-							@Override
-							public void run() {
-								callback.onError(e.getMessage() != null ? e.getMessage() : "Network error");
-							}
-						});
-					}
-					
-					@Override
-					public void onResponse(Call call, final Response response) {
-						final int code = response.code();
-						String responseBody = "";
-						try {
-							ResponseBody rbod = response.body();
-							if (rbod != null) responseBody = rbod.string();
-						} catch (Exception ignored) {}
-						final String text = responseBody != null ? responseBody : "";
-						
-						// One retry with forced token refresh on 401
-						if (code == 401) {
-							String fresh = AuthTokenProvider.getIdToken(true);
-							if (fresh != null && !fresh.isEmpty()) {
-								Request.Builder retry = new Request.Builder().url(urlString)
-								.header("Authorization", "Bearer " + fresh);
-								if ("POST".equals(m) || "PATCH".equals(m) || "PUT".equals(m)) {
-									retry.method(m, RequestBody.create(JSON, body != null ? body : "{}"));
-								} else if ("DELETE".equals(m)) {
-									retry.delete();
-								} else {
-									retry.get();
-								}
-								try {
-									Response r2 = HTTP.newCall(retry.build()).execute();
-									String t2 = "";
-									try {
-										if (r2.body() != null) t2 = r2.body().string();
-									} catch (Exception ignored) {}
-									final int c2 = r2.code();
-									final String body2 = t2;
-									mainHandler.post(new Runnable() {
-										@Override
-										public void run() {
-											if (c2 >= 200 && c2 < 300) callback.onSuccess(body2);
-											else callback.onError("HTTP " + c2 + ": " + body2);
-										}
-									});
-									return;
-								} catch (Exception e) {
-									mainHandler.post(new Runnable() {
-										@Override
-										public void run() {
-											callback.onError(e.getMessage() != null ? e.getMessage() : "Retry failed");
-										}
-									});
-									return;
-								}
-							}
-						}
-						
-						mainHandler.post(new Runnable() {
-							@Override
-							public void run() {
-								if (code >= 200 && code < 300) callback.onSuccess(text);
-								else callback.onError("HTTP " + code + ": " + text);
-							}
-						});
-					}
-				});
-			}
-		}).start();
+	// ── Native SDK plumbing ──────────────────────────────────────────────────
+	
+	private static boolean signedIn(SyncCallback.ErrorSink onError) {
+		if (FirebaseAuth.getInstance().getCurrentUser() != null) return true;
+		mainHandler.post(() -> onError.onError("Not signed in \u2014 no current Firebase user."));
+		return false;
 	}
+	
+	private static DocumentReference ref(String collection, String documentId, SyncCallback cb) {
+		if (!signedIn(cb::onError)) return null;
+		if (collection == null || collection.isEmpty() || documentId == null || documentId.isEmpty()) {
+			mainHandler.post(() -> cb.onError("HTTP 400: missing collection or document id"));
+			return null;
+		}
+		return FirebaseFirestore.getInstance().collection(collection).document(documentId);
+	}
+	
+	/** Reports exactly one result: the SDK's ack, or a network error after WRITE_TIMEOUT_MS. */
+	private static void await(Task<Void> task, final SyncCallback cb) {
+		final AtomicBoolean done = new AtomicBoolean(false);
+		final Runnable timeout = () -> {
+			if (done.compareAndSet(false, true)) {
+				cb.onError("Network error: write not acknowledged yet (queued; will sync when back online)");
+			}
+		};
+		mainHandler.postDelayed(timeout, WRITE_TIMEOUT_MS);
+		task.addOnCompleteListener(t -> {
+			if (!done.compareAndSet(false, true)) return;
+			mainHandler.removeCallbacks(timeout);
+			if (t.isSuccessful()) cb.onSuccess("{}");
+			else cb.onError(describe(t.getException()));
+		});
+	}
+	
+	private static String describe(Exception e) {
+		if (e instanceof FirebaseFirestoreException) {
+			FirebaseFirestoreException fe = (FirebaseFirestoreException) e;
+			String msg = fe.getMessage() != null ? fe.getMessage() : fe.getCode().name();
+			switch (fe.getCode()) {
+				case NOT_FOUND:           return "HTTP 404: " + msg;
+				case PERMISSION_DENIED:   return "HTTP 403: " + msg;
+				case UNAUTHENTICATED:     return "HTTP 401: " + msg;
+				case UNAVAILABLE:
+				case DEADLINE_EXCEEDED:
+				case CANCELLED:           return "Network error: " + msg;
+				case INVALID_ARGUMENT:
+				case FAILED_PRECONDITION:
+				case ALREADY_EXISTS:      return "HTTP 400: " + msg;
+				default:                  return "HTTP 500: " + msg;
+			}
+		}
+		return "Network error: " + (e != null && e.getMessage() != null ? e.getMessage() : "unknown error");
+	}
+	
+	private static Map<String, Object> writeMap(Map<String, Object> data) { return com.harvanna.app.firestore.GroupFirestoreManager.cleanForWrite(data); }
+	private static Map<String, Object> readMap(Map<String, Object> data) { return com.harvanna.app.firestore.GroupFirestoreManager.readFromSdk(data); }
+	
+	private static JSONObject docJson(String path, Map<String, Object> data) throws Exception {
+		return new JSONObject().put("name", DOC_PREFIX + path).put("fields", mapToFieldsJson(readMap(data)));
+	}
+	
 	// ── Firestore JSON helpers ───────────────────────────────────────────────
 	
 	private static String mapToFirestoreJson(Map<String, Object> data) {

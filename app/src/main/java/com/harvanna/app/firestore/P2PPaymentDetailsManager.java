@@ -3,27 +3,26 @@ package com.harvanna.app.firestore;
 import android.content.Context;
 import android.util.Log;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import okhttp3.*;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
-* REST-based Firestore access for P2P_PAYMENT_DETAILS/{listingId} — same
-* REST-not-SDK, OkHttp, Bearer-token pattern as UserProfileManager and
-* GroupFirestoreManager, kept as its own class for the same reason those
-* two are separate: a distinct collection with its own lifecycle.
+* Firestore access (native SDK) for P2P_PAYMENT_DETAILS/{listingId} - same
+* pattern as UserProfileManager and GroupFirestoreManager, kept as its own
+* class for the same reason those two are separate: a distinct collection with its own lifecycle.
 *
 * This collection exists specifically so bank/mobile-money details never
 * touch the blockchain node at all — they used to be part of the signed
@@ -39,12 +38,12 @@ import java.util.concurrent.TimeUnit;
 public class P2PPaymentDetailsManager {
 	
 	private static final String TAG = "P2PPaymentDetailsManager";
-	private static final String PROJECT_ID = "capital-oracle-project";
-	private static final String BASE_URL = "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents";
+	private static final long WRITE_TIMEOUT_MS = 15_000L;
+	private static final Executor BG = Executors.newCachedThreadPool();
+	private static final ScheduledExecutorService TIMER = Executors.newSingleThreadScheduledExecutor();
 	private static final String COLLECTION = "P2P_PAYMENT_DETAILS";
 	
 	private static P2PPaymentDetailsManager instance;
-	private final OkHttpClient client;
 	
 	public static synchronized P2PPaymentDetailsManager getInstance(Context context) {
 		if (instance == null) {
@@ -54,11 +53,6 @@ public class P2PPaymentDetailsManager {
 	}
 	
 	private P2PPaymentDetailsManager() {
-		client = new OkHttpClient.Builder()
-		.connectTimeout(15, TimeUnit.SECONDS)
-		.readTimeout(15, TimeUnit.SECONDS)
-		.writeTimeout(15, TimeUnit.SECONDS)
-		.build();
 	}
 	
 	public interface SimpleCallback {
@@ -121,10 +115,7 @@ public class P2PPaymentDetailsManager {
 		fields.put("sellerUid", sellerUid);
 		fields.put("createdAtMs", System.currentTimeMillis());
 		
-		_authorizedRequest("PATCH", "/" + COLLECTION + "/" + listingId, _encodeFields(fields), new _RawCallback() {
-			@Override public void onSuccess(String body) { callback.onSuccess(); }
-			@Override public void onError(String error) { callback.onError(error); }
-		});
+		write(doc(COLLECTION, listingId), fields, callback);
 	}
 	
 	/** Called by the buyer's client once they've claimed a listing —
@@ -133,17 +124,7 @@ public class P2PPaymentDetailsManager {
 *  document), replacing the old approach of the node deciding what to
 *  redact based on listing status. */	
 	public void get(String listingId, DocCallback callback) {
-		_authorizedRequest("GET", "/" + COLLECTION + "/" + listingId, null, new _RawCallback() {
-			@Override
-			public void onSuccess(String body) {
-				try {
-					callback.onSuccess(_decodeDocument(new JSONObject(body)));
-				} catch (Exception e) {
-					callback.onError("Failed to parse payment details: " + e.getMessage());
-				}
-			}
-			@Override public void onError(String error) { callback.onError(error); }
-		});
+		read(doc(COLLECTION, listingId), callback);
 	}
 	
 	/** Called right after P2PTradeRouter.claimPayment() succeeds. A
@@ -160,11 +141,7 @@ public class P2PPaymentDetailsManager {
 		fields.put("orderId", orderId);
 		fields.put("claimedAtMs", System.currentTimeMillis());
 		
-		_authorizedRequest("PATCH", "/" + COLLECTION + "/" + listingId + "/authorizedBuyers/" + buyerUid,
-		_encodeFields(fields), new _RawCallback() {
-			@Override public void onSuccess(String body) { callback.onSuccess(); }
-			@Override public void onError(String error) { callback.onError(error); }
-		});
+		write(doc(COLLECTION, listingId, "authorizedBuyers", buyerUid), fields, callback);
 	}
 	
 	/** Resolves the buyer's Firestore uid for a specific order — the
@@ -179,41 +156,21 @@ public class P2PPaymentDetailsManager {
 	public interface UidCallback { void onFound(String buyerUid); void onNotFound(); void onError(String error); }
 	
 	public void getBuyerUidForOrder(String listingId, String orderId, UidCallback callback) {
-		try {
-			JSONObject query = new JSONObject();
-			JSONObject structuredQuery = new JSONObject();
-			JSONArray from = new JSONArray();
-			from.put(new JSONObject().put("collectionId", "authorizedBuyers"));
-			structuredQuery.put("from", from);
-			JSONObject fieldFilter = new JSONObject();
-			fieldFilter.put("field", new JSONObject().put("fieldPath", "orderId"));
-			fieldFilter.put("op", "EQUAL");
-			fieldFilter.put("value", new JSONObject().put("stringValue", orderId));
-			structuredQuery.put("where", new JSONObject().put("fieldFilter", fieldFilter));
-			query.put("structuredQuery", structuredQuery);
-			
-			_authorizedRequest("POST", "/" + COLLECTION + "/" + listingId + ":runQuery", query, new _RawCallback() {
-				@Override
-				public void onSuccess(String body) {
-					try {
-						JSONArray results = new JSONArray(body);
-						for (int i = 0; i < results.length(); i++) {
-							JSONObject entry = results.getJSONObject(i);
-							if (!entry.has("document")) continue;
-							String name = entry.getJSONObject("document").optString("name", "");
-							String buyerUid = name.substring(name.lastIndexOf('/') + 1);
-							if (!buyerUid.isEmpty()) { callback.onFound(buyerUid); return; }
-						}
-						callback.onNotFound();
-					} catch (Exception e) {
-						callback.onError("Failed to parse buyer lookup: " + e.getMessage());
-					}
-				}
-				@Override public void onError(String error) { callback.onError(error); }
-			});
-		} catch (Exception e) {
-			callback.onError("Failed to build buyer lookup query: " + e.getMessage());
+		if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+			BG.execute(() -> callback.onError("Not signed in \u2014 no current Firebase user."));
+			return;
 		}
+		FirebaseFirestore.getInstance().collection(COLLECTION).document(listingId).collection("authorizedBuyers")
+				.whereEqualTo("orderId", orderId).get().addOnCompleteListener(BG, task -> {
+			if (!task.isSuccessful()) { callback.onError(describe(task.getException())); return; }
+			QuerySnapshot snap = task.getResult();
+			if (snap != null) {
+				for (QueryDocumentSnapshot d : snap) {
+					if (!d.getId().isEmpty()) { callback.onFound(d.getId()); return; }
+				}
+			}
+			callback.onNotFound();
+		});
 	}
 	
 	// ── Order-level payment details (Sept 17 2026) ──────────────────────
@@ -231,24 +188,11 @@ public class P2PPaymentDetailsManager {
 		}
 		fields.put("createdAtMs", System.currentTimeMillis());
 		
-		_authorizedRequest("PATCH", "/" + ORDER_COLLECTION + "/" + orderId, _encodeFields(fields), new _RawCallback() {
-			@Override public void onSuccess(String body) { callback.onSuccess(); }
-			@Override public void onError(String error) { callback.onError(error); }
-		});
+		write(doc(ORDER_COLLECTION, orderId), fields, callback);
 	}
 	
 	public void getOrderPaymentDetails(String orderId, DocCallback callback) {
-		_authorizedRequest("GET", "/" + ORDER_COLLECTION + "/" + orderId, null, new _RawCallback() {
-			@Override
-			public void onSuccess(String body) {
-				try {
-					callback.onSuccess(_decodeDocument(new JSONObject(body)));
-				} catch (Exception e) {
-					callback.onError("Failed to parse order payment details: " + e.getMessage());
-				}
-			}
-			@Override public void onError(String error) { callback.onError(error); }
-		});
+		read(doc(ORDER_COLLECTION, orderId), callback);
 	}
 	
 	public static void bindAccount(Map data, android.widget.TextView bank, android.widget.TextView number, android.widget.TextView name) {
@@ -278,175 +222,58 @@ public class P2PPaymentDetailsManager {
 		name.setText(accountName != null && !accountName.isEmpty() ? accountName : "—");
 	}
 	
-	// ── HTTP + auth plumbing ──
-	
-	private interface _RawCallback {
-		void onSuccess(String body);
-		void onError(String error);
+	// ── SDK plumbing ──
+
+	private static DocumentReference doc(String... path) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < path.length; i++) { if (i > 0) sb.append('/'); sb.append(path[i]); }
+		return FirebaseFirestore.getInstance().document(sb.toString());
 	}
-	
-	private void _authorizedRequest(String method, String path, JSONObject body, _RawCallback callback) {
-		FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-		if (user == null) {
-			callback.onError("Not signed in — no current Firebase user.");
+
+	private static void write(DocumentReference ref, Map<String, Object> fields, SimpleCallback callback) {
+		if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+			BG.execute(() -> callback.onError("Not signed in \u2014 no current Firebase user."));
 			return;
 		}
-		user.getIdToken(false).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-			@Override
-			public void onComplete(Task<GetTokenResult> task) {
-				if (task.isSuccessful() && task.getResult() != null) {
-					_executeRequest(method, path, body, task.getResult().getToken(), callback, true);
-				} else {
-					String msg = task.getException() != null ? task.getException().getMessage() : "unknown error";
-					callback.onError("Failed to obtain ID token: " + msg);
-				}
+		final AtomicBoolean done = new AtomicBoolean(false);
+		TIMER.schedule(() -> {
+			if (done.compareAndSet(false, true)) {
+				BG.execute(() -> callback.onError("Network error: write not acknowledged yet (queued; will sync when back online)"));
 			}
+		}, WRITE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+		ref.set(GroupFirestoreManager.clean(fields)).addOnCompleteListener(BG, t -> {
+			if (!done.compareAndSet(false, true)) return;
+			if (t.isSuccessful()) callback.onSuccess(); else callback.onError(describe(t.getException()));
 		});
 	}
-	
-	private void _executeRequest(String method, String path, JSONObject body, String idToken, _RawCallback callback, boolean allowRetryOn401) {
-		Request.Builder builder = new Request.Builder()
-		.url(BASE_URL + path)
-		.header("Authorization", "Bearer " + idToken);
-		
-		RequestBody requestBody = null;
-		if (body != null) {
-			requestBody = RequestBody.create(body.toString(), MediaType.parse("application/json"));
+
+	private static void read(DocumentReference ref, DocCallback callback) {
+		if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+			BG.execute(() -> callback.onError("Not signed in \u2014 no current Firebase user."));
+			return;
 		}
-		
-		switch (method) {
-			case "GET": builder.get(); break;
-			case "PATCH": builder.patch(requestBody != null ? requestBody : RequestBody.create("", MediaType.parse("application/json"))); break;
-			case "POST": builder.post(requestBody != null ? requestBody : RequestBody.create("{}", MediaType.parse("application/json"))); break;
-			default: callback.onError("Unsupported HTTP method: " + method); return;
-		}
-		
-		client.newCall(builder.build()).enqueue(new Callback() {
-			@Override
-			public void onFailure(Call call, IOException e) {
-				callback.onError("Network error: " + e.getMessage());
-			}
-			
-			@Override
-			public void onResponse(Call call, Response response) throws IOException {
-				String responseBody = response.body() != null ? response.body().string() : "";
-				if (response.code() == 401 && allowRetryOn401) {
-					FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-					if (user == null) {
-						callback.onError("Not signed in — can't refresh token after 401.");
-						return;
-					}
-					user.getIdToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-						@Override
-						public void onComplete(Task<GetTokenResult> task) {
-							if (task.isSuccessful() && task.getResult() != null) {
-								_executeRequest(method, path, body, task.getResult().getToken(), callback, false);
-							} else {
-								String msg = task.getException() != null ? task.getException().getMessage() : "unknown error";
-								callback.onError("Token refresh failed after 401: " + msg);
-							}
-						}
-					});
-					return;
-				}
-				if (!response.isSuccessful()) {
-					callback.onError("HTTP " + response.code() + ": " + responseBody);
-					return;
-				}
-				callback.onSuccess(responseBody);
-			}
+		ref.get().addOnCompleteListener(BG, task -> {
+			if (!task.isSuccessful()) { callback.onError(describe(task.getException())); return; }
+			DocumentSnapshot snap = task.getResult();
+			if (snap == null || !snap.exists()) { callback.onError("HTTP 404: document " + ref.getPath() + " not found"); return; }
+			callback.onSuccess(GroupFirestoreManager.read(snap.getData()));
 		});
 	}
-	
-	private JSONObject _encodeFields(Map<String, Object> fields) {
-		try {
-			JSONObject root = new JSONObject();
-			JSONObject fieldsObj = new JSONObject();
-			for (Map.Entry<String, Object> entry : fields.entrySet()) {
-				fieldsObj.put(entry.getKey(), _encodeValue(entry.getValue()));
+
+	private static String describe(Exception e) {
+		if (e instanceof FirebaseFirestoreException) {
+			FirebaseFirestoreException fe = (FirebaseFirestoreException) e;
+			String msg = fe.getMessage() != null ? fe.getMessage() : fe.getCode().name();
+			switch (fe.getCode()) {
+				case NOT_FOUND:           return "HTTP 404: " + msg;
+				case PERMISSION_DENIED:   return "HTTP 403: " + msg;
+				case UNAUTHENTICATED:     return "HTTP 401: " + msg;
+				case UNAVAILABLE:
+				case DEADLINE_EXCEEDED:
+				case CANCELLED:           return "Network error: " + msg;
+				default:                  return "HTTP 500: " + msg;
 			}
-			root.put("fields", fieldsObj);
-			return root;
-		} catch (Exception e) {
-			Log.e(TAG, "Failed to encode fields: " + e.getMessage());
-			return new JSONObject();
 		}
-	}
-	
-	private JSONObject _encodeValue(Object value) throws Exception {
-		JSONObject wrapper = new JSONObject();
-		if (value == null) {
-			wrapper.put("nullValue", JSONObject.NULL);
-		} else if (value instanceof String) {
-			wrapper.put("stringValue", value);
-		} else if (value instanceof Integer || value instanceof Long) {
-			wrapper.put("integerValue", String.valueOf(value));
-		} else if (value instanceof Double || value instanceof Float) {
-			wrapper.put("doubleValue", value);
-		} else if (value instanceof Boolean) {
-			wrapper.put("booleanValue", value);
-		} else if (value instanceof java.util.List) {
-			JSONArray values = new JSONArray();
-			for (Object item : (java.util.List<?>) value) {
-				values.put(_encodeValue(item));
-			}
-			JSONObject arrayValue = new JSONObject();
-			arrayValue.put("values", values);
-			wrapper.put("arrayValue", arrayValue);
-		} else if (value instanceof java.util.Map) {
-			JSONObject mapFields = new JSONObject();
-			for (Map.Entry<?, ?> entry : ((java.util.Map<?, ?>) value).entrySet()) {
-				mapFields.put(String.valueOf(entry.getKey()), _encodeValue(entry.getValue()));
-			}
-			JSONObject mapValue = new JSONObject();
-			mapValue.put("fields", mapFields);
-			wrapper.put("mapValue", mapValue);
-		} else {
-			wrapper.put("stringValue", String.valueOf(value));
-		}
-		return wrapper;
-	}
-	
-	private Map<String, Object> _decodeDocument(JSONObject doc) throws Exception {
-		Map<String, Object> result = new HashMap<>();
-		JSONObject fields = doc.optJSONObject("fields");
-		if (fields == null) return result;
-		java.util.Iterator<String> keys = fields.keys();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			result.put(key, _decodeValue(fields.getJSONObject(key)));
-		}
-		return result;
-	}
-	
-	private Object _decodeValue(JSONObject wrapper) throws Exception {
-		if (wrapper.has("stringValue")) return wrapper.getString("stringValue");
-		if (wrapper.has("integerValue")) return Long.parseLong(wrapper.getString("integerValue"));
-		if (wrapper.has("doubleValue")) return wrapper.getDouble("doubleValue");
-		if (wrapper.has("booleanValue")) return wrapper.getBoolean("booleanValue");
-		if (wrapper.has("nullValue")) return null;
-		if (wrapper.has("arrayValue")) {
-			java.util.List<Object> list = new java.util.ArrayList<>();
-			JSONArray values = wrapper.getJSONObject("arrayValue").optJSONArray("values");
-			if (values != null) {
-				for (int i = 0; i < values.length(); i++) {
-					list.add(_decodeValue(values.getJSONObject(i)));
-				}
-			}
-			return list;
-		}
-		if (wrapper.has("mapValue")) {
-			Map<String, Object> map = new HashMap<>();
-			JSONObject mapFields = wrapper.getJSONObject("mapValue").optJSONObject("fields");
-			if (mapFields != null) {
-				java.util.Iterator<String> keys = mapFields.keys();
-				while (keys.hasNext()) {
-					String key = keys.next();
-					map.put(key, _decodeValue(mapFields.getJSONObject(key)));
-				}
-			}
-			return map;
-		}
-		return null;
+		return "Network error: " + (e != null && e.getMessage() != null ? e.getMessage() : "unknown error");
 	}
 }

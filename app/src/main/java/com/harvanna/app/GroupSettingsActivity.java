@@ -39,7 +39,6 @@ import android.view.WindowManager;
 
 import com.google.firebase.FirebaseApp;
 import com.harvanna.app.utils.ThemedDialogs;
-import com.harvanna.app.utils.OfflineCacheManager;
 import com.harvanna.app.manager.GroupFirestoreManager;
 import com.harvanna.app.manager.JoinRequestManager;
 import com.harvanna.app.wallet.WalletGenerator;

@@ -76,7 +76,6 @@ public class NodeGroupActivity extends AppCompatActivity {
         scroll.addView(content, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         refresh.addView(scroll);
         refresh.setOnRefreshListener(this::load);
-        
         com.harvanna.app.utils.AppBar.setContent(this, refresh, titleFor(family), nodeId);
         if (!fsGroupId.isEmpty()) {
             com.harvanna.app.firestore.GroupFirestoreManager.getInstance(this).getGroup(fsGroupId,

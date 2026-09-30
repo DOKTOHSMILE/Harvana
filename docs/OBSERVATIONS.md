@@ -225,3 +225,8 @@ The recipient receives contribution x (members - 1), the amount actually collect
 - The node has no member cap, contribution schedule or slots for these families; "members" and "contribution" on the form are display/app-level only. Admission approval is disabled for all new groups (the node has none).
 - Old Firestore-only Accumulative/Fixed groups still work through the old screens (only old rotating groups are hidden).
 - Still on Firestore: loans tab and payout requests for Accumulative/Fixed; Home totals, Trust score and Open loans.
+
+## Totals and trust from the node, merged with Firestore (stage 3)
+- `sync/NodePortfolio` splits the user's groups into on-node groups (read from the node: your member record, and your line for Accumulative) and older Firestore-only ones. `engine/NodePositions` (unit-tested) turns node records into saved amount, borrowed/repaid, payments expected vs made, late/default gaps and completion.
+- Home: Total saved and Open loans = Firestore totals (older groups) + node totals. The trust ring now shows the computed score (TrustScoreEngine), not the stored profile number. TrustScoreEngine merges node positions into payment history, consistency, loyalty, tenure and savings. Trust Score screen lists a "On the network" line per group. Open Loans lists node debts (borrowed minus repaid from your member record) with a button into the group.
+- Gaps: the node has no call to list a member's loans, so node loans show as an outstanding total per group (not per loan), and per-loan repay needs the loan id (the loan API reads by id only). Circle "saved" counts the locked bond only. Accumulative "expected payments" assumes a daily schedule up to 30 days. A node loans-list endpoint should be added to the request to the node team.

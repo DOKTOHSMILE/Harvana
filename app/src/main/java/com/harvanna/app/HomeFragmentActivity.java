@@ -661,6 +661,8 @@ public class HomeFragmentActivity extends Fragment {
 		_loadUpcomingPayments();
 		_loadTotalSavedAcrossGroups();
 		_loadOpenLoansAcrossGroups();
+		_loadNodeTotals();
+		_loadComputedTrust();
 		_loadTrendingGroups(); // re-run now that we know which groups are ours
 	}
 	
@@ -1240,8 +1242,20 @@ public class HomeFragmentActivity extends Fragment {
 		_applyOpenLoans(count, outstanding);
 	}
 	
+	// Totals = groups read from Firestore (older groups) + groups read from the node.
+	private double fsSaved = 0, nodeSaved = 0, fsLoanOut = 0, nodeLoanOut = 0;
+	private int fsLoanCount = 0, nodeLoanCount = 0, nodeGroupCount = 0;
+	
 	private void _applyOpenLoans(int count, double outstandingHarv) {
+		fsLoanCount = count;
+		fsLoanOut = outstandingHarv;
+		_renderLoans();
+	}
+	
+	private void _renderLoans() {
 		if (!isAdded() || getActivity() == null || text_val_loans == null) return;
+		final int count = fsLoanCount + nodeLoanCount;
+		final double outstandingHarv = fsLoanOut + nodeLoanOut;
 		getActivity().runOnUiThread(() -> {
 			text_val_loans.setText(String.valueOf(count));
 			if (text_sub_loans != null) {
@@ -1251,10 +1265,43 @@ public class HomeFragmentActivity extends Fragment {
 		});
 	}
 	
+	/** The ring shows the computed score (payments, consistency, loyalty, tenure, profile), not a stored number. */
+	private void _loadComputedTrust() {
+		if (getContext() == null || FirebaseAuth.getInstance().getCurrentUser() == null) return;
+		TrustScoreEngine.compute(getContext().getApplicationContext(), FirebaseAuth.getInstance().getCurrentUser().getUid(),
+		new TrustScoreEngine.Callback() {
+			@Override public void onComplete(TrustScoreEngine.Result r) {
+				if (!isAdded() || getActivity() == null) return;
+				getActivity().runOnUiThread(() -> {
+					if (text_val_trust != null) text_val_trust.setText(r.overallScore + "%");
+					if (ring_trust_score != null) { ring_trust_score.setMax(100); ring_trust_score.setProgress(Math.max(0, Math.min(100, r.overallScore))); }
+					if (text_sub_trust != null) text_sub_trust.setText(r.tier + (r.overallScore >= 75 ? " · strong reputation" : " · build with on-time payments"));
+				});
+			}
+			@Override public void onError(String error) { }
+		});
+	}
+	
+	/** Groups that live on the node: totals come from the node's member records. */
+	private void _loadNodeTotals() {
+		if (getContext() == null || FirebaseAuth.getInstance().getCurrentUser() == null) return;
+		String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+		String wallet = WalletManager.getActiveWalletAddress(getContext());
+		com.harvanna.app.sync.NodePortfolio.load(getContext(), uid, wallet, p -> {
+			nodeSaved = p.savedHarv();
+			nodeLoanOut = p.outstandingHarv();
+			nodeLoanCount = p.loansOpen();
+			nodeGroupCount = p.entries.size();
+			_applyTotalSaved(fsSaved);
+			_renderLoans();
+		});
+	}
+	
 	private void _applyTotalSaved(double harv) {
+		fsSaved = harv;
 		if (!isAdded() || getActivity() == null || text_val_saved == null) return;
 		getActivity().runOnUiThread(() -> {
-			text_val_saved.setText(_fmtHarv(harv));
+			text_val_saved.setText(_fmtHarv(fsSaved + nodeSaved));
 			if (text_sub_saved != null) {
 				int n = group_map_list.size();
 				text_sub_saved.setText(n <= 0 ? "No group savings yet"

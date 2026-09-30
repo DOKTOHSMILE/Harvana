@@ -90,10 +90,18 @@ public class TrustScoreEngine {
 				if (_notEmpty(dob)) filled++;
 				int profileCompletenessPercent = (int) Math.round((filled / (double) total) * 100);
 				
-				List<String> firestoreGroups = _groupIdsFromProfile(profileData);
+				final List<String> firestoreGroups = _groupIdsFromProfile(profileData);
+				final long fAccountCreated = accountCreatedAtMs;
+				final boolean fVerified = verified;
+				final int fCompleteness = profileCompletenessPercent;
 				if (!firestoreGroups.isEmpty()) {
-					_continueWithGroupIds(context, uid, firestoreGroups, accountCreatedAtMs,
-					verified, profileCompletenessPercent, callback);
+					// Groups on the node are read from the node; older Firestore-only groups use the old path. Merged below.
+					String wallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(context);
+					com.harvanna.app.sync.NodePortfolio.load(context, uid, wallet, portfolio -> {
+						List<String> legacy = (portfolio.entries.isEmpty() && portfolio.legacyGroupIds.isEmpty())
+						? firestoreGroups : portfolio.legacyGroupIds;
+						_continueWithGroupIds(context, uid, legacy, fAccountCreated, fVerified, fCompleteness, portfolio, callback);
+					});
 				} else {
 					// Fallback for legacy RTDB-only membership lists
 					_fetchGroupsFromRtdbThenContinue(context, uid, accountCreatedAtMs, verified,
@@ -134,7 +142,14 @@ public class TrustScoreEngine {
 	private static void _continueWithGroupIds(Context context, String uid, List<String> groupIds,
 	long accountCreatedAtMs, boolean verified,
 	int profileCompletenessPercent, Callback callback) {
-		if (groupIds == null || groupIds.isEmpty()) {
+		_continueWithGroupIds(context, uid, groupIds, accountCreatedAtMs, verified, profileCompletenessPercent, null, callback);
+	}
+	
+	private static void _continueWithGroupIds(Context context, String uid, List<String> groupIds,
+	long accountCreatedAtMs, boolean verified,
+	int profileCompletenessPercent, com.harvanna.app.sync.NodePortfolio.Portfolio extra, Callback callback) {
+		boolean noNode = extra == null || extra.entries.isEmpty();
+		if ((groupIds == null || groupIds.isEmpty()) && noNode) {
 			Result r = new Result();
 			r.totalGroups = 0;
 			r.tenurePercent = _tenurePercent(accountCreatedAtMs);
@@ -149,8 +164,8 @@ public class TrustScoreEngine {
 			callback.onComplete(r);
 			return;
 		}
-		_gatherGroupData(context, uid, groupIds, accountCreatedAtMs, verified,
-		profileCompletenessPercent, callback);
+		_gatherGroupData(context, uid, groupIds == null ? new ArrayList<String>() : groupIds, accountCreatedAtMs, verified,
+		profileCompletenessPercent, extra, callback);
 	}
 	
 	/** Legacy fallback: groups stored as JSON string (or map/list) under RTDB userdb. */
@@ -214,8 +229,13 @@ public class TrustScoreEngine {
 	
 	private static void _gatherGroupData(Context context, String uid, List<String> groupIds,
 	long accountCreatedAtMs, boolean verified,
-	int profileCompletenessPercent, Callback callback) {
+	int profileCompletenessPercent, com.harvanna.app.sync.NodePortfolio.Portfolio extra, Callback callback) {
 		final int n = groupIds.size();
+		if (n == 0) {
+			_finish(callback, accountCreatedAtMs, accountCreatedAtMs, verified, profileCompletenessPercent, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, extra);
+			return;
+		}
 		final int[] remaining = {n};
 		final long[] earliestJoinedAt = {accountCreatedAtMs};
 		final int[] groupsStillIn = {0};
@@ -249,7 +269,7 @@ public class TrustScoreEngine {
 							profileCompletenessPercent, n, groupsStillIn[0],
 							totalExpectedPayments[0], totalConfirmedPayments[0],
 							totalPaymentGaps[0], totalRoundsTracked[0],
-							totalLoansTaken[0], totalAmountSaved[0], cyclesCompleted[0]);
+							totalLoansTaken[0], totalAmountSaved[0], cyclesCompleted[0], extra);
 						}
 					}
 				}
@@ -354,7 +374,25 @@ public class TrustScoreEngine {
 	boolean verified, int profileCompletenessPercent, int totalGroups,
 	int groupsStillIn, int totalExpectedPayments, int totalConfirmedPayments,
 	int totalPaymentGaps, int totalRoundsTracked, double totalLoansTaken,
-	double totalAmountSaved, int cyclesCompleted) {
+	double totalAmountSaved, int cyclesCompleted, com.harvanna.app.sync.NodePortfolio.Portfolio extra) {
+		// Merge groups that live on the node: their figures come from the node's member records.
+		if (extra != null) {
+			synchronized (extra.entries) {
+				for (com.harvanna.app.sync.NodePortfolio.Entry e : extra.entries) {
+					com.harvanna.app.engine.Position ps = e.position;
+					totalGroups++;
+					if (ps.stillIn) groupsStillIn++;
+					totalExpectedPayments += ps.expectedPayments;
+					totalConfirmedPayments += ps.confirmedPayments;
+					totalPaymentGaps += ps.paymentGaps;
+					totalRoundsTracked += Math.max(1, ps.confirmedPayments);
+					totalLoansTaken += ps.borrowedHarv;
+					totalAmountSaved += ps.savedHarv;
+					if (ps.cycleCompleted) cyclesCompleted++;
+					if (ps.joinedMs > 0 && (earliestJoinedAt <= 0 || ps.joinedMs < earliestJoinedAt)) earliestJoinedAt = ps.joinedMs;
+				}
+			}
+		}
 		Result r = new Result();
 		r.totalGroups = totalGroups;
 		r.totalLoansTakenHarv = totalLoansTaken;

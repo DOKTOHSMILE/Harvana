@@ -37,14 +37,6 @@ public final class AppBar {
         tb.setBackgroundColor(bar.data);
         tb.setTitleTextColor(on.data);
         tb.setSubtitleTextColor(on.data);
-        Drawable back = ContextCompat.getDrawable(a, R.drawable.ic_arrow_back);
-        if (back != null) {
-            back = DrawableCompat.wrap(back.mutate());
-            DrawableCompat.setTint(back, on.data);
-            tb.setNavigationIcon(back);
-        }
-        tb.setNavigationContentDescription("Back");
-        tb.setNavigationOnClickListener(v -> a.finish());
 
         LinearLayout root = new LinearLayout(a);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -54,10 +46,19 @@ public final class AppBar {
 
         a.setSupportActionBar(tb);
         if (a.getSupportActionBar() != null) {
-            a.getSupportActionBar().setDisplayHomeAsUpEnabled(false); // the toolbar's own back arrow is used
+            a.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             a.getSupportActionBar().setTitle(title);
             a.getSupportActionBar().setSubtitle(subtitle == null || subtitle.isEmpty() ? null : subtitle);
         }
+        // Back arrow AFTER the toolbar is installed as the action bar: installing it resets the navigation icon.
+        Drawable back = ContextCompat.getDrawable(a, R.drawable.ic_arrow_back);
+        if (back != null) {
+            back = DrawableCompat.wrap(back.mutate());
+            DrawableCompat.setTint(back, on.data);
+            tb.setNavigationIcon(back);
+        }
+        tb.setNavigationContentDescription("Back");
+        tb.setNavigationOnClickListener(v -> a.finish());
         // Three-dot menu icon in the bar's contrast colour.
         tb.post(() -> {
             Drawable o = tb.getOverflowIcon();

@@ -230,14 +230,14 @@
 			android:name=".NotificationsActivity"
 			android:label="Notifications"
 			android:configChanges="orientation|screenSize|keyboardHidden" />
-		<activity
                 <activity
                         android:name=".group.NodeGroupActivity"
                         android:label="Group"
                         android:configChanges="orientation|screenSize|keyboardHidden" />
-			android:name=".InvitesActivity"
-			android:label="Invitations"
-			android:configChanges="orientation|screenSize|keyboardHidden" />
+                <activity
+                        android:name=".InvitesActivity"
+                        android:label="Invitations"
+                        android:configChanges="orientation|screenSize|keyboardHidden" />
 		<activity
 			android:name=".group.GroupWalletBackupActivity"
 			android:label="Group wallet backup"

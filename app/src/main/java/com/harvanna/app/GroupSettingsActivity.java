@@ -1,3 +1,78 @@
+package com.harvanna.app;
+
+import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.os.Build;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
+import android.util.Base64;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.widget.NestedScrollView;
+import com.google.android.material.appbar.AppBarLayout;
+
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+
+import com.harvanna.app.crypto.Ed25519;
+import com.harvanna.app.firestore.GroupFirestoreManager;
+import com.harvanna.app.group.GroupClosePolicy;
+import com.harvanna.app.group.GroupCloser;
+import com.harvanna.app.group.JoinRequestManager;
+import com.harvanna.app.offline.OfflineCacheManager;
+import com.harvanna.app.p2p.ThemedDialogs;
+import com.harvanna.app.utils.UiColors;
+import com.harvanna.app.wallet.SecureWalletStorage;
+import com.harvanna.app.wallet.WalletGenerator;
+import com.harvanna.app.wallet.WalletManager;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+public class GroupSettingsActivity extends AppCompatActivity {
+
+	private androidx.coordinatorlayout.widget.CoordinatorLayout _coordinator;
+	private com.google.android.material.appbar.AppBarLayout _app_bar;
+	private androidx.appcompat.widget.Toolbar _toolbar;
+	private androidx.core.widget.NestedScrollView vscroll2;
+	private LinearLayout linear74;
+	private LinearLayout linear39;
+	private MaterialCardView cardHero;
 
 	private MaterialCardView cardview11;
 	private MaterialCardView cardview13;
@@ -1439,5 +1514,3 @@
 	}
 	
 }
-
-

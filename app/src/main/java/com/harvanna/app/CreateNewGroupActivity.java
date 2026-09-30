@@ -337,7 +337,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
-		// Opened from the "Create a group" picker with the type already chosen.
 		String preselected = getIntent().getStringExtra("groupType");
 		if (preselected != null && !preselected.isEmpty()) {
 			_selectGroupType(preselected);
@@ -616,9 +615,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		});
 		
 		card_type_rotating.setOnClickListener(_v -> _selectGroupType("Rotating Pool"));
-		
 		card_type_fixed.setOnClickListener(_v -> _selectGroupType("Fixed Contribution"));
-		
 		card_type_accumulative.setOnClickListener(_v -> _selectGroupType("Accumulative Funds"));
 		
 		spinner_frequency.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -629,23 +626,15 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					((TextView)_param2).setTextColor(getResources().getColor(R.color.colorTextPrimary));
 				}
 				frequencyString = _position == 0 ? "" : frequencyList.get(_position);
-				
 			}
-			
 			@Override
-			public void onNothingSelected(AdapterView<?> _param1) {
-				
-			}
+			public void onNothingSelected(AdapterView<?> _param1) {}
 		});
 		
 		dist_card_random.setOnClickListener(_v -> _selectDistributionMethod("Random Ballot"));
-		
 		dist_card_fcfs.setOnClickListener(_v -> _selectDistributionMethod("First Come First Serve"));
-		
 		dist_card_admin.setOnClickListener(_v -> _selectDistributionMethod("Admin Assigned"));
-		
 		dist_card_fixed_order.setOnClickListener(_v -> _selectDistributionMethod("Fixed Order (Join Date)"));
-		
 		dist_card_auction.setOnClickListener(_v -> _selectDistributionMethod("Auction / Bidding"));
 		
 		spinner_draw_timing.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -656,13 +645,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					((TextView)_param2).setTextColor(getResources().getColor(R.color.colorTextPrimary));
 				}
 				drawTimingString = _position == 0 ? "" : drawTimingList.get(_position);
-				
 			}
-			
 			@Override
-			public void onNothingSelected(AdapterView<?> _param1) {
-				
-			}
+			public void onNothingSelected(AdapterView<?> _param1) {}
 		});
 		
 		spinner_default_consequence.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -673,13 +658,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					((TextView)_param2).setTextColor(getResources().getColor(R.color.colorTextPrimary));
 				}
 				defaultConsequenceString = _position == 0 ? "" : defaultConsequenceList.get(_position);
-				
 			}
-			
 			@Override
-			public void onNothingSelected(AdapterView<?> _param1) {
-				
-			}
+			public void onNothingSelected(AdapterView<?> _param1) {}
 		});
 		
 		spinner_frequency_fixed.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -690,13 +671,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					((TextView)_param2).setTextColor(getResources().getColor(R.color.colorTextPrimary));
 				}
 				frequencyString = _position == 0 ? "" : frequencyList.get(_position);
-				
 			}
-			
 			@Override
-			public void onNothingSelected(AdapterView<?> _param1) {
-				
-			}
+			public void onNothingSelected(AdapterView<?> _param1) {}
 		});
 		
 		spinner_disbursement_rule.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -708,11 +685,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				}
 				disbursementRuleString = _position == 0 ? "" : disbursementRuleList.get(_position);
 			}
-			
 			@Override
-			public void onNothingSelected(AdapterView<?> _param1) {
-				
-			}
+			public void onNothingSelected(AdapterView<?> _param1) {}
 		});
 		
 		spinner_frequency_accumulative.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -723,13 +697,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					((TextView)_param2).setTextColor(getResources().getColor(R.color.colorTextPrimary));
 				}
 				frequencyString = _position == 0 ? "" : frequencyList.get(_position);
-				
 			}
-			
 			@Override
-			public void onNothingSelected(AdapterView<?> _param1) {
-				
-			}
+			public void onNothingSelected(AdapterView<?> _param1) {}
 		});
 		
 		spinner_withdrawal_rule.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -740,13 +710,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					((TextView)_param2).setTextColor(getResources().getColor(R.color.colorTextPrimary));
 				}
 				withdrawalRuleString = _position == 0 ? "" : withdrawalRuleList.get(_position);
-				
 			}
-			
 			@Override
-			public void onNothingSelected(AdapterView<?> _param1) {
-				
-			}
+			public void onNothingSelected(AdapterView<?> _param1) {}
 		});
 		
 		spinner_visibility.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -757,13 +723,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					((TextView)_param2).setTextColor(getResources().getColor(R.color.colorTextPrimary));
 				}
 				visibilityString = _position == 0 ? "" : visibilityList.get(_position);
-				
 			}
-			
 			@Override
-			public void onNothingSelected(AdapterView<?> _param1) {
-				
-			}
+			public void onNothingSelected(AdapterView<?> _param1) {}
 		});
 		
 		spinner_state.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -775,13 +737,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				}
 				stateString = _param1.getItemAtPosition(_position).toString();
 				helper.setSpinnerData(spinner_city, helper.getCityNames(countryString, stateString));
-				
 			}
-			
 			@Override
-			public void onNothingSelected(AdapterView<?> _param1) {
-				
-			}
+			public void onNothingSelected(AdapterView<?> _param1) {}
 		});
 		
 		spinner_city.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -792,13 +750,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					((TextView)_param2).setTextColor(getResources().getColor(R.color.colorTextPrimary));
 				}
 				cityString = _param1.getItemAtPosition(_position).toString();
-				
 			}
-			
 			@Override
-			public void onNothingSelected(AdapterView<?> _param1) {
-				
-			}
+			public void onNothingSelected(AdapterView<?> _param1) {}
 		});
 		
 		cancel_btn.setOnClickListener(_v -> finish());
@@ -815,143 +769,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				_showCreateWalletBottomSheet();
 			}
 		});
-		
-		_groupdb_child_listener = new ChildEventListener() {
-			@Override
-			public void onChildAdded(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onChildChanged(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onChildMoved(DataSnapshot _param1, String _param2) {
-				
-			}
-			
-			@Override
-			public void onChildRemoved(DataSnapshot _param1) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onCancelled(DatabaseError _param1) {
-				final int _errorCode = _param1.getCode();
-				final String _errorMessage = _param1.getMessage();
-				
-			}
-		};
-		groupdb.addChildEventListener(_groupdb_child_listener);
-		
-		_userdb_child_listener = new ChildEventListener() {
-			@Override
-			public void onChildAdded(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onChildChanged(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onChildMoved(DataSnapshot _param1, String _param2) {
-				
-			}
-			
-			@Override
-			public void onChildRemoved(DataSnapshot _param1) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onCancelled(DatabaseError _param1) {
-				final int _errorCode = _param1.getCode();
-				final String _errorMessage = _param1.getMessage();
-				
-			}
-		};
-		userdb.addChildEventListener(_userdb_child_listener);
-		
-		fauth_updateEmailListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_updatePasswordListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_emailVerificationSentListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_deleteUserListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_phoneAuthListener = task -> {
-			final boolean _success = task.isSuccessful();
-			final String _errorMessage = task.getException() != null ? task.getException().getMessage() : "";
-			
-		};
-		
-		fauth_updateProfileListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_googleSignInListener = task -> {
-			final boolean _success = task.isSuccessful();
-			final String _errorMessage = task.getException() != null ? task.getException().getMessage() : "";
-			
-		};
-		
-		_fauth_create_user_listener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		_fauth_sign_in_listener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		_fauth_reset_password_listener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			
-		};
 	}
 	
 	private void initializeLogic() {
@@ -967,11 +784,10 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		
 		ViewGroup formHost = findViewById(R.id.linear1);
 		if (formHost != null) formHost.addView(com.harvanna.app.social.PeoplePicker.section(this, peopleToInvite));
-		// The page heading lives in the action bar now (title + subtitle that follows the chosen group type).
 		if (textview1 != null) textview1.setVisibility(View.GONE);
 		if (textview11 != null) textview11.setVisibility(View.GONE);
 		_updateBar();
-		// Load active wallet address
+		
 		SharedPreferences walletPrefs = getSharedPreferences("harv_wallet_prefs", MODE_PRIVATE);
 		String savedSeed = walletPrefs.getString("seed_phrase", walletPrefs.getString("mnemonic", ""));
 		
@@ -994,8 +810,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		ArrayList<String> approvalMethodList = new ArrayList<>(Arrays.asList("Group Admin", "Member Vote (60% required)"));
 		spinner_approval_method.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, approvalMethodList));
 		
-		// Only relevant when approval is required at all — mirrors the
-		// switch's own state, defaulting to shown since the switch defaults checked.
 		fields_approval_method.setVisibility(switch_require_approval.isChecked() ? View.VISIBLE : View.GONE);
 		switch_require_approval.setOnCheckedChangeListener((buttonView, isChecked) ->
 		fields_approval_method.setVisibility(isChecked ? View.VISIBLE : View.GONE));
@@ -1003,7 +817,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		spinner_approval_method.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				// Only "Member Vote" (position 1) needs the explanatory note
 				textview_approval_method_note.setVisibility(position == 1 ? View.VISIBLE : View.GONE);
 			}
 			@Override
@@ -1024,9 +837,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		
 		ArrayList<String> loanInterestPeriodList = new ArrayList<>(Arrays.asList("Monthly", "Daily", "Annually"));
 		spinner_loan_interest_period.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, loanInterestPeriodList));
-		// Monthly is the sensible default for micro-loan interest, matching
-		// common Osusu/Ajo lending convention - not left unselected like the
-		// other spinners, since there's a genuinely reasonable default here.
 		spinner_loan_interest_period.setSelection(0);
 		
 		helper = new LocationHelper(this);
@@ -1053,14 +863,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				}
 			});
 		}
-		
 	}
-	
 	
 	@Override
 	public void onStart() {
 		super.onStart();
-		// Add to onStart
 		androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).registerReceiver(
 		globalTxReceiver, 
 		new android.content.IntentFilter("com.harvanna.app.ACTION_WALLET_RECEIVED")
@@ -1070,14 +877,13 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	@Override
 	public void onStop() {
 		super.onStop();
-		// Add to onStop
 		try {
 			androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(globalTxReceiver);
 		} catch (Exception ignored) {}
-		
 	}
-	public void _MORE() {
-	}
+	
+	public void _MORE() {}
+	
 	private String states = "";
 	private HashMap<String, Object> newGroupMap = new HashMap<>();
 	private String groupTypeString = "";
@@ -1096,7 +902,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private double harv_balance = 0;
 	private static final double GROUP_CREATION_FEE = 5;
 	private String activeAddress = "";
-	// TODO(observations): unused legacy AJ0x fee collector address; needs a real HV0x address if ever used.
 	private static final String FEE_COLLECTOR_ADDRESS = "AJ0xc41061d9f595b3fbc0dc11a0f4811964eeda5bf1";
 	private String stateString = "";
 	private String countryString = "";
@@ -1138,19 +943,12 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		((BaseAdapter)listview1.getAdapter()).notifyDataSetChanged();
 	}
 	
-	
 	public void _showCreateWalletBottomSheet() {
-		
 		final com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog =
 		new com.google.android.material.bottomsheet.BottomSheetDialog(this);
 		
 		View sheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_create_wallet, null);
 		bottomSheetDialog.setContentView(sheetView);
-		// Full-screen + rounded corners via the shared helper — the previous
-		// inline version called getWindow().findViewById() BEFORE show(),
-		// which is unreliable (window isn't guaranteed attached yet), and
-		// never set STATE_EXPANDED/MATCH_PARENT at all, so this sheet was
-		// opening as the default half-peek sheet instead of full screen.
 		com.harvanna.app.group.BottomSheetUtils.expandFullScreen(bottomSheetDialog, sheetView);
 		
 		com.google.android.material.button.MaterialButton btnGenerate = sheetView.findViewById(R.id.btn_generate_wallet);
@@ -1160,40 +958,24 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			tvTitle.setText("New Group Wallet Seed Phrase");
 		}
 		
-		btnGenerate.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				bottomSheetDialog.dismiss();
-				_showRecoveryPhraseBottomSheet();
-			}
+		btnGenerate.setOnClickListener(v -> {
+			bottomSheetDialog.dismiss();
+			_showRecoveryPhraseBottomSheet();
 		});
 		
-		tvCancel.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				bottomSheetDialog.dismiss();
-			}
-		});
-		
+		tvCancel.setOnClickListener(v -> bottomSheetDialog.dismiss());
 		bottomSheetDialog.show();
-		
 	}
 	
-	
 	public void _showRecoveryPhraseBottomSheet() {
-		
 		final Context context = this;
 		if (context == null) return;
 		
 		final com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog =
 		new com.google.android.material.bottomsheet.BottomSheetDialog(context);
 		
-		View sheetView = LayoutInflater.from(context)
-		.inflate(R.layout.bottom_sheet_recovery_phrase, null);
+		View sheetView = LayoutInflater.from(context).inflate(R.layout.bottom_sheet_recovery_phrase, null);
 		bottomSheetDialog.setContentView(sheetView);
-		// Same fix as _showCreateWalletBottomSheet(): shared helper instead of
-		// a pre-show findViewById() that could silently no-op, and this one
-		// additionally never set full-screen state at all.
 		com.harvanna.app.group.BottomSheetUtils.expandFullScreen(bottomSheetDialog, sheetView);
 		
 		try {
@@ -1239,49 +1021,36 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			}
 			
 			final CheckBox cbAgree = sheetView.findViewById(R.id.cb_agree);
-			final com.google.android.material.button.MaterialButton btnFinish =
-			sheetView.findViewById(R.id.btn_finish_setup);
+			final com.google.android.material.button.MaterialButton btnFinish = sheetView.findViewById(R.id.btn_finish_setup);
 			
 			if (btnFinish == null) {
 				SketchwareUtil.showMessage(context, "Finish button not found.");
 				return;
 			}
 			
-			btnFinish.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if (cbAgree != null && !cbAgree.isChecked()) {
-						SketchwareUtil.showMessage(context, "Please confirm you have backed up the phrase.");
-						return;
-					}
-					
-					pendingGroupMnemonic = mnemonic;
-					pendingGroupWalletAddress = groupWalletAddress;
-					pendingGroupBottomSheetDialog = bottomSheetDialog;
-					Intent cardIntent = new Intent(context, com.harvanna.app.CreateHarvannaCardActivity.class);
-					cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_MANDATORY, true);
-					cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RAW_MNEMONIC, mnemonic);
-					cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
-					cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_LABEL, group_name_edittext1.getText().toString().trim());
-					startActivityForResult(cardIntent, RC_MANDATORY_GROUP_CARD);
+			btnFinish.setOnClickListener(v -> {
+				if (cbAgree != null && !cbAgree.isChecked()) {
+					SketchwareUtil.showMessage(context, "Please confirm you have backed up the phrase.");
+					return;
 				}
+				
+				pendingGroupMnemonic = mnemonic;
+				pendingGroupWalletAddress = groupWalletAddress;
+				pendingGroupBottomSheetDialog = bottomSheetDialog;
+				Intent cardIntent = new Intent(context, com.harvanna.app.CreateHarvannaCardActivity.class);
+				cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_MANDATORY, true);
+				cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RAW_MNEMONIC, mnemonic);
+				cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
+				cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_LABEL, group_name_edittext1.getText().toString().trim());
+				startActivityForResult(cardIntent, RC_MANDATORY_GROUP_CARD);
 			});
 			
 			bottomSheetDialog.show();
-			
 		} catch (Exception e) {
 			SketchwareUtil.showMessage(context, "Error: " + e.getMessage());
 		}
-		
-		
 	}
 	
-	/**
-* After node is confirmed reachable: check personal balance, transfer 5 HARV
-* creation fee to the new group wallet address, persist keys locally, then
-* write the group doc. Wallet is created on-chain by the first credit —
-* no Firestore WALLETS write.
-*/
 	private void _continueGroupCreationFee(final ProgressDialog progress,
 	final Context context,
 	final SharedPreferences prefs,
@@ -1321,9 +1090,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 						}
 						
 						progress.setMessage(("Transferring 5 " + com.harvanna.app.CoinInfo.ticker() + " to group wallet..."));
-						// THE FIX: this moved 5 HARV with zero PIN/biometric
-						// confirmation — the only money-moving screen in the
-						// app besides Send/P2P that had no gate at all.
 						com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(CreateNewGroupActivity.this, () ->
 						com.harvanna.app.tx.TransactionRouter.routeTransaction(
 						CreateNewGroupActivity.this,
@@ -1387,8 +1153,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 										.show();
 									} catch (Exception e) {
 										if (!isFinishing() && progress.isShowing()) progress.dismiss();
-										SketchwareUtil.showMessage(context,
-										"Wallet save failed: " + e.getMessage());
+										SketchwareUtil.showMessage(context, "Wallet save failed: " + e.getMessage());
 									}
 								});
 							}
@@ -1397,8 +1162,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 							public void onError(String errorCode, String errorMessage) {
 								runOnUiThread(() -> {
 									if (!isFinishing() && progress.isShowing()) progress.dismiss();
-									SketchwareUtil.showMessage(context,
-									"Fee transfer failed: " + errorMessage);
+									SketchwareUtil.showMessage(context, "Fee transfer failed: " + errorMessage);
 								});
 							}
 						}));
@@ -1416,9 +1180,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		});
 	}
 	
-	/** One "Allow member loans" switch per type card, all bound to the same flag. */
 	private void _addLoanToggles() {
-		CardView[] cards = {card_fixed_details, card_accumulative_details}; // node has no loan engine for circles/rotating
+		CardView[] cards = {card_fixed_details, card_accumulative_details};
 		for (CardView c : cards) {
 			if (c == null || c.getChildCount() == 0 || !(c.getChildAt(0) instanceof LinearLayout)) continue;
 			LinearLayout host = (LinearLayout) c.getChildAt(0);
@@ -1434,7 +1197,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			loanSwitches.add(sw);
 			host.addView(sw);
 		}
-		// Fixed goal: who receives the money is fixed on the network at creation.
 		if (card_fixed_details != null && card_fixed_details.getChildCount() > 0 && card_fixed_details.getChildAt(0) instanceof LinearLayout) {
 			LinearLayout host = (LinearLayout) card_fixed_details.getChildAt(0);
 			beneficiaryInput = new EditText(this);
@@ -1450,33 +1212,26 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		if (row != null) row.setVisibility(allowLoans ? View.VISIBLE : View.GONE);
 	}
 	
-	/** Action bar: "Create new group" with the chosen type as subtitle. */
 	private void _updateBar() {
 		androidx.appcompat.app.ActionBar bar = getSupportActionBar();
 		if (bar == null) return;
 		bar.setTitle("Create new group");
 		bar.setSubtitle(groupTypeString == null || groupTypeString.isEmpty()
-			? "Choose a group type \u00b7 you'll become the admin"
-			: groupTypeString + " \u00b7 you'll become the admin");
+			? "Choose a group type · you'll become the admin"
+			: groupTypeString + " · you'll become the admin");
 	}
 	
 	private void _selectGroupType(String type) {
 		groupTypeString = type;
-<<<<<<< HEAD
 		_updateBar();
-=======
->>>>>>> main
-		// Rotating groups run on the network, which lets anyone lock a bond until the group is full:
-		// there is no admin-approval step to configure.
-		boolean rot = true; // every new group runs on the network, which has no admin-approval step
+		boolean rot = true;
 		switch_require_approval.setEnabled(!rot);
 		if (rot) { switch_require_approval.setChecked(false); }
-		boolean defaultLoans = "Accumulative Funds".equals(type); // rotating: always off
+		boolean defaultLoans = "Accumulative Funds".equals(type);
 		for (androidx.appcompat.widget.SwitchCompat sw : loanSwitches) sw.setChecked(defaultLoans);
 		allowLoans = defaultLoans;
 		_applyLoanFieldVisibility();
 		
-		// Cross-fade the detail-card swap instead of a hard cut
 		TransitionManager.beginDelayedTransition(linear1, new AutoTransition().setDuration(220));
 		
 		card_rotating_details.setVisibility("Rotating Pool".equals(type) ? View.VISIBLE : View.GONE);
@@ -1498,8 +1253,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		_animateCheckFadeIn(selectedCheck);
 		_advanceStepper(2);
 		
-		// Distribution method only applies to Rotating Pool — reset it
-		// cleanly if the user switches away after having picked one.
 		if (!"Rotating Pool".equals(type)) {
 			distributionString = "";
 			fields_random.setVisibility(View.GONE);
@@ -1510,12 +1263,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 	}
 	
-	// ═══════════════════════════════════════════════════════════════════
-	// DISTRIBUTION METHOD SELECTION — five cards, replaces the old spinner
-	// listener. Plain CardView has no built-in "selected" stroke state
-	// (that's Material-only), so selection is shown via background color
-	// instead: lit accent tint when picked, back to normal surface when not.
-	// ═══════════════════════════════════════════════════════════════════
 	private void _selectDistributionMethod(String method) {
 		distributionString = method;
 		
@@ -1541,15 +1288,10 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		fields_fcfs.setVisibility("First Come First Serve".equals(method) ? View.VISIBLE : View.GONE);
 		fields_admin.setVisibility("Admin Assigned".equals(method) ? View.VISIBLE : View.GONE);
 		fields_auction.setVisibility("Auction / Bidding".equals(method) ? View.VISIBLE : View.GONE);
-		// Fixed Order needs no extra fields at all — passive, just join timestamp
 		
-		// Universal pool-risk fields appear once ANY method is picked
 		fields_pool_universal.setVisibility(View.VISIBLE);
-		
 		_advanceStepper(3);
 	}
-	
-	// ── Animators ──────────────────────────────────────────────────────
 	
 	private void _animateCardPress(CardView card) {
 		card.animate()
@@ -1564,8 +1306,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		check.animate().alpha(1f).setDuration(180).start();
 	}
 	
-	/** Fills stepper dots up to and including the given step (1-4), with a
-*  quick color-swap so progress feels alive rather than just correct. */
 	private void _advanceStepper(int upToStep) {
 		View[] dots = { step_dot_1, step_dot_2, step_dot_3, step_dot_4 };
 		for (int i = 0; i < dots.length; i++) {
@@ -1576,9 +1316,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	
 	private String getFirestoreString(JSONObject fields, String fieldName) {
 		try {
-			if (!fields.has(fieldName)) {
-				return "";
-			}
+			if (!fields.has(fieldName)) return "";
 			JSONObject field = fields.getJSONObject(fieldName);
 			return field.optString("stringValue", "");
 		} catch (Exception e) {
@@ -1586,12 +1324,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 	}
 	
-	
 	private boolean getFirestoreBoolean(JSONObject fields, String fieldName) {
 		try {
-			if (!fields.has(fieldName)) {
-				return false;
-			}
+			if (!fields.has(fieldName)) return false;
 			JSONObject field = fields.getJSONObject(fieldName);
 			return field.optBoolean("booleanValue", false);
 		} catch (Exception e) {
@@ -1637,7 +1372,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	}
 	
 	private boolean _validateRotatingPoolFields() {
-		// Rotating groups run on the network: 3-12 members, and a cycle of 1 / 7 / 30 days.
 		if (!("Daily".equals(frequencyString) || "Weekly".equals(frequencyString) || "Monthly".equals(frequencyString))) {
 			SketchwareUtil.showMessage(getApplicationContext(), "Rotating groups run daily, weekly or monthly. Please pick one of those.");
 			return false;
@@ -1676,8 +1410,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 		return true;
 	}
-	
-	// ── Small shared validation helpers, used across all three group types ──
 	
 	private boolean _validatePositiveDecimal(EditText field, String errorMsg) {
 		String s = field.getText().toString().trim();
@@ -1772,11 +1504,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	
 	private String pendingCircleId = null;
 	
-	/**
-	 * Rotating group = one group: its details live in Firestore, its money lives on the network as a circle.
-	 * Steps: show the cost, PIN, create the circle on the node, then save the group record linked to it.
-	 * (No group wallet or Access Card: the circle's escrow is held by the network, not by a key.)
-	 */
 	private void _createRotatingOnChain() {
 		final String wallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
 		if (wallet == null || wallet.isEmpty() || com.harvanna.app.wallet.WalletManager.loadPrivateKey(this, wallet) == null) {
@@ -1792,13 +1519,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		final long creatorBond = perMember * 2L;
 		final long fee = 100_000_000L;
 		String msg = "• Each round every member pays " + com.harvanna.app.circle.CircleUi.harv(contributionRaw) + "\n"
-		+ "• The pot each round: " + com.harvanna.app.circle.CircleUi.harv(contributionRaw * (members - 1)) + " (everyone except the member being paid)\n"
-		+ "• Every other member locks a bond of " + com.harvanna.app.circle.CircleUi.harv(perMember) + " to join\n"
-		+ "• Your bond (2× a member's): " + com.harvanna.app.circle.CircleUi.harv(creatorBond) + "\n"
-		+ "• Creation fee (non-refundable): " + com.harvanna.app.circle.CircleUi.harv(fee) + "\n\n"
-		+ "Total locked from you now: " + com.harvanna.app.circle.CircleUi.harv(creatorBond + fee) + ". Network fees are extra.\n\n"
-		+ "Payout order follows when people join (you join first), with some early slots kept for members with a track record. "
-		+ "A group that doesn't fill within 72 hours is cancelled and bonds are returned.";
+		+ "• The pot each round: " + com.harvanna.app.circle.CircleUi.harv(contributionRaw * (members - 1)) + "\n"
+		+ "• Every other member locks a bond of " + com.harvanna.app.circle.CircleUi.harv(perMember) + "\n"
+		+ "• Your bond: " + com.harvanna.app.circle.CircleUi.harv(creatorBond) + "\n"
+		+ "• Creation fee: " + com.harvanna.app.circle.CircleUi.harv(fee);
+		
 		new androidx.appcompat.app.AlertDialog.Builder(this)
 		.setTitle("Create this rotating group?")
 		.setMessage(msg)
@@ -1810,7 +1535,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				@Override public void onSuccess(org.json.JSONObject json) {
 					final String id = json.optString("circleId", "");
 					if (id.isEmpty()) {
-						runOnUiThread(() -> { pd.dismiss(); SketchwareUtil.showMessage(getApplicationContext(), "The network accepted it but returned no id. Check My Groups in a moment."); });
+						runOnUiThread(() -> { pd.dismiss(); SketchwareUtil.showMessage(getApplicationContext(), "The network accepted it but returned no id."); });
 						return;
 					}
 					pendingCircleId = id;
@@ -1844,30 +1569,24 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		final String wallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
 		if (wallet == null || wallet.isEmpty() || com.harvanna.app.wallet.WalletManager.loadPrivateKey(this, wallet) == null) {
 			new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("You need a wallet first")
-			.setMessage("This group runs on the network and is paid from your wallet. Create or restore a wallet, then try again.")
+			.setMessage("This group runs on the network and is paid from your wallet.")
 			.setPositiveButton("OK", null).show();
 			return null;
 		}
 		return wallet;
 	}
 	
-	/** Accumulative: the network group holds the money and the lines; the Firestore group holds the people-facing details. */
 	private void _createAccumOnChain() {
 		final String wallet = _requireWalletOrExplain();
 		if (wallet == null) return;
 		double ratePct = allowLoans ? Double.parseDouble(loan_interest_rate_edittext.getText().toString()) : 0.0;
 		final long bps = Math.round(ratePct * 100.0);
 		final String rule = "Cycle-End Only".equals(withdrawalRuleString) ? "CYCLE_END_ONLY" : "ANYTIME";
-		String msg = "• Creation fee (non-refundable): 1 HARV\n"
-		+ "• Interest rate set for the group: " + ratePct + "%\n"
-		+ "• Withdrawals: " + ("CYCLE_END_ONLY".equals(rule) ? "only at the end of a cycle" : "any time, with your approval as admin") + "\n\n"
-		+ "Members each keep their own savings line inside the group. Their money is held by the network, not by you. "
-		+ "You earn a fee of one day's saving at the end of each 30-day period on every line. Network fees are extra.";
+		String msg = "• Creation fee: 1 HARV\n• Interest rate: " + ratePct + "%\n• Withdrawals: " + rule;
 		_confirmAndCreateOnChain("Create this savings group?", msg, cb ->
 		com.harvanna.app.sync.NodeGroupClient.createAccumGroup(getApplicationContext(), wallet, bps, rule, cb), "groupId", "ACCUM");
 	}
 	
-	/** Fixed goal: target, payout rule and beneficiary are fixed on the network at creation. */
 	private void _createFixedOnChain() {
 		final String wallet = _requireWalletOrExplain();
 		if (wallet == null) return;
@@ -1875,20 +1594,14 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		String ben = beneficiaryInput != null ? beneficiaryInput.getText().toString().trim() : "";
 		if (ben.isEmpty()) ben = wallet;
 		if (!"EMERGENCY_GRANT".equals(rule) && !(ben.startsWith("HV0x") && ben.length() == 44)) {
-			SketchwareUtil.showMessage(getApplicationContext(), "Enter a valid wallet address for who receives the money (starts with HV0x).");
+			SketchwareUtil.showMessage(getApplicationContext(), "Enter a valid wallet address for who receives the money.");
 			return;
 		}
 		final String beneficiary = "EMERGENCY_GRANT".equals(rule) ? "" : ben;
 		final long target = com.harvanna.app.circle.CircleUi.toRaw(target_goal_edittext.getText().toString());
 		final String name = group_name_edittext1.getText().toString().trim();
 		final String desc = description_edittext5.getText().toString().trim();
-		String msg = "• Goal: " + com.harvanna.app.circle.CircleUi.harv(target) + "\n"
-		+ "• Money is paid out: " + ("ALL_AT_ONCE_AT_GOAL".equals(rule) ? "all at once when the goal is reached, automatically"
-			: "ADMIN_TRIGGERED".equals(rule) ? "when you ask and the group votes yes"
-			: "MILESTONE_BASED".equals(rule) ? "in milestones, each needing a group vote" : "as emergency grants, each needing a group vote") + "\n"
-		+ ("EMERGENCY_GRANT".equals(rule) ? "" : "• Paid to: " + beneficiary + "\n")
-		+ "• Creation fee (non-refundable): 1 HARV\n\n"
-		+ "The goal, the rule and the receiver can't be changed after this. Members' deposits are held by the network. Network fees are extra.";
+		String msg = "• Goal: " + com.harvanna.app.circle.CircleUi.harv(target) + "\n• Creation fee: 1 HARV";
 		_confirmAndCreateOnChain("Create this goal group?", msg, cb ->
 		com.harvanna.app.sync.NodeGroupClient.createFixedGroup(getApplicationContext(), wallet, target, rule, beneficiary, 0L, name, desc, cb), "groupId", "FIXED");
 	}
@@ -1904,7 +1617,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				@Override public void onSuccess(org.json.JSONObject json) {
 					final String id = json.optString(idKey, json.optString("circleId", ""));
 					if (id.isEmpty()) {
-						runOnUiThread(() -> { pd.dismiss(); SketchwareUtil.showMessage(getApplicationContext(), "The network accepted it but returned no id. Check My Groups in a moment."); });
+						runOnUiThread(() -> { pd.dismiss(); SketchwareUtil.showMessage(getApplicationContext(), "The network accepted it but returned no id."); });
 						return;
 					}
 					pendingCircleId = id;
@@ -1923,9 +1636,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	}
 	
 	public void _submitNewGroupData(final String _realGroupWalletAddress) {
-		// Client-generated id — Firestore doc path is fixed via createGroup's
-		// PATCH rather than relying on auto-id, so members/notices/payments/
-		// loans subcollections can all be addressed under it immediately.
 		final String newGroupId = java.util.UUID.randomUUID().toString();
 		final String creatorUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 		final String timestamp = String.valueOf(System.currentTimeMillis());
@@ -1951,7 +1661,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		newGroupMap.put("groupRules", rules_l_map);
 		newGroupMap.put("groupWalletAddress", _realGroupWalletAddress);
 		
-		// Permissions
 		final boolean rotatingOnChain = pendingCircleId != null;
 		newGroupMap.put("requireApprovalToJoin", !rotatingOnChain && switch_require_approval.isChecked());
 		newGroupMap.put("joinApprovalMethod", !rotatingOnChain && switch_require_approval.isChecked()
@@ -1999,23 +1708,19 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			newGroupMap.put("loanInterestPeriod", "MONTHLY");
 		}
 		
-		// members/notice/payments/loans are NOT part of the group document —
-		// they're separate subcollections now, written after the group
-		// document itself succeeds.
 		final ProgressDialog groupProgress = new ProgressDialog(CreateNewGroupActivity.this);
 		groupProgress.setMessage("Saving your group...");
 		groupProgress.setCancelable(false);
 		groupProgress.show();
 		
 		final boolean onNode = pendingCircleId != null;
-		// A group that already exists on the network is queued first, so a failed save here is retried automatically.
 		if (onNode) com.harvanna.app.group.GroupSaver.queue(getApplicationContext(), creatorUid, newGroupId, newGroupMap);
 		
 		com.harvanna.app.group.GroupSaver.save(getApplicationContext(), creatorUid, newGroupId, newGroupMap, error -> runOnUiThread(() -> {
 			if (!CreateNewGroupActivity.this.isFinishing() && groupProgress.isShowing()) groupProgress.dismiss();
 			if (error != null) {
 				if (onNode) {
-					SketchwareUtil.showMessage(getApplicationContext(), "Your group exists on the network, but saving its details here failed. We'll keep retrying automatically. Group ID: " + pendingCircleId);
+					SketchwareUtil.showMessage(getApplicationContext(), "Your group exists on the network, but saving its details failed. Group ID: " + pendingCircleId);
 					finish();
 				} else {
 					SketchwareUtil.showMessage(getApplicationContext(), error);
@@ -2023,11 +1728,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				return;
 			}
 			if (onNode) com.harvanna.app.group.GroupSaver.unqueue(getApplicationContext(), newGroupId);
-<<<<<<< HEAD
-			// People picked while creating the group get their invitations now that the group exists.
+			
 			com.harvanna.app.social.PeoplePicker.sendAll(CreateNewGroupActivity.this, newGroupId, newGroupMap, peopleToInvite, "", (sent, failed) -> { });
-=======
->>>>>>> main
+			
 			if (pendingCardQr != null && pendingCardDigits != null) {
 				com.harvanna.app.group.GroupCardStore.publish(getApplicationContext(), newGroupId,
 				_realGroupWalletAddress, group_name_edittext1.getText().toString().trim(),
@@ -2071,7 +1774,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		
 		if (resolvedAddress.isEmpty()) {
 			if (!CreateNewGroupActivity.this.isFinishing() && progress.isShowing()) progress.dismiss();
-			SketchwareUtil.showMessage(context, "Personal wallet not found. Cannot pay creation fee.");
+			SketchwareUtil.showMessage(context, "Personal wallet not found.");
 			return;
 		}
 		
@@ -2089,20 +1792,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			
 			@Override
 			public void onError(String error) {
-				String err = error != null ? error : "";
-				boolean nodeDown = err.contains("network error")
-				|| err.contains("failed to connect")
-				|| err.contains("Connection refused")
-				|| err.contains("Unable to resolve")
-				|| err.contains("timeout")
-				|| err.contains("ETIMEDOUT");
-				if (nodeDown) {
-					CreateNewGroupActivity.this.runOnUiThread(() -> {
-						if (!CreateNewGroupActivity.this.isFinishing() && progress.isShowing()) progress.dismiss();
-						SketchwareUtil.showMessage(context, (com.harvanna.app.CoinInfo.ticker() + " node unreachable: ") + error);
-					});
-					return;
-				}
 				_continueGroupCreationFee(progress, context, prefs, bottomSheetDialog,
 				groupWalletAddress, mnemonic, finalPersonalAddress, finalPersonalSeed);
 			}
@@ -2122,11 +1811,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 	}
 	
-	{
-	}
-	
 	public class Listview1Adapter extends BaseAdapter {
-		
 		ArrayList<HashMap<String, Object>> _data;
 		
 		public Listview1Adapter(ArrayList<HashMap<String, Object>> _arr) {
@@ -2134,19 +1819,13 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 		
 		@Override
-		public int getCount() {
-			return _data.size();
-		}
+		public int getCount() { return _data.size(); }
 		
 		@Override
-		public HashMap<String, Object> getItem(int _index) {
-			return _data.get(_index);
-		}
+		public HashMap<String, Object> getItem(int _index) { return _data.get(_index); }
 		
 		@Override
-		public long getItemId(int _index) {
-			return _index;
-		}
+		public long getItemId(int _index) { return _index; }
 		
 		@Override
 		public View getView(final int _position, View _v, ViewGroup _container) {
@@ -2156,21 +1835,13 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				_view = _inflater.inflate(R.layout.rules_custom_card, null);
 			}
 			
-			final com.google.android.material.card.MaterialCardView cardview33 = _view.findViewById(R.id.cardview33);
-			final LinearLayout linear1 = _view.findViewById(R.id.linear1);
 			final TextView rule_no_textview1 = _view.findViewById(R.id.rule_no_textview1);
-			final View linear2 = _view.findViewById(R.id.linear2);
 			final TextView rules_textview2 = _view.findViewById(R.id.rules_textview2);
 			final ImageView imageview1 = _view.findViewById(R.id.imageview1);
 			
 			rule_no_textview1.setText(String.valueOf((long)(_position + 1)));
 			rules_textview2.setText(_data.get((int) _position).get("rules").toString());
-			imageview1.setOnClickListener(new View.OnClickListener(){
-				@Override
-				public void onClick(View _view){
-					_delete_rule_in(_position, rules_l_map);
-				}
-			});
+			imageview1.setOnClickListener(_view1 -> _delete_rule_in(_position, rules_l_map));
 			
 			return _view;
 		}

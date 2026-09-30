@@ -332,6 +332,8 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		
 		_setupTabs();
 		_wireGroupLogic();
+		int startTab = getIntent().getIntExtra("tab", -1);
+		if (startTab >= 0 && view_pager != null) view_pager.setCurrentItem(startTab);
 		if (btn_group_overflow != null) {
 			btn_group_overflow.setOnClickListener(v -> {
 				Intent i = new Intent(getApplicationContext(), GroupSettingsActivity.class);

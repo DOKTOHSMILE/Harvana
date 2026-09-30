@@ -58,12 +58,21 @@
 					android:text="0 HARV · Weekly"
 					android:textSize="12.5sp"
 					android:focusable="false" />
+				<TextView
+					android:id="@+id/textview5"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="2dp"
+					android:text=""
+					android:textSize="12sp"
+					android:textColor="@color/colorTextSecondary"
+					android:focusable="false" />
 			</LinearLayout>
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/cardview3"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_marginRight="30dp"
+				android:layout_marginRight="8dp"
 				app:cardElevation="0dp"
 				app:strokeWidth="1dp"
 				app:strokeColor="@color/colorWarning"
@@ -76,18 +85,22 @@
 					android:paddingTop="5dp"
 					android:paddingRight="8dp"
 					android:paddingBottom="5dp"
-					android:text="Pending"
-					android:textSize="8sp"
+					android:text="Due"
+					android:textSize="10sp"
+					android:textStyle="bold"
 					android:textColor="@color/colorWarning"
 					android:focusable="false" />
 			</com.google.android.material.card.MaterialCardView>
 			<com.google.android.material.button.MaterialButton
 				android:id="@+id/materialbutton1"
-				android:layout_width="65dp"
+				android:layout_width="wrap_content"
 				android:layout_height="40dp"
+				android:minWidth="84dp"
 				android:gravity="center_horizontal|center_vertical"
 				android:text="Pay"
-				android:textSize="12sp"
+				android:textAllCaps="false"
+				android:textSize="12.5sp"
+				android:textStyle="bold"
 				android:textColor="@color/colorButtonText"
 				app:backgroundTint="@color/colorButtonBackground"
 				app:cornerRadius="30dp" />

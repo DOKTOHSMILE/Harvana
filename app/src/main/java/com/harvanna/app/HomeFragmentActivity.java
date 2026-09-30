@@ -706,7 +706,7 @@ public class HomeFragmentActivity extends Fragment {
 		final String myUid = FirebaseAuth.getInstance().getCurrentUser() != null
 		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
 		List<HashMap<String, Object>> cachedRows = com.harvanna.app.offline.OfflineCacheManager.loadList(
-		getContext(), "upcoming_payments_" + myUid);
+		getContext(), "upcoming_payments_v2_" + myUid);
 		if (cachedRows != null && !cachedRows.isEmpty()) {
 			_renderUpcoming(new ArrayList<>(cachedRows));
 		} else {
@@ -714,31 +714,44 @@ public class HomeFragmentActivity extends Fragment {
 			if (linear7 != null) linear7.setVisibility(View.VISIBLE);
 		}
 		
-		if (group_map_list.isEmpty()) return;
+		if (group_map_list.isEmpty() || myUid.isEmpty()) return;
 		
 		final ArrayList<HashMap<String, Object>> rows = new ArrayList<>();
 		final int[] left = {group_map_list.size()};
 		final boolean[] hadConnectivityFailure = {false};
+		final Runnable oneDone = () -> {
+			left[0]--;
+			if (left[0] <= 0) _finishUpcoming(myUid, rows, hadConnectivityFailure[0], cachedRows);
+		};
 		
 		for (HashMap<String, Object> g : group_map_list) {
-			String gid = g.get("id") != null ? g.get("id").toString() : "";
-			if (gid.isEmpty()) {
-				left[0]--;
-				if (left[0] <= 0) _finishUpcoming(myUid, rows, hadConnectivityFailure[0], cachedRows);
-				continue;
-			}
-			com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext())
-			.getGroup(gid, new com.harvanna.app.firestore.GroupFirestoreManager.DocCallback() {
+			final String gid = g.get("id") != null ? g.get("id").toString() : "";
+			if (gid.isEmpty()) { oneDone.run(); continue; }
+			final com.harvanna.app.firestore.GroupFirestoreManager mgr =
+					com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext());
+			mgr.getGroup(gid, new com.harvanna.app.firestore.GroupFirestoreManager.DocCallback() {
 				@Override
 				public void onSuccess(Map<String, Object> data) {
-					HashMap<String, Object> row = new HashMap<>();
-					row.put("groupId", gid);
-					row.put("groupName", str(data, "groupName", str(data, "name", "Group")));
-					row.put("amount", num(data, "contributionAmount"));
-					row.put("frequency", str(data, "frequency", "Weekly"));
-					rows.add(row);
-					left[0]--;
-					if (left[0] <= 0) _finishUpcoming(myUid, rows, hadConnectivityFailure[0], cachedRows);
+					// members, then payments, then decide what this member should do
+					mgr.getMembers(gid, new com.harvanna.app.firestore.GroupFirestoreManager.ListCallback() {
+						@Override public void onSuccess(List<Map<String, Object>> members) {
+							mgr.getPayments(gid, new com.harvanna.app.firestore.GroupFirestoreManager.ListCallback() {
+								@Override public void onSuccess(List<Map<String, Object>> payments) {
+									_addUpcomingRow(rows, gid, data, members, payments, myUid);
+									oneDone.run();
+								}
+								@Override public void onError(String error) {
+									if (com.harvanna.app.offline.NetworkStatus.isConnectivityError(error)) hadConnectivityFailure[0] = true;
+									_addUpcomingRow(rows, gid, data, members, null, myUid);
+									oneDone.run();
+								}
+							});
+						}
+						@Override public void onError(String error) {
+							if (com.harvanna.app.offline.NetworkStatus.isConnectivityError(error)) hadConnectivityFailure[0] = true;
+							oneDone.run();
+						}
+					});
 				}
 				
 				@Override
@@ -746,11 +759,27 @@ public class HomeFragmentActivity extends Fragment {
 					if (com.harvanna.app.offline.NetworkStatus.isConnectivityError(error)) {
 						hadConnectivityFailure[0] = true;
 					}
-					left[0]--;
-					if (left[0] <= 0) _finishUpcoming(myUid, rows, hadConnectivityFailure[0], cachedRows);
+					oneDone.run();
 				}
 			});
 		}
+	}
+	
+	/** Works out this member's action for one group and appends a row (Pay / Remind / nothing due). */
+	private void _addUpcomingRow(ArrayList<HashMap<String, Object>> rows, String gid, Map<String, Object> data,
+	List<Map<String, Object>> members, List<Map<String, Object>> payments, String myUid) {
+		com.harvanna.app.group.PaymentDueResolver.Result r = com.harvanna.app.group.PaymentDueResolver.resolve(
+		data, members, payments, myUid, System.currentTimeMillis(), java.util.TimeZone.getDefault());
+		HashMap<String, Object> row = new HashMap<>();
+		row.put("groupId", gid);
+		row.put("groupName", str(data, "groupName", str(data, "name", "Group")));
+		row.put("amount", num(data, "contributionAmount"));
+		row.put("frequency", str(data, "frequency", ""));
+		row.put("action", r.action.name());
+		row.put("otherUid", r.otherMemberUid != null ? r.otherMemberUid : "");
+		row.put("statusLine", r.statusLine);
+		row.put("badge", r.badge);
+		synchronized (rows) { rows.add(row); }
 	}
 	
 	private void _finishUpcoming(String myUid, ArrayList<HashMap<String, Object>> rows,
@@ -759,15 +788,21 @@ public class HomeFragmentActivity extends Fragment {
 			if (cachedRows == null) _renderUpcoming(rows);
 			return;
 		}
-		com.harvanna.app.offline.OfflineCacheManager.saveList(getContext(), "upcoming_payments_" + myUid, rows);
+		// Rows that need action first: PAY, then REMIND, then nothing due.
+		java.util.Collections.sort(rows, (x, y) -> Integer.compare(rank(str(x, "action", "NONE")), rank(str(y, "action", "NONE"))));
+		com.harvanna.app.offline.OfflineCacheManager.saveList(getContext(), "upcoming_payments_v2_" + myUid, rows);
 		_renderUpcoming(rows);
+	}
+	
+	private static int rank(String action) {
+		return "PAY".equals(action) ? 0 : ("REMIND".equals(action) ? 1 : 2);
 	}
 	
 	private void _renderUpcoming(ArrayList<HashMap<String, Object>> rows) {
 		if (!isAdded() || linear_upcoming_payments == null || getActivity() == null) return;
 		getActivity().runOnUiThread(() -> {
 			linear_upcoming_payments.removeAllViews();
-			int show = Math.min(2, rows.size());
+			int show = Math.min(3, rows.size());
 			if (show == 0) {
 				if (linear7 != null) linear7.setVisibility(View.VISIBLE);
 				return;
@@ -775,34 +810,88 @@ public class HomeFragmentActivity extends Fragment {
 			if (linear7 != null) linear7.setVisibility(View.GONE);
 			LayoutInflater inf = LayoutInflater.from(getContext());
 			for (int i = 0; i < show; i++) {
-				HashMap<String, Object> row = rows.get(i);
+				final HashMap<String, Object> row = rows.get(i);
 				View item = inf.inflate(R.layout.home_upcoming_pay_custom_display,
 				linear_upcoming_payments, false);
 				TextView name = item.findViewById(R.id.textview2);
 				TextView meta = item.findViewById(R.id.textview3);
-				TextView action = item.findViewById(R.id.textview1);
+				TextView statusLine = item.findViewById(R.id.textview5);
+				TextView badge = item.findViewById(R.id.textview4);
+				com.google.android.material.card.MaterialCardView badgeCard = item.findViewById(R.id.cardview3);
+				com.google.android.material.button.MaterialButton button = item.findViewById(R.id.materialbutton1);
 				final String gid = str(row, "groupId", "");
-				if (name != null) {
-					name.setText(str(row, "groupName", "Group"));
-					try { name.setTextColor(getResources().getColor(R.color.colorTextPrimary)); } catch (Exception ignored) {}
-				}
-				if (meta != null)
-				meta.setText(com.harvanna.app.wallet.BalanceFormatter.smart(num(row, "amount"))
-				+ " · " + str(row, "frequency", ""));
-				if (action != null) {
-					action.setText("Pay");
-					try { action.setTextColor(getResources().getColor(R.color.colorAccent)); } catch (Exception ignored) {}
-					action.setOnClickListener(v -> _openGroup(gid));
-				}
+				final String action = str(row, "action", "NONE");
+				final String otherUid = str(row, "otherUid", "");
+				final String amountText = com.harvanna.app.wallet.BalanceFormatter.smart(num(row, "amount"));
+				
+				if (name != null) name.setText(str(row, "groupName", "Group"));
+				if (meta != null) meta.setText(amountText + (str(row, "frequency", "").isEmpty() ? "" : " · " + str(row, "frequency", "")));
+				if (statusLine != null) statusLine.setText(str(row, "statusLine", ""));
+				
+				int badgeColor = R.color.colorTextTertiary;
+				if ("PAY".equals(action)) badgeColor = R.color.colorWarning;
+				else if ("REMIND".equals(action)) badgeColor = R.color.colorInfo;
+				else if ("Paid".equals(str(row, "badge", ""))) badgeColor = R.color.colorSuccess;
+				int c = androidx.core.content.ContextCompat.getColor(requireContext(), badgeColor);
+				if (badge != null) { badge.setText(str(row, "badge", "")); badge.setTextColor(c); }
+				if (badgeCard != null) badgeCard.setStrokeColor(c);
+				
 				item.setOnClickListener(v -> _openGroup(gid));
+				
+				if (button == null) { linear_upcoming_payments.addView(item); continue; }
+				if ("PAY".equals(action)) {
+					button.setText("Pay");
+					button.setEnabled(true);
+					button.setAlpha(1f);
+					button.setOnClickListener(v -> _openGroupPayments(gid));
+				} else if ("REMIND".equals(action) && !otherUid.isEmpty()) {
+					button.setText("Remind");
+					button.setEnabled(true);
+					button.setAlpha(1f);
+					// show WHO we are waiting on, resolved from their profile
+					com.harvanna.app.group.MemberNameResolver.resolve(getContext(), otherUid, "a member", who -> {
+						if (isAdded() && statusLine != null) statusLine.setText("Waiting on " + who);
+						button.setOnClickListener(v -> {
+							button.setEnabled(false);
+							com.harvanna.app.group.GroupReminders.remind(getContext(), gid, otherUid, who, amountText,
+							new com.harvanna.app.group.GroupReminders.Callback() {
+								@Override public void onSent() {
+									if (!isAdded()) return;
+									button.setText("Reminded");
+									android.widget.Toast.makeText(getContext(), "Reminder sent to " + who, android.widget.Toast.LENGTH_SHORT).show();
+								}
+								@Override public void onError(String error) {
+									if (!isAdded()) return;
+									button.setEnabled(true);
+									android.widget.Toast.makeText(getContext(), error, android.widget.Toast.LENGTH_LONG).show();
+								}
+							});
+						});
+					});
+				} else {
+					// nothing due: keep the button visible but dimmed and inert
+					button.setText("Pay");
+					button.setEnabled(false);
+					button.setAlpha(0.4f);
+					button.setOnClickListener(null);
+				}
 				linear_upcoming_payments.addView(item);
 			}
 		});
 	}
 	
+	private void _openGroupPayments(String gid) {
+		if (gid == null || gid.isEmpty()) return;
+		intent.setClass(getContext().getApplicationContext(), GroupDetailsActivity.class);
+		intent.putExtra("groupId", gid);
+		intent.putExtra("tab", 2);   // Payments tab
+		startActivity(intent);
+	}
+	
 	private void _openGroup(String gid) {
 		if (gid == null || gid.isEmpty()) return;
 		intent.setClass(getContext().getApplicationContext(), GroupDetailsActivity.class);
+		intent.removeExtra("tab");   // the shared Intent may still carry the Payments-tab extra
 		intent.putExtra("groupId", gid);
 		startActivity(intent);
 	}

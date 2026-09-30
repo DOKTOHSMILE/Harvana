@@ -45,7 +45,7 @@
 						android:layout_width="20dp"
 						android:layout_height="20dp"
 						android:background="@android:color/transparent"
-						android:src="@drawable/main_app_logo_1"
+						android:src="@drawable/ic_coin_harv"
 						app:civ_border_color="@color/colorInfo"
 						app:civ_border_overlay="true"
 						app:civ_border_width="2dp"

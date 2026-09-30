@@ -33,7 +33,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="match_parent"
 					android:background="@color/colorSurfaceAlt"
-					android:src="@drawable/app_logo_transparent"
+					android:src="@drawable/ic_coin_harv"
 					android:scaleType="centerCrop"
 					android:focusable="false" />
 				<LinearLayout

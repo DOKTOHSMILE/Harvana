@@ -504,8 +504,17 @@ public class GroupFirestoreManager {
 
 	// ── Learn Hub content (top-level collection) ───────────────────────
 
-	public void addLearnContent(Map<String, Object> fields, IdCallback callback) {
-		add(col("LEARN_CONTENT"), fields, callback);
+	/**
+	 * Submits a Learn Hub article for automatic review (LEARN_SUBMISSIONS, status PENDING). Apps can no
+	 * longer write LEARN_CONTENT directly: only the node's review service publishes approved items there.
+	 */
+	public void addLearnSubmission(Map<String, Object> fields, IdCallback callback) {
+		add(col("LEARN_SUBMISSIONS"), fields, callback);
+	}
+
+	/** The signed-in user's own submissions with the review verdict (status, reason). */
+	public void getMyLearnSubmissions(String uid, ListCallback callback) {
+		queryTopLevel("LEARN_SUBMISSIONS", "authorUid", uid, 50, callback);
 	}
 
 	/** Lists every Learn Hub content doc - a global feed. */

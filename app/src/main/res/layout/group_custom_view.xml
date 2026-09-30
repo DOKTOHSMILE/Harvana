@@ -43,7 +43,7 @@
 						android:layout_width="44dp"
 						android:layout_height="44dp"
 						android:background="@color/colorAccent"
-						android:src="@drawable/main_app_logo_1"
+						android:src="@drawable/ic_coin_harv"
 						android:scaleType="centerInside"
 						android:focusable="false" />
 				</androidx.cardview.widget.CardView>

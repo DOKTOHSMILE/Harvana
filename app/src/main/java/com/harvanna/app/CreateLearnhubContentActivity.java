@@ -346,10 +346,17 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 			return;
 		}
 		
+		com.harvanna.app.learn.LearnContentScreen.Result screen =
+			com.harvanna.app.learn.LearnContentScreen.check(title, description, imageUrl);
+		if (screen.blocked()) {
+			_showError(screen.message());
+			return;
+		}
+		
 		tv_learn_error.setVisibility(View.GONE);
 		btn_learn_post.setEnabled(false);
 		final ProgressDialog progress = new ProgressDialog(this);
-		progress.setMessage("Posting…");
+		progress.setMessage("Submitting…");
 		progress.setCancelable(false);
 		progress.show();
 		
@@ -361,14 +368,15 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		fields.put("authorUid", uid);
 		fields.put("createdAt", System.currentTimeMillis());
 		fields.put("views", 0);
+		fields.put("status", "PENDING");
 		
 		com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getApplicationContext())
-		.addLearnContent(fields, new com.harvanna.app.firestore.GroupFirestoreManager.IdCallback() {
+		.addLearnSubmission(fields, new com.harvanna.app.firestore.GroupFirestoreManager.IdCallback() {
 			@Override
 			public void onSuccess(String generatedId) {
 				runOnUiThread(() -> {
 					if (!isFinishing() && progress.isShowing()) progress.dismiss();
-					SketchwareUtil.showMessage(getApplicationContext(), "Posted to Learn Hub.");
+					SketchwareUtil.showMessage(getApplicationContext(), "Submitted. Our automatic review checks it first; you'll be notified when it is published or if it can't be.");
 					finish();
 				});
 			}
@@ -378,7 +386,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 				runOnUiThread(() -> {
 					if (!isFinishing() && progress.isShowing()) progress.dismiss();
 					btn_learn_post.setEnabled(true);
-					_showError("Failed to post: " + error);
+					_showError("Failed to submit: " + error);
 				});
 			}
 		});

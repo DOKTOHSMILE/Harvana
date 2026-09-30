@@ -107,7 +107,7 @@ public class HARVQRCodeGenerator {
 
 	/**
 	 * Convenience: generate Harvanna-styled QR with app logo in the center.
-	 * Pass your logo drawable resource id (e.g. R.drawable.app_main_logo_2).
+	 * Pass your logo drawable resource id (e.g. R.drawable.ic_coin_harv).
 	 */
 	public static Bitmap generateQRCodeWithLogo(Context context, String text, int sizePx, int logoResId) {
 		Bitmap logo = null;

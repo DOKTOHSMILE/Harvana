@@ -438,6 +438,12 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		final int _id = item.getItemId();
 		final String _title = (String) item.getTitle();
 		
+		if (_id == 0) {
+			String uid = FirebaseAuth.getInstance().getCurrentUser() != null
+			? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+			com.harvanna.app.group.GroupChatConnector.open(this, groupId, !uid.isEmpty() && uid.equals(groupCreatorId));
+			return true;
+		}
 		return super.onOptionsItemSelected(item);
 	}
 	

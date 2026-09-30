@@ -1257,6 +1257,14 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		}
 		
 		if (isAdmin) {
+			MaterialButton chat = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+			chat.setText("Group chat link (WhatsApp, Telegram...)");
+			chat.setAllCaps(false);
+			chat.setOnClickListener(v -> com.harvanna.app.group.GroupChatConnector.edit(this, groupId));
+			backupSection.addView(chat);
+		}
+		
+		if (isAdmin) {
 			MaterialButton fromCard = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
 			fromCard.setText("Restore wallet from Access Card (new phone)");
 			fromCard.setAllCaps(false);

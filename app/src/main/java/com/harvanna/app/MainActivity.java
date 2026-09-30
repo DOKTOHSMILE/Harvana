@@ -303,6 +303,12 @@ public class MainActivity extends AppCompatActivity {
 	}
 	
 	@Override
+	public void onPause() {
+		super.onPause();
+		com.harvanna.app.utils.PresenceHeartbeat.stop();
+	}
+	
+	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		try {
@@ -323,6 +329,7 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
+		com.harvanna.app.utils.PresenceHeartbeat.start(getApplicationContext());
 		// Keep the local offline database from growing unbounded with data
 		// from groups the user's since left, stale discover snapshots, etc.
 		// Cheap no-op most of the time (only deletes rows older than a week).

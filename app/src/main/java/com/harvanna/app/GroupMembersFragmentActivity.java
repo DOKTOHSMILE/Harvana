@@ -1016,6 +1016,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 							if (h.name != null) h.name.setText(full);
 							if (h.initials != null && full.length() > 0)
 							h.initials.setText(full.substring(0, 1).toUpperCase(Locale.US));
+							_applyPresence(h, data);
 						});
 					}
 					@Override
@@ -1039,6 +1040,23 @@ public class GroupMembersFragmentActivity extends Fragment {
 		
 		@Override
 		public int getItemCount() { return data.size(); }
+		
+		/** Circular ring around the avatar: green = online now, amber = away, thin grey = offline. */
+		private void _applyPresence(VH h, Map<String, Object> profile) {
+			long now = System.currentTimeMillis();
+			com.harvanna.app.group.PresenceState st = com.harvanna.app.group.PresenceState.of(profile, now);
+			View ring = h.itemView.findViewById(R.id.view116);
+			View dot = h.itemView.findViewById(R.id.dot_member_online);
+			if (ring != null) {
+				int res = st == com.harvanna.app.group.PresenceState.ONLINE ? R.drawable.presence_ring_online
+				: st == com.harvanna.app.group.PresenceState.AWAY ? R.drawable.presence_ring_away
+				: R.drawable.presence_ring_offline;
+				ring.setBackgroundResource(res);
+			}
+			if (dot != null) dot.setVisibility(st == com.harvanna.app.group.PresenceState.ONLINE ? View.VISIBLE : View.GONE);
+			String label = com.harvanna.app.group.PresenceState.label(profile, now);
+			if (h.status != null && !label.isEmpty()) h.status.setText(label);
+		}
 		
 		private void _fetchBalance(String address, TextView target) {
 			if (target == null) return;

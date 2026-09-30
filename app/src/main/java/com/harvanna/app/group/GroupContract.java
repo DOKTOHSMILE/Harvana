@@ -139,6 +139,11 @@ public final class GroupContract {
         node.add("When you sign below, your wallet records that you read and agreed to this page. It is not a payment. No money moves.");
         out.add(node);
 
+        Section chat = new Section("Group chat");
+        chat.add("If the admin adds a group chat, it is on another app such as WhatsApp or Telegram. Harvanna does not run it.");
+        chat.add("Never share your recovery words, your passphrase or your PIN in any chat. Payments happen only in the Harvanna app.");
+        out.add(chat);
+
         // 8. Leaving.
         Section leaving = new Section("If you want to leave");
         leaving.add("You can ask to leave at any time. Money you already paid follows the rules above, and may not come back in the middle of a cycle.");

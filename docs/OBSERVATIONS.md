@@ -191,3 +191,8 @@ Consequences to know:
 - Invites live in `INVITES/{groupId}_{emailKey}` (email-keyed so people without an account can be invited). Rules are in docs/firestore.rules and must be deployed. Invitees must have a VERIFIED email to see or answer invites (otherwise anyone could register a victim's email and read their invites).
 - The invitee is notified when the app is opened (Android notification + a Snackbar on Home). There is NO background push: that needs FCM plus a Cloud Function, which this project doesn't have.
 - The invite screen summarises the group and links to the join screen, which shows the rules, requires a wallet and a signed contract.
+
+## Group chat connector and presence
+- Chat is external by design: the admin saves an https WhatsApp/Telegram/Signal/Discord/Facebook link (validated by ChatLink) in `GROUPS/{gid}/private/chatLink` (members-only read via the existing private rule). The toolbar Chat icon opens it after a safety warning.
+- Presence bug found: `markSelfActiveNow` had no callers, so nobody ever appeared online. `PresenceHeartbeat` now writes `lastActiveAt` every 2 min while the app is in the foreground (respecting the privacy switch, which also writes `showActivityStatus=false`). Member avatars get a ring: green online (<5 min), amber away (<1 h), thin grey offline. Presence is self-reported, so it is approximate.
+- Profiles are readable by any signed-in user (open item A2), so presence is too.

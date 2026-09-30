@@ -1410,7 +1410,7 @@ public class HomeFragmentActivity extends Fragment {
 		tv.setText(label);
 		tv.setTextSize(11.5f);
 		tv.setTypeface(null, android.graphics.Typeface.BOLD);
-		tv.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextPrimaryWhite));
+		tv.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextPrimary));
 		tv.setGravity(android.view.Gravity.CENTER);
 		tv.setPadding(0, (int) (4 * d), 0, 0);
 		cell.addView(tv, new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));

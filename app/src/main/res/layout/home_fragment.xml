@@ -434,7 +434,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="18dp"
-						app:cardBackgroundColor="@color/colorHeroCard"
+						app:cardBackgroundColor="@color/darkFaint10"
 						app:cardCornerRadius="20dp"
 						app:cardElevation="0dp"
 						app:strokeWidth="1dp"
@@ -464,7 +464,7 @@
 										android:layout_width="40dp"
 										android:layout_height="40dp"
 										android:layout_marginRight="10dp"
-										app:cardBackgroundColor="@color/colorOnHeroFaint"
+										app:cardBackgroundColor="@color/whiteFaint10"
 										app:cardCornerRadius="360dp"
 										app:cardElevation="0dp">
 										<ImageView
@@ -474,7 +474,7 @@
 											android:padding="8dp"
 											android:src="@drawable/icon_account_balance_wallet_twotone"
 											android:scaleType="centerInside"
-											app:tint="@color/colorTextPrimaryWhite" />
+											app:tint="@color/colorTextPrimary" />
 									</androidx.cardview.widget.CardView>
 									<LinearLayout
 										android:id="@+id/linear207"
@@ -522,7 +522,7 @@
 															android:text="0.00 HARV"
 															android:textSize="22sp"
 															android:textStyle="bold"
-															android:textColor="@color/colorTextPrimaryWhite"
+															android:textColor="@color/colorTextPrimary"
 															android:singleLine="true"
 															android:layout_gravity="center_horizontal|center_vertical" />
 														<ImageView
@@ -532,7 +532,7 @@
 															android:layout_margin="5dp"
 															android:src="@drawable/icon_visibility_off_twotone"
 															android:scaleType="centerInside"
-															app:tint="@color/colorOnHeroMuted" />
+															app:tint="@color/colorTextSecondary" />
 													</LinearLayout>
 												</LinearLayout>
 											</LinearLayout>
@@ -573,12 +573,12 @@
 										android:id="@+id/cardview32"
 										android:layout_width="wrap_content"
 										android:layout_height="wrap_content"
-										app:cardBackgroundColor="@color/colorOnHeroFaint"
+										app:cardBackgroundColor="@color/whiteFaint10"
 										android:layout_weight="1"
 										app:cardCornerRadius="10dp"
 										app:cardElevation="0dp"
 										app:strokeWidth="1dp"
-										app:strokeColor="@color/colorOnHeroStroke">
+										app:strokeColor="@color/whiteFaint10">
 										<LinearLayout
 											android:id="@+id/linear222"
 											android:layout_width="match_parent"
@@ -595,7 +595,7 @@
 												android:layout_height="wrap_content"
 												android:text="View Assets"
 												android:textSize="12sp"
-												android:textColor="@color/colorTextPrimaryWhite" />
+												android:textColor="@color/colorTextPrimary" />
 											<ImageView
 												android:id="@+id/imageview60"
 												android:layout_width="20dp"

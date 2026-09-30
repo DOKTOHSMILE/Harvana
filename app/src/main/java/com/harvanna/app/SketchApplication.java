@@ -26,6 +26,10 @@ public class SketchApplication extends Application {
         super.onCreate();
         appContext = getApplicationContext();
         
+        // Saved theme (System / Light / Dark) must be applied before any screen is created.
+        com.harvanna.app.utils.ThemeManager.applySavedTheme(this);
+        com.harvanna.app.utils.ThemeManager.keepAppContextInSync(this);
+        
         // EXPLICIT INITIALIZATION: Forces Firebase to wake up early
         FirebaseApp.initializeApp(this);
         

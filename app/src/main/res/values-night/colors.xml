@@ -78,4 +78,9 @@
     <color name="colorP2pWarningBg">#332F2610</color>
     <color name="colorSuccessSoft">#2610B881</color>
     <color name="colorWarningSoft">#26F59E0B</color>
+    <!--Hero card (wallet): charcoal in both themes so the brand reads the same-->
+    <color name="colorHeroCard">#1B2538</color>
+    <color name="colorOnHeroFaint">#22FFFFFF</color>
+    <color name="colorOnHeroStroke">#55FFFFFF</color>
+    <color name="colorOnHeroMuted">#9CA3AF</color>
 </resources>

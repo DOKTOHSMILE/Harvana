@@ -1311,8 +1311,7 @@ public class HomeFragmentActivity extends Fragment {
 			android.widget.LinearLayout row = new android.widget.LinearLayout(getContext());
 			row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
 			row.setPadding((int) (10 * d), 0, (int) (10 * d), (int) (12 * d));
-			row.setBackgroundColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.darkFaint10));
-			row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
+						row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
 			row.addView(_quickAction(R.drawable.ic_action_receive, "Receive", ReceiveActivity.class), _quickActionParams(d, true));
 			row.addView(_quickAction(R.drawable.ic_action_buy, "Buy HARV", P2pMarketplaceActivity.class), _quickActionParams(d, true));
 			
@@ -1341,9 +1340,9 @@ public class HomeFragmentActivity extends Fragment {
 		final float d = getResources().getDisplayMetrics().density;
 		android.widget.LinearLayout cell = new android.widget.LinearLayout(getContext());
 		cell.setOrientation(android.widget.LinearLayout.VERTICAL);
-		cell.setGravity(android.view.Gravity.CENTER);
+		cell.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
 		cell.setPadding(0, (int) (10 * d), 0, (int) (8 * d));
-		cell.setBackgroundResource(R.drawable.bg_quick_action);
+		cell.setBackgroundResource(R.drawable.bg_quick_action_hero);
 		cell.setClickable(true);
 		cell.setFocusable(true);
 		cell.setMinimumHeight((int) (72 * d));
@@ -1354,15 +1353,18 @@ public class HomeFragmentActivity extends Fragment {
 		icon.setBackgroundResource(R.drawable.bg_quick_action_icon);
 		int pad = (int) (10 * d);
 		icon.setPadding(pad, pad, pad, pad);
-		cell.addView(icon, new android.widget.LinearLayout.LayoutParams((int) (44 * d), (int) (44 * d)));
+		android.widget.LinearLayout.LayoutParams ilp = new android.widget.LinearLayout.LayoutParams((int) (44 * d), (int) (44 * d));
+		ilp.gravity = android.view.Gravity.CENTER_HORIZONTAL;
+		cell.addView(icon, ilp);
 		
 		TextView tv = new TextView(getContext());
 		tv.setText(label);
 		tv.setTextSize(12.5f);
 		tv.setTypeface(null, android.graphics.Typeface.BOLD);
-		tv.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextPrimary));
+		tv.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextPrimaryWhite));
+		tv.setGravity(android.view.Gravity.CENTER);
 		tv.setPadding(0, (int) (8 * d), 0, 0);
-		cell.addView(tv);
+		cell.addView(tv, new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 		
 		cell.setContentDescription(label);
 		cell.setOnClickListener(v -> startActivity(new Intent(getContext(), target)));

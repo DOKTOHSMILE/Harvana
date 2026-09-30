@@ -547,8 +547,7 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _bindCurrentValues() {
-		boolean isLight = ThemeManager.isLightMode(this);
-		tvThemeValue.setText(isLight ? "Light mode" : "Dark mode");
+		tvThemeValue.setText(ThemeManager.label(this));
 		
 		SharedPreferences currencySp = getSharedPreferences("currencysp", Activity.MODE_PRIVATE);
 		String currency = currencySp.getString("currency", "₦");
@@ -667,17 +666,16 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _showThemePicker() {
+		String mode = ThemeManager.getMode(this);
+		int checked = "light".equals(mode) ? 1 : "dark".equals(mode) ? 2 : 0;
 		new androidx.appcompat.app.AlertDialog.Builder(this)
-		.setTitle("Theme")
-		.setSingleChoiceItems(new String[]{"Light", "Dark"},
-		ThemeManager.isLightMode(this) ? 0 : 1, (dialog, which) -> {
-			if (which == 0) {
-				ThemeManager.setLightMode(this);
-			} else {
-				ThemeManager.setDarkMode(this);
-			}
+		.setTitle("Appearance")
+		.setSingleChoiceItems(new String[]{"Follow system", "Light", "Dark"}, checked, (dialog, which) -> {
+			// The whole app re-themes immediately: AppCompat restarts every open screen in the new mode.
+			if (which == 1) ThemeManager.setLightMode(this);
+			else if (which == 2) ThemeManager.setDarkMode(this);
+			else ThemeManager.setSystemMode(this);
 			dialog.dismiss();
-			recreate();
 		})
 		.setNegativeButton("Cancel", null)
 		.show();

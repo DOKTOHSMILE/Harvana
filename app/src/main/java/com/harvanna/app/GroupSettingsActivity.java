@@ -38,9 +38,6 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.google.firebase.FirebaseApp;
-import com.harvanna.app.utils.ThemedDialogs;
-import com.harvanna.app.manager.GroupFirestoreManager;
-import com.harvanna.app.manager.JoinRequestManager;
 import com.harvanna.app.wallet.WalletGenerator;
 import com.harvanna.app.wallet.WalletManager;
 import com.harvanna.app.wallet.SecureWalletStorage;
@@ -910,7 +907,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	
 	private void _confirmLeaveGroup() {
 		if (isAdmin) {
-			ThemedDialogs.show(ThemedDialogs.alert(this)
+			com.harvanna.app.utils.ThemedDialogs.show(com.harvanna.app.utils.ThemedDialogs.alert(this)
 			.setTitle("Transfer admin first")
 			.setMessage("You're this group's admin. Transfer admin role to another member before you can leave.")
 			.setPositiveButton("Transfer Admin", (dialog, which) -> _showTransferAdminDialog())
@@ -919,7 +916,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		}
 		
 		String leaveMsg = "You'll lose access to this group's payments, loans, and notices.";
-		ThemedDialogs.show(ThemedDialogs.alert(this)
+		com.harvanna.app.utils.ThemedDialogs.show(com.harvanna.app.utils.ThemedDialogs.alert(this)
 		.setTitle("Leave this group?")
 		.setMessage(leaveMsg)
 		.setPositiveButton("Leave", (dialog, which) -> _performLeaveGroup())
@@ -1252,7 +1249,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			for (String n : dec.nextSteps) sb.append("• ").append(n).append("\n");
 		}
 		if (dec.action == com.harvanna.app.group.GroupClosePolicy.Action.NONE) {
-			ThemedDialogs.show(ThemedDialogs.alert(this).setTitle(dec.headline).setMessage(sb.toString().trim()).setPositiveButton("OK", null));
+			com.harvanna.app.utils.ThemedDialogs.show(com.harvanna.app.utils.ThemedDialogs.alert(this).setTitle(dec.headline).setMessage(sb.toString().trim()).setPositiveButton("OK", null));
 			return;
 		}
 		final boolean delete = dec.action == com.harvanna.app.group.GroupClosePolicy.Action.DELETE;
@@ -1274,7 +1271,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		confirm.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
 		box.addView(confirm);
 
-		androidx.appcompat.app.AlertDialog dialog = ThemedDialogs.alert(this)
+		androidx.appcompat.app.AlertDialog dialog = com.harvanna.app.utils.ThemedDialogs.alert(this)
 			.setTitle(dec.headline).setView(box)
 			.setPositiveButton(delete ? "Delete" : "Close group", null)
 			.setNegativeButton("Cancel", null).create();
@@ -1328,7 +1325,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	}
 
 	private void _confirmReopen() {
-		ThemedDialogs.show(ThemedDialogs.alert(this)
+		com.harvanna.app.utils.ThemedDialogs.show(com.harvanna.app.utils.ThemedDialogs.alert(this)
 			.setTitle("Reopen this group?")
 			.setMessage("It returns to its previous visibility.")
 			.setPositiveButton("Reopen", (dialog, which) -> com.harvanna.app.group.GroupCloser.reopen(this, groupId, str(groupData, "closedPrevVisibility", "Private"), new com.harvanna.app.group.GroupCloser.DoneCb() {

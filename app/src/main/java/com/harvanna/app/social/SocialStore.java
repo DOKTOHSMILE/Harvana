@@ -198,4 +198,23 @@ public final class SocialStore {
             }
         });
     }
+
+    /** Country calling code of the signed-in member ("234"), from their contact card or profile phone; "" when it can't be told. */
+    public static void myCountryCode(Cb<String> cb) {
+        final String uid = me();
+        BG.execute(() -> {
+            try {
+                String phone = "";
+                DocumentSnapshot c = Tasks.await(db().collection("CONTACTS").document(uid).get(), T, TimeUnit.SECONDS);
+                if (c.exists() && c.getString("phone") != null) phone = c.getString("phone");
+                String cc = PhoneNumbers.countryCodeOf(PhoneNumbers.normalize(phone, ""));
+                if (cc.isEmpty()) {
+                    DocumentSnapshot u = Tasks.await(db().collection("USERS").document(uid).get(), T, TimeUnit.SECONDS);
+                    String pp = u.getString("phone") == null ? "" : u.getString("phone");
+                    cc = PhoneNumbers.countryCodeOf(PhoneNumbers.normalize(pp, ""));
+                }
+                cb.done(cc, null);
+            } catch (Exception e) { cb.done("", describe(e)); }
+        });
+    }
 }

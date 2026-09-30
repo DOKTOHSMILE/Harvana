@@ -58,12 +58,16 @@ public final class PeoplePicker {
         MaterialButton contacts = SocialUi.button(a, "Contacts", true);
         friends.setOnClickListener(v -> chooseFriends(a, sel, refresh));
         username.setOnClickListener(v -> byUsername(a, sel, refresh));
-        contacts.setOnClickListener(v -> ContactPickerActivity.pickEmail(a, (email, name) -> a.runOnUiThread(() -> {
-            String e = InviteManager.normalizeEmail(email);
-            if (!InviteManager.looksLikeEmail(e)) { Toast.makeText(a, "That contact has no valid email address.", Toast.LENGTH_LONG).show(); return; }
-            if (!sel.emails.contains(e)) sel.emails.add(e);
-            refresh.run();
-        })));
+        contacts.setOnClickListener(v -> new AlertDialog.Builder(a).setTitle("From my contacts")
+            .setItems(new String[]{"Members already on Harvanna", "Invite a contact by email"}, (d, which) -> {
+                if (which == 0) ContactsFinder.find(a, matches -> chooseMatches(a, sel, matches, refresh));
+                else ContactPickerActivity.pickEmail(a, (email, name) -> a.runOnUiThread(() -> {
+                    String e = InviteManager.normalizeEmail(email);
+                    if (!InviteManager.looksLikeEmail(e)) { Toast.makeText(a, "That contact has no valid email address.", Toast.LENGTH_LONG).show(); return; }
+                    if (!sel.emails.contains(e)) sel.emails.add(e);
+                    refresh.run();
+                }));
+            }).setNegativeButton("Cancel", null).show());
         for (View b : new View[]{friends, username, contacts}) {
             row.addView(b, new LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         }
@@ -96,6 +100,29 @@ public final class PeoplePicker {
                     refresh.run();
                 }).setNegativeButton("Cancel", null).show();
         }));
+    }
+
+    private static void chooseMatches(Activity a, Selection sel, List<DiscoveryStore.Match> matches, Runnable refresh) {
+        if (matches.isEmpty()) {
+            Toast.makeText(a, "None of your contacts have turned on discovery yet.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        final String[] names = new String[matches.size()];
+        final boolean[] checked = new boolean[matches.size()];
+        for (int i = 0; i < matches.size(); i++) {
+            DiscoveryStore.Match m = matches.get(i);
+            names[i] = (m.contactName == null || m.contactName.isEmpty() ? m.person.name : m.contactName) + (m.person.handle().isEmpty() ? "" : "  " + m.person.handle());
+            checked[i] = sel.hasPerson(m.person.uid);
+        }
+        new AlertDialog.Builder(a).setTitle("Contacts on Harvanna")
+            .setMultiChoiceItems(names, checked, (d, which, on) -> checked[which] = on)
+            .setPositiveButton("Add", (d, w) -> {
+                for (int i = 0; i < matches.size(); i++) {
+                    Person p = matches.get(i).person;
+                    if (checked[i] && !sel.hasPerson(p.uid)) sel.people.add(p);
+                }
+                refresh.run();
+            }).setNegativeButton("Cancel", null).show();
     }
 
     private static void byUsername(Activity a, Selection sel, Runnable refresh) {

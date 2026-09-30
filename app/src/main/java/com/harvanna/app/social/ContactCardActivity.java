@@ -28,6 +28,7 @@ import java.util.Map;
 public class ContactCardActivity extends AppCompatActivity {
     private EditText username, phone;
     private TextView usernameStatus;
+    private android.widget.CheckBox discoverable;
     private LinearLayout linkRows;
     private final List<Object[]> rows = new ArrayList<>(); // {Spinner, EditText, View}
 
@@ -67,6 +68,12 @@ public class ContactCardActivity extends AppCompatActivity {
         linkRows = new LinearLayout(this);
         linkRows.setOrientation(LinearLayout.VERTICAL);
         c.addView(linkRows);
+        discoverable = new android.widget.CheckBox(this);
+        discoverable.setText("Let people who have my number or email in their contacts find me on Harvanna");
+        discoverable.setTextColor(UiColors.textPrimary());
+        discoverable.setTextSize(13);
+        c.addView(discoverable);
+        c.addView(SocialUi.text(this, "Off by default. Turning it on shares only a scrambled key of your phone number (start it with + and your country code) and your verified email, never the number itself. They then see your name and username.", 12, false, UiColors.textSecondary()));
         MaterialButton add = SocialUi.button(this, "+ Add a chat or social link", true);
         add.setOnClickListener(v -> addRow("WhatsApp", ""));
         c.addView(add);
@@ -86,6 +93,7 @@ public class ContactCardActivity extends AppCompatActivity {
         String uid = FirebaseAuth.getInstance().getCurrentUser() == null ? "" : FirebaseAuth.getInstance().getCurrentUser().getUid();
         SocialStore.contactsOf(uid, (card, err) -> runOnUiThread(() -> {
             if (card == null) return;
+            discoverable.setChecked(Boolean.TRUE.equals(card.get("discoverable")));
             Object ph = card.get("phone");
             if (ph != null) phone.setText(String.valueOf(ph));
             Object links = card.get("links");
@@ -145,10 +153,22 @@ public class ContactCardActivity extends AppCompatActivity {
             m.put("type", type); m.put("value", value);
             links.add(m);
         }
+        final boolean wantFound = discoverable.isChecked();
+        final String intl = PhoneNumbers.normalize(ph.startsWith("+") ? ph : "", "");
+        if (wantFound && intl.isEmpty() && (FirebaseAuth.getInstance().getCurrentUser() == null || !FirebaseAuth.getInstance().getCurrentUser().isEmailVerified())) {
+            Toast.makeText(this, "To be found, add your phone number starting with + and your country code, or verify your email.", Toast.LENGTH_LONG).show();
+            return;
+        }
         btn.setEnabled(false);
-        SocialStore.saveContacts(ph, links, (ok, err) -> runOnUiThread(() -> {
-            btn.setEnabled(true);
-            Toast.makeText(this, err == null ? "Contact card saved." : "Couldn't save: " + err, Toast.LENGTH_LONG).show();
-        }));
+        SocialStore.saveContacts(ph, links, (ok, err) -> {
+            if (err != null) { runOnUiThread(() -> { btn.setEnabled(true); Toast.makeText(this, "Couldn't save: " + err, Toast.LENGTH_LONG).show(); }); return; }
+            com.google.firebase.auth.FirebaseUser fu = FirebaseAuth.getInstance().getCurrentUser();
+            String verifiedEmail = fu != null && fu.isEmailVerified() && fu.getEmail() != null ? fu.getEmail() : "";
+            SocialStore.myUsername((uname, e2) -> DiscoveryStore.setDiscoverable(wantFound, intl, verifiedEmail,
+                fu == null || fu.getDisplayName() == null ? "" : fu.getDisplayName(), uname == null ? "" : uname, (done, e3) -> runOnUiThread(() -> {
+                    btn.setEnabled(true);
+                    Toast.makeText(this, e3 == null ? "Contact card saved." : "Saved, but discovery wasn't updated: " + e3, Toast.LENGTH_LONG).show();
+                })));
+        });
     }
 }

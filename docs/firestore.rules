@@ -270,6 +270,23 @@ service cloud.firestore {
       allow write: if signedIn() && request.auth.uid == uid;
     }
 
+    // Contact discovery (opt-in). Keys are SHA-256 of a phone number / verified email, so the index holds nothing
+    // readable. Entries are read by exact key (get, or a small "in" query); paging through everything is capped.
+    match /PHONE_INDEX/{key} {
+      allow get: if signedIn();
+      allow list: if signedIn() && request.query.limit <= 10;
+      allow create, update: if signedIn() && request.resource.data.uid == request.auth.uid
+        && (resource == null || resource.data.uid == request.auth.uid);
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+    match /EMAIL_INDEX/{key} {
+      allow get: if signedIn();
+      allow list: if signedIn() && request.query.limit <= 10;
+      allow create, update: if signedIn() && request.resource.data.uid == request.auth.uid
+        && (resource == null || resource.data.uid == request.auth.uid);
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
     match /P2P_PAYMENT_DETAILS/{listingId} {
       allow create: if signedIn()
   && request.auth.uid == request.resource.data.sellerUid

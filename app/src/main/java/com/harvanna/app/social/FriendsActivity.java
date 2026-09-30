@@ -27,7 +27,7 @@ import java.util.Set;
  * through the contact links they chose to share. There is no member directory to browse.
  */
 public class FriendsActivity extends AppCompatActivity {
-    private LinearLayout searchResult, listBox;
+    private LinearLayout searchResult, listBox, contactMatches;
     private EditText query;
     private MaterialButton tabFollowing, tabFollowers;
     private List<Person> following = new ArrayList<>(), followers = new ArrayList<>();
@@ -61,6 +61,17 @@ public class FriendsActivity extends AppCompatActivity {
         find.addView(searchResult);
         root.addView(find);
 
+        LinearLayout fromContacts = SocialUi.card(this);
+        fromContacts.addView(SocialUi.text(this, "Friends in my contacts", 14, true, UiColors.textPrimary()));
+        fromContacts.addView(SocialUi.text(this, "See which of your phone contacts already use Harvanna. Only people who chose to be found appear.", 12, false, UiColors.textSecondary()));
+        MaterialButton scan = SocialUi.button(this, "Find friends in my contacts", false);
+        contactMatches = new LinearLayout(this);
+        contactMatches.setOrientation(LinearLayout.VERTICAL);
+        scan.setOnClickListener(v -> ContactsFinder.find(this, matches -> showMatches(matches)));
+        fromContacts.addView(scan);
+        fromContacts.addView(contactMatches);
+        root.addView(fromContacts);
+
         LinearLayout tabs = new LinearLayout(this);
         tabs.setOrientation(LinearLayout.HORIZONTAL);
         tabFollowing = SocialUi.button(this, "Following", false);
@@ -85,6 +96,27 @@ public class FriendsActivity extends AppCompatActivity {
     private void reload() {
         SocialStore.following((list, err) -> { following = list; runOnUiThread(this::render); });
         SocialStore.followers((list, err) -> { followers = list; runOnUiThread(this::render); });
+    }
+
+    private void showMatches(List<DiscoveryStore.Match> matches) {
+        contactMatches.removeAllViews();
+        if (matches.isEmpty()) {
+            contactMatches.addView(SocialUi.text(this, "None of your contacts have turned on discovery yet. Ask them to enable it on their contact card, or find them by username.", 13, false, UiColors.textSecondary()));
+            return;
+        }
+        Set<String> mine = followingIds();
+        for (DiscoveryStore.Match m : matches) {
+            boolean already = mine.contains(m.person.uid);
+            Person shown = m.contactName == null || m.contactName.isEmpty() ? m.person
+                : new Person(m.person.uid, m.person.username, m.contactName + (m.person.name.equals(m.contactName) ? "" : "  \u00b7  " + m.person.name));
+            contactMatches.addView(SocialUi.personRow(this, shown, already ? "Following" : "Follow", already, v -> {
+                if (already) return;
+                SocialStore.follow(m.person, (ok, e) -> runOnUiThread(() -> {
+                    if (ok) { Toast.makeText(this, "You now follow " + m.person.name, Toast.LENGTH_SHORT).show(); reload(); showMatches(matches); }
+                    else Toast.makeText(this, e, Toast.LENGTH_LONG).show();
+                }));
+            }, null));
+        }
     }
 
     private Set<String> followingIds() {

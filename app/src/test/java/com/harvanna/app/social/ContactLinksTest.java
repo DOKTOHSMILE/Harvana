@@ -13,6 +13,10 @@ public class ContactLinksTest {
         assertNotNull(ContactLinks.problem("Phone", "123"));
         assertNotNull(ContactLinks.problem("Phone", "call me maybe"));
     }
+    @Test public void email() {
+        assertEquals("mailto:ada@example.com", ContactLinks.uri("Email", "ada@example.com"));
+        assertNotNull(ContactLinks.problem("Email", "not an email"));
+    }
     @Test public void handles() {
         assertEquals("https://t.me/ada_o", ContactLinks.uri("Telegram", "@ada_o"));
         assertEquals("https://instagram.com/ada.o", ContactLinks.uri("Instagram", "ada.o"));

@@ -175,6 +175,9 @@
 			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
+			android:name=".NotificationsActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode" />
+		<activity
 			android:name=".InvitesActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden|uiMode" />
 		<activity

@@ -855,6 +855,13 @@ public class HomeFragmentActivity extends Fragment {
 				
 				item.setOnClickListener(v -> _openGroup(gid));
 				
+				if ("PAY".equals(action) && getContext() != null) {
+					String day = new java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(new java.util.Date());
+					com.harvanna.app.notify.NotificationCenter.post(getContext(), com.harvanna.app.notify.NotificationCenter.PAYMENT,
+					"due_" + gid + "_" + day, "Payment due: " + str(row, "groupName", "Group"),
+					"Your payment of " + amountText + " " + com.harvanna.app.CoinInfo.ticker() + " is due.", gid, 2);
+				}
+				
 				if (button == null) { linear_upcoming_payments.addView(item); continue; }
 				if ("PAY".equals(action)) {
 					button.setText("Pay");

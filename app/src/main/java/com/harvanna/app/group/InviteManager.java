@@ -125,7 +125,9 @@ public final class InviteManager {
                     String id = str(inv, "_docId", "");
                     if (id.isEmpty() || sp.getBoolean(id, false)) continue;
                     sp.edit().putBoolean(id, true).apply();
-                    notifyInvite(app, id, str(inv, "inviterName", "A member"), str(inv, "groupName", "a group"));
+                    com.harvanna.app.notify.NotificationCenter.post(app, com.harvanna.app.notify.NotificationCenter.INVITE, "invite_" + id,
+                        "You're invited to " + str(inv, "groupName", "a group"),
+                        str(inv, "inviterName", "A member") + " invited you. Open to read the details before you decide.", "", -1);
                 }
             }
             @Override public void onError(String e) { }

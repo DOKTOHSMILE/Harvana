@@ -196,3 +196,9 @@ Consequences to know:
 - Chat is external by design: the admin saves an https WhatsApp/Telegram/Signal/Discord/Facebook link (validated by ChatLink) in `GROUPS/{gid}/private/chatLink` (members-only read via the existing private rule). The toolbar Chat icon opens it after a safety warning.
 - Presence bug found: `markSelfActiveNow` had no callers, so nobody ever appeared online. `PresenceHeartbeat` now writes `lastActiveAt` every 2 min while the app is in the foreground (respecting the privacy switch, which also writes `showActivityStatus=false`). Member avatars get a ring: green online (<5 min), amber away (<1 h), thin grey offline. Presence is self-reported, so it is approximate.
 - Profiles are readable by any signed-in user (open item A2), so presence is too.
+
+## Notification center
+- `NotificationsActivity` + `NotificationCenter` (per-user inbox, 200 cap, de-duplicated) is the single place for notifications. Sources: incoming transfers (WalletController), group notices addressed to you or posted by others, payment reminders targeted at you, payment-due (Home), invitations, join-request answers. Each also raises an Android notification if the user's Notification settings allow that category.
+- Bugs fixed: the toolbar bell (menu id 1) had no handler; MainActivity's receiver read `amount`/`sender` extras that the broadcaster never sets (`EXTRA_AMOUNT`/`EXTRA_SENDER`), so it always showed 0.00000.
+- Delivery is by polling (every ~90 s in the foreground, every ~15 min in the background via WorkManager, only while online). True instant push needs FCM + a Cloud Function or the node pushing; not built. Android may delay background work on battery saver / restricted phones.
+- Not yet connected: loan-due reminders and admin-side alerts (new join request, loan application) - the category switches exist; sources still to be added.

@@ -207,6 +207,11 @@ public class WalletController {
                         mainHandler.post(() -> {
                             if (destroyed) return;
                             if (!com.harvanna.app.utils.IncomingTxWatcher.markNotifiedIfNew(txHash)) return;
+                            com.harvanna.app.notify.NotificationCenter.post(context, com.harvanna.app.notify.NotificationCenter.TX,
+                                    "tx_" + txHash, com.harvanna.app.CoinInfo.ticker() + " received",
+                                    com.harvanna.app.wallet.BalanceFormatter.short4(amountHarv) + " " + symbol
+                                            + " from " + (from.length() > 12 ? from.substring(0, 8) + "…" + from.substring(from.length() - 4) : from),
+                                    "", -1);
 
                             Listener currentListener = listener; // avoid a null race
                             if (currentListener instanceof android.app.Activity) {

@@ -234,6 +234,8 @@ public class MainActivity extends AppCompatActivity {
 		MenuItem menu2 = menu.add(Menu.NONE, 1, Menu.NONE, "Notification");
 		menu2.setIcon(R.drawable.icon_notifications_outline);
 		menu2.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		notifMenuItem = menu2;
+		_updateNotifBadge();
 		
 		MenuItem menu3 = menu.add(Menu.NONE, 2, Menu.NONE, "More");
 		menu3.setIcon(R.drawable.icon_more_vert_round);
@@ -246,6 +248,7 @@ public class MainActivity extends AppCompatActivity {
 		if (menu1.getIcon() != null) {
 			menu1.getIcon().mutate().setColorFilter(iconColor, android.graphics.PorterDuff.Mode.SRC_IN);
 		}
+		_updateNotifBadge();
 		
 		// Mutate and apply the dynamic tint to the More (dropdown) icon
 		if (menu2.getIcon() != null) {
@@ -258,6 +261,42 @@ public class MainActivity extends AppCompatActivity {
 		return super.onCreateOptionsMenu(menu);
 	}
 	
+	private MenuItem notifMenuItem;
+	private final Handler notifHandler = new Handler(Looper.getMainLooper());
+	private Runnable notifTick;
+	private final BroadcastReceiver notifChanged = new BroadcastReceiver() {
+		@Override public void onReceive(Context context, Intent intent) { _updateNotifBadge(); }
+	};
+	
+	/** Bell icon with a small count of unread notifications. */
+	private void _updateNotifBadge() {
+		if (notifMenuItem == null) return;
+		int n = com.harvanna.app.notify.NotificationCenter.unreadCount(this);
+		notifMenuItem.setTitle(n > 0 ? "Notification (" + n + " new)" : "Notification");
+		android.widget.FrameLayout f = new android.widget.FrameLayout(this);
+		int pad = (int) (12 * getResources().getDisplayMetrics().density);
+		android.widget.ImageView iv = new android.widget.ImageView(this);
+		iv.setImageResource(R.drawable.icon_notifications_outline);
+		iv.setColorFilter(androidx.core.content.ContextCompat.getColor(this, R.color.colorAccent));
+		iv.setPadding(pad, pad, pad, pad);
+		f.addView(iv, new android.widget.FrameLayout.LayoutParams(pad * 4, pad * 4));
+		if (n > 0) {
+			TextView b = new TextView(this);
+			b.setText(n > 99 ? "99+" : String.valueOf(n));
+			b.setTextSize(9);
+			b.setTextColor(android.graphics.Color.WHITE);
+			b.setGravity(android.view.Gravity.CENTER);
+			b.setBackgroundResource(R.drawable.dot_online);
+			b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(this, R.color.colorError)));
+			int sz = (int) (16 * getResources().getDisplayMetrics().density);
+			android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(sz, sz, android.view.Gravity.TOP | android.view.Gravity.END);
+			lp.topMargin = pad / 2; lp.rightMargin = pad / 2;
+			f.addView(b, lp);
+		}
+		f.setOnClickListener(v -> startActivity(new Intent(this, com.harvanna.app.NotificationsActivity.class)));
+		notifMenuItem.setActionView(f);
+	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		final int _id = item.getItemId();
@@ -268,6 +307,9 @@ public class MainActivity extends AppCompatActivity {
 			scanIntent.putExtra(com.harvanna.app.ScanQrCodeActivity.EXTRA_MODE, com.harvanna.app.ScanQrCodeActivity.MODE_WALLET_ADDRESS);
 			startActivityForResult(scanIntent, RC_SCAN_TO_SEND);
 			
+		}
+		if (_id == 1) {
+			startActivity(new Intent(this, com.harvanna.app.NotificationsActivity.class));
 		}
 		if (_id == 2) {
 			// Pass the view ID of the button being clicked to anchor the menu to the right side of it
@@ -306,6 +348,8 @@ public class MainActivity extends AppCompatActivity {
 	public void onPause() {
 		super.onPause();
 		com.harvanna.app.utils.PresenceHeartbeat.stop();
+		if (notifTick != null) notifHandler.removeCallbacks(notifTick);
+		try { androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(notifChanged); } catch (Exception ignored) { }
 	}
 	
 	@Override
@@ -330,6 +374,17 @@ public class MainActivity extends AppCompatActivity {
 	public void onResume() {
 		super.onResume();
 		com.harvanna.app.utils.PresenceHeartbeat.start(getApplicationContext());
+		com.harvanna.app.notify.NotificationWorker.schedule(getApplicationContext());
+		androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
+		.registerReceiver(notifChanged, new android.content.IntentFilter(com.harvanna.app.notify.NotificationCenter.ACTION_CHANGED));
+		_updateNotifBadge();
+		notifTick = new Runnable() {
+			@Override public void run() {
+				com.harvanna.app.notify.NotificationSync.run(getApplicationContext(), null);
+				notifHandler.postDelayed(this, 90_000L);
+			}
+		};
+		notifHandler.post(notifTick);
 		// Keep the local offline database from growing unbounded with data
 		// from groups the user's since left, stale discover snapshots, etc.
 		// Cheap no-op most of the time (only deletes rows older than a week).
@@ -865,8 +920,9 @@ public class MainActivity extends AppCompatActivity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent != null && "com.harvanna.app.ACTION_WALLET_RECEIVED".equals(intent.getAction())) {
-				double amount = intent.getDoubleExtra("amount", 0.0);
-				String sender = intent.getStringExtra("sender");
+				double amount = intent.getDoubleExtra("EXTRA_AMOUNT", intent.getDoubleExtra("amount", 0.0));
+				String sender = intent.getStringExtra("EXTRA_SENDER");
+				if (sender == null) sender = intent.getStringExtra("sender");
 				
 				// Pass 4 arguments: Activity, Title, Message, Sender
 				com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(

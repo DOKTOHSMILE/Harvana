@@ -1143,6 +1143,67 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	
 	private LinearLayout backupSection;
 	
+	/** New-phone recovery: download the group's published encrypted card, decrypt with the admin passphrase. */
+	private void _restoreFromCard() {
+		final ProgressDialog pd = ProgressDialog.show(this, null, "Fetching backup card…", true, false);
+		com.harvanna.app.group.GroupCardStore.fetch(this, groupId, new com.harvanna.app.group.GroupCardStore.Callback() {
+			@Override public void onSuccess(Map<String, Object> card) {
+				runOnUiThread(() -> {
+					pd.dismiss();
+					_askCardPassphrase(String.valueOf(card.get("qrPayload")));
+				});
+			}
+			@Override public void onError(String error) {
+				runOnUiThread(() -> {
+					pd.dismiss();
+					Toast.makeText(GroupSettingsActivity.this,
+						"No backup card found online. Use \"Restore group wallet\" with your 12 words instead.",
+						Toast.LENGTH_LONG).show();
+				});
+			}
+		});
+	}
+	
+	private void _askCardPassphrase(final String qrPayload) {
+		final EditText pass = new EditText(this);
+		pass.setHint("Access Card passphrase");
+		pass.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+		new androidx.appcompat.app.AlertDialog.Builder(this)
+			.setTitle("Restore from Access Card")
+			.setMessage("Enter the passphrase you chose when the card was created.")
+			.setView(pass)
+			.setNegativeButton("Cancel", null)
+			.setPositiveButton("Restore", (dlg, w) -> {
+				final String pw = pass.getText().toString();
+				final ProgressDialog pd = ProgressDialog.show(this, null, "Decrypting…", true, false);
+				new Thread(() -> {
+					try {
+						com.harvanna.app.wallet.HarvannaCardCrypto.DecryptResult r =
+							com.harvanna.app.wallet.HarvannaCardCrypto.decryptCardPayload(this, qrPayload, pw);
+						if (!r.success) throw new Exception(r.errorMessage);
+						String mnemonic = r.mnemonic;
+						String derived = WalletGenerator.deriveAddressFromMnemonic(mnemonic);
+						if (derived == null || !derived.equalsIgnoreCase(expectedWallet))
+							throw new Exception("This card doesn't match this group wallet.");
+						String priv = WalletGenerator.derivePrivateKey(mnemonic);
+						byte[] pub = Ed25519.publicKeyFromSeed(Base64.decode(priv, Base64.NO_WRAP));
+						SecureWalletStorage.saveMnemonic(this, expectedWallet, mnemonic);
+						WalletManager.saveKeysLocally(this, expectedWallet, priv, Base64.encodeToString(pub, Base64.NO_WRAP));
+						runOnUiThread(() -> {
+							pd.dismiss();
+							_refreshKeyStatus();
+							Toast.makeText(this, "Group wallet restored on this phone", Toast.LENGTH_LONG).show();
+						});
+					} catch (Exception e) {
+						runOnUiThread(() -> {
+							pd.dismiss();
+							Toast.makeText(this, "Restore failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+						});
+					}
+				}).start();
+			}).show();
+	}
+	
 	/**
 	 * Wallet Access Card backup. The admin (who holds the passphrase) can
 	 * create/replace the card, which is published encrypted to every member;
@@ -1193,6 +1254,15 @@ public class GroupSettingsActivity extends AppCompatActivity {
 				startActivity(i);
 			});
 			backupSection.addView(create);
+		}
+		
+		if (isAdmin) {
+			MaterialButton fromCard = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+			fromCard.setText("Restore wallet from Access Card (new phone)");
+			fromCard.setAllCaps(false);
+			fromCard.setOnClickListener(v -> com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(
+				GroupSettingsActivity.this, () -> _restoreFromCard()));
+			backupSection.addView(fromCard);
 		}
 		
 		MaterialButton view = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);

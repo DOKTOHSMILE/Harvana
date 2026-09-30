@@ -581,7 +581,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 	}
 	
 	private void _renderPaymentRows() {
-		paymentRows.sort((a, b) -> Long.compare((long) num(b, "timestamp"), (long) num(a, "timestamp")));
+		java.util.Collections.sort(paymentRows, (a, b) -> Long.compare((long) num(b, "timestamp"), (long) num(a, "timestamp")));
 		
 		int paidThisRound = 0;
 		for (Map<String, Object> p : paymentRows) {
@@ -954,7 +954,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		});
 	}
 	
-	private void _recordPayment(String from, String txHash, boolean isFixed, int day, java.util.function.Consumer<String> done) {
+	private void _recordPayment(String from, String txHash, boolean isFixed, int day, androidx.core.util.Consumer<String> done) {
 		_resolveMemberName(name -> {
 			if (isFixed) {
 				GroupPaymentHelper.recordFixedDailyPending(
@@ -1005,7 +1005,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		});
 	}
 	
-	private void _resolveMemberName(java.util.function.Consumer<String> done) {
+	private void _resolveMemberName(androidx.core.util.Consumer<String> done) {
 		if (myUid == null || myUid.isEmpty()) {
 			if (done != null) done.accept("Member");
 			return;

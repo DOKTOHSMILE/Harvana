@@ -133,7 +133,8 @@ public final class FiatValueHelper {
                                 double unitPrice = ((Number) priceObj).doubleValue();
                                 String currency = String.valueOf(currencyObj);
                                 if (!currency.isEmpty() && unitPrice > 0) {
-                                    rates.merge(currency, unitPrice, Math::min);
+                                    Double curBest = rates.get(currency);
+                                    if (curBest == null || unitPrice < curBest) rates.put(currency, unitPrice);
                                 }
                             }
                             _finishIfDone(pending, rates, onDone);

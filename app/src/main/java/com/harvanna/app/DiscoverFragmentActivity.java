@@ -511,11 +511,11 @@ public class DiscoverFragmentActivity extends Fragment {
 		
 		int sortIndex = sp_sort != null ? sp_sort.getSelectedItemPosition() : 0;
 		if (sortIndex == 0) {
-			filtered.sort((a, b) -> Double.compare(_safeDouble(b, "membersCount"), _safeDouble(a, "membersCount")));
+			java.util.Collections.sort(filtered, (a, b) -> Double.compare(_safeDouble(b, "membersCount"), _safeDouble(a, "membersCount")));
 		} else if (sortIndex == 1) {
-			filtered.sort((a, b) -> Double.compare(_safeDouble(b, "trustScore"), _safeDouble(a, "trustScore")));
+			java.util.Collections.sort(filtered, (a, b) -> Double.compare(_safeDouble(b, "trustScore"), _safeDouble(a, "trustScore")));
 		} else if (sortIndex == 2) {
-			filtered.sort((a, b) -> Double.compare(
+			java.util.Collections.sort(filtered, (a, b) -> Double.compare(
 			_safeDouble(b, "timestamp", _safeDouble(b, "createdTimestamp")),
 			_safeDouble(a, "timestamp", _safeDouble(a, "createdTimestamp"))));
 		}

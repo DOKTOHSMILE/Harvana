@@ -1982,95 +1982,38 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		// members/notice/payments/loans are NOT part of the group document —
 		// they're separate subcollections now, written after the group
 		// document itself succeeds.
-		final com.harvanna.app.firestore.GroupFirestoreManager firestoreManager =
-		com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getApplicationContext());
-		
 		final ProgressDialog groupProgress = new ProgressDialog(CreateNewGroupActivity.this);
-		groupProgress.setMessage("Creating your group...");
+		groupProgress.setMessage("Saving your group...");
 		groupProgress.setCancelable(false);
 		groupProgress.show();
 		
-		firestoreManager.createGroup(newGroupId, newGroupMap, new com.harvanna.app.firestore.GroupFirestoreManager.SimpleCallback() {
-			@Override
-			public void onSuccess() {
-				// Contract-compliant first member (creator = ADMIN, slot 1)
-				Map<String, Object> memberFields = new HashMap<>();
-				memberFields.put("memberUid", creatorUid);
-				memberFields.put("slot", 1);
-				memberFields.put("role", "ADMIN");
-				memberFields.put("status", "ACTIVE");
-				memberFields.put("joinedAt", System.currentTimeMillis());
-				
-				firestoreManager.addMember(newGroupId, creatorUid, memberFields, new com.harvanna.app.firestore.GroupFirestoreManager.SimpleCallback() {
-					@Override
-					public void onSuccess() {
-						// THE FIX: this used to write the SAME "Group
-						// launched" notice twice — once via postSystemNotice
-						// (the standard path, correctly resolves to "By
-						// System"), and once more via a manual addNotice()
-						// call kept "for backward compatibility" that also
-						// set creatorId to the real creator uid, which
-						// resolves through the name-resolution fix applied
-						// elsewhere this session to show as "By <creator
-						// name>" instead. Two notices, two different
-						// authors shown, same single event. The manual
-						// write was pure duplication — postSystemNotice is
-						// the one every other group event already uses
-						// consistently. Notice-posting was already treated
-						// as non-critical to navigation (the old onError
-						// branch proceeded anyway) — same here, just
-						// without a redundant second write to gate on.
-						firestoreManager.postSystemNotice(newGroupId,
-						"Group launched",
-						"This group is now active. Welcome!");
-						
-						if (pendingCardQr != null && pendingCardDigits != null) {
-							com.harvanna.app.group.GroupCardStore.publish(getApplicationContext(), newGroupId,
-							_realGroupWalletAddress, group_name_edittext1.getText().toString().trim(),
-							pendingCardTemplate == null ? "CLASSIC" : pendingCardTemplate,
-							pendingCardQr, pendingCardDigits, creatorUid, null);
-						}
-						
-						com.harvanna.app.firestore.UserProfileManager.getInstance(getApplicationContext())
-						.addGroupToProfile(creatorUid, newGroupId, new com.harvanna.app.firestore.UserProfileManager.SimpleCallback() {
-							@Override public void onSuccess() { /* best-effort, doesn't block navigation */ }
-							@Override public void onError(String err) {
-								android.util.Log.w("CreateNewGroup", "Failed to add group to Firestore profile: " + err);
-							}
-						});
-						
-						if (!CreateNewGroupActivity.this.isFinishing() && groupProgress.isShowing()) groupProgress.dismiss();
-						intent.putExtra("groupId", newGroupId);
-						intent.setClass(getApplicationContext(), GroupDetailsActivity.class);
-						startActivity(intent);
-						finish();
-					}
-					@Override
-					public void onError(final String error) {
-						runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								// Group document exists but has no members recorded —
-								// a genuinely broken state, so surface this clearly
-								// rather than silently proceeding into it.
-								if (!CreateNewGroupActivity.this.isFinishing() && groupProgress.isShowing()) groupProgress.dismiss();
-								SketchwareUtil.showMessage(getApplicationContext(), "Group created, but adding you as a member failed: " + error + ". Please contact support with this group ID: " + newGroupId);
-							}
-						});
-					}
-				});
+		final boolean onNode = pendingCircleId != null;
+		// A group that already exists on the network is queued first, so a failed save here is retried automatically.
+		if (onNode) com.harvanna.app.group.GroupSaver.queue(getApplicationContext(), creatorUid, newGroupId, newGroupMap);
+		
+		com.harvanna.app.group.GroupSaver.save(getApplicationContext(), creatorUid, newGroupId, newGroupMap, error -> runOnUiThread(() -> {
+			if (!CreateNewGroupActivity.this.isFinishing() && groupProgress.isShowing()) groupProgress.dismiss();
+			if (error != null) {
+				if (onNode) {
+					SketchwareUtil.showMessage(getApplicationContext(), "Your group exists on the network, but saving its details here failed. We'll keep retrying automatically. Group ID: " + pendingCircleId);
+					finish();
+				} else {
+					SketchwareUtil.showMessage(getApplicationContext(), error);
+				}
+				return;
 			}
-			@Override
-			public void onError(final String error) {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if (!CreateNewGroupActivity.this.isFinishing() && groupProgress.isShowing()) groupProgress.dismiss();
-						SketchwareUtil.showMessage(getApplicationContext(), "Failed to create group: " + error);
-					}
-				});
+			if (onNode) com.harvanna.app.group.GroupSaver.unqueue(getApplicationContext(), newGroupId);
+			if (pendingCardQr != null && pendingCardDigits != null) {
+				com.harvanna.app.group.GroupCardStore.publish(getApplicationContext(), newGroupId,
+				_realGroupWalletAddress, group_name_edittext1.getText().toString().trim(),
+				pendingCardTemplate == null ? "CLASSIC" : pendingCardTemplate,
+				pendingCardQr, pendingCardDigits, creatorUid, null);
 			}
-		});
+			intent.putExtra("groupId", newGroupId);
+			intent.setClass(getApplicationContext(), GroupDetailsActivity.class);
+			startActivity(intent);
+			finish();
+		}));
 	}
 	
 	private void _proceedWithGroupWalletCreation() {

@@ -300,7 +300,7 @@ public class CreateHarvannaCardActivity extends AppCompatActivity {
   private Bitmap generatedBackBitmap;
 
   private void tintSwatches() {
-    swatch_classic.setColorFilter(Color.parseColor("#000E1F"), PorterDuff.Mode.SRC_IN);
+    swatch_classic.setColorFilter(Color.parseColor("#111827"), PorterDuff.Mode.SRC_IN);
     swatch_obsidian.setColorFilter(Color.parseColor("#0A0A0A"), PorterDuff.Mode.SRC_IN);
     swatch_gold.setColorFilter(Color.parseColor("#FFC107"), PorterDuff.Mode.SRC_IN);
     swatch_oasis.setColorFilter(Color.parseColor("#FFD180"), PorterDuff.Mode.SRC_IN);

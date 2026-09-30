@@ -166,3 +166,10 @@ Consequences to know:
 - Mechanical name results that need the owner to confirm they exist: the support address is now `support@harvanna.app`; the separate miner app is now expected at package
   `com.harvanna.node.miner` (the Earn screen launches it); saved-file folder is `Harvanna`.
 - The repository is still called "Ajoo" on GitHub and git history contains the old names; neither is part of the app.
+
+## Group wallet card sharing
+- The encrypted Access Card (ciphertext + digit code + address, never the passphrase) is published to `GROUPS/{gid}/private/walletCard` after group creation (or when the admin regenerates it from Group settings). Members view/print/save it in `GroupWalletBackupActivity`.
+- Needs the `private` rule in `docs/firestore.rules.proposed` deployed; until then publish 403s (kept locally and retried when the admin opens the backup screen) and members see an error.
+- Security note: members hold ciphertext, so the passphrase strength is the only protection (min 20 chars enforced by the card crypto). Admin should use a long random passphrase and never share it.
+- Node-derived on-chain Circle escrow has no private key, so no card exists for it; only personal-wallet backup applies.
+- Not implemented: per-type settings for GenLoan; a fuller rebuild of the settings screen (existing type panels for Rotating/Fixed/Accumulative kept, backup section added).

@@ -8,11 +8,11 @@ public enum CardTemplate {
 	// ── Legacy Gradient / Solid Color Cards ──
 	
 	CLASSIC(
-	"Classic",
-	new int[]{Color.parseColor("#000E1F"), Color.parseColor("#001830")},
+	"Harvanna",
+	new int[]{Color.parseColor("#111827"), Color.parseColor("#1F2937")},
 	Color.WHITE,
-	Color.parseColor("#8A93A6"),
-	Color.parseColor("#00D9A5"),
+	Color.parseColor("#9CA3AF"),
+	Color.parseColor("#FF9030"),
 	false,
 	0
 	),

@@ -612,6 +612,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		
 		tvWalletAddress.setText(expectedWallet.isEmpty() ? "No group wallet" : expectedWallet);
 		_refreshKeyStatus();
+		_buildBackupSection();
 		
 		// Apply Admin States
 		btnSaveSettings.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
@@ -1138,6 +1139,74 @@ public class GroupSettingsActivity extends AppCompatActivity {
 				});
 			}
 		}).start();
+	}
+	
+	private LinearLayout backupSection;
+	
+	/**
+	 * Wallet Access Card backup. The admin (who holds the passphrase) can
+	 * create/replace the card, which is published encrypted to every member;
+	 * members can view, print and save it as a social backup.
+	 */
+	private void _buildBackupSection() {
+		if (expectedWallet.isEmpty() || !expectedWallet.startsWith("HV0x")) return;
+		ViewGroup host = (ViewGroup) btnRestoreWallet.getParent();
+		if (backupSection != null && backupSection.getParent() != null) {
+			((ViewGroup) backupSection.getParent()).removeView(backupSection);
+		}
+		backupSection = new LinearLayout(this);
+		backupSection.setOrientation(LinearLayout.VERTICAL);
+		float d = getResources().getDisplayMetrics().density;
+		backupSection.setPadding(0, (int) (12 * d), 0, 0);
+		
+		TextView title = new TextView(this);
+		title.setText("Wallet backup card");
+		title.setTextSize(14);
+		title.setTypeface(null, android.graphics.Typeface.BOLD);
+		title.setTextColor(UiColors.textPrimary());
+		backupSection.addView(title);
+		
+		TextView info = new TextView(this);
+		info.setText(isAdmin
+			? "Create an encrypted Access Card for this wallet. Members receive it as a backup but can't open it: only you know the passphrase."
+			: "The admin's encrypted backup card for this wallet. Print or save a copy; it can't move funds without the admin's passphrase.");
+		info.setTextSize(12);
+		info.setTextColor(UiColors.textSecondary());
+		info.setPadding(0, (int) (4 * d), 0, (int) (8 * d));
+		backupSection.addView(info);
+		
+		if (isAdmin) {
+			MaterialButton create = new MaterialButton(this);
+			create.setText("Create / replace Access Card");
+			create.setAllCaps(false);
+			create.setOnClickListener(v -> {
+				String mn = SecureWalletStorage.loadMnemonic(this, expectedWallet);
+				if (mn == null || mn.isEmpty()) {
+					Toast.makeText(this, "The group phrase isn't on this phone. Restore the group wallet first.", Toast.LENGTH_LONG).show();
+					return;
+				}
+				Intent i = new Intent(this, CreateHarvannaCardActivity.class);
+				i.putExtra(CreateHarvannaCardActivity.EXTRA_RAW_MNEMONIC, mn);
+				i.putExtra(CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, expectedWallet);
+				i.putExtra(CreateHarvannaCardActivity.EXTRA_LABEL, str(groupData, "groupName", ""));
+				i.putExtra(CreateHarvannaCardActivity.EXTRA_GROUP_ID, groupId);
+				startActivity(i);
+			});
+			backupSection.addView(create);
+		}
+		
+		MaterialButton view = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+		view.setText(isAdmin ? "Preview member copy" : "View, print or save backup card");
+		view.setAllCaps(false);
+		view.setOnClickListener(v -> {
+			Intent i = new Intent(this, com.harvanna.app.group.GroupWalletBackupActivity.class);
+			i.putExtra(com.harvanna.app.group.GroupWalletBackupActivity.EXTRA_GROUP_ID, groupId);
+			startActivity(i);
+		});
+		backupSection.addView(view);
+		
+		int idx = host.indexOfChild(btnRestoreWallet);
+		host.addView(backupSection, idx + 1);
 	}
 	
 	private void _refreshKeyStatus() {

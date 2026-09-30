@@ -61,6 +61,7 @@ public final class GroupSaver {
             o.put("uid", uid);
             o.put("map", new JSONObject(map));
             sp(ctx).edit().putString(groupId, o.toString()).apply();
+            GroupSaveWorker.schedule(ctx);
         } catch (Exception ignored) { }
     }
 

@@ -128,7 +128,57 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		initialize(_savedInstanceState, _view);
 		FirebaseApp.initializeApp(getContext());
 		initializeLogic();
-		return _view;
+		return _wrapForOnChain(_view);
+	}
+	
+	/**
+	 * A rotating group's money lives on the network. If this group is linked to a circle, this tab shows a
+	 * clear path to it (contribute, bond, payout order) instead of the old wallet-transfer screen.
+	 */
+	private View _wrapForOnChain(View content) {
+		final android.widget.FrameLayout frame = new android.widget.FrameLayout(getContext());
+		frame.addView(content);
+		String gid = getArguments() != null ? getArguments().getString("groupId", "") : "";
+		if (gid == null || gid.isEmpty()) return frame;
+		com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext()).getGroup(gid,
+		new com.harvanna.app.firestore.GroupFirestoreManager.DocCallback() {
+			@Override public void onSuccess(Map<String, Object> data) {
+				Object cid = data.get("circleId");
+				if (cid == null || String.valueOf(cid).trim().isEmpty() || getActivity() == null) return;
+				final String circleId = String.valueOf(cid).trim();
+				getActivity().runOnUiThread(() -> {
+					if (getContext() == null) return;
+					float d = getResources().getDisplayMetrics().density;
+					android.widget.LinearLayout box = new android.widget.LinearLayout(getContext());
+					box.setOrientation(android.widget.LinearLayout.VERTICAL);
+					box.setBackgroundColor(com.harvanna.app.utils.UiColors.background());
+					box.setPadding((int) (20 * d), (int) (24 * d), (int) (20 * d), (int) (20 * d));
+					TextView t = new TextView(getContext());
+					t.setText("Payments run on the Harvanna network");
+					t.setTextSize(18); t.setTypeface(null, android.graphics.Typeface.BOLD);
+					t.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
+					box.addView(t);
+					TextView b = new TextView(getContext());
+					b.setText("This rotating group keeps its money on the network. Open it to join and lock your bond, pay this round, see whose turn it is and the payout order, and withdraw your bond when the group ends.");
+					b.setTextSize(14); b.setTextColor(com.harvanna.app.utils.UiColors.textSecondary());
+					b.setPadding(0, (int) (8 * d), 0, (int) (16 * d));
+					box.addView(b);
+					com.google.android.material.button.MaterialButton go = new com.google.android.material.button.MaterialButton(getContext());
+					go.setText("Open payments and bond");
+					go.setAllCaps(false);
+					go.setOnClickListener(v -> {
+						Intent i = new Intent(getContext(), com.harvanna.app.circle.CircleActivity.class);
+						i.putExtra("circleId", circleId);
+						startActivity(i);
+					});
+					box.addView(go);
+					frame.addView(box, new android.widget.FrameLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+				});
+			}
+			@Override public void onError(String e) { }
+		});
+		return frame;
 	}
 	
 	private void initialize(Bundle _savedInstanceState, View _view) {

@@ -805,7 +805,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		
 		create_group_btn.setOnClickListener(_v -> {
 			if (!_validateGroupForm()) return;
-			_showCreateWalletBottomSheet();
+			if ("Rotating Pool".equals(groupTypeString)) {
+				_createRotatingOnChain();
+			} else {
+				_showCreateWalletBottomSheet();
+			}
 		});
 		
 		_groupdb_child_listener = new ChildEventListener() {
@@ -1595,37 +1599,13 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	}
 	
 	private boolean _validateRotatingPoolFields() {
-		if (frequencyString.trim().isEmpty()) {
-			SketchwareUtil.showMessage(getApplicationContext(), "Please select a contribution frequency.");
+		// Rotating groups run on the network: 3-12 members, and a cycle of 1 / 7 / 30 days.
+		if (!("Daily".equals(frequencyString) || "Weekly".equals(frequencyString) || "Monthly".equals(frequencyString))) {
+			SketchwareUtil.showMessage(getApplicationContext(), "Rotating groups run daily, weekly or monthly. Please pick one of those.");
 			return false;
 		}
 		if (!_validatePositiveDecimal(contribution_amount_edittext3, "Please enter a valid contribution amount.")) return false;
-		if (!_validateMinInt(no_of_slots_edittext4, 2, "A group needs at least 2 slots.")) return false;
-		
-		if (distributionString.trim().isEmpty()) {
-			SketchwareUtil.showMessage(getApplicationContext(), "Please select a distribution method.");
-			return false;
-		}
-		
-		if ("Random Ballot".equals(distributionString) && drawTimingString.trim().isEmpty()) {
-			SketchwareUtil.showMessage(getApplicationContext(), "Please select draw timing.");
-			return false;
-		}
-		if ("First Come First Serve".equals(distributionString)) {
-			if (!_validateMinInt(claim_window_edittext, 1, "Please enter a valid claim window.")) return false;
-		}
-		if ("Auction / Bidding".equals(distributionString)) {
-			if (!_validateRangeInt(max_bid_cap_edittext, 1, 100, "Max bid cap must be between 1% and 100%.")) return false;
-			if (!_validateRangeInt(commission_edittext, 0, 100, "Commission must be between 0% and 100%.")) return false;
-			if (!_validateMinInt(bidding_window_edittext, 1, "Please enter a valid bidding window.")) return false;
-		}
-		
-		if (!_validateMinInt(grace_period_edittext, 0, "Please enter a valid grace period.")) return false;
-		if (!_validateRangeInt(min_trust_score_edittext, 0, 100, "Minimum trust score must be between 0 and 100.")) return false;
-		if (defaultConsequenceString.trim().isEmpty()) {
-			SketchwareUtil.showMessage(getApplicationContext(), "Please select what happens if a payment is missed.");
-			return false;
-		}
+		if (!_validateRangeInt(no_of_slots_edittext4, 3, 12, "A rotating group needs between 3 and 12 members.")) return false;
 		return true;
 	}
 	
@@ -1752,6 +1732,66 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 	};
 	
+	private String pendingCircleId = null;
+	
+	/**
+	 * Rotating group = one group: its details live in Firestore, its money lives on the network as a circle.
+	 * Steps: show the cost, PIN, create the circle on the node, then save the group record linked to it.
+	 * (No group wallet or Access Card: the circle's escrow is held by the network, not by a key.)
+	 */
+	private void _createRotatingOnChain() {
+		final String wallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
+		if (wallet == null || wallet.isEmpty() || com.harvanna.app.wallet.WalletManager.loadPrivateKey(this, wallet) == null) {
+			new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("You need a wallet first")
+			.setMessage("A rotating group runs on the network and is paid from your wallet. Create or restore a wallet, then try again.")
+			.setPositiveButton("OK", null).show();
+			return;
+		}
+		final long contributionRaw = com.harvanna.app.circle.CircleUi.toRaw(contribution_amount_edittext3.getText().toString());
+		final int members = Integer.parseInt(no_of_slots_edittext4.getText().toString().trim());
+		final long cycleHours = "Daily".equals(frequencyString) ? 24L : "Weekly".equals(frequencyString) ? 168L : 720L;
+		final long perMember = contributionRaw * (members - 1);
+		final long creatorBond = perMember * 2L;
+		final long fee = 100_000_000L;
+		String msg = "• Each round every member pays " + com.harvanna.app.circle.CircleUi.harv(contributionRaw) + "\n"
+		+ "• The pot each round: " + com.harvanna.app.circle.CircleUi.harv(contributionRaw * members) + "\n"
+		+ "• Every other member locks a bond of " + com.harvanna.app.circle.CircleUi.harv(perMember) + " to join\n"
+		+ "• Your bond (2× a member's): " + com.harvanna.app.circle.CircleUi.harv(creatorBond) + "\n"
+		+ "• Creation fee (non-refundable): " + com.harvanna.app.circle.CircleUi.harv(fee) + "\n\n"
+		+ "Total locked from you now: " + com.harvanna.app.circle.CircleUi.harv(creatorBond + fee) + ". Network fees are extra.\n\n"
+		+ "Payout order follows when people join (you join first), with some early slots kept for members with a track record. "
+		+ "A group that doesn't fill within 72 hours is cancelled and bonds are returned.";
+		new androidx.appcompat.app.AlertDialog.Builder(this)
+		.setTitle("Create this rotating group?")
+		.setMessage(msg)
+		.setNegativeButton("Cancel", null)
+		.setPositiveButton("Create", (d, w) -> com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(this, () -> {
+			final ProgressDialog pd = ProgressDialog.show(this, null, "Creating on the network…", true, false);
+			com.harvanna.app.sync.NodeGroupClient.createCircle(getApplicationContext(), wallet, contributionRaw, members, cycleHours,
+			new com.harvanna.app.sync.NodeGroupClient.Callback() {
+				@Override public void onSuccess(org.json.JSONObject json) {
+					final String id = json.optString("circleId", "");
+					if (id.isEmpty()) {
+						runOnUiThread(() -> { pd.dismiss(); SketchwareUtil.showMessage(getApplicationContext(), "The network accepted it but returned no id. Check My Groups in a moment."); });
+						return;
+					}
+					pendingCircleId = id;
+					com.harvanna.app.sync.NodeGroupClient.getCircle(id, new com.harvanna.app.sync.NodeGroupClient.Callback() {
+						@Override public void onSuccess(org.json.JSONObject circle) {
+							runOnUiThread(() -> { pd.dismiss(); _submitNewGroupData(circle.optString("escrowAddress", "")); });
+						}
+						@Override public void onError(String e) {
+							runOnUiThread(() -> { pd.dismiss(); _submitNewGroupData(""); });
+						}
+					});
+				}
+				@Override public void onError(String error) {
+					runOnUiThread(() -> { pd.dismiss(); SketchwareUtil.showMessage(getApplicationContext(), com.harvanna.app.circle.CircleUi.friendly(error)); });
+				}
+			});
+		})).show();
+	}
+	
 	public void _submitNewGroupData(final String _realGroupWalletAddress) {
 		// Client-generated id — Firestore doc path is fixed via createGroup's
 		// PATCH rather than relying on auto-id, so members/notices/payments/
@@ -1817,6 +1857,10 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			newGroupMap.put("withdrawalRule", withdrawalRuleString.trim());
 		}
 		
+		if (pendingCircleId != null) {
+			newGroupMap.put("circleId", pendingCircleId);
+			newGroupMap.put("onChain", true);
+		}
 		newGroupMap.put("allowLoans", allowLoans);
 		if (allowLoans && !newGroupMap.containsKey("loanInterestRate")) {
 			newGroupMap.put("loanInterestRate", 0.0);

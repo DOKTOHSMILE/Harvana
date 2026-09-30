@@ -812,7 +812,24 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 	
 	private void _joinSucceeded(String message) {
 		_markInviteAccepted();
+		final String circleId = loadedGroupData != null && loadedGroupData.get("circleId") != null
+		? String.valueOf(loadedGroupData.get("circleId")).trim() : "";
 		runOnUiThread(() -> {
+			if (!circleId.isEmpty()) {
+				// Rotating group: the last step is to lock the bond on the network.
+				sending = false;
+				new androidx.appcompat.app.AlertDialog.Builder(this)
+				.setTitle("One more step")
+				.setMessage("You're in the group. To secure your place in the payout order, lock your bond on the network now.")
+				.setCancelable(false)
+				.setPositiveButton("Continue", (dd, w) -> {
+					Intent ci = new Intent(this, com.harvanna.app.circle.CircleActivity.class);
+					ci.putExtra("circleId", circleId);
+					startActivity(ci);
+					finish();
+				}).show();
+				return;
+			}
 			sending = false;
 			SketchwareUtil.showMessage(getApplicationContext(),
 			message != null ? message : "You're in.");

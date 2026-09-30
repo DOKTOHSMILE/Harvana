@@ -19,7 +19,7 @@ import com.harvanna.app.wallet.BalanceFormatter;
 import java.math.BigDecimal;
 
 /** Small view builders + amount helpers shared by the Circle screens (theme tokens only, day/night safe). */
-final class CircleUi {
+public final class CircleUi {
 
     private CircleUi() {}
 
@@ -82,12 +82,12 @@ final class CircleUi {
     }
 
     /** Raw units (1 HARV = 1e8) to a trimmed display string, without the unit. */
-    static String harv(long raw) {
+    public static String harv(long raw) {
         return BalanceFormatter.smartDecimal(HarvannaNodeClient.toHarvDisplay(raw)) + " HARV";
     }
 
     /** Exact HARV text to raw units (no floating point). Returns -1 when invalid. */
-    static long toRaw(String s) {
+    public static long toRaw(String s) {
         try {
             if (s == null || s.trim().isEmpty()) return -1;
             BigDecimal v = new BigDecimal(s.trim());
@@ -99,7 +99,7 @@ final class CircleUi {
     }
 
     /** Node rejection codes to plain language. */
-    static String friendly(String error) {
+    public static String friendly(String error) {
         if (error == null) return "Something went wrong.";
         String e = error.toUpperCase();
         if (e.contains("INSUFFICIENT_BALANCE")) return "Not enough available balance to lock the required bond and fee.";

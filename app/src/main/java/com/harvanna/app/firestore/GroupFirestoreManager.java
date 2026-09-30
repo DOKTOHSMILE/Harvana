@@ -634,6 +634,65 @@ public class GroupFirestoreManager {
 		});
 	}
 
+	// ── Generic top-level documents (e.g. INVITES) ─────────────────────
+
+	public void setTopLevelDoc(String collection, String docId, Map<String, Object> fields, SimpleCallback callback) {
+		_authorizedRequest("PATCH", "/" + collection + "/" + docId, _encodeFields(fields), new _RawCallback() {
+			@Override public void onSuccess(String body) { callback.onSuccess(); }
+			@Override public void onError(String error) { callback.onError(error); }
+		});
+	}
+
+	public void updateTopLevelFields(String collection, String docId, Map<String, Object> fields, SimpleCallback callback) {
+		StringBuilder mask = new StringBuilder();
+		for (String key : fields.keySet()) {
+			if (mask.length() > 0) mask.append("&");
+			mask.append("updateMask.fieldPaths=").append(key);
+		}
+		_authorizedRequest("PATCH", "/" + collection + "/" + docId + "?" + mask, _encodeFields(fields), new _RawCallback() {
+			@Override public void onSuccess(String body) { callback.onSuccess(); }
+			@Override public void onError(String error) { callback.onError(error); }
+		});
+	}
+
+	/** Equality query on one string field of a top-level collection. */
+	public void queryTopLevel(String collection, String field, String value, int limit, ListCallback callback) {
+		try {
+			JSONObject fieldFilter = new JSONObject()
+			.put("field", new JSONObject().put("fieldPath", field))
+			.put("op", "EQUAL")
+			.put("value", new JSONObject().put("stringValue", value));
+			JSONObject structuredQuery = new JSONObject()
+			.put("from", new JSONArray().put(new JSONObject().put("collectionId", collection)))
+			.put("where", new JSONObject().put("fieldFilter", fieldFilter))
+			.put("limit", limit);
+			_authorizedRequest("POST", ":runQuery", new JSONObject().put("structuredQuery", structuredQuery), new _RawCallback() {
+				@Override
+				public void onSuccess(String responseBody) {
+					try {
+						List<Map<String, Object>> results = new ArrayList<>();
+						JSONArray arr = new JSONArray(responseBody);
+						for (int i = 0; i < arr.length(); i++) {
+							JSONObject entry = arr.getJSONObject(i);
+							if (!entry.has("document")) continue;
+							JSONObject doc = entry.getJSONObject("document");
+							Map<String, Object> decoded = _decodeDocument(doc);
+							String fullName = doc.optString("name", "");
+							decoded.put("_docId", fullName.substring(fullName.lastIndexOf('/') + 1));
+							results.add(decoded);
+						}
+						callback.onSuccess(results);
+					} catch (Exception e) {
+						callback.onError("Failed to parse " + collection + " query: " + e.getMessage());
+					}
+				}
+				@Override public void onError(String error) { callback.onError(error); }
+			});
+		} catch (Exception e) {
+			callback.onError("Failed to build query: " + e.getMessage());
+		}
+	}
+
 	// ── Notices subcollection ───────────────────────────────────────────
 	
 	public void addNotice(String groupId, Map<String, Object> fields, IdCallback callback) {

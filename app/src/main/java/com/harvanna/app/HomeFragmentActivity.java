@@ -509,7 +509,24 @@ public class HomeFragmentActivity extends Fragment {
 		_loadWalletBalance();
 		_loadLearnHubPreview();
 		_loadTrendingGroups();
-		if (getContext() != null) com.harvanna.app.sync.NodeLinkManager.ensureLinked(getContext(), null);
+		if (getContext() != null) {
+			com.harvanna.app.sync.NodeLinkManager.ensureLinked(getContext(), null);
+			com.harvanna.app.group.InviteManager.checkAndNotify(getContext());
+			final android.content.Context ic = getContext().getApplicationContext();
+			com.harvanna.app.group.InviteManager.listMine(ic, new com.harvanna.app.group.InviteManager.ListCb() {
+				@Override public void onList(java.util.List<java.util.Map<String, Object>> invites) {
+					if (invites.isEmpty() || getActivity() == null || getView() == null) return;
+					getActivity().runOnUiThread(() -> {
+						if (getView() == null) return;
+						com.google.android.material.snackbar.Snackbar.make(getView(),
+							"You have " + invites.size() + " group invitation" + (invites.size() > 1 ? "s" : ""),
+							com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+							.setAction("View", v -> startActivity(new Intent(getContext(), InvitesActivity.class))).show();
+					});
+				}
+				@Override public void onError(String e) { }
+			});
+		}
 	}
 	public void _MORE() {
 	}

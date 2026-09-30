@@ -186,3 +186,8 @@ Consequences to know:
 - The node's trust score is only 0..26: bound = 10, +2 per effective vouch up to 8. It is NOT the app's 0..100 score (TrustScoreEngine, computed client-side from Firestore). They are different measures; the profile now shows both, labelled separately. There is no node endpoint that takes the app score.
 - **One wallet per account and one wallet per device hash**: the node rejects a second wallet for the same user (`USER_ALREADY_LINKED`) and a second wallet on the same device (`DEVICE_ALREADY_BOUND`). "Various wallets per user" is therefore not possible without a node change; the app links the active wallet only and shows the node's message otherwise.
 - The device attestation hash is client-asserted (SHA-256 of ANDROID_ID + package); real attestation (Play Integrity) is future node work. Node deploy must set `harvanna.identity.links-enabled=true` and a real pepper.
+
+## Invites
+- Invites live in `INVITES/{groupId}_{emailKey}` (email-keyed so people without an account can be invited). Rules are in docs/firestore.rules and must be deployed. Invitees must have a VERIFIED email to see or answer invites (otherwise anyone could register a victim's email and read their invites).
+- The invitee is notified when the app is opened (Android notification + a Snackbar on Home). There is NO background push: that needs FCM plus a Cloud Function, which this project doesn't have.
+- The invite screen summarises the group and links to the join screen, which shows the rules, requires a wallet and a signed contract.

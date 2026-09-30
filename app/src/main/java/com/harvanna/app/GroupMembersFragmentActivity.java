@@ -106,6 +106,9 @@ public class GroupMembersFragmentActivity extends Fragment {
 		tv_members_empty = _view.findViewById(R.id.tv_members_empty);
 		tv_members_count = _view.findViewById(R.id.tv_members_count);
 		btn_members_invite = _view.findViewById(R.id.btn_members_invite);
+		if (btn_members_invite != null) btn_members_invite.setOnClickListener(v -> {
+			if (getActivity() != null) com.harvanna.app.group.InviteMemberSheet.show(getActivity(), groupId, lastGroupData);
+		});
 		tv_pending_label = _view.findViewById(R.id.tv_pending_label);
 		recycler_pending_members = _view.findViewById(R.id.recycler_pending_members);
 		groupsp = getContext().getSharedPreferences("groupsp", Activity.MODE_PRIVATE);
@@ -283,6 +286,8 @@ public class GroupMembersFragmentActivity extends Fragment {
 	private HashMap<String, Object> user_data_v_map = new HashMap<>();
 	private String uid = "";
 	private boolean isAdmin = false;
+	private boolean canInvite = false;
+	private Map<String, Object> lastGroupData = new java.util.HashMap<>();
 	private int nextSlot = 1;
 	private int totalSlots = 0;
 	private String joinApprovalMethod = "ADMIN";
@@ -320,10 +325,12 @@ public class GroupMembersFragmentActivity extends Fragment {
 				String uid = FirebaseAuth.getInstance().getCurrentUser() != null
 				? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
 				isAdmin = !creatorId.isEmpty() && creatorId.equals(uid);
+				lastGroupData = new java.util.HashMap<>(data);
+				canInvite = isAdmin || Boolean.TRUE.equals(data.get("membersCanInvite"));
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> {
 					if (btn_members_invite != null)
-					btn_members_invite.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+					btn_members_invite.setVisibility(canInvite ? View.VISIBLE : View.GONE);
 					_loadMembers();
 				});
 			}
@@ -342,7 +349,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> {
 					if (btn_members_invite != null) {
-						btn_members_invite.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+						btn_members_invite.setVisibility(canInvite ? View.VISIBLE : View.GONE);
 					}
 					_loadMembers();
 				});

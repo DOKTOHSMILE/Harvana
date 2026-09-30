@@ -206,6 +206,28 @@ service cloud.firestore {
       }
     }
 
+    // Group invitations, keyed by the invitee's email. The creator (or, if the group allows it, an
+    // active member) may invite. Only the invitee - with a VERIFIED email matching the invite - may read
+    // it or answer it, and only status/respondedAt may change.
+    match /INVITES/{inviteId} {
+      function inviteeIsMe() {
+        return signedIn()
+          && request.auth.token.email_verified == true
+          && resource.data.inviteeEmail == request.auth.token.email.lower();
+      }
+      allow create: if signedIn()
+        && request.resource.data.inviterUid == request.auth.uid
+        && request.resource.data.status == 'PENDING'
+        && (isGroupCreator(request.resource.data.groupId)
+            || (isActiveMember(request.resource.data.groupId)
+                && groupDoc(request.resource.data.groupId).membersCanInvite == true));
+      allow read: if signedIn() && (resource.data.inviterUid == request.auth.uid || inviteeIsMe());
+      allow update: if inviteeIsMe()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'respondedAt'])
+        && request.resource.data.status in ['ACCEPTED', 'DECLINED'];
+      allow delete: if signedIn() && resource.data.inviterUid == request.auth.uid;
+    }
+
     match /P2P_PAYMENT_DETAILS/{listingId} {
       allow create: if signedIn()
   && request.auth.uid == request.resource.data.sellerUid

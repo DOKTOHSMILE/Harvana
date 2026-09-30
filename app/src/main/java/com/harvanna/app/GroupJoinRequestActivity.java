@@ -772,6 +772,7 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 		new com.harvanna.app.firestore.GroupFirestoreManager.IdCallback() {
 			@Override
 			public void onSuccess(String generatedId) {
+				_markInviteAccepted();
 				com.harvanna.app.firestore.UserProfileManager.getInstance(getApplicationContext())
 				.addPendingGroupToProfile(currentUid, groupId,
 				new com.harvanna.app.firestore.UserProfileManager.SimpleCallback() {
@@ -802,7 +803,15 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 		});
 	}
 	
+	private void _markInviteAccepted() {
+		String inviteId = getIntent() != null ? getIntent().getStringExtra("inviteId") : null;
+		if (inviteId != null && !inviteId.isEmpty()) {
+			com.harvanna.app.group.InviteManager.respond(getApplicationContext(), inviteId, true, null);
+		}
+	}
+	
 	private void _joinSucceeded(String message) {
+		_markInviteAccepted();
 		runOnUiThread(() -> {
 			sending = false;
 			SketchwareUtil.showMessage(getApplicationContext(),

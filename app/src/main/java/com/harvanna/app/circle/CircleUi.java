@@ -127,8 +127,6 @@ public final class CircleUi {
         if (e.contains("SIGNING THE LOCK FAILED")) return "The action was accepted but your phone couldn't finish signing the payment. Open the circle again to retry.";
         return error;
     }
-<<<<<<< HEAD
-=======
 
     /** Toolbar (theme appBarColor, back arrow) above the body, plus a status bar that matches it. */
     public static LinearLayout withToolbar(Activity a, String title, View body) {
@@ -160,5 +158,4 @@ public final class CircleUi {
         com.harvanna.app.utils.StatusBarUtil.matchToolbar(a);
         return root;
     }
->>>>>>> main
 }

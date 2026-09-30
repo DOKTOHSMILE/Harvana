@@ -522,6 +522,7 @@ public class GroupFirestoreManager {
 		list(col("LEARN_CONTENT"), callback);
 	}
 
+<<<<<<< HEAD
 	/**
 	 * Removes a group and everything under it (members, notices, payments, loans, joinRequests, payoutRequests,
 	 * private). The group document goes LAST because the security rules that authorise the sub-deletes look at
@@ -634,6 +635,88 @@ public class GroupFirestoreManager {
 						DocumentReference group = d.getReference().getParent().getParent();
 						if (group != null) m.put("groupId", group.getId());
 					}
+=======
+	// ── SDK plumbing ────────────────────────────────────────────────────
+
+	private static DocumentReference doc(String... path) {
+		return FirebaseFirestore.getInstance().document(join(path));
+	}
+
+	private static CollectionReference col(String... path) {
+		return FirebaseFirestore.getInstance().collection(join(path));
+	}
+
+	private static String join(String[] path) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < path.length; i++) {
+			if (path[i] == null || path[i].isEmpty()) throw new IllegalArgumentException("Missing id in " + path[0] + " path.");
+			if (i > 0) sb.append('/');
+			sb.append(path[i]);
+		}
+		return sb.toString();
+	}
+
+	/** Signed-in check shared by every call (rules need an authenticated user). */
+	private static String precheck() {
+		return FirebaseAuth.getInstance().getCurrentUser() == null ? "Not signed in \u2014 no current Firebase user." : null;
+	}
+
+	private void set(DocumentReference ref, Map<String, Object> fields, SimpleCallback cb) {
+		String err = precheck();
+		if (err != null) { deliver(() -> cb.onError(err)); return; }
+		try {
+			await(ref.set(clean(fields)), id -> cb.onSuccess(), cb::onError);
+		} catch (Exception e) { deliver(() -> cb.onError("HTTP 400: " + e.getMessage())); }
+	}
+
+	/** Field-masked merge: only the given top-level fields change; the doc is created if absent. */
+	private void merge(DocumentReference ref, Map<String, Object> fields, SimpleCallback cb) {
+		String err = precheck();
+		if (err != null) { deliver(() -> cb.onError(err)); return; }
+		if (fields == null || fields.isEmpty()) { deliver(cb::onSuccess); return; }
+		try {
+			await(ref.set(clean(fields), SetOptions.mergeFields(new ArrayList<>(fields.keySet()))), id -> cb.onSuccess(), cb::onError);
+		} catch (Exception e) { deliver(() -> cb.onError("HTTP 400: " + e.getMessage())); }
+	}
+
+	private void add(CollectionReference ref, Map<String, Object> fields, IdCallback cb) {
+		String err = precheck();
+		if (err != null) { deliver(() -> cb.onError(err)); return; }
+		try {
+			final DocumentReference newRef = ref.document(); // id is known before the write completes
+			await(newRef.set(clean(fields)), id -> cb.onSuccess(newRef.getId()), cb::onError);
+		} catch (Exception e) { deliver(() -> cb.onError("HTTP 400: " + e.getMessage())); }
+	}
+
+	private void get(DocumentReference ref, DocCallback cb) {
+		String err = precheck();
+		if (err != null) { deliver(() -> cb.onError(err)); return; }
+		ref.get().addOnCompleteListener(BG, task -> {
+			if (!task.isSuccessful()) { cb.onError(describe(task.getException())); return; }
+			DocumentSnapshot snap = task.getResult();
+			if (snap == null || !snap.exists()) { cb.onError("HTTP 404: document " + ref.getPath() + " not found"); return; }
+			cb.onSuccess(read(snap.getData()));
+		});
+	}
+
+	private void list(CollectionReference ref, ListCallback cb) { query(ref, false, cb); }
+
+	private void query(Query q, boolean addGroupId, ListCallback cb) {
+		String err = precheck();
+		if (err != null) { deliver(() -> cb.onError(err)); return; }
+		q.get().addOnCompleteListener(BG, task -> {
+			if (!task.isSuccessful()) { cb.onError(describe(task.getException())); return; }
+			List<Map<String, Object>> out = new ArrayList<>();
+			QuerySnapshot snap = task.getResult();
+			if (snap != null) {
+				for (QueryDocumentSnapshot d : snap) {
+					Map<String, Object> m = read(d.getData());
+					m.put("_docId", d.getId());
+					if (addGroupId) {
+						DocumentReference group = d.getReference().getParent().getParent();
+						if (group != null) m.put("groupId", group.getId());
+					}
+>>>>>>> main
 					out.add(m);
 				}
 			}

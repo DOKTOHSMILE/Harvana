@@ -1462,7 +1462,10 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	
 	private void _selectGroupType(String type) {
 		groupTypeString = type;
+<<<<<<< HEAD
 		_updateBar();
+=======
+>>>>>>> main
 		// Rotating groups run on the network, which lets anyone lock a bond until the group is full:
 		// there is no admin-approval step to configure.
 		boolean rot = true; // every new group runs on the network, which has no admin-approval step
@@ -2020,8 +2023,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				return;
 			}
 			if (onNode) com.harvanna.app.group.GroupSaver.unqueue(getApplicationContext(), newGroupId);
+<<<<<<< HEAD
 			// People picked while creating the group get their invitations now that the group exists.
 			com.harvanna.app.social.PeoplePicker.sendAll(CreateNewGroupActivity.this, newGroupId, newGroupMap, peopleToInvite, "", (sent, failed) -> { });
+=======
+>>>>>>> main
 			if (pendingCardQr != null && pendingCardDigits != null) {
 				com.harvanna.app.group.GroupCardStore.publish(getApplicationContext(), newGroupId,
 				_realGroupWalletAddress, group_name_edittext1.getText().toString().trim(),

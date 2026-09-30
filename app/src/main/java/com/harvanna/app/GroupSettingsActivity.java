@@ -1309,6 +1309,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	}
 	
 	/** On-chain rotating groups hold money in a network escrow that has no private key: nothing to restore or back up. */
+<<<<<<< HEAD
 	// ── Close / delete group ─────────────────────────────────────────────
 
 	private LinearLayout closeSection;
@@ -1461,6 +1462,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			.setNegativeButton("Cancel", null));
 	}
 
+=======
+>>>>>>> main
 	private boolean _isOnChain() {
 		return com.harvanna.app.group.GroupKinds.isOnChain(groupData);
 	}

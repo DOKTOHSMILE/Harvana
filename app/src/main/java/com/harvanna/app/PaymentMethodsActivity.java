@@ -41,7 +41,8 @@ import java.util.regex.*;
 import org.json.*;
 import com.harvanna.app.wallet.PaymentMethod;
 import com.harvanna.app.wallet.PaymentMethodManager;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+
 
 public class PaymentMethodsActivity extends AppCompatActivity {
 	
@@ -67,6 +68,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		com.harvanna.app.utils.AppBar.header(this, "Payment methods", "Saved for your P2P listings", R.id.textview88);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {
@@ -267,4 +269,4 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

@@ -81,6 +81,7 @@ public class PrivacySettingsActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		com.harvanna.app.utils.AppBar.header(this, "Privacy & visibility", "What other members can see about you", R.id.textview92, R.id.textview93);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {
@@ -161,4 +162,4 @@ public class PrivacySettingsActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

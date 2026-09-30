@@ -106,6 +106,7 @@ public class CreateWalletActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		com.harvanna.app.utils.AppBar.header(this, "Create wallet", "Your new seed phrase", R.id.tv_title);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {

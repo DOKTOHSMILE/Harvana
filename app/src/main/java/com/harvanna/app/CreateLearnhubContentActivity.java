@@ -97,6 +97,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		com.harvanna.app.utils.AppBar.header(this, "New Learn Hub article", "Share knowledge with members", R.id.textview24, R.id.textview25);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {

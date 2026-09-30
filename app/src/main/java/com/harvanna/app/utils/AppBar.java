@@ -77,4 +77,20 @@ public final class AppBar {
             ((AppCompatActivity) a).getSupportActionBar().setSubtitle(subtitle == null || subtitle.isEmpty() ? null : subtitle);
         }
     }
+
+    /**
+     * For screens whose layout repeats the screen name as a big heading: puts the title (and a short subtitle)
+     * in the action bar and hides the repeated heading views.
+     */
+    public static void header(Activity a, String title, String subtitle, int... hideViewIds) {
+        if (a instanceof AppCompatActivity && ((AppCompatActivity) a).getSupportActionBar() != null) {
+            androidx.appcompat.app.ActionBar bar = ((AppCompatActivity) a).getSupportActionBar();
+            if (title != null) bar.setTitle(title);
+            bar.setSubtitle(subtitle == null || subtitle.isEmpty() ? null : subtitle);
+        }
+        for (int id : hideViewIds) {
+            View v = a.findViewById(id);
+            if (v != null) v.setVisibility(View.GONE);
+        }
+    }
 }

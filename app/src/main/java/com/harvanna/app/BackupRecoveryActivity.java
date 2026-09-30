@@ -69,6 +69,7 @@ public class BackupRecoveryActivity extends AppCompatActivity {
 		setContentView(R.layout.backup_recovery);
 		initialize(_savedInstanceState);
 		initializeLogic();
+		com.harvanna.app.utils.AppBar.header(this, "Backup & recovery", "Your recovery phrase", R.id.textview52);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {
@@ -221,4 +222,4 @@ public class BackupRecoveryActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

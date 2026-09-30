@@ -142,6 +142,7 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		com.harvanna.app.utils.AppBar.header(this, "Insured trader status", "Lock collateral to build buyer trust", R.id.textview81);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {

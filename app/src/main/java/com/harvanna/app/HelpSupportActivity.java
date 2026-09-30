@@ -81,6 +81,7 @@ public class HelpSupportActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		com.harvanna.app.utils.AppBar.header(this, "Help & support", "Answers, or reach us directly", R.id.textview61, R.id.textview62);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {

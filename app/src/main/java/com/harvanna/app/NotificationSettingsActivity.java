@@ -38,7 +38,8 @@ import java.text.*;
 import java.util.*;
 import java.util.regex.*;
 import org.json.*;
-
+
+
 
 public class NotificationSettingsActivity extends AppCompatActivity {
 	
@@ -92,6 +93,7 @@ public class NotificationSettingsActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		com.harvanna.app.utils.AppBar.header(this, "Notification settings", "Choose what Harvanna notifies you about", R.id.textview74, R.id.textview75);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {
@@ -185,4 +187,4 @@ public class NotificationSettingsActivity extends AppCompatActivity {
 	{
 	}
 	
-}
+}

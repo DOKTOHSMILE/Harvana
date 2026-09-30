@@ -79,6 +79,7 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		com.harvanna.app.utils.AppBar.header(this, "Security & PIN", "Protect sending money", R.id.textview54);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {

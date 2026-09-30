@@ -85,6 +85,7 @@ public class RestoreWalletActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		com.harvanna.app.utils.AppBar.header(this, "Restore wallet", "From your Harvanna Access Card", R.id.textview3);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {

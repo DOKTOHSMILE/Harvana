@@ -50,4 +50,15 @@ public class GroupContractTest {
         assertEquals("HARVANNA_GROUP_JOIN_ACK_V1:G:HV0xA:abc:5",
             GroupContract.signedMessage("G", "HV0xA", "abc", 5L));
     }
+
+    @Test public void startsWithSummaryAndHasExampleAndWords() {
+        Map<String, Object> g = group("Rotating Pool");
+        java.util.List<GroupContract.Section> s = GroupContract.sections(g, "HARV");
+        assertEquals("In short", s.get(0).title);
+        assertEquals("A simple example", s.get(1).title);
+        assertEquals("Words explained", s.get(s.size() - 1).title);
+        boolean hasPot = false;
+        for (String p : s.get(1).points) if (p.contains("500 HARV")) hasPot = true;
+        assertTrue(hasPot); // 10 x 50
+    }
 }

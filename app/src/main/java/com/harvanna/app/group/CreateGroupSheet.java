@@ -41,21 +41,21 @@ public final class CreateGroupSheet {
         root.addView(sub);
 
         root.addView(option(ctx, R.drawable.ic_type_circle, "Rotating circle",
-                "Everyone pays each round and one member takes the pot, until all have been paid. Bonds protect members from defaults.",
+                "Everyone pays the same amount each round. Each round one member takes the whole pot, until everyone has had a turn. Best for getting a large sum at once.",
                 "On-chain  ·  3–12 members  ·  Bond-backed", v -> {
                     dialog.dismiss();
                     ctx.startActivity(new Intent(ctx, CircleCreateActivity.class));
                 }));
 
         root.addView(option(ctx, R.drawable.ic_type_savings, "Accumulative savings",
-                "Each member saves at their own pace in a personal line and earns interest set by the group.",
+                "Each member saves at their own pace in a personal savings line and earns interest set by the group. Best for building savings over time.",
                 "Flexible or locked  ·  Daily saving  ·  Interest", v -> {
                     dialog.dismiss();
                     open(ctx, "Accumulative Funds");
                 }));
 
         root.addView(option(ctx, R.drawable.ic_type_goal, "Fixed goal",
-                "Pool money towards a target: a project, a goal or an emergency fund. Payouts follow the group's rule.",
+                "The group saves together toward one target, such as a project or an emergency fund. Money leaves only when the group votes. Best for shared goals.",
                 "Target amount  ·  Group votes  ·  Milestones", v -> {
                     dialog.dismiss();
                     open(ctx, "Fixed Contribution");

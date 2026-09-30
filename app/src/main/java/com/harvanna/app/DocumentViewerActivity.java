@@ -98,14 +98,12 @@ public class DocumentViewerActivity extends AppCompatActivity {
 				getSupportActionBar().setTitle("Privacy Policy");
 				getSupportActionBar().setSubtitle("");
 			}
-			getSupportActionBar().setTitle("Privacy Policy");
 		} else {
 			assetFileName = "Harvanna-Terms-of-Service.docx";
 			if (getSupportActionBar() != null) {
 				getSupportActionBar().setTitle("Terms of Service");
 				getSupportActionBar().setSubtitle("");
 			}
-			getSupportActionBar().setTitle("Terms of Service");
 		}
 		btnOpenDocument.setOnClickListener(v -> _openDocument());
 	}

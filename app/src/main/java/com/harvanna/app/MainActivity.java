@@ -707,6 +707,15 @@ public class MainActivity extends AppCompatActivity {
 		listView.requestLayout();
 	}
 	
+	private void _showVersionDialog() {
+		String v = "unknown";
+		try { v = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception ignored) { }
+		new androidx.appcompat.app.AlertDialog.Builder(this)
+			.setTitle("Harvanna")
+			.setMessage("You are on version " + v + ".\n\nThis build is installed directly, so new versions arrive as a new install from the team, not through an app store update.")
+			.setPositiveButton("OK", null).show();
+	}
+	
 	// Master Right-Side Sheet Engine with 100% Reliable Background Dim Layer
 	public void showRightDropdownMenu(View anchorView) {
 		if (anchorView == null) {
@@ -766,16 +775,43 @@ public class MainActivity extends AppCompatActivity {
 		if (popupListView4 != null) {
 			popupListView4.setAdapter(new Listview4Adapter(systemLifecycleList));
 			popupListView4.setOnItemClickListener((parent, view, position, id) -> {
-				if (position == 0) {
-					try {
-						popupWindow.dismiss();
+				popupWindow.dismiss();
+				try {
+					if (position == 0) {
 						startActivity(new android.content.Intent(MainActivity.this, SettingsActivity.class));
-					} catch (Exception e) {
-						Toast.makeText(getApplicationContext(), "Settings unavailable", Toast.LENGTH_SHORT).show();
+					} else if (position == 1) {
+						_showVersionDialog();
+					} else if (position == 2) {
+						startActivity(new android.content.Intent(MainActivity.this, DocumentViewerActivity.class).putExtra("doc_type", "terms"));
+					} else if (position == 3) {
+						startActivity(new android.content.Intent(MainActivity.this, AboutActivity.class));
 					}
+				} catch (Exception e) {
+					Toast.makeText(getApplicationContext(), "Couldn't open that screen", Toast.LENGTH_SHORT).show();
 				}
 			});
 		}
+		
+		if (popupListView2 != null) popupListView2.setOnItemClickListener((parent, view, position, id) -> {
+			popupWindow.dismiss();
+			if (position == 0) {
+				bottomnavigation1.setSelectedItemId(R.id.menu_groups);
+			} else if (position == 1) {
+				android.content.Intent share = new android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain");
+				share.putExtra(android.content.Intent.EXTRA_TEXT, "Join me on Harvanna: save together in groups and manage your " + com.harvanna.app.CoinInfo.ticker() + " wallet.");
+				startActivity(android.content.Intent.createChooser(share, "Invite friends"));
+			}
+		});
+		if (popupListView3 != null) popupListView3.setOnItemClickListener((parent, view, position, id) -> {
+			popupWindow.dismiss();
+			if (position == 0) {
+				try {
+					startActivity(new android.content.Intent(MainActivity.this, SecurityPinSettingsActivity.class));
+				} catch (Exception e) {
+					Toast.makeText(getApplicationContext(), "Security settings unavailable", Toast.LENGTH_SHORT).show();
+				}
+			}
+		});
 		
 		// Generate curved left-side background dynamically
 		int cornerRadius = (int) android.util.TypedValue.applyDimension(
@@ -785,7 +821,7 @@ public class MainActivity extends AppCompatActivity {
 		);
 		
 		GradientDrawable backgroundShape = new GradientDrawable();
-		backgroundShape.setColor(0xFFF1F5F9); 
+		backgroundShape.setColor(com.harvanna.app.utils.UiColors.surface());
 		backgroundShape.setCornerRadii(new float[] {
 			cornerRadius, cornerRadius, 
 			0, 0,                       

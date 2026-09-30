@@ -241,10 +241,6 @@
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
-			android:name=".CreateP2pListingActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden"
-			android:windowSoftInputMode="stateHidden" />
-		<activity
 			android:name=".DebugActivity"
 			android:screenOrientation="portrait"
 			android:theme="@style/AppTheme.DebugActivity" />

@@ -1306,8 +1306,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	
 	/** On-chain rotating groups hold money in a network escrow that has no private key: nothing to restore or back up. */
 	private boolean _isOnChain() {
-		Object c = groupData != null ? groupData.get("circleId") : null;
-		return c != null && !String.valueOf(c).trim().isEmpty();
+		return com.harvanna.app.group.GroupKinds.isOnChain(groupData);
 	}
 	
 	private void _refreshKeyStatus() {

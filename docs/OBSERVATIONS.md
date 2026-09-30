@@ -218,3 +218,10 @@ Consequences to know:
 
 ## Owner decision: circle payout = Option A (30 Sep)
 The recipient receives contribution x (members - 1), the amount actually collected that round (the recipient does not pay in their own round). All app text was changed to match (create confirmation, welcome contract example and summary, circle terms row). **The node still pays contribution x members** (per its guide, entry #18): the node team must change the payout target to contribution x (members - 1) (and check the completion/entitlement figures) before real balances. I did not touch the node repo.
+
+## Accumulative and Fixed now created on the network (stage 2)
+- Create form: Accumulative calls `/accum/create-group` (interest = the loan interest %, withdrawal rule mapped to ANYTIME / CYCLE_END_ONLY, 1 HARV fee). Fixed calls `/fixed/create-group` (goal, rule, beneficiary, 1 HARV fee); the rule list gained Milestones and Emergency Grants; a receiver-address field was added (empty = your wallet; not needed for Emergency Grants). Confirmation dialogs state the cost and the irreversible terms first.
+- The Firestore group stores `nodeGroupId` (and `circleId` for circles) + `onChain=true`. `GroupKinds.nodeId` is the single way to read the link.
+- The node has no member cap, contribution schedule or slots for these families; "members" and "contribution" on the form are display/app-level only. Admission approval is disabled for all new groups (the node has none).
+- Old Firestore-only Accumulative/Fixed groups still work through the old screens (only old rotating groups are hidden).
+- Still on Firestore: loans tab and payout requests for Accumulative/Fixed; Home totals, Trust score and Open loans.

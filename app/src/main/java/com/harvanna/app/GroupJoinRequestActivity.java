@@ -812,15 +812,14 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 	
 	private void _joinSucceeded(String message) {
 		_markInviteAccepted();
-		final String circleId = loadedGroupData != null && loadedGroupData.get("circleId") != null
-		? String.valueOf(loadedGroupData.get("circleId")).trim() : "";
+		final String circleId = com.harvanna.app.group.GroupKinds.nodeId(loadedGroupData);
 		runOnUiThread(() -> {
 			if (!circleId.isEmpty()) {
 				// Rotating group: the last step is to lock the bond on the network.
 				sending = false;
 				new androidx.appcompat.app.AlertDialog.Builder(this)
 				.setTitle("One more step")
-				.setMessage("You're in the group. To secure your place in the payout order, lock your bond on the network now.")
+				.setMessage("You're in the group. Open it to take your place on the network: lock your bond, start your savings line or make your first deposit, depending on the group.")
 				.setCancelable(false)
 				.setPositiveButton("Continue", (dd, w) -> {
 					Intent ci = new Intent(this, com.harvanna.app.group.NodeGroupActivity.class);

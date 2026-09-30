@@ -7,9 +7,16 @@ import java.util.Map;
 public final class GroupKinds {
     private GroupKinds() {}
 
+    /** The group's id on the node (CIRC-, ACCUM- or FIXED-), or "" for a Firestore-only group. */
+    public static String nodeId(Map<String, Object> g) {
+        if (g == null) return "";
+        Object n = g.get("nodeGroupId");
+        if (n == null || String.valueOf(n).trim().isEmpty()) n = g.get("circleId");
+        return n == null ? "" : String.valueOf(n).trim();
+    }
+
     public static boolean isOnChain(Map<String, Object> g) {
-        Object c = g == null ? null : g.get("circleId");
-        return c != null && !String.valueOf(c).trim().isEmpty();
+        return !nodeId(g).isEmpty();
     }
 
     /** A rotating group created before rotating groups ran on the network: test data, hidden from lists. */

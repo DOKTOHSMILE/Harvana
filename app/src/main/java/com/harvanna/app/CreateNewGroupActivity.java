@@ -807,6 +807,10 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			if (!_validateGroupForm()) return;
 			if ("Rotating Pool".equals(groupTypeString)) {
 				_createRotatingOnChain();
+			} else if ("Accumulative Funds".equals(groupTypeString)) {
+				_createAccumOnChain();
+			} else if ("Fixed Contribution".equals(groupTypeString)) {
+				_createFixedOnChain();
 			} else {
 				_showCreateWalletBottomSheet();
 			}
@@ -1007,7 +1011,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		defaultConsequenceList = new ArrayList<>(Arrays.asList("SELECT CONSEQUENCE", "Warning", "Penalty Fee", "Skip Next Turn", "Remove from Group"));
 		spinner_default_consequence.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, defaultConsequenceList));
 		
-		disbursementRuleList = new ArrayList<>(Arrays.asList("SELECT DISBURSEMENT", "All at Once at Goal", "Admin-Triggered"));
+		disbursementRuleList = new ArrayList<>(Arrays.asList("SELECT DISBURSEMENT", "All at Once at Goal", "Admin-Triggered", "Released in Milestones", "Emergency Grants"));
 		spinner_disbursement_rule.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, disbursementRuleList));
 		
 		withdrawalRuleList = new ArrayList<>(Arrays.asList("SELECT WITHDRAWAL RULE", "Anytime", "Cycle-End Only"));
@@ -1424,6 +1428,15 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			loanSwitches.add(sw);
 			host.addView(sw);
 		}
+		// Fixed goal: who receives the money is fixed on the network at creation.
+		if (card_fixed_details != null && card_fixed_details.getChildCount() > 0 && card_fixed_details.getChildAt(0) instanceof LinearLayout) {
+			LinearLayout host = (LinearLayout) card_fixed_details.getChildAt(0);
+			beneficiaryInput = new EditText(this);
+			beneficiaryInput.setHint("Who receives the money? Wallet address (empty = your wallet)");
+			beneficiaryInput.setSingleLine(true);
+			beneficiaryInput.setTextSize(13);
+			host.addView(beneficiaryInput);
+		}
 	}
 	
 	private void _applyLoanFieldVisibility() {
@@ -1435,7 +1448,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		groupTypeString = type;
 		// Rotating groups run on the network, which lets anyone lock a bond until the group is full:
 		// there is no admin-approval step to configure.
-		boolean rot = "Rotating Pool".equals(type);
+		boolean rot = true; // every new group runs on the network, which has no admin-approval step
 		switch_require_approval.setEnabled(!rot);
 		if (rot) { switch_require_approval.setChecked(false); }
 		boolean defaultLoans = "Accumulative Funds".equals(type); // rotating: always off
@@ -1797,6 +1810,98 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		})).show();
 	}
 	
+	private EditText beneficiaryInput;
+	
+	private static String _ruleCode(String label) {
+		if ("All at Once at Goal".equals(label)) return "ALL_AT_ONCE_AT_GOAL";
+		if ("Admin-Triggered".equals(label)) return "ADMIN_TRIGGERED";
+		if ("Released in Milestones".equals(label)) return "MILESTONE_BASED";
+		if ("Emergency Grants".equals(label)) return "EMERGENCY_GRANT";
+		return label;
+	}
+	
+	private String _requireWalletOrExplain() {
+		final String wallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
+		if (wallet == null || wallet.isEmpty() || com.harvanna.app.wallet.WalletManager.loadPrivateKey(this, wallet) == null) {
+			new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("You need a wallet first")
+			.setMessage("This group runs on the network and is paid from your wallet. Create or restore a wallet, then try again.")
+			.setPositiveButton("OK", null).show();
+			return null;
+		}
+		return wallet;
+	}
+	
+	/** Accumulative: the network group holds the money and the lines; the Firestore group holds the people-facing details. */
+	private void _createAccumOnChain() {
+		final String wallet = _requireWalletOrExplain();
+		if (wallet == null) return;
+		double ratePct = allowLoans ? Double.parseDouble(loan_interest_rate_edittext.getText().toString()) : 0.0;
+		final long bps = Math.round(ratePct * 100.0);
+		final String rule = "Cycle-End Only".equals(withdrawalRuleString) ? "CYCLE_END_ONLY" : "ANYTIME";
+		String msg = "• Creation fee (non-refundable): 1 HARV\n"
+		+ "• Interest rate set for the group: " + ratePct + "%\n"
+		+ "• Withdrawals: " + ("CYCLE_END_ONLY".equals(rule) ? "only at the end of a cycle" : "any time, with your approval as admin") + "\n\n"
+		+ "Members each keep their own savings line inside the group. Their money is held by the network, not by you. "
+		+ "You earn a fee of one day's saving at the end of each 30-day period on every line. Network fees are extra.";
+		_confirmAndCreateOnChain("Create this savings group?", msg, cb ->
+		com.harvanna.app.sync.NodeGroupClient.createAccumGroup(getApplicationContext(), wallet, bps, rule, cb), "groupId", "ACCUM");
+	}
+	
+	/** Fixed goal: target, payout rule and beneficiary are fixed on the network at creation. */
+	private void _createFixedOnChain() {
+		final String wallet = _requireWalletOrExplain();
+		if (wallet == null) return;
+		final String rule = _ruleCode(disbursementRuleString);
+		String ben = beneficiaryInput != null ? beneficiaryInput.getText().toString().trim() : "";
+		if (ben.isEmpty()) ben = wallet;
+		if (!"EMERGENCY_GRANT".equals(rule) && !(ben.startsWith("HV0x") && ben.length() == 44)) {
+			SketchwareUtil.showMessage(getApplicationContext(), "Enter a valid wallet address for who receives the money (starts with HV0x).");
+			return;
+		}
+		final String beneficiary = "EMERGENCY_GRANT".equals(rule) ? "" : ben;
+		final long target = com.harvanna.app.circle.CircleUi.toRaw(target_goal_edittext.getText().toString());
+		final String name = group_name_edittext1.getText().toString().trim();
+		final String desc = description_edittext5.getText().toString().trim();
+		String msg = "• Goal: " + com.harvanna.app.circle.CircleUi.harv(target) + "\n"
+		+ "• Money is paid out: " + ("ALL_AT_ONCE_AT_GOAL".equals(rule) ? "all at once when the goal is reached, automatically"
+			: "ADMIN_TRIGGERED".equals(rule) ? "when you ask and the group votes yes"
+			: "MILESTONE_BASED".equals(rule) ? "in milestones, each needing a group vote" : "as emergency grants, each needing a group vote") + "\n"
+		+ ("EMERGENCY_GRANT".equals(rule) ? "" : "• Paid to: " + beneficiary + "\n")
+		+ "• Creation fee (non-refundable): 1 HARV\n\n"
+		+ "The goal, the rule and the receiver can't be changed after this. Members' deposits are held by the network. Network fees are extra.";
+		_confirmAndCreateOnChain("Create this goal group?", msg, cb ->
+		com.harvanna.app.sync.NodeGroupClient.createFixedGroup(getApplicationContext(), wallet, target, rule, beneficiary, 0L, name, desc, cb), "groupId", "FIXED");
+	}
+	
+	private interface NodeCreate { void run(com.harvanna.app.sync.NodeGroupClient.Callback cb); }
+	
+	private void _confirmAndCreateOnChain(String title, String msg, NodeCreate create, String idKey, String family) {
+		new androidx.appcompat.app.AlertDialog.Builder(this).setTitle(title).setMessage(msg)
+		.setNegativeButton("Cancel", null)
+		.setPositiveButton("Create", (d, w) -> com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(this, () -> {
+			final ProgressDialog pd = ProgressDialog.show(this, null, "Creating on the network…", true, false);
+			create.run(new com.harvanna.app.sync.NodeGroupClient.Callback() {
+				@Override public void onSuccess(org.json.JSONObject json) {
+					final String id = json.optString(idKey, json.optString("circleId", ""));
+					if (id.isEmpty()) {
+						runOnUiThread(() -> { pd.dismiss(); SketchwareUtil.showMessage(getApplicationContext(), "The network accepted it but returned no id. Check My Groups in a moment."); });
+						return;
+					}
+					pendingCircleId = id;
+					com.harvanna.app.sync.NodeGroupClient.Callback got = new com.harvanna.app.sync.NodeGroupClient.Callback() {
+						@Override public void onSuccess(org.json.JSONObject g) { runOnUiThread(() -> { pd.dismiss(); _submitNewGroupData(g.optString("escrowAddress", "")); }); }
+						@Override public void onError(String e) { runOnUiThread(() -> { pd.dismiss(); _submitNewGroupData(""); }); }
+					};
+					if ("ACCUM".equals(family)) com.harvanna.app.sync.NodeGroupClient.getAccumGroup(id, got);
+					else com.harvanna.app.sync.NodeGroupClient.getFixedGroup(id, got);
+				}
+				@Override public void onError(String error) {
+					runOnUiThread(() -> { pd.dismiss(); SketchwareUtil.showMessage(getApplicationContext(), com.harvanna.app.circle.CircleUi.friendly(error)); });
+				}
+			});
+		})).show();
+	}
+	
 	public void _submitNewGroupData(final String _realGroupWalletAddress) {
 		// Client-generated id — Firestore doc path is fixed via createGroup's
 		// PATCH rather than relying on auto-id, so members/notices/payments/
@@ -1864,7 +1969,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 		
 		if (pendingCircleId != null) {
-			newGroupMap.put("circleId", pendingCircleId);
+			newGroupMap.put("nodeGroupId", pendingCircleId);
+			if (pendingCircleId.startsWith("CIRC-")) newGroupMap.put("circleId", pendingCircleId);
 			newGroupMap.put("onChain", true);
 		}
 		newGroupMap.put("allowLoans", allowLoans);

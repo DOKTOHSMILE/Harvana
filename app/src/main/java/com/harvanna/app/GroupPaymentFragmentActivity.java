@@ -143,9 +143,8 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext()).getGroup(gid,
 		new com.harvanna.app.firestore.GroupFirestoreManager.DocCallback() {
 			@Override public void onSuccess(Map<String, Object> data) {
-				Object cid = data.get("circleId");
-				if (cid == null || String.valueOf(cid).trim().isEmpty() || getActivity() == null) return;
-				final String circleId = String.valueOf(cid).trim();
+				final String circleId = com.harvanna.app.group.GroupKinds.nodeId(data);
+				if (circleId.isEmpty() || getActivity() == null) return;
 				getActivity().runOnUiThread(() -> {
 					if (getContext() == null) return;
 					float d = getResources().getDisplayMetrics().density;
@@ -159,7 +158,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 					t.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
 					box.addView(t);
 					TextView b = new TextView(getContext());
-					b.setText("This rotating group keeps its money on the network. Open it to join and lock your bond, pay this round, see whose turn it is and the payout order, and withdraw your bond when the group ends.");
+					b.setText("This group keeps its money on the network. Open it to see your position and to pay, save, deposit, vote or withdraw, depending on the group.");
 					b.setTextSize(14); b.setTextColor(com.harvanna.app.utils.UiColors.textSecondary());
 					b.setPadding(0, (int) (8 * d), 0, (int) (16 * d));
 					box.addView(b);

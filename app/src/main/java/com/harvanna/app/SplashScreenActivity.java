@@ -490,7 +490,6 @@ public class SplashScreenActivity extends AppCompatActivity {
 	}
 	private boolean hasAllPermissions() {
 		boolean hasLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-		boolean hasPhoneState = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
 		
 		// Notifications permission is only required on Android 13 (TIRAMISU) and above
 		boolean hasNotification = true;
@@ -498,14 +497,13 @@ public class SplashScreenActivity extends AppCompatActivity {
 			hasNotification = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
 		}
 		
-		return hasLocation && hasPhoneState && hasNotification;
+		return hasLocation && hasNotification;
 	}
 	
 	private void requestAllPermissions() {
 		java.util.List<String> permissionsList = new java.util.ArrayList<>();
 		
 		permissionsList.add(Manifest.permission.ACCESS_FINE_LOCATION);
-		permissionsList.add(Manifest.permission.READ_PHONE_STATE); // Used for call state/permissions
 		
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 			permissionsList.add(Manifest.permission.POST_NOTIFICATIONS);

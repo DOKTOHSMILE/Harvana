@@ -38,6 +38,7 @@ public class GroupWalletBackupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
+		getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE, android.view.WindowManager.LayoutParams.FLAG_SECURE); // no screenshots or recents thumbnails of secrets
 
         ScrollView sv = new ScrollView(this);
         sv.setBackgroundColor(UiColors.background());

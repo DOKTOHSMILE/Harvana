@@ -102,6 +102,7 @@ public class CreateWalletActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle _savedInstanceState) {
 		super.onCreate(_savedInstanceState);
+		getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE, android.view.WindowManager.LayoutParams.FLAG_SECURE); // no screenshots or recents thumbnails of secrets
 		setContentView(R.layout.create_wallet);
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);

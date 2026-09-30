@@ -17,7 +17,7 @@ public final class GroupValidation {
     public static boolean isValidHarvWallet(String address) {
         if (address == null) return false;
         String a = address.trim();
-        return a.startsWith("HV0x") && a.length() >= 10;
+        return a.matches("HV0x[0-9a-fA-F]{40}");
     }
 
     public static String requireUid(String uid, String fallbackError) {

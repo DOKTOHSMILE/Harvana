@@ -1,0 +1,289 @@
+package com.harvanna.app;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.ScrollView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.harvanna.app.utils.ThemeManager;
+import com.harvanna.app.utils.UiColors;
+
+import java.util.Map;
+
+/**
+ * The side menu that slides in from the right of the main screen. Built in code from one list of sections, so adding or
+ * removing a row is one line. Colours come from UiColors, so it follows the light and dark themes.
+ */
+final class MainDrawer {
+    interface Host {
+        void openGroupsTab();
+        void showVersion();
+        void logOut();
+    }
+
+    private final Activity a;
+    private final Host host;
+    private final float d;
+    private PopupWindow window;
+
+    MainDrawer(Activity a, Host host) {
+        this.a = a;
+        this.host = host;
+        this.d = a.getResources().getDisplayMetrics().density;
+    }
+
+    private int dp(float v) { return Math.round(v * d); }
+
+    void show(View anchor) {
+        final ViewGroup rootView = (ViewGroup) anchor.getRootView();
+
+        LinearLayout column = new LinearLayout(a);
+        column.setOrientation(LinearLayout.VERTICAL);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(UiColors.surface());
+        bg.setCornerRadii(new float[]{dp(24), dp(24), 0, 0, 0, 0, dp(24), dp(24)});
+        column.setBackground(bg);
+        column.setPadding(0, statusBarHeight(), 0, 0);
+
+        ScrollView scroll = new ScrollView(a);
+        scroll.setVerticalScrollBarEnabled(false);
+        LinearLayout list = new LinearLayout(a);
+        list.setOrientation(LinearLayout.VERTICAL);
+        list.setPadding(0, 0, 0, dp(16));
+        scroll.addView(list);
+        column.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+
+        list.addView(header());
+
+        section(list, "Money");
+        row(list, R.drawable.icon_account_balance_wallet_outline_, "My wallets", null, () -> open(WalletListActivity.class));
+        row(list, R.drawable.icon_credit_card_round, "Payment methods", "For P2P trades", () -> open(PaymentMethodsActivity.class));
+        row(list, R.drawable.icon_lock_round, "Backup & recovery", "Your recovery phrase", () -> open(BackupRecoveryActivity.class));
+        row(list, R.drawable.icon_request_quote_round, "Open loans", null, () -> open(OpenLoansActivity.class));
+
+        section(list, "Community");
+        row(list, R.drawable.icon_groups_outline, "My groups", null, host::openGroupsTab);
+        row(list, R.drawable.icon_mark_unread_chat_alt_round, "Invitations", "Groups that invited you", () -> open(InvitesActivity.class));
+        row(list, R.drawable.icon_group_add_twotone, "Friends", "Follow people, find them in your contacts", () -> open(com.harvanna.app.social.FriendsActivity.class));
+        row(list, R.drawable.icon_alternate_email_twotone, "My contact card", "Username, phone, chat links", () -> open(com.harvanna.app.social.ContactCardActivity.class));
+        row(list, R.drawable.icon_star_rate_round, "Trust score", null, () -> open(TrustScoreActivity.class));
+        row(list, R.drawable.icon_article_twotone, "Write for Learn Hub", null, () -> open(CreateLearnhubContentActivity.class));
+
+        section(list, "Marketplace");
+        row(list, R.drawable.icon_currency_exchange_twotone, "P2P market", "Buy and sell " + CoinInfo.ticker(), () -> open(P2pMarketplaceActivity.class));
+        row(list, R.drawable.icon_history_twotone, "My trades", null, () -> open(P2pMyTradesActivity.class));
+
+        section(list, "Preferences");
+        row(list, R.drawable.icon_notifications_outline, "Notification settings", null, () -> open(NotificationSettingsActivity.class));
+        row(list, R.drawable.icon_toggle_on_round, "Appearance", ThemeManager.label(a), this::pickTheme);
+        row(list, R.drawable.icon_security_round, "Security & PIN", null, () -> open(SecurityPinSettingsActivity.class));
+        row(list, R.drawable.icon_visibility_twotone, "Privacy & visibility", null, () -> open(PrivacySettingsActivity.class));
+        row(list, R.drawable.icon_settings_outline, "Settings", null, () -> open(SettingsActivity.class));
+
+        section(list, "Help");
+        row(list, R.drawable.ic_help, "Help & support", null, () -> open(HelpSupportActivity.class));
+        row(list, R.drawable.icon_description_round, "Terms of service", null, () -> a.startActivity(new Intent(a, DocumentViewerActivity.class).putExtra("doc_type", "terms")));
+        row(list, R.drawable.icon_rule_twotone, "Privacy policy", null, () -> a.startActivity(new Intent(a, DocumentViewerActivity.class).putExtra("doc_type", "privacy")));
+        row(list, R.drawable.icon_info_round, "About", "Harvanna and " + CoinInfo.ticker(), () -> open(AboutActivity.class));
+        row(list, R.drawable.icon_share_round, "Share Harvanna", null, this::shareApp);
+
+        divider(list);
+        LinearLayout out = rowView(R.drawable.icon_power_settings_new_twotone, "Log out", null, UiColors.error(), UiColors.error());
+        out.setOnClickListener(v -> { dismiss(); confirmLogOut(); });
+        list.addView(out);
+
+        TextView version = new TextView(a);
+        version.setText("Version " + versionName());
+        version.setTextSize(12);
+        version.setTextColor(UiColors.textTertiary());
+        version.setPadding(dp(20), dp(8), dp(20), dp(4));
+        version.setOnClickListener(v -> { dismiss(); host.showVersion(); });
+        list.addView(version);
+
+        window = new PopupWindow(column, dp(320), WindowManager.LayoutParams.MATCH_PARENT, true);
+        window.setOutsideTouchable(true);
+        window.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
+        window.setElevation(24f);
+        android.transition.Slide slide = new android.transition.Slide(Gravity.END);
+        slide.setDuration(260);
+        slide.setInterpolator(new android.view.animation.DecelerateInterpolator());
+        window.setEnterTransition(slide);
+        window.setExitTransition(slide);
+
+        // Dim the screen behind the drawer while it is open.
+        final View dim = new View(a);
+        dim.setBackgroundColor(0x73000000);
+        dim.setAlpha(0f);
+        rootView.addView(dim, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        dim.animate().alpha(1f).setDuration(260).start();
+        window.setOnDismissListener(() -> rootView.removeView(dim));
+
+        window.showAtLocation(rootView, Gravity.TOP | Gravity.END, 0, 0);
+    }
+
+    private void dismiss() { if (window != null) window.dismiss(); }
+
+    private void open(Class<?> cls) {
+        dismiss();
+        try { a.startActivity(new Intent(a, cls)); }
+        catch (Exception e) { android.widget.Toast.makeText(a, "Couldn't open that screen", android.widget.Toast.LENGTH_SHORT).show(); }
+    }
+
+    // ── pieces ─────────────────────────────────────────────────────────
+
+    private View header() {
+        LinearLayout h = new LinearLayout(a);
+        h.setOrientation(LinearLayout.HORIZONTAL);
+        h.setGravity(Gravity.CENTER_VERTICAL);
+        h.setPadding(dp(20), dp(20), dp(20), dp(16));
+        GradientDrawable g = new GradientDrawable();
+        g.setColor(UiColors.background());
+        h.setBackground(g);
+
+        ImageView avatar = new ImageView(a);
+        avatar.setImageResource(R.drawable.ic_person);
+        avatar.setColorFilter(UiColors.textSecondary());
+        avatar.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        avatar.setPadding(dp(10), dp(10), dp(10), dp(10));
+        GradientDrawable circle = new GradientDrawable();
+        circle.setShape(GradientDrawable.OVAL);
+        circle.setColor(UiColors.surface());
+        avatar.setBackground(circle);
+        h.addView(avatar, new LinearLayout.LayoutParams(dp(56), dp(56)));
+
+        LinearLayout text = new LinearLayout(a);
+        text.setOrientation(LinearLayout.VERTICAL);
+        text.setPadding(dp(14), 0, 0, 0);
+        final TextView name = label("Your account", 17, true, UiColors.textPrimary());
+        final TextView sub = label("", 13, false, UiColors.textSecondary());
+        text.addView(name);
+        text.addView(sub);
+        h.addView(text, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        com.google.firebase.auth.FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        if (u != null) {
+            sub.setText(u.getEmail() == null ? "" : u.getEmail());
+            Map<String, Object> cached = null;
+            try { cached = com.harvanna.app.offline.OfflineCacheManager.load(a, "profile_" + u.getUid()); } catch (Exception ignored) { }
+            if (cached != null) {
+                String first = str(cached.get("first_name")), last = str(cached.get("last_name")), user = str(cached.get("username"));
+                String full = (first + " " + last).trim();
+                if (!full.isEmpty()) name.setText(full);
+                if (!user.isEmpty()) sub.setText("@" + user);
+                String icon = str(cached.get("icon"));
+                if (!icon.isEmpty()) {
+                    avatar.clearColorFilter();
+                    avatar.setPadding(0, 0, 0, 0);
+                    try { Glide.with(a.getApplicationContext()).load(Uri.parse(icon)).circleCrop().into(avatar); } catch (Exception ignored) { }
+                }
+            }
+        }
+        h.setOnClickListener(v -> open(ProfileActivity.class));
+        return h;
+    }
+
+    private void section(LinearLayout list, String title) {
+        TextView t = label(title.toUpperCase(java.util.Locale.US), 11, true, UiColors.textTertiary());
+        t.setLetterSpacing(0.08f);
+        t.setPadding(dp(20), dp(18), dp(20), dp(4));
+        list.addView(t);
+    }
+
+    private void divider(LinearLayout list) {
+        View v = new View(a);
+        v.setBackgroundColor(UiColors.textTertiary() & 0x33FFFFFF | 0x22000000);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1));
+        lp.setMargins(dp(20), dp(12), dp(20), dp(4));
+        list.addView(v, lp);
+    }
+
+    private void row(LinearLayout list, int icon, String title, String subtitle, Runnable action) {
+        LinearLayout r = rowView(icon, title, subtitle, UiColors.textPrimary(), UiColors.accent());
+        r.setOnClickListener(v -> action.run());
+        list.addView(r);
+    }
+
+    private LinearLayout rowView(int icon, String title, String subtitle, int titleColor, int iconColor) {
+        LinearLayout r = new LinearLayout(a);
+        r.setOrientation(LinearLayout.HORIZONTAL);
+        r.setGravity(Gravity.CENTER_VERTICAL);
+        r.setPadding(dp(20), dp(10), dp(20), dp(10));
+        r.setMinimumHeight(dp(48));
+        TypedValue tv = new TypedValue();
+        a.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv, true);
+        r.setBackgroundResource(tv.resourceId);
+
+        ImageView i = new ImageView(a);
+        i.setImageResource(icon);
+        i.setColorFilter(iconColor);
+        r.addView(i, new LinearLayout.LayoutParams(dp(22), dp(22)));
+
+        LinearLayout t = new LinearLayout(a);
+        t.setOrientation(LinearLayout.VERTICAL);
+        t.setPadding(dp(16), 0, 0, 0);
+        t.addView(label(title, 15, false, titleColor));
+        if (subtitle != null && !subtitle.isEmpty()) t.addView(label(subtitle, 12, false, UiColors.textSecondary()));
+        r.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        return r;
+    }
+
+    private TextView label(String s, int sp, boolean bold, int color) {
+        TextView t = new TextView(a);
+        t.setText(s); t.setTextSize(sp); t.setTextColor(color);
+        if (bold) t.setTypeface(null, Typeface.BOLD);
+        return t;
+    }
+
+    // ── actions ────────────────────────────────────────────────────────
+
+    private void pickTheme() {
+        dismiss();
+        String mode = ThemeManager.getMode(a);
+        int checked = "light".equals(mode) ? 1 : "dark".equals(mode) ? 2 : 0;
+        new androidx.appcompat.app.AlertDialog.Builder(a).setTitle("Appearance")
+            .setSingleChoiceItems(new String[]{ThemeManager.systemLabel(a), "Light", "Dark"}, checked, (dlg, which) -> {
+                if (which == 1) ThemeManager.setLightMode(a); else if (which == 2) ThemeManager.setDarkMode(a); else ThemeManager.setSystemMode(a);
+                dlg.dismiss();
+            }).setNegativeButton("Cancel", null).show();
+    }
+
+    private void shareApp() {
+        dismiss();
+        Intent share = new Intent(Intent.ACTION_SEND).setType("text/plain");
+        share.putExtra(Intent.EXTRA_TEXT, "Join me on Harvanna: save together in groups and manage your " + CoinInfo.ticker() + " wallet.");
+        a.startActivity(Intent.createChooser(share, "Share Harvanna"));
+    }
+
+    private void confirmLogOut() {
+        new androidx.appcompat.app.AlertDialog.Builder(a).setTitle("Log out?")
+            .setMessage("You will need to sign in again. Your wallet stays safe on this phone as long as you keep your recovery phrase.")
+            .setPositiveButton("Log out", (x, y) -> host.logOut())
+            .setNegativeButton("Cancel", null).show();
+    }
+
+    private String versionName() {
+        try { return a.getPackageManager().getPackageInfo(a.getPackageName(), 0).versionName; } catch (Exception e) { return "?"; }
+    }
+
+    private int statusBarHeight() {
+        int id = a.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        return id > 0 ? a.getResources().getDimensionPixelSize(id) : dp(24);
+    }
+
+    private static String str(Object o) { return o == null ? "" : String.valueOf(o).trim(); }
+}

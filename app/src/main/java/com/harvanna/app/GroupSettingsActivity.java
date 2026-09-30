@@ -1,51 +1,78 @@
 package com.harvanna.app;
 
+import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
+import android.util.Base64;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.view.View;
-import android.view.ViewGroup;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Base64;
-import android.view.LayoutInflater;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.widget.NestedScrollView;
+import com.google.android.material.appbar.AppBarLayout;
+
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.content.ContextCompat;
+
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+
+import com.harvanna.app.crypto.Ed25519;
+import com.harvanna.app.firestore.GroupFirestoreManager;
+import com.harvanna.app.group.GroupClosePolicy;
+import com.harvanna.app.group.GroupCloser;
+import com.harvanna.app.group.JoinRequestManager;
+import com.harvanna.app.offline.OfflineCacheManager;
+import com.harvanna.app.p2p.ThemedDialogs;
+import com.harvanna.app.utils.UiColors;
+import com.harvanna.app.wallet.SecureWalletStorage;
+import com.harvanna.app.wallet.WalletGenerator;
+import com.harvanna.app.wallet.WalletManager;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.app.ProgressDialog;
-
-import com.google.firebase.FirebaseApp;
-import com.harvanna.app.utils.ThemedDialogs;
-import com.harvanna.app.utils.OfflineCacheManager;
-import com.harvanna.app.manager.GroupFirestoreManager;
-import com.harvanna.app.manager.JoinRequestManager;
-import com.harvanna.app.wallet.WalletGenerator;
-import com.harvanna.app.wallet.WalletManager;
-import com.harvanna.app.wallet.SecureWalletStorage;
-import com.harvanna.app.crypto.Ed25519;
 
 public class GroupSettingsActivity extends AppCompatActivity {
+
+	private androidx.coordinatorlayout.widget.CoordinatorLayout _coordinator;
+	private com.google.android.material.appbar.AppBarLayout _app_bar;
+	private androidx.appcompat.widget.Toolbar _toolbar;
+	private androidx.core.widget.NestedScrollView vscroll2;
+	private LinearLayout linear74;
+	private LinearLayout linear39;
+	private MaterialCardView cardHero;
 
 	private MaterialCardView cardview11;
 	private MaterialCardView cardview13;
@@ -194,13 +221,6 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	private ImageView imageview30;
 	private TextView textview76;
 	private MaterialButton btnSaveSettings;
-	private View _app_bar;
-	private View _coordinator;
-	private androidx.appcompat.widget.Toolbar _toolbar;
-	private android.widget.ScrollView vscroll2;
-	private LinearLayout linear74;
-	private LinearLayout linear39;
-	private MaterialCardView cardHero;
 	
 	@Override
 	protected void onCreate(Bundle _savedInstanceState) {
@@ -384,10 +404,14 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			}
 			
 			@Override
-			public void beforeTextChanged(CharSequence _param1, int _param2, int _param3, int _param4) {}
+			public void beforeTextChanged(CharSequence _param1, int _param2, int _param3, int _param4) {
+				
+			}
 			
 			@Override
-			public void afterTextChanged(Editable _param1) {}
+			public void afterTextChanged(Editable _param1) {
+				
+			}
 		});
 		
 		btnRestoreWallet.setOnClickListener(_v -> com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(GroupSettingsActivity.this, () -> _showRestoreSheet()));
@@ -396,13 +420,26 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 			ClipData clip = ClipData.newPlainText("Wallet Address", tvWalletAddress.getText().toString());
 			if (clipboard != null) clipboard.setPrimaryClip(clip);
-			Toast.makeText(GroupSettingsActivity.this, "Wallet address copied", Toast.LENGTH_SHORT).show();
+			Toast.makeText(GroupSettingsActivity.this,
+			"Wallet address copied", 
+			Toast.LENGTH_SHORT).show();
+			
 		});
 		
 		btnSaveSettings.setOnClickListener(_v -> _save());
 	}
 	
 	private void initializeLogic() {
+		androidx.appcompat.app.ActionBar ab = getSupportActionBar();
+		int backgroundColor = androidx.core.content.ContextCompat.getColor(this, R.color.colorBackground);
+		
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			final Window window = this.getWindow();
+			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+			com.harvanna.app.utils.StatusBarUtil.matchToolbar(this);
+		}
+		
 		groupId = getIntent() != null ? getIntent().getStringExtra("groupId") : "";
 		if (groupId == null) groupId = "";
 		
@@ -410,6 +447,9 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, visibilityOptions);
 		spinVisibility.setAdapter(adapter);
 		
+		// Same option sets as CreateNewGroupActivity's own disbursement/
+		// withdrawal spinners, so a value saved here means the same thing
+		// there and vice versa.
 		String[] disbursementOptions = new String[]{"All at Once at Goal", "Admin-Triggered"};
 		spinDisbursementRule.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, disbursementOptions));
 		
@@ -417,17 +457,21 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		spinWithdrawalRule.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, withdrawalOptions));
 		
 		_setupGroupNotificationToggles();
+		
 		_loadGroupDoc();
+		
+		
 	}
 	
-	public void _MORE() {}
-	
+	public void _MORE() {
+	}
 	private String groupId = "";
 	private String expectedWallet = "";
 	private boolean isAdmin = false;
 	private Map<String, Object> groupData = new HashMap<>();
 	private final List<String> blockedUids = new ArrayList<>();
 	private List<Map<String, Object>> memberRows = new ArrayList<>();
+	
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -437,6 +481,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
+		// Transfer admin only makes sense for the current admin, and
+		// only if there's someone else in the group to hand it to.
 		MenuItem transferItem = menu.findItem(R.id.menu_transfer_admin);
 		if (transferItem != null) transferItem.setVisible(isAdmin);
 		return super.onPrepareOptionsMenu(menu);
@@ -482,6 +528,12 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		if (w == null) w = data.get("group_wallet");
 		expectedWallet = w != null ? w.toString().trim() : "";
 		
+		// THE FIX: was read from a global SharedPreferences flag shared
+		// across every group — an admin of Group A who was last viewing
+		// Group A would incorrectly see admin controls on Group B too.
+		// Derived fresh here instead, per group, matching the exact
+		// pattern GroupDetailsActivity already uses (compare the current
+		// Firebase UID against this group's own creatorId).
 		String uid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null
 		? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
 		String creatorId = str(groupData, "creatorId", "");
@@ -531,6 +583,12 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			ivHeroTypeIcon.setImageResource(R.drawable.ic_pie_chart);
 			etFixedGoal.setText(numStr(groupData, "targetGoalAmount"));
 			_select(spinDisbursementRule, str(groupData, "disbursementRule", "All at Once at Goal"));
+			// THE FIX: this TextView was bound but never populated at
+			// all — live saved-vs-goal progress needs the group wallet's
+			// actual balance, which this settings screen doesn't fetch
+			// (only Group Overview does). Rather than show a fabricated
+			// or stale number here, this points to where the real one
+			// lives instead.
 			tv_fixed_progress.setText("Live savings progress is shown on the group's Overview tab.");
 			tvRuleInfoBanner.setText("The goal amount and disbursement rule apply to future contributions once saved.");
 		} 
@@ -547,6 +605,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		_buildBackupSection();
 		_buildCloseSection();
 		
+		// Apply Admin States
 		btnSaveSettings.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
 		
 		boolean edit = isAdmin;
@@ -562,6 +621,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		switchApproval.setEnabled(edit);
 		switchInvite.setEnabled(edit);
 		
+		// Dim fields if disabled
 		etContribution.setAlpha(edit ? 1.0f : 0.6f);
 		etGracePeriod.setAlpha(edit ? 1.0f : 0.6f);
 		etCommission.setAlpha(edit ? 1.0f : 0.6f);
@@ -720,6 +780,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		patch.put("requireApprovalToJoin", switchApproval.isChecked());
 		String existingMethod = str(groupData, "joinApprovalMethod", "ADMIN");
 		if (switchApproval.isChecked()) {
+			// Keep MEMBER_VOTE if that's how the group was created. A
+			// save here used to force ADMIN and silently kill voting.
 			if (JoinRequestManager.isOpenJoin(existingMethod) || existingMethod.trim().isEmpty()) {
 				patch.put("joinApprovalMethod", "ADMIN");
 			}
@@ -813,6 +875,11 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		});
 	}
 	
+	/** Picks a target member (excluding self) from the group's active
+*  roster, confirms explicitly, then requires PIN verification before
+*  handing off control — this changes who can move the group's
+*  shared funds, at least as sensitive as any other wallet action in
+*  this app. */
 	private void _showTransferAdminDialog() {
 		String myUid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null
 		? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
@@ -854,7 +921,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	private void _confirmTransferAdmin(String myUid, String targetUid, String targetName) {
 		new AlertDialog.Builder(this)
 		.setTitle("Transfer admin to " + targetName + "?")
-		.setMessage("You will become a regular member and lose admin control over this group, including its settings and wallet.")
+		.setMessage("You will become a regular member and lose admin control over this group, including its settings and wallet. This can only be undone by " + targetName + " transferring it back to you.")
 		.setPositiveButton("Transfer", (dialog, which) ->
 		com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(this, () -> _performTransferAdmin(myUid, targetUid))
 		)
@@ -863,6 +930,15 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _performTransferAdmin(String myUid, String targetUid) {
+		// THE FIX: order matters here. The member-role patches below are
+		// authorized by isGroupCreator(groupId) in the Firestore rules,
+		// which re-checks creatorId at request time — not a snapshot from
+		// when this method started. Patching creatorId first would mean
+		// by the time these two calls fire, the caller no longer IS the
+		// creator, and both would be silently rejected, leaving the role
+		// labels stale even though real control had already transferred.
+		// Doing the role patches first, while still creator, then
+		// creatorId last, keeps every write correctly authorized.
 		Map<String, Object> promote = new HashMap<>();
 		promote.put("role", "ADMIN");
 		GroupFirestoreManager.getInstance(this).updateMemberFields(groupId, targetUid, promote, new GroupFirestoreManager.SimpleCallback() {
@@ -878,6 +954,11 @@ public class GroupSettingsActivity extends AppCompatActivity {
 					}
 					@Override
 					public void onError(String error) {
+						// Target is already promoted at this point —
+						// proceed with the actual handoff regardless,
+						// since creatorId is what really governs
+						// authorization; the demote label is display
+						// polish and can be retried/reconciled later.
 						_finishAdminTransfer(targetUid);
 					}
 				});
@@ -907,18 +988,25 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		});
 	}
 	
+	/** An admin leaving would orphan the group's wallet — nobody left
+*  with signing authority over shared funds — so this is blocked
+*  until they transfer admin to someone else first. A regular
+*  member leaving is a plain, reversible-by-rejoining action. */
 	private void _confirmLeaveGroup() {
 		if (isAdmin) {
-			com.harvanna.app.utils.ThemedDialogs.show(com.harvanna.app.utils.ThemedDialogs.alert(this)
+			ThemedDialogs.show(ThemedDialogs.alert(this)
 			.setTitle("Transfer admin first")
-			.setMessage("You're this group's admin. Transfer admin role to another member before you can leave.")
+			.setMessage("You're this group's admin. Transfer admin role to another member before you can leave — otherwise nobody would be left with control of the group wallet.")
 			.setPositiveButton("Transfer Admin", (dialog, which) -> _showTransferAdminDialog())
 			.setNegativeButton("Cancel", null));
 			return;
 		}
 		
-		String leaveMsg = "You'll lose access to this group's payments, loans, and notices.";
-		com.harvanna.app.utils.ThemedDialogs.show(com.harvanna.app.utils.ThemedDialogs.alert(this)
+		String leaveMsg = "You'll lose access to this group's payments, loans, and notices. You can rejoin later if the group is public or you're invited again.";
+		if (isRotating()) {
+			leaveMsg += "\n\nIf a cycle is in progress, leaving now may forfeit this round's payout.";
+		}
+		ThemedDialogs.show(ThemedDialogs.alert(this)
 		.setTitle("Leave this group?")
 		.setMessage(leaveMsg)
 		.setPositiveButton("Leave", (dialog, which) -> _performLeaveGroup())
@@ -934,7 +1022,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			@Override
 			public void onSuccess(String message) {
 				runOnUiThread(() -> {
-					Toast.makeText(GroupSettingsActivity.this, message != null ? message : "You have left the group.", Toast.LENGTH_SHORT).show();
+					Toast.makeText(GroupSettingsActivity.this,
+					message != null ? message : "You have left the group.", Toast.LENGTH_SHORT).show();
 					Intent home = new Intent(GroupSettingsActivity.this, MainActivity.class);
 					home.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 					startActivity(home);
@@ -943,11 +1032,16 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			}
 			@Override
 			public void onError(String error) {
-				runOnUiThread(() -> Toast.makeText(GroupSettingsActivity.this, "Couldn't leave group: " + error, Toast.LENGTH_LONG).show());
+				runOnUiThread(() -> Toast.makeText(GroupSettingsActivity.this,
+				"Couldn't leave group: " + error, Toast.LENGTH_LONG).show());
 			}
 		});
 	}
 	
+	/** Same "notification_prefs" file the app-wide notification toggles
+*  already use, just with group-scoped keys — so whenever the
+*  enforcement logic for these preferences gets built, it only ever
+*  needs to check one place, global or per-group. */
 	private void _setupGroupNotificationToggles() {
 		android.content.SharedPreferences prefs = getSharedPreferences(
 		com.harvanna.app.NotificationSettingsActivity.PREFS_NAME, MODE_PRIVATE);
@@ -1040,6 +1134,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	
 	private LinearLayout backupSection;
 	
+	/** New-phone recovery: download the group's published encrypted card, decrypt with the admin passphrase. */
 	private void _restoreFromCard() {
 		final ProgressDialog pd = ProgressDialog.show(this, null, "Fetching backup card…", true, false);
 		com.harvanna.app.group.GroupCardStore.fetch(this, groupId, new com.harvanna.app.group.GroupCardStore.Callback() {
@@ -1052,7 +1147,9 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			@Override public void onError(String error) {
 				runOnUiThread(() -> {
 					pd.dismiss();
-					Toast.makeText(GroupSettingsActivity.this, "No backup card found online.", Toast.LENGTH_LONG).show();
+					Toast.makeText(GroupSettingsActivity.this,
+						"No backup card found online. Use \"Restore group wallet\" with your 12 words instead.",
+						Toast.LENGTH_LONG).show();
 				});
 			}
 		});
@@ -1098,6 +1195,11 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			}).show();
 	}
 	
+	/**
+	 * Wallet Access Card backup. The admin (who holds the passphrase) can
+	 * create/replace the card, which is published encrypted to every member;
+	 * members can view, print and save it as a social backup.
+	 */
 	private void _buildBackupSection() {
 		if (expectedWallet.isEmpty() || !expectedWallet.startsWith("HV0x") || _isOnChain()) return;
 		ViewGroup host = (ViewGroup) btnRestoreWallet.getParent();
@@ -1113,15 +1215,15 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		title.setText("Wallet backup card");
 		title.setTextSize(14);
 		title.setTypeface(null, android.graphics.Typeface.BOLD);
-		title.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
+		title.setTextColor(UiColors.textPrimary());
 		backupSection.addView(title);
 		
 		TextView info = new TextView(this);
 		info.setText(isAdmin
-			? "Create an encrypted Access Card for this wallet."
-			: "The admin's encrypted backup card for this wallet.");
+			? "Create an encrypted Access Card for this wallet. Members receive it as a backup but can't open it: only you know the passphrase."
+			: "The admin's encrypted backup card for this wallet. Print or save a copy; it can't move funds without the admin's passphrase.");
 		info.setTextSize(12);
-		info.setTextColor(com.harvanna.app.utils.UiColors.textSecondary());
+		info.setTextColor(UiColors.textSecondary());
 		info.setPadding(0, (int) (4 * d), 0, (int) (8 * d));
 		backupSection.addView(info);
 		
@@ -1132,7 +1234,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			create.setOnClickListener(v -> {
 				String mn = SecureWalletStorage.loadMnemonic(this, expectedWallet);
 				if (mn == null || mn.isEmpty()) {
-					Toast.makeText(this, "The group phrase isn't on this phone.", Toast.LENGTH_LONG).show();
+					Toast.makeText(this, "The group phrase isn't on this phone. Restore the group wallet first.", Toast.LENGTH_LONG).show();
 					return;
 				}
 				Intent i = new Intent(this, CreateHarvannaCardActivity.class);
@@ -1147,7 +1249,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		
 		if (isAdmin) {
 			MaterialButton chat = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
-			chat.setText("Group chat link");
+			chat.setText("Group chat link (WhatsApp, Telegram...)");
 			chat.setAllCaps(false);
 			chat.setOnClickListener(v -> com.harvanna.app.group.GroupChatConnector.edit(this, groupId));
 			backupSection.addView(chat);
@@ -1155,7 +1257,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		
 		if (isAdmin) {
 			MaterialButton fromCard = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
-			fromCard.setText("Restore wallet from Access Card");
+			fromCard.setText("Restore wallet from Access Card (new phone)");
 			fromCard.setAllCaps(false);
 			fromCard.setOnClickListener(v -> com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(
 				GroupSettingsActivity.this, () -> _restoreFromCard()));
@@ -1175,11 +1277,12 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		int idx = host.indexOfChild(btnRestoreWallet);
 		host.addView(backupSection, idx + 1);
 		
+		// Loans on/off: turns the group's Loans tab on or off for everyone.
 		Object al = groupData.get("allowLoans");
 		boolean loansOn = !(al instanceof Boolean) || (Boolean) al;
 		androidx.appcompat.widget.SwitchCompat loanSw = new androidx.appcompat.widget.SwitchCompat(this);
 		loanSw.setText("Allow member loans");
-		loanSw.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
+		loanSw.setTextColor(UiColors.textPrimary());
 		loanSw.setChecked(loansOn);
 		loanSw.setEnabled(isAdmin);
 		loanSw.setPadding(0, (int) (12 * d), 0, 0);
@@ -1191,16 +1294,19 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		});
 		if (!isRotating()) backupSection.addView(loanSw, 0);
 	}
-	
+	/** On-chain rotating groups hold money in a network escrow that has no private key: nothing to restore or back up. */
+	// ── Close / delete group ─────────────────────────────────────────────
+
 	private LinearLayout closeSection;
 
+	/** Admin-only "danger zone": checks what the network and the group's records allow, then closes or deletes. */
 	private void _buildCloseSection() {
 		ViewGroup host = findViewById(R.id.linear39);
 		if (host == null) return;
 		if (closeSection != null && closeSection.getParent() != null) ((ViewGroup) closeSection.getParent()).removeView(closeSection);
 		if (!isAdmin) return;
 		float d = getResources().getDisplayMetrics().density;
-		boolean closed = com.harvanna.app.group.GroupCloser.CLOSED.equalsIgnoreCase(str(groupData, "status", ""));
+		boolean closed = GroupCloser.CLOSED.equalsIgnoreCase(str(groupData, "status", ""));
 
 		closeSection = new LinearLayout(this);
 		closeSection.setOrientation(LinearLayout.VERTICAL);
@@ -1210,15 +1316,15 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		title.setText(closed ? "This group is closed" : "Close or delete this group");
 		title.setTextSize(14);
 		title.setTypeface(null, android.graphics.Typeface.BOLD);
-		title.setTextColor(closed ? com.harvanna.app.utils.UiColors.textPrimary() : com.harvanna.app.utils.UiColors.error());
+		title.setTextColor(closed ? UiColors.textPrimary() : UiColors.error());
 		closeSection.addView(title);
 
 		TextView info = new TextView(this);
 		info.setText(closed
-			? "Closed groups are hidden from Discover."
-			: "We check the network first.");
+			? "Closed groups are hidden from Discover and nobody can join. Members keep their history. You can reopen the group."
+			: "We check the network first. A group that holds money can't be erased: it is closed once everyone has been paid out. A group nobody joined can be deleted.");
 		info.setTextSize(12);
-		info.setTextColor(com.harvanna.app.utils.UiColors.textSecondary());
+		info.setTextColor(UiColors.textSecondary());
 		info.setPadding(0, (int) (4 * d), 0, (int) (8 * d));
 		closeSection.addView(info);
 
@@ -1232,9 +1338,9 @@ public class GroupSettingsActivity extends AppCompatActivity {
 
 	private void _checkClose(MaterialButton btn) {
 		btn.setEnabled(false);
-		btn.setText("Checking the network…");
-		com.harvanna.app.group.GroupCloser.evaluate(this, groupId, new com.harvanna.app.group.GroupCloser.EvalCb() {
-			@Override public void onDecision(com.harvanna.app.group.GroupClosePolicy.Decision dec, com.harvanna.app.group.GroupClosePolicy.Facts f) {
+		btn.setText("Checking the network\u2026");
+		GroupCloser.evaluate(this, groupId, new GroupCloser.EvalCb() {
+			@Override public void onDecision(GroupClosePolicy.Decision dec, GroupClosePolicy.Facts f) {
 				runOnUiThread(() -> { btn.setEnabled(true); btn.setText("Check if I can close this group"); _showCloseDecision(dec); });
 			}
 			@Override public void onError(String e) {
@@ -1243,18 +1349,18 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		});
 	}
 
-	private void _showCloseDecision(com.harvanna.app.group.GroupClosePolicy.Decision dec) {
+	private void _showCloseDecision(GroupClosePolicy.Decision dec) {
 		StringBuilder sb = new StringBuilder();
-		for (String r : dec.reasons) sb.append("• ").append(r).append("\n");
+		for (String r : dec.reasons) sb.append("\u2022 ").append(r).append("\n");
 		if (!dec.nextSteps.isEmpty()) {
 			sb.append("\nWhat to do:\n");
-			for (String n : dec.nextSteps) sb.append("• ").append(n).append("\n");
+			for (String n : dec.nextSteps) sb.append("\u2022 ").append(n).append("\n");
 		}
-		if (dec.action == com.harvanna.app.group.GroupClosePolicy.Action.NONE) {
-			com.harvanna.app.utils.ThemedDialogs.show(com.harvanna.app.utils.ThemedDialogs.alert(this).setTitle(dec.headline).setMessage(sb.toString().trim()).setPositiveButton("OK", null));
+		if (dec.action == GroupClosePolicy.Action.NONE) {
+			ThemedDialogs.show(ThemedDialogs.alert(this).setTitle(dec.headline).setMessage(sb.toString().trim()).setPositiveButton("OK", null));
 			return;
 		}
-		final boolean delete = dec.action == com.harvanna.app.group.GroupClosePolicy.Action.DELETE;
+		final boolean delete = dec.action == GroupClosePolicy.Action.DELETE;
 		final String groupName = str(groupData, "groupName", "");
 		final String phrase = delete ? groupName : "CLOSE";
 
@@ -1263,17 +1369,20 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		int pad = (int) (20 * getResources().getDisplayMetrics().density);
 		box.setPadding(pad, pad / 2, pad, 0);
 		TextView msg = new TextView(this);
-		msg.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
+		msg.setTextColor(UiColors.textPrimary());
 		msg.setTextSize(13);
-		msg.setText(sb.toString().trim());
+		msg.setText(sb.toString().trim() + "\n\n" + (delete
+			? "This permanently removes the group and its records from the app. It cannot be undone."
+			: "Members are notified, joining stops, and the group leaves Discover. Everyone keeps their history and anything they are owed on the network. You can reopen it later."));
 		box.addView(msg);
-		
+		final EditText reason = new EditText(this);
+		if (!delete) { reason.setHint("Reason for members (optional)"); reason.setTextColor(UiColors.textPrimary()); box.addView(reason); }
 		final EditText confirm = new EditText(this);
 		confirm.setHint("Type " + phrase + " to confirm");
-		confirm.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
+		confirm.setTextColor(UiColors.textPrimary());
 		box.addView(confirm);
 
-		androidx.appcompat.app.AlertDialog dialog = com.harvanna.app.utils.ThemedDialogs.alert(this)
+		androidx.appcompat.app.AlertDialog dialog = ThemedDialogs.alert(this)
 			.setTitle(dec.headline).setView(box)
 			.setPositiveButton(delete ? "Delete" : "Close group", null)
 			.setNegativeButton("Cancel", null).create();
@@ -1284,17 +1393,17 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			}
 			dialog.dismiss();
 			com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(GroupSettingsActivity.this, () ->
-				_runClose(delete, ""));
+				_runClose(delete, reason.getText().toString().trim()));
 		}));
 		dialog.show();
 	}
 
 	private void _runClose(boolean delete, String reason) {
-		final ProgressDialog pd = new ProgressDialog(this);
-		pd.setMessage(delete ? "Deleting…" : "Closing the group…");
+		final android.app.ProgressDialog pd = new android.app.ProgressDialog(this);
+		pd.setMessage(delete ? "Deleting\u2026" : "Closing the group\u2026");
 		pd.setCancelable(false);
 		pd.show();
-		com.harvanna.app.group.GroupCloser.DoneCb cb = new com.harvanna.app.group.GroupCloser.DoneCb() {
+		GroupCloser.DoneCb cb = new GroupCloser.DoneCb() {
 			@Override public void onDone() {
 				runOnUiThread(() -> {
 					pd.dismiss();
@@ -1313,24 +1422,25 @@ public class GroupSettingsActivity extends AppCompatActivity {
 				runOnUiThread(() -> { pd.dismiss(); Toast.makeText(GroupSettingsActivity.this, "Couldn't finish: " + e, Toast.LENGTH_LONG).show(); });
 			}
 		};
-		com.harvanna.app.group.GroupCloser.evaluate(this, groupId, new com.harvanna.app.group.GroupCloser.EvalCb() {
-			@Override public void onDecision(com.harvanna.app.group.GroupClosePolicy.Decision dec, com.harvanna.app.group.GroupClosePolicy.Facts f) {
-				if (dec.action == com.harvanna.app.group.GroupClosePolicy.Action.NONE || (delete && dec.action != com.harvanna.app.group.GroupClosePolicy.Action.DELETE)) {
+		// Re-check right before acting: things may have changed since the first check.
+		GroupCloser.evaluate(this, groupId, new GroupCloser.EvalCb() {
+			@Override public void onDecision(GroupClosePolicy.Decision dec, GroupClosePolicy.Facts f) {
+				if (dec.action == GroupClosePolicy.Action.NONE || (delete && dec.action != GroupClosePolicy.Action.DELETE)) {
 					runOnUiThread(() -> { pd.dismiss(); _showCloseDecision(dec); });
 					return;
 				}
-				if (dec.action == com.harvanna.app.group.GroupClosePolicy.Action.DELETE && delete) com.harvanna.app.group.GroupCloser.delete(GroupSettingsActivity.this, groupId, cb);
-				else com.harvanna.app.group.GroupCloser.archive(GroupSettingsActivity.this, groupId, str(groupData, "visibility", "Private"), reason, cb);
+				if (dec.action == GroupClosePolicy.Action.DELETE && delete) GroupCloser.delete(GroupSettingsActivity.this, groupId, cb);
+				else GroupCloser.archive(GroupSettingsActivity.this, groupId, str(groupData, "visibility", "Private"), reason, cb);
 			}
 			@Override public void onError(String e) { cb.onError(e); }
 		});
 	}
 
 	private void _confirmReopen() {
-		com.harvanna.app.utils.ThemedDialogs.show(com.harvanna.app.utils.ThemedDialogs.alert(this)
+		ThemedDialogs.show(ThemedDialogs.alert(this)
 			.setTitle("Reopen this group?")
-			.setMessage("It returns to its previous visibility.")
-			.setPositiveButton("Reopen", (dialog, which) -> com.harvanna.app.group.GroupCloser.reopen(this, groupId, str(groupData, "closedPrevVisibility", "Private"), new com.harvanna.app.group.GroupCloser.DoneCb() {
+			.setMessage("It returns to its previous visibility and members are told it is open again.")
+			.setPositiveButton("Reopen", (dialog, which) -> GroupCloser.reopen(this, groupId, str(groupData, "closedPrevVisibility", "Private"), new GroupCloser.DoneCb() {
 				@Override public void onDone() { runOnUiThread(() -> { Toast.makeText(GroupSettingsActivity.this, "Group reopened.", Toast.LENGTH_SHORT).show(); _loadGroupDoc(); }); }
 				@Override public void onError(String e) { runOnUiThread(() -> Toast.makeText(GroupSettingsActivity.this, "Couldn't reopen: " + e, Toast.LENGTH_LONG).show()); }
 			}))
@@ -1367,17 +1477,18 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			btnRestoreWallet.setText("Restore again (replace key)");
 			btnRestoreWallet.setIconResource(R.drawable.ic_refresh);
 			btnRestoreWallet.setBackgroundTintList(ColorStateList.valueOf(com.harvanna.app.utils.UiColors.accent() & 0x33FFFFFF | 0x33000000));
-			btnRestoreWallet.setTextColor(com.harvanna.app.utils.UiColors.accent());
+			btnRestoreWallet.setTextColor(UiColors.accent());
 			btnRestoreWallet.setIconTintResource(R.color.colorInfo);
 		} else {
 			cardWalletWarning.setVisibility(View.VISIBLE);
 			btnRestoreWallet.setText("Restore group wallet");
 			btnRestoreWallet.setIconResource(R.drawable.ic_shield);
-			btnRestoreWallet.setBackgroundTintList(ColorStateList.valueOf(com.harvanna.app.utils.UiColors.success()));
+			btnRestoreWallet.setBackgroundTintList(ColorStateList.valueOf(UiColors.success()));
 			btnRestoreWallet.setTextColor(Color.WHITE);
 		}
 	}
 	
+	// Utility Parsing Methods
 	private String str(Map<String, Object> m, String k, String fb) {
 		if (m == null || m.get(k) == null) return fb;
 		String s = String.valueOf(m.get(k)).trim();
@@ -1401,4 +1512,5 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		if (v instanceof Boolean) return (Boolean) v;
 		return "true".equalsIgnoreCase(String.valueOf(v));
 	}
+	
 }

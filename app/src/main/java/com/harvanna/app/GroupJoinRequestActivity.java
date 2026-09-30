@@ -413,6 +413,7 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 	
 	private void _bindGroup(Map<String, Object> data) {
 		if (data == null) return;
+		loadedGroupData = new HashMap<>(data);
 		
 		loadedGroupName = _str(data, "groupName", _str(data, "name", "Group"));
 		loadedCreatorId = _str(data, "creatorId", "");
@@ -631,6 +632,9 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 		}
 	}
 	
+	private Map<String, Object> loadedGroupData = new HashMap<>();
+	private Map<String, Object> pendingAck;
+	
 	private void _requestToJoin() {
 		if (sending) return;
 		if (cb_agree_to_rules == null || !cb_agree_to_rules.isChecked()) {
@@ -653,6 +657,15 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 		}
 		if (loadedTotalSlots > 0 && loadedMembersCount >= loadedTotalSlots) {
 			SketchwareUtil.showMessage(getApplicationContext(), "This group is full.");
+			return;
+		}
+		
+		// Gate: needs a wallet, then the member reads and signs the group contract.
+		if (pendingAck == null) {
+			com.harvanna.app.group.GroupWelcomeSheet.start(this, groupId, loadedGroupData, ack -> {
+				pendingAck = ack;
+				_requestToJoin();
+			});
 			return;
 		}
 		
@@ -710,7 +723,7 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 			com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getApplicationContext());
 			int nextSlot = loadedMembersCount + 1;
 			com.harvanna.app.group.JoinRequestManager.admitMember(getApplicationContext(), mgr, groupId, currentUid,
-			nextSlot, nextSlot, new com.harvanna.app.group.JoinRequestManager.Callback() {
+			nextSlot, nextSlot, pendingAck, new com.harvanna.app.group.JoinRequestManager.Callback() {
 				@Override public void onSuccess(String msg) { _joinSucceeded("You're in."); }
 				@Override public void onError(String error) { _joinFailed(error); }
 			});
@@ -751,6 +764,7 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 		requestFields.put("createdAt", System.currentTimeMillis());
 		requestFields.put("message", message);
 		requestFields.put("groupId", groupId);
+		if (pendingAck != null) requestFields.putAll(pendingAck);
 		if (!loadedGroupName.isEmpty()) requestFields.put("groupName", loadedGroupName);
 		
 		com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getApplicationContext())

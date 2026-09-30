@@ -168,7 +168,7 @@ public class CircleCreateActivity extends AppCompatActivity {
         long total = creatorBond + CREATION_FEE_RAW;
         tvSummary.setText(
             "• Each round every member pays " + CircleUi.harv(c) + "\n"
-          + "• The pot each round: " + CircleUi.harv(c * members) + "\n"
+          + "• The pot each round: " + CircleUi.harv(c * (members - 1)) + " (everyone except the member being paid)\n"
           + "• Every other member locks a bond of " + CircleUi.harv(perMember) + " to join\n"
           + "• Your bond (2× a member's): " + CircleUi.harv(creatorBond) + "\n"
           + "• Creation fee (non-refundable): " + CircleUi.harv(CREATION_FEE_RAW) + "\n\n"

@@ -58,7 +58,7 @@ public class GroupContractTest {
         assertEquals("A simple example", s.get(1).title);
         assertEquals("Words explained", s.get(s.size() - 1).title);
         boolean hasPot = false;
-        for (String p : s.get(1).points) if (p.contains("500 HARV")) hasPot = true;
-        assertTrue(hasPot); // 10 x 50
+        for (String p : s.get(1).points) if (p.contains("450 HARV")) hasPot = true;
+        assertTrue(hasPot); // 9 x 50 (the member being paid does not pay)
     }
 }

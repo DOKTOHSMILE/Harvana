@@ -1759,7 +1759,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		final long creatorBond = perMember * 2L;
 		final long fee = 100_000_000L;
 		String msg = "• Each round every member pays " + com.harvanna.app.circle.CircleUi.harv(contributionRaw) + "\n"
-		+ "• The pot each round: " + com.harvanna.app.circle.CircleUi.harv(contributionRaw * members) + "\n"
+		+ "• The pot each round: " + com.harvanna.app.circle.CircleUi.harv(contributionRaw * (members - 1)) + " (everyone except the member being paid)\n"
 		+ "• Every other member locks a bond of " + com.harvanna.app.circle.CircleUi.harv(perMember) + " to join\n"
 		+ "• Your bond (2× a member's): " + com.harvanna.app.circle.CircleUi.harv(creatorBond) + "\n"
 		+ "• Creation fee (non-refundable): " + com.harvanna.app.circle.CircleUi.harv(fee) + "\n\n"

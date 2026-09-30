@@ -42,9 +42,9 @@ public final class GroupContract {
         // 1. In short: the four things anyone must know.
         Section brief = new Section("In short");
         if (rotating) {
-            brief.add("What it is: a rotating savings circle. Everyone pays the same amount each round. Each round, one member takes home the whole pot.");
+            brief.add("What it is: a rotating savings circle. Everyone pays the same amount each round. Each round, one member takes home everything the others paid that round. You do not pay in the round it is your turn.");
             if (amount > 0) brief.add("You pay: " + fmt(amount) + " " + ticker + (freq.isEmpty() ? "" : " every " + everyWord(freq)) + ".");
-            if (amount > 0 && slots > 0) brief.add("You get: one payout of about " + fmt(amount * slots) + " " + ticker + " when it is your turn.");
+            if (amount > 0 && slots > 0) brief.add("You get: one payout of about " + fmt(amount * (slots - 1)) + " " + ticker + " when it is your turn.");
             brief.add("The risk: if you stop paying, the group is hurt and you can lose part of your bond (a deposit you lock when you join).");
         } else if (fixed) {
             brief.add("What it is: the group saves together toward one goal, such as a project or an emergency fund.");
@@ -159,7 +159,7 @@ public final class GroupContract {
         if (rotating) {
             words.add("Round: one payment period. Everyone pays once per round.");
             words.add("Slot: your place in line to receive the pot.");
-            words.add("Pot: all the money paid in during one round.");
+            words.add("Pot: all the money the other members pay in during one round. It goes to the member whose turn it is.");
             words.add("Bond: a deposit locked when you join. It is returned if you pay on time.");
             words.add("Grace period: extra days allowed before a payment counts as late.");
         }
@@ -185,11 +185,11 @@ public final class GroupContract {
         Section ex = new Section("A simple example");
         String per = freq.isEmpty() ? "each round" : "every " + everyWord(freq);
         if (rotating && slots > 1) {
-            double pot = amount * slots;
+            double pot = amount * (slots - 1);
             ex.add("Say " + slots + " people join and each pays " + fmt(amount) + " " + ticker + " " + per + ".");
-            ex.add("Each round the pot is " + fmt(pot) + " " + ticker + " (" + slots + " x " + fmt(amount) + ").");
+            ex.add("The person whose turn it is does not pay that round. So each round the pot is " + fmt(pot) + " " + ticker + " (" + (slots - 1) + " x " + fmt(amount) + ").");
             ex.add("One person takes the whole pot each round, in slot order. After " + slots + " rounds everyone has received the pot once.");
-            ex.add("Over the whole circle you pay " + fmt(pot) + " " + ticker + " in total and you receive " + fmt(pot) + " " + ticker + " once, before any commission. It is a way to get a large sum at once, not a way to earn extra.");
+            ex.add("Over the whole circle you pay " + fmt(pot) + " " + ticker + " in total (every round except your own) and you receive " + fmt(pot) + " " + ticker + " once, before any commission. It is a way to get a large sum at once, not a way to earn extra.");
             return ex;
         }
         if (fixed) {

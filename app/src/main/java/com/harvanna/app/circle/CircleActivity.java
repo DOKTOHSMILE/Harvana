@@ -139,7 +139,7 @@ public class CircleActivity extends AppCompatActivity {
         LinearLayout terms = CircleUi.card(this);
         terms.addView(CircleUi.text(this, "Terms", 15, R.color.colorTextPrimary, true));
         terms.addView(CircleUi.row(this, "Contribution per round", CircleUi.harv(contribution)));
-        terms.addView(CircleUi.row(this, "Pot per round", CircleUi.harv(contribution * limit)));
+        terms.addView(CircleUi.row(this, "Pot per round", CircleUi.harv(contribution * Math.max(0, limit - 1))));
         terms.addView(CircleUi.row(this, "Round length", cycleLabel(cycleHours)));
         terms.addView(CircleUi.row(this, "Bond to join", CircleUi.harv(circle.optLong("requiredBondRaw"))));
         terms.addView(CircleUi.row(this, "Members", String.valueOf(limit)));

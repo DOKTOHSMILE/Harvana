@@ -1,0 +1,193 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:padding="24dp"
+	android:background="?attr/colorSurface">
+	<TextView
+		android:id="@+id/textview9"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="16dp"
+		android:text="Export History"
+		android:textSize="16sp"
+		android:textStyle="bold"
+		android:focusable="false" />
+	<LinearLayout
+		android:id="@+id/btn_export_image"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="?attr/selectableItemBackground"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:focusable="true"
+		android:paddingVertical="12dp"
+		android:paddingHorizontal="4dp">
+		<ImageView
+			android:id="@+id/imageview9"
+			android:layout_width="22dp"
+			android:layout_height="22dp"
+			android:padding="4dp"
+			android:src="@drawable/icon_image_twotone"
+			android:scaleType="centerInside"
+			android:focusable="false"
+			android:backgroundTint="@color/colorSecondaryAccent"
+			app:tint="@color/colorSecondaryAccent" />
+		<TextView
+			android:id="@+id/textview10"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:text="Export as Image (PNG)"
+			android:textSize="14sp"
+			android:textStyle="bold"
+			android:layout_weight="1"
+			android:layout_marginStart="14dp"
+			android:focusable="false" />
+		<ImageView
+			android:id="@+id/imageview10"
+			android:layout_width="16dp"
+			android:layout_height="16dp"
+			android:src="@drawable/ic_arrow_right"
+			android:scaleType="centerInside"
+			app:tint="@color/colorTextTertiary"
+			android:focusable="false" />
+	</LinearLayout>
+	<View
+		android:id="@+id/view7"
+		android:layout_width="match_parent"
+		android:layout_height="1dp"
+		android:background="@color/colorDivider"
+		android:layout_marginStart="36dp" />
+	<LinearLayout
+		android:id="@+id/btn_export_csv"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="?attr/selectableItemBackground"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:focusable="true"
+		android:paddingVertical="12dp"
+		android:paddingHorizontal="4dp">
+		<ImageView
+			android:id="@+id/imageview11"
+			android:layout_width="22dp"
+			android:layout_height="22dp"
+			android:padding="4dp"
+			android:src="@drawable/ic_description"
+			android:scaleType="centerInside"
+			android:focusable="false"
+			android:backgroundTint="@color/colorAmber"
+			app:tint="@color/colorAmber" />
+		<TextView
+			android:id="@+id/textview11"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:text="Export as CSV"
+			android:textSize="14sp"
+			android:textStyle="bold"
+			android:layout_weight="1"
+			android:layout_marginStart="14dp"
+			android:focusable="false" />
+		<ImageView
+			android:id="@+id/imageview12"
+			android:layout_width="16dp"
+			android:layout_height="16dp"
+			android:src="@drawable/ic_arrow_right"
+			android:scaleType="centerInside"
+			app:tint="@color/colorTextTertiary"
+			android:focusable="false" />
+	</LinearLayout>
+	<View
+		android:id="@+id/view8"
+		android:layout_width="match_parent"
+		android:layout_height="1dp"
+		android:background="@color/colorDivider"
+		android:layout_marginStart="36dp" />
+	<LinearLayout
+		android:id="@+id/btn_export_docx"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="?attr/selectableItemBackground"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:focusable="true"
+		android:paddingVertical="12dp"
+		android:paddingHorizontal="4dp">
+		<ImageView
+			android:id="@+id/imageview13"
+			android:layout_width="22dp"
+			android:layout_height="22dp"
+			android:padding="4dp"
+			android:src="@drawable/icon_document_scanner_twotone"
+			android:scaleType="centerInside"
+			android:focusable="false"
+			android:backgroundTint="@color/colorInfo"
+			app:tint="@color/colorInfo" />
+		<TextView
+			android:id="@+id/textview12"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:text="Export as DOCX"
+			android:textSize="14sp"
+			android:textStyle="bold"
+			android:layout_weight="1"
+			android:layout_marginStart="14dp"
+			android:focusable="false" />
+		<ImageView
+			android:id="@+id/imageview14"
+			android:layout_width="16dp"
+			android:layout_height="16dp"
+			android:src="@drawable/ic_arrow_right"
+			android:scaleType="centerInside"
+			app:tint="@color/colorTextTertiary"
+			android:focusable="false" />
+	</LinearLayout>
+	<View
+		android:id="@+id/view9"
+		android:layout_width="match_parent"
+		android:layout_height="1dp"
+		android:background="@color/colorDivider"
+		android:layout_marginStart="36dp" />
+	<LinearLayout
+		android:id="@+id/btn_export_pdf"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="?attr/selectableItemBackground"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:focusable="true"
+		android:paddingVertical="12dp"
+		android:paddingHorizontal="4dp">
+		<ImageView
+			android:id="@+id/imageview15"
+			android:layout_width="22dp"
+			android:layout_height="22dp"
+			android:padding="4dp"
+			android:src="@drawable/icon_picture_as_pdf_twotone"
+			android:scaleType="centerInside"
+			android:focusable="false"
+			android:backgroundTint="@color/colorError"
+			app:tint="@color/colorError" />
+		<TextView
+			android:id="@+id/textview13"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:text="Export as PDF"
+			android:textSize="14sp"
+			android:textStyle="bold"
+			android:layout_weight="1"
+			android:layout_marginStart="14dp"
+			android:focusable="false" />
+		<ImageView
+			android:id="@+id/imageview16"
+			android:layout_width="16dp"
+			android:layout_height="16dp"
+			android:src="@drawable/ic_arrow_right"
+			android:scaleType="centerInside"
+			app:tint="@color/colorTextTertiary"
+			android:focusable="false" />
+	</LinearLayout>
+</LinearLayout>

@@ -1,0 +1,71 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/_coordinator"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<com.google.android.material.appbar.AppBarLayout
+		android:id="@+id/_app_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay"
+		app:elevation="0dp">
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/_toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/appBarColor"
+			app:popupTheme="@style/AppTheme.PopupOverlay" />
+	</com.google.android.material.appbar.AppBarLayout>
+	<LinearLayout
+		android:id="@+id/linear3"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical"
+		android:background="@color/colorPrimary"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<FrameLayout
+			android:id="@+id/cardview1"
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:background="@android:color/transparent"
+			android:layout_weight="1">
+			<LinearLayout
+				android:id="@+id/linear2"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:background="@android:color/transparent"
+				android:orientation="vertical" />
+			<LinearLayout
+				android:id="@+id/linear1"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:background="@android:color/transparent"
+				android:gravity="bottom"
+				android:orientation="vertical" />
+		</FrameLayout>
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/cardview2"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:cardBackgroundColor="@color/colorSurface"
+			app:cardElevation="8dp"
+			app:cardCornerRadius="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<com.google.android.material.bottomnavigation.BottomNavigationView
+				android:id="@+id/bottomnavigation1"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:background="@android:color/transparent"
+				app:menu="@menu/bottom_nav_menu"
+				app:itemIconTint="@color/nav_colors"
+				app:itemTextColor="@color/nav_colors"
+				app:labelVisibilityMode="labeled"
+				app:elevation="0dp"
+				app:itemBackground="@drawable/nav_item_bg"
+				app:itemHorizontalTranslationEnabled="false" />
+		</com.google.android.material.card.MaterialCardView>
+	</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

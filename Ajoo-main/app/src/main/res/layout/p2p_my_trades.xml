@@ -1,0 +1,343 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/_coordinator"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<com.google.android.material.appbar.AppBarLayout
+		android:id="@+id/_app_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay">
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/_toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/appBarColor"
+			app:popupTheme="@style/AppTheme.PopupOverlay" />
+	</com.google.android.material.appbar.AppBarLayout>
+	<androidx.core.widget.NestedScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@color/colorP2pBg"
+		android:fillViewport="true"
+		android:clipToPadding="false"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<LinearLayout
+			android:id="@+id/my_trades_root"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingTop="16dp"
+			android:paddingBottom="35dp"
+			android:orientation="vertical"
+			android:paddingStart="18dp"
+			android:paddingEnd="18dp">
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_trade_summary"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				app:cardBackgroundColor="@color/colorP2pSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear260"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:orientation="vertical">
+					<LinearLayout
+						android:id="@+id/linear261"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<LinearLayout
+							android:id="@+id/linear262"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/textview151"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Trade activity"
+								android:textSize="15sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/tv_trade_summary_period"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="3dp"
+								android:text="Your P2P transaction history"
+								android:textSize="10sp" />
+						</LinearLayout>
+						<TextView
+							android:id="@+id/tv_trade_summary_count"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="0 trades"
+							android:textSize="11sp" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/linear263"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="18dp"
+						android:orientation="horizontal">
+						<LinearLayout
+							android:id="@+id/linear264"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_summary_ongoing"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="0"
+								android:textSize="21sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview152"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="3dp"
+								android:text="Ongoing"
+								android:textSize="10sp" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/linear265"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_summary_completed"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="0"
+								android:textSize="21sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview153"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="3dp"
+								android:text="Completed"
+								android:textSize="10sp" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/linear266"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_summary_cancelled"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="0"
+								android:textSize="21sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview154"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="3dp"
+								android:text="Cancelled"
+								android:textSize="10sp" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/linear267"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_summary_disputed"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="0"
+								android:textSize="21sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview155"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="3dp"
+								android:text="Disputed"
+								android:textSize="10sp" />
+						</LinearLayout>
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<HorizontalScrollView
+				android:id="@+id/my_trades_filter_scroll"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="17dp"
+				android:scrollbars="none">
+				<LinearLayout
+					android:id="@+id/my_trades_filter_container"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:gravity="center_horizontal|center_vertical"
+					android:orientation="horizontal"
+					android:weightSum="5">
+					<TextView
+						android:id="@+id/filter_trade_all"
+						android:layout_width="wrap_content"
+						android:layout_height="40dp"
+						android:background="@color/colorP2pSurfaceAlt"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="All"
+						android:textSize="12sp"
+						android:textStyle="bold"
+						android:layout_weight="1"
+						android:paddingStart="17dp"
+						android:paddingEnd="17dp" />
+					<TextView
+						android:id="@+id/filter_trade_ongoing"
+						android:layout_width="wrap_content"
+						android:layout_height="40dp"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="Ongoing"
+						android:textSize="12sp"
+						android:layout_weight="1"
+						android:layout_marginStart="7dp"
+						android:paddingStart="17dp"
+						android:paddingEnd="17dp" />
+					<TextView
+						android:id="@+id/filter_trade_completed"
+						android:layout_width="wrap_content"
+						android:layout_height="40dp"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="Completed"
+						android:textSize="12sp"
+						android:layout_weight="1"
+						android:layout_marginStart="7dp"
+						android:paddingStart="17dp"
+						android:paddingEnd="17dp" />
+					<TextView
+						android:id="@+id/filter_trade_cancelled"
+						android:layout_width="wrap_content"
+						android:layout_height="40dp"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="Cancelled"
+						android:textSize="12sp"
+						android:layout_weight="1"
+						android:layout_marginStart="7dp"
+						android:paddingStart="17dp"
+						android:paddingEnd="17dp" />
+					<TextView
+						android:id="@+id/filter_trade_disputed"
+						android:layout_width="wrap_content"
+						android:layout_height="40dp"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="Disputed"
+						android:textSize="12sp"
+						android:layout_weight="1"
+						android:layout_marginStart="7dp"
+						android:paddingStart="17dp"
+						android:paddingEnd="17dp" />
+				</LinearLayout>
+			</HorizontalScrollView>
+			<LinearLayout
+				android:id="@+id/linear268"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="20dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<TextView
+					android:id="@+id/tv_trades_section_title"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:text="All trades"
+					android:textSize="15sp"
+					android:textStyle="bold"
+					android:layout_weight="1" />
+				<TextView
+					android:id="@+id/tv_trades_result_count"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="0"
+					android:textSize="11sp" />
+			</LinearLayout>
+			<androidx.recyclerview.widget.RecyclerView
+				android:id="@+id/recycler_my_trades"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:paddingBottom="8dp"
+				android:nestedScrollingEnabled="false"
+				android:clipToPadding="false"
+				android:overScrollMode="never" />
+			<LinearLayout
+				android:id="@+id/layout_my_trades_empty"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="30dp"
+				android:padding="30dp"
+				android:gravity="center_horizontal|center_vertical"
+				android:orientation="vertical"
+				android:visibility="gone">
+				<TextView
+					android:id="@+id/textview156"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="No trades found"
+					android:textSize="17sp"
+					android:textStyle="bold" />
+				<TextView
+					android:id="@+id/tv_empty_trades_description"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="7dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Your P2P transactions will appear here after you participate in a trade."
+					android:textSize="12sp" />
+			</LinearLayout>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_my_trades_info"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="14dp"
+				app:cardBackgroundColor="@color/colorP2pSurface"
+				app:cardCornerRadius="18dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear269"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="15dp"
+					android:orientation="horizontal">
+					<TextView
+						android:id="@+id/textview157"
+						android:layout_width="32dp"
+						android:layout_height="32dp"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="i"
+						android:textSize="16sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/tv_my_trades_info"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:text="Trade records show the transaction lifecycle, including payment status, escrow status and blockchain transaction references where applicable."
+						android:textSize="11sp"
+						android:layout_weight="1"
+						android:layout_marginStart="9dp"
+						android:lineSpacingExtra="2dp" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+		</LinearLayout>
+	</androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

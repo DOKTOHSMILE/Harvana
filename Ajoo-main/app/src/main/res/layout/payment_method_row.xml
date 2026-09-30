@@ -1,0 +1,94 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical">
+	<com.google.android.material.card.MaterialCardView
+		android:id="@+id/rowRoot"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="12dp"
+		app:cardBackgroundColor="@color/colorSurface"
+		app:cardCornerRadius="20dp"
+		app:cardElevation="0dp"
+		app:strokeColor="@color/colorCardStroke"
+		app:strokeWidth="1dp">
+		<LinearLayout
+			android:id="@+id/linear2"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="18dp"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+			<ImageView
+				android:id="@+id/ivMethodIcon"
+				android:focusable="false"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:padding="10dp"
+				android:src="@drawable/ic_credit_card"
+				android:scaleType="centerInside"
+				android:backgroundTint="@color/colorAmber" />
+			<LinearLayout
+				android:id="@+id/linear3"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:layout_weight="1"
+				android:layout_marginStart="14dp">
+				<LinearLayout
+					android:id="@+id/linear4"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:gravity="center_vertical"
+					android:orientation="horizontal">
+					<TextView
+						android:id="@+id/tvMethodLabel"
+						android:focusable="false"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="GTBank - Personal"
+						android:textStyle="bold"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="14.5sp" />
+					<TextView
+						android:id="@+id/tvDefaultBadge"
+						android:focusable="false"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="DEFAULT"
+						android:textStyle="bold"
+						android:textColor="@color/colorTextOnAccent"
+						android:textSize="9.5sp"
+						android:layout_marginStart="8dp"
+						android:backgroundTint="@color/colorAccent"
+						android:paddingHorizontal="6dp"
+						android:paddingVertical="2dp"
+						android:visibility="gone" />
+				</LinearLayout>
+				<TextView
+					android:id="@+id/tvMethodSummary"
+					android:focusable="false"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="3dp"
+					android:text="GTBank · 0123456789 · Valentine Ade"
+					android:textColor="@color/colorTextSecondary"
+					android:textSize="12.5sp" />
+			</LinearLayout>
+			<ImageView
+				android:id="@+id/btnMethodMenu"
+				android:layout_width="24dp"
+				android:layout_height="24dp"
+				android:padding="2dp"
+				android:background="?attr/selectableItemBackgroundBorderless"
+				android:src="@drawable/ic_more_vert"
+				android:scaleType="centerInside"
+				android:contentDescription="Moreoptions"
+				android:focusable="true"
+				app:tint="@color/colorTextTertiary" />
+		</LinearLayout>
+	</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

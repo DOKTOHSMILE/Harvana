@@ -1,0 +1,120 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+	<com.google.android.material.card.MaterialCardView
+		android:id="@+id/cardview1"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		app:cardBackgroundColor="@color/colorSurface"
+		app:cardElevation="1dp"
+		app:strokeWidth="1dp"
+		app:strokeColor="@color/colorCardStroke"
+		app:cardCornerRadius="0dp">
+		<LinearLayout
+			android:id="@+id/linear1"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="14dp"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+			<androidx.cardview.widget.CardView
+				android:id="@+id/cardview2"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="8dp"
+				app:cardElevation="0dp"
+				app:cardCornerRadius="360dp">
+				<ImageView
+					android:id="@+id/imageview1"
+					android:layout_width="45dp"
+					android:layout_height="45dp"
+					android:src="@drawable/ic_coin_harv"
+					android:scaleType="centerInside"
+					android:focusable="false" />
+			</androidx.cardview.widget.CardView>
+			<LinearLayout
+				android:id="@+id/linear2"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:layout_weight="1">
+				<TextView
+					android:id="@+id/textview1"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:text="Public group"
+					android:textSize="15sp"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextPrimary"
+					android:layout_weight="1"
+					android:focusable="false" />
+				<TextView
+					android:id="@+id/textview3"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="3dp"
+					android:text="Location · members · freq"
+					android:textSize="12sp"
+					android:textColor="@color/colorTextTertiary"
+					android:focusable="false" />
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/linear3"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center_horizontal|center_vertical"
+				android:orientation="vertical">
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview3"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginBottom="5dp"
+					app:cardBackgroundColor="@color/darkFaint10"
+					android:layout_weight="1"
+					app:cardElevation="0dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorWarning"
+					app:cardCornerRadius="30dp">
+					<TextView
+						android:id="@+id/textview2"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:paddingLeft="8dp"
+						android:paddingTop="5dp"
+						android:paddingRight="8dp"
+						android:paddingBottom="5dp"
+						android:text="✓ Verified"
+						android:textSize="11sp"
+						android:textStyle="bold"
+						android:textColor="@color/colorAccent"
+						android:focusable="false" />
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:id="@+id/textview4"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Trust 0%"
+					android:textSize="12sp"
+					android:textColor="@color/colorTextTertiary"
+					android:layout_marginEnd="12dp"
+					android:focusable="false" />
+			</LinearLayout>
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_join"
+				android:layout_width="65dp"
+				android:layout_height="40dp"
+				android:layout_marginLeft="5dp"
+				android:gravity="center_horizontal|center_vertical"
+				android:text="Join"
+				android:textSize="12sp"
+				android:textColor="@color/colorButtonText"
+				app:backgroundTint="@color/colorButtonBackground"
+				app:cornerRadius="30dp"
+				android:elevation="0dp" />
+		</LinearLayout>
+	</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

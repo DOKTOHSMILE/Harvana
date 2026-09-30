@@ -1,0 +1,209 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/_coordinator"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<com.google.android.material.appbar.AppBarLayout
+		android:id="@+id/_app_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay">
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/_toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/appBarColor"
+			app:popupTheme="@style/AppTheme.PopupOverlay" />
+	</com.google.android.material.appbar.AppBarLayout>
+	<androidx.core.widget.NestedScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:fillViewport="true"
+		android:overScrollMode="never"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<LinearLayout
+			android:id="@+id/linear49"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingTop="16dp"
+			android:paddingBottom="40dp"
+			android:orientation="vertical"
+			android:paddingHorizontal="24dp">
+			<com.google.android.material.textview.MaterialTextView
+				android:id="@+id/textview52"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Backup &amp; Recovery"
+				android:textSize="22sp"
+				android:textStyle="bold"
+				android:textColor="@color/colorTextPrimary" />
+			<com.google.android.material.textview.MaterialTextView
+				android:id="@+id/textview53"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="4dp"
+				android:layout_marginBottom="24dp"
+				android:text="Your recovery phrase is the only way to restore your Harvanna wallet if you lose this device."
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13.5sp"
+				android:lineSpacingExtra="3dp" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/cardview8"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="28dp"
+				app:cardBackgroundColor="@color/colorErrorSoft"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorError"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear50"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="20dp"
+					android:orientation="horizontal">
+					<ImageView
+						android:id="@+id/imageview44"
+						android:layout_width="24dp"
+						android:layout_height="24dp"
+						android:layout_marginTop="2dp"
+						android:src="@drawable/ic_shield"
+						android:scaleType="centerInside"
+						android:layout_marginEnd="14dp"
+						app:tint="@color/colorError" />
+					<LinearLayout
+						android:id="@+id/linear51"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical">
+						<com.google.android.material.textview.MaterialTextView
+							android:id="@+id/textview54"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:text="Never share this with anyone"
+							android:textStyle="bold"
+							android:textColor="@color/colorError"
+							android:textSize="14.5sp" />
+						<com.google.android.material.textview.MaterialTextView
+							android:id="@+id/textview55"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="Anyone with these words can take everything in your wallet. Staff will never ask you for this phrase — not by phone, chat, or email."
+							android:textSize="13sp"
+							android:textColor="@color/colorError"
+							android:lineSpacingExtra="3dp" />
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<LinearLayout
+				android:id="@+id/layoutLockedState"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_horizontal|center_vertical"
+				android:orientation="vertical"
+				android:paddingVertical="32dp">
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview9"
+					android:layout_width="72dp"
+					android:layout_height="72dp"
+					app:cardBackgroundColor="@color/colorSurface"
+					app:cardCornerRadius="36dp"
+					app:cardElevation="0dp"
+					app:strokeColor="@color/colorCardStroke"
+					app:strokeWidth="1dp">
+					<ImageView
+						android:id="@+id/imageview45"
+						android:layout_width="32dp"
+						android:layout_height="32dp"
+						android:src="@drawable/ic_shield"
+						android:scaleType="centerInside"
+						app:tint="@color/colorAccent" />
+				</com.google.android.material.card.MaterialCardView>
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/textview56"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="18dp"
+					android:text="Authentication Required"
+					android:textSize="18sp"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextPrimary" />
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/textview57"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:text="Verify your PIN to view your phrase"
+					android:textColor="@color/colorTextSecondary"
+					android:textSize="13.5sp" />
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btnRevealPhrase"
+					android:layout_width="match_parent"
+					android:layout_height="52dp"
+					android:layout_marginTop="28dp"
+					android:text="Show Recovery Phrase"
+					android:textSize="15sp"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextOnAccent"
+					android:textAllCaps="false"
+					app:backgroundTint="@color/colorAccent"
+					app:cornerRadius="14dp"
+					app:elevation="0dp" />
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/layoutRevealedState"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:visibility="gone">
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/cardview10"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@color/colorSurface"
+					app:cardCornerRadius="20dp"
+					app:cardElevation="0dp"
+					app:strokeColor="@color/colorCardStroke"
+					app:strokeWidth="1dp">
+					<GridLayout
+						android:id="@+id/gridMnemonicWords"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:padding="20dp"
+						android:columnCount="2"
+						android:useDefaultMargins="true" />
+				</com.google.android.material.card.MaterialCardView>
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btnCopyPhrase"
+					android:layout_width="match_parent"
+					android:layout_height="52dp"
+					android:layout_marginTop="20dp"
+					android:text="Copy to Clipboard (clears in 30s)"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextPrimary"
+					android:textSize="14.5sp"
+					style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+					android:textAllCaps="false"
+					app:backgroundTint="@color/colorSurfaceRaised"
+					app:cornerRadius="14dp"
+					app:elevation="0dp"
+					app:strokeColor="@color/colorCardStroke"
+					app:strokeWidth="1dp" />
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/textview58"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="20dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Write these words down in order and store them somewhere safe and offline."
+					android:textSize="12sp"
+					android:textColor="@color/colorTextTertiary"
+					android:lineSpacingExtra="3dp" />
+			</LinearLayout>
+		</LinearLayout>
+	</androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

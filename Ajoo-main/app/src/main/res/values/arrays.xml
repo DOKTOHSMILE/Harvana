@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="time_filters">
+        <item>1H</item>
+        <item>24H</item>
+        <item>7D</item>
+        <item>30D</item>
+        <item>All Time</item>
+    </string-array>
+
+</resources>

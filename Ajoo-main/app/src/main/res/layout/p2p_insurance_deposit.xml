@@ -1,0 +1,518 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/_coordinator"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<com.google.android.material.appbar.AppBarLayout
+		android:id="@+id/_app_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay">
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/_toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/appBarColor"
+			app:popupTheme="@style/AppTheme.PopupOverlay" />
+	</com.google.android.material.appbar.AppBarLayout>
+	<androidx.core.widget.NestedScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:fillViewport="true"
+		android:background="@color/colorP2pBg"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<LinearLayout
+			android:id="@+id/linear88"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="20dp"
+			android:orientation="vertical">
+			<TextView
+				android:id="@+id/textview81"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Insured Trader Status"
+				android:textSize="22sp"
+				android:textStyle="bold"
+				android:textColor="@android:color/white" />
+			<TextView
+				android:id="@+id/textview82"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="6dp"
+				android:layout_marginBottom="16dp"
+				android:text="Lock HARV collateral to unlock buyer trust, higher trading visibility, and verified merchant privileges on the Harvanna P2P market."
+				android:textSize="13sp"
+				android:textColor="@color/colorP2pTextMuted"
+				android:lineSpacingExtra="3dp" />
+			<androidx.cardview.widget.CardView
+				android:id="@+id/layout_status_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="16dp"
+				app:cardBackgroundColor="@color/colorP2pSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp">
+				<LinearLayout
+					android:id="@+id/linear1"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:orientation="vertical">
+					<LinearLayout
+						android:id="@+id/linear2"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<LinearLayout
+							android:id="@+id/linear3"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/textview83"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Insurance Shield"
+								android:textSize="15sp"
+								android:textStyle="bold"
+								android:textColor="@android:color/white" />
+							<TextView
+								android:id="@+id/textview84"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="On-chain collateral security"
+								android:textSize="12sp"
+								android:textColor="@color/colorP2pTextMuted" />
+						</LinearLayout>
+						<TextView
+							android:id="@+id/tv_status_badge"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:background="@drawable/bg_p2p_button_outline"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="Checking…"
+							android:textStyle="bold"
+							android:textSize="11.5sp"
+							android:textColor="@android:color/white"
+							android:paddingVertical="6dp"
+							android:paddingHorizontal="12dp"
+							android:minWidth="90dp" />
+					</LinearLayout>
+					<View
+						android:id="@+id/view4"
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:layout_marginTop="14dp"
+						android:layout_marginBottom="10dp"
+						android:background="@color/colorP2pBorder" />
+					<LinearLayout
+						android:id="@+id/linear5"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="horizontal"
+						android:paddingVertical="6dp">
+						<TextView
+							android:id="@+id/textview1"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Locked collateral"
+							android:textSize="13sp"
+							android:textColor="@color/colorP2pTextMuted"
+							android:layout_weight="1" />
+						<TextView
+							android:id="@+id/tv_current_deposit"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="0.00 HARV"
+							android:textSize="13sp"
+							android:textStyle="bold"
+							android:textColor="@android:color/white" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/linear6"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="horizontal"
+						android:paddingVertical="6dp">
+						<TextView
+							android:id="@+id/textview2"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Required minimum"
+							android:textSize="13sp"
+							android:textColor="@color/colorP2pTextMuted"
+							android:layout_weight="1" />
+						<TextView
+							android:id="@+id/tv_required_minimum"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="0.00 HARV"
+							android:textSize="13sp"
+							android:textStyle="bold"
+							android:textColor="@android:color/white" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/linear7"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="horizontal"
+						android:paddingVertical="6dp">
+						<TextView
+							android:id="@+id/textview3"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Identity trust state"
+							android:textSize="13sp"
+							android:textColor="@color/colorP2pTextMuted"
+							android:layout_weight="1" />
+						<TextView
+							android:id="@+id/tv_trust_status"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Checking…"
+							android:textSize="13sp"
+							android:textStyle="bold"
+							android:textColor="@android:color/white" />
+					</LinearLayout>
+				</LinearLayout>
+			</androidx.cardview.widget.CardView>
+			<androidx.cardview.widget.CardView
+				android:id="@+id/layout_insurance_info"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="16dp"
+				app:cardBackgroundColor="@color/colorP2pSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp">
+				<LinearLayout
+					android:id="@+id/linear8"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/textview4"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Why become an Insured Trader\?"
+						android:textSize="15sp"
+						android:textStyle="bold"
+						android:textColor="@android:color/white" />
+					<TextView
+						android:id="@+id/textview5"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="8dp"
+						android:text="• Instant Buyer Trust: Users prefer trading with insured merchants because your collateral protects them against bad faith actors.\n\n• Isolated Security: Your collateral is locked safely on-chain via Harvanna Protocol and remains separate from your routine available trading funds.\n\n• Withdrawal Flexibility: You can unlock and withdraw your collateral anytime you have zero active offers or pending trades."
+						android:textColor="@color/colorP2pTextMuted"
+						android:textSize="12.5sp"
+						android:lineSpacingExtra="4dp" />
+				</LinearLayout>
+			</androidx.cardview.widget.CardView>
+			<androidx.cardview.widget.CardView
+				android:id="@+id/layout_criteria_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="20dp"
+				app:cardBackgroundColor="@color/colorP2pSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp">
+				<LinearLayout
+					android:id="@+id/linear9"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:orientation="vertical">
+					<LinearLayout
+						android:id="@+id/linear10"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<LinearLayout
+							android:id="@+id/linear11"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/textview6"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Trader Requirements"
+								android:textSize="15sp"
+								android:textStyle="bold"
+								android:textColor="@android:color/white" />
+							<TextView
+								android:id="@+id/textview7"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Live compliance check"
+								android:textSize="12sp"
+								android:textColor="@color/colorP2pTextMuted" />
+						</LinearLayout>
+						<TextView
+							android:id="@+id/tv_premium_badge"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:background="@drawable/bg_p2p_button_outline"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="Checking…"
+							android:textStyle="bold"
+							android:textSize="11.5sp"
+							android:textColor="@android:color/white"
+							android:paddingVertical="6dp"
+							android:paddingHorizontal="12dp" />
+					</LinearLayout>
+					<View
+						android:id="@+id/view12"
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:layout_marginTop="14dp"
+						android:layout_marginBottom="8dp"
+						android:background="@color/colorP2pBorder" />
+					<LinearLayout
+						android:id="@+id/linear13"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingVertical="6dp">
+						<TextView
+							android:id="@+id/tv_check_verified"
+							android:layout_width="22dp"
+							android:layout_height="22dp"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="○"
+							android:textSize="15sp"
+							android:textColor="@color/colorP2pTextMuted" />
+						<TextView
+							android:id="@+id/textview8"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Fully verified identity"
+							android:textSize="13sp"
+							android:layout_weight="1"
+							android:textColor="@android:color/white"
+							android:layout_marginStart="10dp" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/linear14"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingVertical="6dp">
+						<TextView
+							android:id="@+id/tv_check_clean"
+							android:layout_width="22dp"
+							android:layout_height="22dp"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="○"
+							android:textSize="15sp"
+							android:textColor="@color/colorP2pTextMuted" />
+						<TextView
+							android:id="@+id/textview9"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Clean standing — zero active reports"
+							android:textSize="13sp"
+							android:layout_weight="1"
+							android:textColor="@android:color/white"
+							android:layout_marginStart="10dp" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/linear15"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingVertical="6dp">
+						<TextView
+							android:id="@+id/tv_check_deposit"
+							android:layout_width="22dp"
+							android:layout_height="22dp"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="○"
+							android:textSize="15sp"
+							android:textColor="@color/colorP2pTextMuted" />
+						<TextView
+							android:id="@+id/tv_criteria_deposit_label"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Insurance collateral meets minimum"
+							android:textSize="13sp"
+							android:layout_weight="1"
+							android:textColor="@android:color/white"
+							android:layout_marginStart="10dp" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/linear16"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingVertical="6dp">
+						<TextView
+							android:id="@+id/tv_check_volume"
+							android:layout_width="22dp"
+							android:layout_height="22dp"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="○"
+							android:textSize="15sp"
+							android:textColor="@color/colorP2pTextMuted" />
+						<TextView
+							android:id="@+id/tv_criteria_volume_label"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Minimum completed trades threshold"
+							android:textSize="13sp"
+							android:layout_weight="1"
+							android:textColor="@android:color/white"
+							android:layout_marginStart="10dp" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/linear17"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingVertical="6dp">
+						<TextView
+							android:id="@+id/tv_check_success_rate"
+							android:layout_width="22dp"
+							android:layout_height="22dp"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="○"
+							android:textSize="15sp"
+							android:textColor="@color/colorP2pTextMuted" />
+						<TextView
+							android:id="@+id/tv_criteria_success_rate_label"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Trade reliability metrics"
+							android:textSize="13sp"
+							android:layout_weight="1"
+							android:textColor="@android:color/white"
+							android:layout_marginStart="10dp" />
+					</LinearLayout>
+				</LinearLayout>
+			</androidx.cardview.widget.CardView>
+			<TextView
+				android:id="@+id/textview10"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="8dp"
+				android:text="Deposit Insurance Collateral"
+				android:textSize="13sp"
+				android:textStyle="bold"
+				android:textColor="@android:color/white" />
+			<androidx.cardview.widget.CardView
+				android:id="@+id/layout_deposit_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="12dp"
+				app:cardBackgroundColor="@color/colorP2pSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp">
+				<LinearLayout
+					android:id="@+id/linear18"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/textview11"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:text="Specify the amount of HARV to lock into the on-chain insurance vault."
+						android:textColor="@color/colorP2pTextMuted"
+						android:textSize="12.5sp" />
+					<LinearLayout
+						android:id="@+id/linear19"
+						android:layout_width="match_parent"
+						android:layout_height="56dp"
+						android:layout_marginTop="12dp"
+						android:background="@drawable/bg_p2p_input"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<EditText
+							android:id="@+id/et_deposit_amount"
+							android:layout_width="0dp"
+							android:layout_height="match_parent"
+							android:textSize="18sp"
+							android:textStyle="bold"
+							android:hint="0.00"
+							android:inputType="numberDecimal"
+							android:layout_weight="1"
+							android:background="@null"
+							android:textColor="@android:color/white"
+							android:paddingStart="16dp"
+							android:paddingEnd="8dp" />
+						<TextView
+							android:id="@+id/textview12"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="HARV"
+							android:textSize="14sp"
+							android:textStyle="bold"
+							android:textColor="@android:color/white"
+							android:paddingStart="8dp"
+							android:paddingEnd="16dp" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/linear20"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="10dp"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/textview13"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Wallet available balance"
+							android:textColor="@color/colorP2pTextMuted"
+							android:layout_weight="1"
+							android:textSize="12.5sp" />
+						<TextView
+							android:id="@+id/tv_available_balance"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="…"
+							android:textStyle="bold"
+							android:textSize="12.5sp"
+							android:textColor="@android:color/white" />
+					</LinearLayout>
+				</LinearLayout>
+			</androidx.cardview.widget.CardView>
+			<TextView
+				android:id="@+id/tv_deposit_error"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="4dp"
+				android:layout_marginBottom="8dp"
+				android:textSize="13sp"
+				android:textColor="@color/colorError"
+				android:visibility="gone" />
+			<TextView
+				android:id="@+id/btn_submit_deposit"
+				android:layout_width="match_parent"
+				android:layout_height="56dp"
+				android:layout_marginTop="8dp"
+				android:layout_marginBottom="32dp"
+				android:background="@drawable/bg_p2p_button_primary"
+				android:gravity="center_horizontal|center_vertical"
+				android:text="Deposit HARV"
+				android:textSize="16sp"
+				android:textStyle="bold"
+				android:textColor="@color/colorTextOnAccent" />
+		</LinearLayout>
+	</androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

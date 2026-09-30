@@ -78,7 +78,15 @@ public final class LockSigner {
                 .put("memo", t.optString("memo", "")).put("payload", t.optString("payload", ""))
                 .put("publicKey", pub).put("signature", Base64.encodeToString(sig, Base64.NO_WRAP));
             HarvannaNodeClient.nodePost("/api/v1/locks/submit", body.toString(), new HarvannaNodeClient.JsonCallback() {
-                @Override public void onSuccess(JSONObject r) { submitFrom(c, templates, i + 1, nonce + 1, done); }
+                @Override public void onSuccess(JSONObject r) {
+                    String purpose = com.harvanna.app.notify.TxEvents.purpose(t.optString("memo", ""));
+                    String scope = com.harvanna.app.notify.TxEvents.scope(t.optString("memo", ""));
+                    com.harvanna.app.notify.NotificationCenter.post(c, com.harvanna.app.notify.NotificationCenter.TX,
+                        "signed_" + from + "_" + nonce, "Payment signed",
+                        "You signed " + com.harvanna.app.notify.TxEvents.amt(HarvannaNodeClient.toHarvDisplay(t.optLong("amount"))) + " " + com.harvanna.app.CoinInfo.ticker()
+                            + (scope.isEmpty() ? "" : " for your " + scope) + (purpose.isEmpty() ? "" : " (" + purpose.toLowerCase(java.util.Locale.US) + ")") + ". The network is processing it.", "", -1);
+                    submitFrom(c, templates, i + 1, nonce + 1, done);
+                }
                 @Override public void onError(String e) { done.onDone(e); }
             });
         } catch (Exception e) {

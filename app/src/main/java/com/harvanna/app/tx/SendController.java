@@ -352,6 +352,11 @@ public class SendController {
                 new TransactionRouter.RouterCallback() {
                     @Override
                     public void onSuccess(String txHash) {
+                        // Told immediately, even if the screen was closed meanwhile; the confirmation arrives later.
+                        com.harvanna.app.notify.NotificationCenter.post(context, com.harvanna.app.notify.NotificationCenter.TX,
+                            "tx_" + txHash + "_submitted", com.harvanna.app.CoinInfo.ticker() + " sent",
+                            com.harvanna.app.notify.TxEvents.amt(preview.amountHarv) + " " + com.harvanna.app.CoinInfo.ticker() + " to "
+                                + com.harvanna.app.notify.TxEvents.shortAddr(preview.recipient) + " is on its way. We'll tell you when it is confirmed.", "", -1);
                         if (destroyed || listener == null) return;
                         Log.i(TAG, "Tx submitted | hash=" + txHash);
                         listener.onSendSuccess(txHash, "PENDING");

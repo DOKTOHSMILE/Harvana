@@ -30,7 +30,7 @@ public class OpenLoansActivity extends AppCompatActivity {
     private TextView summary;
 
     private static final class Row {
-        String groupId, groupName;
+        String groupId, groupName, nodeId = "";
         double principal, repaid;
     }
 
@@ -72,8 +72,26 @@ public class OpenLoansActivity extends AppCompatActivity {
     }
 
     private void fetch(String uid, List<String> ids) {
-        if (ids.isEmpty()) { runOnUiThread(() -> show(new ArrayList<>())); return; }
-        final List<Row> rows = new ArrayList<>();
+        // Groups on the node: what you owe comes from your member record on the node. Older groups: Firestore loans.
+        String wallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
+        com.harvanna.app.sync.NodePortfolio.load(this, uid, wallet, portfolio -> {
+            final List<Row> rows = new ArrayList<>();
+            synchronized (portfolio.entries) {
+                for (com.harvanna.app.sync.NodePortfolio.Entry e : portfolio.entries) {
+                    if (e.position.outstandingHarv() <= 0) continue;
+                    Row r = new Row();
+                    r.groupId = e.firestoreGroupId; r.groupName = e.name + " (on the network)";
+                    r.principal = e.position.borrowedHarv; r.repaid = e.position.repaidHarv;
+                    r.nodeId = e.nodeId;
+                    rows.add(r);
+                }
+            }
+            fetchLegacy(uid, portfolio.legacyGroupIds.isEmpty() && portfolio.entries.isEmpty() ? ids : portfolio.legacyGroupIds, rows);
+        });
+    }
+
+    private void fetchLegacy(String uid, List<String> ids, List<Row> rows) {
+        if (ids.isEmpty()) { runOnUiThread(() -> show(rows)); return; }
         final AtomicInteger left = new AtomicInteger(ids.size());
         for (String gid : ids) {
             final String groupId = gid;
@@ -139,11 +157,19 @@ public class OpenLoansActivity extends AppCompatActivity {
         pay.setText("Pay");
         pay.setAllCaps(false);
         pay.setOnClickListener(v -> {
-            Intent i = new Intent(this, GroupDetailsActivity.class);
-            i.putExtra("groupId", r.groupId);
-            i.putExtra("tab", 3);
+            Intent i;
+            if (!r.nodeId.isEmpty()) {
+                i = new Intent(this, com.harvanna.app.group.NodeGroupActivity.class);
+                i.putExtra("nodeGroupId", r.nodeId);
+                i.putExtra("firestoreGroupId", r.groupId);
+            } else {
+                i = new Intent(this, GroupDetailsActivity.class);
+                i.putExtra("groupId", r.groupId);
+                i.putExtra("tab", 3);
+            }
             startActivity(i);
         });
+        if (!r.nodeId.isEmpty()) pay.setText("Open group to repay");
         c.addView(pay);
         return c;
     }

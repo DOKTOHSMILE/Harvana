@@ -35,7 +35,7 @@
 					android:layout_width="38dp"
 					android:layout_height="38dp"
 					android:padding="4dp"
-					android:src="@drawable/main_app_logo_1"
+					android:src="@drawable/ic_coin_harv"
 					android:scaleType="centerInside"
 					android:focusable="false" />
 			</androidx.cardview.widget.CardView>

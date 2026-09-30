@@ -1210,7 +1210,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	 * members can view, print and save it as a social backup.
 	 */
 	private void _buildBackupSection() {
-		if (expectedWallet.isEmpty() || !expectedWallet.startsWith("HV0x")) return;
+		if (expectedWallet.isEmpty() || !expectedWallet.startsWith("HV0x") || _isOnChain()) return;
 		ViewGroup host = (ViewGroup) btnRestoreWallet.getParent();
 		if (backupSection != null && backupSection.getParent() != null) {
 			((ViewGroup) backupSection.getParent()).removeView(backupSection);
@@ -1304,7 +1304,17 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		if (!isRotating()) backupSection.addView(loanSw, 0);
 	}
 	
+	/** On-chain rotating groups hold money in a network escrow that has no private key: nothing to restore or back up. */
+	private boolean _isOnChain() {
+		return com.harvanna.app.group.GroupKinds.isOnChain(groupData);
+	}
+	
 	private void _refreshKeyStatus() {
+		if (_isOnChain()) {
+			cardWalletWarning.setVisibility(View.GONE);
+			btnRestoreWallet.setVisibility(View.GONE);
+			return;
+		}
 		if (expectedWallet.isEmpty() || !expectedWallet.startsWith("HV0x")) {
 			cardWalletWarning.setVisibility(View.GONE);
 			btnRestoreWallet.setVisibility(View.GONE);

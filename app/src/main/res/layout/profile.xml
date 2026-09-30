@@ -63,7 +63,7 @@
 								android:id="@+id/user_photo_imageview1"
 								android:layout_width="match_parent"
 								android:layout_height="match_parent"
-								android:src="@drawable/main_app_logo_1"
+								android:src="@drawable/ic_coin_harv"
 								android:scaleType="centerCrop" />
 						</androidx.cardview.widget.CardView>
 						<LinearLayout

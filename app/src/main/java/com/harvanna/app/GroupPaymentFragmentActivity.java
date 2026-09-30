@@ -128,7 +128,57 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		initialize(_savedInstanceState, _view);
 		FirebaseApp.initializeApp(getContext());
 		initializeLogic();
-		return _view;
+		return _wrapForOnChain(_view);
+	}
+	
+	/**
+	 * A rotating group's money lives on the network. If this group is linked to a circle, this tab shows a
+	 * clear path to it (contribute, bond, payout order) instead of the old wallet-transfer screen.
+	 */
+	private View _wrapForOnChain(View content) {
+		final android.widget.FrameLayout frame = new android.widget.FrameLayout(getContext());
+		frame.addView(content);
+		String gid = getArguments() != null ? getArguments().getString("groupId", "") : "";
+		if (gid == null || gid.isEmpty()) return frame;
+		com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext()).getGroup(gid,
+		new com.harvanna.app.firestore.GroupFirestoreManager.DocCallback() {
+			@Override public void onSuccess(Map<String, Object> data) {
+				final String circleId = com.harvanna.app.group.GroupKinds.nodeId(data);
+				if (circleId.isEmpty() || getActivity() == null) return;
+				getActivity().runOnUiThread(() -> {
+					if (getContext() == null) return;
+					float d = getResources().getDisplayMetrics().density;
+					android.widget.LinearLayout box = new android.widget.LinearLayout(getContext());
+					box.setOrientation(android.widget.LinearLayout.VERTICAL);
+					box.setBackgroundColor(com.harvanna.app.utils.UiColors.background());
+					box.setPadding((int) (20 * d), (int) (24 * d), (int) (20 * d), (int) (20 * d));
+					TextView t = new TextView(getContext());
+					t.setText("Payments run on the Harvanna network");
+					t.setTextSize(18); t.setTypeface(null, android.graphics.Typeface.BOLD);
+					t.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
+					box.addView(t);
+					TextView b = new TextView(getContext());
+					b.setText("This group keeps its money on the network. Open it to see your position and to pay, save, deposit, vote or withdraw, depending on the group.");
+					b.setTextSize(14); b.setTextColor(com.harvanna.app.utils.UiColors.textSecondary());
+					b.setPadding(0, (int) (8 * d), 0, (int) (16 * d));
+					box.addView(b);
+					com.google.android.material.button.MaterialButton go = new com.google.android.material.button.MaterialButton(getContext());
+					go.setText("Open payments and bond");
+					go.setAllCaps(false);
+					go.setOnClickListener(v -> {
+						Intent i = new Intent(getContext(), com.harvanna.app.group.NodeGroupActivity.class);
+						i.putExtra("nodeGroupId", circleId);
+						i.putExtra("firestoreGroupId", gid);
+						startActivity(i);
+					});
+					box.addView(go);
+					frame.addView(box, new android.widget.FrameLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+				});
+			}
+			@Override public void onError(String e) { }
+		});
+		return frame;
 	}
 	
 	private void initialize(Bundle _savedInstanceState, View _view) {
@@ -531,7 +581,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 	}
 	
 	private void _renderPaymentRows() {
-		paymentRows.sort((a, b) -> Long.compare((long) num(b, "timestamp"), (long) num(a, "timestamp")));
+		java.util.Collections.sort(paymentRows, (a, b) -> Long.compare((long) num(b, "timestamp"), (long) num(a, "timestamp")));
 		
 		int paidThisRound = 0;
 		for (Map<String, Object> p : paymentRows) {
@@ -904,7 +954,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		});
 	}
 	
-	private void _recordPayment(String from, String txHash, boolean isFixed, int day, java.util.function.Consumer<String> done) {
+	private void _recordPayment(String from, String txHash, boolean isFixed, int day, androidx.core.util.Consumer<String> done) {
 		_resolveMemberName(name -> {
 			if (isFixed) {
 				GroupPaymentHelper.recordFixedDailyPending(
@@ -955,7 +1005,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		});
 	}
 	
-	private void _resolveMemberName(java.util.function.Consumer<String> done) {
+	private void _resolveMemberName(androidx.core.util.Consumer<String> done) {
 		if (myUid == null || myUid.isEmpty()) {
 			if (done != null) done.accept("Member");
 			return;

@@ -73,6 +73,26 @@ public class TrustScoreActivity extends AppCompatActivity {
 
     private interface EvCb { void done(List<Ev> evs); }
 
+    private void nodeEvents(String uid, List<Ev> out, Runnable done) {
+        String wallet = WalletManager.getActiveWalletAddress(this);
+        com.harvanna.app.sync.NodePortfolio.load(this, uid, wallet, p -> {
+            synchronized (p.entries) {
+                for (com.harvanna.app.sync.NodePortfolio.Entry e : p.entries) {
+                    Ev ev = new Ev();
+                    ev.at = e.position.joinedMs;
+                    ev.title = "On the network · " + e.name;
+                    ev.detail = fmt(e.position.confirmedPayments) + " of " + fmt(e.position.expectedPayments) + " payments made; "
+                        + fmt(e.position.savedHarv) + " " + CoinInfo.ticker() + " put in"
+                        + (e.position.outstandingHarv() > 0 ? "; " + fmt(e.position.outstandingHarv()) + " " + CoinInfo.ticker() + " still owed" : "")
+                        + (e.position.paymentGaps > 0 ? "; late or missed payments recorded" : "");
+                    ev.feeds = "Payment history, consistency and loyalty (read from the network)";
+                    out.add(ev);
+                }
+            }
+            done.run();
+        });
+    }
+
     @SuppressWarnings("unchecked")
     private void events(String uid, EvCb cb) {
         UserProfileManager.getInstance(this).getProfile(uid, new UserProfileManager.DocCallback() {
@@ -80,10 +100,17 @@ public class TrustScoreActivity extends AppCompatActivity {
                 Object g = profile.get("groups");
                 List<String> ids = new ArrayList<>();
                 if (g instanceof List) for (Object o : (List<Object>) g) if (o != null && !String.valueOf(o).trim().isEmpty()) ids.add(String.valueOf(o).trim());
-                if (ids.isEmpty()) { cb.done(new ArrayList<>()); return; }
                 final List<Ev> out = Collections.synchronizedList(new ArrayList<>());
-                final AtomicInteger left = new AtomicInteger(ids.size());
-                for (String gid : ids) groupEvents(uid, gid, out, left, cb);
+                nodeEvents(uid, out, () -> {
+                    if (ids.isEmpty()) {
+                        List<Ev> copy; synchronized (out) { copy = new ArrayList<>(out); }
+                        Collections.sort(copy, (a, b) -> Long.compare(b.at, a.at));
+                        cb.done(copy);
+                        return;
+                    }
+                    final AtomicInteger left = new AtomicInteger(ids.size());
+                    for (String gid : ids) groupEvents(uid, gid, out, left, cb);
+                });
             }
             @Override public void onError(String e) { cb.done(new ArrayList<>()); }
         });

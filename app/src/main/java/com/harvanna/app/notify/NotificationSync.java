@@ -24,7 +24,7 @@ public final class NotificationSync {
         final Context c = ctx.getApplicationContext();
         if (FirebaseAuth.getInstance().getCurrentUser() == null) { if (done != null) done.run(); return; }
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        final AtomicInteger pending = new AtomicInteger(3);
+        final AtomicInteger pending = new AtomicInteger(4);
         final Runnable finish = () -> { if (pending.decrementAndGet() == 0 && done != null) done.run(); };
 
         // 1. Invitations
@@ -53,6 +53,25 @@ public final class NotificationSync {
                     } else if (st.equals("REJECTED") || st.equals("DECLINED")) {
                         NotificationCenter.post(c, NotificationCenter.MEMBERSHIP, "join_" + gid + "_rejected",
                             "Join request not accepted: " + name, "The group's admin didn't accept your request this time.", "", -1);
+                    }
+                }
+                finish.run();
+            }
+            @Override public void onError(String e) { finish.run(); }
+        });
+
+        // 4. Review verdicts on my Learn Hub submissions
+        GroupFirestoreManager.getInstance(c).getMyLearnSubmissions(uid, new GroupFirestoreManager.ListCallback() {
+            @Override public void onSuccess(List<Map<String, Object>> subs) {
+                for (Map<String, Object> sub : subs) {
+                    String id = s(sub.get("_docId")), st = s(sub.get("status")).toUpperCase(), title = s(sub.get("title"));
+                    if (st.equals("APPROVED")) {
+                        NotificationCenter.post(c, NotificationCenter.SYSTEM, "learn_" + id + "_approved",
+                            "Published: " + title, "Your Learn Hub article passed review and is now live.", "", -1);
+                    } else if (st.equals("REJECTED")) {
+                        String why = s(sub.get("reviewMessage"));
+                        NotificationCenter.post(c, NotificationCenter.SYSTEM, "learn_" + id + "_rejected",
+                            "Not published: " + title, why.isEmpty() ? "It didn't pass the automatic review." : why, "", -1);
                     }
                 }
                 finish.run();

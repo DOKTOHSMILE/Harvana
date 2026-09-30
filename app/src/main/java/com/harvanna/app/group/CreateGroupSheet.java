@@ -15,7 +15,6 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.harvanna.app.CreateNewGroupActivity;
 import com.harvanna.app.R;
-import com.harvanna.app.circle.CircleCreateActivity;
 
 /**
  * The single "Create a group" entry. Pick what the group is FOR; each choice opens the right creation flow:
@@ -40,11 +39,11 @@ public final class CreateGroupSheet {
         sub.setPadding(0, (int) (2 * d), 0, (int) (6 * d));
         root.addView(sub);
 
-        root.addView(option(ctx, R.drawable.ic_type_circle, "Rotating circle",
+        root.addView(option(ctx, R.drawable.ic_type_circle, "Rotating group",
                 "Everyone pays the same amount each round. Each round one member takes the whole pot, until everyone has had a turn. Best for getting a large sum at once.",
-                "On-chain  ·  3–12 members  ·  Bond-backed", v -> {
+                "3–12 members  ·  Runs on the network  ·  Bond-backed", v -> {
                     dialog.dismiss();
-                    ctx.startActivity(new Intent(ctx, CircleCreateActivity.class));
+                    open(ctx, "Rotating Pool");
                 }));
 
         root.addView(option(ctx, R.drawable.ic_type_savings, "Accumulative savings",
@@ -61,7 +60,7 @@ public final class CreateGroupSheet {
                     open(ctx, "Fixed Contribution");
                 }));
 
-        TextView note = text(ctx, "Circles run on the Harvanna node today. Accumulative and Fixed groups use the standard flow for now; on-chain versions are next.", 11.5f, R.color.colorTextTertiary, false);
+        TextView note = text(ctx, "Rotating groups keep their money on the Harvanna network. Accumulative and Fixed groups use the standard flow for now; on-chain versions are next.", 11.5f, R.color.colorTextTertiary, false);
         note.setPadding(0, (int) (12 * d), 0, 0);
         root.addView(note);
 

@@ -34,7 +34,7 @@
 					android:layout_width="36dp"
 					android:layout_height="36dp"
 					android:padding="3dp"
-					android:src="@drawable/app_logo_transparent"
+					android:src="@drawable/ic_coin_harv"
 					android:scaleType="centerInside"
 					android:focusable="false" />
 				<LinearLayout

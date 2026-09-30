@@ -531,15 +531,18 @@ public class P2pExpressActivity extends AppCompatActivity {
 				for (JSONObject listing : listings) {
 					_evaluateOne(listing, spend, (candidate, liquidityIfQualified) -> {
 						if (liquidityIfQualified != null) {
-							totalLiquidity.updateAndGet(v -> v + liquidityIfQualified);
+							synchronized (totalLiquidity) { totalLiquidity.set(totalLiquidity.get() + liquidityIfQualified); }
 							qualifyingCount.incrementAndGet();
 						}
 						if (candidate != null) {
-							best.updateAndGet(current -> {
-								if (current == null) return candidate;
-								double cp = (double) current[1], np = (double) candidate[1];
-								return (buyMode ? np < cp : np > cp) ? candidate : current;
-							});
+							synchronized (best) {
+								Object[] current = best.get();
+								if (current == null) best.set(candidate);
+								else {
+									double cp = (double) current[1], np = (double) candidate[1];
+									if (buyMode ? np < cp : np > cp) best.set(candidate);
+								}
+							}
 						}
 						if (remaining.decrementAndGet() == 0) {
 							runOnUiThread(() -> {

@@ -189,34 +189,37 @@ public class LearnFragmentActivity extends Fragment {
 			_renderFiltered();
 		}
 		
-		com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext())
-		.getLearnContent(new com.harvanna.app.firestore.GroupFirestoreManager.ListCallback() {
-			@Override
-			public void onSuccess(List<Map<String, Object>> items) {
-				listMap.clear();
-				if (items != null) {
-					for (Map<String, Object> item : items) {
-						listMap.add(new HashMap<>(item));
-					}
-					Collections.sort(listMap, (a, b) -> {
-						long ta = a.get("createdAt") instanceof Number ? ((Number) a.get("createdAt")).longValue() : 0L;
-						long tb = b.get("createdAt") instanceof Number ? ((Number) b.get("createdAt")).longValue() : 0L;
-						return Long.compare(tb, ta);
-					});
-				}
-				com.harvanna.app.offline.OfflineCacheManager.saveList(getContext(), "learn_content", listMap);
-				if (getActivity() == null) return;
-				getActivity().runOnUiThread(() -> _renderFiltered());
+		// Live sync: the native Firestore listener delivers the published articles now and every time
+		// the node's review service adds one (also served from the local cache when offline).
+		if (learnListener != null) learnListener.remove();
+		if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) return;
+		learnListener = com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("LEARN_CONTENT")
+		.addSnapshotListener((snap, err) -> {
+			if (err != null || snap == null || getActivity() == null) return;
+			ArrayList<HashMap<String, Object>> fresh = new ArrayList<>();
+			for (com.google.firebase.firestore.QueryDocumentSnapshot d : snap) {
+				HashMap<String, Object> m = new HashMap<>(com.harvanna.app.firestore.GroupFirestoreManager.readFromSdk(d.getData()));
+				m.put("_docId", d.getId());
+				fresh.add(m);
 			}
-			
-			@Override
-			public void onError(String error) {
-				if (com.harvanna.app.offline.NetworkStatus.isConnectivityError(error)
-				&& !listMap.isEmpty()) {
-					return;
-				}
-			}
+			Collections.sort(fresh, (x, y) -> {
+				long tx = x.get("createdAt") instanceof Number ? ((Number) x.get("createdAt")).longValue() : 0L;
+				long ty = y.get("createdAt") instanceof Number ? ((Number) y.get("createdAt")).longValue() : 0L;
+				return Long.compare(ty, tx);
+			});
+			listMap.clear();
+			listMap.addAll(fresh);
+			com.harvanna.app.offline.OfflineCacheManager.saveList(getContext(), "learn_content", listMap);
+			_renderFiltered();
 		});
+	}
+	
+	private com.google.firebase.firestore.ListenerRegistration learnListener;
+	
+	@Override
+	public void onDestroyView() {
+		if (learnListener != null) { learnListener.remove(); learnListener = null; }
+		super.onDestroyView();
 	}
 	
 	private void _renderFiltered() {

@@ -69,7 +69,7 @@
 								android:id="@+id/iv_detail_avatar"
 								android:layout_width="match_parent"
 								android:layout_height="match_parent"
-								android:src="@drawable/main_app_logo_1"
+								android:src="@drawable/ic_coin_harv"
 								android:scaleType="centerInside"
 								android:focusable="false"
 								android:visibility="gone" />

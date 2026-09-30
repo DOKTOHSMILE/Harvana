@@ -169,12 +169,12 @@ public class GroupsFragmentActivity extends Fragment {
 				.setNegativeButton("Cancel", null)
 				.setPositiveButton("Open", (dlg, w) -> {
 					String id = input.getText().toString().trim();
-					if (!id.startsWith("CIRC-")) {
-						Toast.makeText(getContext(), "A circle ID starts with CIRC-", Toast.LENGTH_SHORT).show();
+					if (!(id.startsWith("CIRC-") || id.startsWith("ACCUM-") || id.startsWith("FIXED-"))) {
+						Toast.makeText(getContext(), "A group ID starts with CIRC-, ACCUM- or FIXED-", Toast.LENGTH_SHORT).show();
 						return;
 					}
-					Intent it = new Intent(getContext(), com.harvanna.app.circle.CircleActivity.class);
-					it.putExtra("circleId", id);
+					Intent it = new Intent(getContext(), com.harvanna.app.group.NodeGroupActivity.class);
+					it.putExtra("nodeGroupId", id);
 					startActivity(it);
 				})
 				.show();
@@ -465,7 +465,8 @@ public class GroupsFragmentActivity extends Fragment {
 					HashMap<String, Object> row = new HashMap<>();
 					if (data != null) row.putAll(data);
 					row.put("groupId", groupId);
-					resultsByIndex[index] = row;
+					// Old Firestore-only rotating groups were test data: hidden, not deleted.
+					if (!com.harvanna.app.group.GroupKinds.isLegacyRotating(data)) resultsByIndex[index] = row;
 					_checkComplete();
 				}
 				

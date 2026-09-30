@@ -380,6 +380,7 @@ public class MainActivity extends AppCompatActivity {
 	public void onResume() {
 		super.onResume();
 		com.harvanna.app.utils.PresenceHeartbeat.start(getApplicationContext());
+		com.harvanna.app.group.GroupSaver.retryAll(getApplicationContext(), null);
 		com.harvanna.app.notify.NotificationWorker.schedule(getApplicationContext());
 		androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
 		.registerReceiver(notifChanged, new android.content.IntentFilter(com.harvanna.app.notify.NotificationCenter.ACTION_CHANGED));

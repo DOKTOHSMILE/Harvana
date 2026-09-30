@@ -22,7 +22,7 @@
 				android:layout_width="40dp"
 				android:layout_height="40dp"
 				android:padding="3dp"
-				android:src="@drawable/main_app_logo"
+				android:src="@drawable/ic_coin_harv"
 				android:scaleType="centerInside"
 				android:focusable="false" />
 			<LinearLayout

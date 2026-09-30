@@ -346,7 +346,7 @@ public final class HarvannaCardRenderer {
 	}
 	
 	private static void drawAppIcon(Context context, Canvas canvas, float x, float y, float w, float h) {
-		Drawable icon = ContextCompat.getDrawable(context, R.drawable.app_main_logo_2);
+		Drawable icon = ContextCompat.getDrawable(context, R.drawable.ic_coin_harv);
 		if (icon == null) return;
 		canvas.save();
 		icon.setBounds((int) x, (int) y, (int) (x + w), (int) (y + h));

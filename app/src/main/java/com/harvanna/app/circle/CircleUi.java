@@ -19,19 +19,19 @@ import com.harvanna.app.wallet.BalanceFormatter;
 import java.math.BigDecimal;
 
 /** Small view builders + amount helpers shared by the Circle screens (theme tokens only, day/night safe). */
-final class CircleUi {
+public final class CircleUi {
 
     private CircleUi() {}
 
-    static int dp(Context c, int v) {
+    public static int dp(Context c, int v) {
         return Math.round(v * c.getResources().getDisplayMetrics().density);
     }
 
-    static int color(Context c, int res) {
+    public static int color(Context c, int res) {
         return ContextCompat.getColor(c, res);
     }
 
-    static TextView text(Context c, String s, float sp, int colorRes, boolean bold) {
+    public static TextView text(Context c, String s, float sp, int colorRes, boolean bold) {
         TextView t = new TextView(c);
         t.setText(s);
         t.setTextSize(sp);
@@ -40,7 +40,7 @@ final class CircleUi {
         return t;
     }
 
-    static LinearLayout card(Context c) {
+    public static LinearLayout card(Context c) {
         LinearLayout l = new LinearLayout(c);
         l.setOrientation(LinearLayout.VERTICAL);
         l.setBackgroundResource(R.drawable.bg_quick_action);
@@ -52,7 +52,7 @@ final class CircleUi {
     }
 
     /** "Label ........ value" row. */
-    static View row(Context c, String label, String value) {
+    public static View row(Context c, String label, String value) {
         LinearLayout r = new LinearLayout(c);
         r.setOrientation(LinearLayout.HORIZONTAL);
         r.setPadding(0, dp(c, 5), 0, dp(c, 5));
@@ -64,14 +64,14 @@ final class CircleUi {
         return r;
     }
 
-    static TextView chip(Context c, String label, int fgColorRes) {
+    public static TextView chip(Context c, String label, int fgColorRes) {
         TextView t = text(c, label, 11.5f, fgColorRes, true);
         t.setPadding(dp(c, 10), dp(c, 3), dp(c, 10), dp(c, 3));
         t.setBackgroundResource(R.drawable.bg_chip_muted);
         return t;
     }
 
-    static int stateColor(String state) {
+    public static int stateColor(String state) {
         if (state == null) return R.color.colorTextSecondary;
         switch (state) {
             case "ACTIVE": case "COMPLETED": return R.color.colorSuccess;
@@ -82,12 +82,12 @@ final class CircleUi {
     }
 
     /** Raw units (1 HARV = 1e8) to a trimmed display string, without the unit. */
-    static String harv(long raw) {
+    public static String harv(long raw) {
         return BalanceFormatter.smartDecimal(HarvannaNodeClient.toHarvDisplay(raw)) + " HARV";
     }
 
     /** Exact HARV text to raw units (no floating point). Returns -1 when invalid. */
-    static long toRaw(String s) {
+    public static long toRaw(String s) {
         try {
             if (s == null || s.trim().isEmpty()) return -1;
             BigDecimal v = new BigDecimal(s.trim());
@@ -99,7 +99,7 @@ final class CircleUi {
     }
 
     /** Node rejection codes to plain language. */
-    static String friendly(String error) {
+    public static String friendly(String error) {
         if (error == null) return "Something went wrong.";
         String e = error.toUpperCase();
         if (e.contains("INSUFFICIENT_BALANCE")) return "Not enough available balance to lock the required bond and fee.";
@@ -112,11 +112,24 @@ final class CircleUi {
         if (e.contains("CIRCLE_NOT_ACTIVE")) return "This circle isn't running yet.";
         if (e.contains("INVALID_NONCE")) return "Your request was out of sequence. Pull to refresh and try again.";
         if (e.contains("INVALID_SIGNATURE")) return "Couldn't verify your signature. Please try again.";
+        if (e.contains("NOT_ELIGIBLE_NO_CONTRIBUTIONS")) return "You need to have paid into this group at least once first.";
+        if (e.contains("NOT_YET_ELIGIBLE")) return "New members can vote after 48 hours in the group.";
+        if (e.contains("EXPOSURE_LIMIT_EXCEEDED")) return "You're already committed to as many circles as your account allows.";
+        if (e.contains("TERMS_HASH_MISMATCH")) return "The circle's terms changed. Reopen it and read them again.";
+        if (e.contains("CIRCLE_FULL")) return "This circle is full.";
+        if (e.contains("ALREADY_A_MEMBER")) return "You're already a member of this circle.";
+        if (e.contains("ALREADY_CONTRIBUTED_THIS_ROUND")) return "You've already paid this round.";
+        if (e.contains("NO_CONTRIBUTION_DUE_ON_OWN_PAYOUT_ROUND")) return "It's your turn to be paid this round, so nothing is due from you.";
+        if (e.contains("FORMATION_DEADLINE_EXPIRED")) return "This circle ran out of time to fill.";
+        if (e.contains("MEMBER_NOT_ELIGIBLE_TO_CONTRIBUTE")) return "Your place in this circle can't pay right now.";
+        if (e.contains("MAX_FEE_TOO_LOW")) return "The network fee changed. Please try again.";
+        if (e.contains("LOCK_TEMPLATE_EXPIRED") || e.contains("NO_PENDING_LOCK")) return "That step expired. Start the action again.";
+        if (e.contains("SIGNING THE LOCK FAILED")) return "The action was accepted but your phone couldn't finish signing the payment. Open the circle again to retry.";
         return error;
     }
 
     /** Toolbar (theme appBarColor, back arrow) above the body, plus a status bar that matches it. */
-    static LinearLayout withToolbar(Activity a, String title, View body) {
+    public static LinearLayout withToolbar(Activity a, String title, View body) {
         TypedValue bar = new TypedValue();
         TypedValue on = new TypedValue();
         a.getTheme().resolveAttribute(R.attr.appBarColor, bar, true);

@@ -100,7 +100,14 @@ public final class ThemeManager {
     /** "Follow system", "Light" or "Dark", for showing in settings. */
     public static String label(Context context) {
         String m = getMode(context);
-        return "light".equals(m) ? "Light" : "dark".equals(m) ? "Dark" : "Follow system";
+        return "light".equals(m) ? "Light" : "dark".equals(m) ? "Dark" : systemLabel(context);
+    }
+
+    /** "System default (phone is Dark now)" - the option that makes the app follow the phone's own theme. */
+    public static String systemLabel(Context context) {
+        int sys = android.content.res.Resources.getSystem().getConfiguration().uiMode;
+        boolean dark = (sys & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        return "System default (phone is " + (dark ? "dark" : "light") + " now)";
     }
 
     public static boolean isLightMode(Context context) {

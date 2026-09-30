@@ -522,6 +522,38 @@ public class GroupFirestoreManager {
 		list(col("LEARN_CONTENT"), callback);
 	}
 
+	/**
+	 * Removes a group and everything under it (members, notices, payments, loans, joinRequests, payoutRequests,
+	 * private). The group document goes LAST because the security rules that authorise the sub-deletes look at
+	 * it. Only for app-only groups: a group that exists on the network is closed, never deleted.
+	 */
+	public void deleteGroupTree(String groupId, SimpleCallback cb) {
+		String err = precheck();
+		if (err != null) { deliver(() -> cb.onError(err)); return; }
+		BG.execute(() -> {
+			try {
+				FirebaseFirestore db = FirebaseFirestore.getInstance();
+				String[] subs = {"members", "notices", "payments", "loans", "joinRequests", "payoutRequests", "private"};
+				for (String sub : subs) {
+					QuerySnapshot snap = com.google.android.gms.tasks.Tasks.await(
+						db.collection("GROUPS").document(groupId).collection(sub).get(), 30, TimeUnit.SECONDS);
+					com.google.firebase.firestore.WriteBatch batch = db.batch();
+					int n = 0;
+					for (DocumentSnapshot d : snap.getDocuments()) {
+						batch.delete(d.getReference());
+						if (++n == 400) { com.google.android.gms.tasks.Tasks.await(batch.commit(), 30, TimeUnit.SECONDS); batch = db.batch(); n = 0; }
+					}
+					if (n > 0) com.google.android.gms.tasks.Tasks.await(batch.commit(), 30, TimeUnit.SECONDS);
+				}
+				com.google.android.gms.tasks.Tasks.await(db.collection("GROUPS").document(groupId).delete(), 30, TimeUnit.SECONDS);
+				cb.onSuccess();
+			} catch (Exception e) {
+				Throwable c = e.getCause() != null ? e.getCause() : e;
+				cb.onError(c instanceof Exception ? describe((Exception) c) : String.valueOf(c.getMessage()));
+			}
+		});
+	}
+
 	// ── SDK plumbing ────────────────────────────────────────────────────
 
 	private static DocumentReference doc(String... path) {

@@ -96,7 +96,7 @@ service cloud.firestore {
       match /private/{docId} {
         allow read: if isCreatorOrMember(groupId);
         allow create, update: if isGroupCreator(groupId);
-        allow delete: if false;
+        allow delete: if isGroupCreator(groupId); // only when the whole group is deleted
       }
 
       match /members/{memberUid} {
@@ -111,6 +111,7 @@ service cloud.firestore {
             isGroupCreator(groupId)
             || ( request.auth.uid == memberUid
                  && request.resource.data.role == 'MEMBER'
+                 && groupDoc(groupId).get('status', 'Active') != 'Closed'
                  && ( groupDoc(groupId).requireApprovalToJoin == false
                       || ( exists(/databases/$(database)/documents/GROUPS/$(groupId)/joinRequests/$(memberUid))
                            && get(/databases/$(database)/documents/GROUPS/$(groupId)/joinRequests/$(memberUid)).data.status == 'APPROVED' ) ) )
@@ -136,6 +137,7 @@ service cloud.firestore {
         allow read: if signedIn();
 
         allow create: if isSelf(requesterUid)
+          && groupDoc(groupId).get('status', 'Active') != 'Closed'
           && request.resource.data.status == 'PENDING';
 
         // A3 fix: members may only add a vote; only the creator changes status/slot.

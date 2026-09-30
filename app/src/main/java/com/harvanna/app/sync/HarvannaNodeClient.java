@@ -427,7 +427,20 @@ public final class HarvannaNodeClient {
 		NodeAuthManager.getValidToken(new NodeAuthManager.TokenCallback() {
 			@Override
 			public void onToken(String token) {
-				rawPost(path, json, token, cb);
+				rawPost(path, json, token, new JsonCallback() {
+					@Override public void onSuccess(JSONObject result) {
+						// v2 member locks: the node asks the member to sign the money-moving transaction.
+						if (path.startsWith("/api/v1/locks/") || result == null || !result.has("locksToSign")) {
+							cb.onSuccess(result);
+							return;
+						}
+						LockSigner.handle(result, err -> mainHandler.post(() -> {
+							if (err == null) cb.onSuccess(result);
+							else cb.onError("The action was accepted, but signing the lock failed: " + err);
+						}));
+					}
+					@Override public void onError(String error) { cb.onError(error); }
+				});
 			}
 			
 			@Override

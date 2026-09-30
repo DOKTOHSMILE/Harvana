@@ -112,6 +112,19 @@ public final class CircleUi {
         if (e.contains("CIRCLE_NOT_ACTIVE")) return "This circle isn't running yet.";
         if (e.contains("INVALID_NONCE")) return "Your request was out of sequence. Pull to refresh and try again.";
         if (e.contains("INVALID_SIGNATURE")) return "Couldn't verify your signature. Please try again.";
+        if (e.contains("NOT_ELIGIBLE_NO_CONTRIBUTIONS")) return "You need to have paid into this group at least once first.";
+        if (e.contains("NOT_YET_ELIGIBLE")) return "New members can vote after 48 hours in the group.";
+        if (e.contains("EXPOSURE_LIMIT_EXCEEDED")) return "You're already committed to as many circles as your account allows.";
+        if (e.contains("TERMS_HASH_MISMATCH")) return "The circle's terms changed. Reopen it and read them again.";
+        if (e.contains("CIRCLE_FULL")) return "This circle is full.";
+        if (e.contains("ALREADY_A_MEMBER")) return "You're already a member of this circle.";
+        if (e.contains("ALREADY_CONTRIBUTED_THIS_ROUND")) return "You've already paid this round.";
+        if (e.contains("NO_CONTRIBUTION_DUE_ON_OWN_PAYOUT_ROUND")) return "It's your turn to be paid this round, so nothing is due from you.";
+        if (e.contains("FORMATION_DEADLINE_EXPIRED")) return "This circle ran out of time to fill.";
+        if (e.contains("MEMBER_NOT_ELIGIBLE_TO_CONTRIBUTE")) return "Your place in this circle can't pay right now.";
+        if (e.contains("MAX_FEE_TOO_LOW")) return "The network fee changed. Please try again.";
+        if (e.contains("LOCK_TEMPLATE_EXPIRED") || e.contains("NO_PENDING_LOCK")) return "That step expired. Start the action again.";
+        if (e.contains("SIGNING THE LOCK FAILED")) return "The action was accepted but your phone couldn't finish signing the payment. Open the circle again to retry.";
         return error;
     }
 

@@ -336,11 +336,11 @@ public final class NodeGroupClient {
 
     /** Fetch nextRequestNonce → build canonical → sign with the wallet key → POST. */
     private static void act(Context context, String address, String path, Spec spec, Callback cb) {
-        HarvannaNodeClient.getWallet(address, new HarvannaNodeClient.JsonCallback() {
+        HarvannaNodeClient.nodeGet("/api/v1/wallet/nonce/" + address, new HarvannaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject wallet) {
                 try {
-                    long nonce = wallet.optLong("nextRequestNonce", wallet.optLong("nonce", 0) + 1);
+                    long nonce = wallet.optLong("nextRequestNonce", wallet.optLong("requestNonce", 0) + 1);
                     String seedB64 = WalletManager.loadPrivateKey(context, address);
                     String pubB64 = WalletManager.getPublicKey(context, address);
                     if (seedB64 == null || pubB64 == null) {

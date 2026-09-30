@@ -66,6 +66,10 @@ public class CircleActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (circle != null) load();
+        // If the node asked for a v2-signed lock and the answer was lost, finish it now.
+        if (me != null && !me.isEmpty()) {
+            com.harvanna.app.sync.LockSigner.checkPending(me, err -> runOnUiThread(() -> { if (err == null && circle != null) load(); }));
+        }
     }
 
     private void load() {

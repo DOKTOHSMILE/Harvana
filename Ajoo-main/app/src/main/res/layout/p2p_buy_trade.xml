@@ -1,0 +1,1044 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/_coordinator"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<com.google.android.material.appbar.AppBarLayout
+		android:id="@+id/_app_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay">
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/_toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/appBarColor"
+			app:popupTheme="@style/AppTheme.PopupOverlay" />
+	</com.google.android.material.appbar.AppBarLayout>
+	<androidx.core.widget.NestedScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@color/colorP2pBg"
+		android:fillViewport="true"
+		android:clipToPadding="false"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<LinearLayout
+			android:id="@+id/trade_root"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingTop="16dp"
+			android:paddingBottom="36dp"
+			android:orientation="vertical"
+			android:paddingStart="18dp"
+			android:paddingEnd="18dp">
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/action_status_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="14dp"
+				android:backgroundTint="@color/colorP2pSurface"
+				app:cardCornerRadius="18dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/action_status_content"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="16dp"
+					android:orientation="vertical">
+					<LinearLayout
+						android:id="@+id/linear80"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<LinearLayout
+							android:id="@+id/linear81"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/current_action_title"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Complete your payment"
+								android:textSize="14sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/current_action_description"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="4dp"
+								android:text="Send the exact amount to the seller."
+								android:textSize="11sp" />
+						</LinearLayout>
+						<TextView
+							android:id="@+id/countdown"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="14:32"
+							android:textSize="18sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<ProgressBar
+						android:id="@+id/trade_progress"
+						android:layout_width="match_parent"
+						android:layout_height="4dp"
+						android:layout_marginTop="14dp"
+						android:progress="45"
+						android:indeterminate="false"
+						style="?android:progressBarStyle"
+						android:progressTint="@color/colorP2pAccent" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/value_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="14dp"
+				android:backgroundTint="@color/colorP2pSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear82"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/value_title"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Trade value"
+						android:textSize="14sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/harv_amount_large"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:text="40.00 HARV"
+						android:textSize="27sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/fiat_amount_large"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="2dp"
+						android:text="₦50,000.00"
+						android:textSize="18sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/value_direction"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="4dp"
+						android:text="You are buying HARV"
+						android:textSize="11sp" />
+					<View
+						android:id="@+id/view83"
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:layout_marginTop="16dp"
+						android:layout_marginBottom="14dp"
+						android:background="@color/colorP2pBorder" />
+					<LinearLayout
+						android:id="@+id/value_details"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical">
+						<LinearLayout
+							android:id="@+id/linear84"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:gravity="center_vertical">
+							<TextView
+								android:id="@+id/textview42"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:text="Price per HARV"
+								android:textSize="11sp"
+								android:layout_weight="1" />
+							<TextView
+								android:id="@+id/unit_price"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="₦1,250.00"
+								android:textSize="12sp" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/maker_fee_row"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="9dp"
+							android:gravity="center_vertical"
+							android:visibility="gone">
+							<TextView
+								android:id="@+id/textview43"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:text="Maker fee"
+								android:textSize="11sp"
+								android:layout_weight="1" />
+							<TextView
+								android:id="@+id/maker_fee"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="0.00 HARV"
+								android:textSize="12sp" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/network_fee_row"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="9dp"
+							android:gravity="center_vertical"
+							android:visibility="gone">
+							<TextView
+								android:id="@+id/textview44"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:text="Network fee"
+								android:textSize="11sp"
+								android:layout_weight="1" />
+							<TextView
+								android:id="@+id/network_fee"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="0.00 HARV"
+								android:textSize="12sp" />
+						</LinearLayout>
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/participants_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="14dp"
+				android:backgroundTint="@color/colorP2pSurface"
+				app:cardCornerRadius="18dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear85"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="16dp"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/participants_title"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Trade participants"
+						android:textSize="13sp"
+						android:textStyle="bold" />
+					<LinearLayout
+						android:id="@+id/seller_row"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:gravity="center_vertical">
+						<FrameLayout
+							android:id="@+id/frame_layout86"
+							android:layout_width="40dp"
+							android:layout_height="40dp">
+							<ImageView
+								android:id="@+id/seller_avatar"
+								android:layout_width="40dp"
+								android:layout_height="40dp"
+								android:background="@drawable/default_image"
+								android:src="@drawable/default_image"
+								android:scaleType="centerCrop" />
+							<TextView
+								android:id="@+id/seller_initial"
+								android:layout_width="40dp"
+								android:layout_height="40dp"
+								android:gravity="center_horizontal|center_vertical"
+								android:text="S"
+								android:textSize="14sp"
+								android:textStyle="bold" />
+						</FrameLayout>
+						<LinearLayout
+							android:id="@+id/linear87"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1"
+							android:layout_marginStart="10dp">
+							<TextView
+								android:id="@+id/seller_name"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Seller Name"
+								android:textSize="13sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/seller_meta"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="98% trust • 126 trades"
+								android:textSize="10sp" />
+						</LinearLayout>
+						<TextView
+							android:id="@+id/seller_role"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="SELLER"
+							android:textSize="9sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/buyer_row"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="12dp"
+						android:gravity="center_vertical">
+						<FrameLayout
+							android:id="@+id/frame_layout88"
+							android:layout_width="40dp"
+							android:layout_height="40dp">
+							<ImageView
+								android:id="@+id/buyer_avatar"
+								android:layout_width="40dp"
+								android:layout_height="40dp"
+								android:background="@drawable/default_image"
+								android:src="@drawable/default_image"
+								android:scaleType="centerCrop" />
+							<TextView
+								android:id="@+id/buyer_initial"
+								android:layout_width="40dp"
+								android:layout_height="40dp"
+								android:gravity="center_horizontal|center_vertical"
+								android:text="B"
+								android:textSize="14sp"
+								android:textStyle="bold" />
+						</FrameLayout>
+						<LinearLayout
+							android:id="@+id/linear89"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1"
+							android:layout_marginStart="10dp">
+							<TextView
+								android:id="@+id/buyer_name"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="You"
+								android:textSize="13sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/buyer_meta"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Buyer"
+								android:textSize="10sp" />
+						</LinearLayout>
+						<TextView
+							android:id="@+id/buyer_role"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="BUYER"
+							android:textSize="9sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/escrow_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="14dp"
+				android:backgroundTint="@color/colorP2pSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pAccent"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear90"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:orientation="vertical">
+					<LinearLayout
+						android:id="@+id/linear91"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical">
+						<TextView
+							android:id="@+id/escrow_title"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Escrow protection"
+							android:textSize="14sp"
+							android:textStyle="bold"
+							android:layout_weight="1" />
+						<TextView
+							android:id="@+id/escrow_state"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="SECURED"
+							android:textSize="9sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<TextView
+						android:id="@+id/escrow_description"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="6dp"
+						android:text="The seller's HARV is locked for this order and cannot be withdrawn for another trade."
+						android:textSize="11sp" />
+					<LinearLayout
+						android:id="@+id/escrow_transaction_row"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="13dp"
+						android:orientation="vertical">
+						<TextView
+							android:id="@+id/escrow_tx_label"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Escrow transaction"
+							android:textSize="10sp" />
+						<TextView
+							android:id="@+id/escrow_tx_hash"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="0x..."
+							android:textSize="10sp"
+							android:ellipsize="middle"
+							android:maxLines="2" />
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:id="@+id/payment_heading"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="8dp"
+				android:text="Payment details"
+				android:textSize="16sp"
+				android:textStyle="bold" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/payment_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="10dp"
+				android:backgroundTint="@color/colorP2pSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear92"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/bank_name"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:text="Bank Name"
+						android:textSize="14sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/account_number"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="12dp"
+						android:text="0000000000"
+						android:textSize="22sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/account_name"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="3dp"
+						android:text="ACCOUNT HOLDER"
+						android:textSize="11sp" />
+					<LinearLayout
+						android:id="@+id/payment_amount_box"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="15dp"
+						android:padding="12dp"
+						android:background="@color/colorP2pSurfaceAlt"
+						android:gravity="center_vertical">
+						<TextView
+							android:id="@+id/textview45"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Send exactly"
+							android:textSize="11sp"
+							android:layout_weight="1" />
+						<TextView
+							android:id="@+id/payment_amount"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="₦50,000.00"
+							android:textSize="15sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<TextView
+						android:id="@+id/payment_reference"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="11dp"
+						android:text="Payment reference: HARV-8F42D1"
+						android:textSize="10sp" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/payment_warning"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="14dp"
+				android:backgroundTint="@color/colorP2pSurface"
+				app:cardCornerRadius="15dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorAmber"
+				app:strokeWidth="1dp">
+				<TextView
+					android:id="@+id/payment_warning_text"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="13dp"
+					android:text="Verify the recipient's account details before sending. Harvanna will never ask you to send payment to a different account through chat."
+					android:textSize="11sp" />
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/proof_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="14dp"
+				android:backgroundTint="@color/colorP2pSurface"
+				app:cardCornerRadius="18dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear93"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="16dp"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/proof_title"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Payment confirmation"
+						android:textSize="13sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/proof_description"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="4dp"
+						android:text="After completing the transfer, you can attach proof and mark the payment as completed."
+						android:textSize="10sp" />
+					<FrameLayout
+						android:id="@+id/proof_picker"
+						android:layout_width="match_parent"
+						android:layout_height="100dp"
+						android:layout_marginTop="12dp"
+						android:background="@color/colorP2pSurfaceAlt">
+						<ImageView
+							android:id="@+id/proof_preview"
+							android:layout_width="match_parent"
+							android:layout_height="match_parent"
+							android:src="@drawable/default_image"
+							android:scaleType="centerCrop"
+							android:visibility="gone" />
+						<LinearLayout
+							android:id="@+id/proof_placeholder"
+							android:layout_width="match_parent"
+							android:layout_height="match_parent"
+							android:gravity="center_horizontal|center_vertical"
+							android:orientation="vertical">
+							<TextView
+								android:id="@+id/proof_placeholder_title"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Add payment proof"
+								android:textSize="11sp" />
+							<TextView
+								android:id="@+id/proof_placeholder_action"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="3dp"
+								android:text="Tap to select image"
+								android:textSize="10sp" />
+						</LinearLayout>
+					</FrameLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/primary_action"
+				android:layout_width="match_parent"
+				android:layout_height="54dp"
+				android:text="I Have Paid"
+				android:textSize="15sp"
+				android:textStyle="bold"
+				android:textAllCaps="false"
+				android:backgroundTint="@color/colorP2pAccent"
+				app:cornerRadius="15dp" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/timeline_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				android:backgroundTint="@color/colorP2pSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/timeline"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/timeline_title"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Trade progress"
+						android:textSize="14sp"
+						android:textStyle="bold" />
+					<LinearLayout
+						android:id="@+id/step_order"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="17dp"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/step_order_dot"
+							android:layout_width="24dp"
+							android:layout_height="24dp"
+							android:background="@drawable/icon_check_circle_round"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="✓"
+							android:textSize="11sp"
+							android:textStyle="bold" />
+						<LinearLayout
+							android:id="@+id/linear94"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1"
+							android:layout_marginStart="10dp">
+							<TextView
+								android:id="@+id/step_order_title"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Order created"
+								android:textSize="12sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/step_order_time"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="09:41"
+								android:textSize="10sp" />
+						</LinearLayout>
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/step_escrow"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/step_escrow_dot"
+							android:layout_width="24dp"
+							android:layout_height="24dp"
+							android:background="@drawable/icon_check_circle_round"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="✓"
+							android:textSize="11sp"
+							android:textStyle="bold" />
+						<LinearLayout
+							android:id="@+id/linear95"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1"
+							android:layout_marginStart="10dp">
+							<TextView
+								android:id="@+id/step_escrow_title"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="HARV secured in escrow"
+								android:textSize="12sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/step_escrow_status"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Blockchain verified"
+								android:textSize="10sp" />
+						</LinearLayout>
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/step_payment"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/step_payment_dot"
+							android:layout_width="24dp"
+							android:layout_height="24dp"
+							android:background="@drawable/icon_check_circle_round"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="3"
+							android:textSize="10sp"
+							android:textStyle="bold" />
+						<LinearLayout
+							android:id="@+id/linear96"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1"
+							android:layout_marginStart="10dp">
+							<TextView
+								android:id="@+id/step_payment_title"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Buyer payment"
+								android:textSize="12sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/step_payment_status"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Waiting for payment"
+								android:textSize="10sp" />
+						</LinearLayout>
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/step_seller"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/step_seller_dot"
+							android:layout_width="24dp"
+							android:layout_height="24dp"
+							android:background="@drawable/icon_check_circle_round"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="4"
+							android:textSize="10sp"
+							android:textStyle="bold" />
+						<LinearLayout
+							android:id="@+id/linear97"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1"
+							android:layout_marginStart="10dp">
+							<TextView
+								android:id="@+id/step_seller_title"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Seller confirmation"
+								android:textSize="12sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/step_seller_status"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Waiting"
+								android:textSize="10sp" />
+						</LinearLayout>
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/step_release"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/step_release_dot"
+							android:layout_width="24dp"
+							android:layout_height="24dp"
+							android:background="@drawable/icon_check_circle_round"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="5"
+							android:textSize="10sp"
+							android:textStyle="bold" />
+						<LinearLayout
+							android:id="@+id/linear98"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1"
+							android:layout_marginStart="10dp">
+							<TextView
+								android:id="@+id/step_release_title"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Blockchain release"
+								android:textSize="12sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/step_release_status"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Waiting"
+								android:textSize="10sp" />
+						</LinearLayout>
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/step_complete"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/step_complete_dot"
+							android:layout_width="24dp"
+							android:layout_height="24dp"
+							android:background="@drawable/icon_check_circle_round"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="6"
+							android:textSize="10sp"
+							android:textStyle="bold" />
+						<LinearLayout
+							android:id="@+id/linear99"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1"
+							android:layout_marginStart="10dp">
+							<TextView
+								android:id="@+id/step_complete_title"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Trade completed"
+								android:textSize="12sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/step_complete_status"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="Waiting"
+								android:textSize="10sp" />
+						</LinearLayout>
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/blockchain_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="14dp"
+				android:visibility="gone"
+				android:backgroundTint="@color/colorP2pSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear100"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:orientation="vertical">
+					<LinearLayout
+						android:id="@+id/linear101"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content">
+						<TextView
+							android:id="@+id/blockchain_title"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:text="Blockchain release"
+							android:textSize="14sp"
+							android:textStyle="bold"
+							android:layout_weight="1" />
+						<TextView
+							android:id="@+id/blockchain_status"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="CONFIRMED"
+							android:textSize="9sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<TextView
+						android:id="@+id/release_tx_label"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:text="Release transaction"
+						android:textSize="10sp" />
+					<TextView
+						android:id="@+id/release_tx_hash"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="4dp"
+						android:text="0x..."
+						android:textSize="10sp"
+						android:ellipsize="middle"
+						android:maxLines="2" />
+					<LinearLayout
+						android:id="@+id/blockchain_details"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:orientation="vertical">
+						<TextView
+							android:id="@+id/release_network"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="HARV Mainnet"
+							android:textSize="10sp" />
+						<TextView
+							android:id="@+id/release_confirmation"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="Confirmed on-chain"
+							android:textSize="10sp" />
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/security_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="14dp"
+				android:backgroundTint="@color/colorP2pSurface"
+				app:cardCornerRadius="18dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear102"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="16dp"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/security_title"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Trade security"
+						android:textSize="13sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/security_text"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="7dp"
+						android:text="Never share your password, private key, seed phrase or authentication code. Harvanna support will never ask you for them."
+						android:textSize="10sp" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<LinearLayout
+				android:id="@+id/support_actions"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				android:orientation="vertical">
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/dispute_button"
+					android:layout_width="match_parent"
+					android:layout_height="48dp"
+					android:text="Open Dispute"
+					android:textSize="13sp"
+					android:textAllCaps="false"
+					android:backgroundTint="@color/colorP2pSurface"
+					app:cornerRadius="14dp"
+					app:strokeColor="@color/colorAmber"
+					app:strokeWidth="1dp" />
+				<TextView
+					android:id="@+id/support_text"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="9dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Need help with this trade\\\?"
+					android:textSize="10sp" />
+				<TextView
+					android:id="@+id/support_button"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Contact P2P Support"
+					android:textSize="11sp"
+					android:textStyle="bold" />
+			</LinearLayout>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/completed_card"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				android:visibility="gone"
+				android:backgroundTint="@color/colorP2pSurface"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorSuccess"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear103"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="22dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:orientation="vertical">
+					<ImageView
+						android:id="@+id/completed_icon"
+						android:layout_width="48dp"
+						android:layout_height="48dp"
+						android:src="@drawable/ic_check_circle"
+						android:scaleType="center" />
+					<TextView
+						android:id="@+id/completed_title"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="10dp"
+						android:text="Trade Completed"
+						android:textSize="18sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/completed_description"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="5dp"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="The HARV release has been verified on the blockchain."
+						android:textSize="11sp" />
+					<TextView
+						android:id="@+id/completed_transaction"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="12dp"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="Release transaction: 0x..."
+						android:textSize="10sp" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+		</LinearLayout>
+	</androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

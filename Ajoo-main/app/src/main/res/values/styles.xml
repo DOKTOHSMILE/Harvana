@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Plain TextViews (titles, subtitles) use the primary text colour instead of a washed-out default -->
+        <item name="android:textViewStyle">@style/HarvannaTextView</item>
+        <item name="appBarColor">@color/colorAccent</item>
+        <item name="onAppBarColor">@color/colorTextOnAccent</item>
+        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorOnSecondary">@color/colorTextOnAccent</item>
+        <item name="colorPrimaryVariant">@color/colorAccentDark</item>
+        <item name="colorSecondaryVariant">@color/colorAccentDark</item>
+        <item name="colorError">@color/colorError</item>
+        <item name="colorOnError">@color/colorTextPrimaryWhite</item>
+        <item name="colorControlActivated">@color/colorAccent</item>
+        <item name="colorControlNormal">@color/colorControlNormal</item>
+        <item name="colorControlHighlight">@color/colorAccentRipple</item>
+        <item name="android:textColorHighlight">@color/colorAccentStroke</item>
+        <item name="android:textColorLink">@color/colorAccentStrong</item>
+        <item name="android:editTextColor">@color/colorTextPrimary</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
+        <item name="colorPrimary">@color/colorAccent</item>
+        <item name="colorPrimaryDark">@color/colorAccentStrong</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnPrimary">@color/colorTextOnAccent</item>
+        <item name="colorOnSurface">@color/colorTextPrimary</item>
+        <item name="colorOnBackground">@color/colorTextPrimary</item>
+        <item name="colorOnSurfaceVariant">@color/colorTextSecondary</item>
+        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
+        <item name="android:textColorSecondary">@color/colorTextSecondary</item>
+        <item name="android:textColorHint">@color/colorTextTertiary</item>
+        <item name="android:statusBarColor">?attr/appBarColor</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
+        <item name="alertDialogTheme">@style/HarvannaAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/HarvannaAlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/HarvannaBottomSheetDialog</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Light">
+        <!-- text and icons follow the bar color (charcoal on orange by day, light on charcoal by night) -->
+        <item name="android:textColorPrimary">?attr/onAppBarColor</item>
+        <item name="android:textColorSecondary">?attr/onAppBarColor</item>
+        <item name="colorControlNormal">?attr/onAppBarColor</item>
+        <item name="colorOnSurface">?attr/onAppBarColor</item>
+    </style>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+    <style name="AppTheme.DebugActivity" parent="AppTheme" />
+
+    <style name="WhiteSpinnerTheme" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:textSize">20sp</item>
+        <item name="colorControlNormal">@color/colorTextPrimary</item>
+    </style>
+
+    <!-- colorPrimary is ALWAYS the accent. Night used to map it to
+         colorSurface so Material Confirm/Cancel text vanished. -->
+    <style name="HarvannaAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorPrimary">@color/colorAccent</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnPrimary">@color/colorTextOnAccent</item>
+        <item name="colorOnSurface">@color/colorTextPrimary</item>
+        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:windowBackground">@color/colorSurface</item>
+        <item name="buttonBarPositiveButtonStyle">@style/HarvannaDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/HarvannaDialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/HarvannaDialogButton</item>
+    </style>
+
+    <style name="HarvannaDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <style name="HarvannaBottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="colorPrimary">@color/colorAccent</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnPrimary">@color/colorTextOnAccent</item>
+        <item name="colorOnSurface">@color/colorTextPrimary</item>
+        <item name="colorOnSurfaceVariant">@color/colorTextSecondary</item>
+        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
+        <item name="bottomSheetStyle">@style/HarvannaBottomSheetStyle</item>
+    </style>
+
+    <style name="HarvannaBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="backgroundTint">?attr/colorSurface</item>
+        <item name="shapeAppearanceOverlay">@style/HarvannaBottomSheetShape</item>
+    </style>
+
+    <style name="HarvannaBottomSheetShape" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">20dp</item>
+        <item name="cornerSizeTopRight">20dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <!-- P2P stays on the dark fintech board even in light mode. -->
+    <style name="P2pTheme" parent="AppTheme">
+        <item name="android:windowBackground">@color/colorP2pBg</item>
+        <item name="android:statusBarColor">?attr/appBarColor</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="colorSurface">@color/colorP2pSurface</item>
+        <item name="colorOnSurface">@color/colorP2pTextPrimary</item>
+        <item name="colorOnBackground">@color/colorP2pTextPrimary</item>
+        <item name="colorOnSurfaceVariant">@color/colorP2pTextSecondary</item>
+        <item name="android:textColorPrimary">@color/colorP2pTextPrimary</item>
+        <item name="android:textColorSecondary">@color/colorP2pTextSecondary</item>
+        <item name="android:textColorHint">@color/colorP2pTextMuted</item>
+        <item name="colorPrimary">@color/colorP2pAccent</item>
+        <item name="colorAccent">@color/colorP2pAccent</item>
+        <item name="colorSecondary">@color/colorP2pAccent</item>
+        <item name="colorOnSecondary">@color/colorP2pOnAccent</item>
+        <item name="colorControlActivated">@color/colorP2pAccent</item>
+        <item name="android:navigationBarColor">@color/colorP2pBg</item>
+        <item name="colorOnPrimary">@color/colorP2pOnAccent</item>
+        <item name="alertDialogTheme">@style/HarvannaP2pAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/HarvannaP2pAlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/HarvannaP2pBottomSheetDialog</item>
+    </style>
+
+    <style name="HarvannaP2pAlertDialog" parent="HarvannaAlertDialog">
+        <item name="colorPrimary">@color/colorP2pAccent</item>
+        <item name="colorAccent">@color/colorP2pAccent</item>
+        <item name="colorSurface">@color/colorP2pSurface</item>
+        <item name="colorOnPrimary">@color/colorP2pOnAccent</item>
+        <item name="colorOnSurface">@color/colorP2pTextPrimary</item>
+        <item name="android:textColorPrimary">@color/colorP2pTextPrimary</item>
+        <item name="android:windowBackground">@color/colorP2pSurface</item>
+        <item name="buttonBarPositiveButtonStyle">@style/HarvannaP2pDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/HarvannaP2pDialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/HarvannaP2pDialogButton</item>
+    </style>
+
+    <style name="HarvannaP2pDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/colorP2pAccent</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <style name="HarvannaP2pBottomSheetDialog" parent="HarvannaBottomSheetDialog">
+        <item name="colorPrimary">@color/colorP2pAccent</item>
+        <item name="colorAccent">@color/colorP2pAccent</item>
+        <item name="colorSurface">@color/colorP2pSurface</item>
+        <item name="colorOnPrimary">@color/colorP2pOnAccent</item>
+        <item name="colorOnSurface">@color/colorP2pTextPrimary</item>
+        <item name="colorOnSurfaceVariant">@color/colorP2pTextSecondary</item>
+        <item name="android:textColorPrimary">@color/colorP2pTextPrimary</item>
+        <item name="bottomSheetStyle">@style/HarvannaP2pBottomSheetStyle</item>
+    </style>
+
+    <style name="HarvannaP2pBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="backgroundTint">@color/colorP2pSurface</item>
+        <item name="shapeAppearanceOverlay">@style/HarvannaBottomSheetShape</item>
+    </style>
+
+    <style name="P2pSectionLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/colorP2pTextPrimary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:layout_marginTop">14dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <style name="P2pFieldLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/colorP2pTextSecondary</item>
+        <item name="android:textSize">12.5sp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_marginBottom">6dp</item>
+    </style>
+
+    <style name="P2pAmountChip">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginEnd">6dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/bg_p2p_chip</item>
+        <item name="android:textColor">@color/colorP2pTextPrimary</item>
+        <item name="android:textSize">12.5sp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:minHeight">44dp</item>
+    </style>
+
+    <style name="P2pCard">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/bg_p2p_card</item>
+        <item name="android:padding">14dp</item>
+    </style>
+
+    <style name="P2pSummaryRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">6dp</item>
+    </style>
+
+    <style name="P2pSummaryKey">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/colorP2pTextSecondary</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="P2pSummaryVal">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/colorP2pTextPrimary</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="P2pSettingsRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:background">@drawable/bg_p2p_card</item>
+        <item name="android:padding">14dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <style name="P2pSettingsValue">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/colorP2pTextPrimary</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="P2pDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/colorP2pBorder</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:layout_marginBottom">6dp</item>
+    </style>
+
+    <style name="HarvannaTextView" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/colorTextPrimary</item>
+    </style>
+</resources>

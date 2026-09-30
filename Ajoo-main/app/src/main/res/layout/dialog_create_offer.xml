@@ -1,0 +1,77 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical">
+	<com.google.android.material.card.MaterialCardView
+		android:id="@+id/cardview1"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_margin="24dp"
+		app:cardBackgroundColor="@android:color/white"
+		app:cardCornerRadius="10dp"
+		app:cardElevation="8dp">
+		<LinearLayout
+			android:id="@+id/linear1"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingTop="24dp"
+			android:paddingBottom="8dp"
+			android:orientation="vertical">
+			<TextView
+				android:id="@+id/tv_header"
+				android:focusable="false"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="16dp"
+				android:text="Create Offer"
+				android:textSize="20sp"
+				android:textStyle="bold"
+				android:textColor="@color/colorAccentStrong"
+				android:textAlignment="center" />
+			<LinearLayout
+				android:id="@+id/btn_sell_offer"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="16dp"
+				android:background="?android:attr/selectableItemBackground"
+				android:focusable="true">
+				<TextView
+					android:id="@+id/textview1"
+					android:focusable="false"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:text="Sell HARV (I have HARV to sell)"
+					android:textSize="16sp"
+					android:textStyle="bold"
+					android:textColor="@color/colorError"
+					android:textAlignment="center" />
+			</LinearLayout>
+			<View
+				android:id="@+id/view2"
+				android:layout_width="match_parent"
+				android:layout_height="1dp"
+				android:background="@color/colorDivider" />
+			<LinearLayout
+				android:id="@+id/btn_buy_offer"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="16dp"
+				android:background="?android:attr/selectableItemBackground"
+				android:focusable="true">
+				<TextView
+					android:id="@+id/textview2"
+					android:focusable="false"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:text="Buy HARV (I want to acquire HARV)"
+					android:textSize="16sp"
+					android:textStyle="bold"
+					android:textColor="@color/colorSuccess"
+					android:textAlignment="center" />
+			</LinearLayout>
+		</LinearLayout>
+	</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

@@ -1,0 +1,299 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical">
+	<com.google.android.material.card.MaterialCardView
+		android:id="@+id/card_merchant_trade"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="10dp"
+		app:cardBackgroundColor="@color/colorP2pSurface"
+		app:cardCornerRadius="20dp"
+		app:cardElevation="0dp"
+		app:strokeColor="@color/colorP2pBorder"
+		app:strokeWidth="1dp">
+		<LinearLayout
+			android:id="@+id/merchant_trade_container"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="16dp"
+			android:orientation="vertical">
+			<LinearLayout
+				android:id="@+id/linear246"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<LinearLayout
+					android:id="@+id/linear247"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:layout_weight="1">
+					<LinearLayout
+						android:id="@+id/linear248"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/tv_trade_type"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="SELL HARV"
+							android:textSize="10sp"
+							android:textStyle="bold"
+							android:focusable="false" />
+						<TextView
+							android:id="@+id/tv_trade_status"
+							android:layout_width="wrap_content"
+							android:layout_height="27dp"
+							android:gravity="center_horizontal|center_vertical"
+							android:text="PAYMENT PENDING"
+							android:textSize="8sp"
+							android:textStyle="bold"
+							android:focusable="false"
+							android:layout_marginStart="8dp"
+							android:paddingStart="9dp"
+							android:paddingEnd="9dp" />
+					</LinearLayout>
+					<TextView
+						android:id="@+id/tv_trade_id"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="5dp"
+						android:text="Trade #HARV-82F41"
+						android:textSize="10sp"
+						android:focusable="false" />
+				</LinearLayout>
+				<TextView
+					android:id="@+id/tv_trade_menu"
+					android:layout_width="38dp"
+					android:layout_height="38dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="⋮"
+					android:textSize="21sp"
+					android:textColor="@color/colorP2pTextPrimary"
+					android:focusable="false" />
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/linear249"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="15dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<TextView
+					android:id="@+id/tv_counterparty_avatar"
+					android:layout_width="38dp"
+					android:layout_height="38dp"
+					android:background="@color/colorP2pSurfaceAlt"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="U"
+					android:textSize="14sp"
+					android:textStyle="bold"
+					android:focusable="false" />
+				<LinearLayout
+					android:id="@+id/linear250"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:layout_weight="1"
+					android:layout_marginStart="10dp">
+					<TextView
+						android:id="@+id/tv_counterparty_name"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="John Doe"
+						android:textSize="13sp"
+						android:textStyle="bold"
+						android:textColor="@color/colorP2pTextPrimary"
+						android:focusable="false" />
+					<TextView
+						android:id="@+id/tv_counterparty_meta"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="3dp"
+						android:text="Buyer • Trust 94% • 38 completed trades"
+						android:textSize="10sp"
+						android:focusable="false" />
+				</LinearLayout>
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/linear251"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="15dp"
+				android:orientation="horizontal">
+				<LinearLayout
+					android:id="@+id/linear252"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:layout_weight="1">
+					<TextView
+						android:id="@+id/textview148"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Trade amount"
+						android:textSize="10sp"
+						android:focusable="false" />
+					<TextView
+						android:id="@+id/tv_trade_harv_amount"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="3dp"
+						android:text="40.00 HARV"
+						android:textSize="15sp"
+						android:textStyle="bold"
+						android:textColor="@color/colorP2pTextPrimary"
+						android:focusable="false" />
+				</LinearLayout>
+				<LinearLayout
+					android:id="@+id/linear253"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:layout_weight="1">
+					<TextView
+						android:id="@+id/textview149"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Fiat value"
+						android:textSize="10sp"
+						android:focusable="false" />
+					<TextView
+						android:id="@+id/tv_trade_fiat_amount"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="3dp"
+						android:text="₦50,000"
+						android:textSize="15sp"
+						android:textStyle="bold"
+						android:textColor="@color/colorP2pTextPrimary"
+						android:focusable="false" />
+				</LinearLayout>
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/linear254"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="13dp"
+				android:orientation="horizontal">
+				<TextView
+					android:id="@+id/textview150"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:text="Listing"
+					android:textSize="10sp"
+					android:layout_weight="1"
+					android:focusable="false" />
+				<TextView
+					android:id="@+id/tv_listing_reference"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="#LIST-7A82"
+					android:textSize="10sp"
+					android:textColor="@color/colorP2pTextPrimary"
+					android:focusable="false" />
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/layout_trade_action"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="13dp"
+				android:padding="12dp"
+				android:background="@color/colorP2pSurfaceAlt"
+				android:orientation="vertical">
+				<TextView
+					android:id="@+id/tv_trade_action_title"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Action required"
+					android:textSize="11sp"
+					android:textStyle="bold"
+					android:focusable="false" />
+				<TextView
+					android:id="@+id/tv_trade_action_description"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:text="Waiting for buyer payment."
+					android:textSize="10sp"
+					android:focusable="false" />
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/linear255"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="12dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<TextView
+					android:id="@+id/tv_trade_time"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:text="Started 8 min ago"
+					android:textSize="10sp"
+					android:layout_weight="1"
+					android:focusable="false" />
+				<TextView
+					android:id="@+id/tv_trade_countdown"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="21:42 remaining"
+					android:textSize="10sp"
+					android:textStyle="bold"
+					android:focusable="false" />
+			</LinearLayout>
+			<View
+				android:id="@+id/view256"
+				android:layout_width="match_parent"
+				android:layout_height="1dp"
+				android:layout_marginTop="14dp"
+				android:background="@color/colorP2pBorder" />
+			<LinearLayout
+				android:id="@+id/linear257"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="9dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<TextView
+					android:id="@+id/tv_view_trade"
+					android:layout_width="0dp"
+					android:layout_height="42dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="View Trade"
+					android:textSize="11sp"
+					android:textStyle="bold"
+					android:layout_weight="1"
+					android:focusable="false" />
+				<TextView
+					android:id="@+id/tv_manage_trade"
+					android:layout_width="0dp"
+					android:layout_height="42dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Manage"
+					android:textSize="11sp"
+					android:textStyle="bold"
+					android:textColor="@color/colorP2pTextPrimary"
+					android:layout_weight="1"
+					android:focusable="false" />
+				<TextView
+					android:id="@+id/tv_cancel_trade"
+					android:layout_width="0dp"
+					android:layout_height="42dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Cancel"
+					android:textSize="11sp"
+					android:textStyle="bold"
+					android:layout_weight="1"
+					android:focusable="false" />
+			</LinearLayout>
+		</LinearLayout>
+	</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

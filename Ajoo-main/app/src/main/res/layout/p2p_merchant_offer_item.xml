@@ -1,0 +1,262 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+	<com.google.android.material.card.MaterialCardView
+		android:id="@+id/card_offer_item"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		app:cardBackgroundColor="@color/colorP2pSurface"
+		android:layout_marginHorizontal="8dp"
+		android:layout_marginVertical="5dp"
+		app:cardCornerRadius="14dp"
+		app:cardElevation="0dp"
+		app:strokeWidth="0dp">
+		<LinearLayout
+			android:id="@+id/offer_item_container"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="16dp"
+			android:orientation="vertical">
+			<LinearLayout
+				android:id="@+id/linear1"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/card_offer_type"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					app:cardCornerRadius="6dp"
+					app:cardElevation="0dp"
+					app:strokeWidth="0dp">
+					<com.google.android.material.textview.MaterialTextView
+						android:id="@+id/tv_offer_type"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="SELL"
+						android:textSize="11sp"
+						android:textStyle="bold"
+						android:textColor="@color/colorP2pTextPrimary"
+						android:focusable="false"
+						android:paddingHorizontal="8dp"
+						android:paddingVertical="3dp" />
+				</com.google.android.material.card.MaterialCardView>
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/tv_offer_status"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Active"
+					android:textSize="11sp"
+					android:textStyle="bold"
+					android:focusable="false"
+					android:layout_marginStart="8dp" />
+				<View
+					android:id="@+id/view2"
+					android:layout_width="0dp"
+					android:layout_height="0dp"
+					android:layout_weight="1" />
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/tv_offer_id"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="HV0x…"
+					android:textSize="11sp"
+					android:focusable="false" />
+			</LinearLayout>
+			<View
+				android:id="@+id/view3"
+				android:layout_width="match_parent"
+				android:layout_height="1dp"
+				android:background="?android:attr/listDivider"
+				android:layout_marginVertical="10dp" />
+			<LinearLayout
+				android:id="@+id/linear4"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal">
+				<LinearLayout
+					android:id="@+id/linear5"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:layout_weight="1">
+					<com.google.android.material.textview.MaterialTextView
+						android:id="@+id/textview1"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Amount"
+						android:textSize="10.5sp"
+						android:focusable="false" />
+					<com.google.android.material.textview.MaterialTextView
+						android:id="@+id/tv_offer_amount"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="2dp"
+						android:text="0.0000 / 0.0000 HARV"
+						android:textSize="13sp"
+						android:textStyle="bold"
+						android:focusable="false" />
+				</LinearLayout>
+				<LinearLayout
+					android:id="@+id/linear6"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:layout_weight="1">
+					<com.google.android.material.textview.MaterialTextView
+						android:id="@+id/textview2"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Price / HARV"
+						android:textSize="10.5sp"
+						android:focusable="false" />
+					<com.google.android.material.textview.MaterialTextView
+						android:id="@+id/tv_offer_price"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="2dp"
+						android:text="—"
+						android:textSize="13sp"
+						android:textStyle="bold"
+						android:focusable="false" />
+				</LinearLayout>
+				<LinearLayout
+					android:id="@+id/linear7"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:layout_weight="1">
+					<com.google.android.material.textview.MaterialTextView
+						android:id="@+id/textview3"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Fiat value"
+						android:textSize="10.5sp"
+						android:focusable="false" />
+					<com.google.android.material.textview.MaterialTextView
+						android:id="@+id/tv_offer_fiat_value"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="2dp"
+						android:text="—"
+						android:textSize="13sp"
+						android:textStyle="bold"
+						android:focusable="false" />
+				</LinearLayout>
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/layout_offer_payment_methods"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:orientation="horizontal">
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/tv_offer_payment_one"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:background="@drawable/bg_p2p_input"
+					android:textSize="11sp"
+					android:focusable="false"
+					android:paddingHorizontal="8dp"
+					android:paddingVertical="3dp"
+					android:visibility="gone" />
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/tv_offer_payment_two"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:background="@drawable/bg_p2p_input"
+					android:textSize="11sp"
+					android:focusable="false"
+					android:layout_marginStart="6dp"
+					android:paddingHorizontal="8dp"
+					android:paddingVertical="3dp"
+					android:visibility="gone" />
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/tv_offer_payment_none"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="No payment method on file"
+					android:textSize="11sp"
+					android:focusable="false"
+					android:visibility="gone" />
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/linear8"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:orientation="horizontal">
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/tv_offer_orders_count"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:text="0 orders"
+					android:layout_weight="1"
+					android:textSize="11.5sp"
+					android:focusable="false" />
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/tv_offer_created"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Listed —"
+					android:textSize="11.5sp"
+					android:focusable="false" />
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/tv_offer_expiry"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:textStyle="bold"
+					android:textSize="11.5sp"
+					android:focusable="false"
+					android:layout_marginStart="8dp" />
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/linear9"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="12dp"
+				android:orientation="horizontal">
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/tv_offer_details"
+					android:layout_width="0dp"
+					android:layout_height="36dp"
+					android:background="@drawable/bg_p2p_button_outline"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Details"
+					android:textSize="12sp"
+					android:textStyle="bold"
+					android:layout_weight="1"
+					android:focusable="false" />
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/tv_offer_orders_btn"
+					android:layout_width="0dp"
+					android:layout_height="36dp"
+					android:background="@drawable/bg_p2p_button_outline"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Orders (0)"
+					android:textSize="12sp"
+					android:textStyle="bold"
+					android:layout_weight="1"
+					android:focusable="false"
+					android:layout_marginStart="8dp" />
+				<com.google.android.material.textview.MaterialTextView
+					android:id="@+id/tv_offer_cancel"
+					android:layout_width="0dp"
+					android:layout_height="36dp"
+					android:background="@drawable/bg_p2p_button_outline"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Cancel"
+					android:textSize="12sp"
+					android:textStyle="bold"
+					android:layout_weight="1"
+					android:focusable="false"
+					android:layout_marginStart="8dp" />
+			</LinearLayout>
+		</LinearLayout>
+	</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_home"
+        android:title="Home"
+        android:icon="@drawable/icon_house_outline" />
+
+    <item
+        android:id="@+id/menu_groups"
+        android:title="Groups"
+        android:icon="@drawable/icon_groups_outline" />
+
+    <item
+        android:id="@+id/menu_discover"
+        android:title="Discover"
+        android:icon="@drawable/icon_explore_outline" />
+
+    <item
+        android:id="@+id/menu_learn"
+        android:title="Learn"
+        android:icon="@drawable/icon_school_outline" />
+
+    <item
+        android:id="@+id/menu_asset"
+        android:title="Asset"
+        android:icon="@drawable/icon_account_balance_wallet_outline_" />
+
+</menu>

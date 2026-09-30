@@ -1,0 +1,304 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/_coordinator"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<com.google.android.material.appbar.AppBarLayout
+		android:id="@+id/_app_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay">
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/_toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/appBarColor"
+			app:popupTheme="@style/AppTheme.PopupOverlay" />
+	</com.google.android.material.appbar.AppBarLayout>
+	<androidx.core.widget.NestedScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@color/colorP2pBg"
+		android:fillViewport="true"
+		android:clipToPadding="false"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<LinearLayout
+			android:id="@+id/merchant_manager_root"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingTop="16dp"
+			android:paddingBottom="35dp"
+			android:orientation="vertical"
+			android:paddingStart="18dp"
+			android:paddingEnd="18dp">
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_create_offer"
+				android:layout_width="match_parent"
+				android:layout_height="52dp"
+				android:layout_marginTop="16dp"
+				android:gravity="center_horizontal|center_vertical"
+				android:text="+ Create Offer"
+				android:textSize="12sp"
+				android:textStyle="bold"
+				android:textColor="@color/colorAccent"
+				app:cornerRadius="12dp" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_manager_summary"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				app:cardBackgroundColor="@color/colorOverlayLight"
+				app:cardCornerRadius="20dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear239"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="18dp"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/textview141"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Trading overview"
+						android:textSize="15sp"
+						android:textStyle="bold" />
+					<LinearLayout
+						android:id="@+id/linear240"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="17dp"
+						android:orientation="horizontal">
+						<LinearLayout
+							android:id="@+id/linear241"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_summary_active"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="0"
+								android:textSize="21sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview142"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="3dp"
+								android:text="Active trades"
+								android:textSize="10sp" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/linear242"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_summary_locked"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="0 HARV"
+								android:textSize="18sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview143"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="3dp"
+								android:text="In active trades"
+								android:textSize="10sp" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/linear243"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/tv_summary_completed"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="0"
+								android:textSize="21sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/textview144"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="3dp"
+								android:text="Completed"
+								android:textSize="10sp" />
+						</LinearLayout>
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<HorizontalScrollView
+				android:id="@+id/manager_filter_scroll"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="17dp"
+				android:scrollbars="none">
+				<LinearLayout
+					android:id="@+id/manager_filter_container"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal">
+					<TextView
+						android:id="@+id/filter_manager_all"
+						android:layout_width="wrap_content"
+						android:layout_height="40dp"
+						android:background="@color/colorP2pSurfaceAlt"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="All"
+						android:textSize="12sp"
+						android:textStyle="bold"
+						android:layout_weight="1"
+						android:paddingStart="17dp"
+						android:paddingEnd="17dp" />
+					<TextView
+						android:id="@+id/filter_manager_active"
+						android:layout_width="wrap_content"
+						android:layout_height="40dp"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="Active"
+						android:textSize="12sp"
+						android:layout_weight="1"
+						android:layout_marginStart="7dp"
+						android:paddingStart="17dp"
+						android:paddingEnd="17dp" />
+					<TextView
+						android:id="@+id/filter_manager_matched"
+						android:layout_width="wrap_content"
+						android:layout_height="40dp"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="Matched"
+						android:textSize="12sp"
+						android:layout_weight="1"
+						android:layout_marginStart="7dp"
+						android:paddingStart="17dp"
+						android:paddingEnd="17dp" />
+					<TextView
+						android:id="@+id/filter_manager_paused"
+						android:layout_width="wrap_content"
+						android:layout_height="40dp"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="Paused"
+						android:textSize="12sp"
+						android:layout_weight="1"
+						android:layout_marginStart="7dp"
+						android:paddingStart="17dp"
+						android:paddingEnd="17dp" />
+					<TextView
+						android:id="@+id/filter_manager_closed"
+						android:layout_width="wrap_content"
+						android:layout_height="40dp"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="Closed"
+						android:textSize="12sp"
+						android:layout_weight="1"
+						android:layout_marginStart="7dp"
+						android:paddingStart="17dp"
+						android:paddingEnd="17dp" />
+				</LinearLayout>
+			</HorizontalScrollView>
+			<LinearLayout
+				android:id="@+id/linear244"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="20dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<TextView
+					android:id="@+id/tv_manager_section_title"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:text="Active merchant trades"
+					android:textSize="15sp"
+					android:textStyle="bold"
+					android:layout_weight="1" />
+				<TextView
+					android:id="@+id/tv_manager_result_count"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="0"
+					android:textSize="11sp" />
+			</LinearLayout>
+			<androidx.recyclerview.widget.RecyclerView
+				android:id="@+id/recycler_merchant_trades"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:paddingBottom="10dp"
+				android:nestedScrollingEnabled="false"
+				android:clipToPadding="false"
+				android:overScrollMode="never" />
+			<LinearLayout
+				android:id="@+id/layout_manager_empty"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="35dp"
+				android:padding="30dp"
+				android:gravity="center_horizontal|center_vertical"
+				android:orientation="vertical"
+				android:visibility="gone">
+				<TextView
+					android:id="@+id/textview145"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="No merchant trades"
+					android:textSize="17sp"
+					android:textStyle="bold" />
+				<TextView
+					android:id="@+id/textview146"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="7dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="Your active listings and matched trades will appear here."
+					android:textSize="12sp" />
+			</LinearLayout>
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_manager_info"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="14dp"
+				app:cardBackgroundColor="@color/colorP2pSurface"
+				app:cardCornerRadius="18dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/linear245"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="15dp"
+					android:orientation="horizontal">
+					<TextView
+						android:id="@+id/textview147"
+						android:layout_width="32dp"
+						android:layout_height="32dp"
+						android:gravity="center_horizontal|center_vertical"
+						android:text="i"
+						android:textSize="16sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/tv_manager_info"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:text="Only eligible listings can be paused or cancelled. A listing with HARV committed to an active trade remains subject to the trade lifecycle."
+						android:textSize="11sp"
+						android:layout_weight="1"
+						android:layout_marginStart="9dp"
+						android:lineSpacingExtra="2dp" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+		</LinearLayout>
+	</androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

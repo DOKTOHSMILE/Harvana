@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The node is served at https://harvannaprotocol.com with a CA-issued
+  certificate, so the default system trust store is used. The former
+  self-signed pin for the raw IP (5.75.163.65) was removed; that port is
+  closed on the live node.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

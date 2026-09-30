@@ -1,0 +1,165 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:background="?attr/colorSurface"
+	android:orientation="vertical">
+	<LinearLayout
+		android:id="@+id/linear1"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="24dp"
+		android:paddingTop="12dp"
+		android:paddingRight="24dp"
+		android:paddingBottom="24dp"
+		android:orientation="vertical">
+		<View
+			android:id="@+id/view94"
+			android:layout_width="40dp"
+			android:layout_height="4dp"
+			android:layout_marginBottom="20dp"
+			android:background="@color/colorCardStroke"
+			android:layout_gravity="center_horizontal" />
+		<TextView
+			android:id="@+id/textview15"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Receive"
+			android:textSize="20sp"
+			android:textStyle="bold"
+			android:focusable="false" />
+		<TextView
+			android:id="@+id/textview16"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="4dp"
+			android:layout_marginBottom="20dp"
+			android:text="Choose an asset to view its demo deposit address."
+			android:textSize="13.5sp"
+			android:focusable="false" />
+		<TextView
+			android:id="@+id/textview17"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="8dp"
+			android:text="ASSET"
+			android:textStyle="bold"
+			android:textSize="10.5sp"
+			android:letterSpacing="0.06"
+			android:focusable="false" />
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/cardview1"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="16dp"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeColor="@color/colorCardStroke"
+			app:strokeWidth="1dp">
+			<Spinner
+				android:id="@+id/spinner_assets"
+				android:layout_width="match_parent"
+				android:layout_height="52dp"
+				android:background="@android:color/transparent"
+				android:spinnerMode="dropdown"
+				android:theme="@style/WhiteSpinnerTheme"
+				android:paddingStart="12dp"
+				android:paddingEnd="12dp" />
+		</com.google.android.material.card.MaterialCardView>
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/cardview2"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="20dp"
+			app:cardBackgroundColor="@color/colorSurfaceRaised"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeColor="@color/colorCardStroke"
+			app:strokeWidth="1dp">
+			<LinearLayout
+				android:id="@+id/linear2"
+				android:layout_width="match_parent"
+				android:layout_height="52dp"
+				android:padding="14dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<TextView
+					android:id="@+id/tv_deposit_address"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:background="@android:color/transparent"
+					android:text="----"
+					android:singleLine="true"
+					android:layout_weight="1"
+					android:textSize="13.5sp"
+					android:fontFamily="monospace"
+					android:focusable="false"
+					android:ellipsize="middle" />
+				<ImageView
+					android:id="@+id/iv_copy_address"
+					android:layout_width="22dp"
+					android:layout_height="22dp"
+					android:padding="2dp"
+					android:scaleType="centerInside"
+					android:src="@android:drawable/ic_menu_send"
+					android:focusable="false"
+					android:layout_marginStart="12dp"
+					android:contentDescription="CopyAddress"
+					app:tint="@color/colorTextSecondary" />
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+		<LinearLayout
+			android:id="@+id/ll_qr_card"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:background="@color/colorTextPrimaryWhite"
+			android:gravity="center_horizontal|center_vertical"
+			android:orientation="vertical"
+			android:layout_gravity="center_horizontal">
+			<ImageView
+				android:id="@+id/iv_qr_code"
+				android:layout_width="250dp"
+				android:layout_height="250dp"
+				android:layout_margin="20dp"
+				android:scaleType="centerInside"
+				android:src="@android:drawable/ic_menu_camera"
+				android:focusable="false" />
+		</LinearLayout>
+		<TextView
+			android:id="@+id/textview18"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="8dp"
+			android:layout_marginBottom="24dp"
+			android:text="QR placeholder"
+			android:textSize="12sp"
+			android:layout_gravity="center_horizontal"
+			android:focusable="false" />
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_share"
+			android:layout_width="match_parent"
+			android:layout_height="52dp"
+			android:gravity="center_horizontal|center_vertical"
+			android:text="Share wallet"
+			android:textSize="15sp"
+			android:textStyle="bold"
+			android:textColor="@color/colorTextOnAccent"
+			app:backgroundTint="@color/colorAccent"
+			app:cornerRadius="16dp"
+			app:elevation="0dp" />
+		<TextView
+			android:id="@+id/tv_close_sheet"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:padding="12dp"
+			android:text="Close"
+			android:textStyle="bold"
+			android:layout_gravity="center_horizontal"
+			android:textSize="14.5sp"
+			android:focusable="false" />
+	</LinearLayout>
+</LinearLayout>

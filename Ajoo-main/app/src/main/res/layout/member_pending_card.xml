@@ -1,0 +1,95 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+	<com.google.android.material.card.MaterialCardView
+		android:id="@+id/cardview41"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		app:cardBackgroundColor="@color/colorSurface"
+		android:layout_marginHorizontal="4dp"
+		android:layout_marginVertical="6dp"
+		app:cardCornerRadius="16dp"
+		app:cardElevation="0dp"
+		app:strokeWidth="1dp"
+		app:strokeColor="@color/colorCardStroke">
+		<LinearLayout
+			android:id="@+id/linear88"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="14dp"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+			<TextView
+				android:id="@+id/tv_pending_initials"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:background="@drawable/bg_chip_muted"
+				android:gravity="center_horizontal|center_vertical"
+				android:text="\?"
+				android:textSize="15sp"
+				android:textStyle="bold"
+				android:textColor="@color/colorAccent"
+				android:focusable="false" />
+			<LinearLayout
+				android:id="@+id/linear89"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:layout_weight="1"
+				android:layout_marginStart="12dp">
+				<TextView
+					android:id="@+id/tv_pending_name"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:text="Requester"
+					android:textSize="15sp"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextPrimary"
+					android:focusable="false" />
+				<TextView
+					android:id="@+id/tv_pending_meta"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="2dp"
+					android:text="Wants to join"
+					android:textColor="@color/colorTextTertiary"
+					android:textSize="11.5sp"
+					android:focusable="false" />
+			</LinearLayout>
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_reject_request"
+				android:layout_width="wrap_content"
+				android:layout_height="36dp"
+				android:text="Reject"
+				android:textSize="12sp"
+				android:textStyle="bold"
+				android:textColor="@color/colorTextSecondary"
+				android:paddingStart="12dp"
+				android:paddingEnd="12dp"
+				app:backgroundTint="@color/colorSurfaceAlt"
+				app:cornerRadius="10dp"
+				app:elevation="0dp"
+				app:strokeWidth="0dp"
+				android:focusable="false"
+				android:layout_marginEnd="6dp" />
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_accept_request"
+				android:layout_width="wrap_content"
+				android:layout_height="36dp"
+				android:text="Accept"
+				android:textSize="12sp"
+				android:textStyle="bold"
+				android:textColor="@color/colorTextOnAccent"
+				android:paddingStart="16dp"
+				android:paddingEnd="16dp"
+				app:backgroundTint="@color/colorAccent"
+				app:cornerRadius="10dp"
+				app:elevation="0dp"
+				android:focusable="false" />
+		</LinearLayout>
+	</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

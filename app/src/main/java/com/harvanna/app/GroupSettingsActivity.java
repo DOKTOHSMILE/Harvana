@@ -1308,8 +1308,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		if (!isRotating()) backupSection.addView(loanSw, 0);
 	}
 	
-	/** On-chain rotating groups hold money in a network escrow that has no private key: nothing to restore or back up. */
-<<<<<<< HEAD
+	/** On-chain rotating groups hold money in a network escrow that has no private key: nothing to restore or back up. *
 	// ── Close / delete group ─────────────────────────────────────────────
 
 	private LinearLayout closeSection;
@@ -1461,9 +1460,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			}))
 			.setNegativeButton("Cancel", null));
 	}
-
-=======
->>>>>>> main
+	
 	private boolean _isOnChain() {
 		return com.harvanna.app.group.GroupKinds.isOnChain(groupData);
 	}

@@ -1,3 +1,17 @@
+package com.harvanna.app;
+
+import android.os.Bundle;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.view.View;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
+import com.google.android.material.card.MaterialCardView;
+
+public class GroupSettingsActivity extends AppCompatActivity {
 
 	private MaterialCardView cardview11;
 	private MaterialCardView cardview13;
@@ -1441,3 +1455,5 @@
 }
 
 
+
+}

@@ -38,3 +38,8 @@ Not done for Circle, before the plan's Phase 2 can be called finished:
 
 ## STOP - owner decision before Accum/Fixed or any wipe
 Has any real person, other than the developer, used the group feature with real value or real expectations (the screenshots show a second member in "Eguonor special group 1")? If yes, existing Firestore groups have no on-chain backing. Options: archive and start clean, keep them read-only as "legacy", or reconcile by hand. Nothing has been deleted or migrated by this work.
+
+## Owner decisions received (30 Sep) and applied
+1. Existing Firestore-only rotating groups are test data: they are hidden from Discover, My Groups, Home (trending and upcoming payments). Nothing was deleted; wipe them in the Firebase console when you like. (`GroupKinds.isLegacyRotating`.)
+2. Joining is open on the node for on-chain groups: new Rotating groups are saved with `requireApprovalToJoin=false`, the approval switch is disabled for Rotating, members join in the app, then lock their bond on the network.
+Accumulative and Fixed are unchanged until their turn in the agreed order.

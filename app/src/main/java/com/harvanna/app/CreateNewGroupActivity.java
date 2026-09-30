@@ -1433,6 +1433,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	
 	private void _selectGroupType(String type) {
 		groupTypeString = type;
+		// Rotating groups run on the network, which lets anyone lock a bond until the group is full:
+		// there is no admin-approval step to configure.
+		boolean rot = "Rotating Pool".equals(type);
+		switch_require_approval.setEnabled(!rot);
+		if (rot) { switch_require_approval.setChecked(false); }
 		boolean defaultLoans = "Accumulative Funds".equals(type); // rotating: always off
 		for (androidx.appcompat.widget.SwitchCompat sw : loanSwitches) sw.setChecked(defaultLoans);
 		allowLoans = defaultLoans;
@@ -1822,8 +1827,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		newGroupMap.put("groupWalletAddress", _realGroupWalletAddress);
 		
 		// Permissions
-		newGroupMap.put("requireApprovalToJoin", switch_require_approval.isChecked());
-		newGroupMap.put("joinApprovalMethod", switch_require_approval.isChecked()
+		final boolean rotatingOnChain = pendingCircleId != null;
+		newGroupMap.put("requireApprovalToJoin", !rotatingOnChain && switch_require_approval.isChecked());
+		newGroupMap.put("joinApprovalMethod", !rotatingOnChain && switch_require_approval.isChecked()
 		? (spinner_approval_method.getSelectedItemPosition() == 1 ? "MEMBER_VOTE" : "ADMIN")
 		: "NONE");
 		newGroupMap.put("membersCanInvite", switch_members_invite.isChecked());

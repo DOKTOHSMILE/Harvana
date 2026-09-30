@@ -465,7 +465,8 @@ public class GroupsFragmentActivity extends Fragment {
 					HashMap<String, Object> row = new HashMap<>();
 					if (data != null) row.putAll(data);
 					row.put("groupId", groupId);
-					resultsByIndex[index] = row;
+					// Old Firestore-only rotating groups were test data: hidden, not deleted.
+					if (!com.harvanna.app.group.GroupKinds.isLegacyRotating(data)) resultsByIndex[index] = row;
 					_checkComplete();
 				}
 				

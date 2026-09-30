@@ -752,6 +752,7 @@ public class HomeFragmentActivity extends Fragment {
 			mgr.getGroup(gid, new com.harvanna.app.firestore.GroupFirestoreManager.DocCallback() {
 				@Override
 				public void onSuccess(Map<String, Object> data) {
+					if (com.harvanna.app.group.GroupKinds.isLegacyRotating(data)) { oneDone.run(); return; }
 					// members, then payments, then decide what this member should do
 					mgr.getMembers(gid, new com.harvanna.app.firestore.GroupFirestoreManager.ListCallback() {
 						@Override public void onSuccess(List<Map<String, Object>> members) {
@@ -1010,6 +1011,7 @@ public class HomeFragmentActivity extends Fragment {
 						String gid0 = str(g, "_docId", str(g, "groupId", str(g, "id", "")));
 						// Only groups the user hasn't joined and didn't create.
 						if (mine.contains(gid0) || (!meUid.isEmpty() && meUid.equals(str(g, "creatorId", "")))) continue;
+						if (com.harvanna.app.group.GroupKinds.isLegacyRotating(g)) continue;
 						sorted.add(g);
 					}
 				}

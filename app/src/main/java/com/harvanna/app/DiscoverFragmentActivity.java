@@ -429,7 +429,7 @@ public class DiscoverFragmentActivity extends Fragment {
 								Object gid = g.get("groupId");
 								String resolvedId = docId != null ? docId.toString() : (gid != null ? gid.toString() : "");
 								row.put("groupId", resolvedId);
-								if (!myGroupIds.contains(resolvedId)) {
+								if (!myGroupIds.contains(resolvedId) && !com.harvanna.app.group.GroupKinds.isLegacyRotating(g)) {
 									publicGroups.add(row);
 								}
 							}

@@ -73,7 +73,11 @@ public final class GroupContract {
         String desc = str(g, "groupDescription", str(g, "description", ""));
         if (!desc.isEmpty()) about.add(desc);
         if (slots > 0) about.add("Size: up to " + slots + " members.");
-        about.add("The admin is the person who created the group. The admin sets the rules below, accepts or removes members, and looks after the group wallet.");
+        if (GroupKinds.isOnChain(g)) {
+            about.add("The admin is the person who created the group. Joining is open: anyone can lock their bond and take a place until the group is full. The network, not the admin, holds the money and sets the payout order.");
+        } else {
+            about.add("The admin is the person who created the group. The admin sets the rules below, accepts or removes members, and looks after the group wallet.");
+        }
         out.add(about);
 
         // 4. Money rules.

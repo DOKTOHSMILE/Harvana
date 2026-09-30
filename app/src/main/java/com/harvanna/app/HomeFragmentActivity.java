@@ -211,6 +211,8 @@ public class HomeFragmentActivity extends Fragment {
 		FirebaseApp.initializeApp(getContext());
 		initializeLogic();
 		_addQuickActions(_view);
+		if (card_trust_score != null) card_trust_score.setOnClickListener(v -> startActivity(new Intent(getContext(), TrustScoreActivity.class)));
+		if (card_open_loans != null) card_open_loans.setOnClickListener(v -> startActivity(new Intent(getContext(), OpenLoansActivity.class)));
 		return _view;
 	}
 	
@@ -659,6 +661,7 @@ public class HomeFragmentActivity extends Fragment {
 		_loadUpcomingPayments();
 		_loadTotalSavedAcrossGroups();
 		_loadOpenLoansAcrossGroups();
+		_loadTrendingGroups(); // re-run now that we know which groups are ours
 	}
 	
 	private void _loadWalletBalance() {
@@ -988,14 +991,28 @@ public class HomeFragmentActivity extends Fragment {
 		linear_trending_groups.removeAllViews();
 		if (linear10 != null) linear10.setVisibility(View.VISIBLE);
 		
+		final String meUid = FirebaseAuth.getInstance().getCurrentUser() != null
+		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+		final java.util.Set<String> mine = new java.util.HashSet<>();
+		for (HashMap<String, Object> g : group_map_list) {
+			Object id = g.get("id");
+			if (id != null) mine.add(String.valueOf(id));
+		}
 		com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext())
-		.queryGroups("visibility", "Public", 20,
+		.queryGroups("visibility", "Public", 30,
 		new com.harvanna.app.firestore.GroupFirestoreManager.ListCallback() {
 			@Override
 			public void onSuccess(List<Map<String, Object>> list) {
 				if (!isAdded() || getActivity() == null) return;
 				ArrayList<Map<String, Object>> sorted = new ArrayList<>();
-				if (list != null) sorted.addAll(list);
+				if (list != null) {
+					for (Map<String, Object> g : list) {
+						String gid0 = str(g, "_docId", str(g, "groupId", str(g, "id", "")));
+						// Only groups the user hasn't joined and didn't create.
+						if (mine.contains(gid0) || (!meUid.isEmpty() && meUid.equals(str(g, "creatorId", "")))) continue;
+						sorted.add(g);
+					}
+				}
 				Collections.sort(sorted, (a, b) ->
 				Double.compare(num(b, "trustScore"), num(a, "trustScore")));
 				getActivity().runOnUiThread(() -> {
@@ -1034,19 +1051,20 @@ public class HomeFragmentActivity extends Fragment {
 						trust.setText(String.format(Locale.US, "Trust %.0f%%", ts));
 						if (join != null) {
 							join.setText("View");
+							final String joinGid = gid;
 							join.setOnClickListener(v -> {
-								_openTab(new DiscoverFragmentActivity(), R.id.menu_discover);
+								if (joinGid.isEmpty()) { _openTab(new DiscoverFragmentActivity(), R.id.menu_discover); return; }
+								Intent ji = new Intent(getContext(), GroupJoinRequestActivity.class);
+								ji.putExtra("groupId", joinGid);
+								startActivity(ji);
 							});
 						}
+						final String openGid = gid;
 						item.setOnClickListener(v -> {
-							if (getActivity() != null) {
-								com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = 
-								getActivity().findViewById(R.id.bottomnavigation1);
-								
-								if (bottomNav != null) {
-									bottomNav.setSelectedItemId(R.id.menu_groups);
-								}
-							}
+							if (openGid.isEmpty()) return;
+							Intent ji = new Intent(getContext(), GroupJoinRequestActivity.class);
+							ji.putExtra("groupId", openGid);
+							startActivity(ji);
 						});
 						linear_trending_groups.addView(item);
 					}
@@ -1284,19 +1302,30 @@ public class HomeFragmentActivity extends Fragment {
 	// from Home instead of buried in the Assets tab. Uses existing activities only.
 	private void _addQuickActions(View root) {
 		try {
-			final android.widget.LinearLayout content = root.findViewById(R.id.linear2);
-			if (content == null || getContext() == null) return;
+			final MaterialCardView card = root.findViewById(R.id.cardview4);
+			final View top = root.findViewById(R.id.linear30);
+			if (card == null || top == null || getContext() == null) return;
 			final float d = getResources().getDisplayMetrics().density;
 			
+			// The wallet card now carries Send / Receive / Buy, below the balance.
 			android.widget.LinearLayout row = new android.widget.LinearLayout(getContext());
 			row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-			row.setPadding((int) (22 * d), 0, (int) (22 * d), (int) (12 * d));
-			
+			row.setPadding((int) (10 * d), 0, (int) (10 * d), (int) (12 * d));
+			row.setBackgroundColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.darkFaint10));
 			row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
 			row.addView(_quickAction(R.drawable.ic_action_receive, "Receive", ReceiveActivity.class), _quickActionParams(d, true));
 			row.addView(_quickAction(R.drawable.ic_action_buy, "Buy HARV", P2pMarketplaceActivity.class), _quickActionParams(d, true));
 			
-			content.addView(row, Math.min(1, content.getChildCount()));
+			card.removeView(top);
+			android.widget.LinearLayout box = new android.widget.LinearLayout(getContext());
+			box.setOrientation(android.widget.LinearLayout.VERTICAL);
+			box.addView(top);
+			box.addView(row);
+			card.addView(box, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			
+			// "Buy HARV (P2P)" is now the Buy action in the row.
+			View oldBuy = root.findViewById(R.id.linear224);
+			if (oldBuy != null) oldBuy.setVisibility(View.GONE);
 		} catch (Exception e) {
 			android.util.Log.w("HomeFragment", "Quick actions not added", e);
 		}
@@ -1313,11 +1342,11 @@ public class HomeFragmentActivity extends Fragment {
 		android.widget.LinearLayout cell = new android.widget.LinearLayout(getContext());
 		cell.setOrientation(android.widget.LinearLayout.VERTICAL);
 		cell.setGravity(android.view.Gravity.CENTER);
-		cell.setPadding(0, (int) (14 * d), 0, (int) (12 * d));
+		cell.setPadding(0, (int) (10 * d), 0, (int) (8 * d));
 		cell.setBackgroundResource(R.drawable.bg_quick_action);
 		cell.setClickable(true);
 		cell.setFocusable(true);
-		cell.setMinimumHeight((int) (84 * d));
+		cell.setMinimumHeight((int) (72 * d));
 		
 		android.widget.ImageView icon = new android.widget.ImageView(getContext());
 		icon.setImageResource(iconRes);

@@ -242,7 +242,10 @@ public class MainActivity extends AppCompatActivity {
 		menu3.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		
 		// Fetch the theme's adaptive text color
-		int iconColor = androidx.core.content.ContextCompat.getColor(this, R.color.colorAccent);
+		// Icons must contrast with the app bar (orange by day, charcoal by night), so use the bar's own "on" colour.
+		android.util.TypedValue tvOnBar = new android.util.TypedValue();
+		getTheme().resolveAttribute(R.attr.onAppBarColor, tvOnBar, true);
+		int iconColor = tvOnBar.data;
 		
 		// Mutate and apply the dynamic tint to the Notification icon
 		if (menu1.getIcon() != null) {
@@ -277,7 +280,9 @@ public class MainActivity extends AppCompatActivity {
 		int pad = (int) (12 * getResources().getDisplayMetrics().density);
 		android.widget.ImageView iv = new android.widget.ImageView(this);
 		iv.setImageResource(R.drawable.icon_notifications_outline);
-		iv.setColorFilter(androidx.core.content.ContextCompat.getColor(this, R.color.colorAccent));
+		android.util.TypedValue tvOnBar2 = new android.util.TypedValue();
+		getTheme().resolveAttribute(R.attr.onAppBarColor, tvOnBar2, true);
+		iv.setColorFilter(tvOnBar2.data);
 		iv.setPadding(pad, pad, pad, pad);
 		f.addView(iv, new android.widget.FrameLayout.LayoutParams(pad * 4, pad * 4));
 		if (n > 0) {
@@ -288,6 +293,7 @@ public class MainActivity extends AppCompatActivity {
 			b.setGravity(android.view.Gravity.CENTER);
 			b.setBackgroundResource(R.drawable.dot_online);
 			b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(this, R.color.colorError)));
+			b.setTypeface(null, android.graphics.Typeface.BOLD);
 			int sz = (int) (16 * getResources().getDisplayMetrics().density);
 			android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(sz, sz, android.view.Gravity.TOP | android.view.Gravity.END);
 			lp.topMargin = pad / 2; lp.rightMargin = pad / 2;

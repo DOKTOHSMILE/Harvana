@@ -175,6 +175,12 @@
 			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
+			android:name=".TrustScoreActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode" />
+		<activity
+			android:name=".OpenLoansActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode" />
+		<activity
 			android:name=".NotificationsActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden|uiMode" />
 		<activity

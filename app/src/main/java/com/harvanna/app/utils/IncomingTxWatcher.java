@@ -43,18 +43,9 @@ public final class IncomingTxWatcher {
 	private IncomingTxWatcher() {}
 	
 	public static synchronized void start(Context context) {
-		if (context == null) return;
-		appCtx = context.getApplicationContext();
-		wallet = WalletManager.getActiveWalletAddress(appCtx);
-		if (wallet == null || wallet.trim().isEmpty()) {
-			Log.w(TAG, "No active wallet");
-			return;
-		}
-		wallet = wallet.trim();
-		if (running) return;
-		running = true;
-		handler.post(pollRunnable);
-		Log.i(TAG, "Polling incoming txs for " + wallet);
+		// Retired: this polled the old Firestore transaction copy. Incoming money is now announced from the node's
+		// confirmed history by notify/WalletTxNotifier (foreground sync, background worker and the live socket).
+		Log.i(TAG, "IncomingTxWatcher is retired; WalletTxNotifier handles wallet notifications.");
 	}
 	
 	public static synchronized void stop() {

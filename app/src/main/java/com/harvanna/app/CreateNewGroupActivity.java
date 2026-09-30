@@ -965,7 +965,12 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			com.harvanna.app.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
-		setTitle("CREATE NEW GROUP");
+		ViewGroup formHost = findViewById(R.id.linear1);
+		if (formHost != null) formHost.addView(com.harvanna.app.social.PeoplePicker.section(this, peopleToInvite));
+		// The page heading lives in the action bar now (title + subtitle that follows the chosen group type).
+		if (textview1 != null) textview1.setVisibility(View.GONE);
+		if (textview11 != null) textview11.setVisibility(View.GONE);
+		_updateBar();
 		// Load active wallet address
 		SharedPreferences walletPrefs = getSharedPreferences("harv_wallet_prefs", MODE_PRIVATE);
 		String savedSeed = walletPrefs.getString("seed_phrase", walletPrefs.getString("mnemonic", ""));
@@ -1076,6 +1081,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private String states = "";
 	private HashMap<String, Object> newGroupMap = new HashMap<>();
 	private String groupTypeString = "";
+	private final com.harvanna.app.social.PeoplePicker.Selection peopleToInvite = new com.harvanna.app.social.PeoplePicker.Selection();
 	private String frequencyString = "";
 	private String visibilityString = "";
 	private String locationString = "";
@@ -1444,8 +1450,22 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		if (row != null) row.setVisibility(allowLoans ? View.VISIBLE : View.GONE);
 	}
 	
+	/** Action bar: "Create new group" with the chosen type as subtitle. */
+	private void _updateBar() {
+		androidx.appcompat.app.ActionBar bar = getSupportActionBar();
+		if (bar == null) return;
+		bar.setTitle("Create new group");
+		bar.setSubtitle(groupTypeString == null || groupTypeString.isEmpty()
+			? "Choose a group type \u00b7 you'll become the admin"
+			: groupTypeString + " \u00b7 you'll become the admin");
+	}
+	
 	private void _selectGroupType(String type) {
 		groupTypeString = type;
+<<<<<<< HEAD
+		_updateBar();
+=======
+>>>>>>> main
 		// Rotating groups run on the network, which lets anyone lock a bond until the group is full:
 		// there is no admin-approval step to configure.
 		boolean rot = true; // every new group runs on the network, which has no admin-approval step
@@ -2003,6 +2023,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				return;
 			}
 			if (onNode) com.harvanna.app.group.GroupSaver.unqueue(getApplicationContext(), newGroupId);
+<<<<<<< HEAD
+			// People picked while creating the group get their invitations now that the group exists.
+			com.harvanna.app.social.PeoplePicker.sendAll(CreateNewGroupActivity.this, newGroupId, newGroupMap, peopleToInvite, "", (sent, failed) -> { });
+=======
+>>>>>>> main
 			if (pendingCardQr != null && pendingCardDigits != null) {
 				com.harvanna.app.group.GroupCardStore.publish(getApplicationContext(), newGroupId,
 				_realGroupWalletAddress, group_name_edittext1.getText().toString().trim(),

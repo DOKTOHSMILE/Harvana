@@ -24,7 +24,11 @@ public final class NotificationSync {
         final Context c = ctx.getApplicationContext();
         if (FirebaseAuth.getInstance().getCurrentUser() == null) { if (done != null) done.run(); return; }
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+<<<<<<< HEAD
+        final AtomicInteger pending = new AtomicInteger(5);
+=======
         final AtomicInteger pending = new AtomicInteger(4);
+>>>>>>> main
         final Runnable finish = () -> { if (pending.decrementAndGet() == 0 && done != null) done.run(); };
 
         // 1. Invitations
@@ -60,6 +64,12 @@ public final class NotificationSync {
             @Override public void onError(String e) { finish.run(); }
         });
 
+<<<<<<< HEAD
+        // 5. Wallet: money received, sent and payments signed (from the node's confirmed history)
+        WalletTxNotifier.run(c, events -> finish.run());
+
+=======
+>>>>>>> main
         // 4. Review verdicts on my Learn Hub submissions
         GroupFirestoreManager.getInstance(c).getMyLearnSubmissions(uid, new GroupFirestoreManager.ListCallback() {
             @Override public void onSuccess(List<Map<String, Object>> subs) {

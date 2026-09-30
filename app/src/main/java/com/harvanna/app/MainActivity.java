@@ -64,11 +64,6 @@ public class MainActivity extends AppCompatActivity {
 	private CoordinatorLayout _coordinator;
 	private String wallet_address = "";
 	
-	private ArrayList<HashMap<String, Object>> systemLifecycleList = new ArrayList<>();
-	private ArrayList<HashMap<String, Object>> securityFinanceList = new ArrayList<>();
-	private ArrayList<HashMap<String, Object>> communityMechanicsList = new ArrayList<>();
-	private ArrayList<HashMap<String, Object>> devUtilitiesList = new ArrayList<>();
-	private ArrayList<HashMap<String, Object>> miningSettingsList = new ArrayList<>();
 	
 	private FrameLayout cardview1;
 	private MaterialCardView cardview2;
@@ -648,66 +643,6 @@ public class MainActivity extends AppCompatActivity {
 		_activeFragment = fragment; // Update the tracker
 	}
 	
-	// Height Auto-Fixer for Nested ScrollViews
-	private void _ensureOverflowLists() {
-		if (communityMechanicsList.isEmpty()) {
-			HashMap<String, Object> a = new HashMap<>();
-			a.put("title", "My groups");
-			a.put("desc", "Open groups you belong to");
-			communityMechanicsList.add(a);
-			HashMap<String, Object> b = new HashMap<>();
-			b.put("title", "Invite friends");
-			b.put("desc", "Share Harvanna with someone");
-			communityMechanicsList.add(b);
-		}
-		if (securityFinanceList.isEmpty()) {
-			HashMap<String, Object> a = new HashMap<>();
-			a.put("title", "Security & PIN");
-			a.put("desc", "Lock the app and wallet");
-			securityFinanceList.add(a);
-			HashMap<String, Object> b = new HashMap<>();
-			b.put("title", "KYC verification");
-			b.put("desc", "Coming soon");
-			b.put("comingSoon", Boolean.TRUE);
-			securityFinanceList.add(b);
-		}
-		if (systemLifecycleList.isEmpty()) {
-			HashMap<String, Object> s = new HashMap<>();
-			s.put("title", "Settings");
-			s.put("desc", "App preferences and account");
-			systemLifecycleList.add(s);
-			
-			HashMap<String, Object> a = new HashMap<>();
-			a.put("title", "Check for updates");
-			a.put("desc", "App version and updates");
-			systemLifecycleList.add(a);
-			HashMap<String, Object> b = new HashMap<>();
-			b.put("title", "Terms");
-			b.put("desc", "How Harvanna works");
-			systemLifecycleList.add(b);
-			HashMap<String, Object> c = new HashMap<>();
-			c.put("title", "About");
-			c.put("desc", ("Harvanna and " + com.harvanna.app.CoinInfo.ticker()));
-			systemLifecycleList.add(c);
-		}
-	}
-	
-	private void setListViewHeightBasedOnChildren(ListView listView) {
-		ListAdapter listAdapter = listView.getAdapter();
-		if (listAdapter == null) return;
-		int totalHeight = 0;
-		int adapterCount = listAdapter.getCount();
-		for (int i = 0; i < adapterCount; i++) {
-			View listItem = listAdapter.getView(i, null, listView);
-			listItem.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-			totalHeight += listItem.getMeasuredHeight();
-		}
-		ViewGroup.LayoutParams params = listView.getLayoutParams();
-		params.height = totalHeight + (listView.getDividerHeight() * (adapterCount - 1));
-		listView.setLayoutParams(params);
-		listView.requestLayout();
-	}
-	
 	private void _showVersionDialog() {
 		String v = "unknown";
 		try { v = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception ignored) { }
@@ -717,246 +652,20 @@ public class MainActivity extends AppCompatActivity {
 			.setPositiveButton("OK", null).show();
 	}
 	
-	// Master Right-Side Sheet Engine with 100% Reliable Background Dim Layer
+	/** The side menu (built in MainDrawer). */
 	public void showRightDropdownMenu(View anchorView) {
-		if (anchorView == null) {
-			anchorView = findViewById(android.R.id.content);
-		}
+		if (anchorView == null) anchorView = findViewById(android.R.id.content);
 		if (anchorView == null) return;
-		_ensureOverflowLists();
-		final View popupView = getLayoutInflater().inflate(R.layout.custom_right_dropdown, null);
-		
-		ListView popupListView1 = popupView.findViewById(R.id.listview1);
-		ListView popupListView2 = popupView.findViewById(R.id.listview2);
-		ListView popupListView3 = popupView.findViewById(R.id.listview3);
-		ListView popupListView4 = popupView.findViewById(R.id.listview4);
-		Button button1 = popupView.findViewById(R.id.button1);
-		
-		// Mining settings removed from this app (mining now lives in the
-		// standalone Harvanna Node Miner app) — miningSettingsList is always
-		// empty, so this row group is hidden entirely rather than shown
-		// with zero items. listview1 is also absent from custom_right_dropdown.
-		if (popupListView1 != null) popupListView1.setVisibility(View.GONE);
-		if (popupListView2 != null) popupListView2.setAdapter(new Listview2Adapter(communityMechanicsList));
-		if (popupListView3 != null) popupListView3.setAdapter(new Listview3Adapter(securityFinanceList));
-		if (popupListView3 != null) popupListView3.setOnItemClickListener((parent, view, position, id) -> {
-			// Position 0 = "Security & PIN Settings" (real, wired now).
-			// Position 1 = "Compliance / KYC Verification (Coming Soon)" —
-			// deliberately does nothing when tapped, matching its dimmed,
-			// disabled visual state rather than opening a screen with
-			// nothing real behind it.
-			if (position == 0) {
-				try {
-					startActivity(new android.content.Intent(MainActivity.this, SecurityPinSettingsActivity.class));
-				} catch (Exception e) {
-					Toast.makeText(getApplicationContext(), "Security settings unavailable", Toast.LENGTH_SHORT).show();
-				}
-			}
-		});
-		
-		if (popupListView2 != null) setListViewHeightBasedOnChildren(popupListView2);
-		if (popupListView3 != null) setListViewHeightBasedOnChildren(popupListView3);
-		if (popupListView4 != null) setListViewHeightBasedOnChildren(popupListView4);
-		
-		// Calculate side sheet width (320dp) in pixels
-		int sheetWidthPx = (int) android.util.TypedValue.applyDimension(
-		android.util.TypedValue.COMPLEX_UNIT_DIP, 
-		320, 
-		popupView.getContext().getResources().getDisplayMetrics()
-		);
-		
-		// Create the window panel with FULL Screen Height
-		final PopupWindow popupWindow = new PopupWindow(
-		popupView, 
-		sheetWidthPx, 
-		WindowManager.LayoutParams.MATCH_PARENT, 
-		true
-		);
-		
-		if (popupListView4 != null) {
-			popupListView4.setAdapter(new Listview4Adapter(systemLifecycleList));
-			popupListView4.setOnItemClickListener((parent, view, position, id) -> {
-				popupWindow.dismiss();
-				try {
-					if (position == 0) {
-						startActivity(new android.content.Intent(MainActivity.this, SettingsActivity.class));
-					} else if (position == 1) {
-						_showVersionDialog();
-					} else if (position == 2) {
-						startActivity(new android.content.Intent(MainActivity.this, DocumentViewerActivity.class).putExtra("doc_type", "terms"));
-					} else if (position == 3) {
-						startActivity(new android.content.Intent(MainActivity.this, AboutActivity.class));
-					}
-				} catch (Exception e) {
-					Toast.makeText(getApplicationContext(), "Couldn't open that screen", Toast.LENGTH_SHORT).show();
-				}
-			});
-		}
-		
-		if (popupListView2 != null) popupListView2.setOnItemClickListener((parent, view, position, id) -> {
-			popupWindow.dismiss();
-			if (position == 0) {
-				bottomnavigation1.setSelectedItemId(R.id.menu_groups);
-			} else if (position == 1) {
-				android.content.Intent share = new android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain");
-				share.putExtra(android.content.Intent.EXTRA_TEXT, "Join me on Harvanna: save together in groups and manage your " + com.harvanna.app.CoinInfo.ticker() + " wallet.");
-				startActivity(android.content.Intent.createChooser(share, "Invite friends"));
-			}
-		});
-		if (popupListView3 != null) popupListView3.setOnItemClickListener((parent, view, position, id) -> {
-			popupWindow.dismiss();
-			if (position == 0) {
-				try {
-					startActivity(new android.content.Intent(MainActivity.this, SecurityPinSettingsActivity.class));
-				} catch (Exception e) {
-					Toast.makeText(getApplicationContext(), "Security settings unavailable", Toast.LENGTH_SHORT).show();
-				}
-			}
-		});
-		
-		// Generate curved left-side background dynamically
-		int cornerRadius = (int) android.util.TypedValue.applyDimension(
-		android.util.TypedValue.COMPLEX_UNIT_DIP, 
-		28, 
-		popupView.getContext().getResources().getDisplayMetrics()
-		);
-		
-		GradientDrawable backgroundShape = new GradientDrawable();
-		backgroundShape.setColor(com.harvanna.app.utils.UiColors.surface());
-		backgroundShape.setCornerRadii(new float[] {
-			cornerRadius, cornerRadius, 
-			0, 0,                       
-			0, 0,                       
-			cornerRadius, cornerRadius  
-		});
-		
-		View mainContainerLayout = popupView.findViewById(R.id.linear1);
-		if (mainContainerLayout != null) {
-			mainContainerLayout.setBackground(backgroundShape);
-		}
-		
-		popupWindow.setElevation(24f);
-		popupWindow.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-		
-		// Clean Right-To-Left Slide transitions
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-			android.transition.Slide slideTransition = new android.transition.Slide(Gravity.END);
-			slideTransition.setDuration(280); 
-			slideTransition.setInterpolator(new android.view.animation.DecelerateInterpolator());
-			popupWindow.setEnterTransition(slideTransition);
-			popupWindow.setExitTransition(slideTransition);
-		} else {
-			popupWindow.setAnimationStyle(android.R.style.Animation_Activity); 
-		}
-		
-		// FIX: Inject a custom full-screen background overlay container view directly onto the activity window
-		final ViewGroup rootActivityLayout = (ViewGroup) anchorView.getRootView();
-		final View dynamicDimOverlay = new View(popupView.getContext());
-		dynamicDimOverlay.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		dynamicDimOverlay.setBackgroundColor(0x73000000); // Perfectly balanced 45% alpha dark background shadow tint
-		dynamicDimOverlay.setAlpha(0f);
-		
-		// Add the shadow overlay to screen and fade it in smoothly over 280ms
-		rootActivityLayout.addView(dynamicDimOverlay);
-		dynamicDimOverlay.animate().alpha(1f).setDuration(280).start();
-		
-		// Automatically wipe out the dark shadow overlay canvas as soon as user dismisses the side drawer
-		popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-			@Override
-			public void onDismiss() {
-				rootActivityLayout.removeView(dynamicDimOverlay);
-			}
-		});
-		
-		// Render layout right against the screen bounds
-		popupWindow.showAtLocation(anchorView.getRootView(), Gravity.TOP | Gravity.END, 0, 0);
-		
-		if (button1 != null) button1.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View _view) {
+		new MainDrawer(this, new MainDrawer.Host() {
+			@Override public void openGroupsTab() { bottomnavigation1.setSelectedItemId(R.id.menu_groups); }
+			@Override public void showVersion() { _showVersionDialog(); }
+			@Override public void logOut() {
 				com.harvanna.app.auth.LogoutManager.logout(getApplicationContext());
 				intent_page_opener.setClass(getApplicationContext(), SplashScreenActivity.class);
 				startActivity(intent_page_opener);
 				finish();
 			}
-		});
-		
-	}
-	
-	// Adapter 2
-	public class Listview2Adapter extends BaseAdapter {
-		ArrayList<HashMap<String, Object>> _data;
-		public Listview2Adapter(ArrayList<HashMap<String, Object>> _arr) { _data = _arr; }
-		@Override public int getCount() { return _data.size(); }
-		@Override public HashMap<String, Object> getItem(int _index) { return _data.get(_index); }
-		@Override public long getItemId(int _index) { return _index; }
-		@Override public View getView(final int _position, View _v, ViewGroup _container) {
-			View _view = getLayoutInflater().inflate(R.layout.menu_custom_card, _container, false);
-			TextView textview1 = _view.findViewById(R.id.textview1);
-			TextView textview2 = _view.findViewById(R.id.textview2);
-			ImageView imageview1 = _view.findViewById(R.id.imageview1);
-			
-			textview1.setText(_data.get(_position).get("title").toString());
-			textview2.setText(_data.get(_position).get("desc").toString());
-			
-			if (_position == 0) imageview1.setImageResource(R.drawable.icon_checklist_rtl_round);
-			else if (_position == 1) imageview1.setImageResource(R.drawable.icon_share_round);
-			return _view;
-		}
-	}
-	
-	// Adapter 3
-	public class Listview3Adapter extends BaseAdapter {
-		ArrayList<HashMap<String, Object>> _data;
-		public Listview3Adapter(ArrayList<HashMap<String, Object>> _arr) { _data = _arr; }
-		@Override public int getCount() { return _data.size(); }
-		@Override public HashMap<String, Object> getItem(int _index) { return _data.get(_index); }
-		@Override public long getItemId(int _index) { return _index; }
-		@Override public View getView(final int _position, View _v, ViewGroup _container) {
-			View _view = getLayoutInflater().inflate(R.layout.menu_custom_card, _container, false);
-			TextView textview1 = _view.findViewById(R.id.textview1);
-			TextView textview2 = _view.findViewById(R.id.textview2);
-			ImageView imageview1 = _view.findViewById(R.id.imageview1);
-			
-			textview1.setText(_data.get(_position).get("title").toString());
-			textview2.setText(_data.get(_position).get("desc").toString());
-			
-			// THE FIX: KYC is marked Coming Soon (real BVN/NIN verification
-			// needs a third-party identity vendor decision first) — dim the
-			// row so it visibly reads as not-yet-available rather than
-			// looking identical to the working entries around it.
-			boolean comingSoon = Boolean.TRUE.equals(_data.get(_position).get("comingSoon"));
-			_view.setAlpha(comingSoon ? 0.5f : 1f);
-			_view.setEnabled(!comingSoon);
-			
-			if (_position == 0) imageview1.setImageResource(R.drawable.icon_security_round);
-			else if (_position == 1) imageview1.setImageResource(R.drawable.icon_verified_round);
-			return _view;
-		}
-	}
-	
-	// Adapter 4
-	public class Listview4Adapter extends BaseAdapter {
-		ArrayList<HashMap<String, Object>> _data;
-		public Listview4Adapter(ArrayList<HashMap<String, Object>> _arr) { _data = _arr; }
-		@Override public int getCount() { return _data.size(); }
-		@Override public HashMap<String, Object> getItem(int _index) { return _data.get(_index); }
-		@Override public long getItemId(int _index) { return _index; }
-		@Override public View getView(final int _position, View _v, ViewGroup _container) {
-			View _view = getLayoutInflater().inflate(R.layout.menu_custom_card, _container, false);
-			TextView textview1 = _view.findViewById(R.id.textview1);
-			TextView textview2 = _view.findViewById(R.id.textview2);
-			ImageView imageview1 = _view.findViewById(R.id.imageview1);
-			
-			textview1.setText(_data.get(_position).get("title").toString());
-			textview2.setText(_data.get(_position).get("desc").toString());
-			
-			if (_position == 0) imageview1.setImageResource(R.drawable.icon_settings_outline);
-			else if (_position == 1) imageview1.setImageResource(R.drawable.icon_system_update_round);
-			else if (_position == 2) imageview1.setImageResource(R.drawable.icon_description_round);
-			else if (_position == 3) imageview1.setImageResource(R.drawable.icon_info_round);
-			return _view;
-		}
+		}).show(anchorView);
 	}
 	
 	private final BroadcastReceiver globalTxReceiver = new BroadcastReceiver() {

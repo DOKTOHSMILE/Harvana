@@ -330,7 +330,7 @@ public final class SecureWalletStorage {
     private static final int PIN_HASH_LENGTH_BITS = 256;
 
     public static void setTransactionPin(Context context, String pin) {
-        if (context == null || pin == null || pin.length() < 4) return;
+        if (context == null || pin == null || PinPolicy.weakReason(pin) != null) return;
         try {
             byte[] salt = new byte[16];
             new SecureRandom().nextBytes(salt);
@@ -347,8 +347,32 @@ public final class SecureWalletStorage {
         }
     }
 
+    /** Milliseconds until PIN entry is allowed again after too many wrong tries; 0 when not locked. */
+    public static long pinLockRemainingMs(Context context) {
+        if (context == null) return 0L;
+        return PinPolicy.lockRemainingMs(getPrefs(context).getLong("pin_locked_until", 0L), System.currentTimeMillis());
+    }
+
     public static boolean verifyTransactionPin(Context context, String enteredPin) {
         if (context == null || enteredPin == null) return false;
+        if (pinLockRemainingMs(context) > 0) return false;
+        boolean ok = _verifyTransactionPinNoLock(context, enteredPin);
+        android.content.SharedPreferences.Editor ed = getPrefs(context).edit();
+        if (ok) {
+            ed.putInt("pin_failures", 0).putLong("pin_locked_until", 0L);
+        } else {
+            int f = getPrefs(context).getInt("pin_failures", 0) + 1;
+            if (f >= PinPolicy.MAX_FAILURES) {
+                ed.putInt("pin_failures", 0).putLong("pin_locked_until", System.currentTimeMillis() + PinPolicy.LOCKOUT_MS);
+            } else {
+                ed.putInt("pin_failures", f);
+            }
+        }
+        ed.apply();
+        return ok;
+    }
+
+    private static boolean _verifyTransactionPinNoLock(Context context, String enteredPin) {
         try {
             String encrypted = getPrefs(context).getString("txn_pin_hash", null);
             if (encrypted == null) return false;

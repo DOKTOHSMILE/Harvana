@@ -71,14 +71,7 @@ public class SketchApplication extends Application {
                     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
                     String fileName = "Harvanna_Crash_" + timeStamp + ".txt";
                     
-                    File downloadDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS);
-                    File publicCrashFile = new File(downloadDir, fileName);
-                    FileWriter pubWriter = new FileWriter(publicCrashFile);
-                    pubWriter.append("FATAL CRASH DETECTED:\n\n").append(stackTrace);
-                    pubWriter.flush();
-                    pubWriter.close();
-                    
-                    File privateDir = new File(getApplicationContext().getExternalFilesDir(null), "CrashLogs");
+                    File privateDir = new File(getApplicationContext().getFilesDir(), "CrashLogs"); // app-private, never public storage
                     if (!privateDir.exists()) privateDir.mkdirs();
                     File privateCrashFile = new File(privateDir, fileName);
                     FileWriter privWriter = new FileWriter(privateCrashFile);

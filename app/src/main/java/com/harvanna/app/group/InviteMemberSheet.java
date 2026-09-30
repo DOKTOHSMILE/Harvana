@@ -49,6 +49,9 @@ public final class InviteMemberSheet {
         info.setPadding(0, (int) (4 * d), 0, (int) (8 * d));
         root.addView(info);
 
+        final com.harvanna.app.social.PeoplePicker.Selection sel = new com.harvanna.app.social.PeoplePicker.Selection();
+        root.addView(com.harvanna.app.social.PeoplePicker.section(a, sel));
+
         EditText email = new EditText(a);
         email.setHint("Their email address");
         email.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
@@ -58,15 +61,18 @@ public final class InviteMemberSheet {
         root.addView(msg);
 
         MaterialButton send = new MaterialButton(a);
-        send.setText("Send invitation");
+        send.setText("Send invitations");
         send.setAllCaps(false);
         send.setOnClickListener(v -> {
+            String typed = InviteManager.normalizeEmail(email.getText().toString());
+            if (!typed.isEmpty() && !sel.emails.contains(typed)) sel.emails.add(typed);
+            if (sel.count() == 0) { Toast.makeText(a, "Add a friend, a username, a contact or type an email.", Toast.LENGTH_LONG).show(); return; }
             send.setEnabled(false);
-            InviteManager.send(a, groupId, group, email.getText().toString(), msg.getText().toString(), err ->
+            com.harvanna.app.social.PeoplePicker.sendAll(a, groupId, group, sel, msg.getText().toString(), (sent, failed) ->
                 a.runOnUiThread(() -> {
                     send.setEnabled(true);
-                    if (err != null) { Toast.makeText(a, err, Toast.LENGTH_LONG).show(); return; }
-                    Toast.makeText(a, "Invitation sent", Toast.LENGTH_SHORT).show();
+                    if (failed > 0) { Toast.makeText(a, sent + " sent, " + failed + " couldn't be sent.", Toast.LENGTH_LONG).show(); return; }
+                    Toast.makeText(a, sent == 1 ? "Invitation sent" : sent + " invitations sent", Toast.LENGTH_SHORT).show();
                     dlg.dismiss();
                 }));
         });
@@ -83,7 +89,10 @@ public final class InviteMemberSheet {
         });
         root.addView(share);
 
-        dlg.setContentView(root);
+        android.widget.ScrollView scroller = new android.widget.ScrollView(a);
+        scroller.setBackgroundColor(UiColors.surface());
+        scroller.addView(root);
+        dlg.setContentView(scroller);
         dlg.show();
     }
 }

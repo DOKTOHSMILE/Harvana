@@ -178,68 +178,24 @@ public class WalletController {
      * for any other open screen already listening for it.
      */
     private void checkIfIncomingAndNotify(String txHash) {
-        TransactionManager.getTransaction(txHash,
-                new com.harvanna.app.sync.FirestoreSyncManager.SyncCallback() {
-                    @Override
-                    public void onSuccess(String json) {
-                        if (destroyed) return;
-
-                        Map<String, Object> tx =
-                                com.harvanna.app.sync.FirestoreSyncManager.parseFirestoreDocument(json);
-                        if (tx == null) return;
-
-                        String from = tx.get("from") != null ? tx.get("from").toString() : "";
-                        String to   = tx.get("to")   != null ? tx.get("to").toString()   : "";
-
-                        boolean isIncoming = to.equalsIgnoreCase(walletAddress)
-                                && !from.equalsIgnoreCase(walletAddress);
-                        if (!isIncoming) return;
-
-                        long   rawAmount = tx.get("amount") instanceof Number
-                                ? ((Number) tx.get("amount")).longValue() : 0L;
-                        double amountHarv = HarvannaNodeClient.toHarvDisplay(rawAmount);
-                        String symbol    = tx.get("tokenSymbol") != null
-                                ? tx.get("tokenSymbol").toString() : com.harvanna.app.CoinInfo.ticker();
-
-                        // UI work (notification banner) must happen on the main
-                        // thread — this callback's thread isn't guaranteed, so
-                        // marshal explicitly rather than assume.
-                        mainHandler.post(() -> {
-                            if (destroyed) return;
-                            if (!com.harvanna.app.utils.IncomingTxWatcher.markNotifiedIfNew(txHash)) return;
-                            com.harvanna.app.notify.NotificationCenter.post(context, com.harvanna.app.notify.NotificationCenter.TX,
-                                    "tx_" + txHash, com.harvanna.app.CoinInfo.ticker() + " received",
-                                    com.harvanna.app.wallet.BalanceFormatter.short4(amountHarv) + " " + symbol
-                                            + " from " + (from.length() > 12 ? from.substring(0, 8) + "…" + from.substring(from.length() - 4) : from),
-                                    "", -1);
-
-                            Listener currentListener = listener; // avoid a null race
-                            if (currentListener instanceof android.app.Activity) {
-                                String title   = (com.harvanna.app.CoinInfo.ticker() + " Received");
-                                String message = com.harvanna.app.wallet.BalanceFormatter
-                                        .short4(amountHarv) + " received";
-                                com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
-                                        (android.app.Activity) currentListener, title, message, from);
-                            }
-
-                            // Match the existing broadcast pattern other screens
-                            // already listen for (CryptoWalletActivity, CoinDetailActivity
-                            // all have a globalTxReceiver for this action).
-                            android.content.Intent received =
-                                    new android.content.Intent("com.harvanna.app.ACTION_WALLET_RECEIVED");
-                            received.putExtra("EXTRA_AMOUNT", amountHarv);
-                            received.putExtra("EXTRA_SENDER", from);
-                            received.putExtra("EXTRA_SYMBOL", symbol);
-                            androidx.localbroadcastmanager.content.LocalBroadcastManager
-                                    .getInstance(context).sendBroadcast(received);
-                        });
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        Log.w(TAG, "Could not fetch confirmed tx details for notification: " + error);
-                    }
-                });
+        // The node is the source of truth: read the wallet's confirmed history and notify for anything new
+        // (received, sent, or signed payments). New incoming money also gets the in-app banner.
+        com.harvanna.app.notify.WalletTxNotifier.run(context, events -> mainHandler.post(() -> {
+            if (destroyed) return;
+            for (com.harvanna.app.notify.TxEvents.Event e : events) {
+                if (!"RECEIVED".equals(e.kind)) continue;
+                Listener currentListener = listener; // avoid a null race
+                if (currentListener instanceof android.app.Activity) {
+                    com.harvanna.app.utils.InAppNotificationHelper.showTransactionNotification(
+                            (android.app.Activity) currentListener, e.title, e.body, "");
+                }
+                android.content.Intent received = new android.content.Intent("com.harvanna.app.ACTION_WALLET_RECEIVED");
+                received.putExtra("EXTRA_SENDER", "");
+                received.putExtra("EXTRA_SYMBOL", com.harvanna.app.CoinInfo.ticker());
+                androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(context).sendBroadcast(received);
+                break;
+            }
+        }));
     }
 
     /**

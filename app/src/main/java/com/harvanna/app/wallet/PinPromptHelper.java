@@ -124,6 +124,13 @@ public final class PinPromptHelper {
             Button confirmButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
             confirmButton.setOnClickListener(v -> {
                 String entered = etInput.getText().toString().trim();
+                long locked = SecureWalletStorage.pinLockRemainingMs(context);
+                if (locked > 0) {
+                    tvError.setText("Too many wrong tries. Try again in " + ((locked + 59_999) / 60_000) + " min.");
+                    tvError.setVisibility(View.VISIBLE);
+                    etInput.setText("");
+                    return;
+                }
                 if (SecureWalletStorage.verifyTransactionPin(context, entered)) {
                     dialog.dismiss();
                     onVerified.onVerified();

@@ -54,6 +54,8 @@ import androidx.appcompat.widget.SwitchCompat;
 
 import com.harvanna.app.crypto.Ed25519;
 import com.harvanna.app.firestore.GroupFirestoreManager;
+import com.harvanna.app.group.GroupCloser;
+import com.harvanna.app.group.GroupClosePolicy;
 import com.harvanna.app.group.JoinRequestManager;
 import com.harvanna.app.offline.OfflineCacheManager;
 import com.harvanna.app.p2p.ThemedDialogs;
@@ -550,6 +552,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		String creatorId = str(groupData, "creatorId", "");
 		isAdmin = !uid.isEmpty() && uid.equals(creatorId);
 		invalidateOptionsMenu();
+		com.harvanna.app.utils.AppBar.setSubtitle(this, str(groupData, "groupName", ""));
 		
 		_rebuild();
 		_loadMembers();
@@ -613,6 +616,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		tvWalletAddress.setText(expectedWallet.isEmpty() ? "No group wallet" : expectedWallet);
 		_refreshKeyStatus();
 		_buildBackupSection();
+		_buildCloseSection();
 		
 		// Apply Admin States
 		btnSaveSettings.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
@@ -1305,6 +1309,161 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	}
 	
 	/** On-chain rotating groups hold money in a network escrow that has no private key: nothing to restore or back up. */
+<<<<<<< HEAD
+	// ── Close / delete group ─────────────────────────────────────────────
+
+	private LinearLayout closeSection;
+
+	/** Admin-only "danger zone": checks what the network and the group's records allow, then closes or deletes. */
+	private void _buildCloseSection() {
+		ViewGroup host = findViewById(R.id.linear39);
+		if (host == null) return;
+		if (closeSection != null && closeSection.getParent() != null) ((ViewGroup) closeSection.getParent()).removeView(closeSection);
+		if (!isAdmin) return;
+		float d = getResources().getDisplayMetrics().density;
+		boolean closed = GroupCloser.CLOSED.equalsIgnoreCase(str(groupData, "status", ""));
+
+		closeSection = new LinearLayout(this);
+		closeSection.setOrientation(LinearLayout.VERTICAL);
+		closeSection.setPadding(0, (int) (24 * d), 0, 0);
+
+		TextView title = new TextView(this);
+		title.setText(closed ? "This group is closed" : "Close or delete this group");
+		title.setTextSize(14);
+		title.setTypeface(null, android.graphics.Typeface.BOLD);
+		title.setTextColor(closed ? UiColors.textPrimary() : UiColors.error());
+		closeSection.addView(title);
+
+		TextView info = new TextView(this);
+		info.setText(closed
+			? "Closed groups are hidden from Discover and nobody can join. Members keep their history. You can reopen the group."
+			: "We check the network first. A group that holds money can't be erased: it is closed once everyone has been paid out. A group nobody joined can be deleted.");
+		info.setTextSize(12);
+		info.setTextColor(UiColors.textSecondary());
+		info.setPadding(0, (int) (4 * d), 0, (int) (8 * d));
+		closeSection.addView(info);
+
+		MaterialButton btn = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+		btn.setAllCaps(false);
+		btn.setText(closed ? "Reopen group" : "Check if I can close this group");
+		btn.setOnClickListener(v -> { if (closed) _confirmReopen(); else _checkClose(btn); });
+		closeSection.addView(btn, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (48 * d)));
+		host.addView(closeSection);
+	}
+
+	private void _checkClose(MaterialButton btn) {
+		btn.setEnabled(false);
+		btn.setText("Checking the network\u2026");
+		GroupCloser.evaluate(this, groupId, new GroupCloser.EvalCb() {
+			@Override public void onDecision(GroupClosePolicy.Decision dec, GroupClosePolicy.Facts f) {
+				runOnUiThread(() -> { btn.setEnabled(true); btn.setText("Check if I can close this group"); _showCloseDecision(dec); });
+			}
+			@Override public void onError(String e) {
+				runOnUiThread(() -> { btn.setEnabled(true); btn.setText("Check if I can close this group"); Toast.makeText(GroupSettingsActivity.this, e, Toast.LENGTH_LONG).show(); });
+			}
+		});
+	}
+
+	private void _showCloseDecision(GroupClosePolicy.Decision dec) {
+		StringBuilder sb = new StringBuilder();
+		for (String r : dec.reasons) sb.append("\u2022 ").append(r).append("\n");
+		if (!dec.nextSteps.isEmpty()) {
+			sb.append("\nWhat to do:\n");
+			for (String n : dec.nextSteps) sb.append("\u2022 ").append(n).append("\n");
+		}
+		if (dec.action == GroupClosePolicy.Action.NONE) {
+			ThemedDialogs.show(ThemedDialogs.alert(this).setTitle(dec.headline).setMessage(sb.toString().trim()).setPositiveButton("OK", null));
+			return;
+		}
+		final boolean delete = dec.action == GroupClosePolicy.Action.DELETE;
+		final String groupName = str(groupData, "groupName", "");
+		final String phrase = delete ? groupName : "CLOSE";
+
+		LinearLayout box = new LinearLayout(this);
+		box.setOrientation(LinearLayout.VERTICAL);
+		int pad = (int) (20 * getResources().getDisplayMetrics().density);
+		box.setPadding(pad, pad / 2, pad, 0);
+		TextView msg = new TextView(this);
+		msg.setTextColor(UiColors.textPrimary());
+		msg.setTextSize(13);
+		msg.setText(sb.toString().trim() + "\n\n" + (delete
+			? "This permanently removes the group and its records from the app. It cannot be undone."
+			: "Members are notified, joining stops, and the group leaves Discover. Everyone keeps their history and anything they are owed on the network. You can reopen it later."));
+		box.addView(msg);
+		final EditText reason = new EditText(this);
+		if (!delete) { reason.setHint("Reason for members (optional)"); reason.setTextColor(UiColors.textPrimary()); box.addView(reason); }
+		final EditText confirm = new EditText(this);
+		confirm.setHint("Type " + phrase + " to confirm");
+		confirm.setTextColor(UiColors.textPrimary());
+		box.addView(confirm);
+
+		androidx.appcompat.app.AlertDialog dialog = ThemedDialogs.alert(this)
+			.setTitle(dec.headline).setView(box)
+			.setPositiveButton(delete ? "Delete" : "Close group", null)
+			.setNegativeButton("Cancel", null).create();
+		dialog.setOnShowListener(x -> dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+			if (!confirm.getText().toString().trim().equalsIgnoreCase(phrase)) {
+				confirm.setError("Type " + phrase + " exactly");
+				return;
+			}
+			dialog.dismiss();
+			com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(GroupSettingsActivity.this, () ->
+				_runClose(delete, reason.getText().toString().trim()));
+		}));
+		dialog.show();
+	}
+
+	private void _runClose(boolean delete, String reason) {
+		final android.app.ProgressDialog pd = new android.app.ProgressDialog(this);
+		pd.setMessage(delete ? "Deleting\u2026" : "Closing the group\u2026");
+		pd.setCancelable(false);
+		pd.show();
+		GroupCloser.DoneCb cb = new GroupCloser.DoneCb() {
+			@Override public void onDone() {
+				runOnUiThread(() -> {
+					pd.dismiss();
+					Toast.makeText(GroupSettingsActivity.this, delete ? "Group deleted." : "Group closed.", Toast.LENGTH_LONG).show();
+					if (delete) {
+						Intent home = new Intent(GroupSettingsActivity.this, MainActivity.class);
+						home.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+						startActivity(home);
+						finish();
+					} else {
+						_loadGroupDoc();
+					}
+				});
+			}
+			@Override public void onError(String e) {
+				runOnUiThread(() -> { pd.dismiss(); Toast.makeText(GroupSettingsActivity.this, "Couldn't finish: " + e, Toast.LENGTH_LONG).show(); });
+			}
+		};
+		// Re-check right before acting: things may have changed since the first check.
+		GroupCloser.evaluate(this, groupId, new GroupCloser.EvalCb() {
+			@Override public void onDecision(GroupClosePolicy.Decision dec, GroupClosePolicy.Facts f) {
+				if (dec.action == GroupClosePolicy.Action.NONE || (delete && dec.action != GroupClosePolicy.Action.DELETE)) {
+					runOnUiThread(() -> { pd.dismiss(); _showCloseDecision(dec); });
+					return;
+				}
+				if (dec.action == GroupClosePolicy.Action.DELETE && delete) GroupCloser.delete(GroupSettingsActivity.this, groupId, cb);
+				else GroupCloser.archive(GroupSettingsActivity.this, groupId, str(groupData, "visibility", "Private"), reason, cb);
+			}
+			@Override public void onError(String e) { cb.onError(e); }
+		});
+	}
+
+	private void _confirmReopen() {
+		ThemedDialogs.show(ThemedDialogs.alert(this)
+			.setTitle("Reopen this group?")
+			.setMessage("It returns to its previous visibility and members are told it is open again.")
+			.setPositiveButton("Reopen", (dialog, which) -> GroupCloser.reopen(this, groupId, str(groupData, "closedPrevVisibility", "Private"), new GroupCloser.DoneCb() {
+				@Override public void onDone() { runOnUiThread(() -> { Toast.makeText(GroupSettingsActivity.this, "Group reopened.", Toast.LENGTH_SHORT).show(); _loadGroupDoc(); }); }
+				@Override public void onError(String e) { runOnUiThread(() -> Toast.makeText(GroupSettingsActivity.this, "Couldn't reopen: " + e, Toast.LENGTH_LONG).show()); }
+			}))
+			.setNegativeButton("Cancel", null));
+	}
+
+=======
+>>>>>>> main
 	private boolean _isOnChain() {
 		return com.harvanna.app.group.GroupKinds.isOnChain(groupData);
 	}

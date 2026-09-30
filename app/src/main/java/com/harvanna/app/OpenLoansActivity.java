@@ -37,9 +37,6 @@ public class OpenLoansActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        StatusBarUtil.matchToolbar(this);
-        setTitle("Open loans");
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ScrollView sv = new ScrollView(this);
         sv.setBackgroundColor(UiColors.background());
         list = new LinearLayout(this);
@@ -47,7 +44,7 @@ public class OpenLoansActivity extends AppCompatActivity {
         int p = dp(16);
         list.setPadding(p, p, p, p);
         sv.addView(list);
-        setContentView(sv);
+        com.harvanna.app.utils.AppBar.setContent(this, sv, "Open loans", "Loans you have taken across your groups");
         summary = tv("Loading your loans…", 14, false, UiColors.textSecondary());
         list.addView(summary);
     }

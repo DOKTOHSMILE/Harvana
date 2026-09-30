@@ -31,9 +31,6 @@ public class InvitesActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        StatusBarUtil.matchToolbar(this);
-        setTitle("Invitations");
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ScrollView sv = new ScrollView(this);
         sv.setBackgroundColor(UiColors.background());
         LinearLayout root = new LinearLayout(this);
@@ -41,7 +38,7 @@ public class InvitesActivity extends AppCompatActivity {
         int p = dp(16);
         root.setPadding(p, p, p, p);
         sv.addView(root);
-        setContentView(sv);
+        com.harvanna.app.utils.AppBar.setContent(this, sv, "Invitations", "Groups that invited you to join");
         list = root;
         empty = tv("Loading invitations…", 14, false, UiColors.textSecondary());
         root.addView(empty);

@@ -79,6 +79,7 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		com.harvanna.app.utils.AppBar.header(this, "Security & PIN", "Protect sending money", R.id.textview54);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {
@@ -132,8 +133,9 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 		// ══ TEMP DEBUG ENTRY — remove before shipping ══
 		// Guardian Console has no real entry point by design; this exists
 		// purely to reach it without ADB during testing.
-		btn_debug_guardian_console.setOnClickListener(v ->
-		startActivity(new Intent(SecurityPinSettingsActivity.this, GuardianConsoleActivity.class)));
+		// The guardian dispute console is not reachable from a settings screen.
+		btn_debug_guardian_console.setVisibility(View.GONE);
+		btn_debug_guardian_console.setOnClickListener(null);
 		// ══ END TEMP DEBUG ENTRY ══
 		
 		btn_pin_action.setOnClickListener(v -> {
@@ -191,8 +193,9 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 	
 	private void _promptNewPin() {
 		_showPinDialog("Choose a new 4-digit PIN", null, newPin -> {
-			if (newPin.length() != 4) {
-				SketchwareUtil.showMessage(getApplicationContext(), "PIN must be exactly 4 digits.");
+			String weak = com.harvanna.app.wallet.PinPolicy.weakReason(newPin);
+			if (weak != null) {
+				SketchwareUtil.showMessage(getApplicationContext(), weak);
 				return;
 			}
 			_showPinDialog("Confirm your new PIN", null, confirmPin -> {

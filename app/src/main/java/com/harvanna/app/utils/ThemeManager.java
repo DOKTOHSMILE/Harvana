@@ -23,21 +23,50 @@ public final class ThemeManager {
         String mode = context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
                 .getString(KEY_MODE, "system"); // defaults to following the phone's setting
         AppCompatDelegate.setDefaultNightMode(modeStringToDelegateMode(mode));
+        syncAppContext(context);
+    }
+
+    /** True when the app should be showing its night palette: the user's choice, or the phone's setting for "Follow system". */
+    public static boolean isNightNow(Context context) {
+        String mode = getMode(context);
+        if ("dark".equals(mode)) return true;
+        if ("light".equals(mode)) return false;
+        int sys = android.content.res.Resources.getSystem().getConfiguration().uiMode;
+        return (sys & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    /**
+     * Puts the application context's night flag on the app's own choice right now, before any screen is
+     * (re)created. Code that colours views through the application context (UiColors, list rows) therefore
+     * gets the right palette from the very first frame after a live theme change.
+     */
+    public static void syncAppContext(Context context) {
+        android.content.res.Resources r = context.getApplicationContext().getResources();
+        int mask = android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        int want = isNightNow(context) ? android.content.res.Configuration.UI_MODE_NIGHT_YES : android.content.res.Configuration.UI_MODE_NIGHT_NO;
+        android.content.res.Configuration c = new android.content.res.Configuration(r.getConfiguration());
+        if ((c.uiMode & mask) != want) {
+            c.uiMode = (c.uiMode & ~mask) | want;
+            r.updateConfiguration(c, r.getDisplayMetrics());
+        }
     }
 
     public static void setLightMode(Context context) {
         context.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit().putString(KEY_MODE, "light").apply();
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        syncAppContext(context);
     }
 
     public static void setDarkMode(Context context) {
         context.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit().putString(KEY_MODE, "dark").apply();
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        syncAppContext(context);
     }
 
     public static void setSystemMode(Context context) {
         context.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit().putString(KEY_MODE, "system").apply();
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        syncAppContext(context);
     }
 
     /**
@@ -47,20 +76,16 @@ public final class ThemeManager {
      * application context's night flag equal to the screen the user is looking at.
      */
     public static void keepAppContextInSync(final android.app.Application app) {
+        syncAppContext(app);
+        // The phone's own theme changing (for "Follow system"): re-sync before the screens are recreated.
+        app.registerComponentCallbacks(new android.content.ComponentCallbacks() {
+            @Override public void onConfigurationChanged(android.content.res.Configuration newConfig) { syncAppContext(app); }
+            @Override public void onLowMemory() { }
+        });
         app.registerActivityLifecycleCallbacks(new android.app.Application.ActivityLifecycleCallbacks() {
-            private void sync(android.app.Activity a) {
-                int mask = android.content.res.Configuration.UI_MODE_NIGHT_MASK;
-                int night = a.getResources().getConfiguration().uiMode & mask;
-                android.content.res.Resources r = app.getResources();
-                android.content.res.Configuration c = new android.content.res.Configuration(r.getConfiguration());
-                if ((c.uiMode & mask) != night) {
-                    c.uiMode = (c.uiMode & ~mask) | night;
-                    r.updateConfiguration(c, r.getDisplayMetrics());
-                }
-            }
-            @Override public void onActivityCreated(android.app.Activity a, android.os.Bundle b) { sync(a); }
-            @Override public void onActivityStarted(android.app.Activity a) { sync(a); }
-            @Override public void onActivityResumed(android.app.Activity a) { sync(a); }
+            @Override public void onActivityCreated(android.app.Activity a, android.os.Bundle b) { syncAppContext(app); }
+            @Override public void onActivityStarted(android.app.Activity a) { syncAppContext(app); }
+            @Override public void onActivityResumed(android.app.Activity a) { syncAppContext(app); }
             @Override public void onActivityPaused(android.app.Activity a) { }
             @Override public void onActivityStopped(android.app.Activity a) { }
             @Override public void onActivitySaveInstanceState(android.app.Activity a, android.os.Bundle b) { }
@@ -75,7 +100,14 @@ public final class ThemeManager {
     /** "Follow system", "Light" or "Dark", for showing in settings. */
     public static String label(Context context) {
         String m = getMode(context);
-        return "light".equals(m) ? "Light" : "dark".equals(m) ? "Dark" : "Follow system";
+        return "light".equals(m) ? "Light" : "dark".equals(m) ? "Dark" : systemLabel(context);
+    }
+
+    /** "System default (phone is Dark now)" - the option that makes the app follow the phone's own theme. */
+    public static String systemLabel(Context context) {
+        int sys = android.content.res.Resources.getSystem().getConfiguration().uiMode;
+        boolean dark = (sys & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        return "System default (phone is " + (dark ? "dark" : "light") + " now)";
     }
 
     public static boolean isLightMode(Context context) {

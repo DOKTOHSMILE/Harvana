@@ -670,7 +670,7 @@ public class SettingsActivity extends AppCompatActivity {
 		int checked = "light".equals(mode) ? 1 : "dark".equals(mode) ? 2 : 0;
 		new androidx.appcompat.app.AlertDialog.Builder(this)
 		.setTitle("Appearance")
-		.setSingleChoiceItems(new String[]{"Follow system", "Light", "Dark"}, checked, (dialog, which) -> {
+		.setSingleChoiceItems(new String[]{ThemeManager.systemLabel(this), "Light", "Dark"}, checked, (dialog, which) -> {
 			// The whole app re-themes immediately: AppCompat restarts every open screen in the new mode.
 			if (which == 1) ThemeManager.setLightMode(this);
 			else if (which == 2) ThemeManager.setDarkMode(this);

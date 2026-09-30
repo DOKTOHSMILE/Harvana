@@ -171,6 +171,9 @@
 			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
+			android:name=".group.GroupWalletBackupActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|uiMode" />
+		<activity
 			android:name=".RestoreWalletActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
 			android:windowSoftInputMode="stateHidden" />

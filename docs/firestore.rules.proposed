@@ -29,3 +29,13 @@ match /TRANSACTIONS/{txId} {
   allow read: if signedIn();
   allow create, update, delete: if false;
 }
+
+// Wallet Access Card backup (encrypted with an admin-only passphrase).
+// Inside match /GROUPS/{groupId}. Until deployed, the app's publish/fetch of
+// GROUPS/{gid}/private/walletCard returns 403 (publishing is retried, viewing shows an error).
+match /private/{docId} {
+  allow read: if signedIn()
+      && exists(/databases/$(database)/documents/GROUPS/$(groupId)/members/$(request.auth.uid));
+  allow create, update: if isGroupCreator(groupId);
+  allow delete: if false;
+}

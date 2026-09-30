@@ -609,6 +609,31 @@ public class GroupFirestoreManager {
 		});
 	}
 	
+	/**
+	 * Members-only private documents (GROUPS/{gid}/private/{docId}), e.g. the
+	 * encrypted wallet-card backup. Rules must restrict reads to members.
+	 */
+	public void setPrivateDoc(String groupId, String docId, Map<String, Object> fields, SimpleCallback callback) {
+		_authorizedRequest("PATCH", "/GROUPS/" + groupId + "/private/" + docId, _encodeFields(fields), new _RawCallback() {
+			@Override public void onSuccess(String body) { callback.onSuccess(); }
+			@Override public void onError(String error) { callback.onError(error); }
+		});
+	}
+
+	public void getPrivateDoc(String groupId, String docId, DocCallback callback) {
+		_authorizedRequest("GET", "/GROUPS/" + groupId + "/private/" + docId, null, new _RawCallback() {
+			@Override
+			public void onSuccess(String body) {
+				try {
+					callback.onSuccess(_decodeDocument(new JSONObject(body)));
+				} catch (Exception e) {
+					callback.onError("Failed to parse private document: " + e.getMessage());
+				}
+			}
+			@Override public void onError(String error) { callback.onError(error); }
+		});
+	}
+
 	// ── Notices subcollection ───────────────────────────────────────────
 	
 	public void addNotice(String groupId, Map<String, Object> fields, IdCallback callback) {

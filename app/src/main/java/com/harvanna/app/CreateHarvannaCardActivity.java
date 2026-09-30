@@ -279,6 +279,11 @@ public class CreateHarvannaCardActivity extends AppCompatActivity {
   public static final String EXTRA_LABEL = "label";
   public static final String EXTRA_MANDATORY = "mandatory";
   public static final String EXTRA_RAW_MNEMONIC = "raw_mnemonic";
+  /** When set, the encrypted card is also published privately to the group's members. */
+  public static final String EXTRA_GROUP_ID = "group_id";
+  public static final String EXTRA_RESULT_QR = "result_qr_payload";
+  public static final String EXTRA_RESULT_DIGITS = "result_digit_code";
+  public static final String EXTRA_RESULT_TEMPLATE = "result_template";
   public static final String EXTRA_RESULT_CARD_SAVED = "card_saved";
 
   private String mnemonic;
@@ -287,6 +292,9 @@ public class CreateHarvannaCardActivity extends AppCompatActivity {
   private boolean mandatory;
   private boolean cardHasBeenSaved = false;
   private CardTemplate selectedTemplate = CardTemplate.CLASSIC;
+
+  private String lastQrPayload;
+  private String lastDigitCode;
 
   private Bitmap generatedFrontBitmap;
   private Bitmap generatedBackBitmap;
@@ -322,6 +330,9 @@ public class CreateHarvannaCardActivity extends AppCompatActivity {
   private void finishSuccessfully() {
     Intent result = new Intent();
     result.putExtra(EXTRA_RESULT_CARD_SAVED, cardHasBeenSaved);
+    result.putExtra(EXTRA_RESULT_QR, lastQrPayload);
+    result.putExtra(EXTRA_RESULT_DIGITS, lastDigitCode);
+    result.putExtra(EXTRA_RESULT_TEMPLATE, selectedTemplate.name());
     setResult(RESULT_OK, result);
     finish();
   }
@@ -401,6 +412,9 @@ public class CreateHarvannaCardActivity extends AppCompatActivity {
           btn_save_pdf.setVisibility(View.VISIBLE);
           btn_generate.setEnabled(true);
           btn_generate.setText("REGENERATE CARD");
+          lastQrPayload = qrPayload;
+          lastDigitCode = digitCode;
+          publishToGroup(qrPayload, digitCode);
           SketchwareUtil.showMessage(getApplicationContext(),
               "Card ready. Save it now — you'll need the password to restore later.");
         });
@@ -422,6 +436,19 @@ public class CreateHarvannaCardActivity extends AppCompatActivity {
         });
       }
     }).start();
+  }
+
+  private void publishToGroup(String qrPayload, String digitCode) {
+    String gid = getIntent().getStringExtra(EXTRA_GROUP_ID);
+    if (gid == null || gid.isEmpty()) return;
+    com.google.firebase.auth.FirebaseUser u =
+        com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+    com.harvanna.app.group.GroupCardStore.publish(this, gid, walletAddress,
+        getIntent().getStringExtra(EXTRA_LABEL), selectedTemplate.name(), qrPayload, digitCode,
+        u == null ? "" : u.getUid(), published -> runOnUiThread(() ->
+            SketchwareUtil.showMessage(getApplicationContext(), published
+                ? "Encrypted card shared with group members as a backup."
+                : "Couldn't share with members yet — will retry automatically.")));
   }
 
   private void markSavedAndUnlockDone() {

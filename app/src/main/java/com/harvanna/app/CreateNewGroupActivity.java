@@ -1111,6 +1111,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	
 	private String pendingGroupMnemonic;
 	private String pendingGroupWalletAddress;
+	private String pendingCardQr, pendingCardDigits, pendingCardTemplate;
 	private com.google.android.material.bottomsheet.BottomSheetDialog pendingGroupBottomSheetDialog;
 	private static final int RC_MANDATORY_GROUP_CARD = 8803;
 	
@@ -1829,6 +1830,13 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 						"Group launched",
 						"This group is now active. Welcome!");
 						
+						if (pendingCardQr != null && pendingCardDigits != null) {
+							com.harvanna.app.group.GroupCardStore.publish(getApplicationContext(), newGroupId,
+							_realGroupWalletAddress, group_name_edittext1.getText().toString().trim(),
+							pendingCardTemplate == null ? "CLASSIC" : pendingCardTemplate,
+							pendingCardQr, pendingCardDigits, creatorUid, null);
+						}
+						
 						com.harvanna.app.firestore.UserProfileManager.getInstance(getApplicationContext())
 						.addGroupToProfile(creatorUid, newGroupId, new com.harvanna.app.firestore.UserProfileManager.SimpleCallback() {
 							@Override public void onSuccess() { /* best-effort, doesn't block navigation */ }
@@ -1943,6 +1951,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == RC_MANDATORY_GROUP_CARD && resultCode == Activity.RESULT_OK) {
+			if (data != null) {
+				pendingCardQr = data.getStringExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RESULT_QR);
+				pendingCardDigits = data.getStringExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RESULT_DIGITS);
+				pendingCardTemplate = data.getStringExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RESULT_TEMPLATE);
+			}
 			_proceedWithGroupWalletCreation();
 		}
 	}

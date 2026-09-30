@@ -78,7 +78,6 @@ public final class LockSigner {
                 .put("memo", t.optString("memo", "")).put("payload", t.optString("payload", ""))
                 .put("publicKey", pub).put("signature", Base64.encodeToString(sig, Base64.NO_WRAP));
             HarvannaNodeClient.nodePost("/api/v1/locks/submit", body.toString(), new HarvannaNodeClient.JsonCallback() {
-<<<<<<< HEAD
                 @Override public void onSuccess(JSONObject r) {
                     String purpose = com.harvanna.app.notify.TxEvents.purpose(t.optString("memo", ""));
                     String scope = com.harvanna.app.notify.TxEvents.scope(t.optString("memo", ""));
@@ -88,9 +87,6 @@ public final class LockSigner {
                             + (scope.isEmpty() ? "" : " for your " + scope) + (purpose.isEmpty() ? "" : " (" + purpose.toLowerCase(java.util.Locale.US) + ")") + ". The network is processing it.", "", -1);
                     submitFrom(c, templates, i + 1, nonce + 1, done);
                 }
-=======
-                @Override public void onSuccess(JSONObject r) { submitFrom(c, templates, i + 1, nonce + 1, done); }
->>>>>>> main
                 @Override public void onError(String e) { done.onDone(e); }
             });
         } catch (Exception e) {

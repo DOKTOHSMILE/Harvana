@@ -215,6 +215,7 @@ public class ProfileActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		addSocialShortcuts();
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {
@@ -748,4 +749,24 @@ public class ProfileActivity extends AppCompatActivity {
 	{
 	}
 	
+
+	/** Friends and the off-app contact card (username, phone, chat links) live one tap from the profile. */
+	private void addSocialShortcuts() {
+		if (linear1 == null) return;
+		android.widget.LinearLayout box = new android.widget.LinearLayout(this);
+		box.setOrientation(android.widget.LinearLayout.VERTICAL);
+		int pad = (int) (16 * getResources().getDisplayMetrics().density);
+		box.setPadding(pad, pad, pad, 0);
+		com.google.android.material.button.MaterialButton card = new com.google.android.material.button.MaterialButton(this);
+		card.setAllCaps(false);
+		card.setText("Username and chat links");
+		card.setOnClickListener(v -> startActivity(new android.content.Intent(this, com.harvanna.app.social.ContactCardActivity.class)));
+		com.google.android.material.button.MaterialButton friends = new com.google.android.material.button.MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+		friends.setAllCaps(false);
+		friends.setText("Friends");
+		friends.setOnClickListener(v -> startActivity(new android.content.Intent(this, com.harvanna.app.social.FriendsActivity.class)));
+		box.addView(card);
+		box.addView(friends);
+		linear1.addView(box);
+	}
 }

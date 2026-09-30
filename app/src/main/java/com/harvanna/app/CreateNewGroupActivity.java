@@ -965,6 +965,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			com.harvanna.app.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
+		ViewGroup formHost = findViewById(R.id.linear1);
+		if (formHost != null) formHost.addView(com.harvanna.app.social.PeoplePicker.section(this, peopleToInvite));
 		// The page heading lives in the action bar now (title + subtitle that follows the chosen group type).
 		if (textview1 != null) textview1.setVisibility(View.GONE);
 		if (textview11 != null) textview11.setVisibility(View.GONE);
@@ -1079,6 +1081,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private String states = "";
 	private HashMap<String, Object> newGroupMap = new HashMap<>();
 	private String groupTypeString = "";
+	private final com.harvanna.app.social.PeoplePicker.Selection peopleToInvite = new com.harvanna.app.social.PeoplePicker.Selection();
 	private String frequencyString = "";
 	private String visibilityString = "";
 	private String locationString = "";
@@ -2017,6 +2020,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				return;
 			}
 			if (onNode) com.harvanna.app.group.GroupSaver.unqueue(getApplicationContext(), newGroupId);
+			// People picked while creating the group get their invitations now that the group exists.
+			com.harvanna.app.social.PeoplePicker.sendAll(CreateNewGroupActivity.this, newGroupId, newGroupMap, peopleToInvite, "", (sent, failed) -> { });
 			if (pendingCardQr != null && pendingCardDigits != null) {
 				com.harvanna.app.group.GroupCardStore.publish(getApplicationContext(), newGroupId,
 				_realGroupWalletAddress, group_name_edittext1.getText().toString().trim(),

@@ -51,6 +51,9 @@ public final class InviteManager {
         return groupId + "_" + normalizeEmail(email).replaceAll("[^a-z0-9]", "-");
     }
 
+    /** Invite addressed to a member found through friends or username (no email needed). */
+    public static String idForUser(String groupId, String uid) { return groupId + "_u_" + uid; }
+
     public static boolean isExpired(Map<String, Object> inv, long now) {
         Object o = inv.get("expiresAt");
         return o instanceof Number && ((Number) o).longValue() < now;
@@ -86,22 +89,57 @@ public final class InviteManager {
             });
     }
 
-    /** Pending, unexpired invites for the signed-in user's verified email. */
+    public static void sendToUser(Context ctx, String groupId, Map<String, Object> group, com.harvanna.app.social.Person to,
+                                  String message, Done done) {
+        FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
+        if (me == null) { done.onDone("Sign in first."); return; }
+        if (to == null || to.uid.isEmpty()) { done.onDone("Unknown member."); return; }
+        if (to.uid.equals(me.getUid())) { done.onDone("You can't invite yourself."); return; }
+        long now = System.currentTimeMillis();
+        Map<String, Object> f = new HashMap<>();
+        f.put("groupId", groupId);
+        f.put("groupName", str(group, "groupName", "Group"));
+        f.put("groupType", str(group, "groupType", ""));
+        f.put("inviterUid", me.getUid());
+        f.put("inviterName", me.getDisplayName() == null ? "A member" : me.getDisplayName());
+        f.put("inviteeUid", to.uid);
+        f.put("inviteeName", to.name);
+        f.put("message", message == null ? "" : message.trim());
+        f.put("status", "PENDING");
+        f.put("createdAt", now);
+        f.put("expiresAt", now + TTL_MS);
+        GroupFirestoreManager.getInstance(ctx).setTopLevelDoc("INVITES", idForUser(groupId, to.uid), f,
+            new GroupFirestoreManager.SimpleCallback() {
+                @Override public void onSuccess() {
+                    GroupFirestoreManager.getInstance(ctx).postSystemNotice(groupId, "Invitation sent", "An invitation was sent to " + to.name + ".");
+                    done.onDone(null);
+                }
+                @Override public void onError(String err) { done.onDone("Couldn't invite " + to.name + ": " + err); }
+            });
+    }
+
+    /** Pending, unexpired invites for the signed-in user: sent to their verified email or directly to their account. */
     public static void listMine(Context ctx, ListCb cb) {
         FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
-        if (me == null || me.getEmail() == null) { cb.onList(new ArrayList<>()); return; }
-        GroupFirestoreManager.getInstance(ctx).queryTopLevel("INVITES", "inviteeEmail",
-            normalizeEmail(me.getEmail()), 50, new GroupFirestoreManager.ListCallback() {
-                @Override public void onSuccess(List<Map<String, Object>> items) {
-                    long now = System.currentTimeMillis();
-                    List<Map<String, Object>> out = new ArrayList<>();
+        if (me == null) { cb.onList(new ArrayList<>()); return; }
+        final List<Map<String, Object>> out = new ArrayList<>();
+        final java.util.concurrent.atomic.AtomicInteger left = new java.util.concurrent.atomic.AtomicInteger(me.getEmail() == null ? 1 : 2);
+        final Runnable finish = () -> { if (left.decrementAndGet() == 0) cb.onList(out); };
+        GroupFirestoreManager.ListCallback collect = new GroupFirestoreManager.ListCallback() {
+            @Override public void onSuccess(List<Map<String, Object>> items) {
+                long now = System.currentTimeMillis();
+                synchronized (out) {
                     for (Map<String, Object> m : items) {
                         if ("PENDING".equals(str(m, "status", "")) && !isExpired(m, now)) out.add(m);
                     }
-                    cb.onList(out);
                 }
-                @Override public void onError(String error) { cb.onError(error); }
-            });
+                finish.run();
+            }
+            @Override public void onError(String error) { finish.run(); }
+        };
+        GroupFirestoreManager fm = GroupFirestoreManager.getInstance(ctx);
+        fm.queryTopLevel("INVITES", "inviteeUid", me.getUid(), 50, collect);
+        if (me.getEmail() != null) fm.queryTopLevel("INVITES", "inviteeEmail", normalizeEmail(me.getEmail()), 50, collect);
     }
 
     public static void respond(Context ctx, String inviteId, boolean accepted, Done done) {

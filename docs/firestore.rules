@@ -217,8 +217,9 @@ service cloud.firestore {
     match /INVITES/{inviteId} {
       function inviteeIsMe() {
         return signedIn()
-          && request.auth.token.email_verified == true
-          && resource.data.inviteeEmail == request.auth.token.email.lower();
+          && (resource.data.get('inviteeUid', '') == request.auth.uid
+              || (request.auth.token.email_verified == true
+                  && resource.data.get('inviteeEmail', '') == request.auth.token.email.lower()));
       }
       allow create: if signedIn()
         && request.resource.data.inviterUid == request.auth.uid
@@ -231,6 +232,42 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'respondedAt'])
         && request.resource.data.status in ['ACCEPTED', 'DECLINED'];
       allow delete: if signedIn() && resource.data.inviterUid == request.auth.uid;
+    }
+
+    // ── People: usernames, friends, contact cards ─────────────────────
+    // Usernames are unique. A name can be looked up one at a time (get) but never listed, so there is no
+    // member directory to scrape.
+    match /USERNAMES/{name} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.name == name
+        && name.matches('^[a-z][a-z0-9_.]{2,19}$');
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // People I follow: private to me.
+    match /FRIENDS/{owner}/list/{friend} {
+      allow read, write: if signedIn() && request.auth.uid == owner;
+    }
+
+    // Who follows {owner}: the follower writes their own row; the owner reads and may remove rows.
+    match /FOLLOWERS/{owner}/list/{follower} {
+      allow read: if signedIn() && request.auth.uid == owner;
+      allow create: if signedIn() && request.auth.uid == follower && request.resource.data.uid == follower;
+      allow update: if false;
+      allow delete: if signedIn() && (request.auth.uid == follower || request.auth.uid == owner);
+    }
+
+    // Phone number and chat links. Readable by the owner and by people who follow each other with the owner.
+    match /CONTACTS/{uid} {
+      allow read: if signedIn() && (
+        request.auth.uid == uid
+        || (exists(/databases/$(database)/documents/FRIENDS/$(uid)/list/$(request.auth.uid))
+            && exists(/databases/$(database)/documents/FRIENDS/$(request.auth.uid)/list/$(uid))));
+      allow write: if signedIn() && request.auth.uid == uid;
     }
 
     match /P2P_PAYMENT_DETAILS/{listingId} {

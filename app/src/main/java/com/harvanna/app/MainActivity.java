@@ -656,9 +656,17 @@ public class MainActivity extends AppCompatActivity {
 			a.put("desc", "Open groups you belong to");
 			communityMechanicsList.add(a);
 			HashMap<String, Object> b = new HashMap<>();
-			b.put("title", "Invite friends");
-			b.put("desc", "Share Harvanna with someone");
+			b.put("title", "Friends");
+			b.put("desc", "Follow people and invite them to groups");
 			communityMechanicsList.add(b);
+			HashMap<String, Object> b2 = new HashMap<>();
+			b2.put("title", "My contact card");
+			b2.put("desc", "Username, phone and chat links");
+			communityMechanicsList.add(b2);
+			HashMap<String, Object> b3 = new HashMap<>();
+			b3.put("title", "Share Harvanna");
+			b3.put("desc", "Tell someone about the app");
+			communityMechanicsList.add(b3);
 		}
 		if (securityFinanceList.isEmpty()) {
 			HashMap<String, Object> a = new HashMap<>();
@@ -798,6 +806,10 @@ public class MainActivity extends AppCompatActivity {
 			if (position == 0) {
 				bottomnavigation1.setSelectedItemId(R.id.menu_groups);
 			} else if (position == 1) {
+				startActivity(new android.content.Intent(MainActivity.this, com.harvanna.app.social.FriendsActivity.class));
+			} else if (position == 2) {
+				startActivity(new android.content.Intent(MainActivity.this, com.harvanna.app.social.ContactCardActivity.class));
+			} else if (position == 3) {
 				android.content.Intent share = new android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain");
 				share.putExtra(android.content.Intent.EXTRA_TEXT, "Join me on Harvanna: save together in groups and manage your " + com.harvanna.app.CoinInfo.ticker() + " wallet.");
 				startActivity(android.content.Intent.createChooser(share, "Invite friends"));

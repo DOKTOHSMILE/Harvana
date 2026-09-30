@@ -82,7 +82,7 @@
     <color name="colorSuccessSoft">#1A00B98F</color>
     <color name="colorWarningSoft">#1AF59E0B</color>
     <!--Hero card (wallet): charcoal in both themes so the brand reads the same-->
-    <color name="colorHeroCard">#111827</color>
+    <color name="colorHeroCard">#E6111827</color>
     <color name="colorOnHeroFaint">#22FFFFFF</color>
     <color name="colorOnHeroStroke">#55FFFFFF</color>
     <color name="colorOnHeroMuted">#9CA3AF</color>

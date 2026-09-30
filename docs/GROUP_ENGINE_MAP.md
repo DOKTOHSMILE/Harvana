@@ -48,3 +48,11 @@ vouching, staking (unstake/claim signed; stake is a plain transfer to the vault)
 - **Loans**: request (principal, duration) with utilisation cap hint; repay with remaining due and grace countdown.
 Migration approach: run node calls behind the existing screens one action at a time (create -> join -> contribute),
 keeping Firestore only for presentation metadata (names, photos, chat/notices) that the node does not hold.
+
+## Voting rules confirmed from node source (GroupGovernance.java, HarvannaProtocolManager constants)
+- Applies to Accumulative and Fixed groups only: Fixed disbursement / milestone / emergency-grant votes and admin recovery. Circle has no votes. Accumulative has no vote endpoint (loan pools are admin/rule driven).
+- Voter set is snapshotted when the proposal is created: admin 40% (4000 bps, fixed); the other 60% split evenly among up to the top 5 members by achievement (Accum: totalLinesCompleted, Fixed: contributedRaw). If fewer than 5 members have non-zero history, every eligible member votes. The admin never counts twice.
+- Eligible members must have contributed at least once and have 48h tenure (Circle exempt). Migrated (recovered) wallets do not vote.
+- Pass: yes weight >= 51% of snapshot total weight AND yes voters >= quorum AND at least one yes voter other than the requester. Quorum = min(eligible voters, max(2, ceil(15% of total members))), stored on the proposal (`minVoters`).
+- Votes can be changed until the proposal resolves (`alreadyVoted` flag returned). Admin recovery proposals expire after 14 days; a proposal needs at least 2 eligible voters.
+- App consequence: vote UI must show weight bps, yes/total weight, quorum (minVoters), and disable voting for non-eligible members; the Firestore group votes in the Loans/Payments tabs are app-only and do not reflect the node's rules.

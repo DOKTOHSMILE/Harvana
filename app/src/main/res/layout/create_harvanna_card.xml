@@ -211,7 +211,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="6dp"
-				android:text="Set a decryption password. At least 20 characters. Not stored anywhere — if you lose this card and forget the password, your assets cannot be recovered."
+				android:text="Set a decryption password. At least 24 characters. Not stored anywhere — if you lose this card and forget the password, your assets cannot be recovered."
 				android:textSize="13sp"
 				android:textColor="?android:attr/textColorSecondary"
 				android:lineSpacingExtra="2dp" />
@@ -264,7 +264,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="8dp"
-				android:text="0 / 20 characters minimum"
+				android:text="0 / 24 characters minimum"
 				android:textSize="12sp"
 				android:textColor="?android:attr/textColorSecondary" />
 			<TextView

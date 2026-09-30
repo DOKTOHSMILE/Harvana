@@ -48,7 +48,7 @@ public final class HarvannaCardCrypto {
 
     public static final String FORMAT_PREFIX = "HARVANNACARD2:";
 
-    public static final int MIN_PASSWORD_LENGTH = 20;
+    public static final int MIN_PASSWORD_LENGTH = 24;
 
     private static final int SALT_LENGTH = 8;
     private static final int GCM_IV_LENGTH = 12;

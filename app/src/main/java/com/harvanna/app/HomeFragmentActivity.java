@@ -76,7 +76,6 @@ public class HomeFragmentActivity extends Fragment {
 	
 	private HashMap<String, Object> user_v_map = new HashMap<>();
 	private String mySeedPhrase = "";
-	private static final double HARV_TO_NGN = 150.0;
 	
 	private ArrayList<HashMap<String, Object>> lmap_custom_button = new ArrayList<>();
 	private ArrayList<HashMap<String, Object>> new_test_map = new ArrayList<>();

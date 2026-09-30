@@ -338,7 +338,6 @@ public class GroupPaymentFragmentActivity extends Fragment {
 	private String groupId = "";
 	private int mySlot = 0;
 	private static final String PREF_PAY = "harvanna_group_pay_state";
-	private static final double HARV_TO_NGN = 150.0;
 	private String myUid = "";
 	private String groupType = "";
 	private long totalSlots = 1;
@@ -627,9 +626,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 				// APPLIED FIX
 				tv_group_wallet_balance.setText(_formatUIBalance(cachedHarv));
 			}
-			if (tv_group_wallet_ngn != null) {
-				tv_group_wallet_ngn.setText(String.format(Locale.US, "≈ ₦%,.2f", cachedHarv * HARV_TO_NGN));
-			}
+			if (tv_group_wallet_ngn != null) tv_group_wallet_ngn.setVisibility(View.GONE); // no real rate: show nothing rather than a made-up one
 		}
 		
 		HarvannaNodeClient.getWallet(groupWalletAddress, new HarvannaNodeClient.JsonCallback() {
@@ -645,9 +642,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 						// APPLIED FIX
 						tv_group_wallet_balance.setText(_formatUIBalance(harv));
 					}
-					if (tv_group_wallet_ngn != null) {
-						tv_group_wallet_ngn.setText(String.format(Locale.US, "≈ ₦%,.2f", harv * HARV_TO_NGN));
-					}
+					if (tv_group_wallet_ngn != null) tv_group_wallet_ngn.setVisibility(View.GONE);
 				});
 			}
 			@Override

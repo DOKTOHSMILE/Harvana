@@ -1404,7 +1404,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	
 	/** One "Allow member loans" switch per type card, all bound to the same flag. */
 	private void _addLoanToggles() {
-		CardView[] cards = {card_rotating_details, card_fixed_details, card_accumulative_details};
+		CardView[] cards = {card_fixed_details, card_accumulative_details}; // node has no loan engine for circles/rotating
 		for (CardView c : cards) {
 			if (c == null || c.getChildCount() == 0 || !(c.getChildAt(0) instanceof LinearLayout)) continue;
 			LinearLayout host = (LinearLayout) c.getChildAt(0);
@@ -1429,7 +1429,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	
 	private void _selectGroupType(String type) {
 		groupTypeString = type;
-		boolean defaultLoans = "Accumulative Funds".equals(type);
+		boolean defaultLoans = "Accumulative Funds".equals(type); // rotating: always off
 		for (androidx.appcompat.widget.SwitchCompat sw : loanSwitches) sw.setChecked(defaultLoans);
 		allowLoans = defaultLoans;
 		_applyLoanFieldVisibility();

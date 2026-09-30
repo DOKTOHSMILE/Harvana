@@ -169,7 +169,14 @@ Consequences to know:
 
 ## Group wallet card sharing
 - The encrypted Access Card (ciphertext + digit code + address, never the passphrase) is published to `GROUPS/{gid}/private/walletCard` after group creation (or when the admin regenerates it from Group settings). Members view/print/save it in `GroupWalletBackupActivity`.
-- Needs the `private` rule in `docs/firestore.rules.proposed` deployed; until then publish 403s (kept locally and retried when the admin opens the backup screen) and members see an error.
+- Needs the `private` rule in `docs/firestore.rules` deployed; until then publish 403s (kept locally and retried when the admin opens the backup screen) and members see an error.
 - Security note: members hold ciphertext, so the passphrase strength is the only protection (min 20 chars enforced by the card crypto). Admin should use a long random passphrase and never share it.
 - Node-derived on-chain Circle escrow has no private key, so no card exists for it; only personal-wallet backup applies.
 - Not implemented: per-type settings for GenLoan; a fuller rebuild of the settings screen (existing type panels for Rotating/Fixed/Accumulative kept, backup section added).
+
+## Owner decisions applied (30 Sep)
+- Removed the fake HARV_TO_NGN=150 rate everywhere; the group wallet's "≈ ₦" line is hidden (no real rate source).
+- Access Card passphrase minimum is now 24 characters (new cards only; existing cards still decrypt).
+- Loans: the node has loan machinery for Accumulative and Fixed groups only (Circle/Rotating has none), so the loan toggle exists only for those two types; Rotating is always loans-off.
+- Miner package: com.harvanna.mine (+ manifest <queries> so Android 11+ can detect it).
+- Full Firestore rules replacement: docs/firestore.rules. Note the rebrand renamed data fields (amountAjc->amountHarv, repaidAmountAjc->repaidAmountHarv); the rules use the new names, so any data written by an older build under old names would not match.

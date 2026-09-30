@@ -1,0 +1,296 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function groupDoc(groupId) {
+      return get(/databases/$(database)/documents/GROUPS/$(groupId)).data;
+    }
+
+    function memberDoc(groupId) {
+      return get(/databases/$(database)/documents/GROUPS/$(groupId)/members/$(request.auth.uid)).data;
+    }
+
+    function isGroupCreator(groupId) {
+      return signedIn() && groupDoc(groupId).creatorId == request.auth.uid;
+    }
+
+    function isActiveMember(groupId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/GROUPS/$(groupId)/members/$(request.auth.uid))
+        && memberDoc(groupId).status == 'ACTIVE';
+    }
+
+    function isCreatorOrMember(groupId) {
+      return isGroupCreator(groupId) || isActiveMember(groupId);
+    }
+
+    function paymentConfirmOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['status', 'txRef', 'confirmedAt']);
+    }
+
+    // OPEN ITEM (A2): any signed-in user can still read every profile. The app needs
+    // other members' names/icons, and rules cannot hide fields. Fix = move DOB/ID/address/GPS/kin
+    // into USERS/{uid}/private/kyc (owner-only) in an app change, then narrow this read.
+    match /USERS/{uid} {
+      allow read: if signedIn();
+      allow create: if isSelf(uid);
+      allow update: if isSelf(uid);
+      allow delete: if false;
+    }
+
+    match /LEARN_CONTENT/{contentId} {
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.description.size() <= 600
+        && request.resource.data.category is string
+        && request.resource.data.imageUrl is string
+        && request.resource.data.imageUrl.matches('^https?://.*')
+        && request.resource.data.createdAt is number
+        && request.resource.data.views is number;
+
+      allow update: if request.auth != null && (
+        resource.data.authorUid == request.auth.uid ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+      );
+
+      allow delete: if request.auth != null
+        && resource.data.authorUid == request.auth.uid;
+    }
+
+    match /GROUPS/{groupId} {
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && request.resource.data.creatorId == request.auth.uid
+        && request.resource.data.keys().hasAll(['groupName', 'creatorId', 'groupType']);
+
+      // Creator edits anything. Any ACTIVE member may only refresh the member counter
+      // (written by whoever admits/leaves).
+      allow update: if isGroupCreator(groupId)
+        || (isActiveMember(groupId)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['membersCount']));
+      allow delete: if isGroupCreator(groupId);
+
+      // Wallet Access Card backup (ciphertext only; the passphrase never leaves the admin).
+      // Members read; only the group creator writes; never deleted.
+      match /private/{docId} {
+        allow read: if isCreatorOrMember(groupId);
+        allow create, update: if isGroupCreator(groupId);
+        allow delete: if false;
+      }
+
+      match /members/{memberUid} {
+        allow read: if signedIn();
+
+        // A1/A6 fix: the creator may add anyone; a user may add only THEMSELVES, as a plain
+        // MEMBER, and only if the group does not require approval or their join request
+        // was APPROVED.
+        allow create: if signedIn()
+          && request.resource.data.status == 'ACTIVE'
+          && (
+            isGroupCreator(groupId)
+            || ( request.auth.uid == memberUid
+                 && request.resource.data.role == 'MEMBER'
+                 && ( groupDoc(groupId).requireApprovalToJoin == false
+                      || ( exists(/databases/$(database)/documents/GROUPS/$(groupId)/joinRequests/$(memberUid))
+                           && get(/databases/$(database)/documents/GROUPS/$(groupId)/joinRequests/$(memberUid)).data.status == 'APPROVED' ) ) )
+          );
+
+        // THE UPGRADE: added 'status' to the self-update whitelist so a
+        // member can mark their own membership as LEFT (Leave Group).
+        // 'role' deliberately stays out of this list — the one place a
+        // member's own role gets self-updated (Transfer Admin's old
+        // admin demoting themselves) happens while they're still
+        // isGroupCreator, which already authorizes it independently, so
+        // no self-service path for changing your own role is needed or
+        // wanted here.
+        allow update: if isGroupCreator(groupId)
+          || (isSelf(memberUid)
+              && request.resource.data.diff(resource.data).affectedKeys()
+                  .hasOnly(['walletAddress', 'wallet_address', 'status']));
+
+        allow delete: if isGroupCreator(groupId);
+      }
+
+      match /joinRequests/{requesterUid} {
+        allow read: if signedIn();
+
+        allow create: if isSelf(requesterUid)
+          && request.resource.data.status == 'PENDING';
+
+        // A3 fix: members may only add a vote; only the creator changes status/slot.
+        // NOTE: this pauses member-vote approvals until the node/Cloud Function resolves them.
+        allow update: if isGroupCreator(groupId)
+          || (isActiveMember(groupId)
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']));
+
+        allow delete: if isGroupCreator(groupId) || isSelf(requesterUid);
+      }
+
+      match /payments/{paymentId} {
+        allow read: if isCreatorOrMember(groupId);
+
+        allow create: if isCreatorOrMember(groupId)
+          && request.resource.data.keys().hasAny(['type', 'status', 'amountHarv', 'timestamp']);
+
+        allow update: if isCreatorOrMember(groupId)
+          && paymentConfirmOnly()
+          && resource.data.status == 'PENDING'
+          && request.resource.data.status == 'CONFIRMED';
+
+        allow delete: if isGroupCreator(groupId);
+      }
+
+      match /loans/{loanId} {
+        allow read: if isCreatorOrMember(groupId);
+
+        allow create: if isActiveMember(groupId)
+          && request.resource.data.status == 'PENDING'
+          && request.resource.data.borrowerUid == request.auth.uid;
+
+        allow update: if isGroupCreator(groupId)
+          || (isSelf(resource.data.borrowerUid)
+              && request.resource.data.diff(resource.data).affectedKeys()
+                  .hasOnly(['repaidAmountHarv', 'lastRepayAt', 'lastRepayTxRef', 'status', 'repaidAt', 'txRepayRef'])
+              && (request.resource.data.status == resource.data.status
+                  || request.resource.data.status == 'REPAID'));
+
+        allow delete: if isGroupCreator(groupId);
+      }
+
+      match /payoutRequests/{requestId} {
+        allow read: if isCreatorOrMember(groupId);
+
+        allow create: if isActiveMember(groupId)
+          && request.resource.data.status == 'PENDING'
+          && request.resource.data.requesterUid == request.auth.uid;
+
+        allow update: if isGroupCreator(groupId)
+          && request.resource.data.status in ['APPROVED', 'REJECTED'];
+
+        allow delete: if isGroupCreator(groupId);
+      }
+
+      match /notices/{noticeId} {
+        allow read: if isCreatorOrMember(groupId);
+
+        allow create: if isGroupCreator(groupId)
+          && request.resource.data.type == 'ANNOUNCEMENT'
+          && request.resource.data.creatorId == request.auth.uid;
+
+        allow create: if isCreatorOrMember(groupId)
+          && request.resource.data.type == 'SYSTEM'
+          && request.resource.data.system == true;
+
+        allow create: if isCreatorOrMember(groupId)
+          && !('type' in request.resource.data.keys());
+
+        allow update, delete: if isGroupCreator(groupId);
+      }
+    }
+
+    match /P2P_PAYMENT_DETAILS/{listingId} {
+      allow create: if signedIn()
+  && request.auth.uid == request.resource.data.sellerUid
+  && request.resource.data.keys().hasAll(['listingId', 'paymentMethods', 'accountName', 'sellerUid', 'createdAtMs'])
+  && request.resource.data.listingId == listingId;
+
+      allow read: if signedIn()
+        && (request.auth.uid == resource.data.sellerUid
+            || exists(/databases/$(database)/documents/P2P_PAYMENT_DETAILS/$(listingId)/authorizedBuyers/$(request.auth.uid)));
+
+      allow update, delete: if false;
+
+      match /authorizedBuyers/{buyerUid} {
+        allow create: if signedIn()
+          && request.auth.uid == buyerUid
+          && request.resource.data.keys().hasAll(['orderId', 'claimedAtMs']);
+
+        allow read: if signedIn()
+          && (request.auth.uid == buyerUid
+              || request.auth.uid == get(/databases/$(database)/documents/P2P_PAYMENT_DETAILS/$(listingId)).data.sellerUid);
+
+        allow update, delete: if false;
+      }
+    }
+
+    // GROUND-UP (Sept 2026) — completed-trade reputation events. Written
+    // ONLY by the node, via its own service-account credential — that
+    // path authenticates through Google Cloud IAM and bypasses these
+    // rules entirely, so "allow write: if false" here has zero effect on
+    // it. This block exists purely to guarantee no client (modded,
+    // scripted, or otherwise) can ever write here directly — that
+    // client-writable path was the actual vulnerability this closes.
+    match /P2P_COMPLETED_TRADES/{txHash} {
+      // Public reputation data, deliberately not restricted to "your own"
+      // — the Express match card and the insurance-criteria checklist
+      // both need to read a COUNTERPARTY's stats, not just your own.
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // GROUND-UP (Sept 17 2026) — the fulfilling seller's chosen bank/
+    // mobile-money account for one specific order against a BUY listing
+    // (a BUY listing's poster has nowhere to pre-set this, since they're
+    // the one paying, not receiving — see P2pSellOrderActivity's class
+    // doc). Contains real account details, so unlike P2P_COMPLETED_TRADES
+    // this is NOT publicly readable — only the two real parties to this
+    // specific order, proven by uid match, not by anyone claiming to be
+    // one of them.
+    match /P2P_ORDER_PAYMENT_DETAILS/{orderId} {
+      allow create: if signedIn()
+        && request.auth.uid == request.resource.data.sellerUid
+        && request.resource.data.keys().hasAll(['orderId', 'sellerUid', 'buyerUid', 'primaryField', 'accountIdentifier', 'accountName', 'createdAtMs'])
+        && request.resource.data.orderId == orderId;
+
+      allow read: if signedIn()
+        && (request.auth.uid == resource.data.sellerUid
+            || request.auth.uid == resource.data.buyerUid);
+
+      allow update, delete: if false;
+    }
+
+    match /MEMBER_REPORTS/{reportId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.status == 'PENDING';
+      allow update, delete: if false;
+    }
+
+    match /REPORTS/{reportId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.status == 'PENDING';
+      allow update, delete: if false;
+    }
+
+    match /TRANSACTIONS/{txId} {
+      allow read: if signedIn();
+      // A5 fix: clients no longer create transaction records (the app has no writer).
+      allow create, update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

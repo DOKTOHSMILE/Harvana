@@ -1293,7 +1293,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			patch.put("allowLoans", on);
 			_patch(patch, on ? "Loans enabled" : "Loans disabled");
 		});
-		backupSection.addView(loanSw, 0);
+		if (!isRotating()) backupSection.addView(loanSw, 0);
 	}
 	
 	private void _refreshKeyStatus() {

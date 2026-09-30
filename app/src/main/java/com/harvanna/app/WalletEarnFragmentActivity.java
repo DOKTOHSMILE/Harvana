@@ -47,7 +47,6 @@ public class WalletEarnFragmentActivity extends Fragment {
 	
 	private static final String PREF_MINING = "harvanna_mining_rewards";
 	private static final String KEY_TOTAL_MINED = "total_mined_harv";
-	private static final double HARV_TO_NGN = 150.0;
 	private String walletAddress = "";
 	
 	private NestedScrollView vscroll1;
@@ -103,7 +102,7 @@ public class WalletEarnFragmentActivity extends Fragment {
 			
 			if (targetContext != null) {
 				try {
-					targetContext.getPackageManager().getPackageInfo("com.harvanna.node.miner", 0);
+					targetContext.getPackageManager().getPackageInfo("com.harvanna.mine", 0);
 					isInstalled = true;
 				} catch (Exception e) {
 					isInstalled = false;
@@ -111,7 +110,7 @@ public class WalletEarnFragmentActivity extends Fragment {
 			}
 			
 			if (isInstalled && targetContext != null) {
-				Intent launchIntent = targetContext.getPackageManager().getLaunchIntentForPackage("com.harvanna.node.miner");
+				Intent launchIntent = targetContext.getPackageManager().getLaunchIntentForPackage("com.harvanna.mine");
 				if (launchIntent != null) {
 					try {
 						startActivity(launchIntent);

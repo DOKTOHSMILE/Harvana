@@ -552,6 +552,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		String creatorId = str(groupData, "creatorId", "");
 		isAdmin = !uid.isEmpty() && uid.equals(creatorId);
 		invalidateOptionsMenu();
+		com.harvanna.app.utils.AppBar.setSubtitle(this, str(groupData, "groupName", ""));
 		
 		_rebuild();
 		_loadMembers();

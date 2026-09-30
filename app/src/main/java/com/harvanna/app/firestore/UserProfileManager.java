@@ -220,7 +220,10 @@ public class UserProfileManager {
         if (add && !present) {
             items.add(value);
         } else if (!add && present) {
-            items.removeIf(item -> item != null && value.equals(String.valueOf(item)));
+            for (java.util.Iterator<Object> it = items.iterator(); it.hasNext(); ) {
+                Object item = it.next();
+                if (item != null && value.equals(String.valueOf(item))) it.remove();
+            }
         } else if (!add) {
             // Nothing to remove — still a no-op success, not an error.
             callback.onSuccess();

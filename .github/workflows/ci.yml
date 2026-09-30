@@ -29,10 +29,10 @@ jobs:
         continue-on-error: true
         run: |
           gradle --no-daemon lintDebug || true
-          echo "===== LINT ERRORS ====="
-          grep -B1 -A3 " Error:\| Fatal:" app/build/reports/lint-results-debug.txt | head -400 || true
-          echo "===== LINT SUMMARY ====="
-          tail -5 app/build/reports/lint-results-debug.txt || true
+          echo "===== LINT ERRORS BY KIND ====="
+          grep -o "Error: .*\[[A-Za-z]*\]" app/build/reports/lint-results-debug.txt | grep -o "\[[A-Za-z]*\]$" | sort | uniq -c | sort -rn || true
+          echo "===== LINT ERRORS THAT CAN BREAK BEHAVIOUR (style-only kinds hidden) ====="
+          grep -E " Error: .*\[(NewApi|MissingPermission|MissingInflatedId|WrongConstant|ResourceType|InvalidPackage|MissingClass|Instantiatable|ProtectedPermissions|RtlHardcoded|ExportedContentProvider|UnsafeIntentLaunch|SetJavaScriptEnabled|Recycle|ScopedStorage|NotificationPermission|ForegroundServicePermission|ObsoleteSdkInt|UnspecifiedImmutableFlag|ExactAlarm|DefaultLocale|StringFormatInvalid|StringFormatCount|MissingTranslation|WrongThread|SimpleDateFormat|ViewHolder|ServiceCast|Override)\]" app/build/reports/lint-results-debug.txt | sed "s#/home/runner/work/Ajoo/Ajoo/##" | head -80 || true
       # Install THIS file to test: its debug signing fingerprint is the one to register in Firebase
       # (Project settings -> Your apps -> SHA certificate fingerprints) for Google sign-in.
       - name: Upload APKs

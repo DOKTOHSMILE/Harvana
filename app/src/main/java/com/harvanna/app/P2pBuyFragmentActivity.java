@@ -360,8 +360,8 @@ public class P2pBuyFragmentActivity extends Fragment {
 			if (premiumOnly && !e.premium) continue;
 			visible.add(e);
 		}
-		if (sortMode == 1) visible.sort((a, b) -> Double.compare(a.unitPrice, b.unitPrice));
-		else if (sortMode == 2) visible.sort((a, b) -> Double.compare(b.unitPrice, a.unitPrice));
+		if (sortMode == 1) java.util.Collections.sort(visible, (a, b) -> Double.compare(a.unitPrice, b.unitPrice));
+		else if (sortMode == 2) java.util.Collections.sort(visible, (a, b) -> Double.compare(b.unitPrice, a.unitPrice));
 		
 		adapter.notifyDataSetChanged();
 		boolean empty = visible.isEmpty();

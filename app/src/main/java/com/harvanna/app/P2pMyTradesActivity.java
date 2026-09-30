@@ -227,7 +227,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 						if (entry != null && "ORDER".equals(entry.optString("recordType", ""))) orders.add(entry);
 					}
 				}
-				orders.sort((a, b) -> Long.compare(b.optLong("createdTimestamp", 0), a.optLong("createdTimestamp", 0)));
+				java.util.Collections.sort(orders, (a, b) -> Long.compare(b.optLong("createdTimestamp", 0), a.optLong("createdTimestamp", 0)));
 				runOnUiThread(() -> {
 					allOrders.clear();
 					allOrders.addAll(orders);

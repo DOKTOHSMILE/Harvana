@@ -467,6 +467,37 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    // The node writes these with its service account, which skips these rules.
+    // A signed-in phone may read the copy. It may not create, change, or delete it.
+    // Paste this block above the catch-all. Do not remove the rules above it.
+    match /REPUTATION/{docId} {
+      allow read: if signedIn();
+      allow create, update, delete: if false;
+    }
+    match /GROUP_TRUST/{docId} {
+      allow read: if signedIn();
+      allow create, update, delete: if false;
+    }
+    match /GROUP_STATE/{docId} {
+      allow read: if signedIn();
+      allow create, update, delete: if false;
+    }
+    match /GROUP_MEMBERS/{docId} {
+      allow read: if signedIn();
+      allow create, update, delete: if false;
+    }
+    match /STAKING_INFO/{docId} {
+      allow read: if signedIn();
+      allow create, update, delete: if false;
+    }
+    match /STAKING/{docId} {
+      allow read: if signedIn();
+      allow create, update, delete: if false;
+    }
+    match /WALLET_LINKS/{docId} {
+      allow read, write: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

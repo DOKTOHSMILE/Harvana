@@ -13,10 +13,10 @@ import org.json.JSONObject;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Display reads (group, roster, staking totals, staking position) come from the
- * Firestore copy the node pushes after it saves. If that copy is not there yet,
- * the call falls back to the node once, and the node pushes the copy. Signing
- * still uses a live node read for the action nonce. Mutations are signed here.
+ * Group, roster, and staking screens read the Firestore copy the node pushes.
+ * If that copy is missing, or Firestore refuses the read, the same call uses
+ * the node. No switch to flip when the Firebase plan changes. A signed
+ * unstake or claim still reads the live nonce from the node.
  *
  * Request nonce: the node requires each signed request to carry the wallet's
  * "nextRequestNonce" (see GET /api/v1/wallet/balance/{address}); this client fetches
@@ -56,7 +56,7 @@ public final class NodeGroupClient {
     public static void getReferral(String referredAddress, Callback cb) { read("/api/v1/referral/" + referredAddress, cb); }
     /** Live position, including the action nonce. Used before a signed unstake or claim. */
     public static void getStakingPosition(String address, Callback cb) { read("/api/v1/staking/position/" + address, cb); }
-    /** The copy the node pushed. Fine for the Earn screen, not for signing. */
+    /** Earn screen. The copy if Firestore has it, otherwise the node. */
     public static void readStakingPosition(String address, Callback cb) { mirrored("STAKING", address, "/api/v1/staking/position/" + address, cb); }
     public static void getStakingInfo(Callback cb) { mirrored("STAKING_INFO", "current", "/api/v1/staking/info", cb); }
 
@@ -351,7 +351,7 @@ public final class NodeGroupClient {
         });
     }
 
-    /** Firestore first. The node is asked only when it has not pushed a copy yet. */
+    /** Firestore first. A missing document or a rules rejection falls through to the node. */
     private static void mirrored(String collection, String id, String path, Callback cb) {
         if (id == null || id.isEmpty()) { read(path, cb); return; }
         try {

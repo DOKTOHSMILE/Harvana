@@ -70,36 +70,25 @@ final class MainDrawer {
 
         list.addView(header());
 
-        section(list, "Money");
-        row(list, R.drawable.icon_account_balance_wallet_outline_, "My wallets", null, () -> open(WalletListActivity.class));
-        row(list, R.drawable.icon_credit_card_round, "Payment methods", "For P2P trades", () -> open(PaymentMethodsActivity.class));
-        row(list, R.drawable.icon_lock_round, "Backup & recovery", "Your recovery phrase", () -> open(BackupRecoveryActivity.class));
+        section(list, "Wallet");
+        row(list, R.drawable.icon_account_balance_wallet_outline_, "Wallets", null, () -> open(WalletListActivity.class));
+        row(list, R.drawable.icon_lock_round, "Backup & recovery", null, () -> open(BackupRecoveryActivity.class));
+        row(list, R.drawable.icon_security_round, "Security & PIN", null, () -> open(SecurityPinSettingsActivity.class));
+        row(list, R.drawable.icon_credit_card_round, "Payment methods", null, () -> open(PaymentMethodsActivity.class));
+
+        section(list, "Circles");
+        row(list, R.drawable.icon_mark_unread_chat_alt_round, "Invitations", null, () -> open(InvitesActivity.class));
+        row(list, R.drawable.icon_group_add_twotone, "Friends", null, () -> open(com.harvanna.app.social.FriendsActivity.class));
+        row(list, R.drawable.icon_star_rate_round, "Trust score", null, () -> open(TrustScoreActivity.class));
         row(list, R.drawable.icon_request_quote_round, "Open loans", null, () -> open(OpenLoansActivity.class));
 
-        section(list, "Community");
-        row(list, R.drawable.icon_groups_outline, "My groups", null, host::openGroupsTab);
-        row(list, R.drawable.icon_mark_unread_chat_alt_round, "Invitations", "Groups that invited you", () -> open(InvitesActivity.class));
-        row(list, R.drawable.icon_group_add_twotone, "Friends", "Follow people, find them in your contacts", () -> open(com.harvanna.app.social.FriendsActivity.class));
-        row(list, R.drawable.icon_alternate_email_twotone, "My contact card", "Username, phone, chat links", () -> open(com.harvanna.app.social.ContactCardActivity.class));
-        row(list, R.drawable.icon_star_rate_round, "Trust score", null, () -> open(TrustScoreActivity.class));
-        row(list, R.drawable.icon_article_twotone, "Write for Learn Hub", null, () -> open(CreateLearnhubContentActivity.class));
-
-        section(list, "Marketplace");
-        row(list, R.drawable.icon_currency_exchange_twotone, "P2P market", "Buy and sell " + CoinInfo.ticker(), () -> open(P2pMarketplaceActivity.class));
+        section(list, "Market");
+        row(list, R.drawable.icon_currency_exchange_twotone, "P2P market", null, () -> open(P2pMarketplaceActivity.class));
         row(list, R.drawable.icon_history_twotone, "My trades", null, () -> open(P2pMyTradesActivity.class));
 
-        section(list, "Preferences");
-        row(list, R.drawable.icon_notifications_outline, "Notification settings", null, () -> open(NotificationSettingsActivity.class));
+        section(list, "App");
         row(list, R.drawable.icon_toggle_on_round, "Appearance", ThemeManager.label(a), this::pickTheme);
-        row(list, R.drawable.icon_security_round, "Security & PIN", null, () -> open(SecurityPinSettingsActivity.class));
-        row(list, R.drawable.icon_visibility_twotone, "Privacy & visibility", null, () -> open(PrivacySettingsActivity.class));
         row(list, R.drawable.icon_settings_outline, "Settings", null, () -> open(SettingsActivity.class));
-
-        section(list, "Help");
-        row(list, R.drawable.ic_help, "Help & support", null, () -> open(HelpSupportActivity.class));
-        row(list, R.drawable.icon_description_round, "Terms of service", null, () -> a.startActivity(new Intent(a, DocumentViewerActivity.class).putExtra("doc_type", "terms")));
-        row(list, R.drawable.icon_rule_twotone, "Privacy policy", null, () -> a.startActivity(new Intent(a, DocumentViewerActivity.class).putExtra("doc_type", "privacy")));
-        row(list, R.drawable.icon_info_round, "About", "Harvanna and " + CoinInfo.ticker(), () -> open(AboutActivity.class));
         row(list, R.drawable.icon_share_round, "Share Harvanna", null, this::shareApp);
 
         divider(list);

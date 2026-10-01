@@ -223,40 +223,41 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuItem menu1 = menu.add(Menu.NONE, 0, Menu.NONE, "Scan");
-		menu1.setIcon(R.drawable.icon_qr_code_scanner_twotone);
 		menu1.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-		
+		menu1.setActionView(_toolbarIcon(R.drawable.icon_qr_code_scanner_twotone, v -> {
+			Intent scanIntent = new Intent(this, com.harvanna.app.ScanQrCodeActivity.class);
+			scanIntent.putExtra(com.harvanna.app.ScanQrCodeActivity.EXTRA_TITLE, "Scan Wallet Address");
+			scanIntent.putExtra(com.harvanna.app.ScanQrCodeActivity.EXTRA_MODE, com.harvanna.app.ScanQrCodeActivity.MODE_WALLET_ADDRESS);
+			startActivityForResult(scanIntent, RC_SCAN_TO_SEND);
+		}));
+
 		MenuItem menu2 = menu.add(Menu.NONE, 1, Menu.NONE, "Notification");
-		menu2.setIcon(R.drawable.icon_notifications_outline);
 		menu2.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		notifMenuItem = menu2;
 		_updateNotifBadge();
-		
+
 		MenuItem menu3 = menu.add(Menu.NONE, 2, Menu.NONE, "More");
-		menu3.setIcon(R.drawable.icon_more_vert_round);
 		menu3.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-		
-		// Fetch the theme's adaptive text color
-		// Icons must contrast with the app bar (orange by day, charcoal by night), so use the bar's own "on" colour.
+		menu3.setActionView(_toolbarIcon(R.drawable.icon_more_vert_round, v -> showRightDropdownMenu(v)));
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	/** Scan, bell and menu share one 24dp glyph inside a 48dp hit target. */
+	private FrameLayout _toolbarIcon(int icon, View.OnClickListener click) {
+		float d = getResources().getDisplayMetrics().density;
+		int box = (int) (48 * d);
+		int glyph = (int) (24 * d);
+		FrameLayout f = new FrameLayout(this);
+		ImageView iv = new ImageView(this);
+		iv.setImageResource(icon);
+		iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
 		android.util.TypedValue tvOnBar = new android.util.TypedValue();
 		getTheme().resolveAttribute(R.attr.onAppBarColor, tvOnBar, true);
-		int iconColor = tvOnBar.data;
-		
-		// Mutate and apply the dynamic tint to the Notification icon
-		if (menu1.getIcon() != null) {
-			menu1.getIcon().mutate().setColorFilter(iconColor, android.graphics.PorterDuff.Mode.SRC_IN);
-		}
-		_updateNotifBadge();
-		
-		// Mutate and apply the dynamic tint to the More (dropdown) icon
-		if (menu2.getIcon() != null) {
-			menu2.getIcon().mutate().setColorFilter(iconColor, android.graphics.PorterDuff.Mode.SRC_IN);
-		}
-		
-		if (menu3.getIcon() != null) {
-			menu3.getIcon().mutate().setColorFilter(iconColor, android.graphics.PorterDuff.Mode.SRC_IN);
-		}
-		return super.onCreateOptionsMenu(menu);
+		iv.setColorFilter(tvOnBar.data, android.graphics.PorterDuff.Mode.SRC_IN);
+		f.addView(iv, new FrameLayout.LayoutParams(glyph, glyph, android.view.Gravity.CENTER));
+		f.setLayoutParams(new ViewGroup.LayoutParams(box, box));
+		f.setOnClickListener(click);
+		return f;
 	}
 	
 	private MenuItem notifMenuItem;
@@ -271,15 +272,8 @@ public class MainActivity extends AppCompatActivity {
 		if (notifMenuItem == null) return;
 		int n = com.harvanna.app.notify.NotificationCenter.unreadCount(this);
 		notifMenuItem.setTitle(n > 0 ? "Notification (" + n + " new)" : "Notification");
-		android.widget.FrameLayout f = new android.widget.FrameLayout(this);
-		int pad = (int) (12 * getResources().getDisplayMetrics().density);
-		android.widget.ImageView iv = new android.widget.ImageView(this);
-		iv.setImageResource(R.drawable.icon_notifications_outline);
-		android.util.TypedValue tvOnBar2 = new android.util.TypedValue();
-		getTheme().resolveAttribute(R.attr.onAppBarColor, tvOnBar2, true);
-		iv.setColorFilter(tvOnBar2.data);
-		iv.setPadding(pad, pad, pad, pad);
-		f.addView(iv, new android.widget.FrameLayout.LayoutParams(pad * 4, pad * 4));
+		android.widget.FrameLayout f = _toolbarIcon(R.drawable.icon_notifications_outline,
+				v -> startActivity(new Intent(this, com.harvanna.app.NotificationsActivity.class)));
 		if (n > 0) {
 			TextView b = new TextView(this);
 			b.setText(n > 99 ? "99+" : String.valueOf(n));
@@ -291,10 +285,10 @@ public class MainActivity extends AppCompatActivity {
 			b.setTypeface(null, android.graphics.Typeface.BOLD);
 			int sz = (int) (16 * getResources().getDisplayMetrics().density);
 			android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(sz, sz, android.view.Gravity.TOP | android.view.Gravity.END);
-			lp.topMargin = pad / 2; lp.rightMargin = pad / 2;
+			int inset = (int) (6 * getResources().getDisplayMetrics().density);
+			lp.topMargin = inset; lp.rightMargin = inset;
 			f.addView(b, lp);
 		}
-		f.setOnClickListener(v -> startActivity(new Intent(this, com.harvanna.app.NotificationsActivity.class)));
 		notifMenuItem.setActionView(f);
 	}
 	

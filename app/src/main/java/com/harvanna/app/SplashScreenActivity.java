@@ -74,7 +74,9 @@ public class SplashScreenActivity extends AppCompatActivity {
         logo.setImageResource(R.drawable.ic_coin_harv);
         logo.setContentDescription("Harvanna");
         logo.setTag("logo");
-        column.addView(logo, new LinearLayout.LayoutParams((int) (120 * d), (int) (120 * d)));
+        LinearLayout.LayoutParams logoLp = new LinearLayout.LayoutParams((int) (120 * d), (int) (120 * d));
+        logoLp.gravity = Gravity.CENTER_HORIZONTAL;
+        column.addView(logo, logoLp);
 
         TextView name = new TextView(this);
         name.setText("Harvanna");
@@ -82,16 +84,24 @@ public class SplashScreenActivity extends AppCompatActivity {
         name.setTypeface(null, Typeface.BOLD);
         name.setTextColor(ContextCompat.getColor(this, R.color.colorTextPrimary));
         name.setTag("name");
-        name.setPadding(0, (int) (16 * d), 0, 0);
-        column.addView(name);
+        name.setGravity(Gravity.CENTER);
+        name.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        LinearLayout.LayoutParams nameLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        nameLp.topMargin = (int) (18 * d);
+        column.addView(name, nameLp);
 
         TextView tagline = new TextView(this);
         tagline.setText("Save together. Build trust.");
         tagline.setTextSize(14);
         tagline.setTextColor(ContextCompat.getColor(this, R.color.colorTextSecondary));
         tagline.setTag("tagline");
-        tagline.setPadding(0, (int) (6 * d), 0, 0);
-        column.addView(tagline);
+        tagline.setGravity(Gravity.CENTER);
+        tagline.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        LinearLayout.LayoutParams tagLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        tagLp.topMargin = (int) (6 * d);
+        column.addView(tagline, tagLp);
 
         status = new TextView(this);
         status.setTextSize(13);

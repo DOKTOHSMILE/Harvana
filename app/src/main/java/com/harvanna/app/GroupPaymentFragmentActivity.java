@@ -732,7 +732,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 			@Override public void onSuccess(org.json.JSONObject json) {
 				if (gen != nodeLoadGen) return;
 				Map<String, Object> group = com.harvanna.app.utils.JsonMaps.toMap(json);
-				boolean admin = viewerIsAdmin || (me != null && me.equalsIgnoreCase(str(group, "creatorAddress")));
+				boolean admin = viewerIsAdmin || (me != null && me.equalsIgnoreCase(str(group, "creatorAddress", "")));
 				if (admin) viewerIsAdmin = true;
 				_loadMyNodePosition(gen, family, nodeId, me, group, admin);
 			}

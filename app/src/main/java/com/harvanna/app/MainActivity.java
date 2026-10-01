@@ -480,14 +480,7 @@ public class MainActivity extends AppCompatActivity {
 		titleView.setTextColor(onAppBarColor);
 		titleView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 18);
 		titleView.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-		
-		TextView subtitleView = new TextView(this);
-		subtitleView.setText("capital oracle projects");
-		subtitleView.setTextColor((onAppBarColor & 0x00FFFFFF) | 0xB3000000);
-		subtitleView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12);
-		
 		textContainer.addView(titleView);
-		textContainer.addView(subtitleView);
 		toolbarContainer.addView(textContainer);
 		
 		// 4. Click Listeners & Styling

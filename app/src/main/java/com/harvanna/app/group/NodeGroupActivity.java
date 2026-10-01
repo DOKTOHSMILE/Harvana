@@ -30,7 +30,6 @@ import com.harvanna.app.engine.VoteView;
 import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.sync.NodeGroupClient;
 import com.harvanna.app.utils.JsonMaps;
-import com.harvanna.app.wallet.PinPromptHelper;
 import com.harvanna.app.wallet.WalletManager;
 
 import org.json.JSONArray;
@@ -328,7 +327,9 @@ public class NodeGroupActivity extends AppCompatActivity {
             c.addView(CircleUi.text(this, "Withdrawal request", 14, R.color.colorTextPrimary, true));
             c.addView(CircleUi.text(this, shortAddr(str(ln, "memberAddress")) + " wants to withdraw " + CircleUi.harv(num(ln, "amountPaidRaw")) + ".", 12.5f, R.color.colorTextSecondary, false));
             c.addView(actionButton(new GroupAction(GroupAction.ACCUM_APPROVE_PACK, "Approve", true), x ->
-                pin(() -> NodeGroupClient.approveAccumPack(getApplicationContext(), me, nodeId, lineId, result("Approved")))));
+                pay("Approve withdrawal", CircleUi.harv(num(ln, "amountPaidRaw")),
+                    moneyRows(str(ln, "memberAddress"), "Sends this member's savings out of the group"),
+                    () -> NodeGroupClient.approveAccumPack(getApplicationContext(), me, nodeId, lineId, result("Approved")))));
             content.addView(c);
         }
     }
@@ -338,24 +339,50 @@ public class NodeGroupActivity extends AppCompatActivity {
     private void onAction(GroupAction a) {
         switch (a.id) {
             case GroupAction.JOIN: confirmJoin(); break;
-            case GroupAction.CONTRIBUTE: pin(() -> NodeGroupClient.contributeCircle(getApplicationContext(), me, nodeId, result("Payment sent"))); break;
-            case GroupAction.WITHDRAW_BOND: pin(() -> NodeGroupClient.withdrawCircleBond(getApplicationContext(), me, nodeId, result("Bond withdrawal requested"))); break;
+            case GroupAction.CONTRIBUTE:
+                pay("Round contribution", CircleUi.harv(num(group, "contributionAmountRaw")),
+                    moneyRows(escrowOrGroup(), "Your payment for this round"),
+                    () -> NodeGroupClient.contributeCircle(getApplicationContext(), me, nodeId, result("Payment sent")));
+                break;
+            case GroupAction.WITHDRAW_BOND:
+                pay("Withdraw bond", CircleUi.harv(bondOf()),
+                    moneyRows("Your wallet", "Returned only if this group allows it"),
+                    () -> NodeGroupClient.withdrawCircleBond(getApplicationContext(), me, nodeId, result("Bond withdrawal requested")));
+                break;
             case GroupAction.START_LINE: startLineDialog(); break;
-            case GroupAction.ACCUM_CONTRIBUTE: pin(() -> NodeGroupClient.contributeAccum(getApplicationContext(), me, nodeId, a.ref, result("Saved"))); break;
+            case GroupAction.ACCUM_CONTRIBUTE:
+                pay("Save today", CircleUi.harv(line == null ? 0 : num(line, "dailyAmountRaw")),
+                    moneyRows(escrowOrGroup(), "One day on your savings line"),
+                    () -> NodeGroupClient.contributeAccum(getApplicationContext(), me, nodeId, a.ref, result("Saved")));
+                break;
             case GroupAction.ACCUM_CONTRIBUTE_MULTI: saveMoreDialog(a.ref); break;
-            case GroupAction.ACCUM_PACK: pin(() -> NodeGroupClient.packAccumLine(getApplicationContext(), me, nodeId, a.ref, indexed("Withdrawal requested. Waiting for the admin.",
-                GroupProposalIndex.PACK, a.ref, "Withdrawal request"))); break;
-            case GroupAction.ACCUM_CLAIM: pin(() -> NodeGroupClient.claimAccumLine(getApplicationContext(), me, nodeId, a.ref, result("Savings claimed"))); break;
+            case GroupAction.ACCUM_PACK:
+                pay("Request withdrawal", CircleUi.harv(line == null ? 0 : num(line, "amountPaidRaw")),
+                    moneyRows("Your wallet", "The admin still has to approve this"),
+                    () -> NodeGroupClient.packAccumLine(getApplicationContext(), me, nodeId, a.ref, indexed("Withdrawal requested. Waiting for the admin.",
+                        GroupProposalIndex.PACK, a.ref, "Withdrawal request")));
+                break;
+            case GroupAction.ACCUM_CLAIM:
+                pay("Claim savings", CircleUi.harv(line == null ? 0 : num(line, "amountPaidRaw")),
+                    moneyRows("Your wallet", "Pays your savings line out to you"),
+                    () -> NodeGroupClient.claimAccumLine(getApplicationContext(), me, nodeId, a.ref, result("Savings claimed")));
+                break;
             case GroupAction.FIXED_DEPOSIT: amountDialog("Deposit", "Amount to deposit", raw ->
-                pin("Authorize a deposit of " + CircleUi.harv(raw), () -> NodeGroupClient.depositFixed(getApplicationContext(), me, nodeId, raw, result("Deposit sent")))); break;
-            case GroupAction.FIXED_REQUEST_DISBURSEMENT: pin(() -> NodeGroupClient.requestFixedDisbursement(getApplicationContext(), me, nodeId,
-                indexedFrom("requestId", "Payout requested. The group will vote.", GroupProposalIndex.DISBURSEMENT, "Payout request"))); break;
+                pay("Deposit", CircleUi.harv(raw), moneyRows(escrowOrGroup(), "Added to this goal group"),
+                    () -> NodeGroupClient.depositFixed(getApplicationContext(), me, nodeId, raw, result("Deposit sent")))); break;
+            case GroupAction.FIXED_REQUEST_DISBURSEMENT:
+                pay("Request payout", potLabel(), moneyRows(escrowOrGroup(), "The group votes before anyone is paid"),
+                    () -> NodeGroupClient.requestFixedDisbursement(getApplicationContext(), me, nodeId,
+                        indexedFrom("requestId", "Payout requested. The group will vote.", GroupProposalIndex.DISBURSEMENT, "Payout request")));
+                break;
             case GroupAction.FIXED_REQUEST_MILESTONE: requestDialog("Request a milestone release", "What will the money be used for?", (raw, text) ->
-                pin(() -> NodeGroupClient.requestFixedMilestone(getApplicationContext(), me, nodeId, raw, text,
-                    indexedFrom("milestoneId", "Milestone requested. The group will vote.", GroupProposalIndex.MILESTONE, "Milestone request")))); break;
+                pay("Request milestone", CircleUi.harv(raw), moneyRows(escrowOrGroup(), text),
+                    () -> NodeGroupClient.requestFixedMilestone(getApplicationContext(), me, nodeId, raw, text,
+                        indexedFrom("milestoneId", "Milestone requested. The group will vote.", GroupProposalIndex.MILESTONE, "Milestone request")))); break;
             case GroupAction.FIXED_REQUEST_GRANT: requestDialog("Ask for an emergency grant", "Why do you need help?", (raw, text) ->
-                pin(() -> NodeGroupClient.requestFixedGrant(getApplicationContext(), me, nodeId, raw, text,
-                    indexedFrom("grantId", "Grant requested. The group will vote.", GroupProposalIndex.GRANT, "Emergency grant request")))); break;
+                pay("Request emergency grant", CircleUi.harv(raw), moneyRows("Your wallet", text),
+                    () -> NodeGroupClient.requestFixedGrant(getApplicationContext(), me, nodeId, raw, text,
+                        indexedFrom("grantId", "Grant requested. The group will vote.", GroupProposalIndex.GRANT, "Emergency grant request")))); break;
             default: break;
         }
     }
@@ -371,14 +398,14 @@ public class NodeGroupActivity extends AppCompatActivity {
 
     private void confirmJoin() {
         final long bond = num(group, "requiredBondRaw"), contribution = num(group, "contributionAmountRaw");
-        new AlertDialog.Builder(this)
-            .setTitle("Join this group?")
-            .setMessage("You will lock a bond of " + CircleUi.harv(bond) + " now and pay " + CircleUi.harv(contribution)
-                + " each round. The bond is returned when the group completes cleanly; missed payments are taken from it with a penalty.\n\nBy joining you sign these exact terms.")
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Sign and join", (d, w) -> pin(() ->
-                NodeGroupClient.joinCircle(getApplicationContext(), me, nodeId, str(group, "termsHash"), result("You joined"))))
-            .show();
+        java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+        rows.add(new String[]{"Bond locked now", CircleUi.harv(bond)});
+        rows.add(new String[]{"Each round after that", CircleUi.harv(contribution)});
+        rows.add(new String[]{"To", escrowOrGroup()});
+        rows.add(new String[]{"Bond comes back", "When the group finishes cleanly. Missed payments are taken from it."});
+        rows.add(new String[]{"You are signing", "The exact terms already set for this group"});
+        pay("Join this group", CircleUi.harv(bond), rows, () ->
+            NodeGroupClient.joinCircle(getApplicationContext(), me, nodeId, str(group, "termsHash"), result("You joined")));
     }
 
     private void startLineDialog() {
@@ -402,8 +429,12 @@ public class NodeGroupActivity extends AppCompatActivity {
                 if (raw <= 0) { toast("Enter a daily amount."); return; }
                 String days = lockDays.getText().toString().trim();
                 final Long until = days.isEmpty() ? null : System.currentTimeMillis() + Long.parseLong(days) * 86_400_000L;
-                pin(() -> NodeGroupClient.startAccumLine(getApplicationContext(), me, nodeId, raw, false,
-                    until == null ? "FLEXIBLE" : "LOCKED", until, "ONGOING", null, result("Savings line started")));
+                pay("Start a savings line", CircleUi.harv(raw),
+                    moneyRows("Your savings line", until == null
+                        ? "Flexible. Opening the line does not pay today."
+                        : "Locked until the date you chose. Opening it does not pay today."),
+                    () -> NodeGroupClient.startAccumLine(getApplicationContext(), me, nodeId, raw, false,
+                        until == null ? "FLEXIBLE" : "LOCKED", until, "ONGOING", null, result("Savings line started")));
             }).show();
     }
 
@@ -420,11 +451,14 @@ public class NodeGroupActivity extends AppCompatActivity {
                     try { n = Integer.parseInt(days.getText().toString().trim()); } catch (Exception ignored) { }
                     if (n < 2) { toast("Enter 2 or more days."); return; }
                     final long total = dailyRaw * n;
-                    pin("Authorize saving " + CircleUi.harv(total), () -> NodeGroupClient.contributeAccumMultiple(getApplicationContext(), me, nodeId, lineId, total, result("Saved " + CircleUi.harv(total))));
+                    pay("Save several days", CircleUi.harv(total),
+                        moneyRows(escrowOrGroup(), n + " days at " + CircleUi.harv(dailyRaw) + " each"),
+                        () -> NodeGroupClient.contributeAccumMultiple(getApplicationContext(), me, nodeId, lineId, total, result("Saved " + CircleUi.harv(total))));
                 }).show();
         } else {
-            amountDialog("Add to my line", "Amount", raw -> pin("Authorize saving " + CircleUi.harv(raw), () ->
-                NodeGroupClient.contributeAccumVariable(getApplicationContext(), me, nodeId, lineId, raw, result("Saved"))));
+            amountDialog("Add to my line", "Amount", raw -> pay("Add to my line", CircleUi.harv(raw),
+                moneyRows(escrowOrGroup(), "Extra saving on this line"),
+                () -> NodeGroupClient.contributeAccumVariable(getApplicationContext(), me, nodeId, lineId, raw, result("Saved"))));
         }
     }
 
@@ -533,10 +567,48 @@ public class NodeGroupActivity extends AppCompatActivity {
     private void pin(String action, Runnable work) {
         final Button source = pressed;
         pressed = null;
-        PinPromptHelper.authorize(this, action, () -> {
+        java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+        rows.add(new String[]{"You are authorizing", action});
+        pay("Review before you continue", "", rows, () -> {
             markBusy(source);
             work.run();
         });
+    }
+
+    /** Summary of the payment, then PIN. Busy state starts only after both succeed. */
+    private void pay(String title, String amount, java.util.List<String[]> rows, Runnable work) {
+        final Button source = pressed;
+        pressed = null;
+        PaymentConfirmSheet.reviewThenAuthorize(this, title, amount, rows, () -> {
+            markBusy(source);
+            work.run();
+        });
+    }
+
+    private java.util.ArrayList<String[]> moneyRows(String to, String detail) {
+        java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+        rows.add(new String[]{"To", to == null || to.isEmpty() ? escrowOrGroup() : to});
+        if (detail != null && !detail.isEmpty()) rows.add(new String[]{"For", detail});
+        rows.add(new String[]{"Network fee", "Set by the network when this is sent"});
+        return rows;
+    }
+
+    private String escrowOrGroup() {
+        String escrow = str(group, "escrowAddress");
+        return escrow.isEmpty() ? "This group's network wallet" : escrow;
+    }
+
+    private long bondOf() {
+        long bond = num(member, "bondRaw");
+        if (bond <= 0) bond = num(member, "bondLockedRaw");
+        if (bond <= 0) bond = num(group, "requiredBondRaw");
+        return bond;
+    }
+
+    private String potLabel() {
+        long pot = num(group, "totalDepositedRaw");
+        if (pot <= 0) pot = num(group, "currentBalanceRaw");
+        return pot > 0 ? CircleUi.harv(pot) : "Group balance";
     }
 
     private Button button(String label, boolean primary, View.OnClickListener l) {

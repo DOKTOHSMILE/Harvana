@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 
 import com.harvanna.app.tx.P2PTradeRouter;
 import com.harvanna.app.wallet.PaymentMethod;
-import com.harvanna.app.wallet.PinPromptHelper;
 import com.harvanna.app.wallet.WalletManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -129,7 +128,22 @@ public final class P2pListingPublisher {
 		
 		final long maxRaw = com.harvanna.app.sync.HarvannaNodeClient.toRawUnits(maxOrderHarv);
 		final long[] priceKobo = new long[1];
-		final Runnable startPublish = () -> PinPromptHelper.authorize(activity, "Publish this listing", () -> {
+		final Runnable startPublish = () -> {
+			java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+			rows.add(new String[]{"Side", listingSide});
+			rows.add(new String[]{"Each trade", com.harvanna.app.wallet.BalanceFormatter.smart(minOrderHarv)
+				+ " to " + com.harvanna.app.wallet.BalanceFormatter.smart(maxOrderHarv)});
+			rows.add(new String[]{"Price", "MARGIN".equals(pricingType)
+				? (marginPercent + "% from the reference")
+				: String.valueOf(unitPrice) + " " + fiatCode});
+			rows.add(new String[]{"Open for", durationHours + " hours"});
+			rows.add(new String[]{"Payment window", paymentWindowMinutes + " minutes"});
+			rows.add(new String[]{"For", "SELL".equals(listingSide)
+				? "Locks this HARV into the listing until it sells or you cancel"
+				: "Publishes a request. HARV moves when someone fills it"});
+			com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(activity,
+			"SELL".equals(listingSide) ? "Publish sell offer" : "Publish buy request",
+			com.harvanna.app.wallet.BalanceFormatter.smart(amountHarv), rows, () -> {
 			final ProgressDialog progress = new ProgressDialog(activity, com.harvanna.app.R.style.HarvannaP2pAlertDialog);
 			progress.setMessage("SELL".equals(listingSide) ? "Publishing offer…" : "Publishing request…");
 			progress.setCancelable(false);
@@ -202,7 +216,7 @@ public final class P2pListingPublisher {
 				}
 			});
 		});
-		
+		};
 		if ("MARGIN".equals(pricingType)) {
 			// Resolve the floating margin to a fixed signed price against the market reference.
 			P2pPriceReference.fetch((medianKobo, samples) -> {

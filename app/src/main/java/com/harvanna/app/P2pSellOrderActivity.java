@@ -559,7 +559,16 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 			return;
 		}
 		
-		PinPromptHelper.authorize(this, "Open this sell order", () -> {
+		double amountHarv = HarvannaNodeClient.toHarvDisplay(amountRaw);
+		double fiatTotal = unitPrice >= 0 ? amountHarv * unitPrice : -1;
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"You sell", BalanceFormatter.smart(amountHarv)});
+		rows.add(new String[]{"You should receive", fiatTotal >= 0 ? P2pMoney.fiat(fiatTotal, listingCurrency) : "The listed price"});
+		rows.add(new String[]{"Platform fee", BalanceFormatter.smart(HarvannaNodeClient.toHarvDisplay(lastPlatformFeeRaw))});
+		rows.add(new String[]{"Paid into", selectedMethod == null ? "Your payment account" : String.valueOf(selectedMethod)});
+		rows.add(new String[]{"Network fee", "Set by the node when this order opens"});
+		com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
+		"Open this sell", BalanceFormatter.smart(amountHarv), rows, () -> {
 			btn_create_sell_order.setEnabled(false);
 			btn_create_sell_order.setText("Creating order…");
 			

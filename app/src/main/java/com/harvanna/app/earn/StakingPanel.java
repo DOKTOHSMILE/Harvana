@@ -14,13 +14,12 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
-import com.harvanna.app.p2p.ThemedDialogs;
+import com.harvanna.app.group.PaymentConfirmSheet;
 import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.sync.NodeGroupClient;
 import com.harvanna.app.tx.TransactionRouter;
 import com.harvanna.app.utils.UiColors;
 import com.harvanna.app.wallet.BalanceFormatter;
-import com.harvanna.app.wallet.PinPromptHelper;
 import com.harvanna.app.wallet.WalletManager;
 
 import org.json.JSONArray;
@@ -229,9 +228,13 @@ public final class StakingPanel {
         long min = info.optLong("minStakeRaw", HarvannaNodeClient.HARV_UNITS_PER_TOKEN);
         if (vault.isEmpty() || address == null || address.isEmpty()) { toast("Wallet or vault is not ready."); return; }
         if (already < min && BalanceFormatter.harvToRaw(harv) < min) { toast("The first stake must be at least 1 HARV."); return; }
-        final String detail = String.format(Locale.US,
-                "Stake %.4f HARV. It starts earning now. Unstaking later returns after 7 days.", harv);
-        gate("Authorize stake", detail, () -> {
+        final String detail = "It starts earning now. Unstaking later returns after 7 days.";
+        java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+        rows.add(new String[]{"To", vault});
+        rows.add(new String[]{"For", detail});
+        rows.add(new String[]{"From", "Your wallet"});
+        rows.add(new String[]{"Network fee", "Taken with the stake"});
+        gate("Stake HARV", String.format(Locale.US, "%.4f HARV", harv), rows, () -> {
             busy = true;
             paint();
             TransactionRouter.routeTransaction(host.requireContext(), address, vault, BigDecimal.valueOf(harv), null, "STAKE",
@@ -252,9 +255,12 @@ public final class StakingPanel {
         try { harv = Double.parseDouble(amount.getText().toString().trim()); }
         catch (Exception e) { toast("Enter how much HARV to unstake."); return; }
         if (harv <= 0 || address == null) return;
-        final String detail = String.format(Locale.US,
-                "Unstake %.4f HARV. It stops earning now and returns after 7 days.", harv);
-        gate("Authorize unstake", detail, () -> {
+        final String detail = "It stops earning now and returns to your wallet after 7 days.";
+        java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+        rows.add(new String[]{"To", "Your wallet, after 7 days"});
+        rows.add(new String[]{"For", detail});
+        rows.add(new String[]{"Network fee", "Taken when the unstake is sent"});
+        gate("Unstake HARV", String.format(Locale.US, "%.4f HARV", harv), rows, () -> {
             busy = true;
             NodeGroupClient.unstake(host.requireContext(), address, BalanceFormatter.harvToRaw(harv), new NodeGroupClient.Callback() {
                 @Override public void onSuccess(JSONObject json) {
@@ -272,8 +278,12 @@ public final class StakingPanel {
         if (address == null || address.isEmpty()) return;
         long pending = pos == null ? 0 : pos.optLong("pendingRewardsRaw", 0);
         if (pending <= 0) { toast("Nothing to claim yet."); return; }
-        final String detail = "Claim " + harv(pending) + " of staking rewards into your wallet.";
-        gate("Authorize claim", detail, () -> {
+        final String shown = harv(pending);
+        java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+        rows.add(new String[]{"To", "Your wallet"});
+        rows.add(new String[]{"For", "Staking rewards already earned"});
+        rows.add(new String[]{"Network fee", "Taken when the claim is sent"});
+        gate("Claim staking rewards", shown, rows, () -> {
             busy = true;
             NodeGroupClient.claimStakingRewards(host.requireContext(), address, new NodeGroupClient.Callback() {
                 @Override public void onSuccess(JSONObject json) {
@@ -285,15 +295,10 @@ public final class StakingPanel {
         });
     }
 
-    /** Confirm the action, then require a transaction PIN. Cancel sends nothing. */
-    private void gate(String title, String detail, Runnable work) {
+    /** Summary of the stake, unstake, or claim, then a transaction PIN. */
+    private void gate(String title, String amount, java.util.List<String[]> rows, Runnable work) {
         if (host.getContext() == null) return;
-        ThemedDialogs.show(ThemedDialogs.alert(host.requireContext())
-                .setTitle(title)
-                .setMessage(detail + "\n\nNothing is sent until you verify.")
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Verify", (d, w) ->
-                        PinPromptHelper.authorize(host.requireContext(), detail, work::run)));
+        PaymentConfirmSheet.reviewThenAuthorize(host.requireContext(), title, amount, rows, work);
     }
 
     private String harv(long raw) {

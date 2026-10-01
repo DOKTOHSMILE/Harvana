@@ -699,7 +699,17 @@ public class P2pExpressActivity extends AppCompatActivity {
 		}
 		if (previewTimer != null) previewTimer.cancel();
 		
-		PinPromptHelper.authorize(this, "Confirm this express trade", () -> {
+		double harvAmount = HarvannaNodeClient.toHarvDisplay(matchedHarvAmountRaw);
+		String ccy = P2pCurrencyFilterState.getCurrency();
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"You", buyMode ? "Buy HARV" : "Sell HARV"});
+		rows.add(new String[]{"Counterparty", matchedPosterAddress == null ? "Matched trader" : matchedPosterAddress});
+		rows.add(new String[]{"Price", "1 HARV ≈ " + P2pMoney.fiat(matchedPrice, ccy)});
+		rows.add(new String[]{"Fiat", P2pMoney.fiat(harvAmount * matchedPrice, ccy)});
+		rows.add(new String[]{"Network fee", "Set by the node when this trade opens"});
+		com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
+		buyMode ? "Buy on express" : "Sell on express",
+		BalanceFormatter.smart(harvAmount), rows, () -> {
 			btn_express_find_match.setEnabled(false);
 			btn_express_find_match.setText("Confirming…");
 			

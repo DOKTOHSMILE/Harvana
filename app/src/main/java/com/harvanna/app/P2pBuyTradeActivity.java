@@ -835,7 +835,16 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		.setTitle("Confirm payment sent")
 		.setMessage("Only continue if you have actually sent the fiat payment to the seller's account shown above. Falsely marking this paid can suspend your account.")
 		.setPositiveButton("I've Paid", (dialog, which) -> {
-			PinPromptHelper.authorize(this, "Mark this trade as paid", () -> {
+			double claimed = com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay(amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
+			double fiat = unitPrice >= 0 ? claimed * unitPrice : -1;
+			java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+			rows.add(new String[]{"You say you paid", fiat >= 0 ? com.harvanna.app.p2p.P2pMoney.fiat(fiat, listingCurrency) : "The agreed fiat"});
+			rows.add(new String[]{"For", com.harvanna.app.wallet.BalanceFormatter.smart(claimed) + " locked for you"});
+			rows.add(new String[]{"To", sellerAddress == null || sellerAddress.isEmpty() ? "The seller" : sellerAddress});
+			rows.add(new String[]{"This does", "Tells the seller the fiat has left your account. It does not send HARV."});
+			com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
+			"Mark this trade paid", fiat >= 0 ? com.harvanna.app.p2p.P2pMoney.fiat(fiat, listingCurrency) : com.harvanna.app.wallet.BalanceFormatter.smart(claimed),
+			rows, () -> {
 				primary_action.setEnabled(false);
 				primary_action.setText("Submitting…");
 				P2PTradeRouter.markOrderPaid(getApplicationContext(), orderId, myAddress, new P2PTradeRouter.Callback() {

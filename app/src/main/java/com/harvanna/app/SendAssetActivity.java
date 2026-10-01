@@ -501,9 +501,15 @@ public class SendAssetActivity extends AppCompatActivity {
 				progress.setMessage("Broadcasting to node…");
 				progress.setCancelable(false);
 				
-				com.harvanna.app.wallet.PinPromptHelper.authorize(SendAssetActivity.this,
-				"Send " + amountText + " " + symbol,
-				() -> {
+				java.util.ArrayList<String[]> payRows = new java.util.ArrayList<>();
+				payRows.add(new String[]{"To", recipient});
+				payRows.add(new String[]{"Asset", symbol});
+				if (etMemo != null && etMemo.getText() != null && etMemo.getText().toString().trim().length() > 0) {
+					payRows.add(new String[]{"Memo", etMemo.getText().toString().trim()});
+				}
+				payRows.add(new String[]{"Network fee", "Set when this token transfer is sent"});
+				com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(SendAssetActivity.this,
+				"Send " + symbol, amountText + " " + symbol, payRows, () -> {
 				isProcessingSend = true;
 				view.setEnabled(false);
 				progress.show();

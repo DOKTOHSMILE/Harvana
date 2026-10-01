@@ -17,7 +17,6 @@ import android.os.Vibrator;
 import android.text.*;
 import android.text.style.*;
 import android.util.*;
-import android.util.Base64;
 import android.view.*;
 import android.view.View;
 import android.view.View.*;
@@ -35,10 +34,6 @@ import androidx.slidingpanelayout.*;
 import androidx.swiperefreshlayout.*;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
-import com.harvanna.app.crypto.Ed25519;
-import com.harvanna.app.tx.TransactionRouter;
-import com.harvanna.app.wallet.SecureWalletStorage;
-import com.harvanna.app.wallet.WalletGenerator;
 import com.harvanna.app.wallet.WalletManager;
 import com.budiyev.android.codescanner.*;
 import com.bumptech.glide.*;
@@ -770,7 +765,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			} else if ("Fixed Contribution".equals(groupTypeString)) {
 				_createFixedOnChain();
 			} else {
-				_showCreateWalletBottomSheet();
+				SketchwareUtil.showMessage(getApplicationContext(), "Choose rotating, savings, or goal. The network assigns the group wallet — this phone does not create one.");
 			}
 		});
 	}
@@ -904,9 +899,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private String distributionString = "";
 	private String cityString = "";
 	private double harv_balance = 0;
-	private static final double GROUP_CREATION_FEE = 5;
 	private String activeAddress = "";
-	private static final String FEE_COLLECTOR_ADDRESS = "AJ0xc41061d9f595b3fbc0dc11a0f4811964eeda5bf1";
 	private String stateString = "";
 	private String countryString = "";
 	LocationHelper helper;
@@ -935,11 +928,6 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private ArrayList<String> disbursementRuleList = new ArrayList<>();
 	private ArrayList<String> withdrawalRuleList = new ArrayList<>();
 	
-	private String pendingGroupMnemonic;
-	private String pendingGroupWalletAddress;
-	private String pendingCardQr, pendingCardDigits, pendingCardTemplate;
-	private com.google.android.material.bottomsheet.BottomSheetDialog pendingGroupBottomSheetDialog;
-	private static final int RC_MANDATORY_GROUP_CARD = 8803;
 	
 	public void _delete_rule_in(final double _pos, final ArrayList<HashMap<String, Object>> _lMap) {
 		_lMap.remove((int)(_pos));
@@ -947,247 +935,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		((BaseAdapter)listview1.getAdapter()).notifyDataSetChanged();
 	}
 	
-	public void _showCreateWalletBottomSheet() {
-		final com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog =
-		new com.google.android.material.bottomsheet.BottomSheetDialog(this);
-		
-		View sheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_create_wallet, null);
-		bottomSheetDialog.setContentView(sheetView);
-		com.harvanna.app.group.BottomSheetUtils.expandFullScreen(bottomSheetDialog, sheetView);
-		
-		com.google.android.material.button.MaterialButton btnGenerate = sheetView.findViewById(R.id.btn_generate_wallet);
-		TextView tvCancel = sheetView.findViewById(R.id.tv_cancel);
-		TextView tvTitle = sheetView.findViewById(R.id.tv_title);
-		if (tvTitle != null) {
-			tvTitle.setText("New Group Wallet Seed Phrase");
-		}
-		
-		btnGenerate.setOnClickListener(v -> {
-			bottomSheetDialog.dismiss();
-			_showRecoveryPhraseBottomSheet();
-		});
-		
-		tvCancel.setOnClickListener(v -> bottomSheetDialog.dismiss());
-		bottomSheetDialog.show();
-	}
 	
-	public void _showRecoveryPhraseBottomSheet() {
-		final Context context = this;
-		if (context == null) return;
-		
-		final com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog =
-		new com.google.android.material.bottomsheet.BottomSheetDialog(context);
-		
-		View sheetView = LayoutInflater.from(context).inflate(R.layout.bottom_sheet_recovery_phrase, null);
-		bottomSheetDialog.setContentView(sheetView);
-		com.harvanna.app.group.BottomSheetUtils.expandFullScreen(bottomSheetDialog, sheetView);
-		
-		try {
-			final String mnemonic = com.harvanna.app.wallet.WalletGenerator.generateMnemonic(context);
-			if (mnemonic == null || mnemonic.trim().isEmpty()) {
-				SketchwareUtil.showMessage(context, "Failed to generate recovery phrase.");
-				return;
-			}
-			
-			final String groupWalletAddress = com.harvanna.app.wallet.WalletGenerator.deriveAddressFromMnemonic(mnemonic);
-			if (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x") || groupWalletAddress.length() != 44) {
-				SketchwareUtil.showMessage(context, "Failed to derive valid HV0x address.");
-				return;
-			}
-			
-			final String[] phraseWords = mnemonic.trim().split("\\s+");
-			if (phraseWords.length != 12) {
-				SketchwareUtil.showMessage(context, "Invalid phrase length.");
-				return;
-			}
-			
-			TextView tvTitle = sheetView.findViewById(R.id.tv_title);
-			if (tvTitle != null) {
-				tvTitle.setText("New Group Wallet Seed Phrase");
-			}
-			
-			int[] tvNumIds = {
-				R.id.tv_num_1, R.id.tv_num_2, R.id.tv_num_3, R.id.tv_num_4,
-				R.id.tv_num_5, R.id.tv_num_6, R.id.tv_num_7, R.id.tv_num_8,
-				R.id.tv_num_9, R.id.tv_num_10, R.id.tv_num_11, R.id.tv_num_12
-			};
-			int[] tvWordIds = {
-				R.id.tv_word_1, R.id.tv_word_2, R.id.tv_word_3, R.id.tv_word_4,
-				R.id.tv_word_5, R.id.tv_word_6, R.id.tv_word_7, R.id.tv_word_8,
-				R.id.tv_word_9, R.id.tv_word_10, R.id.tv_word_11, R.id.tv_word_12
-			};
-			
-			for (int i = 0; i < 12; i++) {
-				TextView tvNum = sheetView.findViewById(tvNumIds[i]);
-				TextView tvWord = sheetView.findViewById(tvWordIds[i]);
-				if (tvNum != null) tvNum.setText((i + 1) + ".");
-				if (tvWord != null) tvWord.setText(phraseWords[i]);
-			}
-			
-			final CheckBox cbAgree = sheetView.findViewById(R.id.cb_agree);
-			final com.google.android.material.button.MaterialButton btnFinish = sheetView.findViewById(R.id.btn_finish_setup);
-			
-			if (btnFinish == null) {
-				SketchwareUtil.showMessage(context, "Finish button not found.");
-				return;
-			}
-			
-			btnFinish.setOnClickListener(v -> {
-				if (cbAgree != null && !cbAgree.isChecked()) {
-					SketchwareUtil.showMessage(context, "Please confirm you have backed up the phrase.");
-					return;
-				}
-				
-				pendingGroupMnemonic = mnemonic;
-				pendingGroupWalletAddress = groupWalletAddress;
-				pendingGroupBottomSheetDialog = bottomSheetDialog;
-				Intent cardIntent = new Intent(context, com.harvanna.app.CreateHarvannaCardActivity.class);
-				com.harvanna.app.wallet.PhraseHandoff.hold(mnemonic, groupWalletAddress);
-				cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_MANDATORY, true);
-				cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
-				cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_LABEL, group_name_edittext1.getText().toString().trim());
-				startActivityForResult(cardIntent, RC_MANDATORY_GROUP_CARD);
-			});
-			
-			bottomSheetDialog.show();
-		} catch (Exception e) {
-			SketchwareUtil.showMessage(context, "Error: " + e.getMessage());
-		}
-	}
 	
-	private void _continueGroupCreationFee(final ProgressDialog progress,
-	final Context context,
-	final SharedPreferences prefs,
-	final com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog,
-	final String groupWalletAddress,
-	final String mnemonic,
-	final String finalPersonalAddress,
-	final String finalPersonalSeed) {
-		runOnUiThread(() -> {
-			progress.setMessage(("Checking balance for 5 " + com.harvanna.app.CoinInfo.ticker() + " fee..."));
-			com.harvanna.app.wallet.WalletNodeBridge.fetchLiveBalance(CreateNewGroupActivity.this, finalPersonalAddress,
-			new com.harvanna.app.wallet.WalletNodeBridge.BalanceCallback() {
-				@Override
-				public void onSuccess(double harvBalance, long nonce, long blockHeight) {
-					runOnUiThread(() -> {
-						java.math.BigDecimal balance = java.math.BigDecimal.valueOf(harvBalance);
-						java.math.BigDecimal requiredAmount = new java.math.BigDecimal("5.005");
-						if (balance.compareTo(requiredAmount) < 0) {
-							if (!isFinishing() && progress.isShowing()) progress.dismiss();
-							SketchwareUtil.showMessage(context, ("Insufficient balance. You need at least 5.005 " + com.harvanna.app.CoinInfo.ticker() + "."));
-							return;
-						}
-						
-						try {
-							String privateB64 = com.harvanna.app.wallet.WalletGenerator.derivePrivateKey(finalPersonalSeed);
-							if (privateB64 != null) {
-								byte[] seedBytes = android.util.Base64.decode(privateB64, android.util.Base64.NO_WRAP);
-								byte[] pubKey = Ed25519.publicKeyFromSeed(seedBytes);
-								String publicB64 = android.util.Base64.encodeToString(pubKey, android.util.Base64.NO_WRAP);
-								com.harvanna.app.wallet.WalletManager.saveKeysLocally(
-								CreateNewGroupActivity.this, finalPersonalAddress, privateB64, publicB64);
-							}
-						} catch (Exception e) {
-							if (!isFinishing() && progress.isShowing()) progress.dismiss();
-							SketchwareUtil.showMessage(context, "Key error: " + e.getMessage());
-							return;
-						}
-						
-						if (!isFinishing() && progress.isShowing()) progress.dismiss();
-						com.harvanna.app.wallet.PinPromptHelper.authorize(CreateNewGroupActivity.this,
-						"Send 5 " + com.harvanna.app.CoinInfo.ticker() + " from your wallet into the new group wallet",
-						() -> {
-						progress.setMessage(("Transferring 5 " + com.harvanna.app.CoinInfo.ticker() + " to group wallet..."));
-						if (!isFinishing()) progress.show();
-						com.harvanna.app.tx.TransactionRouter.routeTransaction(
-						CreateNewGroupActivity.this,
-						finalPersonalAddress,
-						groupWalletAddress,
-						java.math.BigDecimal.valueOf(5.0),
-						null,
-						"Group creation fee",
-						new com.harvanna.app.tx.TransactionRouter.RouterCallback() {
-							@Override
-							public void onSuccess(String txHash) {
-								runOnUiThread(() -> {
-									try {
-										SharedPreferences.Editor editor = prefs.edit();
-										java.util.Set<String> existing = prefs.getStringSet(
-										"group_wallet_addresses", new java.util.HashSet<>());
-										java.util.Set<String> updated = new java.util.HashSet<>(existing);
-										updated.add(groupWalletAddress);
-										editor.putStringSet("group_wallet_addresses", updated);
-										editor.putString("last_group_wallet_address", groupWalletAddress);
-										editor.putLong("last_group_wallet_created", System.currentTimeMillis());
-										editor.apply();
-										
-										com.harvanna.app.wallet.SecureWalletStorage.saveMnemonic(
-										CreateNewGroupActivity.this, groupWalletAddress, mnemonic);
-										
-										try {
-											String groupPrivateB64 = com.harvanna.app.wallet.WalletGenerator.derivePrivateKey(mnemonic);
-											if (groupPrivateB64 != null) {
-												byte[] groupSeedBytes = android.util.Base64.decode(
-												groupPrivateB64, android.util.Base64.NO_WRAP);
-												byte[] groupPubKey = Ed25519.publicKeyFromSeed(groupSeedBytes);
-												String groupPublicB64 = android.util.Base64.encodeToString(
-												groupPubKey, android.util.Base64.NO_WRAP);
-												com.harvanna.app.wallet.WalletManager.saveKeysLocally(
-												CreateNewGroupActivity.this, groupWalletAddress,
-												groupPrivateB64, groupPublicB64);
-											}
-										} catch (Exception e) {
-											android.util.Log.w("CreateNewGroup",
-											"Group wallet key derivation failed: " + e.getMessage());
-										}
-										
-										if (!isFinishing() && progress.isShowing()) progress.dismiss();
-										_submitNewGroupData(groupWalletAddress);
-										bottomSheetDialog.dismiss();
-										SketchwareUtil.showMessage(context,
-										("Group Created — 5 " + com.harvanna.app.CoinInfo.ticker() + " transfer submitted!"));
-										
-										final String createdGroupName = group_name_edittext1.getText().toString().trim();
-										new androidx.appcompat.app.AlertDialog.Builder(context)
-										.setTitle("Back up this group's wallet?")
-										.setMessage("As the group's admin, you're the one holding its wallet key. An Harvanna Access Card is a physical backup for it — recommended for any group holding real funds.")
-										.setPositiveButton("Create Harvanna Card", (d, w) -> {
-											Intent cardIntent = new Intent(context, com.harvanna.app.CreateHarvannaCardActivity.class);
-											cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
-											cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_LABEL, createdGroupName);
-											context.startActivity(cardIntent);
-										})
-										.setNegativeButton("Not now", null)
-										.show();
-									} catch (Exception e) {
-										if (!isFinishing() && progress.isShowing()) progress.dismiss();
-										SketchwareUtil.showMessage(context, "Wallet save failed: " + e.getMessage());
-									}
-								});
-							}
-							
-							@Override
-							public void onError(String errorCode, String errorMessage) {
-								runOnUiThread(() -> {
-									if (!isFinishing() && progress.isShowing()) progress.dismiss();
-									SketchwareUtil.showMessage(context, "Fee transfer failed: " + errorMessage);
-								});
-							}
-						});
-						});
-					});
-				}
-				
-				@Override
-				public void onError(String error) {
-					runOnUiThread(() -> {
-						if (!isFinishing() && progress.isShowing()) progress.dismiss();
-						SketchwareUtil.showMessage(context, "Failed to check personal balance: " + error);
-					});
-				}
-			});
-		});
-	}
 	
 	private void _addLoanToggles() {
 		CardView[] cards = {card_fixed_details, card_accumulative_details};
@@ -1596,20 +1345,16 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		final long perMember = contributionRaw * (members - 1);
 		final long creatorBond = perMember * 2L;
 		final long fee = 100_000_000L;
-		String msg = "• Each round every member pays " + com.harvanna.app.circle.CircleUi.harv(contributionRaw) + "\n"
-		+ "• The pot each round: " + com.harvanna.app.circle.CircleUi.harv(contributionRaw * (members - 1)) + "\n"
-		+ "• Every other member locks a bond of " + com.harvanna.app.circle.CircleUi.harv(perMember) + "\n"
-		+ "• Your bond: " + com.harvanna.app.circle.CircleUi.harv(creatorBond) + "\n"
-		+ "• Creation fee: " + com.harvanna.app.circle.CircleUi.harv(fee)
-		+ "\n• The payout is only what the other members pay. Bonds stay locked as collateral."
-		+ "\n• If the network asks for a signature, the fee is signed from this wallet right after you confirm.";
-		
-		new androidx.appcompat.app.AlertDialog.Builder(this)
-		.setTitle("Create this rotating group?")
-		.setMessage(msg)
-		.setNegativeButton("Cancel", null)
-		.setPositiveButton("Create", (d, w) -> com.harvanna.app.wallet.PinPromptHelper.authorize(this,
-		"Pay the creation fee and create this group", () -> {
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"Each round", com.harvanna.app.circle.CircleUi.harv(contributionRaw) + " from every member"});
+		rows.add(new String[]{"Pot each round", com.harvanna.app.circle.CircleUi.harv(contributionRaw * (members - 1))});
+		rows.add(new String[]{"Other members lock", com.harvanna.app.circle.CircleUi.harv(perMember)});
+		rows.add(new String[]{"Your bond", com.harvanna.app.circle.CircleUi.harv(creatorBond)});
+		rows.add(new String[]{"Creation fee", com.harvanna.app.circle.CircleUi.harv(fee)});
+		rows.add(new String[]{"Group wallet", "Assigned by the network. This phone does not create one."});
+		rows.add(new String[]{"Payout", "Only what the other members pay. Bonds stay locked."});
+		com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
+		"Create this rotating group", com.harvanna.app.circle.CircleUi.harv(fee), rows, () -> {
 			final ProgressDialog pd = ProgressDialog.show(this, null, "Creating on the network…", true, false);
 			com.harvanna.app.sync.NodeGroupClient.createCircle(getApplicationContext(), wallet, contributionRaw, members, cycleHours,
 			new com.harvanna.app.sync.NodeGroupClient.Callback() {
@@ -1633,7 +1378,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					runOnUiThread(() -> { pd.dismiss(); SketchwareUtil.showMessage(getApplicationContext(), com.harvanna.app.circle.CircleUi.friendly(error)); });
 				}
 			});
-		})).show();
+		});
 	}
 	
 	private EditText beneficiaryInput;
@@ -1701,10 +1446,18 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private interface NodeCreate { void run(com.harvanna.app.sync.NodeGroupClient.Callback cb); }
 	
 	private void _confirmAndCreateOnChain(String title, String msg, NodeCreate create, String idKey, String family) {
-		new androidx.appcompat.app.AlertDialog.Builder(this).setTitle(title).setMessage(msg)
-		.setNegativeButton("Cancel", null)
-		.setPositiveButton("Create", (d, w) -> com.harvanna.app.wallet.PinPromptHelper.authorize(this,
-		"Pay the creation fee and create this group", () -> {
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		if (msg != null) {
+			for (String line : msg.split("\n")) {
+				String t = line.trim();
+				if (t.startsWith("•")) t = t.substring(1).trim();
+				int colon = t.indexOf(':');
+				if (colon > 0) rows.add(new String[]{t.substring(0, colon).trim(), t.substring(colon + 1).trim()});
+				else if (!t.isEmpty()) rows.add(new String[]{"Note", t});
+			}
+		}
+		rows.add(new String[]{"Group wallet", "Assigned by the network. This phone does not create one."});
+		com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, title, "1 HARV", rows, () -> {
 			final ProgressDialog pd = ProgressDialog.show(this, null, "Creating on the network…", true, false);
 			create.run(new com.harvanna.app.sync.NodeGroupClient.Callback() {
 				@Override public void onSuccess(org.json.JSONObject json) {
@@ -1725,7 +1478,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					runOnUiThread(() -> { pd.dismiss(); SketchwareUtil.showMessage(getApplicationContext(), com.harvanna.app.circle.CircleUi.friendly(error)); });
 				}
 			});
-		})).show();
+		});
 	}
 	
 	public void _submitNewGroupData(final String _realGroupWalletAddress) {
@@ -1825,84 +1578,11 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			
 			com.harvanna.app.social.PeoplePicker.sendAll(CreateNewGroupActivity.this, newGroupId, newGroupMap, peopleToInvite, "", (sent, failed) -> { });
 			
-			if (pendingCardQr != null && pendingCardDigits != null) {
-				com.harvanna.app.group.GroupCardStore.publish(getApplicationContext(), newGroupId,
-				_realGroupWalletAddress, group_name_edittext1.getText().toString().trim(),
-				pendingCardTemplate == null ? "CLASSIC" : pendingCardTemplate,
-				pendingCardQr, pendingCardDigits, creatorUid, null);
-			}
 			intent.putExtra("groupId", newGroupId);
 			intent.setClass(getApplicationContext(), GroupDetailsActivity.class);
 			startActivity(intent);
 			finish();
 		}));
-	}
-	
-	private void _proceedWithGroupWalletCreation() {
-		final Context context = this;
-		final String mnemonic = pendingGroupMnemonic;
-		final String groupWalletAddress = pendingGroupWalletAddress;
-		final com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog = pendingGroupBottomSheetDialog;
-		
-		final ProgressDialog progress = new ProgressDialog(CreateNewGroupActivity.this);
-		progress.setMessage("Preparing wallets...");
-		progress.setCancelable(false);
-		progress.show();
-		
-		String personalSeed = com.harvanna.app.wallet.SecureWalletStorage.getActiveMnemonic(CreateNewGroupActivity.this);
-		if (personalSeed == null) personalSeed = "";
-		
-		SharedPreferences prefs = getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
-		String resolvedAddress = prefs.getString("active_wallet_address", "").trim();
-		if (resolvedAddress.isEmpty()) {
-			resolvedAddress = prefs.getString("wallet_address", "").trim();
-		}
-		
-		if (resolvedAddress.isEmpty() && !personalSeed.isEmpty()) {
-			try {
-				resolvedAddress = com.harvanna.app.wallet.WalletManager.deriveAddressFromSeed(personalSeed).trim();
-			} catch (Exception e) {
-				resolvedAddress = "";
-			}
-		}
-		
-		if (resolvedAddress.isEmpty()) {
-			if (!CreateNewGroupActivity.this.isFinishing() && progress.isShowing()) progress.dismiss();
-			SketchwareUtil.showMessage(context, "Personal wallet not found.");
-			return;
-		}
-		
-		final String finalPersonalAddress = resolvedAddress;
-		final String finalPersonalSeed = personalSeed;
-		
-		progress.setMessage(("Connecting to " + com.harvanna.app.CoinInfo.ticker() + " node..."));
-		com.harvanna.app.sync.HarvannaNodeClient.getWallet(groupWalletAddress,
-		new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
-			@Override
-			public void onSuccess(org.json.JSONObject json) {
-				_continueGroupCreationFee(progress, context, prefs, bottomSheetDialog,
-				groupWalletAddress, mnemonic, finalPersonalAddress, finalPersonalSeed);
-			}
-			
-			@Override
-			public void onError(String error) {
-				_continueGroupCreationFee(progress, context, prefs, bottomSheetDialog,
-				groupWalletAddress, mnemonic, finalPersonalAddress, finalPersonalSeed);
-			}
-		});
-	}
-	
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == RC_MANDATORY_GROUP_CARD && resultCode == Activity.RESULT_OK) {
-			if (data != null) {
-				pendingCardQr = data.getStringExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RESULT_QR);
-				pendingCardDigits = data.getStringExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RESULT_DIGITS);
-				pendingCardTemplate = data.getStringExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RESULT_TEMPLATE);
-			}
-			_proceedWithGroupWalletCreation();
-		}
 	}
 	
 	public class Listview1Adapter extends BaseAdapter {

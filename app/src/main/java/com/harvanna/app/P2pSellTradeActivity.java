@@ -696,7 +696,15 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		.setTitle("Confirm payment received")
 		.setMessage(("Only confirm if you have genuinely verified the money is in your account. This releases the escrowed " + com.harvanna.app.CoinInfo.ticker() + " to the buyer immediately and cannot be undone."))
 		.setPositiveButton("Confirm & Release", (dialog, which) -> {
-			PinPromptHelper.authorize(this, "Release the escrow to the buyer", () -> {
+			double claimed = HarvannaNodeClient.toHarvDisplay(amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
+			String ccy = listingCurrency == null ? "NGN" : listingCurrency;
+			java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+			rows.add(new String[]{"Releases", BalanceFormatter.smart(claimed)});
+			rows.add(new String[]{"To", buyerAddress == null || buyerAddress.isEmpty() ? "The buyer" : buyerAddress});
+			rows.add(new String[]{"You were paid", unitPrice >= 0 ? P2pMoney.fiat(claimed * unitPrice, ccy) : "The agreed fiat"});
+			rows.add(new String[]{"For", "You confirmed the fiat is in your account. This cannot be undone."});
+			com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
+			"Release escrow", BalanceFormatter.smart(claimed), rows, () -> {
 				btn_sell_confirm_payment.setEnabled(false);
 				btn_sell_confirm_payment.setText("Releasing…");
 				P2PTradeRouter.confirmReceived(getApplicationContext(), orderId, myAddress, new P2PTradeRouter.Callback() {

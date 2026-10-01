@@ -480,7 +480,13 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 			return;
 		}
 		
-		PinPromptHelper.authorize(this, "Lock this insurance deposit", () -> {
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"From", "Your wallet"});
+		rows.add(new String[]{"To", "Your insurance deposit"});
+		rows.add(new String[]{"For", "Collateral that stays locked while you trade"});
+		rows.add(new String[]{"Network fee", "Taken when the deposit is sent"});
+		com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
+		"Lock insurance deposit", BalanceFormatter.smart(amount), rows, () -> {
 			tv_deposit_error.setVisibility(View.GONE);
 			btn_submit_deposit.setEnabled(false);
 			btn_submit_deposit.setText("Locking Collateral…");

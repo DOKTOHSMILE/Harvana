@@ -635,7 +635,16 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 			return;
 		}
 		
-		PinPromptHelper.authorize(this, "Claim this buy order", () -> {
+		double amountHarv = HarvannaNodeClient.toHarvDisplay(amountRaw);
+		double fiatTotal = unitPrice >= 0 ? amountHarv * unitPrice : -1;
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"You pay", fiatTotal >= 0 ? P2pMoney.fiat(fiatTotal, listingCurrency) : "The listed price"});
+		rows.add(new String[]{"Platform fee", BalanceFormatter.smart(HarvannaNodeClient.toHarvDisplay(lastPlatformFeeRaw))});
+		rows.add(new String[]{"Network fee", BalanceFormatter.smart(HarvannaNodeClient.toHarvDisplay(lastNetworkFeeRaw))});
+		rows.add(new String[]{"You receive", BalanceFormatter.smart(HarvannaNodeClient.toHarvDisplay(lastNetAmountRaw))});
+		rows.add(new String[]{"For", "Opening this buy against the listing"});
+		com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
+		"Open this buy", BalanceFormatter.smart(amountHarv), rows, () -> {
 			create_order_button.setEnabled(false);
 			create_order_button.setText("Creating order…");
 			

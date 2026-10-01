@@ -764,19 +764,16 @@ public class GroupMembersFragmentActivity extends Fragment {
 			public void onReady(double memberPayoutHarv, double adminFeeHarv, String message) {
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> {
-					new android.app.AlertDialog.Builder(getActivity())
-					.setTitle("Close Fixed Month")
-					.setMessage(message + "\n\nTransfer "
-					+ com.harvanna.app.wallet.BalanceFormatter.smart(memberPayoutHarv)
-					+ " from group wallet to member?")
-					.setPositiveButton("Transfer & close", (d, w) ->
-					com.harvanna.app.wallet.PinPromptHelper.authorize(getActivity(),
-					"Send " + com.harvanna.app.wallet.BalanceFormatter.smart(memberPayoutHarv)
-					+ " from the group wallet to this member",
-					() -> _executeFixedMonthTransfer(memberUid, memberWallet,
-					memberPayoutHarv, adminFeeHarv)))
-					.setNegativeButton("Cancel", null)
-					.show();
+					java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+					rows.add(new String[]{"From", "Group wallet"});
+					rows.add(new String[]{"To", memberWallet});
+					rows.add(new String[]{"Member receives", com.harvanna.app.wallet.BalanceFormatter.smart(memberPayoutHarv)});
+					rows.add(new String[]{"Admin fee kept", com.harvanna.app.wallet.BalanceFormatter.smart(adminFeeHarv)});
+					rows.add(new String[]{"For", message});
+					com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(getActivity(),
+					"Close this fixed month",
+					com.harvanna.app.wallet.BalanceFormatter.smart(memberPayoutHarv),
+					rows, () -> _executeFixedMonthTransfer(memberUid, memberWallet, memberPayoutHarv, adminFeeHarv));
 				});
 			}
 			

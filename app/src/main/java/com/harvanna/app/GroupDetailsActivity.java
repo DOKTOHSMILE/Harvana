@@ -707,8 +707,13 @@ public class GroupDetailsActivity extends AppCompatActivity {
 	
 	private void _executeGroupWalletTransfer(String from, String to, double amountHarv,
 	com.harvanna.app.group.GroupPayoutManager.Callback cb) {
-		com.harvanna.app.wallet.PinPromptHelper.authorize(GroupDetailsActivity.this,
-		"Send " + amountHarv + " from the group wallet", () -> {
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"From", from});
+		rows.add(new String[]{"To", to});
+		rows.add(new String[]{"For", "A payout from the group wallet"});
+		rows.add(new String[]{"Network fee", "Taken from the group wallet"});
+		com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(GroupDetailsActivity.this,
+		"Send from the group wallet", com.harvanna.app.wallet.BalanceFormatter.smart(amountHarv), rows, () -> {
 			try {
 				java.math.BigDecimal amount = java.math.BigDecimal.valueOf(amountHarv);
 				com.harvanna.app.tx.TransactionRouter.routeTransaction(

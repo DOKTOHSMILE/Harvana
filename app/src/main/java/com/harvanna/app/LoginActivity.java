@@ -35,21 +35,14 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseException;
-import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.PhoneAuthCredential;
-import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.storage.*;
 import java.io.*;
 import java.text.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.*;
 import org.json.*;
 
@@ -64,7 +57,6 @@ public class LoginActivity extends AppCompatActivity {
 	private LinearLayout linear2;
 	
 	private Intent intent = new Intent();
-	private PhoneAuthProvider.OnVerificationStateChangedCallbacks phauth;private PhoneAuthProvider.ForceResendingToken phauth_resendToken;
 	private RequestNetwork reqnet;
 	private RequestNetwork.RequestListener _reqnet_request_listener;
 	private SharedPreferences sp;
@@ -78,7 +70,6 @@ public class LoginActivity extends AppCompatActivity {
 	private OnCompleteListener<Void> fbauth_emailVerificationSentListener;
 	private OnCompleteListener<Void> fbauth_deleteUserListener;
 	private OnCompleteListener<Void> fbauth_updateProfileListener;
-	private OnCompleteListener<AuthResult> fbauth_phoneAuthListener;
 	private OnCompleteListener<AuthResult> fbauth_googleSignInListener;
 	
 	@Override
@@ -147,12 +138,6 @@ public class LoginActivity extends AppCompatActivity {
 		fbauth_deleteUserListener = _param1 -> {
 			final boolean _success = _param1.isSuccessful();
 			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fbauth_phoneAuthListener = task -> {
-			final boolean _success = task.isSuccessful();
-			final String _errorMessage = task.getException() != null ? task.getException().getMessage() : "";
 			
 		};
 		

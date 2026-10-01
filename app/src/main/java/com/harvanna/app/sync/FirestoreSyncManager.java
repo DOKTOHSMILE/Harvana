@@ -8,7 +8,6 @@ import android.os.Looper;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.harvanna.app.AddressUtil;
-import com.harvanna.app.HarvannaConfig;
 import com.harvanna.app.ChainConstants;
 import com.harvanna.app.ChainMath;
 

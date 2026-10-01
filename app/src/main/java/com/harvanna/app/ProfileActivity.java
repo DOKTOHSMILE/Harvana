@@ -486,6 +486,13 @@ public class ProfileActivity extends AppCompatActivity {
 			public void onSuccess(Map<String, Object> data) {
 				if (data == null || data.isEmpty()) return;
 				com.harvanna.app.offline.OfflineCacheManager.save(getApplicationContext(), "profile_" + uid, data);
+				com.harvanna.app.identity.IdentityStore.ensure(uid, data, (pid, error) -> {
+					if (pid != null && (data.get("pid") == null || !pid.equals(String.valueOf(data.get("pid"))))) {
+						data.put("pid", pid);
+						com.harvanna.app.offline.OfflineCacheManager.save(getApplicationContext(), "profile_" + uid, data);
+						runOnUiThread(() -> _bindProfileFields(data));
+					}
+				});
 				runOnUiThread(() -> _bindProfileFields(data));
 			}
 			
@@ -529,7 +536,9 @@ public class ProfileActivity extends AppCompatActivity {
 		
 		String stateStr = _str(data, "state");
 		String countryStr = _str(data, "country");
-		user_state_country_textview3.setText(stateStr + ", " + countryStr + (joined.isEmpty() ? "" : " • Joined " + joined));
+		String pid = _str(data, "pid");
+		String place = stateStr + ", " + countryStr + (joined.isEmpty() ? "" : " • Joined " + joined);
+		user_state_country_textview3.setText(pid.isEmpty() ? place : "ID " + pid + " • " + place);
 		
 		String tierStr = _str(data, "tier");
 		tier_indicator_textview2.setText("Tier " + tierStr);

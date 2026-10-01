@@ -4,11 +4,14 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.Timestamp;
+import com.harvanna.app.identity.UsernameCadence;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,21 +85,40 @@ public final class SocialStore {
                     if (t.exists() && !uid.equals(t.getString("uid"))) throw new IllegalStateException("TAKEN");
                     DocumentSnapshot u = tx.get(userRef);
                     String old = u.getString("username");
-                    if (old != null && !old.isEmpty() && !old.equals(name)) tx.delete(db().collection("USERNAMES").document(old));
+                    String why = UsernameCadence.problem(old, name, changedAt(u.get("usernameChangedAt")), System.currentTimeMillis());
+                    if (why != null) throw new IllegalStateException("WAIT:" + why);
+                    if (old != null && !old.isEmpty() && !old.equals(name)) {
+                        Map<String, Object> hold = new HashMap<>();
+                        hold.put("uid", uid);
+                        hold.put("releasedAt", FieldValue.serverTimestamp());
+                        tx.set(db().collection("USERNAME_HOLDS").document(old), hold);
+                        tx.delete(db().collection("USERNAMES").document(old));
+                    }
                     Map<String, Object> claim = new HashMap<>();
                     claim.put("uid", uid); claim.put("name", name); claim.put("claimedAt", System.currentTimeMillis());
                     tx.set(target, claim);
                     Map<String, Object> f = new HashMap<>();
                     f.put("username", name);
+                    f.put("usernameChangedAt", FieldValue.serverTimestamp());
                     tx.set(userRef, f, SetOptions.merge());
                     return null;
                 }), T, TimeUnit.SECONDS);
                 cb.done(name, null);
             } catch (Exception e) {
                 Throwable c = e.getCause() != null ? e.getCause() : e;
-                cb.done(null, c instanceof IllegalStateException && "TAKEN".equals(c.getMessage()) ? "That username is already taken." : describe(e));
+                if (c instanceof IllegalStateException && c.getMessage() != null && c.getMessage().startsWith("WAIT:")) {
+                    cb.done(null, c.getMessage().substring(5));
+                } else {
+                    cb.done(null, c instanceof IllegalStateException && "TAKEN".equals(c.getMessage()) ? "That username is already taken." : describe(e));
+                }
             }
         });
+    }
+
+    private static Long changedAt(Object v) {
+        if (v instanceof Number) return ((Number) v).longValue();
+        if (v instanceof Timestamp) return ((Timestamp) v).toDate().getTime();
+        return null;
     }
 
     /** Finds a member by exact username. */

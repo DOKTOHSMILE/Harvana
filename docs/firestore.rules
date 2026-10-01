@@ -38,13 +38,56 @@ service cloud.firestore {
         .hasOnly(['status', 'txRef', 'confirmedAt']);
     }
 
-    // OPEN ITEM (A2): any signed-in user can still read every profile. The app needs
-    // other members' names/icons, and rules cannot hide fields. Fix = move DOB/ID/address/GPS/kin
-    // into USERS/{uid}/private/kyc (owner-only) in an app change, then narrow this read.
+    function userDoc() {
+      return get(/databases/$(database)/documents/USERS/$(request.auth.uid)).data;
+    }
+
+    // First claim, or at least 30 days since the last one. get() sees the
+    // document from before this write, so the same transaction can stamp now.
+    function usernameChangeDue() {
+      return !exists(/databases/$(database)/documents/USERS/$(request.auth.uid))
+        || !('usernameChangedAt' in userDoc())
+        || request.time > userDoc().usernameChangedAt + duration.value(30, 'd');
+    }
+
+    // A released name stays with its previous owner for 90 days.
+    function usernameHeldBySomeoneElse(name) {
+      return exists(/databases/$(database)/documents/USERNAME_HOLDS/$(name))
+        && get(/databases/$(database)/documents/USERNAME_HOLDS/$(name)).data.uid != request.auth.uid
+        && request.time < get(/databases/$(database)/documents/USERNAME_HOLDS/$(name)).data.releasedAt + duration.value(90, 'd');
+    }
+
+    function pidLinkOwned(pid) {
+      return exists(/databases/$(database)/documents/PIDS/$(pid))
+        && get(/databases/$(database)/documents/PIDS/$(pid)).data.uid == request.auth.uid;
+    }
+
+    // OPEN ITEM (A2): any signed-in user can still read every profile. New accounts
+    // also write PROFILES/{pid} (name, photo, username, tier only). Narrow this
+    // read to the owner once every other screen reads the public card by PID.
     match /USERS/{uid} {
       allow read: if signedIn();
-      allow create: if isSelf(uid);
-      allow update: if isSelf(uid);
+      allow create: if isSelf(uid)
+        && (!('pid' in request.resource.data)
+            || (request.resource.data.pid.matches('^[0-9]{10}$') && pidLinkOwned(request.resource.data.pid)))
+        && (!('usernameChangedAt' in request.resource.data)
+            || request.resource.data.usernameChangedAt == request.time);
+      allow update: if isSelf(uid)
+        && (
+          (!('usernameChangedAt' in resource.data) && !('usernameChangedAt' in request.resource.data))
+          || (!('usernameChangedAt' in resource.data) && request.resource.data.usernameChangedAt == request.time)
+          || ('usernameChangedAt' in resource.data
+              && 'usernameChangedAt' in request.resource.data
+              && (request.resource.data.usernameChangedAt == request.time
+                  || request.resource.data.usernameChangedAt == resource.data.usernameChangedAt))
+        )
+        && (
+          (!('pid' in resource.data) && !('pid' in request.resource.data))
+          || ('pid' in resource.data && request.resource.data.pid == resource.data.pid)
+          || (!('pid' in resource.data)
+              && request.resource.data.pid.matches('^[0-9]{10}$')
+              && pidLinkOwned(request.resource.data.pid))
+        );
       allow delete: if false;
     }
 
@@ -152,10 +195,20 @@ service cloud.firestore {
       match /payments/{paymentId} {
         allow read: if isCreatorOrMember(groupId);
 
+        // A member can only open a PENDING row. CONFIRMED / REJECTED ledger
+        // rows are written by the group creator (payout, loan, month close).
+        // A member must not create a payment that already says CONFIRMED.
         allow create: if isCreatorOrMember(groupId)
-          && request.resource.data.keys().hasAny(['type', 'status', 'amountHarv', 'timestamp']);
+          && request.resource.data.keys().hasAny(['type', 'status', 'amountHarv', 'timestamp'])
+          && (
+            request.resource.data.status == 'PENDING'
+            || (isGroupCreator(groupId)
+                && request.resource.data.status in ['CONFIRMED', 'REJECTED', 'PENDING_ADMIN_TRANSFER'])
+          );
 
-        allow update: if isCreatorOrMember(groupId)
+        // A4: only the group creator may move PENDING → CONFIRMED, and only
+        // those three fields. Any other member used to be able to do this.
+        allow update: if isGroupCreator(groupId)
           && paymentConfirmOnly()
           && resource.data.status == 'PENDING'
           && request.resource.data.status == 'CONFIRMED';
@@ -243,9 +296,53 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.name == name
-        && name.matches('^[a-z][a-z0-9_.]{2,19}$');
+        && name.matches('^[a-z][a-z0-9_.]{2,19}$')
+        && usernameChangeDue()
+        && !usernameHeldBySomeoneElse(name);
       allow update: if false;
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // Old usernames, held for 90 days so a stranger cannot take one over.
+    // releasedAt must be the server time of this write, not a client clock.
+    match /USERNAME_HOLDS/{name} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'releasedAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.releasedAt == request.time
+        && exists(/databases/$(database)/documents/USERNAMES/$(name))
+        && get(/databases/$(database)/documents/USERNAMES/$(name)).data.uid == request.auth.uid;
+      allow update: if signedIn()
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid', 'releasedAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.releasedAt == request.time;
+      allow delete: if signedIn()
+        && request.time > resource.data.releasedAt + duration.value(90, 'd');
+    }
+
+    // Permanent 10-digit id → owner. Clients never read this. Rules do,
+    // to check that the signed-in user owns the PID they are writing.
+    match /PIDS/{pid} {
+      allow read: if false;
+      allow create: if signedIn()
+        && pid.matches('^[0-9]{10}$')
+        && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Public card. No date of birth, ID number, address, phone or next of kin.
+    match /PROFILES/{pid} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && pidLinkOwned(pid)
+        && request.resource.data.pid == pid
+        && request.resource.data.keys().hasOnly(
+          ['pid', 'first_name', 'last_name', 'username', 'icon', 'tier', 'trust_score']);
+      allow delete: if false;
     }
 
     // People I follow: private to me.

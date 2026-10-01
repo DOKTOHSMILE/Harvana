@@ -47,6 +47,7 @@ import java.util.*;
 import java.util.regex.*;
 import org.json.*;
 import com.harvanna.app.firestore.UserProfileManager;
+import com.harvanna.app.identity.IdentityStore;
 import androidx.core.content.ContextCompat;
 import android.content.pm.PackageManager;
 
@@ -552,7 +553,15 @@ public class CompleteProfileFragmentActivity extends Fragment {
 		userVMap.put("occupation", et_occupation.getText().toString().trim());
 		userVMap.put("timestamp", String.valueOf(authc.getTimeInMillis()));
 		userVMap.put(idDocument, et_id_number.getText().toString().trim());
-		
+
+		IdentityStore.allocate(effectiveUid, userVMap, (pid, pidError) -> {
+			if (pid != null) userVMap.put("pid", pid);
+			if (getActivity() == null) return;
+			getActivity().runOnUiThread(() -> _saveNewProfile(effectiveUid, userVMap));
+		});
+	}
+
+	private void _saveNewProfile(String effectiveUid, Map<String, Object> userVMap) {
 		UserProfileManager.getInstance(getContext()).saveProfile(effectiveUid, userVMap,
 		new UserProfileManager.SimpleCallback() {
 			@Override

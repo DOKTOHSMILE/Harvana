@@ -56,6 +56,13 @@ public class GroupTypeBoardTest {
         assertEquals("Oct", board.cells.get(1).bottom);
         assertEquals(GroupTypeBoard.PENDING, board.cells.get(1).state);
         assertTrue(board.subtitle.contains("500"));
+        assertEquals("Your savings card", board.title);
+
+        GroupTypeBoard.Board everyone = GroupTypeBoard.fromFirestore(
+                map("groupType", "Accumulative Funds"),
+                null, payments, "me", false, sep30, UTC);
+        assertEquals(3, everyone.cells.size());
+        assertEquals("Members' savings cards", everyone.title);
     }
 
     @Test

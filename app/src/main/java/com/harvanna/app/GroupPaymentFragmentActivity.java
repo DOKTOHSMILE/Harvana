@@ -133,57 +133,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		initialize(_savedInstanceState, _view);
 		FirebaseApp.initializeApp(getContext());
 		initializeLogic();
-		return _wrapForOnChain(_view);
-	}
-	
-	/**
-	 * A rotating group's money lives on the network. If this group is linked to a circle, this tab shows a
-	 * clear path to it (contribute, bond, payout order) instead of the old wallet-transfer screen.
-	 */
-	private View _wrapForOnChain(View content) {
-		final android.widget.FrameLayout frame = new android.widget.FrameLayout(getContext());
-		frame.addView(content);
-		String gid = getArguments() != null ? getArguments().getString("groupId", "") : "";
-		if (gid == null || gid.isEmpty()) return frame;
-		com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext()).getGroup(gid,
-		new com.harvanna.app.firestore.GroupFirestoreManager.DocCallback() {
-			@Override public void onSuccess(Map<String, Object> data) {
-				final String circleId = com.harvanna.app.group.GroupKinds.nodeId(data);
-				if (circleId.isEmpty() || getActivity() == null) return;
-				getActivity().runOnUiThread(() -> {
-					if (getContext() == null) return;
-					float d = getResources().getDisplayMetrics().density;
-					android.widget.LinearLayout box = new android.widget.LinearLayout(getContext());
-					box.setOrientation(android.widget.LinearLayout.VERTICAL);
-					box.setBackgroundColor(com.harvanna.app.utils.UiColors.background());
-					box.setPadding((int) (20 * d), (int) (24 * d), (int) (20 * d), (int) (20 * d));
-					TextView t = new TextView(getContext());
-					t.setText("Payments run on the Harvanna network");
-					t.setTextSize(18); t.setTypeface(null, android.graphics.Typeface.BOLD);
-					t.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
-					box.addView(t);
-					TextView b = new TextView(getContext());
-					b.setText("This group keeps its money on the network. Open it to see your position and to pay, save, deposit, vote or withdraw, depending on the group.");
-					b.setTextSize(14); b.setTextColor(com.harvanna.app.utils.UiColors.textSecondary());
-					b.setPadding(0, (int) (8 * d), 0, (int) (16 * d));
-					box.addView(b);
-					com.google.android.material.button.MaterialButton go = new com.google.android.material.button.MaterialButton(getContext());
-					go.setText("Open payments and bond");
-					go.setAllCaps(false);
-					go.setOnClickListener(v -> {
-						Intent i = new Intent(getContext(), com.harvanna.app.group.NodeGroupActivity.class);
-						i.putExtra("nodeGroupId", circleId);
-						i.putExtra("firestoreGroupId", gid);
-						startActivity(i);
-					});
-					box.addView(go);
-					frame.addView(box, new android.widget.FrameLayout.LayoutParams(
-					ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-				});
-			}
-			@Override public void onError(String e) { }
-		});
-		return frame;
+		return _view;
 	}
 	
 	private void initialize(Bundle _savedInstanceState, View _view) {
@@ -411,6 +361,9 @@ public class GroupPaymentFragmentActivity extends Fragment {
 	private final ArrayList<HashMap<String, Object>> paymentRows = new ArrayList<>();
 	private FixedDayGridAdapter dayAdapter;
 	private List<Map<String, Object>> boardMembers = new ArrayList<>();
+	private String linkedNodeId = "";
+	private String groupCreatorId = "";
+	private boolean viewerIsAdmin = false;
 	
 	private void _applyCachedPayContext() {
 		Map<String, Object> cached = com.harvanna.app.offline.OfflineCacheManager.load(
@@ -452,6 +405,9 @@ public class GroupPaymentFragmentActivity extends Fragment {
 				groupType = str(data, "groupType", "");
 				groupWalletAddress = str(data, "groupWalletAddress", str(data, "group_wallet", ""));
 				currentPayerSlot = (int) ((currentRound - 1) % totalSlots) + 1;
+				groupCreatorId = str(data, "creatorId", "");
+				if (myUid != null && myUid.equals(groupCreatorId)) viewerIsAdmin = true;
+				linkedNodeId = com.harvanna.app.group.GroupKinds.nodeId(data);
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> {
 					if (tv_my_payment_amount != null) {
@@ -462,7 +418,12 @@ public class GroupPaymentFragmentActivity extends Fragment {
 					if (panel_fixed_days != null) {
 						panel_fixed_days.setVisibility(View.GONE);
 					}
-					if (isFixed) _setupFixedGrid();
+					if (!linkedNodeId.isEmpty()) {
+						_hideLegacyPaymentChrome();
+						_embedNodeRecord(linkedNodeId);
+					} else if (isFixed) {
+						_setupFixedGrid();
+					}
 					_loadMyMemberThenPayments();
 					_loadGroupWalletBalance();
 				});
@@ -509,9 +470,12 @@ public class GroupPaymentFragmentActivity extends Fragment {
 						if (str(m, "memberUid", "").equals(myUid)) {
 							mySlot = (int) num(m, "slot");
 							fixedDaysPaid = FixedPaymentEngine.daysPaidFromMember(m, monthKey);
+							String role = str(m, "role", "");
+							if ("ADMIN".equalsIgnoreCase(role) || "CREATOR".equalsIgnoreCase(role)) viewerIsAdmin = true;
 						}
 					}
 				}
+				if (!linkedNodeId.isEmpty()) _embedNodeRecord(linkedNodeId);
 				if (getActivity() != null) {
 					getActivity().runOnUiThread(() -> {
 						if (dayAdapter != null) dayAdapter.setPaidDays(fixedDaysPaid);
@@ -716,6 +680,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 	
 	private void _bindTypeBoard() {
 		if (panel_type_board == null || layout_type_board == null || getContext() == null) return;
+		if (linkedNodeId != null && !linkedNodeId.isEmpty()) return;
 		Map<String, Object> group = new HashMap<>();
 		group.put("groupType", groupType);
 		group.put("totalSlots", totalSlots);
@@ -724,9 +689,12 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		group.put("contributionAmount", contributionAmount);
 		List<Map<String, Object>> pays = new ArrayList<>();
 		pays.addAll(paymentRows);
+		boolean accum = com.harvanna.app.group.GroupTypeBoard.ACCUMULATIVE.equals(
+				com.harvanna.app.group.GroupTypeBoard.kindOf(groupType));
+		boolean personalBook = !accum || !viewerIsAdmin;
 		com.harvanna.app.group.GroupTypeBoard.Board board =
 			com.harvanna.app.group.GroupTypeBoard.fromFirestore(
-				group, boardMembers, pays, myUid, true, System.currentTimeMillis(), java.util.TimeZone.getDefault());
+				group, boardMembers, pays, myUid, personalBook, System.currentTimeMillis(), java.util.TimeZone.getDefault());
 		if (board.kind == null || board.kind.isEmpty()) {
 			panel_type_board.setVisibility(View.GONE);
 			return;
@@ -742,6 +710,216 @@ public class GroupPaymentFragmentActivity extends Fragment {
 				com.harvanna.app.group.GroupTypeBoardView.showDetail(getContext(), cell);
 			}
 		});
+	}
+
+	/** On-chain groups show the savings card here, not a second screen. */
+	private int nodeLoadGen = 0;
+	private com.google.android.material.button.MaterialButton nodeActionButton;
+
+	private void _hideLegacyPaymentChrome() {
+		if (card_group_wallet != null) card_group_wallet.setVisibility(View.GONE);
+		if (cardview23 != null) cardview23.setVisibility(View.GONE);
+		if (linear129 != null) linear129.setVisibility(View.GONE);
+		if (panel_fixed_days != null) panel_fixed_days.setVisibility(View.GONE);
+	}
+
+	private void _embedNodeRecord(String nodeId) {
+		if (nodeId == null || nodeId.isEmpty() || getContext() == null) return;
+		final int gen = ++nodeLoadGen;
+		final String family = com.harvanna.app.sync.NodeGroupClient.familyOf(nodeId);
+		final String me = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(getContext());
+		com.harvanna.app.sync.NodeGroupClient.Callback onGroup = new com.harvanna.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				if (gen != nodeLoadGen) return;
+				Map<String, Object> group = com.harvanna.app.utils.JsonMaps.toMap(json);
+				boolean admin = viewerIsAdmin || (me != null && me.equalsIgnoreCase(str(group, "creatorAddress")));
+				if (admin) viewerIsAdmin = true;
+				_loadMyNodePosition(gen, family, nodeId, me, group, admin);
+			}
+			@Override public void onError(String e) { }
+		};
+		if ("CIRCLE".equals(family)) com.harvanna.app.sync.NodeGroupClient.getCircle(nodeId, onGroup);
+		else if ("ACCUM".equals(family)) com.harvanna.app.sync.NodeGroupClient.getAccumGroup(nodeId, onGroup);
+		else if ("FIXED".equals(family)) com.harvanna.app.sync.NodeGroupClient.getFixedGroup(nodeId, onGroup);
+	}
+
+	private void _loadMyNodePosition(int gen, String family, String nodeId, String me,
+			Map<String, Object> group, boolean admin) {
+		if (me == null || me.isEmpty()) {
+			_finishNodeRecord(gen, family, group, null, null, me, admin);
+			return;
+		}
+		com.harvanna.app.sync.NodeGroupClient.Callback cb = new com.harvanna.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				if (gen != nodeLoadGen) return;
+				Map<String, Object> member = com.harvanna.app.utils.JsonMaps.toMap(json);
+				if (!"ACCUM".equals(family)) {
+					_finishNodeRecord(gen, family, group, member, null, me, admin);
+					return;
+				}
+				Object lid = member.get("currentLineId");
+				if (lid == null || String.valueOf(lid).isEmpty()) {
+					_finishNodeRecord(gen, family, group, member, null, me, admin);
+					return;
+				}
+				com.harvanna.app.sync.NodeGroupClient.getAccumLine(nodeId, String.valueOf(lid), new com.harvanna.app.sync.NodeGroupClient.Callback() {
+					@Override public void onSuccess(org.json.JSONObject lineJson) {
+						if (gen != nodeLoadGen) return;
+						_finishNodeRecord(gen, family, group, member, com.harvanna.app.utils.JsonMaps.toMap(lineJson), me, admin);
+					}
+					@Override public void onError(String e) {
+						_finishNodeRecord(gen, family, group, member, null, me, admin);
+					}
+				});
+			}
+			@Override public void onError(String e) {
+				_finishNodeRecord(gen, family, group, null, null, me, admin);
+			}
+		};
+		if ("CIRCLE".equals(family)) com.harvanna.app.sync.NodeGroupClient.getCircleMember(nodeId, me, cb);
+		else if ("ACCUM".equals(family)) com.harvanna.app.sync.NodeGroupClient.getAccumMember(nodeId, me, cb);
+		else com.harvanna.app.sync.NodeGroupClient.getFixedMember(nodeId, me, cb);
+	}
+
+	private void _finishNodeRecord(int gen, String family, Map<String, Object> group,
+			Map<String, Object> member, Map<String, Object> line, String me, boolean admin) {
+		if (!admin || !"ACCUM".equals(family)) {
+			_paintNodeRecord(gen, family, group, member, line, me, false, null);
+			return;
+		}
+		final List<Object[]> others = new ArrayList<>();
+		List<Map<String, Object>> targets = new ArrayList<>();
+		if (boardMembers != null) {
+			for (Map<String, Object> m : boardMembers) {
+				String wallet = str(m, "walletAddress", str(m, "wallet_address", str(m, "wallet", "")));
+				if (wallet.isEmpty() || (me != null && wallet.equalsIgnoreCase(me))) continue;
+				targets.add(m);
+			}
+		}
+		if (targets.isEmpty()) {
+			_paintNodeRecord(gen, family, group, member, line, me, true, others);
+			return;
+		}
+		final java.util.concurrent.atomic.AtomicInteger left = new java.util.concurrent.atomic.AtomicInteger(targets.size());
+		for (Map<String, Object> m : targets) {
+			final String wallet = str(m, "walletAddress", str(m, "wallet_address", str(m, "wallet", "")));
+			final String name = str(m, "displayName", str(m, "memberName", str(m, "name", _shortWallet(wallet))));
+			com.harvanna.app.sync.NodeGroupClient.getAccumMember(linkedNodeId, wallet, new com.harvanna.app.sync.NodeGroupClient.Callback() {
+				@Override public void onSuccess(org.json.JSONObject json) {
+					Map<String, Object> mem = com.harvanna.app.utils.JsonMaps.toMap(json);
+					Object lid = mem.get("currentLineId");
+					if (lid == null || String.valueOf(lid).isEmpty()) {
+						if (left.decrementAndGet() == 0) _paintNodeRecord(gen, family, group, member, line, me, true, others);
+						return;
+					}
+					com.harvanna.app.sync.NodeGroupClient.getAccumLine(linkedNodeId, String.valueOf(lid), new com.harvanna.app.sync.NodeGroupClient.Callback() {
+						@Override public void onSuccess(org.json.JSONObject lineJson) {
+							synchronized (others) { others.add(new Object[]{name, com.harvanna.app.utils.JsonMaps.toMap(lineJson)}); }
+							if (left.decrementAndGet() == 0) _paintNodeRecord(gen, family, group, member, line, me, true, others);
+						}
+						@Override public void onError(String e) {
+							if (left.decrementAndGet() == 0) _paintNodeRecord(gen, family, group, member, line, me, true, others);
+						}
+					});
+				}
+				@Override public void onError(String e) {
+					if (left.decrementAndGet() == 0) _paintNodeRecord(gen, family, group, member, line, me, true, others);
+				}
+			});
+		}
+	}
+
+	private void _paintNodeRecord(int gen, String family, Map<String, Object> group,
+			Map<String, Object> member, Map<String, Object> line, String me, boolean admin, List<Object[]> others) {
+		if (gen != nodeLoadGen || getActivity() == null) return;
+		getActivity().runOnUiThread(() -> {
+			if (gen != nodeLoadGen || getContext() == null || layout_type_board == null || panel_type_board == null) return;
+			_hideLegacyPaymentChrome();
+			long now = System.currentTimeMillis();
+			java.util.TimeZone zone = java.util.TimeZone.getDefault();
+			com.harvanna.app.group.GroupTypeBoard.Board mine =
+					com.harvanna.app.group.GroupTypeBoard.fromNode(family, group, member, line, me, now, zone);
+			boolean accum = "ACCUM".equals(family);
+			panel_type_board.setVisibility(View.VISIBLE);
+			if (tv_type_board_title != null) {
+				tv_type_board_title.setText(accum ? (admin ? "Members' savings cards" : "Your savings card") : mine.title);
+			}
+			if (tv_type_board_subtitle != null) {
+				tv_type_board_subtitle.setText(accum && admin
+						? "You see every member. Each member only sees their own card."
+						: mine.subtitle);
+			}
+			if (tv_type_board_legend != null) tv_type_board_legend.setText(mine.legend);
+			layout_type_board.removeAllViews();
+			_addRecordSection(accum && admin ? "You" : null, mine, cell -> _onNodeCell(cell));
+			if (accum && admin && others != null) {
+				for (Object[] row : others) {
+					@SuppressWarnings("unchecked") Map<String, Object> theirLine = (Map<String, Object>) row[1];
+					com.harvanna.app.group.GroupTypeBoard.Board theirs =
+							com.harvanna.app.group.GroupTypeBoard.fromNode("ACCUM", group, null, theirLine, "", now, zone);
+					_addRecordSection(String.valueOf(row[0]), theirs, cell -> {
+						if (getContext() != null) com.harvanna.app.group.GroupTypeBoardView.showDetail(getContext(), cell);
+					});
+				}
+			}
+			_ensureNodeActionButton(family);
+		});
+	}
+
+	private void _addRecordSection(String label, com.harvanna.app.group.GroupTypeBoard.Board board,
+			com.harvanna.app.group.GroupTypeBoardView.Click click) {
+		if (getContext() == null || layout_type_board == null || board == null) return;
+		if (label != null && !label.isEmpty()) {
+			TextView t = new TextView(getContext());
+			t.setText(label);
+			t.setTextSize(12);
+			t.setTypeface(null, android.graphics.Typeface.BOLD);
+			t.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
+			t.setPadding(0, (int) (10 * getResources().getDisplayMetrics().density), 0, 0);
+			layout_type_board.addView(t);
+		}
+		LinearLayout host = new LinearLayout(getContext());
+		host.setOrientation(LinearLayout.VERTICAL);
+		layout_type_board.addView(host, new LinearLayout.LayoutParams(
+				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		com.harvanna.app.group.GroupTypeBoardView.fill(host, board, click);
+	}
+
+	private void _onNodeCell(com.harvanna.app.group.GroupTypeBoard.Cell cell) {
+		if (cell != null && cell.payToday) {
+			_openNodeActions();
+			return;
+		}
+		if (getContext() != null) com.harvanna.app.group.GroupTypeBoardView.showDetail(getContext(), cell);
+	}
+
+	private void _ensureNodeActionButton(String family) {
+		if (getContext() == null || panel_type_board == null) return;
+		if (nodeActionButton == null) {
+			nodeActionButton = new com.google.android.material.button.MaterialButton(getContext());
+			nodeActionButton.setAllCaps(false);
+			LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			lp.topMargin = (int) (12 * getResources().getDisplayMetrics().density);
+			panel_type_board.addView(nodeActionButton, lp);
+		}
+		String label = "ACCUM".equals(family) ? "Save or withdraw"
+				: "FIXED".equals(family) ? "Deposit or request a payout" : "Pay and bond";
+		nodeActionButton.setText(label);
+		nodeActionButton.setOnClickListener(v -> _openNodeActions());
+	}
+
+	private void _openNodeActions() {
+		if (getContext() == null || linkedNodeId == null || linkedNodeId.isEmpty()) return;
+		Intent i = new Intent(getContext(), com.harvanna.app.group.NodeGroupActivity.class);
+		i.putExtra("nodeGroupId", linkedNodeId);
+		i.putExtra("firestoreGroupId", groupId);
+		startActivity(i);
+	}
+
+	private static String _shortWallet(String wallet) {
+		if (wallet == null || wallet.length() < 10) return wallet == null ? "Member" : wallet;
+		return wallet.substring(0, 6) + "…" + wallet.substring(wallet.length() - 4);
 	}
 
 	private void _updatePayButtonState() {

@@ -307,9 +307,11 @@ public final class GroupTypeBoard {
         String subtitle = cells.isEmpty()
                 ? "No savings recorded yet. Each payment you make appears here as its own box, with the date written inside."
                 : confirmedN + " recorded · " + money(total) + " saved";
-        return new Board(ACCUMULATIVE, "SAVINGS STAMPS", "Payment book", subtitle,
-                "Every contribution is a small box. The payment date is written inside. Green is confirmed, amber is still pending.",
-                4, "", cells);
+        String title = personalBook ? "Your savings card" : "Members' savings cards";
+        String legend = personalBook
+                ? "Only your payments are on this card. The date is written in each box. Green is confirmed, amber is still pending."
+                : "You are the admin, so every member's payment is here. Each member only sees their own card.";
+        return new Board(ACCUMULATIVE, "SAVINGS STAMPS", title, subtitle, legend, 6, "", cells);
     }
 
     // ── node circle ───────────────────────────────────────────────────────

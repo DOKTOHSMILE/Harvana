@@ -36,9 +36,11 @@ public final class GroupTypeBoardView {
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             }
             final GroupTypeBoard.Cell cell = board.cells.get(i);
-            LinearLayout box = cellBox(c, cell);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(c, 58), 1f);
-            int m = dp(c, 3);
+            boolean dense = cols >= 6;
+            LinearLayout box = cellBox(c, cell, dense);
+            int height = dp(c, dense ? 34 : 46);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, height, 1f);
+            int m = dp(c, dense ? 2 : 3);
             lp.setMargins(m, m, m, m);
             box.setOnClickListener(v -> {
                 if (click != null) click.onCell(cell);
@@ -65,7 +67,7 @@ public final class GroupTypeBoardView {
                 .show();
     }
 
-    private static LinearLayout cellBox(Context c, GroupTypeBoard.Cell cell) {
+    private static LinearLayout cellBox(Context c, GroupTypeBoard.Cell cell, boolean dense) {
         int bg;
         int fg;
         switch (cell.state) {
@@ -98,7 +100,7 @@ public final class GroupTypeBoardView {
         box.setOrientation(LinearLayout.VERTICAL);
         box.setGravity(Gravity.CENTER);
         GradientDrawable d = new GradientDrawable();
-        d.setCornerRadius(dp(c, 10));
+        d.setCornerRadius(dp(c, dense ? 6 : 8));
         d.setColor(bg);
         box.setBackground(d);
         box.setClickable(true);
@@ -106,7 +108,7 @@ public final class GroupTypeBoardView {
 
         TextView top = new TextView(c);
         top.setText(cell.top);
-        top.setTextSize(14);
+        top.setTextSize(dense ? 11 : 13);
         top.setTypeface(null, Typeface.BOLD);
         top.setTextColor(fg);
         top.setGravity(Gravity.CENTER);
@@ -115,7 +117,7 @@ public final class GroupTypeBoardView {
         if (cell.bottom != null && !cell.bottom.isEmpty()) {
             TextView bottom = new TextView(c);
             bottom.setText(cell.bottom);
-            bottom.setTextSize(9);
+            bottom.setTextSize(dense ? 8 : 9);
             bottom.setTextColor(fg);
             bottom.setGravity(Gravity.CENTER);
             box.addView(bottom);

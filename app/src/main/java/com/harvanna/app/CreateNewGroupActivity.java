@@ -337,9 +337,13 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
-		String preselected = getIntent().getStringExtra("groupType");
-		if (preselected != null && !preselected.isEmpty()) {
+		boolean lock = getIntent() != null && getIntent().getBooleanExtra("lockType", false);
+		String preselected = getIntent() != null ? getIntent().getStringExtra("groupType") : null;
+		if (lock && preselected != null && !preselected.isEmpty()) {
 			_selectGroupType(preselected);
+			_lockToType(preselected);
+		} else {
+			_showTypeChooserOnly();
 		}
 	}
 	
@@ -614,9 +618,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			}
 		});
 		
-		card_type_rotating.setOnClickListener(_v -> _selectGroupType("Rotating Pool"));
-		card_type_fixed.setOnClickListener(_v -> _selectGroupType("Fixed Contribution"));
-		card_type_accumulative.setOnClickListener(_v -> _selectGroupType("Accumulative Funds"));
+		card_type_rotating.setOnClickListener(_v -> _openType(CreateRotatingGroupActivity.class));
+		card_type_fixed.setOnClickListener(_v -> _openType(CreateFixedGroupActivity.class));
+		card_type_accumulative.setOnClickListener(_v -> _openType(CreateAccumulativeGroupActivity.class));
 		
 		spinner_frequency.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
@@ -1212,6 +1216,71 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		if (row != null) row.setVisibility(allowLoans ? View.VISIBLE : View.GONE);
 	}
 	
+	private void _openType(Class<?> cls) {
+		Intent next = new Intent(this, cls);
+		startActivity(next);
+		finish();
+	}
+
+	/** No type chosen yet: this screen is only the three choices, never the combined form. */
+	private void _showTypeChooserOnly() {
+		_updateBar();
+		if (card_rotating_details != null) card_rotating_details.setVisibility(View.GONE);
+		if (card_fixed_details != null) card_fixed_details.setVisibility(View.GONE);
+		if (card_accumulative_details != null) card_accumulative_details.setVisibility(View.GONE);
+		if (linear1 != null) {
+			for (int i = 0; i < linear1.getChildCount(); i++) {
+				View child = linear1.getChildAt(i);
+				int id = child.getId();
+				if (id != R.id.cardview_type && id != R.id.textview1 && id != R.id.textview11) {
+					child.setVisibility(View.GONE);
+				}
+			}
+		}
+		if (cardview_type != null) cardview_type.setVisibility(View.VISIBLE);
+	}
+
+	/** A dedicated create screen: only the fields that belong to this type stay on the page. */
+	private void _lockToType(String type) {
+		if (cardview_type != null) cardview_type.setVisibility(View.GONE);
+		if (linear_stepper != null) linear_stepper.setVisibility(View.GONE);
+		if (card_rotating_details != null) {
+			card_rotating_details.setVisibility("Rotating Pool".equals(type) ? View.VISIBLE : View.GONE);
+		}
+		if (card_fixed_details != null) {
+			card_fixed_details.setVisibility("Fixed Contribution".equals(type) ? View.VISIBLE : View.GONE);
+		}
+		if (card_accumulative_details != null) {
+			card_accumulative_details.setVisibility("Accumulative Funds".equals(type) ? View.VISIBLE : View.GONE);
+		}
+		androidx.appcompat.app.ActionBar bar = getSupportActionBar();
+		String title = "Create group";
+		String blurb = "";
+		if ("Rotating Pool".equals(type)) {
+			title = "New rotating group";
+			blurb = "Everyone pays the same amount each round. One member receives the pot each round until every slot has had a turn. 3 to 12 members. This group runs on the Harvanna network.";
+		} else if ("Fixed Contribution".equals(type)) {
+			title = "New goal group";
+			blurb = "The group saves toward one target. Each day of the month is its own box, and a payment marks that date. Money leaves only by the disbursement rule you set here.";
+		} else if ("Accumulative Funds".equals(type)) {
+			title = "New savings group";
+			blurb = "Each member keeps their own savings. Every payment is recorded as a small box with the date written inside. Set the interest and when members may withdraw.";
+		}
+		if (bar != null) {
+			bar.setTitle(title);
+			bar.setSubtitle("You'll be the admin");
+		}
+		if (linear1 != null && !blurb.isEmpty()) {
+			TextView intro = new TextView(this);
+			intro.setText(blurb);
+			intro.setTextSize(13.5f);
+			intro.setTextColor(com.harvanna.app.utils.UiColors.textSecondary());
+			int pad = (int) (8 * getResources().getDisplayMetrics().density);
+			intro.setPadding(0, 0, 0, pad);
+			linear1.addView(intro, 0);
+		}
+	}
+
 	private void _updateBar() {
 		androidx.appcompat.app.ActionBar bar = getSupportActionBar();
 		if (bar == null) return;

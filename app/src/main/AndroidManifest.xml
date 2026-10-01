@@ -77,6 +77,21 @@
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
+			android:name=".CreateRotatingGroupActivity"
+			android:label="New rotating group"
+			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".CreateFixedGroupActivity"
+			android:label="New goal group"
+			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
+			android:name=".CreateAccumulativeGroupActivity"
+			android:label="New savings group"
+			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
 			android:name=".CoinDetailActivity"
 			android:label="Coin"
 			android:configChanges="orientation|screenSize|keyboardHidden"

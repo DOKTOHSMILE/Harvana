@@ -181,6 +181,43 @@
 			</LinearLayout>
 		</com.google.android.material.card.MaterialCardView>
 		<LinearLayout
+			android:id="@+id/panel_type_board"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:padding="16dp"
+			android:background="@color/colorSurface"
+			android:orientation="vertical"
+			android:visibility="gone">
+			<TextView
+				android:id="@+id/tv_type_board_title"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Payments"
+				android:textSize="15sp"
+				android:textStyle="bold" />
+			<TextView
+				android:id="@+id/tv_type_board_subtitle"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="4dp"
+				android:text=""
+				android:textSize="12.5sp" />
+			<LinearLayout
+				android:id="@+id/layout_type_board"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:orientation="vertical" />
+			<TextView
+				android:id="@+id/tv_type_board_legend"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="8dp"
+				android:text=""
+				android:textSize="11sp" />
+		</LinearLayout>
+		<LinearLayout
 			android:id="@+id/panel_fixed_days"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"

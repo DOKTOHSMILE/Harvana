@@ -217,10 +217,7 @@ public class GroupsFragmentActivity extends Fragment {
 		authsp = getContext().getSharedPreferences("authsp", Activity.MODE_PRIVATE);
 		fauth = FirebaseAuth.getInstance();
 		
-		cardview1.setOnClickListener(_v -> {
-			i.setClass(getContext().getApplicationContext(), CreateNewGroupActivity.class);
-			startActivity(i);
-		});
+		cardview1.setOnClickListener(_v -> com.harvanna.app.group.CreateGroupSheet.show(getContext()));
 		
 		listview1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override

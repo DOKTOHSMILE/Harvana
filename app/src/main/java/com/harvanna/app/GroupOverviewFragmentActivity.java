@@ -135,6 +135,8 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	private LinearLayout layout_rules_container;
 	private LinearLayout linear29;
 	private RecyclerView recycler_payment_slots;
+	private LinearLayout layout_type_board;
+	private Map<String, Object> loadedGroup = new HashMap<>();
 	private LinearLayout linear30;
 	private LinearLayout linear2;
 	private TextView tv_slot_grid_helper_hint;
@@ -265,6 +267,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		layout_rules_container = _view.findViewById(R.id.layout_rules_container);
 		linear29 = _view.findViewById(R.id.linear29);
 		recycler_payment_slots = _view.findViewById(R.id.recycler_payment_slots);
+		layout_type_board = _view.findViewById(R.id.layout_type_board);
 		linear30 = _view.findViewById(R.id.linear30);
 		linear2 = _view.findViewById(R.id.linear2);
 		tv_slot_grid_helper_hint = _view.findViewById(R.id.tv_slot_grid_helper_hint);
@@ -510,6 +513,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	
 	private void _applyGroupData(Map<String, Object> data) {
 		if (data == null) return;
+		loadedGroup = data;
 		
 		// Admin?
 		String creatorId = _safeString(data, "creatorId", "");
@@ -633,24 +637,35 @@ public class GroupOverviewFragmentActivity extends Fragment {
 			}
 		}
 		
-		// Cycle progress
+		// Cycle progress — wording follows the group type, not a generic slot counter
 		int percent = (int) Math.min(100, (currentRound * 100.0) / totalSlots);
+		boolean rotating = groupType.contains("Rotating");
+		boolean fixed = groupType.contains("Fixed");
+		boolean accum = groupType.contains("Accumulative");
 		if (tv_cycle_status != null) {
-			tv_cycle_status.setText("Slot " + currentRound + " of " + totalSlots);
+			if (rotating) tv_cycle_status.setText("Round " + currentRound + " of " + totalSlots);
+			else if (fixed) tv_cycle_status.setText("Daily custody");
+			else if (accum) tv_cycle_status.setText("Savings book");
+			else tv_cycle_status.setText("Slot " + currentRound + " of " + totalSlots);
 		}
 		if (tv_cycle_percent != null) {
 			tv_cycle_percent.setText(percent + "%");
 		}
-		if (tv_slot_grid_helper_hint != null) {
-			tv_slot_grid_helper_hint.setText("Tracks unique member slots participating in Round " + currentRound);
+		if (tv_cycle_hint != null) {
+			if (rotating) tv_cycle_hint.setText("Each box is a member slot. Green means they have paid this round, and the date is written in the box.");
+			else if (fixed) tv_cycle_hint.setText("Each box is one day of this month, with the date written inside.");
+			else if (accum) tv_cycle_hint.setText("Every contribution is its own box, with the payment date written inside.");
 		}
-		_updateProgressBar(percent);
+		if (textview21 != null) {
+			if (rotating) textview21.setText("ROTATION BOARD");
+			else if (fixed) textview21.setText("THIS MONTH");
+			else if (accum) textview21.setText("SAVINGS STAMPS");
+		}
+		_updateProgressBar(rotating ? percent : 0);
 		_loadPaymentSlots(groupId, currentRound, totalSlots, goal);
+		if (accum) _loadActiveLoanCount();
 		
 		// Type panels — only one visible
-		boolean rotating = groupType.contains("Rotating");
-		boolean fixed = groupType.contains("Fixed");
-		boolean accum = groupType.contains("Accumulative");
 		
 		if (panel_rotating != null) panel_rotating.setVisibility(rotating ? View.VISIBLE : View.GONE);
 		if (panel_fixed != null) panel_fixed.setVisibility(fixed ? View.VISIBLE : View.GONE);
@@ -701,6 +716,31 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		}
 	}
 	
+	private void _loadActiveLoanCount() {
+		if (groupId == null || groupId.isEmpty() || getContext() == null || tv_loan_active_count == null) return;
+		com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext())
+		.getLoans(groupId, new com.harvanna.app.firestore.GroupFirestoreManager.ListCallback() {
+			@Override
+			public void onSuccess(java.util.List<Map<String, Object>> loans) {
+				int active = 0;
+				if (loans != null) {
+					for (Map<String, Object> loan : loans) {
+						if (loan == null) continue;
+						String st = _safeString(loan, "status", "");
+						if (st.equalsIgnoreCase("CLOSED") || st.equalsIgnoreCase("REPAID")
+							|| st.equalsIgnoreCase("REJECTED") || st.equalsIgnoreCase("CANCELLED")) continue;
+						active++;
+					}
+				}
+				final int n = active;
+				if (getActivity() != null) getActivity().runOnUiThread(() -> {
+					if (tv_loan_active_count != null) tv_loan_active_count.setText("Active loans: " + n);
+				});
+			}
+			@Override public void onError(String error) {}
+		});
+	}
+
 	private void _updateProgressBar(int percent) {
 		if (view_cycle_progress == null) return;
 		view_cycle_progress.post(() -> {
@@ -878,12 +918,43 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		final int slots = (int) totalSlots;
 		
 		Runnable paint = () -> {
-			if (recycler_payment_slots == null) return;
-			if (recycler_payment_slots.getLayoutManager() == null) {
-				recycler_payment_slots.setLayoutManager(
-				new androidx.recyclerview.widget.GridLayoutManager(getContext(), 8));
+			String focusUid = FirebaseAuth.getInstance().getCurrentUser() != null
+				? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+			com.harvanna.app.group.GroupTypeBoard.Board board =
+				com.harvanna.app.group.GroupTypeBoard.fromFirestore(
+					loadedGroup, members, payments, focusUid, false,
+					System.currentTimeMillis(), java.util.TimeZone.getDefault());
+			if (layout_type_board != null && board.kind != null && !board.kind.isEmpty()) {
+				if (recycler_payment_slots != null) recycler_payment_slots.setVisibility(View.GONE);
+				com.harvanna.app.group.GroupTypeBoardView.fill(layout_type_board, board, cell -> {
+					if (getContext() != null) com.harvanna.app.group.GroupTypeBoardView.showDetail(getContext(), cell);
+				});
+				if (textview21 != null && board.sectionTitle != null && !board.sectionTitle.isEmpty()) {
+					textview21.setText(board.sectionTitle);
+				}
+				if (tv_slot_grid_helper_hint != null) tv_slot_grid_helper_hint.setText(board.legend);
+				if (tv_rotating_next != null && board.nextRecipient != null && !board.nextRecipient.isEmpty()) {
+					tv_rotating_next.setText("Next recipient: " + board.nextRecipient);
+				}
+				if (com.harvanna.app.group.GroupTypeBoard.ROTATING.equals(board.kind) && tv_rotating_current != null) {
+					tv_rotating_current.setText(board.subtitle);
+				}
+				int shown = Math.max(1, board.cells.size());
+				int pct = (int) Math.round(board.paidCount() * 100.0 / shown);
+				if (tv_cycle_percent != null) tv_cycle_percent.setText(pct + "%");
+				_updateProgressBar(pct);
+				if (textview22 != null) {
+					textview22.setText(com.harvanna.app.group.GroupTypeBoard.ACCUMULATIVE.equals(board.kind)
+						? "Pending" : "Not paid yet");
+				}
+				if (textview23 != null) textview23.setText("Paid");
+			} else if (recycler_payment_slots != null) {
+				if (recycler_payment_slots.getLayoutManager() == null) {
+					recycler_payment_slots.setLayoutManager(
+					new androidx.recyclerview.widget.GridLayoutManager(getContext(), 8));
+				}
+				recycler_payment_slots.setAdapter(new SlotGridAdapter(slots, slotPaid));
 			}
-			recycler_payment_slots.setAdapter(new SlotGridAdapter(slots, slotPaid));
 			if (tv_pool_paid != null) {
 				tv_pool_paid.setText(paidCount + " / " + slots);
 			}

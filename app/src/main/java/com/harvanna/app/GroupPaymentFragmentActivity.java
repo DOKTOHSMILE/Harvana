@@ -75,6 +75,11 @@ public class GroupPaymentFragmentActivity extends Fragment {
 	private MaterialCardView card_group_wallet;
 	private MaterialCardView cardview23;
 	private LinearLayout panel_fixed_days;
+	private LinearLayout panel_type_board;
+	private LinearLayout layout_type_board;
+	private TextView tv_type_board_title;
+	private TextView tv_type_board_subtitle;
+	private TextView tv_type_board_legend;
 	private LinearLayout linear129;
 	private LinearProgressIndicator progress_round_paid;
 	private RecyclerView recycler_payments;
@@ -186,6 +191,11 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		card_group_wallet = _view.findViewById(R.id.card_group_wallet);
 		cardview23 = _view.findViewById(R.id.cardview23);
 		panel_fixed_days = _view.findViewById(R.id.panel_fixed_days);
+		panel_type_board = _view.findViewById(R.id.panel_type_board);
+		layout_type_board = _view.findViewById(R.id.layout_type_board);
+		tv_type_board_title = _view.findViewById(R.id.tv_type_board_title);
+		tv_type_board_subtitle = _view.findViewById(R.id.tv_type_board_subtitle);
+		tv_type_board_legend = _view.findViewById(R.id.tv_type_board_legend);
 		linear129 = _view.findViewById(R.id.linear129);
 		progress_round_paid = _view.findViewById(R.id.progress_round_paid);
 		recycler_payments = _view.findViewById(R.id.recycler_payments);
@@ -400,6 +410,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 	private CountDownTimer countdownTimer;
 	private final ArrayList<HashMap<String, Object>> paymentRows = new ArrayList<>();
 	private FixedDayGridAdapter dayAdapter;
+	private List<Map<String, Object>> boardMembers = new ArrayList<>();
 	
 	private void _applyCachedPayContext() {
 		Map<String, Object> cached = com.harvanna.app.offline.OfflineCacheManager.load(
@@ -449,7 +460,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 					}
 					boolean isFixed = groupType != null && groupType.toLowerCase(Locale.US).contains("fixed");
 					if (panel_fixed_days != null) {
-						panel_fixed_days.setVisibility(isFixed ? View.VISIBLE : View.GONE);
+						panel_fixed_days.setVisibility(View.GONE);
 					}
 					if (isFixed) _setupFixedGrid();
 					_loadMyMemberThenPayments();
@@ -491,12 +502,13 @@ public class GroupPaymentFragmentActivity extends Fragment {
 			public void onSuccess(List<Map<String, Object>> members) {
 				mySlot = 0;
 				fixedDaysPaid = new ArrayList<>();
+				boardMembers = new ArrayList<>();
 				if (members != null) {
 					for (Map<String, Object> m : members) {
+						boardMembers.add(m);
 						if (str(m, "memberUid", "").equals(myUid)) {
 							mySlot = (int) num(m, "slot");
 							fixedDaysPaid = FixedPaymentEngine.daysPaidFromMember(m, monthKey);
-							break;
 						}
 					}
 				}
@@ -610,6 +622,8 @@ public class GroupPaymentFragmentActivity extends Fragment {
 					}
 				}
 			}
+			if (textview72 != null) textview72.setText("PAYMENT RECORDS");
+			_bindTypeBoard();
 			if (tv_payments_empty != null) {
 				tv_payments_empty.setVisibility(paymentRows.isEmpty() ? View.VISIBLE : View.GONE);
 			}
@@ -700,6 +714,36 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		});
 	}
 	
+	private void _bindTypeBoard() {
+		if (panel_type_board == null || layout_type_board == null || getContext() == null) return;
+		Map<String, Object> group = new HashMap<>();
+		group.put("groupType", groupType);
+		group.put("totalSlots", totalSlots);
+		group.put("currentRound", currentRound);
+		group.put("frequency", frequency);
+		group.put("contributionAmount", contributionAmount);
+		List<Map<String, Object>> pays = new ArrayList<>();
+		pays.addAll(paymentRows);
+		com.harvanna.app.group.GroupTypeBoard.Board board =
+			com.harvanna.app.group.GroupTypeBoard.fromFirestore(
+				group, boardMembers, pays, myUid, true, System.currentTimeMillis(), java.util.TimeZone.getDefault());
+		if (board.kind == null || board.kind.isEmpty()) {
+			panel_type_board.setVisibility(View.GONE);
+			return;
+		}
+		panel_type_board.setVisibility(View.VISIBLE);
+		if (tv_type_board_title != null) tv_type_board_title.setText(board.title);
+		if (tv_type_board_subtitle != null) tv_type_board_subtitle.setText(board.subtitle);
+		if (tv_type_board_legend != null) tv_type_board_legend.setText(board.legend);
+		com.harvanna.app.group.GroupTypeBoardView.fill(layout_type_board, board, cell -> {
+			if (cell.payToday && btn_pay_now != null && btn_pay_now.isEnabled()) {
+				_onPayClicked();
+			} else if (getContext() != null) {
+				com.harvanna.app.group.GroupTypeBoardView.showDetail(getContext(), cell);
+			}
+		});
+	}
+
 	private void _updatePayButtonState() {
 		if (btn_pay_now == null) return;
 		if (countdownTimer != null) { countdownTimer.cancel(); countdownTimer = null; }

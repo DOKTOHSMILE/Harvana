@@ -248,6 +248,36 @@ public class NodeGroupActivity extends AppCompatActivity {
         }
         for (String n : s.notes) content.addView(CircleUi.text(this, n, 12.5f, R.color.colorWarning, false));
 
+        GroupTypeBoard.Board board = GroupTypeBoard.fromNode(family, group, member, line, me,
+                System.currentTimeMillis(), java.util.TimeZone.getDefault());
+        if (board != null && board.kind != null && !board.kind.isEmpty()
+                && (board.cells != null && !board.cells.isEmpty() || !board.subtitle.isEmpty())) {
+            LinearLayout card = CircleUi.card(this);
+            card.addView(CircleUi.text(this, board.title, 15, R.color.colorTextPrimary, true));
+            if (!board.subtitle.isEmpty()) {
+                card.addView(CircleUi.text(this, board.subtitle, 12.5f, R.color.colorTextSecondary, false));
+            }
+            LinearLayout host = new LinearLayout(this);
+            host.setOrientation(LinearLayout.VERTICAL);
+            card.addView(host);
+            GroupTypeBoardView.fill(host, board, cell -> {
+                if (cell.payToday) {
+                    for (GroupAction a : s.actions) {
+                        if (GroupAction.ACCUM_CONTRIBUTE.equals(a.id) || GroupAction.CONTRIBUTE.equals(a.id)
+                                || GroupAction.FIXED_DEPOSIT.equals(a.id)) {
+                            onAction(a);
+                            return;
+                        }
+                    }
+                }
+                GroupTypeBoardView.showDetail(this, cell);
+            });
+            if (!board.legend.isEmpty()) {
+                card.addView(CircleUi.text(this, board.legend, 11.5f, R.color.colorTextTertiary, false));
+            }
+            content.addView(card);
+        }
+
         for (GroupAction a : s.actions) content.addView(button(a.label, a.primary, v -> onAction(a)));
 
         renderProposals();

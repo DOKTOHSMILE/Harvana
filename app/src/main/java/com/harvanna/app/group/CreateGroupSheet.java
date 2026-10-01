@@ -13,14 +13,17 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.harvanna.app.CreateNewGroupActivity;
+import com.harvanna.app.CreateAccumulativeGroupActivity;
+import com.harvanna.app.CreateFixedGroupActivity;
+import com.harvanna.app.CreateRotatingGroupActivity;
 import com.harvanna.app.R;
 
 /**
- * The single "Create a group" entry. Pick what the group is FOR; each choice opens the right creation flow:
- *  - Rotating circle  -> on-chain circle (bonds and payouts enforced by the Harvanna node)
- *  - Accumulative     -> standard group form, type preselected
- *  - Fixed goal       -> standard group form, type preselected
+ * The single "Create a group" entry. Pick what the group is FOR; each choice opens its own screen,
+ * with only the fields that belong to that type:
+ *  - Rotating circle  -> CreateRotatingGroupActivity
+ *  - Accumulative     -> CreateAccumulativeGroupActivity
+ *  - Fixed goal       -> CreateFixedGroupActivity
  */
 public final class CreateGroupSheet {
 
@@ -43,24 +46,24 @@ public final class CreateGroupSheet {
                 "Everyone pays the same amount each round. Each round one member takes the whole pot, until everyone has had a turn. Best for getting a large sum at once.",
                 "3–12 members  ·  Runs on the network  ·  Bond-backed", v -> {
                     dialog.dismiss();
-                    open(ctx, "Rotating Pool");
+                    open(ctx, CreateRotatingGroupActivity.class);
                 }));
 
         root.addView(option(ctx, R.drawable.ic_type_savings, "Accumulative savings",
                 "Each member saves at their own pace in a personal savings line and earns interest set by the group. Best for building savings over time.",
                 "Flexible or locked  ·  Daily saving  ·  Interest", v -> {
                     dialog.dismiss();
-                    open(ctx, "Accumulative Funds");
+                    open(ctx, CreateAccumulativeGroupActivity.class);
                 }));
 
         root.addView(option(ctx, R.drawable.ic_type_goal, "Fixed goal",
                 "The group saves together toward one target, such as a project or an emergency fund. Money leaves only when the group votes. Best for shared goals.",
                 "Target amount  ·  Group votes  ·  Milestones", v -> {
                     dialog.dismiss();
-                    open(ctx, "Fixed Contribution");
+                    open(ctx, CreateFixedGroupActivity.class);
                 }));
 
-        TextView note = text(ctx, "Rotating groups keep their money on the Harvanna network. Accumulative and Fixed groups use the standard flow for now; on-chain versions are next.", 11.5f, R.color.colorTextTertiary, false);
+        TextView note = text(ctx, "Each group type has its own screen. Rotating groups keep their money on the Harvanna network.", 11.5f, R.color.colorTextTertiary, false);
         note.setPadding(0, (int) (12 * d), 0, 0);
         root.addView(note);
 
@@ -68,9 +71,8 @@ public final class CreateGroupSheet {
         dialog.show();
     }
 
-    private static void open(Context ctx, String groupType) {
-        Intent i = new Intent(ctx, CreateNewGroupActivity.class);
-        i.putExtra("groupType", groupType);
+    private static void open(Context ctx, Class<?> activity) {
+        Intent i = new Intent(ctx, activity);
         ctx.startActivity(i);
     }
 

@@ -721,10 +721,17 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		if (cardview23 != null) cardview23.setVisibility(View.GONE);
 		if (linear129 != null) linear129.setVisibility(View.GONE);
 		if (panel_fixed_days != null) panel_fixed_days.setVisibility(View.GONE);
+		if (btn_pay_now != null) btn_pay_now.setVisibility(View.GONE);
 	}
 
 	private void _embedNodeRecord(String nodeId) {
 		if (nodeId == null || nodeId.isEmpty() || getContext() == null) return;
+		_ensureNodeActionButton("");
+		if (nodeActionButton != null) {
+			nodeActionButton.setEnabled(false);
+			nodeActionButton.setAlpha(0.55f);
+			nodeActionButton.setText("Reading your record…");
+		}
 		final int gen = ++nodeLoadGen;
 		final String family = com.harvanna.app.sync.NodeGroupClient.familyOf(nodeId);
 		final String me = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(getContext());
@@ -863,7 +870,46 @@ public class GroupPaymentFragmentActivity extends Fragment {
 				}
 			}
 			_ensureNodeActionButton(family);
+			_applyPayGate(family, group, member, line);
 		});
+	}
+
+	/** The one payment button on this tab. Disabled, with the reason on it, when the node would reject a payment. */
+	private void _applyPayGate(String family, Map<String, Object> group, Map<String, Object> member, Map<String, Object> line) {
+		if (nodeActionButton == null) return;
+		String me = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(getContext());
+		com.harvanna.app.engine.GroupSnapshot snap = "CIRCLE".equals(family)
+				? com.harvanna.app.engine.CircleSnapshot.of(group, member)
+				: "ACCUM".equals(family) ? com.harvanna.app.engine.AccumSnapshot.of(group, member, line, me == null ? "" : me)
+				: com.harvanna.app.engine.FixedSnapshot.of(group, member, me == null ? "" : me);
+		com.harvanna.app.engine.GroupAction pay = null;
+		com.harvanna.app.engine.GroupAction blocked = null;
+		com.harvanna.app.engine.GroupAction other = null;
+		for (com.harvanna.app.engine.GroupAction a : snap.actions) {
+			boolean money = com.harvanna.app.engine.GroupAction.CONTRIBUTE.equals(a.id)
+					|| com.harvanna.app.engine.GroupAction.ACCUM_CONTRIBUTE.equals(a.id)
+					|| com.harvanna.app.engine.GroupAction.ACCUM_CONTRIBUTE_MULTI.equals(a.id)
+					|| com.harvanna.app.engine.GroupAction.FIXED_DEPOSIT.equals(a.id);
+			if (money && a.enabled && pay == null) pay = a;
+			if (!a.enabled && blocked == null) blocked = a;
+			if (a.enabled && other == null) other = a;
+		}
+		if (pay != null) {
+			nodeActionButton.setText(pay.label);
+			nodeActionButton.setEnabled(true);
+			nodeActionButton.setAlpha(1f);
+			nodeActionButton.setOnClickListener(v -> _openNodeActions());
+		} else if (blocked != null) {
+			nodeActionButton.setText(blocked.label);
+			nodeActionButton.setEnabled(false);
+			nodeActionButton.setAlpha(0.55f);
+			nodeActionButton.setOnClickListener(null);
+		} else if (other != null) {
+			nodeActionButton.setText(other.label);
+			nodeActionButton.setEnabled(true);
+			nodeActionButton.setAlpha(1f);
+			nodeActionButton.setOnClickListener(v -> _openNodeActions());
+		}
 	}
 
 	private void _addRecordSection(String label, com.harvanna.app.group.GroupTypeBoard.Board board,
@@ -886,7 +932,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 	}
 
 	private void _onNodeCell(com.harvanna.app.group.GroupTypeBoard.Cell cell) {
-		if (cell != null && cell.payToday) {
+		if (cell != null && cell.payToday && nodeActionButton != null && nodeActionButton.isEnabled()) {
 			_openNodeActions();
 			return;
 		}

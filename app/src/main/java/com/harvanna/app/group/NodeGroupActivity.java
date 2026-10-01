@@ -56,6 +56,7 @@ public class NodeGroupActivity extends AppCompatActivity {
     private final List<Object[]> packRequests = new ArrayList<>(); // {lineId, Map line}
     private String trustTier = "";
     private List<String> myLabels = new ArrayList<>();
+    private Button pressed;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -105,7 +106,13 @@ public class NodeGroupActivity extends AppCompatActivity {
     // ── loading ────────────────────────────────────────────────────────────
 
     private void load() {
+        boolean first = group == null;
         refresh.setRefreshing(true);
+        if (first) {
+            content.removeAllViews();
+            content.addView(new ProgressBar(this));
+            content.addView(CircleUi.text(this, "Reading the network…", 14, R.color.colorTextSecondary, false));
+        }
         NodeGroupClient.Callback onGroup = new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject json) { group = JsonMaps.toMap(json); loadMember(); }
             @Override public void onError(String e) {
@@ -278,7 +285,7 @@ public class NodeGroupActivity extends AppCompatActivity {
             content.addView(card);
         }
 
-        for (GroupAction a : s.actions) content.addView(button(a.label, a.primary, v -> onAction(a)));
+        for (GroupAction a : s.actions) content.addView(actionButton(a));
 
         renderProposals();
         renderPackRequests();
@@ -302,8 +309,8 @@ public class NodeGroupActivity extends AppCompatActivity {
             c.addView(CircleUi.text(this, v.explain(), 12.5f, R.color.colorTextSecondary, false));
             if (v.open && v.eligible) {
                 LinearLayout row = new LinearLayout(this);
-                row.addView(button("Vote yes", true, x -> vote(kind, id, true)), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-                row.addView(button("Vote no", false, x -> vote(kind, id, false)), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+                row.addView(actionButton(new GroupAction(GroupAction.VOTE_YES, "Vote yes", true), v -> vote(kind, id, true)), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+                row.addView(actionButton(new GroupAction(GroupAction.VOTE_NO, "Vote no", false), v -> vote(kind, id, false)), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
                 c.addView(row);
             }
             content.addView(c);
@@ -320,8 +327,8 @@ public class NodeGroupActivity extends AppCompatActivity {
             LinearLayout c = CircleUi.card(this);
             c.addView(CircleUi.text(this, "Withdrawal request", 14, R.color.colorTextPrimary, true));
             c.addView(CircleUi.text(this, shortAddr(str(ln, "memberAddress")) + " wants to withdraw " + CircleUi.harv(num(ln, "amountPaidRaw")) + ".", 12.5f, R.color.colorTextSecondary, false));
-            c.addView(button("Approve", true, x -> PinPromptHelper.verifyPinThenProceed(this, () ->
-                NodeGroupClient.approveAccumPack(getApplicationContext(), me, nodeId, lineId, result("Approved")))));
+            c.addView(actionButton(new GroupAction(GroupAction.ACCUM_APPROVE_PACK, "Approve", true), x ->
+                pin(() -> NodeGroupClient.approveAccumPack(getApplicationContext(), me, nodeId, lineId, result("Approved")))));
             content.addView(c);
         }
     }
@@ -461,12 +468,10 @@ public class NodeGroupActivity extends AppCompatActivity {
 
     // ── plumbing ───────────────────────────────────────────────────────────
 
-    private void pin(Runnable r) { PinPromptHelper.verifyPinThenProceed(this, r::run); }
-
     private NodeGroupClient.Callback result(String ok) {
         return new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject json) { toast(ok); load(); }
-            @Override public void onError(String error) { toast(CircleUi.friendly(error)); }
+            @Override public void onError(String error) { toast(CircleUi.friendly(error)); load(); }
         };
     }
 
@@ -477,7 +482,7 @@ public class NodeGroupActivity extends AppCompatActivity {
                 GroupProposalIndex.post(getApplicationContext(), fsGroupId, kind, json.optString(idKey, ""), title, me);
                 toast(ok); load();
             }
-            @Override public void onError(String error) { toast(CircleUi.friendly(error)); }
+            @Override public void onError(String error) { toast(CircleUi.friendly(error)); load(); }
         };
     }
 
@@ -487,8 +492,38 @@ public class NodeGroupActivity extends AppCompatActivity {
                 GroupProposalIndex.post(getApplicationContext(), fsGroupId, kind, id, title, me);
                 toast(ok); load();
             }
-            @Override public void onError(String error) { toast(CircleUi.friendly(error)); }
+            @Override public void onError(String error) { toast(CircleUi.friendly(error)); load(); }
         };
+    }
+
+    private Button actionButton(GroupAction a) {
+        return actionButton(a, v -> onAction(a));
+    }
+
+    private Button actionButton(GroupAction a, View.OnClickListener go) {
+        Button bt = button(a.label, a.primary && a.enabled, v -> {
+            if (!a.enabled) return;
+            pressed = (Button) v;
+            go.onClick(v);
+        });
+        bt.setEnabled(a.enabled);
+        if (!a.enabled) bt.setAlpha(0.55f);
+        return bt;
+    }
+
+    private void markBusy(Button source) {
+        if (source == null) return;
+        source.setEnabled(false);
+        source.setText("Working…");
+    }
+
+    private void pin(Runnable work) {
+        final Button source = pressed;
+        pressed = null;
+        PinPromptHelper.verifyPinThenProceed(this, () -> {
+            markBusy(source);
+            work.run();
+        });
     }
 
     private Button button(String label, boolean primary, View.OnClickListener l) {

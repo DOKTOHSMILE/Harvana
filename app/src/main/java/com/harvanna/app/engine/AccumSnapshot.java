@@ -44,7 +44,14 @@ public final class AccumSnapshot {
         if (hasLine && "ACTIVE".equals(lineStatus)) {
             String lineId = str(line, "lineId");
             long daily = lng(line, "dailyAmountRaw");
-            if ("SINGLE_LUMP_SUM".equals(str(line, "depositMode")) || "VARIABLE_AMOUNT".equals(str(line, "depositMode"))) {
+            String mode = str(line, "depositMode");
+            boolean lumpDone = "SINGLE_LUMP_SUM".equals(mode) && lng(line, "amountPaidRaw") > 0;
+            boolean covered = !"VARIABLE_AMOUNT".equals(mode) && coveredThroughToday(line);
+            if (lumpDone) {
+                s.actions.add(GroupAction.closed("This line is already saved"));
+            } else if (covered) {
+                s.actions.add(GroupAction.closed("Today is already saved"));
+            } else if ("SINGLE_LUMP_SUM".equals(mode) || "VARIABLE_AMOUNT".equals(mode)) {
                 s.actions.add(new GroupAction(GroupAction.ACCUM_CONTRIBUTE_MULTI, "Add to my line", true, lineId));
             } else {
                 s.actions.add(new GroupAction(GroupAction.ACCUM_CONTRIBUTE, "Save today " + harv(daily), true, lineId));
@@ -52,12 +59,23 @@ public final class AccumSnapshot {
             }
             boolean lockedNow = "LOCKED".equals(str(line, "lineType")) && lng(line, "lockedUntilTimestamp") > System.currentTimeMillis();
             if (lockedNow) s.notes.add("This line is locked and can't be withdrawn before its date.");
-            else s.actions.add(new GroupAction(GroupAction.ACCUM_PACK, "Ask to withdraw (pack)", false, lineId));
+            else if (!lumpDone) s.actions.add(new GroupAction(GroupAction.ACCUM_PACK, "Ask to withdraw (pack)", false, lineId));
         } else if (hasLine && "PENDING_PACK_APPROVAL".equals(lineStatus)) {
+            s.actions.add(GroupAction.closed("Waiting for the admin to approve"));
             s.notes.add("Waiting for the admin to approve your withdrawal.");
         } else if (hasLine && "CLAIMABLE".equals(lineStatus)) {
             s.actions.add(new GroupAction(GroupAction.ACCUM_CLAIM, "Claim my savings", true, str(line, "lineId")));
         }
         return s;
+    }
+
+    /** Same rule as the node: lastPaidDay is the last UTC day already covered, and it may be in the future. */
+    private static boolean coveredThroughToday(Map<String, Object> line) {
+        String last = str(line, "lastPaidDay");
+        if (last.length() < 10) return false;
+        java.util.Calendar c = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+        String today = String.format(java.util.Locale.US, "%04d-%02d-%02d",
+                c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH) + 1, c.get(java.util.Calendar.DAY_OF_MONTH));
+        return last.compareTo(today) >= 0;
     }
 }

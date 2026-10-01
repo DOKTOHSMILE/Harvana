@@ -899,10 +899,11 @@ public class HomeFragmentActivity extends Fragment {
 						});
 					});
 				} else {
-					// nothing due: keep the button visible but dimmed and inert
-					button.setText("Pay");
+					String why = str(row, "badge", "");
+					if (why.isEmpty() || "Pay".equalsIgnoreCase(why)) why = "Not due";
+					button.setText(why);
 					button.setEnabled(false);
-					button.setAlpha(0.4f);
+					button.setAlpha(0.55f);
 					button.setOnClickListener(null);
 				}
 				linear_upcoming_payments.addView(item);

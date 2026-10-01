@@ -58,12 +58,37 @@ public final class CircleSnapshot {
 
         if (!isMember && forming) {
             s.actions.add(new GroupAction(GroupAction.JOIN, "Join and lock bond", true));
-        } else if (isMember && active && ("ACTIVE".equals(ms) || "LATE".equals(ms))
-                && !(lng(member, "payoutRound") == round && round > 0)) {
+        } else if (isMember && forming) {
+            s.actions.add(GroupAction.closed("Waiting for the circle to fill"));
+        } else if (isMember && active && ("DEFAULTED_PRE_PAYOUT".equals(ms) || "DEFAULTED_POST_PAYOUT".equals(ms))) {
+            s.actions.add(GroupAction.closed("Can't pay — this membership defaulted"));
+        } else if (isMember && active && round > 0 && lng(member, "payoutRound") == round) {
+            s.actions.add(GroupAction.closed("Nothing due — you're being paid this round"));
+        } else if (isMember && active && alreadyPaidThisRound(member, contribution, limit, round)) {
+            s.actions.add(GroupAction.closed("Already paid this round"));
+        } else if (isMember && active && ("ACTIVE".equals(ms) || "LATE".equals(ms))) {
             s.actions.add(new GroupAction(GroupAction.CONTRIBUTE, "Pay " + harv(contribution), true));
         } else if (isMember && "COMPLETED".equals(s.state)) {
             s.actions.add(new GroupAction(GroupAction.WITHDRAW_BOND, "Withdraw bond", true));
+        } else if (isMember && !active && !forming) {
+            s.actions.add(GroupAction.closed("Nothing to pay"));
         }
         return s;
+    }
+
+    /** Confirmed payments reduce the remaining obligation. If that covers every round owed so far, this round is done. */
+    private static boolean alreadyPaidThisRound(Map<String, Object> member,
+                                                long contribution, int limit, int round) {
+        if (contribution <= 0 || round <= 0 || member == null || !member.containsKey("remainingObligationRaw")) return false;
+        long payoutRound = lng(member, "payoutRound");
+        int owed = 0;
+        for (int r = 1; r <= round; r++) if (r != payoutRound) owed++;
+        long original = member.containsKey("originalContributionObligationRaw")
+                ? lng(member, "originalContributionObligationRaw")
+                : contribution * Math.max(0, limit - 1);
+        long remaining = lng(member, "remainingObligationRaw");
+        if (original < remaining) return false;
+        long paidRounds = (original - remaining) / contribution;
+        return paidRounds >= owed;
     }
 }

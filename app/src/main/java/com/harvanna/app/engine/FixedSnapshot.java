@@ -39,6 +39,8 @@ public final class FixedSnapshot {
             if ("ADMIN_TRIGGERED".equals(rule) && admin) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_DISBURSEMENT, "Request payout (group votes)", false));
             if ("MILESTONE_BASED".equals(rule) && admin) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_MILESTONE, "Request a milestone release", false));
             if ("EMERGENCY_GRANT".equals(rule) && isMember) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_GRANT, "Ask for an emergency grant", false));
+        } else if (!s.state.isEmpty()) {
+            s.actions.add(GroupAction.closed("This goal is closed"));
         }
         if ("ALL_AT_ONCE_AT_GOAL".equals(rule)) s.notes.add("When the goal is reached, the full amount is paid to the beneficiary automatically. No vote is needed.");
         return s;

@@ -38,13 +38,16 @@ public final class NodeGroupClient {
 
     public static void getCircle(String circleId, Callback cb) { read("/api/v1/circle/" + circleId, cb); }
     public static void getCircleMember(String circleId, String address, Callback cb) { read("/api/v1/circle/" + circleId + "/member/" + address, cb); }
+    public static void getCircleMembers(String circleId, Callback cb) { read("/api/v1/circle/" + circleId + "/members", cb); }
 
     public static void getAccumGroup(String groupId, Callback cb) { read("/api/v1/accum/group/" + groupId, cb); }
     public static void getAccumMember(String groupId, String address, Callback cb) { read("/api/v1/accum/group/" + groupId + "/member/" + address, cb); }
     public static void getAccumLine(String groupId, String lineId, Callback cb) { read("/api/v1/accum/group/" + groupId + "/line/" + lineId, cb); }
+    public static void getAccumMembers(String groupId, Callback cb) { read("/api/v1/accum/group/" + groupId + "/members", cb); }
 
     public static void getFixedGroup(String groupId, Callback cb) { read("/api/v1/fixed/group/" + groupId, cb); }
     public static void getFixedMember(String groupId, String address, Callback cb) { read("/api/v1/fixed/group/" + groupId + "/member/" + address, cb); }
+    public static void getFixedMembers(String groupId, Callback cb) { read("/api/v1/fixed/group/" + groupId + "/members", cb); }
     public static void getFixedMilestone(String groupId, String id, Callback cb) { read("/api/v1/fixed/group/" + groupId + "/milestone/" + id, cb); }
     public static void getFixedGrant(String groupId, String id, Callback cb) { read("/api/v1/fixed/group/" + groupId + "/grant/" + id, cb); }
     public static void getFixedDisbursementRequest(String groupId, String id, Callback cb) { read("/api/v1/fixed/group/" + groupId + "/disbursement-request/" + id, cb); }

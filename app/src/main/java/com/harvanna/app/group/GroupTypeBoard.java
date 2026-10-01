@@ -360,8 +360,11 @@ public final class GroupTypeBoard {
             long payoutRound = (long) num(member, "payoutRound", 0);
             if (payoutRound > 0) recipient = "You, round " + payoutRound;
         }
+        long contribution = (long) num(group, "contributionAmountRaw", 0);
+        long payout = contribution * Math.max(0, limit - 1L);
         String subtitle = (forming ? "Still forming · " : "Round " + round + " of " + limit + " · ")
-                + (recipient.isEmpty() ? "payout order fills as members join" : "this round: " + recipient);
+                + (recipient.isEmpty() ? "payout order fills as members join" : "this round: " + recipient)
+                + (contribution > 0 ? " · payout " + String.format(java.util.Locale.US, "%.4f HARV", payout / RAW) + " from the other members. Bonds stay locked." : "");
         return new Board(ROTATING, "ROTATION BOARD", "Payout order", subtitle,
                 "Orange is the current round. Green rounds are already paid. Tap a box to see who and when.",
                 4, recipient, cells);

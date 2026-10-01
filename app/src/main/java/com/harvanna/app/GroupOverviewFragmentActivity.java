@@ -526,6 +526,77 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		String label = "HIGH_TRUST".equals(tier) ? "High trust" : "ESTABLISHED".equals(tier) ? "Established" : "New circle";
 		return label + " · " + members + " members · " + Math.round(clean * 100) + "% clean · " + Math.round(history * 100) + "% with history";
 	}
+
+	/** Overview numbers for an on-chain group come from the node, not the Firebase copy. */
+	private void _paintLiveEngine(Map<String, Object> data) {
+		String nodeId = com.harvanna.app.group.GroupKinds.nodeId(data);
+		String family = com.harvanna.app.sync.NodeGroupClient.familyOf(nodeId);
+		if (nodeId.isEmpty() || family.isEmpty() || getContext() == null) return;
+		com.harvanna.app.sync.NodeGroupClient.Callback cb = new com.harvanna.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				if (getActivity() == null) return;
+				getActivity().runOnUiThread(() -> _applyLiveEngine(family, json));
+			}
+			@Override public void onError(String error) { }
+		};
+		if ("CIRCLE".equals(family)) com.harvanna.app.sync.NodeGroupClient.getCircle(nodeId, cb);
+		else if ("ACCUM".equals(family)) com.harvanna.app.sync.NodeGroupClient.getAccumGroup(nodeId, cb);
+		else com.harvanna.app.sync.NodeGroupClient.getFixedGroup(nodeId, cb);
+		if (!"CIRCLE".equals(family)) return;
+		com.harvanna.app.sync.NodeGroupClient.getCircleMembers(nodeId, new com.harvanna.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				if (getActivity() == null) return;
+				org.json.JSONArray members = json.optJSONArray("members");
+				int round = json.optInt("currentRound", 0);
+				String who = "—";
+				if (members != null) {
+					for (int i = 0; i < members.length(); i++) {
+						org.json.JSONObject m = members.optJSONObject(i);
+						if (m != null && m.optInt("payoutRound") == round) {
+							String addr = m.optString("address", "");
+							who = addr.length() > 10 ? addr.substring(0, 6) + "…" + addr.substring(addr.length() - 4) : addr;
+							who = who + " · " + m.optString("state", "");
+						}
+					}
+				}
+				final String recipient = who;
+				getActivity().runOnUiThread(() -> {
+					if (tv_rotating_next != null) tv_rotating_next.setText("This round's recipient: " + recipient);
+				});
+			}
+			@Override public void onError(String error) { }
+		});
+	}
+
+	private void _applyLiveEngine(String family, org.json.JSONObject json) {
+		if ("CIRCLE".equals(family)) {
+			long raw = json.optLong("contributionAmountRaw");
+			int limit = json.optInt("memberLimit", 0);
+			int round = json.optInt("currentRound", 0);
+			double each = raw / 100_000_000.0;
+			double payout = each * Math.max(0, limit - 1);
+			if (tv_pool_contribution != null) tv_pool_contribution.setText(_formatUIBalance(each));
+			if (textview63 != null) textview63.setText("Payout this round");
+			if (tv_pool_total != null) tv_pool_total.setText(_formatUIBalance(payout));
+			if (tv_rotating_current != null) tv_rotating_current.setText(json.optString("state", "") + " · round " + round + " / " + limit);
+			if (tv_rotating_method != null) tv_rotating_method.setText("Order is set when the circle fills. Bonds are collateral, not the payout.");
+			return;
+		}
+		if ("FIXED".equals(family)) {
+			double goal = json.optLong("targetGoalAmountRaw") / 100_000_000.0;
+			double raised = json.optLong("raisedAmountRaw") / 100_000_000.0;
+			if (tv_fixed_goal != null) tv_fixed_goal.setText("Target: " + _formatUIBalance(goal));
+			if (tv_fixed_progress != null) tv_fixed_progress.setText("Raised: " + _formatUIBalance(raised));
+			if (tv_fixed_rule != null) tv_fixed_rule.setText("Disbursement: " + json.optString("disbursementRule", "—"));
+			if (tv_pool_contribution != null) tv_pool_contribution.setText(_formatUIBalance(raised));
+			if (textview63 != null) textview63.setText("Raised so far");
+			if (tv_pool_total != null) tv_pool_total.setText(_formatUIBalance(goal));
+			return;
+		}
+		double bps = json.optLong("interestRateBps") / 100.0;
+		if (tv_loan_rate != null) tv_loan_rate.setText(String.format(java.util.Locale.US, "Interest: %.2f%%", bps));
+		if (tv_loan_withdrawal != null) tv_loan_withdrawal.setText("Withdrawal rule: " + json.optString("withdrawalRule", "—"));
+	}
 	
 	private void _loadGroupData() {
 		if (groupId == null || groupId.isEmpty()) {
@@ -762,8 +833,14 @@ public class GroupOverviewFragmentActivity extends Fragment {
 			tv_pool_contribution.setText(_formatUIBalance(contribution));
 		}
 		if (tv_pool_total != null) {
-			tv_pool_total.setText(_formatUIBalance(contribution * totalSlots));
+			boolean rotatingNow = groupType.toLowerCase(java.util.Locale.US).contains("rotat");
+			double pot = rotatingNow ? contribution * Math.max(0, totalSlots - 1) : contribution * totalSlots;
+			tv_pool_total.setText(_formatUIBalance(pot));
 		}
+		if (textview63 != null && groupType.toLowerCase(java.util.Locale.US).contains("rotat")) {
+			textview63.setText("Payout this round");
+		}
+		_paintLiveEngine(data);
 	}
 	
 	private void _loadActiveLoanCount() {

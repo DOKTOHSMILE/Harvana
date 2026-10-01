@@ -1583,6 +1583,10 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 		final long contributionRaw = com.harvanna.app.circle.CircleUi.toRaw(contribution_amount_edittext3.getText().toString());
 		final int members = Integer.parseInt(no_of_slots_edittext4.getText().toString().trim());
+		if (members < 3 || members > 12) {
+			SketchwareUtil.showMessage(getApplicationContext(), "A rotating group needs 3 to 12 members.");
+			return;
+		}
 		final long cycleHours = "Daily".equals(frequencyString) ? 24L : "Weekly".equals(frequencyString) ? 168L : 720L;
 		final long perMember = contributionRaw * (members - 1);
 		final long creatorBond = perMember * 2L;
@@ -1591,7 +1595,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		+ "• The pot each round: " + com.harvanna.app.circle.CircleUi.harv(contributionRaw * (members - 1)) + "\n"
 		+ "• Every other member locks a bond of " + com.harvanna.app.circle.CircleUi.harv(perMember) + "\n"
 		+ "• Your bond: " + com.harvanna.app.circle.CircleUi.harv(creatorBond) + "\n"
-		+ "• Creation fee: " + com.harvanna.app.circle.CircleUi.harv(fee);
+		+ "• Creation fee: " + com.harvanna.app.circle.CircleUi.harv(fee)
+		+ "\n• The payout is only what the other members pay. Bonds stay locked as collateral."
+		+ "\n• If the network asks for a signature, the fee is signed from this wallet right after you confirm.";
 		
 		new androidx.appcompat.app.AlertDialog.Builder(this)
 		.setTitle("Create this rotating group?")
@@ -1648,7 +1654,18 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private void _createAccumOnChain() {
 		final String wallet = _requireWalletOrExplain();
 		if (wallet == null) return;
-		double ratePct = allowLoans ? Double.parseDouble(loan_interest_rate_edittext.getText().toString()) : 0.0;
+		double ratePct = 0.0;
+		if (allowLoans) {
+			try { ratePct = Double.parseDouble(loan_interest_rate_edittext.getText().toString().trim()); }
+			catch (Exception e) {
+				SketchwareUtil.showMessage(getApplicationContext(), "Enter an interest rate from 0 to 50.");
+				return;
+			}
+		}
+		if (ratePct < 0 || ratePct > 50) {
+			SketchwareUtil.showMessage(getApplicationContext(), "Interest on a savings group is 0 to 50%.");
+			return;
+		}
 		final long bps = Math.round(ratePct * 100.0);
 		final String rule = "Cycle-End Only".equals(withdrawalRuleString) ? "CYCLE_END_ONLY" : "ANYTIME";
 		String msg = "• Creation fee: 1 HARV\n• Interest rate: " + ratePct + "%\n• Withdrawals: " + rule;

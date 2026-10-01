@@ -110,6 +110,7 @@ public class P2pMarketplaceActivity extends AppCompatActivity {
 		
 		cardview_choose_currency.setOnClickListener(_v -> _showCurrencyPickerSheet());
 		
+		imageview2.setContentDescription("My trades");
 		imageview2.setOnClickListener(_v -> {
 			i.setClass(getApplicationContext(), P2pMyTradesActivity.class);
 			startActivity(i);

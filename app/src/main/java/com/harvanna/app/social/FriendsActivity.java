@@ -29,9 +29,11 @@ import java.util.Set;
 public class FriendsActivity extends AppCompatActivity {
     private LinearLayout searchResult, listBox, contactMatches;
     private EditText query;
-    private MaterialButton tabFollowing, tabFollowers;
+    private MaterialButton tabFollowing, tabFollowers, tabBack;
     private List<Person> following = new ArrayList<>(), followers = new ArrayList<>();
     private boolean showingFollowers;
+    /** 0 friends (mutual), 1 following, 2 followers. */
+    private int tab;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -43,10 +45,26 @@ public class FriendsActivity extends AppCompatActivity {
         int p = SocialUi.dp(this, 16);
         root.setPadding(p, p, p, p);
         sv.addView(root);
-        AppBar.setContent(this, sv, "Friends", "People you follow");
+        AppBar.setContent(this, sv, "Friends", "People you and they both follow");
+
+        LinearLayout tabs = new LinearLayout(this);
+        tabs.setOrientation(LinearLayout.HORIZONTAL);
+        tabFollowing = SocialUi.button(this, "Friends", false);
+        tabFollowers = SocialUi.button(this, "Following", true);
+        tabBack = SocialUi.button(this, "Followers", true);
+        tabFollowing.setOnClickListener(v -> { tab = 0; render(); });
+        tabFollowers.setOnClickListener(v -> { tab = 1; render(); });
+        tabBack.setOnClickListener(v -> { tab = 2; render(); });
+        tabs.addView(tabFollowing, new LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        tabs.addView(tabFollowers, new LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        tabs.addView(tabBack, new LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        root.addView(tabs);
+
+        listBox = SocialUi.card(this);
+        root.addView(listBox);
 
         LinearLayout find = SocialUi.card(this);
-        find.addView(SocialUi.text(this, "Find someone", 14, true, UiColors.textPrimary()));
+        find.addView(SocialUi.text(this, "Add a friend", 14, true, UiColors.textPrimary()));
         find.addView(SocialUi.text(this, "Type their exact username. There is no public member list.", 12, false, UiColors.textSecondary()));
         LinearLayout line = new LinearLayout(this);
         line.setOrientation(LinearLayout.HORIZONTAL);
@@ -62,33 +80,14 @@ public class FriendsActivity extends AppCompatActivity {
         root.addView(find);
 
         LinearLayout fromContacts = SocialUi.card(this);
-        fromContacts.addView(SocialUi.text(this, "Friends in my contacts", 14, true, UiColors.textPrimary()));
-        fromContacts.addView(SocialUi.text(this, "See which of your phone contacts already use Harvanna. Only people who chose to be found appear.", 12, false, UiColors.textSecondary()));
-        MaterialButton scan = SocialUi.button(this, "Find friends in my contacts", false);
+        fromContacts.addView(SocialUi.text(this, "From your contacts", 14, true, UiColors.textPrimary()));
+        MaterialButton scan = SocialUi.button(this, "Find friends in my contacts", true);
         contactMatches = new LinearLayout(this);
         contactMatches.setOrientation(LinearLayout.VERTICAL);
         scan.setOnClickListener(v -> ContactsFinder.find(this, matches -> showMatches(matches)));
         fromContacts.addView(scan);
         fromContacts.addView(contactMatches);
         root.addView(fromContacts);
-
-        LinearLayout tabs = new LinearLayout(this);
-        tabs.setOrientation(LinearLayout.HORIZONTAL);
-        tabFollowing = SocialUi.button(this, "Following", false);
-        tabFollowers = SocialUi.button(this, "Followers", true);
-        tabFollowing.setOnClickListener(v -> { showingFollowers = false; render(); });
-        tabFollowers.setOnClickListener(v -> { showingFollowers = true; render(); });
-        tabs.addView(tabFollowing, new LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        tabs.addView(tabFollowers, new LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        root.addView(tabs);
-
-        listBox = SocialUi.card(this);
-        root.addView(listBox);
-
-        Intent me = new Intent(this, ContactCardActivity.class);
-        MaterialButton card = SocialUi.button(this, "My username and contact card", true);
-        card.setOnClickListener(v -> startActivity(me));
-        root.addView(card);
     }
 
     @Override protected void onResume() { super.onResume(); reload(); }
@@ -144,30 +143,46 @@ public class FriendsActivity extends AppCompatActivity {
     }
 
     private void render() {
-        tabFollowing.setText("Following (" + following.size() + ")");
-        tabFollowers.setText("Followers (" + followers.size() + ")");
+        List<Person> friends = mutual();
+        tabFollowing.setText("Friends (" + friends.size() + ")");
+        tabFollowers.setText("Following (" + following.size() + ")");
+        tabBack.setText("Followers (" + followers.size() + ")");
         listBox.removeAllViews();
-        List<Person> list = showingFollowers ? followers : following;
+        List<Person> list = tab == 1 ? following : tab == 2 ? followers : friends;
         if (list.isEmpty()) {
-            listBox.addView(SocialUi.text(this, showingFollowers ? "Nobody follows you yet." : "You don't follow anyone yet. Find a friend by username above.", 13, false, UiColors.textSecondary()));
+            String empty = tab == 1 ? "You don't follow anyone yet. Add a friend by username below."
+                    : tab == 2 ? "Nobody follows you yet."
+                    : "No friends yet. A friend is someone you follow who follows you back.";
+            listBox.addView(SocialUi.text(this, empty, 13, false, UiColors.textSecondary()));
             return;
         }
         Set<String> mine = followingIds();
         for (Person p : list) {
             boolean iFollow = mine.contains(p.uid);
-            String action = showingFollowers ? (iFollow ? "Following" : "Follow back") : "Unfollow";
-            listBox.addView(SocialUi.personRow(this, p, action, showingFollowers ? iFollow : true, v -> {
-                if (showingFollowers) {
-                    if (iFollow) return;
+            boolean friend = tab == 0;
+            String action = friend || (tab == 1) ? "Unfollow" : (iFollow ? "Friends" : "Follow back");
+            boolean outlined = friend || tab == 1 || iFollow;
+            listBox.addView(SocialUi.personRow(this, p, action, outlined, v -> {
+                if (tab == 2 && !iFollow) {
                     SocialStore.follow(p, (ok, e) -> runOnUiThread(() -> { if (!ok) Toast.makeText(this, e, Toast.LENGTH_LONG).show(); reload(); }));
-                } else {
-                    new AlertDialog.Builder(this).setTitle("Unfollow " + p.name + "?")
-                        .setMessage("They will no longer see your contact links.")
-                        .setPositiveButton("Unfollow", (d, w) -> SocialStore.unfollow(p.uid, (ok, e) -> runOnUiThread(this::reload)))
-                        .setNegativeButton("Cancel", null).show();
+                    return;
                 }
+                if (tab == 2) return;
+                new AlertDialog.Builder(this).setTitle("Unfollow " + p.name + "?")
+                    .setMessage("They leave your friends list, and they will no longer see your contact links.")
+                    .setPositiveButton("Unfollow", (d, w) -> SocialStore.unfollow(p.uid, (ok, e) -> runOnUiThread(this::reload)))
+                    .setNegativeButton("Cancel", null).show();
             }, v -> openCard(p)));
         }
+    }
+
+    /** People both sides follow. */
+    private List<Person> mutual() {
+        Set<String> back = new HashSet<>();
+        for (Person p : followers) back.add(p.uid);
+        List<Person> out = new ArrayList<>();
+        for (Person p : following) if (back.contains(p.uid)) out.add(p);
+        return out;
     }
 
     /** Contact links of a person, only when we follow each other. */

@@ -759,23 +759,50 @@ public class ProfileActivity extends AppCompatActivity {
 	}
 	
 
-	/** Friends and the off-app contact card (username, phone, chat links) live one tap from the profile. */
+	/** Friends sit under the name, not at the bottom of the profile. */
 	private void addSocialShortcuts() {
-		if (linear1 == null) return;
-		android.widget.LinearLayout box = new android.widget.LinearLayout(this);
-		box.setOrientation(android.widget.LinearLayout.VERTICAL);
-		int pad = (int) (16 * getResources().getDisplayMetrics().density);
-		box.setPadding(pad, pad, pad, 0);
-		com.google.android.material.button.MaterialButton card = new com.google.android.material.button.MaterialButton(this);
-		card.setAllCaps(false);
-		card.setText("Username and chat links");
-		card.setOnClickListener(v -> startActivity(new android.content.Intent(this, com.harvanna.app.social.ContactCardActivity.class)));
-		com.google.android.material.button.MaterialButton friends = new com.google.android.material.button.MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
-		friends.setAllCaps(false);
-		friends.setText("Friends");
-		friends.setOnClickListener(v -> startActivity(new android.content.Intent(this, com.harvanna.app.social.FriendsActivity.class)));
-		box.addView(card);
-		box.addView(friends);
-		linear1.addView(box);
+		if (linear2 == null) return;
+		float d = getResources().getDisplayMetrics().density;
+		android.widget.LinearLayout row = new android.widget.LinearLayout(this);
+		row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+		row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+		row.setPadding(0, (int) (16 * d), 0, 0);
+		android.widget.LinearLayout text = new android.widget.LinearLayout(this);
+		text.setOrientation(android.widget.LinearLayout.VERTICAL);
+		android.widget.TextView title = new android.widget.TextView(this);
+		title.setText("Friends");
+		title.setTextSize(15);
+		title.setTypeface(null, android.graphics.Typeface.BOLD);
+		title.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
+		final android.widget.TextView sub = new android.widget.TextView(this);
+		sub.setText("People you follow each other with");
+		sub.setTextSize(12);
+		sub.setTextColor(com.harvanna.app.utils.UiColors.textSecondary());
+		text.addView(title);
+		text.addView(sub);
+		row.addView(text, new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+		android.widget.TextView open = new android.widget.TextView(this);
+		open.setText("See all");
+		open.setTextSize(13);
+		open.setTypeface(null, android.graphics.Typeface.BOLD);
+		open.setTextColor(com.harvanna.app.utils.UiColors.accent());
+		row.addView(open);
+		row.setOnClickListener(v -> startActivity(new android.content.Intent(this, com.harvanna.app.social.FriendsActivity.class)));
+		linear2.addView(row, 1);
+		com.harvanna.app.social.SocialStore.following((following, e1) ->
+			com.harvanna.app.social.SocialStore.followers((followers, e2) -> runOnUiThread(() -> {
+				java.util.Set<String> back = new java.util.HashSet<>();
+				if (followers != null) for (com.harvanna.app.social.Person p : followers) back.add(p.uid);
+				java.util.List<String> names = new java.util.ArrayList<>();
+				if (following != null) for (com.harvanna.app.social.Person p : following) {
+					if (back.contains(p.uid)) names.add(p.name);
+				}
+				if (names.isEmpty()) sub.setText("No friends yet. Find someone by username.");
+				else {
+					String shown = names.size() == 1 ? names.get(0)
+						: names.get(0) + (names.size() == 2 ? " and " + names.get(1) : " and " + (names.size() - 1) + " others");
+					sub.setText(names.size() + (names.size() == 1 ? " friend · " : " friends · ") + shown);
+				}
+			})));
 	}
 }

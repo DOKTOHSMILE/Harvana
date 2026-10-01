@@ -50,79 +50,31 @@ final class MainDrawer {
     private int dp(float v) { return Math.round(v * d); }
 
     void show(View anchor) {
-        final ViewGroup rootView = (ViewGroup) anchor.getRootView();
-
-        LinearLayout column = new LinearLayout(a);
-        column.setOrientation(LinearLayout.VERTICAL);
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(UiColors.surface());
-        bg.setCornerRadii(new float[]{dp(24), dp(24), 0, 0, 0, 0, dp(24), dp(24)});
-        column.setBackground(bg);
-        column.setPadding(0, statusBarHeight(), 0, 0);
-
-        ScrollView scroll = new ScrollView(a);
-        scroll.setVerticalScrollBarEnabled(false);
         LinearLayout list = new LinearLayout(a);
         list.setOrientation(LinearLayout.VERTICAL);
-        list.setPadding(0, 0, 0, dp(16));
-        scroll.addView(list);
-        column.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        list.setPadding(0, dp(6), 0, dp(6));
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(UiColors.surface());
+        bg.setCornerRadius(dp(16));
+        list.setBackground(bg);
 
-        list.addView(header());
-
-        section(list, "Wallet");
-        row(list, R.drawable.icon_account_balance_wallet_outline_, "Wallets", null, () -> open(WalletListActivity.class));
-        row(list, R.drawable.icon_lock_round, "Backup & recovery", null, () -> open(BackupRecoveryActivity.class));
-        row(list, R.drawable.icon_security_round, "Security & PIN", null, () -> open(SecurityPinSettingsActivity.class));
-        row(list, R.drawable.icon_credit_card_round, "Payment methods", null, () -> open(PaymentMethodsActivity.class));
-
-        section(list, "Circles");
-        row(list, R.drawable.icon_mark_unread_chat_alt_round, "Invitations", null, () -> open(InvitesActivity.class));
         row(list, R.drawable.icon_group_add_twotone, "Friends", null, () -> open(com.harvanna.app.social.FriendsActivity.class));
-        row(list, R.drawable.icon_star_rate_round, "Trust score", null, () -> open(TrustScoreActivity.class));
-        row(list, R.drawable.icon_request_quote_round, "Open loans", null, () -> open(OpenLoansActivity.class));
-
-        section(list, "Market");
-        row(list, R.drawable.icon_currency_exchange_twotone, "P2P market", null, () -> open(P2pMarketplaceActivity.class));
-        row(list, R.drawable.icon_history_twotone, "My trades", null, () -> open(P2pMyTradesActivity.class));
-
-        section(list, "App");
-        row(list, R.drawable.icon_toggle_on_round, "Appearance", ThemeManager.label(a), this::pickTheme);
+        row(list, R.drawable.icon_mark_unread_chat_alt_round, "Invitations", null, () -> open(InvitesActivity.class));
+        row(list, R.drawable.icon_alternate_email_twotone, "My contact card", null, () -> open(com.harvanna.app.social.ContactCardActivity.class));
         row(list, R.drawable.icon_settings_outline, "Settings", null, () -> open(SettingsActivity.class));
+        row(list, R.drawable.ic_help, "Help & support", null, () -> open(HelpSupportActivity.class));
+        row(list, R.drawable.icon_info_round, "About", null, () -> open(AboutActivity.class));
         row(list, R.drawable.icon_share_round, "Share Harvanna", null, this::shareApp);
-
-        divider(list);
         LinearLayout out = rowView(R.drawable.icon_power_settings_new_twotone, "Log out", null, UiColors.error(), UiColors.error());
         out.setOnClickListener(v -> { dismiss(); confirmLogOut(); });
         list.addView(out);
 
-        TextView version = new TextView(a);
-        version.setText("Version " + versionName());
-        version.setTextSize(12);
-        version.setTextColor(UiColors.textTertiary());
-        version.setPadding(dp(20), dp(8), dp(20), dp(4));
-        version.setOnClickListener(v -> { dismiss(); host.showVersion(); });
-        list.addView(version);
-
-        window = new PopupWindow(column, dp(320), WindowManager.LayoutParams.MATCH_PARENT, true);
+        window = new PopupWindow(list, dp(232), ViewGroup.LayoutParams.WRAP_CONTENT, true);
         window.setOutsideTouchable(true);
         window.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
-        window.setElevation(24f);
-        android.transition.Slide slide = new android.transition.Slide(Gravity.END);
-        slide.setDuration(260);
-        slide.setInterpolator(new android.view.animation.DecelerateInterpolator());
-        window.setEnterTransition(slide);
-        window.setExitTransition(slide);
-
-        // Dim the screen behind the drawer while it is open.
-        final View dim = new View(a);
-        dim.setBackgroundColor(0x73000000);
-        dim.setAlpha(0f);
-        rootView.addView(dim, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        dim.animate().alpha(1f).setDuration(260).start();
-        window.setOnDismissListener(() -> rootView.removeView(dim));
-
-        window.showAtLocation(rootView, Gravity.TOP | Gravity.END, 0, 0);
+        window.setElevation(dp(8));
+        if (anchor == null) anchor = a.findViewById(android.R.id.content);
+        window.showAsDropDown(anchor, 0, dp(4), Gravity.END);
     }
 
     private void dismiss() { if (window != null) window.dismiss(); }
@@ -211,8 +163,8 @@ final class MainDrawer {
         LinearLayout r = new LinearLayout(a);
         r.setOrientation(LinearLayout.HORIZONTAL);
         r.setGravity(Gravity.CENTER_VERTICAL);
-        r.setPadding(dp(20), dp(10), dp(20), dp(10));
-        r.setMinimumHeight(dp(48));
+        r.setPadding(dp(16), dp(11), dp(16), dp(11));
+        r.setMinimumHeight(dp(44));
         TypedValue tv = new TypedValue();
         a.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv, true);
         r.setBackgroundResource(tv.resourceId);

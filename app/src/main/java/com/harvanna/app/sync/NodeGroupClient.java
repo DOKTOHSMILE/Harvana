@@ -53,6 +53,12 @@ public final class NodeGroupClient {
     public static void getAdminRecovery(String groupId, Callback cb) { read("/api/v1/admin-recovery/group/" + groupId, cb); }
     public static void getReferral(String referredAddress, Callback cb) { read("/api/v1/referral/" + referredAddress, cb); }
     public static void getStakingPosition(String address, Callback cb) { read("/api/v1/staking/position/" + address, cb); }
+    public static void getStakingInfo(Callback cb) { read("/api/v1/staking/info", cb); }
+
+    /** Live group tier from member labels on the node. Firestore must not invent this. */
+    public static void getGroupTrust(String groupId, Callback cb) {
+        read("/api/v1/wallet/group-trust/" + groupId, cb);
+    }
 
     /** Family of a group id, from the node's fixed id prefixes. */
     public static String familyOf(String groupId) {
@@ -266,17 +272,23 @@ public final class NodeGroupClient {
     }
 
     public static void claimStakingRewards(Context c, String address, Callback cb) {
-        act(c, address, "/api/v1/staking/claim", new Spec() {
-            public String canonical(long n) { return GroupCanonical.stakingClaim(address, n); }
-            public void fill(JSONObject b, long n) throws JSONException { b.put("address", address); }
-        }, cb);
+        withActionNonce(address, (nonce, err) -> {
+            if (nonce < 0) { cb.onError(err); return; }
+            actNonce(c, address, "/api/v1/staking/claim", nonce, new Spec() {
+                public String canonical(long n) { return GroupCanonical.stakingClaim(address, n); }
+                public void fill(JSONObject b, long n) throws JSONException { b.put("address", address); }
+            }, cb);
+        });
     }
 
     public static void unstake(Context c, String address, long amountRaw, Callback cb) {
-        act(c, address, "/api/v1/staking/unstake", new Spec() {
-            public String canonical(long n) { return GroupCanonical.stakingUnstake(address, amountRaw, n); }
-            public void fill(JSONObject b, long n) throws JSONException { b.put("address", address).put("amountRaw", amountRaw); }
-        }, cb);
+        withActionNonce(address, (nonce, err) -> {
+            if (nonce < 0) { cb.onError(err); return; }
+            actNonce(c, address, "/api/v1/staking/unstake", nonce, new Spec() {
+                public String canonical(long n) { return GroupCanonical.stakingUnstake(address, amountRaw, n); }
+                public void fill(JSONObject b, long n) throws JSONException { b.put("address", address).put("amountRaw", amountRaw); }
+            }, cb);
+        });
     }
 
     // ═════════════════════════════ plumbing ═════════════════════════════
@@ -332,6 +344,40 @@ public final class NodeGroupClient {
             @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }
             @Override public void onError(String error) { cb.onError(error); }
         });
+    }
+
+    private interface NonceNext { void ready(long nonce, String error); }
+
+    /** Claim and unstake use the staking action nonce, not the transfer nonce. */
+    private static void withActionNonce(String address, NonceNext next) {
+        getStakingPosition(address, new Callback() {
+            @Override public void onSuccess(JSONObject json) { next.ready(json.optLong("actionNonce", 0) + 1, null); }
+            @Override public void onError(String error) { next.ready(-1L, error); }
+        });
+    }
+
+    private static void actNonce(Context context, String address, String path, long nonce, Spec spec, Callback cb) {
+        try {
+            String seedB64 = WalletManager.loadPrivateKey(context, address);
+            String pubB64 = WalletManager.getPublicKey(context, address);
+            if (seedB64 == null || pubB64 == null) {
+                cb.onError("No local signing key for this wallet.");
+                return;
+            }
+            byte[] sig = Ed25519.sign(Base64.decode(seedB64, Base64.NO_WRAP),
+                    spec.canonical(nonce).getBytes(StandardCharsets.UTF_8));
+            JSONObject body = new JSONObject();
+            spec.fill(body, nonce);
+            body.put("nonce", nonce)
+                .put("signature", Base64.encodeToString(sig, Base64.NO_WRAP))
+                .put("publicKey", pubB64);
+            HarvannaNodeClient.nodePost(path, body.toString(), new HarvannaNodeClient.JsonCallback() {
+                @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }
+                @Override public void onError(String error) { cb.onError(error); }
+            });
+        } catch (Exception e) {
+            cb.onError("Signing failed: " + e.getMessage());
+        }
     }
 
     /** Fetch nextRequestNonce → build canonical → sign with the wallet key → POST. */

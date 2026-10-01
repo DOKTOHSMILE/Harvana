@@ -393,6 +393,14 @@
 				android:text="No description yet."
 				android:textSize="13.5sp"
 				android:lineSpacingExtra="3dp" />
+			<TextView
+				android:id="@+id/tv_group_trust"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:text="Trust · reading the network"
+				android:textSize="13sp"
+				android:textStyle="bold" />
 		</LinearLayout>
 		<TextView
 			android:id="@+id/tv_rules_header"

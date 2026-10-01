@@ -134,12 +134,13 @@ public class WalletEarnFragmentActivity extends Fragment {
 	}
 	
 	private void initializeLogic() {
+		com.harvanna.app.earn.StakingPanel.attach(this, linear1);
 	}
 	
 	@Override
 	public void onStart() {
 		super.onStart();
-		
+		com.harvanna.app.earn.StakingPanel.attach(this, linear1);
 	}
 	
 

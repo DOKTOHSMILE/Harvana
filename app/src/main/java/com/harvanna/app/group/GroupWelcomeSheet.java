@@ -108,7 +108,7 @@ public final class GroupWelcomeSheet {
         sign.setEnabled(false);
         sign.setAlpha(0.45f);
         agree.setOnCheckedChangeListener((b, on) -> { sign.setEnabled(on); sign.setAlpha(on ? 1f : 0.45f); });
-        sign.setOnClickListener(v -> PinPromptHelper.verifyPinThenProceed(a, () -> {
+        sign.setOnClickListener(v -> PinPromptHelper.authorize(a, "Sign this group contract", () -> {
             try {
                 long now = System.currentTimeMillis();
                 String seed = WalletManager.loadPrivateKey(a, wallet);

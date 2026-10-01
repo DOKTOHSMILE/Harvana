@@ -559,7 +559,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 			return;
 		}
 		
-		PinPromptHelper.verifyPinThenProceed(this, () -> {
+		PinPromptHelper.authorize(this, "Open this sell order", () -> {
 			btn_create_sell_order.setEnabled(false);
 			btn_create_sell_order.setText("Creating order…");
 			

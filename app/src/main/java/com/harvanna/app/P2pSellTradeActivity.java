@@ -696,7 +696,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		.setTitle("Confirm payment received")
 		.setMessage(("Only confirm if you have genuinely verified the money is in your account. This releases the escrowed " + com.harvanna.app.CoinInfo.ticker() + " to the buyer immediately and cannot be undone."))
 		.setPositiveButton("Confirm & Release", (dialog, which) -> {
-			PinPromptHelper.verifyPinThenProceed(this, () -> {
+			PinPromptHelper.authorize(this, "Release the escrow to the buyer", () -> {
 				btn_sell_confirm_payment.setEnabled(false);
 				btn_sell_confirm_payment.setText("Releasing…");
 				P2PTradeRouter.confirmReceived(getApplicationContext(), orderId, myAddress, new P2PTradeRouter.Callback() {
@@ -733,7 +733,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			String reason = input.getText().toString().trim();
 			if (reason.isEmpty()) reason = "No reason provided";
 			String finalReason = reason;
-			PinPromptHelper.verifyPinThenProceed(this, () -> {
+			PinPromptHelper.authorize(this, "Raise a dispute on this trade", () -> {
 				P2PTradeRouter.raiseDispute(getApplicationContext(), orderId, myAddress, finalReason, new P2PTradeRouter.Callback() {
 					@Override
 					public void onSuccess(JSONObject result) {

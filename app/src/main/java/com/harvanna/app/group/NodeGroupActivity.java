@@ -347,7 +347,7 @@ public class NodeGroupActivity extends AppCompatActivity {
                 GroupProposalIndex.PACK, a.ref, "Withdrawal request"))); break;
             case GroupAction.ACCUM_CLAIM: pin(() -> NodeGroupClient.claimAccumLine(getApplicationContext(), me, nodeId, a.ref, result("Savings claimed"))); break;
             case GroupAction.FIXED_DEPOSIT: amountDialog("Deposit", "Amount to deposit", raw ->
-                pin(() -> NodeGroupClient.depositFixed(getApplicationContext(), me, nodeId, raw, result("Deposit sent")))); break;
+                pin("Authorize a deposit of " + CircleUi.harv(raw), () -> NodeGroupClient.depositFixed(getApplicationContext(), me, nodeId, raw, result("Deposit sent")))); break;
             case GroupAction.FIXED_REQUEST_DISBURSEMENT: pin(() -> NodeGroupClient.requestFixedDisbursement(getApplicationContext(), me, nodeId,
                 indexedFrom("requestId", "Payout requested. The group will vote.", GroupProposalIndex.DISBURSEMENT, "Payout request"))); break;
             case GroupAction.FIXED_REQUEST_MILESTONE: requestDialog("Request a milestone release", "What will the money be used for?", (raw, text) ->
@@ -420,10 +420,10 @@ public class NodeGroupActivity extends AppCompatActivity {
                     try { n = Integer.parseInt(days.getText().toString().trim()); } catch (Exception ignored) { }
                     if (n < 2) { toast("Enter 2 or more days."); return; }
                     final long total = dailyRaw * n;
-                    pin(() -> NodeGroupClient.contributeAccumMultiple(getApplicationContext(), me, nodeId, lineId, total, result("Saved " + CircleUi.harv(total))));
+                    pin("Authorize saving " + CircleUi.harv(total), () -> NodeGroupClient.contributeAccumMultiple(getApplicationContext(), me, nodeId, lineId, total, result("Saved " + CircleUi.harv(total))));
                 }).show();
         } else {
-            amountDialog("Add to my line", "Amount", raw -> pin(() ->
+            amountDialog("Add to my line", "Amount", raw -> pin("Authorize saving " + CircleUi.harv(raw), () ->
                 NodeGroupClient.contributeAccumVariable(getApplicationContext(), me, nodeId, lineId, raw, result("Saved"))));
         }
     }
@@ -523,9 +523,17 @@ public class NodeGroupActivity extends AppCompatActivity {
     }
 
     private void pin(Runnable work) {
+        String action = "Authorize this before it is sent.";
+        if (pressed != null && pressed.getText() != null && pressed.getText().length() > 0) {
+            action = "Authorize: " + pressed.getText();
+        }
+        pin(action, work);
+    }
+
+    private void pin(String action, Runnable work) {
         final Button source = pressed;
         pressed = null;
-        PinPromptHelper.verifyPinThenProceed(this, () -> {
+        PinPromptHelper.authorize(this, action, () -> {
             markBusy(source);
             work.run();
         });

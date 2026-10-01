@@ -1,6 +1,7 @@
 package com.harvanna.app.wallet;
 
 import android.content.Context;
+import android.content.Intent;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
+import com.harvanna.app.SecurityPinSettingsActivity;
 import com.harvanna.app.p2p.ThemedDialogs;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
@@ -16,14 +18,15 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 /**
- * Shared PIN-entry prompt, used by any screen that needs to gate a real
- * action (sending funds, releasing P2P escrow, etc.) behind the
- * transaction PIN set up in SecurityPinSettingsActivity.
+ * Shared PIN-entry prompt.
  *
- * If no PIN has ever been set, verifyPinThenProceed() lets the action
- * through unchallenged — this is an opt-in security feature, not a forced
- * one; someone who hasn't set a PIN yet shouldn't be locked out of sending
- * money because of it.
+ * verifyPinThenProceed() is for screens that are not payments (seed reveal,
+ * restore). If no PIN is set, that call still continues.
+ *
+ * authorize() is the payment gate. Stake, unstake, claim, send, contribution,
+ * and every other payment must call it. Nothing is broadcast until a
+ * transaction PIN exists and the person has just verified it. The action
+ * text is what they are authorizing.
  */
 public final class PinPromptHelper {
 
@@ -34,45 +37,67 @@ public final class PinPromptHelper {
     }
 
     /**
-     * The single call most screens actually want: does nothing but invoke
-     * onVerified immediately if no PIN is set. If a PIN is set AND
-     * biometric unlock is enabled, tries fingerprint/face first (matching
-     * SecurityPinSettingsActivity's own real BiometricPrompt integration —
-     * previously this was PIN-only and ignored the biometric toggle
-     * entirely, which meant enabling biometric there had no actual effect
-     * on any real send flow). Falls back to the PIN dialog if biometric
-     * fails, is cancelled, or isn't available on this specific call site's
-     * Context. A wrong PIN or a cancelled dialog simply does not proceed —
-     * no error thrown, the caller's action just doesn't happen.
+     * Opt-in check. If no PIN is set, onVerified runs immediately.
+     * Do not use this for anything that moves money — use {@link #authorize}.
      */
     public static void verifyPinThenProceed(Context context, OnVerified onVerified) {
+        if (context == null || onVerified == null) return;
         if (!SecureWalletStorage.hasTransactionPin(context)) {
             onVerified.onVerified();
             return;
         }
+        _challenge(context, "Enter your transaction PIN", onVerified);
+    }
 
+    /**
+     * Required gate for a payment. Does not call onVerified until biometric
+     * or PIN verification succeeds. If no PIN is set, opens PIN settings
+     * and does not continue.
+     */
+    public static void authorize(Context context, String action, OnVerified onVerified) {
+        if (context == null || onVerified == null) return;
+        String what = (action == null || action.trim().isEmpty())
+                ? "Authorize this before it is sent."
+                : action.trim();
+        if (!SecureWalletStorage.hasTransactionPin(context)) {
+            _requirePin(context, what);
+            return;
+        }
+        _challenge(context, what, onVerified);
+    }
+
+    private static void _requirePin(Context context, String action) {
+        ThemedDialogs.show(ThemedDialogs.alert(context)
+                .setTitle("Verification required")
+                .setMessage("Set a transaction PIN before this can go through.\n\n" + action)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Set PIN", (d, w) -> {
+                    Intent i = new Intent(context, SecurityPinSettingsActivity.class);
+                    if (!(context instanceof android.app.Activity)) {
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    }
+                    context.startActivity(i);
+                }));
+    }
+
+    private static void _challenge(Context context, String action, OnVerified onVerified) {
         if (SecureWalletStorage.isBiometricEnabled(context) && context instanceof FragmentActivity) {
             FragmentActivity activity = (FragmentActivity) context;
             BiometricManager biometricManager = BiometricManager.from(activity);
             boolean biometricReady = biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)
                     == BiometricManager.BIOMETRIC_SUCCESS;
             if (biometricReady) {
-                _tryBiometric(activity, context, onVerified);
+                _tryBiometric(activity, context, action, onVerified);
                 return;
             }
-            // Enrolled/available state can change after the toggle was
-            // turned on (e.g. all fingerprints removed in phone Settings) —
-            // fall through to the PIN dialog instead of silently blocking
-            // the action or crashing on an unusable prompt.
         }
-
-        _showPinDialog(context, "Enter your transaction PIN", onVerified);
+        _showPinDialog(context, action, onVerified);
     }
 
-    private static void _tryBiometric(FragmentActivity activity, Context context, OnVerified onVerified) {
+    private static void _tryBiometric(FragmentActivity activity, Context context, String action, OnVerified onVerified) {
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
         .setTitle("Confirm it's you")
-        .setSubtitle("Verify to continue")
+        .setSubtitle(action)
         .setNegativeButtonText("Use PIN instead")
         .build();
 
@@ -85,17 +110,11 @@ public final class PinPromptHelper {
 
             @Override
             public void onAuthenticationError(int errorCode, CharSequence errString) {
-                // Covers both "Use PIN instead" and a genuine biometric
-                // failure/timeout — either way, fall back to the PIN
-                // dialog rather than just silently doing nothing, since
-                // the person still has a legitimate way to proceed.
-                _showPinDialog(context, "Enter your transaction PIN", onVerified);
+                _showPinDialog(context, action, onVerified);
             }
 
             @Override
             public void onAuthenticationFailed() {
-                // A single failed match doesn't cancel the prompt itself —
-                // the system dialog stays open for another attempt.
             }
         });
 
@@ -142,9 +161,6 @@ public final class PinPromptHelper {
             });
         });
 
-        // Clears the inline error as soon as the person starts typing again,
-        // rather than leaving a stale "Incorrect PIN" message visible while
-        // they're mid-way through entering a fresh attempt.
         etInput.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
             @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}

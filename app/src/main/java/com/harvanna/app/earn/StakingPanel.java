@@ -14,11 +14,13 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
+import com.harvanna.app.p2p.ThemedDialogs;
 import com.harvanna.app.sync.HarvannaNodeClient;
 import com.harvanna.app.sync.NodeGroupClient;
 import com.harvanna.app.tx.TransactionRouter;
 import com.harvanna.app.utils.UiColors;
 import com.harvanna.app.wallet.BalanceFormatter;
+import com.harvanna.app.wallet.PinPromptHelper;
 import com.harvanna.app.wallet.WalletManager;
 
 import org.json.JSONArray;
@@ -227,16 +229,20 @@ public final class StakingPanel {
         long min = info.optLong("minStakeRaw", HarvannaNodeClient.HARV_UNITS_PER_TOKEN);
         if (vault.isEmpty() || address == null || address.isEmpty()) { toast("Wallet or vault is not ready."); return; }
         if (already < min && BalanceFormatter.harvToRaw(harv) < min) { toast("The first stake must be at least 1 HARV."); return; }
-        busy = true;
-        paint();
-        TransactionRouter.routeTransaction(host.requireContext(), address, vault, BigDecimal.valueOf(harv), null, "STAKE",
-                new TransactionRouter.RouterCallback() {
-                    @Override public void onSuccess(String txHash) {
-                        com.harvanna.app.trust.AppActivity.note(host.getContext(), "STAKE", "Staked HARV");
-                        busy = false; toast("Stake submitted."); refresh();
-                    }
-                    @Override public void onError(String code, String message) { busy = false; toast(message); paint(); }
-                });
+        final String detail = String.format(Locale.US,
+                "Stake %.4f HARV. It starts earning now. Unstaking later returns after 7 days.", harv);
+        gate("Authorize stake", detail, () -> {
+            busy = true;
+            paint();
+            TransactionRouter.routeTransaction(host.requireContext(), address, vault, BigDecimal.valueOf(harv), null, "STAKE",
+                    new TransactionRouter.RouterCallback() {
+                        @Override public void onSuccess(String txHash) {
+                            com.harvanna.app.trust.AppActivity.note(host.getContext(), "STAKE", "Staked HARV");
+                            busy = false; toast("Stake submitted."); refresh();
+                        }
+                        @Override public void onError(String code, String message) { busy = false; toast(message); paint(); }
+                    });
+        });
     }
 
     private void doUnstake() {
@@ -246,13 +252,17 @@ public final class StakingPanel {
         try { harv = Double.parseDouble(amount.getText().toString().trim()); }
         catch (Exception e) { toast("Enter how much HARV to unstake."); return; }
         if (harv <= 0 || address == null) return;
-        busy = true;
-        NodeGroupClient.unstake(host.requireContext(), address, BalanceFormatter.harvToRaw(harv), new NodeGroupClient.Callback() {
-            @Override public void onSuccess(JSONObject json) {
-                com.harvanna.app.trust.AppActivity.note(host.getContext(), "UNSTAKE", "Unstaked HARV");
-                busy = false; toast("Unstaking. It returns after 7 days."); refresh();
-            }
-            @Override public void onError(String error) { busy = false; toast(error); paint(); }
+        final String detail = String.format(Locale.US,
+                "Unstake %.4f HARV. It stops earning now and returns after 7 days.", harv);
+        gate("Authorize unstake", detail, () -> {
+            busy = true;
+            NodeGroupClient.unstake(host.requireContext(), address, BalanceFormatter.harvToRaw(harv), new NodeGroupClient.Callback() {
+                @Override public void onSuccess(JSONObject json) {
+                    com.harvanna.app.trust.AppActivity.note(host.getContext(), "UNSTAKE", "Unstaked HARV");
+                    busy = false; toast("Unstaking. It returns after 7 days."); refresh();
+                }
+                @Override public void onError(String error) { busy = false; toast(error); paint(); }
+            });
         });
     }
 
@@ -260,14 +270,30 @@ public final class StakingPanel {
         if (host.getContext() == null) return;
         String address = WalletManager.getActiveWalletAddress(host.requireContext());
         if (address == null || address.isEmpty()) return;
-        busy = true;
-        NodeGroupClient.claimStakingRewards(host.requireContext(), address, new NodeGroupClient.Callback() {
-            @Override public void onSuccess(JSONObject json) {
-                com.harvanna.app.trust.AppActivity.note(host.getContext(), "CLAIM", "Claimed staking rewards");
-                busy = false; toast("Reward claimed."); refresh();
-            }
-            @Override public void onError(String error) { busy = false; toast(error); paint(); }
+        long pending = pos == null ? 0 : pos.optLong("pendingRewardsRaw", 0);
+        if (pending <= 0) { toast("Nothing to claim yet."); return; }
+        final String detail = "Claim " + harv(pending) + " of staking rewards into your wallet.";
+        gate("Authorize claim", detail, () -> {
+            busy = true;
+            NodeGroupClient.claimStakingRewards(host.requireContext(), address, new NodeGroupClient.Callback() {
+                @Override public void onSuccess(JSONObject json) {
+                    com.harvanna.app.trust.AppActivity.note(host.getContext(), "CLAIM", "Claimed staking rewards");
+                    busy = false; toast("Reward claimed."); refresh();
+                }
+                @Override public void onError(String error) { busy = false; toast(error); paint(); }
+            });
         });
+    }
+
+    /** Confirm the action, then require a transaction PIN. Cancel sends nothing. */
+    private void gate(String title, String detail, Runnable work) {
+        if (host.getContext() == null) return;
+        ThemedDialogs.show(ThemedDialogs.alert(host.requireContext())
+                .setTitle(title)
+                .setMessage(detail + "\n\nNothing is sent until you verify.")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Verify", (d, w) ->
+                        PinPromptHelper.authorize(host.requireContext(), detail, work::run)));
     }
 
     private String harv(long raw) {

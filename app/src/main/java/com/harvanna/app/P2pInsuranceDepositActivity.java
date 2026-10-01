@@ -480,7 +480,7 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 			return;
 		}
 		
-		PinPromptHelper.verifyPinThenProceed(this, () -> {
+		PinPromptHelper.authorize(this, "Lock this insurance deposit", () -> {
 			tv_deposit_error.setVisibility(View.GONE);
 			btn_submit_deposit.setEnabled(false);
 			btn_submit_deposit.setText("Locking Collateral…");

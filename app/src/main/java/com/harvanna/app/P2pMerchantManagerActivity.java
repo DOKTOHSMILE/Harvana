@@ -509,7 +509,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 		.setTitle("Cancel this listing?")
 		.setMessage("This stops new orders against the remaining, unfilled amount. Any order already claimed continues normally and isn't affected.")
 		.setPositiveButton("Cancel Listing", (dialog, which) -> {
-			PinPromptHelper.verifyPinThenProceed(this, () -> {
+			PinPromptHelper.authorize(this, "Cancel this listing", () -> {
 				P2PTradeRouter.cancelListing(getApplicationContext(), listingId, myAddress, new P2PTradeRouter.Callback() {
 					@Override
 					public void onSuccess(JSONObject result) {

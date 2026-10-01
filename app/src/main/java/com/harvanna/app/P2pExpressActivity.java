@@ -699,7 +699,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 		}
 		if (previewTimer != null) previewTimer.cancel();
 		
-		PinPromptHelper.verifyPinThenProceed(this, () -> {
+		PinPromptHelper.authorize(this, "Confirm this express trade", () -> {
 			btn_express_find_match.setEnabled(false);
 			btn_express_find_match.setText("Confirming…");
 			

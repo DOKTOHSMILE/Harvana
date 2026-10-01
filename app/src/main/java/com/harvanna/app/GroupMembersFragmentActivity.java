@@ -770,8 +770,11 @@ public class GroupMembersFragmentActivity extends Fragment {
 					+ com.harvanna.app.wallet.BalanceFormatter.smart(memberPayoutHarv)
 					+ " from group wallet to member?")
 					.setPositiveButton("Transfer & close", (d, w) ->
-					_executeFixedMonthTransfer(memberUid, memberWallet,
-					memberPayoutHarv, adminFeeHarv))
+					com.harvanna.app.wallet.PinPromptHelper.authorize(getActivity(),
+					"Send " + com.harvanna.app.wallet.BalanceFormatter.smart(memberPayoutHarv)
+					+ " from the group wallet to this member",
+					() -> _executeFixedMonthTransfer(memberUid, memberWallet,
+					memberPayoutHarv, adminFeeHarv)))
 					.setNegativeButton("Cancel", null)
 					.show();
 				});
@@ -794,11 +797,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 		getActivity(), "Closing Fixed Month", memberPayoutHarv);
 		progress.advanceTo(2);
 		
-		// THE FIX: this moved a real fixed-month payout with zero PIN/
-		// biometric confirmation - gated the same way as every other
-		// real money movement now.
-		com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(getActivity(), () -> {
-			try {
+		try {
 				com.harvanna.app.tx.TransactionRouter.routeTransaction(
 				getActivity(),
 				groupWalletAddress,
@@ -849,7 +848,6 @@ public class GroupMembersFragmentActivity extends Fragment {
 			} catch (Exception e) {
 				progress.showError(e.getMessage() != null ? e.getMessage() : "Transfer failed");
 			}
-		});
 	}
 	
 	private void _confirmKickMember(String targetUid) {

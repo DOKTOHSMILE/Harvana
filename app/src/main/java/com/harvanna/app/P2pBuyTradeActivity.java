@@ -835,7 +835,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		.setTitle("Confirm payment sent")
 		.setMessage("Only continue if you have actually sent the fiat payment to the seller's account shown above. Falsely marking this paid can suspend your account.")
 		.setPositiveButton("I've Paid", (dialog, which) -> {
-			PinPromptHelper.verifyPinThenProceed(this, () -> {
+			PinPromptHelper.authorize(this, "Mark this trade as paid", () -> {
 				primary_action.setEnabled(false);
 				primary_action.setText("Submitting…");
 				P2PTradeRouter.markOrderPaid(getApplicationContext(), orderId, myAddress, new P2PTradeRouter.Callback() {
@@ -872,7 +872,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 			String reason = input.getText().toString().trim();
 			if (reason.isEmpty()) reason = "No reason provided";
 			String finalReason = reason;
-			PinPromptHelper.verifyPinThenProceed(this, () -> {
+			PinPromptHelper.authorize(this, "Raise a dispute on this trade", () -> {
 				P2PTradeRouter.raiseDispute(getApplicationContext(), orderId, myAddress, finalReason, new P2PTradeRouter.Callback() {
 					@Override
 					public void onSuccess(JSONObject result) {

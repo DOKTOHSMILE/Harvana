@@ -727,7 +727,9 @@ public class GroupLoansFragmentActivity extends Fragment {
 		
 		com.harvanna.app.group.PaymentConfirmSheet.show(getContext(), "Approve & Disburse Loan",
 		principal, borrowerWallet, "Group wallet debit stays " + _formatUIBalance(principal) + " total",
-		feeDisplay, () -> _executeLoanDisbursement(loanId, borrowerWallet, principal, feeHarv));
+		feeDisplay, () -> com.harvanna.app.wallet.PinPromptHelper.authorize(getActivity(),
+		"Disburse " + _formatUIBalance(principal) + " from the group wallet",
+		() -> _executeLoanDisbursement(loanId, borrowerWallet, principal, feeHarv)));
 	}
 	
 	private void _executeLoanDisbursement(String loanId, String borrowerWallet, double principal, double feeHarv) {
@@ -738,14 +740,13 @@ public class GroupLoansFragmentActivity extends Fragment {
 				cb.onError("Loan amount too small to cover the network fee.");
 				return;
 			}
-			com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(getActivity(), () ->
 			com.harvanna.app.tx.TransactionRouter.routeTransaction(
 			getActivity(), from, to, java.math.BigDecimal.valueOf(netAmount), null,
 			"Loan disbursement (network fee deducted from principal)",
 			new com.harvanna.app.tx.TransactionRouter.RouterCallback() {
 				@Override public void onSuccess(String txHash) { cb.onSuccess(txHash); }
 				@Override public void onError(String code, String msg) { cb.onError(msg); }
-			}));
+			});
 		};
 		
 		com.harvanna.app.group.GroupLoanManager.approveAndDisburse(getContext(), groupId, loanId,
@@ -936,7 +937,11 @@ public class GroupLoansFragmentActivity extends Fragment {
 					fully = true;
 				}
 				sheet.dismiss();
-				_executeLoanRepayment(loanId, fromWallet, amount, fully);
+				final double payAmount = amount;
+				final boolean payFully = fully;
+				com.harvanna.app.wallet.PinPromptHelper.authorize(getActivity(),
+				"Repay " + _formatUIBalance(payAmount) + " toward this loan",
+				() -> _executeLoanRepayment(loanId, fromWallet, payAmount, payFully));
 			});
 		}
 		
@@ -951,8 +956,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		getActivity(), markFullyRepaid ? "Repaying loan" : "Partial repayment", amountHarv);
 		progress.advanceTo(2);
 		
-		com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(getActivity(), () -> {
-			try {
+		try {
 				com.harvanna.app.tx.TransactionRouter.routeTransaction(
 				getActivity(),
 				fromWallet,
@@ -1016,7 +1020,6 @@ public class GroupLoansFragmentActivity extends Fragment {
 			} catch (Exception e) {
 				progress.showError(e.getMessage() != null ? e.getMessage() : "Repayment failed");
 			}
-		});
 	}
 	
 	private String _safe(Map<String, Object> d, String k, String fb) {

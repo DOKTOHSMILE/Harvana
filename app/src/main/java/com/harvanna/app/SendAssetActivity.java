@@ -497,11 +497,15 @@ public class SendAssetActivity extends AppCompatActivity {
 					return;
 				}
 				
-				isProcessingSend = true;
-				view.setEnabled(false);
 				android.app.ProgressDialog progress = new android.app.ProgressDialog(this);
 				progress.setMessage("Broadcasting to node…");
 				progress.setCancelable(false);
+				
+				com.harvanna.app.wallet.PinPromptHelper.authorize(SendAssetActivity.this,
+				"Send " + amountText + " " + symbol,
+				() -> {
+				isProcessingSend = true;
+				view.setEnabled(false);
 				progress.show();
 				
 				TransactionRouter.routeTransaction(
@@ -534,6 +538,7 @@ public class SendAssetActivity extends AppCompatActivity {
 							SketchwareUtil.showMessage(getApplicationContext(), errorMessage);
 						});
 					}
+				});
 				});
 			});
 		}
@@ -582,15 +587,8 @@ public class SendAssetActivity extends AppCompatActivity {
 		
 		if (btnAccept != null) {
 			btnAccept.setOnClickListener(v -> {
-				// THE FIX: this is the actual enforcement point — a PIN
-				// could be set in Security & PIN Settings but nothing
-				// anywhere ever checked it before this. Checked first,
-				// before even reserving PendingSpendGuard below, so a
-				// cancelled or wrong PIN attempt never leaves a spend
-				// reservation sitting around for nothing. Does nothing
-				// (skips straight through) if no PIN has ever been set —
-				// this is opt-in, not forced.
-				com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(SendAssetActivity.this, () -> {
+				com.harvanna.app.wallet.PinPromptHelper.authorize(SendAssetActivity.this,
+				"Send " + _formatUIBalance(reqAmount) + " " + symbol, () -> {
 					String fromAddress = prepared.req != null ? prepared.req.from : null;
 					
 					// THE FIX: this screen had no PendingSpendGuard at all —

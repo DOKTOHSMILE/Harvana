@@ -1109,7 +1109,9 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		
 		com.harvanna.app.group.PaymentConfirmSheet.show(getContext(), "Confirm Contribution",
 		contributionAmount, groupWalletAddress, null, "Calculated on send",
-		() -> _submitPayment(fromAddr));
+		() -> com.harvanna.app.wallet.PinPromptHelper.authorize(getActivity(),
+		"Pay " + _formatUIBalance(contributionAmount) + " into this group",
+		() -> _submitPayment(fromAddr)));
 	}
 	
 	private void _submitPayment(String fromAddr) {
@@ -1129,8 +1131,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		
 		progress.advanceTo(2);
 		
-		com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(getActivity(), () -> {
-			com.harvanna.app.tx.TransactionRouter.routeTransaction(
+		com.harvanna.app.tx.TransactionRouter.routeTransaction(
 			getActivity(), fromAddr, groupWalletAddress,
 			BigDecimal.valueOf(contributionAmount), null,
 			"Group contribution - Round " + currentRound,
@@ -1220,7 +1221,6 @@ public class GroupPaymentFragmentActivity extends Fragment {
 					});
 				}
 			});
-		});
 	}
 	
 	private void _recordPayment(String from, String txHash, boolean isFixed, int day, androidx.core.util.Consumer<String> done) {

@@ -1093,8 +1093,12 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 							return;
 						}
 						
+						if (!isFinishing() && progress.isShowing()) progress.dismiss();
+						com.harvanna.app.wallet.PinPromptHelper.authorize(CreateNewGroupActivity.this,
+						"Send 5 " + com.harvanna.app.CoinInfo.ticker() + " from your wallet into the new group wallet",
+						() -> {
 						progress.setMessage(("Transferring 5 " + com.harvanna.app.CoinInfo.ticker() + " to group wallet..."));
-						com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(CreateNewGroupActivity.this, () ->
+						if (!isFinishing()) progress.show();
 						com.harvanna.app.tx.TransactionRouter.routeTransaction(
 						CreateNewGroupActivity.this,
 						finalPersonalAddress,
@@ -1169,7 +1173,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 									SketchwareUtil.showMessage(context, "Fee transfer failed: " + errorMessage);
 								});
 							}
-						}));
+						});
+						});
 					});
 				}
 				
@@ -1603,7 +1608,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		.setTitle("Create this rotating group?")
 		.setMessage(msg)
 		.setNegativeButton("Cancel", null)
-		.setPositiveButton("Create", (d, w) -> com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(this, () -> {
+		.setPositiveButton("Create", (d, w) -> com.harvanna.app.wallet.PinPromptHelper.authorize(this,
+		"Pay the creation fee and create this group", () -> {
 			final ProgressDialog pd = ProgressDialog.show(this, null, "Creating on the network…", true, false);
 			com.harvanna.app.sync.NodeGroupClient.createCircle(getApplicationContext(), wallet, contributionRaw, members, cycleHours,
 			new com.harvanna.app.sync.NodeGroupClient.Callback() {
@@ -1697,7 +1703,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private void _confirmAndCreateOnChain(String title, String msg, NodeCreate create, String idKey, String family) {
 		new androidx.appcompat.app.AlertDialog.Builder(this).setTitle(title).setMessage(msg)
 		.setNegativeButton("Cancel", null)
-		.setPositiveButton("Create", (d, w) -> com.harvanna.app.wallet.PinPromptHelper.verifyPinThenProceed(this, () -> {
+		.setPositiveButton("Create", (d, w) -> com.harvanna.app.wallet.PinPromptHelper.authorize(this,
+		"Pay the creation fee and create this group", () -> {
 			final ProgressDialog pd = ProgressDialog.show(this, null, "Creating on the network…", true, false);
 			create.run(new com.harvanna.app.sync.NodeGroupClient.Callback() {
 				@Override public void onSuccess(org.json.JSONObject json) {

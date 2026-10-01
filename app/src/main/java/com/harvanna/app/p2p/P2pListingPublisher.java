@@ -129,7 +129,7 @@ public final class P2pListingPublisher {
 		
 		final long maxRaw = com.harvanna.app.sync.HarvannaNodeClient.toRawUnits(maxOrderHarv);
 		final long[] priceKobo = new long[1];
-		final Runnable startPublish = () -> PinPromptHelper.verifyPinThenProceed(activity, () -> {
+		final Runnable startPublish = () -> PinPromptHelper.authorize(activity, "Publish this listing", () -> {
 			final ProgressDialog progress = new ProgressDialog(activity, com.harvanna.app.R.style.HarvannaP2pAlertDialog);
 			progress.setMessage("SELL".equals(listingSide) ? "Publishing offer…" : "Publishing request…");
 			progress.setCancelable(false);

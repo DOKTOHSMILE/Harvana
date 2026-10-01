@@ -635,7 +635,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 			return;
 		}
 		
-		PinPromptHelper.verifyPinThenProceed(this, () -> {
+		PinPromptHelper.authorize(this, "Claim this buy order", () -> {
 			create_order_button.setEnabled(false);
 			create_order_button.setText("Creating order…");
 			

@@ -295,8 +295,8 @@ public class CreateWalletActivity extends AppCompatActivity {
 	
 	private void launchMandatoryCardCreation() {
 		Intent cardIntent = new Intent(this, CreateHarvannaCardActivity.class);
+		com.harvanna.app.wallet.PhraseHandoff.hold(pendingMnemonic, pendingWalletAddress);
 		cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_MANDATORY, true);
-		cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_RAW_MNEMONIC, pendingMnemonic);
 		cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, pendingWalletAddress);
 		cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_LABEL, "your new wallet");
 		startActivityForResult(cardIntent, RC_MANDATORY_CARD);

@@ -1238,7 +1238,6 @@ public class GroupSettingsActivity extends AppCompatActivity {
 					return;
 				}
 				Intent i = new Intent(this, CreateHarvannaCardActivity.class);
-				i.putExtra(CreateHarvannaCardActivity.EXTRA_RAW_MNEMONIC, mn);
 				i.putExtra(CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, expectedWallet);
 				i.putExtra(CreateHarvannaCardActivity.EXTRA_LABEL, str(groupData, "groupName", ""));
 				i.putExtra(CreateHarvannaCardActivity.EXTRA_GROUP_ID, groupId);

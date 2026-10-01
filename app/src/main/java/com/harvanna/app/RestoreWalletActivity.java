@@ -179,8 +179,8 @@ public class RestoreWalletActivity extends AppCompatActivity {
 			pendingPubKeyB64 = Base64.encodeToString(pubKey, Base64.NO_WRAP);
 			
 			Intent cardIntent = new Intent(this, CreateHarvannaCardActivity.class);
+			com.harvanna.app.wallet.PhraseHandoff.hold(pendingMnemonic, pendingAddress);
 			cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_MANDATORY, true);
-			cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_RAW_MNEMONIC, pendingMnemonic);
 			cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, pendingAddress);
 			cardIntent.putExtra(CreateHarvannaCardActivity.EXTRA_LABEL,
 			"this restored wallet — you only have the phrase backup so far");

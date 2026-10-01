@@ -1042,8 +1042,8 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				pendingGroupWalletAddress = groupWalletAddress;
 				pendingGroupBottomSheetDialog = bottomSheetDialog;
 				Intent cardIntent = new Intent(context, com.harvanna.app.CreateHarvannaCardActivity.class);
+				com.harvanna.app.wallet.PhraseHandoff.hold(mnemonic, groupWalletAddress);
 				cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_MANDATORY, true);
-				cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_RAW_MNEMONIC, mnemonic);
 				cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_WALLET_ADDRESS, groupWalletAddress);
 				cardIntent.putExtra(com.harvanna.app.CreateHarvannaCardActivity.EXTRA_LABEL, group_name_edittext1.getText().toString().trim());
 				startActivityForResult(cardIntent, RC_MANDATORY_GROUP_CARD);

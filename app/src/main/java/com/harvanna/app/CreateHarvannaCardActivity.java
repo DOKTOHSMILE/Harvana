@@ -155,8 +155,9 @@ public class CreateHarvannaCardActivity extends AppCompatActivity {
     String label = getIntent() != null ? getIntent().getStringExtra(EXTRA_LABEL) : null;
 
     if (mandatory) {
-      mnemonic = getIntent() != null ? getIntent().getStringExtra(EXTRA_RAW_MNEMONIC) : null;
       walletAddress = getIntent() != null ? getIntent().getStringExtra(EXTRA_WALLET_ADDRESS) : null;
+      if (getIntent() != null) getIntent().removeExtra(EXTRA_RAW_MNEMONIC);
+      mnemonic = com.harvanna.app.wallet.PhraseHandoff.peek(walletAddress);
       if (tvSubtitle != null) {
         tvSubtitle.setText("Required step: back up "
             + (label != null && !label.trim().isEmpty() ? label : "this wallet")
@@ -279,6 +280,7 @@ public class CreateHarvannaCardActivity extends AppCompatActivity {
   public static final String EXTRA_WALLET_ADDRESS = "wallet_address";
   public static final String EXTRA_LABEL = "label";
   public static final String EXTRA_MANDATORY = "mandatory";
+  /** Unused. The phrase is passed in memory via {@link com.harvanna.app.wallet.PhraseHandoff}, never on an Intent. */
   public static final String EXTRA_RAW_MNEMONIC = "raw_mnemonic";
   /** When set, the encrypted card is also published privately to the group's members. */
   public static final String EXTRA_GROUP_ID = "group_id";
@@ -323,6 +325,7 @@ public class CreateHarvannaCardActivity extends AppCompatActivity {
     new AlertDialog.Builder(this).setTitle("Skip the backup card?").setMessage(
         "Without a saved Harvanna Access Card, this wallet has no backup yet. If you lose this device, the funds are gone. Are you sure you want to cancel wallet creation?")
         .setPositiveButton("Cancel Wallet Creation", (d, w) -> {
+          com.harvanna.app.wallet.PhraseHandoff.clear();
           setResult(RESULT_CANCELED);
           super.onBackPressed();
         }).setNegativeButton("Keep Going", null).show();
@@ -335,6 +338,7 @@ public class CreateHarvannaCardActivity extends AppCompatActivity {
     result.putExtra(EXTRA_RESULT_DIGITS, lastDigitCode);
     result.putExtra(EXTRA_RESULT_TEMPLATE, selectedTemplate.name());
     setResult(RESULT_OK, result);
+    com.harvanna.app.wallet.PhraseHandoff.clear();
     finish();
   }
 

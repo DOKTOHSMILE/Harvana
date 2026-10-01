@@ -1722,6 +1722,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	}
 	
 	public void _submitNewGroupData(final String _realGroupWalletAddress) {
+		com.harvanna.app.trust.AppActivity.note(this, "GROUP", "Created a group");
 		final String newGroupId = java.util.UUID.randomUUID().toString();
 		final String creatorUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 		final String timestamp = String.valueOf(System.currentTimeMillis());

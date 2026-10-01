@@ -1137,6 +1137,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 			new com.harvanna.app.tx.TransactionRouter.RouterCallback() {
 				@Override
 				public void onSuccess(String txHash) {
+					com.harvanna.app.trust.AppActivity.note(getContext(), "PAY", "Paid a contribution");
 					try {
 						com.harvanna.app.group.PendingSpendGuard.markBroadcast(
 						getContext(), fromAddr, contributionAmount + 0.1, txHash);

@@ -20,14 +20,16 @@ import com.harvanna.app.wallet.WalletManager;
 import org.json.JSONObject;
 
 /**
- * Trust as the node records it. The number is personhood: 10 once this device is bound to the
- * wallet, plus 2 for each active vouch, up to 8. Labels are live badges from circle history.
- * Neither is stored in Firebase, and neither is a 100-point profile score.
+ * Trust is both halves together. The number is the network's personhood score
+ * (0–26), saved by the node into Firestore. The list under it is activity:
+ * actions the network confirmed, plus what this member did in the app.
+ * The phone does not invent the number.
  */
 public class TrustScoreActivity extends AppCompatActivity {
     private LinearLayout root;
     private String address = "";
     private ListenerRegistration mirror;
+    private int generation;
 
     @Override
     protected void onDestroy() {
@@ -45,7 +47,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         int p = dp(16);
         root.setPadding(p, p, p, dp(28));
         sv.addView(root);
-        com.harvanna.app.utils.AppBar.setContent(this, sv, "Trust score", "Recorded on the network");
+        com.harvanna.app.utils.AppBar.setContent(this, sv, "Trust score", "Network and activity");
     }
 
     @Override protected void onResume() { super.onResume(); load(); }
@@ -66,6 +68,7 @@ public class TrustScoreActivity extends AppCompatActivity {
     }
 
     private void render(java.util.Map<String, Object> person) {
+        final int gen = ++generation;
         root.removeAllViews();
         if (person == null) {
             root.addView(tv("— / 26", 36, true, UiColors.accent()));
@@ -120,6 +123,43 @@ public class TrustScoreActivity extends AppCompatActivity {
             }
         }
         }
+        showActivity(gen, person.get("activity"), num(person.get("activityCount")));
+    }
+
+    private void showActivity(int gen, Object networkLines, int networkCount) {
+        root.addView(head("Activity"));
+        root.addView(tv(networkCount + (networkCount == 1 ? " action confirmed on the network." : " actions confirmed on the network.")
+                + " Things you do in the app are listed with them. Neither changes the score.", 13, false, UiColors.textSecondary()));
+        java.util.List<com.harvanna.app.trust.AppActivity.Event> network =
+                com.harvanna.app.trust.AppActivity.fromNetwork(networkLines);
+        root.addView(tv("On the network", 13, true, UiColors.textPrimary()));
+        if (network.isEmpty()) {
+            root.addView(tv("Nothing confirmed on the network yet.", 13, false, UiColors.textSecondary()));
+        } else {
+            int shown = 0;
+            for (com.harvanna.app.trust.AppActivity.Event e : network) {
+                if (shown++ == 8) break;
+                root.addView(line(when(e.at), e.title, "Confirmed by the network"));
+            }
+        }
+        com.harvanna.app.trust.AppActivity.recent(events -> runOnUiThread(() -> {
+            if (gen != generation) return;
+            root.addView(tv("In the app", 13, true, UiColors.textPrimary()));
+            if (events.isEmpty()) {
+                root.addView(tv("Nothing recorded in the app yet.", 13, false, UiColors.textSecondary()));
+                return;
+            }
+            int shown = 0;
+            for (com.harvanna.app.trust.AppActivity.Event e : events) {
+                if (shown++ == 8) break;
+                root.addView(line(when(e.at), e.title, "Recorded in the app"));
+            }
+        }));
+    }
+
+    private static String when(long at) {
+        if (at <= 0) return "Activity";
+        return new java.text.SimpleDateFormat("d MMM", java.util.Locale.US).format(new java.util.Date(at));
     }
 
     private void addBind() {
@@ -138,7 +178,10 @@ public class TrustScoreActivity extends AppCompatActivity {
             .setMessage("This ties the wallet to this phone and sets the base score to 10. It does not upload an ID. One device hash can be bound to one wallet.")
             .setNegativeButton("Cancel", null)
             .setPositiveButton("Bind", (d, w) -> NodeIdentityClient.bindPersonhood(this, address, new NodeIdentityClient.Callback() {
-                @Override public void onSuccess(JSONObject j) { runOnUiThread(TrustScoreActivity.this::load); }
+                @Override public void onSuccess(JSONObject j) {
+                    com.harvanna.app.trust.AppActivity.note(TrustScoreActivity.this, "BIND", "Bound this device");
+                    runOnUiThread(TrustScoreActivity.this::load);
+                }
                 @Override public void onError(String e) {
                     runOnUiThread(() -> android.widget.Toast.makeText(TrustScoreActivity.this, e, android.widget.Toast.LENGTH_LONG).show());
                 }

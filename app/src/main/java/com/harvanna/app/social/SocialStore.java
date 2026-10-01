@@ -156,6 +156,7 @@ public final class SocialStore {
                 b.set(db().collection("FRIENDS").document(uid).collection("list").document(p.uid), mineRow);
                 b.set(db().collection("FOLLOWERS").document(p.uid).collection("list").document(uid), theirRow);
                 Tasks.await(b.commit(), T, TimeUnit.SECONDS);
+                com.harvanna.app.trust.AppActivity.note(null, "FRIEND", "Added " + (p.name == null || p.name.isEmpty() ? "a member" : p.name));
                 cb.done(true, null);
             } catch (Exception e) { cb.done(false, describe(e)); }
         });

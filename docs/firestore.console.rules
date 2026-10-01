@@ -400,6 +400,26 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // What the member did in the app. They may add their own rows and read them.
+    // This does not change the 0–26 score. The network half is REPUTATION, written by the node.
+    match /USERS/{uid}/ACTIVITY/{eventId} {
+      allow read: if isSelf(uid);
+      allow create: if isSelf(uid)
+        && request.resource.data.keys().hasOnly(['kind', 'title', 'detail', 'at', 'source'])
+        && request.resource.data.source == 'app'
+        && request.resource.data.kind is string
+        && request.resource.data.kind.size() > 0
+        && request.resource.data.kind.size() <= 32
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 80
+        && request.resource.data.detail is string
+        && request.resource.data.detail.size() <= 120
+        && request.resource.data.at is number
+        && request.resource.data.at > 0;
+      allow update, delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

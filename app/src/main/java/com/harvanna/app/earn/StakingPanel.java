@@ -231,7 +231,10 @@ public final class StakingPanel {
         paint();
         TransactionRouter.routeTransaction(host.requireContext(), address, vault, BigDecimal.valueOf(harv), null, "STAKE",
                 new TransactionRouter.RouterCallback() {
-                    @Override public void onSuccess(String txHash) { busy = false; toast("Stake submitted."); refresh(); }
+                    @Override public void onSuccess(String txHash) {
+                        com.harvanna.app.trust.AppActivity.note(host.getContext(), "STAKE", "Staked HARV");
+                        busy = false; toast("Stake submitted."); refresh();
+                    }
                     @Override public void onError(String code, String message) { busy = false; toast(message); paint(); }
                 });
     }
@@ -245,7 +248,10 @@ public final class StakingPanel {
         if (harv <= 0 || address == null) return;
         busy = true;
         NodeGroupClient.unstake(host.requireContext(), address, BalanceFormatter.harvToRaw(harv), new NodeGroupClient.Callback() {
-            @Override public void onSuccess(JSONObject json) { busy = false; toast("Unstaking. It returns after 7 days."); refresh(); }
+            @Override public void onSuccess(JSONObject json) {
+                com.harvanna.app.trust.AppActivity.note(host.getContext(), "UNSTAKE", "Unstaked HARV");
+                busy = false; toast("Unstaking. It returns after 7 days."); refresh();
+            }
             @Override public void onError(String error) { busy = false; toast(error); paint(); }
         });
     }
@@ -256,7 +262,10 @@ public final class StakingPanel {
         if (address == null || address.isEmpty()) return;
         busy = true;
         NodeGroupClient.claimStakingRewards(host.requireContext(), address, new NodeGroupClient.Callback() {
-            @Override public void onSuccess(JSONObject json) { busy = false; toast("Reward claimed."); refresh(); }
+            @Override public void onSuccess(JSONObject json) {
+                com.harvanna.app.trust.AppActivity.note(host.getContext(), "CLAIM", "Claimed staking rewards");
+                busy = false; toast("Reward claimed."); refresh();
+            }
             @Override public void onError(String error) { busy = false; toast(error); paint(); }
         });
     }

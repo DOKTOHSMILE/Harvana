@@ -586,6 +586,11 @@ public class ProfileActivity extends AppCompatActivity {
 				}
 				Object summary = doc.get("summary");
 				String line = summary == null ? "Network trust published" : "Network trust: " + summary;
+				Object actions = doc.get("activityCount");
+				if (actions instanceof Number) {
+					int n = ((Number) actions).intValue();
+					line += "\nActivity: " + n + (n == 1 ? " action confirmed on the network" : " actions confirmed on the network");
+				}
 				if (status != null && !status.isEmpty()) line += "\n" + status;
 				networkTrustView.setText(line);
 			}));

@@ -470,7 +470,10 @@ public class NodeGroupActivity extends AppCompatActivity {
 
     private NodeGroupClient.Callback result(String ok) {
         return new NodeGroupClient.Callback() {
-            @Override public void onSuccess(JSONObject json) { toast(ok); load(); }
+            @Override public void onSuccess(JSONObject json) {
+                com.harvanna.app.trust.AppActivity.note(NodeGroupActivity.this, "GROUP", ok);
+                toast(ok); load();
+            }
             @Override public void onError(String error) { toast(CircleUi.friendly(error)); load(); }
         };
     }
@@ -480,6 +483,7 @@ public class NodeGroupActivity extends AppCompatActivity {
         return new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject json) {
                 GroupProposalIndex.post(getApplicationContext(), fsGroupId, kind, json.optString(idKey, ""), title, me);
+                com.harvanna.app.trust.AppActivity.note(NodeGroupActivity.this, "GROUP", ok);
                 toast(ok); load();
             }
             @Override public void onError(String error) { toast(CircleUi.friendly(error)); load(); }
@@ -490,6 +494,7 @@ public class NodeGroupActivity extends AppCompatActivity {
         return new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject json) {
                 GroupProposalIndex.post(getApplicationContext(), fsGroupId, kind, id, title, me);
+                com.harvanna.app.trust.AppActivity.note(NodeGroupActivity.this, "GROUP", ok);
                 toast(ok); load();
             }
             @Override public void onError(String error) { toast(CircleUi.friendly(error)); load(); }

@@ -270,7 +270,12 @@ public final class StakingPanel {
     private int dp(int v) { return Math.round(v * host.getResources().getDisplayMetrics().density); }
 
     private TextView text(int sp, boolean bold, int color) {
+        return text("", sp, bold, color);
+    }
+
+    private TextView text(String value, int sp, boolean bold, int color) {
         TextView t = new TextView(host.requireContext());
+        t.setText(value);
         t.setTextSize(sp);
         t.setTextColor(color);
         if (bold) t.setTypeface(null, Typeface.BOLD);

@@ -303,11 +303,11 @@ public class NodeGroupActivity extends AppCompatActivity {
                 : "Emergency grant: " + str(rec, "reasonDescription");
             long amt = num(rec, "amountRaw");
             if (amt > 0) title += " (" + CircleUi.harv(amt) + ")";
-            VoteView v = VoteView.of(title, rec, me == null ? "" : me);
+            VoteView vote = VoteView.of(title, rec, me == null ? "" : me);
             LinearLayout c = CircleUi.card(this);
-            c.addView(CircleUi.text(this, v.title, 14, R.color.colorTextPrimary, true));
-            c.addView(CircleUi.text(this, v.explain(), 12.5f, R.color.colorTextSecondary, false));
-            if (v.open && v.eligible) {
+            c.addView(CircleUi.text(this, vote.title, 14, R.color.colorTextPrimary, true));
+            c.addView(CircleUi.text(this, vote.explain(), 12.5f, R.color.colorTextSecondary, false));
+            if (vote.open && vote.eligible) {
                 LinearLayout row = new LinearLayout(this);
                 row.addView(actionButton(new GroupAction(GroupAction.VOTE_YES, "Vote yes", true), v -> vote(kind, id, true)), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
                 row.addView(actionButton(new GroupAction(GroupAction.VOTE_NO, "Vote no", false), v -> vote(kind, id, false)), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));

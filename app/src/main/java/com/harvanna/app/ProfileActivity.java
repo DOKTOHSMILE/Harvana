@@ -559,8 +559,9 @@ public class ProfileActivity extends AppCompatActivity {
 	}
 	
 	private TextView networkTrustView;
+	private com.google.firebase.firestore.ListenerRegistration reputationReg;
 	
-	/** Shows the node's own view of this wallet next to the app score, and lets the user link the wallet. */
+	/** The score on screen is the document the node wrote. This activity does not calculate it. */
 	private void _attachNetworkTrust() {
 		try {
 			final String addr = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
@@ -573,28 +574,23 @@ public class ProfileActivity extends AppCompatActivity {
 				networkTrustView.setPadding(0, (int) (10 * getResources().getDisplayMetrics().density), 0, 0);
 				host.addView(networkTrustView);
 			}
+			if (reputationReg != null) { reputationReg.remove(); reputationReg = null; }
 			if (addr == null || addr.isEmpty()) { networkTrustView.setText("Network trust: create a wallet to build a trust record on the network."); return; }
-			networkTrustView.setText("Network trust: checking…");
-			com.harvanna.app.sync.NodeLinkManager.ensureLinked(this, status -> _showNetworkTrust(addr, status));
-			_showNetworkTrust(addr, com.harvanna.app.sync.NodeLinkManager.cachedStatus(this, addr));
-		} catch (Exception ignored) { }
-	}
-	
-	private void _showNetworkTrust(String addr, String status) {
-		com.harvanna.app.sync.NodeIdentityClient.lookup(addr, new com.harvanna.app.sync.NodeIdentityClient.Callback() {
-			@Override public void onSuccess(org.json.JSONObject j) {
-				String line = "Network trust: " + j.optInt("trustScore", 0) + " / 26"
-					+ (j.optBoolean("bound") ? " · verified person" : " · not verified yet")
-					+ " · " + j.optInt("effectiveVouchCount", 0) + " vouch(es)";
+			networkTrustView.setText("Network trust: waiting for Firestore…");
+			com.harvanna.app.sync.NodeLinkManager.ensureLinked(this, status -> { });
+			String status = com.harvanna.app.sync.NodeLinkManager.cachedStatus(this, addr);
+			reputationReg = com.harvanna.app.firestore.NodeMirrors.wallet(addr, doc -> runOnUiThread(() -> {
+				if (networkTrustView == null) return;
+				if (doc == null) {
+					networkTrustView.setText("Network trust: not published yet." + (status == null || status.isEmpty() ? "" : "\n" + status));
+					return;
+				}
+				Object summary = doc.get("summary");
+				String line = summary == null ? "Network trust published" : "Network trust: " + summary;
 				if (status != null && !status.isEmpty()) line += "\n" + status;
-				final String f = line;
-				runOnUiThread(() -> networkTrustView.setText(f));
-			}
-			@Override public void onError(String e) {
-				runOnUiThread(() -> networkTrustView.setText("Network trust unavailable right now."
-					+ (status != null && !status.isEmpty() ? "\n" + status : "")));
-			}
-		});
+				networkTrustView.setText(line);
+			}));
+		} catch (Exception ignored) { }
 	}
 	
 	private void _loadTrustScore() {

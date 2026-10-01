@@ -11,11 +11,12 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.harvanna.app.firestore.NodeMirrors;
 import com.harvanna.app.sync.NodeIdentityClient;
 import com.harvanna.app.utils.UiColors;
 import com.harvanna.app.wallet.WalletManager;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -26,6 +27,13 @@ import org.json.JSONObject;
 public class TrustScoreActivity extends AppCompatActivity {
     private LinearLayout root;
     private String address = "";
+    private ListenerRegistration mirror;
+
+    @Override
+    protected void onDestroy() {
+        if (mirror != null) mirror.remove();
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle b) {
@@ -53,63 +61,58 @@ public class TrustScoreActivity extends AppCompatActivity {
             root.addView(tv("Create a wallet first. Trust is recorded against the wallet, not the profile.", 14, false, UiColors.textSecondary()));
             return;
         }
-        final JSONObject[] person = new JSONObject[1];
-        final JSONObject[] labels = new JSONObject[1];
-        final int[] left = {2};
-        Runnable paint = () -> { if (--left[0] == 0) runOnUiThread(() -> render(person[0], labels[0])); };
-        NodeIdentityClient.lookup(address, new NodeIdentityClient.Callback() {
-            @Override public void onSuccess(JSONObject j) { person[0] = j; paint.run(); }
-            @Override public void onError(String e) { paint.run(); }
-        });
-        com.harvanna.app.sync.HarvannaNodeClient.nodeGet("/api/v1/wallet/labels/" + address, new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {
-            @Override public void onSuccess(JSONObject j) { labels[0] = j; paint.run(); }
-            @Override public void onError(String e) { paint.run(); }
-        });
+        if (mirror != null) mirror.remove();
+        mirror = NodeMirrors.wallet(address, data -> runOnUiThread(() -> render(data)));
     }
 
-    private void render(JSONObject person, JSONObject labels) {
+    private void render(java.util.Map<String, Object> person) {
         root.removeAllViews();
         if (person == null) {
-            root.addView(tv("The network didn't return a trust score.", 14, false, UiColors.error()));
+            root.addView(tv("0 / 26", 36, true, UiColors.accent()));
+            root.addView(tv("The network has not published a score for this wallet yet. Bind this device and it will appear here once Firestore has it.", 14, false, UiColors.textSecondary()));
+            addBind();
             return;
         }
-        boolean bound = person.optBoolean("bound");
-        int score = person.optInt("trustScore", 0);
-        int vouches = person.optInt("effectiveVouchCount", 0);
+        boolean bound = Boolean.TRUE.equals(person.get("bound"));
+        int score = num(person.get("trustScore"));
+        int vouches = num(person.get("effectiveVouchCount"));
         root.addView(tv(score + " / 26", 36, true, UiColors.accent()));
-        root.addView(tv(bound ? "This wallet is bound to a device." : "Not bound yet. The score stays 0 until it is.", 14, false, UiColors.textSecondary()));
+        Object summary = person.get("summary");
+        root.addView(tv(summary == null ? "" : String.valueOf(summary), 14, false, UiColors.textSecondary()));
 
-        root.addView(head("How the number is made"));
-        root.addView(line("Device", bound ? "10" : "0", "Binding this phone to the wallet is worth 10. It is not a government ID."));
-        root.addView(line("Vouches", String.valueOf(Math.min(vouches, 8) * 2), vouches + " active " + (vouches == 1 ? "vouch" : "vouches") + ". Each one adds 2, and only the first 8 count."));
-        if (person.optBoolean("established")) root.addView(tv("Established. You can vouch for other members.", 13, false, UiColors.textPrimary()));
-        long cool = person.optLong("vouchCoolOffUntil", 0);
-        if (cool > System.currentTimeMillis()) root.addView(tv("You cannot vouch again until the cool-off ends.", 13, false, UiColors.error()));
-
-        if (!bound) {
-            MaterialButton bind = new MaterialButton(this);
-            bind.setAllCaps(false);
-            bind.setText("Bind this device");
-            bind.setOnClickListener(v -> bindDevice());
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            lp.topMargin = dp(12);
-            root.addView(bind, lp);
+        root.addView(head("Saved by the network"));
+        root.addView(line("Device", bound ? "10" : "0", "Binding this phone is worth 10. Firestore is showing the figure the node saved."));
+        root.addView(line("Vouches", String.valueOf(Math.min(vouches, 8) * 2), vouches + " active " + (vouches == 1 ? "vouch" : "vouches") + "."));
+        if (Boolean.TRUE.equals(person.get("established"))) root.addView(tv("Established. You can vouch for other members.", 13, false, UiColors.textPrimary()));
+        if (numLong(person.get("vouchCoolOffUntil")) > System.currentTimeMillis()) {
+            root.addView(tv("You cannot vouch again until the cool-off ends.", 13, false, UiColors.error()));
         }
+        if (!bound) addBind();
 
-        root.addView(head("Badges from your circles"));
-        root.addView(tv("These are computed when you open this screen, from rotating circles you have actually finished. A badge does not add points, and a group uses them only to mark the circle New, Established, or High trust.", 13, false, UiColors.textSecondary()));
-        JSONArray rows = labels == null ? null : labels.optJSONArray("labels");
-        if (rows == null || rows.length() == 0) {
-            root.addView(card("No badges yet", "Finish a rotating circle. If you never default, Zero default appears. Ten payments met on time can add Early payer."));
+        root.addView(head("Badges"));
+        Object names = person.get("labels");
+        Object notes = person.get("labelNotes");
+        if (!(names instanceof java.util.List) || ((java.util.List<?>) names).isEmpty()) {
+            root.addView(card("No badges yet", "Finish a rotating circle. The node writes the badge here. This screen does not invent one."));
         } else {
-            for (int i = 0; i < rows.length(); i++) {
-                JSONObject row = rows.optJSONObject(i);
-                if (row == null) continue;
-                String name = row.optString("label", "");
-                JSONObject detail = row.optJSONObject("detail");
-                root.addView(card(titleOf(name), bodyOf(name, row.optString("type", ""), detail)));
+            java.util.List<?> list = (java.util.List<?>) names;
+            java.util.List<?> detail = notes instanceof java.util.List ? (java.util.List<?>) notes : java.util.Collections.emptyList();
+            for (int i = 0; i < list.size(); i++) {
+                String name = String.valueOf(list.get(i));
+                String body = i < detail.size() ? String.valueOf(detail.get(i)) : name;
+                root.addView(card(titleOf(name), body));
             }
         }
+    }
+
+    private void addBind() {
+        MaterialButton bind = new MaterialButton(this);
+        bind.setAllCaps(false);
+        bind.setText("Bind this device");
+        bind.setOnClickListener(v -> bindDevice());
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(12);
+        root.addView(bind, lp);
     }
 
     private void bindDevice() {
@@ -135,24 +138,8 @@ public class TrustScoreActivity extends AppCompatActivity {
         return name;
     }
 
-    private static String bodyOf(String name, String type, JSONObject detail) {
-        String kind = "PERMANENT".equals(type) ? "Stays on the record." : "Recalculated every time. It can go away.";
-        if ("CIRCLE_VETERAN".equals(name)) {
-            int n = detail == null ? 0 : detail.optInt("circlesCompleted", 0);
-            return "Finished " + n + " rotating " + (n == 1 ? "circle" : "circles") + ". " + kind;
-        }
-        if ("FOUNDING_MEMBER".equals(name)) return "You started a rotating circle that ran to the end. " + kind;
-        if ("ZERO_DEFAULT".equals(name)) return "You have finished a circle and have never defaulted. One default removes this. " + kind;
-        if ("EARLY_PAYER".equals(name)) {
-            int pct = detail == null ? 0 : detail.optInt("onTimeRatePercent", 0);
-            return "At least 10 payments, and " + pct + "% met the obligation. " + kind;
-        }
-        if ("VOUCHED".equals(name)) {
-            int n = detail == null ? 0 : detail.optInt("activeVouches", 0);
-            return n + " active " + (n == 1 ? "vouch" : "vouches") + " from members the network already trusts. " + kind;
-        }
-        return kind;
-    }
+    private static int num(Object o) { return o instanceof Number ? ((Number) o).intValue() : 0; }
+    private static long numLong(Object o) { return o instanceof Number ? ((Number) o).longValue() : 0; }
 
     private ViewGroup line(String name, String value, String note) {
         LinearLayout row = new LinearLayout(this);

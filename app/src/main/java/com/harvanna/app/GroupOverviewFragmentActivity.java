@@ -480,46 +480,41 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		return loc.isEmpty() ? "Unknown" : loc;
 	}
 
-	/** The node scores the circle from real member labels. Firestore only stores a copy. */
+	private com.google.firebase.firestore.ListenerRegistration groupTrustReg;
+
+	/** The node writes GROUP_TRUST. This screen only listens. */
 	private void _showGroupTrust(Map<String, Object> data) {
 		if (tv_group_trust == null || data == null) return;
-		String cached = _safeString(data, "nodeTrustTier", "");
-		if (!cached.isEmpty()) tv_group_trust.setText(_trustLine(cached, (int) _safeDouble(data, "nodeTrustMembers"),
-				_safeDouble(data, "nodeTrustClean"), _safeDouble(data, "nodeTrustHistory")) + " · saved");
 		String nodeId = com.harvanna.app.group.GroupKinds.nodeId(data);
+		if (groupTrustReg != null) { groupTrustReg.remove(); groupTrustReg = null; }
 		if (nodeId.isEmpty()) {
 			tv_group_trust.setText("Trust starts once this circle is on the network.");
 			return;
 		}
-		tv_group_trust.setText("Trust · reading the network…");
-		com.harvanna.app.sync.NodeGroupClient.getGroupTrust(nodeId, new com.harvanna.app.sync.NodeGroupClient.Callback() {
-			@Override public void onSuccess(org.json.JSONObject json) {
-				if (getActivity() == null) return;
-				getActivity().runOnUiThread(() -> {
-					String tier = json.optString("tier", "NEW");
-					int members = json.optInt("memberCount", 0);
-					double clean = json.optDouble("fractionZeroDefault", 0);
-					double history = json.optDouble("fractionExperienced", 0);
-					tv_group_trust.setText(_trustLine(tier, members, clean, history));
-					if (!isAdmin || getContext() == null) return;
-					java.util.Map<String, Object> fields = new java.util.HashMap<>();
-					fields.put("nodeTrustTier", tier);
-					fields.put("nodeTrustMembers", members);
-					fields.put("nodeTrustClean", clean);
-					fields.put("nodeTrustHistory", history);
-					fields.put("nodeTrustAt", System.currentTimeMillis());
-					com.harvanna.app.firestore.GroupFirestoreManager.getInstance(getContext())
-							.updateGroupFields(groupId, fields, new com.harvanna.app.firestore.GroupFirestoreManager.SimpleCallback() {
-								@Override public void onSuccess() { }
-								@Override public void onError(String error) { }
-							});
-				});
-			}
-			@Override public void onError(String error) {
-				if (getActivity() == null || !cached.isEmpty()) return;
-				getActivity().runOnUiThread(() -> tv_group_trust.setText("Trust · network unavailable"));
-			}
+		tv_group_trust.setText("Trust · waiting for Firestore…");
+		groupTrustReg = com.harvanna.app.firestore.NodeMirrors.group(nodeId, doc -> {
+			if (getActivity() == null) return;
+			getActivity().runOnUiThread(() -> {
+				if (tv_group_trust == null) return;
+				if (doc == null) {
+					tv_group_trust.setText("Trust · the network has not published this circle yet.");
+					return;
+				}
+				Object summary = doc.get("summary");
+				if (summary != null && !String.valueOf(summary).isEmpty()) {
+					tv_group_trust.setText(String.valueOf(summary));
+					return;
+				}
+				tv_group_trust.setText(_trustLine(String.valueOf(doc.get("tier")),
+						(int) _safeDouble(doc, "memberCount"), _safeDouble(doc, "fractionZeroDefault"), _safeDouble(doc, "fractionExperienced")));
+			});
 		});
+	}
+
+	@Override
+	public void onDestroyView() {
+		if (groupTrustReg != null) { groupTrustReg.remove(); groupTrustReg = null; }
+		super.onDestroyView();
 	}
 
 	private static String _trustLine(String tier, int members, double clean, double history) {

@@ -13,11 +13,10 @@ import org.json.JSONObject;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Client for the node's on-chain group engines (Circle / Accumulative / Fixed /
- * GenLoan / admin recovery / referral / staking). The node is the source of truth:
- * group state is READ from its endpoints and every mutation is a request SIGNED with
- * the wallet key over a canonical message built by {@link GroupCanonical}
- * (verified byte-for-byte against the node's own request classes).
+ * Display reads (group, roster, staking totals, staking position) come from the
+ * Firestore copy the node pushes after it saves. If that copy is not there yet,
+ * the call falls back to the node once, and the node pushes the copy. Signing
+ * still uses a live node read for the action nonce. Mutations are signed here.
  *
  * Request nonce: the node requires each signed request to carry the wallet's
  * "nextRequestNonce" (see GET /api/v1/wallet/balance/{address}); this client fetches
@@ -36,18 +35,18 @@ public final class NodeGroupClient {
 
     // ═════════════════════════════ READS ═════════════════════════════
 
-    public static void getCircle(String circleId, Callback cb) { read("/api/v1/circle/" + circleId, cb); }
+    public static void getCircle(String circleId, Callback cb) { mirrored("GROUP_STATE", circleId, "/api/v1/circle/" + circleId, cb); }
     public static void getCircleMember(String circleId, String address, Callback cb) { read("/api/v1/circle/" + circleId + "/member/" + address, cb); }
-    public static void getCircleMembers(String circleId, Callback cb) { read("/api/v1/circle/" + circleId + "/members", cb); }
+    public static void getCircleMembers(String circleId, Callback cb) { mirrored("GROUP_MEMBERS", circleId, "/api/v1/circle/" + circleId + "/members", cb); }
 
-    public static void getAccumGroup(String groupId, Callback cb) { read("/api/v1/accum/group/" + groupId, cb); }
+    public static void getAccumGroup(String groupId, Callback cb) { mirrored("GROUP_STATE", groupId, "/api/v1/accum/group/" + groupId, cb); }
     public static void getAccumMember(String groupId, String address, Callback cb) { read("/api/v1/accum/group/" + groupId + "/member/" + address, cb); }
     public static void getAccumLine(String groupId, String lineId, Callback cb) { read("/api/v1/accum/group/" + groupId + "/line/" + lineId, cb); }
-    public static void getAccumMembers(String groupId, Callback cb) { read("/api/v1/accum/group/" + groupId + "/members", cb); }
+    public static void getAccumMembers(String groupId, Callback cb) { mirrored("GROUP_MEMBERS", groupId, "/api/v1/accum/group/" + groupId + "/members", cb); }
 
-    public static void getFixedGroup(String groupId, Callback cb) { read("/api/v1/fixed/group/" + groupId, cb); }
+    public static void getFixedGroup(String groupId, Callback cb) { mirrored("GROUP_STATE", groupId, "/api/v1/fixed/group/" + groupId, cb); }
     public static void getFixedMember(String groupId, String address, Callback cb) { read("/api/v1/fixed/group/" + groupId + "/member/" + address, cb); }
-    public static void getFixedMembers(String groupId, Callback cb) { read("/api/v1/fixed/group/" + groupId + "/members", cb); }
+    public static void getFixedMembers(String groupId, Callback cb) { mirrored("GROUP_MEMBERS", groupId, "/api/v1/fixed/group/" + groupId + "/members", cb); }
     public static void getFixedMilestone(String groupId, String id, Callback cb) { read("/api/v1/fixed/group/" + groupId + "/milestone/" + id, cb); }
     public static void getFixedGrant(String groupId, String id, Callback cb) { read("/api/v1/fixed/group/" + groupId + "/grant/" + id, cb); }
     public static void getFixedDisbursementRequest(String groupId, String id, Callback cb) { read("/api/v1/fixed/group/" + groupId + "/disbursement-request/" + id, cb); }
@@ -55,8 +54,11 @@ public final class NodeGroupClient {
     public static void getLoan(String groupId, String loanId, Callback cb) { read("/api/v1/genloan/group/" + groupId + "/loan/" + loanId, cb); }
     public static void getAdminRecovery(String groupId, Callback cb) { read("/api/v1/admin-recovery/group/" + groupId, cb); }
     public static void getReferral(String referredAddress, Callback cb) { read("/api/v1/referral/" + referredAddress, cb); }
+    /** Live position, including the action nonce. Used before a signed unstake or claim. */
     public static void getStakingPosition(String address, Callback cb) { read("/api/v1/staking/position/" + address, cb); }
-    public static void getStakingInfo(Callback cb) { read("/api/v1/staking/info", cb); }
+    /** The copy the node pushed. Fine for the Earn screen, not for signing. */
+    public static void readStakingPosition(String address, Callback cb) { mirrored("STAKING", address, "/api/v1/staking/position/" + address, cb); }
+    public static void getStakingInfo(Callback cb) { mirrored("STAKING_INFO", "current", "/api/v1/staking/info", cb); }
 
     /** Live group tier from member labels on the node. Firestore must not invent this. */
     public static void getGroupTrust(String groupId, Callback cb) {
@@ -347,6 +349,26 @@ public final class NodeGroupClient {
             @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }
             @Override public void onError(String error) { cb.onError(error); }
         });
+    }
+
+    /** Firestore first. The node is asked only when it has not pushed a copy yet. */
+    private static void mirrored(String collection, String id, String path, Callback cb) {
+        if (id == null || id.isEmpty()) { read(path, cb); return; }
+        try {
+            com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                    .collection(collection).document(id).get()
+                    .addOnSuccessListener(snap -> {
+                        String body = snap != null && snap.exists() ? snap.getString("body") : null;
+                        if (body != null && !body.isEmpty()) {
+                            try { cb.onSuccess(new JSONObject(body)); return; }
+                            catch (JSONException ignored) { }
+                        }
+                        read(path, cb);
+                    })
+                    .addOnFailureListener(e -> read(path, cb));
+        } catch (Exception e) {
+            read(path, cb);
+        }
     }
 
     private interface NonceNext { void ready(long nonce, String error); }

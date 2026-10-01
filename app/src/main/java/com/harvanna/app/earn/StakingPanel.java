@@ -134,7 +134,7 @@ public final class StakingPanel {
             ui(() -> position.setText("Create a wallet before you stake."));
             return;
         }
-        NodeGroupClient.getStakingPosition(address, new NodeGroupClient.Callback() {
+        NodeGroupClient.readStakingPosition(address, new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject json) { pos = json; paint(); }
             @Override public void onError(String error) { ui(() -> status.setText(error)); }
         });

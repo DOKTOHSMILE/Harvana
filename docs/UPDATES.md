@@ -13,6 +13,6 @@ What you do:
 1. Do not copy rules out of a chat message. A chat copy inserts `\` in front of `$(...)`, and the Firebase console rejects that. Open `docs/firestore.console.rules` in this repository, select all, and paste that over the Firebase console editor. Publish. This works on the free plan. That file is the console rules you pasted on 1 Oct 2026, plus the seven node collections.
 2. `docs/firestore.rules` also allows those reads, but its `USERS` rules are stricter than the console. Do not publish that file over the console until the two have been compared.
 3. Install an app build from `5ce4531` or later.
-4. The copies stay empty until the node is restarted from its own repository at `772214c` or later, with the service-account path set. That restart is documented in the node repository, `docs/DEPLOYMENT.md`. This app update does not do it.
+4. The copies stay empty until the node is restarted from its own repository, using the steps in that repository's `docs/DEPLOYMENT.md` ("Putting a new jar on the live node"). Those steps keep the live config. Do not rebuild the jar from a fresh git checkout and start it on its own: the git properties file is placeholders, and that would blank the guardian keys and the fee wallet. This app update does not restart the node.
 
 Until step 4, the screens still work. They ask the node.

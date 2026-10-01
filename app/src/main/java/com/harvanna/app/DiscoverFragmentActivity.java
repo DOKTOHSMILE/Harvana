@@ -281,7 +281,7 @@ public class DiscoverFragmentActivity extends Fragment {
 		ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(
 		getContext(),
 		android.R.layout.simple_spinner_dropdown_item,
-		new String[]{"Most Members", "Highest Trust", "Newest"});
+		new String[]{"Most Members", "On network", "Newest"});
 		sp_sort.setAdapter(sortAdapter);
 	}
 	
@@ -494,10 +494,7 @@ public class DiscoverFragmentActivity extends Fragment {
 		boolean verifiedOnly = cd_verified_only != null && cd_verified_only.isChecked();
 		
 		for (HashMap<String, Object> g : publicGroups) {
-			if (verifiedOnly) {
-				double trust = _safeDouble(g, "trustScore");
-				if (trust < 75) continue;
-			}
+			if (verifiedOnly && com.harvanna.app.trust.NetworkTrust.groupKey(g).isEmpty()) continue;
 			if (!searchQuery.isEmpty()) {
 				String name = _safeString(g, "groupName", "").toLowerCase(Locale.US);
 				String state = _safeString(g, "state", "").toLowerCase(Locale.US);
@@ -513,7 +510,12 @@ public class DiscoverFragmentActivity extends Fragment {
 		if (sortIndex == 0) {
 			java.util.Collections.sort(filtered, (a, b) -> Double.compare(_safeDouble(b, "membersCount"), _safeDouble(a, "membersCount")));
 		} else if (sortIndex == 1) {
-			java.util.Collections.sort(filtered, (a, b) -> Double.compare(_safeDouble(b, "trustScore"), _safeDouble(a, "trustScore")));
+			java.util.Collections.sort(filtered, (a, b) -> {
+				int an = com.harvanna.app.trust.NetworkTrust.groupKey(a).isEmpty() ? 0 : 1;
+				int bn = com.harvanna.app.trust.NetworkTrust.groupKey(b).isEmpty() ? 0 : 1;
+				if (an != bn) return Integer.compare(bn, an);
+				return Double.compare(_safeDouble(b, "membersCount"), _safeDouble(a, "membersCount"));
+			});
 		} else if (sortIndex == 2) {
 			java.util.Collections.sort(filtered, (a, b) -> Double.compare(
 			_safeDouble(b, "timestamp", _safeDouble(b, "createdTimestamp")),
@@ -626,8 +628,7 @@ public class DiscoverFragmentActivity extends Fragment {
 			HashMap<String, Object> group = _data.get(_position);
 			if (tv_groupName != null) tv_groupName.setText(_safeString(group, "groupName", "Untitled Group"));
 			if (tv_status != null) {
-				double trust = _safeDouble(group, "trustScore");
-				tv_status.setText(trust >= 75 ? "Verified" : _safeString(group, "status", "Active"));
+				tv_status.setText(_safeString(group, "status", "Active"));
 			}
 			String city = _safeString(group, "city", "");
 			String state = _safeString(group, "state", "");
@@ -643,12 +644,30 @@ public class DiscoverFragmentActivity extends Fragment {
 				tv_slotAmount.setText(String.format(Locale.US, ("%.4f " + com.harvanna.app.CoinInfo.ticker()), _safeDouble(group, "contributionAmount")));
 			}
 			
-			double trustScore = _safeDouble(group, "trustScore");
+			String nodeId = com.harvanna.app.trust.NetworkTrust.groupKey(group);
 			if (tv_trustscore != null) {
-				tv_trustscore.setText((long) trustScore + "%");
-				if (trustScore < 50) tv_trustscore.setTextColor(0xFFF44336);
-				else if (trustScore < 75) tv_trustscore.setTextColor(0xFFFF9800);
-				else tv_trustscore.setTextColor(0xFF4CAF50);
+				tv_trustscore.setTag(nodeId);
+				tv_trustscore.setText(nodeId.isEmpty() ? "—" : "…");
+				tv_trustscore.setTextColor(0xFF9E9E9E);
+				if (!nodeId.isEmpty()) {
+					final TextView cell = tv_trustscore;
+					com.harvanna.app.trust.NetworkTrust.group(nodeId, score -> {
+						if (getActivity() == null) return;
+						getActivity().runOnUiThread(() -> {
+							if (!nodeId.equals(cell.getTag())) return;
+							if (!score.published || score.summary.isEmpty()) {
+								cell.setText("—");
+								return;
+							}
+							String label = score.summary;
+							int cut = label.indexOf(" · ");
+							if (cut > 0) label = label.substring(0, cut);
+							cell.setText(label);
+							if (score.summary.startsWith("High trust")) cell.setTextColor(0xFF4CAF50);
+							else if (score.summary.startsWith("Established")) cell.setTextColor(0xFFFF9800);
+						});
+					});
+				}
 			}
 			
 			// Slots-filled progress — the pre-join equivalent of the "current

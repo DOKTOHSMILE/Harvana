@@ -690,9 +690,24 @@ public class GroupMembersFragmentActivity extends Fragment {
 			}
 		}
 		
-		Object trustObj = data.get("trust_score");
-		String trustVal = trustObj != null ? trustObj.toString() : "0";
-		if (trust != null) trust.setText(trustVal + "%");
+		if (trust != null) trust.setText("—");
+		Object walletObj = data.get("walletAddress");
+		if (walletObj == null) walletObj = data.get("wallet_address");
+		String wallet = walletObj == null ? "" : String.valueOf(walletObj).trim();
+		if (wallet.isEmpty()) {
+			com.google.firebase.auth.FirebaseUser me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+			Object uidObj = data.get("uid");
+			if (me != null && uidObj != null && me.getUid().equals(String.valueOf(uidObj))) {
+				wallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(getContext());
+			}
+		}
+		if (trust != null && wallet != null && wallet.startsWith("HV0x")) {
+			final String addr = wallet;
+			com.harvanna.app.trust.NetworkTrust.wallet(addr, score -> {
+				if (getActivity() == null) return;
+				getActivity().runOnUiThread(() -> trust.setText(score.published ? (score.score + " / 26") : "—"));
+			});
+		}
 		
 		Object occObj = data.get("occupation");
 		String occ = occObj != null ? occObj.toString() : null;

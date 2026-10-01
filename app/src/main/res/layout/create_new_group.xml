@@ -1128,7 +1128,7 @@
 										android:id="@+id/textview104"
 										android:layout_width="wrap_content"
 										android:layout_height="wrap_content"
-										android:text="Min Trust Score, Early Slots"
+										android:text="Min trust (0–26), early slots"
 										android:textSize="12sp"
 										android:textStyle="bold" />
 									<EditText
@@ -1139,7 +1139,7 @@
 										android:background="@drawable/field_background"
 										android:gravity="center_vertical"
 										android:textSize="15sp"
-										android:hint="50"
+										android:hint="10"
 										android:singleLine="true"
 										android:inputType="number"
 										android:paddingHorizontal="14dp" />

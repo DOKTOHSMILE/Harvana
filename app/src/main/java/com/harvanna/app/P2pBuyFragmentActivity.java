@@ -302,8 +302,9 @@ public class P2pBuyFragmentActivity extends Fragment {
 					@Override
 					public void onComplete(com.harvanna.app.TrustScoreEngine.Result result) {
 						e.verified = result.verified;
-						e.trustScore = result.overallScore;
 						int reportCount = result.reportCount;
+						com.harvanna.app.trust.NetworkTrust.wallet(e.posterAddress, score -> {
+						e.trustScore = score.published ? score.score : -1;
 						
 						HarvannaNodeClient.getP2PInsuranceStatus(e.posterAddress, new HarvannaNodeClient.JsonCallback() {
 							@Override
@@ -326,6 +327,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 							}
 							@Override
 							public void onError(String error) { maybeDone.run(); }
+						});
 						});
 					}
 					@Override
@@ -875,7 +877,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 			txt_online.setVisibility(e.online ? View.VISIBLE : View.GONE);
 			cardview3.setVisibility(e.verified ? View.VISIBLE : View.GONE);
 			txt_trusted.setText(e.premium ? "Premium Trader" : (e.insured ? "Insured Trader" : ""));
-			txt_rating.setText(e.trustScore >= 0 ? String.format(Locale.US, "Trust %d", e.trustScore) : "—");
+			txt_rating.setText(e.trustScore >= 0 ? String.format(Locale.US, "Trust %d / 26", e.trustScore) : "—");
 			txt_trades.setText(e.completedTrades + " trades");
 			txt_unique.setText("• " + e.uniqueCounterparties + " unique");
 			txt_available.setText(String.format(Locale.US, ("%.4f " + com.harvanna.app.CoinInfo.ticker()), e.remainingHarv));

@@ -110,7 +110,7 @@
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="3dp"
-						android:text="Seller • Trust 94%"
+						android:text="—"
 						android:textSize="10sp"
 						android:focusable="false" />
 				</LinearLayout>

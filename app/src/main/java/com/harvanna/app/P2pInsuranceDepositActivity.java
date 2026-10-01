@@ -386,8 +386,13 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 				isCleanRecord = r.reportCount == 0;
 				hasCleanTrustRecord = isVerified && isCleanRecord;
 				runOnUiThread(() -> {
-					tv_trust_status.setText(hasCleanTrustRecord ? "Clean & Verified" :
-					(!r.verified ? "Verification Pending" : "Active Reports Flagged"));
+					tv_trust_status.setText((hasCleanTrustRecord ? "Clean & Verified" :
+					(!r.verified ? "Verification Pending" : "Active Reports Flagged")));
+					com.harvanna.app.trust.NetworkTrust.wallet(
+					com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(P2pInsuranceDepositActivity.this),
+					score -> runOnUiThread(() -> {
+						if (score.published) tv_trust_status.append(" · " + score.score + " / 26");
+					}));
 					_refreshOverallBadge();
 				});
 			}

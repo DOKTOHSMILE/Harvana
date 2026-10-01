@@ -385,8 +385,10 @@ public class P2pExpressActivity extends AppCompatActivity {
 			@Override
 			public void onComplete(TrustScoreEngine.Result result) {
 				boolean cleanRecord = result.verified && result.reportCount == 0;
-				tv_express_trust.setText(String.valueOf(result.overallScore));
-				tv_express_tier_level.setText(result.tier != null ? result.tier : "Unranked");
+				com.harvanna.app.trust.NetworkTrust.wallet(myAddress, score -> runOnUiThread(() -> {
+					tv_express_trust.setText(score.published ? (score.score + " / 26") : "—");
+					tv_express_tier_level.setText(score.published ? (score.score + " / 26") : "—");
+				}));
 				
 				HarvannaNodeClient.getP2PInsuranceStatus(myAddress, new HarvannaNodeClient.JsonCallback() {
 					@Override

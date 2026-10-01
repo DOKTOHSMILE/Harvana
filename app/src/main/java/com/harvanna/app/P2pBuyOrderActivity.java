@@ -501,14 +501,16 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 					public void onComplete(com.harvanna.app.TrustScoreEngine.Result result) {
 						runOnUiThread(() -> {
 							seller_verified.setVisibility(result.verified ? View.VISIBLE : View.GONE);
-							seller_level.setText(result.tier != null ? result.tier : "Unranked");
-							seller_trust_score.setText(String.valueOf(result.overallScore));
 							seller_groups.setText(String.valueOf(result.totalGroups));
 						});
 					}
 					@Override
 					public void onError(String error) { }
 				});
+				com.harvanna.app.trust.NetworkTrust.wallet(sellerAddress, score -> runOnUiThread(() -> {
+					seller_trust_score.setText(score.published ? (score.score + " / 26") : "—");
+					seller_level.setText(score.summary.isEmpty() ? "Not on the network" : score.summary);
+				}));
 				
 				P2PTradeStatsManager.getInstance(getApplicationContext()).getStats(sellerUid, new P2PTradeStatsManager.StatsCallback() {
 					@Override

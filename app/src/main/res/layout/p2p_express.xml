@@ -82,7 +82,7 @@
 							android:id="@+id/tv_express_tier_level"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="TIER 5"
+							android:text="—"
 							android:textSize="11sp"
 							android:textStyle="bold" />
 					</LinearLayout>
@@ -102,7 +102,7 @@
 								android:id="@+id/tv_express_trust"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:text="98%"
+								android:text="—"
 								android:textSize="16sp"
 								android:textStyle="bold" />
 							<TextView

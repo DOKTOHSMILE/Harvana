@@ -145,7 +145,7 @@
 								android:layout_height="match_parent"
 								android:background="@android:color/transparent"
 								android:gravity="center_vertical"
-								android:text="Verified"
+								android:text="On network"
 								android:textSize="12sp"
 								android:textStyle="bold"
 								android:paddingStart="6dp"

@@ -680,12 +680,26 @@ public class GroupsFragmentActivity extends Fragment {
 				number_of_members_textview7.setText((long) _safeDouble(group, "membersCount") + " members");
 			}
 			
-			double trustScore = _safeDouble(group, "trustScore");
+			String nodeId = com.harvanna.app.trust.NetworkTrust.groupKey(group);
 			if (group_trust_score_perc_textview8 != null) {
-				group_trust_score_perc_textview8.setText("Trust " + (long) trustScore + "%");
-				if (trustScore < 50) group_trust_score_perc_textview8.setTextColor(0xFFF44336);
-				else if (trustScore < 75) group_trust_score_perc_textview8.setTextColor(0xFFFF9800);
-				else group_trust_score_perc_textview8.setTextColor(0xFF4CAF50);
+				group_trust_score_perc_textview8.setTag(nodeId);
+				group_trust_score_perc_textview8.setText("Trust …");
+				group_trust_score_perc_textview8.setTextColor(0xFF9E9E9E);
+				com.harvanna.app.trust.NetworkTrust.group(nodeId, score -> {
+					if (getActivity() == null) return;
+					getActivity().runOnUiThread(() -> {
+						if (!nodeId.equals(group_trust_score_perc_textview8.getTag())) return;
+						if (!score.published || score.summary.isEmpty()) {
+							group_trust_score_perc_textview8.setText("Not on the network");
+							return;
+						}
+						group_trust_score_perc_textview8.setText(score.summary);
+						if ("HIGH_TRUST".equals(score.summary) || score.summary.startsWith("High trust"))
+							group_trust_score_perc_textview8.setTextColor(0xFF4CAF50);
+						else if ("ESTABLISHED".equals(score.summary) || score.summary.startsWith("Established"))
+							group_trust_score_perc_textview8.setTextColor(0xFFFF9800);
+					});
+				});
 			}
 			
 			return _view;

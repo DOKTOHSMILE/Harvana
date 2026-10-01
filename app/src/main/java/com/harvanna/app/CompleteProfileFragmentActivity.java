@@ -549,7 +549,6 @@ public class CompleteProfileFragmentActivity extends Fragment {
 		userVMap.put("address", et_address.getText().toString().trim());
 		userVMap.put("last_name", et_last_name.getText().toString().trim());
 		userVMap.put("first_name", et_first_name.getText().toString().trim());
-		userVMap.put("trust_score", "30");
 		userVMap.put("occupation", et_occupation.getText().toString().trim());
 		userVMap.put("timestamp", String.valueOf(authc.getTimeInMillis()));
 		userVMap.put(idDocument, et_id_number.getText().toString().trim());

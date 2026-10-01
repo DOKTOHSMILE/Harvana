@@ -147,7 +147,7 @@
 								android:id="@+id/user_trust_score_textview5"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:text="--/--"
+								android:text="— / 26"
 								android:textSize="14sp"
 								android:textStyle="bold"
 								android:textColor="@color/colorTextPrimary" />
@@ -443,7 +443,7 @@
 							android:id="@+id/textview159"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:text="Payment History"
+							android:text="Device"
 							android:textColor="@color/colorTextSecondary"
 							android:layout_weight="1"
 							android:textSize="13.5sp" />
@@ -451,7 +451,7 @@
 							android:id="@+id/textview40"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="0%"
+							android:text="0"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
 							android:textSize="13.5sp" />
@@ -476,7 +476,7 @@
 							android:id="@+id/textview160"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:text="Consistency"
+							android:text="Vouches"
 							android:textColor="@color/colorTextSecondary"
 							android:layout_weight="1"
 							android:textSize="13.5sp" />
@@ -484,7 +484,7 @@
 							android:id="@+id/textview42"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="0%"
+							android:text="0"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
 							android:textSize="13.5sp" />
@@ -509,7 +509,7 @@
 							android:id="@+id/textview161"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:text="Group Loyalty"
+							android:text="Badges"
 							android:textColor="@color/colorTextSecondary"
 							android:layout_weight="1"
 							android:textSize="13.5sp" />
@@ -517,7 +517,7 @@
 							android:id="@+id/textview44"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="0%"
+							android:text="0"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
 							android:textSize="13.5sp" />
@@ -542,7 +542,7 @@
 							android:id="@+id/textview162"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:text="Tenure"
+							android:text="Established"
 							android:textColor="@color/colorTextSecondary"
 							android:layout_weight="1"
 							android:textSize="13.5sp" />
@@ -550,7 +550,7 @@
 							android:id="@+id/textview46"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="0%"
+							android:text="0"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
 							android:textSize="13.5sp" />

@@ -507,19 +507,16 @@ public class SettingsActivity extends AppCompatActivity {
 		String iconStr = _str(data, "icon");
 		String firstName = _str(data, "first_name");
 		String lastName = _str(data, "last_name");
-		double trustScore = _num(data, "trust_score");
-		
+		String vType = _str(data, "v_type");
 		String fullName = (firstName + " " + lastName).trim();
 		tvSettingsName.setText(fullName.isEmpty() ? "Harvanna Member" : fullName);
-		
 		if (!firstName.isEmpty()) {
 			tvSettingsHandle.setText("@" + firstName.toLowerCase());
 			tvSettingsHandle.setVisibility(View.VISIBLE);
 		} else {
 			tvSettingsHandle.setVisibility(View.GONE);
 		}
-		
-		if (trustScore >= 70) {
+		if (vType != null && !vType.trim().isEmpty() && !"null".equalsIgnoreCase(vType.trim())) {
 			tvSettingsVerified.setVisibility(View.VISIBLE);
 		} else {
 			tvSettingsVerified.setVisibility(View.GONE);

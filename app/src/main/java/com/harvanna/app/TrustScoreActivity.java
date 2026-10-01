@@ -68,9 +68,24 @@ public class TrustScoreActivity extends AppCompatActivity {
     private void render(java.util.Map<String, Object> person) {
         root.removeAllViews();
         if (person == null) {
-            root.addView(tv("0 / 26", 36, true, UiColors.accent()));
-            root.addView(tv("The network has not published a score for this wallet yet. Bind this device and it will appear here once Firestore has it.", 14, false, UiColors.textSecondary()));
-            addBind();
+            root.addView(tv("— / 26", 36, true, UiColors.accent()));
+            root.addView(tv("Reading the network…", 14, false, UiColors.textSecondary()));
+            com.harvanna.app.trust.NetworkTrust.wallet(address, score -> runOnUiThread(() -> {
+                if (score.published) {
+                    java.util.Map<String, Object> live = new java.util.HashMap<>();
+                    live.put("trustScore", score.score);
+                    live.put("bound", score.bound);
+                    live.put("effectiveVouchCount", score.vouches);
+                    live.put("established", score.established);
+                    live.put("summary", score.summary.isEmpty() ? (score.score + " / 26") : score.summary);
+                    render(live);
+                    return;
+                }
+                root.removeAllViews();
+                root.addView(tv("— / 26", 36, true, UiColors.accent()));
+                root.addView(tv("The network has not published a score for this wallet yet. Bind this device and it will appear here once Firestore has it.", 14, false, UiColors.textSecondary()));
+                addBind();
+            }));
             return;
         }
         boolean bound = Boolean.TRUE.equals(person.get("bound"));
@@ -89,6 +104,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         }
         if (!bound) addBind();
 
+        if (person.containsKey("labels")) {
         root.addView(head("Badges"));
         Object names = person.get("labels");
         Object notes = person.get("labelNotes");
@@ -102,6 +118,7 @@ public class TrustScoreActivity extends AppCompatActivity {
                 String body = i < detail.size() ? String.valueOf(detail.get(i)) : name;
                 root.addView(card(titleOf(name), body));
             }
+        }
         }
     }
 

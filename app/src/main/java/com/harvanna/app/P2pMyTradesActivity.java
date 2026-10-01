@@ -488,7 +488,13 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 					if (rowId != null && row != null && !rowId.equals(row.getTag())) return;
 					name.setText(resolvedName);
 					avatar.setText(resolvedName.length() > 0 ? resolvedName.substring(0, 1).toUpperCase(Locale.US) : "?");
-					meta.setText(_shortAddr(fallbackAddress));
+					String line = _shortAddr(fallbackAddress);
+					meta.setText(line);
+					final String addr = fallbackAddress;
+					com.harvanna.app.trust.NetworkTrust.wallet(addr, score -> runOnUiThread(() -> {
+						if (rowId != null && row != null && !rowId.equals(row.getTag())) return;
+						meta.setText(score.published ? (line + " · " + score.score + " / 26") : line);
+					}));
 				});
 			}
 			@Override

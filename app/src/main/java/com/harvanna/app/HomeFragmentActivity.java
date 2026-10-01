@@ -624,18 +624,12 @@ public class HomeFragmentActivity extends Fragment {
 		if (textview3 != null)
 		textview3.setText(_greeting() + (first.isEmpty() ? "" : ", " + first));
 		
-		int trust = 0;
-		Object trustObj = data.get("trust_score");
-		if (trustObj != null) {
-			try { trust = (int) Double.parseDouble(trustObj.toString()); } catch (Exception ignored) {}
-		}
-		if (text_val_trust != null) text_val_trust.setText(trust + "%");
+		if (text_val_trust != null) text_val_trust.setText("—");
 		if (ring_trust_score != null) {
-			ring_trust_score.setMax(100);
-			ring_trust_score.setProgress(Math.max(0, Math.min(100, trust)));
+			ring_trust_score.setMax(com.harvanna.app.trust.NetworkTrust.MAX);
+			ring_trust_score.setProgress(0);
 		}
-		if (text_sub_trust != null)
-		text_sub_trust.setText(trust >= 75 ? "Strong reputation" : "Build with on-time pays");
+		if (text_sub_trust != null) text_sub_trust.setText("of 26");
 		
 		if (text_val_loans != null) text_val_loans.setText("0");
 		if (text_sub_loans != null) text_sub_loans.setText("No open loans");
@@ -1019,7 +1013,7 @@ public class HomeFragmentActivity extends Fragment {
 					}
 				}
 				Collections.sort(sorted, (a, b) ->
-				Double.compare(num(b, "trustScore"), num(a, "trustScore")));
+				Double.compare(num(b, "membersCount"), num(a, "membersCount")));
 				getActivity().runOnUiThread(() -> {
 					linear_trending_groups.removeAllViews();
 					int show = Math.min(2, sorted.size());
@@ -1044,16 +1038,34 @@ public class HomeFragmentActivity extends Fragment {
 						String freq = str(g, "frequency", "Weekly");
 						int members = (int) num(g, "membersCount");
 						if (members <= 0) members = (int) num(g, "totalSlots");
-						double ts = num(g, "trustScore");
+						String nodeId = com.harvanna.app.trust.NetworkTrust.groupKey(g);
 						String gid = str(g, "_docId", str(g, "groupId", str(g, "id", "")));
 						
 						if (name != null) name.setText(gname);
-						if (verified != null)
-						verified.setVisibility(ts >= 75 ? View.VISIBLE : View.GONE);
+						if (verified != null) verified.setVisibility(View.GONE);
 						if (meta != null)
 						meta.setText(loc + " · " + members + " members · " + freq);
-						if (trust != null)
-						trust.setText(String.format(Locale.US, "Trust %.0f%%", ts));
+						if (trust != null) {
+							trust.setTag(nodeId);
+							trust.setText(nodeId.isEmpty() ? "Not on the network" : "Trust …");
+							if (!nodeId.isEmpty()) {
+								com.harvanna.app.trust.NetworkTrust.group(nodeId, score -> {
+									if (!isAdded() || getActivity() == null) return;
+									getActivity().runOnUiThread(() -> {
+										if (!nodeId.equals(trust.getTag())) return;
+										if (!score.published || score.summary.isEmpty()) {
+											trust.setText("Not on the network");
+											return;
+										}
+										trust.setText(score.summary);
+										if (verified != null && score.summary.startsWith("High trust")) {
+											verified.setText("High trust");
+											verified.setVisibility(View.VISIBLE);
+										}
+									});
+								});
+							}
+						}
 						if (join != null) {
 							join.setText("View");
 							final String joinGid = gid;
@@ -1266,20 +1278,20 @@ public class HomeFragmentActivity extends Fragment {
 		});
 	}
 	
-	/** The ring shows the computed score (payments, consistency, loyalty, tenure, profile), not a stored number. */
+	/** The ring is the score the node saved for this wallet, out of 26. */
 	private void _loadComputedTrust() {
-		if (getContext() == null || FirebaseAuth.getInstance().getCurrentUser() == null) return;
-		TrustScoreEngine.compute(getContext().getApplicationContext(), FirebaseAuth.getInstance().getCurrentUser().getUid(),
-		new TrustScoreEngine.Callback() {
-			@Override public void onComplete(TrustScoreEngine.Result r) {
-				if (!isAdded() || getActivity() == null) return;
-				getActivity().runOnUiThread(() -> {
-					if (text_val_trust != null) text_val_trust.setText(r.overallScore + "%");
-					if (ring_trust_score != null) { ring_trust_score.setMax(100); ring_trust_score.setProgress(Math.max(0, Math.min(100, r.overallScore))); }
-					if (text_sub_trust != null) text_sub_trust.setText(r.tier + (r.overallScore >= 75 ? " · strong reputation" : " · build with on-time payments"));
-				});
-			}
-			@Override public void onError(String error) { }
+		if (getContext() == null) return;
+		String address = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(getContext());
+		com.harvanna.app.trust.NetworkTrust.wallet(address, score -> {
+			if (!isAdded() || getActivity() == null) return;
+			getActivity().runOnUiThread(() -> {
+				if (text_val_trust != null) text_val_trust.setText(score.published ? String.valueOf(score.score) : "—");
+				if (ring_trust_score != null) {
+					ring_trust_score.setMax(com.harvanna.app.trust.NetworkTrust.MAX);
+					ring_trust_score.setProgress(Math.max(0, Math.min(com.harvanna.app.trust.NetworkTrust.MAX, score.score)));
+				}
+				if (text_sub_trust != null) text_sub_trust.setText(score.summary.isEmpty() ? "of 26" : score.summary);
+			});
 		});
 	}
 	

@@ -104,8 +104,6 @@ public final class IdentityStore {
         card.put("username", text(src, "username"));
         card.put("icon", text(src, "icon"));
         card.put("tier", text(src, "tier").isEmpty() ? "2" : text(src, "tier"));
-        String trust = text(src, "trust_score");
-        card.put("trust_score", trust.isEmpty() ? "30" : trust);
         return card;
     }
 

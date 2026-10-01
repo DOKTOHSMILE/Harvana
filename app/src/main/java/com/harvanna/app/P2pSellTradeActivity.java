@@ -476,12 +476,13 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 					public void onComplete(TrustScoreEngine.Result result) {
 						runOnUiThread(() -> {
 							iv_sell_buyer_verified.setVisibility(result.verified ? View.VISIBLE : View.GONE);
-							tv_sell_buyer_trust.setText("Trust " + result.overallScore);
 						});
 					}
 					@Override
 					public void onError(String error) { }
 				});
+				com.harvanna.app.trust.NetworkTrust.wallet(buyerAddress, score -> runOnUiThread(() ->
+					tv_sell_buyer_trust.setText(score.published ? ("Trust " + score.score + " / 26") : "Trust —")));
 				
 				P2PTradeStatsManager.getInstance(getApplicationContext()).getStats(buyerUid, new P2PTradeStatsManager.StatsCallback() {
 					@Override

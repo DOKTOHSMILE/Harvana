@@ -59,7 +59,6 @@ import java.util.HashMap;
 import java.util.regex.*;
 import org.json.*;
 import com.bumptech.glide.Glide;
-import com.harvanna.app.TrustScoreEngine;
 
 
 public class ProfileActivity extends AppCompatActivity {
@@ -522,9 +521,9 @@ public class ProfileActivity extends AppCompatActivity {
 		
 		name_textview1.setText((firstNameStr + " " + lastNameStr).trim());
 		
-		double trustScore = _num(data, "trust_score");
-		user_trust_score_textview5.setText((int) trustScore + "/100");
-		trustScoreProgress5.setProgress((int) trustScore);
+		user_trust_score_textview5.setText("— / 26");
+		trustScoreProgress5.setMax(26);
+		trustScoreProgress5.setProgress(0);
 		
 		long timestamp = (long) _num(data, "timestamp");
 		String joined = "";
@@ -603,104 +602,57 @@ public class ProfileActivity extends AppCompatActivity {
 		getApplicationContext(), "trust_score_" + uid);
 		if (cachedScore != null) _bindTrustScoreFields(cachedScore);
 		
-		TrustScoreEngine.compute(getApplicationContext(), uid, new TrustScoreEngine.Callback() {
-			@Override
-			public void onComplete(TrustScoreEngine.Result r) {
-				Map<String, Object> toCache = new HashMap<>();
-				toCache.put("overallScore", r.overallScore);
-				toCache.put("paymentHistoryPercent", r.paymentHistoryPercent);
-				toCache.put("consistencyPercent", r.consistencyPercent);
-				toCache.put("groupLoyaltyPercent", r.groupLoyaltyPercent);
-				toCache.put("tenurePercent", r.tenurePercent);
-				toCache.put("totalGroups", r.totalGroups);
-				toCache.put("totalCyclesCompleted", r.totalCyclesCompleted);
-				toCache.put("totalAmountSavedHarv", r.totalAmountSavedHarv);
-				toCache.put("totalLoansTakenHarv", r.totalLoansTakenHarv);
-				toCache.put("tier", r.tier);
-				com.harvanna.app.offline.OfflineCacheManager.save(getApplicationContext(), "trust_score_" + uid, toCache);
-				
-				runOnUiThread(() -> _bindTrustScoreFields(toCache));
-				
-				// Persist for other screens (member lists, report review,
-				// detail sheets) to read without recomputing.
-				Map<String, Object> update = new HashMap<>();
-				update.put("trust_score", r.overallScore);
-				com.harvanna.app.firestore.UserProfileManager.getInstance(getApplicationContext())
-				.updateProfileFields(uid, update, new com.harvanna.app.firestore.UserProfileManager.SimpleCallback() {
-					@Override public void onSuccess() { /* best-effort */ }
-					@Override public void onError(String error) { /* best-effort, don't surface to the user */ }
-				});
-			}
-			
-			@Override
-			public void onError(String error) {
-				// Non-fatal — basic profile fields already loaded independently,
-				// and the cache-first render above already covers this card
-				// if anything was computed before.
-			}
-		});
+		com.harvanna.app.trust.NetworkTrust.wallet(
+		com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this), score -> runOnUiThread(() -> {
+			Map<String, Object> toCache = new HashMap<>();
+			toCache.put("network", true);
+			toCache.put("overallScore", score.score);
+			toCache.put("published", score.published);
+			toCache.put("bound", score.bound);
+			toCache.put("vouches", score.vouches);
+			toCache.put("badges", score.badges);
+			toCache.put("established", score.established);
+			toCache.put("summary", score.summary);
+			com.harvanna.app.offline.OfflineCacheManager.save(getApplicationContext(), "trust_score_" + uid, toCache);
+			_bindTrustScoreFields(toCache);
+		}));
 	}
 	
 	private void _bindTrustScoreFields(Map<String, Object> r) {
+		if (!Boolean.TRUE.equals(r.get("network"))) return;
 		int overallScore = r.get("overallScore") instanceof Number ? ((Number) r.get("overallScore")).intValue() : 0;
-		int paymentHistoryPercent = r.get("paymentHistoryPercent") instanceof Number ? ((Number) r.get("paymentHistoryPercent")).intValue() : 0;
-		int consistencyPercent = r.get("consistencyPercent") instanceof Number ? ((Number) r.get("consistencyPercent")).intValue() : 0;
-		int groupLoyaltyPercent = r.get("groupLoyaltyPercent") instanceof Number ? ((Number) r.get("groupLoyaltyPercent")).intValue() : 0;
-		int tenurePercent = r.get("tenurePercent") instanceof Number ? ((Number) r.get("tenurePercent")).intValue() : 0;
-		int totalGroups = r.get("totalGroups") instanceof Number ? ((Number) r.get("totalGroups")).intValue() : 0;
-		int totalCyclesCompleted = r.get("totalCyclesCompleted") instanceof Number ? ((Number) r.get("totalCyclesCompleted")).intValue() : 0;
-		double totalAmountSavedHarv = r.get("totalAmountSavedHarv") instanceof Number ? ((Number) r.get("totalAmountSavedHarv")).doubleValue() : 0;
-		double totalLoansTakenHarv = r.get("totalLoansTakenHarv") instanceof Number ? ((Number) r.get("totalLoansTakenHarv")).doubleValue() : 0;
-		String tier = r.get("tier") != null ? String.valueOf(r.get("tier")) : "Bronze";
-		
-		user_trust_score_textview5.setText(overallScore + "/100");
-		trustScoreProgress5.setProgress(overallScore);
-		tier_indicator_textview2.setText(tier);
-		
-		textview40.setText(paymentHistoryPercent + "%");
-		trustScoreProgress1.setProgress(paymentHistoryPercent);
-		textview42.setText(consistencyPercent + "%");
-		trustScoreProgress2.setProgress(consistencyPercent);
-		textview44.setText(groupLoyaltyPercent + "%");
-		trustScoreProgress3.setProgress(groupLoyaltyPercent);
-		textview46.setText(tenurePercent + "%");
-		trustScoreProgress4.setProgress(tenurePercent);
-		
-		textview6.setText(String.valueOf(totalGroups));
-		textview9.setText(String.valueOf(totalCyclesCompleted));
-		textview11.setText(paymentHistoryPercent + "%");
-		
-		TextView tvSaved = findViewById(R.id.tv_total_saved);
-		TextView tvLoans = findViewById(R.id.tv_total_loans);
-		TextView tvSavedFiat = findViewById(R.id.tv_total_saved_fiat);
-		TextView tvLoansFiat = findViewById(R.id.tv_total_loans_fiat);
-		if (tvSaved != null) tvSaved.setText(com.harvanna.app.wallet.BalanceFormatter.smart(totalAmountSavedHarv));
-		if (tvLoans != null) tvLoans.setText(com.harvanna.app.wallet.BalanceFormatter.smart(totalLoansTakenHarv));
-		
-		// New — these figures previously showed HARV only, with no fiat
-		// equivalent attempted at all. Real value now comes from
-		// FiatValueHelper's cheapest-open-P2P-listing rate, same source
-		// every other fiat display in the app uses.
-		SharedPreferences currencySp = getSharedPreferences("currencysp", Context.MODE_PRIVATE);
-		String currencySymbol = currencySp.getString("currency", "₦");
-		String currencyCode = com.harvanna.app.wallet.FiatValueHelper.symbolToCurrencyCode(currencySymbol);
-		
-		if (tvSavedFiat != null) {
-			com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(totalAmountSavedHarv, currencyCode, (fiatValue, rateAvailable) -> {
-				runOnUiThread(() -> tvSavedFiat.setText(rateAvailable
-				? String.format(java.util.Locale.US, "≈ %s%,.2f", currencySymbol, fiatValue)
-				: ""));
-			});
-		}
-		if (tvLoansFiat != null) {
-			com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(totalLoansTakenHarv, currencyCode, (fiatValue, rateAvailable) -> {
-				runOnUiThread(() -> tvLoansFiat.setText(rateAvailable
-				? String.format(java.util.Locale.US, "≈ %s%,.2f", currencySymbol, fiatValue)
-				: ""));
-			});
-		}
+		boolean published = Boolean.TRUE.equals(r.get("published"));
+		user_trust_score_textview5.setText(published ? overallScore + " / 26" : "— / 26");
+		trustScoreProgress5.setMax(26);
+		trustScoreProgress5.setProgress(published ? Math.max(0, Math.min(26, overallScore)) : 0);
+
+		boolean bound = Boolean.TRUE.equals(r.get("bound"));
+		int vouches = r.get("vouches") instanceof Number ? ((Number) r.get("vouches")).intValue() : 0;
+		int vouchPoints = Math.min(vouches, 8) * 2;
+		int badges = r.get("badges") instanceof Number ? ((Number) r.get("badges")).intValue() : 0;
+		boolean established = Boolean.TRUE.equals(r.get("established"));
+		TextView device = findViewById(R.id.textview159);
+		TextView vouchLabel = findViewById(R.id.textview160);
+		TextView badgeLabel = findViewById(R.id.textview161);
+		TextView establishedLabel = findViewById(R.id.textview162);
+		if (device != null) device.setText("Device");
+		if (vouchLabel != null) vouchLabel.setText("Vouches");
+		if (badgeLabel != null) badgeLabel.setText("Badges");
+		if (establishedLabel != null) establishedLabel.setText("Established");
+		textview40.setText(bound ? "10" : "0");
+		trustScoreProgress1.setMax(10);
+		trustScoreProgress1.setProgress(bound ? 10 : 0);
+		textview42.setText(String.valueOf(vouchPoints));
+		trustScoreProgress2.setMax(16);
+		trustScoreProgress2.setProgress(vouchPoints);
+		textview44.setText(String.valueOf(badges));
+		trustScoreProgress3.setMax(5);
+		trustScoreProgress3.setProgress(Math.min(5, badges));
+		textview46.setText(established ? "Yes" : "No");
+		trustScoreProgress4.setMax(1);
+		trustScoreProgress4.setProgress(established ? 1 : 0);
 	}
-	
+
 	public void _createInitialAvatar(final String _first, final String _last, final ImageView _img) {
 		String initials = "";
 		if (_first != null && !_first.trim().isEmpty()) {

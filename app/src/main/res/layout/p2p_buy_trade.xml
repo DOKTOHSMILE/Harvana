@@ -285,7 +285,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:layout_marginTop="2dp"
-								android:text="98% trust • 126 trades"
+								android:text="—"
 								android:textSize="10sp" />
 						</LinearLayout>
 						<TextView

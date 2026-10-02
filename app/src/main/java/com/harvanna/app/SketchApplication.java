@@ -49,6 +49,11 @@ public class SketchApplication extends Application {
         // Coin ticker/name come from the node (cached; defaults HARV / Harvanna)
         CoinInfo.init(this);
         CoinInfo.refresh(this);
+        try {
+            com.harvanna.app.notify.NotificationWorker.schedule(this);
+        } catch (Exception e) {
+            Log.w("SketchApplication", "Could not schedule background notifications", e);
+        }
         
         // GLOBAL CRASH INTERCEPTOR (File Writer + Debug Screen)
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {

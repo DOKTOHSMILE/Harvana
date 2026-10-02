@@ -13,9 +13,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Pulls what's new for the signed-in user (group notices, invitations, answers to join requests) and
- * feeds it into the NotificationCenter. There is no server push in this project, so this runs while the
- * app is open (every ~90 s) and in the background about every 15 minutes (WorkManager's minimum).
+ * Pulls what's new for the signed-in user and raises a phone notification even when Harvanna
+ * is not on screen. There is no push server, so WorkManager runs this about every 15 minutes
+ * after the member leaves, and again after a reboot.
  */
 public final class NotificationSync {
     private NotificationSync() {}
@@ -24,7 +24,7 @@ public final class NotificationSync {
         final Context c = ctx.getApplicationContext();
         if (FirebaseAuth.getInstance().getCurrentUser() == null) { if (done != null) done.run(); return; }
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        final AtomicInteger pending = new AtomicInteger(5);
+        final AtomicInteger pending = new AtomicInteger(6);
         final Runnable finish = () -> { if (pending.decrementAndGet() == 0 && done != null) done.run(); };
 
         // 1. Invitations
@@ -62,6 +62,9 @@ public final class NotificationSync {
 
         // 5. Wallet: money received, sent and payments signed (from the node's confirmed history)
         WalletTxNotifier.run(c, events -> finish.run());
+
+        // 6. Contribution dues, including after the member has left the app
+        DueAlertSync.run(c, uid, finish);
 
       // 4. Review verdicts on my Learn Hub submissions
         GroupFirestoreManager.getInstance(c).getMyLearnSubmissions(uid, new GroupFirestoreManager.ListCallback() {

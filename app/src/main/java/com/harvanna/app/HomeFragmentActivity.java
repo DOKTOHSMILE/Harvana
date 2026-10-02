@@ -1,4 +1,4 @@
-package com.harvanna.app;
+Package com.harvanna.app;
 
 import android.animation.*;
 import android.app.*;
@@ -155,20 +155,13 @@ public class HomeFragmentActivity extends Fragment {
 	private LinearLayout linear208;
 	private LinearLayout linear225;
 	private TextView tv_local_currency_eqv;
-	private LinearLayout linear227;
-	private TextView textview208;
-	private LinearLayout linear226;
 	private TextView tv_harv_balance;
 	private ImageView imageview61;
 	private LinearLayout linear223;
-	private LinearLayout linear224;
 	private MaterialCardView cardview32;
 	private LinearLayout linear222;
 	private TextView textview220;
 	private ImageView imageview60;
-	private CardView btn_buy;
-	private LinearLayout linear216;
-	private TextView textview219;
 	private LinearLayout linear211;
 	private LinearLayout linear212;
 	private TextView textview215;
@@ -288,20 +281,13 @@ public class HomeFragmentActivity extends Fragment {
 		linear208 = _view.findViewById(R.id.linear208);
 		linear225 = _view.findViewById(R.id.linear225);
 		tv_local_currency_eqv = _view.findViewById(R.id.tv_local_currency_eqv);
-		linear227 = _view.findViewById(R.id.linear227);
-		textview208 = _view.findViewById(R.id.textview208);
-		linear226 = _view.findViewById(R.id.linear226);
 		tv_harv_balance = _view.findViewById(R.id.tv_harv_balance);
 		imageview61 = _view.findViewById(R.id.imageview61);
 		linear223 = _view.findViewById(R.id.linear223);
-		linear224 = _view.findViewById(R.id.linear224);
 		cardview32 = _view.findViewById(R.id.cardview32);
 		linear222 = _view.findViewById(R.id.linear222);
 		textview220 = _view.findViewById(R.id.textview220);
 		imageview60 = _view.findViewById(R.id.imageview60);
-		btn_buy = _view.findViewById(R.id.btn_buy);
-		linear216 = _view.findViewById(R.id.linear216);
-		textview219 = _view.findViewById(R.id.textview219);
 		linear211 = _view.findViewById(R.id.linear211);
 		linear212 = _view.findViewById(R.id.linear212);
 		textview215 = _view.findViewById(R.id.textview215);
@@ -327,8 +313,6 @@ public class HomeFragmentActivity extends Fragment {
 				getActivity().findViewById(R.id.bottomnavigation1);
 				
 				if (bottomNav != null) {
-					// This mathematically triggers the exact same logic as a user tapping the button physically.
-					// It updates the highlight AND fires your MainActivity routing safely.
 					bottomNav.setSelectedItemId(R.id.menu_groups);
 				}
 			}
@@ -340,8 +324,6 @@ public class HomeFragmentActivity extends Fragment {
 				getActivity().findViewById(R.id.bottomnavigation1);
 				
 				if (bottomNav != null) {
-					// This mathematically triggers the exact same logic as a user tapping the button physically.
-					// It updates the highlight AND fires your MainActivity routing safely.
 					bottomNav.setSelectedItemId(R.id.menu_groups);
 				}
 			}
@@ -353,16 +335,9 @@ public class HomeFragmentActivity extends Fragment {
 				getActivity().findViewById(R.id.bottomnavigation1);
 				
 				if (bottomNav != null) {
-					// This mathematically triggers the exact same logic as a user tapping the button physically.
-					// It updates the highlight AND fires your MainActivity routing safely.
 					bottomNav.setSelectedItemId(R.id.menu_asset);
 				}
 			}
-		});
-		
-		btn_buy.setOnClickListener(_v -> {
-			intent.setClass(getContext().getApplicationContext(), P2pMarketplaceActivity.class);
-			startActivity(intent);
 		});
 		
 		textview10.setOnClickListener(_v -> {
@@ -371,8 +346,6 @@ public class HomeFragmentActivity extends Fragment {
 				getActivity().findViewById(R.id.bottomnavigation1);
 				
 				if (bottomNav != null) {
-					// This mathematically triggers the exact same logic as a user tapping the button physically.
-					// It updates the highlight AND fires your MainActivity routing safely.
 					bottomNav.setSelectedItemId(R.id.menu_learn);
 				}
 			}
@@ -384,8 +357,6 @@ public class HomeFragmentActivity extends Fragment {
 				getActivity().findViewById(R.id.bottomnavigation1);
 				
 				if (bottomNav != null) {
-					// This mathematically triggers the exact same logic as a user tapping the button physically.
-					// It updates the highlight AND fires your MainActivity routing safely.
 					bottomNav.setSelectedItemId(R.id.menu_discover);
 				}
 			}
@@ -397,7 +368,6 @@ public class HomeFragmentActivity extends Fragment {
 				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
 				final String _childKey = _param1.getKey();
 				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
 			}
 			
 			@Override
@@ -405,12 +375,10 @@ public class HomeFragmentActivity extends Fragment {
 				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
 				final String _childKey = _param1.getKey();
 				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
 			}
 			
 			@Override
 			public void onChildMoved(DataSnapshot _param1, String _param2) {
-				
 			}
 			
 			@Override
@@ -418,14 +386,12 @@ public class HomeFragmentActivity extends Fragment {
 				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
 				final String _childKey = _param1.getKey();
 				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
 			}
 			
 			@Override
 			public void onCancelled(DatabaseError _param1) {
 				final int _errorCode = _param1.getCode();
 				final String _errorMessage = _param1.getMessage();
-				
 			}
 		};
 		userdb.addChildEventListener(_userdb_child_listener);
@@ -433,60 +399,50 @@ public class HomeFragmentActivity extends Fragment {
 		fbauth_updateEmailListener = _param1 -> {
 			final boolean _success = _param1.isSuccessful();
 			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
 		};
 		
 		fbauth_updatePasswordListener = _param1 -> {
 			final boolean _success = _param1.isSuccessful();
 			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
 		};
 		
 		fbauth_emailVerificationSentListener = _param1 -> {
 			final boolean _success = _param1.isSuccessful();
 			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
 		};
 		
 		fbauth_deleteUserListener = _param1 -> {
 			final boolean _success = _param1.isSuccessful();
 			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
 		};
 		
 		fbauth_phoneAuthListener = task -> {
 			final boolean _success = task.isSuccessful();
 			final String _errorMessage = task.getException() != null ? task.getException().getMessage() : "";
-			
 		};
 		
 		fbauth_updateProfileListener = _param1 -> {
 			final boolean _success = _param1.isSuccessful();
 			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
 		};
 		
 		fbauth_googleSignInListener = task -> {
 			final boolean _success = task.isSuccessful();
 			final String _errorMessage = task.getException() != null ? task.getException().getMessage() : "";
-			
 		};
 		
 		_fbauth_create_user_listener = _param1 -> {
 			final boolean _success = _param1.isSuccessful();
 			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
 		};
 		
 		_fbauth_sign_in_listener = _param1 -> {
 			final boolean _success = _param1.isSuccessful();
 			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
 		};
 		
 		_fbauth_reset_password_listener = _param1 -> {
 			final boolean _success = _param1.isSuccessful();
-			
 		};
 	}
 	
@@ -500,9 +456,7 @@ public class HomeFragmentActivity extends Fragment {
 		_loadWalletBalance();
 		_loadLearnHubPreview();
 		_loadTrendingGroups();
-		
 	}
-	
 	
 	@Override
 	public void onResume() {
@@ -595,7 +549,6 @@ public class HomeFragmentActivity extends Fragment {
 						_loadUpcomingPayments();
 					}
 				});
-				
 			}
 		});
 	}
@@ -657,11 +610,10 @@ public class HomeFragmentActivity extends Fragment {
 		_loadOpenLoansAcrossGroups();
 		_loadNodeTotals();
 		_loadComputedTrust();
-		_loadTrendingGroups(); // re-run now that we know which groups are ours
+		_loadTrendingGroups();
 	}
 	
 	private void _loadWalletBalance() {
-		
 		String addr = WalletManager.getActiveWalletAddress(getContext());
 		SharedPreferences currencySp = getContext().getSharedPreferences("currencysp", Context.MODE_PRIVATE);
 		final String currencySymbol = currencySp.getString("currency", "₦");
@@ -749,7 +701,6 @@ public class HomeFragmentActivity extends Fragment {
 				@Override
 				public void onSuccess(Map<String, Object> data) {
 					if (com.harvanna.app.group.GroupKinds.isLegacyRotating(data)) { oneDone.run(); return; }
-					// members, then payments, then decide what this member should do
 					mgr.getMembers(gid, new com.harvanna.app.firestore.GroupFirestoreManager.ListCallback() {
 						@Override public void onSuccess(List<Map<String, Object>> members) {
 							mgr.getPayments(gid, new com.harvanna.app.firestore.GroupFirestoreManager.ListCallback() {
@@ -782,7 +733,6 @@ public class HomeFragmentActivity extends Fragment {
 		}
 	}
 	
-	/** Works out this member's action for one group and appends a row (Pay / Remind / nothing due). */
 	private void _addUpcomingRow(ArrayList<HashMap<String, Object>> rows, String gid, Map<String, Object> data,
 	List<Map<String, Object>> members, List<Map<String, Object>> payments, String myUid) {
 		com.harvanna.app.group.PaymentDueResolver.Result r = com.harvanna.app.group.PaymentDueResolver.resolve(
@@ -805,7 +755,6 @@ public class HomeFragmentActivity extends Fragment {
 			if (cachedRows == null) _renderUpcoming(rows);
 			return;
 		}
-		// Rows that need action first: PAY, then REMIND, then nothing due.
 		java.util.Collections.sort(rows, (x, y) -> Integer.compare(rank(str(x, "action", "NONE")), rank(str(y, "action", "NONE"))));
 		com.harvanna.app.offline.OfflineCacheManager.saveList(getContext(), "upcoming_payments_v2_" + myUid, rows);
 		_renderUpcoming(rows);
@@ -874,7 +823,6 @@ public class HomeFragmentActivity extends Fragment {
 					button.setText("Remind");
 					button.setEnabled(true);
 					button.setAlpha(1f);
-					// show WHO we are waiting on, resolved from their profile
 					com.harvanna.app.group.MemberNameResolver.resolve(getContext(), otherUid, "a member", who -> {
 						if (isAdded() && statusLine != null) statusLine.setText("Waiting on " + who);
 						button.setOnClickListener(v -> {
@@ -911,14 +859,14 @@ public class HomeFragmentActivity extends Fragment {
 		if (gid == null || gid.isEmpty()) return;
 		intent.setClass(getContext().getApplicationContext(), GroupDetailsActivity.class);
 		intent.putExtra("groupId", gid);
-		intent.putExtra("tab", 2);   // Payments tab
+		intent.putExtra("tab", 2);
 		startActivity(intent);
 	}
 	
 	private void _openGroup(String gid) {
 		if (gid == null || gid.isEmpty()) return;
 		intent.setClass(getContext().getApplicationContext(), GroupDetailsActivity.class);
-		intent.removeExtra("tab");   // the shared Intent may still carry the Payments-tab extra
+		intent.removeExtra("tab");
 		intent.putExtra("groupId", gid);
 		startActivity(intent);
 	}
@@ -1008,7 +956,6 @@ public class HomeFragmentActivity extends Fragment {
 				if (list != null) {
 					for (Map<String, Object> g : list) {
 						String gid0 = str(g, "_docId", str(g, "groupId", str(g, "id", "")));
-						// Only groups the user hasn't joined and didn't create.
 						if (mine.contains(gid0) || (!meUid.isEmpty() && meUid.equals(str(g, "creatorId", "")))) continue;
 						if (com.harvanna.app.group.GroupKinds.isLegacyRotating(g)) continue;
 						sorted.add(g);
@@ -1257,7 +1204,6 @@ public class HomeFragmentActivity extends Fragment {
 		_applyOpenLoans(count, outstanding);
 	}
 	
-	// Totals = groups read from Firestore (older groups) + groups read from the node.
 	private double fsSaved = 0, nodeSaved = 0, fsLoanOut = 0, nodeLoanOut = 0;
 	private int fsLoanCount = 0, nodeLoanCount = 0, nodeGroupCount = 0;
 	
@@ -1280,7 +1226,6 @@ public class HomeFragmentActivity extends Fragment {
 		});
 	}
 	
-	/** The ring is the score the node saved for this wallet, out of 26. */
 	private void _loadComputedTrust() {
 		if (getContext() == null) return;
 		String address = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(getContext());
@@ -1297,7 +1242,6 @@ public class HomeFragmentActivity extends Fragment {
 		});
 	}
 	
-	/** Groups that live on the node: totals come from the node's member records. */
 	private void _loadNodeTotals() {
 		if (getContext() == null || FirebaseAuth.getInstance().getCurrentUser() == null) return;
 		String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -1369,10 +1313,6 @@ public class HomeFragmentActivity extends Fragment {
 	{
 	}
 	
-
-	// ── Quick actions (Send / Receive / Buy) ─────────────────────────────
-	// Additive UI: a row under the greeting so the wallet's core actions are one tap
-	// from Home instead of buried in the Assets tab. Uses existing activities only.
 	private void _addQuickActions(View root) {
 		try {
 			final MaterialCardView card = root.findViewById(R.id.cardview4);
@@ -1380,11 +1320,10 @@ public class HomeFragmentActivity extends Fragment {
 			if (card == null || top == null || getContext() == null) return;
 			final float d = getResources().getDisplayMetrics().density;
 			
-			// The wallet card now carries Send / Receive / Buy, below the balance.
 			android.widget.LinearLayout row = new android.widget.LinearLayout(getContext());
 			row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
 			row.setPadding((int) (10 * d), 0, (int) (10 * d), (int) (10 * d));
-						row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
+			row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
 			row.addView(_quickAction(R.drawable.ic_action_receive, "Receive", ReceiveActivity.class), _quickActionParams(d, true));
 			row.addView(_quickAction(R.drawable.ic_action_buy, "P2P", P2pMarketplaceActivity.class), _quickActionParams(d, true));
 			
@@ -1394,10 +1333,6 @@ public class HomeFragmentActivity extends Fragment {
 			box.addView(top);
 			box.addView(row);
 			card.addView(box, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-			
-			// "Buy HARV (P2P)" is now the Buy action in the row.
-			View oldBuy = root.findViewById(R.id.linear224);
-			if (oldBuy != null) oldBuy.setVisibility(View.GONE);
 		} catch (Exception e) {
 			android.util.Log.w("HomeFragment", "Quick actions not added", e);
 		}

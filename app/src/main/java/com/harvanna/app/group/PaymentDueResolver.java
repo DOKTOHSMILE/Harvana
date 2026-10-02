@@ -159,6 +159,31 @@ public final class PaymentDueResolver {
         return c.getTimeInMillis();
     }
 
+    /**
+     * The next time a contribution may be made after one recorded at {@code paidAtMs}.
+     * Daily opens at the next local midnight, not 24 hours after the payment.
+     */
+    public static long nextOpenMs(String frequency, long paidAtMs, TimeZone tz) {
+        long start = periodStartMs(frequency, paidAtMs, tz);
+        Calendar c = Calendar.getInstance(tz != null ? tz : TimeZone.getDefault(), Locale.US);
+        c.setTimeInMillis(start);
+        String f = frequency == null ? "" : frequency.trim().toUpperCase(Locale.US);
+        if (f.contains("DAY") && !f.contains("WEEK") && !f.contains("MONTH") && !f.contains("YEAR")) {
+            c.add(Calendar.DAY_OF_MONTH, 1);
+        } else if (f.contains("QUARTER")) {
+            c.add(Calendar.MONTH, 3);
+        } else if (f.contains("MONTH")) {
+            c.add(Calendar.MONTH, 1);
+        } else if (f.contains("YEAR") || f.contains("ANNUAL")) {
+            c.add(Calendar.YEAR, 1);
+        } else if (f.contains("FORTNIGHT") || f.contains("BI")) {
+            c.add(Calendar.DAY_OF_YEAR, 14);
+        } else {
+            c.add(Calendar.DAY_OF_YEAR, 7);
+        }
+        return c.getTimeInMillis();
+    }
+
     private static String str(Object o) { return o == null ? "" : String.valueOf(o).trim(); }
 
     private static String firstNonEmpty(String a, String b) { return !a.isEmpty() ? a : b; }

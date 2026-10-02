@@ -1018,10 +1018,10 @@ public class GroupPaymentFragmentActivity extends Fragment {
 		}
 		
 		if (iHavePaidThisRound) {
-			long cycleMs = _frequencyToMillis(frequency);
 			long paidAt = getContext().getSharedPreferences(PREF_PAY, Activity.MODE_PRIVATE)
 			.getLong(groupId + "_" + myUid + "_paidAt", System.currentTimeMillis());
-			long remain = paidAt + cycleMs - System.currentTimeMillis();
+			long openAt = com.harvanna.app.group.PaymentDueResolver.nextOpenMs(frequency, paidAt, java.util.TimeZone.getDefault());
+			long remain = openAt - System.currentTimeMillis();
 			if (remain > 0) {
 				btn_pay_now.setEnabled(false);
 				if (tv_my_payment_due != null) {

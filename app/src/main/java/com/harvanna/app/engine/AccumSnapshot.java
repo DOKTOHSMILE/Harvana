@@ -73,7 +73,7 @@ public final class AccumSnapshot {
     private static boolean coveredThroughToday(Map<String, Object> line) {
         String last = str(line, "lastPaidDay");
         if (last.length() < 10) return false;
-        java.util.Calendar c = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+        java.util.Calendar c = java.util.Calendar.getInstance();
         String today = String.format(java.util.Locale.US, "%04d-%02d-%02d",
                 c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH) + 1, c.get(java.util.Calendar.DAY_OF_MONTH));
         return last.compareTo(today) >= 0;

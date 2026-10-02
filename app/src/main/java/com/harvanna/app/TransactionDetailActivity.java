@@ -186,7 +186,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			com.harvanna.app.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
-		setTitle("Transaction details");
+		setTitle("");
 		
 		txHash = getIntent().getStringExtra("txHash");
 		status = getIntent().getStringExtra("status");
@@ -205,7 +205,6 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		
 		confirmations = getIntent().getLongExtra("confirmations", 0);
 		
-		// Resolve active wallet
 		SharedPreferences prefs = getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
 		String activeAddress = prefs.getString("active_wallet_address", "").trim();
 		if (activeAddress.isEmpty()) {
@@ -213,66 +212,79 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			if (activeAddress == null) activeAddress = "";
 		}
 		boolean isIncoming = recipient != null && !recipient.isEmpty() && recipient.equalsIgnoreCase(activeAddress);
+		boolean pending = status != null && status.equalsIgnoreCase("pending");
+		boolean confirmed = status != null && (status.equalsIgnoreCase("confirmed") || status.equalsIgnoreCase("success"));
 		
-		String valuePrefix = isIncoming ? "+ " : "- ";
+		tv_tx_value.setText(_formatUIBalance(value) + " " + tokenSymbol);
+		textview40.setText(isIncoming ? "Received" : "Sent");
 		
-		// APPLIED FIX
-		tv_tx_value.setText(valuePrefix + _formatUIBalance(value) + " " + tokenSymbol);
-		
-		// Status rendering logic
-		if (status != null && status.equalsIgnoreCase("pending")) {
-			tv_tx_status.setText("PENDING");
+		if (pending) {
+			tv_tx_status.setText("●  Pending");
 			tv_tx_status.setTextColor(UiColors.warning());
 			img_status_icon.setImageResource(R.drawable.icon_access_time_outline);
 			img_status_icon.setColorFilter(UiColors.warning());
-			
-		} else if (status != null && (status.equalsIgnoreCase("confirmed") || status.equalsIgnoreCase("success"))) {
-			tv_tx_status.setText("CONFIRMED");
+		} else if (confirmed) {
+			tv_tx_status.setText("●  Completed");
 			tv_tx_status.setTextColor(UiColors.success());
-			
 			img_status_icon.setImageResource(isIncoming ? R.drawable.icon_call_received_twotone : R.drawable.icon_call_made_twotone);
-			img_status_icon.setColorFilter(isIncoming ? UiColors.success() : UiColors.error());
+			img_status_icon.setColorFilter(isIncoming ? UiColors.success() : UiColors.accent());
 		} else {
-			tv_tx_status.setText(status != null ? status.toUpperCase() : "FAILED");
-			tv_tx_status.setTextColor(UiColors.error()); 
-			
+			tv_tx_status.setText("●  Failed");
+			tv_tx_status.setTextColor(UiColors.error());
 			img_status_icon.setImageResource(isIncoming ? R.drawable.icon_call_received_twotone : R.drawable.icon_call_made_twotone);
-			img_status_icon.setColorFilter(UiColors.error()); 
+			img_status_icon.setColorFilter(UiColors.error());
 		}
 		
-		tv_from_address.setText(sender != null && !sender.isEmpty() ? sender : "Unknown Address");
-		tv_to_address.setText(recipient != null && !recipient.isEmpty() ? recipient : "Unknown Address");
+		tv_from_address.setText(_shortAddr(sender));
+		tv_from_address.setTag(sender);
+		tv_to_address.setText(_shortAddr(recipient));
+		tv_to_address.setTag(recipient);
+		textview31.setText(isIncoming ? "Received from" : "Sent from");
 		
 		if (memo == null || memo.trim().isEmpty()) {
-			tv_memo.setText("None");
-			tv_memo.setTextColor(UiColors.textTertiary());
+			if (cardview4 != null) cardview4.setVisibility(View.GONE);
 		} else {
 			tv_memo.setText(memo);
-			tv_memo.setTextColor(UiColors.textSecondary());
+			tv_memo.setTextColor(UiColors.textPrimary());
+			tv_memo.setTag(memo);
 		}
 		
-		// APPLIED FIX
-		tv_network_fee.setText(_formatUIBalance(harvFee) + (" " + com.harvanna.app.CoinInfo.ticker()));
-		tv_burn_amount.setText(_formatUIBalance(burnAmount) + (" " + com.harvanna.app.CoinInfo.ticker()));
+		tv_network_fee.setText(_formatUIBalance(harvFee) + " " + tokenSymbol);
+		tv_burn_amount.setText(_formatUIBalance(burnAmount) + " " + tokenSymbol);
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
+		SimpleDateFormat sdf = new SimpleDateFormat("MMM d, yyyy | h:mma", Locale.US);
 		sdf.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));
-		tv_timestamp.setText(sdf.format(new Date(timestamp)));
+		String when = sdf.format(new Date(timestamp));
+		tv_timestamp.setText(when);
+		TextView tl1 = findViewById(R.id.tv_tl1);
+		TextView tl2 = findViewById(R.id.tv_tl2);
+		TextView tl3 = findViewById(R.id.tv_tl3);
+		TextView tl3Title = findViewById(R.id.tv_tl3_title);
+		TextView tl3Body = findViewById(R.id.tv_tl3_body);
+		TextView tl3Mark = findViewById(R.id.tv_tl3_mark);
+		if (tl1 != null) tl1.setText(when);
+		if (tl2 != null) tl2.setText(when);
+		if (tl3 != null) tl3.setText(when);
+		if (!confirmed) {
+			if (tl3Title != null) tl3Title.setText(pending ? "Waiting to complete" : "Payment failed");
+			if (tl3Body != null) tl3Body.setText(pending ? "This transfer is not confirmed yet" : "This transfer did not complete");
+			if (tl3Mark != null) tl3Mark.setTextColor(pending ? UiColors.warning() : UiColors.error());
+		}
 		
-		tv_tx_hash.setText(txHash != null && !txHash.isEmpty() ? txHash : "N/A");
+		tv_tx_hash.setText(_shortAddr(txHash));
+		tv_tx_hash.setTag(txHash);
 		tv_block_number.setText(blockNumber > 0 ? String.valueOf(blockNumber) : "Pending");
-		tv_confirmations.setText(confirmations > 0 ? confirmations + "+" : "0 (Pending)");
+		tv_confirmations.setText(confirmations > 0 ? String.valueOf((long) confirmations) : "0");
 		tv_nonce.setText(String.valueOf(nonce));
 		
 		View.OnClickListener copyListener = v -> {
-			if (v instanceof TextView) {
-				String text = ((TextView) v).getText().toString();
-				if (!text.isEmpty() && !text.equalsIgnoreCase("N/A") && !text.equalsIgnoreCase("Unknown Address") && !text.equalsIgnoreCase("None")) {
-					ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-					ClipData clip = ClipData.newPlainText("Copied Data", text);
-					clipboard.setPrimaryClip(clip);
-					Toast.makeText(TransactionDetailActivity.this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
-				}
+			String text = null;
+			if (v.getTag() instanceof String) text = (String) v.getTag();
+			else if (v instanceof TextView) text = ((TextView) v).getText().toString();
+			if (text != null && !text.isEmpty() && !text.equalsIgnoreCase("N/A") && !text.equalsIgnoreCase("Unknown Address") && !text.equalsIgnoreCase("None") && !"—".equals(text)) {
+				ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+				clipboard.setPrimaryClip(ClipData.newPlainText("Copied", text));
+				Toast.makeText(TransactionDetailActivity.this, "Copied", Toast.LENGTH_SHORT).show();
 			}
 		};
 		
@@ -281,7 +293,12 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		tv_to_address.setOnClickListener(copyListener);
 		tv_memo.setOnClickListener(copyListener);
 		
-		// Wire up the export button
+		textview37.setOnClickListener(v -> {
+			boolean open = linear11.getVisibility() == View.VISIBLE;
+			linear11.setVisibility(open ? View.GONE : View.VISIBLE);
+			textview37.setText(open ? "See more" : "See less");
+		});
+		
 		btn_export_transaction.setOnClickListener(v -> _showExportOptionsBottomSheet());
 		
 		// ... (Other activity code)
@@ -892,6 +909,14 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		return y + 32; // Bottom margin for the next row
 	}
 	
+
+	private String _shortAddr(String a) {
+		if (a == null || a.trim().isEmpty()) return "—";
+		String v = a.trim();
+		if (v.length() <= 16) return v;
+		return v.substring(0, 8) + "…" + v.substring(v.length() - 4);
+	}
+
 	// NEW UI FORMATTER HELPER
 	private String _formatUIBalance(double v) {
 		try {

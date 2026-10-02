@@ -35,7 +35,7 @@ public final class GroupProposalIndex {
         f.put("type", "SYSTEM");
         f.put("system", true);
         f.put("title", title);
-        f.put("message", title);
+        f.put("message", "");
         f.put("sender", "System");
         f.put("creatorId", "");
         f.put("priority", "NORMAL");

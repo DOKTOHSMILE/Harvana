@@ -132,11 +132,6 @@ public final class GroupPaymentHelper {
 		.addPayment(groupId, payment, new GroupFirestoreManager.IdCallback() {
 			@Override
 			public void onSuccess(String id) {
-				GroupFirestoreManager.getInstance(context)
-				.postSystemNotice(groupId, "Contribution received",
-				"A contribution of "
-				+ com.harvanna.app.wallet.BalanceFormatter.smart(amountHarv)
-				+ " was confirmed.");
 				if (callback != null) callback.onSuccess(id);
 			}
 			

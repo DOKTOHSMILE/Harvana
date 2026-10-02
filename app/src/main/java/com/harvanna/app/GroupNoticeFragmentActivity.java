@@ -205,6 +205,7 @@ public class GroupNoticeFragmentActivity extends Fragment {
 		String currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null
 		? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
 		isAdmin = !creatorId.isEmpty() && creatorId.equals(currentUid);
+		if (linear133 != null) linear133.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
 		if (btn_new_notice != null) {
 			btn_new_notice.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
 			btn_new_notice.setOnClickListener(v -> _showPostDialog());
@@ -252,15 +253,16 @@ public class GroupNoticeFragmentActivity extends Fragment {
 	
 	private void _bindNoticeList(List<Map<String, Object>> list) {
 		if (getActivity() == null) return;
+		final List<Map<String, Object>> shown = com.harvanna.app.group.GroupNoticeHelper.unique(list);
 		getActivity().runOnUiThread(() -> {
 			if (tv_notices_empty != null) {
-				tv_notices_empty.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+				tv_notices_empty.setVisibility(shown.isEmpty() ? View.VISIBLE : View.GONE);
 			}
 			if (recycler_notices != null) {
 				if (recycler_notices.getLayoutManager() == null) {
 					recycler_notices.setLayoutManager(new LinearLayoutManager(getContext()));
 				}
-				recycler_notices.setAdapter(new NoticeAdapter(list));
+				recycler_notices.setAdapter(new NoticeAdapter(shown));
 			}
 		});
 	}
@@ -370,8 +372,7 @@ public class GroupNoticeFragmentActivity extends Fragment {
 			final String rawTitle = tempTitle;
 			final String rawBody = str(n, "message", str(n, "body", ""));
 			
-			if (h.title != null) h.title.setText(rawTitle);
-			if (h.body != null) h.body.setText(rawBody);
+			_showCopy(h, rawTitle, rawBody);
 			
 			boolean isSystem = Boolean.TRUE.equals(n.get("system")) || "true".equalsIgnoreCase(str(n, "system", ""));
 			String creatorId = str(n, "creatorId", "");
@@ -388,20 +389,19 @@ public class GroupNoticeFragmentActivity extends Fragment {
 							
 							if (rawTitle.equalsIgnoreCase("New member joined")) {
 								newTitle = resolvedName + " joined the group";
-								newBody = resolvedName + " has joined the group.";
+								newBody = "";
 							} else if (rawTitle.equalsIgnoreCase("Contribution received")) {
 								newBody = rawBody.replace("A member", resolvedName);
 							} else if (rawTitle.equalsIgnoreCase("Loan repaid") || rawBody.contains("fully repaid")) {
-								newTitle = resolvedName + " pay back loan";
-								newBody = resolvedName + " has fully repaid their loan.";
+								newTitle = resolvedName + " repaid a loan";
+								newBody = "";
 							} else if (rawTitle.equalsIgnoreCase("Loan applied")) {
 								newBody = rawBody.replace("A member", resolvedName);
 							} else if (rawTitle.equalsIgnoreCase("Loan disbursed")) {
 								newBody = "Loan was approved and disbursed to " + resolvedName + ".";
 							}
 							
-							if (h.title != null) h.title.setText(newTitle);
-							if (h.body != null) h.body.setText(newBody);
+							_showCopy(h, newTitle, newBody);
 						}
 					});
 				}
@@ -444,6 +444,19 @@ public class GroupNoticeFragmentActivity extends Fragment {
 			Object v = m.get(k);
 			return v != null ? String.valueOf(v) : d;
 		}
+	}
+
+	/** Title is the notice. The body is hidden when it only repeats the title. */
+	private static void _showCopy(NoticeAdapter.VH h, String title, String body) {
+		if (h.title != null) h.title.setText(title == null ? "" : title);
+		if (h.body == null) return;
+		String t = title == null ? "" : title.trim();
+		String b = body == null ? "" : body.trim();
+		String nt = t.toLowerCase(java.util.Locale.US).replaceAll("[^a-z0-9]+", " ").replace(" has ", " ").trim();
+		String nb = b.toLowerCase(java.util.Locale.US).replaceAll("[^a-z0-9]+", " ").replace(" has ", " ").trim();
+		boolean repeat = b.isEmpty() || nt.equals(nb) || (!nt.isEmpty() && (nb.startsWith(nt) || nt.startsWith(nb)));
+		h.body.setVisibility(repeat ? View.GONE : View.VISIBLE);
+		if (!repeat) h.body.setText(b);
 	}
 	
 	{

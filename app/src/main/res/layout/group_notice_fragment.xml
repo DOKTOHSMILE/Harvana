@@ -15,15 +15,14 @@
 		android:paddingBottom="12dp"
 		android:gravity="center_vertical"
 		android:orientation="horizontal"
-		android:paddingHorizontal="20dp">
+		android:paddingHorizontal="20dp"
+		android:visibility="gone">
 		<TextView
 			android:id="@+id/textview78"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
-			android:text="Notices"
-			android:textSize="18sp"
-			android:textStyle="bold"
-			android:textColor="@color/colorTextPrimary"
+			android:text=""
+			android:visibility="gone"
 			android:layout_weight="1" />
 		<TextView
 			android:id="@+id/btn_new_notice"

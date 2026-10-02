@@ -165,7 +165,7 @@ public final class GroupNoticeHelper {
                         List<Map<String, Object>> list = items != null
                                 ? new ArrayList<>(items) : new ArrayList<>();
                         sortNewestFirst(list);
-                        callback.onSuccess(list);
+                        callback.onSuccess(unique(list));
                     }
 
                     @Override
@@ -173,6 +173,48 @@ public final class GroupNoticeHelper {
                         callback.onError(error);
                     }
                 });
+    }
+
+    /** Drops a second copy of the same notice. A payment used to write two, and a proposal stored its title as the message. */
+    public static List<Map<String, Object>> unique(List<Map<String, Object>> notices) {
+        List<Map<String, Object>> out = new ArrayList<>();
+        if (notices == null) return out;
+        for (Map<String, Object> n : notices) {
+            if (n == null || isDuplicate(out, n)) continue;
+            out.add(n);
+        }
+        return out;
+    }
+
+    private static boolean isDuplicate(List<Map<String, Object>> kept, Map<String, Object> n) {
+        String title = norm(text(n, "title"));
+        String message = norm(text(n, "message").isEmpty() ? text(n, "body") : text(n, "message"));
+        String id = text(n, "_docId");
+        String creator = text(n, "creatorId");
+        long at = createdAtMillis(n);
+        for (Map<String, Object> k : kept) {
+            if (!id.isEmpty() && id.equals(text(k, "_docId"))) return true;
+            String kt = norm(text(k, "title"));
+            if (!kt.equals(title) || title.isEmpty()) continue;
+            String km = norm(text(k, "message").isEmpty() ? text(k, "body") : text(k, "message"));
+            if (km.equals(message)) return true;
+            String kc = text(k, "creatorId");
+            long dt = Math.abs(createdAtMillis(k) - at);
+            if (dt < 120_000L && !creator.isEmpty() && creator.equals(kc)
+                    && "contribution received".equals(title)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String text(Map<String, Object> m, String key) {
+        Object v = m.get(key);
+        return v == null ? "" : String.valueOf(v).trim();
+    }
+
+    private static String norm(String s) {
+        return s == null ? "" : s.trim().toLowerCase(Locale.US).replaceAll("\\s+", " ");
     }
 
     public static void sortNewestFirst(List<Map<String, Object>> notices) {

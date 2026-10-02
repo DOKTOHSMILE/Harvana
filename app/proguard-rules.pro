@@ -21,5 +21,8 @@
 # QR scanner library (JitPack)
 -keep class com.budiyev.android.codescanner.** { *; }
 
+# Staking reward chart
+-keep class com.github.mikephil.charting.** { *; }
+
 # BouncyCastle: only the pieces referenced directly are needed; it ships no reflection-based lookups here
 -dontwarn org.bouncycastle.**

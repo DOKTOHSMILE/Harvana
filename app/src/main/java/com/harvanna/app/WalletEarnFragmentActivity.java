@@ -53,7 +53,6 @@ public class WalletEarnFragmentActivity extends Fragment {
 	private LinearLayout linear1;
 	private MaterialCardView cardview4;
 	private MaterialCardView cardview5;
-	private MaterialCardView cardview6;
 	private LinearLayout linear7;
 	private CardView cardview7;
 	private LinearLayout linear13;
@@ -62,9 +61,9 @@ public class WalletEarnFragmentActivity extends Fragment {
 	private LinearLayout linear8;
 	private TextView textview10;
 	private TextView textview8;
-	private LinearLayout linear9;
-	private TextView textview11;
-	private TextView textview9;
+	private TextView tvEarnApr;
+	private TextView tvLearnMore;
+	private com.google.android.material.button.MaterialButton btnOpenStaking;
 	
 	private Intent intent = new Intent();
 	
@@ -83,7 +82,6 @@ public class WalletEarnFragmentActivity extends Fragment {
 		linear1 = _view.findViewById(R.id.linear1);
 		cardview4 = _view.findViewById(R.id.cardview4);
 		cardview5 = _view.findViewById(R.id.cardview5);
-		cardview6 = _view.findViewById(R.id.cardview6);
 		linear7 = _view.findViewById(R.id.linear7);
 		cardview7 = _view.findViewById(R.id.cardview7);
 		linear13 = _view.findViewById(R.id.linear13);
@@ -92,9 +90,15 @@ public class WalletEarnFragmentActivity extends Fragment {
 		linear8 = _view.findViewById(R.id.linear8);
 		textview10 = _view.findViewById(R.id.textview10);
 		textview8 = _view.findViewById(R.id.textview8);
-		linear9 = _view.findViewById(R.id.linear9);
-		textview11 = _view.findViewById(R.id.textview11);
-		textview9 = _view.findViewById(R.id.textview9);
+		tvEarnApr = _view.findViewById(R.id.tv_earn_apr);
+		tvLearnMore = _view.findViewById(R.id.tv_learn_more);
+		btnOpenStaking = _view.findViewById(R.id.btn_open_staking);
+
+		btnOpenStaking.setOnClickListener(_v -> {
+			if (getContext() == null) return;
+			startActivity(new Intent(getContext(), StakingDashboardActivity.class));
+		});
+		tvLearnMore.setOnClickListener(_v -> showHowItWorks());
 		
 		cardview7.setOnClickListener(_v -> {
 			Context targetContext = getContext() != null ? getContext() : (getActivity() != null ? getActivity() : null);
@@ -134,14 +138,43 @@ public class WalletEarnFragmentActivity extends Fragment {
 	}
 	
 	private void initializeLogic() {
-		com.harvanna.app.earn.StakingPanel.attach(this, linear1);
-		if (getContext() != null) com.harvanna.app.earn.MiningThreads.attach(getContext(), linear1);
+		if (getActivity() != null) com.harvanna.app.earn.StakingPanel.fillHeadline(getActivity(), tvEarnApr);
 	}
-	
-	@Override
-	public void onStart() {
-		super.onStart();
-		com.harvanna.app.earn.StakingPanel.attach(this, linear1);
+
+	private void showHowItWorks() {
+		if (getContext() == null) return;
+		com.google.android.material.bottomsheet.BottomSheetDialog dialog = com.harvanna.app.p2p.ThemedDialogs.sheet(getContext());
+		android.widget.ScrollView scroll = new android.widget.ScrollView(getContext());
+		LinearLayout box = new LinearLayout(getContext());
+		box.setOrientation(LinearLayout.VERTICAL);
+		int p = (int) (20 * getResources().getDisplayMetrics().density);
+		box.setPadding(p, p, p, p);
+		box.addView(sheetTitle("HARV PoW Reward Program"));
+		box.addView(sheetBody("The HARV Proof-of-Work reward program pays people who secure the chain. Solo miners take the full block when they find it. Pool miners split that block by the valid shares they submitted. A reward stays pending until the block has enough confirmations, then it is credited to the wallet.\n\nDifficulty, hashrate, battery protection and share checks are there so one phone cannot pretend to be a farm."));
+		box.addView(sheetTitle("How to earn more"));
+		box.addView(sheetBody("Stay online in longer sessions, keep a stable connection, and cut rejected shares by updating the app. A stronger CPU raises hashrate, but the red thread setting can overheat the phone. Staking is the other path: lock HARV and take a share of every block in proportion to your stake. Unstaking stops earning immediately and returns after 7 days."));
+		scroll.addView(box);
+		dialog.setContentView(scroll);
+		dialog.show();
+	}
+
+	private TextView sheetTitle(String value) {
+		TextView t = new TextView(getContext());
+		t.setText(value);
+		t.setTextSize(18);
+		t.setTypeface(null, android.graphics.Typeface.BOLD);
+		t.setTextColor(com.harvanna.app.utils.UiColors.textPrimary());
+		t.setPadding(0, (int) (12 * getResources().getDisplayMetrics().density), 0, 0);
+		return t;
+	}
+
+	private TextView sheetBody(String value) {
+		TextView t = new TextView(getContext());
+		t.setText(value);
+		t.setTextSize(14);
+		t.setTextColor(com.harvanna.app.utils.UiColors.textSecondary());
+		t.setPadding(0, (int) (8 * getResources().getDisplayMetrics().density), 0, 0);
+		return t;
 	}
 	
 

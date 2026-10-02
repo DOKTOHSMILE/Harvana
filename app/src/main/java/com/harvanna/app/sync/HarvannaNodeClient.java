@@ -120,6 +120,10 @@ public final class HarvannaNodeClient {
 	public static void getTip(JsonCallback cb) {
 		get("/api/v1/blocks/latest", cb);
 	}
+
+	public static void getRecentBlocks(JsonCallback cb) {
+		get("/api/v1/blocks/recent?limit=20", cb);
+	}
 	
 	public static void getNodeStatus(JsonCallback cb) {
 		get("/api/v1/node/status", cb);

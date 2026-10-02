@@ -45,6 +45,7 @@ public final class StakingPanel {
     private final MaterialButton stake, unstake, claim;
     private JSONObject info;
     private JSONObject pos;
+    private long observedPace;
     private boolean busy;
 
     private StakingPanel(Fragment host, LinearLayout root) {
@@ -139,35 +140,87 @@ public final class StakingPanel {
             @Override public void onSuccess(JSONObject json) { pos = json; paint(); }
             @Override public void onError(String error) { ui(() -> status.setText(error)); }
         });
+        HarvannaNodeClient.getRecentBlocks(new HarvannaNodeClient.JsonCallback() {
+            @Override public void onSuccess(JSONObject json) {
+                observedPace = paceFromBlocks(json);
+                paint();
+            }
+            @Override public void onError(String error) { }
+        });
     }
 
     private void paint() {
         ui(() -> {
-            if (info != null) {
-                long aprBps = info.optLong("estimatedAprBps", 0);
-                double aprPct = aprBps / 100.0;
-                apr.setText(String.format(Locale.US, "%.2f%% estimated APR", aprPct));
-                tvl.setText(String.format(Locale.US, "%s staked · %d stakers · %.4f HARV per block to stakers",
-                        harv(info.optLong("totalStakedRaw", 0)),
-                        info.optInt("stakerCount", 0),
-                        info.optLong("stakingRewardPerBlockRaw", 0) / (double) HarvannaNodeClient.HARV_UNITS_PER_TOKEN));
-            }
             long staked = pos == null ? 0 : pos.optLong("stakedRaw", 0);
             long pending = pos == null ? 0 : pos.optLong("pendingRewardsRaw", 0);
             long claimed = pos == null ? 0 : pos.optLong("totalClaimedRaw", 0);
             position.setText("Your stake  " + harv(staked) + "\nUnclaimed  " + harv(pending) + "    Claimed  " + harv(claimed));
-            double aprFrac = info == null ? 0 : info.optLong("estimatedAprBps", 0) / 10000.0;
-            double stakedHarv = staked / (double) HarvannaNodeClient.HARV_UNITS_PER_TOKEN;
-            double perDay = stakedHarv * aprFrac / 365.0;
+            double units = (double) HarvannaNodeClient.HARV_UNITS_PER_TOKEN;
+            long total = info == null ? 0 : info.optLong("totalStakedRaw", 0);
+            long perBlock = info == null ? 0 : info.optLong("stakingRewardPerBlockRaw", 0);
+            long pace = observedPace > 0 ? observedPace : (info == null ? 0 : info.optLong("observedBlockSeconds", 0));
+            double poolHarv = total / units;
+            double stakedHarv = staked / units;
+            if (pace <= 0) {
+                if (info != null) {
+                    apr.setText("—");
+                    tvl.setText(String.format(Locale.US, "%s staked · %d stakers · %.4f HARV per block to stakers",
+                            harv(total), info.optInt("stakerCount", 0), perBlock / units));
+                }
+                daily.setText("Checking how often blocks are landing…");
+                drawChart(0);
+            } else {
+            double emissionPerDay = (perBlock / units) * (86400.0 / pace);
+            double aprPct = poolHarv > 0 ? (emissionPerDay * 365.0 / poolHarv) * 100.0 : 0;
+            double perDay = poolHarv > 0 ? stakedHarv * (emissionPerDay / poolHarv) : 0;
+            double share = poolHarv > 0 ? stakedHarv / poolHarv : 0;
+            if (info != null) {
+                apr.setText(aprPct >= 100
+                        ? String.format(Locale.US, "%.0f%% estimated APR", aprPct)
+                        : String.format(Locale.US, "%.2f%% estimated APR", aprPct));
+                tvl.setText(String.format(Locale.US, "%s staked · %d stakers · %.4f HARV per block to stakers",
+                        harv(total),
+                        info.optInt("stakerCount", 0),
+                        perBlock / units));
+            }
             daily.setText(staked > 0
-                    ? String.format(Locale.US, "About %.6f HARV a day at the current rate", perDay)
+                    ? String.format(Locale.US, "About %s HARV a day · your %s of each block · recent blocks about %s apart",
+                        trim(perDay), shareText(share), paceText(pace))
                     : "Stake to start earning. The chart uses the amount you type.");
-            drawChart(staked > 0 ? perDay : projectedFromField(aprFrac));
+            drawChart(staked > 0 ? perDay : projectedFromField(aprPct / 100.0));
+            }
             drawUnbonding();
             claim.setEnabled(!busy && pending > 0);
             stake.setEnabled(!busy);
             unstake.setEnabled(!busy && staked > 0);
         });
+    }
+
+    private static long paceFromBlocks(JSONObject json) {
+        JSONArray blocks = json == null ? null : json.optJSONArray("blocks");
+        if (blocks == null || blocks.length() < 2) return 0;
+        long newest = blocks.optJSONObject(0) == null ? 0 : blocks.optJSONObject(0).optLong("timestamp");
+        long oldest = blocks.optJSONObject(blocks.length() - 1) == null ? 0 : blocks.optJSONObject(blocks.length() - 1).optLong("timestamp");
+        long span = newest - oldest;
+        int gaps = blocks.length() - 1;
+        if (span < 1000 || gaps < 1) return 0;
+        return Math.max(1L, span / 1000L / gaps);
+    }
+
+    private static String trim(double v) {
+        if (v >= 100) return String.format(Locale.US, "%.0f", v);
+        if (v >= 1) return String.format(Locale.US, "%.2f", v);
+        return String.format(Locale.US, "%.4f", v);
+    }
+
+    private static String shareText(double share) {
+        return String.format(Locale.US, "%.0f%%", share * 100.0);
+    }
+
+    private static String paceText(long seconds) {
+        if (seconds < 90) return seconds + "s";
+        if (seconds < 3600) return (seconds / 60) + " min";
+        return (seconds / 3600) + " h";
     }
 
     /** Cumulative estimate: day n is n times one day's share. */

@@ -721,15 +721,16 @@ public class GroupLoansFragmentActivity extends Fragment {
 			return;
 		}
 		
-		// APPLIED FIX
-		String feeDisplay = com.harvanna.app.wallet.BalanceFormatter.fee(feeHarv) + " (deducted from principal — "
-		+ "borrower receives " + _formatUIBalance(netToBorrower) + ")";
-		
-		com.harvanna.app.group.PaymentConfirmSheet.show(getContext(), "Approve & Disburse Loan",
-		principal, borrowerWallet, "Group wallet debit stays " + _formatUIBalance(principal) + " total",
-		feeDisplay, () -> com.harvanna.app.wallet.PinPromptHelper.authorize(getActivity(),
-		"Disburse " + _formatUIBalance(principal) + " from the group wallet",
-		() -> _executeLoanDisbursement(loanId, borrowerWallet, principal, feeHarv)));
+		String feeDisplay = com.harvanna.app.wallet.BalanceFormatter.fee(feeHarv);
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"For", "Disburse this approved loan from the group wallet"});
+		rows.add(new String[]{"To", borrowerWallet});
+		rows.add(new String[]{"Borrower receives", _formatUIBalance(netToBorrower)});
+		rows.add(new String[]{"Network fee", feeDisplay + ", taken from the principal"});
+		rows.add(new String[]{"Group wallet debit", _formatUIBalance(principal)});
+		com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(getActivity(),
+		"Approve and disburse", _formatUIBalance(principal), rows,
+		() -> _executeLoanDisbursement(loanId, borrowerWallet, principal, feeHarv));
 	}
 	
 	private void _executeLoanDisbursement(String loanId, String borrowerWallet, double principal, double feeHarv) {
@@ -939,8 +940,19 @@ public class GroupLoansFragmentActivity extends Fragment {
 				sheet.dismiss();
 				final double payAmount = amount;
 				final boolean payFully = fully;
-				com.harvanna.app.wallet.PinPromptHelper.authorize(getActivity(),
-				"Repay " + _formatUIBalance(payAmount) + " toward this loan",
+				java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+				rows.add(new String[]{"For", payFully
+						? "Pays the rest of this loan and closes it"
+						: "Pays part of what is still owed on this loan"});
+				rows.add(new String[]{"To", "Group wallet"});
+				rows.add(new String[]{"Wallet", groupWalletAddress});
+				rows.add(new String[]{"From", fromWallet});
+				if (alreadyRepaid > 0) rows.add(new String[]{"Already paid", _formatUIBalance(alreadyRepaid)});
+				rows.add(new String[]{"Still owed before this", _formatUIBalance(remainingDue)});
+				rows.add(new String[]{"Network fee", "Taken from your wallet when this is sent"});
+				com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(getActivity(),
+				payFully ? "Repay and close this loan" : "Part-pay this loan",
+				_formatUIBalance(payAmount), rows,
 				() -> _executeLoanRepayment(loanId, fromWallet, payAmount, payFully));
 			});
 		}

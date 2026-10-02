@@ -592,6 +592,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		if (btnCancelSheet != null) btnCancelSheet.setOnClickListener(v -> dialog.dismiss());
 		
 		if (btnAccept != null) {
+			btnAccept.setText("Verify");
 			btnAccept.setOnClickListener(v -> {
 				com.harvanna.app.wallet.PinPromptHelper.authorize(SendAssetActivity.this,
 				"Send " + _formatUIBalance(reqAmount) + " " + symbol, () -> {
@@ -643,7 +644,7 @@ public class SendAssetActivity extends AppCompatActivity {
 							if (fromAddress != null) PendingSpendGuard.release(SendAssetActivity.this, fromAddress);
 							runOnUiThread(() -> {
 								btnAccept.setEnabled(true);
-								btnAccept.setText("Accept & Send");
+								btnAccept.setText("Verify");
 								if (tvError != null) {
 									tvError.setText(error);
 									tvError.setVisibility(View.VISIBLE);

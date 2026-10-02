@@ -54,6 +54,7 @@ public class NodeGroupActivity extends AppCompatActivity {
     private final List<Object[]> proposals = new ArrayList<>();   // {kind, id, Map record}
     private final List<Object[]> packRequests = new ArrayList<>(); // {lineId, Map line}
     private String trustTier = "";
+    private String groupName = "";
     private List<String> myLabels = new ArrayList<>();
     private Button pressed;
 
@@ -83,7 +84,8 @@ public class NodeGroupActivity extends AppCompatActivity {
                     @Override public void onSuccess(java.util.Map<String, Object> data) {
                         Object n = data.get("groupName");
                         if (n != null && !String.valueOf(n).isEmpty()) {
-                            runOnUiThread(() -> com.harvanna.app.utils.AppBar.setSubtitle(NodeGroupActivity.this, String.valueOf(n)));
+                            groupName = String.valueOf(n);
+                            runOnUiThread(() -> com.harvanna.app.utils.AppBar.setSubtitle(NodeGroupActivity.this, groupName));
                         }
                     }
                     @Override public void onError(String e) { }
@@ -587,9 +589,11 @@ public class NodeGroupActivity extends AppCompatActivity {
 
     private java.util.ArrayList<String[]> moneyRows(String to, String detail) {
         java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+        if (groupName != null && !groupName.isEmpty()) rows.add(new String[]{"Group", groupName});
         rows.add(new String[]{"To", to == null || to.isEmpty() ? escrowOrGroup() : to});
         if (detail != null && !detail.isEmpty()) rows.add(new String[]{"For", detail});
-        rows.add(new String[]{"Network fee", "Set by the network when this is sent"});
+        rows.add(new String[]{"From", "Your wallet"});
+        rows.add(new String[]{"Network fee", "Taken from your wallet when this is sent"});
         return rows;
     }
 

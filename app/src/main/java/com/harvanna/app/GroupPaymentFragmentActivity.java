@@ -350,6 +350,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 	private static final String PREF_PAY = "harvanna_group_pay_state";
 	private String myUid = "";
 	private String groupType = "";
+	private String groupName = "";
 	private long totalSlots = 1;
 	private long currentRound = 1;
 	private int currentPayerSlot = 1;
@@ -374,6 +375,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 			currentRound = Math.max(1, (long) num(cached, "currentRound"));
 			frequency = str(cached, "frequency", frequency);
 			groupType = str(cached, "groupType", groupType);
+			groupName = str(cached, "groupName", groupName);
 			groupWalletAddress = str(cached, "groupWalletAddress",
 			str(cached, "group_wallet", groupWalletAddress));
 			currentPayerSlot = (int) ((currentRound - 1) % Math.max(1, totalSlots)) + 1;
@@ -403,6 +405,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 				currentRound = Math.max(1, (long) num(data, "currentRound"));
 				frequency = str(data, "frequency", "Weekly");
 				groupType = str(data, "groupType", "");
+				groupName = str(data, "groupName", groupName);
 				groupWalletAddress = str(data, "groupWalletAddress", str(data, "group_wallet", ""));
 				currentPayerSlot = (int) ((currentRound - 1) % totalSlots) + 1;
 				groupCreatorId = str(data, "creatorId", "");
@@ -1106,12 +1109,27 @@ public class GroupPaymentFragmentActivity extends Fragment {
 			return;
 		}
 		final String fromAddr = from;
-		
-		com.harvanna.app.group.PaymentConfirmSheet.show(getContext(), "Confirm Contribution",
-		contributionAmount, groupWalletAddress, null, "Calculated on send",
-		() -> com.harvanna.app.wallet.PinPromptHelper.authorize(getActivity(),
-		"Pay " + _formatUIBalance(contributionAmount) + " into this group",
-		() -> _submitPayment(fromAddr)));
+		String who = groupName == null || groupName.trim().isEmpty() ? "this group" : groupName.trim();
+		boolean fixed = groupType != null && groupType.toLowerCase(Locale.US).contains("fixed");
+		boolean rotating = groupType != null && groupType.toLowerCase(Locale.US).contains("rotating");
+		String purpose = fixed
+				? "Today's saving in " + who
+				: rotating
+				? "Round " + currentRound + " contribution in " + who
+				: frequency + " contribution in " + who;
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"For", purpose});
+		if (groupName != null && !groupName.trim().isEmpty()) rows.add(new String[]{"Group", groupName.trim()});
+		rows.add(new String[]{"To", "Group wallet"});
+		rows.add(new String[]{"Wallet", groupWalletAddress});
+		rows.add(new String[]{"From", fromAddr});
+		rows.add(new String[]{"Schedule", frequency});
+		rows.add(new String[]{"Network fee", "Taken from your wallet when this is sent"});
+		android.content.Context host = getActivity() != null ? getActivity() : getContext();
+		if (host == null) return;
+		com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(host,
+				"Pay this contribution", _formatUIBalance(contributionAmount), rows,
+				() -> _submitPayment(fromAddr));
 	}
 	
 	private void _submitPayment(String fromAddr) {

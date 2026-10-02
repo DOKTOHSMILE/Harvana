@@ -417,7 +417,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			tv_offer_orders_btn.setOnClickListener(v -> _showOrdersForListing(listingId, side));
 			
 			tv_offer_cancel.setVisibility(isOpen ? View.VISIBLE : View.GONE);
-			tv_offer_cancel.setOnClickListener(v -> _confirmCancelListing(listingId));
+			tv_offer_cancel.setOnClickListener(v -> _confirmCancelListing(listingId, side, remainingHarv));
 			
 			_view.setTag(listingId);
 			
@@ -504,25 +504,25 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 		}));
 	}
 	
-	private void _confirmCancelListing(String listingId) {
-		ThemedDialogs.show(ThemedDialogs.alert(this)
-		.setTitle("Cancel this listing?")
-		.setMessage("This stops new orders against the remaining, unfilled amount. Any order already claimed continues normally and isn't affected.")
-		.setPositiveButton("Cancel Listing", (dialog, which) -> {
-			PinPromptHelper.authorize(this, "Cancel this listing", () -> {
-				P2PTradeRouter.cancelListing(getApplicationContext(), listingId, myAddress, new P2PTradeRouter.Callback() {
-					@Override
-					public void onSuccess(JSONObject result) {
-						runOnUiThread(() -> _loadMine());
-					}
-					@Override
-					public void onError(String error) {
-						runOnUiThread(() -> Toast.makeText(P2pMerchantManagerActivity.this, "Couldn't cancel: " + error, Toast.LENGTH_LONG).show());
-					}
-				});
+	private void _confirmCancelListing(String listingId, String side, double remainingHarv) {
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"For", "Stops new orders on what is still listed. Orders already opened are not touched. Locked HARV that nobody has claimed comes back to your wallet."});
+		rows.add(new String[]{"Side", side == null || side.isEmpty() ? "—" : side});
+		rows.add(new String[]{"Still listed", com.harvanna.app.wallet.BalanceFormatter.smart(remainingHarv)});
+		rows.add(new String[]{"Returns to", "Your wallet"});
+		com.harvanna.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
+		"Cancel this listing", com.harvanna.app.wallet.BalanceFormatter.smart(remainingHarv), rows, () -> {
+			P2PTradeRouter.cancelListing(getApplicationContext(), listingId, myAddress, new P2PTradeRouter.Callback() {
+				@Override
+				public void onSuccess(JSONObject result) {
+					runOnUiThread(() -> _loadMine());
+				}
+				@Override
+				public void onError(String error) {
+					runOnUiThread(() -> Toast.makeText(P2pMerchantManagerActivity.this, "Couldn't cancel: " + error, Toast.LENGTH_LONG).show());
+				}
 			});
-		})
-		.setNegativeButton("Keep Listing", null));
+		});
 	}
 	
 	private static String _truncate(String s) {

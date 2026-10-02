@@ -668,7 +668,7 @@ public class HomeFragmentActivity extends Fragment {
 		final String currencyCode = com.harvanna.app.wallet.FiatValueHelper.symbolToCurrencyCode(currencySymbol);
 		
 		if (addr == null || addr.isEmpty()) {
-			if (tv_harv_balance != null) tv_harv_balance.setText(("0.00 " + com.harvanna.app.CoinInfo.ticker()));
+			if (tv_harv_balance != null) tv_harv_balance.setText("0.00");
 			if (tv_local_currency_eqv != null) tv_local_currency_eqv.setText("≈ " + currencySymbol + "0.00");
 			return;
 		}
@@ -677,7 +677,7 @@ public class HomeFragmentActivity extends Fragment {
 		getContext(), "wallet_balance_" + addr);
 		if (cachedBalance != null && cachedBalance.get("show") instanceof Number) {
 			double cachedShow = ((Number) cachedBalance.get("show")).doubleValue();
-			if (tv_harv_balance != null) tv_harv_balance.setText(_fmtHarv(cachedShow));
+			if (tv_harv_balance != null) tv_harv_balance.setText(_fmtAmount(cachedShow));
 			
 			if (tv_local_currency_eqv != null) {
 				com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(cachedShow, currencyCode, (fiatValue, rateAvailable) -> {
@@ -703,7 +703,7 @@ public class HomeFragmentActivity extends Fragment {
 			}
 			getActivity().runOnUiThread(() -> {
 				if (tv_harv_balance != null)
-				tv_harv_balance.setText(_fmtHarv(show));
+				tv_harv_balance.setText(_fmtAmount(show));
 				if (tv_local_currency_eqv != null) {
 					com.harvanna.app.wallet.FiatValueHelper.convertHarvToFiat(show, currencyCode, (fiatValue, rateAvailable) -> {
 						if (!isAdded() || getActivity() == null) return;
@@ -1325,6 +1325,15 @@ public class HomeFragmentActivity extends Fragment {
 		});
 	}
 	
+	private static String _fmtAmount(double v) {
+		try {
+			java.text.DecimalFormat df = new java.text.DecimalFormat("#,##0.00######", new java.text.DecimalFormatSymbols(java.util.Locale.US));
+			return df.format(v);
+		} catch (Exception e) {
+			return String.valueOf(v);
+		}
+	}
+
 	private static String _fmtHarv(double v) {
 		try {
 			java.text.DecimalFormat df = new java.text.DecimalFormat("0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
@@ -1377,7 +1386,7 @@ public class HomeFragmentActivity extends Fragment {
 			row.setPadding((int) (10 * d), 0, (int) (10 * d), (int) (10 * d));
 						row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
 			row.addView(_quickAction(R.drawable.ic_action_receive, "Receive", ReceiveActivity.class), _quickActionParams(d, true));
-			row.addView(_quickAction(R.drawable.ic_action_buy, "Buy HARV", P2pMarketplaceActivity.class), _quickActionParams(d, true));
+			row.addView(_quickAction(R.drawable.ic_action_buy, "P2P", P2pMarketplaceActivity.class), _quickActionParams(d, true));
 			
 			card.removeView(top);
 			android.widget.LinearLayout box = new android.widget.LinearLayout(getContext());
@@ -1405,25 +1414,25 @@ public class HomeFragmentActivity extends Fragment {
 		android.widget.LinearLayout cell = new android.widget.LinearLayout(getContext());
 		cell.setOrientation(android.widget.LinearLayout.VERTICAL);
 		cell.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
-		cell.setPadding(0, (int) (8 * d), 0, (int) (6 * d));
+		cell.setPadding(0, (int) (4 * d), 0, (int) (4 * d));
 		cell.setBackgroundResource(R.drawable.bg_quick_action_hero);
 		cell.setClickable(true);
 		cell.setFocusable(true);
-		cell.setMinimumHeight((int) (56 * d));
+		cell.setMinimumHeight((int) (36 * d));
 		
 		android.widget.ImageView icon = new android.widget.ImageView(getContext());
 		icon.setImageResource(iconRes);
 		icon.setColorFilter(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextOnAccent));
 		icon.setBackgroundResource(R.drawable.bg_quick_action_icon);
-		int pad = (int) (7 * d);
+		int pad = (int) (4 * d);
 		icon.setPadding(pad, pad, pad, pad);
-		android.widget.LinearLayout.LayoutParams ilp = new android.widget.LinearLayout.LayoutParams((int) (32 * d), (int) (32 * d));
+		android.widget.LinearLayout.LayoutParams ilp = new android.widget.LinearLayout.LayoutParams((int) (20 * d), (int) (20 * d));
 		ilp.gravity = android.view.Gravity.CENTER_HORIZONTAL;
 		cell.addView(icon, ilp);
 		
 		TextView tv = new TextView(getContext());
 		tv.setText(label);
-		tv.setTextSize(11.5f);
+		tv.setTextSize(10f);
 		tv.setTypeface(null, android.graphics.Typeface.BOLD);
 		tv.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextPrimary));
 		tv.setGravity(android.view.Gravity.CENTER);

@@ -229,8 +229,11 @@ public final class StakingPanel {
             apy.setText(aprPct >= 100
                     ? String.format(Locale.US, "Current est. pool APY  %.0f%%", aprPct)
                     : String.format(Locale.US, "Current est. pool APY  %.2f%%", aprPct));
-            monthly.setText(String.format(Locale.US, "~ %s monthly, at your current share", trim(perDay * 30)));
-            activeMonthly.setText(String.format(Locale.US, "Est. monthly reward  ~ %s", trim(perDay * 30)));
+            // Create a formatter that limits to 4 decimal places and dynamically drops trailing zeros
+java.text.DecimalFormat df = new java.text.DecimalFormat("#.####");
+
+monthly.setText(String.format(Locale.US, "~ %s monthly, at your current share", df.format(perDay * 30)));
+activeMonthly.setText(String.format(Locale.US, "Est. monthly reward ~ %s", df.format(perDay * 30)));
             long queued = unbondingTotal();
             posTotal.setText(harv(staked + queued));
             if (pace <= 0 || staked <= 0) {

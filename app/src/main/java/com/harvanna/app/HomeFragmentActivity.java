@@ -1,4 +1,4 @@
-Package com.harvanna.app;
+package com.harvanna.app;
 
 import android.animation.*;
 import android.app.*;

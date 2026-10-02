@@ -123,7 +123,7 @@
 											android:layout_width="24dp"
 											android:layout_height="24dp"
 											android:padding="3dp"
-											android:src="@drawable/icon_account_balance_wallet_outline_"
+											android:src="@drawable/default_image"
 											android:scaleType="centerInside"
 											app:tint="@color/colorAccent" />
 										<TextView
@@ -187,7 +187,7 @@
 											android:layout_width="24dp"
 											android:layout_height="24dp"
 											android:padding="3dp"
-											android:src="@drawable/icon_groups_outline"
+											android:src="@drawable/default_image"
 											android:scaleType="centerInside"
 											app:tint="@color/colorTextSecondary" />
 										<TextView
@@ -318,7 +318,7 @@
 											android:layout_width="24dp"
 											android:layout_height="24dp"
 											android:padding="3dp"
-											android:src="@drawable/icon_timelapse_twotone"
+											android:src="@drawable/default_image"
 											android:scaleType="centerInside"
 											app:tint="@color/colorTextSecondary" />
 										<TextView
@@ -416,8 +416,8 @@
 									android:id="@+id/imageview54"
 									android:layout_width="36dp"
 									android:layout_height="36dp"
-									android:src="@drawable/icon_check_circle_round"
-									android:scaleType="center"
+									android:src="@drawable/default_image"
+									android:scaleType="centerInside"
 									app:tint="@color/colorAccent" />
 								<TextView
 									android:id="@+id/textview213"
@@ -470,7 +470,7 @@
 											android:layout_width="match_parent"
 											android:layout_height="match_parent"
 											android:padding="2dp"
-											android:src="@drawable/ic_coin_harv"
+											android:src="@drawable/default_image"
 											android:scaleType="fitCenter" />
 									</androidx.cardview.widget.CardView>
 									<LinearLayout
@@ -490,48 +490,29 @@
 												android:id="@+id/linear225"
 												android:layout_width="match_parent"
 												android:layout_height="wrap_content"
-												android:gravity="center_horizontal|center_vertical"
-												android:orientation="vertical"
+												android:gravity="center_vertical"
+												android:orientation="horizontal"
 												android:layout_weight="1">
-												<LinearLayout
-													android:id="@+id/linear227"
+												<TextView
+													android:id="@+id/tv_harv_balance"
 													android:layout_width="wrap_content"
 													android:layout_height="wrap_content"
-													android:orientation="vertical">
-													<TextView
-														android:id="@+id/textview208"
-														android:layout_width="wrap_content"
-														android:layout_height="wrap_content"
-														android:text="HARV"
-														android:textSize="13sp"
-														android:textStyle="bold" />
-													<LinearLayout
-														android:id="@+id/linear226"
-														android:layout_width="wrap_content"
-														android:layout_height="wrap_content"
-														android:gravity="center_vertical"
-														android:orientation="horizontal">
-														<TextView
-															android:id="@+id/tv_harv_balance"
-															android:layout_width="wrap_content"
-															android:layout_height="wrap_content"
-															android:gravity="center_vertical"
-															android:text="0.00"
-															android:textSize="22sp"
-															android:textStyle="bold"
-															android:textColor="@color/colorTextPrimary"
-															android:singleLine="true"
-															android:layout_gravity="center_horizontal|center_vertical" />
-														<ImageView
-															android:id="@+id/imageview61"
-															android:layout_width="15dp"
-															android:layout_height="15dp"
-															android:layout_margin="5dp"
-															android:src="@drawable/icon_visibility_off_twotone"
-															android:scaleType="centerInside"
-															app:tint="@color/colorTextSecondary" />
-													</LinearLayout>
-												</LinearLayout>
+													android:gravity="center_vertical"
+													android:text="0.00"
+													android:textSize="22sp"
+													android:textStyle="bold"
+													android:textColor="@color/colorTextPrimary"
+													android:singleLine="true"
+													android:layout_gravity="center_horizontal|center_vertical"
+													android:layout_weight="1" />
+												<ImageView
+													android:id="@+id/imageview61"
+													android:layout_width="15dp"
+													android:layout_height="15dp"
+													android:layout_margin="5dp"
+													android:src="@drawable/default_image"
+													android:scaleType="centerInside"
+													app:tint="@color/colorTextSecondary" />
 											</LinearLayout>
 											<TextView
 												android:id="@+id/tv_local_currency_eqv"
@@ -562,10 +543,11 @@
 								android:orientation="horizontal">
 								<LinearLayout
 									android:id="@+id/linear223"
-									android:layout_width="match_parent"
+									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:padding="5dp"
-									android:orientation="horizontal">
+									android:orientation="horizontal"
+									android:layout_weight="1">
 									<com.google.android.material.card.MaterialCardView
 										android:id="@+id/cardview32"
 										android:layout_width="wrap_content"
@@ -580,16 +562,15 @@
 											android:id="@+id/linear222"
 											android:layout_width="match_parent"
 											android:layout_height="wrap_content"
-											android:paddingLeft="5dp"
-											android:paddingTop="6dp"
-											android:paddingRight="8dp"
-											android:paddingBottom="6dp"
+											android:padding="6dp"
 											android:gravity="center_horizontal|center_vertical"
 											android:orientation="horizontal">
 											<TextView
 												android:id="@+id/textview220"
 												android:layout_width="wrap_content"
 												android:layout_height="wrap_content"
+												android:paddingTop="5dp"
+												android:paddingBottom="5dp"
 												android:text="View Assets"
 												android:textSize="12sp"
 												android:textColor="@color/colorTextPrimary" />
@@ -597,43 +578,12 @@
 												android:id="@+id/imageview60"
 												android:layout_width="20dp"
 												android:layout_height="match_parent"
-												android:src="@drawable/icon_arrow_forward_round"
+												android:paddingTop="5dp"
+												android:paddingBottom="5dp"
+												android:src="@drawable/default_image"
 												android:scaleType="centerInside" />
 										</LinearLayout>
 									</com.google.android.material.card.MaterialCardView>
-								</LinearLayout>
-								<LinearLayout
-									android:id="@+id/linear224"
-									android:layout_width="wrap_content"
-									android:layout_height="wrap_content"
-									android:padding="5dp"
-									android:orientation="horizontal">
-									<androidx.cardview.widget.CardView
-										android:id="@+id/btn_buy"
-										android:layout_width="wrap_content"
-										android:layout_height="wrap_content"
-										app:cardBackgroundColor="@color/colorButtonBackground"
-										android:layout_weight="1"
-										app:cardCornerRadius="10dp"
-										app:cardElevation="0dp">
-										<LinearLayout
-											android:id="@+id/linear216"
-											android:layout_width="match_parent"
-											android:layout_height="wrap_content"
-											android:paddingLeft="20dp"
-											android:paddingTop="10dp"
-											android:paddingRight="20dp"
-											android:paddingBottom="10dp">
-											<TextView
-												android:id="@+id/textview219"
-												android:layout_width="wrap_content"
-												android:layout_height="wrap_content"
-												android:text="Buy HARV (P2P)"
-												android:textSize="12sp"
-												android:textStyle="bold"
-												android:textColor="@color/colorButtonText" />
-										</LinearLayout>
-									</androidx.cardview.widget.CardView>
 								</LinearLayout>
 							</LinearLayout>
 						</LinearLayout>
@@ -666,7 +616,7 @@
 									android:id="@+id/imageview55"
 									android:layout_width="24dp"
 									android:layout_height="24dp"
-									android:src="@drawable/icon_school_outline"
+									android:src="@drawable/default_image"
 									android:scaleType="centerInside"
 									app:tint="@color/colorAccent" />
 								<TextView
@@ -766,8 +716,8 @@
 									android:id="@+id/imageview56"
 									android:layout_width="36dp"
 									android:layout_height="36dp"
-									android:src="@drawable/icon_add_circle_round"
-									android:scaleType="center"
+									android:src="@drawable/default_image"
+									android:scaleType="centerInside"
 									app:tint="@color/colorTextSecondary" />
 								<TextView
 									android:id="@+id/textview217"

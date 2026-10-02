@@ -94,10 +94,16 @@ public final class NotificationSync {
                 final AtomicInteger left = new AtomicInteger(groups.size());
                 for (Object o : groups) {
                     final String gid = s(o);
-                    GroupFirestoreManager.getInstance(c).getNotices(gid, new GroupFirestoreManager.ListCallback() {
-                        @Override public void onSuccess(List<Map<String, Object>> notices) {
-                            processNotices(c, uid, gid, notices);
-                            if (left.decrementAndGet() == 0) finish.run();
+                    GroupFirestoreManager.getInstance(c).getGroup(gid, new GroupFirestoreManager.DocCallback() {
+                        @Override public void onSuccess(Map<String, Object> group) {
+                            final String groupName = s(group == null ? null : group.get("groupName"));
+                            GroupFirestoreManager.getInstance(c).getNotices(gid, new GroupFirestoreManager.ListCallback() {
+                                @Override public void onSuccess(List<Map<String, Object>> notices) {
+                                    processNotices(c, uid, gid, groupName, notices);
+                                    if (left.decrementAndGet() == 0) finish.run();
+                                }
+                                @Override public void onError(String e) { if (left.decrementAndGet() == 0) finish.run(); }
+                            });
                         }
                         @Override public void onError(String e) { if (left.decrementAndGet() == 0) finish.run(); }
                     });
@@ -107,7 +113,7 @@ public final class NotificationSync {
         });
     }
 
-    private static void processNotices(Context c, String uid, String gid, List<Map<String, Object>> notices) {
+    private static void processNotices(Context c, String uid, String gid, String groupName, List<Map<String, Object>> notices) {
         SharedPreferences sp = c.getSharedPreferences("notif_notice_seen", Context.MODE_PRIVATE);
         String key = uid + "_" + gid;
         long now = System.currentTimeMillis();
@@ -119,8 +125,13 @@ public final class NotificationSync {
             if (created > newest) newest = created;
             if (cat == null) continue;
             String title = s(n.get("title")), msg = s(n.get("message"));
+            String who = s(n.get("actorName"));
+            if (who.isEmpty()) who = s(n.get("memberName"));
+            String named = title.isEmpty() ? "New group notice" : title;
+            if (!groupName.isEmpty() && !named.contains(groupName)) named = groupName + " · " + named;
+            if (!who.isEmpty() && !msg.contains(who)) msg = who + " — " + msg;
             NotificationCenter.post(c, cat, "notice_" + s(n.get("_docId")),
-                title.isEmpty() ? "New group notice" : title, msg, gid, cat.equals(NotificationCenter.PAYMENT) ? 2 : 4);
+                named, msg, gid, cat.equals(NotificationCenter.PAYMENT) ? 2 : 4);
         }
         if (newest > since) sp.edit().putLong(key, newest).apply();
     }

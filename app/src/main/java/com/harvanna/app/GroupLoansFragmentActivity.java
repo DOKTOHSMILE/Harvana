@@ -741,6 +741,11 @@ public class GroupLoansFragmentActivity extends Fragment {
 				cb.onError("Loan amount too small to cover the network fee.");
 				return;
 			}
+			String escrowKey = com.harvanna.app.wallet.WalletManager.loadPrivateKey(getActivity(), from);
+			if (escrowKey == null) {
+				cb.onError("This circle's wallet is held on the node, not on this phone. Accepting can't sign that wallet from here, so the loan was not sent. Reject still works because it moves no money.");
+				return;
+			}
 			com.harvanna.app.tx.TransactionRouter.routeTransaction(
 			getActivity(), from, to, java.math.BigDecimal.valueOf(netAmount), null,
 			"Loan disbursement (network fee deducted from principal)",

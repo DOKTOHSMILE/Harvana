@@ -247,6 +247,7 @@ public class HistoryFragmentActivity extends Fragment {
 						row.put("memo", tx.optString("memo", ""));
 						row.put("timestamp", tx.optLong("timestamp", 0L));
 						row.put("confirmations", tx.optLong("confirmations", 0L));
+						row.put("fee", tx.optLong("gas", tx.optLong("fee", 0L)));
 						rows.add(row);
 					}
 				}
@@ -806,7 +807,7 @@ public class HistoryFragmentActivity extends Fragment {
 				intent.putExtra("confirmations", confirmations);
 				
 				// Pass optional node telemetry if available in the HashMap
-				intent.putExtra("harvFee", num(tx, "fee")); 
+				intent.putExtra("harvFee", com.harvanna.app.sync.HarvannaNodeClient.toHarvDisplay((long) num(tx, "fee"))); 
 				intent.putExtra("blockNumber", (long) num(tx, "blockHeight"));
 				intent.putExtra("nonce", (long) num(tx, "nonce"));
 				

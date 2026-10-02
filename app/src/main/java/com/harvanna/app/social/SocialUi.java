@@ -2,10 +2,12 @@ package com.harvanna.app.social;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -63,6 +65,25 @@ final class SocialUi {
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
         row.setPadding(0, dp(c, 8), 0, dp(c, 8));
+        TextView face = text(c, p.initials(), 14, true, 0xFF1A1208);
+        face.setGravity(Gravity.CENTER);
+        int size = dp(c, 40);
+        GradientDrawable disc = new GradientDrawable();
+        disc.setShape(GradientDrawable.OVAL);
+        disc.setColor(0xFFF0B45A);
+        face.setBackground(disc);
+        LinearLayout.LayoutParams faceLp = new LinearLayout.LayoutParams(size, size);
+        faceLp.rightMargin = dp(c, 12);
+        row.addView(face, faceLp);
+        if (p.photo.startsWith("http")) {
+            ImageView photo = new ImageView(c);
+            photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            try {
+                com.bumptech.glide.Glide.with(c).load(p.photo).circleCrop().into(photo);
+                row.removeView(face);
+                row.addView(photo, 0, faceLp);
+            } catch (Exception ignored) { }
+        }
         LinearLayout names = new LinearLayout(c);
         names.setOrientation(LinearLayout.VERTICAL);
         names.addView(text(c, p.name, 15, true, UiColors.textPrimary()));

@@ -135,6 +135,7 @@ public class WalletEarnFragmentActivity extends Fragment {
 	
 	private void initializeLogic() {
 		com.harvanna.app.earn.StakingPanel.attach(this, linear1);
+		if (getContext() != null) com.harvanna.app.earn.MiningThreads.attach(getContext(), linear1);
 	}
 	
 	@Override

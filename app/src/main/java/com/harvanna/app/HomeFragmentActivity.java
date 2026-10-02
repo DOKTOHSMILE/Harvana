@@ -819,7 +819,7 @@ public class HomeFragmentActivity extends Fragment {
 		if (!isAdded() || linear_upcoming_payments == null || getActivity() == null) return;
 		getActivity().runOnUiThread(() -> {
 			linear_upcoming_payments.removeAllViews();
-			int show = Math.min(3, rows.size());
+			int show = Math.min(2, rows.size());
 			if (show == 0) {
 				if (linear7 != null) linear7.setVisibility(View.VISIBLE);
 				return;

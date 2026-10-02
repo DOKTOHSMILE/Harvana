@@ -312,6 +312,11 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 	// ── Submit ───────────────────────────────────────────────────────────
 	
 	private void _submit() {
+		String wallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
+		if (wallet == null || wallet.trim().isEmpty()) {
+			_showError("Add a wallet before you post. Tips for this article are paid to that address.");
+			return;
+		}
 		if (uploadInProgress) {
 			_showError("Please wait for the image to finish uploading.");
 			return;

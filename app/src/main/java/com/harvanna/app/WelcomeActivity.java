@@ -196,9 +196,16 @@ public class WelcomeActivity extends AppCompatActivity {
 		});
 		
 		button2.setOnClickListener(_v -> {
-			i.putExtra("page", "eCreate");
-			i.setClass(getApplicationContext(), LoginActivity.class);
-			startActivity(i);
+			new android.app.AlertDialog.Builder(this)
+				.setTitle("Before you start")
+				.setMessage("Harvanna keeps your name, phone and wallet address so a circle can trust you. Contributions, loans and tips are in HARV, and every transfer shows the network fee before you confirm. Mining is optional and can heat the phone. The current admin of a circle sees member payment cards. Everyone else sees only their own.\n\nBy continuing you accept that.")
+				.setPositiveButton("I agree", (d, w) -> {
+					i.putExtra("page", "eCreate");
+					i.setClass(getApplicationContext(), LoginActivity.class);
+					startActivity(i);
+				})
+				.setNegativeButton("Not now", null)
+				.show();
 		});
 		
 		_dbauth_child_listener = new ChildEventListener() {

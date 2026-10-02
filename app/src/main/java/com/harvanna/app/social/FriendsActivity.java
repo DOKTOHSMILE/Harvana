@@ -47,6 +47,12 @@ public class FriendsActivity extends AppCompatActivity {
         sv.addView(root);
         AppBar.setContent(this, sv, "Friends", "People you and they both follow");
 
+        LinearLayout header = SocialUi.card(this);
+        TextView title = SocialUi.text(this, "Friends", 28, true, UiColors.textPrimary());
+        header.addView(title);
+        header.addView(SocialUi.text(this, "Mutual follows. A photo when they have one, their initials when they don't.", 13, false, UiColors.accent()));
+        root.addView(header, 0);
+
         LinearLayout tabs = new LinearLayout(this);
         tabs.setOrientation(LinearLayout.HORIZONTAL);
         tabFollowing = SocialUi.button(this, "Friends", false);

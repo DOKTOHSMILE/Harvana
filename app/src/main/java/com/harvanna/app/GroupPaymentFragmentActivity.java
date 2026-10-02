@@ -409,7 +409,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 				groupWalletAddress = str(data, "groupWalletAddress", str(data, "group_wallet", ""));
 				currentPayerSlot = (int) ((currentRound - 1) % totalSlots) + 1;
 				groupCreatorId = str(data, "creatorId", "");
-				if (myUid != null && myUid.equals(groupCreatorId)) viewerIsAdmin = true;
+				viewerIsAdmin = com.harvanna.app.group.AdminSeat.current(myUid, null, groupCreatorId, "", "");
 				linkedNodeId = com.harvanna.app.group.GroupKinds.nodeId(data);
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> {
@@ -474,7 +474,8 @@ public class GroupPaymentFragmentActivity extends Fragment {
 							mySlot = (int) num(m, "slot");
 							fixedDaysPaid = FixedPaymentEngine.daysPaidFromMember(m, monthKey);
 							String role = str(m, "role", "");
-							if ("ADMIN".equalsIgnoreCase(role) || "CREATOR".equalsIgnoreCase(role)) viewerIsAdmin = true;
+							viewerIsAdmin = com.harvanna.app.group.AdminSeat.current(
+									myUid, null, groupCreatorId, "", role);
 						}
 					}
 				}
@@ -742,8 +743,9 @@ public class GroupPaymentFragmentActivity extends Fragment {
 			@Override public void onSuccess(org.json.JSONObject json) {
 				if (gen != nodeLoadGen) return;
 				Map<String, Object> group = com.harvanna.app.utils.JsonMaps.toMap(json);
-				boolean admin = viewerIsAdmin || (me != null && me.equalsIgnoreCase(str(group, "creatorAddress", "")));
-				if (admin) viewerIsAdmin = true;
+				boolean admin = com.harvanna.app.group.AdminSeat.current(
+						myUid, me, groupCreatorId, str(group, "creatorAddress", ""), "");
+				viewerIsAdmin = admin;
 				_loadMyNodePosition(gen, family, nodeId, me, group, admin);
 			}
 			@Override public void onError(String e) { }

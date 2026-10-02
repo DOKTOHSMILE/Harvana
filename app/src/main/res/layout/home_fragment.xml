@@ -123,7 +123,7 @@
 											android:layout_width="24dp"
 											android:layout_height="24dp"
 											android:padding="3dp"
-											android:src="@drawable/default_image"
+											android:src="@drawable/ic_wallet"
 											android:scaleType="centerInside"
 											app:tint="@color/colorAccent" />
 										<TextView
@@ -187,7 +187,7 @@
 											android:layout_width="24dp"
 											android:layout_height="24dp"
 											android:padding="3dp"
-											android:src="@drawable/default_image"
+											android:src="@drawable/ic_groups"
 											android:scaleType="centerInside"
 											app:tint="@color/colorTextSecondary" />
 										<TextView
@@ -318,7 +318,7 @@
 											android:layout_width="24dp"
 											android:layout_height="24dp"
 											android:padding="3dp"
-											android:src="@drawable/default_image"
+											android:src="@drawable/ic_receipt"
 											android:scaleType="centerInside"
 											app:tint="@color/colorTextSecondary" />
 										<TextView
@@ -416,7 +416,7 @@
 									android:id="@+id/imageview54"
 									android:layout_width="36dp"
 									android:layout_height="36dp"
-									android:src="@drawable/default_image"
+									android:src="@drawable/ic_check_circle"
 									android:scaleType="centerInside"
 									app:tint="@color/colorAccent" />
 								<TextView
@@ -510,7 +510,7 @@
 													android:layout_width="15dp"
 													android:layout_height="15dp"
 													android:layout_margin="5dp"
-													android:src="@drawable/default_image"
+													android:src="@drawable/ic_visibility"
 													android:scaleType="centerInside"
 													app:tint="@color/colorTextSecondary" />
 											</LinearLayout>
@@ -580,8 +580,9 @@
 												android:layout_height="match_parent"
 												android:paddingTop="5dp"
 												android:paddingBottom="5dp"
-												android:src="@drawable/default_image"
-												android:scaleType="centerInside" />
+												android:src="@drawable/ic_arrow_right"
+												android:scaleType="centerInside"
+												app:tint="@color/colorTextSecondary" />
 										</LinearLayout>
 									</com.google.android.material.card.MaterialCardView>
 								</LinearLayout>
@@ -616,7 +617,7 @@
 									android:id="@+id/imageview55"
 									android:layout_width="24dp"
 									android:layout_height="24dp"
-									android:src="@drawable/default_image"
+									android:src="@drawable/ic_school"
 									android:scaleType="centerInside"
 									app:tint="@color/colorAccent" />
 								<TextView
@@ -716,7 +717,7 @@
 									android:id="@+id/imageview56"
 									android:layout_width="36dp"
 									android:layout_height="36dp"
-									android:src="@drawable/default_image"
+									android:src="@drawable/ic_search_off"
 									android:scaleType="centerInside"
 									app:tint="@color/colorTextSecondary" />
 								<TextView

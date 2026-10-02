@@ -55,7 +55,12 @@ public final class AppBar {
         if (back != null) {
             back = DrawableCompat.wrap(back.mutate());
             DrawableCompat.setTint(back, on.data);
-            tb.setNavigationIcon(back);
+            int px = Math.round(24 * a.getResources().getDisplayMetrics().density);
+            android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(px, px, android.graphics.Bitmap.Config.ARGB_8888);
+            android.graphics.Canvas canvas = new android.graphics.Canvas(bmp);
+            back.setBounds(0, 0, px, px);
+            back.draw(canvas);
+            tb.setNavigationIcon(new android.graphics.drawable.BitmapDrawable(a.getResources(), bmp));
         }
         tb.setNavigationContentDescription("Back");
         tb.setNavigationOnClickListener(v -> a.finish());

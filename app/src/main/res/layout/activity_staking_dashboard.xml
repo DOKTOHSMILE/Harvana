@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -15,175 +16,338 @@
 			android:layout_width="match_parent"
 			android:layout_height="?attr/actionBarSize"
 			android:background="?attr/appBarColor"
-			app:title="Staking Dashboard"
+			app:title="Staking"
 			app:popupTheme="@style/AppTheme.PopupOverlay" />
 	</com.google.android.material.appbar.AppBarLayout>
 	<androidx.core.widget.NestedScrollView
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:fillViewport="true"
-		android:overScrollMode="never"
 		app:layout_behavior="@string/appbar_scrolling_view_behavior">
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:orientation="vertical"
-			android:padding="16dp"
-			android:paddingBottom="32dp">
-			<com.google.android.material.card.MaterialCardView
+			android:padding="16dp">
+			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				app:cardBackgroundColor="@color/colorSurface"
-				app:cardCornerRadius="20dp"
-				app:cardElevation="2dp"
-				app:strokeWidth="1dp"
-				app:strokeColor="@color/colorCardStroke">
-				<LinearLayout
-					android:layout_width="match_parent"
+				android:orientation="horizontal"
+				android:background="@drawable/bg_card_surface"
+				android:padding="4dp">
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/tab_stake"
+					android:layout_width="0dp"
 					android:layout_height="wrap_content"
-					android:orientation="vertical"
-					android:padding="16dp">
-					<TextView
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:text="Total staked"
-						android:textSize="12sp"
-						android:textColor="@color/colorTextSecondary" />
-					<TextView
-						android:id="@+id/tv_staked"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:text="0.0000 HARV"
-						android:textSize="24sp"
-						android:textStyle="bold"
-						android:textColor="@color/colorTextPrimary" />
-					<TextView
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="12dp"
-						android:text="Unclaimed rewards"
-						android:textSize="12sp"
-						android:textColor="@color/colorTextSecondary" />
-					<TextView
-						android:id="@+id/tv_unclaimed"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:text="0.0000 HARV"
-						android:textSize="20sp"
-						android:textStyle="bold"
-						android:textColor="@color/colorTextPrimary" />
-					<TextView
-						android:id="@+id/tv_daily_pct"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="8dp"
-						android:text="—"
-						android:textSize="16sp"
-						android:textStyle="bold"
-						android:textColor="@color/colorSuccess" />
-					<TextView
-						android:id="@+id/tv_pool"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="8dp"
-						android:textSize="12sp"
-						android:textColor="@color/colorTextSecondary" />
-				</LinearLayout>
-			</com.google.android.material.card.MaterialCardView>
-			<com.google.android.material.card.MaterialCardView
+					android:layout_weight="1"
+					android:text="Staking"
+					android:textAllCaps="false" />
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/tab_positions"
+					style="@style/Widget.MaterialComponents.Button.TextButton"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:text="My Positions"
+					android:textAllCaps="false" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/page_stake"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="12dp"
-				app:cardBackgroundColor="@color/colorSurface"
-				app:cardCornerRadius="20dp"
-				app:cardElevation="2dp"
-				app:strokeWidth="1dp"
-				app:strokeColor="@color/colorCardStroke">
-				<LinearLayout
+				android:orientation="vertical">
+				<com.google.android.material.card.MaterialCardView
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:orientation="vertical"
-					android:padding="16dp">
-					<TextView
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:text="Rewards over time"
-						android:textSize="16sp"
-						android:textStyle="bold"
-						android:textColor="@color/colorTextPrimary" />
-					<com.github.mikephil.charting.charts.LineChart
-						android:id="@+id/reward_chart"
-						android:layout_width="match_parent"
-						android:layout_height="220dp"
-						android:layout_marginTop="8dp" />
-				</LinearLayout>
-			</com.google.android.material.card.MaterialCardView>
-			<com.google.android.material.card.MaterialCardView
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="12dp"
-				app:cardBackgroundColor="@color/colorSurface"
-				app:cardCornerRadius="20dp"
-				app:cardElevation="2dp"
-				app:strokeWidth="1dp"
-				app:strokeColor="@color/colorCardStroke">
-				<LinearLayout
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:orientation="vertical"
-					android:padding="16dp">
-					<TextView
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:text="Amount in HARV"
-						android:textSize="12sp"
-						android:textColor="@color/colorTextSecondary" />
-					<EditText
-						android:id="@+id/et_amount"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="4dp"
-						android:hint="0.00"
-						android:inputType="numberDecimal"
-						android:textColor="@color/colorTextPrimary"
-						android:textColorHint="@color/colorTextTertiary" />
+					android:layout_marginTop="12dp"
+					app:cardBackgroundColor="@color/colorSurface"
+					app:cardCornerRadius="20dp"
+					app:cardElevation="2dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
 					<LinearLayout
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:layout_marginTop="8dp"
-						android:orientation="horizontal">
+						android:orientation="vertical"
+						android:padding="16dp">
+						<TextView
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:text="Your stake"
+							android:textSize="12sp"
+							android:textColor="@color/colorTextSecondary" />
+						<TextView
+							android:id="@+id/tv_staked"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:fontFamily="monospace"
+							android:text="0.0000 HARV"
+							android:textSize="28sp"
+							android:textStyle="bold"
+							android:textColor="@color/colorTextPrimary" />
+						<TextView
+							android:id="@+id/tv_daily_pct"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="—"
+							android:textSize="14sp"
+							android:textStyle="bold"
+							android:textColor="@color/colorSuccess" />
+						<TextView
+							android:id="@+id/tv_unclaimed"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="8dp"
+							android:fontFamily="monospace"
+							android:text="Unclaimed  0.0000 HARV"
+							android:textSize="14sp"
+							android:textColor="@color/colorTextPrimary" />
+						<TextView
+							android:id="@+id/tv_apy"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:text="Current est. pool APY  —"
+							android:textSize="14sp"
+							android:textColor="@color/colorAccent" />
+						<TextView
+							android:id="@+id/tv_pool"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="8dp"
+							android:textSize="12sp"
+							android:textColor="@color/colorTextSecondary" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+
+				<com.google.android.material.card.MaterialCardView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="12dp"
+					app:cardBackgroundColor="@color/colorSurface"
+					app:cardCornerRadius="20dp"
+					app:cardElevation="2dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical"
+						android:padding="16dp">
+						<LinearLayout
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:gravity="center_vertical"
+							android:orientation="horizontal">
+							<TextView
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:layout_weight="1"
+								android:text="Rewards overview"
+								android:textSize="16sp"
+								android:textStyle="bold"
+								android:textColor="@color/colorTextPrimary" />
+							<TextView android:id="@+id/chip_7d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="6dp" android:text="7D" android:textStyle="bold" android:textColor="@color/colorAccent" />
+							<TextView android:id="@+id/chip_1m" android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="6dp" android:text="1M" android:textColor="@color/colorTextSecondary" />
+							<TextView android:id="@+id/chip_3m" android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="6dp" android:text="3M" android:textColor="@color/colorTextSecondary" />
+							<TextView android:id="@+id/chip_all" android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="6dp" android:text="ALL" android:textColor="@color/colorTextSecondary" />
+						</LinearLayout>
+						<com.github.mikephil.charting.charts.LineChart
+							android:id="@+id/reward_chart"
+							android:layout_width="match_parent"
+							android:layout_height="200dp"
+							android:layout_marginTop="8dp" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+
+				<com.google.android.material.card.MaterialCardView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="12dp"
+					app:cardBackgroundColor="@color/colorSurface"
+					app:cardCornerRadius="20dp"
+					app:cardElevation="2dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical"
+						android:padding="16dp">
+						<TextView
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:text="Stake HARV"
+							android:textSize="16sp"
+							android:textStyle="bold"
+							android:textColor="@color/colorTextPrimary" />
+						<TextView
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:text="One balance. It earns a share of 10% of every block."
+							android:textSize="13sp"
+							android:textColor="@color/colorTextSecondary" />
+						<LinearLayout
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="12dp"
+							android:gravity="center_vertical"
+							android:orientation="horizontal">
+							<EditText
+								android:id="@+id/et_amount"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:layout_weight="1"
+								android:fontFamily="monospace"
+								android:hint="Amount"
+								android:inputType="numberDecimal"
+								android:textColor="@color/colorTextPrimary"
+								android:textColorHint="@color/colorTextTertiary" />
+							<com.google.android.material.button.MaterialButton
+								android:id="@+id/btn_max"
+								style="@style/Widget.MaterialComponents.Button.TextButton"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="MAX"
+								android:textAllCaps="true" />
+						</LinearLayout>
+						<TextView
+							android:id="@+id/tv_available"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:text="Available  —"
+							android:textSize="12sp"
+							android:textColor="@color/colorTextSecondary" />
+						<TextView
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="12dp"
+							android:text="Primary stake type"
+							android:textSize="12sp"
+							android:textStyle="bold"
+							android:textColor="@color/colorTextSecondary" />
+						<TextView
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="4dp"
+							android:padding="12dp"
+							android:background="@drawable/bg_p2p_input"
+							android:text="Liquid (7-day cooldown)\nStake weight: 1x"
+							android:textColor="@color/colorTextPrimary" />
+						<TextView
+							android:id="@+id/tv_monthly"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="12dp"
+							android:fontFamily="monospace"
+							android:text="~ 0 HARV monthly, at your current share"
+							android:textSize="13sp"
+							android:textColor="@color/colorTextPrimary" />
 						<com.google.android.material.button.MaterialButton
 							android:id="@+id/btn_stake"
-							android:layout_width="0dp"
+							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
-							android:layout_weight="1"
-							android:layout_marginEnd="8dp"
-							android:text="Stake"
+							android:layout_marginTop="12dp"
+							android:text="Stake HARV"
 							android:textAllCaps="false" />
 						<com.google.android.material.button.MaterialButton
 							android:id="@+id/btn_unstake"
 							style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-							android:layout_width="0dp"
+							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
-							android:layout_weight="1"
+							android:layout_marginTop="8dp"
+							android:text="Unstake"
+							android:textAllCaps="false" />
+						<TextView
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="8dp"
+							android:gravity="center"
+							android:text="Unbonding process takes 7 days."
+							android:textSize="12sp"
+							android:textColor="@color/colorTextSecondary" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/page_positions"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:visibility="gone">
+				<com.google.android.material.card.MaterialCardView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="12dp"
+					app:cardBackgroundColor="@color/colorSurface"
+					app:cardCornerRadius="20dp"
+					app:cardElevation="2dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke">
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical"
+						android:padding="16dp">
+						<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Total staked" android:textSize="12sp" android:textColor="@color/colorTextSecondary" />
+						<TextView android:id="@+id/pos_total" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:text="0.0000 HARV" android:textSize="26sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" />
+						<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Unclaimed rewards" android:textSize="12sp" android:textColor="@color/colorTextSecondary" />
+						<TextView android:id="@+id/pos_unclaimed" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:text="0.0000 HARV" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" />
+						<com.google.android.material.button.MaterialButton
+							android:id="@+id/btn_claim"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="12dp"
+							android:text="Claim now"
+							android:textAllCaps="false" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<com.google.android.material.card.MaterialCardView
+					android:id="@+id/active_card"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="12dp"
+					app:cardBackgroundColor="@color/colorSurface"
+					app:cardCornerRadius="20dp"
+					app:cardElevation="2dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorSuccess">
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical"
+						android:padding="16dp">
+						<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Active (earning)" android:textStyle="bold" android:textColor="@color/colorSuccess" />
+						<TextView android:id="@+id/tv_active_amount" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:fontFamily="monospace" android:text="0.0000 HARV" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" />
+						<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Stake type: Liquid (1x weight)" android:textSize="13sp" android:textColor="@color/colorTextSecondary" />
+						<TextView android:id="@+id/tv_active_monthly" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:fontFamily="monospace" android:textSize="13sp" android:textColor="@color/colorTextPrimary" />
+						<com.google.android.material.button.MaterialButton
+							android:id="@+id/btn_active_unstake"
+							style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="12dp"
 							android:text="Unstake"
 							android:textAllCaps="false" />
 					</LinearLayout>
-				</LinearLayout>
-			</com.google.android.material.card.MaterialCardView>
-			<com.google.android.material.button.MaterialButton
-				android:id="@+id/btn_claim"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="12dp"
-				android:text="Claim rewards"
-				android:textAllCaps="false" />
-			<LinearLayout
-				android:id="@+id/unbonding_list"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="12dp"
-				android:orientation="vertical" />
+				</com.google.android.material.card.MaterialCardView>
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="16dp"
+					android:text="Unbonding and withdrawals"
+					android:textSize="16sp"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextPrimary" />
+				<LinearLayout
+					android:id="@+id/unbonding_list"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical" />
+			</LinearLayout>
 			<TextView
 				android:id="@+id/tv_status"
 				android:layout_width="match_parent"
@@ -191,13 +355,6 @@
 				android:layout_marginTop="8dp"
 				android:textSize="12sp"
 				android:textColor="@color/colorTextSecondary" />
-			<TextView
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="8dp"
-				android:text="Minimum first stake is 1 HARV. Unstaking returns after 7 days and stops earning immediately."
-				android:textSize="12sp"
-				android:textColor="@color/colorTextTertiary" />
 		</LinearLayout>
 	</androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

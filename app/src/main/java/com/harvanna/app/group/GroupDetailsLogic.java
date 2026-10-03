@@ -57,6 +57,7 @@ public class GroupDetailsLogic {
     private String groupType = "";
     private String groupWalletAddress = "";
     private boolean isAdmin = false;
+    private GroupIdentity identity = new GroupIdentity("", "", "", GroupIdentity.Kind.LEGACY_OFFCHAIN);
     private Map<String, Object> groupData = new HashMap<>();
     private double contributionAmount = 0;
     private int totalSlots = 0;
@@ -123,6 +124,7 @@ public class GroupDetailsLogic {
     private void _applyGroupData(Map<String, Object> data, final TextView btnPayout,
                                  final TextView btnLoanOrTransfer, final ViewBinder headerBinder) {
         groupData = data;
+        identity = GroupIdentityResolver.resolve(groupId, data);
         groupType = str(groupData, "groupType", "");
         groupWalletAddress = str(groupData, "groupWalletAddress",
                 str(groupData, "group_wallet", ""));
@@ -132,7 +134,7 @@ public class GroupDetailsLogic {
         String creator = str(groupData, "creatorId", str(groupData, "adminUid", ""));
         String uid = FirebaseAuth.getInstance().getCurrentUser() != null
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
-        isAdmin = !uid.isEmpty() && uid.equals(creator);
+        isAdmin = !identity.onChain() && !uid.isEmpty() && uid.equals(creator);
 
         ui.runOnUi(new Runnable() {
             @Override
@@ -141,6 +143,26 @@ public class GroupDetailsLogic {
                 wireFooter(btnPayout, btnLoanOrTransfer);
                 refreshGroupWalletBalance(null);
             }
+        });
+        if (!identity.onChain()) return;
+        final String wallet = ui.getMemberWalletAddress();
+        GroupRepository.loadProtocol(identity, wallet, (state, protocolCreator, escrow, raw, limit, round, callerIsCreator) -> {
+            if (!escrow.isEmpty()) groupWalletAddress = escrow;
+            if (raw > 0) contributionAmount = com.harvanna.app.wallet.BalanceFormatter.rawToHarv(raw);
+            if (limit > 0) totalSlots = limit;
+            isAdmin = callerIsCreator;
+            groupData.put("protocolState", state);
+            groupData.put("protocolCreator", protocolCreator);
+            groupData.put("family", identity.family);
+            groupData.put("nodeGroupId", identity.nodeGroupId);
+            if (round > 0) groupData.put("currentRound", round);
+            ui.runOnUi(new Runnable() {
+                @Override
+                public void run() {
+                    if (headerBinder != null) headerBinder.bind(groupData, isAdmin);
+                    wireFooter(btnPayout, btnLoanOrTransfer);
+                }
+            });
         });
     }
 

@@ -69,13 +69,33 @@ public final class GroupPayoutManager {
                 GroupValidation.requireUid(currentUid(), "Not signed in."),
                 GroupValidation.requireGroupId(groupId),
                 GroupValidation.requireValidWallet(requesterWallet, "Member wallet"),
-                GroupValidation.requirePositiveAmount(amountHarv),
-                GroupValidation.requireSlot(slot)
+                GroupValidation.requirePositiveAmount(amountHarv)
         );
         if (err != null) {
             callback.onError(err);
             return;
         }
+        GroupRepository.classify(context, groupId, new GroupRepository.Classified() {
+            @Override public void onError(String error) { callback.onError(error); }
+            @Override public void onIdentity(GroupIdentity id) {
+                if (id.onChain()) {
+                    GroupRepository.requestPayout(context, id, requesterWallet.trim(), new com.harvanna.app.sync.NodeGroupClient.Callback() {
+                        @Override public void onSuccess(org.json.JSONObject json) {
+                            callback.onSuccess("The network accepted the disbursement request.");
+                        }
+                        @Override public void onError(String error) { callback.onError(error); }
+                    });
+                    return;
+                }
+                String slotErr = GroupValidation.requireSlot(slot);
+                if (slotErr != null) { callback.onError(slotErr); return; }
+                submitLegacyPayout(context, groupId, requesterWallet, amountHarv, slot, callback);
+            }
+        });
+    }
+
+    private static void submitLegacyPayout(Context context, String groupId, String requesterWallet,
+                                           double amountHarv, int slot, Callback callback) {
         String uid = currentUid();
 
         Map<String, Object> fields = new HashMap<>();
@@ -196,6 +216,22 @@ public final class GroupPayoutManager {
             callback.onError("Transfer handler missing.");
             return;
         }
+        GroupRepository.classify(context, groupId, new GroupRepository.Classified() {
+            @Override public void onError(String error) { callback.onError(error); }
+            @Override public void onIdentity(GroupIdentity id) {
+                if (id.onChain()) {
+                    callback.onError("This group moves money on the network. Approving an app payout would not follow the protocol.");
+                    return;
+                }
+                approveLegacy(context, groupId, requestId, groupWalletAddress, memberWalletAddress, amountHarv, adminUid, transferExecutor, callback);
+            }
+        });
+    }
+
+    private static void approveLegacy(Context context, String groupId, String requestId,
+                                      String groupWalletAddress, String memberWalletAddress,
+                                      double amountHarv, String adminUid,
+                                      GroupWalletTransfer transferExecutor, Callback callback) {
 
         // THE FIX: re-fetch the request and confirm it's actually still
         // PENDING before touching real money — previously this executed

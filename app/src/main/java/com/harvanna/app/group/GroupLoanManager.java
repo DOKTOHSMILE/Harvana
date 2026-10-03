@@ -89,6 +89,30 @@ public final class GroupLoanManager {
             callback.onError(err);
             return;
         }
+        GroupRepository.classify(context, groupId, new GroupRepository.Classified() {
+            @Override public void onError(String error) { callback.onError(error); }
+            @Override public void onIdentity(GroupIdentity id) {
+                if (id.onChain()) {
+                    GroupRepository.requestLoan(context, id, borrowerWallet, principalHarv, interestPeriod,
+                            new com.harvanna.app.sync.NodeGroupClient.Callback() {
+                                @Override public void onSuccess(org.json.JSONObject json) {
+                                    String loanId = json.optString("loanId", "");
+                                    callback.onSuccess(loanId.isEmpty()
+                                            ? "The network accepted the loan request."
+                                            : "The network accepted the loan request " + loanId + ".");
+                                }
+                                @Override public void onError(String error) { callback.onError(error); }
+                            });
+                    return;
+                }
+                submitLegacyLoan(context, groupId, borrowerWallet, principalHarv, interestRatePercent, interestPeriod, note, callback);
+            }
+        });
+    }
+
+    private static void submitLegacyLoan(Context context, String groupId, String borrowerWallet,
+                                         double principalHarv, double interestRatePercent,
+                                         String interestPeriod, String note, Callback callback) {
 
         String uid = currentUid();
         String period = (interestPeriod != null && !interestPeriod.trim().isEmpty())

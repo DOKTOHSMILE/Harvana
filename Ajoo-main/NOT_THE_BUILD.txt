@@ -1,0 +1,2 @@
+This nested tree is not a Gradle module. settings.gradle includes only :app at the repository root.
+Do not edit copies of group classes here. The app under /app is the build.

@@ -67,11 +67,7 @@ public final class NodeGroupClient {
 
     /** Family of a group id, from the node's fixed id prefixes. */
     public static String familyOf(String groupId) {
-        if (groupId == null) return "";
-        if (groupId.startsWith("CIRC-")) return "CIRCLE";
-        if (groupId.startsWith("ACCUM-")) return "ACCUM";
-        if (groupId.startsWith("FIXED-")) return "FIXED";
-        return "";
+        return com.harvanna.app.group.GroupKinds.familyOf(groupId);
     }
 
     // ═════════════════════════════ CIRCLE ═════════════════════════════

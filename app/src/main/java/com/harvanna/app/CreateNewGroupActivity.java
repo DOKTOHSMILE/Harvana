@@ -1489,6 +1489,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		
 		newGroupMap = new HashMap<>();
 		newGroupMap.put("groupId", newGroupId);
+		newGroupMap.put("firestoreDocId", newGroupId);
 		newGroupMap.put("timestamp", timestamp);
 		newGroupMap.put("groupName", group_name_edittext1.getText().toString().trim());
 		newGroupMap.put("groupType", groupTypeString.trim());
@@ -1546,6 +1547,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		
 		if (pendingCircleId != null) {
 			newGroupMap.put("nodeGroupId", pendingCircleId);
+			newGroupMap.put("family", com.harvanna.app.group.GroupKinds.familyOf(pendingCircleId));
 			if (pendingCircleId.startsWith("CIRC-")) newGroupMap.put("circleId", pendingCircleId);
 			newGroupMap.put("onChain", true);
 		}

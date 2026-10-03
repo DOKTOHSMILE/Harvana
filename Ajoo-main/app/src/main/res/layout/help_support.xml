@@ -152,7 +152,7 @@
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="6dp"
-							android:text="HARV (HARV) is Harvanna's own token, used for contributions and payouts inside the app. You can deposit into your wallet, or mine HARV directly using the separate Harvanna Node Miner app."
+							android:text="HARV (HARV) is Harvana's own token, used for contributions and payouts inside the app. You can deposit into your wallet, or mine HARV directly using the separate Harvana Node Miner app."
 							android:textSize="13sp"
 							android:textColor="@color/colorTextSecondary"
 							android:lineSpacingExtra="3dp" />
@@ -182,7 +182,7 @@
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="6dp"
-							android:text="Your group's own rules and penalty bylaws apply — check Harvanna Rules &amp; Guidelines from a group's settings for its specific terms. Missed payments also affect your trust score."
+							android:text="Your group's own rules and penalty bylaws apply — check Harvana Rules &amp; Guidelines from a group's settings for its specific terms. Missed payments also affect your trust score."
 							android:textSize="13sp"
 							android:textColor="@color/colorTextSecondary"
 							android:lineSpacingExtra="3dp" />
@@ -237,7 +237,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="2dp"
-							android:text="support\@harvanna.app"
+							android:text="support\@harvana.app"
 							android:textSize="13sp"
 							android:textColor="@color/colorAccent" />
 					</LinearLayout>

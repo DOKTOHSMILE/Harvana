@@ -14,7 +14,7 @@ The app no longer publishes Learn Hub articles itself. It writes a submission, a
 - Everything in the phone screen (same patterns, so a tampered app gains nothing).
 - Links: allow-list or reputation check; reject shorteners, IP-address links, lookalike domains of harvannaprotocol.com, and wallet-drainer patterns; resolve redirects.
 - Promotion: reject or hold posts that push a token, group, exchange or channel with a referral or contact call-to-action (phone numbers, handles, invite links).
-- Impersonation: names or claims of the Harvanna team, moderators or "support".
+- Impersonation: names or claims of the Harvana team, moderators or "support".
 - Financial claims: guaranteed or fixed returns, "double your money", "insider" tips.
 - Image: fetch the cover image (size and type limits) and hold it if it fails to load or is not an image.
 - Duplicates: same or near-identical text from the same or other authors (flood/spam).

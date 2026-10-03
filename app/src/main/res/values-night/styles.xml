@@ -3,7 +3,7 @@
 
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Plain TextViews (titles, subtitles) use the primary text colour instead of a washed-out default -->
-        <item name="android:textViewStyle">@style/HarvannaTextView</item>
+        <item name="android:textViewStyle">@style/HarvanaTextView</item>
         <item name="appBarColor">@color/colorSurface</item>
         <item name="onAppBarColor">@color/colorTextPrimary</item>
         <item name="colorSecondary">@color/colorAccent</item>
@@ -36,9 +36,9 @@
         <item name="android:statusBarColor">?attr/appBarColor</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowBackground">@color/colorBackground</item>
-        <item name="alertDialogTheme">@style/HarvannaAlertDialog</item>
-        <item name="materialAlertDialogTheme">@style/HarvannaAlertDialog</item>
-        <item name="bottomSheetDialogTheme">@style/HarvannaBottomSheetDialog</item>
+        <item name="alertDialogTheme">@style/HarvanaAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/HarvanaAlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/HarvanaBottomSheetDialog</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Light">
@@ -58,7 +58,7 @@
         <item name="colorControlNormal">@color/colorTextPrimary</item>
     </style>
 
-    <style name="HarvannaTextView" parent="android:Widget.TextView">
+    <style name="HarvanaTextView" parent="android:Widget.TextView">
         <item name="android:textColor">@color/colorTextPrimary</item>
     </style>
 </resources>

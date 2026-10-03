@@ -43,7 +43,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="6dp"
 				android:layout_marginBottom="16dp"
-				android:text="Lock HARV collateral to unlock buyer trust, higher trading visibility, and verified merchant privileges on the Harvanna P2P market."
+				android:text="Lock HARV collateral to unlock buyer trust, higher trading visibility, and verified merchant privileges on the Harvana P2P market."
 				android:textSize="13sp"
 				android:textColor="@color/colorP2pTextMuted"
 				android:lineSpacingExtra="3dp" />
@@ -209,7 +209,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="8dp"
-						android:text="• Instant Buyer Trust: Users prefer trading with insured merchants because your collateral protects them against bad faith actors.\n\n• Isolated Security: Your collateral is locked safely on-chain via Harvanna Protocol and remains separate from your routine available trading funds.\n\n• Withdrawal Flexibility: You can unlock and withdraw your collateral anytime you have zero active offers or pending trades."
+						android:text="• Instant Buyer Trust: Users prefer trading with insured merchants because your collateral protects them against bad faith actors.\n\n• Isolated Security: Your collateral is locked safely on-chain via Harvana Protocol and remains separate from your routine available trading funds.\n\n• Withdrawal Flexibility: You can unlock and withdraw your collateral anytime you have zero active offers or pending trades."
 						android:textColor="@color/colorP2pTextMuted"
 						android:textSize="12.5sp"
 						android:lineSpacingExtra="4dp" />

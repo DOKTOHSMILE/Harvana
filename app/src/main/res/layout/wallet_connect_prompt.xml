@@ -20,7 +20,7 @@
 			android:layout_marginBottom="20dp"
 			android:scaleType="fitCenter"
 			android:src="@drawable/ic_launcher"
-			android:contentDescription="Harvanna" />
+			android:contentDescription="Harvana" />
 		<TextView
 			android:id="@+id/tv_requesting_app"
 			android:focusable="false"

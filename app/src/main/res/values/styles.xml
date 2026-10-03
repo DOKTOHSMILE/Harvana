@@ -3,7 +3,7 @@
 
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Plain TextViews (titles, subtitles) use the primary text colour instead of a washed-out default -->
-        <item name="android:textViewStyle">@style/HarvannaTextView</item>
+        <item name="android:textViewStyle">@style/HarvanaTextView</item>
         <item name="appBarColor">@color/colorAccent</item>
         <item name="onAppBarColor">@color/colorTextOnAccent</item>
         <item name="colorSecondary">@color/colorAccent</item>
@@ -33,9 +33,9 @@
         <item name="android:statusBarColor">?attr/appBarColor</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowBackground">@color/colorBackground</item>
-        <item name="alertDialogTheme">@style/HarvannaAlertDialog</item>
-        <item name="materialAlertDialogTheme">@style/HarvannaAlertDialog</item>
-        <item name="bottomSheetDialogTheme">@style/HarvannaBottomSheetDialog</item>
+        <item name="alertDialogTheme">@style/HarvanaAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/HarvanaAlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/HarvanaBottomSheetDialog</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Light">
@@ -57,7 +57,7 @@
 
     <!-- colorPrimary is ALWAYS the accent. Night used to map it to
          colorSurface so Material Confirm/Cancel text vanished. -->
-    <style name="HarvannaAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+    <style name="HarvanaAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
         <item name="colorPrimary">@color/colorAccent</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorSurface">@color/colorSurface</item>
@@ -66,17 +66,17 @@
         <item name="android:textColorPrimary">@color/colorTextPrimary</item>
         <item name="android:textColor">@color/colorTextPrimary</item>
         <item name="android:windowBackground">@color/colorSurface</item>
-        <item name="buttonBarPositiveButtonStyle">@style/HarvannaDialogButton</item>
-        <item name="buttonBarNegativeButtonStyle">@style/HarvannaDialogButton</item>
-        <item name="buttonBarNeutralButtonStyle">@style/HarvannaDialogButton</item>
+        <item name="buttonBarPositiveButtonStyle">@style/HarvanaDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/HarvanaDialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/HarvanaDialogButton</item>
     </style>
 
-    <style name="HarvannaDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+    <style name="HarvanaDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
         <item name="android:textColor">@color/colorAccent</item>
         <item name="android:minHeight">48dp</item>
     </style>
 
-    <style name="HarvannaBottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+    <style name="HarvanaBottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:background">@android:color/transparent</item>
@@ -88,15 +88,15 @@
         <item name="colorOnSurface">@color/colorTextPrimary</item>
         <item name="colorOnSurfaceVariant">@color/colorTextSecondary</item>
         <item name="android:textColorPrimary">@color/colorTextPrimary</item>
-        <item name="bottomSheetStyle">@style/HarvannaBottomSheetStyle</item>
+        <item name="bottomSheetStyle">@style/HarvanaBottomSheetStyle</item>
     </style>
 
-    <style name="HarvannaBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
+    <style name="HarvanaBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
         <item name="backgroundTint">?attr/colorSurface</item>
-        <item name="shapeAppearanceOverlay">@style/HarvannaBottomSheetShape</item>
+        <item name="shapeAppearanceOverlay">@style/HarvanaBottomSheetShape</item>
     </style>
 
-    <style name="HarvannaBottomSheetShape" parent="">
+    <style name="HarvanaBottomSheetShape" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopLeft">20dp</item>
         <item name="cornerSizeTopRight">20dp</item>
@@ -123,12 +123,12 @@
         <item name="colorControlActivated">@color/colorP2pAccent</item>
         <item name="android:navigationBarColor">@color/colorP2pBg</item>
         <item name="colorOnPrimary">@color/colorP2pOnAccent</item>
-        <item name="alertDialogTheme">@style/HarvannaP2pAlertDialog</item>
-        <item name="materialAlertDialogTheme">@style/HarvannaP2pAlertDialog</item>
-        <item name="bottomSheetDialogTheme">@style/HarvannaP2pBottomSheetDialog</item>
+        <item name="alertDialogTheme">@style/HarvanaP2pAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/HarvanaP2pAlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/HarvanaP2pBottomSheetDialog</item>
     </style>
 
-    <style name="HarvannaP2pAlertDialog" parent="HarvannaAlertDialog">
+    <style name="HarvanaP2pAlertDialog" parent="HarvanaAlertDialog">
         <item name="colorPrimary">@color/colorP2pAccent</item>
         <item name="colorAccent">@color/colorP2pAccent</item>
         <item name="colorSurface">@color/colorP2pSurface</item>
@@ -136,17 +136,17 @@
         <item name="colorOnSurface">@color/colorP2pTextPrimary</item>
         <item name="android:textColorPrimary">@color/colorP2pTextPrimary</item>
         <item name="android:windowBackground">@color/colorP2pSurface</item>
-        <item name="buttonBarPositiveButtonStyle">@style/HarvannaP2pDialogButton</item>
-        <item name="buttonBarNegativeButtonStyle">@style/HarvannaP2pDialogButton</item>
-        <item name="buttonBarNeutralButtonStyle">@style/HarvannaP2pDialogButton</item>
+        <item name="buttonBarPositiveButtonStyle">@style/HarvanaP2pDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/HarvanaP2pDialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/HarvanaP2pDialogButton</item>
     </style>
 
-    <style name="HarvannaP2pDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+    <style name="HarvanaP2pDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
         <item name="android:textColor">@color/colorP2pAccent</item>
         <item name="android:minHeight">48dp</item>
     </style>
 
-    <style name="HarvannaP2pBottomSheetDialog" parent="HarvannaBottomSheetDialog">
+    <style name="HarvanaP2pBottomSheetDialog" parent="HarvanaBottomSheetDialog">
         <item name="colorPrimary">@color/colorP2pAccent</item>
         <item name="colorAccent">@color/colorP2pAccent</item>
         <item name="colorSurface">@color/colorP2pSurface</item>
@@ -154,12 +154,12 @@
         <item name="colorOnSurface">@color/colorP2pTextPrimary</item>
         <item name="colorOnSurfaceVariant">@color/colorP2pTextSecondary</item>
         <item name="android:textColorPrimary">@color/colorP2pTextPrimary</item>
-        <item name="bottomSheetStyle">@style/HarvannaP2pBottomSheetStyle</item>
+        <item name="bottomSheetStyle">@style/HarvanaP2pBottomSheetStyle</item>
     </style>
 
-    <style name="HarvannaP2pBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
+    <style name="HarvanaP2pBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
         <item name="backgroundTint">@color/colorP2pSurface</item>
-        <item name="shapeAppearanceOverlay">@style/HarvannaBottomSheetShape</item>
+        <item name="shapeAppearanceOverlay">@style/HarvanaBottomSheetShape</item>
     </style>
 
     <style name="P2pSectionLabel">
@@ -254,7 +254,7 @@
         <item name="android:layout_marginBottom">6dp</item>
     </style>
 
-    <style name="HarvannaTextView" parent="android:Widget.TextView">
+    <style name="HarvanaTextView" parent="android:Widget.TextView">
         <item name="android:textColor">@color/colorTextPrimary</item>
     </style>
 </resources>

@@ -62,7 +62,7 @@
 					android:id="@+id/textview7"
 					android:layout_width="0dp"
 					android:layout_height="wrap_content"
-					android:text="Enter your 12-word recovery phrase in the correct numerical order to restore access to your Harvanna wallet."
+					android:text="Enter your 12-word recovery phrase in the correct numerical order to restore access to your Harvana wallet."
 					android:textSize="13sp"
 					android:layout_weight="1"
 					android:focusable="false"

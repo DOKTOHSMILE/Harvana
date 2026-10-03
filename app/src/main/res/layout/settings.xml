@@ -1176,7 +1176,7 @@
 							android:background="@color/colorDivider"
 							android:layout_marginStart="66dp" />
 						<LinearLayout
-							android:id="@+id/rowAboutHarvanna"
+							android:id="@+id/rowAboutHarvana"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:padding="14dp"
@@ -1204,7 +1204,7 @@
 									android:id="@+id/textview39"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="About Harvanna"
+									android:text="About Harvana"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
 									android:textSize="14.5sp" />
@@ -1212,7 +1212,7 @@
 									android:id="@+id/textview40"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="Learn more about Harvanna"
+									android:text="Learn more about Harvana"
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
@@ -1335,7 +1335,7 @@
 					android:layout_height="wrap_content"
 					android:layout_marginTop="20dp"
 					android:gravity="center_horizontal|center_vertical"
-					android:text="Harvanna"
+					android:text="Harvana"
 					android:textColor="@color/colorTextTertiary"
 					android:textSize="11.5sp" />
 			</LinearLayout>

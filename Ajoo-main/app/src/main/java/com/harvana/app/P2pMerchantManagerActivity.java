@@ -1,0 +1,553 @@
+package com.harvana.app;
+
+import android.animation.*;
+import android.app.*;
+import android.content.*;
+import android.content.res.*;
+import android.graphics.*;
+import android.graphics.drawable.*;
+import android.media.*;
+import android.net.*;
+import android.os.*;
+import android.text.*;
+import android.text.style.*;
+import android.util.*;
+import android.view.*;
+import android.view.View.*;
+import android.view.animation.*;
+import android.widget.*;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import androidx.annotation.*;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.biometric.*;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.*;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.Adapter;
+import androidx.recyclerview.widget.RecyclerView.ViewHolder;
+import com.budiyev.android.codescanner.*;
+import com.bumptech.glide.*;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.button.*;
+import com.google.android.material.card.*;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.storage.*;
+import java.io.*;
+import java.text.*;
+import java.util.*;
+import java.util.regex.*;
+import org.json.*;
+import com.harvana.app.firestore.P2PPaymentDetailsManager;
+import com.harvana.app.sync.HarvanaNodeClient;
+import com.harvana.app.tx.P2PTradeRouter;
+import com.harvana.app.wallet.BalanceFormatter;
+import com.harvana.app.wallet.PinPromptHelper;
+import com.harvana.app.wallet.WalletManager;
+import com.harvana.app.p2p.P2pIds;
+import com.harvana.app.p2p.P2pMoney;
+import com.harvana.app.p2p.ThemedDialogs;
+
+
+public class P2pMerchantManagerActivity extends AppCompatActivity {
+	
+	private Toolbar _toolbar;
+	private AppBarLayout _app_bar;
+	private CoordinatorLayout _coordinator;
+	
+	private LinearLayout merchant_manager_root;
+	private MaterialButton btn_create_offer;
+	private MaterialCardView card_manager_summary;
+	private HorizontalScrollView manager_filter_scroll;
+	private LinearLayout linear244;
+	private RecyclerView recycler_merchant_trades;
+	private LinearLayout layout_manager_empty;
+	private MaterialCardView card_manager_info;
+	private LinearLayout linear239;
+	private TextView textview141;
+	private LinearLayout linear240;
+	private LinearLayout linear241;
+	private LinearLayout linear242;
+	private LinearLayout linear243;
+	private TextView tv_summary_active;
+	private TextView textview142;
+	private TextView tv_summary_locked;
+	private TextView textview143;
+	private TextView tv_summary_completed;
+	private TextView textview144;
+	private LinearLayout manager_filter_container;
+	private TextView filter_manager_all;
+	private TextView filter_manager_active;
+	private TextView filter_manager_matched;
+	private TextView filter_manager_paused;
+	private TextView filter_manager_closed;
+	private TextView tv_manager_section_title;
+	private TextView tv_manager_result_count;
+	private TextView textview145;
+	private TextView textview146;
+	private LinearLayout linear245;
+	private TextView textview147;
+	private TextView tv_manager_info;
+	
+	@Override
+	protected void onCreate(Bundle _savedInstanceState) {
+		super.onCreate(_savedInstanceState);
+		setContentView(R.layout.p2p_merchant_manager);
+		initialize(_savedInstanceState);
+		FirebaseApp.initializeApp(this);
+		initializeLogic();
+	}
+	
+	private void initialize(Bundle _savedInstanceState) {
+		_app_bar = findViewById(R.id._app_bar);
+		_coordinator = findViewById(R.id._coordinator);
+		_toolbar = findViewById(R.id._toolbar);
+		setSupportActionBar(_toolbar);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setHomeButtonEnabled(true);
+		_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View _v) {
+				onBackPressed();
+			}
+		});
+		merchant_manager_root = findViewById(R.id.merchant_manager_root);
+		btn_create_offer = findViewById(R.id.btn_create_offer);
+		card_manager_summary = findViewById(R.id.card_manager_summary);
+		manager_filter_scroll = findViewById(R.id.manager_filter_scroll);
+		linear244 = findViewById(R.id.linear244);
+		recycler_merchant_trades = findViewById(R.id.recycler_merchant_trades);
+		layout_manager_empty = findViewById(R.id.layout_manager_empty);
+		card_manager_info = findViewById(R.id.card_manager_info);
+		linear239 = findViewById(R.id.linear239);
+		textview141 = findViewById(R.id.textview141);
+		linear240 = findViewById(R.id.linear240);
+		linear241 = findViewById(R.id.linear241);
+		linear242 = findViewById(R.id.linear242);
+		linear243 = findViewById(R.id.linear243);
+		tv_summary_active = findViewById(R.id.tv_summary_active);
+		textview142 = findViewById(R.id.textview142);
+		tv_summary_locked = findViewById(R.id.tv_summary_locked);
+		textview143 = findViewById(R.id.textview143);
+		tv_summary_completed = findViewById(R.id.tv_summary_completed);
+		textview144 = findViewById(R.id.textview144);
+		manager_filter_container = findViewById(R.id.manager_filter_container);
+		filter_manager_all = findViewById(R.id.filter_manager_all);
+		filter_manager_active = findViewById(R.id.filter_manager_active);
+		filter_manager_matched = findViewById(R.id.filter_manager_matched);
+		filter_manager_paused = findViewById(R.id.filter_manager_paused);
+		filter_manager_closed = findViewById(R.id.filter_manager_closed);
+		tv_manager_section_title = findViewById(R.id.tv_manager_section_title);
+		tv_manager_result_count = findViewById(R.id.tv_manager_result_count);
+		textview145 = findViewById(R.id.textview145);
+		textview146 = findViewById(R.id.textview146);
+		linear245 = findViewById(R.id.linear245);
+		textview147 = findViewById(R.id.textview147);
+		tv_manager_info = findViewById(R.id.tv_manager_info);
+	}
+	
+	private void initializeLogic() {
+		androidx.appcompat.app.ActionBar ab = getSupportActionBar();
+		int backgroundColor = androidx.core.content.ContextCompat.getColor(this, R.color.colorBackground);
+		
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			final Window window = this.getWindow();
+			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+			com.harvana.app.utils.StatusBarUtil.matchToolbar(this);
+		}
+		
+		myAddress = WalletManager.getActiveWalletAddress(this);
+		
+		adapter = new Recycler_merchant_offersAdapter(visible);
+		recycler_merchant_trades.setLayoutManager(new LinearLayoutManager(this));
+		recycler_merchant_trades.setAdapter(adapter);
+		
+		tv_manager_info.setText("Pausing a listing isn't supported yet — cancel it and post a new one if you need to stop taking new orders temporarily. Cancelling only affects the remaining, unfilled amount; any order already claimed against this listing continues normally.");
+		
+		btn_create_offer.setOnClickListener(v -> _showCreateOfferChoice());
+		
+		_setFilter("ALL", filter_manager_all);
+		filter_manager_all.setOnClickListener(v -> _setFilter("ALL", filter_manager_all));
+		filter_manager_active.setOnClickListener(v -> _setFilter("ACTIVE", filter_manager_active));
+		filter_manager_matched.setOnClickListener(v -> _setFilter("MATCHED", filter_manager_matched));
+		filter_manager_paused.setOnClickListener(v -> _setFilter("PAUSED", filter_manager_paused));
+		filter_manager_closed.setOnClickListener(v -> _setFilter("CLOSED", filter_manager_closed));
+		
+		_loadMine();
+		
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (!allListings.isEmpty() || !allOrders.isEmpty()) _loadMine();
+	}
+	
+
+	public void _MORE() {
+	}
+	private String myAddress = "";
+	private final List<JSONObject> allListings = new ArrayList<>();
+	private final List<JSONObject> allOrders = new ArrayList<>();
+	private final List<JSONObject> visible = new ArrayList<>();
+	private String activeFilter = "ALL";
+	private Recycler_merchant_offersAdapter adapter;
+	
+	private void _showCreateOfferChoice() {
+		// Inflate the custom card layout
+		View dialogView = getLayoutInflater().inflate(R.layout.dialog_create_offer, null);
+		
+		// Build the dialog
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setView(dialogView);
+		AlertDialog dialog = builder.create();
+		
+		// Make the system dialog background transparent so the CardView shadow and corners are visible
+		if (dialog.getWindow() != null) {
+			dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+		}
+		
+		// Set up click listeners
+		View btnSell = dialogView.findViewById(R.id.btn_sell_offer);
+		View btnBuy = dialogView.findViewById(R.id.btn_buy_offer);
+		
+		btnSell.setOnClickListener(v -> {
+			dialog.dismiss();
+			startActivity(new Intent(this, CreateP2pSellOfferActivity.class));
+		});
+		
+		btnBuy.setOnClickListener(v -> {
+			dialog.dismiss();
+			startActivity(new Intent(this, CreateP2pBuyOfferActivity.class));
+		});
+		
+		dialog.show();
+	}
+	
+	private void _loadMine() {
+		if (myAddress == null || myAddress.isEmpty()) {
+			tv_manager_result_count.setText("No wallet found on this device.");
+			return;
+		}
+		P2PTradeRouter.listMine(getApplicationContext(), myAddress, new P2PTradeRouter.Callback() {
+			@Override
+			public void onSuccess(JSONObject result) {
+				List<JSONObject> listings = new ArrayList<>();
+				List<JSONObject> orders = new ArrayList<>();
+				JSONArray arr = result.optJSONArray("listings");
+				if (arr != null) {
+					for (int i = 0; i < arr.length(); i++) {
+						JSONObject entry = arr.optJSONObject(i);
+						if (entry == null) continue;
+						if ("ORDER".equals(entry.optString("recordType", ""))) orders.add(entry);
+						else listings.add(entry);
+					}
+				}
+				runOnUiThread(() -> {
+					allListings.clear();
+					allListings.addAll(listings);
+					allOrders.clear();
+					allOrders.addAll(orders);
+					_applyFilter();
+				});
+			}
+			@Override
+			public void onError(String error) {
+				runOnUiThread(() -> {
+					tv_manager_result_count.setText("Couldn't load: " + error);
+					layout_manager_empty.setVisibility(View.VISIBLE);
+					recycler_merchant_trades.setVisibility(View.GONE);
+				});
+			}
+		});
+	}
+	
+	// ── Filtering ────────────────────────────────────────────────────────
+	
+	private void _setFilter(String filter, TextView selectedTab) {
+		activeFilter = filter;
+		filter_manager_all.setAlpha(0.6f);
+		filter_manager_active.setAlpha(0.6f);
+		filter_manager_matched.setAlpha(0.6f);
+		filter_manager_paused.setAlpha(0.6f);
+		filter_manager_closed.setAlpha(0.6f);
+		selectedTab.setAlpha(1f);
+		_applyFilter();
+	}
+	
+	private void _applyFilter() {
+		visible.clear();
+		int activeCount = 0, matchedCount = 0, closedCount = 0;
+		for (JSONObject listing : allListings) {
+			String status = listing.optString("status", "");
+			long total = listing.optLong("totalAmount", 0);
+			long remaining = listing.optLong("remainingAmount", 0);
+			boolean isOpen = "OPEN".equals(status);
+			boolean hasOrders = remaining < total;
+			boolean isActive = isOpen;
+			boolean isMatched = isOpen && hasOrders;
+			boolean isClosed = !isOpen;
+			
+			if (isActive) activeCount++;
+			if (isMatched) matchedCount++;
+			if (isClosed) closedCount++;
+			
+			boolean include;
+			switch (activeFilter) {
+				case "ACTIVE": include = isActive; break;
+				case "MATCHED": include = isMatched; break;
+				case "PAUSED": include = false; break; // always empty — real, not a bug
+				case "CLOSED": include = isClosed; break;
+				default: include = true;
+			}
+			if (include) visible.add(listing);
+		}
+		
+		tv_summary_active.setText(String.valueOf(activeCount));
+		tv_summary_locked.setText(String.valueOf(matchedCount));
+		tv_summary_completed.setText(String.valueOf(closedCount));
+		tv_manager_result_count.setText(visible.size() + " listing" + (visible.size() == 1 ? "" : "s"));
+		
+		adapter.notifyDataSetChanged();
+		boolean empty = visible.isEmpty();
+		recycler_merchant_trades.setVisibility(empty ? View.GONE : View.VISIBLE);
+		layout_manager_empty.setVisibility(empty ? View.VISIBLE : View.GONE);
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuItem refreshItem = menu.add("Refresh");
+		refreshItem.setIcon(R.drawable.ic_refresh);
+		refreshItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if ("Refresh".contentEquals(item.getTitle())) { _loadMine(); return true; }
+		return super.onOptionsItemSelected(item);
+	}
+	
+	public class Recycler_merchant_offersAdapter extends RecyclerView.Adapter<Recycler_merchant_offersAdapter.ViewHolder> {
+		
+		List<JSONObject> _data;
+		
+		public Recycler_merchant_offersAdapter(List<JSONObject> _arr) {
+			_data = _arr;
+		}
+		
+		@Override
+		public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+			LayoutInflater _inflater = getLayoutInflater();
+			View _v = _inflater.inflate(R.layout.p2p_merchant_offer_item, parent, false);
+			return new ViewHolder(_v);
+		}
+		
+		@Override
+		public void onBindViewHolder(ViewHolder _holder, final int _position) {
+			View _view = _holder.itemView;
+			JSONObject listing = _data.get(_position);
+			
+			final com.google.android.material.card.MaterialCardView card_offer_type = _view.findViewById(R.id.card_offer_type);
+			final TextView tv_offer_type = _view.findViewById(R.id.tv_offer_type);
+			final TextView tv_offer_status = _view.findViewById(R.id.tv_offer_status);
+			final TextView tv_offer_id = _view.findViewById(R.id.tv_offer_id);
+			final TextView tv_offer_amount = _view.findViewById(R.id.tv_offer_amount);
+			final TextView tv_offer_price = _view.findViewById(R.id.tv_offer_price);
+			final TextView tv_offer_fiat_value = _view.findViewById(R.id.tv_offer_fiat_value);
+			final TextView tv_offer_payment_one = _view.findViewById(R.id.tv_offer_payment_one);
+			final TextView tv_offer_payment_two = _view.findViewById(R.id.tv_offer_payment_two);
+			final TextView tv_offer_payment_none = _view.findViewById(R.id.tv_offer_payment_none);
+			final TextView tv_offer_orders_count = _view.findViewById(R.id.tv_offer_orders_count);
+			final TextView tv_offer_created = _view.findViewById(R.id.tv_offer_created);
+			final TextView tv_offer_expiry = _view.findViewById(R.id.tv_offer_expiry);
+			final TextView tv_offer_details = _view.findViewById(R.id.tv_offer_details);
+			final TextView tv_offer_orders_btn = _view.findViewById(R.id.tv_offer_orders_btn);
+			final TextView tv_offer_cancel = _view.findViewById(R.id.tv_offer_cancel);
+			
+			String listingId = P2pIds.listingId(listing);
+			String side = listing.optString("side", "");
+			String status = listing.optString("status", "");
+			double totalHarv = HarvanaNodeClient.toHarvDisplay(listing.optLong("totalAmount", 0));
+			double remainingHarv = HarvanaNodeClient.toHarvDisplay(listing.optLong("remainingAmount", 0));
+			long createdAt = listing.optLong("createdTimestamp", 0);
+			long expiresAt = listing.optLong("expiresAt", 0);
+			boolean isOpen = "OPEN".equals(status);
+			boolean hasOrders = remainingHarv < totalHarv;
+			boolean isSell = "SELL".equals(side);
+			
+			int myOrderCount = 0;
+			for (JSONObject order : allOrders) {
+				if (listingId.equals(order.optString("listingId", ""))) myOrderCount++;
+			}
+			
+			tv_offer_type.setText(isSell ? "SELL" : "BUY");
+			card_offer_type.setCardBackgroundColor(getResources().getColor(isSell ? R.color.colorAccent : R.color.colorError));
+			String stateLabel = !isOpen ? "Closed" : (hasOrders ? "Matched" : "Active");
+			tv_offer_status.setText(stateLabel);
+			tv_offer_id.setText(_shortId(listingId));
+			tv_offer_amount.setText(String.format(Locale.US, ("%.4f / %.4f " + com.harvana.app.CoinInfo.ticker()), remainingHarv, totalHarv));
+			tv_offer_price.setText("Loading…");
+			tv_offer_fiat_value.setText("Loading…");
+			tv_offer_orders_count.setText(myOrderCount + " order" + (myOrderCount == 1 ? "" : "s"));
+			tv_offer_created.setText("Listed " + _formatDate(createdAt));
+			tv_offer_expiry.setText(expiresAt > 0 ? _formatExpiry(expiresAt) : "");
+			tv_offer_payment_one.setVisibility(View.GONE);
+			tv_offer_payment_two.setVisibility(View.GONE);
+			tv_offer_payment_none.setVisibility(View.GONE);
+			
+			final int finalOrderCount = myOrderCount; // lambdas below need an effectively-final capture
+			
+			tv_offer_details.setOnClickListener(v -> ThemedDialogs.show(ThemedDialogs.alert(P2pMerchantManagerActivity.this)
+			.setTitle(_shortId(listingId))
+			.setMessage("Side: " + side + "\nStatus: " + status + "\nTotal: " + BalanceFormatter.smart(totalHarv)
+			+ "\nRemaining: " + BalanceFormatter.smart(remainingHarv)
+			+ "\nListed: " + _formatDate(createdAt)
+			+ (expiresAt > 0 ? "\nExpires: " + _formatDate(expiresAt) : "")
+			+ "\nOrders against this listing: " + finalOrderCount)
+			.setPositiveButton("Close", null)));
+			
+			tv_offer_orders_btn.setText("Orders (" + myOrderCount + ")");
+			tv_offer_orders_btn.setOnClickListener(v -> _showOrdersForListing(listingId, side));
+			
+			tv_offer_cancel.setVisibility(isOpen ? View.VISIBLE : View.GONE);
+			tv_offer_cancel.setOnClickListener(v -> _confirmCancelListing(listingId));
+			
+			_view.setTag(listingId);
+			
+			if (!listingId.isEmpty()) {
+				P2PPaymentDetailsManager.getInstance(getApplicationContext()).get(listingId, new P2PPaymentDetailsManager.DocCallback() {
+					@Override
+					public void onSuccess(Map<String, Object> data) {
+						Object priceObj = data.get("unitPrice");
+						double price = priceObj instanceof Number ? ((Number) priceObj).doubleValue() : -1;
+						Object currencyObj = data.get("currency");
+						String ccy = currencyObj != null && !String.valueOf(currencyObj).trim().isEmpty()
+						? String.valueOf(currencyObj).trim() : com.harvana.app.p2p.P2pCurrencyFilterState.getCurrency();
+						Object methodsObj = data.get("paymentMethods");
+						List<String> labels = new ArrayList<>();
+						if (methodsObj instanceof List) {
+							for (Object m : (List<?>) methodsObj) {
+								if (!(m instanceof Map)) continue;
+								Object primary = ((Map<?, ?>) m).get("primaryField");
+								if (primary != null && !String.valueOf(primary).trim().isEmpty()) labels.add(String.valueOf(primary).trim());
+							}
+						}
+						runOnUiThread(() -> {
+							if (!listingId.equals(_view.getTag())) return;
+							tv_offer_price.setText(price >= 0 ? P2pMoney.perHarv(price, ccy) : "Unavailable");
+							tv_offer_fiat_value.setText(price >= 0 ? P2pMoney.fiat(remainingHarv * price, ccy) : "Unavailable");
+							if (labels.isEmpty()) {
+								tv_offer_payment_none.setVisibility(View.VISIBLE);
+							} else {
+								tv_offer_payment_one.setText(_truncate(labels.get(0)));
+								tv_offer_payment_one.setVisibility(View.VISIBLE);
+								if (labels.size() > 1) {
+									tv_offer_payment_two.setText(_truncate(labels.get(1)));
+									tv_offer_payment_two.setVisibility(View.VISIBLE);
+								}
+							}
+						});
+					}
+					@Override
+					public void onError(String error) {
+						runOnUiThread(() -> {
+							if (!listingId.equals(_view.getTag())) return;
+							tv_offer_price.setText("Unavailable");
+							tv_offer_fiat_value.setText("Unavailable");
+							tv_offer_payment_none.setVisibility(View.VISIBLE);
+						});
+					}
+				});
+			}
+		}
+		
+		@Override
+		public int getItemCount() {
+			return _data.size();
+		}
+		
+		public class ViewHolder extends RecyclerView.ViewHolder {
+			public ViewHolder(View v) {
+				super(v);
+			}
+		}
+	}
+	
+	private void _showOrdersForListing(String listingId, String side) {
+		List<JSONObject> matched = new ArrayList<>();
+		for (JSONObject order : allOrders) {
+			if (listingId.equals(order.optString("listingId", ""))) matched.add(order);
+		}
+		if (matched.isEmpty()) {
+			ThemedDialogs.show(ThemedDialogs.alert(this).setTitle("No orders yet").setMessage("Nobody has claimed against this listing yet.").setPositiveButton("Close", null));
+			return;
+		}
+		String[] labels = new String[matched.size()];
+		for (int i = 0; i < matched.size(); i++) {
+			JSONObject o = matched.get(i);
+			labels[i] = _shortId(P2pIds.orderId(o)) + " — " + o.optString("status", "");
+		}
+		ThemedDialogs.show(ThemedDialogs.alert(this).setTitle("Orders on this listing").setItems(labels, (dialog, which) -> {
+			JSONObject order = matched.get(which);
+			String orderId = P2pIds.orderId(order);
+			boolean iAmSeller = myAddress.equals(order.optString("sellerAddress", ""));
+			Intent intent = new Intent(this, iAmSeller ? P2pSellTradeActivity.class : P2pBuyTradeActivity.class);
+			intent.putExtra("orderId", orderId);
+			startActivity(intent);
+		}));
+	}
+	
+	private void _confirmCancelListing(String listingId) {
+		ThemedDialogs.show(ThemedDialogs.alert(this)
+		.setTitle("Cancel this listing?")
+		.setMessage("This stops new orders against the remaining, unfilled amount. Any order already claimed continues normally and isn't affected.")
+		.setPositiveButton("Cancel Listing", (dialog, which) -> {
+			PinPromptHelper.verifyPinThenProceed(this, () -> {
+				P2PTradeRouter.cancelListing(getApplicationContext(), listingId, myAddress, new P2PTradeRouter.Callback() {
+					@Override
+					public void onSuccess(JSONObject result) {
+						runOnUiThread(() -> _loadMine());
+					}
+					@Override
+					public void onError(String error) {
+						runOnUiThread(() -> Toast.makeText(P2pMerchantManagerActivity.this, "Couldn't cancel: " + error, Toast.LENGTH_LONG).show());
+					}
+				});
+			});
+		})
+		.setNegativeButton("Keep Listing", null));
+	}
+	
+	private static String _truncate(String s) {
+		return s.length() > 12 ? s.substring(0, 11) + "…" : s;
+	}
+	
+	private static String _shortId(String id) {
+		if (id == null || id.length() < 10) return id != null ? id : "";
+		return id.substring(0, 8) + "…";
+	}
+	
+	private static String _formatDate(long epochMs) {
+		if (epochMs <= 0) return "—";
+		return new SimpleDateFormat("MMM d, h:mm a", Locale.US).format(new Date(epochMs));
+	}
+	
+	private static String _formatExpiry(long expiresAtMs) {
+		long remaining = expiresAtMs - System.currentTimeMillis();
+		if (remaining <= 0) return "Expired";
+		long hours = remaining / (3600_000L);
+		if (hours >= 24) return (hours / 24) + "d left";
+		return hours + "h left";
+	}
+	
+	{
+	}
+	
+}

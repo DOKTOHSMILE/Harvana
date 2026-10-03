@@ -1,6 +1,6 @@
-# Harvanna (Ajoo)
+# Harvana (Ajoo)
 
-Android app for Harvanna / Ajoo savings groups. Package: `com.harvanna.app`.
+Android app for Harvana / Ajoo savings groups. Package: `com.harvana.app`.
 
 ## Requirements
 

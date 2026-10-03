@@ -43,7 +43,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="4dp"
 				android:layout_marginBottom="24dp"
-				android:text="Choose what Harvanna notifies you about."
+				android:text="Choose what Harvana notifies you about."
 				android:textColor="@color/colorTextSecondary"
 				android:textSize="13.5sp"
 				android:lineSpacingExtra="3dp" />
@@ -325,7 +325,7 @@
 				android:id="@+id/textview87"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:text="These control whether Harvanna shows you a notification for each type of event. Turning one off doesn't cancel the underlying reminder — it just won't appear as a push notification."
+				android:text="These control whether Harvana shows you a notification for each type of event. Turning one off doesn't cancel the underlying reminder — it just won't appear as a push notification."
 				android:textSize="12sp"
 				android:textColor="@color/colorTextTertiary"
 				android:layout_marginStart="4dp"

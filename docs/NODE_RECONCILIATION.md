@@ -26,7 +26,7 @@ UI has no fields for these. Listing creation will fail signature verification un
 Not guessed.
 
 ## Node actions the app has no client for
-The node defines 41 `getCanonicalMessage()` formats. The app implements none of the `HARVANNA_*_V1` group/Circle/
+The node defines 41 `getCanonicalMessage()` formats. The app implements none of the `HARVANA_*_V1` group/Circle/
 Accumulative/Fixed/GenLoan/staking/referral/identity-link actions (grep finds no such string). Group logic in the
 app is Firestore-only (`GroupPayoutManager`, `GroupLoanManager`, ...), i.e. it is not wired to the on-chain group
 protocol at all. That is a feature build, not a fix, and needs a decision on scope.

@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Harvanna"
+rootProject.name = "Harvana"
 include ':app'

@@ -2,7 +2,7 @@
 
 ## Done in this pass (Tier 0 / Tier 1 constants)
 - T0-1: node base URL and WS base -> `https://harvannaprotocol.com` / `wss://harvannaprotocol.com`.
-  Removed the self-signed IP pin from `network_security_config.xml` and deleted `harvanna_node_cert.pem`
+  Removed the self-signed IP pin from `network_security_config.xml` and deleted `harvana_node_cert.pem`
   (the live host uses a CA cert). No stored-URL migration exists in this app (URL is a constant).
 - T0-2: `AJ0x` -> `HV0x` everywhere (constants, regex validators, layouts hints).
   Left unchanged: `CreateNewGroupActivity.FEE_COLLECTOR_ADDRESS` (unused legacy hex; real HV0x address unknown).
@@ -39,7 +39,7 @@
 - Firebase console: enable Email/Password and Google providers, register SHA fingerprints; T0-5 still open.
 
 ## Firebase setup (T0-5)
-- Package renamed `com.harvanna.app` -> `com.harvanna.app` (applicationId, namespace, sources, manifest authorities). Register `com.harvanna.app` in Firebase.
+- Package renamed `com.harvana.app` -> `com.harvana.app` (applicationId, namespace, sources, manifest authorities). Register `com.harvana.app` in Firebase.
 - `com.harvanna.node.miner` (separate miner app) is still referenced by WalletEarnFragmentActivity; update if the miner is renamed.
 - `com.google.gms.google-services` plugin (4.4.1) added to `app/build.gradle`. The build fails until
   `app/google-services.json` is added (download from Firebase console after registering the app + SHA fingerprints).
@@ -91,8 +91,8 @@ breaking reflection at runtime, Firestore offline persistence syncing after a re
 - Palette: Neon Orange #FF9030 + Charcoal #111827, light and dark (values/ and values-night/), drawable hardcoded
   greens/navys moved to tokens. Text on orange is charcoal (white on #FF9030 is only ~2.2:1). Visual result not
   reviewed on a device.
-- App renamed "Harvanna Wallet"; layout text rebranded (Harvanna -> Harvanna, HARV/Harvannacoin -> HARV). Java string
-  literals still say "HARV"/"Harvanna" in places (not changed; user-visible follow-up). The launcher icon is a generated
+- App renamed "Harvana Wallet"; layout text rebranded (Harvana -> Harvana, HARV/Harvanacoin -> HARV). Java string
+  literals still say "HARV"/"Harvana" in places (not changed; user-visible follow-up). The launcher icon is a generated
   placeholder (orange square, charcoal H).
 - "Home activity" UX/UI redesign, and per-group-type screens: NOT done yet. See docs/GROUP_ENGINE_MAP.md.
 - R8: first release build ran out of memory (512 MB default heap) - raised via gradle.properties. CI evidence:
@@ -119,34 +119,34 @@ Differences from the decisions as stated (found while reading the node; NOT chan
 5. Whether `/listings/open` includes `unitPricePerHarvRaw` per listing was not verified against a running node; if it is
    redacted the reference shows "No market reference yet".
 
-## Package renamed again (29 Sep 2026, urgent): com.harvanna.wallet -> com.harvanna.app
-All sources, tests, manifest authorities, Gradle `applicationId`/`namespace` and docs updated (history: com.harvanna.app -> com.harvanna.wallet -> com.harvanna.app).
-**Firebase action required:** `app/google-services.json` was registered for `com.harvanna.wallet`. I only edited its `package_name` field so
+## Package renamed again (29 Sep 2026, urgent): com.harvana.wallet -> com.harvana.app
+All sources, tests, manifest authorities, Gradle `applicationId`/`namespace` and docs updated (history: com.harvana.app -> com.harvana.wallet -> com.harvana.app).
+**Firebase action required:** `app/google-services.json` was registered for `com.harvana.wallet`. I only edited its `package_name` field so
 the Gradle plugin accepts the build; the `mobilesdk_app_id` and OAuth entries still belong to the OLD Firebase app. Register a new Android app
-`com.harvanna.app` in the Firebase console (with SHA-1/SHA-256 from README/this file's debug key), download the new `google-services.json`, and
+`com.harvana.app` in the Firebase console (with SHA-1/SHA-256 from README/this file's debug key), download the new `google-services.json`, and
 replace this one. Until then email/password may work but Google sign-in will not.
 
 ## App name and Firebase file (29 Sep 2026)
-- App name is now just "Harvanna" (launcher label, main header, about screen).
-- `app/google-services.json` replaced with the owner's file that has a client for `com.harvanna.app`
-  (`1:92873857858:android:7edea0b3ad5cf38d65c6db`). It has NO Android OAuth client (`client_type: 1`) for `com.harvanna.app` yet:
-  the debug SHA-1 (bff2f88297ff53dd1f21bca9e5a36e49011fc55a) was registered on the OLD `com.harvanna.wallet` app entry.
-  Register SHA-1 + SHA-256 on the `com.harvanna.app` entry, re-download, replace this file. Google sign-in stays broken until then.
-  The old `com.harvanna.wallet` entry can be deleted in the console afterwards.
+- App name is now just "Harvana" (launcher label, main header, about screen).
+- `app/google-services.json` replaced with the owner's file that has a client for `com.harvana.app`
+  (`1:92873857858:android:7edea0b3ad5cf38d65c6db`). It has NO Android OAuth client (`client_type: 1`) for `com.harvana.app` yet:
+  the debug SHA-1 (bff2f88297ff53dd1f21bca9e5a36e49011fc55a) was registered on the OLD `com.harvana.wallet` app entry.
+  Register SHA-1 + SHA-256 on the `com.harvana.app` entry, re-download, replace this file. Google sign-in stays broken until then.
+  The old `com.harvana.wallet` entry can be deleted in the console afterwards.
 
 ## Firebase file finalised (29 Sep 2026)
-`app/google-services.json` now contains only `com.harvanna.app` (`1:92873857858:android:7edea0b3ad5cf38d65c6db`) with the Android OAuth client
+`app/google-services.json` now contains only `com.harvana.app` (`1:92873857858:android:7edea0b3ad5cf38d65c6db`) with the Android OAuth client
 for the debug SHA-1 (bff2f88297ff53dd1f21bca9e5a36e49011fc55a) and the web client used by `requestIdToken`. This is the config Google sign-in needs.
 Whether the SHA-256 is also registered is not visible in this file. Still to verify on a device: Google sign-in, and that Email/Password + Google
 providers are enabled in Authentication.
 
 ## Coin ticker and name from the node (29 Sep 2026)
-- New `CoinInfo` (ticker/name), loaded from cache at startup and refreshed from `GET /api/v1/chain/info` (`ticker`). Defaults: HARV / Harvanna.
+- New `CoinInfo` (ticker/name), loaded from cache at startup and refreshed from `GET /api/v1/chain/info` (`ticker`). Defaults: HARV / Harvana.
   The node publishes NO coin name and NO decimals; `CoinInfo` will pick up `coinName`/`name` if the node adds it. Node-side suggestion:
   add `coinName` and `decimals` to `/chain/info`.
-- 194 user-visible string literals in 51 Java files no longer hardcode HARV/Harvanna/Harvannacoin/HarvannaChain: they use `CoinInfo.ticker()`/`name()` or "Harvanna" / "Harvanna Protocol".
-  Left on purpose: class/identifier names, log tags, file-system folder names (`Harvanna`, `Harvanna/media/documents`, so nothing saved by older code is orphaned),
-  and "Harvanna Node Miner" (a separate app with its own package/name).
+- 194 user-visible string literals in 51 Java files no longer hardcode HARV/Harvana/Harvanacoin/HarvanaChain: they use `CoinInfo.ticker()`/`name()` or "Harvana" / "Harvana Protocol".
+  Left on purpose: class/identifier names, log tags, file-system folder names (`Harvana`, `Harvana/media/documents`, so nothing saved by older code is orphaned),
+  and "Harvana Node Miner" (a separate app with its own package/name).
 - Static text in XML layouts says HARV (set earlier); it is not fetched dynamically. If the node ever changes the ticker, Java-built text follows, layout text does not.
 - **Found, not fixed:** `HomeFragmentActivity` and `GroupPaymentFragmentActivity` use a hardcoded `HARV_TO_NGN = 150.0` to show a Naira value. That is a made-up
   rate, so the "NGN" totals (e.g. the asset screen) are not real. The node's mark is the right source but no endpoint exposes it yet; until then these should show no
@@ -155,7 +155,7 @@ providers are enabled in Authentication.
 
 ## The old brand and ticker were removed everywhere (29 Sep 2026)
 Every class, file, resource id/style/layout, string, log tag, preference/database/keystore name, comment, doc, CI artifact name and the Gradle project
-name now use Harvanna / HARV. The two legal documents in `assets` (Privacy Policy, Terms of Service) were renamed and their text rewritten - **the owner
+name now use Harvana / HARV. The two legal documents in `assets` (Privacy Policy, Terms of Service) were renamed and their text rewritten - **the owner
 or counsel should review them**, since a mechanical brand swap changes legal wording. The countries data file was deliberately left alone: it contains the letters
 "ajc" inside real place names.
 
@@ -163,8 +163,8 @@ Consequences to know:
 - **Local storage names changed** (preferences files, keystore alias, offline database, etc.). A device that already has the previous build installed keeps its old
   data on disk but the new build cannot see it: the wallet must be restored from its recovery phrase / Access Card. Do not uninstall or clear data on a device holding
   a wallet you have not backed up.
-- Mechanical name results that need the owner to confirm they exist: the support address is now `support@harvanna.app`; the separate miner app is now expected at package
-  `com.harvanna.node.miner` (the Earn screen launches it); saved-file folder is `Harvanna`.
+- Mechanical name results that need the owner to confirm they exist: the support address is now `support@harvana.app`; the separate miner app is now expected at package
+  `com.harvanna.node.miner` (the Earn screen launches it); saved-file folder is `Harvana`.
 - The repository is still called "Ajoo" on GitHub and git history contains the old names; neither is part of the app.
 
 ## Group wallet card sharing
@@ -235,7 +235,7 @@ The recipient receives contribution x (members - 1), the amount actually collect
 A group created on the node whose Firestore save fails is queued on the phone (`group/GroupSaver`, SharedPreferences `pending_group_saves`). A background job (`group/GroupSaveWorker`, WorkManager, network required, fixed retry times: right away, then after 1, 5, 15 and 30 minutes, then hourly) retries automatically as soon as a connection exists, and the app also retries on every open. Every step uses fixed ids and PATCH writes, so retrying is safe. Node data is never touched by the retry.
 
 ## Firestore: REST replaced by the native SDK
-`GroupFirestoreManager`, `P2PTradeStatsManager`, `P2PPaymentDetailsManager` and `sync/FirestoreSyncManager` now use the native Firestore SDK (like `UserProfileManager`); the hand-written REST/OkHttp calls and typed-value encoding are gone, and `HarvannaConfig` no longer has REST URL helpers. Public APIs and the error strings ("HTTP 404/403/401/400", "Network error") are unchanged; `GroupFirestoreManager` and `P2P*` callbacks still arrive on a background thread, `FirestoreSyncManager` callbacks on the main thread, as before. `FirestoreSyncManager` still hands back REST-shaped JSON strings so its callers (`WalletManager`, `TransactionManager`, ...) are unchanged. Behaviour differences to check on a device: (1) offline persistence means reads can come from the local cache when offline; (2) writes not acknowledged within 15 s are reported as a network error but stay queued in the SDK and sync later; (3) list calls now return every document (REST returned only the first page of 20); (4) `FirestoreSyncManager` now requires a signed-in user (it used to fall back to an unauthenticated API-key request); (5) collection-group and ordered queries need the same Firestore indexes as before.
+`GroupFirestoreManager`, `P2PTradeStatsManager`, `P2PPaymentDetailsManager` and `sync/FirestoreSyncManager` now use the native Firestore SDK (like `UserProfileManager`); the hand-written REST/OkHttp calls and typed-value encoding are gone, and `HarvanaConfig` no longer has REST URL helpers. Public APIs and the error strings ("HTTP 404/403/401/400", "Network error") are unchanged; `GroupFirestoreManager` and `P2P*` callbacks still arrive on a background thread, `FirestoreSyncManager` callbacks on the main thread, as before. `FirestoreSyncManager` still hands back REST-shaped JSON strings so its callers (`WalletManager`, `TransactionManager`, ...) are unchanged. Behaviour differences to check on a device: (1) offline persistence means reads can come from the local cache when offline; (2) writes not acknowledged within 15 s are reported as a network error but stay queued in the SDK and sync later; (3) list calls now return every document (REST returned only the first page of 20); (4) `FirestoreSyncManager` now requires a signed-in user (it used to fall back to an unauthenticated API-key request); (5) collection-group and ordered queries need the same Firestore indexes as before.
 
 ## Theme: app-context palette synced before screens are (re)created
 `ThemeManager.syncAppContext` sets the application context's night flag from the app's own choice (Light / Dark / Follow system) immediately when the mode is chosen, at startup, on the phone's own theme change (component callback) and on every activity lifecycle step. Before, it only followed the visible screen after `onCreate`, so a screen built in code (Notifications, Trust score, Open loans, ...) could use the old palette for its first frame after a live switch. Needs a device check: switch mode in Settings with several screens open, and switch the phone's theme while on "Follow system".
@@ -260,4 +260,4 @@ Opt-in, like messaging apps but privacy-first: with READ_CONTACTS allowed, numbe
 `notify/TxEvents` (pure, tested) turns confirmed history into notifications: money received, money sent, and payments the wallet signed for a circle, savings group, fixed group, trade or loan (recognised from the transaction memo; payouts, refunds, withdrawals, rewards and penalties are named). `notify/WalletTxNotifier` reads the active wallet's last 30 confirmed transactions from the node and posts each new one once (the first run only sets the starting point). It runs with the foreground sync (~90 s), the 15-minute background worker, and immediately when the live socket reports a transaction. Also: "sent, on its way" is posted the moment a send is accepted, and "Payment signed" is posted when the wallet signs and submits a v2 lock for a group or trade. The old Firestore-based incoming watcher is retired. Everything respects the Transaction alerts switch in Notification settings.
 
 ## Side menu (MainDrawer)
-The old three-list popup (index-based adapters, a "KYC coming soon" row, a separate "check for updates" row) is replaced by `MainDrawer`, built in code from sections: profile header (photo, name, @username, opens Profile), Money (wallets, payment methods, backup & recovery, open loans), Community (my groups, invitations, friends, contact card, trust score, write for Learn Hub), Marketplace (P2P market, my trades), Preferences (notification settings, appearance with the current choice, security & PIN, privacy, settings), Help (help & support, terms, privacy policy, about, share), Log out (asks first) and the version (tap for the update note). Removed: KYC coming soon (nothing behind it), "Invite friends" as a bare share row (now Friends plus Share Harvanna). Colours come from UiColors so both themes work. Wallet notifications (received, sent, signed payments) go through the same inbox as everything else, so they already show in the Notifications screen under the Transaction label.
+The old three-list popup (index-based adapters, a "KYC coming soon" row, a separate "check for updates" row) is replaced by `MainDrawer`, built in code from sections: profile header (photo, name, @username, opens Profile), Money (wallets, payment methods, backup & recovery, open loans), Community (my groups, invitations, friends, contact card, trust score, write for Learn Hub), Marketplace (P2P market, my trades), Preferences (notification settings, appearance with the current choice, security & PIN, privacy, settings), Help (help & support, terms, privacy policy, about, share), Log out (asks first) and the version (tap for the update note). Removed: KYC coming soon (nothing behind it), "Invite friends" as a bare share row (now Friends plus Share Harvana). Colours come from UiColors so both themes work. Wallet notifications (received, sent, signed payments) go through the same inbox as everything else, so they already show in the Notifications screen under the Transaction label.

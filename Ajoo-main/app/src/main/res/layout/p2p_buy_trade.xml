@@ -515,7 +515,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:padding="13dp"
-					android:text="Verify the recipient's account details before sending. Harvanna will never ask you to send payment to a different account through chat."
+					android:text="Verify the recipient's account details before sending. Harvana will never ask you to send payment to a different account through chat."
 					android:textSize="11sp" />
 			</com.google.android.material.card.MaterialCardView>
 			<com.google.android.material.card.MaterialCardView
@@ -950,7 +950,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="7dp"
-						android:text="Never share your password, private key, seed phrase or authentication code. Harvanna support will never ask you for them."
+						android:text="Never share your password, private key, seed phrase or authentication code. Harvana support will never ask you for them."
 						android:textSize="10sp" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>

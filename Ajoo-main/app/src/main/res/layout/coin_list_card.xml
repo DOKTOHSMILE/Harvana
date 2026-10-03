@@ -52,7 +52,7 @@
 					android:id="@+id/tv_asset_name"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="Harvanna Coin"
+					android:text="Harvana Coin"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextPrimary"
 					android:textSize="15.5sp"

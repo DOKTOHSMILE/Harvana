@@ -32,7 +32,7 @@
 		
 		<provider
 			android:name="androidx.core.content.FileProvider"
-			android:authorities="com.harvanna.app.fileprovider"
+			android:authorities="com.harvana.app.fileprovider"
 			android:exported="false"
 			android:grantUriPermissions="true">
 			<meta-data
@@ -197,7 +197,7 @@
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
-			android:name=".CreateHarvannaCardActivity"
+			android:name=".CreateHarvanaCardActivity"
 			android:label="Backup card"
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
@@ -317,7 +317,7 @@
 		
 		<provider
 			android:name="com.google.firebase.provider.FirebaseInitProvider"
-			android:authorities="com.harvanna.app.firebaseinitprovider"
+			android:authorities="com.harvana.app.firebaseinitprovider"
 			android:exported="false"
 			android:initOrder="100" />
 		

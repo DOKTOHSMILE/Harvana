@@ -57,13 +57,17 @@ Deleted: none. `Ajoo-main` is not the Gradle module (`settings.gradle` includes 
 - A GenLoan request is mirrored as `source: node` under its `GENLOAN-` id. The list refreshes status, principal and repaid amount from the node. Repay calls `POST /api/v1/genloan/repay` and does not send a second transfer. The app does not disburse a network loan.
 - Settings can still change the profile. On a network group it does not write a new contribution or cycle rule.
 
-Still open: governance votes, Accum/Fixed social join (the node has no separate join call), guardian signature entry, and a full Gradle run.
+Still open: Accumulative and Fixed groups have no separate join endpoint, so a social request remains, and a full Gradle run was not executed in this pass.
+
+## Votes and guardians
+
+- Fixed votes load from `GET /api/v1/fixed/group/{id}/proposals`. Accumulative withdrawals load from `GET /api/v1/accum/group/{id}/pending-packs`. Notices are only a fallback if that read fails.
+- Admin recovery is read from `GET /api/v1/admin-recovery/group/{id}`. Offering the seat and voting call the signed node routes.
+- A network loan shows "Waiting for guardians" and cannot be paid out by a group admin. A guardian signs it in the guardian console, which posts `POST /api/v1/genloan/stage-guardian-signature`.
 
 ## 7. Still open
 
-- Governance votes in the proposals tab.
 - Accumulative and Fixed groups have no separate join endpoint, so a social request remains.
-- The loan screen does not collect guardian signatures.
 - A full Gradle and node test run was not executed in this pass.
 
 ## 8. Path that is now real

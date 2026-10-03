@@ -1142,6 +1142,10 @@ public class GroupLoansFragmentActivity extends Fragment {
 			final String borrowerWallet = _safe(loan, "borrowerWallet", "");
 			
 			if (h.status != null) h.status.setText(status);
+			boolean fromNode = "node".equalsIgnoreCase(_safe(loan, "source", "")) || loanId.startsWith("GENLOAN-");
+			if (fromNode && "PENDING_APPROVAL".equalsIgnoreCase(status) && h.status != null) {
+				h.status.setText("Waiting for guardians");
+			}
 			// APPLIED FIX
 			if (h.amount != null) h.amount.setText(_formatUIBalance(principal));
 			double repaidSoFar = _num(loan, "repaidAmountHarv");
@@ -1149,7 +1153,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 				long disbursedAt = (long) _num(loan, "disbursedAt");
 				String interestPeriod = _safe(loan, "interestPeriod", "MONTHLY");
 				double interestRate = _num(loan, "interestRate");
-				if (disbursedAt > 0) {
+				if (disbursedAt > 0 && !fromNode) {
 					double accrued = com.harvanna.app.group.GroupLoanManager.computeAccruedTotalDue(
 					principal, interestRate, interestPeriod, disbursedAt);
 					double remaining = Math.max(0, accrued - repaidSoFar);
@@ -1161,6 +1165,10 @@ public class GroupLoansFragmentActivity extends Fragment {
 						// APPLIED FIX
 						h.meta.setText("Total due: " + _formatUIBalance(accrued) + " (accruing)");
 					}
+				} else if (fromNode && "PENDING_APPROVAL".equalsIgnoreCase(status)) {
+					h.meta.setText("Released only after enough guardians sign. A group admin cannot pay this out.");
+				} else if (fromNode) {
+					h.meta.setText("Paid " + _formatUIBalance(repaidSoFar) + " of " + _formatUIBalance(principal));
 				} else {
 					h.meta.setText(_shortAddr(borrowerWallet));
 				}
@@ -1174,9 +1182,13 @@ public class GroupLoansFragmentActivity extends Fragment {
 			
 			String currentUid = FirebaseAuth.getInstance().getCurrentUser() != null
 			? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
-			boolean isMyActiveLoan = "ACTIVE".equalsIgnoreCase(status)
-			&& !borrowerUid.isEmpty() && borrowerUid.equals(currentUid);
-			boolean showAdminActions = isAdmin && "PENDING".equalsIgnoreCase(status);
+			String myWallet = "";
+			try { myWallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(getContext()); } catch (Throwable ignored) {}
+			boolean isMyActiveLoan = fromNode
+					? (("ACTIVE".equalsIgnoreCase(status) || "LATE".equalsIgnoreCase(status))
+						&& myWallet != null && myWallet.equalsIgnoreCase(borrowerWallet))
+					: ("ACTIVE".equalsIgnoreCase(status) && !borrowerUid.isEmpty() && borrowerUid.equals(currentUid));
+			boolean showAdminActions = !fromNode && isAdmin && "PENDING".equalsIgnoreCase(status);
 			
 			if (h.adminRow != null) {
 				h.adminRow.setVisibility((showAdminActions || isMyActiveLoan) ? View.VISIBLE : View.GONE);
@@ -1198,10 +1210,15 @@ public class GroupLoansFragmentActivity extends Fragment {
 					h.reject.setOnClickListener(v -> _rejectLoan(loanId));
 				}
 			} else if (isMyActiveLoan) {
-				double accrued = com.harvanna.app.group.GroupLoanManager.computeAccruedTotalDue(
-				fPrincipal, fInterestRate, fInterestPeriod, fDisbursedAt);
-				repaidSoFar = _num(loan, "repaidAmountHarv");
-				double remaining = Math.max(0, accrued - repaidSoFar);
+				double remaining;
+				if (fromNode) {
+					remaining = Math.max(0, principal - repaidSoFar);
+				} else {
+					double accrued = com.harvanna.app.group.GroupLoanManager.computeAccruedTotalDue(
+					fPrincipal, fInterestRate, fInterestPeriod, fDisbursedAt);
+					repaidSoFar = _num(loan, "repaidAmountHarv");
+					remaining = Math.max(0, accrued - repaidSoFar);
+				}
 				if (h.approve != null) {
 					h.approve.setVisibility(View.VISIBLE);
 					h.approve.setText(remaining <= 0.0001 ? "Close" : "Repay");

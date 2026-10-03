@@ -53,6 +53,14 @@ public final class NodeGroupClient {
 
     public static void getLoan(String groupId, String loanId, Callback cb) { read("/api/v1/genloan/group/" + groupId + "/loan/" + loanId, cb); }
     public static void getAdminRecovery(String groupId, Callback cb) { read("/api/v1/admin-recovery/group/" + groupId, cb); }
+    /** Open disbursements, milestones and grants. The node list is the source, not a notice. */
+    public static void listFixedProposals(String groupId, Callback cb) {
+        read("/api/v1/fixed/group/" + groupId + "/proposals?status=OPEN", cb);
+    }
+    /** Savings lines waiting for the admin. */
+    public static void listAccumPendingPacks(String groupId, Callback cb) {
+        read("/api/v1/accum/group/" + groupId + "/pending-packs", cb);
+    }
     public static void getReferral(String referredAddress, Callback cb) { read("/api/v1/referral/" + referredAddress, cb); }
     /** Live position, including the action nonce. Used before a signed unstake or claim. */
     public static void getStakingPosition(String address, Callback cb) { read("/api/v1/staking/position/" + address, cb); }
@@ -247,6 +255,19 @@ public final class NodeGroupClient {
                 b.put("groupId", groupId).put("loanId", loanId).put("borrowerAddress", borrower).put("amountRaw", amountRaw);
             }
         }, cb);
+    }
+
+    /** A guardian key signs HARVANNA_GENLOAN_APPROVE_V1. This is not a wallet action. */
+    public static void stageGenLoanGuardian(String groupId, String loanId, String publicKey, String signature, Callback cb) {
+        try {
+            JSONObject body = new JSONObject();
+            body.put("groupId", groupId).put("loanId", loanId);
+            body.put("guardianPublicKey", publicKey).put("guardianSignature", signature);
+            HarvannaNodeClient.nodePost("/api/v1/genloan/stage-guardian-signature", body.toString(), new HarvannaNodeClient.JsonCallback() {
+                @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }
+                @Override public void onError(String error) { cb.onError(error); }
+            });
+        } catch (JSONException e) { cb.onError(e.getMessage()); }
     }
 
     // ═════════════════════════════ ADMIN RECOVERY / REFERRAL / STAKING ═════════════════════════════

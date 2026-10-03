@@ -148,6 +148,58 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 		_loadDisputes();
 	}
 	
+	/** Signs HARVANNA_GENLOAN_APPROVE_V1 for one loan. The node checks this key is a guardian. */
+	private void _addLoanApprovalCard() {
+		LinearLayout card = new LinearLayout(this);
+		card.setOrientation(LinearLayout.VERTICAL);
+		int p = (int) (12 * getResources().getDisplayMetrics().density);
+		card.setPadding(p, p, p, p);
+		TextView title = new TextView(this);
+		title.setText("Group loan");
+		title.setTextSize(16);
+		title.setTypeface(null, android.graphics.Typeface.BOLD);
+		card.addView(title);
+		TextView note = new TextView(this);
+		note.setText("A loan stays pending until enough guardians sign it. This does not move the money by itself.");
+		note.setTextSize(13);
+		card.addView(note);
+		EditText group = new EditText(this);
+		group.setHint("Group id (ACCUM- or FIXED-)");
+		EditText loan = new EditText(this);
+		loan.setHint("Loan id (GENLOAN-)");
+		Button sign = new Button(this);
+		sign.setText("Sign this loan");
+		sign.setOnClickListener(v -> {
+			String gid = group.getText().toString().trim();
+			String lid = loan.getText().toString().trim();
+			if (guardianSeed == null) { SketchwareUtil.showMessage(this, "Console locked."); return; }
+			if (gid.isEmpty() || !lid.startsWith("GENLOAN-")) {
+				SketchwareUtil.showMessage(this, "Enter the group id and the GENLOAN id.");
+				return;
+			}
+			try {
+				String msg = "HARVANNA_GENLOAN_APPROVE_V1:" + gid + ":" + lid;
+				byte[] sig = com.harvanna.app.crypto.Ed25519.sign(guardianSeed, msg.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+				String signature = android.util.Base64.encodeToString(sig, android.util.Base64.NO_WRAP);
+				com.harvanna.app.sync.NodeGroupClient.stageGenLoanGuardian(gid, lid, guardianPublicKeyB64, signature,
+						new com.harvanna.app.sync.NodeGroupClient.Callback() {
+							@Override public void onSuccess(org.json.JSONObject json) {
+								runOnUiThread(() -> SketchwareUtil.showMessage(GuardianConsoleActivity.this, "Signature recorded."));
+							}
+							@Override public void onError(String error) {
+								runOnUiThread(() -> SketchwareUtil.showMessage(GuardianConsoleActivity.this, error));
+							}
+						});
+			} catch (Exception e) {
+				SketchwareUtil.showMessage(this, "Could not sign.");
+			}
+		});
+		card.addView(group);
+		card.addView(loan);
+		card.addView(sign);
+		layoutDisputeCards.addView(card);
+	}
+
 	private void _showKeyError(String message) {
 		tvKeyError.setText(message);
 		tvKeyError.setVisibility(View.VISIBLE);
@@ -155,6 +207,7 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 	
 	private void _loadDisputes() {
 		layoutDisputeCards.removeAllViews();
+		_addLoanApprovalCard();
 		tvNoDisputes.setVisibility(View.GONE);
 		
 		com.harvanna.app.sync.HarvannaNodeClient.getDisputedOrders(new com.harvanna.app.sync.HarvannaNodeClient.JsonCallback() {

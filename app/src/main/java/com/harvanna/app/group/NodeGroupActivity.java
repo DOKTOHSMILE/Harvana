@@ -42,8 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * One screen for a group that lives on the node (Circle, Accumulative or Fixed). Everything shown comes from
- * the node; the engine classes decide what the member may do; every action is a signed request. Firestore is
- * used only to find open proposals (see GroupProposalIndex).
+ * the node; the engine classes decide what the member may do; every action is a signed request.
  */
 public class NodeGroupActivity extends AppCompatActivity {
     private String nodeId = "", fsGroupId = "", me = "", family = "";
@@ -53,6 +52,7 @@ public class NodeGroupActivity extends AppCompatActivity {
     private Map<String, Object> group, member, line;
     private final List<Object[]> proposals = new ArrayList<>();   // {kind, id, Map record}
     private final List<Object[]> packRequests = new ArrayList<>(); // {lineId, Map line}
+    private Map<String, Object> recovery;
     private String trustTier = "";
     private String groupName = "";
     private List<String> myLabels = new ArrayList<>();
@@ -149,7 +149,7 @@ public class NodeGroupActivity extends AppCompatActivity {
 
     /** Group trust tier, my badges, and open proposals / pack requests. Each part is best-effort. */
     private void loadExtras() {
-        proposals.clear(); packRequests.clear(); trustTier = ""; myLabels = new ArrayList<>();
+        proposals.clear(); packRequests.clear(); recovery = null; trustTier = ""; myLabels = new ArrayList<>();
         final AtomicInteger left = new AtomicInteger(3);
         final Runnable done = () -> { if (left.decrementAndGet() == 0) runOnUiThread(this::render); };
 
@@ -170,8 +170,47 @@ public class NodeGroupActivity extends AppCompatActivity {
                 @Override public void onError(String e) { done.run(); }
             });
         }
-        if ("CIRCLE".equals(family)) { done.run(); return; }
-        GroupProposalIndex.list(this, fsGroupId, entries -> loadProposals(entries, done));
+        if ("CIRCLE".equals(family)) { loadRecovery(done); return; }
+        if ("FIXED".equals(family)) {
+            NodeGroupClient.listFixedProposals(nodeId, new NodeGroupClient.Callback() {
+                @Override public void onSuccess(JSONObject j) { fillListedProposals(j); loadRecovery(done); }
+                @Override public void onError(String e) { GroupProposalIndex.list(NodeGroupActivity.this, fsGroupId, entries -> loadProposals(entries, () -> loadRecovery(done))); }
+            });
+            return;
+        }
+        NodeGroupClient.listAccumPendingPacks(nodeId, new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject j) { fillListedPacks(j); loadRecovery(done); }
+            @Override public void onError(String e) { GroupProposalIndex.list(NodeGroupActivity.this, fsGroupId, entries -> loadProposals(entries, () -> loadRecovery(done))); }
+        });
+    }
+
+    private void loadRecovery(Runnable done) {
+        NodeGroupClient.getAdminRecovery(nodeId, new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject j) { recovery = JsonMaps.toMap(j); done.run(); }
+            @Override public void onError(String e) { done.run(); }
+        });
+    }
+
+    private void fillListedProposals(JSONObject j) {
+        JSONArray arr = j == null ? null : j.optJSONArray("proposals");
+        if (arr == null) return;
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject row = arr.optJSONObject(i);
+            if (row == null) continue;
+            proposals.add(new Object[]{row.optString("kind", ""), row.optString("id", ""), JsonMaps.toMap(row)});
+        }
+    }
+
+    private void fillListedPacks(JSONObject j) {
+        JSONArray arr = j == null ? null : j.optJSONArray("pendingPacks");
+        if (arr == null) return;
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject row = arr.optJSONObject(i);
+            if (row == null) continue;
+            Map<String, Object> rowMap = JsonMaps.toMap(row);
+            rowMap.put("status", "PENDING_PACK_APPROVAL");
+            packRequests.add(new Object[]{row.optString("lineId", ""), rowMap});
+        }
     }
 
     private void loadProposals(List<GroupProposalIndex.Entry> entries, Runnable done) {
@@ -290,6 +329,7 @@ public class NodeGroupActivity extends AppCompatActivity {
 
         renderProposals();
         renderPackRequests();
+        renderRecovery();
         content.addView(button("Copy group ID", false, v -> copy(nodeId)));
     }
 
@@ -334,6 +374,33 @@ public class NodeGroupActivity extends AppCompatActivity {
                     () -> NodeGroupClient.approveAccumPack(getApplicationContext(), me, nodeId, lineId, result("Approved")))));
             content.addView(c);
         }
+    }
+
+    /** Moving the admin seat is a weighted member vote on the node, not a profile edit. */
+    private void renderRecovery() {
+        boolean pending = recovery != null && "PENDING".equals(str(recovery, "status"));
+        if (!pending) {
+            if (me == null || me.isEmpty()) return;
+            content.addView(button("Offer to take the admin seat", false, v -> pin(() ->
+                NodeGroupClient.requestAdminRecovery(getApplicationContext(), me, nodeId, me, result("The group can now vote on you as admin.")))));
+            return;
+        }
+        String title = "Move the admin seat to " + shortAddr(str(recovery, "newAdminAddress"));
+        VoteView vote = VoteView.of(title, recovery, me == null ? "" : me);
+        LinearLayout c = CircleUi.card(this);
+        c.addView(CircleUi.text(this, vote.title, 14, R.color.colorTextPrimary, true));
+        c.addView(CircleUi.text(this, vote.explain(), 12.5f, R.color.colorTextSecondary, false));
+        if (vote.open && vote.eligible && !vote.alreadyVoted) {
+            LinearLayout row = new LinearLayout(this);
+            row.addView(actionButton(new GroupAction(GroupAction.VOTE_YES, "Vote yes", true), v -> pin(() ->
+                NodeGroupClient.voteAdminRecovery(getApplicationContext(), me, nodeId, true, result("Voted yes")))),
+                new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            row.addView(actionButton(new GroupAction(GroupAction.VOTE_NO, "Vote no", false), v -> pin(() ->
+                NodeGroupClient.voteAdminRecovery(getApplicationContext(), me, nodeId, false, result("Voted no")))),
+                new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            c.addView(row);
+        }
+        content.addView(c);
     }
 
     // ── actions ────────────────────────────────────────────────────────────

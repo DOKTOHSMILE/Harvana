@@ -6,8 +6,12 @@ import com.harvanna.app.firestore.GroupFirestoreManager;
 import com.harvanna.app.sync.NodeGroupClient;
 import com.harvanna.app.wallet.BalanceFormatter;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,7 +60,45 @@ public final class GroupRepository {
         else NodeGroupClient.getFixedGroup(id.protocolId(), read);
     }
 
-    /** Fixed groups request a disbursement. Circle and Accum do not have this payout request. */
+    public interface Members {
+        void onMembers(List<Map<String, Object>> rows);
+        void onError(String error);
+    }
+
+    /** Protocol roster. Circle rows are in payout order. Empty family does not call the node. */
+    public static void loadMembers(GroupIdentity id, Members cb) {
+        if (id == null || !id.onChain()) { cb.onError("Not a network group."); return; }
+        NodeGroupClient.Callback read = new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject json) { cb.onMembers(rows(json)); }
+            @Override public void onError(String error) { cb.onError(error); }
+        };
+        if ("CIRCLE".equals(id.family)) NodeGroupClient.getCircleMembers(id.protocolId(), read);
+        else if ("ACCUM".equals(id.family)) NodeGroupClient.getAccumMembers(id.protocolId(), read);
+        else NodeGroupClient.getFixedMembers(id.protocolId(), read);
+    }
+
+    private static List<Map<String, Object>> rows(JSONObject json) {
+        List<Map<String, Object>> out = new ArrayList<>();
+        JSONArray arr = json == null ? null : json.optJSONArray("members");
+        if (arr == null) return out;
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject row = arr.optJSONObject(i);
+            if (row == null) continue;
+            String address = row.optString("address", row.optString("memberAddress", ""));
+            Map<String, Object> m = new HashMap<>();
+            m.put("walletAddress", address);
+            m.put("address", address);
+            m.put("state", row.optString("state", ""));
+            m.put("status", "ACTIVE");
+            m.put("slot", i + 1);
+            m.put("source", "node");
+            if (row.has("paidRaw")) m.put("paidRaw", row.optLong("paidRaw"));
+            if (row.has("payoutRound")) m.put("payoutRound", row.optInt("payoutRound"));
+            if (row.has("bondRemainingRaw")) m.put("bondRemainingRaw", row.optLong("bondRemainingRaw"));
+            out.add(m);
+        }
+        return out;
+    }
     public static void requestPayout(Context context, GroupIdentity id, String wallet, NodeGroupClient.Callback cb) {
         if (!GroupCapability.canRequestDisbursement(id)) {
             String msg = GroupCapability.payoutFollowsLockedOrder(id)

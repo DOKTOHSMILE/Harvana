@@ -97,9 +97,22 @@ public final class GroupLoanManager {
                             new com.harvanna.app.sync.NodeGroupClient.Callback() {
                                 @Override public void onSuccess(org.json.JSONObject json) {
                                     String loanId = json.optString("loanId", "");
-                                    callback.onSuccess(loanId.isEmpty()
+                                    String message = loanId.isEmpty()
                                             ? "The network accepted the loan request."
-                                            : "The network accepted the loan request " + loanId + ".");
+                                            : "The network accepted the loan request " + loanId + ".";
+                                    if (loanId.isEmpty()) { callback.onSuccess(message); return; }
+                                    java.util.Map<String, Object> mirror = new java.util.HashMap<>();
+                                    mirror.put("source", "node");
+                                    mirror.put("status", "PENDING_APPROVAL");
+                                    mirror.put("borrowerWallet", borrowerWallet.trim());
+                                    mirror.put("principalRaw", com.harvanna.app.wallet.BalanceFormatter.harvToRaw(principalHarv));
+                                    mirror.put("principalHarv", principalHarv);
+                                    mirror.put("createdAt", System.currentTimeMillis());
+                                    GroupFirestoreManager.getInstance(context).updateLoan(id.firestoreId, loanId, mirror,
+                                            new GroupFirestoreManager.SimpleCallback() {
+                                                @Override public void onSuccess() { callback.onSuccess(message); }
+                                                @Override public void onError(String error) { callback.onSuccess(message); }
+                                            });
                                 }
                                 @Override public void onError(String error) { callback.onError(error); }
                             });
@@ -196,6 +209,21 @@ public final class GroupLoanManager {
             callback.onError("Transfer handler missing.");
             return;
         }
+        GroupRepository.classify(context, groupId, new GroupRepository.Classified() {
+            @Override public void onError(String error) { callback.onError(error); }
+            @Override public void onIdentity(GroupIdentity id) {
+                if (id.onChain()) {
+                    callback.onError("The network disburses this loan after guardian signatures. The app cannot mark it paid out.");
+                    return;
+                }
+                disburseLegacy(context, groupId, loanId, groupWalletAddress, borrowerWallet, principalHarv, transferExecutor, adminUid, callback);
+            }
+        });
+    }
+
+    private static void disburseLegacy(Context context, String groupId, String loanId, String groupWalletAddress,
+                                       String borrowerWallet, double principalHarv,
+                                       GroupPayoutManager.GroupWalletTransfer transferExecutor, String adminUid, Callback callback) {
 
         GroupFirestoreManager.getInstance(context).getLoan(groupId, loanId, new GroupFirestoreManager.DocCallback() {
             @Override

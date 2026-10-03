@@ -50,19 +50,30 @@ Changed: `GroupKinds`, `NodeGroupClient.familyOf`, `CreateNewGroupActivity`, `Gr
 
 Deleted: none. `Ajoo-main` is not the Gradle module (`settings.gradle` includes only `:app`). It is marked, not removed.
 
+## Continuation
+
+- Circle join signs `POST /api/v1/circle/join` with the circle's `termsHash`. An admin approval no longer adds that person in Firestore.
+- The members tab loads the node roster and uses Firestore only to put a name on a wallet the network already lists.
+- A GenLoan request is mirrored as `source: node` under its `GENLOAN-` id. The list refreshes status, principal and repaid amount from the node. Repay calls `POST /api/v1/genloan/repay` and does not send a second transfer. The app does not disburse a network loan.
+- Settings can still change the profile. On a network group it does not write a new contribution or cycle rule.
+
+Still open: governance votes, Accum/Fixed social join (the node has no separate join call), guardian signature entry, and a full Gradle run.
+
 ## 7. Still open
 
-- Members, payments, governance and settings screens still read Firestore beside the node. They must go through `GroupRepository` the same way.
-- Loan list UI still lists Firestore loans. A node loan id returned by `request` is not yet the row on that list.
-- Guardian signature stage is not on the loan screen.
-- Circle join still needs every join button to send the node `termsHash`.
-- Offline queues can still replay a legacy loan write; an on-chain replay now hits the node path, but a stale cache can still show old Firestore rows.
-- Full Gradle and node test runs were not executed in this pass.
+- Governance votes in the proposals tab.
+- Accumulative and Fixed groups have no separate join endpoint, so a social request remains.
+- The loan screen does not collect guardian signatures.
+- A full Gradle and node test run was not executed in this pass.
 
 ## 8. Path that is now real
 
 Payout on a Fixed group: button → `GroupPayoutManager.requestPayout` → `GroupRepository.classify` → `GroupRepository.requestPayout` → `NodeGroupClient.requestFixedDisbursement` → `POST /api/v1/fixed/request-disbursement`.
 
-Loan: button → `GroupLoanManager.applyForLoan` → `GroupRepository.requestLoan` → `NodeGroupClient.requestLoan` → `POST /api/v1/genloan/request` with `principalRaw` and `durationHours`.
+Loan request: button → `GroupLoanManager.applyForLoan` → `GroupRepository.requestLoan` → `POST /api/v1/genloan/request`.
+
+Loan repay: repay on a `GENLOAN-` id → `NodeGroupClient.repayLoan` → `POST /api/v1/genloan/repay`.
+
+Circle join: join button → read `termsHash` → `NodeGroupClient.joinCircle` → `POST /api/v1/circle/join`.
 
 Details: Firestore profile → `GroupIdentityResolver` → `GroupRepository.loadProtocol` → the family GET → creator, escrow, contribution and round replace the profile numbers.

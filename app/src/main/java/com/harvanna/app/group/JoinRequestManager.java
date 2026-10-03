@@ -70,6 +70,11 @@ public final class JoinRequestManager {
         mgr.getGroup(groupId, new GroupFirestoreManager.DocCallback() {
             @Override
             public void onSuccess(Map<String, Object> groupData) {
+                GroupIdentity identity = GroupIdentityResolver.resolve(groupId, groupData);
+                if (identity.kind == GroupIdentity.Kind.ON_CHAIN_CIRCLE) {
+                    if (cb != null) cb.onError("This circle adds a member only when they sign its terms. Approving the request does not put them on the network.");
+                    return;
+                }
                 int currentCount = 0;
                 Object countObj = groupData != null ? groupData.get("membersCount") : null;
                 if (countObj instanceof Number) {

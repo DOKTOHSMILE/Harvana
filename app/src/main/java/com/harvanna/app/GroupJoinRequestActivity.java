@@ -1,6 +1,8 @@
 package com.harvanna.app;
 
 import com.harvanna.app.utils.UiColors;
+import com.harvanna.app.group.GroupIdentity;
+import com.harvanna.app.group.GroupIdentityResolver;
 import android.animation.*;
 import android.app.*;
 import android.app.Activity;
@@ -714,6 +716,11 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 	}
 	
 	private void _submitJoinRequest(String currentUid) {
+		GroupIdentity identity = GroupIdentityResolver.resolve(groupId, loadedGroupData);
+		if (identity.kind == GroupIdentity.Kind.ON_CHAIN_CIRCLE) {
+			_joinCircle(identity);
+			return;
+		}
 		boolean open = com.harvanna.app.group.JoinRequestManager.isOpenJoin(loadedJoinApprovalMethod);
 		String message = et_message_to_admin != null
 		? et_message_to_admin.getText().toString().trim() : "";
@@ -803,6 +810,29 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 		});
 	}
 	
+	private void _joinCircle(GroupIdentity identity) {
+		String wallet = com.harvanna.app.wallet.WalletManager.getActiveWalletAddress(this);
+		if (wallet == null || wallet.isEmpty()) {
+			_joinFailed("Create a wallet before joining this circle.");
+			return;
+		}
+		com.harvanna.app.sync.NodeGroupClient.getCircle(identity.protocolId(), new com.harvanna.app.sync.NodeGroupClient.Callback() {
+			@Override public void onError(String error) { _joinFailed(error); }
+			@Override public void onSuccess(org.json.JSONObject json) {
+				String terms = json.optString("termsHash", "");
+				if (terms.isEmpty()) {
+					_joinFailed("This circle has no terms to sign yet.");
+					return;
+				}
+				com.harvanna.app.sync.NodeGroupClient.joinCircle(GroupJoinRequestActivity.this, wallet, identity.protocolId(), terms,
+						new com.harvanna.app.sync.NodeGroupClient.Callback() {
+							@Override public void onSuccess(org.json.JSONObject ignored) { _joinSucceeded("You're on the circle."); }
+							@Override public void onError(String error) { _joinFailed(error); }
+						});
+			}
+		});
+	}
+
 	private void _markInviteAccepted() {
 		String inviteId = getIntent() != null ? getIntent().getStringExtra("inviteId") : null;
 		if (inviteId != null && !inviteId.isEmpty()) {

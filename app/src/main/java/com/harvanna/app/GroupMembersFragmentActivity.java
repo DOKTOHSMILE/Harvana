@@ -293,6 +293,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 	private String joinApprovalMethod = "ADMIN";
 	private final java.util.Set<String> activeMemberUids = new java.util.HashSet<>();
 	private String groupType = "";
+	private String linkedNodeId = "";
 	private String groupWalletAddress = "";
 	private double contributionAmount = 0;
 	
@@ -320,6 +321,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 				if (gw == null) gw = data.get("group_wallet");
 				groupWalletAddress = gw != null ? gw.toString() : "";
 				totalSlots = (int) num(data, "totalSlots");
+				linkedNodeId = com.harvanna.app.group.GroupKinds.nodeId(data);
 				Object methodObj = data.get("joinApprovalMethod");
 				joinApprovalMethod = methodObj != null ? methodObj.toString() : "ADMIN";
 				String uid = FirebaseAuth.getInstance().getCurrentUser() != null
@@ -357,6 +359,44 @@ public class GroupMembersFragmentActivity extends Fragment {
 		});
 	}
 	
+	/** Protocol roster wins. Firestore only supplies a name for a wallet the network already lists. */
+	private void _replaceWithNodeRoster(List<Map<String, Object>> social) {
+		if (getContext() == null || lastGroupData == null) return;
+		com.harvanna.app.group.GroupIdentity id = com.harvanna.app.group.GroupIdentityResolver.resolve(groupId, lastGroupData);
+		com.harvanna.app.group.GroupRepository.loadMembers(id, new com.harvanna.app.group.GroupRepository.Members() {
+			@Override public void onError(String error) { }
+			@Override public void onMembers(List<Map<String, Object>> rows) {
+				if (getActivity() == null) return;
+				getActivity().runOnUiThread(() -> {
+					java.util.HashMap<String, Map<String, Object>> byWallet = new java.util.HashMap<>();
+					if (social != null) {
+						for (Map<String, Object> m : social) {
+							String w = str(m, "walletAddress", str(m, "wallet", ""));
+							if (!w.isEmpty()) byWallet.put(w.toLowerCase(java.util.Locale.US), m);
+						}
+					}
+					displayMembers.clear();
+					activeMemberUids.clear();
+					for (Map<String, Object> row : rows) {
+						String wallet = str(row, "walletAddress", "");
+						Map<String, Object> known = byWallet.get(wallet.toLowerCase(java.util.Locale.US));
+						HashMap<String, Object> show = new HashMap<>(row);
+						String name = known == null ? "" : str(known, "displayName", str(known, "name", str(known, "memberName", "")));
+						if (name.isEmpty()) name = wallet.length() > 10 ? wallet.substring(0, 6) + "…" + wallet.substring(wallet.length() - 4) : wallet;
+						show.put("displayName", name);
+						if (known != null) show.put("memberUid", str(known, "memberUid", ""));
+						String state = str(row, "state", "");
+						if (!state.isEmpty()) show.put("paymentStatus", state);
+						displayMembers.add(show);
+					}
+					if (tv_members_count != null) tv_members_count.setText("Members · " + displayMembers.size() + " on the network");
+					if (tv_members_empty != null) tv_members_empty.setVisibility(displayMembers.isEmpty() ? View.VISIBLE : View.GONE);
+					if (recycler_members != null) recycler_members.setAdapter(new MembersAdapter(displayMembers));
+				});
+			}
+		});
+	}
+
 	private void _loadMembers() {
 		if (groupId.isEmpty() || getContext() == null) return;
 		// WhatsApp-style: show the last known member list instantly, before
@@ -420,6 +460,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 					tv_members_empty.setVisibility(displayMembers.isEmpty() ? View.VISIBLE : View.GONE);
 					if (recycler_members != null)
 					recycler_members.setAdapter(new MembersAdapter(displayMembers));
+					if (!linkedNodeId.isEmpty()) _replaceWithNodeRoster(members);
 					// Chained here rather than called separately by every
 					// caller - guarantees activeMemberUids is populated
 					// before the pending-list filter runs, closing the real

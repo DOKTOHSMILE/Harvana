@@ -50,6 +50,8 @@ import com.harvanna.app.crypto.Ed25519;
 import com.harvanna.app.firestore.GroupFirestoreManager;
 import com.harvanna.app.group.GroupClosePolicy;
 import com.harvanna.app.group.GroupCloser;
+import com.harvanna.app.group.GroupIdentity;
+import com.harvanna.app.group.GroupIdentityResolver;
 import com.harvanna.app.group.JoinRequestManager;
 import com.harvanna.app.offline.OfflineCacheManager;
 import com.harvanna.app.p2p.ThemedDialogs;
@@ -771,7 +773,12 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		
 		Map<String, Object> patch = new HashMap<>();
 		patch.put("groupDescription", desc);
-		patch.put("contributionAmount", contribution);
+		GroupIdentity identity = GroupIdentityResolver.resolve(groupId, groupData);
+		if (identity.onChain()) {
+			Toast.makeText(this, "Contribution and cycle rules stay as the network set them. This save only updates the profile.", Toast.LENGTH_LONG).show();
+		} else {
+			patch.put("contributionAmount", contribution);
+		}
 		
 		if (spinVisibility.getSelectedItem() != null) {
 			patch.put("visibility", spinVisibility.getSelectedItem().toString());
@@ -790,7 +797,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		}
 		patch.put("membersCanInvite", switchInvite.isChecked());
 		
-		if (isRotating()) {
+		if (isRotating() && !identity.onChain()) {
 			String grace = etGracePeriod.getText().toString().trim();
 			String comm = etCommission.getText().toString().trim();
 			try {

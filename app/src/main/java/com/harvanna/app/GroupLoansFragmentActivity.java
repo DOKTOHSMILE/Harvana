@@ -312,6 +312,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 	private String creatorId = "";
 	private double groupWalletAvailable = 0;
 	private String loanInterestPeriod = "MONTHLY";
+	private String protocolId = "";
 	
 	private ArrayList<HashMap<String, Object>> loanRows = new ArrayList<>();
 	
@@ -347,6 +348,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		String currentUid = FirebaseAuth.getInstance().getCurrentUser() != null
 		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
 		isAdmin = !creatorId.isEmpty() && creatorId.equals(currentUid);
+		protocolId = com.harvanna.app.group.GroupKinds.nodeId(data);
 		
 		if (getActivity() == null) return;
 		getActivity().runOnUiThread(() -> {
@@ -399,6 +401,39 @@ public class GroupLoansFragmentActivity extends Fragment {
 		});
 	}
 	
+	/** A node loan's status and amounts replace the copy. The copy is only the list of ids. */
+	private void _refreshNodeLoansThenRender(List<Map<String, Object>> loans, List<Map<String, Object>> payments) {
+		if (protocolId.isEmpty() || loans == null || loans.isEmpty()) {
+			_renderLoansWithPayments(loans, payments);
+			return;
+		}
+		List<Map<String, Object>> nodeLoans = new ArrayList<>();
+		for (Map<String, Object> loan : loans) {
+			String id = _safe(loan, "_docId", "");
+			if ("node".equalsIgnoreCase(_safe(loan, "source", "")) || id.startsWith("GENLOAN-")) nodeLoans.add(loan);
+		}
+		if (nodeLoans.isEmpty()) {
+			_renderLoansWithPayments(loans, payments);
+			return;
+		}
+		java.util.concurrent.atomic.AtomicInteger left = new java.util.concurrent.atomic.AtomicInteger(nodeLoans.size());
+		for (Map<String, Object> loan : nodeLoans) {
+			String id = _safe(loan, "_docId", "");
+			com.harvanna.app.sync.NodeGroupClient.getLoan(protocolId, id, new com.harvanna.app.sync.NodeGroupClient.Callback() {
+				@Override public void onSuccess(org.json.JSONObject json) {
+					loan.put("status", json.optString("status", _safe(loan, "status", "")));
+					if (json.has("principalRaw")) loan.put("principalRaw", json.optLong("principalRaw"));
+					if (json.has("repaidRaw")) loan.put("repaidRaw", json.optLong("repaidRaw"));
+					loan.put("source", "node");
+					if (left.decrementAndGet() == 0) _renderLoansWithPayments(loans, payments);
+				}
+				@Override public void onError(String error) {
+					if (left.decrementAndGet() == 0) _renderLoansWithPayments(loans, payments);
+				}
+			});
+		}
+	}
+
 	private void _loadLoans() {
 		if (getContext() == null || groupId.isEmpty()) return;
 		
@@ -423,7 +458,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 					public void onSuccess(List<Map<String, Object>> payments) {
 						com.harvanna.app.offline.OfflineCacheManager.saveList(getContext(), "loans_" + groupId, loans);
 						com.harvanna.app.offline.OfflineCacheManager.saveList(getContext(), "loan_payments_" + groupId, payments);
-						_renderLoansWithPayments(loans, payments);
+						_refreshNodeLoansThenRender(loans, payments);
 					}
 					@Override
 					public void onError(String error) {
@@ -473,9 +508,15 @@ public class GroupLoansFragmentActivity extends Fragment {
 				HashMap<String, Object> row = new HashMap<>();
 				row.putAll(loan);
 				String loanId = _safe(loan, "_docId", "");
+				boolean fromNode = "node".equalsIgnoreCase(_safe(loan, "source", "")) || loanId.startsWith("GENLOAN-");
 				double fromDoc = _num(loan, "repaidAmountHarv");
-				double fromLedger = repaidByLoan.containsKey(loanId) ? repaidByLoan.get(loanId) : 0;
-				double repaidSoFar = Math.max(fromDoc, fromLedger);
+				double fromLedger = !fromNode && repaidByLoan.containsKey(loanId) ? repaidByLoan.get(loanId) : 0;
+				double repaidSoFar = fromNode && loan.get("repaidRaw") instanceof Number
+						? com.harvanna.app.wallet.BalanceFormatter.rawToHarv(((Number) loan.get("repaidRaw")).longValue())
+						: Math.max(fromDoc, fromLedger);
+				if (fromNode && loan.get("principalRaw") instanceof Number) {
+					row.put("principalHarv", com.harvanna.app.wallet.BalanceFormatter.rawToHarv(((Number) loan.get("principalRaw")).longValue()));
+				}
 				row.put("repaidAmountHarv", repaidSoFar);
 				loanRows.add(row);
 				
@@ -968,6 +1009,32 @@ public class GroupLoansFragmentActivity extends Fragment {
 	private void _executeLoanRepayment(String loanId, String fromWallet,
 	double amountHarv, boolean markFullyRepaid) {
 		if (getActivity() == null) return;
+		if (!protocolId.isEmpty()) {
+			if (loanId == null || !loanId.startsWith("GENLOAN-")) {
+				SketchwareUtil.showMessage(getContext(), "This loan is only in the app. The network does not have it, so it cannot be repaid here.");
+				return;
+			}
+			final com.harvanna.app.group.TransactionProgressSheet progress =
+					com.harvanna.app.group.TransactionProgressSheet.show(getActivity(), "Repaying on the network", amountHarv);
+			progress.advanceTo(2);
+			long raw = com.harvanna.app.wallet.BalanceFormatter.harvToRaw(amountHarv);
+			com.harvanna.app.sync.NodeGroupClient.repayLoan(getContext(), fromWallet, protocolId, loanId, raw,
+					new com.harvanna.app.sync.NodeGroupClient.Callback() {
+						@Override public void onSuccess(org.json.JSONObject json) {
+							if (getActivity() == null) return;
+							getActivity().runOnUiThread(() -> {
+								progress.showConfirmed();
+								SketchwareUtil.showMessage(getContext(), "The network accepted the repayment.");
+								_loadLoans();
+							});
+						}
+						@Override public void onError(String error) {
+							if (getActivity() == null) return;
+							getActivity().runOnUiThread(() -> progress.showError(error));
+						}
+					});
+			return;
+		}
 		final com.harvanna.app.group.TransactionProgressSheet progress =
 		com.harvanna.app.group.TransactionProgressSheet.show(
 		getActivity(), markFullyRepaid ? "Repaying loan" : "Partial repayment", amountHarv);

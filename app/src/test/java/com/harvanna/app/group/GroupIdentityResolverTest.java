@@ -48,6 +48,17 @@ public class GroupIdentityResolverTest {
         assertEquals("", id.protocolId());
     }
 
+    @Test public void payoutCapabilityFollowsFamily() {
+        GroupIdentity circle = GroupIdentityResolver.resolve("doc", map("nodeGroupId", "CIRC-1"));
+        GroupIdentity fixed = GroupIdentityResolver.resolve("doc", map("nodeGroupId", "FIXED-1"));
+        GroupIdentity accum = GroupIdentityResolver.resolve("doc", map("nodeGroupId", "ACCUM-1"));
+        assertTrue(GroupCapability.payoutFollowsLockedOrder(circle));
+        assertFalse(GroupCapability.canRequestDisbursement(circle));
+        assertTrue(GroupCapability.canRequestDisbursement(fixed));
+        assertTrue(GroupCapability.canClaimLine(accum));
+        assertFalse(GroupCapability.canRequestDisbursement(accum));
+    }
+
     @Test public void nodeMemberStateWinsOverAStaleFirestoreRole() {
         GroupIdentity id = GroupIdentityResolver.resolve("doc", map("nodeGroupId", "ACCUM-1", "adminUid", "firebase-user"));
         assertTrue(id.onChain());

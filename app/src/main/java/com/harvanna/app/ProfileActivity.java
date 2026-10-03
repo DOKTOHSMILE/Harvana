@@ -592,7 +592,12 @@ public class ProfileActivity extends AppCompatActivity {
 					line += "\nActivity: " + n + (n == 1 ? " action confirmed on the network" : " actions confirmed on the network");
 				}
 				if (status != null && !status.isEmpty()) line += "\n" + status;
-				networkTrustView.setText(line);
+				final String networkLine = line;
+				com.harvanna.app.identity.CombinedIdentity.load(account -> runOnUiThread(() -> {
+					if (networkTrustView == null) return;
+					String who = account.name.isEmpty() ? "Signed-in account" : account.name;
+					networkTrustView.setText(who + "\n" + networkLine);
+				}));
 			}));
 		} catch (Exception ignored) { }
 	}

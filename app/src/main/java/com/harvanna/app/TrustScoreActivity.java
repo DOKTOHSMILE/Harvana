@@ -24,7 +24,8 @@ import org.json.JSONObject;
 
 /**
  * Trust is both halves together. The number is the network's personhood score
- * (0–26), saved by the node into Firestore. The list under it is activity:
+ * (0–26), saved by the node into Firestore. The account card is the signed-in
+ * profile: name, photo and contact. The list under them is activity.
  * actions the network confirmed, plus what this member did in the app.
  * The phone does not invent the number.
  */
@@ -97,6 +98,21 @@ public class TrustScoreActivity extends AppCompatActivity {
         int score = num(person.get("trustScore"));
         int vouches = num(person.get("effectiveVouchCount"));
         root.addView(scoreCard(score));
+        LinearLayout account = cardBox();
+        account.addView(tv("Account", 16, true, UiColors.textPrimary()));
+        TextView who = note("Reading your profile…");
+        account.addView(who);
+        root.addView(account, 0);
+        com.harvanna.app.identity.CombinedIdentity.load(a -> runOnUiThread(() -> {
+            if (gen != generation) return;
+            StringBuilder bld = new StringBuilder();
+            bld.append(a.name.isEmpty() ? "Signed-in account" : a.name);
+            if (!a.username.isEmpty()) bld.append("\n@").append(a.username);
+            if (!a.phone.isEmpty()) bld.append("\n").append(a.phone);
+            if (!a.email.isEmpty()) bld.append("\n").append(a.email);
+            bld.append("\n").append(address);
+            who.setText(bld.toString());
+        }));
         Object summary = person.get("summary");
         if (summary != null && !String.valueOf(summary).isEmpty()) {
             TextView sum = tv(String.valueOf(summary), 13, false, UiColors.textSecondary());

@@ -33,6 +33,7 @@ public final class NodeLinkManager {
         }
         SharedPreferences p = prefs(c);
         if (p.getBoolean("linked_" + addr, false) && p.getBoolean("bound_" + addr, false)) {
+            com.harvanna.app.identity.CombinedIdentity.stamp(c, addr);
             if (done != null) done.onDone(p.getString("status_" + addr, ""));
             return;
         }
@@ -42,6 +43,7 @@ public final class NodeLinkManager {
         NodeIdentityClient.link(c, addr, new NodeIdentityClient.Callback() {
             @Override public void onSuccess(JSONObject j) {
                 p.edit().putBoolean("linked_" + addr, true).apply();
+                com.harvanna.app.identity.CombinedIdentity.stamp(c, addr);
                 bind(c, addr, done);
             }
             @Override public void onError(String e) {

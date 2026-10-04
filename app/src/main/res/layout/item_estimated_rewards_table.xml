@@ -1,0 +1,132 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    app:cardBackgroundColor="#161922"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Loading / Calculating State View -->
+        <LinearLayout
+            android:id="@+id/layoutCalculating"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="visible">
+
+            <ProgressBar
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:indeterminateTint="#F7931A" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Calculating reward metrics..."
+                android:textColor="#8A92A6"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Actual Data Table View -->
+        <TableLayout
+            android:id="@+id/tableRewardsData"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="1"
+            android:visibility="gone">
+
+            <TableRow android:paddingBottom="8dp">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_harv_coin"
+                        android:layout_marginRight="6dp"/>
+                    <TextView 
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Lock Multiplier" 
+                        android:textColor="#8A92A6" 
+                        android:textSize="12sp"/>
+                </LinearLayout>
+                <TextView 
+                    android:id="@+id/tvTableMultiplier" 
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1.00x" 
+                    android:textColor="#FFFFFF" 
+                    android:textSize="12sp" 
+                    android:gravity="end" 
+                    android:textStyle="bold"/>
+            </TableRow>
+
+            <TableRow android:paddingBottom="8dp">
+                <TextView 
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Daily Pool Drip" 
+                    android:textColor="#8A92A6" 
+                    android:textSize="12sp"/>
+                <TextView 
+                    android:id="@+id/tvTableDailyDrip" 
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0.05% / day" 
+                    android:textColor="#FFFFFF" 
+                    android:textSize="12sp" 
+                    android:gravity="end" 
+                    android:textStyle="bold"/>
+            </TableRow>
+
+            <TableRow android:paddingBottom="8dp">
+                <TextView 
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Est. Monthly Yield" 
+                    android:textColor="#8A92A6" 
+                    android:textSize="12sp"/>
+                <TextView 
+                    android:id="@+id/tvTableMonthlyYield" 
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="~0.5 HARV" 
+                    android:textColor="#00E676" 
+                    android:textSize="12sp" 
+                    android:gravity="end" 
+                    android:textStyle="bold"/>
+            </TableRow>
+
+            <TableRow>
+                <TextView 
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Vault Security" 
+                    android:textColor="#8A92A6" 
+                    android:textSize="12sp"/>
+                <TextView 
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Active Protocol" 
+                    android:textColor="#F7931A" 
+                    android:textSize="12sp" 
+                    android:gravity="end" 
+                    android:textStyle="bold"/>
+            </TableRow>
+        </TableLayout>
+
+    </FrameLayout>
+</androidx.cardview.widget.CardView>

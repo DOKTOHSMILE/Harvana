@@ -25,7 +25,7 @@
         android:layout_height="match_parent"
         android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -93,7 +93,7 @@
                             android:textSize="12sp"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
-                        
+
                         <TextView
                             android:id="@+id/tv_overview_staked"
                             android:layout_width="wrap_content"
@@ -193,7 +193,7 @@
                             <TextView android:id="@+id/chip_3m" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3M" android:textColor="@color/colorTextMuted" android:layout_marginLeft="8dp" android:textSize="10sp"/>
                             <TextView android:id="@+id/chip_all" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ALL" android:textColor="@color/colorTextMuted" android:layout_marginLeft="8dp" android:textSize="10sp"/>
                         </LinearLayout>
-                        
+
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/reward_chart"
                             android:layout_width="match_parent"
@@ -238,7 +238,7 @@
                             android:text="Amount"
                             android:textColor="@color/colorTextMuted"
                             android:textSize="12sp"/>
-                        
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="56dp"
@@ -351,7 +351,7 @@
                             android:textSize="12sp"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
-                        
+
                         <TextView
                             android:id="@+id/tv_pos_total"
                             android:layout_width="wrap_content"
@@ -373,13 +373,13 @@
                             app:layout_constraintTop_toBottomOf="@id/tv_pos_total"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                                                <GridLayout
+                        <GridLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:columnCount="2"
                             android:layout_marginTop="24dp"
                             app:layout_constraintTop_toBottomOf="@id/tv_pos_daily_pct">
-                            
+
                             <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:text="Total Staked" android:textColor="@color/colorTextMuted" android:textSize="12sp" android:layout_columnWeight="1"/>
                             <TextView android:id="@+id/tv_grid_total" android:layout_width="0dp" android:layout_height="wrap_content" android:text="0 HARV" android:textColor="#FFFFFF" android:textSize="12sp" android:gravity="end" android:layout_columnWeight="1"/>
 
@@ -389,7 +389,6 @@
                             <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:text="Pool APY" android:textColor="@color/colorTextMuted" android:textSize="12sp" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
                             <TextView android:id="@+id/tv_grid_apy" android:layout_width="0dp" android:layout_height="wrap_content" android:text="--%" android:textColor="#FFFFFF" android:textSize="12sp" android:gravity="end" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
                         </GridLayout>
-
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -409,7 +408,7 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
                         android:paddingHorizontal="16dp">
-                        
+
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -467,7 +466,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp">
-                        
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -542,16 +541,16 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:orientation="vertical">
-                                <TextView android:text="Stake Type" android:textColor="@color/colorTextMuted" android:textSize="12sp"/>
-                                <TextView android:text="Liquid (1x Weight)" android:textColor="#FFFFFF" android:textSize="13sp" android:layout_marginTop="2dp"/>
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Stake Type" android:textColor="@color/colorTextMuted" android:textSize="12sp"/>
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Liquid (1x Weight)" android:textColor="#FFFFFF" android:textSize="13sp" android:layout_marginTop="2dp"/>
                             </LinearLayout>
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:orientation="vertical">
-                                <TextView android:text="Est. Monthly Reward" android:textColor="@color/colorTextMuted" android:textSize="12sp"/>
-                                <TextView android:id="@+id/tv_active_monthly" android:text="~ 0 HARV" android:textColor="#FFFFFF" android:textSize="13sp" android:layout_marginTop="2dp"/>
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Est. Monthly Reward" android:textColor="@color/colorTextMuted" android:textSize="12sp"/>
+                                <TextView android:id="@+id/tv_active_monthly" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="~ 0 HARV" android:textColor="#FFFFFF" android:textSize="13sp" android:layout_marginTop="2dp"/>
                             </LinearLayout>
                         </LinearLayout>
 

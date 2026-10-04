@@ -326,19 +326,24 @@ public final class StakingPanel {
             available.setText("Available " + harv(walletRaw));
             if (info != null) tvPool.setText(String.format(Locale.US, "● Reward pool %s · %d stakers · 0.05%% drips into Claim each day",
                     harv(info.optLong("rewardPoolBalanceRaw", 0)), info.optInt("stakerCount", 0)));
-            dailyPct.setText(staked <= 0 ? "Stake to start earning" : String.format(Locale.US, "~ +%.3f%% Daily Fluctuating", shareBps / 100.0));
+            dailyPct.setText(staked <= 0 ? "Stake to start earning" : String.format(Locale.US, "You hold %.2f%% of the stake", shareBps / 100.0));
 
             long queued = unbondingTotal();
             posTotal.setText(harv(staked + queued));
             posDailyPct.setText(dailyPct.getText());
             gridTotal.setText(harv(staked));
             gridUnclaimed.setText(harv(pending));
-            gridApy.setText(info != null ? String.format(Locale.US, "%.2f%%", info.optLong("estimatedAprBps", 0) / 100.0) : "--%");
+            gridApy.setText(String.format(Locale.US, "%.2f%%", shareBps / 100.0));
 
             activeCard.setVisibility(staked > 0 ? View.VISIBLE : View.GONE);
             activeAmount.setText(harv(staked));
-            activeLockType.setText(staked > 0 ? "Liquid (1x Weight)" : "Free");
-            activeMonthly.setText(staked <= 0 ? "—" : "~ " + harvFormatter.format(stakedHarv * 0.05) + " HARV");
+            int lockDays = pos == null ? 0 : pos.optInt("lockDays", 0);
+            int mult = pos == null ? 10000 : pos.optInt("multiplierBps", 10000);
+            if (mult <= 0) mult = 10000;
+            activeLockType.setText(staked <= 0 ? "Not staked" : lockDays <= 0
+                    ? "Flexible · 1x · stays until you unstake"
+                    : "Locked " + lockDays + " days · " + String.format(Locale.US, "%.2fx", mult / 10000.0));
+            activeMonthly.setText("0.05% of the pool drips into Claim each day");
 
             String address = WalletManager.getActiveWalletAddress(host);
             if (address != null && staked > 0) recordSnapshot(address, pending + claimed);
@@ -372,9 +377,6 @@ public final class StakingPanel {
             claim.setEnabled(false); claim.setText("Claiming Locked");
             claimSub.setText("Rewards unlock in " + formatTimerPrecise(timeUntilClaim));
         }
-
-        int activeUnbondings = 0;
-        unbondCount.setText("● " + activeUnbondings + " In Progress");
     }
 
     private static String formatTimerPrecise(long ms) {

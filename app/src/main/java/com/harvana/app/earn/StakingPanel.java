@@ -2,17 +2,20 @@ package com.harvana.app.earn;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +31,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.harvana.app.CoinInfo;
@@ -50,7 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import android.view.Gravity;
 
 public final class StakingPanel {
     private static final String PREFS = "harvana_stake_history";
@@ -85,7 +88,7 @@ public final class StakingPanel {
 
     private JSONObject info;
     private JSONObject pos;
-    private long observedPace;
+    long observedPace;
     private long walletRaw;
     private int chartDays = 7;
     private boolean busy;
@@ -203,7 +206,6 @@ public final class StakingPanel {
                 TextView tv = (TextView) super.getView(pos, convertView, parent);
                 tv.setTextColor(Color.WHITE);
                 tv.setTextSize(18);
-                // Optionally add drawable here
                 return tv;
             }
 
@@ -227,9 +229,9 @@ public final class StakingPanel {
             cardLock7.setStrokeColor(Color.parseColor("#2A3042"));
             cardLock30.setStrokeColor(Color.parseColor("#2A3042"));
             cardLock90.setStrokeColor(Color.parseColor("#2A3042"));
-            
+
             ((MaterialCardView) v).setStrokeColor(Color.parseColor("#FF7A00"));
-            
+
             if (v == cardLockFree) selectedLockDays = 0;
             if (v == cardLock7) selectedLockDays = 7;
             if (v == cardLock30) selectedLockDays = 30;
@@ -246,8 +248,15 @@ public final class StakingPanel {
 
     private void updateEstReward() {
         double weight = selectedLockDays >= 90 ? 2.5 : selectedLockDays >= 30 ? 1.75 : selectedLockDays >= 7 ? 1.25 : 1.0;
-        String hold = selectedLockDays <= 0 ? "Stake stays until you unstake." : "Principal stays locked for " + selectedLockDays + " days.";
-        tvEstRewardInput.setText(String.format(Locale.US, "Weight %.2fx. Each day 0.05%% of the reward pool drips into Claim by this weight. %s", weight, hold));
+        tvEstRewardInput.setText("⏳ Calculating reward metrics...");
+        
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (host.isDestroyed() || host.isFinishing()) return;
+            String holdText = selectedLockDays <= 0 ? "Flexible (No expiry)" : selectedLockDays + " Days Lock";
+            tvEstRewardInput.setText(String.format(Locale.US, 
+                "• Lock Multiplier: %.2fx\n• Daily Drip: 0.05%% pool share\n• Term: %s", 
+                weight, holdText));
+        }, 500);
     }
 
     private void refresh() {
@@ -308,7 +317,6 @@ public final class StakingPanel {
             long claimed = pos == null ? 0 : pos.optLong("totalClaimedRaw", 0);
             long total = info == null ? 0 : info.optLong("totalStakedRaw", 0);
             long shareBps = pos != null && pos.has("shareBps") ? pos.optLong("shareBps", 0) : (total > 0 ? staked * 10_000L / total : 0);
-            long poolRaw = pos != null && pos.has("rewardPoolBalanceRaw") ? pos.optLong("rewardPoolBalanceRaw", 0) : (info == null ? 0 : info.optLong("rewardPoolBalanceRaw", 0));
 
             double units = (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN;
             double stakedHarv = staked / units;
@@ -329,7 +337,6 @@ public final class StakingPanel {
 
             activeCard.setVisibility(staked > 0 ? View.VISIBLE : View.GONE);
             activeAmount.setText(harv(staked));
-            // Basic UI inference for lock term based on current pool status
             activeLockType.setText(staked > 0 ? "Liquid (1x Weight)" : "Free");
             activeMonthly.setText(staked <= 0 ? "—" : "~ " + harvFormatter.format(stakedHarv * 0.05) + " HARV");
 
@@ -367,32 +374,6 @@ public final class StakingPanel {
         }
 
         int activeUnbondings = 0;
-        for (int i = 0; i < unbondingList.getChildCount(); i++) {
-            View v = unbondingList.getChildAt(i);
-            if (v.getTag() instanceof JSONObject) {
-                JSONObject u = (JSONObject) v.getTag();
-                long release = u.optLong("releaseTimestamp", 0);
-                long remain = release - now;
-                boolean ready = remain <= 0 || "RELEASING".equals(u.optString("status"));
-
-                TextView statusBadge = v.findViewWithTag("badge");
-                TextView subText = v.findViewWithTag("sub");
-                MaterialButton btn = v.findViewWithTag("btn");
-
-                if (ready) {
-                    statusBadge.setText("● Ready for Withdrawal");
-                    statusBadge.setTextColor(Color.parseColor("#3B82F6"));
-                    subText.setText("Status: Cooldown Complete");
-                    btn.setVisibility(View.VISIBLE);
-                } else {
-                    activeUnbondings++;
-                    statusBadge.setText("● Unbonding");
-                    statusBadge.setTextColor(Color.parseColor("#FF7A00"));
-                    subText.setText("Cooldown Remaining: " + formatTimerPrecise(remain));
-                    btn.setVisibility(View.GONE);
-                }
-            }
-        }
         unbondCount.setText("● " + activeUnbondings + " In Progress");
     }
 
@@ -402,86 +383,183 @@ public final class StakingPanel {
         return String.format(Locale.US, "%02dh %02dm", totalSecs / 3600, (totalSecs % 3600) / 60);
     }
 
+    private View createUnbondingRowView(JSONObject u) {
+        ConstraintLayout cl = new ConstraintLayout(host);
+        cl.setPadding(dp(12), dp(12), dp(12), dp(12));
+        cl.setTag(u);
+
+        long now = System.currentTimeMillis();
+        long release = u.optLong("releaseTimestamp", 0);
+        boolean ready = (release - now) <= 0 || "RELEASING".equals(u.optString("status"));
+
+        TextView badge = new TextView(host);
+        badge.setId(View.generateViewId());
+        badge.setTextSize(11);
+        badge.setTypeface(null, android.graphics.Typeface.BOLD);
+        if (ready) {
+            badge.setText("● Ready");
+            badge.setTextColor(Color.parseColor("#3B82F6"));
+        } else {
+            badge.setText("● Unbonding");
+            badge.setTextColor(Color.parseColor("#FF7A00"));
+        }
+
+        TextView amountTv = new TextView(host);
+        amountTv.setId(View.generateViewId());
+        amountTv.setText(harv(u.optLong("amountRaw", 0)));
+        amountTv.setTextColor(Color.WHITE);
+        amountTv.setTextSize(15);
+        amountTv.setTypeface(null, android.graphics.Typeface.BOLD);
+
+        TextView subTv = new TextView(host);
+        subTv.setId(View.generateViewId());
+        subTv.setTextColor(Color.parseColor("#8F9BB3"));
+        subTv.setTextSize(11);
+        subTv.setText(ready ? "Cooldown Complete" : "Remaining: " + formatTimerPrecise(release - now));
+
+        MaterialButton btn = new MaterialButton(host, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+        btn.setId(View.generateViewId());
+        btn.setText("Withdraw");
+        btn.setAllCaps(false);
+        btn.setTextSize(11);
+        btn.setTextColor(Color.parseColor("#FF7A00"));
+        btn.setVisibility(ready ? View.VISIBLE : View.GONE);
+        btn.setOnClickListener(v -> doManualSweep());
+
+        cl.addView(badge);
+        cl.addView(amountTv);
+        cl.addView(subTv);
+        cl.addView(btn);
+
+        ConstraintSet cs = new ConstraintSet();
+        cs.clone(cl);
+        cs.connect(badge.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
+        cs.connect(badge.getId(), ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+        cs.connect(amountTv.getId(), ConstraintSet.TOP, badge.getId(), ConstraintSet.BOTTOM, dp(2));
+        cs.connect(amountTv.getId(), ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+        cs.connect(subTv.getId(), ConstraintSet.TOP, amountTv.getId(), ConstraintSet.BOTTOM, dp(2));
+        cs.connect(subTv.getId(), ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+        cs.connect(btn.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
+        cs.connect(btn.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
+        cs.connect(btn.getId(), ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
+        cs.applyTo(cl);
+
+        return cl;
+    }
+
     private void setupUnbondingViews() {
         unbondingList.removeAllViews();
         if (pos == null) return;
         JSONArray rows = pos.optJSONArray("unbonding");
-        if (rows == null || rows.length() == 0) return;
+        if (rows == null || rows.length() == 0) {
+            unbondCount.setText("● 0 In Progress");
+            return;
+        }
 
+        List<JSONObject> activeRows = new ArrayList<>();
         for (int i = 0; i < rows.length(); i++) {
             JSONObject u = rows.optJSONObject(i);
-            if (u == null || "RELEASED".equals(u.optString("status"))) continue;
-
-            MaterialCardView card = new MaterialCardView(host);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            lp.setMargins(0, dp(8), 0, dp(8));
-            card.setLayoutParams(lp);
-            card.setCardBackgroundColor(Color.parseColor("#121623"));
-            card.setRadius(dp(12));
-            card.setStrokeColor(Color.parseColor("#2A3042"));
-            card.setStrokeWidth(dp(1));
-            card.setTag(u);
-
-            card.setClickable(true);
-            card.setFocusable(true);
-            card.setOnClickListener(v -> {
-                JSONObject unbondData = (JSONObject) v.getTag();
-                showUnbondDetailsSheet(unbondData);
-            });
-
-            ConstraintLayout cl = new ConstraintLayout(host);
-            cl.setPadding(dp(16), dp(16), dp(16), dp(16));
-
-            TextView badge = new TextView(host);
-            badge.setId(View.generateViewId());
-            badge.setTag("badge");
-            badge.setTextSize(12);
-            badge.setTypeface(null, android.graphics.Typeface.BOLD);
-
-            TextView amountTv = new TextView(host);
-            amountTv.setId(View.generateViewId());
-            amountTv.setText(harv(u.optLong("amountRaw", 0)));
-            amountTv.setTextColor(Color.WHITE);
-            amountTv.setTextSize(16);
-            amountTv.setTypeface(null, android.graphics.Typeface.BOLD);
-
-            TextView subTv = new TextView(host);
-            subTv.setId(View.generateViewId());
-            subTv.setTag("sub");
-            subTv.setTextColor(Color.parseColor("#8F9BB3"));
-            subTv.setTextSize(12);
-
-            MaterialButton btn = new MaterialButton(host, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
-            btn.setId(View.generateViewId());
-            btn.setTag("btn");
-            btn.setText("[Withdraw to Wallet]");
-            btn.setAllCaps(false);
-            btn.setTextColor(Color.parseColor("#FF7A00"));
-            btn.setStrokeColorResource(android.R.color.transparent);
-            btn.setVisibility(View.GONE);
-            btn.setOnClickListener(v -> doManualSweep());
-
-            cl.addView(badge);
-            cl.addView(amountTv);
-            cl.addView(subTv);
-            cl.addView(btn);
-
-            ConstraintSet cs = new ConstraintSet();
-            cs.clone(cl);
-            cs.connect(badge.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
-            cs.connect(badge.getId(), ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
-            cs.connect(amountTv.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
-            cs.connect(amountTv.getId(), ConstraintSet.START, badge.getId(), ConstraintSet.END, dp(16));
-            cs.connect(subTv.getId(), ConstraintSet.TOP, amountTv.getId(), ConstraintSet.BOTTOM, dp(4));
-            cs.connect(subTv.getId(), ConstraintSet.START, amountTv.getId(), ConstraintSet.START);
-            cs.connect(btn.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
-            cs.connect(btn.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
-            cs.connect(btn.getId(), ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
-            cs.applyTo(cl);
-
-            card.addView(cl);
-            unbondingList.addView(card);
+            if (u != null && !"RELEASED".equals(u.optString("status"))) {
+                activeRows.add(u);
+            }
         }
+
+        unbondCount.setText("● " + activeRows.size() + " In Progress");
+        if (activeRows.isEmpty()) return;
+
+        MaterialCardView containerCard = new MaterialCardView(host);
+        LinearLayout.LayoutParams cardLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        cardLp.setMargins(0, dp(8), 0, dp(8));
+        containerCard.setLayoutParams(cardLp);
+        containerCard.setCardBackgroundColor(Color.parseColor("#121623"));
+        containerCard.setRadius(dp(16));
+        containerCard.setStrokeColor(Color.parseColor("#2A3042"));
+        containerCard.setStrokeWidth(dp(1));
+
+        LinearLayout cardInner = new LinearLayout(host);
+        cardInner.setOrientation(LinearLayout.VERTICAL);
+        cardInner.setPadding(dp(16), dp(16), dp(16), dp(16));
+
+        int limit = Math.min(2, activeRows.size());
+        for (int i = 0; i < limit; i++) {
+            cardInner.addView(createUnbondingRowView(activeRows.get(i)));
+            if (i < limit - 1) {
+                View divider = new View(host);
+                LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1));
+                divLp.setMargins(0, dp(6), 0, dp(6));
+                divider.setLayoutParams(divLp);
+                divider.setBackgroundColor(Color.parseColor("#1A2235"));
+                cardInner.addView(divider);
+            }
+        }
+
+        if (activeRows.size() > 2) {
+            TextView viewMoreBtn = new TextView(host);
+            viewMoreBtn.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            viewMoreBtn.setPadding(0, dp(12), 0, dp(4));
+            viewMoreBtn.setGravity(Gravity.CENTER);
+            viewMoreBtn.setText("View All Withdrawals (" + activeRows.size() + ") >");
+            viewMoreBtn.setTextColor(Color.parseColor("#FF7A00"));
+            viewMoreBtn.setTextSize(12);
+            viewMoreBtn.setTypeface(null, android.graphics.Typeface.BOLD);
+            viewMoreBtn.setOnClickListener(v -> showFullUnbondingBottomSheet(activeRows));
+            cardInner.addView(viewMoreBtn);
+        }
+
+        containerCard.addView(cardInner);
+        unbondingList.addView(containerCard);
+    }
+
+    private void showFullUnbondingBottomSheet(List<JSONObject> allRows) {
+        BottomSheetDialog sheet = new BottomSheetDialog(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+
+        LinearLayout root = new LinearLayout(host);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dp(24), dp(24), dp(24), dp(32));
+
+        GradientDrawable roundedBg = new GradientDrawable();
+        roundedBg.setShape(GradientDrawable.RECTANGLE);
+        roundedBg.setColor(Color.parseColor("#121623"));
+        float radius = dp(20);
+        roundedBg.setCornerRadii(new float[]{radius, radius, radius, radius, 0, 0, 0, 0});
+        root.setBackground(roundedBg);
+
+        TextView title = new TextView(host);
+        title.setText("All Unbonding & Withdrawals");
+        title.setTextColor(Color.WHITE);
+        title.setTextSize(20);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setPadding(0, 0, 0, dp(16));
+        root.addView(title);
+
+        ScrollView scrollView = new ScrollView(host);
+        scrollView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(400)));
+        scrollView.setNestedScrollingEnabled(true);
+
+        LinearLayout listContainer = new LinearLayout(host);
+        listContainer.setOrientation(LinearLayout.VERTICAL);
+
+        for (JSONObject u : allRows) {
+            View itemV = createUnbondingRowView(u);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.setMargins(0, dp(4), 0, dp(4));
+            itemV.setLayoutParams(lp);
+            listContainer.addView(itemV);
+        }
+
+        scrollView.addView(listContainer);
+        root.addView(scrollView);
+
+        sheet.setContentView(root);
+        sheet.setOnShowListener(dialog -> {
+            BottomSheetDialog d = (BottomSheetDialog) dialog;
+            View bottomSheet = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (bottomSheet != null) {
+                bottomSheet.setBackgroundColor(Color.TRANSPARENT);
+            }
+        });
+
+        sheet.show();
     }
 
     private void doManualSweep() {
@@ -492,39 +570,41 @@ public final class StakingPanel {
         });
     }
 
-        private void askUnstake() {
-        com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
-            new com.google.android.material.bottomsheet.BottomSheetDialog(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+    private void askUnstake() {
+        BottomSheetDialog sheet = new BottomSheetDialog(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
 
         LinearLayout root = new LinearLayout(host);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(24), dp(24), dp(24), dp(32));
-        root.setBackgroundColor(Color.parseColor("#121623")); // Dark surface matching app theme
 
-        // 1. Title
+        GradientDrawable roundedBg = new GradientDrawable();
+        roundedBg.setShape(GradientDrawable.RECTANGLE);
+        roundedBg.setColor(Color.parseColor("#121623"));
+        float radius = dp(20);
+        roundedBg.setCornerRadii(new float[]{radius, radius, radius, radius, 0, 0, 0, 0});
+        root.setBackground(roundedBg);
+
         TextView title = new TextView(host);
         title.setText("Unstake Principal");
         title.setTextColor(Color.WHITE);
         title.setTextSize(20);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        // 2. Subtitle / Currently Staked Info
         long stakedRaw = pos == null ? 0 : pos.optLong("stakedRaw", 0);
         double stakedHarv = stakedRaw / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN;
-        
+
         TextView subTitle = new TextView(host);
         subTitle.setText("Currently Staked: " + harv(stakedRaw));
         subTitle.setTextColor(Color.parseColor("#8F9BB3"));
         subTitle.setTextSize(13);
         subTitle.setPadding(0, dp(4), 0, dp(16));
 
-        // 3. Amount Input Container
         LinearLayout inputContainer = new LinearLayout(host);
         inputContainer.setOrientation(LinearLayout.HORIZONTAL);
         inputContainer.setBackgroundResource(R.drawable.bg_input_dark);
         inputContainer.setPadding(dp(16), dp(12), dp(16), dp(12));
         inputContainer.setGravity(Gravity.CENTER_VERTICAL);
-        
+
         EditText inputEt = new EditText(host);
         inputEt.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         inputEt.setBackground(null);
@@ -538,11 +618,10 @@ public final class StakingPanel {
         currencyTv.setText("HARV");
         currencyTv.setTextColor(Color.WHITE);
         currencyTv.setTypeface(null, android.graphics.Typeface.BOLD);
-        
+
         inputContainer.addView(inputEt);
         inputContainer.addView(currencyTv);
 
-        // 4. Percentage Quick Select Buttons Row (10%, 25%, 50%, Unstake All)
         LinearLayout percentRow = new LinearLayout(host);
         percentRow.setOrientation(LinearLayout.HORIZONTAL);
         percentRow.setPadding(0, dp(12), 0, dp(16));
@@ -571,32 +650,6 @@ public final class StakingPanel {
             percentRow.addView(btn);
         }
 
-        // 5. Warning / Info Box
-        LinearLayout warningBox = new LinearLayout(host);
-        warningBox.setOrientation(LinearLayout.VERTICAL);
-        warningBox.setBackgroundResource(R.drawable.bg_surface_light);
-        warningBox.setPadding(dp(16), dp(14), dp(16), dp(14));
-        LinearLayout.LayoutParams boxParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        boxParams.setMargins(0, dp(8), 0, dp(20));
-        warningBox.setLayoutParams(boxParams);
-
-        TextView warningTitle = new TextView(host);
-        warningTitle.setText("⚠️ Important Notice");
-        warningTitle.setTextColor(Color.parseColor("#FF7A00"));
-        warningTitle.setTextSize(13);
-        warningTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-
-        TextView warningBody = new TextView(host);
-        warningBody.setText("• Funds stop earning rewards immediately.\n• Unstaked principal enters a strict 24-hour unbonding cooldown before returning to your spendable wallet balance.");
-        warningBody.setTextColor(Color.parseColor("#8F9BB3"));
-        warningBody.setTextSize(12);
-        warningBody.setPadding(0, dp(4), 0, 0);
-        warningBody.setLineSpacing(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, host.getResources().getDisplayMetrics()), 1.0f);
-
-        warningBox.addView(warningTitle);
-        warningBox.addView(warningBody);
-
-        // 6. Action Button (Confirm Unstake)
         MaterialButton confirmBtn = new MaterialButton(host);
         LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56));
         confirmBtn.setLayoutParams(btnParams);
@@ -605,39 +658,34 @@ public final class StakingPanel {
         confirmBtn.setTextColor(Color.BLACK);
         confirmBtn.setCornerRadius(dp(12));
         confirmBtn.setBackgroundColor(Color.parseColor("#FF7A00"));
-        
+
         confirmBtn.setOnClickListener(v -> {
             String valStr = inputEt.getText().toString().trim();
-            if (valStr.isEmpty()) {
-                toast("Enter an amount to unstake.");
-                return;
-            }
+            if (valStr.isEmpty()) { toast("Enter an amount to unstake."); return; }
             try {
                 double val = Double.parseDouble(valStr);
-                if (val <= 0) {
-                    toast("Amount must be greater than zero.");
-                    return;
-                }
-                if (val > stakedHarv) {
-                    toast("Cannot unstake more than your total staked balance.");
-                    return;
-                }
+                if (val <= 0 || val > stakedHarv) { toast("Invalid unstake amount."); return; }
                 sheet.dismiss();
                 amount.setText(valStr);
                 doUnstake();
-            } catch (Exception e) {
-                toast("Invalid amount.");
-            }
+            } catch (Exception e) { toast("Invalid amount."); }
         });
 
         root.addView(title);
         root.addView(subTitle);
         root.addView(inputContainer);
         root.addView(percentRow);
-        root.addView(warningBox);
         root.addView(confirmBtn);
 
         sheet.setContentView(root);
+        sheet.setOnShowListener(dialog -> {
+            BottomSheetDialog d = (BottomSheetDialog) dialog;
+            View bottomSheet = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (bottomSheet != null) {
+                bottomSheet.setBackgroundColor(Color.TRANSPARENT);
+            }
+        });
+
         sheet.show();
     }
 
@@ -657,22 +705,13 @@ public final class StakingPanel {
         ArrayList<String[]> rows = new ArrayList<>();
         rows.add(new String[]{"To", vault});
         rows.add(new String[]{"Term", selectedLockDays == 0 ? "Free Stake (No Lock)" : selectedLockDays + " Days"});
-        rows.add(new String[]{"Network fee", "Taken with the stake"});
 
         gate("Stake HARV", harvFormatter.format(harvAmount) + " HARV", rows, () -> {
             busy = true; paint();
-            
-            // Set the lock duration into the transaction memo so backend can intercept it
             String memoLock = "STAKE_LOCK:" + selectedLockDays;
-            
             TransactionRouter.routeTransaction(host, address, vault, BigDecimal.valueOf(harvAmount), null, memoLock,
                     new TransactionRouter.RouterCallback() {
-                        @Override public void onSuccess(String txHash) { 
-                            busy = false; 
-                            amount.setText(""); // CLEAR INPUT ON SUCCESS
-                            toast("Stake submitted."); 
-                            refresh(); 
-                        }
+                        @Override public void onSuccess(String txHash) { busy = false; amount.setText(""); toast("Stake submitted."); refresh(); }
                         @Override public void onError(String code, String msg) { busy = false; toast(msg); paint(); }
                     });
         });
@@ -686,17 +725,11 @@ public final class StakingPanel {
 
         ArrayList<String[]> rows = new ArrayList<>();
         rows.add(new String[]{"To", "Your wallet, after 24 hours"});
-        rows.add(new String[]{"For", "Returns to your wallet in exactly 24 hours."});
 
         gate("Unstake HARV", harvFormatter.format(harvAmount) + " HARV", rows, () -> {
             busy = true;
             NodeGroupClient.unstake(host, address, BalanceFormatter.harvToRaw(harvAmount), new NodeGroupClient.Callback() {
-                @Override public void onSuccess(JSONObject json) { 
-                    busy = false; 
-                    amount.setText(""); // CLEAR INPUT ON SUCCESS
-                    toast("Unstaking. Returns in 24 hours."); 
-                    refresh(); 
-                }
+                @Override public void onSuccess(JSONObject json) { busy = false; amount.setText(""); toast("Unstaking. Returns in 24 hours."); refresh(); }
                 @Override public void onError(String error) { busy = false; toast(error); paint(); }
             });
         });
@@ -709,7 +742,6 @@ public final class StakingPanel {
 
         ArrayList<String[]> rows = new ArrayList<>();
         rows.add(new String[]{"To", "Your wallet"});
-        rows.add(new String[]{"For", "Rewards already dripped into Claim. Your stake stays until you unstake."});
         gate("Claim staking rewards", harv(pending), rows, () -> {
             busy = true;
             NodeGroupClient.claimStakingRewards(host, address, new NodeGroupClient.Callback() {
@@ -728,17 +760,10 @@ public final class StakingPanel {
         chip3m.setTextColor(Color.parseColor("#8F9BB3")); chip3m.setBackgroundResource(0);
         chipAll.setTextColor(Color.parseColor("#8F9BB3")); chipAll.setBackgroundResource(0);
 
-        TextView selected = null;
-        if (days == 1) selected = chip1d;
-        else if (days == 3) selected = chip3d;
-        else if (days == 7) selected = chip7d;
-        else if (days == 30) selected = chip1m;
-        else if (days == 90) selected = chip3m;
-        else selected = chipAll;
-
+        TextView selected = days == 1 ? chip1d : days == 3 ? chip3d : days == 7 ? chip7d : days == 30 ? chip1m : days == 90 ? chip3m : chipAll;
         selected.setTextColor(Color.parseColor("#080A11"));
         selected.setBackgroundResource(R.drawable.bg_pill_orange);
-        
+
         drawChart(WalletManager.getActiveWalletAddress(host));
     }
 
@@ -779,11 +804,7 @@ public final class StakingPanel {
                 JSONObject row = rows.optJSONObject(i);
                 if (row != null && today.equals(row.optString("d"))) { hit = row; break; }
             }
-            if (hit == null) {
-                hit = new JSONObject();
-                hit.put("d", today);
-                rows.put(hit);
-            }
+            if (hit == null) { hit = new JSONObject(); hit.put("d", today); rows.put(hit); }
             hit.put("earned", earnedRaw);
             while (rows.length() > 120) rows.remove(0);
             host.getSharedPreferences(PREFS, Activity.MODE_PRIVATE).edit().putString(address, rows.toString()).apply();
@@ -825,8 +846,7 @@ public final class StakingPanel {
         if (rows.length() == 0) { chart.clear(); chart.invalidate(); return; }
         List<Entry> entries = new ArrayList<>();
         List<String> labels = new ArrayList<>();
-        
-        // 1D needs to show the jump from yesterday to today, so it requires at least 2 points
+
         int requiredPoints = chartDays == 1 ? 2 : chartDays;
         int start = requiredPoints >= rows.length() ? 0 : rows.length() - requiredPoints;
         long previous = -1;
@@ -869,119 +889,5 @@ public final class StakingPanel {
         int gaps = blocks.length() - 1;
         if (span < 1000 || gaps < 1) return 0;
         return Math.max(1L, span / 1000L / gaps);
-    }
-
-    private void showUnbondDetailsSheet(JSONObject u) {
-        com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
-            new com.google.android.material.bottomsheet.BottomSheetDialog(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
-        
-        LinearLayout root = new LinearLayout(host);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(24), dp(24), dp(24), dp(32));
-        root.setBackgroundColor(Color.parseColor("#121623"));
-
-        TextView title = new TextView(host);
-        title.setText("Withdrawal Details");
-        title.setTextColor(Color.WHITE);
-        title.setTextSize(20);
-        title.setTypeface(null, android.graphics.Typeface.BOLD);
-        
-        TextView amountTv = new TextView(host);
-        amountTv.setText(harv(u.optLong("amountRaw", 0)));
-        amountTv.setTextColor(Color.WHITE);
-        amountTv.setTextSize(32);
-        amountTv.setTypeface(null, android.graphics.Typeface.BOLD);
-        amountTv.setPadding(0, dp(16), 0, dp(4));
-
-        long now = System.currentTimeMillis();
-        long release = u.optLong("releaseTimestamp", 0);
-        boolean ready = (release - now) <= 0 || "RELEASING".equals(u.optString("status"));
-        
-        TextView status = new TextView(host);
-        status.setTextSize(12);
-        status.setTypeface(null, android.graphics.Typeface.BOLD);
-        if (ready) {
-            status.setText("● Ready for Withdrawal");
-            status.setTextColor(Color.parseColor("#3B82F6"));
-        } else {
-            status.setText("● Unbonding (Locked)");
-            status.setTextColor(Color.parseColor("#FF7A00"));
-        }
-
-        LinearLayout receiptBox = new LinearLayout(host);
-        receiptBox.setOrientation(LinearLayout.VERTICAL);
-        receiptBox.setBackgroundResource(R.drawable.bg_surface_light);
-        receiptBox.setPadding(dp(16), dp(16), dp(16), dp(16));
-        LinearLayout.LayoutParams boxParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        boxParams.setMargins(0, dp(24), 0, dp(16));
-        receiptBox.setLayoutParams(boxParams);
-
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy • HH:mm", Locale.US);
-        String reqDate = sdf.format(new java.util.Date(u.optLong("requestedTimestamp", 0)));
-        String relDate = sdf.format(new java.util.Date(release));
-
-        receiptBox.addView(buildReceiptRow("Requested", reqDate));
-        receiptBox.addView(buildReceiptRow("Unlocks", relDate));
-        receiptBox.addView(buildReceiptRow("Unbond ID", u.optString("id", "UNKNOWN")));
-
-        TextView note = new TextView(host);
-        note.setText("For network security, unstaked funds undergo a strict 24-hour cooldown. Once the timer finishes, you can withdraw the HARV directly to your spendable wallet balance.");
-        note.setTextColor(Color.parseColor("#8F9BB3"));
-        note.setTextSize(12);
-        note.setLineSpacing(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, host.getResources().getDisplayMetrics()), 1.0f);
-
-        MaterialButton actionBtn = new MaterialButton(host);
-        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56));
-        btnParams.setMargins(0, dp(24), 0, 0);
-        actionBtn.setLayoutParams(btnParams);
-        actionBtn.setAllCaps(false);
-        actionBtn.setCornerRadius(dp(12));
-        
-        if (ready) {
-            actionBtn.setText("Withdraw to Wallet");
-            actionBtn.setTextColor(Color.BLACK);
-            actionBtn.setBackgroundColor(Color.parseColor("#FF7A00"));
-            actionBtn.setOnClickListener(v -> {
-                sheet.dismiss();
-                doManualSweep();
-            });
-        } else {
-            actionBtn.setText("Got it");
-            actionBtn.setTextColor(Color.WHITE);
-            actionBtn.setBackgroundColor(Color.parseColor("#2A3042"));
-            actionBtn.setOnClickListener(v -> sheet.dismiss());
-        }
-
-        root.addView(title);
-        root.addView(amountTv);
-        root.addView(status);
-        root.addView(receiptBox);
-        root.addView(note);
-        root.addView(actionBtn);
-
-        sheet.setContentView(root);
-        sheet.show();
-    }
-
-    private LinearLayout buildReceiptRow(String label, String value) {
-        LinearLayout row = new LinearLayout(host);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setPadding(0, dp(6), 0, dp(6));
-        
-        TextView lblTv = new TextView(host);
-        lblTv.setText(label);
-        lblTv.setTextColor(Color.parseColor("#8F9BB3"));
-        lblTv.setTextSize(13);
-        lblTv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        
-        TextView valTv = new TextView(host);
-        valTv.setText(value);
-        valTv.setTextColor(Color.WHITE);
-        valTv.setTextSize(13);
-        valTv.setTypeface(null, android.graphics.Typeface.BOLD);
-        
-        row.addView(lblTv);
-        row.addView(valTv);
-        return row;
     }
 }

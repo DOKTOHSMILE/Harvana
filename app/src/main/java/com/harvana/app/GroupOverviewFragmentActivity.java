@@ -316,146 +316,55 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		
 		_groupdb_child_listener = new ChildEventListener() {
 			@Override
-			public void onChildAdded(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
+			public void onChildAdded(DataSnapshot _param1, String _param2) { }
 			
 			@Override
-			public void onChildChanged(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
+			public void onChildChanged(DataSnapshot _param1, String _param2) { }
 			
 			@Override
-			public void onChildMoved(DataSnapshot _param1, String _param2) {
-				
-			}
+			public void onChildMoved(DataSnapshot _param1, String _param2) { }
 			
 			@Override
-			public void onChildRemoved(DataSnapshot _param1) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
+			public void onChildRemoved(DataSnapshot _param1) { }
 			
 			@Override
-			public void onCancelled(DatabaseError _param1) {
-				final int _errorCode = _param1.getCode();
-				final String _errorMessage = _param1.getMessage();
-				
-			}
+			public void onCancelled(DatabaseError _param1) { }
 		};
 		groupdb.addChildEventListener(_groupdb_child_listener);
 		
 		_userdb_child_listener = new ChildEventListener() {
 			@Override
-			public void onChildAdded(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
+			public void onChildAdded(DataSnapshot _param1, String _param2) { }
 			
 			@Override
-			public void onChildChanged(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
+			public void onChildChanged(DataSnapshot _param1, String _param2) { }
 			
 			@Override
-			public void onChildMoved(DataSnapshot _param1, String _param2) {
-				
-			}
+			public void onChildMoved(DataSnapshot _param1, String _param2) { }
 			
 			@Override
-			public void onChildRemoved(DataSnapshot _param1) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
+			public void onChildRemoved(DataSnapshot _param1) { }
 			
 			@Override
-			public void onCancelled(DatabaseError _param1) {
-				final int _errorCode = _param1.getCode();
-				final String _errorMessage = _param1.getMessage();
-				
-			}
+			public void onCancelled(DatabaseError _param1) { }
 		};
 		userdb.addChildEventListener(_userdb_child_listener);
 		
-		fauth_updateEmailListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_updatePasswordListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_emailVerificationSentListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_deleteUserListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_phoneAuthListener = task -> {
-			final boolean _success = task.isSuccessful();
-			final String _errorMessage = task.getException() != null ? task.getException().getMessage() : "";
-			
-		};
-		
-		fauth_updateProfileListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_googleSignInListener = task -> {
-			final boolean _success = task.isSuccessful();
-			final String _errorMessage = task.getException() != null ? task.getException().getMessage() : "";
-			
-		};
-		
-		_fauth_create_user_listener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		_fauth_sign_in_listener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		_fauth_reset_password_listener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			
-		};
+		fauth_updateEmailListener = _param1 -> { };
+		fauth_updatePasswordListener = _param1 -> { };
+		fauth_emailVerificationSentListener = _param1 -> { };
+		fauth_deleteUserListener = _param1 -> { };
+		fauth_phoneAuthListener = task -> { };
+		fauth_updateProfileListener = _param1 -> { };
+		fauth_googleSignInListener = task -> { };
+		_fauth_create_user_listener = _param1 -> { };
+		_fauth_sign_in_listener = _param1 -> { };
+		_fauth_reset_password_listener = _param1 -> { };
 	}
 	
 	private void initializeLogic() {
 		groupId = getArguments() != null ? getArguments().getString("groupId", "") : "";
 		_loadGroupData();
-		
 	}
 	
 	@Override
@@ -464,10 +373,11 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		if (groupId != null && !groupId.isEmpty()) {
 			_loadGroupData();
 		}
-		
 	}
+	
 	public void _MORE() {
 	}
+	
 	private String _extractLocation(Map<String, Object> data) {
 		String city = _safeString(data, "city", "");
 		String state = _safeString(data, "state", "");
@@ -738,7 +648,6 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		
 		// Apply to Financial Terms Grid
 		if (tv_rule_type != null) tv_rule_type.setText(groupType.isEmpty() ? "—" : groupType);
-		// APPLIED FIX
 		if (tv_rule_contribution != null) tv_rule_contribution.setText(_formatUIBalance(contribution));
 		if (tv_rule_location != null) tv_rule_location.setText(location);
 		if (tv_rule_admin_fee != null) tv_rule_admin_fee.setText(secondaryFinancialVal);
@@ -809,10 +718,13 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		boolean rotating = groupType.contains("Rotating");
 		boolean fixed = groupType.contains("Fixed");
 		boolean accum = groupType.contains("Accumulative");
-		boolean goal = fixed && com.harvana.app.group.GroupTypeBoard.isGoalPool(data);
+		
+		// FIXED BOOLEAN NAME COLLISION HERE
+		boolean isGoal = fixed && com.harvana.app.group.GroupTypeBoard.isGoalPool(data);
+		
 		if (tv_cycle_status != null) {
 			if (rotating) tv_cycle_status.setText("Round " + currentRound + " of " + totalSlots);
-			else if (goal) tv_cycle_status.setText("Shared goal");
+			else if (isGoal) tv_cycle_status.setText("Shared goal");
 			else if (fixed) tv_cycle_status.setText("Daily custody");
 			else if (accum) tv_cycle_status.setText("Savings book");
 			else tv_cycle_status.setText("Slot " + currentRound + " of " + totalSlots);
@@ -822,22 +734,23 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		}
 		if (tv_cycle_hint != null) {
 			if (rotating) tv_cycle_hint.setText("Each box is a member slot. Green means they have paid this round, and the date is written in the box.");
-			else if (goal) tv_cycle_hint.setText("You can deposit any day until the goal is reached. A day you skip is not a missed payment.");
+			else if (isGoal) tv_cycle_hint.setText("You can deposit any day until the goal is reached. A day you skip is not a missed payment.");
 			else if (fixed) tv_cycle_hint.setText("Each box is one day of this month, with the date written inside.");
 			else if (accum) tv_cycle_hint.setText("Every contribution is its own box, with the payment date written inside.");
 		}
 		if (textview21 != null) {
 			if (rotating) textview21.setText("ROTATION BOARD");
-			else if (goal) textview21.setText("GOAL");
+			else if (isGoal) textview21.setText("GOAL");
 			else if (fixed) textview21.setText("THIS MONTH");
 			else if (accum) textview21.setText("SAVINGS STAMPS");
 		}
 		_updateProgressBar(rotating ? percent : 0);
+		
+		// Re-using the unmodified numeric double variable 'goal' from earlier in the method
 		_loadPaymentSlots(groupId, currentRound, totalSlots, goal);
 		if (accum) _loadActiveLoanCount();
 		
 		// Type panels — only one visible
-		
 		if (panel_rotating != null) panel_rotating.setVisibility(rotating ? View.VISIBLE : View.GONE);
 		if (panel_fixed != null) panel_fixed.setVisibility(fixed ? View.VISIBLE : View.GONE);
 		if (panel_accumulative != null) panel_accumulative.setVisibility(accum ? View.VISIBLE : View.GONE);
@@ -855,7 +768,6 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		}
 		
 		if (fixed) {
-			// APPLIED FIX
 			if (tv_fixed_goal != null) {
 				tv_fixed_goal.setText("Target: " + _formatUIBalance(goal));
 			}
@@ -878,11 +790,11 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		}
 		
 		// Pool summary
-		// APPLIED FIX
 		if (tv_pool_contribution != null) {
 			tv_pool_contribution.setText(_formatUIBalance(contribution));
 		}
-		if (goal) {
+		
+		if (isGoal) {
 			if (textview62 != null) textview62.setText("Raised");
 			if (textview63 != null) textview63.setText("Goal");
 			if (tv_pool_total != null) tv_pool_total.setText(_formatUIBalance(goal));
@@ -947,7 +859,6 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		if (cached != null && tv_group_wallet_balance != null) {
 			Object show = cached.get("show");
 			if (show instanceof Number) {
-				// APPLIED FIX
 				tv_group_wallet_balance.setText(_formatUIBalance(((Number) show).doubleValue()));
 			}
 		}
@@ -957,14 +868,13 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				long raw = json.optLong("balance", 0L);
 				double harv = com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay(raw);
 				Map<String, Object> toCache = new HashMap<>();
-				toCache.put("show", harv); // Saves safely as a raw double to the cache
+				toCache.put("show", harv); 
 				if (getContext() != null) {
 					com.harvana.app.offline.OfflineCacheManager.save(getContext(), cacheKey, toCache);
 				}
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> {
 					if (tv_group_wallet_balance != null) {
-						// APPLIED FIX
 						tv_group_wallet_balance.setText(_formatUIBalance(harv));
 					}
 				});
@@ -1156,7 +1066,6 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				tv_pool_paid.setText(paidCount + " / " + slots);
 			}
 			if (tv_fixed_progress != null && liveRaised < 0) {
-				// APPLIED FIX
 				tv_fixed_progress.setText("Raised: "
 				+ _formatUIBalance(finalRaised)
 				+ " / " + _formatUIBalance(targetGoal));
@@ -1243,7 +1152,4 @@ public class GroupOverviewFragmentActivity extends Fragment {
 			return String.valueOf(v);
 		}
 	}
-	{
-	}
-	
 }

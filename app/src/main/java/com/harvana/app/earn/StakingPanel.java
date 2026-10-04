@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputType;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -146,6 +146,20 @@ public final class StakingPanel {
     }
 
     public void reload() { refresh(); }
+
+    public static void fillHeadline(Activity activity, TextView apr) {
+        if (activity == null || apr == null) return;
+        NodeGroupClient.getStakingInfo(new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject json) {
+                long pool = json == null ? 0 : json.optLong("rewardPoolBalanceRaw", 0);
+                activity.runOnUiThread(() -> {
+                    DecimalFormat fmt = new DecimalFormat("0.####", DecimalFormatSymbols.getInstance(Locale.US));
+                    apr.setText(fmt.format(pool / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN) + " HARV in the reward pool");
+                });
+            }
+            @Override public void onError(String error) { }
+        });
+    }
 
     private void refresh() {
         NodeGroupClient.getStakingInfo(new NodeGroupClient.Callback() {
@@ -460,7 +474,6 @@ public final class StakingPanel {
         PaymentConfirmSheet.reviewThenAuthorize(host, title, amt, rows, w); 
     }
     
-    // Updated harv formatting method using DecimalFormat
     private String harv(long raw) { 
         return harvFormatter.format(raw / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN) + " HARV"; 
     }

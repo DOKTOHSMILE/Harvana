@@ -388,6 +388,14 @@ public final class StakingPanel {
         cl.setPadding(dp(12), dp(12), dp(12), dp(12));
         cl.setTag(u);
 
+        cl.setClickable(true);
+        cl.setFocusable(true);
+        cl.setBackgroundResource(android.R.attr.selectableItemBackground);
+        cl.setOnClickListener(v -> {
+            JSONObject unbondData = (JSONObject) v.getTag();
+            showUnbondDetailsSheet(unbondData);
+        });
+
         long now = System.currentTimeMillis();
         long release = u.optLong("releaseTimestamp", 0);
         boolean ready = (release - now) <= 0 || "RELEASING".equals(u.optString("status"));
@@ -510,19 +518,30 @@ public final class StakingPanel {
         unbondingList.addView(containerCard);
     }
 
-    private void showFullUnbondingBottomSheet(List<JSONObject> allRows) {
-        BottomSheetDialog sheet = new BottomSheetDialog(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
-
-        LinearLayout root = new LinearLayout(host);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(24), dp(24), dp(24), dp(32));
-
+    private void applyCurvedBottomSheetBackground(LinearLayout root, BottomSheetDialog sheet) {
         GradientDrawable roundedBg = new GradientDrawable();
         roundedBg.setShape(GradientDrawable.RECTANGLE);
         roundedBg.setColor(Color.parseColor("#121623"));
         float radius = dp(20);
         roundedBg.setCornerRadii(new float[]{radius, radius, radius, radius, 0, 0, 0, 0});
         root.setBackground(roundedBg);
+
+        sheet.setOnShowListener(dialog -> {
+            BottomSheetDialog d = (BottomSheetDialog) dialog;
+            View bottomSheet = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (bottomSheet != null) {
+                bottomSheet.setBackgroundColor(Color.TRANSPARENT);
+            }
+        });
+    }
+
+    private void showFullUnbondingBottomSheet(List<JSONObject> allRows) {
+        BottomSheetDialog sheet = new BottomSheetDialog(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+
+        LinearLayout root = new LinearLayout(host);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dp(24), dp(24), dp(24), dp(32));
+        applyCurvedBottomSheetBackground(root, sheet);
 
         TextView title = new TextView(host);
         title.setText("All Unbonding & Withdrawals");
@@ -539,27 +558,142 @@ public final class StakingPanel {
         LinearLayout listContainer = new LinearLayout(host);
         listContainer.setOrientation(LinearLayout.VERTICAL);
 
-        for (JSONObject u : allRows) {
-            View itemV = createUnbondingRowView(u);
+        for (int i = 0; i < allRows.size(); i++) {
+            View itemV = createUnbondingRowView(allRows.get(i));
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.setMargins(0, dp(4), 0, dp(4));
             itemV.setLayoutParams(lp);
             listContainer.addView(itemV);
+
+            // Add line separator between rows in the bottom sheet
+            if (i < allRows.size() - 1) {
+                View divider = new View(host);
+                LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1));
+                divLp.setMargins(0, dp(6), 0, dp(6));
+                divider.setLayoutParams(divLp);
+                divider.setBackgroundColor(Color.parseColor("#1A2235"));
+                listContainer.addView(divider);
+            }
         }
 
         scrollView.addView(listContainer);
         root.addView(scrollView);
 
         sheet.setContentView(root);
-        sheet.setOnShowListener(dialog -> {
-            BottomSheetDialog d = (BottomSheetDialog) dialog;
-            View bottomSheet = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            if (bottomSheet != null) {
-                bottomSheet.setBackgroundColor(Color.TRANSPARENT);
-            }
-        });
-
         sheet.show();
+    }
+
+    private void showUnbondDetailsSheet(JSONObject u) {
+        BottomSheetDialog sheet = new BottomSheetDialog(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+
+        LinearLayout root = new LinearLayout(host);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dp(24), dp(24), dp(24), dp(32));
+        applyCurvedBottomSheetBackground(root, sheet);
+
+        TextView title = new TextView(host);
+        title.setText("Withdrawal Details");
+        title.setTextColor(Color.WHITE);
+        title.setTextSize(20);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+
+        TextView amountTv = new TextView(host);
+        amountTv.setText(harv(u.optLong("amountRaw", 0)));
+        amountTv.setTextColor(Color.WHITE);
+        amountTv.setTextSize(32);
+        amountTv.setTypeface(null, android.graphics.Typeface.BOLD);
+        amountTv.setPadding(0, dp(16), 0, dp(4));
+
+        long now = System.currentTimeMillis();
+        long release = u.optLong("releaseTimestamp", 0);
+        boolean ready = (release - now) <= 0 || "RELEASING".equals(u.optString("status"));
+
+        TextView status = new TextView(host);
+        status.setTextSize(12);
+        status.setTypeface(null, android.graphics.Typeface.BOLD);
+        if (ready) {
+            status.setText("● Ready for Withdrawal");
+            status.setTextColor(Color.parseColor("#3B82F6"));
+        } else {
+            status.setText("● Unbonding (Locked)");
+            status.setTextColor(Color.parseColor("#FF7A00"));
+        }
+
+        LinearLayout receiptBox = new LinearLayout(host);
+        receiptBox.setOrientation(LinearLayout.VERTICAL);
+        receiptBox.setBackgroundResource(R.drawable.bg_surface_light);
+        receiptBox.setPadding(dp(16), dp(16), dp(16), dp(16));
+        LinearLayout.LayoutParams boxParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        boxParams.setMargins(0, dp(24), 0, dp(16));
+        receiptBox.setLayoutParams(boxParams);
+
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy • HH:mm", Locale.US);
+        String reqDate = sdf.format(new java.util.Date(u.optLong("requestedTimestamp", 0)));
+        String relDate = sdf.format(new java.util.Date(release));
+
+        receiptBox.addView(buildReceiptRow("Requested", reqDate));
+        receiptBox.addView(buildReceiptRow("Unlocks", relDate));
+        receiptBox.addView(buildReceiptRow("Unbond ID", u.optString("id", "UNKNOWN")));
+
+        TextView note = new TextView(host);
+        note.setText("For network security, unstaked funds undergo a strict 24-hour cooldown. Once the timer finishes, you can withdraw the HARV directly to your spendable wallet balance.");
+        note.setTextColor(Color.parseColor("#8F9BB3"));
+        note.setTextSize(12);
+        note.setLineSpacing(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, host.getResources().getDisplayMetrics()), 1.0f);
+
+        MaterialButton actionBtn = new MaterialButton(host);
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56));
+        btnParams.setMargins(0, dp(24), 0, 0);
+        actionBtn.setLayoutParams(btnParams);
+        actionBtn.setAllCaps(false);
+        actionBtn.setCornerRadius(dp(12));
+
+        if (ready) {
+            actionBtn.setText("Withdraw to Wallet");
+            actionBtn.setTextColor(Color.BLACK);
+            actionBtn.setBackgroundColor(Color.parseColor("#FF7A00"));
+            actionBtn.setOnClickListener(v -> {
+                sheet.dismiss();
+                doManualSweep();
+            });
+        } else {
+            actionBtn.setText("Got it");
+            actionBtn.setTextColor(Color.WHITE);
+            actionBtn.setBackgroundColor(Color.parseColor("#2A3042"));
+            actionBtn.setOnClickListener(v -> sheet.dismiss());
+        }
+
+        root.addView(title);
+        root.addView(amountTv);
+        root.addView(status);
+        root.addView(receiptBox);
+        root.addView(note);
+        root.addView(actionBtn);
+
+        sheet.setContentView(root);
+        sheet.show();
+    }
+
+    private LinearLayout buildReceiptRow(String label, String value) {
+        LinearLayout row = new LinearLayout(host);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(0, dp(6), 0, dp(6));
+
+        TextView lblTv = new TextView(host);
+        lblTv.setText(label);
+        lblTv.setTextColor(Color.parseColor("#8F9BB3"));
+        lblTv.setTextSize(13);
+        lblTv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+
+        TextView valTv = new TextView(host);
+        valTv.setText(value);
+        valTv.setTextColor(Color.WHITE);
+        valTv.setTextSize(13);
+        valTv.setTypeface(null, android.graphics.Typeface.BOLD);
+
+        row.addView(lblTv);
+        row.addView(valTv);
+        return row;
     }
 
     private void doManualSweep() {
@@ -576,13 +710,7 @@ public final class StakingPanel {
         LinearLayout root = new LinearLayout(host);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(24), dp(24), dp(24), dp(32));
-
-        GradientDrawable roundedBg = new GradientDrawable();
-        roundedBg.setShape(GradientDrawable.RECTANGLE);
-        roundedBg.setColor(Color.parseColor("#121623"));
-        float radius = dp(20);
-        roundedBg.setCornerRadii(new float[]{radius, radius, radius, radius, 0, 0, 0, 0});
-        root.setBackground(roundedBg);
+        applyCurvedBottomSheetBackground(root, sheet);
 
         TextView title = new TextView(host);
         title.setText("Unstake Principal");
@@ -678,14 +806,6 @@ public final class StakingPanel {
         root.addView(confirmBtn);
 
         sheet.setContentView(root);
-        sheet.setOnShowListener(dialog -> {
-            BottomSheetDialog d = (BottomSheetDialog) dialog;
-            View bottomSheet = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            if (bottomSheet != null) {
-                bottomSheet.setBackgroundColor(Color.TRANSPARENT);
-            }
-        });
-
         sheet.show();
     }
 

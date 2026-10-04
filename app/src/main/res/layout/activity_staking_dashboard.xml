@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/_coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackgroundMain">
@@ -61,7 +62,7 @@
             </LinearLayout>
 
             <!-- ========================================== -->
-            <!-- PAGE 1: STAKING OVERVIEW (Image 1)         -->
+            <!-- PAGE 1: STAKING OVERVIEW                   -->
             <!-- ========================================== -->
             <LinearLayout
                 android:id="@+id/page_stake"
@@ -97,7 +98,7 @@
                             android:id="@+id/tv_overview_staked"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0.0000 HARV"
+                            android:text="0 HARV"
                             android:textColor="#FFFFFF"
                             android:textSize="26sp"
                             android:textStyle="bold"
@@ -130,14 +131,24 @@
                             android:id="@+id/tv_overview_unclaimed"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0.0000 HARV"
+                            android:text="0 HARV"
                             android:textColor="#FFFFFF"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             app:layout_constraintTop_toBottomOf="@id/lbl_unclaimed"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <!-- Giant Logo aligned to right -->
+                        <TextView
+                            android:id="@+id/tv_pool"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="0 HARV in reward pool · 0 stakers"
+                            android:textColor="@color/colorTextMuted"
+                            android:textSize="11sp"
+                            app:layout_constraintTop_toBottomOf="@id/tv_overview_unclaimed"
+                            app:layout_constraintStart_toStartOf="parent"/>
+
                         <ImageView
                             android:layout_width="120dp"
                             android:layout_height="120dp"
@@ -177,7 +188,6 @@
                                 android:textColor="#FFFFFF"
                                 android:textSize="16sp"
                                 android:textStyle="bold"/>
-                            <!-- Tiny chart filter pills -->
                             <TextView android:id="@+id/chip_7d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="7D" android:textColor="@color/colorBackgroundMain" android:background="@drawable/bg_pill_orange" android:paddingHorizontal="10dp" android:paddingVertical="4dp" android:textSize="10sp" android:textStyle="bold"/>
                             <TextView android:id="@+id/chip_1m" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1M" android:textColor="@color/colorTextMuted" android:layout_marginLeft="8dp" android:textSize="10sp"/>
                             <TextView android:id="@+id/chip_3m" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3M" android:textColor="@color/colorTextMuted" android:layout_marginLeft="8dp" android:textSize="10sp"/>
@@ -229,7 +239,6 @@
                             android:textColor="@color/colorTextMuted"
                             android:textSize="12sp"/>
                         
-                        <!-- Dark Input Field -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="56dp"
@@ -274,7 +283,6 @@
                             android:textColor="@color/colorTextMuted"
                             android:textSize="12sp"/>
 
-                        <!-- Type Box -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -311,7 +319,7 @@
             </LinearLayout>
 
             <!-- ========================================== -->
-            <!-- PAGE 2: MY POSITIONS (Image 2)             -->
+            <!-- PAGE 2: MY POSITIONS                       -->
             <!-- ========================================== -->
             <LinearLayout
                 android:id="@+id/page_positions"
@@ -348,7 +356,7 @@
                             android:id="@+id/tv_pos_total"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0.0000 HARV"
+                            android:text="0 HARV"
                             android:textColor="#FFFFFF"
                             android:textSize="22sp"
                             android:textStyle="bold"
@@ -365,7 +373,6 @@
                             app:layout_constraintTop_toBottomOf="@id/tv_pos_total"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <!-- Info Grid -->
                         <GridLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -374,10 +381,10 @@
                             app:layout_constraintTop_toBottomOf="@id/tv_pos_daily_pct">
                             
                             <TextView android:text="Total Staked" android:textColor="@color/colorTextMuted" android:textSize="12sp" android:layout_columnWeight="1"/>
-                            <TextView android:id="@+id/tv_grid_total" android:text="0.0000 HARV" android:textColor="#FFFFFF" android:textSize="12sp" android:gravity="end" android:layout_columnWeight="1"/>
+                            <TextView android:id="@+id/tv_grid_total" android:text="0 HARV" android:textColor="#FFFFFF" android:textSize="12sp" android:gravity="end" android:layout_columnWeight="1"/>
 
                             <TextView android:text="Unclaimed" android:textColor="@color/colorTextMuted" android:textSize="12sp" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
-                            <TextView android:id="@+id/tv_grid_unclaimed" android:text="0.0000 HARV" android:textColor="#FFFFFF" android:textSize="12sp" android:gravity="end" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
+                            <TextView android:id="@+id/tv_grid_unclaimed" android:text="0 HARV" android:textColor="#FFFFFF" android:textSize="12sp" android:gravity="end" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
 
                             <TextView android:text="Pool APY" android:textColor="@color/colorTextMuted" android:textSize="12sp" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
                             <TextView android:id="@+id/tv_grid_apy" android:text="--%" android:textColor="#FFFFFF" android:textSize="12sp" android:gravity="end" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
@@ -516,7 +523,7 @@
                                     android:id="@+id/tv_active_amount"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0.0000 HARV"
+                                    android:text="0 HARV"
                                     android:textColor="#FFFFFF"
                                     android:textSize="16sp"
                                     android:textStyle="bold"/>
@@ -543,7 +550,7 @@
                                 android:layout_weight="1"
                                 android:orientation="vertical">
                                 <TextView android:text="Est. Monthly Reward" android:textColor="@color/colorTextMuted" android:textSize="12sp"/>
-                                <TextView android:id="@+id/tv_active_monthly" android:text="~ 0.00 HARV" android:textColor="#FFFFFF" android:textSize="13sp" android:layout_marginTop="2dp"/>
+                                <TextView android:id="@+id/tv_active_monthly" android:text="~ 0 HARV" android:textColor="#FFFFFF" android:textSize="13sp" android:layout_marginTop="2dp"/>
                             </LinearLayout>
                         </LinearLayout>
 
@@ -560,7 +567,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Dynamic Unbonding List Container -->
+                <!-- Unbonding Queue -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -596,14 +603,4 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Nav Placeholder (to match image) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_gravity="bottom"
-        android:background="@color/colorSurfaceDark"
-        android:orientation="horizontal"
-        android:elevation="8dp">
-        <!-- Add your BottomNavigationView here -->
-    </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

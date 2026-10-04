@@ -725,7 +725,6 @@ public class GroupPaymentFragmentActivity extends Fragment {
 
 	/** On-chain groups show the savings card here, not a second screen. */
 	private int nodeLoadGen = 0;
-	private com.google.android.material.button.MaterialButton nodeActionButton;
 
 	private void _hideLegacyPaymentChrome() {
 		if (card_group_wallet != null) card_group_wallet.setVisibility(View.GONE);
@@ -737,12 +736,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 
 	private void _embedNodeRecord(String nodeId) {
 		if (nodeId == null || nodeId.isEmpty() || getContext() == null) return;
-		_ensureNodeActionButton("");
-		if (nodeActionButton != null) {
-			nodeActionButton.setEnabled(false);
-			nodeActionButton.setAlpha(0.55f);
-			nodeActionButton.setText("Reading your record…");
-		}
+		_showNodeActionsPending();
 		final int gen = ++nodeLoadGen;
 		final String family = com.harvana.app.sync.NodeGroupClient.familyOf(nodeId);
 		final String me = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(getContext());
@@ -884,47 +878,91 @@ public class GroupPaymentFragmentActivity extends Fragment {
 					});
 				}
 			}
-			_ensureNodeActionButton(family);
 			_applyPayGate(family, group, member, line);
 		});
 	}
 
-	/** The one payment button on this tab. Disabled, with the reason on it, when the node would reject a payment. */
+	private LinearLayout nodeActionHost;
+	private Map<String, Object> nodeGroupMap, nodeMemberMap, nodeLineMap;
+	private String nodeMe = "";
+
+	/** Every payment this member can make, on this tab. Not a second screen. */
 	private void _applyPayGate(String family, Map<String, Object> group, Map<String, Object> member, Map<String, Object> line) {
-		if (nodeActionButton == null) return;
-		String me = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(getContext());
+		if (getActivity() == null || panel_type_board == null) return;
+		nodeGroupMap = group;
+		nodeMemberMap = member;
+		nodeLineMap = line;
+		nodeMe = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(getContext());
+		if (nodeMe == null) nodeMe = "";
+		if (nodeActionHost == null) {
+			nodeActionHost = new LinearLayout(getContext());
+			nodeActionHost.setOrientation(LinearLayout.VERTICAL);
+			panel_type_board.addView(nodeActionHost);
+		}
+		nodeActionHost.removeAllViews();
+		String me = nodeMe;
 		com.harvana.app.engine.GroupSnapshot snap = "CIRCLE".equals(family)
 				? com.harvana.app.engine.CircleSnapshot.of(group, member)
-				: "ACCUM".equals(family) ? com.harvana.app.engine.AccumSnapshot.of(group, member, line, me == null ? "" : me)
-				: com.harvana.app.engine.FixedSnapshot.of(group, member, me == null ? "" : me);
-		com.harvana.app.engine.GroupAction pay = null;
-		com.harvana.app.engine.GroupAction blocked = null;
-		com.harvana.app.engine.GroupAction other = null;
+				: "ACCUM".equals(family) ? com.harvana.app.engine.AccumSnapshot.of(group, member, line, me)
+				: com.harvana.app.engine.FixedSnapshot.of(group, member, me);
+		NodePayActions.Ctx ctx = _payCtx();
 		for (com.harvana.app.engine.GroupAction a : snap.actions) {
-			boolean money = com.harvana.app.engine.GroupAction.CONTRIBUTE.equals(a.id)
-					|| com.harvana.app.engine.GroupAction.ACCUM_CONTRIBUTE.equals(a.id)
-					|| com.harvana.app.engine.GroupAction.ACCUM_CONTRIBUTE_MULTI.equals(a.id)
-					|| com.harvana.app.engine.GroupAction.FIXED_DEPOSIT.equals(a.id);
-			if (money && a.enabled && pay == null) pay = a;
-			if (!a.enabled && blocked == null) blocked = a;
-			if (a.enabled && other == null) other = a;
+			final com.harvana.app.engine.GroupAction action = a;
+			Button b = NodePayActions.button(getActivity(), a.label, a.primary && a.enabled, v -> {
+				ctx.pressed = (Button) v;
+				NodePayActions.run(ctx, action);
+			});
+			b.setEnabled(a.enabled);
+			if (!a.enabled) b.setAlpha(0.55f);
+			nodeActionHost.addView(b);
 		}
-		if (pay != null) {
-			nodeActionButton.setText(pay.label);
-			nodeActionButton.setEnabled(true);
-			nodeActionButton.setAlpha(1f);
-			nodeActionButton.setOnClickListener(v -> _openNodeActions());
-		} else if (blocked != null) {
-			nodeActionButton.setText(blocked.label);
-			nodeActionButton.setEnabled(false);
-			nodeActionButton.setAlpha(0.55f);
-			nodeActionButton.setOnClickListener(null);
-		} else if (other != null) {
-			nodeActionButton.setText(other.label);
-			nodeActionButton.setEnabled(true);
-			nodeActionButton.setAlpha(1f);
-			nodeActionButton.setOnClickListener(v -> _openNodeActions());
+		if ("ACCUM".equals(family) && viewerIsAdmin && linkedNodeId != null) {
+			_addPackApprovals(ctx);
 		}
+		nodeActionHost.addView(NodePayActions.button(getActivity(), "Copy group ID", false,
+				v -> NodePayActions.copyId(getActivity(), linkedNodeId)));
+	}
+
+	private NodePayActions.Ctx _payCtx() {
+		NodePayActions.Ctx ctx = new NodePayActions.Ctx();
+		ctx.activity = getActivity();
+		ctx.nodeId = linkedNodeId == null ? "" : linkedNodeId;
+		ctx.fsGroupId = groupId == null ? "" : groupId;
+		ctx.me = nodeMe;
+		ctx.group = nodeGroupMap;
+		ctx.member = nodeMemberMap;
+		ctx.line = nodeLineMap;
+		ctx.groupName = groupName == null ? "" : groupName;
+		ctx.reload = () -> { if (linkedNodeId != null) _embedNodeRecord(linkedNodeId); };
+		return ctx;
+	}
+
+	private void _addPackApprovals(NodePayActions.Ctx ctx) {
+		com.harvana.app.sync.NodeGroupClient.listAccumPendingPacks(linkedNodeId, new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject j) {
+				org.json.JSONArray arr = j == null ? null : j.optJSONArray("pendingPacks");
+				if (arr == null || getActivity() == null) return;
+				getActivity().runOnUiThread(() -> {
+					if (nodeActionHost == null) return;
+					for (int i = 0; i < arr.length(); i++) {
+						org.json.JSONObject row = arr.optJSONObject(i);
+						if (row == null) continue;
+						String lineId = row.optString("lineId", "");
+						String who = row.optString("memberAddress", "");
+						if (who.length() > 12) who = who.substring(0, 8) + "…" + who.substring(who.length() - 4);
+						com.harvana.app.engine.GroupAction a = new com.harvana.app.engine.GroupAction(
+								com.harvana.app.engine.GroupAction.ACCUM_APPROVE_PACK,
+								"Approve withdrawal · " + who, true, lineId);
+						Button b = NodePayActions.button(getActivity(), a.label, true, v -> {
+							ctx.pressed = (Button) v;
+							NodePayActions.run(ctx, a);
+						});
+						nodeActionHost.addView(b, Math.max(0, nodeActionHost.getChildCount() - 1));
+					}
+				});
+			}
+			@Override public void onError(String e) { }
+		});
 	}
 
 	private void _addRecordSection(String label, com.harvana.app.group.GroupTypeBoard.Board board,
@@ -947,35 +985,25 @@ public class GroupPaymentFragmentActivity extends Fragment {
 	}
 
 	private void _onNodeCell(com.harvana.app.group.GroupTypeBoard.Cell cell) {
-		if (cell != null && cell.payToday && nodeActionButton != null && nodeActionButton.isEnabled()) {
-			_openNodeActions();
+		if (cell != null && cell.payToday && nodeActionHost != null && nodeActionHost.getChildCount() > 0) {
+			nodeActionHost.getChildAt(0).performClick();
 			return;
 		}
 		if (getContext() != null) com.harvana.app.group.GroupTypeBoardView.showDetail(getContext(), cell);
 	}
 
-	private void _ensureNodeActionButton(String family) {
-		if (getContext() == null || panel_type_board == null) return;
-		if (nodeActionButton == null) {
-			nodeActionButton = new com.google.android.material.button.MaterialButton(getContext());
-			nodeActionButton.setAllCaps(false);
-			LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-					ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-			lp.topMargin = (int) (12 * getResources().getDisplayMetrics().density);
-			panel_type_board.addView(nodeActionButton, lp);
+	private void _showNodeActionsPending() {
+		if (getActivity() == null || panel_type_board == null) return;
+		if (nodeActionHost == null) {
+			nodeActionHost = new LinearLayout(getContext());
+			nodeActionHost.setOrientation(LinearLayout.VERTICAL);
+			panel_type_board.addView(nodeActionHost);
 		}
-		String label = "ACCUM".equals(family) ? "Save or withdraw"
-				: "FIXED".equals(family) ? "Deposit or request a payout" : "Pay and bond";
-		nodeActionButton.setText(label);
-		nodeActionButton.setOnClickListener(v -> _openNodeActions());
-	}
-
-	private void _openNodeActions() {
-		if (getContext() == null || linkedNodeId == null || linkedNodeId.isEmpty()) return;
-		Intent i = new Intent(getContext(), com.harvana.app.group.NodeGroupActivity.class);
-		i.putExtra("nodeGroupId", linkedNodeId);
-		i.putExtra("firestoreGroupId", groupId);
-		startActivity(i);
+		nodeActionHost.removeAllViews();
+		Button b = NodePayActions.button(getActivity(), "Reading your record…", false, null);
+		b.setEnabled(false);
+		b.setAlpha(0.55f);
+		nodeActionHost.addView(b);
 	}
 
 	private static String _shortWallet(String wallet) {

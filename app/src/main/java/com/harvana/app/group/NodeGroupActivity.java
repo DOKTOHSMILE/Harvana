@@ -329,7 +329,6 @@ public class NodeGroupActivity extends AppCompatActivity {
 
         renderProposals();
         renderPackRequests();
-        renderRecovery();
         content.addView(button("Copy group ID", false, v -> copy(nodeId)));
     }
 
@@ -374,33 +373,6 @@ public class NodeGroupActivity extends AppCompatActivity {
                     () -> NodeGroupClient.approveAccumPack(getApplicationContext(), me, nodeId, lineId, result("Approved")))));
             content.addView(c);
         }
-    }
-
-    /** Moving the admin seat is a weighted member vote on the node, not a profile edit. */
-    private void renderRecovery() {
-        boolean pending = recovery != null && "PENDING".equals(str(recovery, "status"));
-        if (!pending) {
-            if (me == null || me.isEmpty()) return;
-            content.addView(button("Offer to take the admin seat", false, v -> pin(() ->
-                NodeGroupClient.requestAdminRecovery(getApplicationContext(), me, nodeId, me, result("The group can now vote on you as admin.")))));
-            return;
-        }
-        String title = "Move the admin seat to " + shortAddr(str(recovery, "newAdminAddress"));
-        VoteView vote = VoteView.of(title, recovery, me == null ? "" : me);
-        LinearLayout c = CircleUi.card(this);
-        c.addView(CircleUi.text(this, vote.title, 14, R.color.colorTextPrimary, true));
-        c.addView(CircleUi.text(this, vote.explain(), 12.5f, R.color.colorTextSecondary, false));
-        if (vote.open && vote.eligible && !vote.alreadyVoted) {
-            LinearLayout row = new LinearLayout(this);
-            row.addView(actionButton(new GroupAction(GroupAction.VOTE_YES, "Vote yes", true), v -> pin(() ->
-                NodeGroupClient.voteAdminRecovery(getApplicationContext(), me, nodeId, true, result("Voted yes")))),
-                new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            row.addView(actionButton(new GroupAction(GroupAction.VOTE_NO, "Vote no", false), v -> pin(() ->
-                NodeGroupClient.voteAdminRecovery(getApplicationContext(), me, nodeId, false, result("Voted no")))),
-                new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            c.addView(row);
-        }
-        content.addView(c);
     }
 
     // ── actions ────────────────────────────────────────────────────────────

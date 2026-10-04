@@ -125,7 +125,7 @@ public final class GroupContract {
             govern.add("Big decisions are voted on. The admin's vote counts 40%. The other 60% is shared among the group's most active members (up to 5), or among all eligible members while the group is new.");
             govern.add("A vote passes when at least 51% of the total vote weight says yes, enough people voted (at least 2, or 15% of the group), and someone other than the person asking also said yes.");
             govern.add("You can vote once you have paid at least once and been in the group for 48 hours.");
-            govern.add("If the admin loses access to their wallet, the group can vote to choose a new admin. That request expires after 14 days.");
+            govern.add("The admin seat is not a vote. Only the current admin can hand it to another member, from the group settings. Members cannot vote an admin out.");
         } else {
             govern.add("Payments and payouts follow the schedule above. The admin manages who joins, removals and notices.");
         }

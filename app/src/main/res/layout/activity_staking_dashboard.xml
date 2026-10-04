@@ -37,8 +37,7 @@
                 android:layout_height="48dp"
                 android:background="@drawable/bg_tab_container"
                 android:orientation="horizontal"
-                android:padding="4dp"
-                app:boxCornerRadius="24dp">
+                android:padding="4dp">
                 <TextView
                     android:id="@+id/tab_stake"
                     android:layout_width="0dp"

@@ -491,20 +491,153 @@ public final class StakingPanel {
         });
     }
 
-    private void askUnstake() {
-        EditText input = new EditText(host);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        input.setHint("Amount in HARV");
-        new androidx.appcompat.app.AlertDialog.Builder(host)
-                .setTitle("Unstake Principal")
-                .setMessage("Funds stop earning immediately and will lock for exactly 24 hours before returning to your wallet.")
-                .setView(input)
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Unstake", (d, w) -> {
-                    amount.setText(input.getText());
-                    doUnstake();
-                })
-                .show();
+        private void askUnstake() {
+        com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
+            new com.google.android.material.bottomsheet.BottomSheetDialog(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+
+        LinearLayout root = new LinearLayout(host);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dp(24), dp(24), dp(24), dp(32));
+        root.setBackgroundColor(Color.parseColor("#121623")); // Dark surface matching app theme
+
+        // 1. Title
+        TextView title = new TextView(host);
+        title.setText("Unstake Principal");
+        title.setTextColor(Color.WHITE);
+        title.setTextSize(20);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+
+        // 2. Subtitle / Currently Staked Info
+        long stakedRaw = pos == null ? 0 : pos.optLong("stakedRaw", 0);
+        double stakedHarv = stakedRaw / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN;
+        
+        TextView subTitle = new TextView(host);
+        subTitle.setText("Currently Staked: " + harv(stakedRaw));
+        subTitle.setTextColor(Color.parseColor("#8F9BB3"));
+        subTitle.setTextSize(13);
+        subTitle.setPadding(0, dp(4), 0, dp(16));
+
+        // 3. Amount Input Container
+        LinearLayout inputContainer = new LinearLayout(host);
+        inputContainer.setOrientation(LinearLayout.HORIZONTAL);
+        inputContainer.setBackgroundResource(R.drawable.bg_input_dark);
+        inputContainer.setPadding(dp(16), dp(12), dp(16), dp(12));
+        inputContainer.setGravity(Gravity.CENTER_VERTICAL);
+        
+        EditText inputEt = new EditText(host);
+        inputEt.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        inputEt.setBackground(null);
+        inputEt.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        inputEt.setHint("0.00");
+        inputEt.setTextColor(Color.WHITE);
+        inputEt.setTextSize(18);
+        inputEt.setHintTextColor(Color.parseColor("#5A6578"));
+
+        TextView currencyTv = new TextView(host);
+        currencyTv.setText("HARV");
+        currencyTv.setTextColor(Color.WHITE);
+        currencyTv.setTypeface(null, android.graphics.Typeface.BOLD);
+        
+        inputContainer.addView(inputEt);
+        inputContainer.addView(currencyTv);
+
+        // 4. Percentage Quick Select Buttons Row (10%, 25%, 50%, Unstake All)
+        LinearLayout percentRow = new LinearLayout(host);
+        percentRow.setOrientation(LinearLayout.HORIZONTAL);
+        percentRow.setPadding(0, dp(12), 0, dp(16));
+        percentRow.setWeightSum(4);
+
+        String[] labels = {"10%", "25%", "50%", "Unstake All"};
+        double[] multipliers = {0.10, 0.25, 0.50, 1.00};
+
+        for (int i = 0; i < labels.length; i++) {
+            final double mult = multipliers[i];
+            MaterialButton btn = new MaterialButton(host, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, dp(36), 1);
+            if (i > 0) p.setMargins(dp(6), 0, 0, 0);
+            btn.setLayoutParams(p);
+            btn.setText(labels[i]);
+            btn.setTextSize(11);
+            btn.setAllCaps(false);
+            btn.setTextColor(Color.parseColor("#FF7A00"));
+            btn.setStrokeColorResource(android.R.color.transparent);
+            btn.setBackgroundColor(Color.parseColor("#1A2235"));
+            btn.setOnClickListener(v -> {
+                double val = stakedHarv * mult;
+                inputEt.setText(harvFormatter.format(val));
+                inputEt.setSelection(inputEt.getText().length());
+            });
+            percentRow.addView(btn);
+        }
+
+        // 5. Warning / Info Box
+        LinearLayout warningBox = new LinearLayout(host);
+        warningBox.setOrientation(LinearLayout.VERTICAL);
+        warningBox.setBackgroundResource(R.drawable.bg_surface_light);
+        warningBox.setPadding(dp(16), dp(14), dp(16), dp(14));
+        LinearLayout.LayoutParams boxParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        boxParams.setMargins(0, dp(8), 0, dp(20));
+        warningBox.setLayoutParams(boxParams);
+
+        TextView warningTitle = new TextView(host);
+        warningTitle.setText("⚠️ Important Notice");
+        warningTitle.setTextColor(Color.parseColor("#FF7A00"));
+        warningTitle.setTextSize(13);
+        warningTitle.setTypeface(null, android.graphics.Typeface.BOLD);
+
+        TextView warningBody = new TextView(host);
+        warningBody.setText("• Funds stop earning rewards immediately.\n• Unstaked principal enters a strict 24-hour unbonding cooldown before returning to your spendable wallet balance.");
+        warningBody.setTextColor(Color.parseColor("#8F9BB3"));
+        warningBody.setTextSize(12);
+        warningBody.setPadding(0, dp(4), 0, 0);
+        warningBody.setLineSpacing(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, host.getResources().getDisplayMetrics()), 1.0f);
+
+        warningBox.addView(warningTitle);
+        warningBox.addView(warningBody);
+
+        // 6. Action Button (Confirm Unstake)
+        MaterialButton confirmBtn = new MaterialButton(host);
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56));
+        confirmBtn.setLayoutParams(btnParams);
+        confirmBtn.setText("Confirm Unstake");
+        confirmBtn.setAllCaps(false);
+        confirmBtn.setTextColor(Color.BLACK);
+        confirmBtn.setCornerRadius(dp(12));
+        confirmBtn.setBackgroundColor(Color.parseColor("#FF7A00"));
+        
+        confirmBtn.setOnClickListener(v -> {
+            String valStr = inputEt.getText().toString().trim();
+            if (valStr.isEmpty()) {
+                toast("Enter an amount to unstake.");
+                return;
+            }
+            try {
+                double val = Double.parseDouble(valStr);
+                if (val <= 0) {
+                    toast("Amount must be greater than zero.");
+                    return;
+                }
+                if (val > stakedHarv) {
+                    toast("Cannot unstake more than your total staked balance.");
+                    return;
+                }
+                sheet.dismiss();
+                amount.setText(valStr);
+                doUnstake();
+            } catch (Exception e) {
+                toast("Invalid amount.");
+            }
+        });
+
+        root.addView(title);
+        root.addView(subTitle);
+        root.addView(inputContainer);
+        root.addView(percentRow);
+        root.addView(warningBox);
+        root.addView(confirmBtn);
+
+        sheet.setContentView(root);
+        sheet.show();
     }
 
     private void doStake() {

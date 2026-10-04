@@ -1,6 +1,7 @@
 package com.harvana.app.group;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -117,6 +118,25 @@ public class GroupTypeBoardTest {
         assertEquals(GroupTypeBoard.PAID, board.cells.get(1).state);
         assertEquals(GroupTypeBoard.MISSED, board.cells.get(2).state);
         assertEquals(GroupTypeBoard.TODAY, board.cells.get(3).state);
+    }
+
+    @Test
+    public void goalPoolDoesNotCallAQuietDayMissed() {
+        Map<String, Object> group = map(
+                "groupType", "Fixed Contribution",
+                "disbursementRule", "ALL_AT_ONCE_AT_GOAL",
+                "targetGoalAmountRaw", 400_000_000L,
+                "raisedAmountRaw", 500_000_000L,
+                "state", "COMPLETED",
+                "beneficiaryAddress", "HV0xbeneficiary00000000000000000000000001");
+        GroupTypeBoard.Board board = GroupTypeBoard.fromFirestore(
+                group, null, null, "me", true, at(2026, 10, 4), UTC);
+        assertEquals("Shared goal", board.title);
+        assertTrue(board.subtitle.contains("sent"));
+        assertTrue(board.subtitle.contains("Deposits are closed"));
+        for (GroupTypeBoard.Cell cell : board.cells) {
+            assertNotEquals(GroupTypeBoard.MISSED, cell.state);
+        }
     }
 
     private static List<Integer> ints(int... n) {

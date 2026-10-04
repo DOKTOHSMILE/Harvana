@@ -593,7 +593,14 @@ public class GroupPaymentFragmentActivity extends Fragment {
 			if (textview72 != null) textview72.setText("PAYMENT RECORDS");
 			_bindTypeBoard();
 			if (tv_payments_empty != null) {
-				tv_payments_empty.setVisibility(paymentRows.isEmpty() ? View.VISIBLE : View.GONE);
+				boolean goal = linkedNodeId != null && linkedNodeId.startsWith("FIXED-");
+				if (paymentRows.isEmpty() && goal) {
+					tv_payments_empty.setText("Deposits are on the network, in the boxes above. A day with no box is not a missed payment.");
+					tv_payments_empty.setVisibility(View.VISIBLE);
+				} else {
+					tv_payments_empty.setText("No payment records for this round yet.");
+					tv_payments_empty.setVisibility(paymentRows.isEmpty() ? View.VISIBLE : View.GONE);
+				}
 			}
 			if (recycler_payments != null) {
 				if (recycler_payments.getLayoutManager() == null) {
@@ -746,6 +753,9 @@ public class GroupPaymentFragmentActivity extends Fragment {
 				boolean admin = com.harvana.app.group.AdminSeat.current(
 						myUid, me, groupCreatorId, str(group, "creatorAddress", ""), "");
 				viewerIsAdmin = admin;
+				if ("FIXED".equals(family)) {
+					_finishNodeRecord(gen, family, group, null, null, me, admin);
+				}
 				_loadMyNodePosition(gen, family, nodeId, me, group, admin);
 			}
 			@Override public void onError(String e) { }

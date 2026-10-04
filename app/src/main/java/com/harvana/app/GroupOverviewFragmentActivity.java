@@ -169,6 +169,10 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	private TextView textview63;
 	private TextView tv_pool_total;
 	private TextView textview64;
+	private double liveRaised = -1;
+	private double liveGoal = -1;
+	private String liveBeneficiary = "";
+	private boolean liveGoalReached = false;
 	private TextView tv_pool_paid;
 	private LinearLayout linear94;
 	private TextView textview65;
@@ -580,12 +584,59 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		if ("FIXED".equals(family)) {
 			double goal = json.optLong("targetGoalAmountRaw") / 100_000_000.0;
 			double raised = json.optLong("raisedAmountRaw") / 100_000_000.0;
+			String state = json.optString("state", "");
+			String ben = json.optString("beneficiaryAddress", "");
+			boolean reached = "COMPLETED".equalsIgnoreCase(state) || (goal > 0 && raised + 0.0000001 >= goal);
+			liveRaised = raised;
+			liveGoal = goal;
+			liveBeneficiary = ben;
+			liveGoalReached = reached;
+			String who = ben.length() > 14 ? ben.substring(0, 8) + "…" + ben.substring(ben.length() - 4) : (ben.isEmpty() ? "the wallet set at creation" : ben);
 			if (tv_fixed_goal != null) tv_fixed_goal.setText("Target: " + _formatUIBalance(goal));
-			if (tv_fixed_progress != null) tv_fixed_progress.setText("Raised: " + _formatUIBalance(raised));
-			if (tv_fixed_rule != null) tv_fixed_rule.setText("Disbursement: " + json.optString("disbursementRule", "—"));
+			if (tv_fixed_progress != null) {
+				tv_fixed_progress.setText("Raised: " + _formatUIBalance(raised) + " / " + _formatUIBalance(goal)
+						+ (reached ? " · sent to " + who : ""));
+			}
+			if (tv_fixed_rule != null) {
+				tv_fixed_rule.setText(reached
+						? "The goal was reached. " + _formatUIBalance(raised) + " was sent to " + who + ". No vote — that was the rule."
+						: "When the goal is reached, the whole pot goes to " + who + ". You can deposit any day until then.");
+			}
+			if (textview62 != null) textview62.setText("Raised");
 			if (tv_pool_contribution != null) tv_pool_contribution.setText(_formatUIBalance(raised));
-			if (textview63 != null) textview63.setText("Raised so far");
+			if (textview63 != null) textview63.setText("Goal");
 			if (tv_pool_total != null) tv_pool_total.setText(_formatUIBalance(goal));
+			if (textview64 != null) textview64.setText(reached ? "Paid to" : "Deposits");
+			if (tv_pool_paid != null) tv_pool_paid.setText(reached ? who : "Open any day");
+			if (tv_cycle_status != null) tv_cycle_status.setText(reached ? "Goal reached" : "Shared goal");
+			if (tv_cycle_hint != null) {
+				tv_cycle_hint.setText(reached
+						? "The pot already left the group wallet. A red day on an old screen was not a missed payment."
+						: "This is not a daily payment. A day you skip is not marked missed, and you can still deposit.");
+			}
+			int pct = goal > 0 ? (int) Math.min(100, Math.round(raised * 100.0 / goal)) : 0;
+			if (tv_cycle_percent != null) tv_cycle_percent.setText(pct + "%");
+			_updateProgressBar(pct);
+			if (loadedGroup != null) {
+				loadedGroup.put("raisedAmountRaw", json.optLong("raisedAmountRaw"));
+				loadedGroup.put("targetGoalAmountRaw", json.optLong("targetGoalAmountRaw"));
+				loadedGroup.put("state", state);
+				loadedGroup.put("beneficiaryAddress", ben);
+				if (!json.optString("disbursementRule", "").isEmpty()) {
+					loadedGroup.put("disbursementRule", json.optString("disbursementRule"));
+				}
+			}
+			if (layout_type_board != null) {
+				com.harvana.app.group.GroupTypeBoard.Board board =
+						com.harvana.app.group.GroupTypeBoard.fromNode("FIXED",
+								loadedGroup != null ? loadedGroup : new java.util.HashMap<String, Object>(),
+								null, null, "", System.currentTimeMillis(), java.util.TimeZone.getDefault());
+				com.harvana.app.group.GroupTypeBoardView.fill(layout_type_board, board, cell -> {
+					if (getContext() != null) com.harvana.app.group.GroupTypeBoardView.showDetail(getContext(), cell);
+				});
+				if (tv_slot_grid_helper_hint != null) tv_slot_grid_helper_hint.setText(board.legend);
+				if (textview21 != null) textview21.setText("GOAL");
+			}
 			return;
 		}
 		double bps = json.optLong("interestRateBps") / 100.0;
@@ -758,8 +809,10 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		boolean rotating = groupType.contains("Rotating");
 		boolean fixed = groupType.contains("Fixed");
 		boolean accum = groupType.contains("Accumulative");
+		boolean goal = fixed && com.harvana.app.group.GroupTypeBoard.isGoalPool(data);
 		if (tv_cycle_status != null) {
 			if (rotating) tv_cycle_status.setText("Round " + currentRound + " of " + totalSlots);
+			else if (goal) tv_cycle_status.setText("Shared goal");
 			else if (fixed) tv_cycle_status.setText("Daily custody");
 			else if (accum) tv_cycle_status.setText("Savings book");
 			else tv_cycle_status.setText("Slot " + currentRound + " of " + totalSlots);
@@ -769,11 +822,13 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		}
 		if (tv_cycle_hint != null) {
 			if (rotating) tv_cycle_hint.setText("Each box is a member slot. Green means they have paid this round, and the date is written in the box.");
+			else if (goal) tv_cycle_hint.setText("You can deposit any day until the goal is reached. A day you skip is not a missed payment.");
 			else if (fixed) tv_cycle_hint.setText("Each box is one day of this month, with the date written inside.");
 			else if (accum) tv_cycle_hint.setText("Every contribution is its own box, with the payment date written inside.");
 		}
 		if (textview21 != null) {
 			if (rotating) textview21.setText("ROTATION BOARD");
+			else if (goal) textview21.setText("GOAL");
 			else if (fixed) textview21.setText("THIS MONTH");
 			else if (accum) textview21.setText("SAVINGS STAMPS");
 		}
@@ -827,7 +882,13 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		if (tv_pool_contribution != null) {
 			tv_pool_contribution.setText(_formatUIBalance(contribution));
 		}
-		if (tv_pool_total != null) {
+		if (goal) {
+			if (textview62 != null) textview62.setText("Raised");
+			if (textview63 != null) textview63.setText("Goal");
+			if (tv_pool_total != null) tv_pool_total.setText(_formatUIBalance(goal));
+			if (textview64 != null) textview64.setText("Deposits");
+			if (tv_pool_paid != null) tv_pool_paid.setText("Open any day");
+		} else if (tv_pool_total != null) {
 			boolean rotatingNow = groupType.toLowerCase(java.util.Locale.US).contains("rotat");
 			double pot = rotatingNow ? contribution * Math.max(0, totalSlots - 1) : contribution * totalSlots;
 			tv_pool_total.setText(_formatUIBalance(pot));
@@ -1047,6 +1108,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 					loadedGroup, members, payments, focusUid, false,
 					System.currentTimeMillis(), java.util.TimeZone.getDefault());
 			if (layout_type_board != null && board.kind != null && !board.kind.isEmpty()) {
+				boolean goalBoard = com.harvana.app.group.GroupTypeBoard.isGoalPool(loadedGroup);
 				if (recycler_payment_slots != null) recycler_payment_slots.setVisibility(View.GONE);
 				com.harvana.app.group.GroupTypeBoardView.fill(layout_type_board, board, cell -> {
 					if (getContext() != null) com.harvana.app.group.GroupTypeBoardView.showDetail(getContext(), cell);
@@ -1055,21 +1117,34 @@ public class GroupOverviewFragmentActivity extends Fragment {
 					textview21.setText(board.sectionTitle);
 				}
 				if (tv_slot_grid_helper_hint != null) tv_slot_grid_helper_hint.setText(board.legend);
-				if (tv_rotating_next != null && board.nextRecipient != null && !board.nextRecipient.isEmpty()) {
+				if (tv_rotating_next != null && board.nextRecipient != null && !board.nextRecipient.isEmpty() && !goalBoard) {
 					tv_rotating_next.setText("Next recipient: " + board.nextRecipient);
 				}
 				if (com.harvana.app.group.GroupTypeBoard.ROTATING.equals(board.kind) && tv_rotating_current != null) {
 					tv_rotating_current.setText(board.subtitle);
 				}
-				int shown = Math.max(1, board.cells.size());
-				int pct = (int) Math.round(board.paidCount() * 100.0 / shown);
-				if (tv_cycle_percent != null) tv_cycle_percent.setText(pct + "%");
-				_updateProgressBar(pct);
-				if (textview22 != null) {
-					textview22.setText(com.harvana.app.group.GroupTypeBoard.ACCUMULATIVE.equals(board.kind)
-						? "Pending" : "Not paid yet");
+				if (goalBoard) {
+					double raised = liveRaised >= 0 ? liveRaised : finalRaised;
+					double goalAmt = liveGoal > 0 ? liveGoal : targetGoal;
+					int pct = goalAmt > 0 ? (int) Math.min(100, Math.round(raised * 100.0 / goalAmt)) : 0;
+					if (tv_cycle_percent != null) tv_cycle_percent.setText(pct + "%");
+					_updateProgressBar(pct);
+					if (tv_fixed_progress != null && liveRaised < 0) {
+						tv_fixed_progress.setText("Raised: " + _formatUIBalance(raised) + " / " + _formatUIBalance(goalAmt));
+					}
+					if (textview22 != null) textview22.setText("Not a daily debt");
+					if (textview23 != null) textview23.setText("Deposit");
+				} else {
+					int shown = Math.max(1, board.cells.size());
+					int pct = (int) Math.round(board.paidCount() * 100.0 / shown);
+					if (tv_cycle_percent != null) tv_cycle_percent.setText(pct + "%");
+					_updateProgressBar(pct);
+					if (textview22 != null) {
+						textview22.setText(com.harvana.app.group.GroupTypeBoard.ACCUMULATIVE.equals(board.kind)
+							? "Pending" : "Not paid yet");
+					}
+					if (textview23 != null) textview23.setText("Paid");
 				}
-				if (textview23 != null) textview23.setText("Paid");
 			} else if (recycler_payment_slots != null) {
 				if (recycler_payment_slots.getLayoutManager() == null) {
 					recycler_payment_slots.setLayoutManager(
@@ -1077,10 +1152,10 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				}
 				recycler_payment_slots.setAdapter(new SlotGridAdapter(slots, slotPaid));
 			}
-			if (tv_pool_paid != null) {
+			if (tv_pool_paid != null && (loadedGroup == null || !com.harvana.app.group.GroupTypeBoard.isGoalPool(loadedGroup))) {
 				tv_pool_paid.setText(paidCount + " / " + slots);
 			}
-			if (tv_fixed_progress != null) {
+			if (tv_fixed_progress != null && liveRaised < 0) {
 				// APPLIED FIX
 				tv_fixed_progress.setText("Raised: "
 				+ _formatUIBalance(finalRaised)

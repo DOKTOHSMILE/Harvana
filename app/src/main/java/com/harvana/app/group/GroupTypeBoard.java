@@ -109,7 +109,10 @@ public final class GroupTypeBoard {
         if (zone == null) zone = TimeZone.getDefault();
         String kind = kindOf(str(group, "groupType", ""));
         if (ROTATING.equals(kind)) return rotating(group, members, payments, nowMs, zone);
-        if (FIXED.equals(kind)) return fixed(group, members, payments, focusUid, nowMs, zone);
+        if (FIXED.equals(kind)) {
+            if (isGoalPool(group)) return goalPool(group, payments, zone);
+            return fixed(group, members, payments, focusUid, nowMs, zone);
+        }
         if (ACCUMULATIVE.equals(kind)) return accumulative(payments, focusUid, personalBook, zone);
         return new Board("", "PAYMENTS", "Payments", "This group has no type yet.", "", 4, "", new ArrayList<Cell>());
     }
@@ -195,7 +198,80 @@ public final class GroupTypeBoard {
                 4, recipient, cells);
     }
 
-    // ── fixed custody month ───────────────────────────────────────────────
+    /** A goal pool takes money until a target, then pays one beneficiary. It is not a daily debt. */
+    public static boolean isGoalPool(Map<String, Object> group) {
+        if (group == null) return false;
+        String rule = str(group, "disbursementRule", "").trim();
+        if (!rule.isEmpty() && !"—".equals(rule) && !"select disbursement".equals(rule.toLowerCase(Locale.US))) return true;
+        if (str(group, "nodeGroupId", "").startsWith("FIXED-")) return true;
+        return "FIXED".equalsIgnoreCase(str(group, "family", ""));
+    }
+
+    /** Deposits only. A day with no deposit is absent, never "missed". */
+    private static Board goalPool(Map<String, Object> group, List<? extends Map<String, Object>> payments, TimeZone zone) {
+        double target = goalAmount(group);
+        double raised = raisedAmount(group);
+        boolean summed = num(group, "raisedAmountRaw", 0) <= 0 && num(group, "raisedAmount", 0) <= 0;
+        List<Cell> cells = new ArrayList<>();
+        if (payments != null) {
+            for (Map<String, Object> p : payments) {
+                if (p == null || !confirmed(p) || !isDeposit(p)) continue;
+                double amt = amountOf(p);
+                if (summed) raised += amt;
+                long ts = timeOf(p);
+                if (ts <= 0) continue;
+                String who = str(p, "memberName", "");
+                cells.add(new Cell(String.valueOf(cal(ts, zone).get(Calendar.DAY_OF_MONTH)),
+                        MONTHS[cal(ts, zone).get(Calendar.MONTH)],
+                        "Deposit" + (who.isEmpty() ? "" : " · " + who),
+                        money(amt) + " on " + fullDate(ts, zone) + ".",
+                        PAID, false));
+            }
+        }
+        boolean reached = goalReached(group, raised, target);
+        String who = beneficiaryPhrase(group);
+        String subtitle = money(raised) + " raised of " + money(target);
+        if (reached) {
+            subtitle += ". The goal was reached, so the network sent the pot to " + who
+                    + ". Deposits are closed. Nobody voted — that was the rule.";
+        } else {
+            subtitle += ". Deposit any day until the goal is reached. A quiet day is not a missed payment.";
+        }
+        return new Board(FIXED, "GOAL", "Shared goal", subtitle,
+                "A box is a deposit, with the date inside. This goal does not mark a quiet day as missed.",
+                4, who, cells);
+    }
+
+    private static double goalAmount(Map<String, Object> group) {
+        double raw = num(group, "targetGoalAmountRaw", 0);
+        if (raw > 0) return raw / RAW;
+        double harv = num(group, "targetGoalAmount", 0);
+        return harv > 0 ? harv : num(group, "targetGoal", 0);
+    }
+
+    private static double raisedAmount(Map<String, Object> group) {
+        double raw = num(group, "raisedAmountRaw", 0);
+        if (raw > 0) return raw / RAW;
+        return num(group, "raisedAmount", 0);
+    }
+
+    private static boolean goalReached(Map<String, Object> group, double raised, double target) {
+        String state = str(group, "state", "");
+        if ("COMPLETED".equalsIgnoreCase(state) || "CLOSED".equalsIgnoreCase(state)) return true;
+        return target > 0 && raised + 0.0000001 >= target;
+    }
+
+    private static String beneficiaryPhrase(Map<String, Object> group) {
+        String ben = str(group, "beneficiaryAddress", "");
+        if (ben.isEmpty()) return "the wallet chosen when the group was created";
+        return ben.length() > 14 ? ben.substring(0, 8) + "…" + ben.substring(ben.length() - 4) : ben;
+    }
+
+    private static boolean isDeposit(Map<String, Object> p) {
+        String type = str(p, "type", "").toUpperCase(Locale.US);
+        return !(type.contains("LOAN") || type.contains("PAYOUT") || type.contains("FEE")
+                || type.contains("DISBURSE") || type.contains("WITHDRAW") || type.contains("BOND"));
+    }
 
     private static Board fixed(Map<String, Object> group, List<? extends Map<String, Object>> members,
                                List<? extends Map<String, Object>> payments, String focusUid,
@@ -421,11 +497,19 @@ public final class GroupTypeBoard {
                     PAID, false));
         }
         String rule = str(group, "disbursementRule", "");
-        return new Board(FIXED, "GOAL", "Shared goal",
-                money(raised) + " raised of " + money(target)
-                        + (rule.isEmpty() ? "" : " · " + rule.replace('_', ' ').toLowerCase(Locale.US)),
-                "Deposits show as a box with the date. Money leaves only by the rule the group set.",
-                4, "", cells);
+        boolean reached = goalReached(group, raised, target);
+        String who = beneficiaryPhrase(group);
+        String subtitle = money(raised) + " raised of " + money(target);
+        if (reached) {
+            subtitle += ". The goal was reached, so the network sent the pot to " + who
+                    + ". Deposits are closed. Nobody voted — that was the rule.";
+        } else {
+            subtitle += ". Deposit any day until the goal is reached. A quiet day is not a missed payment.";
+        }
+        if (!rule.isEmpty()) subtitle += " " + rule.replace('_', ' ').toLowerCase(Locale.US) + ".";
+        return new Board(FIXED, "GOAL", "Shared goal", subtitle,
+                "A box is a deposit, with the date inside. This goal does not mark a quiet day as missed.",
+                4, who, cells);
     }
 
     // ── helpers ───────────────────────────────────────────────────────────

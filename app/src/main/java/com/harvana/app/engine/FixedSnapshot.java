@@ -34,15 +34,23 @@ public final class FixedSnapshot {
             s.my("You have put in", harv(lng(member, "contributedRaw")));
         }
         boolean active = "ACTIVE".equals(s.state);
-        if (active) {
+        boolean reached = !active || (target > 0 && raised >= target);
+        if (active && !reached) {
             s.actions.add(new GroupAction(GroupAction.FIXED_DEPOSIT, "Deposit", true));
             if ("ADMIN_TRIGGERED".equals(rule) && admin) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_DISBURSEMENT, "Request payout (group votes)", false));
             if ("MILESTONE_BASED".equals(rule) && admin) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_MILESTONE, "Request a milestone release", false));
             if ("EMERGENCY_GRANT".equals(rule) && isMember) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_GRANT, "Ask for an emergency grant", false));
+        } else if (reached && ("ALL_AT_ONCE_AT_GOAL".equals(rule) || "COMPLETED".equals(s.state))) {
+            String who = str(group, "beneficiaryAddress");
+            who = who.length() > 14 ? who.substring(0, 8) + "…" + who.substring(who.length() - 4) : who;
+            if (who.isEmpty()) who = "the beneficiary";
+            s.actions.add(GroupAction.closed("Goal reached. " + harv(raised) + " was sent to " + who));
         } else if (!s.state.isEmpty()) {
             s.actions.add(GroupAction.closed("This goal is closed"));
         }
-        if ("ALL_AT_ONCE_AT_GOAL".equals(rule)) s.notes.add("When the goal is reached, the full amount is paid to the beneficiary automatically. No vote is needed.");
+        if ("ALL_AT_ONCE_AT_GOAL".equals(rule)) {
+            s.notes.add("When the goal is reached, the full amount is paid automatically to the beneficiary chosen at creation. No vote, and deposits stop.");
+        }
         return s;
     }
 

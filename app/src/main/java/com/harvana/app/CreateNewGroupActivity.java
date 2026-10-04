@@ -1438,7 +1438,10 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		final long target = com.harvana.app.circle.CircleUi.toRaw(target_goal_edittext.getText().toString());
 		final String name = group_name_edittext1.getText().toString().trim();
 		final String desc = description_edittext5.getText().toString().trim();
-		String msg = "• Goal: " + com.harvana.app.circle.CircleUi.harv(target) + "\n• Creation fee: 1 HARV";
+		String msg = "• Goal: " + com.harvana.app.circle.CircleUi.harv(target)
+				+ "\n• Paid to: " + (beneficiary.isEmpty() ? "the group, by vote" : beneficiary)
+				+ "\n• When the goal is reached, the whole pot is sent to that wallet automatically. No vote."
+				+ "\n• Creation fee: 1 HARV";
 		_confirmAndCreateOnChain("Create this goal group?", msg, cb ->
 		com.harvana.app.sync.NodeGroupClient.createFixedGroup(getApplicationContext(), wallet, target, rule, beneficiary, 0L, name, desc, cb), "groupId", "FIXED");
 	}

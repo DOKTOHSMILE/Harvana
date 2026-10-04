@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import android.view.Gravity;
 
 public final class StakingPanel {
     private static final String PREFS = "harvana_stake_history";

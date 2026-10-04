@@ -152,7 +152,7 @@ public class WalletEarnFragmentActivity extends Fragment {
 		box.addView(sheetTitle("HARV PoW Reward Program"));
 		box.addView(sheetBody("The HARV Proof-of-Work reward program pays people who secure the chain. Solo miners take the full block when they find it. Pool miners split that block by the valid shares they submitted. A reward stays pending until the block has enough confirmations, then it is credited to the wallet.\n\nDifficulty, hashrate, battery protection and share checks are there so one phone cannot pretend to be a farm."));
 		box.addView(sheetTitle("How to earn more"));
-		box.addView(sheetBody("Stay online in longer sessions, keep a stable connection, and cut rejected shares by updating the app. A stronger CPU raises hashrate, but the red thread setting can overheat the phone. Staking is the other path: lock HARV and take a share of every block in proportion to your stake. Unstaking stops earning immediately and returns after 7 days."));
+		box.addView(sheetBody("Stay online in longer sessions, keep a stable connection, and cut rejected shares by updating the app. A stronger CPU raises hashrate, but the red thread setting can overheat the phone. Staking is the other path: lock HARV and take your percentage of the reward pool that is already there. Unstaking stops earning immediately and returns after 24 hours."));
 		scroll.addView(box);
 		dialog.setContentView(scroll);
 		dialog.show();

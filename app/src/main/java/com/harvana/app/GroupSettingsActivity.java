@@ -585,14 +585,10 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			ivHeroTypeIcon.setImageResource(R.drawable.ic_pie_chart);
 			etFixedGoal.setText(numStr(groupData, "targetGoalAmount"));
 			_select(spinDisbursementRule, str(groupData, "disbursementRule", "All at Once at Goal"));
-			// THE FIX: this TextView was bound but never populated at
-			// all — live saved-vs-goal progress needs the group wallet's
-			// actual balance, which this settings screen doesn't fetch
-			// (only Group Overview does). Rather than show a fabricated
-			// or stale number here, this points to where the real one
-			// lives instead.
 			tv_fixed_progress.setText("Live savings progress is shown on the group's Overview tab.");
-			tvRuleInfoBanner.setText("The goal amount and disbursement rule apply to future contributions once saved.");
+			tvRuleInfoBanner.setText(GroupIdentityResolver.resolve(groupId, groupData).onChain()
+					? "This goal runs on the network. The target and the payout rule cannot be changed here. Open votes are on the Payments tab."
+					: "The goal amount and disbursement rule apply to future contributions once saved.");
 		} 
 		else if (isAccum()) {
 			ivHeroTypeIcon.setImageResource(R.drawable.ic_attach_money);
@@ -631,6 +627,23 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		spinDisbursementRule.setAlpha(edit ? 1.0f : 0.6f);
 		etLoanInterestRate.setAlpha(edit ? 1.0f : 0.6f);
 		spinWithdrawalRule.setAlpha(edit ? 1.0f : 0.6f);
+		GroupIdentity locked = GroupIdentityResolver.resolve(groupId, groupData);
+		if (locked.onChain()) {
+			etContribution.setEnabled(false);
+			etGracePeriod.setEnabled(false);
+			etCommission.setEnabled(false);
+			etFixedGoal.setEnabled(false);
+			spinDisbursementRule.setEnabled(false);
+			etLoanInterestRate.setEnabled(false);
+			spinWithdrawalRule.setEnabled(false);
+			etContribution.setAlpha(0.6f);
+			etGracePeriod.setAlpha(0.6f);
+			etCommission.setAlpha(0.6f);
+			etFixedGoal.setAlpha(0.6f);
+			spinDisbursementRule.setAlpha(0.6f);
+			etLoanInterestRate.setAlpha(0.6f);
+			spinWithdrawalRule.setAlpha(0.6f);
+		}
 	}
 	
 	private void _select(Spinner sp, String value) {
@@ -822,6 +835,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			}
 		}
 		else if (isFixed()) {
+			if (!identity.onChain()) {
 			String goal = etFixedGoal.getText().toString().trim();
 			try {
 				double g = Double.parseDouble(goal.isEmpty() ? "0" : goal);
@@ -836,8 +850,10 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			if (spinDisbursementRule.getSelectedItem() != null) {
 				patch.put("disbursementRule", spinDisbursementRule.getSelectedItem().toString());
 			}
+			}
 		}
 		else if (isAccum()) {
+			if (!identity.onChain()) {
 			String rate = etLoanInterestRate.getText().toString().trim();
 			try {
 				double r = Double.parseDouble(rate.isEmpty() ? "0" : rate);
@@ -851,6 +867,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			}
 			if (spinWithdrawalRule.getSelectedItem() != null) {
 				patch.put("withdrawalRule", spinWithdrawalRule.getSelectedItem().toString());
+			}
 			}
 		}
 		

@@ -836,6 +836,9 @@ public class GroupPaymentFragmentActivity extends Fragment {
                 if ("ACCUM".equals(family) && viewerIsAdmin && linkedNodeId != null) {
                         _addPackApprovals(ctx);
                 }
+                if ("FIXED".equals(family) && linkedNodeId != null) {
+                        _addVotes(ctx);
+                }
                 nodeActionHost.addView(NodePayActions.button(getActivity(), "Copy group ID", false,
                                 v -> NodePayActions.copyId(getActivity(), linkedNodeId)));
         }
@@ -879,6 +882,72 @@ public class GroupPaymentFragmentActivity extends Fragment {
                                 });
                         }
                         @Override public void onError(String e) { }
+                });
+        }
+
+        private void _addVotes(NodePayActions.Ctx ctx) {
+                com.harvana.app.sync.NodeGroupClient.listFixedProposals(linkedNodeId, new com.harvana.app.sync.NodeGroupClient.Callback() {
+                        @Override public void onSuccess(org.json.JSONObject j) {
+                                org.json.JSONArray arr = j == null ? null : j.optJSONArray("proposals");
+                                if (arr == null || arr.length() == 0 || getActivity() == null) return;
+                                getActivity().runOnUiThread(() -> {
+                                        if (nodeActionHost == null || getContext() == null) return;
+                                        TextView title = new TextView(getContext());
+                                        title.setText("Votes");
+                                        title.setTextSize(15);
+                                        title.setTypeface(null, android.graphics.Typeface.BOLD);
+                                        title.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+                                        title.setPadding(0, (int) (16 * getResources().getDisplayMetrics().density), 0, 0);
+                                        int at = Math.max(0, nodeActionHost.getChildCount() - 1);
+                                        nodeActionHost.addView(title, at);
+                                        int insert = at + 1;
+                                        for (int i = 0; i < arr.length(); i++) {
+                                                org.json.JSONObject row = arr.optJSONObject(i);
+                                                if (row == null) continue;
+                                                String kind = row.optString("kind", "");
+                                                String id = row.optString("id", "");
+                                                java.util.Map<String, Object> rec = com.harvana.app.utils.JsonMaps.toMap(row);
+                                                String label = kind.contains("MILESTONE") ? "Milestone" : kind.contains("GRANT") ? "Emergency grant" : "Payout request";
+                                                com.harvana.app.engine.VoteView vote = com.harvana.app.engine.VoteView.of(label, rec, nodeMe);
+                                                if (!vote.open) continue;
+                                                TextView body = new TextView(getContext());
+                                                body.setText(vote.title + "\n" + vote.explain());
+                                                body.setTextSize(12.5f);
+                                                body.setTextColor(com.harvana.app.utils.UiColors.textSecondary());
+                                                nodeActionHost.addView(body, insert++);
+                                                if (!vote.eligible) continue;
+                                                Button yes = NodePayActions.button(getActivity(), "Vote yes", true, v -> _castVote(kind, id, true));
+                                                Button no = NodePayActions.button(getActivity(), "Vote no", false, v -> _castVote(kind, id, false));
+                                                nodeActionHost.addView(yes, insert++);
+                                                nodeActionHost.addView(no, insert++);
+                                        }
+                                });
+                        }
+                        @Override public void onError(String e) { }
+                });
+        }
+
+        private void _castVote(String kind, String id, boolean yes) {
+                if (getActivity() == null || nodeMe == null || nodeMe.isEmpty()) return;
+                java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+                rows.add(new String[]{"Vote", yes ? "Yes" : "No"});
+                rows.add(new String[]{"On", kind});
+                com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(getActivity(), yes ? "Vote yes" : "Vote no", "", rows, () -> {
+                        com.harvana.app.sync.NodeGroupClient.Callback cb = new com.harvana.app.sync.NodeGroupClient.Callback() {
+                                @Override public void onSuccess(org.json.JSONObject json) {
+                                        if (getActivity() != null) getActivity().runOnUiThread(() -> {
+                                                android.widget.Toast.makeText(getActivity(), "Vote sent", android.widget.Toast.LENGTH_SHORT).show();
+                                                if (linkedNodeId != null) _embedNodeRecord(linkedNodeId);
+                                        });
+                                }
+                                @Override public void onError(String error) {
+                                        if (getActivity() != null) getActivity().runOnUiThread(() ->
+                                                android.widget.Toast.makeText(getActivity(), error, android.widget.Toast.LENGTH_LONG).show());
+                                }
+                        };
+                        if (kind.contains("MILESTONE")) com.harvana.app.sync.NodeGroupClient.voteFixedMilestone(getActivity(), nodeMe, linkedNodeId, id, yes, cb);
+                        else if (kind.contains("GRANT")) com.harvana.app.sync.NodeGroupClient.voteFixedGrant(getActivity(), nodeMe, linkedNodeId, id, yes, cb);
+                        else com.harvana.app.sync.NodeGroupClient.voteFixedDisbursement(getActivity(), nodeMe, linkedNodeId, id, yes, cb);
                 });
         }
 

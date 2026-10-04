@@ -111,29 +111,14 @@ public final class StakingPanel {
         refresh();
     }
 
-    /** Headline APR on the Earn intro. Uses the same pace and pool size as the dashboard. */
+    /** Headline on the Earn intro: the reward pool that exists now, not a forecast. */
     public static void fillHeadline(Activity activity, TextView apr) {
         if (activity == null || apr == null) return;
-        final long[] pace = new long[]{0};
-        final JSONObject[] info = new JSONObject[]{null};
-        Runnable paint = () -> {
-            if (info[0] == null || pace[0] <= 0) return;
-            double units = (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN;
-            long total = info[0].optLong("totalStakedRaw", 0);
-            long perBlock = info[0].optLong("stakingRewardPerBlockRaw", 0);
-            double poolHarv = total / units;
-            double emissionPerDay = (perBlock / units) * (86400.0 / pace[0]);
-            double aprPct = poolHarv > 0 ? (emissionPerDay * 365.0 / poolHarv) * 100.0 : 0;
-            activity.runOnUiThread(() -> apr.setText(aprPct >= 100
-                    ? String.format(Locale.US, "%.0f%% APR", aprPct)
-                    : String.format(Locale.US, "%.2f%% APR", aprPct)));
-        };
         NodeGroupClient.getStakingInfo(new NodeGroupClient.Callback() {
-            @Override public void onSuccess(JSONObject json) { info[0] = json; paint.run(); }
-            @Override public void onError(String error) { }
-        });
-        HarvanaNodeClient.getRecentBlocks(new HarvanaNodeClient.JsonCallback() {
-            @Override public void onSuccess(JSONObject json) { pace[0] = paceFromBlocks(json); paint.run(); }
+            @Override public void onSuccess(JSONObject json) {
+                long pool = json == null ? 0 : json.optLong("rewardPoolBalanceRaw", 0);
+                activity.runOnUiThread(() -> apr.setText(com.harvana.app.circle.CircleUi.harv(pool) + " in the reward pool"));
+            }
             @Override public void onError(String error) { }
         });
     }
@@ -206,11 +191,14 @@ public final class StakingPanel {
             long staked = pos == null ? 0 : pos.optLong("stakedRaw", 0);
             long pending = pos == null ? 0 : pos.optLong("pendingRewardsRaw", 0);
             long claimed = pos == null ? 0 : pos.optLong("totalClaimedRaw", 0);
-            double units = (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN;
             long total = info == null ? 0 : info.optLong("totalStakedRaw", 0);
-            long perBlock = info == null ? 0 : info.optLong("stakingRewardPerBlockRaw", 0);
-            long pace = observedPace > 0 ? observedPace : (info == null ? 0 : info.optLong("observedBlockSeconds", 0));
-            double poolHarv = total / units;
+            long shareBps = pos != null && pos.has("shareBps")
+                    ? pos.optLong("shareBps", 0)
+                    : (total > 0 ? staked * 10_000L / total : 0);
+            long poolRaw = pos != null && pos.has("rewardPoolBalanceRaw")
+                    ? pos.optLong("rewardPoolBalanceRaw", 0)
+                    : (info == null ? 0 : info.optLong("rewardPoolBalanceRaw", 0));
+            double units = (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN;
             double stakedHarv = staked / units;
             stakedView.setText(harv(staked));
             unclaimedView.setText("Unclaimed  " + harv(pending));
@@ -219,30 +207,18 @@ public final class StakingPanel {
             activeCard.setVisibility(staked > 0 ? View.VISIBLE : View.GONE);
             available.setText("Available  " + harv(walletRaw));
             if (info != null) {
-                pool.setText(String.format(Locale.US, "%.4f HARV per block  ·  %d active stakers",
-                        perBlock / units, info.optInt("stakerCount", 0)));
+                pool.setText(String.format(Locale.US, "%s in the reward pool  ·  %d stakers",
+                        harv(poolRaw), info.optInt("stakerCount", 0)));
             }
-            double pct = dailyPercent(staked, pending, claimed, pace, perBlock, poolHarv, stakedHarv);
-            double emissionPerDay = pace > 0 ? (perBlock / units) * (86400.0 / pace) : 0;
-            double perDay = (pace > 0 && poolHarv > 0) ? stakedHarv * (emissionPerDay / poolHarv) : 0;
-            double aprPct = poolHarv > 0 ? (emissionPerDay * 365.0 / poolHarv) * 100.0 : 0;
-            apy.setText(aprPct >= 100
-                    ? String.format(Locale.US, "Current est. pool APY  %.0f%%", aprPct)
-                    : String.format(Locale.US, "Current est. pool APY  %.2f%%", aprPct));
-            // Create a formatter that limits to 4 decimal places and dynamically drops trailing zeros
-java.text.DecimalFormat df = new java.text.DecimalFormat("#.####");
-
-monthly.setText(String.format(Locale.US, "~ %s monthly, at your current share", df.format(perDay * 30)));
-activeMonthly.setText(String.format(Locale.US, "Est. monthly reward ~ %s", df.format(perDay * 30)));
+            apy.setText(String.format(Locale.US, "Your share  %.2f%% of the stake. Rewards are that slice of the pool on hand.",
+                    shareBps / 100.0));
+            monthly.setText("Nothing is added from future blocks. You can only claim what the pool can pay.");
+            activeMonthly.setText(staked <= 0 ? "Stake to earn a share of the pool" : String.format(Locale.US, "%.4f HARV staked", stakedHarv));
             long queued = unbondingTotal();
             posTotal.setText(harv(staked + queued));
-            if (pace <= 0 || staked <= 0) {
-                dailyPct.setText(staked <= 0 ? "Stake to start earning" : "Checking the block pace…");
-                dailyPct.setTextColor(UiColors.textSecondary());
-            } else {
-                dailyPct.setText(String.format(Locale.US, "%+.2f%% today", pct));
-                dailyPct.setTextColor(pct >= 0 ? UiColors.success() : UiColors.error());
-            }
+            dailyPct.setText(staked <= 0 ? "Stake to start earning"
+                    : String.format(Locale.US, "You hold %.2f%% of the stake", shareBps / 100.0));
+            dailyPct.setTextColor(UiColors.textSecondary());
             String address = WalletManager.getActiveWalletAddress(host);
             if (address != null && staked > 0) recordSnapshot(address, pending + claimed);
             drawChart(address);

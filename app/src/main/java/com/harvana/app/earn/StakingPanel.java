@@ -191,7 +191,7 @@ public final class StakingPanel {
         input.setHint("Amount in HARV");
         new androidx.appcompat.app.AlertDialog.Builder(host)
                 .setTitle("Unstake")
-                .setMessage("This amount stops earning now and returns after 7 days.")
+                .setMessage("This amount stops earning now and returns after 24 hours.")
                 .setView(input)
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Unstake", (d, w) -> {
@@ -440,7 +440,7 @@ activeMonthly.setText(String.format(Locale.US, "Est. monthly reward ~ %s", df.fo
         if (already < min && BalanceFormatter.harvToRaw(harvAmount) < min) { toast("The first stake must be at least 1 HARV."); return; }
         ArrayList<String[]> rows = new ArrayList<>();
         rows.add(new String[]{"To", vault});
-        rows.add(new String[]{"For", "It starts earning now. Unstaking later returns after 7 days."});
+        rows.add(new String[]{"For", "It starts earning now. Unstaking later returns after 24 hours."});
         rows.add(new String[]{"From", "Your wallet"});
         rows.add(new String[]{"Network fee", "Taken with the stake"});
         gate("Stake HARV", String.format(Locale.US, "%.4f HARV", harvAmount), rows, () -> {
@@ -464,15 +464,15 @@ activeMonthly.setText(String.format(Locale.US, "Est. monthly reward ~ %s", df.fo
         catch (Exception e) { toast("Enter how much HARV to unstake."); return; }
         if (harvAmount <= 0 || address == null) return;
         ArrayList<String[]> rows = new ArrayList<>();
-        rows.add(new String[]{"To", "Your wallet, after 7 days"});
-        rows.add(new String[]{"For", "It stops earning now and returns to your wallet after 7 days."});
+        rows.add(new String[]{"To", "Your wallet, after 24 hours"});
+        rows.add(new String[]{"For", "It stops earning now and returns to your wallet after 24 hours."});
         rows.add(new String[]{"Network fee", "Taken when the unstake is sent"});
         gate("Unstake HARV", String.format(Locale.US, "%.4f HARV", harvAmount), rows, () -> {
             busy = true;
             NodeGroupClient.unstake(host, address, BalanceFormatter.harvToRaw(harvAmount), new NodeGroupClient.Callback() {
                 @Override public void onSuccess(JSONObject json) {
                     com.harvana.app.trust.AppActivity.note(host, "UNSTAKE", "Unstaked HARV");
-                    busy = false; toast("Unstaking. It returns after 7 days."); refresh();
+                    busy = false; toast("Unstaking. It returns after 24 hours."); refresh();
                 }
                 @Override public void onError(String error) { busy = false; toast(error); paint(); }
             });

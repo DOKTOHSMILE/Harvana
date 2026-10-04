@@ -390,7 +390,12 @@ public final class StakingPanel {
 
         cl.setClickable(true);
         cl.setFocusable(true);
-        cl.setBackgroundResource(android.R.attr.selectableItemBackground);
+
+        // Dynamically resolve theme attribute to prevent Resources$NotFoundException
+        TypedValue outValue = new TypedValue();
+        host.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        cl.setBackgroundResource(outValue.resourceId);
+
         cl.setOnClickListener(v -> {
             JSONObject unbondData = (JSONObject) v.getTag();
             showUnbondDetailsSheet(unbondData);
@@ -565,7 +570,7 @@ public final class StakingPanel {
             itemV.setLayoutParams(lp);
             listContainer.addView(itemV);
 
-            // Add line separator between rows in the bottom sheet
+            // Add lime/dark separator between rows in the bottom sheet
             if (i < allRows.size() - 1) {
                 View divider = new View(host);
                 LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1));

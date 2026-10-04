@@ -1,171 +1,236 @@
 <LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:orientation="vertical"
-	android:id="@+id/_main">
-	<androidx.core.widget.NestedScrollView
-		android:id="@+id/vscroll1"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:fillViewport="true">
-		<LinearLayout
-			android:id="@+id/linear1"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:orientation="vertical"
-			android:paddingBottom="24dp">
-			<com.google.android.material.card.MaterialCardView
-				android:id="@+id/card_stake_intro"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="20dp"
-				android:layout_marginTop="20dp"
-				android:layout_marginRight="20dp"
-				app:cardBackgroundColor="@color/colorSurface"
-				app:cardCornerRadius="20dp"
-				app:cardElevation="0dp"
-				app:strokeWidth="1dp"
-				app:strokeColor="@color/colorCardStroke">
-				<LinearLayout
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:orientation="vertical"
-					android:padding="16dp">
-					<TextView
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:text="Stake HARV"
-						android:textSize="20sp"
-						android:textStyle="bold"
-						android:textColor="@color/colorTextPrimary" />
-					<TextView
-						android:id="@+id/tv_earn_apr"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="8dp"
-						android:text="—"
-						android:textSize="28sp"
-						android:textStyle="bold"
-						android:textColor="@color/colorAccent" />
-					<TextView
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="8dp"
-						android:text="Earn a share of every block, in proportion to what you stake. The rate moves with the pool and how often blocks land."
-						android:textSize="14sp"
-						android:textColor="@color/colorTextSecondary" />
-					<com.google.android.material.button.MaterialButton
-						android:id="@+id/btn_open_staking"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="16dp"
-						android:text="Open Staking Dashboard"
-						android:textAllCaps="false" />
-				</LinearLayout>
-			</com.google.android.material.card.MaterialCardView>
-			<com.google.android.material.card.MaterialCardView
-				android:id="@+id/cardview4"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="20dp"
-				android:layout_marginTop="12dp"
-				android:layout_marginRight="20dp"
-				app:cardBackgroundColor="@color/colorSurface"
-				app:cardCornerRadius="20dp"
-				app:cardElevation="0dp"
-				app:strokeWidth="1dp"
-				app:strokeColor="@color/colorCardStroke">
-				<LinearLayout
-					android:id="@+id/linear7"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:padding="10dp"
-					android:orientation="vertical">
-					<androidx.cardview.widget.CardView
-						android:id="@+id/cardview7"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_margin="5dp"
-						app:cardBackgroundColor="@color/colorAccent"
-						app:cardElevation="2dp"
-						app:cardCornerRadius="10dp">
-						<LinearLayout
-							android:id="@+id/linear13"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:padding="8dp"
-							android:gravity="center_horizontal|center_vertical"
-							android:orientation="horizontal">
-							<ImageView
-								android:id="@+id/imageview1"
-								android:layout_width="30dp"
-								android:layout_height="30dp"
-								android:layout_marginRight="5dp"
-								android:src="@drawable/icon_power_settings_new_twotone"
-								android:scaleType="fitEnd" />
-							<TextView
-								android:id="@+id/textview16"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_marginLeft="5dp"
-								android:gravity="center_horizontal"
-								android:text="START\nMINING"
-								android:textSize="12sp"
-								android:textStyle="bold"
-								android:textColor="@color/colorTextPrimaryWhite" />
-						</LinearLayout>
-					</androidx.cardview.widget.CardView>
-				</LinearLayout>
-			</com.google.android.material.card.MaterialCardView>
-			<com.google.android.material.card.MaterialCardView
-				android:id="@+id/cardview5"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="20dp"
-				android:layout_marginTop="12dp"
-				android:layout_marginRight="20dp"
-				app:cardBackgroundColor="@color/colorSurface"
-				app:cardCornerRadius="20dp"
-				app:cardElevation="0dp"
-				app:strokeWidth="1dp"
-				app:strokeColor="@color/colorCardStroke">
-				<LinearLayout
-					android:id="@+id/linear8"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:padding="16dp"
-					android:orientation="vertical">
-					<TextView
-						android:id="@+id/textview10"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:text="How earning works"
-						android:textSize="18sp"
-						android:textStyle="bold"
-						android:textColor="@color/colorTextPrimary" />
-					<TextView
-						android:id="@+id/textview8"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="8dp"
-						android:text="Mine with your phone, or stake HARV and take a share of every block. Rewards follow your hashrate or your stake, and they only count after the chain confirms the block."
-						android:textSize="14sp"
-						android:textColor="@color/colorTextSecondary" />
-					<TextView
-						android:id="@+id/tv_learn_more"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="12dp"
-						android:paddingTop="4dp"
-						android:paddingBottom="4dp"
-						android:text="Learn more"
-						android:textSize="14sp"
-						android:textStyle="bold"
-						android:textColor="@color/colorAccent" />
-				</LinearLayout>
-			</com.google.android.material.card.MaterialCardView>
-		</LinearLayout>
-	</androidx.core.widget.NestedScrollView>
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorBackgroundMain"
+    android:id="@+id/_main">
+    
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/vscroll1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+        
+        <LinearLayout
+            android:id="@+id/linear1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="24dp">
+            
+            <!-- STAKING SUMMARY CARD -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_stake_intro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginRight="16dp"
+                app:cardBackgroundColor="@color/colorSurfaceDark"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/colorStrokeBase">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Staking Portfolio"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF" />
+                    
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="16dp">
+                        
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Total Staked"
+                                android:textColor="@color/colorTextMuted"
+                                android:textSize="12sp" />
+                            <TextView
+                                android:id="@+id/tv_summary_staked"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 HARV"
+                                android:textColor="#FFFFFF"
+                                android:textSize="20sp"
+                                android:fontFamily="monospace"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                        
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Accumulated"
+                                android:textColor="@color/colorTextMuted"
+                                android:textSize="12sp" />
+                            <TextView
+                                android:id="@+id/tv_summary_unclaimed"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 HARV"
+                                android:textColor="@color/colorSuccessNeon"
+                                android:textSize="20sp"
+                                android:fontFamily="monospace"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    
+                    <!-- Sparkline Chart -->
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/mini_reward_chart"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:layout_marginTop="12dp" />
+                        
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_open_staking"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="12dp"
+                        android:text="Manage Staking"
+                        android:textAllCaps="false"
+                        android:textColor="#000000"
+                        app:cornerRadius="12dp"
+                        app:backgroundTint="@color/colorHarvOrange" />
+                        
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- MINING CARD -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardview4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginRight="16dp"
+                app:cardBackgroundColor="@color/colorSurfaceDark"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/colorStrokeBase">
+                <LinearLayout
+                    android:id="@+id/linear7"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:orientation="vertical">
+                    
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Proof-of-Work Miner"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF" />
+                        
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardview7"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        app:cardBackgroundColor="@color/colorReadyBlue"
+                        app:cardElevation="0dp"
+                        app:cardCornerRadius="12dp">
+                        <LinearLayout
+                            android:id="@+id/linear13"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:orientation="horizontal">
+                            <ImageView
+                                android:id="@+id/imageview1"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_marginRight="8dp"
+                                android:src="@drawable/icon_power_settings_new_twotone"
+                                app:tint="#FFFFFF"/>
+                            <TextView
+                                android:id="@+id/textview16"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="START MINING"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="#FFFFFF" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- INFO CARD -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardview5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginRight="16dp"
+                app:cardBackgroundColor="@color/colorSurfaceDark"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/colorStrokeBase">
+                <LinearLayout
+                    android:id="@+id/linear8"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/textview10"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="How earning works"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF" />
+                    <TextView
+                        android:id="@+id/textview8"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Mine with your phone, or stake HARV and take a share of every block. Rewards follow your hashrate or your stake, and they only count after the chain confirms the block."
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="4dp"
+                        android:textColor="@color/colorTextMuted" />
+                    <TextView
+                        android:id="@+id/tv_learn_more"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:text="Learn more >"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorHarvOrange" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

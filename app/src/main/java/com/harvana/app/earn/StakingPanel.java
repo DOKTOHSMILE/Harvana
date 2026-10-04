@@ -244,18 +244,9 @@ public final class StakingPanel {
     }
 
     private void updateEstReward() {
-        double a = 0;
-        try { a = Double.parseDouble(amount.getText().toString()); } catch (Exception ignored) {}
-        
-        // Base APY approximation multipliers based on mockups
-        double multiplier = 0.05; // Free
-        if (selectedLockDays == 7) multiplier = 0.084;
-        if (selectedLockDays == 30) multiplier = 0.12;
-        if (selectedLockDays == 90) multiplier = 0.165;
-        
-        String term = selectedLockDays == 0 ? "month" : selectedLockDays + " days";
-        double est = a * multiplier * (selectedLockDays > 0 ? selectedLockDays / 365.0 : 1.0/12.0);
-        tvEstRewardInput.setText("~ " + harvFormatter.format(est) + " HARV / " + term);
+        double weight = selectedLockDays >= 90 ? 2.5 : selectedLockDays >= 30 ? 1.75 : selectedLockDays >= 7 ? 1.25 : 1.0;
+        String hold = selectedLockDays <= 0 ? "Stake stays until you unstake." : "Principal stays locked for " + selectedLockDays + " days.";
+        tvEstRewardInput.setText(String.format(Locale.US, "Weight %.2fx. Each day 0.05%% of the reward pool drips into Claim by this weight. %s", weight, hold));
     }
 
     private void refresh() {
@@ -324,7 +315,8 @@ public final class StakingPanel {
             overviewStaked.setText(harv(staked));
             overviewUnclaimed.setText(harv(pending));
             available.setText("Available " + harv(walletRaw));
-            if (info != null) tvPool.setText(String.format(Locale.US, "● Staking active   %d stakers · %.4f HARV per block", info.optInt("stakerCount", 0), info.optLong("stakingRewardPerBlockRaw", 0)/units));
+            if (info != null) tvPool.setText(String.format(Locale.US, "● Reward pool %s · %d stakers · 0.05%% drips into Claim each day",
+                    harv(info.optLong("rewardPoolBalanceRaw", 0)), info.optInt("stakerCount", 0)));
             dailyPct.setText(staked <= 0 ? "Stake to start earning" : String.format(Locale.US, "~ +%.3f%% Daily Fluctuating", shareBps / 100.0));
 
             long queued = unbondingTotal();
@@ -583,7 +575,7 @@ public final class StakingPanel {
 
         ArrayList<String[]> rows = new ArrayList<>();
         rows.add(new String[]{"To", "Your wallet"});
-        rows.add(new String[]{"For", "Staking rewards already earned"});
+        rows.add(new String[]{"For", "Rewards already dripped into Claim. Your stake stays until you unstake."});
         gate("Claim staking rewards", harv(pending), rows, () -> {
             busy = true;
             NodeGroupClient.claimStakingRewards(host, address, new NodeGroupClient.Callback() {

@@ -83,4 +83,13 @@
     <color name="colorOnHeroFaint">#22FFFFFF</color>
     <color name="colorOnHeroStroke">#55FFFFFF</color>
     <color name="colorOnHeroMuted">#9CA3AF</color>
+<color name="colorBackgroundMain">#080A11</color>
+<color name="colorSurfaceDark">#121623</color>
+<color name="colorSurfaceLight">#1A1F2E</color>
+<color name="colorHarvOrange">#FF7A00</color>
+<color name="colorHarvOrangeDark">#CC6200</color>
+<color name="colorSuccessNeon">#00FFA3</color>
+<color name="colorReadyBlue">#3B82F6</color>
+<color name="colorTextMuted">#8F9BB3</color>
+<color name="colorStrokeBase">#2A3042</color>
 </resources>

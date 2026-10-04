@@ -135,7 +135,7 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     private void showLoginBottomSheet() {
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
         
         LinearLayout sheetLayout = new LinearLayout(this);
         sheetLayout.setOrientation(LinearLayout.VERTICAL);

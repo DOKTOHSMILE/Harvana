@@ -38,6 +38,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -46,6 +48,9 @@ public final class StakingPanel {
     private static final String PREFS = "harvana_stake_history";
 
     private final AppCompatActivity host;
+    
+    // Smart formatter: drops trailing zeros, max 4 decimals
+    private final DecimalFormat harvFormatter = new DecimalFormat("0.####", DecimalFormatSymbols.getInstance(Locale.US));
     
     // Page 1 UI
     private final TextView overviewStaked, dailyPct, overviewUnclaimed;
@@ -204,7 +209,7 @@ public final class StakingPanel {
             
             activeCard.setVisibility(staked > 0 ? View.VISIBLE : View.GONE);
             activeAmount.setText(harv(staked));
-            activeMonthly.setText(staked <= 0 ? "—" : String.format(Locale.US, "~ %.4f HARV (Dynamic)", stakedHarv * 0.05)); // Placeholder for monthly
+            activeMonthly.setText(staked <= 0 ? "—" : "~ " + harvFormatter.format(stakedHarv * 0.05) + " HARV (Dynamic)");
             
             String address = WalletManager.getActiveWalletAddress(host);
             if (address != null && staked > 0) recordSnapshot(address, pending + claimed);
@@ -270,6 +275,12 @@ public final class StakingPanel {
         unbondCount.setText("● " + activeUnbondings + " In Progress");
     }
 
+    private static String formatTimerPrecise(long ms) {
+        if (ms <= 0) return "00h 00m";
+        long totalSecs = ms / 1000;
+        return String.format(Locale.US, "%02dh %02dm", totalSecs / 3600, (totalSecs % 3600) / 60);
+    }
+
     private void setupUnbondingViews() {
         unbondingList.removeAllViews();
         if (pos == null) return;
@@ -280,7 +291,6 @@ public final class StakingPanel {
             JSONObject u = rows.optJSONObject(i);
             if (u == null || "RELEASED".equals(u.optString("status"))) continue;
             
-            // Build the complex row programmatically to match the image
             MaterialCardView card = new MaterialCardView(host);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.setMargins(0, dp(8), 0, dp(8));
@@ -321,7 +331,7 @@ public final class StakingPanel {
             btn.setTextColor(Color.parseColor("#FF7A00"));
             btn.setStrokeColorResource(android.R.color.transparent);
             btn.setVisibility(View.GONE);
-            btn.setOnClickListener(v -> doManualSweep()); // Allows forced sweep check
+            btn.setOnClickListener(v -> doManualSweep());
             
             cl.addView(badge);
             cl.addView(amountTv);
@@ -330,16 +340,12 @@ public final class StakingPanel {
             
             ConstraintSet cs = new ConstraintSet();
             cs.clone(cl);
-            // Badge top left
             cs.connect(badge.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
             cs.connect(badge.getId(), ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
-            // Amount middle
             cs.connect(amountTv.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
             cs.connect(amountTv.getId(), ConstraintSet.START, badge.getId(), ConstraintSet.END, dp(16));
-            // Sub middle bottom
             cs.connect(subTv.getId(), ConstraintSet.TOP, amountTv.getId(), ConstraintSet.BOTTOM, dp(4));
             cs.connect(subTv.getId(), ConstraintSet.START, amountTv.getId(), ConstraintSet.START);
-            // Button right
             cs.connect(btn.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
             cs.connect(btn.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
             cs.connect(btn.getId(), ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
@@ -352,15 +358,12 @@ public final class StakingPanel {
 
     private void doManualSweep() {
         busy = true; toast("Requesting withdrawal release...");
-        // Call backend sweep logic. Re-use generic JSON client for a quick ping.
         HarvanaNodeClient.getRecentBlocks(new HarvanaNodeClient.JsonCallback() {
             @Override public void onSuccess(JSONObject json) { busy = false; refresh(); }
             @Override public void onError(String error) { busy = false; refresh(); }
         });
     }
 
-    // --- Core Action Methods ---
-    
     private void askUnstake() {
         EditText input = new EditText(host);
         input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -393,7 +396,8 @@ public final class StakingPanel {
         ArrayList<String[]> rows = new ArrayList<>();
         rows.add(new String[]{"To", vault});
         rows.add(new String[]{"For", "Starts earning continuously. Claims unlock every 24h."});
-        gate("Stake HARV", String.format(Locale.US, "%.4f HARV", harvAmount), rows, () -> {
+        
+        gate("Stake HARV", harvFormatter.format(harvAmount) + " HARV", rows, () -> {
             busy = true; paint();
             TransactionRouter.routeTransaction(host, address, vault, BigDecimal.valueOf(harvAmount), null, "STAKE",
                     new TransactionRouter.RouterCallback() {
@@ -412,7 +416,8 @@ public final class StakingPanel {
         ArrayList<String[]> rows = new ArrayList<>();
         rows.add(new String[]{"To", "Your wallet, after 24 hours"});
         rows.add(new String[]{"For", "Returns to your wallet in exactly 24 hours."});
-        gate("Unstake HARV", String.format(Locale.US, "%.4f HARV", harvAmount), rows, () -> {
+        
+        gate("Unstake HARV", harvFormatter.format(harvAmount) + " HARV", rows, () -> {
             busy = true;
             NodeGroupClient.unstake(host, address, BalanceFormatter.harvToRaw(harvAmount), new NodeGroupClient.Callback() {
                 @Override public void onSuccess(JSONObject json) { busy = false; toast("Unstaking. Returns in 24 hours."); refresh(); }
@@ -444,20 +449,26 @@ public final class StakingPanel {
         chartDays = days;
         chip7.setTextColor(days == 7 ? Color.parseColor("#080A11") : Color.parseColor("#8F9BB3"));
         chip7.setBackgroundResource(days == 7 ? R.drawable.bg_pill_orange : 0);
-        // Do same for others if needed
         drawChart(WalletManager.getActiveWalletAddress(host));
     }
-    private void fillMax() { if (walletRaw > 0) amount.setText(String.format(Locale.US, "%.4f", walletRaw / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN)); }
-    private void gate(String title, String amt, List<String[]> rows, Runnable w) { PaymentConfirmSheet.reviewThenAuthorize(host, title, amt, rows, w); }
-    private String harv(long raw) { return String.format(Locale.US, "%.4f HARV", raw / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN); }
+    
+    private void fillMax() { 
+        if (walletRaw > 0) amount.setText(harvFormatter.format(walletRaw / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN)); 
+    }
+    
+    private void gate(String title, String amt, List<String[]> rows, Runnable w) { 
+        PaymentConfirmSheet.reviewThenAuthorize(host, title, amt, rows, w); 
+    }
+    
+    // Updated harv formatting method using DecimalFormat
+    private String harv(long raw) { 
+        return harvFormatter.format(raw / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN) + " HARV"; 
+    }
+    
     private void toast(String s) { ui(() -> Toast.makeText(host, s, Toast.LENGTH_LONG).show()); }
     private void ui(Runnable r) { host.runOnUiThread(r); }
     private int dp(int v) { return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, v, host.getResources().getDisplayMetrics()); }
-    private static String formatTimerPrecise(long ms) {
-        if (ms <= 0) return "00h 00m";
-        long totalSecs = ms / 1000;
-        return String.format(Locale.US, "%02dh %02dm", totalSecs / 3600, (totalSecs % 3600) / 60);
-    }
+    
     private long unbondingTotal() {
         if (pos == null) return 0;
         JSONArray rows = pos.optJSONArray("unbonding");
@@ -469,8 +480,102 @@ public final class StakingPanel {
         }
         return sum;
     }
-    private void recordSnapshot(String a, long e) {} // Keep your existing
-    private void drawChart(String a) {} // Keep your existing charting code
-    private void styleChart() {} // Keep your existing charting code
-    private static long paceFromBlocks(JSONObject j) { return 10; } // Keep your existing pace logic
+    
+    private void recordSnapshot(String address, long earnedRaw) {
+        try {
+            JSONArray rows = history(address);
+            String today = dayKey(0);
+            JSONObject hit = null;
+            for (int i = 0; i < rows.length(); i++) {
+                JSONObject row = rows.optJSONObject(i);
+                if (row != null && today.equals(row.optString("d"))) { hit = row; break; }
+            }
+            if (hit == null) {
+                hit = new JSONObject();
+                hit.put("d", today);
+                rows.put(hit);
+            }
+            hit.put("earned", earnedRaw);
+            while (rows.length() > 120) rows.remove(0);
+            host.getSharedPreferences(PREFS, Activity.MODE_PRIVATE).edit().putString(address, rows.toString()).apply();
+        } catch (Exception ignored) { }
+    }
+    
+    private JSONArray history(String address) {
+        String raw = host.getSharedPreferences(PREFS, Activity.MODE_PRIVATE).getString(address, "[]");
+        try { return new JSONArray(raw); } catch (Exception e) { return new JSONArray(); }
+    }
+    
+    private static String dayKey(int offsetDays) {
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        c.add(java.util.Calendar.DAY_OF_YEAR, offsetDays);
+        return String.format(Locale.US, "%04d-%02d-%02d", c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH) + 1, c.get(java.util.Calendar.DAY_OF_MONTH));
+    }
+    
+    private void styleChart() {
+        chart.setNoDataText("Rewards show here as days pass.");
+        chart.setNoDataTextColor(UiColors.textSecondary());
+        chart.getDescription().setEnabled(false);
+        chart.getLegend().setEnabled(false);
+        chart.getAxisRight().setEnabled(false);
+        chart.setTouchEnabled(true);
+        chart.setExtraBottomOffset(8f);
+        XAxis x = chart.getXAxis();
+        x.setPosition(XAxis.XAxisPosition.BOTTOM);
+        x.setTextColor(UiColors.textTertiary());
+        x.setDrawGridLines(false);
+        x.setGranularity(1f);
+        chart.getAxisLeft().setTextColor(UiColors.textTertiary());
+        chart.getAxisLeft().setGridColor(UiColors.textTertiary() & 0x40FFFFFF | 0x22000000);
+        chart.setBackgroundColor(Color.TRANSPARENT);
+    }
+    
+    private void drawChart(String address) {
+        if (address == null) { chart.clear(); return; }
+        JSONArray rows = history(address);
+        if (rows.length() == 0) { chart.clear(); chart.invalidate(); return; }
+        List<Entry> entries = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        int start = chartDays >= rows.length() ? 0 : rows.length() - chartDays;
+        long previous = -1;
+        if (start > 0) {
+            JSONObject prior = rows.optJSONObject(start - 1);
+            if (prior != null) previous = prior.optLong("earned", -1);
+        }
+        for (int i = start; i < rows.length(); i++) {
+            JSONObject row = rows.optJSONObject(i);
+            if (row == null) continue;
+            long earned = row.optLong("earned", 0);
+            double delta = previous < 0 ? 0 : Math.max(0, earned - previous) / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN;
+            previous = earned;
+            entries.add(new Entry(labels.size(), (float) delta));
+            String d = row.optString("d", "");
+            labels.add(d.length() >= 10 ? d.substring(5) : d);
+        }
+        LineDataSet set = new LineDataSet(entries, "Rewards");
+        set.setColor(UiColors.accent());
+        set.setLineWidth(2f);
+        set.setCircleColor(UiColors.accent());
+        set.setCircleRadius(3f);
+        set.setDrawValues(false);
+        set.setDrawFilled(true);
+        set.setFillColor(UiColors.accent());
+        set.setFillAlpha(70);
+        set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        chart.setData(new LineData(set));
+        chart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+        chart.getXAxis().setLabelCount(Math.min(labels.size(), 6), false);
+        chart.invalidate();
+    }
+    
+    private static long paceFromBlocks(JSONObject json) {
+        JSONArray blocks = json == null ? null : json.optJSONArray("blocks");
+        if (blocks == null || blocks.length() < 2) return 0;
+        long newest = blocks.optJSONObject(0) == null ? 0 : blocks.optJSONObject(0).optLong("timestamp");
+        long oldest = blocks.optJSONObject(blocks.length() - 1) == null ? 0 : blocks.optJSONObject(blocks.length() - 1).optLong("timestamp");
+        long span = newest - oldest;
+        int gaps = blocks.length() - 1;
+        if (span < 1000 || gaps < 1) return 0;
+        return Math.max(1L, span / 1000L / gaps);
+    }
 }

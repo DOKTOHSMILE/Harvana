@@ -1,261 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:orientation="vertical"
-	android:id="@+id/_main">
-	<androidx.cardview.widget.CardView
-		android:id="@+id/cardview7"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		app:cardBackgroundColor="@color/colorPrimary"
-		app:cardElevation="0dp"
-		app:cardCornerRadius="0dp">
-		<LinearLayout
-			android:id="@+id/linear1"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:padding="15dp"
-			android:gravity="center_vertical"
-			android:orientation="vertical">
-			<LinearLayout
-				android:id="@+id/linear7"
-				android:layout_width="match_parent"
-				android:layout_height="200dp"
-				android:padding="5dp"
-				android:gravity="center_horizontal|center_vertical"
-				android:orientation="vertical"
-				android:layout_weight="1">
-				<androidx.cardview.widget.CardView
-					android:id="@+id/cardview6"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					app:cardBackgroundColor="@android:color/transparent"
-					app:cardElevation="0dp"
-					app:cardCornerRadius="360dp">
-					<ImageView
-						android:id="@+id/imageview1"
-						android:layout_width="168dp"
-						android:layout_height="168dp"
-						android:src="@drawable/ic_launcher"
-						android:scaleType="fitCenter"
-						android:contentDescription="Harvana, three woven cycles" />
-				</androidx.cardview.widget.CardView>
-				<TextView
-					android:id="@+id/textview1"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:paddingTop="5dp"
-					android:paddingBottom="8dp"
-					android:text="Welcome to Harvana"
-					android:textSize="30sp"
-					android:layout_gravity="center_horizontal|center_vertical" />
-				<TextView
-					android:id="@+id/textview2"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginBottom="30dp"
-					android:gravity="center_horizontal|center_vertical"
-					android:text="The Capital Oracle\n\nDigital capital pool, capital rotation savings circles — built on trust, never on custody of your money."
-					android:textSize="16sp" />
-				<LinearLayout
-					android:id="@+id/linear2"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:orientation="vertical">
-					<LinearLayout
-						android:id="@+id/linear3"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:paddingTop="5dp"
-						android:paddingBottom="5dp"
-						android:gravity="center_vertical"
-						android:orientation="horizontal">
-						<ImageView
-							android:id="@+id/imageview2"
-							android:layout_width="20dp"
-							android:layout_height="20dp"
-							android:padding="2dp"
-							android:src="@drawable/icon_security_outline"
-							android:scaleType="centerInside"
-							android:tint="@color/colorControlNormal" />
-						<TextView
-							android:id="@+id/textview3"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:paddingLeft="5dp"
-							android:text="We provide a secure platform for our users"
-							android:textSize="15sp" />
-					</LinearLayout>
-					<LinearLayout
-						android:id="@+id/linear4"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:paddingTop="5dp"
-						android:paddingBottom="5dp"
-						android:gravity="center_vertical"
-						android:orientation="horizontal">
-						<ImageView
-							android:id="@+id/imageview3"
-							android:layout_width="20dp"
-							android:layout_height="20dp"
-							android:padding="2dp"
-							android:src="@drawable/icon_lock_round"
-							android:scaleType="centerInside"
-							android:tint="@color/colorControlNormal" />
-						<TextView
-							android:id="@+id/textview4"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:paddingLeft="5dp"
-							android:text="Double-confirmation payment ledger"
-							android:textSize="15sp" />
-					</LinearLayout>
-					<LinearLayout
-						android:id="@+id/linear5"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:paddingTop="5dp"
-						android:paddingBottom="5dp"
-						android:gravity="center_vertical"
-						android:orientation="horizontal">
-						<ImageView
-							android:id="@+id/imageview4"
-							android:layout_width="20dp"
-							android:layout_height="20dp"
-							android:src="@drawable/icon_star_rate_round"
-							android:scaleType="centerInside"
-							android:tint="@color/colorControlNormal" />
-						<TextView
-							android:id="@+id/textview5"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:paddingLeft="5dp"
-							android:text="Trust score follows you across circles"
-							android:textSize="15sp" />
-					</LinearLayout>
-				</LinearLayout>
-			</LinearLayout>
-			<LinearLayout
-				android:id="@+id/linear6"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:padding="5dp"
-				android:gravity="center_horizontal|center_vertical"
-				android:orientation="vertical"
-				android:layout_gravity="bottom"
-				android:layout_weight="1"
-				android:visibility="gone">
-				<androidx.cardview.widget.CardView
-					android:id="@+id/cardview3"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginLeft="5dp"
-					android:layout_marginTop="10dp"
-					android:layout_marginRight="5dp"
-					android:layout_marginBottom="5dp"
-					android:visibility="gone"
-					app:cardElevation="@dimen/cardElevation"
-					app:cardCornerRadius="10dp">
-					<Button
-						android:id="@+id/button3"
-						android:layout_width="match_parent"
-						android:layout_height="50dp"
-						android:background="@android:color/transparent"
-						android:text="Phone login"
-						android:textSize="20sp"
-						android:enabled="false" />
-				</androidx.cardview.widget.CardView>
-				<LinearLayout
-					android:id="@+id/linear9"
-					android:layout_width="match_parent"
-					android:layout_height="50dp"
-					android:layout_marginLeft="5dp"
-					android:layout_marginTop="10dp"
-					android:layout_marginRight="5dp"
-					android:layout_marginBottom="5dp"
-					android:padding="8dp"
-					android:orientation="horizontal" />
-				<androidx.cardview.widget.CardView
-					android:id="@+id/cardview4"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="10dp"
-					app:cardBackgroundColor="@android:color/transparent"
-					app:cardElevation="0dp"
-					app:cardCornerRadius="12dp">
-					<Button
-						android:id="@+id/button2"
-						android:layout_width="match_parent"
-						android:layout_height="52dp"
-						android:background="@drawable/bg_btn_primary"
-						android:text="Get started"
-						android:textAllCaps="false"
-						android:textColor="@color/colorTextOnAccent"
-						android:textStyle="bold"
-						android:textSize="16sp" />
-				</androidx.cardview.widget.CardView>
-				<androidx.cardview.widget.CardView
-					android:id="@+id/cardview2"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="10dp"
-					app:cardBackgroundColor="@android:color/transparent"
-					app:cardElevation="0dp"
-					app:cardCornerRadius="12dp">
-					<Button
-						android:id="@+id/button1"
-						android:layout_width="match_parent"
-						android:layout_height="52dp"
-						android:background="@drawable/bg_btn_outline_accent"
-						android:text="Sign in with email"
-						android:textAllCaps="false"
-						android:textColor="@color/colorAccentStrong"
-						android:textStyle="bold"
-						android:textSize="16sp" />
-				</androidx.cardview.widget.CardView>
-				<androidx.cardview.widget.CardView
-					android:id="@+id/cardview5"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginLeft="5dp"
-					android:layout_marginTop="10dp"
-					android:layout_marginRight="5dp"
-					android:layout_marginBottom="5dp"
-					app:cardElevation="@dimen/cardElevation"
-					app:cardCornerRadius="10dp">
-					<com.google.android.gms.common.SignInButton
-						android:id="@+id/signinbutton1"
-						android:layout_width="match_parent"
-						android:layout_height="50dp" />
-				</androidx.cardview.widget.CardView>
-			</LinearLayout>
-		</LinearLayout>
-		<LinearLayout
-			android:id="@+id/linear10"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:gravity="bottom"
-			android:orientation="vertical">
-			<TextView
-				android:id="@+id/textview6"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:padding="8dp"
-				android:gravity="center_horizontal"
-				android:text="Loading Please Wait...."
-				android:textSize="12sp" />
-			<ProgressBar
-				android:id="@+id/progressbar1"
-				android:layout_width="match_parent"
-				android:layout_height="40dp"
-				android:padding="8dp"
-				android:background="@android:color/transparent"
-				android:indeterminate="true"
-				style="?android:progressBarStyle"
-				android:tint="@color/colorAccent" />
-		</LinearLayout>
-	</androidx.cardview.widget.CardView>
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorBackgroundMain"
+    android:id="@+id/_main">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="24dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical">
+
+            <!-- App Logo with Subtle Glow -->
+            <FrameLayout
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="24dp">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_harv_glow_logo"
+                    android:alpha="0.5"/>
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_launcher"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Harvana Logo" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Welcome to Harvana"
+                android:textColor="#FFFFFF"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="32dp"
+                android:gravity="center_horizontal"
+                android:text="The Capital Oracle\nDigital capital pools and rotational savings circles built strictly on trust, never on custody."
+                android:textColor="@color/colorTextMuted"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp"/>
+
+            <!-- Feature Points -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_surface_light"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/icon_lock_round"
+                        app:tint="@color/colorHarvOrange" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="Secure &amp; Transparent\nDouble-confirmation payment ledger."
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/colorStrokeBase" android:layout_marginTop="12dp" android:layout_marginBottom="12dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/icon_star_rate_round"
+                        app:tint="@color/colorHarvOrange" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="Reputation Matters\nYour Trust Score follows you across circles."
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/colorStrokeBase" android:layout_marginTop="12dp" android:layout_marginBottom="12dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_harv_coin" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="Earn Continuously\nStake HARV to earn daily protocol rewards."
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:background="@color/colorBackgroundMain">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_get_started"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Get Started"
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="12dp"
+            app:backgroundTint="@color/colorHarvOrange" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_login"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="12dp"
+            android:text="Log In"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:strokeColor="@color/colorStrokeBase"
+            app:cornerRadius="12dp" />
+
+        <LinearLayout
+            android:id="@+id/linear10"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/textview6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Loading Please Wait...."
+                android:textColor="@color/colorTextMuted"
+                android:textSize="12sp" />
+            <ProgressBar
+                android:id="@+id/progressbar1"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="4dp"
+                android:indeterminate="true"
+                android:tint="@color/colorHarvOrange" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

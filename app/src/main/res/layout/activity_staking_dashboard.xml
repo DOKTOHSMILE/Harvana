@@ -109,44 +109,72 @@
                             android:id="@+id/tv_daily_pct"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="~ +0.018% Daily Fluctuating"
+                            android:text="~ +0.00% Today"
                             android:textColor="@color/colorSuccessNeon"
                             android:textSize="12sp"
                             android:layout_marginTop="4dp"
                             app:layout_constraintTop_toBottomOf="@id/tv_overview_staked"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
-                            android:id="@+id/lbl_unclaimed"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Unclaimed Rewards"
-                            android:textColor="@color/colorTextMuted"
-                            android:textSize="12sp"
                             android:layout_marginTop="16dp"
-                            app:layout_constraintTop_toBottomOf="@id/tv_daily_pct"
-                            app:layout_constraintStart_toStartOf="parent"/>
+                            android:orientation="horizontal"
+                            app:layout_constraintTop_toBottomOf="@id/tv_daily_pct">
+                            
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Unclaimed Rewards"
+                                    android:textColor="@color/colorTextMuted"
+                                    android:textSize="12sp"/>
+                                <TextView
+                                    android:id="@+id/tv_overview_unclaimed"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0 HARV"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/tv_overview_unclaimed"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0 HARV"
-                            android:textColor="#FFFFFF"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            app:layout_constraintTop_toBottomOf="@id/lbl_unclaimed"
-                            app:layout_constraintStart_toStartOf="parent"/>
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Est. APY"
+                                    android:textColor="@color/colorTextMuted"
+                                    android:textSize="12sp"/>
+                                <TextView
+                                    android:id="@+id/tv_apy"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="--%"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
+                        </LinearLayout>
 
                         <TextView
                             android:id="@+id/tv_pool"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="0 HARV in reward pool · 0 stakers"
+                            android:layout_marginTop="12dp"
+                            android:text="● Staking active   0 stakers · 0 HARV per block"
                             android:textColor="@color/colorTextMuted"
                             android:textSize="11sp"
-                            app:layout_constraintTop_toBottomOf="@id/tv_overview_unclaimed"
+                            app:layout_constraintTop_toBottomOf="@+id/lbl_unclaimed"
                             app:layout_constraintStart_toStartOf="parent"/>
 
                         <ImageView
@@ -188,10 +216,12 @@
                                 android:textColor="#FFFFFF"
                                 android:textSize="16sp"
                                 android:textStyle="bold"/>
-                            <TextView android:id="@+id/chip_7d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="7D" android:textColor="@color/colorBackgroundMain" android:background="@drawable/bg_pill_orange" android:paddingHorizontal="10dp" android:paddingVertical="4dp" android:textSize="10sp" android:textStyle="bold"/>
-                            <TextView android:id="@+id/chip_1m" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1M" android:textColor="@color/colorTextMuted" android:layout_marginLeft="8dp" android:textSize="10sp"/>
-                            <TextView android:id="@+id/chip_3m" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3M" android:textColor="@color/colorTextMuted" android:layout_marginLeft="8dp" android:textSize="10sp"/>
-                            <TextView android:id="@+id/chip_all" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ALL" android:textColor="@color/colorTextMuted" android:layout_marginLeft="8dp" android:textSize="10sp"/>
+                            <TextView android:id="@+id/chip_1d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1D" android:textColor="@color/colorTextMuted" android:paddingHorizontal="8dp" android:paddingVertical="4dp" android:textSize="10sp" android:textStyle="bold"/>
+                            <TextView android:id="@+id/chip_3d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3D" android:textColor="@color/colorTextMuted" android:paddingHorizontal="8dp" android:paddingVertical="4dp" android:textSize="10sp" android:textStyle="bold"/>
+                            <TextView android:id="@+id/chip_7d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="7D" android:textColor="@color/colorBackgroundMain" android:background="@drawable/bg_pill_orange" android:paddingHorizontal="8dp" android:paddingVertical="4dp" android:textSize="10sp" android:textStyle="bold"/>
+                            <TextView android:id="@+id/chip_1m" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1M" android:textColor="@color/colorTextMuted" android:paddingHorizontal="8dp" android:paddingVertical="4dp" android:textSize="10sp"/>
+                            <TextView android:id="@+id/chip_3m" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3M" android:textColor="@color/colorTextMuted" android:paddingHorizontal="8dp" android:paddingVertical="4dp" android:textSize="10sp"/>
+                            <TextView android:id="@+id/chip_all" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ALL" android:textColor="@color/colorTextMuted" android:paddingHorizontal="8dp" android:paddingVertical="4dp" android:textSize="10sp"/>
                         </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
@@ -220,14 +250,14 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Stake HARV"
+                            android:text="Stake Asset"
                             android:textColor="#FFFFFF"
                             android:textSize="18sp"
                             android:textStyle="bold"/>
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Earn protocol rewards continuously."
+                            android:text="Earn protocol rewards while securing the network."
                             android:textColor="@color/colorTextMuted"
                             android:textSize="13sp"/>
 
@@ -257,19 +287,24 @@
                                 android:textColor="#FFFFFF"
                                 android:textSize="18sp"
                                 android:hint="0.00"/>
-                            <TextView
+                            
+                            <!-- Dropdown Spinner for Coin -->
+                            <Spinner
+                                android:id="@+id/spAsset"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="HARV"
-                                android:textColor="#FFFFFF"
-                                android:textStyle="bold"
-                                android:layout_marginEnd="16dp"/>
+                                android:layout_height="match_parent"
+                                android:backgroundTint="#FFFFFF"
+                                android:layout_marginEnd="8dp"/>
+                            
                             <TextView
                                 android:id="@+id/btn_max"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="MAX"
                                 android:textColor="@color/colorSuccessNeon"
+                                android:background="#1A00FFA3"
+                                android:paddingHorizontal="8dp"
+                                android:paddingVertical="4dp"
                                 android:textStyle="bold"
                                 android:textSize="12sp"/>
                         </LinearLayout>
@@ -283,37 +318,110 @@
                             android:textColor="@color/colorTextMuted"
                             android:textSize="12sp"/>
 
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="Lock period"
+                            android:textColor="@color/colorTextMuted"
+                            android:textSize="12sp"/>
+
+                        <!-- Lock Duration Row -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:background="@drawable/bg_surface_light"
-                            android:padding="12dp"
-                            android:layout_marginTop="16dp">
-                            <TextView
-                                android:layout_width="match_parent"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="8dp">
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/card_lock_free"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="Liquid (24-hour cooldown)"
-                                android:textColor="#FFFFFF"
-                                android:textSize="14sp"
-                                android:textStyle="bold"/>
-                            <TextView
-                                android:layout_width="match_parent"
+                                android:layout_weight="1"
+                                app:cardBackgroundColor="@color/colorSurfaceLight"
+                                app:strokeColor="@color/colorHarvOrange"
+                                app:strokeWidth="1dp"
+                                app:cardCornerRadius="8dp">
+                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="8dp" android:gravity="center">
+                                    <TextView android:text="Free" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"/>
+                                    <TextView android:text="~ 5.0% APY" android:textColor="@color/colorTextMuted" android:textSize="10sp"/>
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/card_lock_7"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="Stake Weight: 1x (Liquid)"
-                                android:textColor="@color/colorTextMuted"
-                                android:textSize="12sp"/>
+                                android:layout_weight="1"
+                                android:layout_marginStart="6dp"
+                                app:cardBackgroundColor="@color/colorSurfaceLight"
+                                app:strokeColor="@color/colorStrokeBase"
+                                app:strokeWidth="1dp"
+                                app:cardCornerRadius="8dp">
+                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="8dp" android:gravity="center">
+                                    <TextView android:text="7 days" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"/>
+                                    <TextView android:text="~ 8.4% APY" android:textColor="@color/colorTextMuted" android:textSize="10sp"/>
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/card_lock_30"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="6dp"
+                                app:cardBackgroundColor="@color/colorSurfaceLight"
+                                app:strokeColor="@color/colorStrokeBase"
+                                app:strokeWidth="1dp"
+                                app:cardCornerRadius="8dp">
+                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="8dp" android:gravity="center">
+                                    <TextView android:text="30 days" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"/>
+                                    <TextView android:text="~ 12.0% APY" android:textColor="@color/colorTextMuted" android:textSize="10sp"/>
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/card_lock_90"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="6dp"
+                                app:cardBackgroundColor="@color/colorSurfaceLight"
+                                app:strokeColor="@color/colorStrokeBase"
+                                app:strokeWidth="1dp"
+                                app:cardCornerRadius="8dp">
+                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="8dp" android:gravity="center">
+                                    <TextView android:text="90 days" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"/>
+                                    <TextView android:text="~ 16.5% APY" android:textColor="@color/colorTextMuted" android:textSize="10sp"/>
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+                            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_harv_coin"/>
+                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginStart="8dp">
+                                <TextView android:text="Estimated rewards" android:textColor="@color/colorTextMuted" android:textSize="12sp"/>
+                                <TextView android:id="@+id/tv_est_reward_input" android:text="~ 0.0000 HARV / Term" android:textColor="@color/colorSuccessNeon" android:textSize="12sp" android:textStyle="bold"/>
+                            </LinearLayout>
                         </LinearLayout>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_stake"
                             android:layout_width="match_parent"
                             android:layout_height="56dp"
-                            android:layout_marginTop="24dp"
+                            android:layout_marginTop="16dp"
                             android:text="Stake HARV"
                             android:textAllCaps="false"
+                            android:textColor="#000000"
                             app:cornerRadius="12dp"
                             app:backgroundTint="@color/colorHarvOrange" />
+                            
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -386,7 +494,7 @@
                             <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:text="Unclaimed" android:textColor="@color/colorTextMuted" android:textSize="12sp" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
                             <TextView android:id="@+id/tv_grid_unclaimed" android:layout_width="0dp" android:layout_height="wrap_content" android:text="0 HARV" android:textColor="#FFFFFF" android:textSize="12sp" android:gravity="end" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
 
-                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:text="Pool APY" android:textColor="@color/colorTextMuted" android:textSize="12sp" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:text="Est. APR" android:textColor="@color/colorTextMuted" android:textSize="12sp" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
                             <TextView android:id="@+id/tv_grid_apy" android:layout_width="0dp" android:layout_height="wrap_content" android:text="--%" android:textColor="#FFFFFF" android:textSize="12sp" android:gravity="end" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
                         </GridLayout>
 
@@ -542,7 +650,7 @@
                                 android:layout_weight="1"
                                 android:orientation="vertical">
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Stake Type" android:textColor="@color/colorTextMuted" android:textSize="12sp"/>
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Liquid (1x Weight)" android:textColor="#FFFFFF" android:textSize="13sp" android:layout_marginTop="2dp"/>
+                                <TextView android:id="@+id/tv_active_lock_type" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Free" android:textColor="#FFFFFF" android:textSize="13sp" android:layout_marginTop="2dp"/>
                             </LinearLayout>
                             <LinearLayout
                                 android:layout_width="0dp"

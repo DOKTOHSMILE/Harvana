@@ -59,14 +59,14 @@ final class SocialUi {
     static LinearLayout card(Context c) {
         LinearLayout l = new LinearLayout(c);
         l.setOrientation(LinearLayout.VERTICAL);
-        int p = dp(c, 14);
+        int p = dp(c, 16);
         l.setPadding(p, p, p, p);
         android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
         g.setColor(UiColors.surface()); g.setCornerRadius(dp(c, 14));
         g.setStroke(dp(c, 1), (UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000);
         l.setBackground(g);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.bottomMargin = dp(c, 12);
+        lp.bottomMargin = dp(c, 14);
         l.setLayoutParams(lp);
         return l;
     }

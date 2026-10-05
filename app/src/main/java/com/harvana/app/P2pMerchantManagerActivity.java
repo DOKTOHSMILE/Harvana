@@ -209,13 +209,13 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 		
 		LinearLayout row = new LinearLayout(this);
 		row.setOrientation(LinearLayout.HORIZONTAL);
-		row.setPadding(0, ThemedDialogs.dp(this, 12), 0, ThemedDialogs.dp(this, 8));
+		row.setPadding(0, ThemedDialogs.dp(this, 16), 0, ThemedDialogs.dp(this, 12));
 		row.addView(_choiceButton("Sell HARV", "I have HARV to sell", androidx.core.content.ContextCompat.getColor(this, R.color.colorError), v -> {
 			sheet.dismiss();
 			startActivity(new Intent(this, CreateP2pSellOfferActivity.class));
 		}), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 		View gap = new View(this);
-		row.addView(gap, new LinearLayout.LayoutParams(ThemedDialogs.dp(this, 12), 1));
+		row.addView(gap, new LinearLayout.LayoutParams(ThemedDialogs.dp(this, 14), 1));
 		row.addView(_choiceButton("Buy HARV", "I want to acquire HARV", androidx.core.content.ContextCompat.getColor(this, R.color.colorSuccess), v -> {
 			sheet.dismiss();
 			startActivity(new Intent(this, CreateP2pBuyOfferActivity.class));

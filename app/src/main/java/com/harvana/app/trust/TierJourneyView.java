@@ -43,7 +43,7 @@ public class TierJourneyView extends View {
     }
 
     @Override protected void onMeasure(int w, int h) {
-        setMeasuredDimension(View.resolveSize(getSuggestedMinimumWidth(), w), Math.round(88 * getResources().getDisplayMetrics().density));
+        setMeasuredDimension(View.resolveSize(getSuggestedMinimumWidth(), w), Math.round(100 * getResources().getDisplayMetrics().density));
     }
 
     @Override protected void onDetachedFromWindow() {
@@ -54,7 +54,7 @@ public class TierJourneyView extends View {
     @Override protected void onDraw(Canvas canvas) {
         float d = getResources().getDisplayMetrics().density;
         float left = 18 * d, right = getWidth() - 18 * d, trackW = right - left;
-        float cy = 42 * d, th = 10 * d;
+        float cy = 46 * d, th = 10 * d;
 
         paint.setStyle(Paint.Style.FILL);
         paint.setColor((UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000);

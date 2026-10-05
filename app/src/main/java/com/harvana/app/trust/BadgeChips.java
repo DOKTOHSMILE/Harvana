@@ -46,14 +46,15 @@ public final class BadgeChips {
         t.setText(b.title);
         t.setTextSize(12f);
         t.setTextColor(UiColors.textPrimary());
-        t.setPadding((int) (10 * d), (int) (5 * d), (int) (10 * d), (int) (5 * d));
+        t.setPadding((int) (12 * d), (int) (7 * d), (int) (12 * d), (int) (7 * d));
         GradientDrawable bg = new GradientDrawable();
         bg.setCornerRadius(40 * d);
         bg.setColor(UiColors.surface());
         bg.setStroke((int) Math.max(1, d), b.permanent ? UiColors.accent() : UiColors.success());
         t.setBackground(bg);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.setMarginEnd((int) (6 * d));
+        lp.setMarginEnd((int) (8 * d));
+        lp.bottomMargin = (int) (2 * d);
         t.setLayoutParams(lp);
         t.setOnClickListener(v -> Toast.makeText(c, b.title + (b.detail.isEmpty() ? "" : ": " + b.detail), Toast.LENGTH_LONG).show());
         return t;

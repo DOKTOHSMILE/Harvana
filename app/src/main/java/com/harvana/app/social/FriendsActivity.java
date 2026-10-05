@@ -75,10 +75,12 @@ public class FriendsActivity extends AppCompatActivity {
         codeTop.addView(codeText, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         MaterialButton share = SocialUi.compactButton(this, "Share", false);
         share.setOnClickListener(v -> shareCode());
-        codeTop.addView(share);
+        LinearLayout.LayoutParams shareLp = (LinearLayout.LayoutParams) share.getLayoutParams();
+        shareLp.setMarginStart(SocialUi.dp(this, 12));
+        codeTop.addView(share, shareLp);
         code.addView(codeTop);
         codeStats = SocialUi.text(this, "Friends enter your username when they create their account. You confirm them under Referrals.", 12, false, UiColors.textSecondary());
-        codeStats.setPadding(0, SocialUi.dp(this, 6), 0, 0);
+        codeStats.setPadding(0, SocialUi.dp(this, 10), 0, 0);
         code.addView(codeStats);
         root.addView(code);
 
@@ -124,9 +126,14 @@ public class FriendsActivity extends AppCompatActivity {
             t.setMaxLines(1);
             t.setInsetTop(0); t.setInsetBottom(0);
             t.setPadding(SocialUi.dp(this, 4), t.getPaddingTop(), SocialUi.dp(this, 4), t.getPaddingBottom());
-            tabs.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            LinearLayout.LayoutParams tl = new LinearLayout.LayoutParams(0, SocialUi.dp(this, 40), 1f);
+            tl.setMarginStart(SocialUi.dp(this, 3)); tl.setMarginEnd(SocialUi.dp(this, 3));
+            tabs.addView(t, tl);
         }
-        root.addView(tabs);
+        LinearLayout.LayoutParams tabsLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        tabsLp.topMargin = SocialUi.dp(this, 4);
+        tabsLp.bottomMargin = SocialUi.dp(this, 12);
+        root.addView(tabs, tabsLp);
 
         listBox = SocialUi.card(this);
         root.addView(listBox);
@@ -265,7 +272,7 @@ public class FriendsActivity extends AppCompatActivity {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, SocialUi.dp(this, 6), 0, SocialUi.dp(this, 6));
+        row.setPadding(0, SocialUi.dp(this, 8), 0, SocialUi.dp(this, 8));
 
         int size = SocialUi.dp(this, 40);
         FrameLayout face = new FrameLayout(this);
@@ -320,7 +327,7 @@ public class FriendsActivity extends AppCompatActivity {
         buttons.addView(main);
         if (canPinch) {
             MaterialButton pinch = SocialUi.compactButton(this, "Pinch", true);
-            ((LinearLayout.LayoutParams) pinch.getLayoutParams()).setMarginStart(SocialUi.dp(this, 6));
+            ((LinearLayout.LayoutParams) pinch.getLayoutParams()).setMarginStart(SocialUi.dp(this, 8));
             long wait = PinchStore.waitMs(this, p.uid);
             if (wait > 0) { pinch.setText("Pinched"); pinch.setEnabled(false); }
             pinch.setOnClickListener(v -> {

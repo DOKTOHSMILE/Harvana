@@ -21,7 +21,7 @@ public final class FixedGoalText {
     public static String sentence(String rule, String state, boolean goalMet, String money, String who) {
         switch (stage(rule, state, goalMet)) {
             case PAID:
-                return "Goal reached. " + money + " was sent to " + who + ". That wallet was chosen when the group was created.";
+                return "Goal reached. " + money + " was sent to " + who + ". That wallet was chosen when the group was created. Deposits are closed.";
             case SENDING:
                 return "Goal reached. The network is sending " + money + " to " + who + ". Deposits are closed.";
             case HELD:

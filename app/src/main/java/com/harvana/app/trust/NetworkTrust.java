@@ -125,6 +125,8 @@ public final class NetworkTrust {
     private static Score fromGroup(Map<String, Object> doc) {
         Score s = new Score();
         s.published = true;
+        if (doc.get("trustPercent") instanceof Number) s.percent = num(doc.get("trustPercent"));
+        s.tier = doc.get("trustTier") == null ? "" : String.valueOf(doc.get("trustTier"));
         Object summary = doc.get("summary");
         Object tier = doc.get("tier");
         s.summary = summary != null ? String.valueOf(summary) : (tier == null ? "" : String.valueOf(tier));
@@ -135,6 +137,8 @@ public final class NetworkTrust {
         Score s = new Score();
         if (j == null) return s;
         s.published = true;
+        if (j.has("trustPercent")) s.percent = j.optInt("trustPercent", -1);
+        s.tier = j.optString("trustTier", "");
         String summary = j.optString("summary", "");
         s.summary = summary.isEmpty() ? j.optString("tier", "") : summary;
         return s;

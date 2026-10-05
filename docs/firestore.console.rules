@@ -336,6 +336,43 @@ service cloud.firestore {
       allow delete: if signedIn() && (request.auth.uid == referrer || request.auth.uid == referred);
     }
 
+    // Chat on a P2P trade. The document id is {orderId}_{uidA}_{uidB} with the two uids in order, so nobody can take over the chat of
+    // a trade they are not in by creating its document first. Only the two members can read or write. Messages are kept for 30
+    // days after the last one (expiresAt) and either person may delete an expired chat; there is no server job to do it.
+    match /P2P_CHATS/{chatId} {
+      allow get: if signedIn() && request.auth.uid in resource.data.members;
+      allow list: if signedIn() && request.auth.uid in resource.data.members;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['members', 'createdAt', 'lastAt', 'lastFrom', 'expiresAt'])
+        && request.resource.data.members.size() == 2
+        && request.resource.data.members[0] < request.resource.data.members[1]
+        && request.auth.uid in request.resource.data.members
+        && chatId.matches('^.+_' + request.resource.data.members[0] + '_' + request.resource.data.members[1] + '$')
+        && request.resource.data.expiresAt is number;
+      allow update: if signedIn() && request.auth.uid in resource.data.members
+        && request.resource.data.members == resource.data.members
+        && request.resource.data.keys().hasOnly(['members', 'createdAt', 'lastAt', 'lastFrom', 'expiresAt'])
+        && request.resource.data.lastFrom == request.auth.uid;
+      allow delete: if signedIn() && request.auth.uid in resource.data.members
+        && resource.data.expiresAt < request.time.toMillis();
+
+      match /messages/{messageId} {
+        allow read: if signedIn() && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members;
+        allow create: if signedIn()
+          && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members
+          && request.resource.data.keys().hasOnly(['from', 'text', 'at'])
+          && request.resource.data.from == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 500
+          && request.resource.data.at == request.time;
+        allow update: if false;
+        allow delete: if signedIn()
+          && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members
+          && get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.expiresAt < request.time.toMillis();
+      }
+    }
+
     // People I follow: private to me.
     match /FRIENDS/{owner}/list/{friend} {
       allow read, write: if signedIn() && request.auth.uid == owner;

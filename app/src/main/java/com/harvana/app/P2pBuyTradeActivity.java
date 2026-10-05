@@ -231,6 +231,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		blockchain_card = findViewById(R.id.blockchain_card);
 		security_card = findViewById(R.id.security_card);
 		support_actions = findViewById(R.id.support_actions);
+		P2pChatActivity.addButton(this, support_actions, () -> orderId, () -> chatOtherUid);
 		completed_card = findViewById(R.id.completed_card);
 		action_status_content = findViewById(R.id.action_status_content);
 		linear80 = findViewById(R.id.linear80);
@@ -408,6 +409,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	private String listingId = "";
 	private String buyerAddress = "";
 	private String sellerAddress = "";
+	private String chatOtherUid = "";
 	private String myAddress = "";
 	private String status = "";
 	private String orderReferenceLabel = "";
@@ -567,6 +569,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 					if (bindPaymentFromListing) _bindFirstPaymentMethod(data);
 				});
 				
+				chatOtherUid = sellerUid;
 				if (sellerUid.isEmpty()) { runOnUiThread(() -> seller_name.setText("Trader")); return; }
 				
 				UserProfileManager.getInstance(getApplicationContext()).getProfile(sellerUid, new UserProfileManager.DocCallback() {

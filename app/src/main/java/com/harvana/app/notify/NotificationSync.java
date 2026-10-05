@@ -24,7 +24,7 @@ public final class NotificationSync {
         final Context c = ctx.getApplicationContext();
         if (FirebaseAuth.getInstance().getCurrentUser() == null) { if (done != null) done.run(); return; }
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        final AtomicInteger pending = new AtomicInteger(8);
+        final AtomicInteger pending = new AtomicInteger(9);
         final Runnable finish = () -> { if (pending.decrementAndGet() == 0 && done != null) done.run(); };
 
         // 1. Invitations
@@ -65,6 +65,9 @@ public final class NotificationSync {
 
         // 7. Pinches from friends
         com.harvana.app.social.PinchStore.poll(c, uid, finish);
+
+        // 9. New messages on my P2P trades
+        com.harvana.app.p2p.P2pChatStore.poll(c, uid, finish);
 
         // 8. Referrals: move my own along, and tell me when someone names me as their referrer
         com.harvana.app.social.ReferralStore.sync(c, (line, err) -> {

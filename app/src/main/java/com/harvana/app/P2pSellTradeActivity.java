@@ -192,6 +192,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		card_sell_release = findViewById(R.id.card_sell_release);
 		card_sell_security = findViewById(R.id.card_sell_security);
 		linear154 = findViewById(R.id.linear154);
+		P2pChatActivity.addButton(this, linear154, () -> orderId, () -> chatOtherUid);
 		card_sell_completed = findViewById(R.id.card_sell_completed);
 		linear134 = findViewById(R.id.linear134);
 		tv_sell_action_title = findViewById(R.id.tv_sell_action_title);
@@ -329,6 +330,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	private String orderId = "";
 	private String listingId = "";
 	private String buyerAddress = "";
+	private String chatOtherUid = "";
 	private String sellerAddress = "";
 	private String myAddress = "";
 	private String status = "";
@@ -454,6 +456,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		.getBuyerUidForOrder(listingId, orderId, new P2PPaymentDetailsManager.UidCallback() {
 			@Override
 			public void onFound(String buyerUid) {
+				chatOtherUid = buyerUid;
 				UserProfileManager.getInstance(getApplicationContext()).getProfile(buyerUid, new UserProfileManager.DocCallback() {
 					@Override
 					public void onSuccess(Map<String, Object> profile) {

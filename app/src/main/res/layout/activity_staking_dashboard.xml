@@ -186,7 +186,9 @@
                             android:contentDescription="Harvana"
                             android:src="@drawable/ic_coin_harv"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"/>
+                            app:layout_constraintTop_toTopOf="parent"
+                            android:alpha="0.4"
+                            android:rotation="30"/>
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </com.google.android.material.card.MaterialCardView>

@@ -114,7 +114,7 @@ public final class GroupRepository {
 
     /**
      * GenLoan request. The node accepts 24 to 720 hours
-     * (HarvannaProtocolManager.GENLOAN_MIN_DURATION_HOURS / MAX).
+     * (HarvanaProtocolManager.GENLOAN_MIN_DURATION_HOURS / MAX).
      * Monthly maps to 720. Daily maps to 24. Anything else is refused.
      */
     public static void requestLoan(Context context, GroupIdentity id, String wallet, double principalHarv, String period, NodeGroupClient.Callback cb) {

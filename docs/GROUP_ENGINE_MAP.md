@@ -49,7 +49,7 @@ vouching, staking (unstake/claim signed; stake is a plain transfer to the vault)
 Migration approach: run node calls behind the existing screens one action at a time (create -> join -> contribute),
 keeping Firestore only for presentation metadata (names, photos, chat/notices) that the node does not hold.
 
-## Voting rules confirmed from node source (GroupGovernance.java, HarvannaProtocolManager constants)
+## Voting rules confirmed from node source (GroupGovernance.java, HarvanaProtocolManager constants)
 - Applies to Accumulative and Fixed groups only: Fixed disbursement / milestone / emergency-grant votes and admin recovery. Circle has no votes. Accumulative has no vote endpoint (loan pools are admin/rule driven).
 - Voter set is snapshotted when the proposal is created: admin 40% (4000 bps, fixed); the other 60% split evenly among up to the top 5 members by achievement (Accum: totalLinesCompleted, Fixed: contributedRaw). If fewer than 5 members have non-zero history, every eligible member votes. The admin never counts twice.
 - Eligible members must have contributed at least once and have 48h tenure (Circle exempt). Migrated (recovered) wallets do not vote.

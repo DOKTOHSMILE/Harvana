@@ -111,7 +111,7 @@ Differences from the decisions as stated (found while reading the node; NOT chan
    `MINIMUM_P2P_ESCROW_TIME_MS` does not exist anywhere in the node repo. 1h/2h/4h presets would be rejected for 2h and 4h.
    The app keeps the existing 15/30/45/60 presets (which the node's own comment says match the UI). If a 1h minimum is really
    wanted, that is a node change (owner's decision) and the presets change with it.
-2. **The mark is not reachable from the app**: `HarvannaProtocolManager.getMarkStatus()` exists but no controller exposes it.
+2. **The mark is not reachable from the app**: `HarvanaProtocolManager.getMarkStatus()` exists but no controller exposes it.
    So the screen shows the MEDIAN of open-listing prices as a clearly-labelled reference, not the accepted mark. Needs a node
    endpoint (e.g. `GET /api/v1/mark`) - node-side follow-up. When it exists, swap it into `P2pPriceReference.fetch`.
 3. **Currency**: the node prices in kobo (Naira). Non-NGN offers are refused in the app with a clear message.

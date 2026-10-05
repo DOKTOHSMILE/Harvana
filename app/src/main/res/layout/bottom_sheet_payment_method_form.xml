@@ -56,7 +56,7 @@
 		android:textColor="@color/colorTextTertiary"
 		android:textSize="10.5sp"
 		android:layout_marginStart="4dp"
-		android:letterSpacing="0.06"
+		android:letterSpacing="0.06" />
 	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/cardview1"
 		android:layout_width="match_parent"
@@ -91,7 +91,7 @@
 		android:textColor="@color/colorTextTertiary"
 		android:textSize="10.5sp"
 		android:layout_marginStart="4dp"
-		android:letterSpacing="0.06"
+		android:letterSpacing="0.06" />
 	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/cardview2"
 		android:layout_width="match_parent"
@@ -126,7 +126,7 @@
 		android:textColor="@color/colorTextTertiary"
 		android:textSize="10.5sp"
 		android:layout_marginStart="4dp"
-		android:letterSpacing="0.06"
+		android:letterSpacing="0.06" />
 	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/cardview3"
 		android:layout_width="match_parent"
@@ -161,7 +161,7 @@
 		android:textColor="@color/colorTextTertiary"
 		android:textSize="10.5sp"
 		android:layout_marginStart="4dp"
-		android:letterSpacing="0.06"
+		android:letterSpacing="0.06" />
 	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/cardview4"
 		android:layout_width="match_parent"

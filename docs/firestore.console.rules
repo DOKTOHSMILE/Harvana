@@ -38,13 +38,22 @@ service cloud.firestore {
         .hasOnly(['status', 'txRef', 'confirmedAt']);
     }
 
-    // OPEN ITEM (A2): any signed-in user can still read every profile. The app needs
-    // other members' names/icons, and rules cannot hide fields. Fix = move DOB/ID/address/GPS/kin
-    // into USERS/{uid}/private/kyc (owner-only) in an app change, then narrow this read.
+    // A2: personal fields now live in USERS/{uid}/private/kyc (below). Once every account has been
+    // opened once on the new app build they are gone from this document. Narrowing this read to the
+    // owner is a later step: other screens still read names and icons from here.
     match /USERS/{uid} {
       allow read: if signedIn();
       allow create: if isSelf(uid);
       allow update: if isSelf(uid);
+      allow delete: if false;
+    }
+
+    // A2 fix: date of birth, BVN/NIN, phone, email, address, GPS and next of kin live here, not in
+    // USERS/{uid}. Only the owner can read or write it. The app (UserProfileManager) moves old
+    // accounts' fields here on their next profile load. DEPLOY THIS RULE BEFORE the app update:
+    // without it, new sign-ups cannot save their profile.
+    match /USERS/{uid}/private/{doc} {
+      allow read, create, update: if isSelf(uid);
       allow delete: if false;
     }
 

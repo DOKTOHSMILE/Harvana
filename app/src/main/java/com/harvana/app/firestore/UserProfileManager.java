@@ -10,9 +10,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -71,7 +73,12 @@ public class UserProfileManager {
         DocumentReference ref = _docOrFail(uid, callback);
         if (ref == null) return;
         try {
-            _awaitWrite(ref.set(fields), callback);
+            // Personal fields go to USERS/{uid}/private/kyc, the rest to USERS/{uid}, in one batch.
+            Map<String, Object>[] parts = PrivateProfile.split(fields);
+            WriteBatch batch = FirebaseFirestore.getInstance().batch();
+            batch.set(ref, parts[0]);
+            if (!parts[1].isEmpty()) batch.set(_privateDoc(ref), parts[1]);
+            _awaitWrite(batch.commit(), callback);
         } catch (Exception e) {
             callback.onError("Invalid profile data: " + e.getMessage());
         }
@@ -87,7 +94,16 @@ public class UserProfileManager {
         try {
             // mergeFields replaces each listed top-level field wholesale (same as the old
             // REST updateMask) and, like the old PATCH, creates the doc if it doesn't exist.
-            _awaitWrite(ref.set(fields, SetOptions.mergeFields(new ArrayList<>(fields.keySet()))), callback);
+            // Personal fields are routed to USERS/{uid}/private/kyc the same way.
+            Map<String, Object>[] parts = PrivateProfile.split(fields);
+            if (parts[1].isEmpty()) {
+                _awaitWrite(ref.set(fields, SetOptions.mergeFields(new ArrayList<>(fields.keySet()))), callback);
+                return;
+            }
+            WriteBatch batch = FirebaseFirestore.getInstance().batch();
+            if (!parts[0].isEmpty()) batch.set(ref, parts[0], SetOptions.mergeFields(new ArrayList<>(parts[0].keySet())));
+            batch.set(_privateDoc(ref), parts[1], SetOptions.mergeFields(new ArrayList<>(parts[1].keySet())));
+            _awaitWrite(batch.commit(), callback);
         } catch (Exception e) {
             callback.onError("Invalid profile data: " + e.getMessage());
         }
@@ -283,8 +299,56 @@ public class UserProfileManager {
                 return;
             }
             Map<String, Object> data = snap.getData();
-            callback.onSuccess(data != null ? data : new HashMap<String, Object>());
+            Map<String, Object> pub = data != null ? data : new HashMap<String, Object>();
+            FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
+            if (me == null || !uid.equals(me.getUid())) {
+                // Someone else's profile: only the public part is readable, and only that is returned.
+                callback.onSuccess(pub);
+                return;
+            }
+            _addOwnerOnlyPart(ref, pub, callback);
         });
+    }
+
+    /**
+     * Own profile only: lays USERS/{uid}/private/kyc over the public document so callers see the
+     * full profile as before. Accounts made before the split still hold personal fields in the public
+     * document; those are copied to the private document first and only then removed from the public
+     * one, so a failed copy never loses data. If the private document cannot be read (for example the
+     * rules are not deployed yet) the public part is returned and nothing is moved or deleted.
+     */
+    private void _addOwnerOnlyPart(DocumentReference ref, Map<String, Object> pub, DocCallback callback) {
+        DocumentReference priv = _privateDoc(ref);
+        priv.get().addOnCompleteListener(t -> {
+            if (!t.isSuccessful()) {
+                Log.w(TAG, "Owner-only profile not readable: " + _describe(t.getException()));
+                callback.onSuccess(pub);
+                return;
+            }
+            DocumentSnapshot ps = t.getResult();
+            Map<String, Object> privData = ps != null && ps.exists() ? ps.getData() : null;
+            Map<String, Object> full = PrivateProfile.merge(pub, privData);
+            callback.onSuccess(full);
+
+            Set<String> leftovers = PrivateProfile.leftoversIn(pub);
+            if (leftovers.isEmpty()) return;
+            Map<String, Object> toMove = new HashMap<>();
+            for (String f : leftovers) toMove.put(f, pub.get(f));
+            // Never overwrite a newer owner-only value with an old public one.
+            if (privData != null) for (String f : privData.keySet()) toMove.remove(f);
+            Task<Void> copy = toMove.isEmpty() ? com.google.android.gms.tasks.Tasks.<Void>forResult(null)
+                    : priv.set(toMove, SetOptions.merge());
+            copy.addOnSuccessListener(v -> {
+                Map<String, Object> scrub = new HashMap<>();
+                for (String f : leftovers) scrub.put(f, FieldValue.delete());
+                ref.update(scrub).addOnFailureListener(e ->
+                        Log.w(TAG, "Could not clear moved fields: " + _describe(e)));
+            }).addOnFailureListener(e -> Log.w(TAG, "Could not move personal fields: " + _describe(e)));
+        });
+    }
+
+    private static DocumentReference _privateDoc(DocumentReference userDoc) {
+        return userDoc.collection(PrivateProfile.SUBCOLLECTION).document(PrivateProfile.DOCUMENT);
     }
 
     // ── SDK plumbing ──────────────────────────────────────────────────

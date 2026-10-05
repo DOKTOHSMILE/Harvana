@@ -62,9 +62,11 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/PIDS/$(pid)).data.uid == request.auth.uid;
     }
 
-    // OPEN ITEM (A2): any signed-in user can still read every profile. New accounts
-    // also write PROFILES/{pid} (name, photo, username, tier only). Narrow this
-    // read to the owner once every other screen reads the public card by PID.
+    // A2: personal fields (DOB, BVN/NIN, phone, email, address, GPS, next of kin) now live in
+    // USERS/{uid}/private/kyc (below), so this document holds no sensitive data once an account has
+    // been opened on the new app build. New accounts also write PROFILES/{pid} (name, photo,
+    // username, tier only). Narrowing this read to the owner is a later step: do it once every
+    // other screen reads the public card by PID.
     match /USERS/{uid} {
       allow read: if signedIn();
       allow create: if isSelf(uid)
@@ -88,6 +90,15 @@ service cloud.firestore {
               && request.resource.data.pid.matches('^[0-9]{10}$')
               && pidLinkOwned(request.resource.data.pid))
         );
+      allow delete: if false;
+    }
+
+    // A2 fix: date of birth, BVN/NIN, phone, email, address, GPS and next of kin live here, not in
+    // USERS/{uid}. Only the owner can read or write it. The app (UserProfileManager) moves old
+    // accounts' fields here on their next profile load. DEPLOY THIS RULE BEFORE the app update:
+    // without it, new sign-ups cannot save their profile.
+    match /USERS/{uid}/private/{doc} {
+      allow read, create, update: if isSelf(uid);
       allow delete: if false;
     }
 

@@ -297,4 +297,16 @@ public class GroupCanonicalTest {
             GroupCanonical.stakingUnstake("V_address:x y", 1008L, 1009L));
     }
 
+
+    @Test public void forgiveDefault_matchesTheNode() {
+        assertEquals("HARVANA_FORGIVE_DEFAULT_REQUEST_V1:CIRC-1:HV0xabc:HV0xadm:1004",
+            GroupCanonical.forgiveDefault("CIRC-1", "HV0xabc", "HV0xadm", 1004L));
+    }
+
+    @Test public void forgiveDefaultVote_matchesTheNode() {
+        assertEquals("HARVANA_FORGIVE_DEFAULT_VOTE_V1:CIRC-1:HV0xabc:HV0xvot:true:1005",
+            GroupCanonical.forgiveDefaultVote("CIRC-1", "HV0xabc", "HV0xvot", true, 1005L));
+        assertEquals("HARVANA_FORGIVE_DEFAULT_VOTE_V1:CIRC-1:HV0xabc:HV0xvot:false:1006",
+            GroupCanonical.forgiveDefaultVote("CIRC-1", "HV0xabc", "HV0xvot", false, 1006L));
+    }
 }

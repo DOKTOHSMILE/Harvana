@@ -52,6 +52,7 @@ public final class NodeGroupClient {
     public static void getFixedDisbursementRequest(String groupId, String id, Callback cb) { read("/api/v1/fixed/group/" + groupId + "/disbursement-request/" + id, cb); }
 
     public static void getLoan(String groupId, String loanId, Callback cb) { read("/api/v1/genloan/group/" + groupId + "/loan/" + loanId, cb); }
+    public static void getForgiveness(String circleId, String memberAddress, Callback cb) { read("/api/v1/forgive-default/" + circleId + "/" + memberAddress, cb); }
     public static void getAdminRecovery(String groupId, Callback cb) { read("/api/v1/admin-recovery/group/" + groupId, cb); }
     /** Open disbursements, milestones and grants. The node list is the source, not a notice. */
     public static void listFixedProposals(String groupId, Callback cb) {
@@ -283,6 +284,23 @@ public final class NodeGroupClient {
         act(c, voter, "/api/v1/admin-recovery/vote", new Spec() {
             public String canonical(long n) { return GroupCanonical.adminRecoveryVote(groupId, voter, yes, n); }
             public void fill(JSONObject b, long n) throws JSONException { b.put("groupId", groupId).put("voterAddress", voter).put("voteYes", yes); }
+        }, cb);
+    }
+
+    /** The circle admin asks the group to forgive a member's default. The group's weighted vote decides; no money moves. */
+    public static void proposeForgiveness(Context c, String admin, String circleId, String member, Callback cb) {
+        act(c, admin, "/api/v1/forgive-default/request", new Spec() {
+            public String canonical(long n) { return GroupCanonical.forgiveDefault(circleId, member, admin, n); }
+            public void fill(JSONObject b, long n) throws JSONException { b.put("circleId", circleId).put("memberAddress", member).put("proposerAddress", admin); }
+        }, cb);
+    }
+
+    public static void voteForgiveness(Context c, String voter, String circleId, String member, boolean yes, Callback cb) {
+        act(c, voter, "/api/v1/forgive-default/vote", new Spec() {
+            public String canonical(long n) { return GroupCanonical.forgiveDefaultVote(circleId, member, voter, yes, n); }
+            public void fill(JSONObject b, long n) throws JSONException {
+                b.put("circleId", circleId).put("memberAddress", member).put("voterAddress", voter).put("voteYes", yes);
+            }
         }, cb);
     }
 

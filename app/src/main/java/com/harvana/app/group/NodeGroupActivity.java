@@ -28,6 +28,7 @@ import com.harvana.app.engine.GroupAction;
 import com.harvana.app.engine.GroupSnapshot;
 import com.harvana.app.engine.VoteView;
 import com.harvana.app.sync.HarvanaNodeClient;
+import com.harvana.app.wallet.PinPromptHelper;
 import com.harvana.app.sync.NodeGroupClient;
 import com.harvana.app.utils.JsonMaps;
 import com.harvana.app.wallet.WalletManager;
@@ -170,7 +171,7 @@ public class NodeGroupActivity extends AppCompatActivity {
                 @Override public void onError(String e) { done.run(); }
             });
         }
-        if ("CIRCLE".equals(family)) { loadRecovery(done); return; }
+        if ("CIRCLE".equals(family)) { loadRecovery(() -> loadDefaults(done)); return; }
         if ("FIXED".equals(family)) {
             NodeGroupClient.listFixedProposals(nodeId, new NodeGroupClient.Callback() {
                 @Override public void onSuccess(JSONObject j) { fillListedProposals(j); loadRecovery(done); }
@@ -181,6 +182,40 @@ public class NodeGroupActivity extends AppCompatActivity {
         NodeGroupClient.listAccumPendingPacks(nodeId, new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject j) { fillListedPacks(j); loadRecovery(done); }
             @Override public void onError(String e) { GroupProposalIndex.list(NodeGroupActivity.this, fsGroupId, entries -> loadProposals(entries, () -> loadRecovery(done))); }
+        });
+    }
+
+    /** Members of this circle who defaulted and are not yet forgiven, each with the open forgiveness vote if there is one. */
+    private final List<Map<String, Object>> defaulted = new ArrayList<>();
+
+    private void loadDefaults(Runnable done) {
+        defaulted.clear();
+        NodeGroupClient.getCircleMembers(nodeId, new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject j) {
+                JSONArray rows = j == null ? null : j.optJSONArray("members");
+                final List<Map<String, Object>> found = new ArrayList<>();
+                if (rows != null) for (int i = 0; i < rows.length(); i++) {
+                    JSONObject r = rows.optJSONObject(i);
+                    if (r == null) continue;
+                    String st = r.optString("state", "");
+                    String res = r.optString("defaultResolution", "");
+                    if (st.startsWith("DEFAULTED") && !"FORGIVEN".equals(res) && !"CURED".equals(res) && found.size() < 10) found.add(JsonMaps.toMap(r));
+                }
+                if (found.isEmpty()) { done.run(); return; }
+                final AtomicInteger pending = new AtomicInteger(found.size());
+                for (Map<String, Object> m : found) {
+                    final String addr = String.valueOf(m.get("address"));
+                    NodeGroupClient.getForgiveness(nodeId, addr, new NodeGroupClient.Callback() {
+                        @Override public void onSuccess(JSONObject p) { m.put("proposal", JsonMaps.toMap(p)); finish(); }
+                        @Override public void onError(String e) { finish(); }
+                        private void finish() {
+                            synchronized (defaulted) { if (!defaulted.contains(m)) defaulted.add(m); }
+                            if (pending.decrementAndGet() == 0) done.run();
+                        }
+                    });
+                }
+            }
+            @Override public void onError(String e) { done.run(); }
         });
     }
 
@@ -329,6 +364,7 @@ public class NodeGroupActivity extends AppCompatActivity {
 
         renderProposals();
         renderPackRequests();
+        renderDefaults();
         content.addView(button("Copy group ID", false, v -> copy(nodeId)));
     }
 
@@ -352,6 +388,51 @@ public class NodeGroupActivity extends AppCompatActivity {
                 row.addView(actionButton(new GroupAction(GroupAction.VOTE_YES, "Vote yes", true), v -> vote(kind, id, true)), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
                 row.addView(actionButton(new GroupAction(GroupAction.VOTE_NO, "Vote no", false), v -> vote(kind, id, false)), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
                 c.addView(row);
+            }
+            content.addView(c);
+        }
+    }
+
+    /** Circles only: defaulted members, and the group's vote on forgiving each one. Forgiving moves no money. */
+    private void renderDefaults() {
+        if (!"CIRCLE".equals(family) || defaulted.isEmpty()) return;
+        boolean admin = group != null && me != null && me.equals(str(group, "creatorAddress"));
+        content.addView(CircleUi.text(this, "Defaults", 16, R.color.colorTextPrimary, true));
+        for (Map<String, Object> m : defaulted) {
+            final String addr = String.valueOf(m.get("address"));
+            LinearLayout c = CircleUi.card(this);
+            boolean mineCase = addr.equalsIgnoreCase(me == null ? "" : me);
+            c.addView(CircleUi.text(this, (mineCase ? "You" : shortAddr(addr)) + " defaulted", 14, R.color.colorTextPrimary, true));
+            @SuppressWarnings("unchecked") Map<String, Object> proposal = (Map<String, Object>) m.get("proposal");
+            boolean open = proposal != null && "PENDING".equals(str(proposal, "status"));
+            if (!open) {
+                c.addView(CircleUi.text(this, "The group can vote to forgive a default. Forgiving it takes it off this member's record. "
+                        + "It does not move any money.", 12.5f, R.color.colorTextSecondary, false));
+                if (admin && !mineCase) {
+                    c.addView(button("Ask the group to forgive", false, v -> PinPromptHelper.authorize(this, "Ask the group to forgive this default", () ->
+                        NodeGroupClient.proposeForgiveness(getApplicationContext(), me, nodeId, addr, result("Asked. The voters decide.")))));
+                }
+            } else {
+                long yes = 0, total = 0;
+                boolean eligible = false;
+                Object weights = proposal.get("voterWeights"), votes = proposal.get("votes");
+                if (weights instanceof Map) for (Map.Entry<?, ?> e : ((Map<?, ?>) weights).entrySet()) {
+                    long w = e.getValue() instanceof Number ? ((Number) e.getValue()).longValue() : 0;
+                    total += w;
+                    if (votes instanceof Map && Boolean.TRUE.equals(((Map<?, ?>) votes).get(e.getKey()))) yes += w;
+                    if (String.valueOf(e.getKey()).equalsIgnoreCase(me)) eligible = true;
+                }
+                c.addView(CircleUi.text(this, "The admin asked the group to forgive this default. Yes " + (total == 0 ? 0 : yes * 100 / total)
+                        + "% of the vote, 51% needed. " + (mineCase ? "You cannot vote on your own case." : eligible ? "You can vote." : "You are not one of the voters."),
+                        12.5f, R.color.colorTextSecondary, false));
+                if (eligible && !mineCase) {
+                    LinearLayout row = new LinearLayout(this);
+                    row.addView(button("Vote yes", true, v -> PinPromptHelper.authorize(this, "Vote to forgive this default", () ->
+                        NodeGroupClient.voteForgiveness(getApplicationContext(), me, nodeId, addr, true, result("Voted yes")))), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+                    row.addView(button("Vote no", false, v -> PinPromptHelper.authorize(this, "Vote against forgiving this default", () ->
+                        NodeGroupClient.voteForgiveness(getApplicationContext(), me, nodeId, addr, false, result("Voted no")))), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+                    c.addView(row);
+                }
             }
             content.addView(c);
         }

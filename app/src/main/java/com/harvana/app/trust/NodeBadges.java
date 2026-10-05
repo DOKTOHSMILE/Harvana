@@ -88,6 +88,9 @@ public final class NodeBadges {
             case "EARLY_PAYER": return "Early payer";
             case "VOUCHED": return "Vouched";
             case "INSURED_TRADER": return "Insured trader";
+            case "FORGIVEN": return "Forgiven default";
+            case "CURED_DEFAULT": return "Cured default";
+            case "REHABILITATED": return "Rehabilitated";
             default: return key.replace('_', ' ').toLowerCase(java.util.Locale.US);
         }
     }
@@ -99,6 +102,9 @@ public final class NodeBadges {
             case "FOUNDING_MEMBER": return "Joined in the network's first period. Permanent.";
             case "ZERO_DEFAULT": return "Has never defaulted on a group.";
             case "EARLY_PAYER": return "Pays contributions ahead of the due date.";
+            case "FORGIVEN": return "A group voted to forgive a default. It no longer counts against this member. Permanent.";
+            case "CURED_DEFAULT": return "A default was made good, so it no longer counts as a hard default.";
+            case "REHABILITATED": return "Has finished clean circles since the last default.";
             case "VOUCHED": return "Vouched for by " + (d != null ? d.optInt("activeVouches", 0) : 0) + " people.";
             default: return "";
         }

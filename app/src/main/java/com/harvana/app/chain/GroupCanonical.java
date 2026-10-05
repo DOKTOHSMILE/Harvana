@@ -168,4 +168,14 @@ public final class GroupCanonical {
         return "HARVANA_STAKING_UNSTAKE_V1:" + address + ":" + amountRaw + ":" + nonce;
     }
 
+
+    /** ForgiveDefaultRequest.getCanonicalMessage(): the circle admin asks the group to forgive one member's default. */
+    public static String forgiveDefault(String circleId, String memberAddress, String proposerAddress, long nonce) {
+        return "HARVANA_FORGIVE_DEFAULT_REQUEST_V1:" + circleId + ":" + memberAddress + ":" + proposerAddress + ":" + nonce;
+    }
+
+    /** ForgiveDefaultVoteRequest.getCanonicalMessage() */
+    public static String forgiveDefaultVote(String circleId, String memberAddress, String voterAddress, boolean voteYes, long nonce) {
+        return "HARVANA_FORGIVE_DEFAULT_VOTE_V1:" + circleId + ":" + memberAddress + ":" + voterAddress + ":" + voteYes + ":" + nonce;
+    }
 }

@@ -46,19 +46,23 @@ public final class HarvanaCardRenderer {
 		
 		float margin = 56f;
 		
-		// Un-squeezed text logo
-		drawAppIcon(context, canvas, margin, 40f, 130f, 45f);
-		
-		// Titles
+		// Title block: the card title and the line under it. The logo is a square coin, so it is drawn square, as tall as that block,
+		// instead of being stretched into a wide box as before.
 		Paint subtitle1 = new Paint(Paint.ANTI_ALIAS_FLAG);
 		subtitle1.setColor(template.textPrimary);
 		subtitle1.setTextSize(20f);
-		canvas.drawText("Capital oracle projects", margin + 145f, 60f, subtitle1);
-		
+		subtitle1.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
 		Paint subtitle2 = new Paint(Paint.ANTI_ALIAS_FLAG);
 		subtitle2.setColor(template.textSecondary);
 		subtitle2.setTextSize(14f);
-		canvas.drawText("Wallet access card", margin + 145f, 82f, subtitle2);
+		final float titleBaseline = 60f, subtitleBaseline = 82f;
+		float blockTop = titleBaseline + subtitle1.getFontMetrics().ascent;           // top of the title's tallest letters
+		float blockBottom = subtitleBaseline + subtitle2.getFontMetrics().descent;    // bottom of the line under it
+		float logoSize = blockBottom - blockTop;
+		drawAppIcon(context, canvas, margin, blockTop, logoSize, logoSize);
+		float textX = margin + logoSize + 16f;
+		canvas.drawText("Harvana Access Card", textX, titleBaseline, subtitle1);
+		canvas.drawText("Encrypted wallet backup", textX, subtitleBaseline, subtitle2);
 		
 		// Top Right Card Tier
 		Paint badgePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -136,7 +140,7 @@ public final class HarvanaCardRenderer {
 		Paint footerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		footerPaint.setColor(template.textSecondary);
 		footerPaint.setTextSize(16f);
-		canvas.drawText("HARVANACHAIN NETWORK", margin, CARD_HEIGHT_PX - 40f, footerPaint);
+		canvas.drawText("HARVANA NETWORK", margin, CARD_HEIGHT_PX - 40f, footerPaint);
 		
 		// Draw the custom signature seal at the bottom right
 		drawSignatureStamp(canvas, CARD_WIDTH_PX - margin - 100f, CARD_HEIGHT_PX - margin - 100f);

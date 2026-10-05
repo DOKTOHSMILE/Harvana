@@ -309,4 +309,9 @@ public class GroupCanonicalTest {
         assertEquals("HARVANA_FORGIVE_DEFAULT_VOTE_V1:CIRC-1:HV0xabc:HV0xvot:false:1006",
             GroupCanonical.forgiveDefaultVote("CIRC-1", "HV0xabc", "HV0xvot", false, 1006L));
     }
+
+    @Test public void accumBackpay_sortsTheDatesLikeTheNode() {
+        assertEquals("HARVANA_ACCUM_BACKPAY_V1:ACCUM-g:LINE-l:HV0xabc:2026-10-01,2026-10-02,2026-10-03:7",
+            GroupCanonical.accumBackpay("ACCUM-g", "LINE-l", "HV0xabc", java.util.Arrays.asList("2026-10-03", "2026-10-01", "2026-10-02"), 7L));
+    }
 }

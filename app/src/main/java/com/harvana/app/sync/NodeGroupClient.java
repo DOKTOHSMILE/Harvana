@@ -287,6 +287,16 @@ public final class NodeGroupClient {
         }, cb);
     }
 
+    /** Pays back specific missed days of a savings line; the charge is the daily amount times the dates. */
+    public static void backpayAccum(Context c, String member, String groupId, String lineId, java.util.List<String> dates, Callback cb) {
+        act(c, member, "/api/v1/accum/backpay", new Spec() {
+            public String canonical(long n) { return GroupCanonical.accumBackpay(groupId, lineId, member, dates, n); }
+            public void fill(JSONObject b, long n) throws JSONException {
+                b.put("groupId", groupId).put("lineId", lineId).put("memberAddress", member).put("dates", new org.json.JSONArray(dates));
+            }
+        }, cb);
+    }
+
     /** The circle admin asks the group to forgive a member's default. The group's weighted vote decides; no money moves. */
     public static void proposeForgiveness(Context c, String admin, String circleId, String member, Callback cb) {
         act(c, admin, "/api/v1/forgive-default/request", new Spec() {

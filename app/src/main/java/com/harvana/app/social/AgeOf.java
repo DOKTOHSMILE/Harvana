@@ -25,6 +25,19 @@ public final class AgeOf {
         return -1;
     }
 
+    /** The date of birth as a date, or null when it is only a year or cannot be read. */
+    public static java.util.Date parse(String dob) {
+        if (dob == null) return null;
+        for (String pattern : new String[] {"dd/MM/yyyy", "yyyy-MM-dd", "d/M/yyyy"}) {
+            try {
+                SimpleDateFormat f = new SimpleDateFormat(pattern, Locale.US);
+                f.setLenient(false);
+                return f.parse(dob.trim());
+            } catch (Exception ignored) { }
+        }
+        return null;
+    }
+
     static int years(Calendar born, Calendar now) {
         int age = now.get(Calendar.YEAR) - born.get(Calendar.YEAR);
         if (now.get(Calendar.DAY_OF_YEAR) < born.get(Calendar.DAY_OF_YEAR)) age--;

@@ -21,7 +21,20 @@ public final class GroupTypeBoardView {
 
     private GroupTypeBoardView() {}
 
+    /** Which missed days the member has picked to pay back. A tap on a red box toggles it; a long press starts picking. */
+    public static final class Selection {
+        public final java.util.TreeSet<String> picked = new java.util.TreeSet<>();
+        /** Called after every change so the screen can update its "Pay N days" bar. */
+        public Runnable onChange;
+        void toggle(String iso) { if (!picked.remove(iso)) picked.add(iso); }
+        public void clear() { picked.clear(); }
+    }
+
     public static void fill(LinearLayout host, GroupTypeBoard.Board board, Click click) {
+        fill(host, board, click, null);
+    }
+
+    public static void fill(LinearLayout host, GroupTypeBoard.Board board, Click click, Selection sel) {
         if (host == null) return;
         host.removeAllViews();
         if (board == null || board.cells.isEmpty()) return;
@@ -38,12 +51,21 @@ public final class GroupTypeBoardView {
             final GroupTypeBoard.Cell cell = board.cells.get(i);
             boolean dense = cols >= 6;
             LinearLayout box = cellBox(c, cell, dense);
+            final boolean pickable = sel != null && cell.backpayable;
+            if (pickable && sel.picked.contains(cell.isoDate)) markPicked(c, box, cell, dense);
             int height = dp(c, dense ? 34 : 46);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, height, 1f);
             int m = dp(c, dense ? 2 : 3);
             lp.setMargins(m, m, m, m);
             box.setOnClickListener(v -> {
+                if (pickable) { sel.toggle(cell.isoDate); fill(host, board, click, sel); if (sel.onChange != null) sel.onChange.run(); return; }
                 if (click != null) click.onCell(cell);
+            });
+            if (pickable) box.setOnLongClickListener(v -> {
+                sel.toggle(cell.isoDate);
+                fill(host, board, click, sel);
+                if (sel.onChange != null) sel.onChange.run();
+                return true;
             });
             row.addView(box, lp);
         }
@@ -123,6 +145,22 @@ public final class GroupTypeBoardView {
             box.addView(bottom);
         }
         return box;
+    }
+
+    /** A picked missed day keeps its red but gains a thick accent ring and a tick, so it reads as chosen. */
+    private static void markPicked(Context c, LinearLayout box, GroupTypeBoard.Cell cell, boolean dense) {
+        GradientDrawable d = new GradientDrawable();
+        d.setCornerRadius(dp(c, dense ? 6 : 8));
+        d.setColor(color(c, R.color.colorError));
+        d.setStroke(dp(c, 3), color(c, R.color.colorAccent));
+        box.setBackground(d);
+        TextView tick = new TextView(c);
+        tick.setText("\u2713");
+        tick.setTextSize(dense ? 10 : 12);
+        tick.setTypeface(null, Typeface.BOLD);
+        tick.setTextColor(0xFFFFFFFF);
+        tick.setGravity(Gravity.CENTER);
+        box.addView(tick);
     }
 
     private static int color(Context c, int res) {

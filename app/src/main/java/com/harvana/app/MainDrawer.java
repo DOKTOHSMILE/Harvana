@@ -134,7 +134,12 @@ final class MainDrawer {
                 }
             }
         }
-        h.setOnClickListener(v -> open(ProfileActivity.class));
+        h.setOnClickListener(v -> {
+            com.google.firebase.auth.FirebaseUser me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+            if (me == null) { open(ProfileActivity.class); return; }
+            a.startActivity(new android.content.Intent(a, com.harvana.app.social.PublicProfileActivity.class)
+                    .putExtra(com.harvana.app.social.PublicProfileActivity.EXTRA_UID, me.getUid()));
+        });
         return h;
     }
 

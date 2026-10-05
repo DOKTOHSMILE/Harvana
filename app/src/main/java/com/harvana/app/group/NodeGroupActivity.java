@@ -342,6 +342,17 @@ public class NodeGroupActivity extends AppCompatActivity {
             LinearLayout host = new LinearLayout(this);
             host.setOrientation(LinearLayout.VERTICAL);
             card.addView(host);
+            final GroupTypeBoardView.Selection sel = "ACCUM".equals(family) && line != null ? new GroupTypeBoardView.Selection() : null;
+            if (sel != null) {
+                double daily = num(line, "dailyAmountRaw") / 100_000_000.0;
+                card.addView(BackpayBar.create(this, sel, daily, dates -> {
+                    long total = (long) num(line, "dailyAmountRaw") * dates.size();
+                    pay("Pay back missed days", CircleUi.harv(total),
+                        moneyRows(escrowOrGroup(), dates.size() + (dates.size() == 1 ? " missed day" : " missed days")),
+                        () -> NodeGroupClient.backpayAccum(getApplicationContext(), me, nodeId, str(line, "lineId"), dates,
+                            result("Paid back. It shows once the network confirms it.")));
+                }));
+            }
             GroupTypeBoardView.fill(host, board, cell -> {
                 if (cell.payToday) {
                     for (GroupAction a : s.actions) {
@@ -353,7 +364,7 @@ public class NodeGroupActivity extends AppCompatActivity {
                     }
                 }
                 GroupTypeBoardView.showDetail(this, cell);
-            });
+            }, sel);
             if (!board.legend.isEmpty()) {
                 card.addView(CircleUi.text(this, board.legend, 11.5f, R.color.colorTextTertiary, false));
             }

@@ -47,6 +47,10 @@ public final class GroupTypeBoard {
         public final int state;
         /** Fixed custody: this box is today and still unpaid, so a tap should start payment. */
         public final boolean payToday;
+        /** yyyy-MM-dd (group time, Lagos) for a day box that belongs to a savings line; empty otherwise. */
+        public String isoDate = "";
+        /** A missed day the member can still pay for. */
+        public boolean backpayable;
 
         public Cell(String top, String bottom, String title, String body, int state, boolean payToday) {
             this.top = top == null ? "" : top;
@@ -442,6 +446,13 @@ public final class GroupTypeBoard {
                 4, recipient, cells);
     }
 
+    /** The calendar day a moment falls on in group time (Africa/Lagos), which is the day the node counts. */
+    static String isoDay(long ms) {
+        java.text.SimpleDateFormat f = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
+        f.setTimeZone(TimeZone.getTimeZone("Africa/Lagos"));
+        return f.format(new java.util.Date(ms));
+    }
+
     private static Board accumLine(Map<String, Object> line, long nowMs, TimeZone zone) {
         List<Cell> cells = new ArrayList<>();
         long start = line == null ? 0 : (long) num(line, "startTimestamp", 0);
@@ -455,26 +466,34 @@ public final class GroupTypeBoard {
                     6, "", cells);
         }
         Calendar today = cal(nowMs, zone);
+        java.util.Set<String> paidDates = new java.util.HashSet<>();
+        Object rawDates = line == null ? null : line.get("paidDates");
+        boolean dated = rawDates instanceof List;
+        if (dated) for (Object d : (List<?>) rawDates) paidDates.add(String.valueOf(d));
+        String todayIso = isoDay(nowMs);
         int saved = 0;
         for (int i = 0; i < 30; i++) {
             long ts = start + i * DAY_MS;
             Calendar c = cal(ts, zone);
-            boolean paid = i < daysPaid;
-            boolean sameDay = c.get(Calendar.YEAR) == today.get(Calendar.YEAR)
-                    && c.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR);
+            String iso = isoDay(ts);
+            boolean paid = dated ? paidDates.contains(iso) : i < daysPaid;
+            boolean sameDay = iso.equals(todayIso);
             int state;
             if (paid) { state = PAID; saved++; }
             else if (sameDay) state = TODAY;
-            else if (ts < startOfDay(nowMs, zone)) state = MISSED;
+            else if (iso.compareTo(todayIso) < 0) state = MISSED;
             else state = OPEN;
             String title = fullDate(ts, zone);
-            String body = title + "\n" + (paid ? "Saved." : state == TODAY ? "Due today." : state == MISSED ? "Not saved." : "Coming up.");
-            cells.add(new Cell(String.valueOf(c.get(Calendar.DAY_OF_MONTH)), MONTHS[c.get(Calendar.MONTH)], title, body, state, false));
+            String body = title + "\n" + (paid ? "Saved." : state == TODAY ? "Due today." : state == MISSED ? "Not saved. Tap to pay it back." : "Coming up.");
+            Cell cell = new Cell(String.valueOf(c.get(Calendar.DAY_OF_MONTH)), MONTHS[c.get(Calendar.MONTH)], title, body, state, false);
+            cell.isoDate = iso;
+            cell.backpayable = state == MISSED && dated;
+            cells.add(cell);
         }
         double savedHarv = line == null ? 0 : num(line, "amountPaidRaw", 0) / RAW;
         return new Board(ACCUMULATIVE, "SAVINGS STAMPS", "30-day savings line",
                 saved + " of 30 days saved · " + money(savedHarv),
-                "Each box is one day of the line. The date is written inside. Green means that day was paid.",
+                "Each box is one day of the line. The date is written inside. Green is paid, red is missed: tap a red box (or long-press to pick several) to pay those days back.",
                 6, "", cells);
     }
 

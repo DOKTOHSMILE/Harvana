@@ -212,6 +212,17 @@ public final class NodePayActions {
                 }).show();
     }
 
+    /** Pays back the picked missed days of the member's own savings line: review, PIN, then the signed back-pay. */
+    public static void backpay(Ctx c, java.util.List<String> dates) {
+        if (c.line == null || dates == null || dates.isEmpty()) return;
+        long dailyRaw = num(c.line, "dailyAmountRaw");
+        long total = dailyRaw * dates.size();
+        String lineId = str(c.line, "lineId");
+        pay(c, "Pay back missed days", CircleUi.harv(total),
+                moneyRows(c, escrow(c), dates.size() + (dates.size() == 1 ? " missed day" : " missed days") + " at " + CircleUi.harv(dailyRaw) + " each"),
+                () -> NodeGroupClient.backpayAccum(c.activity, c.me, c.nodeId, lineId, dates, result(c, "Paid back. It shows once the network confirms it.")));
+    }
+
     private static void pay(Ctx c, String title, String amount, java.util.List<String[]> rows, Runnable work) {
         Button source = c.pressed;
         c.pressed = null;

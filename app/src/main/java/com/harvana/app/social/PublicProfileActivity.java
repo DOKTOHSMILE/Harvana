@@ -1,14 +1,18 @@
 package com.harvana.app.social;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -17,10 +21,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
+import com.harvana.app.ActivityStatsActivity;
+import com.harvana.app.EditProfileActivity;
 import com.harvana.app.GroupDetailsActivity;
+import com.harvana.app.ProfileActivity;
+import com.harvana.app.R;
 import com.harvana.app.SendAssetActivity;
+import com.harvana.app.SettingsActivity;
+import com.harvana.app.firestore.UserProfileManager;
 import com.harvana.app.trust.BadgeChips;
 import com.harvana.app.trust.NodeBadges;
 import com.harvana.app.trust.ProfileTrust;
@@ -30,18 +41,25 @@ import com.harvana.app.utils.UiColors;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 /**
- * A member's public profile: what they have chosen to show and what the network shows about everyone.
- * Always shown: name, photo, trust score and its parts, country and state, member-since, counts of groups, cycles, loans and
- * pending loans. Shown only when the member allows it: age and city. Never shown: amounts, group names (only groups both people
- * belong to, and tapping one opens it), date of birth, phone, email. Opened from the Friends list.
+ * A member's profile, the same layout for everyone: photo, name and presence, a row of action tiles, an info card with the details
+ * they show, and three tabs (Trust, Activity, Groups). Opened from Friends for other people and from the drawer for yourself.
+ *
+ * Others see: name, photo, trust score and parts, badges, country and state, member-since, counts of groups, cycles, loans and
+ * pending loans, groups both belong to (tap to open), and age and city only if the member allows them. Never amounts, group names
+ * you do not share, date of birth, phone or email. You see your own details too (phone, birthday, email) and your own actions.
  */
 public class PublicProfileActivity extends AppCompatActivity {
     public static final String EXTRA_UID = "uid";
 
     private LinearLayout root;
+    private LinearLayout tabContent;
     private String uid = "";
+    private PublicProfileStore.Card card;
+    private Map<String, Object> selfData;
+    private int tab;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -54,57 +72,117 @@ public class PublicProfileActivity extends AppCompatActivity {
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         int p = SocialUi.dp(this, 16);
-        root.setPadding(p, p, p, SocialUi.dp(this, 28));
+        root.setPadding(p, 0, p, SocialUi.dp(this, 28));
         sv.addView(root);
-        AppBar.setContent(this, sv, "Profile", "");
+        AppBar.setContent(this, sv, "", "");
         root.addView(SocialUi.text(this, "Loading…", 14, false, UiColors.textSecondary()));
     }
 
     @Override protected void onResume() { super.onResume(); load(); }
     @Override public boolean onSupportNavigateUp() { finish(); return true; }
 
+    private boolean isMe() {
+        com.google.firebase.auth.FirebaseUser u = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        return u != null && u.getUid().equals(uid);
+    }
+
     private void load() {
         if (uid.isEmpty()) { root.removeAllViews(); root.addView(SocialUi.text(this, "This profile can't be opened.", 14, false, UiColors.textSecondary())); return; }
-        PublicProfileStore.load(uid, (card, err) -> runOnUiThread(() -> {
+        PublicProfileStore.load(uid, (c, err) -> runOnUiThread(() -> {
             if (isFinishing()) return;
-            root.removeAllViews();
-            if (card == null) {
+            if (c == null) {
+                root.removeAllViews();
                 root.addView(SocialUi.text(this, "Couldn't load this profile: " + err, 14, false, UiColors.textSecondary()));
                 return;
             }
-            render(card);
+            card = c;
+            if (isMe()) PublicProfileStore.publishMine(getApplicationContext());
+            invalidateOptionsMenu();
+            render();
+            if (isMe()) UserProfileManager.getInstance(getApplicationContext()).getProfile(uid, new UserProfileManager.DocCallback() {
+                @Override public void onSuccess(Map<String, Object> data) { runOnUiThread(() -> { selfData = data; if (!isFinishing()) render(); }); }
+                @Override public void onError(String error) { }
+            });
         }));
     }
 
-    private boolean isMe(PublicProfileStore.Card c) {
-        com.google.firebase.auth.FirebaseUser u = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
-        return u != null && u.getUid().equals(c.uid);
+    // ── Menu ─────────────────────────────────────────────────────────────
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (card == null) return true;
+        if (isMe()) {
+            menu.add(0, 1, 0, "Share profile");
+            if (!card.username.isEmpty()) menu.add(0, 2, 1, "Copy username");
+            menu.add(0, 3, 2, "Change username");
+            menu.add(0, 4, 3, "Privacy settings");
+            menu.add(0, 5, 4, "Personal details");
+            menu.add(0, 6, 5, "My QR code");
+        } else {
+            menu.add(0, 1, 0, "Share profile");
+            if (!card.username.isEmpty()) menu.add(0, 2, 1, "Copy username");
+            if (card.iFollow && card.followsMe) menu.add(0, 7, 2, "Contact details");
+            if (card.iFollow) menu.add(0, 8, 3, "Unfollow");
+        }
+        return true;
     }
 
-    private void render(PublicProfileStore.Card c) {
-        boolean mine = isMe(c);
-        root.addView(heroCard(c, mine));
-        root.addView(actions(c, mine));
-        root.addView(aboutCard(c, mine));
-        root.addView(trustCard(c));
-        root.addView(badgesCard(c));
-        root.addView(activityCard(c));
-        root.addView(sharedCard(c, mine));
-        TextView foot = SocialUi.text(this, "Trust, country and state are always public. Amounts and group names are never shown. "
-                + "Age and city are shown only if the member turns them on.", 11.5f, false, UiColors.textTertiary());
-        foot.setPadding(SocialUi.dp(this, 4), SocialUi.dp(this, 4), SocialUi.dp(this, 4), 0);
-        root.addView(foot);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (card == null) return super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case 1: shareProfile(); return true;
+            case 2: copy("@" + card.username); return true;
+            case 3: startActivity(new Intent(this, ContactCardActivity.class)); return true;
+            case 4: startActivity(new Intent(this, ProfilePrivacyActivity.class)); return true;
+            case 5: startActivity(new Intent(this, ProfileActivity.class)); return true;
+            case 6: startActivity(new Intent(this, ProfileQrActivity.class)); return true;
+            case 7: FriendsActivity.openCard(this, person()); return true;
+            case 8: SocialStore.unfollow(card.uid, (ok, e) -> runOnUiThread(() -> { if (!ok) toast(e); load(); })); return true;
+            default: return super.onOptionsItemSelected(item);
+        }
     }
 
-    // ── Hero ─────────────────────────────────────────────────────────────
+    private Person person() { return new Person(card.uid, card.username, card.name, card.icon); }
 
-    private View heroCard(PublicProfileStore.Card c, boolean mine) {
-        LinearLayout card = SocialUi.card(this);
-        card.setGravity(Gravity.CENTER_HORIZONTAL);
-        int size = SocialUi.dp(this, 88);
-        int tint = c.scored() ? ProfileTrust.tierColor(c.trustTier.isEmpty() ? ProfileTrust.tierFor(c.trustPercent) : c.trustTier) : 0xFF8B98AD;
+    private void copy(String text) {
+        ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("Harvana", text));
+        toast("Copied");
+    }
+
+    private void shareProfile() {
+        String line = (card.name.isEmpty() ? "A member" : card.name) + (card.username.isEmpty() ? "" : " (@" + card.username + ")") + " on Harvana"
+                + (card.scored() ? ", trust " + card.trustPercent + "%" : "") + ".";
+        startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, line), "Share profile"));
+    }
+
+    private void toast(String s) { Toast.makeText(this, s == null ? "Something went wrong." : s, Toast.LENGTH_LONG).show(); }
+
+    // ── Page ─────────────────────────────────────────────────────────────
+
+    private void render() {
+        root.removeAllViews();
+        boolean mine = isMe();
+        root.addView(header(mine));
+        root.addView(actionRow(mine));
+        root.addView(infoCard(mine));
+        root.addView(tabs());
+        tabContent = new LinearLayout(this);
+        tabContent.setOrientation(LinearLayout.VERTICAL);
+        root.addView(tabContent);
+        renderTab();
+    }
+
+    private View header(boolean mine) {
+        LinearLayout h = new LinearLayout(this);
+        h.setOrientation(LinearLayout.VERTICAL);
+        h.setGravity(Gravity.CENTER_HORIZONTAL);
+        h.setPadding(0, SocialUi.dp(this, 4), 0, SocialUi.dp(this, 18));
+        int size = SocialUi.dp(this, 104);
+        int tint = card.scored() ? ProfileTrust.tierColor(tierName()) : 0xFF8B98AD;
         FrameLayout face = new FrameLayout(this);
-        TextView initials = SocialUi.text(this, initialsOf(c), 30, true, UiColors.onAccent());
+        TextView initials = SocialUi.text(this, initialsOf(), 34, true, UiColors.onAccent());
         initials.setGravity(Gravity.CENTER);
         GradientDrawable disc = new GradientDrawable();
         disc.setShape(GradientDrawable.OVAL);
@@ -115,42 +193,38 @@ public class PublicProfileActivity extends AppCompatActivity {
         ImageView photo = new ImageView(this);
         photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
         face.addView(photo, new FrameLayout.LayoutParams(size, size));
-        if (c.icon.startsWith("http")) {
-            try { com.bumptech.glide.Glide.with(this).load(c.icon).circleCrop().into(photo); initials.setVisibility(View.INVISIBLE); }
+        if (card.icon.startsWith("http")) {
+            try { com.bumptech.glide.Glide.with(this).load(card.icon).circleCrop().into(photo); initials.setVisibility(View.INVISIBLE); }
             catch (Exception ignored) { }
         }
-        card.addView(face, new LinearLayout.LayoutParams(size, size));
+        h.addView(face, new LinearLayout.LayoutParams(size, size));
 
-        TextView name = SocialUi.text(this, c.name.isEmpty() ? (c.username.isEmpty() ? "Member" : "@" + c.username) : c.name, 22, true, UiColors.textPrimary());
+        TextView name = SocialUi.text(this, card.name.isEmpty() ? (card.username.isEmpty() ? "Member" : "@" + card.username) : card.name, 24, true, UiColors.textPrimary());
         name.setGravity(Gravity.CENTER);
-        name.setPadding(0, SocialUi.dp(this, 12), 0, 0);
-        card.addView(name);
-        if (!c.username.isEmpty()) {
-            TextView handle = SocialUi.text(this, "@" + c.username, 14, false, UiColors.textSecondary());
-            handle.setGravity(Gravity.CENTER);
-            card.addView(handle);
+        name.setPadding(0, SocialUi.dp(this, 14), 0, 0);
+        h.addView(name);
+
+        String status = mine ? "online" : PublicProfileStore.presence(card.lastActiveAt, System.currentTimeMillis());
+        if (!status.isEmpty()) {
+            TextView st = SocialUi.text(this, status, 14, false, "online".equals(status) ? UiColors.accent() : UiColors.textSecondary());
+            st.setGravity(Gravity.CENTER);
+            st.setPadding(0, SocialUi.dp(this, 2), 0, 0);
+            h.addView(st);
         }
         LinearLayout pills = new LinearLayout(this);
         pills.setOrientation(LinearLayout.HORIZONTAL);
         pills.setGravity(Gravity.CENTER);
         pills.setPadding(0, SocialUi.dp(this, 12), 0, 0);
-        pills.addView(pill(c.scored() ? (("New".equals(c.trustTier) ? "New · " + c.trustPercent + "%" : c.trustPercent + "% · " + (c.trustTier.isEmpty() ? ProfileTrust.tierFor(c.trustPercent) : c.trustTier))) : "Not scored yet", tint));
+        pills.addView(pill(card.scored() ? ("New".equals(tierName()) ? "New · " + card.trustPercent + "%" : card.trustPercent + "% · " + tierName()) : "Not scored yet", tint));
         if (!mine) {
-            String rel = c.iFollow && c.followsMe ? "Friends" : c.iFollow ? "You follow" : c.followsMe ? "Follows you" : "";
+            String rel = card.iFollow && card.followsMe ? "Friends" : card.iFollow ? "You follow" : card.followsMe ? "Follows you" : "";
             if (!rel.isEmpty()) pills.addView(pill(rel, UiColors.textSecondary()));
-        } else {
-            pills.addView(pill("This is you", UiColors.accent()));
         }
-        card.addView(pills);
-        if (!c.bio.isEmpty()) {
-            TextView bio = SocialUi.text(this, c.bio, 14, false, UiColors.textPrimary());
-            bio.setGravity(Gravity.CENTER);
-            bio.setPadding(SocialUi.dp(this, 8), SocialUi.dp(this, 14), SocialUi.dp(this, 8), 0);
-            bio.setLineSpacing(SocialUi.dp(this, 2), 1f);
-            card.addView(bio);
-        }
-        return card;
+        h.addView(pills);
+        return h;
     }
+
+    private String tierName() { return card.trustTier.isEmpty() ? ProfileTrust.tierFor(Math.max(0, card.trustPercent)) : card.trustTier; }
 
     private TextView pill(String text, int color) {
         TextView t = SocialUi.text(this, text, 12, true, color);
@@ -166,121 +240,242 @@ public class PublicProfileActivity extends AppCompatActivity {
         return t;
     }
 
-    private static String initialsOf(PublicProfileStore.Card c) {
-        String s = c.name.isEmpty() ? c.username : c.name;
+    private String initialsOf() {
+        String s = card.name.isEmpty() ? card.username : card.name;
         String[] parts = s.trim().split("\\s+");
         if (parts.length == 0 || parts[0].isEmpty()) return "?";
         if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase(Locale.US);
         return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase(Locale.US);
     }
 
-    // ── Actions ──────────────────────────────────────────────────────────
+    // ── Action tiles ─────────────────────────────────────────────────────
 
-    private View actions(PublicProfileStore.Card c, boolean mine) {
-        HorizontalScrollView scroll = new HorizontalScrollView(this);
-        scroll.setHorizontalScrollBarEnabled(false);
+    private View actionRow(boolean mine) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setPadding(0, 0, 0, SocialUi.dp(this, 14));
-        final com.harvana.app.social.Person person = new com.harvana.app.social.Person(c.uid, c.username, c.name, c.icon);
         if (mine) {
-            row.addView(action("Privacy settings", false, v -> startActivity(new Intent(this, ProfilePrivacyActivity.class))));
-        } else {
-            MaterialButton follow = action(c.iFollow ? "Unfollow" : (c.followsMe ? "Follow back" : "Follow"), c.iFollow, null);
-            follow.setOnClickListener(v -> {
-                follow.setEnabled(false);
-                if (c.iFollow) SocialStore.unfollow(c.uid, (ok, e) -> runOnUiThread(() -> { if (!ok) toast(e); load(); }));
-                else SocialStore.follow(person, (ok, e) -> runOnUiThread(() -> { if (!ok) toast(e); load(); }));
-            });
-            row.addView(follow);
-            if (c.iFollow) {
-                MaterialButton pinch = action("Pinch", true, null);
-                if (PinchStore.waitMs(this, c.uid) > 0) { pinch.setText("Pinched"); pinch.setEnabled(false); }
-                pinch.setOnClickListener(v -> {
-                    pinch.setEnabled(false);
-                    PinchStore.send(this, person, (ok, err) -> runOnUiThread(() -> {
-                        if (ok) { pinch.setText("Pinched"); toast(person.name + " will get a notification."); }
-                        else { pinch.setEnabled(true); toast(err); }
-                    }));
-                });
-                row.addView(pinch);
-            }
-            if (c.iFollow && c.followsMe) row.addView(action("Contact", true, v -> FriendsActivity.openCard(this, person)));
-            if (!c.wallet.isEmpty()) {
-                row.addView(action("Send HARV", true, v -> startActivity(new Intent(this, SendAssetActivity.class).putExtra("toAddress", c.wallet))));
-            }
+            row.addView(actionTile(R.drawable.ic_pf_edit, "Edit info", v -> startActivity(new Intent(this, EditProfileActivity.class))));
+            row.addView(actionTile(R.drawable.ic_pf_qr, "QR code", v -> startActivity(new Intent(this, ProfileQrActivity.class))));
+            row.addView(actionTile(R.drawable.ic_pf_settings, "Settings", v -> startActivity(new Intent(this, SettingsActivity.class))));
+            return row;
         }
-        row.addView(action("Share", true, v -> {
-            String line = (c.name.isEmpty() ? "A member" : c.name) + (c.username.isEmpty() ? "" : " (@" + c.username + ")") + " on Harvana"
-                    + (c.scored() ? ", trust " + c.trustPercent + "%" : "") + ".";
-            startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, line), "Share profile"));
-        }));
-        scroll.addView(row);
-        return scroll;
+        TextView follow = actionTile(R.drawable.ic_pf_person_add, card.iFollow ? "Unfollow" : (card.followsMe ? "Follow back" : "Follow"), null);
+        follow.setOnClickListener(v -> {
+            follow.setEnabled(false);
+            if (card.iFollow) SocialStore.unfollow(card.uid, (ok, e) -> runOnUiThread(() -> { if (!ok) toast(e); load(); }));
+            else SocialStore.follow(person(), (ok, e) -> runOnUiThread(() -> { if (!ok) toast(e); load(); }));
+        });
+        row.addView(follow);
+        TextView pinch = actionTile(R.drawable.ic_pf_bell, "Pinch", null);
+        if (!card.iFollow) { pinch.setAlpha(0.45f); pinch.setOnClickListener(v -> toast("Follow " + (card.name.isEmpty() ? "this member" : card.name) + " to pinch them.")); }
+        else if (PinchStore.waitMs(this, card.uid) > 0) { pinch.setText("Pinched"); pinch.setAlpha(0.6f); pinch.setEnabled(false); }
+        else pinch.setOnClickListener(v -> {
+            pinch.setEnabled(false);
+            PinchStore.send(this, person(), (ok, err) -> runOnUiThread(() -> {
+                if (ok) { pinch.setText("Pinched"); pinch.setAlpha(0.6f); toast(person().name + " will get a notification."); }
+                else { pinch.setEnabled(true); toast(err); }
+            }));
+        });
+        row.addView(pinch);
+        TextView send = actionTile(R.drawable.ic_pf_send, "Send", null);
+        if (card.wallet.isEmpty()) { send.setAlpha(0.45f); send.setOnClickListener(v -> toast("This member has no wallet linked yet.")); }
+        else send.setOnClickListener(v -> startActivity(new Intent(this, SendAssetActivity.class).putExtra("toAddress", card.wallet)));
+        row.addView(send);
+        row.addView(actionTile(R.drawable.ic_pf_share, "Share", v -> shareProfile()));
+        return row;
     }
 
-    private MaterialButton action(String label, boolean outlined, View.OnClickListener click) {
-        MaterialButton b = SocialUi.compactButton(this, label, outlined);
-        b.setTextSize(13);
-        ((LinearLayout.LayoutParams) b.getLayoutParams()).height = SocialUi.dp(this, 40);
-        ((LinearLayout.LayoutParams) b.getLayoutParams()).setMarginEnd(SocialUi.dp(this, 8));
-        if (click != null) b.setOnClickListener(click);
-        return b;
+    /** An icon over a label in a rounded block; the whole block is the tap target. The label is the tile's text, so it can change. */
+    private TextView actionTile(int icon, String label, View.OnClickListener click) {
+        TextView t = new TextView(this);
+        t.setText(label);
+        t.setTextSize(12);
+        t.setTypeface(null, Typeface.BOLD);
+        t.setTextColor(UiColors.textPrimary());
+        t.setGravity(Gravity.CENTER);
+        t.setMaxLines(1);
+        android.graphics.drawable.Drawable d = ContextCompat.getDrawable(this, icon);
+        if (d != null) {
+            d = d.mutate();
+            androidx.core.graphics.drawable.DrawableCompat.setTint(d, UiColors.textPrimary());
+            int s = SocialUi.dp(this, 24);
+            d.setBounds(0, 0, s, s);
+            t.setCompoundDrawables(null, d, null, null);
+        }
+        t.setCompoundDrawablePadding(SocialUi.dp(this, 6));
+        t.setPadding(0, SocialUi.dp(this, 14), 0, SocialUi.dp(this, 12));
+        GradientDrawable g = new GradientDrawable();
+        g.setCornerRadius(SocialUi.dp(this, 16));
+        g.setColor(UiColors.surface());
+        g.setStroke(SocialUi.dp(this, 1), (UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000);
+        t.setBackground(new android.graphics.drawable.RippleDrawable(
+                android.content.res.ColorStateList.valueOf((UiColors.accent() & 0x00FFFFFF) | 0x33000000), g, null));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        lp.setMargins(SocialUi.dp(this, 4), 0, SocialUi.dp(this, 4), 0);
+        t.setLayoutParams(lp);
+        t.setClickable(true);
+        t.setFocusable(true);
+        if (click != null) t.setOnClickListener(click);
+        return t;
     }
 
-    private void toast(String s) { Toast.makeText(this, s == null ? "Something went wrong." : s, Toast.LENGTH_LONG).show(); }
+    // ── Info card ────────────────────────────────────────────────────────
 
-    // ── About ────────────────────────────────────────────────────────────
-
-    private View aboutCard(PublicProfileStore.Card c, boolean mine) {
-        LinearLayout card = SocialUi.card(this);
-        card.addView(SocialUi.text(this, "About", 16, true, UiColors.textPrimary()));
-        String where = c.country.isEmpty() ? "" : (c.state.isEmpty() ? c.country : c.state + ", " + c.country);
-        card.addView(infoRow("Location", where.isEmpty() ? "Not provided" : where, !where.isEmpty()));
-        card.addView(infoRow("City", c.showCity && !c.city.isEmpty() ? c.city : "Private", c.showCity && !c.city.isEmpty()));
-        card.addView(infoRow("Age", c.showAge && c.age >= 0 ? c.age + " years" : "Private", c.showAge && c.age >= 0));
-        String since = c.memberSince > 0 ? new SimpleDateFormat("MMM yyyy", Locale.US).format(new Date(c.memberSince)) : "Not recorded";
-        card.addView(infoRow("Member since", since, c.memberSince > 0));
-        return card;
+    private View infoCard(boolean mine) {
+        LinearLayout c = SocialUi.card(this);
+        boolean any = false;
+        if (!card.bio.isEmpty()) { c.addView(infoRow(card.bio, "Bio", 0, null)); any = true; }
+        if (mine && selfData != null) {
+            String phone = PublicProfileStore.tidyPhone(String.valueOf(selfData.get("phone") == null ? "" : selfData.get("phone")));
+            if (!phone.isEmpty()) { c.addView(infoRow(phone, "Mobile", 0, null)); any = true; }
+        }
+        if (!card.username.isEmpty()) {
+            c.addView(infoRow("@" + card.username, "Username", mine ? R.drawable.ic_pf_qr : 0,
+                    mine ? v -> startActivity(new Intent(this, ProfileQrActivity.class)) : null));
+            any = true;
+        }
+        if (mine && selfData != null) {
+            String dob = String.valueOf(selfData.get("dob") == null ? "" : selfData.get("dob"));
+            Date born = AgeOf.parse(dob);
+            if (born != null) {
+                int age = AgeOf.fromDob(dob, java.util.Calendar.getInstance());
+                c.addView(infoRow(new SimpleDateFormat("MMM d, yyyy", Locale.US).format(born) + (age >= 0 ? " (" + age + " years old)" : ""), "Birthday", 0, null));
+                any = true;
+            }
+            String email = String.valueOf(selfData.get("email") == null ? "" : selfData.get("email"));
+            if (!email.isEmpty() && !"null".equals(email)) { c.addView(infoRow(email, "Email", 0, null)); any = true; }
+        }
+        String where = card.country.isEmpty() ? "" : (card.state.isEmpty() ? card.country : card.state + ", " + card.country);
+        if (mine && selfData != null && selfData.get("city") != null && !String.valueOf(selfData.get("city")).trim().isEmpty() && !where.isEmpty()) {
+            where = String.valueOf(selfData.get("city")).trim() + ", " + where;
+        } else if (!card.city.isEmpty() && !where.isEmpty()) {
+            where = card.city + ", " + where;
+        }
+        if (!where.isEmpty()) { c.addView(infoRow(where, "Location", 0, null)); any = true; }
+        if (!mine && card.showAge && card.age >= 0) { c.addView(infoRow(card.age + " years old", "Age", 0, null)); any = true; }
+        if (card.memberSince > 0) {
+            c.addView(infoRow(new SimpleDateFormat("MMM yyyy", Locale.US).format(new Date(card.memberSince)), "Member since", 0, null));
+            any = true;
+        }
+        if (!any) c.addView(SocialUi.text(this, "Nothing to show yet.", 13, false, UiColors.textSecondary()));
+        if (mine) {
+            TextView more = SocialUi.text(this, "Personal details and verification  ›", 14, true, UiColors.accent());
+            more.setPadding(0, SocialUi.dp(this, 16), 0, SocialUi.dp(this, 2));
+            more.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+            c.addView(more);
+        }
+        return c;
     }
 
-    private View infoRow(String label, String value, boolean shown) {
+    /** Value on top, small caption under it: the way contact details are laid out in a chat app. */
+    private View infoRow(String value, String caption, int trailingIcon, View.OnClickListener click) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setPadding(0, SocialUi.dp(this, 10), 0, 0);
-        row.addView(SocialUi.text(this, label, 14, false, UiColors.textSecondary()), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView v = SocialUi.text(this, value, 14, shown, shown ? UiColors.textPrimary() : UiColors.textTertiary());
-        v.setGravity(Gravity.END);
-        row.addView(v, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(0, SocialUi.dp(this, 8), 0, SocialUi.dp(this, 8));
+        LinearLayout text = new LinearLayout(this);
+        text.setOrientation(LinearLayout.VERTICAL);
+        text.addView(SocialUi.text(this, value, 16, false, UiColors.textPrimary()));
+        TextView cap = SocialUi.text(this, caption, 13, false, UiColors.textSecondary());
+        cap.setPadding(0, SocialUi.dp(this, 2), 0, 0);
+        text.addView(cap);
+        row.addView(text, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        if (trailingIcon != 0) {
+            ImageView iv = new ImageView(this);
+            iv.setImageResource(trailingIcon);
+            iv.setColorFilter(UiColors.accent());
+            row.addView(iv, new LinearLayout.LayoutParams(SocialUi.dp(this, 26), SocialUi.dp(this, 26)));
+        }
+        if (click != null) { row.setClickable(true); row.setOnClickListener(click); }
         return row;
+    }
+
+    // ── Tabs ─────────────────────────────────────────────────────────────
+
+    private View tabs() {
+        LinearLayout wrap = new LinearLayout(this);
+        wrap.setGravity(Gravity.CENTER);
+        wrap.setPadding(0, SocialUi.dp(this, 4), 0, SocialUi.dp(this, 12));
+        LinearLayout pillBar = new LinearLayout(this);
+        pillBar.setOrientation(LinearLayout.HORIZONTAL);
+        pillBar.setPadding(SocialUi.dp(this, 4), SocialUi.dp(this, 4), SocialUi.dp(this, 4), SocialUi.dp(this, 4));
+        GradientDrawable g = new GradientDrawable();
+        g.setCornerRadius(SocialUi.dp(this, 26));
+        g.setColor(UiColors.surface());
+        pillBar.setBackground(g);
+        String[] names = {"Trust", "Activity", "Groups"};
+        final TextView[] labels = new TextView[names.length];
+        for (int i = 0; i < names.length; i++) {
+            final int idx = i;
+            TextView t = SocialUi.text(this, names[i], 14, true, UiColors.textSecondary());
+            t.setGravity(Gravity.CENTER);
+            t.setPadding(SocialUi.dp(this, 20), SocialUi.dp(this, 9), SocialUi.dp(this, 20), SocialUi.dp(this, 9));
+            t.setClickable(true);
+            labels[i] = t;
+            t.setOnClickListener(v -> { tab = idx; styleTabs(labels); renderTab(); });
+            pillBar.addView(t);
+        }
+        styleTabs(labels);
+        wrap.addView(pillBar);
+        return wrap;
+    }
+
+    private void styleTabs(TextView[] labels) {
+        for (int i = 0; i < labels.length; i++) {
+            boolean on = i == tab;
+            GradientDrawable g = new GradientDrawable();
+            g.setCornerRadius(SocialUi.dp(this, 22));
+            g.setColor(on ? ((UiColors.accent() & 0x00FFFFFF) | 0x33000000) : android.graphics.Color.TRANSPARENT);
+            labels[i].setBackground(g);
+            labels[i].setTextColor(on ? UiColors.accent() : UiColors.textSecondary());
+        }
+    }
+
+    private void renderTab() {
+        if (tabContent == null) return;
+        tabContent.removeAllViews();
+        if (tab == 0) { tabContent.addView(trustCard()); tabContent.addView(badgesCard()); }
+        else if (tab == 1) {
+            tabContent.addView(activityCard());
+            if (isMe()) {
+                MaterialButton see = SocialUi.button(this, "See my activity", true);
+                see.setOnClickListener(v -> startActivity(new Intent(this, ActivityStatsActivity.class)));
+                tabContent.addView(see, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 48)));
+            }
+        } else tabContent.addView(sharedCard());
+        TextView foot = SocialUi.text(this, "Trust, country and state are always public. Amounts and group names are never shown. "
+                + "Age and city are shown only if the member turns them on.", 11.5f, false, UiColors.textTertiary());
+        foot.setPadding(SocialUi.dp(this, 4), SocialUi.dp(this, 10), SocialUi.dp(this, 4), 0);
+        tabContent.addView(foot);
     }
 
     // ── Trust ────────────────────────────────────────────────────────────
 
-    private View trustCard(PublicProfileStore.Card c) {
-        LinearLayout card = SocialUi.card(this);
-        card.addView(SocialUi.text(this, "Trust score", 16, true, UiColors.textPrimary()));
-        if (!c.scored()) {
-            card.addView(SocialUi.text(this, "The network hasn't published a score for this member yet.", 13, false, UiColors.textSecondary()));
-            return card;
+    private View trustCard() {
+        LinearLayout c = SocialUi.card(this);
+        c.addView(SocialUi.text(this, "Trust score", 16, true, UiColors.textPrimary()));
+        if (!card.scored()) {
+            c.addView(SocialUi.text(this, "The network hasn't published a score for this member yet.", 13, false, UiColors.textSecondary()));
+            return c;
         }
-        String tier = c.trustTier.isEmpty() ? ProfileTrust.tierFor(c.trustPercent) : c.trustTier;
+        String tier = tierName();
         int color = ProfileTrust.tierColor(tier);
         LinearLayout top = new LinearLayout(this);
         top.setOrientation(LinearLayout.HORIZONTAL);
         top.setGravity(Gravity.BOTTOM);
         top.setPadding(0, SocialUi.dp(this, 6), 0, 0);
-        top.addView(SocialUi.text(this, c.trustPercent + "%", 34, true, color));
+        top.addView(SocialUi.text(this, card.trustPercent + "%", 34, true, color));
         TextView t = SocialUi.text(this, "  " + tier, 16, true, UiColors.textPrimary());
         t.setPadding(0, 0, 0, SocialUi.dp(this, 5));
         top.addView(t);
-        card.addView(top);
-        card.addView(bar(c.trustPercent, color));
+        c.addView(top);
+        c.addView(bar(card.trustPercent, color));
         String[][] parts = {{"Personhood", "trustPersonhoodPct"}, {"Reliability", "trustReliabilityPct"}, {"Conduct", "trustConductPct"},
                 {"Tenure", "trustTenurePct"}, {"Engagement", "trustEngagementPct"}};
-        if (c.trustParts.get("trustPersonhoodPct") instanceof Number) {
+        if (card.trustParts.get("trustPersonhoodPct") instanceof Number) {
             for (String[] part : parts) {
-                int v = c.trustParts.get(part[1]) instanceof Number ? ((Number) c.trustParts.get(part[1])).intValue() : 0;
+                int v = card.trustParts.get(part[1]) instanceof Number ? ((Number) card.trustParts.get(part[1])).intValue() : 0;
                 LinearLayout line = new LinearLayout(this);
                 line.setOrientation(LinearLayout.VERTICAL);
                 line.setPadding(0, SocialUi.dp(this, 12), 0, 0);
@@ -289,13 +484,19 @@ public class PublicProfileActivity extends AppCompatActivity {
                 head.addView(SocialUi.text(this, v + "%", 13, true, UiColors.textPrimary()));
                 line.addView(head);
                 line.addView(bar(v, UiColors.accent()));
-                card.addView(line);
+                c.addView(line);
             }
         }
         TextView note = SocialUi.text(this, "Worked out by the network. Nobody can hide or change it.", 12, false, UiColors.textTertiary());
         note.setPadding(0, SocialUi.dp(this, 12), 0, 0);
-        card.addView(note);
-        return card;
+        c.addView(note);
+        if (isMe()) {
+            TextView more = SocialUi.text(this, "How to raise it  ›", 14, true, UiColors.accent());
+            more.setPadding(0, SocialUi.dp(this, 12), 0, 0);
+            more.setOnClickListener(v -> startActivity(new Intent(this, com.harvana.app.TrustScoreActivity.class)));
+            c.addView(more);
+        }
+        return c;
     }
 
     private ProgressBar bar(int value, int color) {
@@ -310,44 +511,42 @@ public class PublicProfileActivity extends AppCompatActivity {
         return b;
     }
 
-    // ── Badges ───────────────────────────────────────────────────────────
-
-    private View badgesCard(PublicProfileStore.Card c) {
-        LinearLayout card = SocialUi.card(this);
-        card.addView(SocialUi.text(this, "Badges", 16, true, UiColors.textPrimary()));
+    private View badgesCard() {
+        LinearLayout c = SocialUi.card(this);
+        c.addView(SocialUi.text(this, "Badges", 16, true, UiColors.textPrimary()));
         final LinearLayout chips = new LinearLayout(this);
         chips.setOrientation(LinearLayout.VERTICAL);
         chips.setPadding(0, SocialUi.dp(this, 10), 0, 0);
-        card.addView(chips);
-        if (c.wallet.isEmpty()) { BadgeChips.fill(chips, new java.util.ArrayList<>(), false); return card; }
-        NodeBadges.load(c.wallet, list -> BadgeChips.fill(chips, list, false));
-        return card;
+        c.addView(chips);
+        if (card.wallet.isEmpty()) { BadgeChips.fill(chips, new java.util.ArrayList<>(), false); return c; }
+        NodeBadges.load(card.wallet, list -> BadgeChips.fill(chips, list, false));
+        return c;
     }
 
-    // ── Activity counts ──────────────────────────────────────────────────
+    // ── Activity ─────────────────────────────────────────────────────────
 
-    private View activityCard(PublicProfileStore.Card c) {
-        LinearLayout card = SocialUi.card(this);
-        card.addView(SocialUi.text(this, "Activity", 16, true, UiColors.textPrimary()));
+    private View activityCard() {
+        LinearLayout c = SocialUi.card(this);
+        c.addView(SocialUi.text(this, "Activity", 16, true, UiColors.textPrimary()));
         LinearLayout grid = new LinearLayout(this);
         grid.setOrientation(LinearLayout.VERTICAL);
         grid.setPadding(0, SocialUi.dp(this, 10), 0, 0);
         LinearLayout r1 = new LinearLayout(this);
-        r1.addView(tile("Groups", c.groups), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        r1.addView(tile("Cycles completed", c.cycles), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        r1.addView(countTile("Groups", card.groups), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        r1.addView(countTile("Cycles completed", card.cycles), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         LinearLayout r2 = new LinearLayout(this);
-        r2.addView(tile("Loans", c.loans), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        r2.addView(tile("Pending loans", c.pendingLoans), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        r2.addView(countTile("Loans", card.loans), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        r2.addView(countTile("Pending loans", card.pendingLoans), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         grid.addView(r1);
         grid.addView(r2);
-        card.addView(grid);
+        c.addView(grid);
         TextView note = SocialUi.text(this, "Counts only. Amounts and group names are never shown.", 12, false, UiColors.textTertiary());
         note.setPadding(0, SocialUi.dp(this, 8), 0, 0);
-        card.addView(note);
-        return card;
+        c.addView(note);
+        return c;
     }
 
-    private View tile(String label, int value) {
+    private View countTile(String label, int value) {
         LinearLayout t = new LinearLayout(this);
         t.setOrientation(LinearLayout.VERTICAL);
         t.setGravity(Gravity.CENTER);
@@ -369,34 +568,43 @@ public class PublicProfileActivity extends AppCompatActivity {
 
     // ── Groups in common ─────────────────────────────────────────────────
 
-    private View sharedCard(PublicProfileStore.Card c, boolean mine) {
-        LinearLayout card = SocialUi.card(this);
-        card.addView(SocialUi.text(this, mine ? "Your groups" : "Groups you share", 16, true, UiColors.textPrimary()));
+    private View sharedCard() {
+        boolean mine = isMe();
+        LinearLayout c = SocialUi.card(this);
+        c.addView(SocialUi.text(this, mine ? "Your groups" : "Groups you share", 16, true, UiColors.textPrimary()));
         if (mine) {
             TextView note = SocialUi.text(this, "Others only see how many groups you are in. Group names show only for groups you both belong to.", 13, false, UiColors.textSecondary());
             note.setPadding(0, SocialUi.dp(this, 6), 0, 0);
-            card.addView(note);
-            return card;
+            c.addView(note);
+            return c;
         }
-        if (c.sharedGroups.isEmpty()) {
-            TextView none = SocialUi.text(this, "You and " + (c.name.isEmpty() ? "this member" : c.name) + " have no groups in common"
-                    + (c.groups > 0 ? ". They are in " + c.groups + (c.groups == 1 ? " group." : " groups.") : "."), 13, false, UiColors.textSecondary());
+        if (card.sharedGroups.isEmpty()) {
+            TextView none = SocialUi.text(this, "You and " + (card.name.isEmpty() ? "this member" : card.name) + " have no groups in common"
+                    + (card.groups > 0 ? ". They are in " + card.groups + (card.groups == 1 ? " group." : " groups.") : "."), 13, false, UiColors.textSecondary());
             none.setPadding(0, SocialUi.dp(this, 6), 0, 0);
-            card.addView(none);
-            return card;
+            c.addView(none);
+            return c;
         }
-        for (PublicProfileStore.SharedGroup g : c.sharedGroups) {
+        for (PublicProfileStore.SharedGroup g : card.sharedGroups) {
             LinearLayout row = new LinearLayout(this);
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
             row.setPadding(0, SocialUi.dp(this, 12), 0, SocialUi.dp(this, 4));
+            TextView initial = SocialUi.text(this, g.name.isEmpty() ? "G" : g.name.substring(0, 1).toUpperCase(Locale.US), 16, true, UiColors.onAccent());
+            initial.setGravity(Gravity.CENTER);
+            GradientDrawable disc = new GradientDrawable();
+            disc.setShape(GradientDrawable.OVAL);
+            disc.setColor(UiColors.accent());
+            initial.setBackground(disc);
+            row.addView(initial, new LinearLayout.LayoutParams(SocialUi.dp(this, 40), SocialUi.dp(this, 40)));
             TextView name = SocialUi.text(this, g.name, 15, true, UiColors.textPrimary());
+            name.setPadding(SocialUi.dp(this, 12), 0, 0, 0);
             row.addView(name, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
             row.addView(SocialUi.text(this, "Open  ›", 13, true, UiColors.accent()));
             row.setClickable(true);
             row.setOnClickListener(v -> startActivity(new Intent(this, GroupDetailsActivity.class).putExtra("groupId", g.id)));
-            card.addView(row);
+            c.addView(row);
         }
-        return card;
+        return c;
     }
 }

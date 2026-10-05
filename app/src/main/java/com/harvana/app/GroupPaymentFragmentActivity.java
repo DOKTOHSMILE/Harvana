@@ -785,7 +785,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
                         }
                         if (tv_type_board_legend != null) tv_type_board_legend.setText(mine.legend);
                         layout_type_board.removeAllViews();
-                        _addRecordSection(accum && admin ? "You" : null, mine, cell -> _onNodeCell(cell));
+                        _addRecordSection(accum && admin ? "You" : null, mine, cell -> _onNodeCell(cell), accum ? line : null);
                         if (accum && admin && others != null) {
                                 for (Object[] row : others) {
                                         @SuppressWarnings("unchecked") Map<String, Object> theirLine = (Map<String, Object>) row[1];
@@ -953,6 +953,12 @@ public class GroupPaymentFragmentActivity extends Fragment {
 
         private void _addRecordSection(String label, com.harvana.app.group.GroupTypeBoard.Board board,
                         com.harvana.app.group.GroupTypeBoardView.Click click) {
+                _addRecordSection(label, board, click, null);
+        }
+
+        /** {@code ownLine} is the member's own savings line when this board is theirs: its missed days can then be picked and paid back. */
+        private void _addRecordSection(String label, com.harvana.app.group.GroupTypeBoard.Board board,
+                        com.harvana.app.group.GroupTypeBoardView.Click click, Map<String, Object> ownLine) {
                 if (getContext() == null || layout_type_board == null || board == null) return;
                 if (label != null && !label.isEmpty()) {
                         TextView t = new TextView(getContext());
@@ -967,7 +973,19 @@ public class GroupPaymentFragmentActivity extends Fragment {
                 host.setOrientation(LinearLayout.VERTICAL);
                 layout_type_board.addView(host, new LinearLayout.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                com.harvana.app.group.GroupTypeBoardView.fill(host, board, click);
+                if (ownLine == null) {
+                        com.harvana.app.group.GroupTypeBoardView.fill(host, board, click);
+                        return;
+                }
+                final com.harvana.app.group.GroupTypeBoardView.Selection sel = new com.harvana.app.group.GroupTypeBoardView.Selection();
+                double daily = ownLine.get("dailyAmountRaw") instanceof Number ? ((Number) ownLine.get("dailyAmountRaw")).doubleValue() / 100_000_000.0 : 0;
+                LinearLayout bar = com.harvana.app.group.BackpayBar.create(getContext(), sel, daily, dates -> {
+                        NodePayActions.Ctx ctx = _payCtx();
+                        ctx.line = ownLine;
+                        NodePayActions.backpay(ctx, dates);
+                });
+                layout_type_board.addView(bar);
+                com.harvana.app.group.GroupTypeBoardView.fill(host, board, click, sel);
         }
 
         private void _onNodeCell(com.harvana.app.group.GroupTypeBoard.Cell cell) {

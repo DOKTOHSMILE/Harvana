@@ -178,4 +178,10 @@ public final class GroupCanonical {
     public static String forgiveDefaultVote(String circleId, String memberAddress, String voterAddress, boolean voteYes, long nonce) {
         return "HARVANA_FORGIVE_DEFAULT_VOTE_V1:" + circleId + ":" + memberAddress + ":" + voterAddress + ":" + voteYes + ":" + nonce;
     }
+
+    /** AccumBackpayRequest.getCanonicalMessage(): the dates are sorted and comma-separated, so the order the app lists them in does not matter. */
+    public static String accumBackpay(String groupId, String lineId, String memberAddress, java.util.Collection<String> dates, long nonce) {
+        return "HARVANA_ACCUM_BACKPAY_V1:" + groupId + ":" + lineId + ":" + memberAddress + ":"
+            + String.join(",", new java.util.TreeSet<>(dates)) + ":" + nonce;
+    }
 }

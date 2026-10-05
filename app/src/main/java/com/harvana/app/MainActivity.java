@@ -486,8 +486,13 @@ public class MainActivity extends AppCompatActivity {
 		// 4. Click Listeners & Styling
 		View.OnClickListener openProfile = v -> {
 			try {
-				intent_page_opener.setClass(getApplicationContext(), ProfileActivity.class);
-				startActivity(intent_page_opener);
+				com.google.firebase.auth.FirebaseUser me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+				if (me != null) startActivity(new Intent(getApplicationContext(), com.harvana.app.social.PublicProfileActivity.class)
+						.putExtra(com.harvana.app.social.PublicProfileActivity.EXTRA_UID, me.getUid()));
+				else {
+					intent_page_opener.setClass(getApplicationContext(), ProfileActivity.class);
+					startActivity(intent_page_opener);
+				}
 			} catch (Exception ignored) {}
 		};
 		avatarCard.setOnClickListener(openProfile);

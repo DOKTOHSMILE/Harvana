@@ -54,6 +54,8 @@ public final class PublicProfileStore {
         public int trustPercent = -1, age = -1;
         public boolean showAge, showCity;
         public long memberSince;
+        /** When the member last had the app open (self-reported presence); 0 when unknown. */
+        public long lastActiveAt;
         public int groups = -1, cycles = -1, loans = -1, pendingLoans = -1;
         public List<SharedGroup> sharedGroups = new ArrayList<>();
         public boolean iFollow, followsMe;
@@ -82,6 +84,7 @@ public final class PublicProfileStore {
                 c.country = str(user.get("country"));
                 c.state = str(user.get("state"));
                 if (user.get("timestamp") instanceof Number) c.memberSince = ((Number) user.get("timestamp")).longValue();
+                if (user.get("lastActiveAt") instanceof Number) c.lastActiveAt = ((Number) user.get("lastActiveAt")).longValue();
                 List<String> theirGroups = groupIds(user.get("groups"));
 
                 if (c.pid.matches("^[0-9]{10}$")) {
@@ -234,6 +237,28 @@ public final class PublicProfileStore {
                 cb.done(true, null);
             } catch (Exception e) { cb.done(false, e.getMessage() == null ? e.toString() : e.getMessage()); }
         });
+    }
+
+    /** A stored phone is country code plus number; when two full numbers were joined, keep the first (Nigerian numbers are +234 and ten digits). */
+    public static String tidyPhone(String raw) {
+        if (raw == null) return "";
+        String digits = raw.replaceAll("[^0-9]", "");
+        boolean plus = raw.trim().startsWith("+");
+        if (digits.startsWith("234") && digits.length() > 13) digits = digits.substring(0, 13);
+        else if (digits.length() > 15) digits = digits.substring(0, 15);
+        return digits.isEmpty() ? "" : (plus || digits.startsWith("234") ? "+" : "") + digits;
+    }
+
+    /** "Online" within five minutes, otherwise "last seen" with a rough time; empty when the member has no presence record. */
+    public static String presence(long lastActiveAt, long now) {
+        if (lastActiveAt <= 0) return "";
+        long ago = now - lastActiveAt;
+        if (ago < 5 * 60 * 1000L) return "online";
+        if (ago < 60 * 60 * 1000L) return "last seen " + (ago / 60000L) + " min ago";
+        if (ago < 24 * 60 * 60 * 1000L) return "last seen " + (ago / 3600000L) + " h ago";
+        if (ago < 2 * 24 * 60 * 60 * 1000L) return "last seen yesterday";
+        if (ago < 7 * 24 * 60 * 60 * 1000L) return "last seen within a week";
+        return "last seen a while ago";
     }
 
     /** Whole years from a date of birth; see {@link AgeOf}. */

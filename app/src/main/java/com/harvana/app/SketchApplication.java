@@ -61,22 +61,25 @@ public class SketchApplication extends Application {
             public void uncaughtException(Thread thread, Throwable throwable) {
                 String stackTrace = Log.getStackTraceString(throwable);
                 
+                // Infinite loop prevention: If DebugActivity itself crashes, exit cleanly
                 if (stackTrace.contains("DebugActivity")) {
                     android.os.Process.killProcess(android.os.Process.myPid());
                     System.exit(1);
                     return;
                 }
                 
+                // Save crash log to SharedPreferences synchronously
                 getApplicationContext().getSharedPreferences("crash_prefs", Context.MODE_PRIVATE)
                         .edit()
                         .putString("crash_error", stackTrace)
                         .commit(); 
                 
+                // Save a timestamped backup copy to private internal storage
                 try {
                     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
                     String fileName = "Harvana_Crash_" + timeStamp + ".txt";
                     
-                    File privateDir = new File(getApplicationContext().getFilesDir(), "CrashLogs"); // app-private, never public storage
+                    File privateDir = new File(getApplicationContext().getFilesDir(), "CrashLogs");
                     if (!privateDir.exists()) privateDir.mkdirs();
                     File privateCrashFile = new File(privateDir, fileName);
                     FileWriter privWriter = new FileWriter(privateCrashFile);
@@ -84,9 +87,10 @@ public class SketchApplication extends Application {
                     privWriter.flush();
                     privWriter.close();
                 } catch (Exception e) {
-                    // Ignore file writing errors during a crash
+                    // Ignore file writing errors during a critical crash
                 }
                 
+                // Launch the modern DebugActivity
                 Intent intent = new Intent(getApplicationContext(), DebugActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);

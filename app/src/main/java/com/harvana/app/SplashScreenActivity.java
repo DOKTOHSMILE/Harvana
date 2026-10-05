@@ -71,11 +71,11 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         ImageView logo = new ImageView(this);
         logo.setId(View.generateViewId());
-        logo.setImageResource(R.drawable.ic_launcher);
+        logo.setImageResource(R.mipmap.ic_launcher_foreground);
         logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
         logo.setContentDescription("Harvana");
         logo.setTag("logo");
-        LinearLayout.LayoutParams logoLp = new LinearLayout.LayoutParams((int) (168 * d), (int) (168 * d));
+        LinearLayout.LayoutParams logoLp = new LinearLayout.LayoutParams((int) (80 * d), (int) (80 * d));
         logoLp.gravity = Gravity.CENTER_HORIZONTAL;
         column.addView(logo, logoLp);
 

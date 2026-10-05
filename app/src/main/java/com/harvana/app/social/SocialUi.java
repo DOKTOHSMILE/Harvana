@@ -88,6 +88,12 @@ final class SocialUi {
         names.setOrientation(LinearLayout.VERTICAL);
         names.addView(text(c, p.name, 15, true, UiColors.textPrimary()));
         if (!p.handle().isEmpty()) names.addView(text(c, p.handle(), 12, false, UiColors.textSecondary()));
+        TextView trust = text(c, "", 11, true, UiColors.textSecondary());
+        trust.setPadding(dp(c, 8), dp(c, 2), dp(c, 8), dp(c, 2));
+        LinearLayout.LayoutParams trustLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        trustLp.topMargin = dp(c, 4);
+        names.addView(trust, trustLp);
+        com.harvana.app.trust.ProfileTrust.attach(trust, p.uid);
         row.addView(names, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         if (action != null) {
             MaterialButton b = button(c, action, outlined);

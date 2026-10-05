@@ -508,7 +508,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 					public void onError(String error) { }
 				});
 				com.harvana.app.trust.NetworkTrust.wallet(sellerAddress, score -> runOnUiThread(() -> {
-					seller_trust_score.setText(score.published ? (score.score + " / 26") : "—");
+					seller_trust_score.setText(score.label());
 					seller_level.setText(score.summary.isEmpty() ? "Not on the network" : score.summary);
 				}));
 				

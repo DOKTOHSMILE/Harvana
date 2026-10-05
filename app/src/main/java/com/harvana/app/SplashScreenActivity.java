@@ -166,6 +166,18 @@ public class SplashScreenActivity extends AppCompatActivity {
         if (routed || isFinishing()) return;
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) { go(new Intent(this, WelcomeActivity.class)); return; }
+        if (com.harvana.app.auth.EmailVerification.needsVerification(user)) {
+            // Confirmed in the browser since last time? Reload first so they are not sent back needlessly.
+            user.reload().addOnCompleteListener(t -> {
+                FirebaseUser fresh = FirebaseAuth.getInstance().getCurrentUser();
+                if (fresh != null && com.harvana.app.auth.EmailVerification.needsVerification(fresh)) {
+                    go(new Intent(this, VerifyEmailActivity.class));
+                } else {
+                    route();
+                }
+            });
+            return;
+        }
         final String uid = user.getUid();
         status.setText("");
         com.harvana.app.firestore.UserProfileManager.getInstance(getApplicationContext()).getProfile(uid,

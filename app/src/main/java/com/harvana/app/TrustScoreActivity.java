@@ -23,11 +23,9 @@ import com.harvana.app.wallet.WalletManager;
 import org.json.JSONObject;
 
 /**
- * Trust is both halves together. The number is the network's personhood score
- * (0–26), saved by the node into Firestore. The account card is the signed-in
- * profile: name, photo and contact. The list under them is activity.
- * actions the network confirmed, plus what this member did in the app.
- * The phone does not invent the number.
+ * The trust score is one percentage, worked out by the node from what the network confirmed (personhood, paying on
+ * time, conduct, how long the wallet has been around) plus verified reading in Learn Hub, and saved into Firestore.
+ * This screen shows it, what it is made of and how to raise it. The phone does not invent the number.
  */
 public class TrustScoreActivity extends AppCompatActivity {
     private LinearLayout root;
@@ -74,12 +72,16 @@ public class TrustScoreActivity extends AppCompatActivity {
         final int gen = ++generation;
         root.removeAllViews();
         if (person == null) {
-            root.addView(tv("— / 26", 36, true, UiColors.accent()));
+            root.addView(tv("\u2014", 36, true, UiColors.accent()));
             root.addView(tv("Reading the network…", 14, false, UiColors.textSecondary()));
             com.harvana.app.trust.NetworkTrust.wallet(address, score -> runOnUiThread(() -> {
                 if (score.published) {
                     java.util.Map<String, Object> live = new java.util.HashMap<>();
                     live.put("trustScore", score.score);
+                    if (score.percent >= 0) { live.put("trustPercent", score.percent); live.put("trustTier", score.tier); }
+                    live.put("verifiedReads", score.verifiedReads);
+                    live.put("activeDays30", score.activeDays30);
+                    live.put("giftsSent", score.giftsSent);
                     live.put("bound", score.bound);
                     live.put("effectiveVouchCount", score.vouches);
                     live.put("established", score.established);
@@ -88,7 +90,7 @@ public class TrustScoreActivity extends AppCompatActivity {
                     return;
                 }
                 root.removeAllViews();
-                root.addView(tv("— / 26", 36, true, UiColors.accent()));
+                root.addView(tv("\u2014", 36, true, UiColors.accent()));
                 root.addView(tv("The network has not published a score for this wallet yet. Bind this device and it will appear here once Firestore has it.", 14, false, UiColors.textSecondary()));
                 addBind();
             }));
@@ -97,7 +99,14 @@ public class TrustScoreActivity extends AppCompatActivity {
         boolean bound = Boolean.TRUE.equals(person.get("bound"));
         int score = num(person.get("trustScore"));
         int vouches = num(person.get("effectiveVouchCount"));
-        root.addView(scoreCard(score));
+        if (person.get("trustPercent") instanceof Number) {
+            root.addView(heroCard(person));
+            root.addView(partsCard(person));
+            root.addView(engagementCard(person));
+        } else {
+            root.addView(scoreCard(score));
+            root.addView(note("The node has not worked out a percentage for this wallet yet. It appears after the next confirmed action."));
+        }
         LinearLayout account = cardBox();
         account.addView(tv("Account", 16, true, UiColors.textPrimary()));
         TextView who = note("Reading your profile…");
@@ -121,7 +130,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         }
 
         LinearLayout saved = cardBox();
-        saved.addView(tv("Saved by the network", 16, true, UiColors.textPrimary()));
+        saved.addView(tv("Personhood detail", 16, true, UiColors.textPrimary()));
         saved.addView(metricRow(R.drawable.ic_phone, "Device", bound ? "10" : "0",
                 "Binding this phone is worth 10. This is the figure the network saved."));
         saved.addView(metricRow(R.drawable.ic_person, "Vouches", String.valueOf(Math.min(vouches, 8) * 2),
@@ -243,6 +252,96 @@ public class TrustScoreActivity extends AppCompatActivity {
         row.addView(top);
         row.addView(tv(note, 12, false, UiColors.textSecondary()));
         return row;
+    }
+
+
+    private static final String[][] TIERS = {{"Bronze", "0"}, {"Silver", "40"}, {"Gold", "65"}, {"Platinum", "85"}};
+
+    private LinearLayout heroCard(java.util.Map<String, Object> p) {
+        int percent = Math.max(0, Math.min(100, num(p.get("trustPercent"))));
+        String tier = p.get("trustTier") == null ? com.harvana.app.trust.ProfileTrust.tierFor(percent) : String.valueOf(p.get("trustTier"));
+        int color = com.harvana.app.trust.ProfileTrust.tierColor(tier);
+        LinearLayout c = cardBox();
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.BOTTOM);
+        TextView big = tv(percent + "%", 44, true, color);
+        big.setPadding(0, 0, dp(10), 0);
+        TextView pill = tv(tier, 14, true, color);
+        pill.setPadding(dp(10), dp(4), dp(10), dp(4));
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(dp(12));
+        bg.setColor((color & 0x00FFFFFF) | 0x28000000);
+        bg.setStroke(dp(1), (color & 0x00FFFFFF) | 0x78000000);
+        pill.setBackground(bg);
+        row.addView(big);
+        row.addView(pill);
+        c.addView(row);
+        c.addView(bar(percent, 100, color));
+        String next = null;
+        for (String[] t : TIERS) {
+            int at = Integer.parseInt(t[1]);
+            if (at > percent) { next = (at - percent) + " points to " + t[0]; break; }
+        }
+        c.addView(note(next == null ? "Top tier. Keep paying on time and the score holds." : next + ". Bronze, Silver at 40, Gold at 65, Platinum at 85."));
+        c.addView(note("Everyone who opens your profile sees this number. You cannot hide or change it: the node works it out."));
+        return c;
+    }
+
+    private LinearLayout partsCard(java.util.Map<String, Object> p) {
+        LinearLayout c = cardBox();
+        c.addView(tv("What it is made of", 16, true, UiColors.textPrimary()));
+        c.addView(partRow("Personhood", 30, num(p.get("trustPersonhoodPct")),
+                "Bind this device and get vouched for by established members."));
+        c.addView(partRow("Reliability", 25, num(p.get("trustReliabilityPct")),
+                "Pay every circle contribution in full and on time. It counts fully after 5 obligations."));
+        c.addView(partRow("Conduct", 15, num(p.get("trustConductPct")),
+                "Finish circles cleanly. Finish 3 for the full part; each default takes half of it away."));
+        c.addView(partRow("Tenure", 15, num(p.get("trustTenurePct")),
+                "Time on the network and number of confirmed actions. Full at a year and 50 actions."));
+        c.addView(partRow("Engagement", 15, num(p.get("trustEngagementPct")),
+                "Read Learn Hub posts to the end, on different days, and gift creators."));
+        return c;
+    }
+
+    private LinearLayout partRow(String name, int weight, int pct, String tip) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.VERTICAL);
+        row.setPadding(0, dp(12), 0, 0);
+        TextView top = tv(name + "   " + pct + "%   \u00b7   worth " + weight + " of 100", 14, true, UiColors.textPrimary());
+        row.addView(top);
+        row.addView(bar(pct, 100, UiColors.accent()));
+        row.addView(note(tip));
+        return row;
+    }
+
+    private LinearLayout engagementCard(java.util.Map<String, Object> p) {
+        LinearLayout c = cardBox();
+        c.addView(tv("Your Learn Hub activity", 16, true, UiColors.textPrimary()));
+        c.addView(note(num(p.get("verifiedReads")) + " verified reads   \u00b7   " + num(p.get("activeDays30")) + " active days in the last 30   \u00b7   "
+                + num(p.get("giftsSent")) + " gifts sent"));
+        c.addView(note("Only reads the network verified count: you reached the end, stayed long enough and read each post once. "
+                + "Reading that looks automated counts as zero."));
+        MaterialButton open = new MaterialButton(this);
+        open.setAllCaps(false);
+        open.setText("See my activity");
+        open.setOnClickListener(v -> startActivity(new android.content.Intent(this, ActivityStatsActivity.class)));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(10);
+        c.addView(open, lp);
+        return c;
+    }
+
+    private android.widget.ProgressBar bar(int value, int max, int color) {
+        android.widget.ProgressBar b = new android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        b.setMax(max);
+        b.setProgress(Math.max(0, Math.min(max, value)));
+        b.setProgressTintList(android.content.res.ColorStateList.valueOf(color));
+        b.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf((UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(10));
+        lp.topMargin = dp(8);
+        b.setLayoutParams(lp);
+        return b;
     }
 
     private LinearLayout scoreCard(int score) {

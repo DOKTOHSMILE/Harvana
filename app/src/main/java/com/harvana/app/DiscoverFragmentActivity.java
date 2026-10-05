@@ -663,6 +663,7 @@ public class DiscoverFragmentActivity extends Fragment {
 							int cut = label.indexOf(" · ");
 							if (cut > 0) label = label.substring(0, cut);
 							cell.setText(label);
+							if (score.percent >= 0) { cell.setTextColor(com.harvana.app.trust.ProfileTrust.tierColor(score.tier)); return; }
 							if (score.summary.startsWith("High trust")) cell.setTextColor(0xFF4CAF50);
 							else if (score.summary.startsWith("Established")) cell.setTextColor(0xFFFF9800);
 						});

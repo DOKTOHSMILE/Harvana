@@ -1007,8 +1007,9 @@ public class HomeFragmentActivity extends Fragment {
 											return;
 										}
 										trust.setText(score.summary);
-										if (verified != null && score.summary.startsWith("High trust")) {
-											verified.setText("High trust");
+										boolean strong = score.percent >= 65 || score.summary.startsWith("High trust");
+										if (verified != null && strong) {
+											verified.setText(score.percent >= 0 ? score.tier : "High trust");
 											verified.setVisibility(View.VISIBLE);
 										}
 									});
@@ -1232,12 +1233,14 @@ public class HomeFragmentActivity extends Fragment {
 		com.harvana.app.trust.NetworkTrust.wallet(address, score -> {
 			if (!isAdded() || getActivity() == null) return;
 			getActivity().runOnUiThread(() -> {
-				if (text_val_trust != null) text_val_trust.setText(score.published ? String.valueOf(score.score) : "—");
+				boolean pct = score.percent >= 0;
+				if (text_val_trust != null) text_val_trust.setText(pct ? score.percent + "%" : score.published ? String.valueOf(score.score) : "\u2014");
 				if (ring_trust_score != null) {
-					ring_trust_score.setMax(com.harvana.app.trust.NetworkTrust.MAX);
-					ring_trust_score.setProgress(Math.max(0, Math.min(com.harvana.app.trust.NetworkTrust.MAX, score.score)));
+					int max = pct ? 100 : com.harvana.app.trust.NetworkTrust.MAX;
+					ring_trust_score.setMax(max);
+					ring_trust_score.setProgress(Math.max(0, Math.min(max, pct ? score.percent : score.score)));
 				}
-				if (text_sub_trust != null) text_sub_trust.setText(score.summary.isEmpty() ? "of 26" : score.summary);
+				if (text_sub_trust != null) text_sub_trust.setText(pct ? (score.tier.isEmpty() ? "trust score" : score.tier) : (score.summary.isEmpty() ? "of 26" : score.summary));
 			});
 		});
 	}

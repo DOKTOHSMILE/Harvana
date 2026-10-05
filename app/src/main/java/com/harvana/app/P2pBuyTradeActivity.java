@@ -581,7 +581,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 							_applyAvatar(name, iconUrl, seller_avatar, seller_initial);
 							com.harvana.app.trust.NetworkTrust.wallet(sellerAddress, score -> runOnUiThread(() -> {
 								String line = _shortAddr(sellerAddress);
-								if (score.published) line = line + " · " + score.score + " / 26";
+								if (score.published) line = line + " · " + score.label();
 								seller_meta.setText(line);
 							}));
 						});

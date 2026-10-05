@@ -746,7 +746,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 			final String addr = wallet;
 			com.harvana.app.trust.NetworkTrust.wallet(addr, score -> {
 				if (getActivity() == null) return;
-				getActivity().runOnUiThread(() -> trust.setText(score.published ? (score.score + " / 26") : "—"));
+				getActivity().runOnUiThread(() -> trust.setText(score.label()));
 			});
 		}
 		

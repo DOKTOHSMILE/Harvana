@@ -41,6 +41,15 @@ public final class GroupChatSheet {
 
     private GroupChatSheet() {}
 
+    public interface OnLink {
+        void onLink(Map<String, Object> link);
+    }
+
+    /** One link, not saved yet. Used while a group is still being created. */
+    public static void pickOne(Activity activity, OnLink onLink) {
+        askAdd(activity, null, new ArrayList<Link>(), onLink);
+    }
+
     public static void show(Activity activity, String groupId) {
         if (activity == null || groupId == null || groupId.isEmpty()) return;
         GroupFirestoreManager.getInstance(activity).getGroup(groupId, new GroupFirestoreManager.DocCallback() {
@@ -107,7 +116,7 @@ public final class GroupChatSheet {
             if (links.size() < MAX_LINKS) {
                 add.setOnClickListener(v -> {
                     sheet.dismiss();
-                    askAdd(activity, groupId, links);
+                    askAdd(activity, groupId, links, null);
                 });
             }
             root.addView(add);
@@ -185,7 +194,7 @@ public final class GroupChatSheet {
         }
     }
 
-    private static void askAdd(Activity activity, String groupId, List<Link> existing) {
+    private static void askAdd(Activity activity, String groupId, List<Link> existing, OnLink onLink) {
         if (activity.isFinishing()) return;
         BottomSheetDialog sheet = new BottomSheetDialog(activity, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
         float d = activity.getResources().getDisplayMetrics().density;
@@ -258,7 +267,13 @@ public final class GroupChatSheet {
             if (name.isEmpty()) name = kindName(kind[0]);
             if (name.length() > 40) name = name.substring(0, 40);
             List<Link> next = new ArrayList<>(existing);
-            next.add(new Link(String.valueOf(System.currentTimeMillis()), kind[0], name, cleaned));
+            Link made = new Link(String.valueOf(System.currentTimeMillis()), kind[0], name, cleaned);
+            next.add(made);
+            if (onLink != null) {
+                sheet.dismiss();
+                onLink.onLink(made.toMap());
+                return;
+            }
             v.setEnabled(false);
             save(activity, groupId, next, () -> {
                 sheet.dismiss();

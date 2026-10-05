@@ -303,6 +303,9 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private CardView cardview16;
 	private TextView cancel_btn;
 	private TextView create_group_btn;
+	private TextView tv_chat_links_list;
+	private TextView btn_add_chat_link;
+	private final ArrayList<HashMap<String, Object>> pendingChatLinks = new ArrayList<>();
 	
 	private SharedPreferences groupsp;
 	private SharedPreferences authsp;
@@ -595,10 +598,43 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		cardview16 = findViewById(R.id.cardview16);
 		cancel_btn = findViewById(R.id.cancel_btn);
 		create_group_btn = findViewById(R.id.create_group_btn);
+		tv_chat_links_list = findViewById(R.id.tv_chat_links_list);
+		btn_add_chat_link = findViewById(R.id.btn_add_chat_link);
 		groupsp = getSharedPreferences("groupsp", Activity.MODE_PRIVATE);
 		authsp = getSharedPreferences("authsp", Activity.MODE_PRIVATE);
 		v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 		fauth = FirebaseAuth.getInstance();
+		if (btn_add_chat_link != null) {
+			btn_add_chat_link.setOnClickListener(v -> {
+				if (pendingChatLinks.size() >= 8) {
+					SketchwareUtil.showMessage(getApplicationContext(), "A group can have 8 chats.");
+					return;
+				}
+				com.harvana.app.group.GroupChatSheet.pickOne(this, link -> runOnUiThread(() -> {
+					HashMap<String, Object> copy = new HashMap<>();
+					if (link != null) copy.putAll(link);
+					pendingChatLinks.add(copy);
+					_paintPendingChats();
+				}));
+			});
+		}
+		if (tv_chat_links_list != null) {
+			tv_chat_links_list.setOnClickListener(v -> {
+				if (pendingChatLinks.isEmpty()) return;
+				String[] names = new String[pendingChatLinks.size()];
+				for (int i = 0; i < pendingChatLinks.size(); i++) {
+					Object label = pendingChatLinks.get(i).get("label");
+					names[i] = label == null ? "Chat" : String.valueOf(label);
+				}
+				new androidx.appcompat.app.AlertDialog.Builder(this)
+						.setTitle("Remove a chat")
+						.setItems(names, (d, which) -> {
+							if (which >= 0 && which < pendingChatLinks.size()) pendingChatLinks.remove(which);
+							_paintPendingChats();
+						})
+						.show();
+			});
+		}
 		
 		button1.setOnClickListener(_v -> {
 			if (!(rules_edittext2.getText().toString().trim().equals(""))) {
@@ -1019,7 +1055,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			blurb = "Everyone pays the same amount each round. One member receives the pot each round until every slot has had a turn. 3 to 12 members. This group runs on the Harvana network.";
 		} else if ("Fixed Contribution".equals(type)) {
 			title = "New goal group";
-			blurb = "The group saves toward one target. Each day of the month is its own box, and a payment marks that date. Money leaves only by the disbursement rule you set here.";
+			blurb = "The group saves toward one target. You can deposit any day until it is reached. A day you skip is not a missed payment. Money leaves only by the rule you set here.";
 		} else if ("Accumulative Funds".equals(type)) {
 			title = "New savings group";
 			blurb = "Each member keeps their own savings. Every payment is recorded as a small box with the date written inside. Set the interest and when members may withdraw.";
@@ -1520,6 +1556,21 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		});
 	}
 	
+	private void _paintPendingChats() {
+		if (tv_chat_links_list == null) return;
+		if (pendingChatLinks.isEmpty()) {
+			tv_chat_links_list.setText("None yet. Tap a saved chat here to remove it.");
+			return;
+		}
+		StringBuilder text = new StringBuilder();
+		for (int i = 0; i < pendingChatLinks.size(); i++) {
+			if (i > 0) text.append('\n');
+			Object label = pendingChatLinks.get(i).get("label");
+			text.append(label == null ? "Chat" : label).append(" · tap to remove");
+		}
+		tv_chat_links_list.setText(text.toString());
+	}
+
 	public void _submitNewGroupData(final String _realGroupWalletAddress) {
 		com.harvana.app.trust.AppActivity.note(this, "GROUP", "Created a group");
 		final String newGroupId = java.util.UUID.randomUUID().toString();
@@ -1591,6 +1642,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			newGroupMap.put("onChain", true);
 		}
 		newGroupMap.put("allowLoans", allowLoans);
+		if (!pendingChatLinks.isEmpty()) newGroupMap.put("chatLinks", new ArrayList<>(pendingChatLinks));
 		if (allowLoans && !newGroupMap.containsKey("loanInterestRate")) {
 			newGroupMap.put("loanInterestRate", 0.0);
 			newGroupMap.put("loanInterestPeriod", "MONTHLY");

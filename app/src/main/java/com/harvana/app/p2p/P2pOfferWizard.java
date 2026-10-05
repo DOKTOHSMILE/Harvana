@@ -370,7 +370,7 @@ public final class P2pOfferWizard {
 					tvNote.setText(String.format(Locale.US,
 						"Your price is significantly different from the market rate of %s.",
 						P2pMoney.perHarv(indexPrice, currency)));
-					tvNote.setTextColor(a.getResources().getColor(R.color.colorWarning)); // colorWarning
+					tvNote.setTextColor(tvNote.getResources().getColor(R.color.colorWarning)); // colorWarning
 					return;
 				}
 			}
@@ -387,7 +387,7 @@ public final class P2pOfferWizard {
 			double calculated = indexPrice * (1 + (margin / 100.0));
 			if (margin < -20 || margin > 20) {
 				tvCalculatedPrice.setText("Margin must be between -20% and +20%.");
-				tvCalculatedPrice.setTextColor(a.getResources().getColor(R.color.colorError)); // colorError
+				tvCalculatedPrice.setTextColor(tvCalculatedPrice.getResources().getColor(R.color.colorError)); // colorError
 			} else {
 				tvCalculatedPrice.setText(String.format(Locale.US, "Current price: %s (market %s)",
 					P2pMoney.perHarv(calculated, currency), P2pMoney.perHarv(indexPrice, currency)));

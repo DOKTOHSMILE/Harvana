@@ -198,3 +198,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 - The top score line shows the node percentage whenever the node has one (it showed "— / 26" while the card below said 16% Bronze).
 - Sample text in the layout (name, "Lagos, Nigeria", phone, DOB, "Tier 2 · BVN/NIN verified") is gone; empty fields read "Not provided"; the address skips empty parts.
 - Phone: a stored number made of two joined numbers is shown as the first one, and saving no longer joins a code onto a number that already starts with it.
+
+## 5 Oct 2026 — Renamed to Harvana for the fresh genesis
+- Signing prefixes (`HARVANA_*`), the auth message and the miner package name now use the new spelling, matching the node. This build only works against a node built from the matching node commit. The domain is unchanged until harvana is registered.

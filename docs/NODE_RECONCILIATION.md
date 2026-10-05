@@ -1,6 +1,13 @@
 # Node reconciliation report (Tier 5, partial)
 
-Reference: node repo `capital-oracle-projects` (read-only; nothing there was modified).
+> **Status note (5 Oct 2026).** This report is the partial Tier 5 pass of 29 Sep 2026 and parts of it are now out of date. The app
+> now has signed group clients (`sync/NodeGroupClient`, `group/NodeGroupActivity`, `group/NodePayActions`, `group/NodeSettingsPanel`),
+> the referral consent signature, trust percentages published by the node, and named badges (`trust/NodeBadges`). Group logic is no
+> longer Firestore-only for groups created on the network. Where this page says the app has no client for a group action, read it as
+> "partly done"; `GROUP_SYNC_AND_VOTING.md` and `UPDATES.md` hold the current state. The node repo was edited this session at the
+> owner's direction (trust percentages, referral consent, circle creation, listings).
+
+Reference: node repo `capital-oracle-projects`.
 Scope of this pass: signed-action canonical messages and endpoint paths for what the app actually calls.
 
 ## Signed actions
@@ -26,7 +33,7 @@ UI has no fields for these. Listing creation will fail signature verification un
 Not guessed.
 
 ## Node actions the app has no client for
-The node defines 41 `getCanonicalMessage()` formats. The app implements none of the `HARVANA_*_V1` group/Circle/
+The node defines 41 `getCanonicalMessage()` formats. As of 29 Sep the app implemented none of the `HARVANNA_*_V1` group/Circle/
 Accumulative/Fixed/GenLoan/staking/referral/identity-link actions (grep finds no such string). Group logic in the
 app is Firestore-only (`GroupPayoutManager`, `GroupLoanManager`, ...), i.e. it is not wired to the on-chain group
 protocol at all. That is a feature build, not a fix, and needs a decision on scope.

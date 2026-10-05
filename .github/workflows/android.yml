@@ -20,6 +20,11 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Generate the Gradle config from app/module.toml
+      # CodeAssist builds from app/module.toml, so the toml is the one source of truth. This writes app/build.gradle from it
+      # (SDK levels, version, build types and every dependency) so CI builds exactly what CodeAssist builds.
+      run: python3 tools/module_toml_to_gradle.py
+
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
       with:

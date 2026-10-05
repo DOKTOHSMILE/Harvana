@@ -212,7 +212,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         bind.setText("Bind this device");
         bind.setOnClickListener(v -> bindDevice());
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(12);
+        lp.topMargin = dp(16);
         root.addView(bind, lp);
     }
 
@@ -283,7 +283,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         LinearLayout wrap = new LinearLayout(this);
         wrap.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams wlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        wlp.topMargin = dp(12);
+        wlp.topMargin = dp(8);
         wrap.setLayoutParams(wlp);
 
         // Each page is a whole tier screen: the tier card, the road to that tier and the next badge. Built up front so the pager can be
@@ -294,7 +294,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         for (int i = 0; i < TIERS.length; i++) {
             LinearLayout page = new LinearLayout(this);
             page.setOrientation(LinearLayout.VERTICAL);
-            page.addView(tierPage(i, current, percent), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(176)));
+            page.addView(tierPage(i, current, percent), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(184)));
             page.addView(journeyCard(p, i));
             page.addView(nextBadgeCard(p));
             page.measure(View.MeasureSpec.makeMeasureSpec(screenW, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
@@ -318,12 +318,12 @@ public class TrustScoreActivity extends AppCompatActivity {
             @Override public int getItemCount() { return TIERS.length; }
         });
         pager.setCurrentItem(current, false);
-        wrap.addView(pager, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, tallest + dp(4)));
+        wrap.addView(pager, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, tallest + dp(12)));
         tintScreen(current, false);
 
         final LinearLayout dots = new LinearLayout(this);
         dots.setGravity(Gravity.CENTER);
-        dots.setPadding(0, dp(8), 0, 0);
+        dots.setPadding(0, dp(12), 0, dp(4));
         final View[] dot = new View[TIERS.length];
         for (int i = 0; i < TIERS.length; i++) {
             dot[i] = new View(this);
@@ -373,7 +373,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         LinearLayout page = new LinearLayout(this);
         page.setOrientation(LinearLayout.HORIZONTAL);
         page.setGravity(Gravity.CENTER_VERTICAL);
-        page.setPadding(dp(20), dp(16), dp(20), dp(16));
+        page.setPadding(dp(24), dp(20), dp(24), dp(20));
         GradientDrawable bg = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
                 new int[]{blend(UiColors.surface(), color, 0.30f), blend(UiColors.surface(), color, 0.06f)});
         bg.setCornerRadius(dp(20));
@@ -396,7 +396,7 @@ public class TrustScoreActivity extends AppCompatActivity {
 
         LinearLayout text = new LinearLayout(this);
         text.setOrientation(LinearLayout.VERTICAL);
-        text.setPadding(dp(18), 0, 0, 0);
+        text.setPadding(dp(20), 0, dp(4), 0);
         text.addView(tv(name, 28, true, UiColors.textPrimary()));
         String status = i < current ? "Surpassed" : i == current ? "Current" : "Yet to unlock";
         text.addView(tv(status, 16, true, locked ? UiColors.textSecondary() : color));
@@ -500,7 +500,7 @@ public class TrustScoreActivity extends AppCompatActivity {
     private LinearLayout partRow(String name, int weight, int pct, String tip) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.VERTICAL);
-        row.setPadding(0, dp(12), 0, 0);
+        row.setPadding(0, dp(18), 0, 0);
         TextView top = tv(name + "   " + pct + "%   \u00b7   worth " + weight + " of 100", 14, true, UiColors.textPrimary());
         row.addView(top);
         row.addView(bar(pct, 100, UiColors.accent()));
@@ -520,7 +520,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         open.setText("See my activity");
         open.setOnClickListener(v -> startActivity(new android.content.Intent(this, ActivityStatsActivity.class)));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(10);
+        lp.topMargin = dp(16);
         c.addView(open, lp);
         return c;
     }
@@ -532,7 +532,8 @@ public class TrustScoreActivity extends AppCompatActivity {
         b.setProgressTintList(android.content.res.ColorStateList.valueOf(color));
         b.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf((UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(10));
-        lp.topMargin = dp(8);
+        lp.topMargin = dp(10);
+        lp.bottomMargin = dp(4);
         b.setLayoutParams(lp);
         return b;
     }
@@ -555,16 +556,16 @@ public class TrustScoreActivity extends AppCompatActivity {
     private LinearLayout cardBox() {
         LinearLayout c = new LinearLayout(this);
         c.setOrientation(LinearLayout.VERTICAL);
-        int p = dp(16);
+        int p = dp(20);
         c.setPadding(p, p, p, p);
         GradientDrawable g = new GradientDrawable();
         g.setColor(UiColors.surface());
-        g.setCornerRadius(dp(16));
+        g.setCornerRadius(dp(18));
         g.setStroke(dp(1), (UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000);
         c.setBackground(g);
         c.setElevation(dp(2));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(12);
+        lp.topMargin = dp(16);
         c.setLayoutParams(lp);
         return c;
     }
@@ -573,7 +574,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, dp(12), 0, 0);
+        row.setPadding(0, dp(16), 0, 0);
         ImageView iv = new ImageView(this);
         iv.setImageDrawable(ContextCompat.getDrawable(this, icon));
         iv.setColorFilter(UiColors.textSecondary());
@@ -581,7 +582,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         row.addView(iv, new LinearLayout.LayoutParams(s, s));
         LinearLayout text = new LinearLayout(this);
         text.setOrientation(LinearLayout.VERTICAL);
-        text.setPadding(dp(12), 0, 0, 0);
+        text.setPadding(dp(14), 0, 0, 0);
         text.addView(tv(name + "   " + value, 16, true, UiColors.textPrimary()));
         text.addView(note(hint));
         row.addView(text, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
@@ -589,8 +590,9 @@ public class TrustScoreActivity extends AppCompatActivity {
     }
 
     private TextView note(String t) {
-        TextView v = tv(t, 12, false, UiColors.textSecondary());
-        v.setPadding(0, dp(2), 0, 0);
+        TextView v = tv(t, 12.5f, false, UiColors.textSecondary());
+        v.setPadding(0, dp(6), 0, dp(2));
+        v.setLineSpacing(dp(2), 1f);
         return v;
     }
 
@@ -602,7 +604,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         v.setTextSize(sp);
         v.setTextColor(color);
         if (bold) v.setTypeface(null, Typeface.BOLD);
-        v.setPadding(0, dp(2), 0, dp(2));
+        v.setPadding(0, dp(4), 0, dp(4));
         return v;
     }
 }

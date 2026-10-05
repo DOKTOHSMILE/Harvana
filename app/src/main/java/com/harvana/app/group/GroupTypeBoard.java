@@ -231,12 +231,8 @@ public final class GroupTypeBoard {
         boolean reached = goalReached(group, raised, target);
         String who = beneficiaryPhrase(group);
         String subtitle = money(raised) + " raised of " + money(target);
-        if (reached) {
-            subtitle += ". The goal was reached, so the network sent the pot to " + who
-                    + ". Deposits are closed. Nobody voted — that was the rule.";
-        } else {
-            subtitle += ". Deposit any day until the goal is reached. A quiet day is not a missed payment.";
-        }
+        subtitle += ". " + com.harvana.app.engine.FixedGoalText.sentence(str(group, "disbursementRule", ""), str(group, "state", ""),
+                reached, money(raised), who);
         return new Board(FIXED, "GOAL", "Shared goal", subtitle,
                 "A box is a deposit, with the date inside. This goal does not mark a quiet day as missed.",
                 4, who, cells);
@@ -500,12 +496,8 @@ public final class GroupTypeBoard {
         boolean reached = goalReached(group, raised, target);
         String who = beneficiaryPhrase(group);
         String subtitle = money(raised) + " raised of " + money(target);
-        if (reached) {
-            subtitle += ". The goal was reached, so the network sent the pot to " + who
-                    + ". Deposits are closed. Nobody voted — that was the rule.";
-        } else {
-            subtitle += ". Deposit any day until the goal is reached. A quiet day is not a missed payment.";
-        }
+        subtitle += ". " + com.harvana.app.engine.FixedGoalText.sentence(str(group, "disbursementRule", ""), str(group, "state", ""),
+                reached, money(raised), who);
         if (!rule.isEmpty()) subtitle += " " + rule.replace('_', ' ').toLowerCase(Locale.US) + ".";
         return new Board(FIXED, "GOAL", "Shared goal", subtitle,
                 "A box is a deposit, with the date inside. This goal does not mark a quiet day as missed.",

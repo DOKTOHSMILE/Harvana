@@ -24,7 +24,7 @@ public final class NotificationSync {
         final Context c = ctx.getApplicationContext();
         if (FirebaseAuth.getInstance().getCurrentUser() == null) { if (done != null) done.run(); return; }
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        final AtomicInteger pending = new AtomicInteger(6);
+        final AtomicInteger pending = new AtomicInteger(8);
         final Runnable finish = () -> { if (pending.decrementAndGet() == 0 && done != null) done.run(); };
 
         // 1. Invitations
@@ -62,6 +62,22 @@ public final class NotificationSync {
 
         // 5. Wallet: money received, sent and payments signed (from the node's confirmed history)
         WalletTxNotifier.run(c, events -> finish.run());
+
+        // 7. Pinches from friends
+        com.harvana.app.social.PinchStore.poll(c, uid, finish);
+
+        // 8. Referrals: move my own along, and tell me when someone names me as their referrer
+        com.harvana.app.social.ReferralStore.sync(c, (line, err) -> {
+            com.harvana.app.social.ReferralStore.asksForMe((asks, e2) -> {
+                for (com.harvana.app.social.ReferralStore.Ask a : asks) {
+                    if (a.consented()) continue;
+                    NotificationCenter.post(c, NotificationCenter.SOCIAL, "referral_ask_" + a.fromUid,
+                        "Someone named you as their referrer",
+                        "Open Friends, then Referrals, to confirm only if you know them. If they misbehave in groups, your trust score drops too.", "", -1);
+                }
+                finish.run();
+            });
+        });
 
         // 6. Contribution dues, including after the member has left the app
         DueAlertSync.run(c, uid, finish);

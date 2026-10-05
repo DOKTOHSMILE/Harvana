@@ -784,6 +784,19 @@ public class GroupDetailsActivity extends AppCompatActivity {
 	private void _loadTotalGroupContributions() {
 		if (groupId == null || groupId.isEmpty()) return;
 		
+		// A fixed goal lives on the network: deposits are on the chain, not in the Firestore payments list below, so that list
+		// reads 0 for it. Collected is what the network says was raised, whether or not it has been paid out yet.
+		if ("FIXED".equals(com.harvana.app.sync.NodeGroupClient.familyOf(groupId))) {
+			com.harvana.app.sync.NodeGroupClient.getFixedGroup(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
+				@Override public void onSuccess(org.json.JSONObject json) {
+					final double raised = json.optLong("raisedAmountRaw", 0L) / 100_000_000.0;
+					runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(com.harvana.app.wallet.BalanceFormatter.smart(raised)); });
+				}
+				@Override public void onError(String error) { /* keep what is shown */ }
+			});
+			return;
+		}
+		
 		Map<String, Object> cachedTotal = com.harvana.app.offline.OfflineCacheManager.load(
 		getApplicationContext(), "group_total_contributions_" + groupId);
 		if (cachedTotal != null && cachedTotal.get("total") instanceof Number) {

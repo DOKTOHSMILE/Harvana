@@ -286,10 +286,14 @@ public final class NodeGroupClient {
         }, cb);
     }
 
-    public static void recordReferral(Context c, String referred, String referrer, Callback cb) {
+    /** Signed by the referred wallet here; {@code consentKey} and {@code consentSig} are the referrer\'s own signature, given earlier. */
+    public static void recordReferral(Context c, String referred, String referrer, String consentKey, String consentSig, Callback cb) {
         act(c, referred, "/api/v1/referral/record", new Spec() {
             public String canonical(long n) { return GroupCanonical.recordReferral(referred, referrer, n); }
-            public void fill(JSONObject b, long n) throws JSONException { b.put("referredAddress", referred).put("referrerAddress", referrer); }
+            public void fill(JSONObject b, long n) throws JSONException {
+                b.put("referredAddress", referred).put("referrerAddress", referrer)
+                 .put("referrerPublicKey", consentKey).put("referrerSignature", consentSig);
+            }
         }, cb);
     }
 

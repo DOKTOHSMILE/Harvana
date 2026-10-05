@@ -104,6 +104,7 @@ public class NotificationsActivity extends AppCompatActivity {
         Intent i;
         switch (it.type) {
             case NotificationCenter.INVITE: i = new Intent(this, InvitesActivity.class); break;
+            case NotificationCenter.SOCIAL: i = new Intent(this, com.harvana.app.social.FriendsActivity.class); break;
             case NotificationCenter.TX:
                 i = new Intent(this, MainActivity.class).putExtra("open_fragment", "asset")
                     .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);

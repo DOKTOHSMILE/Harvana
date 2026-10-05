@@ -36,21 +36,21 @@ public final class FixedSnapshot {
         boolean goalMet = target > 0 && raised >= target;
         boolean completed = "COMPLETED".equals(s.state);
         boolean open = "ACTIVE".equals(s.state) || s.state.isEmpty();
-        if (open && !goalMet && !completed) {
-            s.actions.add(new GroupAction(GroupAction.FIXED_DEPOSIT, "Deposit", true));
+        long left = raised - lng(group, "totalDisbursedRaw");
+        if (open && !goalMet && !completed) s.actions.add(new GroupAction(GroupAction.FIXED_DEPOSIT, "Deposit", true));
+        // Reaching the goal closes deposits. It does not move the money: under every rule except "all at once" the pot stays in the
+        // group wallet until the admin (or a member, for grants) asks and the group votes, so those actions stay available.
+        if (open && !completed && left > 0) {
             if ("ADMIN_TRIGGERED".equals(rule) && admin) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_DISBURSEMENT, "Request payout (group votes)", false));
             if ("MILESTONE_BASED".equals(rule) && admin) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_MILESTONE, "Request a milestone release", false));
             if ("EMERGENCY_GRANT".equals(rule) && isMember) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_GRANT, "Ask for an emergency grant", false));
-        } else if (goalMet || completed) {
-            if ("ALL_AT_ONCE_AT_GOAL".equals(rule)) {
-                String who = str(group, "beneficiaryAddress");
-                who = who.length() > 14 ? who.substring(0, 8) + "…" + who.substring(who.length() - 4) : who;
-                if (who.isEmpty()) who = "the wallet chosen when this group was created";
-                s.actions.add(GroupAction.closed("Goal reached. " + harv(raised) + " was sent to " + who + ". That wallet was chosen at creation. Nobody voted."));
-            } else {
-                s.actions.add(GroupAction.closed("This goal is closed. Raised " + harv(raised) + " of " + harv(target) + "."));
-            }
-        } else if (!s.state.isEmpty()) {
+        }
+        if (goalMet || completed) {
+            String who = str(group, "beneficiaryAddress");
+            who = who.length() > 14 ? who.substring(0, 8) + "…" + who.substring(who.length() - 4) : who;
+            if (who.isEmpty()) who = "the wallet chosen when this group was created";
+            s.actions.add(GroupAction.closed(FixedGoalText.sentence(rule, s.state, goalMet, harv(raised), who)));
+        } else if (!open && !s.state.isEmpty()) {
             s.actions.add(GroupAction.closed("Deposits are paused while this goal is " + s.state + "."));
         }
         if ("ALL_AT_ONCE_AT_GOAL".equals(rule)) {

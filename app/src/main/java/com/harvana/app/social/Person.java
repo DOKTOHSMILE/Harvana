@@ -26,6 +26,7 @@ public final class Person {
         String name = str(m.get("name"));
         if (name.isEmpty()) name = (str(m.get("first_name")) + " " + str(m.get("last_name"))).trim();
         String photo = str(m.get("photoUrl"));
+        if (photo.isEmpty()) photo = str(m.get("icon"));
         if (photo.isEmpty()) photo = str(m.get("avatarUrl"));
         if (photo.isEmpty()) photo = str(m.get("profileImage"));
         return new Person(uid, user, name, photo);

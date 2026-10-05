@@ -184,4 +184,9 @@ public final class GroupCanonical {
         return "HARVANA_ACCUM_BACKPAY_V1:" + groupId + ":" + lineId + ":" + memberAddress + ":"
             + String.join(",", new java.util.TreeSet<>(dates)) + ":" + nonce;
     }
+
+    /** CureDefaultRequest.getCanonicalMessage(): the member who defaulted puts back what the default took from their own bond. */
+    public static String cureDefault(String circleId, String memberAddress, long nonce) {
+        return "HARVANA_CURE_DEFAULT_V1:" + circleId + ":" + memberAddress + ":" + nonce;
+    }
 }

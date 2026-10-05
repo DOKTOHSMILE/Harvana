@@ -206,8 +206,17 @@ public class NodeGroupActivity extends AppCompatActivity {
                 for (Map<String, Object> m : found) {
                     final String addr = String.valueOf(m.get("address"));
                     NodeGroupClient.getForgiveness(nodeId, addr, new NodeGroupClient.Callback() {
-                        @Override public void onSuccess(JSONObject p) { m.put("proposal", JsonMaps.toMap(p)); finish(); }
-                        @Override public void onError(String e) { finish(); }
+                        @Override public void onSuccess(JSONObject p) { m.put("proposal", JsonMaps.toMap(p)); next(); }
+                        @Override public void onError(String e) { next(); }
+                        /** My own default also needs the cure offer: what it costs and until when. */
+                        private void next() {
+                            if (me != null && addr.equalsIgnoreCase(me)) {
+                                NodeGroupClient.getCureOffer(nodeId, addr, new NodeGroupClient.Callback() {
+                                    @Override public void onSuccess(JSONObject o) { m.put("cureOffer", JsonMaps.toMap(o)); finish(); }
+                                    @Override public void onError(String e) { finish(); }
+                                });
+                            } else finish();
+                        }
                         private void finish() {
                             synchronized (defaulted) { if (!defaulted.contains(m)) defaulted.add(m); }
                             if (pending.decrementAndGet() == 0) done.run();
@@ -414,6 +423,7 @@ public class NodeGroupActivity extends AppCompatActivity {
             LinearLayout c = CircleUi.card(this);
             boolean mineCase = addr.equalsIgnoreCase(me == null ? "" : me);
             c.addView(CircleUi.text(this, (mineCase ? "You" : shortAddr(addr)) + " defaulted", 14, R.color.colorTextPrimary, true));
+            if (mineCase) renderCure(c, (Map<String, Object>) m.get("cureOffer"));
             @SuppressWarnings("unchecked") Map<String, Object> proposal = (Map<String, Object>) m.get("proposal");
             boolean open = proposal != null && "PENDING".equals(str(proposal, "status"));
             if (!open) {
@@ -447,6 +457,30 @@ public class NodeGroupActivity extends AppCompatActivity {
             }
             content.addView(c);
         }
+    }
+
+    /** My own default: what putting it right costs and by when. The node fixes the amount and decides if it is allowed. */
+    private void renderCure(LinearLayout card, Map<String, Object> offer) {
+        if (offer == null) return;
+        boolean eligible = Boolean.TRUE.equals(offer.get("eligible"));
+        long amount = num(offer, "amountRaw");
+        if (!eligible) {
+            String why = str(offer, "reason");
+            String text = "SHORTFALL_NOT_COVERED_BY_BOND".equals(why) ? "Your bond did not cover everything you missed, so only the group can forgive this default."
+                    : "CURE_WINDOW_CLOSED".equals(why) ? "The 14 days to put this right have passed. The group can still vote to forgive it."
+                    : "CURE_LIMIT_REACHED".equals(why) ? "You have already put " + num(offer, "curesAllowed") + " defaults right. The group can still vote to forgive this one."
+                    : "";
+            if (!text.isEmpty()) card.addView(CircleUi.text(this, text, 12.5f, R.color.colorTextSecondary, false));
+            return;
+        }
+        long deadline = num(offer, "deadlineTimestamp");
+        card.addView(CircleUi.text(this, "You can put this right: pay back " + CircleUi.harv(amount) + " of the bond the default used"
+                + (deadline > 0 ? ", before " + new java.text.SimpleDateFormat("d MMM", java.util.Locale.US).format(new java.util.Date(deadline)) : "")
+                + ". The penalty is not refunded. It goes back into your bond and the default stops counting against you. You can do this "
+                + num(offer, "curesAllowed") + " times in all (" + num(offer, "curesUsed") + " used).", 12.5f, R.color.colorTextSecondary, false));
+        card.addView(button("Put it right  \u00b7  " + CircleUi.harv(amount), true, v -> pay("Put a default right", CircleUi.harv(amount),
+            moneyRows(escrowOrGroup(), "Goes back into your own bond in this circle"),
+            () -> NodeGroupClient.cureDefault(getApplicationContext(), me, nodeId, result("Sent. The default is cleared once the network confirms it.")))));
     }
 
     private void renderPackRequests() {

@@ -52,6 +52,8 @@ public final class NodeGroupClient {
     public static void getFixedDisbursementRequest(String groupId, String id, Callback cb) { read("/api/v1/fixed/group/" + groupId + "/disbursement-request/" + id, cb); }
 
     public static void getLoan(String groupId, String loanId, Callback cb) { read("/api/v1/genloan/group/" + groupId + "/loan/" + loanId, cb); }
+    /** What a cure would cost and until when, or why it is not available. */
+    public static void getCureOffer(String circleId, String memberAddress, Callback cb) { read("/api/v1/circle/" + circleId + "/cure/" + memberAddress, cb); }
     public static void getForgiveness(String circleId, String memberAddress, Callback cb) { read("/api/v1/forgive-default/" + circleId + "/" + memberAddress, cb); }
     public static void getAdminRecovery(String groupId, Callback cb) { read("/api/v1/admin-recovery/group/" + groupId, cb); }
     /** Open disbursements, milestones and grants. The node list is the source, not a notice. */
@@ -294,6 +296,14 @@ public final class NodeGroupClient {
             public void fill(JSONObject b, long n) throws JSONException {
                 b.put("groupId", groupId).put("lineId", lineId).put("memberAddress", member).put("dates", new org.json.JSONArray(dates));
             }
+        }, cb);
+    }
+
+    /** The member who defaulted puts back what the default took from their own bond. The node fixes the amount. */
+    public static void cureDefault(Context c, String member, String circleId, Callback cb) {
+        act(c, member, "/api/v1/circle/cure-default", new Spec() {
+            public String canonical(long n) { return GroupCanonical.cureDefault(circleId, member, n); }
+            public void fill(JSONObject b, long n) throws JSONException { b.put("circleId", circleId).put("memberAddress", member); }
         }, cb);
     }
 

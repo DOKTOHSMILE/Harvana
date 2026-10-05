@@ -286,6 +286,21 @@ public class TrustScoreActivity extends AppCompatActivity {
         wlp.topMargin = dp(12);
         wrap.setLayoutParams(wlp);
 
+        // Each page is a whole tier screen: the tier card, the road to that tier and the next badge. Built up front so the pager can be
+        // given the height of the tallest one.
+        final java.util.List<View> pages = new java.util.ArrayList<>();
+        int screenW = getResources().getDisplayMetrics().widthPixels - dp(32);
+        int tallest = 0;
+        for (int i = 0; i < TIERS.length; i++) {
+            LinearLayout page = new LinearLayout(this);
+            page.setOrientation(LinearLayout.VERTICAL);
+            page.addView(tierPage(i, current, percent), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(176)));
+            page.addView(journeyCard(p, i));
+            page.addView(nextBadgeCard(p));
+            page.measure(View.MeasureSpec.makeMeasureSpec(screenW, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            tallest = Math.max(tallest, page.getMeasuredHeight());
+            pages.add(page);
+        }
         androidx.viewpager2.widget.ViewPager2 pager = new androidx.viewpager2.widget.ViewPager2(this);
         pager.setAdapter(new androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
             @Override public androidx.recyclerview.widget.RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -296,12 +311,15 @@ public class TrustScoreActivity extends AppCompatActivity {
             @Override public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder h, int i) {
                 FrameLayout f = (FrameLayout) h.itemView;
                 f.removeAllViews();
-                f.addView(tierPage(i, current, percent));
+                View v = pages.get(i);
+                if (v.getParent() instanceof ViewGroup) ((ViewGroup) v.getParent()).removeView(v);
+                f.addView(v);
             }
             @Override public int getItemCount() { return TIERS.length; }
         });
         pager.setCurrentItem(current, false);
-        wrap.addView(pager, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(176)));
+        wrap.addView(pager, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, tallest + dp(4)));
+        tintScreen(current, false);
 
         final LinearLayout dots = new LinearLayout(this);
         dots.setGravity(Gravity.CENTER);
@@ -313,11 +331,26 @@ public class TrustScoreActivity extends AppCompatActivity {
             ((LinearLayout.LayoutParams) dot[i].getLayoutParams()).setMargins(dp(3), 0, dp(3), 0);
         }
         pager.registerOnPageChangeCallback(new androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
-            @Override public void onPageSelected(int pos) { paintDots(dot, pos); }
+            @Override public void onPageSelected(int pos) { paintDots(dot, pos); tintScreen(pos, true); }
         });
         paintDots(dot, current);
         wrap.addView(dots);
         return wrap;
+    }
+
+    private int screenTint = 0;
+
+    /** The whole screen takes the colour of the tier on show, mixed into the theme background so day and night keep their own feel. */
+    private void tintScreen(int tier, boolean animate) {
+        View screen = findViewById(R.id.trust_screen);
+        if (screen == null) return;
+        int to = blend(UiColors.background(), com.harvana.app.trust.ProfileTrust.tierColor(TIERS[tier][0]), 0.16f);
+        if (!animate || screenTint == 0) { screen.setBackgroundColor(to); screenTint = to; return; }
+        android.animation.ValueAnimator a = android.animation.ValueAnimator.ofObject(new android.animation.ArgbEvaluator(), screenTint, to);
+        a.setDuration(350);
+        a.addUpdateListener(x -> screen.setBackgroundColor((int) x.getAnimatedValue()));
+        a.start();
+        screenTint = to;
     }
 
     private void paintDots(View[] dot, int sel) {
@@ -376,24 +409,27 @@ public class TrustScoreActivity extends AppCompatActivity {
         return page;
     }
 
-    /** "Level up to Gold": the whole road with the knob where the score is, filling in when the screen opens. */
-    private LinearLayout journeyCard(java.util.Map<String, Object> p) {
+    /** The road to the tier on this page: "Level up to Gold", "You are at Silver" or "Surpassed Bronze", with the knob where the score is. */
+    private LinearLayout journeyCard(java.util.Map<String, Object> p, int page) {
         int percent = Math.max(0, Math.min(100, num(p.get("trustPercent"))));
         int cur = tierIndex(p);
-        int color = com.harvana.app.trust.ProfileTrust.tierColor(TIERS[cur][0]);
+        int color = com.harvana.app.trust.ProfileTrust.tierColor(TIERS[page][0]);
         LinearLayout c = cardBox();
-        boolean top = cur == TIERS.length - 1;
-        c.addView(tv(top ? "You are at the top level" : "Level up to " + TIERS[cur + 1][0], 17, true, UiColors.textPrimary()));
+        String head = page > cur ? (page == cur + 1 ? "Level up to " : "Work towards ") + TIERS[page][0]
+                : page == cur ? "You are at " + TIERS[page][0] : "You have surpassed " + TIERS[page][0];
+        c.addView(tv(head, 17, true, UiColors.textPrimary()));
         com.harvana.app.trust.TierJourneyView road = new com.harvana.app.trust.TierJourneyView(this);
         c.addView(road, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         road.set(percent, color);
-        if (!top) {
-            int left = Integer.parseInt(TIERS[cur + 1][1]) - percent;
-            c.addView(tv(left > 0 ? left + " points left to reach " + TIERS[cur + 1][0]
-                    : TIERS[cur + 1][0] + " also needs reliability and conduct at 85% or more", 14, true, UiColors.textPrimary()));
+        if (page > cur) {
+            int left = Integer.parseInt(TIERS[page][1]) - percent;
+            c.addView(tv(left > 0 ? left + " points left to reach " + TIERS[page][0]
+                    : TIERS[page][0] + " also needs reliability and conduct at 85% or more", 14, true, UiColors.textPrimary()));
             c.addView(note(weakestPart(p)));
-        } else {
+        } else if (page == cur && cur == TIERS.length - 1) {
             c.addView(note("Keep paying on time and the score holds."));
+        } else if (page == cur) {
+            c.addView(note("Your score is " + percent + "%."));
         }
         c.addView(note("The node works this out and rechecks it with every confirmed action."));
         return c;

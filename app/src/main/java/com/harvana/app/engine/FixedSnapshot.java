@@ -33,23 +33,34 @@ public final class FixedSnapshot {
             s.myState = "MEMBER";
             s.my("You have put in", harv(lng(member, "contributedRaw")));
         }
-        boolean active = "ACTIVE".equals(s.state);
-        boolean reached = !active || (target > 0 && raised >= target);
-        if (active && !reached) {
+        boolean goalMet = target > 0 && raised >= target;
+        boolean completed = "COMPLETED".equals(s.state);
+        boolean open = "ACTIVE".equals(s.state) || s.state.isEmpty();
+        if (open && !goalMet && !completed) {
             s.actions.add(new GroupAction(GroupAction.FIXED_DEPOSIT, "Deposit", true));
             if ("ADMIN_TRIGGERED".equals(rule) && admin) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_DISBURSEMENT, "Request payout (group votes)", false));
             if ("MILESTONE_BASED".equals(rule) && admin) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_MILESTONE, "Request a milestone release", false));
             if ("EMERGENCY_GRANT".equals(rule) && isMember) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_GRANT, "Ask for an emergency grant", false));
-        } else if (reached && ("ALL_AT_ONCE_AT_GOAL".equals(rule) || "COMPLETED".equals(s.state))) {
-            String who = str(group, "beneficiaryAddress");
-            who = who.length() > 14 ? who.substring(0, 8) + "…" + who.substring(who.length() - 4) : who;
-            if (who.isEmpty()) who = "the beneficiary";
-            s.actions.add(GroupAction.closed("Goal reached. " + harv(raised) + " was sent to " + who));
+        } else if (goalMet || completed) {
+            if ("ALL_AT_ONCE_AT_GOAL".equals(rule)) {
+                String who = str(group, "beneficiaryAddress");
+                who = who.length() > 14 ? who.substring(0, 8) + "…" + who.substring(who.length() - 4) : who;
+                if (who.isEmpty()) who = "the wallet chosen when this group was created";
+                s.actions.add(GroupAction.closed("Goal reached. " + harv(raised) + " was sent to " + who + ". That wallet was chosen at creation. Nobody voted."));
+            } else {
+                s.actions.add(GroupAction.closed("This goal is closed. Raised " + harv(raised) + " of " + harv(target) + "."));
+            }
         } else if (!s.state.isEmpty()) {
-            s.actions.add(GroupAction.closed("This goal is closed"));
+            s.actions.add(GroupAction.closed("Deposits are paused while this goal is " + s.state + "."));
         }
         if ("ALL_AT_ONCE_AT_GOAL".equals(rule)) {
-            s.notes.add("When the goal is reached, the full amount is paid automatically to the beneficiary chosen at creation. No vote, and deposits stop.");
+            s.notes.add("When the goal is reached, the full amount is paid automatically to the wallet chosen at creation. No vote, and deposits stop. A day you skip is not a missed payment.");
+        } else if ("ADMIN_TRIGGERED".equals(rule)) {
+            s.notes.add("Reaching the goal does not send the money. The admin requests a payout and the group votes.");
+        } else if ("MILESTONE_BASED".equals(rule)) {
+            s.notes.add("Money leaves in parts. Each part is voted before it is paid.");
+        } else if ("EMERGENCY_GRANT".equals(rule)) {
+            s.notes.add("Nothing is sent automatically. A member asks, the group votes, then that person is paid.");
         }
         return s;
     }

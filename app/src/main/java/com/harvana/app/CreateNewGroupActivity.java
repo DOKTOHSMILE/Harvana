@@ -683,6 +683,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					((TextView)_param2).setTextColor(getResources().getColor(R.color.colorTextPrimary));
 				}
 				disbursementRuleString = _position == 0 ? "" : disbursementRuleList.get(_position);
+				_refreshBeneficiaryHint();
 			}
 			@Override
 			public void onNothingSelected(AdapterView<?> _param1) {}
@@ -961,7 +962,10 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			beneficiaryInput.setHint("Who receives the money? Wallet address (empty = your wallet)");
 			beneficiaryInput.setSingleLine(true);
 			beneficiaryInput.setTextSize(13);
+			beneficiaryInput.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+			beneficiaryInput.setHintTextColor(com.harvana.app.utils.UiColors.textSecondary());
 			host.addView(beneficiaryInput);
+			_refreshBeneficiaryHint();
 		}
 	}
 	
@@ -1424,6 +1428,27 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		com.harvana.app.sync.NodeGroupClient.createAccumGroup(getApplicationContext(), wallet, bps, rule, cb), "groupId", "ACCUM");
 	}
 	
+	private void _refreshBeneficiaryHint() {
+		if (beneficiaryInput == null) return;
+		String rule = _ruleCode(disbursementRuleString);
+		if ("EMERGENCY_GRANT".equals(rule)) {
+			beneficiaryInput.setEnabled(false);
+			beneficiaryInput.setHint("No fixed receiver. Each grant names who is paid, after a vote.");
+		} else if ("ADMIN_TRIGGERED".equals(rule)) {
+			beneficiaryInput.setEnabled(true);
+			beneficiaryInput.setHint("Who is paid if the vote passes? Leave empty to use your wallet.");
+		} else if ("MILESTONE_BASED".equals(rule)) {
+			beneficiaryInput.setEnabled(true);
+			beneficiaryInput.setHint("Who receives each approved milestone? Leave empty to use your wallet.");
+		} else if ("ALL_AT_ONCE_AT_GOAL".equals(rule)) {
+			beneficiaryInput.setEnabled(true);
+			beneficiaryInput.setHint("Who receives the whole pot? Leave empty to use your wallet. Sent automatically.");
+		} else {
+			beneficiaryInput.setEnabled(true);
+			beneficiaryInput.setHint("Who receives the money? Wallet address, or empty for your wallet.");
+		}
+	}
+
 	private void _createFixedOnChain() {
 		final String wallet = _requireWalletOrExplain();
 		if (wallet == null) return;
@@ -1438,9 +1463,20 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		final long target = com.harvana.app.circle.CircleUi.toRaw(target_goal_edittext.getText().toString());
 		final String name = group_name_edittext1.getText().toString().trim();
 		final String desc = description_edittext5.getText().toString().trim();
+		String shown = beneficiary.isEmpty() ? "the member the group approves" : beneficiary;
+		String when;
+		if ("EMERGENCY_GRANT".equals(rule)) {
+			when = "Nothing is sent automatically. A member asks, the group votes, then that person is paid.";
+		} else if ("ADMIN_TRIGGERED".equals(rule)) {
+			when = "Reaching the goal does not send the money. You request a payout and the group votes. If it passes, it goes to this wallet.";
+		} else if ("MILESTONE_BASED".equals(rule)) {
+			when = "Money leaves in parts. Each part is voted. Approved parts go to this wallet.";
+		} else {
+			when = "When the goal is reached, the whole pot is sent automatically to this wallet. No vote. Deposits then stop.";
+		}
 		String msg = "• Goal: " + com.harvana.app.circle.CircleUi.harv(target)
-				+ "\n• Paid to: " + (beneficiary.isEmpty() ? "the group, by vote" : beneficiary)
-				+ "\n• When the goal is reached, the whole pot is sent to that wallet automatically. No vote."
+				+ "\n• Paid to: " + shown
+				+ "\n• " + when
 				+ "\n• Creation fee: 1 HARV";
 		_confirmAndCreateOnChain("Create this goal group?", msg, cb ->
 		com.harvana.app.sync.NodeGroupClient.createFixedGroup(getApplicationContext(), wallet, target, rule, beneficiary, 0L, name, desc, cb), "groupId", "FIXED");

@@ -20,6 +20,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -225,12 +226,13 @@ public final class StakingPanel {
 
     private void setupLockCards() {
         View.OnClickListener lockClick = v -> {
-            cardLockFree.setStrokeColor(Color.parseColor("#2A3042"));
-            cardLock7.setStrokeColor(Color.parseColor("#2A3042"));
-            cardLock30.setStrokeColor(Color.parseColor("#2A3042"));
-            cardLock90.setStrokeColor(Color.parseColor("#2A3042"));
-
-            ((MaterialCardView) v).setStrokeColor(Color.parseColor("#FF7A00"));
+        int quiet = ContextCompat.getColor(host, R.color.colorStrokeBase);
+        int accent = ContextCompat.getColor(host, R.color.colorHarvOrange);
+        cardLockFree.setStrokeColor(quiet);
+        cardLock7.setStrokeColor(quiet);
+        cardLock30.setStrokeColor(quiet);
+        cardLock90.setStrokeColor(quiet);
+        ((MaterialCardView) v).setStrokeColor(accent);
 
             if (v == cardLockFree) selectedLockDays = 0;
             if (v == cardLock7) selectedLockDays = 7;
@@ -248,15 +250,8 @@ public final class StakingPanel {
 
     private void updateEstReward() {
         double weight = selectedLockDays >= 90 ? 2.5 : selectedLockDays >= 30 ? 1.75 : selectedLockDays >= 7 ? 1.25 : 1.0;
-        tvEstRewardInput.setText("⏳ Calculating reward metrics...");
-        
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (host.isDestroyed() || host.isFinishing()) return;
-            String holdText = selectedLockDays <= 0 ? "Flexible (No expiry)" : selectedLockDays + " Days Lock";
-            tvEstRewardInput.setText(String.format(Locale.US, 
-                "• Lock Multiplier: %.2fx\n• Daily Drip: 0.05%% pool share\n• Term: %s", 
-                weight, holdText));
-        }, 500);
+        String holdText = selectedLockDays <= 0 ? "stays until you unstake" : selectedLockDays + "-day lock on the principal";
+        tvEstRewardInput.setText(String.format(Locale.US, "%.2fx weight. Each day 0.05%% of the pool drips into Claim. %s.", weight, holdText));
     }
 
     private void refresh() {
@@ -303,11 +298,12 @@ public final class StakingPanel {
         pageStake.setVisibility(staking ? View.VISIBLE : View.GONE);
         pagePositions.setVisibility(staking ? View.GONE : View.VISIBLE);
 
+        int muted = ContextCompat.getColor(host, R.color.colorTextMuted);
+        int onAccent = ContextCompat.getColor(host, R.color.colorTextPrimaryWhite);
         tabStake.setBackgroundResource(staking ? R.drawable.bg_tab_active : 0);
-        tabStake.setTextColor(staking ? Color.WHITE : Color.parseColor("#8F9BB3"));
-
+        tabStake.setTextColor(staking ? onAccent : muted);
         tabPositions.setBackgroundResource(staking ? 0 : R.drawable.bg_tab_active);
-        tabPositions.setTextColor(staking ? Color.parseColor("#8F9BB3") : Color.WHITE);
+        tabPositions.setTextColor(staking ? muted : onAccent);
     }
 
     private void paint() {
@@ -317,9 +313,6 @@ public final class StakingPanel {
             long claimed = pos == null ? 0 : pos.optLong("totalClaimedRaw", 0);
             long total = info == null ? 0 : info.optLong("totalStakedRaw", 0);
             long shareBps = pos != null && pos.has("shareBps") ? pos.optLong("shareBps", 0) : (total > 0 ? staked * 10_000L / total : 0);
-
-            double units = (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN;
-            double stakedHarv = staked / units;
 
             overviewStaked.setText(harv(staked));
             overviewUnclaimed.setText(harv(pending));
@@ -359,23 +352,21 @@ public final class StakingPanel {
 
     private void updateLiveTimers() {
         if (pos == null) return;
-        long now = System.currentTimeMillis();
         long staked = pos.optLong("stakedRaw", 0);
         long pending = pos.optLong("pendingRewardsRaw", 0);
 
-        long lastInteraction = pos.optLong("lastClaimedTimestamp", 0);
-        if (lastInteraction == 0) lastInteraction = pos.optLong("firstStakedTimestamp", 0);
-        long timeUntilClaim = (lastInteraction + 24L * 3600 * 1000) - now;
-
         if (staked == 0 && pending == 0) {
-            claim.setEnabled(false); claim.setText("Claim Now >");
-            claimSub.setText("Stake HARV to start earning rewards.");
-        } else if (pending > 0 && timeUntilClaim <= 0) {
-            claim.setEnabled(!busy); claim.setText("Claim Now >");
-            claimSub.setText("Your rewards are ready to be claimed.");
+            claim.setEnabled(false);
+            claim.setText("Claim");
+            claimSub.setText("Stake HARV to start earning. The stake stays until you unstake.");
         } else if (pending > 0) {
-            claim.setEnabled(false); claim.setText("Claiming Locked");
-            claimSub.setText("Rewards unlock in " + formatTimerPrecise(timeUntilClaim));
+            claim.setEnabled(!busy);
+            claim.setText("Claim");
+            claimSub.setText(harv(pending) + " is ready. Claiming sends it to your wallet and leaves the stake in place.");
+        } else {
+            claim.setEnabled(false);
+            claim.setText("Claim");
+            claimSub.setText("Nothing has dripped into Claim yet. The pool adds to it through the day.");
         }
     }
 

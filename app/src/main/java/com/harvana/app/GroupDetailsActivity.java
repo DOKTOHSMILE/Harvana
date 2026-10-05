@@ -102,6 +102,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 	private ImageView imageview1;
 	private View view8;
 	private ImageView btn_group_overflow;
+	private ImageView btn_group_chats;
 	private LinearLayout linear9;
 	private TabLayout tab_layout;
 	private ViewPager view_pager;
@@ -171,6 +172,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		imageview1 = findViewById(R.id.imageview1);
 		view8 = findViewById(R.id.view8);
 		btn_group_overflow = findViewById(R.id.btn_group_overflow);
+		btn_group_chats = findViewById(R.id.btn_group_chats);
 		linear9 = findViewById(R.id.linear9);
 		tab_layout = findViewById(R.id.tab_layout);
 		view_pager = findViewById(R.id.view_pager);
@@ -340,6 +342,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
 				i.putExtra("groupId", groupId);
 				startActivity(i);
 			});
+		}
+		if (btn_group_chats != null) {
+			btn_group_chats.setOnClickListener(v ->
+				com.harvana.app.group.GroupChatSheet.show(this, groupId));
 		}
 		
 	}

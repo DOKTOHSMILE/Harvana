@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 /** Rotating pool only. Slots, contribution, frequency and payout order — nothing from the other group types. */
-public class CreateRotatingGroupActivity extends CreateNewGroupActivity {
+public class CreateRotatingGroupActivity extends CreateGroupWizardActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Intent i = getIntent();

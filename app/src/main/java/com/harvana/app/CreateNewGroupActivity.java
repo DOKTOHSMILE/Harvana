@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.regex.*;
 import org.json.*;
 
+/** Superseded by CreateGroupWizardActivity, which has a separate screen for each group type. Nothing launches this class any more. */
 public class CreateNewGroupActivity extends AppCompatActivity {
 	
 	private FirebaseDatabase _firebase = FirebaseDatabase.getInstance();

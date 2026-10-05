@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 /** Accumulative savings only. Contribution, interest, withdrawal rule and the savings-book fields. */
-public class CreateAccumulativeGroupActivity extends CreateNewGroupActivity {
+public class CreateAccumulativeGroupActivity extends CreateGroupWizardActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Intent i = getIntent();

@@ -53,7 +53,7 @@ public final class PeoplePicker {
 
         LinearLayout row = new LinearLayout(a);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        MaterialButton friends = SocialUi.button(a, "Friends", true);
+        MaterialButton friends = SocialUi.button(a, "Add friends", true);
         MaterialButton username = SocialUi.button(a, "Username", true);
         MaterialButton contacts = SocialUi.button(a, "Contacts", true);
         friends.setOnClickListener(v -> chooseFriends(a, sel, refresh));
@@ -75,31 +75,13 @@ public final class PeoplePicker {
         return box;
     }
 
+    /** Opens the friend picker: search, tap one friend, or press and hold to tick several. */
     private static void chooseFriends(Activity a, Selection sel, Runnable refresh) {
-        SocialStore.following((list, err) -> a.runOnUiThread(() -> {
-            if (list.isEmpty()) {
-                Toast.makeText(a, err != null ? err : "You don't follow anyone yet. Add friends from the Friends screen first.", Toast.LENGTH_LONG).show();
-                return;
-            }
-            final String[] names = new String[list.size()];
-            final boolean[] checked = new boolean[list.size()];
-            for (int i = 0; i < list.size(); i++) {
-                names[i] = list.get(i).name + (list.get(i).handle().isEmpty() ? "" : "  " + list.get(i).handle());
-                checked[i] = sel.hasPerson(list.get(i).uid);
-            }
-            new AlertDialog.Builder(a).setTitle("Invite friends")
-                .setMultiChoiceItems(names, checked, (d, which, on) -> checked[which] = on)
-                .setPositiveButton("Add", (d, w) -> {
-                    for (int i = 0; i < list.size(); i++) {
-                        Person p = list.get(i);
-                        if (checked[i] && !sel.hasPerson(p.uid)) sel.people.add(p);
-                        if (!checked[i]) {
-                            for (int k = sel.people.size() - 1; k >= 0; k--) if (sel.people.get(k).uid.equals(p.uid)) sel.people.remove(k);
-                        }
-                    }
-                    refresh.run();
-                }).setNegativeButton("Cancel", null).show();
-        }));
+        FriendPickerActivity.pick(a, sel.people, chosen -> {
+            sel.people.clear();
+            sel.people.addAll(chosen);
+            a.runOnUiThread(refresh);
+        });
     }
 
     private static void chooseMatches(Activity a, Selection sel, List<DiscoveryStore.Match> matches, Runnable refresh) {

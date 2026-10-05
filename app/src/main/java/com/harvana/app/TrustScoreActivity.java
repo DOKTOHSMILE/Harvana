@@ -101,7 +101,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         int score = num(person.get("trustScore"));
         int vouches = num(person.get("effectiveVouchCount"));
         if (person.get("trustPercent") instanceof Number) {
-            root.addView(heroCard(person));
+            root.addView(tierPager(person));
             root.addView(partsCard(person));
             root.addView(engagementCard(person));
         } else {

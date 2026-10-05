@@ -33,6 +33,11 @@ service cloud.firestore {
       return isGroupCreator(groupId) || isActiveMember(groupId);
     }
 
+    function pidLinkOwned(pid) {
+      return exists(/databases/$(database)/documents/PIDS/$(pid))
+        && get(/databases/$(database)/documents/PIDS/$(pid)).data.uid == request.auth.uid;
+    }
+
     function paymentConfirmOnly() {
       return request.resource.data.diff(resource.data).affectedKeys()
         .hasOnly(['status', 'txRef', 'confirmedAt']);
@@ -64,6 +69,29 @@ service cloud.firestore {
       allow create, delete: if false;
       allow update: if request.auth != null
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']);
+    }
+
+    // Reactions and comments on a published article. One reaction per person (the document id is the uid).
+    // Reactions and comments on a published article. One reaction per person (the document id is the uid).
+    match /LEARN_CONTENT/{contentId}/reactions/{uid} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['uid', 'at'])
+        && request.resource.data.uid == request.auth.uid;
+      allow update: if false;
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+    match /LEARN_CONTENT/{contentId}/comments/{commentId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['uid', 'text', 'at'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 500
+        && request.resource.data.at is number;
+      allow update: if false;
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
     }
 
     // Submissions waiting for the node's automatic review. The author creates one (always PENDING) and
@@ -427,6 +455,40 @@ service cloud.firestore {
         && request.resource.data.at is number
         && request.resource.data.at > 0;
       allow update, delete: if false;
+    }
+
+    // Permanent 10-digit id → owner. Clients never read this. Rules do,
+    // to check that the signed-in user owns the PID they are writing.
+    match /PIDS/{pid} {
+      allow read: if false;
+      allow create: if signedIn()
+        && pid.matches('^[0-9]{10}$')
+        && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Public card. No date of birth, ID number, address, phone or next of kin.
+    //
+    // Trust: trust_percent, trust_tier, trust_updated and wallet are written by the node only (its service account skips these
+    // rules). A user can create or edit their card but cannot add those fields, change them, or remove them, so the
+    // score on a profile is read-only for its owner and cannot be hidden. The old client-writable trust_score is gone.
+    match /PROFILES/{pid} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && pidLinkOwned(pid)
+        && request.resource.data.pid == pid
+        && request.resource.data.keys().hasOnly(['pid', 'first_name', 'last_name', 'username', 'icon', 'tier']);
+      allow update: if signedIn()
+        && pidLinkOwned(pid)
+        && request.resource.data.pid == pid
+        && request.resource.data.keys().hasOnly(
+          ['pid', 'first_name', 'last_name', 'username', 'icon', 'tier', 'trust_percent', 'trust_tier', 'trust_updated', 'wallet'])
+        && request.resource.data.get('trust_percent', null) == resource.data.get('trust_percent', null)
+        && request.resource.data.get('trust_tier', null) == resource.data.get('trust_tier', null)
+        && request.resource.data.get('trust_updated', null) == resource.data.get('trust_updated', null)
+        && request.resource.data.get('wallet', null) == resource.data.get('wallet', null);
+      allow delete: if false;
     }
 
     match /{document=**} {

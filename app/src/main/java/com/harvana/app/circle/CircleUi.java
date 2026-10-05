@@ -102,7 +102,7 @@ public final class CircleUi {
     public static String friendly(String error) {
         if (error == null) return "Something went wrong.";
         String e = error.toUpperCase();
-        if (e.contains("INSUFFICIENT_BALANCE")) return "Not enough available balance to lock the required bond and fee.";
+        if (e.contains("INSUFFICIENT_BALANCE")) return "Not enough available balance for the bond or the creation fee.";
         if (e.contains("INVALID_MEMBER_LIMIT")) return "A circle needs between 3 and 12 members.";
         if (e.contains("INVALID_CYCLE_DURATION")) return "Cycle length must be between 1 and 30 days.";
         if (e.contains("CONTRIBUTION_TOO_LARGE")) return "That contribution is too large.";
@@ -116,6 +116,7 @@ public final class CircleUi {
         if (e.contains("NOT_YET_ELIGIBLE")) return "New members can vote after 48 hours in the group.";
         if (e.contains("EXPOSURE_LIMIT_EXCEEDED")) return "You're already committed to as many circles as your account allows.";
         if (e.contains("TERMS_HASH_MISMATCH")) return "The circle's terms changed. Reopen it and read them again.";
+        if (e.contains("ADMIN_MUST_JOIN_FIRST")) return "The admin has to join first and lock their bond. Try again once they have.";
         if (e.contains("CIRCLE_FULL")) return "This circle is full.";
         if (e.contains("ALREADY_A_MEMBER")) return "You're already a member of this circle.";
         if (e.contains("ALREADY_CONTRIBUTED_THIS_ROUND")) return "You've already paid this round.";

@@ -1383,15 +1383,14 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 		final long cycleHours = "Daily".equals(frequencyString) ? 24L : "Weekly".equals(frequencyString) ? 168L : 720L;
 		final long perMember = contributionRaw * (members - 1);
-		final long creatorBond = perMember * 2L;
 		final long fee = 100_000_000L;
 		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
 		rows.add(new String[]{"Each round", com.harvana.app.circle.CircleUi.harv(contributionRaw) + " from every member"});
 		rows.add(new String[]{"Pot each round", com.harvana.app.circle.CircleUi.harv(contributionRaw * (members - 1))});
-		rows.add(new String[]{"Other members lock", com.harvana.app.circle.CircleUi.harv(perMember)});
-		rows.add(new String[]{"Your bond", com.harvana.app.circle.CircleUi.harv(creatorBond)});
+		rows.add(new String[]{"Every member locks", com.harvana.app.circle.CircleUi.harv(perMember) + " when they join"});
 		rows.add(new String[]{"Creation fee", com.harvana.app.circle.CircleUi.harv(fee)});
-		rows.add(new String[]{"Group wallet", "Assigned by the network. This phone does not create one."});
+		rows.add(new String[]{"Locked now", "Nothing. You join first afterwards, like everyone else."});
+		rows.add(new String[]{"Group wallet", "Made and controlled by the network. This phone does not create one."});
 		rows.add(new String[]{"Payout", "Only what the other members pay. Bonds stay locked."});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
 		"Create this rotating group", com.harvana.app.circle.CircleUi.harv(fee), rows, () -> {

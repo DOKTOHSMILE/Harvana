@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 5 Oct 2026: creating a group locks nothing; the group wallet is the network's
+
+What the app does. No group creation makes a wallet on the phone. The group wallet is an address the network derives from the group id; no key exists for it, so only the node's rules can move its money. Creating a rotating group no longer locks the admin's double bond: the review sheet says "Locked now: Nothing", the admin pays only the 1 HARV creation fee, and then joins first, like everyone else, locking the ordinary bond. Until the admin has joined, other members see "Nobody has joined yet. The admin joins first" and the node refuses their join with a clear message. Savings and goal groups were already fee-only.
+
+What you do, in this order:
+
+1. Deploy the node first (node repository `docs/DEPLOYMENT.md`, "creating a rotating circle locks nothing"). The change is in the node: an old node still takes the double bond at creation.
+2. Then install an app build from this date. An old app against the new node still works; the admin just has to tap Join afterwards.
+
+What did not change. Circles created before the node swap keep their admin as member 1 with the double bond locked; nothing is refunded or moved.
+
 ## 5 Oct 2026: one build file, `app/module.toml`
 
 What changed. CodeAssist builds from `app/module.toml`, and GitHub Actions used a separate `app/build.gradle`, so the two could disagree (the CodeAssist build failed on missing CardView and DrawerLayout resources while the Gradle build passed). CI now runs `tools/module_toml_to_gradle.py` first, which writes `app/build.gradle` from the toml: package name, SDK levels, version, build types and every dependency. Edit the toml, not the Gradle file; `python3 tools/module_toml_to_gradle.py --check` tells you whether they match. The toml now lists CardView, DrawerLayout, ConstraintLayout, CoordinatorLayout, RecyclerView and ViewPager2 explicitly, and takes Material and Core from Maven, not from local `.aar` files: a local `.aar` brings none of its own dependencies, which is why CodeAssist could not find `cardElevation`, `drawerLayoutStyle` and `contentPadding`.

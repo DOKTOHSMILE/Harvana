@@ -56,6 +56,9 @@ public final class CircleSnapshot {
             if (active && payoutRound > 0 && payoutRound == round) s.notes.add("It's your turn to be paid this round, so nothing is due from you.");
         }
 
+        if (forming && joined == 0) {
+            s.notes.add("Nobody has joined yet. The admin joins first and locks the same bond as everyone else; then the others can join.");
+        }
         if (!isMember && forming) {
             s.actions.add(new GroupAction(GroupAction.JOIN, "Join and lock bond", true));
         } else if (isMember && forming) {

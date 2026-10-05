@@ -17,6 +17,41 @@ TOML = ROOT / "app" / "module.toml"
 OUT = ROOT / "app" / "build.gradle"
 
 
+# CodeAssist deletes the root Gradle files when it opens a project, and a commit made from the phone can push those deletions.
+# CI would then fail within seconds, so this puts back any that are missing (never overwrites one that exists).
+ROOT_FILES = {
+    "build.gradle": "// Root build file managed via settings repositories\n",
+    "settings.gradle": """pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+rootProject.name = "Harvana"
+include ':app'
+""",
+    "gradle.properties": "android.useAndroidX=true\nandroid.enableJetifier=true\norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8\n",
+}
+
+
+def restore_root_files():
+    for name, body in ROOT_FILES.items():
+        f = ROOT / name
+        if not f.exists():
+            f.write_text(body)
+            print("restored missing", name)
+
+
 # CodeAssist uses these local files. Gradle must not: a local .aar next to the same library arriving through another
 # dependency (appcompat needs core) is a duplicate-class error. So CI builds the same version from Maven.
 LOCAL_FILE_AS_MAVEN = {
@@ -121,6 +156,7 @@ def main() -> int:
             print("app/build.gradle is not what app/module.toml produces. Run: python3 tools/module_toml_to_gradle.py")
             return 1
         return 0
+    restore_root_files()
     OUT.write_text(text)
     print(f"wrote {OUT.relative_to(ROOT)} from {TOML.relative_to(ROOT)}")
     return 0

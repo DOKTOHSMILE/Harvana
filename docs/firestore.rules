@@ -57,6 +57,23 @@ service cloud.firestore {
         && request.time < get(/databases/$(database)/documents/USERNAME_HOLDS/$(name)).data.releasedAt + duration.value(90, 'd');
     }
 
+    // Who invited this member (referral by username). Set once, at sign-up or the first time it is added, to someone
+    // else who exists; after that it cannot be changed or removed. The referral only counts on the network once that
+    // person has confirmed it too (REFERRAL_ASKS below, and the node checks both signatures).
+    function referrerSetOk() {
+      return !('referred_by_uid' in request.resource.data)
+        || (request.resource.data.referred_by_uid is string
+            && request.resource.data.referred_by_uid != request.auth.uid
+            && exists(/databases/$(database)/documents/USERS/$(request.resource.data.referred_by_uid)));
+    }
+
+    function referrerUnchangedOrNew() {
+      return ('referred_by_uid' in resource.data)
+        ? (request.resource.data.get('referred_by_uid', '') == resource.data.referred_by_uid
+            && request.resource.data.get('referred_by_username', '') == resource.data.get('referred_by_username', ''))
+        : referrerSetOk();
+    }
+
     function pidLinkOwned(pid) {
       return exists(/databases/$(database)/documents/PIDS/$(pid))
         && get(/databases/$(database)/documents/PIDS/$(pid)).data.uid == request.auth.uid;
@@ -73,8 +90,10 @@ service cloud.firestore {
         && (!('pid' in request.resource.data)
             || (request.resource.data.pid.matches('^[0-9]{10}$') && pidLinkOwned(request.resource.data.pid)))
         && (!('usernameChangedAt' in request.resource.data)
-            || request.resource.data.usernameChangedAt == request.time);
+            || request.resource.data.usernameChangedAt == request.time)
+        && referrerSetOk();
       allow update: if isSelf(uid)
+        && referrerUnchangedOrNew()
         && (
           (!('usernameChangedAt' in resource.data) && !('usernameChangedAt' in request.resource.data))
           || (!('usernameChangedAt' in resource.data) && request.resource.data.usernameChangedAt == request.time)
@@ -388,6 +407,40 @@ service cloud.firestore {
         && request.resource.data.get('trust_updated', null) == resource.data.get('trust_updated', null)
         && request.resource.data.get('wallet', null) == resource.data.get('wallet', null);
       allow delete: if false;
+    }
+
+    // A pinch: a nudge to someone you follow. One document per sender and person (the id is the sender), so the same
+    // friend can pinch the same person only once an hour. The time is the server's. Only the receiver can read them.
+    // The receiver's phone looks the sender's name up from their profile, so a pinch cannot pose as someone else.
+    match /PINCHES/{to}/from/{sender} {
+      allow read: if signedIn() && request.auth.uid == to;
+      allow create: if signedIn() && request.auth.uid == sender && sender != to
+        && request.resource.data.keys().hasOnly(['from', 'at'])
+        && request.resource.data.from == sender
+        && request.resource.data.at == request.time
+        && exists(/databases/$(database)/documents/FOLLOWERS/$(to)/list/$(sender));
+      allow update: if signedIn() && request.auth.uid == sender
+        && request.resource.data.keys().hasOnly(['from', 'at'])
+        && request.resource.data.from == sender
+        && request.resource.data.at == request.time
+        && resource.data.at < request.time - duration.value(1, 'h');
+      allow delete: if signedIn() && request.auth.uid == to;
+    }
+
+    // Referral requests. The new member leaves one for the person they named (their profile must name that person);
+    // the person named reads it and confirms it by adding a signed consent, or declines by deleting it.
+    match /REFERRAL_ASKS/{referrer}/from/{referred} {
+      allow read: if signedIn() && (request.auth.uid == referrer || request.auth.uid == referred);
+      allow create: if signedIn() && request.auth.uid == referred
+        && request.resource.data.keys().hasOnly(['from', 'referredAddress', 'at'])
+        && request.resource.data.from == referred
+        && request.resource.data.referredAddress is string
+        && request.resource.data.referredAddress.matches('^HV0x[0-9a-fA-F]{40}$')
+        && get(/databases/$(database)/documents/USERS/$(referred)).data.get('referred_by_uid', '') == referrer;
+      allow update: if signedIn() && request.auth.uid == referrer
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['consent_address', 'consent_pub', 'consent_sig', 'status'])
+        && request.resource.data.status == 'CONSENTED';
+      allow delete: if signedIn() && (request.auth.uid == referrer || request.auth.uid == referred);
     }
 
     // People I follow: private to me.

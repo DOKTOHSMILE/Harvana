@@ -148,6 +148,11 @@ public final class GroupCanonical {
         return "HARVANNA_GENLOAN_REQUEST_V1:" + groupId + ":" + borrowerAddress + ":" + principalRaw + ":" + durationHours + ":" + nonce;
     }
 
+    /** RecordReferralRequest.getConsentMessage(): the referrer\'s own signature, so nobody can be named as a referrer without agreeing. */
+    public static String referralConsent(String referredAddress, String referrerAddress) {
+        return "HARVANNA_REFERRAL_CONSENT_V1:" + referredAddress + ":" + referrerAddress;
+    }
+
     /** RecordReferralRequest.getCanonicalMessage() */
     public static String recordReferral(String referredAddress, String referrerAddress, long nonce) {
         return "HARVANNA_RECORD_REFERRAL_V1:" + referredAddress + ":" + referrerAddress + ":" + nonce;

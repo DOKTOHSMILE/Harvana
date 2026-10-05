@@ -510,14 +510,37 @@ public class CompleteProfileFragmentActivity extends Fragment {
 		
 		btn_submit_profile.setEnabled(false);
 		btn_submit_profile.setText("Creating account…");
-		_submitToFirebase(country, state, kinState, effectiveUid);
+		// A named referrer must exist. Leaving the box empty skips it.
+		final EditText referrerBox = _view_et_referrer();
+		String typed = referrerBox == null ? "" : referrerBox.getText().toString().trim();
+		if (typed.isEmpty()) {
+			_submitToFirebase(country, state, kinState, effectiveUid, null);
+			return;
+		}
+		com.harvana.app.social.SocialStore.findByUsername(typed, (person, err) -> {
+			if (getActivity() == null) return;
+			getActivity().runOnUiThread(() -> {
+				if (person == null) {
+					btn_submit_profile.setEnabled(true);
+					btn_submit_profile.setText("Create Account");
+					referrerBox.setError("No member has that username. Check it, or clear the box to skip.");
+					referrerBox.requestFocus();
+					return;
+				}
+				_submitToFirebase(country, state, kinState, effectiveUid, person);
+			});
+		});
+	}
+
+	private EditText _view_et_referrer() {
+		return getView() == null ? null : (EditText) getView().findViewById(R.id.et_referrer);
 	}
 	
 	/** Moved directly from FinishSignupFragmentActivity's real write logic -
 *  same userdb field names, so ProfileActivity, TrustScoreEngine, and
 *  every member-detail sheet built earlier this session keep working
 *  against this unchanged. */
-	private void _submitToFirebase(String country, String state, String kinState, String effectiveUid) {
+	private void _submitToFirebase(String country, String state, String kinState, String effectiveUid, com.harvana.app.social.Person referrer) {
 		Calendar authc = Calendar.getInstance();
 		String cityStr = spinner_city.getSelectedItem() != null ? spinner_city.getSelectedItem().toString() : "";
 		String kinCityStr = spinner_kin_city.getSelectedItem() != null ? spinner_kin_city.getSelectedItem().toString() : "";
@@ -552,6 +575,11 @@ public class CompleteProfileFragmentActivity extends Fragment {
 		userVMap.put("occupation", et_occupation.getText().toString().trim());
 		userVMap.put("timestamp", String.valueOf(authc.getTimeInMillis()));
 		userVMap.put(idDocument, et_id_number.getText().toString().trim());
+		if (referrer != null && !referrer.uid.isEmpty() && !referrer.uid.equals(effectiveUid)) {
+			// Who invited this person. The referrer still has to confirm before anything is recorded on the network.
+			userVMap.put("referred_by_uid", referrer.uid);
+			userVMap.put("referred_by_username", referrer.username);
+		}
 
 		IdentityStore.allocate(effectiveUid, userVMap, (pid, pidError) -> {
 			if (pid != null) userVMap.put("pid", pid);

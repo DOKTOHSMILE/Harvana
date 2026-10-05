@@ -28,7 +28,7 @@ import java.util.List;
  */
 public final class NotificationCenter {
     public static final String ACTION_CHANGED = "com.harvana.app.ACTION_NOTIFICATIONS_CHANGED";
-    public static final String TX = "TX", GROUP = "GROUP", PAYMENT = "PAYMENT", LOAN = "LOAN", INVITE = "INVITE", MEMBERSHIP = "MEMBERSHIP", SYSTEM = "SYSTEM";
+    public static final String TX = "TX", GROUP = "GROUP", PAYMENT = "PAYMENT", LOAN = "LOAN", INVITE = "INVITE", MEMBERSHIP = "MEMBERSHIP", SYSTEM = "SYSTEM", SOCIAL = "SOCIAL";
     private static final int CAP = 200;
 
     public static final class Item {
@@ -165,6 +165,7 @@ public final class NotificationCenter {
             case LOAN: return "Loans";
             case INVITE: return "Invitations";
             case MEMBERSHIP: return "Membership";
+            case SOCIAL: return "Friends";
             default: return "Harvana";
         }
     }

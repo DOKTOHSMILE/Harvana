@@ -90,6 +90,11 @@ public final class NodeIdentityClient {
         return sb.toString();
     }
 
+    /** Signs {@code message} with the wallet\'s key: {publicKey, signature}. For consents that are checked by the node later. */
+    public static JSONObject signMessage(Context c, String address, String message) throws Exception {
+        return signed(c, address, message);
+    }
+
     static JSONObject signed(Context c, String address, String message) throws Exception {
         String seed = WalletManager.loadPrivateKey(c, address);
         String pub = WalletManager.getPublicKey(c, address);

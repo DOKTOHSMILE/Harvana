@@ -410,6 +410,45 @@
 							android:inputType="text|textCapWords" />
 					</com.google.android.material.card.MaterialCardView>
 					<TextView
+						android:id="@+id/tv_referrer_label"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginBottom="6dp"
+						android:text="Referred by (optional)"
+						android:textStyle="bold"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="13.5sp" />
+					<com.google.android.material.card.MaterialCardView
+						android:id="@+id/card_referrer"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginBottom="4dp"
+						app:cardBackgroundColor="@color/colorSurfaceAlt"
+						app:cardCornerRadius="12dp"
+						app:cardElevation="0dp"
+						app:strokeColor="@color/colorCardStroke"
+						app:strokeWidth="1dp">
+						<EditText
+							android:id="@+id/et_referrer"
+							android:layout_width="match_parent"
+							android:layout_height="52dp"
+							android:padding="12dp"
+							android:background="@android:color/transparent"
+							android:hint="@username of the friend who invited you"
+							android:textColor="@color/colorTextPrimary"
+							android:textColorHint="@color/colorTextTertiary"
+							android:textSize="14.5sp"
+							android:inputType="textNoSuggestions|textVisiblePassword" />
+					</com.google.android.material.card.MaterialCardView>
+					<TextView
+						android:id="@+id/tv_referrer_note"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginBottom="20dp"
+						android:text="Only name someone you know. They have to confirm it, and if you misbehave in groups their trust score drops too."
+						android:textColor="@color/colorTextTertiary"
+						android:textSize="12sp" />
+					<TextView
 						android:id="@+id/textview63"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"

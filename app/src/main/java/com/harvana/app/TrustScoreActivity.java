@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -257,34 +258,185 @@ public class TrustScoreActivity extends AppCompatActivity {
 
     private static final String[][] TIERS = {{"Bronze", "0"}, {"Silver", "40"}, {"Gold", "65"}, {"Platinum", "85"}};
 
-    private LinearLayout heroCard(java.util.Map<String, Object> p) {
-        int percent = Math.max(0, Math.min(100, num(p.get("trustPercent"))));
-        String tier = p.get("trustTier") == null ? com.harvana.app.trust.ProfileTrust.tierFor(percent) : String.valueOf(p.get("trustTier"));
-        int color = com.harvana.app.trust.ProfileTrust.tierColor(tier);
-        LinearLayout c = cardBox();
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.BOTTOM);
-        TextView big = tv(percent + "%", 44, true, color);
-        big.setPadding(0, 0, dp(10), 0);
-        TextView pill = tv(tier, 14, true, color);
-        pill.setPadding(dp(10), dp(4), dp(10), dp(4));
-        GradientDrawable bg = new GradientDrawable();
-        bg.setCornerRadius(dp(12));
-        bg.setColor((color & 0x00FFFFFF) | 0x28000000);
-        bg.setStroke(dp(1), (color & 0x00FFFFFF) | 0x78000000);
-        pill.setBackground(bg);
-        row.addView(big);
-        row.addView(pill);
-        c.addView(row);
-        c.addView(bar(percent, 100, color));
-        String next = null;
-        for (String[] t : TIERS) {
-            int at = Integer.parseInt(t[1]);
-            if (at > percent) { next = (at - percent) + " points to " + t[0]; break; }
+
+    private int tierIndex(int percent) {
+        int idx = 0;
+        for (int i = 0; i < TIERS.length; i++) if (percent >= Integer.parseInt(TIERS[i][1])) idx = i;
+        return idx;
+    }
+
+    private static int blend(int base, int over, float amount) {
+        int r = Math.round(((base >> 16) & 0xFF) * (1 - amount) + ((over >> 16) & 0xFF) * amount);
+        int g = Math.round(((base >> 8) & 0xFF) * (1 - amount) + ((over >> 8) & 0xFF) * amount);
+        int b = Math.round((base & 0xFF) * (1 - amount) + (over & 0xFF) * amount);
+        return 0xFF000000 | (r << 16) | (g << 8) | b;
+    }
+
+    /** One swipeable page per tier, opening on the current one: Surpassed, Current or Yet to unlock, as in a loyalty level screen. */
+    private LinearLayout tierPager(java.util.Map<String, Object> p) {
+        final int percent = Math.max(0, Math.min(100, num(p.get("trustPercent"))));
+        final int current = tierIndex(percent);
+        LinearLayout wrap = new LinearLayout(this);
+        wrap.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams wlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        wlp.topMargin = dp(12);
+        wrap.setLayoutParams(wlp);
+
+        androidx.viewpager2.widget.ViewPager2 pager = new androidx.viewpager2.widget.ViewPager2(this);
+        pager.setAdapter(new androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
+            @Override public androidx.recyclerview.widget.RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                FrameLayout f = new FrameLayout(TrustScoreActivity.this);
+                f.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                return new androidx.recyclerview.widget.RecyclerView.ViewHolder(f) { };
+            }
+            @Override public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder h, int i) {
+                FrameLayout f = (FrameLayout) h.itemView;
+                f.removeAllViews();
+                f.addView(tierPage(i, current, percent));
+            }
+            @Override public int getItemCount() { return TIERS.length; }
+        });
+        pager.setCurrentItem(current, false);
+        wrap.addView(pager, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(176)));
+
+        final LinearLayout dots = new LinearLayout(this);
+        dots.setGravity(Gravity.CENTER);
+        dots.setPadding(0, dp(8), 0, 0);
+        final View[] dot = new View[TIERS.length];
+        for (int i = 0; i < TIERS.length; i++) {
+            dot[i] = new View(this);
+            dots.addView(dot[i], new LinearLayout.LayoutParams(dp(6), dp(6)));
+            ((LinearLayout.LayoutParams) dot[i].getLayoutParams()).setMargins(dp(3), 0, dp(3), 0);
         }
-        c.addView(note(next == null ? "Top tier. Keep paying on time and the score holds." : next + ". Bronze, Silver at 40, Gold at 65, Platinum at 85."));
-        c.addView(note("Everyone who opens your profile sees this number. You cannot hide or change it: the node works it out."));
+        pager.registerOnPageChangeCallback(new androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+            @Override public void onPageSelected(int pos) { paintDots(dot, pos); }
+        });
+        paintDots(dot, current);
+        wrap.addView(dots);
+        return wrap;
+    }
+
+    private void paintDots(View[] dot, int sel) {
+        for (int i = 0; i < dot.length; i++) {
+            GradientDrawable g = new GradientDrawable();
+            g.setCornerRadius(dp(3));
+            g.setColor(i == sel ? com.harvana.app.trust.ProfileTrust.tierColor(TIERS[i][0]) : (UiColors.textTertiary() & 0x00FFFFFF) | 0x55000000);
+            dot[i].setBackground(g);
+            ViewGroup.LayoutParams lp = dot[i].getLayoutParams();
+            lp.width = dp(i == sel ? 18 : 6);
+            dot[i].setLayoutParams(lp);
+        }
+    }
+
+    private View tierPage(int i, int current, int percent) {
+        String name = TIERS[i][0];
+        int at = Integer.parseInt(TIERS[i][1]);
+        int color = com.harvana.app.trust.ProfileTrust.tierColor(name);
+        boolean locked = i > current;
+        LinearLayout page = new LinearLayout(this);
+        page.setOrientation(LinearLayout.HORIZONTAL);
+        page.setGravity(Gravity.CENTER_VERTICAL);
+        page.setPadding(dp(20), dp(16), dp(20), dp(16));
+        GradientDrawable bg = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{blend(UiColors.surface(), color, 0.30f), blend(UiColors.surface(), color, 0.06f)});
+        bg.setCornerRadius(dp(20));
+        bg.setStroke(dp(1), (color & 0x00FFFFFF) | 0x55000000);
+        page.setBackground(bg);
+        LinearLayout.LayoutParams m = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        page.setLayoutParams(m);
+
+        FrameLayout badge = new FrameLayout(this);
+        GradientDrawable halo = new GradientDrawable();
+        halo.setShape(GradientDrawable.OVAL);
+        halo.setColor((color & 0x00FFFFFF) | (locked ? 0x22000000 : 0x44000000));
+        badge.setBackground(halo);
+        ImageView icon = new ImageView(this);
+        icon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.icon_verified_round));
+        icon.setColorFilter(color);
+        icon.setAlpha(locked ? 0.45f : 1f);
+        badge.addView(icon, new FrameLayout.LayoutParams(dp(54), dp(54), Gravity.CENTER));
+        page.addView(badge, new LinearLayout.LayoutParams(dp(96), dp(96)));
+
+        LinearLayout text = new LinearLayout(this);
+        text.setOrientation(LinearLayout.VERTICAL);
+        text.setPadding(dp(18), 0, 0, 0);
+        text.addView(tv(name, 28, true, UiColors.textPrimary()));
+        String status = i < current ? "Surpassed" : i == current ? "Current" : "Yet to unlock";
+        text.addView(tv(status, 16, true, locked ? UiColors.textSecondary() : color));
+        String line = i == 0 ? "Everyone starts here"
+                : locked ? (at - percent) + " more points to unlock"
+                : "Reached at " + at + "% trust";
+        text.addView(note(line));
+        if (i == current) text.addView(note("Your score: " + percent + "%"));
+        page.addView(text, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        return page;
+    }
+
+    /** "Level up to Gold": the whole road with the knob where the score is, filling in when the screen opens. */
+    private LinearLayout journeyCard(java.util.Map<String, Object> p) {
+        int percent = Math.max(0, Math.min(100, num(p.get("trustPercent"))));
+        int cur = tierIndex(percent);
+        int color = com.harvana.app.trust.ProfileTrust.tierColor(TIERS[cur][0]);
+        LinearLayout c = cardBox();
+        boolean top = cur == TIERS.length - 1;
+        c.addView(tv(top ? "You are at the top level" : "Level up to " + TIERS[cur + 1][0], 17, true, UiColors.textPrimary()));
+        com.harvana.app.trust.TierJourneyView road = new com.harvana.app.trust.TierJourneyView(this);
+        c.addView(road, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        road.set(percent, color);
+        if (!top) {
+            int left = Integer.parseInt(TIERS[cur + 1][1]) - percent;
+            c.addView(tv(left + " points left to reach " + TIERS[cur + 1][0], 14, true, UiColors.textPrimary()));
+            c.addView(note(weakestPart(p)));
+        } else {
+            c.addView(note("Keep paying on time and the score holds."));
+        }
+        c.addView(note("The node works this out and rechecks it with every confirmed action."));
+        return c;
+    }
+
+    /** Names the part of the score with the most room left, so the advice points somewhere real. */
+    private String weakestPart(java.util.Map<String, Object> p) {
+        String[] names = {"Personhood", "Reliability", "Conduct", "Tenure", "Engagement"};
+        String[] keys = {"trustPersonhoodPct", "trustReliabilityPct", "trustConductPct", "trustTenurePct", "trustEngagementPct"};
+        int[] weight = {30, 25, 15, 15, 15};
+        String tips[] = {"Bind this device and ask established members to vouch for you.", "Pay circle contributions in full and on time.",
+                "Finish circles cleanly.", "Stay active; time on the network counts.", "Read Learn Hub posts to the end on different days."};
+        int best = 0; double room = -1;
+        for (int i = 0; i < names.length; i++) {
+            double r = weight[i] * (100 - num(p.get(keys[i]))) / 100.0;
+            if (r > room) { room = r; best = i; }
+        }
+        return room <= 0 ? "Every part is full." : "Biggest gain: " + names[best] + " (up to " + Math.round(room) + " points). " + tips[best];
+    }
+
+    /** The next badge you can earn, with a bar that fills as you get closer. Only badges the node really awards. */
+    private LinearLayout nextBadgeCard(java.util.Map<String, Object> p) {
+        java.util.Set<String> held = new java.util.HashSet<>();
+        if (p.get("labels") instanceof java.util.List) for (Object o : (java.util.List<?>) p.get("labels")) held.add(String.valueOf(o));
+        int vouches = num(p.get("effectiveVouchCount"));
+        int conduct = num(p.get("trustConductPct"));
+        int reliability = num(p.get("trustReliabilityPct"));
+        String[][] order = {
+            {"VOUCHED", "Vouched", "One established member vouches for you", String.valueOf(Math.min(vouches, 1) * 100), "vouches"},
+            {"CIRCLE_VETERAN", "Circle veteran", "Finish one rotating circle", conduct > 0 ? "100" : "0", ""},
+            {"ZERO_DEFAULT", "Zero default", "Finish a circle without ever defaulting", conduct > 0 ? "100" : "0", ""},
+            {"EARLY_PAYER", "Early payer", "Pay at least 10 contributions, 90% of them on time", String.valueOf(reliability), "reliability"}};
+        String[] next = null;
+        for (String[] o : order) if (!held.contains(o[0])) { next = o; break; }
+        LinearLayout c = cardBox();
+        c.addView(tv("Next badge", 17, true, UiColors.textPrimary()));
+        if (next == null) {
+            c.addView(note("You hold every badge the network awards for now. Insured trader comes from a P2P insurance deposit."));
+            return c;
+        }
+        c.addView(tv(next[1], 15, true, UiColors.accent()));
+        c.addView(note(next[2]));
+        final int target = Integer.parseInt(next[3]);
+        final android.widget.ProgressBar bar = bar(0, 100, UiColors.accent());
+        c.addView(bar);
+        android.animation.ObjectAnimator.ofInt(bar, "progress", 0, target).setDuration(900).start();
+        c.addView(note(target >= 100 ? "Requirement met; the badge appears after the next confirmed action."
+                : "reliability".equals(next[4]) ? "Your payment reliability so far: " + target + "%" : target + "% of the way"));
         return c;
     }
 

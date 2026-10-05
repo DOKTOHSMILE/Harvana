@@ -9,7 +9,6 @@
 	android:background="?attr/colorSurface">
 	<TextView
 		android:id="@+id/tvFormTitle"
-		android:focusable="false"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:text="Add Payment Method"
@@ -58,7 +57,6 @@
 		android:textSize="10.5sp"
 		android:layout_marginStart="4dp"
 		android:letterSpacing="0.06"
-		android:focusable="false" />
 	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/cardview1"
 		android:layout_width="match_parent"
@@ -69,8 +67,10 @@
 		app:strokeColor="@color/colorCardStroke"
 		app:strokeWidth="1dp">
 		<EditText
+			android:textColorHint="@color/colorTextTertiary"
+			android:singleLine="true"
+			android:importantForAutofill="no"
 			android:id="@+id/etPrimaryField"
-			android:focusable="false"
 			android:layout_width="match_parent"
 			android:layout_height="52dp"
 			android:background="@android:color/transparent"
@@ -92,7 +92,6 @@
 		android:textSize="10.5sp"
 		android:layout_marginStart="4dp"
 		android:letterSpacing="0.06"
-		android:focusable="false" />
 	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/cardview2"
 		android:layout_width="match_parent"
@@ -103,8 +102,10 @@
 		app:strokeColor="@color/colorCardStroke"
 		app:strokeWidth="1dp">
 		<EditText
+			android:textColorHint="@color/colorTextTertiary"
+			android:singleLine="true"
+			android:importantForAutofill="no"
 			android:id="@+id/etAccountIdentifier"
-			android:focusable="false"
 			android:layout_width="match_parent"
 			android:layout_height="52dp"
 			android:background="@android:color/transparent"
@@ -126,7 +127,6 @@
 		android:textSize="10.5sp"
 		android:layout_marginStart="4dp"
 		android:letterSpacing="0.06"
-		android:focusable="false" />
 	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/cardview3"
 		android:layout_width="match_parent"
@@ -137,8 +137,10 @@
 		app:strokeColor="@color/colorCardStroke"
 		app:strokeWidth="1dp">
 		<EditText
+			android:textColorHint="@color/colorTextTertiary"
+			android:singleLine="true"
+			android:importantForAutofill="no"
 			android:id="@+id/etAccountName"
-			android:focusable="false"
 			android:layout_width="match_parent"
 			android:layout_height="52dp"
 			android:background="@android:color/transparent"
@@ -160,7 +162,6 @@
 		android:textSize="10.5sp"
 		android:layout_marginStart="4dp"
 		android:letterSpacing="0.06"
-		android:focusable="false" />
 	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/cardview4"
 		android:layout_width="match_parent"
@@ -171,8 +172,10 @@
 		app:strokeColor="@color/colorCardStroke"
 		app:strokeWidth="1dp">
 		<EditText
+			android:textColorHint="@color/colorTextTertiary"
+			android:singleLine="true"
+			android:importantForAutofill="no"
 			android:id="@+id/etNickname"
-			android:focusable="false"
 			android:layout_width="match_parent"
 			android:layout_height="52dp"
 			android:background="@android:color/transparent"
@@ -183,6 +186,9 @@
 	</com.google.android.material.card.MaterialCardView>
 	<LinearLayout
 		android:id="@+id/linear2"
+		android:clickable="true"
+		android:focusable="true"
+		android:minHeight="48dp"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="16dp"
@@ -190,14 +196,13 @@
 		android:orientation="horizontal">
 		<CheckBox
 			android:id="@+id/cbSetAsDefault"
-			android:focusable="false"
+			android:clickable="false"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:textSize="12sp"
 			app:buttonTint="@color/colorAccent" />
 		<TextView
 			android:id="@+id/textview5"
-			android:focusable="false"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:text="Set as default payment method"
@@ -208,7 +213,6 @@
 	</LinearLayout>
 	<TextView
 		android:id="@+id/tvFormError"
-		android:focusable="false"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="8dp"

@@ -183,7 +183,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 	}
 	
 	private void _showFormSheet(PaymentMethod editingMethod) {
-		BottomSheetDialog sheet = new BottomSheetDialog(this);
+		BottomSheetDialog sheet = com.harvana.app.p2p.ThemedDialogs.sheet(this);
+		sheet.getBehavior().setSkipCollapsed(true);
+		sheet.getBehavior().setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+		if (sheet.getWindow() != null) sheet.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 		View sheetView = LayoutInflater.from(this)
 		.inflate(R.layout.bottom_sheet_payment_method_form, null);
 		sheet.setContentView(sheetView);
@@ -228,6 +231,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 			cbSetAsDefault.setChecked(editingMethod.isDefault);
 		}
 		applyTypeStyle.run();
+		sheetView.findViewById(R.id.linear2).setOnClickListener(v -> cbSetAsDefault.toggle());
 		
 		btnSaveMethod.setOnClickListener(v -> {
 			String primaryField = etPrimaryField.getText().toString().trim();

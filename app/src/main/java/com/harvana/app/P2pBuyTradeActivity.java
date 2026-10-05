@@ -802,7 +802,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	
 	private void _setStepDone(TextView dot, boolean done) {
 		dot.setText(done ? "✓" : "○");
-		dot.setTextColor(done ? 0xFF1FD18C : 0xFF8A93A6);
+		dot.setTextColor(androidx.core.content.ContextCompat.getColor(this, done ? R.color.colorSuccess : R.color.colorTextTertiary));
 	}
 	
 	// ── Countdown ────────────────────────────────────────────────────────

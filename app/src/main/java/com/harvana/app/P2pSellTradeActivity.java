@@ -665,7 +665,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	
 	private void _setStep(TextView dot, boolean done) {
 		dot.setText(done ? "✓" : "○");
-		dot.setTextColor(done ? 0xFF1FD18C : 0xFF8A93A6);
+		dot.setTextColor(androidx.core.content.ContextCompat.getColor(this, done ? R.color.colorSuccess : R.color.colorTextTertiary));
 	}
 	
 	private void _startCountdown(long fromTimestamp, int minutes) {

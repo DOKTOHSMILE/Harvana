@@ -164,8 +164,8 @@ public class P2pChatActivity extends AppCompatActivity {
             g.setColor(mine ? UiColors.accent() : UiColors.surface());
             if (!mine) g.setStroke(dp(1), (UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000);
             bubble.setBackground(g);
-            bubble.addView(text(m.text, 14, false, mine ? Color.parseColor("#1A1208") : UiColors.textPrimary()));
-            bubble.addView(text(fmt.format(new Date(m.at)), 10, false, mine ? Color.parseColor("#6B4A12") : UiColors.textTertiary()));
+            bubble.addView(text(m.text, 14, false, mine ? getResources().getColor(R.color.colorTextOnAccent) : UiColors.textPrimary()));
+            bubble.addView(text(fmt.format(new Date(m.at)), 10, false, mine ? getResources().getColor(R.color.colorTextOnAccentMuted) : UiColors.textTertiary()));
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.gravity = mine ? Gravity.END : Gravity.START;
             lp.topMargin = dp(6);

@@ -391,7 +391,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 	// ── Select Coin bottom sheet — one real entry, nothing invented ─────
 	
 	private void _showCoinSheet() {
-		BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+		BottomSheetDialog dialog = com.harvana.app.p2p.ThemedDialogs.sheet(requireContext());
 		LinearLayout root = _sheetRoot();
 		root.addView(_sheetTitle("Select Coin"));
 		
@@ -448,7 +448,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 	// ── Amount bottom sheet ──────────────────────────────────────────────
 	
 	private void _showAmountSheet() {
-		BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+		BottomSheetDialog dialog = com.harvana.app.p2p.ThemedDialogs.sheet(requireContext());
 		LinearLayout root = _sheetRoot();
 		root.addView(_sheetTitle("I Want to Buy"));
 		
@@ -508,7 +508,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		Set<String> availableLabels = new LinkedHashSet<>();
 		for (EnrichedListing e : allEnriched) availableLabels.addAll(e.paymentLabels);
 		
-		BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+		BottomSheetDialog dialog = com.harvana.app.p2p.ThemedDialogs.sheet(requireContext());
 		LinearLayout root = _sheetRoot();
 		root.addView(_sheetTitle("Pay With"));
 		
@@ -644,7 +644,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 	// ── Filter (funnel) bottom sheet — real toggles + real sort ─────────
 	
 	private void _showFilterSheet() {
-		BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+		BottomSheetDialog dialog = com.harvana.app.p2p.ThemedDialogs.sheet(requireContext());
 		LinearLayout root = _sheetRoot();
 		root.addView(_sheetTitle("Filter"));
 		
@@ -786,6 +786,10 @@ public class P2pBuyFragmentActivity extends Fragment {
 		row.addView(tv);
 		row.addView(_spacer());
 		row.addView(cb);
+		row.setMinimumHeight(96);
+		row.setClickable(true);
+		cb.setClickable(false);
+		row.setOnClickListener(v -> cb.toggle());
 		root.addView(row);
 		return cb;
 	}

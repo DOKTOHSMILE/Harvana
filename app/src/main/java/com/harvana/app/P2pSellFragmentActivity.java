@@ -683,6 +683,10 @@ public class P2pSellFragmentActivity extends Fragment {
 		row.addView(tv);
 		row.addView(_spacer());
 		row.addView(cb);
+		row.setMinimumHeight(96);
+		row.setClickable(true);
+		cb.setClickable(false);
+		row.setOnClickListener(v -> cb.toggle());
 		root.addView(row);
 		return cb;
 	}

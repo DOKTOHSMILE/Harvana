@@ -178,6 +178,7 @@ public class P2pSellFragmentActivity extends Fragment {
 		boolean insured = false;
 		boolean premium = false;
 		int trustScore = -1;
+		String trustLabel = "";
 		int completedTrades = 0;
 		int uniqueCounterparties = 0;
 	}
@@ -303,6 +304,7 @@ public class P2pSellFragmentActivity extends Fragment {
 						int reportCount = result.reportCount;
 						com.harvana.app.trust.NetworkTrust.wallet(e.posterAddress, score -> {
 						e.trustScore = score.published ? score.score : -1;
+						e.trustLabel = score.label();
 						
 						HarvanaNodeClient.getP2PInsuranceStatus(e.posterAddress, new HarvanaNodeClient.JsonCallback() {
 							@Override
@@ -766,7 +768,7 @@ public class P2pSellFragmentActivity extends Fragment {
 			seller_status.setVisibility(e.online ? View.VISIBLE : View.GONE);
 			seller_status.setText("● Online");
 			seller_trusted_badge.setText(e.premium ? "Premium Trader" : (e.insured ? "Insured Trader" : ""));
-			trust_score.setText(e.trustScore >= 0 ? (e.trustScore + " / 26") : "—");
+			trust_score.setText(e.trustLabel.isEmpty() ? "\u2014" : e.trustLabel);
 			trades_and_unique.setText(e.completedTrades + " trades · " + e.uniqueCounterparties + " unique");
 			sell_price.setText(e.unitPrice >= 0 ? P2pMoney.perHarv(e.unitPrice, e.currency) : "Unavailable");
 			available_amount.setText(String.format(Locale.US, ("%.4f " + com.harvana.app.CoinInfo.ticker()), e.remainingHarv));

@@ -26,6 +26,12 @@ public final class NetworkTrust {
         public int badges;
         public boolean established;
         public String summary = "";
+
+        /** "92% · Gold" once the node has published a percentage, the older "12 / 26" before that, "—" if nothing. */
+        public String label() {
+            if (percent >= 0) return percent + "%" + (tier.isEmpty() ? "" : " · " + tier);
+            return published ? score + " / " + MAX : "\u2014";
+        }
     }
 
     public interface Callback { void onScore(Score score); }

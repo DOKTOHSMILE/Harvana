@@ -180,6 +180,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		boolean insured = false;
 		boolean premium = false;
 		int trustScore = -1;
+		String trustLabel = "";
 		int completedTrades = 0;
 		int uniqueCounterparties = 0;
 	}
@@ -305,6 +306,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 						int reportCount = result.reportCount;
 						com.harvana.app.trust.NetworkTrust.wallet(e.posterAddress, score -> {
 						e.trustScore = score.published ? score.score : -1;
+						e.trustLabel = score.label();
 						
 						HarvanaNodeClient.getP2PInsuranceStatus(e.posterAddress, new HarvanaNodeClient.JsonCallback() {
 							@Override
@@ -877,7 +879,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 			txt_online.setVisibility(e.online ? View.VISIBLE : View.GONE);
 			cardview3.setVisibility(e.verified ? View.VISIBLE : View.GONE);
 			txt_trusted.setText(e.premium ? "Premium Trader" : (e.insured ? "Insured Trader" : ""));
-			txt_rating.setText(e.trustScore >= 0 ? String.format(Locale.US, "Trust %d / 26", e.trustScore) : "—");
+			txt_rating.setText(e.trustLabel.isEmpty() ? "\u2014" : "Trust " + e.trustLabel);
 			txt_trades.setText(e.completedTrades + " trades");
 			txt_unique.setText("• " + e.uniqueCounterparties + " unique");
 			txt_available.setText(String.format(Locale.US, ("%.4f " + com.harvana.app.CoinInfo.ticker()), e.remainingHarv));

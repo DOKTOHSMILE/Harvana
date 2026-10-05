@@ -300,7 +300,7 @@ public class GroupDetailsLogic {
                 // Fix: was resolving via legacy RTDB userdb/{uid}. Firestore
                 // is the real profile source post-migration — same fix as
                 // everywhere else names are resolved in this codebase.
-                com.harvana.app.group.MemberNameResolver.resolveInto(activity, requesterUid, "Member", h.requester);
+                com.harvana.app.trust.ProfileTrust.nameWithTrust(activity, h.requester, requesterUid, "Member");
             }
 
             if (h.approveBtn != null) {

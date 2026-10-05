@@ -36,7 +36,10 @@ import java.util.Map;
 *                          (currently empty) data, ready the moment reporting
 *                          gets built
 */
+@Deprecated
 public class TrustScoreEngine {
+	// The trust score people see is the node's percentage (trust/NetworkTrust, trust/ProfileTrust). This class is kept only for
+	// the counts the P2P screens still read from it (verified, report count, number of groups). Do not show its overallScore.
 	
 	public static class Result {
 		public int overallScore;              // 0-100

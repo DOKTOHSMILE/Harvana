@@ -493,7 +493,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 					final String addr = fallbackAddress;
 					com.harvana.app.trust.NetworkTrust.wallet(addr, score -> runOnUiThread(() -> {
 						if (rowId != null && row != null && !rowId.equals(row.getTag())) return;
-						meta.setText(score.published ? (line + " · " + score.score + " / 26") : line);
+						meta.setText(score.published ? (line + " · " + score.label()) : line);
 					}));
 				});
 			}

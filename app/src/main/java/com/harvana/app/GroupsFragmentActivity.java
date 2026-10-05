@@ -694,6 +694,7 @@ public class GroupsFragmentActivity extends Fragment {
 							return;
 						}
 						group_trust_score_perc_textview8.setText(score.summary);
+						if (score.percent >= 0) { group_trust_score_perc_textview8.setTextColor(com.harvana.app.trust.ProfileTrust.tierColor(score.tier)); return; }
 						if ("HIGH_TRUST".equals(score.summary) || score.summary.startsWith("High trust"))
 							group_trust_score_perc_textview8.setTextColor(0xFF4CAF50);
 						else if ("ESTABLISHED".equals(score.summary) || score.summary.startsWith("Established"))

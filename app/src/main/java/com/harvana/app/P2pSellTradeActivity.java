@@ -482,7 +482,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 					public void onError(String error) { }
 				});
 				com.harvana.app.trust.NetworkTrust.wallet(buyerAddress, score -> runOnUiThread(() ->
-					tv_sell_buyer_trust.setText(score.published ? ("Trust " + score.score + " / 26") : "Trust —")));
+					tv_sell_buyer_trust.setText("Trust " + score.label())));
 				
 				P2PTradeStatsManager.getInstance(getApplicationContext()).getStats(buyerUid, new P2PTradeStatsManager.StatsCallback() {
 					@Override

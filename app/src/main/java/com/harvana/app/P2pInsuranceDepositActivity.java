@@ -391,7 +391,7 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 					com.harvana.app.trust.NetworkTrust.wallet(
 					com.harvana.app.wallet.WalletManager.getActiveWalletAddress(P2pInsuranceDepositActivity.this),
 					score -> runOnUiThread(() -> {
-						if (score.published) tv_trust_status.append(" · " + score.score + " / 26");
+						if (score.published) tv_trust_status.append(" · " + score.label());
 					}));
 					_refreshOverallBadge();
 				});

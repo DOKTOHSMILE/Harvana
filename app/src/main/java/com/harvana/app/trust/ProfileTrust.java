@@ -78,6 +78,23 @@ public final class ProfileTrust {
         MAIN.post(() -> cb.onCard(card));
     }
 
+    /** Fills {@code pill} with the person's trust score as soon as it is read. */
+    public static void attach(TextView pill, String uid) {
+        if (pill == null) return;
+        bind(pill, null);
+        resolve(uid, card -> bind(pill, card));
+    }
+
+    /** Puts "Name  ·  92% Gold" in {@code view}: the name first, the score once it is read (name only when unscored). */
+    public static void nameWithTrust(android.content.Context context, TextView view, String uid, String fallback) {
+        if (view == null) return;
+        view.setText(fallback);
+        com.harvana.app.group.MemberNameResolver.resolve(context, uid, fallback, name -> {
+            view.setText(name);
+            resolve(uid, card -> { if (card.scored()) view.setText(name + "  \u00b7  " + label(card)); });
+        });
+    }
+
     /** The label on a profile: "92% · Gold", or "Not scored yet" before the node has published one. */
     public static String label(Card c) {
         if (c == null || !c.scored()) return "Not scored yet";

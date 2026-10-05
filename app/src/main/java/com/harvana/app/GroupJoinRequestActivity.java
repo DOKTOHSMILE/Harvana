@@ -501,7 +501,12 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 					_str(profile, "name",
 					_str(profile, "displayName", "Admin")));
 					runOnUiThread(() -> {
-						if (tv_join_admin_value != null) tv_join_admin_value.setText(name);
+						if (tv_join_admin_value != null) {
+							tv_join_admin_value.setText(name);
+							com.harvana.app.trust.ProfileTrust.resolve(loadedCreatorId, card -> {
+								if (tv_join_admin_value != null && card.scored()) tv_join_admin_value.setText(name + "  \u00b7  " + com.harvana.app.trust.ProfileTrust.label(card));
+							});
+						}
 					});
 				}
 				

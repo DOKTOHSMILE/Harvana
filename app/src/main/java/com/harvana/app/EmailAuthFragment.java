@@ -109,6 +109,11 @@ public class EmailAuthFragment extends Fragment {
 		
 		if (!createMode) {
 			TextView forgot = link("Forgot password?");
+			forgot.setPadding(dp(12), dp(14), dp(12), dp(14));
+			forgot.setClickable(true);
+			forgot.setFocusable(true);
+			android.util.TypedValue tv = new android.util.TypedValue();
+			if (requireContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv, true)) forgot.setBackgroundResource(tv.resourceId);
 			forgot.setOnClickListener(v -> resetPassword());
 			root.addView(forgot);
 		}
@@ -153,7 +158,8 @@ public class EmailAuthFragment extends Fragment {
 				if (task.isSuccessful()) {
 					FirebaseUser u = auth.getCurrentUser();
 					if (u != null) u.sendEmailVerification();
-					proceed(email);
+					saveEmail(email);
+					openVerifyScreen();
 				} else {
 					setBusy(false);
 					showError(task.getException());
@@ -163,7 +169,20 @@ public class EmailAuthFragment extends Fragment {
 			auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
 				if (!isAdded()) return;
 				if (task.isSuccessful()) {
-					proceed(email);
+					FirebaseUser u = auth.getCurrentUser();
+					if (u == null) { setBusy(false); return; }
+					// An unconfirmed email does not get into the app: refresh the account first (they may have
+					// confirmed in the browser), then either go on or send them to confirm.
+					u.reload().addOnCompleteListener(r -> {
+						if (!isAdded()) return;
+						FirebaseUser fresh = auth.getCurrentUser();
+						if (fresh != null && com.harvana.app.auth.EmailVerification.needsVerification(fresh)) {
+							saveEmail(email);
+							openVerifyScreen();
+						} else {
+							proceed(email);
+						}
+					});
 				} else {
 					setBusy(false);
 					showError(task.getException());
@@ -176,7 +195,8 @@ public class EmailAuthFragment extends Fragment {
 		clearErrors();
 		String email = text(etEmail);
 		if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-			tilEmail.setError("Enter your email above, then tap Forgot password");
+			tilEmail.setError("Enter your email address here first, then tap Forgot password");
+			etEmail.requestFocus();
 			return;
 		}
 		setBusy(true);
@@ -184,11 +204,32 @@ public class EmailAuthFragment extends Fragment {
 			if (!isAdded()) return;
 			setBusy(false);
 			if (task.isSuccessful()) {
+				new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+					.setTitle("Check your email")
+					.setMessage("If an account exists for " + email + ", we sent a link to choose a new password. "
+						+ "It can take a few minutes. Check your spam folder too.")
+					.setPositiveButton("OK", null)
+					.show();
+			} else if (task.getException() instanceof FirebaseAuthInvalidUserException) {
+				// Firebase can answer this way when it hides whether an address is registered; say the same either way.
 				toast("If an account exists for that email, a reset link has been sent.");
 			} else {
 				showError(task.getException());
 			}
 		});
+	}
+	
+	private void saveEmail(String email) {
+		requireContext().getSharedPreferences("authsp", android.content.Context.MODE_PRIVATE)
+			.edit().putString("gmail", email).apply();
+	}
+	
+	/** An account with an unconfirmed email goes to the confirm screen, not into the app. */
+	private void openVerifyScreen() {
+		Intent i = new Intent(requireContext(), VerifyEmailActivity.class);
+		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		startActivity(i);
+		requireActivity().finish();
 	}
 	
 	/** Hand off to the splash router, which sends the user to Main or the profile form. */

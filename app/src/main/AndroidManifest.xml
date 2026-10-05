@@ -80,6 +80,10 @@
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
+			android:name=".VerifyEmailActivity"
+			android:exported="false"
+			android:screenOrientation="portrait" />
+		<activity
 			android:name=".LoginActivity"
 			android:label="Sign in"
 			android:configChanges="orientation|screenSize|keyboardHidden"

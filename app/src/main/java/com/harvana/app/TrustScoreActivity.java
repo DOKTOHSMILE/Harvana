@@ -101,7 +101,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         int score = num(person.get("trustScore"));
         int vouches = num(person.get("effectiveVouchCount"));
         if (person.get("trustPercent") instanceof Number) {
-            root.addView(heroCard(person));
+            root.addView(tierPager(person));
             root.addView(partsCard(person));
             root.addView(engagementCard(person));
         } else {
@@ -256,7 +256,7 @@ public class TrustScoreActivity extends AppCompatActivity {
     }
 
 
-    private static final String[][] TIERS = {{"Bronze", "0"}, {"Silver", "40"}, {"Gold", "65"}, {"Platinum", "85"}};
+    private static final String[][] TIERS = {{"New", "0"}, {"Bronze", "0"}, {"Silver", "40"}, {"Gold", "65"}, {"Platinum", "85"}};
 
 
     /** The tier is the node's own word (trustTier); the percentage is only used when the node sent no tier. */
@@ -400,7 +400,8 @@ public class TrustScoreActivity extends AppCompatActivity {
         text.addView(tv(name, 28, true, UiColors.textPrimary()));
         String status = i < current ? "Surpassed" : i == current ? "Current" : "Yet to unlock";
         text.addView(tv(status, 16, true, locked ? UiColors.textSecondary() : color));
-        String line = i == 0 ? "Everyone starts here"
+        String line = i == 0 ? "Where everyone starts"
+                : i == 1 ? "Your first step up from New"
                 : locked ? (at > percent ? (at - percent) + " more points to unlock" : "Needs reliability and conduct at 85% or more")
                 : "Reached at " + at + "% trust";
         text.addView(note(line));
@@ -415,6 +416,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         int cur = tierIndex(p);
         int color = com.harvana.app.trust.ProfileTrust.tierColor(TIERS[page][0]);
         LinearLayout c = cardBox();
+        if (page == 0 || cur == 0) return newCard(p, page, cur, percent);
         String head = page > cur ? (page == cur + 1 ? "Level up to " : "Work towards ") + TIERS[page][0]
                 : page == cur ? "You are at " + TIERS[page][0] : "You have surpassed " + TIERS[page][0];
         c.addView(tv(head, 17, true, UiColors.textPrimary()));
@@ -432,6 +434,26 @@ public class TrustScoreActivity extends AppCompatActivity {
             c.addView(note("Your score is " + percent + "%."));
         }
         c.addView(note("The node works this out and rechecks it with every confirmed action."));
+        return c;
+    }
+
+    /** For the New tier, and for a person still in it: what ends it, with a bar for the confirmed-actions route. */
+    private LinearLayout newCard(java.util.Map<String, Object> p, int page, int cur, int percent) {
+        LinearLayout c = cardBox();
+        int actions = num(p.get("activityCount"));
+        int need = 5;
+        if (page == 0 && cur > 0) {
+            c.addView(tv("You have left New", 17, true, UiColors.textPrimary()));
+            c.addView(note("New describes someone with no history yet. You have some now, so your score is what counts."));
+            return c;
+        }
+        c.addView(tv(page == 0 ? "You are New" : "Leave New first", 17, true, UiColors.textPrimary()));
+        c.addView(note("New is about history, not score. Any one of these ends it:"));
+        c.addView(note("\u2022 pay one contribution in full\n\u2022 finish one circle\n\u2022 have " + need + " actions confirmed on the network"));
+        final android.widget.ProgressBar bar = bar(0, need, UiColors.accent());
+        c.addView(bar);
+        android.animation.ObjectAnimator.ofInt(bar, "progress", 0, Math.min(need, actions)).setDuration(900).start();
+        c.addView(note(Math.min(need, actions) + " of " + need + " confirmed actions so far. Your score is " + percent + "%."));
         return c;
     }
 

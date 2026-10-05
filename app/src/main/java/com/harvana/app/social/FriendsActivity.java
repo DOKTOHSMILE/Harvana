@@ -64,38 +64,23 @@ public class FriendsActivity extends AppCompatActivity {
         root.addView(header, 0);
 
         LinearLayout code = SocialUi.card(this);
-        code.addView(SocialUi.text(this, "Your referral code", 12, true, UiColors.textSecondary()));
+        LinearLayout codeTop = new LinearLayout(this);
+        codeTop.setOrientation(LinearLayout.HORIZONTAL);
+        codeTop.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout codeText = new LinearLayout(this);
+        codeText.setOrientation(LinearLayout.VERTICAL);
+        codeText.addView(SocialUi.text(this, "Your referral code", 12, true, UiColors.textSecondary()));
         codeLine = SocialUi.text(this, "Loading...", 22, true, UiColors.textPrimary());
-        code.addView(codeLine);
-        codeStats = SocialUi.text(this, "Friends enter your username when they create their account. You confirm them under Referrals.", 12, false, UiColors.textSecondary());
-        code.addView(codeStats);
-        MaterialButton share = SocialUi.button(this, "Share my code", false);
+        codeText.addView(codeLine);
+        codeTop.addView(codeText, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        MaterialButton share = SocialUi.compactButton(this, "Share", false);
         share.setOnClickListener(v -> shareCode());
-        LinearLayout.LayoutParams shareLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        shareLp.topMargin = SocialUi.dp(this, 8);
-        code.addView(share, shareLp);
+        codeTop.addView(share);
+        code.addView(codeTop);
+        codeStats = SocialUi.text(this, "Friends enter your username when they create their account. You confirm them under Referrals.", 12, false, UiColors.textSecondary());
+        codeStats.setPadding(0, SocialUi.dp(this, 6), 0, 0);
+        code.addView(codeStats);
         root.addView(code);
-
-        LinearLayout tabs = new LinearLayout(this);
-        tabs.setOrientation(LinearLayout.HORIZONTAL);
-        tabFollowing = SocialUi.button(this, "Friends", false);
-        tabFollowers = SocialUi.button(this, "Following", true);
-        tabBack = SocialUi.button(this, "Followers", true);
-        tabReferrals = SocialUi.button(this, "Referrals", true);
-        tabFollowing.setOnClickListener(v -> { tab = 0; render(); });
-        tabFollowers.setOnClickListener(v -> { tab = 1; render(); });
-        tabBack.setOnClickListener(v -> { tab = 2; render(); });
-        tabReferrals.setOnClickListener(v -> { tab = 3; render(); });
-        for (MaterialButton t : new MaterialButton[] {tabFollowing, tabFollowers, tabBack, tabReferrals}) {
-            t.setTextSize(11);
-            t.setInsetTop(0); t.setInsetBottom(0);
-            t.setPadding(SocialUi.dp(this, 4), t.getPaddingTop(), SocialUi.dp(this, 4), t.getPaddingBottom());
-            tabs.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        }
-        root.addView(tabs);
-
-        listBox = SocialUi.card(this);
-        root.addView(listBox);
 
         LinearLayout find = SocialUi.card(this);
         find.addView(SocialUi.text(this, "Add a friend", 14, true, UiColors.textPrimary()));
@@ -122,6 +107,30 @@ public class FriendsActivity extends AppCompatActivity {
         fromContacts.addView(scan);
         fromContacts.addView(contactMatches);
         root.addView(fromContacts);
+
+        LinearLayout tabs = new LinearLayout(this);
+        tabs.setOrientation(LinearLayout.HORIZONTAL);
+        tabFollowing = SocialUi.button(this, "Friends", false);
+        tabFollowers = SocialUi.button(this, "Following", true);
+        tabBack = SocialUi.button(this, "Followers", true);
+        tabReferrals = SocialUi.button(this, "Referrals", true);
+        tabFollowing.setOnClickListener(v -> { tab = 0; render(); });
+        tabFollowers.setOnClickListener(v -> { tab = 1; render(); });
+        tabBack.setOnClickListener(v -> { tab = 2; render(); });
+        tabReferrals.setOnClickListener(v -> { tab = 3; render(); });
+        for (MaterialButton t : new MaterialButton[] {tabFollowing, tabFollowers, tabBack, tabReferrals}) {
+            t.setTextSize(12);
+            t.setLetterSpacing(0f);
+            t.setMaxLines(1);
+            t.setInsetTop(0); t.setInsetBottom(0);
+            t.setPadding(SocialUi.dp(this, 4), t.getPaddingTop(), SocialUi.dp(this, 4), t.getPaddingBottom());
+            tabs.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        }
+        root.addView(tabs);
+
+        listBox = SocialUi.card(this);
+        root.addView(listBox);
+
     }
 
     @Override protected void onResume() { super.onResume(); reload(); }
@@ -196,7 +205,22 @@ public class FriendsActivity extends AppCompatActivity {
         }));
     }
 
+    /** The selected tab is filled; the others are outlined. Called on every render, so tapping a tab visibly moves the selection. */
+    private void styleTabs() {
+        MaterialButton[] all = {tabFollowing, tabFollowers, tabBack, tabReferrals};
+        for (int i = 0; i < all.length; i++) {
+            MaterialButton t = all[i];
+            boolean on = i == tab;
+            t.setBackgroundTintList(android.content.res.ColorStateList.valueOf(on ? UiColors.accent() : android.graphics.Color.TRANSPARENT));
+            t.setTextColor(on ? UiColors.onAccent() : UiColors.textSecondary());
+            t.setStrokeColor(android.content.res.ColorStateList.valueOf(on ? UiColors.accent() : ((UiColors.textTertiary() & 0x00FFFFFF) | 0x66000000)));
+            t.setStrokeWidth(SocialUi.dp(this, 1));
+            t.setTypeface(null, on ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+        }
+    }
+
     private void render() {
+        styleTabs();
         List<Person> friends = mutual();
         tabFollowing.setText("Friends " + friends.size());
         tabFollowers.setText("Following " + following.size());
@@ -241,9 +265,9 @@ public class FriendsActivity extends AppCompatActivity {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, SocialUi.dp(this, 10), 0, SocialUi.dp(this, 10));
+        row.setPadding(0, SocialUi.dp(this, 6), 0, SocialUi.dp(this, 6));
 
-        int size = SocialUi.dp(this, 48);
+        int size = SocialUi.dp(this, 40);
         FrameLayout face = new FrameLayout(this);
         TextView initials = SocialUi.text(this, p.initials(), 16, true, 0xFF1A1208);
         initials.setGravity(Gravity.CENTER);
@@ -256,7 +280,7 @@ public class FriendsActivity extends AppCompatActivity {
         photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
         face.addView(photo, new FrameLayout.LayoutParams(size, size));
         LinearLayout.LayoutParams faceLp = new LinearLayout.LayoutParams(size, size);
-        faceLp.rightMargin = SocialUi.dp(this, 12);
+        faceLp.rightMargin = SocialUi.dp(this, 10);
         row.addView(face, faceLp);
 
         LinearLayout names = new LinearLayout(this);
@@ -289,13 +313,14 @@ public class FriendsActivity extends AppCompatActivity {
         row.addView(names, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
         LinearLayout buttons = new LinearLayout(this);
-        buttons.setOrientation(LinearLayout.VERTICAL);
-        buttons.setGravity(Gravity.END);
-        MaterialButton main = SocialUi.button(this, action, outlined);
+        buttons.setOrientation(LinearLayout.HORIZONTAL);
+        buttons.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+        MaterialButton main = SocialUi.compactButton(this, action, outlined);
         main.setOnClickListener(onAction);
         buttons.addView(main);
         if (canPinch) {
-            MaterialButton pinch = SocialUi.button(this, "Pinch", true);
+            MaterialButton pinch = SocialUi.compactButton(this, "Pinch", true);
+            ((LinearLayout.LayoutParams) pinch.getLayoutParams()).setMarginStart(SocialUi.dp(this, 6));
             long wait = PinchStore.waitMs(this, p.uid);
             if (wait > 0) { pinch.setText("Pinched"); pinch.setEnabled(false); }
             pinch.setOnClickListener(v -> {

@@ -35,6 +35,18 @@ final class SocialUi {
         return b;
     }
 
+    /** A short button for rows: 34dp high, small text, no letter spacing, so a row of two fits a small phone. */
+    static MaterialButton compactButton(Context c, String label, boolean outlined) {
+        MaterialButton b = button(c, label, outlined);
+        b.setTextSize(12);
+        b.setLetterSpacing(0f);
+        b.setInsetTop(0); b.setInsetBottom(0);
+        b.setMinHeight(0); b.setMinimumHeight(0); b.setMinWidth(0); b.setMinimumWidth(0);
+        b.setPadding(dp(c, 12), 0, dp(c, 12), 0);
+        b.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(c, 34)));
+        return b;
+    }
+
     static EditText edit(Context c, String hint) {
         EditText e = new EditText(c);
         e.setHint(hint); e.setSingleLine(true);

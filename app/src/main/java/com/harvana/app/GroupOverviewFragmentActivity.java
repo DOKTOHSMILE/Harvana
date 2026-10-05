@@ -415,6 +415,13 @@ public class GroupOverviewFragmentActivity extends Fragment {
 					return;
 				}
 				Object summary = doc.get("summary");
+				if (doc.get("trustPercent") instanceof Number && summary != null) {
+					// The node's group trust percentage, with what it is made of.
+					tv_group_trust.setText(summary + "\nMember standing " + _pct(doc, "trustStandingPct") + " · Clean record " + _pct(doc, "trustCleanPct")
+							+ " · Experience " + _pct(doc, "trustExperiencePct") + " · Depth " + _pct(doc, "trustDepthPct")
+							+ " · Vouching " + _pct(doc, "trustVouchingPct"));
+					return;
+				}
 				if (summary != null && !String.valueOf(summary).isEmpty()) {
 					tv_group_trust.setText(String.valueOf(summary));
 					return;
@@ -429,6 +436,10 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	public void onDestroyView() {
 		if (groupTrustReg != null) { groupTrustReg.remove(); groupTrustReg = null; }
 		super.onDestroyView();
+	}
+
+	private static String _pct(Map<String, Object> doc, String key) {
+		return (doc.get(key) instanceof Number ? ((Number) doc.get(key)).intValue() : 0) + "%";
 	}
 
 	private static String _trustLine(String tier, int members, double clean, double history) {

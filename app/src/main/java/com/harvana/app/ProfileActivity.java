@@ -618,6 +618,8 @@ public class ProfileActivity extends AppCompatActivity {
 			toCache.put("network", true);
 			toCache.put("overallScore", score.score);
 			toCache.put("published", score.published);
+			toCache.put("percent", score.percent);
+			toCache.put("tier", score.tier);
 			toCache.put("bound", score.bound);
 			toCache.put("vouches", score.vouches);
 			toCache.put("badges", score.badges);
@@ -632,9 +634,18 @@ public class ProfileActivity extends AppCompatActivity {
 		if (!Boolean.TRUE.equals(r.get("network"))) return;
 		int overallScore = r.get("overallScore") instanceof Number ? ((Number) r.get("overallScore")).intValue() : 0;
 		boolean published = Boolean.TRUE.equals(r.get("published"));
-		user_trust_score_textview5.setText(published ? overallScore + " / 26" : "— / 26");
-		trustScoreProgress5.setMax(26);
-		trustScoreProgress5.setProgress(published ? Math.max(0, Math.min(26, overallScore)) : 0);
+		int percent = r.get("percent") instanceof Number ? ((Number) r.get("percent")).intValue() : -1;
+		if (published && percent >= 0) {
+			// The node's single trust score, as a percentage (the same number every profile shows).
+			Object tier = r.get("tier");
+			user_trust_score_textview5.setText(percent + "%" + (tier == null || String.valueOf(tier).isEmpty() ? "" : " · " + tier));
+			trustScoreProgress5.setMax(100);
+			trustScoreProgress5.setProgress(Math.max(0, Math.min(100, percent)));
+		} else {
+			user_trust_score_textview5.setText(published ? overallScore + " / 26" : "— / 26");
+			trustScoreProgress5.setMax(26);
+			trustScoreProgress5.setProgress(published ? Math.max(0, Math.min(26, overallScore)) : 0);
+		}
 
 		boolean bound = Boolean.TRUE.equals(r.get("bound"));
 		int vouches = r.get("vouches") instanceof Number ? ((Number) r.get("vouches")).intValue() : 0;

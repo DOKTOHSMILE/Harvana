@@ -90,6 +90,8 @@ public class LearnFragmentActivity extends Fragment {
 	
 	private void initialize(Bundle _savedInstanceState, View _view) {
 		_fab = _view.findViewById(R.id._fab);
+		View _myActivity = _view.findViewById(R.id.tv_my_activity);
+		if (_myActivity != null) _myActivity.setOnClickListener(_v -> startActivity(new Intent(getContext(), ActivityStatsActivity.class)));
 		vscroll8 = _view.findViewById(R.id.vscroll8);
 		linear1 = _view.findViewById(R.id.linear1);
 		textview1 = _view.findViewById(R.id.textview1);
@@ -304,49 +306,30 @@ public class LearnFragmentActivity extends Fragment {
 		
 		@Override
 		public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-			View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.learn_hub_content_view, parent, false);
+			View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.learn_post_card, parent, false);
 			return new ViewHolder(view);
 		}
 		
 		@Override
 		public void onBindViewHolder(ViewHolder holder, int position) {
-			HashMap<String, Object> item = data.get(position);
-			
-			holder.layoutBadgeWrapper.setBackground(new GradientDrawable() { 
-				public GradientDrawable getIns(int a, int b) {
-					this.setCornerRadius(a);
-					this.setColor(b); 
-					return this;
-				} 
-			}.getIns((int)30, 0xFFDCFCE7));
-			
-			Object imageUrlObj = item.get("imageUrl");
-			if (imageUrlObj != null && !imageUrlObj.toString().isEmpty()) {
-				Glide.with(getContext()).load(Uri.parse(imageUrlObj.toString())).into(holder.imageview_cover);
-			} else {
-				holder.imageview_cover.setImageDrawable(null);
-			}
-			
-			Object titleObj = item.get("title");
-			holder.textview_title.setText(titleObj != null ? titleObj.toString() : "Untitled");
-			
-			Object descObj = item.get("description");
-			holder.textview_desc.setText(descObj != null ? descObj.toString() : "");
-			
-			Object categoryObj = item.get("category");
-			holder.textview_badge.setText(categoryObj != null ? categoryObj.toString() : "General");
-			
-			Object viewsObj = item.get("views");
-			long views = viewsObj instanceof Number ? ((Number) viewsObj).longValue() : 0L;
-			holder.textview_views.setText(views + (views == 1 ? " view" : " views"));
-			
-			Object authorUidObj = item.get("authorUid");
-			String authorUid = authorUidObj != null ? authorUidObj.toString() : "";
-			if (!authorUid.isEmpty()) {
-				com.harvana.app.group.MemberNameResolver.resolveInto(getContext(), authorUid, "Harvana Community", holder.textview_author);
-			} else {
-				holder.textview_author.setText("Harvana Community");
-			}
+			final com.harvana.app.learn.LearnPostBinder.Post post = com.harvana.app.learn.LearnPostBinder.Post.from(data.get(position));
+			com.harvana.app.learn.LearnPostBinder.bind(getActivity(), holder.itemView, post, false, null);
+			View.OnClickListener open = v -> {
+				Intent i = new Intent(getContext(), LearnReadActivity.class);
+				i.putExtra(LearnReadActivity.EXTRA_ID, post.id);
+				i.putExtra(LearnReadActivity.EXTRA_TITLE, post.title);
+				i.putExtra(LearnReadActivity.EXTRA_BODY, post.body);
+				i.putExtra(LearnReadActivity.EXTRA_CATEGORY, post.category);
+				i.putExtra(LearnReadActivity.EXTRA_IMAGE, post.imageUrl);
+				i.putExtra(LearnReadActivity.EXTRA_AUTHOR, post.authorUid);
+				i.putExtra(LearnReadActivity.EXTRA_CREATED, post.createdAt);
+				i.putExtra(LearnReadActivity.EXTRA_VIEWS, post.views);
+				startActivity(i);
+			};
+			View title = holder.itemView.findViewById(R.id.tv_title);
+			View body = holder.itemView.findViewById(R.id.tv_body);
+			if (title != null) title.setOnClickListener(open);
+			if (body != null) body.setOnClickListener(open);
 		}
 		
 		@Override
@@ -355,28 +338,8 @@ public class LearnFragmentActivity extends Fragment {
 		}
 		
 		public class ViewHolder extends RecyclerView.ViewHolder {
-			androidx.cardview.widget.CardView card_view_container;
-			LinearLayout linear58, layoutBadgeWrapper, linear60, linear62;
-			FrameLayout frame_layout59;
-			ImageView imageview_cover;
-			TextView textview_badge, textview_title, textview_desc, textview_author, textview_views;
-			View view61;
-			
 			public ViewHolder(View _view) {
 				super(_view);
-				card_view_container = _view.findViewById(R.id.card_view_container);
-				linear58 = _view.findViewById(R.id.linear58);
-				frame_layout59 = _view.findViewById(R.id.frame_layout59);
-				linear60 = _view.findViewById(R.id.linear60);
-				imageview_cover = _view.findViewById(R.id.imageview_cover);
-				layoutBadgeWrapper = _view.findViewById(R.id.layoutBadgeWrapper);
-				textview_badge = _view.findViewById(R.id.textview_badge);
-				textview_title = _view.findViewById(R.id.textview_title);
-				textview_desc = _view.findViewById(R.id.textview_desc);
-				view61 = _view.findViewById(R.id.view61);
-				linear62 = _view.findViewById(R.id.linear62);
-				textview_author = _view.findViewById(R.id.textview_author);
-				textview_views = _view.findViewById(R.id.textview_views);
 			}
 		}
 	}

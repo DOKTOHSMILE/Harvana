@@ -187,6 +187,8 @@ public class WalletEarnFragmentActivity extends Fragment {
         miniChart.setDrawBorders(false);
         miniChart.setViewPortOffsets(0, 0, 0, 0); // Fills exactly to the edge
         miniChart.setBackgroundColor(Color.TRANSPARENT);
+        miniChart.setNoDataText("Rewards show here as days pass.");
+        miniChart.setNoDataTextColor(com.harvana.app.utils.UiColors.textSecondary());
     }
 
     private void drawMiniChart(String address) {
@@ -218,12 +220,12 @@ public class WalletEarnFragmentActivity extends Fragment {
             if (entries.isEmpty()) return;
 
             LineDataSet set = new LineDataSet(entries, "Rewards");
-            set.setColor(Color.parseColor("#FF7A00")); // Harvana Orange
+            set.setColor(com.harvana.app.utils.UiColors.accent()); // Harvana Orange
             set.setLineWidth(2f);
             set.setDrawCircles(false);
             set.setDrawValues(false);
             set.setDrawFilled(true);
-            set.setFillColor(Color.parseColor("#FF7A00"));
+            set.setFillColor(com.harvana.app.utils.UiColors.accent());
             set.setFillAlpha(40);
             set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
 

@@ -11,64 +11,16 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:orientation="vertical">
-		<androidx.cardview.widget.CardView
-			android:id="@+id/cardview4"
+		<TextView
+			android:id="@+id/tv_no_wallet_hint"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_margin="40dp"
-			app:cardCornerRadius="20dp"
-			app:cardElevation="1dp"
-			android:visibility="gone">
-			<LinearLayout
-				android:id="@+id/linear7"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:padding="20dp"
-				android:gravity="center_horizontal|center_vertical"
-				android:orientation="vertical">
-				<ImageView
-					android:id="@+id/imageview4"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:src="@drawable/icon_account_balance_wallet_twotone"
-					android:scaleType="center"
-					app:tint="@color/colorAccent" />
-				<TextView
-					android:id="@+id/textview7"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_margin="10dp"
-					android:padding="8dp"
-					android:gravity="center_horizontal|center_vertical"
-					android:text="Set up a non-custodial wallet to hold HARV, ETH, USDT, USDC, XRP and your HARV rewards."
-					android:textSize="15sp"
-					android:textColor="@color/colorTextSecondary" />
-				<com.google.android.material.button.MaterialButton
-					android:id="@+id/button1"
-					android:layout_width="match_parent"
-					android:layout_height="50dp"
-					android:gravity="center_horizontal|center_vertical"
-					android:text="Create New Wallet"
-					android:textSize="16sp"
-					android:textColor="@color/colorQrBackground"
-					app:backgroundTint="@color/colorAccent"
-					android:paddingStart="32dp"
-					android:paddingEnd="32dp"
-					app:cornerRadius="10dp" />
-				<com.google.android.material.button.MaterialButton
-					android:id="@+id/materialbutton1"
-					android:layout_width="match_parent"
-					android:layout_height="50dp"
-					android:gravity="center_horizontal|center_vertical"
-					android:text="Recover Old Wallet"
-					android:textSize="16sp"
-					android:textColor="@color/colorQrBackground"
-					app:backgroundTint="@color/colorOverlayDark"
-					app:cornerRadius="10dp"
-					app:strokeColor="@color/colorCardStroke"
-					app:strokeWidth="2dp" />
-			</LinearLayout>
-		</androidx.cardview.widget.CardView>
+			android:layout_margin="32dp"
+			android:gravity="center_horizontal"
+			android:text="No wallet yet. Tap the wallet selector above to create or import one."
+			android:textSize="14sp"
+			android:textColor="@color/colorTextSecondary"
+			android:visibility="gone" />
 		<androidx.recyclerview.widget.RecyclerView
 			android:id="@+id/recyclerview1"
 			android:layout_width="match_parent"

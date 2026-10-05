@@ -92,6 +92,9 @@ public final class StakingPanel {
     long observedPace;
     private long walletRaw;
     private int chartDays = 7;
+
+    /** Colors come from the app theme, so the staking screens follow day and night like the rest of the app. */
+    private int themeColor(int resId) { return ContextCompat.getColor(host, resId); }
     private boolean busy;
 
     private final ArrayList<HashMap<String, Object>> walletAssets = new ArrayList<>();
@@ -216,7 +219,7 @@ public final class StakingPanel {
                 tv.setTextColor(Color.WHITE);
                 tv.setTextSize(16);
                 tv.setPadding(24, 24, 24, 24);
-                tv.setBackgroundColor(Color.parseColor("#1A1F2E"));
+                tv.setBackgroundColor(themeColor(R.color.colorSurface));
                 return tv;
             }
         };
@@ -404,10 +407,10 @@ public final class StakingPanel {
         badge.setTypeface(null, android.graphics.Typeface.BOLD);
         if (ready) {
             badge.setText("● Ready");
-            badge.setTextColor(Color.parseColor("#3B82F6"));
+            badge.setTextColor(themeColor(R.color.colorSuccess));
         } else {
             badge.setText("● Unbonding");
-            badge.setTextColor(Color.parseColor("#FF7A00"));
+            badge.setTextColor(themeColor(R.color.colorAccent));
         }
 
         TextView amountTv = new TextView(host);
@@ -419,7 +422,7 @@ public final class StakingPanel {
 
         TextView subTv = new TextView(host);
         subTv.setId(View.generateViewId());
-        subTv.setTextColor(Color.parseColor("#8F9BB3"));
+        subTv.setTextColor(themeColor(R.color.colorTextTertiary));
         subTv.setTextSize(11);
         subTv.setText(ready ? "Cooldown Complete" : "Remaining: " + formatTimerPrecise(release - now));
 
@@ -428,7 +431,7 @@ public final class StakingPanel {
         btn.setText("Withdraw");
         btn.setAllCaps(false);
         btn.setTextSize(11);
-        btn.setTextColor(Color.parseColor("#FF7A00"));
+        btn.setTextColor(themeColor(R.color.colorAccent));
         btn.setVisibility(ready ? View.VISIBLE : View.GONE);
         btn.setOnClickListener(v -> doManualSweep());
 
@@ -477,9 +480,9 @@ public final class StakingPanel {
         LinearLayout.LayoutParams cardLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         cardLp.setMargins(0, dp(8), 0, dp(8));
         containerCard.setLayoutParams(cardLp);
-        containerCard.setCardBackgroundColor(Color.parseColor("#121623"));
+        containerCard.setCardBackgroundColor(themeColor(R.color.colorSurface));
         containerCard.setRadius(dp(16));
-        containerCard.setStrokeColor(Color.parseColor("#2A3042"));
+        containerCard.setStrokeColor(themeColor(R.color.colorCardStroke));
         containerCard.setStrokeWidth(dp(1));
 
         LinearLayout cardInner = new LinearLayout(host);
@@ -494,7 +497,7 @@ public final class StakingPanel {
                 LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1));
                 divLp.setMargins(0, dp(6), 0, dp(6));
                 divider.setLayoutParams(divLp);
-                divider.setBackgroundColor(Color.parseColor("#1A2235"));
+                divider.setBackgroundColor(themeColor(R.color.colorCardStroke));
                 cardInner.addView(divider);
             }
         }
@@ -505,7 +508,7 @@ public final class StakingPanel {
             viewMoreBtn.setPadding(0, dp(12), 0, dp(4));
             viewMoreBtn.setGravity(Gravity.CENTER);
             viewMoreBtn.setText("View All Withdrawals (" + activeRows.size() + ") >");
-            viewMoreBtn.setTextColor(Color.parseColor("#FF7A00"));
+            viewMoreBtn.setTextColor(themeColor(R.color.colorAccent));
             viewMoreBtn.setTextSize(12);
             viewMoreBtn.setTypeface(null, android.graphics.Typeface.BOLD);
             viewMoreBtn.setOnClickListener(v -> showFullUnbondingBottomSheet(activeRows));
@@ -519,7 +522,7 @@ public final class StakingPanel {
     private void applyCurvedBottomSheetBackground(LinearLayout root, BottomSheetDialog sheet) {
         GradientDrawable roundedBg = new GradientDrawable();
         roundedBg.setShape(GradientDrawable.RECTANGLE);
-        roundedBg.setColor(Color.parseColor("#121623"));
+        roundedBg.setColor(themeColor(R.color.colorSurface));
         float radius = dp(20);
         roundedBg.setCornerRadii(new float[]{radius, radius, radius, radius, 0, 0, 0, 0});
         root.setBackground(roundedBg);
@@ -569,7 +572,7 @@ public final class StakingPanel {
                 LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1));
                 divLp.setMargins(0, dp(6), 0, dp(6));
                 divider.setLayoutParams(divLp);
-                divider.setBackgroundColor(Color.parseColor("#1A2235"));
+                divider.setBackgroundColor(themeColor(R.color.colorCardStroke));
                 listContainer.addView(divider);
             }
         }
@@ -611,10 +614,10 @@ public final class StakingPanel {
         status.setTypeface(null, android.graphics.Typeface.BOLD);
         if (ready) {
             status.setText("● Ready for Withdrawal");
-            status.setTextColor(Color.parseColor("#3B82F6"));
+            status.setTextColor(themeColor(R.color.colorSuccess));
         } else {
             status.setText("● Unbonding (Locked)");
-            status.setTextColor(Color.parseColor("#FF7A00"));
+            status.setTextColor(themeColor(R.color.colorAccent));
         }
 
         LinearLayout receiptBox = new LinearLayout(host);
@@ -635,7 +638,7 @@ public final class StakingPanel {
 
         TextView note = new TextView(host);
         note.setText("For network security, unstaked funds undergo a strict 24-hour cooldown. Once the timer finishes, you can withdraw the HARV directly to your spendable wallet balance.");
-        note.setTextColor(Color.parseColor("#8F9BB3"));
+        note.setTextColor(themeColor(R.color.colorTextTertiary));
         note.setTextSize(12);
         note.setLineSpacing(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, host.getResources().getDisplayMetrics()), 1.0f);
 
@@ -649,7 +652,7 @@ public final class StakingPanel {
         if (ready) {
             actionBtn.setText("Withdraw to Wallet");
             actionBtn.setTextColor(Color.BLACK);
-            actionBtn.setBackgroundColor(Color.parseColor("#FF7A00"));
+            actionBtn.setBackgroundColor(themeColor(R.color.colorAccent));
             actionBtn.setOnClickListener(v -> {
                 sheet.dismiss();
                 doManualSweep();
@@ -657,7 +660,7 @@ public final class StakingPanel {
         } else {
             actionBtn.setText("Got it");
             actionBtn.setTextColor(Color.WHITE);
-            actionBtn.setBackgroundColor(Color.parseColor("#2A3042"));
+            actionBtn.setBackgroundColor(themeColor(R.color.colorCardStroke));
             actionBtn.setOnClickListener(v -> sheet.dismiss());
         }
 
@@ -679,7 +682,7 @@ public final class StakingPanel {
 
         TextView lblTv = new TextView(host);
         lblTv.setText(label);
-        lblTv.setTextColor(Color.parseColor("#8F9BB3"));
+        lblTv.setTextColor(themeColor(R.color.colorTextTertiary));
         lblTv.setTextSize(13);
         lblTv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
 
@@ -721,7 +724,7 @@ public final class StakingPanel {
 
         TextView subTitle = new TextView(host);
         subTitle.setText("Currently Staked: " + harv(stakedRaw));
-        subTitle.setTextColor(Color.parseColor("#8F9BB3"));
+        subTitle.setTextColor(themeColor(R.color.colorTextTertiary));
         subTitle.setTextSize(13);
         subTitle.setPadding(0, dp(4), 0, dp(16));
 
@@ -738,7 +741,7 @@ public final class StakingPanel {
         inputEt.setHint("0.00");
         inputEt.setTextColor(Color.WHITE);
         inputEt.setTextSize(18);
-        inputEt.setHintTextColor(Color.parseColor("#5A6578"));
+        inputEt.setHintTextColor(themeColor(R.color.colorTextMuted));
 
         TextView currencyTv = new TextView(host);
         currencyTv.setText("HARV");
@@ -765,9 +768,9 @@ public final class StakingPanel {
             btn.setText(labels[i]);
             btn.setTextSize(11);
             btn.setAllCaps(false);
-            btn.setTextColor(Color.parseColor("#FF7A00"));
+            btn.setTextColor(themeColor(R.color.colorAccent));
             btn.setStrokeColorResource(android.R.color.transparent);
-            btn.setBackgroundColor(Color.parseColor("#1A2235"));
+            btn.setBackgroundColor(themeColor(R.color.colorCardStroke));
             btn.setOnClickListener(v -> {
                 double val = stakedHarv * mult;
                 inputEt.setText(harvFormatter.format(val));
@@ -783,7 +786,7 @@ public final class StakingPanel {
         confirmBtn.setAllCaps(false);
         confirmBtn.setTextColor(Color.BLACK);
         confirmBtn.setCornerRadius(dp(12));
-        confirmBtn.setBackgroundColor(Color.parseColor("#FF7A00"));
+        confirmBtn.setBackgroundColor(themeColor(R.color.colorAccent));
 
         confirmBtn.setOnClickListener(v -> {
             String valStr = inputEt.getText().toString().trim();
@@ -871,15 +874,15 @@ public final class StakingPanel {
 
     private void setRange(int days) {
         chartDays = days;
-        chip1d.setTextColor(Color.parseColor("#8F9BB3")); chip1d.setBackgroundResource(0);
-        chip3d.setTextColor(Color.parseColor("#8F9BB3")); chip3d.setBackgroundResource(0);
-        chip7d.setTextColor(Color.parseColor("#8F9BB3")); chip7d.setBackgroundResource(0);
-        chip1m.setTextColor(Color.parseColor("#8F9BB3")); chip1m.setBackgroundResource(0);
-        chip3m.setTextColor(Color.parseColor("#8F9BB3")); chip3m.setBackgroundResource(0);
-        chipAll.setTextColor(Color.parseColor("#8F9BB3")); chipAll.setBackgroundResource(0);
+        chip1d.setTextColor(themeColor(R.color.colorTextTertiary)); chip1d.setBackgroundResource(0);
+        chip3d.setTextColor(themeColor(R.color.colorTextTertiary)); chip3d.setBackgroundResource(0);
+        chip7d.setTextColor(themeColor(R.color.colorTextTertiary)); chip7d.setBackgroundResource(0);
+        chip1m.setTextColor(themeColor(R.color.colorTextTertiary)); chip1m.setBackgroundResource(0);
+        chip3m.setTextColor(themeColor(R.color.colorTextTertiary)); chip3m.setBackgroundResource(0);
+        chipAll.setTextColor(themeColor(R.color.colorTextTertiary)); chipAll.setBackgroundResource(0);
 
         TextView selected = days == 1 ? chip1d : days == 3 ? chip3d : days == 7 ? chip7d : days == 30 ? chip1m : days == 90 ? chip3m : chipAll;
-        selected.setTextColor(Color.parseColor("#080A11"));
+        selected.setTextColor(themeColor(R.color.colorBackground));
         selected.setBackgroundResource(R.drawable.bg_pill_orange);
 
         drawChart(WalletManager.getActiveWalletAddress(host));

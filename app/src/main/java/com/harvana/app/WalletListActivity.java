@@ -54,6 +54,7 @@ public class WalletListActivity extends AppCompatActivity {
 	private FloatingActionButton _fab;
 	
 	private RecyclerView recycler_wallets;
+	private View card_no_wallet;
 	
 	@Override
 	protected void onCreate(Bundle _savedInstanceState) {
@@ -79,6 +80,14 @@ public class WalletListActivity extends AppCompatActivity {
 		});
 		_fab = findViewById(R.id._fab);
 		recycler_wallets = findViewById(R.id.recycler_wallets);
+		card_no_wallet = findViewById(R.id.card_no_wallet);
+		findViewById(R.id.btn_create_wallet).setOnClickListener(_v ->
+			startActivityForResult(new Intent(this, CreateWalletActivity.class), RC_CREATE_WALLET));
+		findViewById(R.id.btn_recover_wallet).setOnClickListener(_v -> {
+			Intent restoreIntent = new Intent(this, RestoreWalletActivity.class);
+			restoreIntent.putExtra(RestoreWalletActivity.EXTRA_EMBEDDED, true);
+			startActivityForResult(restoreIntent, RC_RESTORE_WALLET);
+		});
 		
 		_fab.setOnClickListener(_v -> showAddWalletChooser());
 	}
@@ -119,6 +128,10 @@ public class WalletListActivity extends AppCompatActivity {
 		
 		adapter = new WalletAdapter(wallets, activeAddress);
 		recycler_wallets.setAdapter(adapter);
+		// With no wallet at all, the set-up card (moved here from the Assets tab) takes the place of the empty list.
+		boolean none = wallets.isEmpty();
+		card_no_wallet.setVisibility(none ? View.VISIBLE : View.GONE);
+		recycler_wallets.setVisibility(none ? View.GONE : View.VISIBLE);
 	}
 	
 	private void showAddWalletChooser() {

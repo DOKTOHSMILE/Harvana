@@ -21,7 +21,8 @@ jobs:
         distribution: 'temurin'
 
     - name: Generate the Gradle config from app/module.toml
-      # CodeAssist builds from app/module.toml, so the toml is the one source of truth. This writes app/build.gradle from it
+      # CodeAssist builds from app/module.toml, so the toml is the one source of truth. No Gradle file is stored in the repo: this writes
+      # app/build.gradle, settings.gradle, build.gradle and gradle.properties from it
       # (SDK levels, version, build types and every dependency) so CI builds exactly what CodeAssist builds.
       run: python3 tools/module_toml_to_gradle.py
 

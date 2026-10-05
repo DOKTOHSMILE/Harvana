@@ -620,7 +620,7 @@ public class TrustScoreActivity extends AppCompatActivity {
 
     private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
 
-    private TextView tv(String t, int sp, boolean bold, int color) {
+    private TextView tv(String t, float sp, boolean bold, int color) {
         TextView v = new TextView(this);
         v.setText(t);
         v.setTextSize(sp);

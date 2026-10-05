@@ -86,12 +86,16 @@ public class P2pBuyFragmentActivity extends Fragment {
 	private MaterialTextView tv_fragment_empty_subtitle;
 	private MaterialButton btn_fragment_empty_cta;
 	
+	/** Application context, kept so background callbacks that finish after the fragment is gone do not hit a null getContext(). */
+	private android.content.Context appCtx;
+	
 	@NonNull
 	@Override
 	public View onCreateView(@NonNull LayoutInflater _inflater, @Nullable ViewGroup _container, @Nullable Bundle _savedInstanceState) {
 		View _view = _inflater.inflate(R.layout.p2p_buy_fragment, _container, false);
 		initialize(_savedInstanceState, _view);
-		FirebaseApp.initializeApp(getContext());
+		appCtx = _view.getContext().getApplicationContext();
+		FirebaseApp.initializeApp(appCtx);
 		initializeLogic();
 		return _view;
 	}
@@ -252,7 +256,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		
 		if (e.listingId.isEmpty() || e.posterAddress.isEmpty()) { done.onDone(e); return; }
 		
-		P2PPaymentDetailsManager.getInstance(getContext().getApplicationContext())
+		P2PPaymentDetailsManager.getInstance(appCtx)
 		.get(e.listingId, new P2PPaymentDetailsManager.DocCallback() {
 			@Override
 			public void onSuccess(Map<String, Object> data) {
@@ -278,7 +282,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 				java.util.concurrent.atomic.AtomicInteger innerRemaining = new java.util.concurrent.atomic.AtomicInteger(2);
 				Runnable maybeDone = () -> { if (innerRemaining.decrementAndGet() == 0) done.onDone(e); };
 				
-				UserProfileManager.getInstance(getContext().getApplicationContext())
+				UserProfileManager.getInstance(appCtx)
 				.getProfile(e.sellerUid, new UserProfileManager.DocCallback() {
 					@Override
 					public void onSuccess(Map<String, Object> profile) {
@@ -298,7 +302,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 					public void onError(String error) { maybeDone.run(); }
 				});
 				
-				com.harvana.app.TrustScoreEngine.compute(getContext().getApplicationContext(), e.sellerUid,
+				com.harvana.app.TrustScoreEngine.compute(appCtx, e.sellerUid,
 				new com.harvana.app.TrustScoreEngine.Callback() {
 					@Override
 					public void onComplete(com.harvana.app.TrustScoreEngine.Result result) {
@@ -314,7 +318,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 								boolean meetsDeposit = insuranceJson.optBoolean("meetsInsuranceThreshold", false);
 								e.insured = meetsDeposit && e.verified && reportCount == 0;
 								
-								P2PTradeStatsManager.getInstance(getContext().getApplicationContext())
+								P2PTradeStatsManager.getInstance(appCtx)
 								.getFullStats(e.sellerUid, new P2PTradeStatsManager.FullStatsCallback() {
 									@Override
 									public void onSuccess(int totalTrades, int successfulTrades, double successRatePercent, int uniqueCounterparties) {
@@ -873,7 +877,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 			if (e.iconUrl.startsWith("http")) {
 				txt_avatar.setVisibility(View.GONE);
 				iv_avatar_photo.setVisibility(View.VISIBLE);
-				Glide.with(getContext().getApplicationContext()).load(Uri.parse(e.iconUrl)).circleCrop().into(iv_avatar_photo);
+				Glide.with(appCtx).load(Uri.parse(e.iconUrl)).circleCrop().into(iv_avatar_photo);
 			} else {
 				iv_avatar_photo.setVisibility(View.GONE);
 				txt_avatar.setVisibility(View.VISIBLE);

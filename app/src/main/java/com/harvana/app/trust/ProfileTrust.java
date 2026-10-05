@@ -1,0 +1,118 @@
+package com.harvana.app.trust;
+
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.TextView;
+
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * The person behind a post, with their trust score. Reads the public profile card (PROFILES/{pid}); the trust fields on it
+ * are written by the node and cannot be edited or removed by the user, so a score is shown on every profile that has one.
+ * Nothing here calculates a score. Results are cached for a couple of minutes so a scrolling feed does not re-read the same author.
+ */
+public final class ProfileTrust {
+    private ProfileTrust() {}
+
+    public static final class Card {
+        public String uid = "", pid = "", name = "", username = "", icon = "", wallet = "", trustTier = "";
+        /** 0 to 100 once the node has scored this person; -1 before that. */
+        public int percent = -1;
+        public boolean scored() { return percent >= 0; }
+    }
+
+    public interface Callback { void onCard(Card card); }
+
+    private static final long TTL_MS = 2 * 60 * 1000L;
+    private static final Map<String, Card> CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, Long> CACHED_AT = new ConcurrentHashMap<>();
+    private static final Handler MAIN = new Handler(Looper.getMainLooper());
+
+    /** Calls back on the main thread, always with a card (empty fields when the person cannot be read). */
+    public static void resolve(String uid, Callback cb) {
+        if (uid == null || uid.trim().isEmpty()) { MAIN.post(() -> cb.onCard(new Card())); return; }
+        Long at = CACHED_AT.get(uid);
+        Card cached = CACHE.get(uid);
+        if (cached != null && at != null && System.currentTimeMillis() - at < TTL_MS) { MAIN.post(() -> cb.onCard(cached)); return; }
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("USERS").document(uid).get().addOnCompleteListener(userTask -> {
+            Card card = new Card();
+            card.uid = uid;
+            if (userTask.isSuccessful() && userTask.getResult() != null && userTask.getResult().exists()) {
+                Map<String, Object> u = userTask.getResult().getData();
+                if (u != null) {
+                    card.name = fullName(text(u.get("first_name")), text(u.get("last_name")));
+                    card.username = text(u.get("username"));
+                    card.icon = text(u.get("icon"));
+                    card.pid = text(u.get("pid"));
+                }
+            }
+            if (!card.pid.matches("^[0-9]{10}$")) { finish(uid, card, cb); return; }
+            db.collection("PROFILES").document(card.pid).get().addOnCompleteListener(cardTask -> {
+                if (cardTask.isSuccessful() && cardTask.getResult() != null && cardTask.getResult().exists()) {
+                    Map<String, Object> p = cardTask.getResult().getData();
+                    if (p != null) {
+                        String n = fullName(text(p.get("first_name")), text(p.get("last_name")));
+                        if (!n.isEmpty()) card.name = n;
+                        if (!text(p.get("username")).isEmpty()) card.username = text(p.get("username"));
+                        if (!text(p.get("icon")).isEmpty()) card.icon = text(p.get("icon"));
+                        card.wallet = text(p.get("wallet"));
+                        card.trustTier = text(p.get("trust_tier"));
+                        if (p.get("trust_percent") instanceof Number) card.percent = Math.max(0, Math.min(100, ((Number) p.get("trust_percent")).intValue()));
+                    }
+                }
+                finish(uid, card, cb);
+            });
+        });
+    }
+
+    private static void finish(String uid, Card card, Callback cb) {
+        CACHE.put(uid, card);
+        CACHED_AT.put(uid, System.currentTimeMillis());
+        MAIN.post(() -> cb.onCard(card));
+    }
+
+    /** The label on a profile: "92% · Gold", or "Not scored yet" before the node has published one. */
+    public static String label(Card c) {
+        if (c == null || !c.scored()) return "Not scored yet";
+        return c.percent + "% · " + (c.trustTier.isEmpty() ? tierFor(c.percent) : c.trustTier);
+    }
+
+    /** Fills a small text view as a pill coloured by tier. Always visible: the score cannot be hidden. */
+    public static void bind(TextView pill, Card c) {
+        if (pill == null) return;
+        pill.setVisibility(android.view.View.VISIBLE);
+        pill.setText(label(c));
+        int color = c != null && c.scored() ? tierColor(c.trustTier.isEmpty() ? tierFor(c.percent) : c.trustTier) : 0xFF8B98AD;
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(pill.getResources().getDisplayMetrics().density * 12);
+        bg.setColor(Color.argb(40, Color.red(color), Color.green(color), Color.blue(color)));
+        bg.setStroke(Math.max(1, (int) pill.getResources().getDisplayMetrics().density), Color.argb(120, Color.red(color), Color.green(color), Color.blue(color)));
+        pill.setBackground(bg);
+        pill.setTextColor(color);
+    }
+
+    /** Same thresholds as the node's TrustPercent (Platinum also needs strong components, which the node already applied to the tier it sent). */
+    public static String tierFor(int percent) {
+        if (percent >= 85) return "Platinum";
+        if (percent >= 65) return "Gold";
+        if (percent >= 40) return "Silver";
+        return "Bronze";
+    }
+
+    public static int tierColor(String tier) {
+        if ("Platinum".equals(tier)) return 0xFF7DD3FC;
+        if ("Gold".equals(tier)) return 0xFFFFC857;
+        if ("Silver".equals(tier)) return 0xFFB4BFD0;
+        return 0xFFD08A4E;
+    }
+
+    private static String fullName(String first, String last) { return (first + " " + last).trim(); }
+    private static String text(Object o) { return o == null ? "" : String.valueOf(o).trim(); }
+}

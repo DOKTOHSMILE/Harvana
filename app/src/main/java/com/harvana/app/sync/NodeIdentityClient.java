@@ -44,12 +44,20 @@ public final class NodeIdentityClient {
             if (!t.isSuccessful() || t.getResult() == null || t.getResult().getToken() == null) {
                 cb.onError("Could not get sign-in token."); return;
             }
-            try {
-                long ts = System.currentTimeMillis();
-                JSONObject body = signed(c, address, IdentityCanonical.identityLink(address, ts));
-                body.put("address", address).put("timestamp", ts).put("idToken", t.getResult().getToken());
-                post("/api/v1/identity/link", body, cb);
-            } catch (Exception e) { cb.onError(e.getMessage()); }
+            final String token = t.getResult().getToken();
+            // The profile id lets the node put the trust score on the public profile card. Linking works without it.
+            com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("USERS").document(u.getUid()).get()
+                    .addOnCompleteListener(r -> {
+                        String pid = "";
+                        if (r.isSuccessful() && r.getResult() != null && r.getResult().getString("pid") != null) pid = r.getResult().getString("pid");
+                        try {
+                            long ts = System.currentTimeMillis();
+                            JSONObject body = signed(c, address, IdentityCanonical.identityLink(address, ts));
+                            body.put("address", address).put("timestamp", ts).put("idToken", token);
+                            if (!pid.isEmpty()) body.put("pid", pid);
+                            post("/api/v1/identity/link", body, cb);
+                        } catch (Exception e) { cb.onError(e.getMessage()); }
+                    });
         });
     }
 
@@ -82,7 +90,7 @@ public final class NodeIdentityClient {
         return sb.toString();
     }
 
-    private static JSONObject signed(Context c, String address, String message) throws Exception {
+    static JSONObject signed(Context c, String address, String message) throws Exception {
         String seed = WalletManager.loadPrivateKey(c, address);
         String pub = WalletManager.getPublicKey(c, address);
         if (seed == null || pub == null) throw new IllegalStateException("No local signing key for this wallet.");

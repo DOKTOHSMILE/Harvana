@@ -16,6 +16,10 @@ public final class NetworkTrust {
 
     public static final class Score {
         public int score;
+        /** The node's trust percentage (0 to 100), or -1 when it has not published one. */
+        public int percent = -1;
+        public String tier = "";
+        public int verifiedReads, activeDays30, giftsSent;
         public boolean published;
         public boolean bound;
         public int vouches;
@@ -89,6 +93,11 @@ public final class NetworkTrust {
         Score s = new Score();
         s.published = true;
         s.score = num(doc.get("trustScore"));
+        if (doc.get("trustPercent") instanceof Number) s.percent = num(doc.get("trustPercent"));
+        s.tier = doc.get("trustTier") == null ? "" : String.valueOf(doc.get("trustTier"));
+        s.verifiedReads = num(doc.get("verifiedReads"));
+        s.activeDays30 = num(doc.get("activeDays30"));
+        s.giftsSent = num(doc.get("giftsSent"));
         s.bound = Boolean.TRUE.equals(doc.get("bound"));
         s.vouches = num(doc.get("effectiveVouchCount"));
         s.established = Boolean.TRUE.equals(doc.get("established"));
@@ -104,6 +113,8 @@ public final class NetworkTrust {
         if (j == null || !j.has("trustScore")) return s;
         s.published = true;
         s.score = j.optInt("trustScore", 0);
+        if (j.has("trustPercent")) s.percent = j.optInt("trustPercent", -1);
+        s.tier = j.optString("trustTier", "");
         s.bound = j.optBoolean("bound", false);
         s.vouches = j.optInt("effectiveVouchCount", 0);
         s.established = j.optBoolean("established", false);

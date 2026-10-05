@@ -4,14 +4,14 @@ package com.harvana.app.chain;
 public final class EngagementCanonical {
     private EngagementCanonical() {}
 
-    /** HARVANNA_ENGAGEMENT_READ_V1:{address}:{contentId}:{dwellMs}:{timestamp} */
+    /** HARVANA_ENGAGEMENT_READ_V1:{address}:{contentId}:{dwellMs}:{timestamp} */
     public static String read(String address, String contentId, long dwellMs, long timestamp) {
-        return "HARVANNA_ENGAGEMENT_READ_V1:" + address + ":" + contentId + ":" + dwellMs + ":" + timestamp;
+        return "HARVANA_ENGAGEMENT_READ_V1:" + address + ":" + contentId + ":" + dwellMs + ":" + timestamp;
     }
 
-    /** HARVANNA_ENGAGEMENT_STATS_V1:{address}:{timestamp} */
+    /** HARVANA_ENGAGEMENT_STATS_V1:{address}:{timestamp} */
     public static String stats(String address, long timestamp) {
-        return "HARVANNA_ENGAGEMENT_STATS_V1:" + address + ":" + timestamp;
+        return "HARVANA_ENGAGEMENT_STATS_V1:" + address + ":" + timestamp;
     }
 
     /** The memo on a Learn Hub gift. The node counts a confirmed transfer with this memo once per recipient. */

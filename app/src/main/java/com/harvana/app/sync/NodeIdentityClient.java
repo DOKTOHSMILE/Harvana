@@ -84,7 +84,7 @@ public final class NodeIdentityClient {
     static String deviceHash(Context c) throws Exception {
         String id = Settings.Secure.getString(c.getContentResolver(), Settings.Secure.ANDROID_ID);
         byte[] d = MessageDigest.getInstance("SHA-256")
-            .digest(("HARVANNA_DEVICE_V1|" + id + "|" + c.getPackageName()).getBytes(StandardCharsets.UTF_8));
+            .digest(("HARVANA_DEVICE_V1|" + id + "|" + c.getPackageName()).getBytes(StandardCharsets.UTF_8));
         StringBuilder sb = new StringBuilder();
         for (byte b : d) sb.append(String.format("%02x", b));
         return sb.toString();

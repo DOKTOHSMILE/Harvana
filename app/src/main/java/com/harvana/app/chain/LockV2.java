@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
  * big-endian ints/longs. No JSON, no separators.
  */
 public final class LockV2 {
-    public static final String DOMAIN = "HARVANNA_TX_V2";
+    public static final String DOMAIN = "HARVANA_TX_V2";
 
     private LockV2() {}
 

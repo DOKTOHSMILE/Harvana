@@ -456,7 +456,7 @@ public final class HarvanaNodeClient {
 *  this directly.
 *
 *  Includes "app": "harvana-app" so the node can distinguish this app's
-*  traffic from com.harvanna.node.miner's, which hits the exact same
+*  traffic from com.harvana.node.miner's, which hits the exact same
 *  endpoint. Without this, a device running both apps on the same
 *  IP/address has no way to avoid sharing one rate-limit budget
 *  between mining traffic and ordinary wallet-app usage — this field
@@ -491,7 +491,7 @@ public final class HarvanaNodeClient {
 							return;
 						}
 						if (canonical.isEmpty()) {
-							canonical = "HARVANNA_AUTH|" + address + "|" + challenge + "|"
+							canonical = "HARVANA_AUTH|" + address + "|" + challenge + "|"
 							+ (clientId == null ? "" : clientId) + "|harvana-app";
 						}
 						String pkB64 = SecureWalletStorage.loadPrivateKey(context, address);

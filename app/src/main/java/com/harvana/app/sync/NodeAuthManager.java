@@ -19,7 +19,7 @@ import java.util.List;
  * before every request; nothing else in the app needs to know this exists.
  *
  * Reuses the exact same token contract already proven working against
- * this node by com.harvanna.node.miner's mining-auth flow: POST address +
+ * this node by com.harvana.node.miner's mining-auth flow: POST address +
  * a device clientId to /api/v1/mining/auth, get back {token, expiresAt},
  * send the token back as "Authorization: Bearer <token>". The endpoint
  * path still says "mining" for historical reasons on the node side, but

@@ -36,6 +36,6 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: harvanna-apks
+        name: harvana-apks
         path: app/build/outputs/apk/**/*.apk
         retention-days: 1   # shortest GitHub allows; the repo's artifact storage quota filled up

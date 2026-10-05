@@ -7,7 +7,7 @@
 - T0-2: `AJ0x` -> `HV0x` everywhere (constants, regex validators, layouts hints).
   Left unchanged: `CreateNewGroupActivity.FEE_COLLECTOR_ADDRESS` (unused legacy hex; real HV0x address unknown).
 - T0-3: read from node source (read-only): `AuthChallengeStore.canonicalMessage` =
-  `HARVANNA_AUTH|address|challenge|clientId|app`. The app signs the node-supplied `canonical`;
+  `HARVANA_AUTH|address|challenge|clientId|app`. The app signs the node-supplied `canonical`;
   the local fallback now matches that format.
 - T1-1/2/3: `ChainConstants` reward/halving/fee split corrected; hardcoded gas constants removed (were unused).
 - T0-4: untouched, as instructed.
@@ -40,7 +40,7 @@
 
 ## Firebase setup (T0-5)
 - Package renamed `com.harvana.app` -> `com.harvana.app` (applicationId, namespace, sources, manifest authorities). Register `com.harvana.app` in Firebase.
-- `com.harvanna.node.miner` (separate miner app) is still referenced by WalletEarnFragmentActivity; update if the miner is renamed.
+- `com.harvana.node.miner` (separate miner app) is still referenced by WalletEarnFragmentActivity; update if the miner is renamed.
 - `com.google.gms.google-services` plugin (4.4.1) added to `app/build.gradle`. The build fails until
   `app/google-services.json` is added (download from Firebase console after registering the app + SHA fingerprints).
 - App has never been on Play, so `versionCode 1` is fine (T2-2 resolved). Keystore (T2-1) still open.
@@ -111,7 +111,7 @@ Differences from the decisions as stated (found while reading the node; NOT chan
    `MINIMUM_P2P_ESCROW_TIME_MS` does not exist anywhere in the node repo. 1h/2h/4h presets would be rejected for 2h and 4h.
    The app keeps the existing 15/30/45/60 presets (which the node's own comment says match the UI). If a 1h minimum is really
    wanted, that is a node change (owner's decision) and the presets change with it.
-2. **The mark is not reachable from the app**: `HarvannaProtocolManager.getMarkStatus()` exists but no controller exposes it.
+2. **The mark is not reachable from the app**: `HarvanaProtocolManager.getMarkStatus()` exists but no controller exposes it.
    So the screen shows the MEDIAN of open-listing prices as a clearly-labelled reference, not the accepted mark. Needs a node
    endpoint (e.g. `GET /api/v1/mark`) - node-side follow-up. When it exists, swap it into `P2pPriceReference.fetch`.
 3. **Currency**: the node prices in kobo (Naira). Non-NGN offers are refused in the app with a clear message.
@@ -164,7 +164,7 @@ Consequences to know:
   data on disk but the new build cannot see it: the wallet must be restored from its recovery phrase / Access Card. Do not uninstall or clear data on a device holding
   a wallet you have not backed up.
 - Mechanical name results that need the owner to confirm they exist: the support address is now `support@harvana.app`; the separate miner app is now expected at package
-  `com.harvanna.node.miner` (the Earn screen launches it); saved-file folder is `Harvana`.
+  `com.harvana.node.miner` (the Earn screen launches it); saved-file folder is `Harvana`.
 - The repository is still called "Ajoo" on GitHub and git history contains the old names; neither is part of the app.
 
 ## Group wallet card sharing
@@ -178,14 +178,14 @@ Consequences to know:
 - Removed the fake HARV_TO_NGN=150 rate everywhere; the group wallet's "≈ ₦" line is hidden (no real rate source).
 - Access Card passphrase minimum is now 24 characters (new cards only; existing cards still decrypt).
 - Loans: the node has loan machinery for Accumulative and Fixed groups only (Circle/Rotating has none), so the loan toggle exists only for those two types; Rotating is always loans-off.
-- Miner package: com.harvanna.mine (+ manifest <queries> so Android 11+ can detect it).
+- Miner package: com.harvana.mine (+ manifest <queries> so Android 11+ can detect it).
 - Full Firestore rules replacement: docs/firestore.rules. Note the rebrand renamed data fields (amountAjc->amountHarv, repaidAmountAjc->repaidAmountHarv); the rules use the new names, so any data written by an older build under old names would not match.
 
 ## Trust score and wallet ownership on the node
-- Node has two mechanisms: `POST /api/v1/identity/link` (wallet signature + Firebase ID token; node stores only HMAC(pepper, uid); disabled unless `harvanna.identity.links-enabled=true`) and `POST /api/v1/personhood/bind` + `/vouch`, `GET /api/v1/personhood/{address}`.
+- Node has two mechanisms: `POST /api/v1/identity/link` (wallet signature + Firebase ID token; node stores only HMAC(pepper, uid); disabled unless `harvana.identity.links-enabled=true`) and `POST /api/v1/personhood/bind` + `/vouch`, `GET /api/v1/personhood/{address}`.
 - The node's trust score is only 0..26: bound = 10, +2 per effective vouch up to 8. It is NOT the app's 0..100 score (TrustScoreEngine, computed client-side from Firestore). They are different measures; the profile now shows both, labelled separately. There is no node endpoint that takes the app score.
 - **One wallet per account and one wallet per device hash**: the node rejects a second wallet for the same user (`USER_ALREADY_LINKED`) and a second wallet on the same device (`DEVICE_ALREADY_BOUND`). "Various wallets per user" is therefore not possible without a node change; the app links the active wallet only and shows the node's message otherwise.
-- The device attestation hash is client-asserted (SHA-256 of ANDROID_ID + package); real attestation (Play Integrity) is future node work. Node deploy must set `harvanna.identity.links-enabled=true` and a real pepper.
+- The device attestation hash is client-asserted (SHA-256 of ANDROID_ID + package); real attestation (Play Integrity) is future node work. Node deploy must set `harvana.identity.links-enabled=true` and a real pepper.
 
 ## Invites
 - Invites live in `INVITES/{groupId}_{emailKey}` (email-keyed so people without an account can be invited). Rules are in docs/firestore.rules and must be deployed. Invitees must have a VERIFIED email to see or answer invites (otherwise anyone could register a victim's email and read their invites).

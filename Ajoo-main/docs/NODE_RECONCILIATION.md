@@ -7,7 +7,7 @@ Scope of this pass: signed-action canonical messages and endpoint paths for what
 
 | Action | App | Node | Result |
 |---|---|---|---|
-| Auth challenge (`HARVANNA_AUTH`) | uses node-supplied `canonical`; fallback fixed | `AuthChallengeStore.canonicalMessage` | MATCH (fixed fallback) |
+| Auth challenge (`HARVANA_AUTH`) | uses node-supplied `canonical`; fallback fixed | `AuthChallengeStore.canonicalMessage` | MATCH (fixed fallback) |
 | Native transfer | `from+to+amount+nonce+memo` | `TransactionPayload` | MATCH (T0-4) |
 | `P2P_CLAIM_PAYMENT` | same fields | same | MATCH |
 | `P2P_MARK_PAID` | same | same | MATCH |

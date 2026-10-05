@@ -47,7 +47,7 @@ public class GroupContractTest {
     }
 
     @Test public void signedMessageFormat() {
-        assertEquals("HARVANNA_GROUP_JOIN_ACK_V1:G:HV0xA:abc:5",
+        assertEquals("HARVANA_GROUP_JOIN_ACK_V1:G:HV0xA:abc:5",
             GroupContract.signedMessage("G", "HV0xA", "abc", 5L));
     }
 

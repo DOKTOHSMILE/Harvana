@@ -6,7 +6,7 @@ public final class IdentityCanonical {
 
     /** IdentityLinkService.message(): DOMAIN:address:timestamp */
     public static String identityLink(String address, long timestamp) {
-        return "HARVANNA_IDENTITY_LINK:" + address + ":" + timestamp;
+        return "HARVANA_IDENTITY_LINK:" + address + ":" + timestamp;
     }
 
     /** Personhood.canonicalMessage() */

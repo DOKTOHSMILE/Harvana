@@ -536,28 +536,56 @@ public class ProfileActivity extends AppCompatActivity {
 		String stateStr = _str(data, "state");
 		String countryStr = _str(data, "country");
 		String pid = _str(data, "pid");
-		String place = stateStr + ", " + countryStr + (joined.isEmpty() ? "" : " • Joined " + joined);
+		String placeNames = (stateStr.isEmpty() || countryStr.isEmpty()) ? stateStr + countryStr : stateStr + ", " + countryStr;
+		String place = placeNames + (joined.isEmpty() ? "" : (placeNames.isEmpty() ? "" : " • ") + "Joined " + joined);
 		user_state_country_textview3.setText(pid.isEmpty() ? place : "ID " + pid + " • " + place);
 		
-		String tierStr = _str(data, "tier");
-		tier_indicator_textview2.setText("Tier " + tierStr);
-		imageview11.setColorFilter(0xFF2196F3, PorterDuff.Mode.MULTIPLY);
-		
 		String vTypeStr = _str(data, "v_type").toUpperCase(Locale.US);
-		tier_textview57.setText("Tier " + tierStr + " • " + vTypeStr + " verified");
+		tier_textview57.setText(vTypeStr.isEmpty() ? "Not verified yet" : vTypeStr + " verified");
 		
-		tv_phone.setText(_str(data, "phone"));
-		tv_email.setText(_str(data, "email"));
-		tv_occupation.setText(_str(data, "occupation"));
+		_setText(tv_phone, _tidyPhone(_str(data, "phone")));
+		_setText(tv_email, _str(data, "email"));
+		_setText(tv_occupation, _str(data, "occupation"));
 		
-		String addressStr = _str(data, "address");
-		String cityStr = _str(data, "city");
-		tv_address.setText(addressStr + ", " + cityStr + ", " + stateStr + ", " + countryStr);
+		StringBuilder where = new StringBuilder();
+		for (String part : new String[]{_str(data, "address"), _str(data, "city"), stateStr, countryStr}) {
+			if (part.trim().isEmpty()) continue;
+			if (where.length() > 0) where.append(", ");
+			where.append(part.trim());
+		}
+		_setText(tv_address, where.toString());
 		
-		tv_dob.setText(_str(data, "dob"));
+		_setText(tv_dob, _str(data, "dob"));
 	}
 	
 	private TextView networkTrustView;
+	
+	/** Header check mark: the node's own tier (Bronze to Platinum), coloured by tier, hidden until the node has scored this person. */
+	private void _applyTierBadge(Object tierObj, int percent) {
+		View box = findViewById(R.id.linear120);
+		if (box == null) return;
+		if (percent < 0) { box.setVisibility(View.GONE); return; }
+		String tier = tierObj == null || String.valueOf(tierObj).isEmpty() ? com.harvana.app.trust.ProfileTrust.tierFor(percent) : String.valueOf(tierObj);
+		int color = com.harvana.app.trust.ProfileTrust.tierColor(tier);
+		imageview11.setImageTintList(android.content.res.ColorStateList.valueOf(color));
+		tier_indicator_textview2.setText(tier);
+		tier_indicator_textview2.setTextColor(color);
+		box.setVisibility(View.VISIBLE);
+	}
+	
+	private static void _setText(TextView t, String value) {
+		t.setText(value == null || value.trim().isEmpty() ? "Not provided" : value.trim());
+	}
+	
+	/** A stored phone is country code plus number; when two full numbers were joined, keep the first (Nigerian numbers are +234 and ten digits). */
+	private static String _tidyPhone(String raw) {
+		if (raw == null) return "";
+		String digits = raw.replaceAll("[^0-9]", "");
+		boolean plus = raw.trim().startsWith("+");
+		if (digits.startsWith("234") && digits.length() > 13) digits = digits.substring(0, 13);
+		else if (digits.length() > 15) digits = digits.substring(0, 15);
+		return digits.isEmpty() ? "" : (plus || digits.startsWith("234") ? "+" : "") + digits;
+	}
 	private com.google.firebase.firestore.ListenerRegistration reputationReg;
 	
 	/** The score on screen is the document the node wrote. This activity does not calculate it. */
@@ -635,7 +663,8 @@ public class ProfileActivity extends AppCompatActivity {
 		int overallScore = r.get("overallScore") instanceof Number ? ((Number) r.get("overallScore")).intValue() : 0;
 		boolean published = Boolean.TRUE.equals(r.get("published"));
 		int percent = r.get("percent") instanceof Number ? ((Number) r.get("percent")).intValue() : -1;
-		if (published && percent >= 0) {
+		_applyTierBadge(r.get("tier"), percent);
+		if (percent >= 0) {
 			// The node's single trust score, as a percentage (the same number every profile shows).
 			Object tier = r.get("tier");
 			user_trust_score_textview5.setText(percent + "%" + (tier == null || String.valueOf(tier).isEmpty() ? "" : " · " + tier));

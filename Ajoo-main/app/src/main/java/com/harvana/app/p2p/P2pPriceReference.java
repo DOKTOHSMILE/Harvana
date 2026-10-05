@@ -13,7 +13,7 @@ import java.util.List;
  * Price reference for the seller screen, in kobo per 1 HARV (1 Naira = 100 kobo, the node's unit).
  *
  * The node's accepted "mark" (MarkEngine) is the ideal reference, but no REST endpoint exposes it yet
- * (HarvannaProtocolManager.getMarkStatus() has no controller). Until one exists this uses the MEDIAN of the
+ * (HarvanaProtocolManager.getMarkStatus() has no controller). Until one exists this uses the MEDIAN of the
  * unit prices on currently open listings (GET /api/v1/p2p/listings/open). It is an approximation and is
  * labelled as such in the UI; it is NOT the mark the node enforces.
  *

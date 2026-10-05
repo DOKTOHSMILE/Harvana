@@ -257,7 +257,7 @@ public final class NodeGroupClient {
         }, cb);
     }
 
-    /** A guardian key signs HARVANNA_GENLOAN_APPROVE_V1. This is not a wallet action. */
+    /** A guardian key signs HARVANA_GENLOAN_APPROVE_V1. This is not a wallet action. */
     public static void stageGenLoanGuardian(String groupId, String loanId, String publicKey, String signature, Callback cb) {
         try {
             JSONObject body = new JSONObject();

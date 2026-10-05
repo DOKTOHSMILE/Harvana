@@ -16,7 +16,7 @@
             android:id="@+id/_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Harvanna Protocol"
+            app:title="Harvana Protocol"
             app:titleTextColor="@color/colorTextPrimary"/>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -616,7 +616,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Harvanna Token"
+                                    android:text="Harvana Token"
                                     android:textColor="@color/colorTextMuted"
                                     android:textSize="12sp"/>
                             </LinearLayout>

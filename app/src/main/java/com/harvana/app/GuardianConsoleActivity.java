@@ -148,7 +148,7 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 		_loadDisputes();
 	}
 	
-	/** Signs HARVANNA_GENLOAN_APPROVE_V1 for one loan. The node checks this key is a guardian. */
+	/** Signs HARVANA_GENLOAN_APPROVE_V1 for one loan. The node checks this key is a guardian. */
 	private void _addLoanApprovalCard() {
 		LinearLayout card = new LinearLayout(this);
 		card.setOrientation(LinearLayout.VERTICAL);
@@ -178,7 +178,7 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 				return;
 			}
 			try {
-				String msg = "HARVANNA_GENLOAN_APPROVE_V1:" + gid + ":" + lid;
+				String msg = "HARVANA_GENLOAN_APPROVE_V1:" + gid + ":" + lid;
 				byte[] sig = com.harvana.app.crypto.Ed25519.sign(guardianSeed, msg.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 				String signature = android.util.Base64.encodeToString(sig, android.util.Base64.NO_WRAP);
 				com.harvana.app.sync.NodeGroupClient.stageGenLoanGuardian(gid, lid, guardianPublicKeyB64, signature,

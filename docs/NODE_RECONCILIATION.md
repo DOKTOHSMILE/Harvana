@@ -14,7 +14,7 @@ Scope of this pass: signed-action canonical messages and endpoint paths for what
 
 | Action | App | Node | Result |
 |---|---|---|---|
-| Auth challenge (`HARVANNA_AUTH`) | uses node-supplied `canonical`; fallback fixed | `AuthChallengeStore.canonicalMessage` | MATCH (fixed fallback) |
+| Auth challenge (`HARVANA_AUTH`) | uses node-supplied `canonical`; fallback fixed | `AuthChallengeStore.canonicalMessage` | MATCH (fixed fallback) |
 | Native transfer | `from+to+amount+nonce+memo` | `TransactionPayload` | MATCH (T0-4) |
 | `P2P_CLAIM_PAYMENT` | same fields | same | MATCH |
 | `P2P_MARK_PAID` | same | same | MATCH |
@@ -33,7 +33,7 @@ UI has no fields for these. Listing creation will fail signature verification un
 Not guessed.
 
 ## Node actions the app has no client for
-The node defines 41 `getCanonicalMessage()` formats. As of 29 Sep the app implemented none of the `HARVANNA_*_V1` group/Circle/
+The node defines 41 `getCanonicalMessage()` formats. As of 29 Sep the app implemented none of the `HARVANA_*_V1` group/Circle/
 Accumulative/Fixed/GenLoan/staking/referral/identity-link actions (grep finds no such string). Group logic in the
 app is Firestore-only (`GroupPayoutManager`, `GroupLoanManager`, ...), i.e. it is not wired to the on-chain group
 protocol at all. That is a feature build, not a fix, and needs a decision on scope.

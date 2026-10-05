@@ -102,7 +102,7 @@ public class WalletEarnFragmentActivity extends Fragment {
 			
 			if (targetContext != null) {
 				try {
-					targetContext.getPackageManager().getPackageInfo("com.harvanna.mine", 0);
+					targetContext.getPackageManager().getPackageInfo("com.harvana.mine", 0);
 					isInstalled = true;
 				} catch (Exception e) {
 					isInstalled = false;
@@ -110,7 +110,7 @@ public class WalletEarnFragmentActivity extends Fragment {
 			}
 			
 			if (isInstalled && targetContext != null) {
-				Intent launchIntent = targetContext.getPackageManager().getLaunchIntentForPackage("com.harvanna.mine");
+				Intent launchIntent = targetContext.getPackageManager().getLaunchIntentForPackage("com.harvana.mine");
 				if (launchIntent != null) {
 					try {
 						startActivity(launchIntent);

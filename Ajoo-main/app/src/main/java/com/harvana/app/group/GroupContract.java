@@ -231,7 +231,7 @@ public final class GroupContract {
 
     /** Deterministic text the member signs the hash of. */
     public static String canonicalText(String groupId, Map<String, Object> g, String ticker) {
-        StringBuilder sb = new StringBuilder("HARVANNA_GROUP_CONTRACT_V1\n").append(groupId).append('\n');
+        StringBuilder sb = new StringBuilder("HARVANA_GROUP_CONTRACT_V1\n").append(groupId).append('\n');
         for (Section s : sections(g, ticker)) {
             sb.append('#').append(s.title).append('\n');
             for (String p : s.points) sb.append('-').append(p).append('\n');
@@ -251,7 +251,7 @@ public final class GroupContract {
 
     /** The exact string the member's wallet signs. */
     public static String signedMessage(String groupId, String memberAddress, String contractHash, long signedAtMs) {
-        return "HARVANNA_GROUP_JOIN_ACK_V1:" + groupId + ":" + memberAddress + ":" + contractHash + ":" + signedAtMs;
+        return "HARVANA_GROUP_JOIN_ACK_V1:" + groupId + ":" + memberAddress + ":" + contractHash + ":" + signedAtMs;
     }
 
     private static String fmt(double d) {

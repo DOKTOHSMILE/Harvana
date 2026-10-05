@@ -516,23 +516,28 @@ public class GroupOverviewFragmentActivity extends Fragment {
 			if (tv_fixed_goal != null) tv_fixed_goal.setText("Target: " + _formatUIBalance(goal));
 			if (tv_fixed_progress != null) {
 				tv_fixed_progress.setText("Raised: " + _formatUIBalance(raised) + " / " + _formatUIBalance(goal)
-						+ (reached ? " · sent to " + who : ""));
+						+ ("COMPLETED".equalsIgnoreCase(state) ? " · sent to " + who : reached ? " · held by the group" : ""));
 			}
 			if (tv_fixed_rule != null) {
+				String ruleKey = json.optString("disbursementRule", "");
 				tv_fixed_rule.setText(reached
-						? "The goal was reached. " + _formatUIBalance(raised) + " was sent to " + who + ". No vote — that was the rule."
-						: "When the goal is reached, the whole pot goes to " + who + ". You can deposit any day until then.");
+						? com.harvana.app.engine.FixedGoalText.sentence(ruleKey, state, true, _formatUIBalance(raised), who)
+						: "ALL_AT_ONCE_AT_GOAL".equals(ruleKey)
+							? "When the goal is reached, the whole pot goes to " + who + ". You can deposit any day until then."
+							: "When the goal is reached, deposits close. " + com.harvana.app.engine.FixedGoalText.howItLeaves(ruleKey));
 			}
 			if (textview62 != null) textview62.setText("Raised");
 			if (tv_pool_contribution != null) tv_pool_contribution.setText(_formatUIBalance(raised));
 			if (textview63 != null) textview63.setText("Goal");
 			if (tv_pool_total != null) tv_pool_total.setText(_formatUIBalance(goal));
-			if (textview64 != null) textview64.setText(reached ? "Paid to" : "Deposits");
-			if (tv_pool_paid != null) tv_pool_paid.setText(reached ? who : "Open any day");
+			boolean paid = "COMPLETED".equalsIgnoreCase(state);
+			if (textview64 != null) textview64.setText(paid ? "Paid to" : reached ? "Held by" : "Deposits");
+			if (tv_pool_paid != null) tv_pool_paid.setText(paid ? who : reached ? "the group wallet" : "Open any day");
 			if (tv_cycle_status != null) tv_cycle_status.setText(reached ? "Goal reached" : "Shared goal");
 			if (tv_cycle_hint != null) {
 				tv_cycle_hint.setText(reached
-						? "The pot already left the group wallet. A red day on an old screen was not a missed payment."
+						? (paid ? "The pot has left the group wallet. A red day on an old screen was not a missed payment."
+								: "The money is still in the group wallet. A red day on an old screen was not a missed payment.")
 						: "This is not a daily payment. A day you skip is not marked missed, and you can still deposit.");
 			}
 			int pct = goal > 0 ? (int) Math.min(100, Math.round(raised * 100.0 / goal)) : 0;

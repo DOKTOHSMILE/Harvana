@@ -199,35 +199,65 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 	private String activeFilter = "ALL";
 	private Recycler_merchant_offersAdapter adapter;
 	
+	/** Create Offer: a curved bottom sheet with Sell and Buy side by side. */
 	private void _showCreateOfferChoice() {
-		// Inflate the custom card layout
-		View dialogView = getLayoutInflater().inflate(R.layout.dialog_create_offer, null);
+		com.google.android.material.bottomsheet.BottomSheetDialog sheet = ThemedDialogs.sheet(this);
+		LinearLayout root = ThemedDialogs.sheetRoot(this);
+		root.addView(ThemedDialogs.sheetTitle(this, "Create offer"));
+		TextView sub = ThemedDialogs.sheetLabel(this, "Choose what you want to do with HARV.");
+		root.addView(sub);
 		
-		// Build the dialog
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setView(dialogView);
-		AlertDialog dialog = builder.create();
-		
-		// Make the system dialog background transparent so the CardView shadow and corners are visible
-		if (dialog.getWindow() != null) {
-			dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-		}
-		
-		// Set up click listeners
-		View btnSell = dialogView.findViewById(R.id.btn_sell_offer);
-		View btnBuy = dialogView.findViewById(R.id.btn_buy_offer);
-		
-		btnSell.setOnClickListener(v -> {
-			dialog.dismiss();
+		LinearLayout row = new LinearLayout(this);
+		row.setOrientation(LinearLayout.HORIZONTAL);
+		row.setPadding(0, ThemedDialogs.dp(this, 12), 0, ThemedDialogs.dp(this, 8));
+		row.addView(_choiceButton("Sell HARV", "I have HARV to sell", androidx.core.content.ContextCompat.getColor(this, R.color.colorError), v -> {
+			sheet.dismiss();
 			startActivity(new Intent(this, CreateP2pSellOfferActivity.class));
-		});
-		
-		btnBuy.setOnClickListener(v -> {
-			dialog.dismiss();
+		}), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+		View gap = new View(this);
+		row.addView(gap, new LinearLayout.LayoutParams(ThemedDialogs.dp(this, 12), 1));
+		row.addView(_choiceButton("Buy HARV", "I want to acquire HARV", androidx.core.content.ContextCompat.getColor(this, R.color.colorSuccess), v -> {
+			sheet.dismiss();
 			startActivity(new Intent(this, CreateP2pBuyOfferActivity.class));
-		});
+		}), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+		root.addView(row);
 		
-		dialog.show();
+		sheet.setContentView(root);
+		sheet.getBehavior().setSkipCollapsed(true);
+		sheet.getBehavior().setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+		sheet.show();
+	}
+	
+	/** A tall filled button with a title and a one-line caption; text always contrasts with the fill. */
+	private View _choiceButton(String title, String caption, int fill, View.OnClickListener click) {
+		LinearLayout box = new LinearLayout(this);
+		box.setOrientation(LinearLayout.VERTICAL);
+		box.setGravity(android.view.Gravity.CENTER);
+		int pad = ThemedDialogs.dp(this, 14);
+		box.setPadding(pad, pad + ThemedDialogs.dp(this, 4), pad, pad + ThemedDialogs.dp(this, 4));
+		android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+		bg.setColor(fill);
+		bg.setCornerRadius(ThemedDialogs.dp(this, 16));
+		box.setBackground(new android.graphics.drawable.RippleDrawable(
+			android.content.res.ColorStateList.valueOf(0x33FFFFFF), bg, null));
+		TextView t = new TextView(this);
+		t.setText(title);
+		t.setTextSize(17f);
+		t.setTypeface(null, android.graphics.Typeface.BOLD);
+		t.setTextColor(android.graphics.Color.WHITE);
+		t.setGravity(android.view.Gravity.CENTER);
+		box.addView(t);
+		TextView c = new TextView(this);
+		c.setText(caption);
+		c.setTextSize(12f);
+		c.setTextColor(0xE6FFFFFF);
+		c.setGravity(android.view.Gravity.CENTER);
+		c.setPadding(0, ThemedDialogs.dp(this, 2), 0, 0);
+		box.addView(c);
+		box.setClickable(true);
+		box.setFocusable(true);
+		box.setOnClickListener(click);
+		return box;
 	}
 	
 	private void _loadMine() {
@@ -272,13 +302,26 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 	
 	private void _setFilter(String filter, TextView selectedTab) {
 		activeFilter = filter;
-		filter_manager_all.setAlpha(0.6f);
-		filter_manager_active.setAlpha(0.6f);
-		filter_manager_matched.setAlpha(0.6f);
-		filter_manager_paused.setAlpha(0.6f);
-		filter_manager_closed.setAlpha(0.6f);
-		selectedTab.setAlpha(1f);
+		for (TextView t : new TextView[]{filter_manager_all, filter_manager_active, filter_manager_matched, filter_manager_paused, filter_manager_closed}) {
+			_styleTab(t, t == selectedTab);
+		}
 		_applyFilter();
+	}
+	
+	/** Selected tab: filled with a tint of the accent, accent text. Others: plain, secondary text. Every tab has a tap ripple. */
+	private void _styleTab(TextView t, boolean selected) {
+		int accent = androidx.core.content.ContextCompat.getColor(this, R.color.colorAccent);
+		android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+		bg.setCornerRadius(ThemedDialogs.dp(this, 20));
+		bg.setColor(selected ? ((accent & 0x00FFFFFF) | 0x33000000) : android.graphics.Color.TRANSPARENT);
+		if (selected) bg.setStroke(ThemedDialogs.dp(this, 1), (accent & 0x00FFFFFF) | 0x99000000);
+		t.setBackground(new android.graphics.drawable.RippleDrawable(
+			android.content.res.ColorStateList.valueOf((accent & 0x00FFFFFF) | 0x22000000), bg, null));
+		t.setTextColor(selected ? accent : androidx.core.content.ContextCompat.getColor(this, R.color.colorTextSecondary));
+		t.setTypeface(null, selected ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+		t.setAlpha(1f);
+		t.setClickable(true);
+		t.setFocusable(true);
 	}
 	
 	private void _applyFilter() {

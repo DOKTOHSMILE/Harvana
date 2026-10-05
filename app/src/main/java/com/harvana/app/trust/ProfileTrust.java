@@ -98,7 +98,8 @@ public final class ProfileTrust {
     /** The label on a profile: "92% · Gold", or "Not scored yet" before the node has published one. */
     public static String label(Card c) {
         if (c == null || !c.scored()) return "Not scored yet";
-        return c.percent + "% · " + (c.trustTier.isEmpty() ? tierFor(c.percent) : c.trustTier);
+        String tier = c.trustTier.isEmpty() ? tierFor(c.percent) : c.trustTier;
+        return "New".equals(tier) ? "New · " + c.percent + "%" : c.percent + "% · " + tier;
     }
 
     /** Fills a small text view as a pill coloured by tier. Always visible: the score cannot be hidden. */
@@ -124,6 +125,7 @@ public final class ProfileTrust {
     }
 
     public static int tierColor(String tier) {
+        if ("New".equals(tier)) return 0xFF8B98AD;
         if ("Platinum".equals(tier)) return 0xFF7DD3FC;
         if ("Gold".equals(tier)) return 0xFFFFC857;
         if ("Silver".equals(tier)) return 0xFFB4BFD0;

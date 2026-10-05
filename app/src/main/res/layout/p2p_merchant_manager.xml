@@ -42,7 +42,8 @@
 				android:text="+ Create Offer"
 				android:textSize="12sp"
 				android:textStyle="bold"
-				android:textColor="@color/colorAccent"
+				android:textColor="@color/colorTextOnAccent"
+				app:backgroundTint="@color/colorAccent"
 				app:cornerRadius="12dp" />
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/card_manager_summary"
@@ -154,7 +155,6 @@
 						android:id="@+id/filter_manager_all"
 						android:layout_width="wrap_content"
 						android:layout_height="40dp"
-						android:background="@color/colorP2pSurfaceAlt"
 						android:gravity="center_horizontal|center_vertical"
 						android:text="All"
 						android:textSize="12sp"

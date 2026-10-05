@@ -17,9 +17,19 @@ TOML = ROOT / "app" / "module.toml"
 OUT = ROOT / "app" / "build.gradle"
 
 
+# CodeAssist uses these local files. Gradle must not: a local .aar next to the same library arriving through another
+# dependency (appcompat needs core) is a duplicate-class error. So CI builds the same version from Maven.
+LOCAL_FILE_AS_MAVEN = {
+    "core-1.13.0.aar": "androidx.core:core:1.13.0",
+    "material-1.11.0.aar": "com.google.android.material:material:1.11.0",
+}
+
+
 def dependency(line: str, config: str) -> str:
-    """A maven coordinate stays a coordinate. A bare file name (material-1.11.0.aar) is a local file in app/libs."""
+    """A maven coordinate stays a coordinate. A known local file becomes its Maven twin; any other file is used from app/libs."""
     name = line.strip()
+    if name in LOCAL_FILE_AS_MAVEN:
+        return f"    {config} '{LOCAL_FILE_AS_MAVEN[name]}'"
     if name.endswith((".aar", ".jar")):
         return f"    {config} files('libs/{name}')"
     return f"    {config} '{name}'"

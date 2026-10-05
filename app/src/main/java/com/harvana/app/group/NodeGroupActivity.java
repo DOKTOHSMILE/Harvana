@@ -414,12 +414,12 @@ public class NodeGroupActivity extends AppCompatActivity {
             case GroupAction.FIXED_REQUEST_DISBURSEMENT:
                 pay("Request payout", potLabel(), moneyRows(escrowOrGroup(), "The group votes before anyone is paid"),
                     () -> NodeGroupClient.requestFixedDisbursement(getApplicationContext(), me, nodeId,
-                        indexedFrom("requestId", "Payout requested. The group will vote.", GroupProposalIndex.DISBURSEMENT, "Payout request")));
+                        indexedFromThenVote("requestId", "Payout requested. The group will vote.", GroupProposalIndex.DISBURSEMENT, "Payout request")));
                 break;
             case GroupAction.FIXED_REQUEST_MILESTONE: requestDialog("Request a milestone release", "What will the money be used for?", (raw, text) ->
                 pay("Request milestone", CircleUi.harv(raw), moneyRows(escrowOrGroup(), text),
                     () -> NodeGroupClient.requestFixedMilestone(getApplicationContext(), me, nodeId, raw, text,
-                        indexedFrom("milestoneId", "Milestone requested. The group will vote.", GroupProposalIndex.MILESTONE, "Milestone request")))); break;
+                        indexedFromThenVote("milestoneId", "Milestone requested. The group will vote.", GroupProposalIndex.MILESTONE, "Milestone request")))); break;
             case GroupAction.FIXED_REQUEST_GRANT: requestDialog("Ask for an emergency grant", "Why do you need help?", (raw, text) ->
                 pay("Request emergency grant", CircleUi.harv(raw), moneyRows("Your wallet", text),
                     () -> NodeGroupClient.requestFixedGrant(getApplicationContext(), me, nodeId, raw, text,
@@ -560,6 +560,28 @@ public class NodeGroupActivity extends AppCompatActivity {
                 GroupProposalIndex.post(getApplicationContext(), fsGroupId, kind, json.optString(idKey, ""), title, me);
                 com.harvana.app.trust.AppActivity.note(NodeGroupActivity.this, "GROUP", ok);
                 toast(ok); load();
+            }
+            @Override public void onError(String error) { toast(CircleUi.friendly(error)); load(); }
+        };
+    }
+
+    /**
+     * For a request the admin makes (payout, milestone): the admin approves by asking, so their yes vote is cast right after.
+     * The node counts yes votes toward its quorum, and a two-person group could not finish without it.
+     */
+    private NodeGroupClient.Callback indexedFromThenVote(String idKey, String ok, String kind, String title) {
+        return new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject json) {
+                String id = json.optString(idKey, "");
+                GroupProposalIndex.post(getApplicationContext(), fsGroupId, kind, id, title, me);
+                com.harvana.app.trust.AppActivity.note(NodeGroupActivity.this, "GROUP", ok);
+                if (id.isEmpty()) { toast(ok); load(); return; }
+                NodeGroupClient.Callback voted = new NodeGroupClient.Callback() {
+                    @Override public void onSuccess(JSONObject v) { toast(ok + " Your yes vote is in."); load(); }
+                    @Override public void onError(String e) { toast(ok + " Your own yes vote did not go through: vote from the list below."); load(); }
+                };
+                if (GroupProposalIndex.MILESTONE.equals(kind)) NodeGroupClient.voteFixedMilestone(getApplicationContext(), me, nodeId, id, true, voted);
+                else NodeGroupClient.voteFixedDisbursement(getApplicationContext(), me, nodeId, id, true, voted);
             }
             @Override public void onError(String error) { toast(CircleUi.friendly(error)); load(); }
         };

@@ -592,7 +592,8 @@ public class GroupDetailsActivity extends AppCompatActivity {
 					btn_footer_request_payout.setEnabled(true);
 				}
 				if (btn_footer_apply_loan != null) {
-					btn_footer_apply_loan.setVisibility(View.VISIBLE);
+					// A group on the network has no Firestore loan or payout buttons: the footer opens its network actions.
+					btn_footer_apply_loan.setVisibility(groupLogic.isOnChain() ? View.GONE : View.VISIBLE);
 					btn_footer_apply_loan.setEnabled(true);
 				}
 				groupCreatorId = _safeString(data, "creatorId", "");

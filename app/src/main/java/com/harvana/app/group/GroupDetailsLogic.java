@@ -166,7 +166,26 @@ public class GroupDetailsLogic {
         });
     }
 
+    /** True when the group lives on the network, so its money moves only through signed requests the node carries out. */
+    public boolean isOnChain() { return identity.onChain(); }
+
+    /**
+     * A group on the network is not paid by a Firestore request and a transfer from a phone: the node holds the money and
+     * carries out what the admin signs and the members vote. So the footer opens the group's network actions (request a
+     * payout, vote, approve a withdrawal) instead of the old payout and loan buttons, which only changed Firestore.
+     */
     public void wireFooter(TextView btnPayout, TextView btnLoanOrTransfer) {
+        if (identity.onChain() && btnPayout != null) {
+            btnPayout.setText("Actions & votes");
+            btnPayout.setOnClickListener(v -> {
+                android.content.Intent i = new android.content.Intent(activity, NodeGroupActivity.class);
+                i.putExtra("nodeGroupId", identity.protocolId());
+                i.putExtra("firestoreGroupId", groupId);
+                activity.startActivity(i);
+            });
+            if (btnLoanOrTransfer != null) btnLoanOrTransfer.setVisibility(android.view.View.GONE);
+            return;
+        }
         GroupTypeUiController.configureFooterButtons(
                 btnPayout,
                 btnLoanOrTransfer,

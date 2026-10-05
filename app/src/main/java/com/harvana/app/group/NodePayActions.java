@@ -76,12 +76,12 @@ public final class NodePayActions {
                 break;
             case GroupAction.FIXED_REQUEST_DISBURSEMENT:
                 pay(c, "Request payout", "Group balance", moneyRows(c, escrow(c), "The group votes before anyone is paid"),
-                        () -> NodeGroupClient.requestFixedDisbursement(c.activity, c.me, c.nodeId, result(c, "Payout requested")));
+                        () -> NodeGroupClient.requestFixedDisbursement(c.activity, c.me, c.nodeId, requestThenVote(c, "requestId", false, "Payout requested")));
                 break;
             case GroupAction.FIXED_REQUEST_MILESTONE:
                 reason(c, "Request a milestone release", "What will the money be used for?", (raw, text) ->
                         pay(c, "Request milestone", CircleUi.harv(raw), moneyRows(c, escrow(c), text),
-                                () -> NodeGroupClient.requestFixedMilestone(c.activity, c.me, c.nodeId, raw, text, result(c, "Milestone requested"))));
+                                () -> NodeGroupClient.requestFixedMilestone(c.activity, c.me, c.nodeId, raw, text, requestThenVote(c, "milestoneId", true, "Milestone requested"))));
                 break;
             case GroupAction.FIXED_REQUEST_GRANT:
                 reason(c, "Ask for an emergency grant", "Why do you need help?", (raw, text) ->
@@ -219,6 +219,27 @@ public final class NodePayActions {
             if (source != null) { source.setEnabled(false); source.setText("Working…"); }
             work.run();
         });
+    }
+
+    /**
+     * The admin who asks for a payout or a milestone approves it by asking, so their yes vote is cast straight after the
+     * request. The node's quorum counts yes votes, and without this a two-person group sat unfinished after the other member
+     * said yes, because the admin had not voted on their own request. Passing still needs a yes from someone else.
+     */
+    private static NodeGroupClient.Callback requestThenVote(Ctx c, String idField, boolean milestone, String ok) {
+        return new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject json) {
+                String id = json == null ? "" : json.optString(idField, "");
+                if (id.isEmpty()) { result(c, ok).onSuccess(json); return; }
+                NodeGroupClient.Callback voted = new NodeGroupClient.Callback() {
+                    @Override public void onSuccess(JSONObject v) { result(c, ok + ". Your yes vote is in. The members vote next.").onSuccess(v); }
+                    @Override public void onError(String e) { result(c, ok + ", but your own yes vote did not go through. Vote from Actions & votes.").onSuccess(null); }
+                };
+                if (milestone) NodeGroupClient.voteFixedMilestone(c.activity, c.me, c.nodeId, id, true, voted);
+                else NodeGroupClient.voteFixedDisbursement(c.activity, c.me, c.nodeId, id, true, voted);
+            }
+            @Override public void onError(String error) { result(c, ok).onError(error); }
+        };
     }
 
     private static NodeGroupClient.Callback result(Ctx c, String ok) {

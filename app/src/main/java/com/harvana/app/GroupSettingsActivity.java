@@ -545,6 +545,22 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		
 		_rebuild();
 		_loadMembers();
+		_showNetworkPanel();
+	}
+	
+	/** The network half of the settings: what the network says about this group, who decides, admin recovery. */
+	private LinearLayout networkPanelHost;
+	
+	private void _showNetworkPanel() {
+		ViewGroup page = findViewById(R.id.linear39);
+		if (page == null || groupId.isEmpty()) return;
+		if (networkPanelHost == null) {
+			networkPanelHost = new LinearLayout(this);
+			networkPanelHost.setOrientation(LinearLayout.VERTICAL);
+			page.addView(networkPanelHost);
+		}
+		networkPanelHost.removeAllViews();
+		com.harvana.app.group.NodeSettingsPanel.attach(this, networkPanelHost, groupId, groupData);
 	}
 	
 	private String typeOf() {

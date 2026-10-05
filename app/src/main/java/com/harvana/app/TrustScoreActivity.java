@@ -259,7 +259,11 @@ public class TrustScoreActivity extends AppCompatActivity {
     private static final String[][] TIERS = {{"Bronze", "0"}, {"Silver", "40"}, {"Gold", "65"}, {"Platinum", "85"}};
 
 
-    private int tierIndex(int percent) {
+    /** The tier is the node's own word (trustTier); the percentage is only used when the node sent no tier. */
+    private int tierIndex(java.util.Map<String, Object> p) {
+        Object t = p.get("trustTier");
+        if (t != null) for (int i = 0; i < TIERS.length; i++) if (TIERS[i][0].equalsIgnoreCase(String.valueOf(t))) return i;
+        int percent = Math.max(0, Math.min(100, num(p.get("trustPercent"))));
         int idx = 0;
         for (int i = 0; i < TIERS.length; i++) if (percent >= Integer.parseInt(TIERS[i][1])) idx = i;
         return idx;
@@ -275,7 +279,7 @@ public class TrustScoreActivity extends AppCompatActivity {
     /** One swipeable page per tier, opening on the current one: Surpassed, Current or Yet to unlock, as in a loyalty level screen. */
     private LinearLayout tierPager(java.util.Map<String, Object> p) {
         final int percent = Math.max(0, Math.min(100, num(p.get("trustPercent"))));
-        final int current = tierIndex(percent);
+        final int current = tierIndex(p);
         LinearLayout wrap = new LinearLayout(this);
         wrap.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams wlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -364,7 +368,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         String status = i < current ? "Surpassed" : i == current ? "Current" : "Yet to unlock";
         text.addView(tv(status, 16, true, locked ? UiColors.textSecondary() : color));
         String line = i == 0 ? "Everyone starts here"
-                : locked ? (at - percent) + " more points to unlock"
+                : locked ? (at > percent ? (at - percent) + " more points to unlock" : "Needs reliability and conduct at 85% or more")
                 : "Reached at " + at + "% trust";
         text.addView(note(line));
         if (i == current) text.addView(note("Your score: " + percent + "%"));
@@ -375,7 +379,7 @@ public class TrustScoreActivity extends AppCompatActivity {
     /** "Level up to Gold": the whole road with the knob where the score is, filling in when the screen opens. */
     private LinearLayout journeyCard(java.util.Map<String, Object> p) {
         int percent = Math.max(0, Math.min(100, num(p.get("trustPercent"))));
-        int cur = tierIndex(percent);
+        int cur = tierIndex(p);
         int color = com.harvana.app.trust.ProfileTrust.tierColor(TIERS[cur][0]);
         LinearLayout c = cardBox();
         boolean top = cur == TIERS.length - 1;
@@ -385,7 +389,8 @@ public class TrustScoreActivity extends AppCompatActivity {
         road.set(percent, color);
         if (!top) {
             int left = Integer.parseInt(TIERS[cur + 1][1]) - percent;
-            c.addView(tv(left + " points left to reach " + TIERS[cur + 1][0], 14, true, UiColors.textPrimary()));
+            c.addView(tv(left > 0 ? left + " points left to reach " + TIERS[cur + 1][0]
+                    : TIERS[cur + 1][0] + " also needs reliability and conduct at 85% or more", 14, true, UiColors.textPrimary()));
             c.addView(note(weakestPart(p)));
         } else {
             c.addView(note("Keep paying on time and the score holds."));

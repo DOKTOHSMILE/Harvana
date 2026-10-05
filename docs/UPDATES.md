@@ -182,3 +182,8 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 - Add/Edit payment method: the four text fields were locked (`focusable=false`) and could not be typed in; fixed. "Set as default" now toggles from the whole row, not only the tiny checkbox. The sheet opens expanded and resizes above the keyboard.
 - All P2P bottom sheets use the shared themed sheet (day/night correct). Filter/payment toggle rows are tappable across the full row.
 - Hardcoded colours in P2P trade, chat and offer screens replaced by theme colours.
+
+## 5 Oct 2026 — Named node badges
+- New `trust/NodeBadges` reads the node's real badges (Circle veteran, Founding member, Zero default, Early payer, Vouched) from `/wallet/labels/{address}`, plus Insured trader from `/p2p/insurance-status`. `trust/BadgeChips` draws them as chips; tap a chip to read what it means.
+- Shown on your profile (replacing the bare count) and under people on the Friends list and the friend picker. Badges are decoration only and are never stored by the app.
+- Group trust before joining was already on Discover cards; group member rows do not show badges yet.

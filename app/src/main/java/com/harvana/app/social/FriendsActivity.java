@@ -272,6 +272,14 @@ public class FriendsActivity extends AppCompatActivity {
         names.addView(trust, trustLp);
         com.harvana.app.trust.ProfileTrust.resolve(p.uid, card -> {
             com.harvana.app.trust.ProfileTrust.bind(trust, card);
+            if (!card.wallet.isEmpty()) com.harvana.app.trust.NodeBadges.load(card.wallet, list -> {
+                if (list.isEmpty()) return;
+                LinearLayout chips = new LinearLayout(this);
+                chips.setOrientation(LinearLayout.VERTICAL);
+                chips.setPadding(0, SocialUi.dp(this, 4), 0, 0);
+                com.harvana.app.trust.BadgeChips.fill(chips, list, true);
+                names.addView(chips);
+            });
             if (!card.icon.isEmpty() && card.icon.startsWith("http")) {
                 try { com.bumptech.glide.Glide.with(this).load(card.icon).circleCrop().into(photo); initials.setVisibility(View.INVISIBLE); }
                 catch (Exception ignored) { }

@@ -667,6 +667,14 @@ public class ProfileActivity extends AppCompatActivity {
 		trustScoreProgress2.setMax(16);
 		trustScoreProgress2.setProgress(vouchPoints);
 		textview44.setText(String.valueOf(badges));
+		final android.widget.LinearLayout badgeRow = findViewById(R.id.profileBadgeRow);
+		if (badgeRow != null) {
+			String me = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
+			com.harvana.app.trust.NodeBadges.load(me, list -> {
+				com.harvana.app.trust.BadgeChips.fill(badgeRow, list, false);
+				if (!list.isEmpty()) textview44.setText(String.valueOf(list.size()));
+			});
+		}
 		trustScoreProgress3.setMax(5);
 		trustScoreProgress3.setProgress(Math.min(5, badges));
 		textview46.setText(established ? "Yes" : "No");

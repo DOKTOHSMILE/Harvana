@@ -532,6 +532,12 @@
 						app:trackCornerRadius="30dp"
 						app:trackThickness="7dp" />
 					<LinearLayout
+						android:id="@+id/profileBadgeRow"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="10dp"
+						android:orientation="vertical" />
+					<LinearLayout
 						android:id="@+id/linear131"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"

@@ -152,6 +152,8 @@ public class SendAssetActivity extends AppCompatActivity {
 		spAsset = findViewById(R.id.spAsset);
 		linear17 = findViewById(R.id.linear17);
 		etRecipient = findViewById(R.id.etRecipient);
+		String prefillTo = getIntent().getStringExtra("toAddress");
+		if (prefillTo != null && !prefillTo.trim().isEmpty() && etRecipient != null) etRecipient.setText(prefillTo.trim());
 		btnPaste = findViewById(R.id.btnPaste);
 		btnScan = findViewById(R.id.btnScan);
 		etAmount = findViewById(R.id.etAmount);

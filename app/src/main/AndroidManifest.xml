@@ -246,6 +246,13 @@
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
+			android:name=".social.PublicProfileActivity"
+			android:exported="false" />
+		<activity
+			android:name=".social.ProfilePrivacyActivity"
+			android:exported="false"
+			android:windowSoftInputMode="adjustResize" />
+		<activity
 			android:name=".social.FriendsActivity"
 			android:label="Friends"
 			android:configChanges="orientation|screenSize|keyboardHidden" />

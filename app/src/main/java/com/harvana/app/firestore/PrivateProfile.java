@@ -23,11 +23,13 @@ public final class PrivateProfile {
     public static final String SUBCOLLECTION = "private";
     public static final String DOCUMENT = "kyc";
 
-    /** Date of birth, ID numbers, contact details, exact location and next of kin. */
+    /** Date of birth, ID numbers, contact details, city, exact location and next of kin. */
     public static final Set<String> FIELDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
             "dob", "v_type", "bvn", "nin",
             "phone", "email", "address", "occupation",
-            "gps_lat", "gps_long", "kin")));
+            "gps_lat", "gps_long", "kin",
+            // The city is shown on the public profile only when the member turns that on (PublicProfileStore).
+            "city")));
 
     private PrivateProfile() {}
 

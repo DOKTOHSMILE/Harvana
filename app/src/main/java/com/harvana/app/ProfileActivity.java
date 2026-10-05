@@ -795,6 +795,33 @@ public class ProfileActivity extends AppCompatActivity {
 		row.addView(open);
 		row.setOnClickListener(v -> startActivity(new android.content.Intent(this, com.harvana.app.social.FriendsActivity.class)));
 		linear2.addView(row, 1);
+		// How others see me: the public profile and what I choose to show on it.
+		android.widget.LinearLayout pub = new android.widget.LinearLayout(this);
+		pub.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+		pub.setGravity(android.view.Gravity.CENTER_VERTICAL);
+		pub.setPadding(0, (int) (14 * d), 0, 0);
+		android.widget.LinearLayout pubText = new android.widget.LinearLayout(this);
+		pubText.setOrientation(android.widget.LinearLayout.VERTICAL);
+		android.widget.TextView pubTitle = new android.widget.TextView(this);
+		pubTitle.setText("Public profile");
+		pubTitle.setTextSize(15);
+		pubTitle.setTypeface(null, android.graphics.Typeface.BOLD);
+		pubTitle.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+		android.widget.TextView pubSub = new android.widget.TextView(this);
+		pubSub.setText("See what others see and choose what to show");
+		pubSub.setTextSize(12);
+		pubSub.setTextColor(com.harvana.app.utils.UiColors.textSecondary());
+		pubText.addView(pubTitle);
+		pubText.addView(pubSub);
+		pub.addView(pubText, new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+		android.widget.TextView pubOpen = new android.widget.TextView(this);
+		pubOpen.setText("Privacy");
+		pubOpen.setTextSize(13);
+		pubOpen.setTypeface(null, android.graphics.Typeface.BOLD);
+		pubOpen.setTextColor(com.harvana.app.utils.UiColors.accent());
+		pub.addView(pubOpen);
+		pub.setOnClickListener(v -> startActivity(new android.content.Intent(this, com.harvana.app.social.ProfilePrivacyActivity.class)));
+		linear2.addView(pub, 2);
 		com.harvana.app.social.SocialStore.following((following, e1) ->
 			com.harvana.app.social.SocialStore.followers((followers, e2) -> runOnUiThread(() -> {
 				java.util.Set<String> back = new java.util.HashSet<>();
@@ -810,5 +837,12 @@ public class ProfileActivity extends AppCompatActivity {
 					sub.setText(names.size() + (names.size() == 1 ? " friend · " : " friends · ") + shown);
 				}
 			})));
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		// Keep the public card's counts, location and age current (the member's own switches decide what others can see).
+		com.harvana.app.social.PublicProfileStore.publishMine(this);
 	}
 }

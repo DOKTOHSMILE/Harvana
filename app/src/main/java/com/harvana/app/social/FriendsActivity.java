@@ -263,7 +263,7 @@ public class FriendsActivity extends AppCompatActivity {
                     .setMessage("They leave your friends list, and they will no longer see your contact links.")
                     .setPositiveButton("Unfollow", (d, w) -> SocialStore.unfollow(p.uid, (ok, e) -> runOnUiThread(this::reload)))
                     .setNegativeButton("Cancel", null).show();
-            }, v -> openCard(p)));
+            }, v -> openProfile(p)));
         }
     }
 
@@ -388,9 +388,15 @@ public class FriendsActivity extends AppCompatActivity {
     }
 
     /** Contact links of a person, only when we follow each other. */
-    private void openCard(Person p) {
-        SocialStore.contactsOf(p.uid, (card, err) -> runOnUiThread(() -> {
-            AlertDialog.Builder d = new AlertDialog.Builder(this).setTitle(p.name + (p.handle().isEmpty() ? "" : "  " + p.handle()));
+    /** Tapping a person opens their public profile. Their contact links stay behind "Contact" on that screen's menu path (mutual friends only). */
+    private void openProfile(Person p) {
+        startActivity(new Intent(this, PublicProfileActivity.class).putExtra(PublicProfileActivity.EXTRA_UID, p.uid));
+    }
+
+    /** Contact links of a mutual friend (also used from the public profile). */
+    static void openCard(androidx.appcompat.app.AppCompatActivity a, Person p) {
+        SocialStore.contactsOf(p.uid, (card, err) -> a.runOnUiThread(() -> {
+            AlertDialog.Builder d = new AlertDialog.Builder(a).setTitle(p.name + (p.handle().isEmpty() ? "" : "  " + p.handle()));
             if (card == null) {
                 d.setMessage("NOT_MUTUAL".equals(err)
                     ? "You can see how to reach " + p.name + " once you follow each other."
@@ -414,8 +420,8 @@ public class FriendsActivity extends AppCompatActivity {
             }
             if (labels.isEmpty()) { d.setMessage(p.name + " hasn't added contact links yet.").setPositiveButton("OK", null).show(); return; }
             d.setItems(labels.toArray(new String[0]), (dlg, which) -> {
-                try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(uris.get(which)))); }
-                catch (Exception e) { Toast.makeText(this, "No app can open that.", Toast.LENGTH_SHORT).show(); }
+                try { a.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(uris.get(which)))); }
+                catch (Exception e) { Toast.makeText(a, "No app can open that.", Toast.LENGTH_SHORT).show(); }
             }).setNegativeButton("Close", null).show();
         }));
     }

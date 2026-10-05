@@ -391,17 +391,21 @@ service cloud.firestore {
     // Trust: trust_percent, trust_tier, trust_updated and wallet are written by the node only (its service account skips these
     // rules). A user can create or edit their card but cannot add those fields, change them, or remove them, so the
     // score on a profile is read-only for its owner and cannot be hidden. The old client-writable trust_score is gone.
+    // Public profile card. Besides the node-written trust fields it holds what the member chooses to show: country and state
+    // (always shown), city and age (only when the member turns them on; the phone removes them otherwise), a short bio, and counts
+    // (groups, cycles, loans, pending loans) with no amounts. The counts are written by the member's own phone.
     match /PROFILES/{pid} {
       allow read: if signedIn();
       allow create: if signedIn()
         && pidLinkOwned(pid)
         && request.resource.data.pid == pid
-        && request.resource.data.keys().hasOnly(['pid', 'first_name', 'last_name', 'username', 'icon', 'tier']);
+        && request.resource.data.keys().hasOnly(['pid', 'first_name', 'last_name', 'username', 'icon', 'tier', 'country', 'state', 'city', 'age', 'show_age', 'show_city', 'bio', 'member_since', 'groups_count', 'cycles_completed', 'loans_count', 'loans_pending', 'stats_updated']);
       allow update: if signedIn()
         && pidLinkOwned(pid)
         && request.resource.data.pid == pid
         && request.resource.data.keys().hasOnly(
-          ['pid', 'first_name', 'last_name', 'username', 'icon', 'tier', 'trust_percent', 'trust_tier', 'trust_updated', 'wallet'])
+          ['pid', 'first_name', 'last_name', 'username', 'icon', 'tier', 'trust_percent', 'trust_tier', 'trust_updated', 'wallet',
+           'country', 'state', 'city', 'age', 'show_age', 'show_city', 'bio', 'member_since', 'groups_count', 'cycles_completed', 'loans_count', 'loans_pending', 'stats_updated'])
         && request.resource.data.get('trust_percent', null) == resource.data.get('trust_percent', null)
         && request.resource.data.get('trust_tier', null) == resource.data.get('trust_tier', null)
         && request.resource.data.get('trust_updated', null) == resource.data.get('trust_updated', null)

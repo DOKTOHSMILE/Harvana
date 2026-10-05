@@ -47,7 +47,7 @@ public class PrivateProfileTest {
         Map<String, Object> p = signupProfile();
         p.put("someNewField", "x");
         Map<String, Object>[] parts = PrivateProfile.split(p);
-        for (String f : new String[] {"uid", "pid", "first_name", "last_name", "icon", "tier", "city", "someNewField"}) {
+        for (String f : new String[] {"uid", "pid", "first_name", "last_name", "icon", "tier", "someNewField"}) {
             assertTrue(f, parts[0].containsKey(f));
             assertFalse(f, parts[1].containsKey(f));
         }

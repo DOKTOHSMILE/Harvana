@@ -95,6 +95,42 @@ public final class StakingPanel {
 
     /** Colors come from the app theme, so the staking screens follow day and night like the rest of the app. */
     private int themeColor(int resId) { return ContextCompat.getColor(host, resId); }
+
+    private static String dateTime(long ms) {
+        return new java.text.SimpleDateFormat("MMM d, yyyy h:mm a", Locale.getDefault()).format(new java.util.Date(ms));
+    }
+
+    /** When the next claim opens: 24 h after the last claim, or after the first stake if nothing was claimed yet. 0 = no position. */
+    private long nextClaimAt() {
+        if (pos == null) return 0;
+        return StakingRules.nextClaimAt(pos.optLong("stakedRaw", 0), pos.optLong("lastClaimedTimestamp", 0),
+                pos.optLong("firstStakedTimestamp", 0));
+    }
+
+    /** Unlock time of locked principal, or 0 when it is flexible or the lock has ended. */
+    private long lockedUntil() {
+        if (pos == null) return 0;
+        return StakingRules.lockedUntil(pos.optLong("stakedRaw", 0), pos.optLong("unlockTimestamp", 0), System.currentTimeMillis());
+    }
+
+    /** Turns the node's refusal codes into sentences with the date the user needs. */
+    private String friendlyStakingError(String raw) {
+        String code = StakingRules.refusalCode(raw);
+        if (code == null) return raw;
+        if ("STAKE_LOCKED".equals(code)) {
+            long until = pos == null ? 0 : pos.optLong("unlockTimestamp", 0);
+            return until > 0 ? "Your principal is locked until " + dateTime(until) + ". Rewards can still be claimed."
+                    : "Your principal is still locked. Rewards can still be claimed.";
+        }
+        if ("CLAIM_AVAILABLE_EVERY_24_HOURS".equals(code)) {
+            long at = nextClaimAt();
+            return at > 0 ? "You can claim once every 24 hours. Your next claim opens " + dateTime(at) + "."
+                    : "You can claim once every 24 hours.";
+        }
+        if ("REMAINING_STAKE_BELOW_MINIMUM".equals(code)) return "Leave at least 1 HARV staked, or unstake everything.";
+        if ("NOTHING_TO_CLAIM".equals(code)) return "Nothing to claim yet. Rewards drip into Claim through the day.";
+        return "You cannot unstake more than you have staked.";
+    }
     private boolean busy;
 
     private final ArrayList<HashMap<String, Object>> walletAssets = new ArrayList<>();
@@ -254,7 +290,12 @@ public final class StakingPanel {
     private void updateEstReward() {
         double weight = selectedLockDays >= 90 ? 2.5 : selectedLockDays >= 30 ? 1.75 : selectedLockDays >= 7 ? 1.25 : 1.0;
         String holdText = selectedLockDays <= 0 ? "stays until you unstake" : selectedLockDays + "-day lock on the principal";
-        tvEstRewardInput.setText(String.format(Locale.US, "%.2fx weight. Each day 0.05%% of the pool drips into Claim. %s.", weight, holdText));
+        String text = String.format(Locale.US, "%.2fx weight. Each day 0.05%% of the pool drips into Claim. %s.", weight, holdText);
+        long locked = lockedUntil();
+        if (locked > 0) {
+            text += " Your current lock ends " + dateTime(locked) + ". A top-up never shortens it, and a longer lock still counts its days from your first stake.";
+        }
+        tvEstRewardInput.setText(text + " Claims open once every 24 hours.");
     }
 
     private void refresh() {
@@ -336,9 +377,12 @@ public final class StakingPanel {
             int lockDays = pos == null ? 0 : pos.optInt("lockDays", 0);
             int mult = pos == null ? 10000 : pos.optInt("multiplierBps", 10000);
             if (mult <= 0) mult = 10000;
+            long lockedUntil = lockedUntil();
             activeLockType.setText(staked <= 0 ? "Not staked" : lockDays <= 0
                     ? "Flexible · 1x · stays until you unstake"
-                    : "Locked " + lockDays + " days · " + String.format(Locale.US, "%.2fx", mult / 10000.0));
+                    : lockedUntil > 0
+                    ? "Locked " + lockDays + " days · " + String.format(Locale.US, "%.2fx", mult / 10000.0) + " · unlocks " + dateTime(lockedUntil)
+                    : "Lock ended · " + String.format(Locale.US, "%.2fx", mult / 10000.0) + " · you can unstake");
             activeMonthly.setText("0.05% of the pool drips into Claim each day");
 
             String address = WalletManager.getActiveWalletAddress(host);
@@ -362,14 +406,25 @@ public final class StakingPanel {
             claim.setEnabled(false);
             claim.setText("Claim");
             claimSub.setText("Stake HARV to start earning. The stake stays until you unstake.");
-        } else if (pending > 0) {
-            claim.setEnabled(!busy);
-            claim.setText("Claim");
-            claimSub.setText(harv(pending) + " is ready. Claiming sends it to your wallet and leaves the stake in place.");
         } else {
-            claim.setEnabled(false);
-            claim.setText("Claim");
-            claimSub.setText("Nothing has dripped into Claim yet. The pool adds to it through the day.");
+            long now = System.currentTimeMillis();
+            long opensAt = nextClaimAt();
+            boolean waiting = opensAt > now;
+            String rule = "You can claim once every 24 hours.";
+            if (waiting) {
+                claim.setEnabled(false);
+                claim.setText("Claim in " + formatTimerPrecise(opensAt - now));
+                claimSub.setText((pending > 0 ? harv(pending) + " has dripped so far. " : "")
+                        + "Next claim opens " + dateTime(opensAt) + ". " + rule);
+            } else if (pending > 0) {
+                claim.setEnabled(!busy);
+                claim.setText("Claim");
+                claimSub.setText(harv(pending) + " is ready. Claiming sends it to your wallet and leaves the stake in place. " + rule);
+            } else {
+                claim.setEnabled(false);
+                claim.setText("Claim");
+                claimSub.setText("Nothing has dripped into Claim yet. The pool adds to it through the day. " + rule);
+            }
         }
     }
 
@@ -546,7 +601,7 @@ public final class StakingPanel {
 
         TextView title = new TextView(host);
         title.setText("All Unbonding & Withdrawals");
-        title.setTextColor(Color.WHITE);
+        title.setTextColor(themeColor(R.color.colorTextPrimary));
         title.setTextSize(20);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
         title.setPadding(0, 0, 0, dp(16));
@@ -706,6 +761,16 @@ public final class StakingPanel {
     }
 
     private void askUnstake() {
+        long lockedUntil = lockedUntil();
+        if (lockedUntil > 0) {
+            new androidx.appcompat.app.AlertDialog.Builder(host)
+                    .setTitle("Principal locked")
+                    .setMessage("Your stake is locked until " + dateTime(lockedUntil)
+                            + ". You cannot unstake before then. You can still claim rewards once every 24 hours.")
+                    .setPositiveButton("OK", null)
+                    .show();
+            return;
+        }
         BottomSheetDialog sheet = new BottomSheetDialog(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
 
         LinearLayout root = new LinearLayout(host);
@@ -851,7 +916,7 @@ public final class StakingPanel {
             busy = true;
             NodeGroupClient.unstake(host, address, BalanceFormatter.harvToRaw(harvAmount), new NodeGroupClient.Callback() {
                 @Override public void onSuccess(JSONObject json) { busy = false; amount.setText(""); toast("Unstaking. Returns in 24 hours."); refresh(); }
-                @Override public void onError(String error) { busy = false; toast(error); paint(); }
+                @Override public void onError(String error) { busy = false; toast(friendlyStakingError(error)); paint(); }
             });
         });
     }
@@ -867,7 +932,7 @@ public final class StakingPanel {
             busy = true;
             NodeGroupClient.claimStakingRewards(host, address, new NodeGroupClient.Callback() {
                 @Override public void onSuccess(JSONObject json) { busy = false; toast("Reward claimed."); refresh(); }
-                @Override public void onError(String error) { busy = false; toast(error); paint(); }
+                @Override public void onError(String error) { busy = false; toast(friendlyStakingError(error)); paint(); }
             });
         });
     }

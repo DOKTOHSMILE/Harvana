@@ -105,6 +105,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		linear1 = _view.findViewById(R.id.linear1);
 		linear2 = _view.findViewById(R.id.linear2);
 		recyclerview_fragment = _view.findViewById(R.id.recyclerview_fragment);
+		com.harvana.app.utils.Shimmer.hold(recyclerview_fragment, com.harvana.app.utils.Shimmer.rows(recyclerview_fragment.getContext(), 5), 4000);
 		layout_fragment_empty = _view.findViewById(R.id.layout_fragment_empty);
 		cardview_select_coin_btn = _view.findViewById(R.id.cardview_select_coin_btn);
 		cardview_enter_amount = _view.findViewById(R.id.cardview_enter_amount);

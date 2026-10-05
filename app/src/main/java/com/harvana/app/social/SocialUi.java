@@ -15,19 +15,19 @@ import com.google.android.material.button.MaterialButton;
 import com.harvana.app.utils.UiColors;
 
 /** Small view builders shared by the friends and contact-card screens (themed through UiColors). */
-final class SocialUi {
+public final class SocialUi {
     private SocialUi() {}
 
-    static int dp(Context c, float v) { return (int) (v * c.getResources().getDisplayMetrics().density); }
+    public static int dp(Context c, float v) { return (int) (v * c.getResources().getDisplayMetrics().density); }
 
-    static TextView text(Context c, String s, float sp, boolean bold, int color) {
+    public static TextView text(Context c, String s, float sp, boolean bold, int color) {
         TextView t = new TextView(c);
         t.setText(s); t.setTextSize(sp); t.setTextColor(color);
         if (bold) t.setTypeface(null, Typeface.BOLD);
         return t;
     }
 
-    static MaterialButton button(Context c, String label, boolean outlined) {
+    public static MaterialButton button(Context c, String label, boolean outlined) {
         MaterialButton b = outlined
             ? new MaterialButton(c, null, com.google.android.material.R.attr.materialButtonOutlinedStyle)
             : new MaterialButton(c);
@@ -36,7 +36,7 @@ final class SocialUi {
     }
 
     /** A short button for rows: 34dp high, small text, no letter spacing, so a row of two fits a small phone. */
-    static MaterialButton compactButton(Context c, String label, boolean outlined) {
+    public static MaterialButton compactButton(Context c, String label, boolean outlined) {
         MaterialButton b = button(c, label, outlined);
         b.setTextSize(12);
         b.setLetterSpacing(0f);
@@ -47,7 +47,7 @@ final class SocialUi {
         return b;
     }
 
-    static EditText edit(Context c, String hint) {
+    public static EditText edit(Context c, String hint) {
         EditText e = new EditText(c);
         e.setHint(hint); e.setSingleLine(true);
         e.setTextColor(UiColors.textPrimary());
@@ -56,7 +56,7 @@ final class SocialUi {
     }
 
     /** A rounded surface block with padding, used as a card. */
-    static LinearLayout card(Context c) {
+    public static LinearLayout card(Context c) {
         LinearLayout l = new LinearLayout(c);
         l.setOrientation(LinearLayout.VERTICAL);
         int p = dp(c, 16);
@@ -72,7 +72,7 @@ final class SocialUi {
     }
 
     /** name + @handle on the left, one action button on the right. */
-    static LinearLayout personRow(Context c, Person p, String action, boolean outlined, View.OnClickListener onAction, View.OnClickListener onRow) {
+    public static LinearLayout personRow(Context c, Person p, String action, boolean outlined, View.OnClickListener onAction, View.OnClickListener onRow) {
         LinearLayout row = new LinearLayout(c);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);

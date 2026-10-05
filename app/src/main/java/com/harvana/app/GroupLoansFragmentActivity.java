@@ -123,6 +123,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		card_apply_loan = _view.findViewById(R.id.card_apply_loan);
 		textview20 = _view.findViewById(R.id.textview20);
 		recycler_loans = _view.findViewById(R.id.recycler_loans);
+		com.harvana.app.utils.Shimmer.hold(recycler_loans, com.harvana.app.utils.Shimmer.cards(recycler_loans.getContext(), 3), 4000);
 		tv_loans_empty = _view.findViewById(R.id.tv_loans_empty);
 		cardview11 = _view.findViewById(R.id.cardview11);
 		cardview12 = _view.findViewById(R.id.cardview12);
@@ -1177,7 +1178,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 			String borrowerUid = _safe(loan, "borrowerUid", "");
 			if (h.borrower != null) {
 				h.borrower.setTag(borrowerUid);
-				h.borrower.setText("Loading…");
+				com.harvana.app.utils.Shimmer.loading(h.borrower);
 			}
 			
 			String currentUid = FirebaseAuth.getInstance().getCurrentUser() != null
@@ -1322,7 +1323,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		if (tvTotalDue != null) tvTotalDue.setText(_formatUIBalance(totalDue));
 		
 		if (tvBorrower != null) {
-			tvBorrower.setText("Loading…");
+			com.harvana.app.utils.Shimmer.loading(tvBorrower);
 			if (!borrowerUid.isEmpty()) {
 				com.harvana.app.group.MemberNameResolver.resolve(getContext(), borrowerUid, "Member", name -> {
 					if (tvBorrower != null) tvBorrower.setText(name);

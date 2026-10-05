@@ -213,6 +213,7 @@ public class GroupsFragmentActivity extends Fragment {
 		linear105 = _view.findViewById(R.id.linear105);
 		et_search_groups = _view.findViewById(R.id.et_search_groups);
 		listview1 = _view.findViewById(R.id.listview1);
+		com.harvana.app.utils.Shimmer.hold(listview1, com.harvana.app.utils.Shimmer.rows(listview1.getContext(), 5), 4000);
 		groupsp = getContext().getSharedPreferences("groupsp", Activity.MODE_PRIVATE);
 		authsp = getContext().getSharedPreferences("authsp", Activity.MODE_PRIVATE);
 		fauth = FirebaseAuth.getInstance();
@@ -409,6 +410,7 @@ public class GroupsFragmentActivity extends Fragment {
 					getActivity().runOnUiThread(() -> {
 						myGroups.clear();
 						listview1.setAdapter(new Listview1Adapter(myGroups));
+						com.harvana.app.utils.Shimmer.release(listview1);
 					});
 					return;
 				}
@@ -423,6 +425,7 @@ public class GroupsFragmentActivity extends Fragment {
 					getActivity().runOnUiThread(() -> {
 						myGroups.clear();
 						listview1.setAdapter(new Listview1Adapter(myGroups));
+						com.harvana.app.utils.Shimmer.release(listview1);
 					});
 					return;
 				}

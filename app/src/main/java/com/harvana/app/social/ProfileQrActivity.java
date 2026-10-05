@@ -39,22 +39,19 @@ public class ProfileQrActivity extends AppCompatActivity {
     private String username = "";
     private String icon = "";
 
+    @Override public boolean onSupportNavigateUp() { finish(); return true; }
+
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         FrameLayout screen = new FrameLayout(this);
         screen.setBackgroundColor(UiColors.background());
-        setContentView(screen);
+        com.harvana.app.utils.AppBar.setContent(this, screen, "My QR code", "Share or scan to connect");
 
         LinearLayout column = new LinearLayout(this);
         column.setOrientation(LinearLayout.VERTICAL);
         column.setGravity(Gravity.CENTER_HORIZONTAL);
         screen.addView(column, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-        TextView back = SocialUi.text(this, "‹  Back", 16, true, UiColors.textPrimary());
-        back.setPadding(SocialUi.dp(this, 20), SocialUi.dp(this, 20), SocialUi.dp(this, 20), SocialUi.dp(this, 8));
-        back.setOnClickListener(v -> finish());
-        column.addView(back, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         final FrameLayout cardHost = new FrameLayout(this);
         LinearLayout.LayoutParams hostLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);

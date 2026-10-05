@@ -91,6 +91,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 	private void initialize(Bundle _savedInstanceState, View _view) {
 		linear1 = _view.findViewById(R.id.linear1);
 		recyclerview1 = _view.findViewById(R.id.recyclerview1);
+		com.harvana.app.utils.Shimmer.hold(recyclerview1, com.harvana.app.utils.Shimmer.rows(recyclerview1.getContext(), 4), 4000);
 		tvNoWalletHint = _view.findViewById(R.id.tv_no_wallet_hint);
 		walletsp = getContext().getSharedPreferences("walletsp", Activity.MODE_PRIVATE);
 	}

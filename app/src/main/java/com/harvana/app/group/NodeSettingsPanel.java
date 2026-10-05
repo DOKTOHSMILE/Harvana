@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.text.InputType;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -51,6 +52,9 @@ public final class NodeSettingsPanel {
                 + "Both are read together, and where they differ the network wins.", 12, false, UiColors.textSecondary()));
         final TextView facts = text(a, "Reading the network…", 13, false, UiColors.textPrimary());
         facts.setPadding(0, dp(a, 8), 0, dp(a, 4));
+        facts.setVisibility(View.GONE);
+        final View factsLoading = com.harvana.app.utils.Shimmer.lines(a, 4);
+        card.addView(factsLoading);
         card.addView(facts);
         final LinearLayout actions = new LinearLayout(a);
         actions.setOrientation(LinearLayout.VERTICAL);
@@ -68,10 +72,10 @@ public final class NodeSettingsPanel {
         NodeGroupClient.Callback onGroup = new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject json) {
                 Map<String, Object> g = JsonMaps.toMap(json);
-                a.runOnUiThread(() -> showFacts(a, id, firestoreGroupId, groupData, g, me, facts, actions));
+                a.runOnUiThread(() -> { factsLoading.setVisibility(View.GONE); facts.setVisibility(View.VISIBLE); showFacts(a, id, firestoreGroupId, groupData, g, me, facts, actions); });
                 loadMembers(a, id, count -> a.runOnUiThread(() -> compare(a, id, firestoreGroupId, groupData, g, count, me, actions)));
             }
-            @Override public void onError(String e) { a.runOnUiThread(() -> facts.setText("Could not read the network right now. Pull to refresh later.")); }
+            @Override public void onError(String e) { a.runOnUiThread(() -> { factsLoading.setVisibility(View.GONE); facts.setVisibility(View.VISIBLE); facts.setText("Could not read the network right now. Pull to refresh later."); }); }
         };
         if ("CIRCLE".equals(id.family)) NodeGroupClient.getCircle(id.protocolId(), onGroup);
         else if ("ACCUM".equals(id.family)) NodeGroupClient.getAccumGroup(id.protocolId(), onGroup);

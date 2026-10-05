@@ -697,7 +697,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 			tv_group_meta.setText(metaText);
 		}
 		if (tv_header_amount != null) {
-			tv_header_amount.setText("Loading…");
+			com.harvana.app.utils.Shimmer.loading(tv_header_amount);
 		}
 		_loadTotalGroupContributions();
 		

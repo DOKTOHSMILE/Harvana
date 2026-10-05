@@ -33,7 +33,7 @@ import java.util.Set;
  * when they sign up, and you confirm them here. People are found by exact username. There is no member directory.
  */
 public class FriendsActivity extends AppCompatActivity {
-    private LinearLayout searchResult, listBox, contactMatches;
+    private LinearLayout searchResult, listBox;
     private EditText query;
     private MaterialButton tabFollowing, tabFollowers, tabBack, tabReferrals;
     private LinearLayout referralBox;
@@ -42,6 +42,7 @@ public class FriendsActivity extends AppCompatActivity {
     private List<ReferralStore.Ask> asks = new ArrayList<>();
     private List<Person> namedMe = new ArrayList<>();
     private List<Person> following = new ArrayList<>(), followers = new ArrayList<>();
+    private boolean followingLoaded, followersLoaded;
     private boolean showingFollowers;
     /** 0 friends (mutual), 1 following, 2 followers, 3 referrals. */
     private int tab;
@@ -71,6 +72,7 @@ public class FriendsActivity extends AppCompatActivity {
         codeText.setOrientation(LinearLayout.VERTICAL);
         codeText.addView(SocialUi.text(this, "Your referral code", 12, true, UiColors.textSecondary()));
         codeLine = SocialUi.text(this, "Loading...", 22, true, UiColors.textPrimary());
+        com.harvana.app.utils.Shimmer.watch(codeLine);
         codeText.addView(codeLine);
         codeTop.addView(codeText, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         MaterialButton share = SocialUi.compactButton(this, "Share", false);
@@ -102,12 +104,12 @@ public class FriendsActivity extends AppCompatActivity {
 
         LinearLayout fromContacts = SocialUi.card(this);
         fromContacts.addView(SocialUi.text(this, "From your contacts", 14, true, UiColors.textPrimary()));
+        fromContacts.addView(SocialUi.text(this, "See which of your contacts are already on Harvana, and invite the rest.", 12, false, UiColors.textSecondary()));
         MaterialButton scan = SocialUi.button(this, "Find friends in my contacts", true);
-        contactMatches = new LinearLayout(this);
-        contactMatches.setOrientation(LinearLayout.VERTICAL);
-        scan.setOnClickListener(v -> ContactsFinder.find(this, matches -> showMatches(matches)));
-        fromContacts.addView(scan);
-        fromContacts.addView(contactMatches);
+        scan.setOnClickListener(v -> startActivity(new Intent(this, FindContactsActivity.class)));
+        LinearLayout.LayoutParams scanLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        scanLp.topMargin = SocialUi.dp(this, 10);
+        fromContacts.addView(scan, scanLp);
         root.addView(fromContacts);
 
         LinearLayout tabs = new LinearLayout(this);
@@ -143,8 +145,8 @@ public class FriendsActivity extends AppCompatActivity {
     @Override protected void onResume() { super.onResume(); reload(); }
 
     private void reload() {
-        SocialStore.following((list, err) -> { following = list; runOnUiThread(this::render); });
-        SocialStore.followers((list, err) -> { followers = list; runOnUiThread(this::render); });
+        SocialStore.following((list, err) -> { following = list; followingLoaded = true; runOnUiThread(this::render); });
+        SocialStore.followers((list, err) -> { followers = list; followersLoaded = true; runOnUiThread(this::render); });
         SocialStore.myUsername((name, err) -> runOnUiThread(() -> { myUsername = name == null ? "" : name; showCode(); }));
         ReferralStore.sync(this, (line, err) -> { });
         ReferralStore.asksForMe((list, err) -> { asks = list; runOnUiThread(this::render); });
@@ -165,27 +167,6 @@ public class FriendsActivity extends AppCompatActivity {
         Intent send = new Intent(Intent.ACTION_SEND).setType("text/plain");
         send.putExtra(Intent.EXTRA_TEXT, "Join me on Harvana. When you create your account, enter @" + myUsername + " as the friend who invited you.");
         startActivity(Intent.createChooser(send, "Share my referral code"));
-    }
-
-    private void showMatches(List<DiscoveryStore.Match> matches) {
-        contactMatches.removeAllViews();
-        if (matches.isEmpty()) {
-            contactMatches.addView(SocialUi.text(this, "None of your contacts have turned on discovery yet. Ask them to enable it on their contact card, or find them by username.", 13, false, UiColors.textSecondary()));
-            return;
-        }
-        Set<String> mine = followingIds();
-        for (DiscoveryStore.Match m : matches) {
-            boolean already = mine.contains(m.person.uid);
-            Person shown = m.contactName == null || m.contactName.isEmpty() ? m.person
-                : new Person(m.person.uid, m.person.username, m.contactName + (m.person.name.equals(m.contactName) ? "" : "  \u00b7  " + m.person.name));
-            contactMatches.addView(SocialUi.personRow(this, shown, already ? "Following" : "Follow", already, v -> {
-                if (already) return;
-                SocialStore.follow(m.person, (ok, e) -> runOnUiThread(() -> {
-                    if (ok) { Toast.makeText(this, "You now follow " + m.person.name, Toast.LENGTH_SHORT).show(); reload(); showMatches(matches); }
-                    else Toast.makeText(this, e, Toast.LENGTH_LONG).show();
-                }));
-            }, null));
-        }
     }
 
     private Set<String> followingIds() {
@@ -238,6 +219,7 @@ public class FriendsActivity extends AppCompatActivity {
         if (!myUsername.isEmpty()) codeStats.setText(namedMe.size() + (namedMe.size() == 1 ? " person has" : " people have") + " named you as their referrer."
                 + " If someone you referred defaults in a group, your trust score drops too.");
         listBox.removeAllViews();
+        if (tab != 3 && !(followingLoaded && followersLoaded)) { listBox.addView(com.harvana.app.utils.Shimmer.rows(this, 5)); return; }
         if (tab == 3) { renderReferrals(); return; }
         List<Person> list = tab == 1 ? following : tab == 2 ? followers : friends;
         if (list.isEmpty()) {

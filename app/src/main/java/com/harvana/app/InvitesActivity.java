@@ -41,7 +41,7 @@ public class InvitesActivity extends AppCompatActivity {
         com.harvana.app.utils.AppBar.setContent(this, sv, "Invitations", "Groups that invited you to join");
         list = root;
         empty = tv("Loading invitations…", 14, false, UiColors.textSecondary());
-        root.addView(empty);
+        root.addView(com.harvana.app.utils.Shimmer.rows(this, 4));
     }
 
     @Override protected void onResume() { super.onResume(); load(); }
@@ -85,6 +85,7 @@ public class InvitesActivity extends AppCompatActivity {
         if (!msg.isEmpty()) c.addView(tv("“" + msg + "”", 13, false, UiColors.textPrimary()));
         final TextView summary = tv("Loading group details…", 13, false, UiColors.textSecondary());
         c.addView(summary);
+        com.harvana.app.utils.Shimmer.watch(summary);
 
         GroupFirestoreManager.getInstance(this).getGroup(gid, new GroupFirestoreManager.DocCallback() {
             @Override public void onSuccess(Map<String, Object> g) {

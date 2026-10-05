@@ -75,7 +75,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         root.setPadding(p, 0, p, SocialUi.dp(this, 28));
         sv.addView(root);
         AppBar.setContent(this, sv, "", "");
-        root.addView(SocialUi.text(this, "Loading…", 14, false, UiColors.textSecondary()));
+        root.addView(com.harvana.app.utils.Shimmer.profile(this));
     }
 
     @Override protected void onResume() { super.onResume(); load(); }
@@ -115,8 +115,8 @@ public class PublicProfileActivity extends AppCompatActivity {
             menu.add(0, 1, 0, "Share profile");
             if (!card.username.isEmpty()) menu.add(0, 2, 1, "Copy username");
             menu.add(0, 3, 2, "Change username");
-            menu.add(0, 4, 3, "Privacy settings");
-            menu.add(0, 5, 4, "Personal details");
+            menu.add(0, 4, 3, "Profile privacy");
+            menu.add(0, 5, 4, "Edit profile");
             menu.add(0, 6, 5, "My QR code");
         } else {
             menu.add(0, 1, 0, "Share profile");
@@ -135,7 +135,7 @@ public class PublicProfileActivity extends AppCompatActivity {
             case 2: copy("@" + card.username); return true;
             case 3: startActivity(new Intent(this, ContactCardActivity.class)); return true;
             case 4: startActivity(new Intent(this, ProfilePrivacyActivity.class)); return true;
-            case 5: startActivity(new Intent(this, ProfileActivity.class)); return true;
+            case 5: startActivity(new Intent(this, EditProfileActivity.class)); return true;
             case 6: startActivity(new Intent(this, ProfileQrActivity.class)); return true;
             case 7: FriendsActivity.openCard(this, person()); return true;
             case 8: SocialStore.unfollow(card.uid, (ok, e) -> runOnUiThread(() -> { if (!ok) toast(e); load(); })); return true;
@@ -167,6 +167,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         root.addView(header(mine));
         root.addView(actionRow(mine));
         root.addView(infoCard(mine));
+        if (mine && selfData != null) root.addView(personalCard());
         root.addView(tabs());
         tabContent = new LinearLayout(this);
         tabContent.setOrientation(LinearLayout.VERTICAL);
@@ -257,7 +258,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         if (mine) {
             row.addView(actionTile(R.drawable.ic_pf_edit, "Edit info", v -> startActivity(new Intent(this, EditProfileActivity.class))));
             row.addView(actionTile(R.drawable.ic_pf_qr, "QR code", v -> startActivity(new Intent(this, ProfileQrActivity.class))));
-            row.addView(actionTile(R.drawable.ic_pf_settings, "Settings", v -> startActivity(new Intent(this, SettingsActivity.class))));
+            row.addView(actionTile(R.drawable.ic_pf_settings, "Settings", v -> startActivity(new Intent(this, ProfileSettingsActivity.class))));
             return row;
         }
         TextView follow = actionTile(R.drawable.ic_pf_person_add, card.iFollow ? "Unfollow" : (card.followsMe ? "Follow back" : "Follow"), null);
@@ -320,31 +321,89 @@ public class PublicProfileActivity extends AppCompatActivity {
         return t;
     }
 
+    // ── Foldable cards ───────────────────────────────────────────────────
+
+    private final java.util.Set<String> opened = new java.util.HashSet<>();
+
+    /** A card that shows a title and a one-line summary, and opens to reveal {@code body}. Whether it is open survives a refresh. */
+    private LinearLayout fold(String key, String title, String summary, View body) {
+        final LinearLayout c = SocialUi.card(this);
+        LinearLayout head = new LinearLayout(this);
+        head.setOrientation(LinearLayout.HORIZONTAL);
+        head.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout words = new LinearLayout(this);
+        words.setOrientation(LinearLayout.VERTICAL);
+        words.addView(SocialUi.text(this, title, 16, true, UiColors.textPrimary()));
+        if (summary != null && !summary.isEmpty()) {
+            TextView sub = SocialUi.text(this, summary, 13, false, UiColors.textSecondary());
+            sub.setPadding(0, SocialUi.dp(this, 2), 0, 0);
+            words.addView(sub);
+        }
+        head.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final TextView chevron = SocialUi.text(this, opened.contains(key) ? "\u25B4" : "\u25BE", 18, true, UiColors.accent());
+        head.addView(chevron);
+        head.setClickable(true);
+        c.addView(head);
+        body.setVisibility(opened.contains(key) ? View.VISIBLE : View.GONE);
+        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        bp.topMargin = SocialUi.dp(this, 8);
+        c.addView(body, bp);
+        head.setOnClickListener(v -> {
+            boolean open = body.getVisibility() != View.VISIBLE;
+            body.setVisibility(open ? View.VISIBLE : View.GONE);
+            chevron.setText(open ? "\u25B4" : "\u25BE");
+            if (open) opened.add(key); else opened.remove(key);
+        });
+        return c;
+    }
+
+    /** My own contact and identity details: only I see these, so they sit folded away under one heading. */
+    private View personalCard() {
+        LinearLayout body = new LinearLayout(this);
+        body.setOrientation(LinearLayout.VERTICAL);
+        String phone = PublicProfileStore.tidyPhone(str(selfData, "phone"));
+        String email = str(selfData, "email");
+        String job = str(selfData, "occupation");
+        String address = str(selfData, "address");
+        String dob = str(selfData, "dob");
+        String pid = str(selfData, "pid");
+        String verified = str(selfData, "v_type");
+        int rows = 0;
+        if (!phone.isEmpty()) { body.addView(infoRow(phone, "Mobile", 0, null)); rows++; }
+        if (!email.isEmpty() && !"null".equals(email)) { body.addView(infoRow(email, "Email", 0, null)); rows++; }
+        if (!job.isEmpty()) { body.addView(infoRow(job, "Occupation", 0, null)); rows++; }
+        if (!address.isEmpty()) { body.addView(infoRow(address, "Address", 0, null)); rows++; }
+        Date born = AgeOf.parse(dob);
+        if (born != null) {
+            int age = AgeOf.fromDob(dob, java.util.Calendar.getInstance());
+            body.addView(infoRow(new SimpleDateFormat("MMM d, yyyy", Locale.US).format(born) + (age >= 0 ? " (" + age + " years old)" : ""), "Birthday", 0, null));
+            rows++;
+        }
+        if (!pid.isEmpty()) { body.addView(infoRow(pid, "Harvana ID", 0, null)); rows++; }
+        body.addView(infoRow(verified.isEmpty() ? "Not verified yet" : verified.toUpperCase(Locale.US) + " verified", "Verification", 0, null));
+        MaterialButton edit = SocialUi.button(this, "Edit these details", true);
+        edit.setOnClickListener(v -> startActivity(new Intent(this, EditProfileActivity.class)));
+        LinearLayout.LayoutParams ep = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 46));
+        ep.topMargin = SocialUi.dp(this, 8);
+        body.addView(edit, ep);
+        return fold("personal", "Personal details", "Only you can see these", body);
+    }
+
+    private static String str(Map<String, Object> m, String k) {
+        Object v = m == null ? null : m.get(k);
+        return v == null || "null".equals(String.valueOf(v)) ? "" : String.valueOf(v).trim();
+    }
+
     // ── Info card ────────────────────────────────────────────────────────
 
     private View infoCard(boolean mine) {
         LinearLayout c = SocialUi.card(this);
         boolean any = false;
         if (!card.bio.isEmpty()) { c.addView(infoRow(card.bio, "Bio", 0, null)); any = true; }
-        if (mine && selfData != null) {
-            String phone = PublicProfileStore.tidyPhone(String.valueOf(selfData.get("phone") == null ? "" : selfData.get("phone")));
-            if (!phone.isEmpty()) { c.addView(infoRow(phone, "Mobile", 0, null)); any = true; }
-        }
         if (!card.username.isEmpty()) {
             c.addView(infoRow("@" + card.username, "Username", mine ? R.drawable.ic_pf_qr : 0,
                     mine ? v -> startActivity(new Intent(this, ProfileQrActivity.class)) : null));
             any = true;
-        }
-        if (mine && selfData != null) {
-            String dob = String.valueOf(selfData.get("dob") == null ? "" : selfData.get("dob"));
-            Date born = AgeOf.parse(dob);
-            if (born != null) {
-                int age = AgeOf.fromDob(dob, java.util.Calendar.getInstance());
-                c.addView(infoRow(new SimpleDateFormat("MMM d, yyyy", Locale.US).format(born) + (age >= 0 ? " (" + age + " years old)" : ""), "Birthday", 0, null));
-                any = true;
-            }
-            String email = String.valueOf(selfData.get("email") == null ? "" : selfData.get("email"));
-            if (!email.isEmpty() && !"null".equals(email)) { c.addView(infoRow(email, "Email", 0, null)); any = true; }
         }
         String where = card.country.isEmpty() ? "" : (card.state.isEmpty() ? card.country : card.state + ", " + card.country);
         if (mine && selfData != null && selfData.get("city") != null && !String.valueOf(selfData.get("city")).trim().isEmpty() && !where.isEmpty()) {
@@ -359,12 +418,6 @@ public class PublicProfileActivity extends AppCompatActivity {
             any = true;
         }
         if (!any) c.addView(SocialUi.text(this, "Nothing to show yet.", 13, false, UiColors.textSecondary()));
-        if (mine) {
-            TextView more = SocialUi.text(this, "Personal details and verification  ›", 14, true, UiColors.accent());
-            more.setPadding(0, SocialUi.dp(this, 16), 0, SocialUi.dp(this, 2));
-            more.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
-            c.addView(more);
-        }
         return c;
     }
 
@@ -474,6 +527,19 @@ public class PublicProfileActivity extends AppCompatActivity {
         String[][] parts = {{"Personhood", "trustPersonhoodPct"}, {"Reliability", "trustReliabilityPct"}, {"Conduct", "trustConductPct"},
                 {"Tenure", "trustTenurePct"}, {"Engagement", "trustEngagementPct"}};
         if (card.trustParts.get("trustPersonhoodPct") instanceof Number) {
+            final LinearLayout breakdown = new LinearLayout(this);
+            breakdown.setOrientation(LinearLayout.VERTICAL);
+            breakdown.setVisibility(opened.contains("breakdown") ? View.VISIBLE : View.GONE);
+            final TextView toggle = SocialUi.text(this, opened.contains("breakdown") ? "Hide breakdown \u25B4" : "Show breakdown \u25BE", 14, true, UiColors.accent());
+            toggle.setPadding(0, SocialUi.dp(this, 14), 0, SocialUi.dp(this, 2));
+            toggle.setOnClickListener(v -> {
+                boolean open = breakdown.getVisibility() != View.VISIBLE;
+                breakdown.setVisibility(open ? View.VISIBLE : View.GONE);
+                toggle.setText(open ? "Hide breakdown \u25B4" : "Show breakdown \u25BE");
+                if (open) opened.add("breakdown"); else opened.remove("breakdown");
+            });
+            c.addView(toggle);
+            c.addView(breakdown);
             for (String[] part : parts) {
                 int v = card.trustParts.get(part[1]) instanceof Number ? ((Number) card.trustParts.get(part[1])).intValue() : 0;
                 LinearLayout line = new LinearLayout(this);
@@ -484,7 +550,7 @@ public class PublicProfileActivity extends AppCompatActivity {
                 head.addView(SocialUi.text(this, v + "%", 13, true, UiColors.textPrimary()));
                 line.addView(head);
                 line.addView(bar(v, UiColors.accent()));
-                c.addView(line);
+                breakdown.addView(line);
             }
         }
         TextView note = SocialUi.text(this, "Worked out by the network. Nobody can hide or change it.", 12, false, UiColors.textTertiary());

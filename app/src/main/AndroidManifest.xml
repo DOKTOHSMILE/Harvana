@@ -256,6 +256,15 @@
 			android:exported="false"
 			android:windowSoftInputMode="adjustResize" />
 		<activity
+			android:name=".social.FindContactsActivity"
+			android:label="Find friends"
+			android:exported="false"
+			android:windowSoftInputMode="adjustResize" />
+		<activity
+			android:name=".social.ProfileSettingsActivity"
+			android:label="Profile settings"
+			android:exported="false" />
+		<activity
 			android:name=".social.FriendsActivity"
 			android:label="Friends"
 			android:configChanges="orientation|screenSize|keyboardHidden" />

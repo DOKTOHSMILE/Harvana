@@ -395,7 +395,10 @@ public class CoinDetailActivity extends AppCompatActivity {
 		TextView tvLabel = row.findViewById(labelId);
 		TextView tvValue = row.findViewById(valueId);
 		if (tvLabel != null) tvLabel.setText(label);
-		if (tvValue != null) tvValue.setText(value);
+		if (tvValue != null) {
+			if (value != null && value.startsWith("Loading")) com.harvana.app.utils.Shimmer.loading(tvValue);
+			else tvValue.setText(value);
+		}
 	}
 	
 	private int _labelIdFor(int rowId) {

@@ -345,7 +345,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 		create_order_button.setEnabled(false);
 		create_order_button.setText(("Buy " + com.harvana.app.CoinInfo.ticker()));
 		
-		seller_name.setText("Loading trader…");
+		com.harvana.app.utils.Shimmer.loading(seller_name);
 		seller_initial.setVisibility(View.VISIBLE);
 		seller_avatar.setVisibility(View.GONE);
 		seller_verified.setVisibility(View.GONE);

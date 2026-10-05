@@ -386,6 +386,11 @@ public class GroupFirestoreManager {
 		add(col("LEARN_SUBMISSIONS"), fields, callback);
 	}
 
+	/** Publishes a Learn Hub article straight away; there is no approval step. */
+	public void publishLearn(Map<String, Object> fields, IdCallback callback) {
+		add(col("LEARN_CONTENT"), fields, callback);
+	}
+
 	public void getMyLearnSubmissions(String uid, ListCallback callback) {
 		queryTopLevel("LEARN_SUBMISSIONS", "authorUid", uid, 50, callback);
 	}

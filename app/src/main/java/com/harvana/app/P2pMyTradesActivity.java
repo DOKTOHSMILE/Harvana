@@ -125,6 +125,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 		my_trades_filter_scroll = findViewById(R.id.my_trades_filter_scroll);
 		linear268 = findViewById(R.id.linear268);
 		recycler_my_trades = findViewById(R.id.recycler_my_trades);
+		com.harvana.app.utils.Shimmer.hold(recycler_my_trades, com.harvana.app.utils.Shimmer.rows(recycler_my_trades.getContext(), 5), 4000);
 		layout_my_trades_empty = findViewById(R.id.layout_my_trades_empty);
 		card_my_trades_info = findViewById(R.id.card_my_trades_info);
 		linear260 = findViewById(R.id.linear260);
@@ -351,7 +352,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 			tv_my_trade_status.setText(_statusLabel(status));
 			tv_my_trade_order_id.setText(_shortId(orderId));
 			tv_my_trade_harv.setText(BalanceFormatter.smart(harvAmount));
-			tv_my_trade_fiat.setText("Loading…");
+			com.harvana.app.utils.Shimmer.loading(tv_my_trade_fiat);
 			tv_my_trade_date.setText(_formatDate(createdAt));
 			tv_my_trade_tx_state.setText(releaseTxHash.isEmpty() ? "No release yet" : _shortId(releaseTxHash));
 			tv_my_trade_menu.setVisibility(View.GONE);
@@ -388,7 +389,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 			// Mutual visibility: resolve whichever party ISN'T me, using
 			// the same real lookups Buy Trade / Sell Trade already use.
 			tv_my_trade_avatar.setText("?");
-			tv_my_trade_counterparty.setText("Loading…");
+			com.harvana.app.utils.Shimmer.loading(tv_my_trade_counterparty);
 			tv_my_trade_counterparty_meta.setText("");
 			
 			if (iWasBuyer) {

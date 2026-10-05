@@ -46,7 +46,7 @@ public class OpenLoansActivity extends AppCompatActivity {
         sv.addView(list);
         com.harvana.app.utils.AppBar.setContent(this, sv, "Open loans", "Loans you have taken across your groups");
         summary = tv("Loading your loans…", 14, false, UiColors.textSecondary());
-        list.addView(summary);
+        list.addView(com.harvana.app.utils.Shimmer.rows(this, 3));
     }
 
     @Override protected void onResume() { super.onResume(); load(); }

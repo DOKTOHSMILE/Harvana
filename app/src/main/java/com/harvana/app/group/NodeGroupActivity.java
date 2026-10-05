@@ -112,8 +112,7 @@ public class NodeGroupActivity extends AppCompatActivity {
         refresh.setRefreshing(true);
         if (first) {
             content.removeAllViews();
-            content.addView(new ProgressBar(this));
-            content.addView(CircleUi.text(this, "Reading the network…", 14, R.color.colorTextSecondary, false));
+            content.addView(com.harvana.app.utils.Shimmer.cards(this, 3));
         }
         NodeGroupClient.Callback onGroup = new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject json) { group = JsonMaps.toMap(json); loadMember(); }

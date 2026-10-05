@@ -122,6 +122,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 		manager_filter_scroll = findViewById(R.id.manager_filter_scroll);
 		linear244 = findViewById(R.id.linear244);
 		recycler_merchant_trades = findViewById(R.id.recycler_merchant_trades);
+		com.harvana.app.utils.Shimmer.hold(recycler_merchant_trades, com.harvana.app.utils.Shimmer.rows(recycler_merchant_trades.getContext(), 5), 4000);
 		layout_manager_empty = findViewById(R.id.layout_manager_empty);
 		card_manager_info = findViewById(R.id.card_manager_info);
 		linear239 = findViewById(R.id.linear239);
@@ -436,8 +437,8 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			tv_offer_status.setText(stateLabel);
 			tv_offer_id.setText(_shortId(listingId));
 			tv_offer_amount.setText(String.format(Locale.US, ("%.4f / %.4f " + com.harvana.app.CoinInfo.ticker()), remainingHarv, totalHarv));
-			tv_offer_price.setText("Loading…");
-			tv_offer_fiat_value.setText("Loading…");
+			com.harvana.app.utils.Shimmer.loading(tv_offer_price);
+			com.harvana.app.utils.Shimmer.loading(tv_offer_fiat_value);
 			tv_offer_orders_count.setText(myOrderCount + " order" + (myOrderCount == 1 ? "" : "s"));
 			tv_offer_created.setText("Listed " + _formatDate(createdAt));
 			tv_offer_expiry.setText(expiresAt > 0 ? _formatExpiry(expiresAt) : "");

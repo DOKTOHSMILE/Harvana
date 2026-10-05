@@ -57,7 +57,7 @@ public class TrustScoreActivity extends AppCompatActivity {
 
     private void load() {
         root.removeAllViews();
-        root.addView(tv("Reading the network…", 14, false, UiColors.textSecondary()));
+        root.addView(com.harvana.app.utils.Shimmer.cards(this, 3));
         address = WalletManager.getActiveWalletAddress(this);
         if (address == null || address.isEmpty()) {
             root.removeAllViews();
@@ -74,7 +74,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         root.removeAllViews();
         if (person == null) {
             root.addView(tv("\u2014", 36, true, UiColors.accent()));
-            root.addView(tv("Reading the network…", 14, false, UiColors.textSecondary()));
+            root.addView(com.harvana.app.utils.Shimmer.cards(this, 3));
             com.harvana.app.trust.NetworkTrust.wallet(address, score -> runOnUiThread(() -> {
                 if (score.published) {
                     java.util.Map<String, Object> live = new java.util.HashMap<>();

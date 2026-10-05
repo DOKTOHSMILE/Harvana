@@ -362,7 +362,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		tv_learn_error.setVisibility(View.GONE);
 		btn_learn_post.setEnabled(false);
 		final ProgressDialog progress = new ProgressDialog(this);
-		progress.setMessage("Submitting…");
+		progress.setMessage("Publishing…");
 		progress.setCancelable(false);
 		progress.show();
 		
@@ -374,15 +374,14 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		fields.put("authorUid", uid);
 		fields.put("createdAt", System.currentTimeMillis());
 		fields.put("views", 0);
-		fields.put("status", "PENDING");
-		
+				
 		com.harvana.app.firestore.GroupFirestoreManager.getInstance(getApplicationContext())
-		.addLearnSubmission(fields, new com.harvana.app.firestore.GroupFirestoreManager.IdCallback() {
+		.publishLearn(fields, new com.harvana.app.firestore.GroupFirestoreManager.IdCallback() {
 			@Override
 			public void onSuccess(String generatedId) {
 				runOnUiThread(() -> {
 					if (!isFinishing() && progress.isShowing()) progress.dismiss();
-					SketchwareUtil.showMessage(getApplicationContext(), "Submitted. Our automatic review checks it first; you'll be notified when it is published or if it can't be.");
+					SketchwareUtil.showMessage(getApplicationContext(), "Published. Your article is live in Learn Hub.");
 					finish();
 				});
 			}
@@ -392,7 +391,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 				runOnUiThread(() -> {
 					if (!isFinishing() && progress.isShowing()) progress.dismiss();
 					btn_learn_post.setEnabled(true);
-					_showError("Failed to submit: " + error);
+					_showError("Failed to publish: " + error);
 				});
 			}
 		});

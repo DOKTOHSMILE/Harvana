@@ -22,9 +22,9 @@ public final class ContactsFinder {
         }));
     }
 
-    private interface Code { void use(String cc); }
+    public interface Code { void use(String cc); }
 
-    private static void withCountryCode(Activity a, String detected, Code next) {
+    public static void withCountryCode(Activity a, String detected, Code next) {
         SharedPreferences sp = a.getSharedPreferences("contact_discovery", Activity.MODE_PRIVATE);
         String cc = detected != null && !detected.isEmpty() ? detected : sp.getString("cc", "");
         if (!cc.isEmpty()) { next.use(cc); return; }

@@ -490,7 +490,7 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 		}
 		
 		if (tv_join_admin_value != null) {
-			tv_join_admin_value.setText(loadedCreatorId.isEmpty() ? "—" : "Loading…");
+			{ if (loadedCreatorId.isEmpty()) tv_join_admin_value.setText("—"); else com.harvana.app.utils.Shimmer.loading(tv_join_admin_value); }
 		}
 		if (!loadedCreatorId.isEmpty()) {
 			com.harvana.app.firestore.UserProfileManager.getInstance(getApplicationContext())

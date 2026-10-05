@@ -7,11 +7,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * First-pass screen for Learn Hub submissions, run on the phone before anything is sent. It only stops
- * the obvious: guaranteed-returns promises, requests for keys/seed phrases/codes, "send money to me" pitches,
- * impersonation of the team, and shortened or chat-invite links. It is NOT the authority: every submission
- * that passes still goes to the node's automatic review, which repeats and extends these checks before
- * anything is published.
+ * Screen for Learn Hub articles, run on the phone before anything is published. There is no approval step: an article that passes
+ * goes live straight away. This only stops the obvious: guaranteed-returns promises, requests for keys/seed phrases/codes,
+ * "send money to me" pitches, impersonation of the team, and shortened or chat-invite links. Members can report a post, and
+ * the author can delete their own.
  */
 public final class LearnContentScreen {
     private LearnContentScreen() {}

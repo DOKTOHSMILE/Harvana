@@ -103,6 +103,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 		panel_pending = _view.findViewById(R.id.panel_pending);
 		textview2 = _view.findViewById(R.id.textview2);
 		recycler_members = _view.findViewById(R.id.recycler_members);
+		com.harvana.app.utils.Shimmer.hold(recycler_members, com.harvana.app.utils.Shimmer.rows(recycler_members.getContext(), 5), 4000);
 		tv_members_empty = _view.findViewById(R.id.tv_members_empty);
 		tv_members_count = _view.findViewById(R.id.tv_members_count);
 		btn_members_invite = _view.findViewById(R.id.btn_members_invite);
@@ -627,7 +628,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 			boolean admin = !creatorId.isEmpty() && creatorId.equals(memberUid);
 			role.setText(isPending ? "Join request" : (admin ? "Admin" : "Member"));
 		}
-		if (name != null) name.setText("Loading…");
+		if (name != null) com.harvana.app.utils.Shimmer.loading(name);
 		if (close != null) close.setOnClickListener(v -> dialog.dismiss());
 		
 		// Offline-first: this member's profile may have been viewed before
@@ -1014,7 +1015,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 				h.role.setVisibility(memberIsAdmin ? View.VISIBLE : View.GONE);
 				h.role.setText("Admin");
 			}
-			if (h.name != null) h.name.setText("Loading…");
+			if (h.name != null) com.harvana.app.utils.Shimmer.loading(h.name);
 			if (h.wallet != null) h.wallet.setText("—");
 			if (h.status != null) h.status.setText(str(member, "status", "Active"));
 			if (h.balance != null) h.balance.setText("");
@@ -1164,7 +1165,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 			str(req, "_docId", str(req, "id", ""))));
 			final String docId = str(req, "_docId", reqUid);
 			
-			if (h.name != null) h.name.setText("Loading…");
+			if (h.name != null) com.harvana.app.utils.Shimmer.loading(h.name);
 			if (h.meta != null) h.meta.setText("Wants to join");
 			if (h.initials != null) h.initials.setText("?");
 			

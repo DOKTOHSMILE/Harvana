@@ -51,7 +51,8 @@ public final class GroupRing {
             sv.setStrokeColor(android.content.res.ColorStateList.valueOf(color(groupType)));
             sv.setStrokeWidth(ring);
             sv.setShapeAppearanceModel(com.google.android.material.shape.ShapeAppearanceModel.builder()
-                .setAllCorners(com.google.android.material.shape.CornerFamily.ROUNDED, new com.google.android.material.shape.RelativeCornerSize(0.5f)).build());
+                .setAllCorners(com.google.android.material.shape.CornerFamily.ROUNDED, 0f)
+                .setAllCornerSizes(new com.google.android.material.shape.RelativeCornerSize(0.5f)).build());
             sv.setContentDescription("Group type: " + (color(groupType) == OTHER ? "other" : colorName(groupType)));
             return;
         }

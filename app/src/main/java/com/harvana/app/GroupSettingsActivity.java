@@ -546,6 +546,25 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		_rebuild();
 		_loadMembers();
 		_showNetworkPanel();
+		_organize();
+	}
+	
+	private com.harvana.app.group.SettingsSections sections;
+	
+	/** Puts the page's cards into the standard sections (General, Access, Members, Money & rules, Network, More). */
+	private void _organize() {
+		LinearLayout page = findViewById(R.id.linear39);
+		if (page == null) return;
+		if (sections == null) {
+			sections = new com.harvana.app.group.SettingsSections(this, page, findViewById(R.id.vscroll2),
+				new com.harvana.app.group.SettingsSections.Host() {
+					@Override public void invite() { com.harvana.app.group.InviteMemberSheet.show(GroupSettingsActivity.this, groupId, groupData); }
+					@Override public void transferAdmin() { _showTransferAdminDialog(); }
+					@Override public void leave() { _confirmLeaveGroup(); }
+				});
+		}
+		sections.apply(groupId, groupData, isAdmin, memberRows == null ? 0 : memberRows.size(), _isOnChain(),
+			cardHero, cardview13, cardview11, cardview15, cardview19, cardview20, cardview10, linear72, networkPanelHost, closeSection);
 	}
 	
 	/** The network half of the settings: what the network says about this group, who decides, admin recovery. */
@@ -801,6 +820,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _renderBlocked() {
+		if (sections != null) _organize();                           // the member count is known now
 		if (layoutBlockedMembers == null) return;
 		layoutBlockedMembers.removeAllViews();
 		blockedUids.clear();

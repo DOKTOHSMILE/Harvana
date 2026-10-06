@@ -454,6 +454,8 @@ public class LearnFragmentActivity extends Fragment {
 			};
 			View title = holder.itemView.findViewById(R.id.tv_title);
 			View body = holder.itemView.findViewById(R.id.tv_body);
+			View cover = holder.itemView.findViewById(R.id.fl_cover);
+			if (cover != null) cover.setOnClickListener(open);          // in the feed, the picture opens the post
 			if (title != null) title.setOnClickListener(open);
 			if (body != null) body.setOnClickListener(open);
 		}

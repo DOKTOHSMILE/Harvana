@@ -99,6 +99,14 @@ public final class LearnPostBinder {
             shown.setVisibility(View.GONE);
             cover.setImageDrawable(null);
         }
+        // In the full reader, tapping the picture opens it full screen (pinch, drag and double-tap to zoom, or straight to a face).
+        if (fullText && !post.imageUrl.isEmpty()) {
+            cover.setClickable(true);
+            cover.setOnClickListener(v -> com.harvana.app.utils.ImageViewerActivity.open(host, post.imageUrl));
+        } else {
+            cover.setOnClickListener(null);
+            cover.setClickable(false);
+        }
         if (frame != null && content != null) {
             View card = root.findViewById(R.id.card_post);
             if (card != null) card.setClipToOutline(true);           // the card's curve cuts the top of the picture

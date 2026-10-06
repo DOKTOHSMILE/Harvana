@@ -287,10 +287,7 @@ public final class StakingPanel {
         double weight = selectedLockDays >= 90 ? 2.5 : selectedLockDays >= 30 ? 1.75 : selectedLockDays >= 7 ? 1.25 : 1.0;
         String holdText = selectedLockDays <= 0 ? "stays until you unstake" : selectedLockDays + "-day lock on the principal";
         String text = String.format(Locale.US, "%.2fx weight. Each day 0.05%% of the pool drips into Claim. %s.", weight, holdText);
-        long locked = lockedUntil();
-        if (locked > 0) {
-            text += " Your current lock ends " + dateTime(locked) + ". A top-up never shortens it, and a longer lock still counts its days from your first stake.";
-        }
+        text += " Each stake is its own row with its own lock.";
         tvEstRewardInput.setText(text + " Claims open once every 24 hours.");
     }
 

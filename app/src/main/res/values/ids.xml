@@ -2,4 +2,6 @@
 <resources>
     <!-- Marks a text view that shimmers while it says "Loading…" (utils/Shimmer). -->
     <item name="shimmer_watch" type="id" />
+    <!-- Marks a window that SmartCaps already watches (utils/SmartCaps). -->
+    <item name="smart_caps_attached" type="id" />
 </resources>

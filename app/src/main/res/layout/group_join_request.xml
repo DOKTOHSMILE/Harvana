@@ -12,7 +12,7 @@
 		android:theme="@style/AppTheme.AppBarOverlay"
 		app:elevation="0dp"
 		android:stateListAnimator="@null">
-		<androidx.appcompat.widget.Toolbar
+		<com.google.android.material.appbar.MaterialToolbar
 			android:id="@+id/_toolbar"
 			android:layout_width="match_parent"
 			android:layout_height="?attr/actionBarSize"
@@ -60,20 +60,21 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<androidx.cardview.widget.CardView
+							<com.google.android.material.card.MaterialCardView
 								android:id="@+id/cardview34"
 								android:layout_width="56dp"
 								android:layout_height="56dp"
 								app:cardBackgroundColor="@color/colorSurfaceAlt"
 								app:cardCornerRadius="28dp"
-								app:cardElevation="0dp">
+								app:cardElevation="0dp"
+	app:strokeWidth="0dp">
 								<ImageView
 									android:id="@+id/img_group_avatar"
 									android:layout_width="28dp"
 									android:layout_height="28dp"
 									android:src="@drawable/icon_groups_3_round"
 									android:scaleType="centerInside" />
-							</androidx.cardview.widget.CardView>
+							</com.google.android.material.card.MaterialCardView>
 							<LinearLayout
 								android:id="@+id/linear68"
 								android:layout_width="0dp"

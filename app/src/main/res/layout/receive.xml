@@ -12,7 +12,7 @@
 		android:theme="@style/AppTheme.AppBarOverlay"
 		app:elevation="0dp"
 		android:stateListAnimator="@null">
-		<androidx.appcompat.widget.Toolbar
+		<com.google.android.material.appbar.MaterialToolbar
 			android:id="@+id/_toolbar"
 			android:layout_width="match_parent"
 			android:layout_height="?attr/actionBarSize"

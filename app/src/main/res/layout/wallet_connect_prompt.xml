@@ -41,14 +41,15 @@
 			android:text="Only your wallet address will be shared — never your private key or seed phrase. This app will never be able to sign or send anything on your behalf."
 			android:textSize="13sp"
 			android:alpha="0.75" />
-		<androidx.cardview.widget.CardView
+		<com.google.android.material.card.MaterialCardView
 			android:id="@+id/cardview3"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginBottom="28dp"
 			app:cardBackgroundColor="@color/colorOverlayDark"
 			app:cardCornerRadius="12dp"
-			app:cardElevation="0dp">
+			app:cardElevation="0dp"
+	app:strokeWidth="0dp">
 			<TextView
 				android:id="@+id/tv_wallet_address"
 				android:layout_width="match_parent"
@@ -59,15 +60,16 @@
 				android:textSize="13sp"
 				android:fontFamily="monospace"
 				android:focusable="false" />
-		</androidx.cardview.widget.CardView>
-		<androidx.cardview.widget.CardView
+		</com.google.android.material.card.MaterialCardView>
+		<com.google.android.material.card.MaterialCardView
 			android:id="@+id/cardview4"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginBottom="12dp"
 			app:cardBackgroundColor="@color/colorAccent"
 			app:cardCornerRadius="12dp"
-			app:cardElevation="2dp">
+			app:cardElevation="2dp"
+	app:strokeWidth="0dp">
 			<com.google.android.material.button.MaterialButton
 				android:id="@+id/btn_approve_connect"
 				android:layout_width="match_parent"
@@ -78,7 +80,7 @@
 				android:textStyle="bold"
 				android:textColor="@color/colorQrBackground"
 				android:textAllCaps="false" />
-		</androidx.cardview.widget.CardView>
+		</com.google.android.material.card.MaterialCardView>
 		<com.google.android.material.button.MaterialButton
 			android:id="@+id/btn_deny_connect"
 			android:layout_width="match_parent"

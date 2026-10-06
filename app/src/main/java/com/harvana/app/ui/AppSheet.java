@@ -54,6 +54,7 @@ public class AppSheet extends BottomSheetDialog {
     @Override
     protected void onStart() {
         super.onStart();
+        com.harvana.app.utils.SmartCaps.attach(getWindow());
         final FrameLayout sheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (sheet != null) {
             style(sheet);

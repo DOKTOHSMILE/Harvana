@@ -12,7 +12,7 @@
 		android:theme="@style/AppTheme.AppBarOverlay"
 		app:elevation="0dp"
 		android:stateListAnimator="@null">
-		<androidx.appcompat.widget.Toolbar
+		<com.google.android.material.appbar.MaterialToolbar
 			android:id="@+id/_toolbar"
 			android:layout_width="match_parent"
 			android:layout_height="?attr/actionBarSize"
@@ -49,14 +49,15 @@
 				android:textSize="13sp"
 				android:textColor="@color/colorP2pTextMuted"
 				android:lineSpacingExtra="3dp" />
-			<androidx.cardview.widget.CardView
+			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/layout_status_card"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="16dp"
 				app:cardBackgroundColor="@color/colorSurface"
 				app:cardCornerRadius="16dp"
-				app:cardElevation="0dp">
+				app:cardElevation="0dp"
+	app:strokeWidth="0dp">
 				<LinearLayout
 					android:id="@+id/linear1"
 					android:layout_width="match_parent"
@@ -183,15 +184,16 @@
 							android:textColor="@color/colorTextPrimary" />
 					</LinearLayout>
 				</LinearLayout>
-			</androidx.cardview.widget.CardView>
-			<androidx.cardview.widget.CardView
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/layout_insurance_info"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="16dp"
 				app:cardBackgroundColor="@color/colorSurface"
 				app:cardCornerRadius="16dp"
-				app:cardElevation="0dp">
+				app:cardElevation="0dp"
+	app:strokeWidth="0dp">
 				<LinearLayout
 					android:id="@+id/linear8"
 					android:layout_width="match_parent"
@@ -216,15 +218,16 @@
 						android:textSize="12.5sp"
 						android:lineSpacingExtra="4dp" />
 				</LinearLayout>
-			</androidx.cardview.widget.CardView>
-			<androidx.cardview.widget.CardView
+			</com.google.android.material.card.MaterialCardView>
+			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/layout_criteria_card"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="20dp"
 				app:cardBackgroundColor="@color/colorSurface"
 				app:cardCornerRadius="16dp"
-				app:cardElevation="0dp">
+				app:cardElevation="0dp"
+	app:strokeWidth="0dp">
 				<LinearLayout
 					android:id="@+id/linear9"
 					android:layout_width="match_parent"
@@ -406,7 +409,7 @@
 							android:layout_marginStart="10dp" />
 					</LinearLayout>
 				</LinearLayout>
-			</androidx.cardview.widget.CardView>
+			</com.google.android.material.card.MaterialCardView>
 			<TextView
 				android:id="@+id/textview10"
 				android:layout_width="wrap_content"
@@ -416,14 +419,15 @@
 				android:textSize="13sp"
 				android:textStyle="bold"
 				android:textColor="@color/colorTextPrimary" />
-			<androidx.cardview.widget.CardView
+			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/layout_deposit_card"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="12dp"
 				app:cardBackgroundColor="@color/colorSurface"
 				app:cardCornerRadius="16dp"
-				app:cardElevation="0dp">
+				app:cardElevation="0dp"
+	app:strokeWidth="0dp">
 				<LinearLayout
 					android:id="@+id/linear18"
 					android:layout_width="match_parent"
@@ -493,7 +497,7 @@
 							android:textColor="@color/colorTextPrimary" />
 					</LinearLayout>
 				</LinearLayout>
-			</androidx.cardview.widget.CardView>
+			</com.google.android.material.card.MaterialCardView>
 			<TextView
 				android:id="@+id/tv_deposit_error"
 				android:layout_width="match_parent"

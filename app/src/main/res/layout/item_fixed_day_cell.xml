@@ -1,4 +1,4 @@
-<androidx.cardview.widget.CardView
+<com.google.android.material.card.MaterialCardView
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
@@ -8,7 +8,8 @@
 	android:layout_margin="3dp"
 	app:cardBackgroundColor="@color/colorSurface"
 	app:cardCornerRadius="12dp"
-	app:cardElevation="0dp">
+	app:cardElevation="0dp"
+	app:strokeWidth="0dp">
 	<TextView
 		android:id="@+id/tv_day"
 		android:layout_width="match_parent"
@@ -18,4 +19,4 @@
 		android:textSize="12sp"
 		android:textStyle="bold"
 		android:focusable="false" />
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

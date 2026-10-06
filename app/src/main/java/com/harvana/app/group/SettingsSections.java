@@ -337,7 +337,6 @@ public final class SettingsSections {
         StringBuilder sb = new StringBuilder();
         sb.append(admin ? "Role: Admin\n" : treasurer ? "Role: Treasurer\n" : "Role: Member\n");
         if (joined > 0) sb.append("Joined: ").append(new SimpleDateFormat("d MMM yyyy", Locale.US).format(new Date(joined))).append("\n");
-        String wallet = str(m, "walletAddress", str(m, "wallet", ""));
         if (!wallet.isEmpty()) sb.append("Wallet: ").append(wallet.length() > 14 ? wallet.substring(0, 8) + "\u2026" + wallet.substring(wallet.length() - 4) : wallet).append("\n");
         sb.append("\nWHAT THIS PERSON CAN DO\n");
         sb.append(yes(true)).append("Pay into the group from their own wallet\n");

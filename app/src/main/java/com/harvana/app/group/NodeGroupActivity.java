@@ -606,7 +606,7 @@ public class NodeGroupActivity extends AppCompatActivity {
             if (error != null) { toast("Your goal exists on the network, but saving its details failed. Group ID: " + nodeGroupId); return; }
             GroupSaver.unqueue(ctx, docId);
             toast("New goal created.");
-            startActivity(new android.content.Intent(ctx, GroupDetailsActivity.class).putExtra("groupId", docId)
+            startActivity(new android.content.Intent(ctx, com.harvana.app.GroupDetailsActivity.class).putExtra("groupId", docId)
                 .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK));
         }));
     }

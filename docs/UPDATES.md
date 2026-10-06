@@ -647,3 +647,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Smaller Pay button on Home
 - The Pay / Remind / status button on Home's Upcoming payments rows is now a compact 32dp pill (it was drawing at about 56dp tall because of the button style's minimum height and insets).
+
+## Shorter rows on Home
+- Upcoming payments and Trending public groups rows are shorter: less vertical padding, a 36dp group picture (was 45dp), slightly smaller title and detail text, a tighter badge, and the Join button is the same compact 32dp pill as Pay.

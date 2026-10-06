@@ -36,7 +36,6 @@ public final class PaymentSuccessSheet {
 
     private final BottomSheetDialog dialog;
     private android.widget.ImageView icon;
-    private android.graphics.drawable.GradientDrawable disc;
     private android.animation.ObjectAnimator pulse;
     private boolean shownConfirmed;
     private final TextView status;
@@ -54,14 +53,10 @@ public final class PaymentSuccessSheet {
         root.setGravity(Gravity.CENTER_HORIZONTAL);
         root.setPadding(dp(24), dp(48), dp(24), dp(24));
 
-        // The state icon: a clock on an amber disc while the network has not confirmed the payment, a check on a
-        // green disc once it has. A pending payment never shows the success check.
+        // The state icon, in the app's duotone style with no background: an amber clock while the network has not
+        // confirmed the payment, a green check in a circle once it has. A pending payment never shows the check.
         icon = new android.widget.ImageView(a);
         icon.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
-        icon.setPadding(dp(22), dp(22), dp(22), dp(22));
-        disc = new android.graphics.drawable.GradientDrawable();
-        disc.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-        icon.setBackground(disc);
         root.addView(icon, new LinearLayout.LayoutParams(dp(96), dp(96)));
         icon.setScaleX(0.2f); icon.setScaleY(0.2f);
         icon.animate().scaleX(1f).scaleY(1f).setDuration(380).setInterpolator(new android.view.animation.OvershootInterpolator()).start();
@@ -172,30 +167,33 @@ public final class PaymentSuccessSheet {
         }
     }
 
-    /** Clock on amber while pending; check on green when confirmed, drawn in when it changes in front of the user. */
+    /** Amber clock while pending; green check when confirmed, popping in when it changes in front of the user. */
     private void showStateIcon(boolean confirmed, boolean animateChange) {
         if (confirmed) {
             if (shownConfirmed) return;
             shownConfirmed = true;
-            if (pulse != null) { pulse.cancel(); icon.setAlpha(1f); }
-            int from = color(R.color.colorAmber), to = color(R.color.colorSuccess);
+            if (pulse != null) pulse.cancel();
+            icon.setAlpha(1f);
+            final int to = color(R.color.colorSuccess);
             if (animateChange) {
-                android.animation.ValueAnimator fade = android.animation.ValueAnimator.ofObject(new android.animation.ArgbEvaluator(), from, to);
-                fade.setDuration(300);
-                fade.addUpdateListener(an -> disc.setColor((int) an.getAnimatedValue()));
-                fade.start();
-                android.graphics.drawable.Drawable d = androidx.core.content.ContextCompat.getDrawable(ctx, R.drawable.avd_status_check);
-                icon.setImageDrawable(d);
-                if (d instanceof android.graphics.drawable.Animatable) ((android.graphics.drawable.Animatable) d).start();
-                icon.animate().scaleX(1.08f).scaleY(1.08f).setDuration(160).withEndAction(() -> icon.animate().scaleX(1f).scaleY(1f).setDuration(160).start()).start();
+                int from = color(R.color.colorAmber);
+                icon.animate().scaleX(0.6f).scaleY(0.6f).alpha(0f).setDuration(140).withEndAction(() -> {
+                    icon.setImageResource(R.drawable.ic_status_check);
+                    android.animation.ValueAnimator fade = android.animation.ValueAnimator.ofObject(new android.animation.ArgbEvaluator(), from, to);
+                    fade.setDuration(260);
+                    fade.addUpdateListener(an -> tint((int) an.getAnimatedValue()));
+                    fade.start();
+                    icon.animate().scaleX(1f).scaleY(1f).alpha(1f).setDuration(320)
+                        .setInterpolator(new android.view.animation.OvershootInterpolator(2.2f)).start();
+                }).start();
             } else {
-                disc.setColor(to);
                 icon.setImageResource(R.drawable.ic_status_check);
+                tint(to);
             }
             icon.setContentDescription("Confirmed");
         } else {
-            disc.setColor(color(R.color.colorAmber));
             icon.setImageResource(R.drawable.ic_status_pending);
+            tint(color(R.color.colorAmber));
             icon.setContentDescription("Waiting for the network");
             if (pulse == null) {
                 pulse = android.animation.ObjectAnimator.ofFloat(icon, "alpha", 1f, 0.55f);
@@ -205,6 +203,12 @@ public final class PaymentSuccessSheet {
             }
             if (!pulse.isStarted()) pulse.start();
         }
+    }
+
+    /** Colours the duotone icon; SRC_IN keeps its two tones (line and soft fill) in the one colour. */
+    private void tint(int c) {
+        androidx.core.widget.ImageViewCompat.setImageTintMode(icon, android.graphics.PorterDuff.Mode.SRC_IN);
+        androidx.core.widget.ImageViewCompat.setImageTintList(icon, android.content.res.ColorStateList.valueOf(c));
     }
 
     private TextView text(String s, int sp, int colorRes, boolean bold) {

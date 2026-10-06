@@ -63,6 +63,16 @@ public final class NodeLinkManager {
         });
     }
 
+    /** Links the active wallet to the signed-in account now, whatever was remembered, and reports what the node said. */
+    public static void linkNow(Context ctx, Done done) {
+        final Context c = ctx.getApplicationContext();
+        final String addr = WalletManager.getActiveWalletAddress(c);
+        if (addr == null || addr.isEmpty() || WalletManager.loadPrivateKey(c, addr) == null
+                || com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) { if (done != null) done.onDone("No wallet on this phone."); return; }
+        prefs(c).edit().remove("linked_" + addr).apply();
+        link(c, addr, status -> { if (done != null) done.onDone(status); });
+    }
+
     /** The "Bind this device" button: binds now, whatever was remembered, and reports what the node said. */
     public static void bindNow(Context ctx, Done done) {
         final Context c = ctx.getApplicationContext();

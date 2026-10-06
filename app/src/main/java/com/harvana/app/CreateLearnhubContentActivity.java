@@ -429,9 +429,10 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 	private void _submit() {
 		String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
 		if (wallet == null || wallet.trim().isEmpty()) {
-			_showError("Add a wallet before you post. Tips for this article are paid to that address.");
+			_showError("Create or import a wallet and link it to your account before you post. Gifts for your articles are paid to that wallet.");
 			return;
 		}
+		if (!walletLinkedOk) { _requireLinkedWallet(wallet); return; }
 		if (uploadInProgress) {
 			_showError("Please wait for the image to finish uploading.");
 			return;
@@ -551,6 +552,52 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		});
 	}
 	
+	// ── a linked wallet is required to post ──────────────────────────
+
+	private boolean walletLinkedOk;
+
+	/**
+	 * Readers gift HARV to the wallet the network has confirmed for the author's profile, so an article is only accepted from someone whose
+	 * profile has that wallet and whose active wallet is the same one. If it is missing the app links the wallet to the account right now,
+	 * waits for the network to confirm, and carries on with the post; if that does not work the author is told why.
+	 */
+	private void _requireLinkedWallet(final String wallet) {
+		final String uid = FirebaseAuth.getInstance().getCurrentUser() == null ? "" : FirebaseAuth.getInstance().getCurrentUser().getUid();
+		tv_learn_error.setVisibility(View.GONE);
+		btn_learn_post.setEnabled(false);
+		final ProgressDialog pd = ProgressDialog.show(this, null, "Checking your linked wallet\u2026", true, false);
+		final Runnable[] check = new Runnable[1];
+		final int[] tries = {0};
+		final boolean[] linkedTried = {false};
+		check[0] = () -> {
+			com.harvana.app.trust.ProfileTrust.forget(uid);
+			com.harvana.app.trust.ProfileTrust.resolve(uid, card -> {
+				if (!card.wallet.isEmpty() && card.wallet.equalsIgnoreCase(wallet)) {
+					pd.dismiss();
+					walletLinkedOk = true;
+					btn_learn_post.setEnabled(true);
+					_submit();                                              // go on with the post
+					return;
+				}
+				if (!linkedTried[0]) {                                      // link now, then look again
+					linkedTried[0] = true;
+					pd.setMessage("Linking your wallet to your account\u2026");
+					com.harvana.app.sync.NodeLinkManager.linkNow(this, status -> new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(check[0], 2500));
+					return;
+				}
+				if (++tries[0] < 3) { new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(check[0], 3000); return; }
+				pd.dismiss();
+				btn_learn_post.setEnabled(true);
+				String why = !card.wallet.isEmpty()
+					? "Your account is linked to a different wallet than the one active on this phone. Switch to the linked wallet to post."
+					: com.harvana.app.sync.NodeLinkManager.cachedStatus(this, wallet);
+				_showError("Your wallet must be linked to your account before you can post, so readers can send you gifts. "
+					+ (why == null || why.isEmpty() ? "It could not be confirmed just now. Check your connection and try again." : why));
+			});
+		};
+		check[0].run();
+	}
+
 	private void _showError(String message) {
 		tv_learn_error.setText(message);
 		tv_learn_error.setVisibility(View.VISIBLE);

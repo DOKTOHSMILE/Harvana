@@ -76,7 +76,6 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 	private LinearProgressIndicator progress_image_upload;
 	private ImageView imageview2;
 	private TextView textview30;
-	private EditText et_learn_image_url;
 	private EditText et_learn_video_url;
 	private TextView tv_learn_video_status;
 	
@@ -141,7 +140,6 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		progress_image_upload = findViewById(R.id.progress_image_upload);
 		imageview2 = findViewById(R.id.imageview2);
 		textview30 = findViewById(R.id.textview30);
-		et_learn_image_url = findViewById(R.id.et_learn_image_url);
 		et_learn_video_url = findViewById(R.id.et_learn_video_url);
 		tv_learn_video_status = findViewById(R.id.tv_learn_video_status);
 		final String videoHint = tv_learn_video_status.getText().toString();
@@ -443,8 +441,10 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		uploadInProgress = false;
 		progress_image_upload.setVisibility(View.GONE);
 		btn_learn_post.setEnabled(true);
-		_showError("Image upload failed: " + (e != null ? e.getMessage() : "unknown error")
-		+ ". You can paste an image URL below instead.");
+		String m = e != null && e.getMessage() != null ? e.getMessage().toLowerCase(java.util.Locale.US) : "";
+		boolean network = m.contains("connect") || m.contains("timeout") || m.contains("timed out") || m.contains("unable to resolve") || m.contains("network");
+		_showError(network ? "Couldn't reach the picture server. Check your internet connection and try again, or post without a picture."
+				: "Couldn't upload the picture" + (e != null && e.getMessage() != null ? ": " + e.getMessage() : "") + ". Try again, or post without a picture.");
 	}
 	
 	// ── Submit ───────────────────────────────────────────────────────────
@@ -462,11 +462,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		
 		String title = et_learn_title.getText().toString().trim();
 		String description = et_learn_description.getText().toString().trim();
-		String typedUrl = et_learn_image_url.getText().toString().trim();
-		// A device-uploaded image always wins over a manually-typed URL if
-		// both are somehow present — the upload is the more deliberate,
-		// more recent action.
-		String imageUrl = uploadedImageUrl != null ? uploadedImageUrl : typedUrl;
+		String imageUrl = uploadedImageUrl != null ? uploadedImageUrl : "";    // the picture is uploaded from the phone; there is no typed address
 		String category = (String) spinner_learn_category.getSelectedItem();
 		
 		if (title.isEmpty()) {

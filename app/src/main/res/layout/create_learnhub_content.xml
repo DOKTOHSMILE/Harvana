@@ -222,49 +222,11 @@
 				</FrameLayout>
 			</com.google.android.material.card.MaterialCardView>
 			<TextView
-				android:id="@+id/textview31"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="6dp"
-				android:text="OR PASTE AN IMAGE URL"
-				android:textStyle="bold"
-				android:textColor="@color/colorTextTertiary"
-				android:textSize="10.5sp"
-				android:layout_marginStart="4dp"
-				android:focusable="false"
-				android:letterSpacing="0.06" />
-			<com.google.android.material.card.MaterialCardView
-				android:id="@+id/cardview15"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="6dp"
-				android:layout_marginBottom="4dp"
-				app:cardBackgroundColor="@color/colorSurfaceRaised"
-				app:cardCornerRadius="14dp"
-				app:cardElevation="0dp"
-				app:strokeColor="@color/colorCardStroke"
-				app:strokeWidth="1dp">
-				<EditText
-					android:id="@+id/et_learn_image_url"
-					android:layout_width="match_parent"
-					android:layout_height="50dp"
-					android:background="@android:color/transparent"
-					android:gravity="center_vertical"
-					android:textSize="14sp"
-					android:textColor="@color/colorTextPrimary"
-					android:hint="https://…"
-					android:inputType="textUri"
-					android:focusable="true"
-					android:focusableInTouchMode="true"
-					android:maxLength="500"
-					android:paddingHorizontal="14dp" />
-			</com.google.android.material.card.MaterialCardView>
-			<TextView
 				android:id="@+id/textview32"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="24dp"
-				android:text="Picking an image above fills this in once it uploads. A picture or a video is optional: you can post words only."
+				android:text="A picture or a video is optional: you can post words only."
 				android:textColor="@color/colorTextTertiary"
 				android:textSize="11.5sp"
 				android:layout_marginStart="4dp"

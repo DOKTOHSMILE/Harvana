@@ -368,6 +368,7 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
+		if (toolbarLogo != null) loadUserProfile(toolbarLogo, toolbarLogoPx);       // a photo changed in Edit profile shows on return
 		com.harvana.app.utils.PresenceHeartbeat.start(getApplicationContext());
 		com.harvana.app.group.GroupSaver.retryAll(getApplicationContext(), null);
 		com.harvana.app.notify.NotificationWorker.schedule(getApplicationContext());
@@ -514,8 +515,13 @@ public class MainActivity extends AppCompatActivity {
 		android.view.Gravity.START | android.view.Gravity.CENTER_VERTICAL);
 		ab.setCustomView(toolbarContainer, params);
 		
+		toolbarLogo = logoView;
+		toolbarLogoPx = sizePx;
 		loadUserProfile(logoView, sizePx);
 	}
+	
+	private ImageView toolbarLogo;
+	private int toolbarLogoPx;
 	
 	private void loadUserProfile(final ImageView logoView, final int sizePx) {
 		FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -524,6 +530,12 @@ public class MainActivity extends AppCompatActivity {
 			return;
 		}
 		String photoUrl = user.getPhotoUrl().toString().trim();
+		// The photo chosen in Edit profile is saved on the profile; prefer it over the one from sign-in.
+		try {
+			java.util.Map<String, Object> mine = com.harvana.app.offline.OfflineCacheManager.load(this, "profile_" + user.getUid());
+			Object ic = mine == null ? null : mine.get("icon");
+			if (ic != null && String.valueOf(ic).startsWith("http")) photoUrl = String.valueOf(ic).trim();
+		} catch (Exception ignored) { }
 		if (photoUrl.isEmpty()) {
 			_setToolbarInitialAvatar("", "", logoView);
 			return;

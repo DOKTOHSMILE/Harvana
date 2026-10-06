@@ -69,6 +69,8 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
 
     // basics
     private String name = "", description = "", visibility = "Public", country = "", state = "", city = "";
+    private String photoUrl = "";
+    private static final int RC_PHOTO = 721;
     private final List<String> rules = new ArrayList<>();
     private final List<Map<String, Object>> chatLinks = new ArrayList<>();
     private LocationHelper location;
@@ -216,10 +218,66 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
 
     // ── step 1: basics ─────────────────────────────────────────────────────
 
+    /** The optional group picture: a round preview, Add / Change, and Remove. Picked, cropped square and uploaded by GroupPhotoPickerActivity. */
+    private View photoRow() {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(0, dp(14), 0, dp(4));
+        android.widget.ImageView face = new android.widget.ImageView(this);
+        face.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
+        GradientDrawable disc = new GradientDrawable();
+        disc.setShape(GradientDrawable.OVAL);
+        disc.setColor((UiColors.accent() & 0x00FFFFFF) | 0x33000000);
+        face.setBackground(disc);
+        face.setClipToOutline(true);
+        face.setOutlineProvider(new android.view.ViewOutlineProvider() {
+            @Override public void getOutline(View v, android.graphics.Outline o) { o.setOval(0, 0, v.getWidth(), v.getHeight()); }
+        });
+        if (photoUrl.isEmpty()) {
+            face.setImageResource(R.drawable.ic_groups);
+            face.setScaleType(android.widget.ImageView.ScaleType.CENTER_INSIDE);
+            face.setPadding(dp(18), dp(18), dp(18), dp(18));
+            face.setColorFilter(UiColors.accent());
+        } else {
+            com.bumptech.glide.Glide.with(this).load(photoUrl).circleCrop().into(face);
+        }
+        row.addView(face, new LinearLayout.LayoutParams(dp(76), dp(76)));
+        LinearLayout side = new LinearLayout(this);
+        side.setOrientation(LinearLayout.VERTICAL);
+        side.setPadding(dp(14), 0, 0, 0);
+        side.addView(text("Group picture (optional)", 14, true, UiColors.textPrimary()));
+        side.addView(hint("A square picture. You choose the part to keep."));
+        LinearLayout buttons = new LinearLayout(this);
+        MaterialButton pick = button(photoUrl.isEmpty() ? "Add picture" : "Change", true);
+        pick.setOnClickListener(v -> startActivityForResult(com.harvana.app.utils.GroupPhotoPickerActivity.intent(this, FirebaseAuth.getInstance().getUid()), RC_PHOTO));
+        buttons.addView(pick);
+        if (!photoUrl.isEmpty()) {
+            MaterialButton remove = button("Remove", true);
+            remove.setOnClickListener(v -> { photoUrl = ""; go(step); });
+            LinearLayout.LayoutParams rl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            rl.setMarginStart(dp(8));
+            buttons.addView(remove, rl);
+        }
+        side.addView(buttons);
+        row.addView(side, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        return row;
+    }
+
+    @Override
+    protected void onActivityResult(int req, int res, android.content.Intent data) {
+        super.onActivityResult(req, res, data);
+        if (req == RC_PHOTO && res == RESULT_OK && data != null) {
+            String url = data.getStringExtra(com.harvana.app.utils.GroupPhotoPickerActivity.RESULT_URL);
+            if (url != null && !url.isEmpty()) { photoUrl = url; go(step); }
+        }
+    }
+
     private void basics() {
         page.addView(text(kind == Kind.ROTATING ? "A circle where everyone pays in each round and one member takes the pot, until all have had a turn."
                 : kind == Kind.ACCUM ? "A group where each member saves in their own line and earns interest set by the group."
                 : "A group saving together toward one target, where money leaves only by the rule you pick.", 13, false, UiColors.textSecondary()));
+        page.addView(photoRow());
         page.addView(label("Group name"));
         EditText n = edit("e.g. Market women ajo", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS, name);
         n.setFilters(new android.text.InputFilter[] {new android.text.InputFilter.LengthFilter(40)});
@@ -625,6 +683,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         g.put("groupName", name.trim());
         g.put("groupType", typeLabel);
         g.put("groupDescription", description.trim());
+        if (!photoUrl.isEmpty()) g.put("groupPhoto", photoUrl);
         g.put("frequency", kind == Kind.ROTATING ? (cycleDays == 1 ? "Daily" : cycleDays == 7 ? "Weekly" : cycleDays == 14 ? "Bi-weekly" : cycleDays == 30 ? "Monthly" : "Every " + cycleDays + " days") : "Daily");
         g.put("visibility", visibility);
         g.put("country", country);

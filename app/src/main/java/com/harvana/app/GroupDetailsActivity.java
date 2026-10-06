@@ -689,6 +689,16 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		String location = _extractLocation(data);
 		
 		if (tv_group_name != null) tv_group_name.setText(name);
+		if (iv_group_icon != null) {
+			String photo = _safeString(data, "groupPhoto", "");
+			if (photo.startsWith("http")) {
+				iv_group_icon.clearColorFilter();
+				iv_group_icon.setPadding(0, 0, 0, 0);
+				iv_group_icon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+				try { com.bumptech.glide.Glide.with(this).load(photo).circleCrop().into(iv_group_icon); } catch (Exception ignored) { }
+				iv_group_icon.setOnClickListener(v -> com.harvana.app.utils.ImageViewerActivity.open(this, photo));
+			}
+		}
 		if (tv_group_meta != null) {
 			String metaText = freq + " · " + slots + " slots · " + vis;
 			if (!location.isEmpty() && !"Unknown".equalsIgnoreCase(location)) {

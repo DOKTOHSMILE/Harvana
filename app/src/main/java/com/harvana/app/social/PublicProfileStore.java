@@ -99,7 +99,8 @@ public final class PublicProfileStore {
                         String n = (str(card.get("first_name")) + " " + str(card.get("last_name"))).trim();
                         if (!n.isEmpty()) c.name = n;
                         if (!str(card.get("username")).isEmpty()) c.username = str(card.get("username"));
-                        if (!str(card.get("icon")).isEmpty()) c.icon = str(card.get("icon"));
+                        // For anyone else the public card is the source; for yourself the profile you just edited wins.
+                        if (!str(card.get("icon")).isEmpty() && !(uid.equals(me()) && !c.icon.isEmpty())) c.icon = str(card.get("icon"));
                         if (!str(card.get("country")).isEmpty()) c.country = str(card.get("country"));
                         if (!str(card.get("state")).isEmpty()) c.state = str(card.get("state"));
                         c.wallet = str(card.get("wallet"));
@@ -220,6 +221,12 @@ public final class PublicProfileStore {
                 out.put("pid", pid);
                 out.put("show_age", showAge);
                 out.put("show_city", showCity);
+                // The public card is what other screens read first, so a changed photo or name must be copied onto it.
+                // Only non-empty values: a missing field on the phone never blanks the card.
+                for (String k : new String[] {"icon", "first_name", "last_name", "username"}) {
+                    String v = str(me.get(k));
+                    if (!v.isEmpty()) out.put(k, v);
+                }
                 out.put("country", str(me.get("country")));
                 out.put("state", str(me.get("state")));
                 int age = showAge ? ageFromDob(str(me.get("dob"))) : -1;

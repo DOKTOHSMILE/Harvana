@@ -47,6 +47,13 @@
     </style>
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
     <style name="AppTheme.DebugActivity" parent="AppTheme" />
+    <!-- For a step that only opens other screens and shows nothing itself (the group picture picker). -->
+    <style name="AppTheme.Transparent" parent="AppTheme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 
     <style name="WhiteSpinnerTheme" parent="ThemeOverlay.AppCompat.Light">
         <item name="android:textColorPrimary">@color/colorTextPrimary</item>

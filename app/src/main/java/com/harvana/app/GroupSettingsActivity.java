@@ -572,8 +572,111 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	private boolean isFixed() { return typeOf().toLowerCase(Locale.US).contains("fixed"); }
 	private boolean isAccum() { return typeOf().toLowerCase(Locale.US).contains("accumul"); }
 	
+	private static final int RC_GROUP_PHOTO = 731;
+	
+	/** The group picture at the top of "About": a round preview with Change picture / Remove for the admin; members only see it. */
+	private void _buildPhotoRow() {
+		if (etDescription == null || !(etDescription.getParent() instanceof View) || !(((View) etDescription.getParent()).getParent() instanceof LinearLayout)) return;
+		LinearLayout about = (LinearLayout) ((View) etDescription.getParent()).getParent();
+		View old = about.findViewWithTag("group_photo_row");
+		if (old != null) about.removeView(old);
+		float d = getResources().getDisplayMetrics().density;
+		LinearLayout row = new LinearLayout(this);
+		row.setTag("group_photo_row");
+		row.setOrientation(LinearLayout.HORIZONTAL);
+		row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+		row.setPadding(0, 0, 0, (int) (14 * d));
+		final String url = str(groupData, "groupPhoto", "");
+		ImageView face = new ImageView(this);
+		android.graphics.drawable.GradientDrawable disc = new android.graphics.drawable.GradientDrawable();
+		disc.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+		disc.setColor((UiColors.accent() & 0x00FFFFFF) | 0x33000000);
+		face.setBackground(disc);
+		face.setClipToOutline(true);
+		face.setOutlineProvider(new android.view.ViewOutlineProvider() {
+			@Override public void getOutline(View v, android.graphics.Outline o) { o.setOval(0, 0, v.getWidth(), v.getHeight()); }
+		});
+		if (url.startsWith("http")) {
+			face.setScaleType(ImageView.ScaleType.CENTER_CROP);
+			com.bumptech.glide.Glide.with(this).load(url).circleCrop().into(face);
+			face.setOnClickListener(v -> com.harvana.app.utils.ImageViewerActivity.open(this, url));
+		} else {
+			face.setImageResource(R.drawable.ic_groups);
+			face.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+			int pad = (int) (18 * d);
+			face.setPadding(pad, pad, pad, pad);
+			face.setColorFilter(UiColors.accent());
+		}
+		row.addView(face, new LinearLayout.LayoutParams((int) (76 * d), (int) (76 * d)));
+		LinearLayout side = new LinearLayout(this);
+		side.setOrientation(LinearLayout.VERTICAL);
+		side.setPadding((int) (14 * d), 0, 0, 0);
+		TextView t = new TextView(this);
+		t.setText("Group picture");
+		t.setTextSize(14.5f);
+		t.setTypeface(null, android.graphics.Typeface.BOLD);
+		t.setTextColor(UiColors.textPrimary());
+		side.addView(t);
+		TextView sub = new TextView(this);
+		sub.setText(isAdmin ? "A square picture. You choose the part to keep." : (url.isEmpty() ? "No picture yet." : "Set by the group admin."));
+		sub.setTextSize(11.5f);
+		sub.setTextColor(UiColors.textSecondary());
+		side.addView(sub);
+		if (isAdmin) {
+			LinearLayout buttons = new LinearLayout(this);
+			buttons.setPadding(0, (int) (8 * d), 0, 0);
+			MaterialButton change = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+			change.setText(url.isEmpty() ? "Add picture" : "Change picture");
+			change.setAllCaps(false);
+			change.setOnClickListener(v -> startActivityForResult(com.harvana.app.utils.GroupPhotoPickerActivity.intent(this, groupId), RC_GROUP_PHOTO));
+			buttons.addView(change);
+			if (!url.isEmpty()) {
+				MaterialButton remove = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+				remove.setText("Remove");
+				remove.setAllCaps(false);
+				remove.setOnClickListener(v -> _setGroupPhoto(""));
+				LinearLayout.LayoutParams rl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+				rl.setMarginStart((int) (8 * d));
+				buttons.addView(remove, rl);
+			}
+			side.addView(buttons);
+		}
+		row.addView(side, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+		about.addView(row, Math.min(1, about.getChildCount()));      // under the About heading, above the description
+	}
+	
+	@Override
+	protected void onActivityResult(int req, int res, Intent data) {
+		super.onActivityResult(req, res, data);
+		if (req == RC_GROUP_PHOTO && res == RESULT_OK && data != null) {
+			String url = data.getStringExtra(com.harvana.app.utils.GroupPhotoPickerActivity.RESULT_URL);
+			if (url != null && !url.isEmpty()) _setGroupPhoto(url);
+		}
+	}
+	
+	/** Saves the picture straight away (it is its own action, not part of Save Settings) and redraws the row. "" removes it. */
+	private void _setGroupPhoto(String url) {
+		if (!isAdmin) return;
+		Map<String, Object> patch = new HashMap<>();
+		patch.put("groupPhoto", url);
+		GroupFirestoreManager.getInstance(this).updateGroupFields(groupId, patch, new GroupFirestoreManager.SimpleCallback() {
+			@Override public void onSuccess() {
+				groupData.put("groupPhoto", url);
+				OfflineCacheManager.save(GroupSettingsActivity.this, "group_" + groupId, groupData);
+				runOnUiThread(() -> {
+					_buildPhotoRow();
+					Toast.makeText(GroupSettingsActivity.this, url.isEmpty() ? "Group picture removed." : "Group picture updated.", Toast.LENGTH_SHORT).show();
+				});
+			}
+			@Override public void onError(String error) {
+				runOnUiThread(() -> Toast.makeText(GroupSettingsActivity.this, error, Toast.LENGTH_LONG).show());
+			}
+		});
+	}
+	
 	private void _rebuild() {
 		String type = typeOf();
+		_buildPhotoRow();
 		tvHeroTypeName.setText(type.isEmpty() ? "Unknown Type" : type);
 		tvHeroFrequency.setText("📅 " + str(groupData, "frequency", "Daily"));
 		

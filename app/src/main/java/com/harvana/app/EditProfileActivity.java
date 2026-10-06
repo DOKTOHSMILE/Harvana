@@ -403,6 +403,11 @@ public class EditProfileActivity extends AppCompatActivity {
                 merged.putAll(changes);
                 OfflineCacheManager.save(getApplicationContext(), "profile_" + uid, merged);
                 PublicProfileStore.publishMine(getApplicationContext());
+                if (changes.get("icon") instanceof String) {            // the sign-in profile photo, which the Home header reads
+                    com.google.firebase.auth.FirebaseUser au = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+                    if (au != null) au.updateProfile(new com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                            .setPhotoUri(android.net.Uri.parse((String) changes.get("icon"))).build());
+                }
                 runOnUiThread(() -> { toast("Profile saved."); finish(); });
             }
             @Override public void onError(String error) {

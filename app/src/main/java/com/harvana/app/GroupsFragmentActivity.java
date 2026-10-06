@@ -629,6 +629,15 @@ public class GroupsFragmentActivity extends Fragment {
 				name_textview1.setText(_safeString(group, "groupName", "Untitled Group"));
 			}
 			
+			if (iv_group_card_icon != null) {
+				String photo = _safeString(group, "groupPhoto", "");
+				if (photo.startsWith("http")) {
+					iv_group_card_icon.setBackground(null);
+					iv_group_card_icon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+					try { com.bumptech.glide.Glide.with(iv_group_card_icon.getContext()).load(photo).circleCrop().into(iv_group_card_icon); } catch (Exception ignored) { }
+				}
+			}
+			
 			boolean isAdmin = uid.equals(_safeString(group, "creatorId", ""));
 			if (position_textview2 != null) {
 				if (isAdmin) {

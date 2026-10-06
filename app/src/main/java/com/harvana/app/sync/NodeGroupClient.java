@@ -494,27 +494,30 @@ public final class NodeGroupClient {
 
     private static void actNonce(Context context, String address, String path, long nonce, Spec spec, Callback cb0) {
         final Callback cb = wrapPayment(path, address, cb0);
-        try {
-            String seedB64 = WalletManager.loadPrivateKey(context, address);
-            String pubB64 = WalletManager.getPublicKey(context, address);
-            if (seedB64 == null || pubB64 == null) {
-                cb.onError("No local signing key for this wallet.");
-                return;
+        payActionFee(context, address, path, nonce, feeHash -> {
+            try {
+                String seedB64 = WalletManager.loadPrivateKey(context, address);
+                String pubB64 = WalletManager.getPublicKey(context, address);
+                if (seedB64 == null || pubB64 == null) {
+                    cb.onError("No local signing key for this wallet.");
+                    return;
+                }
+                byte[] sig = Ed25519.sign(Base64.decode(seedB64, Base64.NO_WRAP),
+                        spec.canonical(nonce).getBytes(StandardCharsets.UTF_8));
+                JSONObject body = new JSONObject();
+                spec.fill(body, nonce);
+                body.put("nonce", nonce)
+                    .put("signature", Base64.encodeToString(sig, Base64.NO_WRAP))
+                    .put("publicKey", pubB64);
+                if (feeHash != null) body.put("feeTxHash", feeHash);
+                HarvanaNodeClient.nodePost(path, body.toString(), new HarvanaNodeClient.JsonCallback() {
+                    @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }
+                    @Override public void onError(String error) { cb.onError(error); }
+                });
+            } catch (Exception e) {
+                cb.onError("Signing failed: " + e.getMessage());
             }
-            byte[] sig = Ed25519.sign(Base64.decode(seedB64, Base64.NO_WRAP),
-                    spec.canonical(nonce).getBytes(StandardCharsets.UTF_8));
-            JSONObject body = new JSONObject();
-            spec.fill(body, nonce);
-            body.put("nonce", nonce)
-                .put("signature", Base64.encodeToString(sig, Base64.NO_WRAP))
-                .put("publicKey", pubB64);
-            HarvanaNodeClient.nodePost(path, body.toString(), new HarvanaNodeClient.JsonCallback() {
-                @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }
-                @Override public void onError(String error) { cb.onError(error); }
-            });
-        } catch (Exception e) {
-            cb.onError("Signing failed: " + e.getMessage());
-        }
+        }, cb);
     }
 
     /** Fetch nextRequestNonce → build canonical → sign with the wallet key → POST. */
@@ -523,28 +526,31 @@ public final class NodeGroupClient {
         HarvanaNodeClient.nodeGet("/api/v1/wallet/nonce/" + address, new HarvanaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject wallet) {
-                try {
-                    long nonce = wallet.optLong("nextRequestNonce", wallet.optLong("requestNonce", 0) + 1);
-                    String seedB64 = WalletManager.loadPrivateKey(context, address);
-                    String pubB64 = WalletManager.getPublicKey(context, address);
-                    if (seedB64 == null || pubB64 == null) {
-                        cb.onError("No local signing key for this wallet.");
-                        return;
+                long nonce = wallet.optLong("nextRequestNonce", wallet.optLong("requestNonce", 0) + 1);
+                payActionFee(context, address, path, nonce, feeHash -> {
+                    try {
+                        String seedB64 = WalletManager.loadPrivateKey(context, address);
+                        String pubB64 = WalletManager.getPublicKey(context, address);
+                        if (seedB64 == null || pubB64 == null) {
+                            cb.onError("No local signing key for this wallet.");
+                            return;
+                        }
+                        byte[] sig = Ed25519.sign(Base64.decode(seedB64, Base64.NO_WRAP),
+                                spec.canonical(nonce).getBytes(StandardCharsets.UTF_8));
+                        JSONObject body = new JSONObject();
+                        spec.fill(body, nonce);
+                        body.put("nonce", nonce)
+                            .put("signature", Base64.encodeToString(sig, Base64.NO_WRAP))
+                            .put("publicKey", pubB64);
+                        if (feeHash != null) body.put("feeTxHash", feeHash);
+                        HarvanaNodeClient.nodePost(path, body.toString(), new HarvanaNodeClient.JsonCallback() {
+                            @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }
+                            @Override public void onError(String error) { cb.onError(error); }
+                        });
+                    } catch (Exception e) {
+                        cb.onError("Signing failed: " + e.getMessage());
                     }
-                    byte[] sig = Ed25519.sign(Base64.decode(seedB64, Base64.NO_WRAP),
-                            spec.canonical(nonce).getBytes(StandardCharsets.UTF_8));
-                    JSONObject body = new JSONObject();
-                    spec.fill(body, nonce);
-                    body.put("nonce", nonce)
-                        .put("signature", Base64.encodeToString(sig, Base64.NO_WRAP))
-                        .put("publicKey", pubB64);
-                    HarvanaNodeClient.nodePost(path, body.toString(), new HarvanaNodeClient.JsonCallback() {
-                        @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }
-                        @Override public void onError(String error) { cb.onError(error); }
-                    });
-                } catch (Exception e) {
-                    cb.onError("Signing failed: " + e.getMessage());
-                }
+                }, cb);
             }
 
             @Override
@@ -601,5 +607,38 @@ public final class NodeGroupClient {
                 inner.onError(error);
             }
         };
+    }
+
+    // ═════════════════════ no action is free: network fee from the user's wallet ═════════════════════
+
+    private interface FeeNext { void go(String feeTxHash); }
+
+    /** The actions that pay HARV out of a keyless wallet to the person asking. The node refuses them without a fee. */
+    private static String feeKind(String path) {
+        switch (path) {
+            case "/api/v1/staking/claim": return "STAKING_CLAIM";
+            case "/api/v1/staking/unstake": return "STAKING_UNSTAKE";
+            case "/api/v1/accum/claim": return "ACCUM_CLAIM";
+            case "/api/v1/circle/withdraw-bond": return "CIRCLE_WITHDRAW";
+            case "/api/v1/fixed/request-disbursement": return "FIXED_DISBURSE";
+            default: return null;
+        }
+    }
+
+    /**
+     * Pays the network fee first: a normal signed transfer to yourself carrying ACTION_FEE:kind:nonce, which charges
+     * gas like any transfer (so the wallet must hold HARV). Its hash goes into the request as feeTxHash.
+     */
+    private static void payActionFee(Context context, String address, String path, long nonce, FeeNext next, Callback cb) {
+        final String kind = feeKind(path);
+        if (kind == null) { next.go(null); return; }
+        com.harvana.app.tx.TransactionRouter.routeTransaction(context, address, address,
+                new java.math.BigDecimal("0.00000001"), null, "ACTION_FEE:" + kind + ":" + nonce,
+                new com.harvana.app.tx.TransactionRouter.RouterCallback() {
+                    @Override public void onSuccess(String txHash) { next.go(txHash); }
+                    @Override public void onError(String code, String msg) {
+                        cb.onError("Network fee not paid. Every action needs a small fee in HARV from your wallet. " + (msg == null ? "" : msg));
+                    }
+                });
     }
 }

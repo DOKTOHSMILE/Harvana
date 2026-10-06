@@ -549,3 +549,8 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 - **History names and icons by what the transaction is.** Staked HARV (lock icon, shows the lock length), Staking payout, Group created, Group contribution, Savings contribution, Goal deposit, Circle bond, Loan repayment / disbursement, Gift sent / received, P2P escrow and Group payout each have their own title and icon instead of "Sent HARV" (code: `tx/TxKind.java`, `res/drawable/ic_tx_*.xml`). Plain transfers stay "Sent / Received". The detail page uses the same names.
 - **Staking: Live and Closed tabs.** My Positions now has Live (one card per stake) and Closed (unstakes returning, and withdrawn ones) so the page stays short.
 - Needs the new node jar for separate stakes (node docs/DEPLOYMENT.md, "Separate stakes").
+
+## Gas on every action (needs the node jar with the fee rule)
+- Claiming staking rewards, unstaking, claiming a savings payout, withdrawing a circle bond and requesting a goal payout now each charge a network fee from your own wallet, like a send does. You need a little HARV in the wallet or the action is refused with "Network fee not paid".
+- The app sends a tiny fee transfer first (history shows it as "Network fee · For claiming staking rewards" with a receipt icon), then the action. The fee success sheet is not shown; the action's own sheet is.
+- Stakes already paid gas.

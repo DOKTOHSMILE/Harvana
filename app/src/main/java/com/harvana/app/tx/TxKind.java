@@ -22,6 +22,14 @@ public final class TxKind {
         String m = memo.trim();
         if (m.isEmpty()) return null;
 
+        if (m.startsWith("ACTION_FEE:")) {
+            String[] parts = m.split(":");
+            String what = parts.length > 1 ? parts[1] : "";
+            String label = what.startsWith("STAKING_CLAIM") ? "claiming staking rewards" : what.startsWith("STAKING_UNSTAKE") ? "unstaking"
+                    : what.startsWith("ACCUM_CLAIM") ? "a savings payout" : what.startsWith("CIRCLE_WITHDRAW") ? "withdrawing a bond"
+                    : what.startsWith("FIXED_DISBURSE") ? "a goal payout" : "an action";
+            return new TxKind("Network fee", "For " + label, R.drawable.ic_tx_fee);
+        }
         if (m.startsWith("STAKE_LOCK:")) {
             String days = m.substring("STAKE_LOCK:".length());
             return new TxKind("Staked HARV", "0".equals(days) ? "Flexible stake" : days + "-day lock", R.drawable.ic_tx_stake);

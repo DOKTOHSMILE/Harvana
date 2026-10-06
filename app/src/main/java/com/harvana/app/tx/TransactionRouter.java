@@ -79,6 +79,7 @@ public class TransactionRouter {
                 @Override public void onSuccess(ExecutionResult result) {
                     final String hash = result != null && result.txHash != null ? result.txHash : "";
                     try {
+                        if (memo != null && memo.startsWith("ACTION_FEE:")) throw new IllegalStateException("fee only");
                         PaymentSuccessSheet.Info info = new PaymentSuccessSheet.Info();
                         TxKind kind = TxKind.of(memo, false);
                         info.title = kind != null ? kind.title : "Payment sent";

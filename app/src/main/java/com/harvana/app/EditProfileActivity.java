@@ -92,7 +92,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     if (isFinishing() || first != null) return;
                     page.removeAllViews();
-                    page.addView(SocialUi.text(this, "Couldn't load your details: " + error, 14, false, UiColors.error()));
+                    page.addView(SocialUi.text(EditProfileActivity.this, "Couldn't load your details: " + error, 14, false, UiColors.error()));
                 });
             }
         });

@@ -1087,7 +1087,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 				if (memberWallet.startsWith("HV0x")) {
 					h.wallet.setText(_shortAddr(memberWallet));
 					Long paid = nodePaid.get(memberWallet.toLowerCase(Locale.US));
-					if (h.contributions != null && paid != null) h.contributions.setText(com.harvana.app.wallet.BalanceFormatter.smart(paid / 100_000_000.0) + " HARV");
+					if (h.contributions != null && paid != null) h.contributions.setText(com.harvana.app.wallet.BalanceFormatter.smart(paid / 100_000_000.0));
 					_fetchBalance(memberWallet, h.balance);
 				} else {
 					h.wallet.setText("No wallet");

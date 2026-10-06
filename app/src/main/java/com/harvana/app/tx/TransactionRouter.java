@@ -83,7 +83,7 @@ public class TransactionRouter {
                         PaymentSuccessSheet.Info info = new PaymentSuccessSheet.Info();
                         TxKind kind = TxKind.of(memo, false);
                         info.title = kind != null ? kind.title : "Payment sent";
-                        info.amount = BalanceFormatter.smart(amount.doubleValue()) + " " + CoinInfo.ticker();
+                        info.amount = BalanceFormatter.smartDecimal(amount.doubleValue()) + " " + CoinInfo.ticker();
                         info.rows = new String[][] {{"To", recipient}, {"From", sender},
                                 {"For", kind != null ? kind.detail : (memo == null ? "" : memo)}, {"Transaction", hash}};
                         info.txHash = hash;

@@ -454,7 +454,7 @@ public final class GroupLoanManager {
                         
                         if (amountHarv > remainingDue + 0.0001) {
                             callback.onError("Amount exceeds what's owed ("
-                                    + com.harvana.app.wallet.BalanceFormatter.smart(remainingDue) + (" " + com.harvana.app.CoinInfo.ticker() + " remaining)."));
+                                    + com.harvana.app.wallet.BalanceFormatter.smartDecimal(remainingDue) + (" " + com.harvana.app.CoinInfo.ticker() + " remaining)."));
                             return;
                         }
 

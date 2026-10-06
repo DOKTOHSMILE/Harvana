@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The confirmed check drawing itself in, played once when the network confirms the payment. -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android" android:drawable="@drawable/ic_status_check">
+    <target android:name="check" android:animation="@animator/status_check_draw"/>
+</animated-vector>

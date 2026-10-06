@@ -166,6 +166,12 @@ public final class PaymentTracker {
     /** Shows the success sheet on the screen in front (or the next one if that screen is closing). */
     public static void success(PaymentSuccessSheet.Info info) {
         MAIN.post(() -> {
+            // One sheet per transaction: a second report of the same payment (a retry, a second listener) is dropped.
+            String h = info.txHash == null ? "" : info.txHash;
+            if (!h.isEmpty()) {
+                if (h.equals(shownHash) && System.currentTimeMillis() - shownAt < 120_000L) return;
+                for (PaymentSuccessSheet.Info w : waiting) if (h.equals(w.txHash)) return;
+            }
             waiting.add(info);
             MAIN.postDelayed(PaymentTracker::showWaiting, 350);
         });
@@ -181,6 +187,7 @@ public final class PaymentTracker {
     }
 
     private static String shownHash = "";
+    private static long shownAt;
 
     private static void showWaiting() {
         Activity a = current.get();
@@ -192,6 +199,7 @@ public final class PaymentTracker {
         try {
             openSheet = new WeakReference<>(PaymentSuccessSheet.show(a, info));
             shownHash = info.txHash == null ? "" : info.txHash;
+            shownAt = System.currentTimeMillis();
         } catch (Throwable t) {
             // a screen that cannot host a sheet (closing); the next resumed screen shows it
             waiting.add(0, info);

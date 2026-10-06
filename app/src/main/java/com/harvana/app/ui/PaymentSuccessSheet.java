@@ -35,6 +35,10 @@ public final class PaymentSuccessSheet {
     }
 
     private final BottomSheetDialog dialog;
+    private android.widget.ImageView icon;
+    private android.graphics.drawable.GradientDrawable disc;
+    private android.animation.ObjectAnimator pulse;
+    private boolean shownConfirmed;
     private final TextView status;
     private final SpinnerDrawable ring;
     private final Context ctx;
@@ -50,26 +54,24 @@ public final class PaymentSuccessSheet {
         root.setGravity(Gravity.CENTER_HORIZONTAL);
         root.setPadding(dp(24), dp(48), dp(24), dp(24));
 
-        TextView tick = new TextView(a);
-        tick.setText("✓");
-        tick.setGravity(Gravity.CENTER);
-        tick.setTextSize(44);
-        tick.setTextColor(color(R.color.colorTextOnAccent));
-        tick.setTypeface(null, Typeface.BOLD);
-        android.graphics.drawable.GradientDrawable disc = new android.graphics.drawable.GradientDrawable();
+        // The state icon: a clock on an amber disc while the network has not confirmed the payment, a check on a
+        // green disc once it has. A pending payment never shows the success check.
+        icon = new android.widget.ImageView(a);
+        icon.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
+        icon.setPadding(dp(22), dp(22), dp(22), dp(22));
+        disc = new android.graphics.drawable.GradientDrawable();
         disc.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-        disc.setColor(color(R.color.colorSuccess));
-        tick.setBackground(disc);
-        root.addView(tick, new LinearLayout.LayoutParams(dp(96), dp(96)));
-        tick.setScaleX(0.2f); tick.setScaleY(0.2f);
-        tick.animate().scaleX(1f).scaleY(1f).setDuration(380).setInterpolator(new android.view.animation.OvershootInterpolator()).start();
+        icon.setBackground(disc);
+        root.addView(icon, new LinearLayout.LayoutParams(dp(96), dp(96)));
+        icon.setScaleX(0.2f); icon.setScaleY(0.2f);
+        icon.animate().scaleX(1f).scaleY(1f).setDuration(380).setInterpolator(new android.view.animation.OvershootInterpolator()).start();
 
         TextView title = text(info.title, 22, R.color.colorTextPrimary, true);
         title.setPadding(0, dp(24), 0, 0);
         root.addView(title);
 
         if (!info.amount.isEmpty()) {
-            TextView amount = text(info.amount, 34, R.color.colorTextPrimary, true);
+            TextView amount = text(info.amount.replaceAll("(?i)\\b(HARV)(\\s+HARV)+\\b", "$1"), 34, R.color.colorTextPrimary, true);
             amount.setPadding(0, dp(8), 0, 0);
             root.addView(amount);
         }
@@ -142,7 +144,7 @@ public final class PaymentSuccessSheet {
         scroll.addView(root, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         dialog.setContentView(scroll);
         com.harvana.app.group.BottomSheetUtils.expandFullScreen(dialog, scroll);
-        dialog.setOnDismissListener(d -> ring.stop());
+        dialog.setOnDismissListener(d -> { ring.stop(); if (pulse != null) pulse.cancel(); });
     }
 
     /** Shows the sheet on this activity. Must be called on the main thread. */
@@ -155,7 +157,9 @@ public final class PaymentSuccessSheet {
     public boolean isShowing() { return dialog.isShowing(); }
 
     public void setConfirmed(boolean confirmed) {
+        boolean wasPending = info != null && !shownConfirmed && icon.getDrawable() != null;
         info.confirmed = confirmed;
+        showStateIcon(confirmed, wasPending);
         if (confirmed) {
             ring.stop();
             status.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null);
@@ -165,6 +169,41 @@ public final class PaymentSuccessSheet {
             status.setText("Confirming on the network…");
             status.setCompoundDrawablesRelativeWithIntrinsicBounds(ring, null, null, null);
             ring.start();
+        }
+    }
+
+    /** Clock on amber while pending; check on green when confirmed, drawn in when it changes in front of the user. */
+    private void showStateIcon(boolean confirmed, boolean animateChange) {
+        if (confirmed) {
+            if (shownConfirmed) return;
+            shownConfirmed = true;
+            if (pulse != null) { pulse.cancel(); icon.setAlpha(1f); }
+            int from = color(R.color.colorAmber), to = color(R.color.colorSuccess);
+            if (animateChange) {
+                android.animation.ValueAnimator fade = android.animation.ValueAnimator.ofObject(new android.animation.ArgbEvaluator(), from, to);
+                fade.setDuration(300);
+                fade.addUpdateListener(an -> disc.setColor((int) an.getAnimatedValue()));
+                fade.start();
+                android.graphics.drawable.Drawable d = androidx.core.content.ContextCompat.getDrawable(ctx, R.drawable.avd_status_check);
+                icon.setImageDrawable(d);
+                if (d instanceof android.graphics.drawable.Animatable) ((android.graphics.drawable.Animatable) d).start();
+                icon.animate().scaleX(1.08f).scaleY(1.08f).setDuration(160).withEndAction(() -> icon.animate().scaleX(1f).scaleY(1f).setDuration(160).start()).start();
+            } else {
+                disc.setColor(to);
+                icon.setImageResource(R.drawable.ic_status_check);
+            }
+            icon.setContentDescription("Confirmed");
+        } else {
+            disc.setColor(color(R.color.colorAmber));
+            icon.setImageResource(R.drawable.ic_status_pending);
+            icon.setContentDescription("Waiting for the network");
+            if (pulse == null) {
+                pulse = android.animation.ObjectAnimator.ofFloat(icon, "alpha", 1f, 0.55f);
+                pulse.setDuration(900);
+                pulse.setRepeatMode(android.animation.ValueAnimator.REVERSE);
+                pulse.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+            }
+            if (!pulse.isStarted()) pulse.start();
         }
     }
 

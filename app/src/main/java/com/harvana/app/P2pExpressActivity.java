@@ -664,8 +664,8 @@ public class P2pExpressActivity extends AppCompatActivity {
 			tv_express_match_indicator.setText("✓");
 			tv_express_match_title.setText("Matched — best available price found");
 			tv_express_match_description.setText(buyMode
-			? "You'll receive " + BalanceFormatter.smart(harvAmount) + (" " + com.harvana.app.CoinInfo.ticker() + ".")
-			: "You'll provide " + BalanceFormatter.smart(harvAmount) + (" " + com.harvana.app.CoinInfo.ticker() + "."));
+			? "You'll receive " + BalanceFormatter.smartDecimal(harvAmount) + (" " + com.harvana.app.CoinInfo.ticker() + ".")
+			: "You'll provide " + BalanceFormatter.smartDecimal(harvAmount) + (" " + com.harvana.app.CoinInfo.ticker() + "."));
 			btn_express_find_match.setText("Confirm & Trade");
 			_startFreshnessCountdown();
 		});

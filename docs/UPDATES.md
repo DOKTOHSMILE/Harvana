@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: payment sheet shows pending honestly, and no more "HARV HARV"
+
+What the app does. The payment sheet no longer shows a success tick while a payment is still waiting for the network. Pending: a clock on an amber disc that gently pulses, with "Confirming on the network…". Confirmed: the disc turns green and a check mark draws itself in. Both are new vector icons (the old tick was a text character). Amounts no longer read "10 HARV HARV" on the payment sheet, the members list, the express marketplace and loan reminders (the amount formatter already adds HARV). One payment can no longer open a second success sheet. What you do: install the new build.
+
 ## 6 Oct 2026: notification checks read only what is new
 
 What the app does. The notification check (every 90 seconds while the app is open, every 15 minutes in the background) used to read every notice ever posted in each of your groups. It now reads only notices newer than the last one seen, at most 100 per group, and pinch checks only read pinches since the last look. Same notifications, a small fraction of the Firestore reads (about 320 to about 20 per check for a member in 3 busy groups). Firestore creates the single-field index this needs on its own. What you do: install the new build. Details: node repository `docs/PLATFORM_SCALE_TEST.md`.

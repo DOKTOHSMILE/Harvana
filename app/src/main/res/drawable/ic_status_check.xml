@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Payment confirmed on the network: a check mark. The path is named so avd_status_check can draw it in. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
+    <path android:name="check" android:strokeColor="#FFFFFFFF" android:strokeWidth="4.4" android:strokeLineCap="round"
+        android:strokeLineJoin="round" android:fillColor="#00000000" android:trimPathEnd="1"
+        android:pathData="M12.5,25 L20.5,33 L36,16.5"/>
+</vector>

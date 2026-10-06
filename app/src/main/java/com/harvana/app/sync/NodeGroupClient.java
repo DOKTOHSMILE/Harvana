@@ -608,7 +608,7 @@ public final class NodeGroupClient {
                     info.title = title;
                     long raw = json == null ? 0 : json.optLong("amountRaw", json.optLong("totalRaw", 0));
                     com.harvana.app.tx.PaymentTracker.Review review = com.harvana.app.tx.PaymentTracker.takeReview();
-                    if (raw > 0) info.amount = com.harvana.app.wallet.BalanceFormatter.smart(
+                    if (raw > 0) info.amount = com.harvana.app.wallet.BalanceFormatter.smartDecimal(
                             com.harvana.app.wallet.BalanceFormatter.rawToHarv(raw)) + " " + com.harvana.app.CoinInfo.ticker();
                     else if (review != null && !review.amount.isEmpty()) info.amount = review.amount;   // the network's answer has no amount: use what was approved
                     java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();

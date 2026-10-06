@@ -79,4 +79,19 @@ public class GroupContractTest {
         assertTrue(t.contains("HV0x1111"));
         assertTrue(t.contains("Nothing is held in a Harvana company wallet"));
     }
+
+    @Test public void everyGroupTypeStatesWhoStartedItAndWhereTheMoneyGoes() {
+        String[][] kinds = {{"Rotating Pool", "The circle and where the money goes"}, {"Accumulative Funds", "The savings group and where the money goes"},
+            {"Fixed Contribution", "The goal and where the money goes"}};
+        for (String[] k : kinds) {
+            boolean found = false;
+            StringBuilder all = new StringBuilder();
+            for (GroupContract.Section s : GroupContract.sections(group(k[0]), "HARV")) {
+                if (s.title.equals(k[1])) { found = true; for (String p : s.points) all.append(p); }
+            }
+            assertTrue(k[0], found);
+            assertTrue(k[0], all.toString().contains("Who started it") || all.toString().contains("Who set the goal"));
+            assertTrue(k[0], all.toString().contains("company wallet"));
+        }
+    }
 }

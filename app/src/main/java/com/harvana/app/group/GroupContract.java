@@ -65,6 +65,8 @@ public final class GroupContract {
 
         // 1b. A goal group: what the goal is, who set it, and exactly where the money goes.
         if (fixed) out.add(goalSection(g, name, ticker));
+        else if (rotating) out.add(circleSection(g, name, ticker));
+        else if (accum) out.add(savingsSection(g, name, ticker));
 
         // 2. A worked example with the group's real numbers.
         Section ex = exampleSection(rotating, fixed, accum, amount, slots, freq, ticker, g);
@@ -193,7 +195,7 @@ public final class GroupContract {
         String desc = str(g, "groupDescription", str(g, "description", ""));
         s.add("The purpose of this group: members gather money together for one goal. The goal is \u201c" + name + "\u201d"
             + (goal > 0 ? ", a total of " + fmt(goal) + " " + ticker : "") + "." + (desc.isEmpty() ? "" : " " + desc));
-        s.add("Who set the goal: the admin, the person who created this group. The admin chose the goal, the target, who receives the money and how it is paid out. These cannot be changed after the group is created.");
+        s.add("Who set the goal: the admin, the person who created this group. The admin chose the goal, the target, who receives the money and how it is paid out.");
         String wallet = str(g, "groupWalletAddress", "");
         s.add("The group wallet: when the group was created, the network made a wallet just for this goal" + (wallet.isEmpty() ? "" : " (" + shortAddr(wallet) + ")")
             + ". It has no private key, so nobody, not the admin and not Harvana, can spend from it by themselves. It only pays out by the rules of this page.");
@@ -215,6 +217,40 @@ public final class GroupContract {
         else if (grants) s.add("When it is paid: only after a member asks, the group votes yes, and the network sends it.");
         else s.add("When it is paid: by the payout rule the admin chose, shown below.");
         s.add("If the goal is never reached: the money stays in the group wallet and leaves only by a group vote. You cannot take your deposit back by yourself.");
+        return s;
+    }
+
+    /** A rotating circle: what it is for, who started it, and exactly where each payment and each payout goes. */
+    static Section circleSection(Map<String, Object> g, String name, String ticker) {
+        Section s = new Section("The circle and where the money goes");
+        long slots = (long) num(g, "totalSlots");
+        double amount = num(g, "contributionAmount");
+        s.add("The purpose of this circle: members take turns receiving a lump sum that all the others pay in. It is a way to get a large amount at once, not a way to earn extra.");
+        s.add("Who started it: the admin, the person who created this group. The admin set the contribution" + (amount > 0 ? " (" + fmt(amount) + " " + ticker + ")" : "")
+            + ", the number of places" + (slots > 0 ? " (" + slots + ")" : "") + " and how often everyone pays.");
+        String wallet = str(g, "groupWalletAddress", "");
+        s.add("The circle wallet: when the group was created, the network made a wallet just for this circle" + (wallet.isEmpty() ? "" : " (" + shortAddr(wallet) + ")")
+            + ". It has no private key, so nobody, not the admin and not Harvana, can spend from it by themselves.");
+        s.add("Where your payments go: each round you pay from your own wallet into the circle wallet. Nothing is held in a Harvana company wallet on the way.");
+        s.add("Where your bond goes: the bond you lock when you join also sits in the circle wallet. It comes back to you if you pay on time. A missed payment is covered from it, with a penalty.");
+        s.add("Who receives the money: each round, the member whose turn it is receives the pot, paid from the circle wallet to their own wallet. The order is the order of joining.");
+        s.add("If someone does not pay: the round is covered from their bond first, so the member whose turn it is is not left short. Please pay on time.");
+        return s;
+    }
+
+    /** An accumulative savings group: what it is for, who started it, where a member's savings sit and how they come back. */
+    static Section savingsSection(Map<String, Object> g, String name, String ticker) {
+        Section s = new Section("The savings group and where the money goes");
+        s.add("The purpose of this group: members save at their own pace inside one group, each in their own savings line, and the group can lend from the pooled money for interest.");
+        s.add("Who started it: the admin, the person who created this group. The admin set the loan interest and the withdrawal rule" + ".");
+        String wallet = str(g, "groupWalletAddress", "");
+        s.add("The group wallet: when the group was created, the network made a wallet for this group" + (wallet.isEmpty() ? "" : " (" + shortAddr(wallet) + ")")
+            + ". It has no private key, so nobody, not the admin and not Harvana, can spend from it by themselves.");
+        s.add("Where your savings go: every amount you save goes from your own wallet into the group wallet and is recorded on your own savings line. Nothing is held in a Harvana company wallet on the way.");
+        s.add("Whose money it is: what is in your line is yours. The network keeps a separate record for each member, so the admin cannot take your line.");
+        String w = str(g, "withdrawalRule", "");
+        s.add("How your money comes back: it is paid from the group wallet to your own wallet when you claim it" + (w.isEmpty() ? "" : ", under the group's withdrawal rule (" + w + ")")
+            + ". The admin has to approve a withdrawal request, and a loan you owe is taken from your line first.");
         return s;
     }
 

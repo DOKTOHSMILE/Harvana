@@ -31,6 +31,7 @@ public class SketchApplication extends Application {
         com.harvana.app.utils.ThemeManager.keepAppContextInSync(this);
         // App bar, status bar and bottom bar take the colour of the page they are on, on every screen.
         com.harvana.app.utils.BarMatcher.install(this);
+        com.harvana.app.utils.ActivityTracker.install(this);
         
         // EXPLICIT INITIALIZATION: Forces Firebase to wake up early
         FirebaseApp.initializeApp(this);

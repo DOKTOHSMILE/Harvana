@@ -58,7 +58,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
-                android:text="DAILY ACTIVITY"
+                android:text="DAILY APP ACTIVITY"
                 android:textColor="@color/colorTextTertiary"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -82,7 +82,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
-                android:text="POPULAR DAYS"
+                android:text="BUSIEST DAYS"
                 android:textColor="@color/colorTextTertiary"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -107,7 +107,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
-                android:text="PEAK HOURS"
+                android:text="PEAK HOURS (YOUR TIME)"
                 android:textColor="@color/colorTextTertiary"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -125,6 +125,32 @@
                     android:layout_width="match_parent"
                     android:layout_height="180dp"
                     android:layout_margin="12dp" />
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text="ON THIS PHONE"
+                android:textColor="@color/colorTextTertiary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardBackgroundColor="@color/colorSurface"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorCardStroke"
+                app:strokeWidth="1dp">
+                <LinearLayout
+                    android:id="@+id/ll_usage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp" />
             </com.google.android.material.card.MaterialCardView>
 
             <TextView

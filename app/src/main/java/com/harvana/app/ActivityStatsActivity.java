@@ -38,7 +38,7 @@ public class ActivityStatsActivity extends AppCompatActivity {
 
     private TextView state, note;
     private BarChart daily, hours;
-    private LinearLayout weekdays;
+    private LinearLayout weekdays, usage;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -54,12 +54,14 @@ public class ActivityStatsActivity extends AppCompatActivity {
         daily = findViewById(R.id.chart_daily);
         hours = findViewById(R.id.chart_hours);
         weekdays = findViewById(R.id.ll_weekdays);
+        usage = findViewById(R.id.ll_usage);
         tile(R.id.tile_reads, "Verified reads", "--");
         tile(R.id.tile_days, "Active days (30)", "--");
         tile(R.id.tile_gifts, "Gifts sent", "--");
         tile(R.id.tile_trust, "Trust score", "--");
         styleChart(daily);
         styleChart(hours);
+        showLocal();
 
         String wallet = WalletManager.getActiveWalletAddress(this);
         if (wallet == null || wallet.isEmpty()) {
@@ -70,6 +72,59 @@ public class ActivityStatsActivity extends AppCompatActivity {
         state.setOnClickListener(v -> load(wallet));
         NetworkTrust.wallet(wallet, score -> runOnUiThread(() ->
                 tile(R.id.tile_trust, "Trust score", score.published && score.percent >= 0 ? score.percent + "% · " + score.tier : "Not scored yet")));
+    }
+
+    /** Everything the app has seen you do on this phone: taps, screens, time, by day, weekday and hour. */
+    private void showLocal() {
+        com.harvana.app.utils.ActivityTracker.Summary t = com.harvana.app.utils.ActivityTracker.summary(this);
+        List<BarEntry> entries = new ArrayList<>();
+        for (int i = 0; i < 30; i++) entries.add(new BarEntry(i, t.daily30[i]));
+        fill(daily, entries, new ValueFormatter() {
+            @Override public String getFormattedValue(float v) {
+                int back = 29 - (int) v;
+                return back == 0 ? "today" : back % 7 == 0 ? back + "d" : "";
+            }
+        });
+        int maxWd = 1;
+        for (int v : t.weekdays) maxWd = Math.max(maxWd, v);
+        weekdays.removeAllViews();
+        for (int i = 0; i < 7; i++) weekdays.addView(weekdayRow(DAYS[i], t.weekdays[i], maxWd));
+        List<BarEntry> hourEntries = new ArrayList<>();
+        for (int h = 0; h < 24; h++) hourEntries.add(new BarEntry(h, t.hours[h]));
+        fill(hours, hourEntries, new ValueFormatter() {
+            @Override public String getFormattedValue(float v) { int h = (int) v; return h % 6 == 0 ? h + ":00" : ""; }
+        });
+        usage.removeAllViews();
+        usage.addView(usageRow("Time in the app today", minutes(t.secondsToday)));
+        usage.addView(usageRow("Time in the app (30 days)", minutes(t.seconds30)));
+        usage.addView(usageRow("Days you used the app (30)", String.valueOf(t.activeDays30)));
+        usage.addView(usageRow("Visits", String.valueOf(t.sessions)));
+        usage.addView(usageRow("Taps", String.valueOf(t.taps)));
+        java.util.List<java.util.Map.Entry<String, Integer>> top = new ArrayList<>(t.screens.entrySet());
+        java.util.Collections.sort(top, (x, y) -> y.getValue() - x.getValue());
+        for (int i = 0; i < top.size() && i < 6; i++) usage.addView(usageRow(friendly(top.get(i).getKey()), top.get(i).getValue() + " opens"));
+        tile(R.id.tile_days, "Active days (30)", String.valueOf(t.activeDays30));
+    }
+
+    private static String minutes(long sec) { return sec < 60 ? sec + " s" : sec < 3600 ? (sec / 60) + " min" : (sec / 3600) + " h " + ((sec % 3600) / 60) + " min"; }
+
+    private static String friendly(String cls) {
+        String n = cls.replace("Activity", "").replace("Fragment", "");
+        return n.replaceAll("([a-z])([A-Z])", "$1 $2");
+    }
+
+    private View usageRow(String label, String value) {
+        LinearLayout row = new LinearLayout(this);
+        row.setPadding(0, dp(6), 0, dp(6));
+        TextView l = new TextView(this);
+        l.setText(label); l.setTextSize(13);
+        l.setTextColor(ContextCompat.getColor(this, R.color.colorTextTertiary));
+        row.addView(l, new LinearLayout.LayoutParams(0, -2, 1f));
+        TextView v = new TextView(this);
+        v.setText(value); v.setTextSize(13); v.setTypeface(null, android.graphics.Typeface.BOLD);
+        v.setTextColor(ContextCompat.getColor(this, R.color.colorTextPrimary));
+        row.addView(v);
+        return row;
     }
 
     private void load(String wallet) {
@@ -92,35 +147,9 @@ public class ActivityStatsActivity extends AppCompatActivity {
     private void show(JSONObject j) {
         state.setText(j.optInt("reads", 0) == 0
                 ? "No verified reads yet. Open someone else\u2019s Learn post, scroll to the end and stay a few seconds until it says \u201cCounted as a read\u201d. Your own posts do not count."
-                : "Your reading over the last 30 days.");
+                : "Your activity over the last 30 days.");
         tile(R.id.tile_reads, "Verified reads", String.valueOf(j.optInt("reads", 0)));
-        tile(R.id.tile_days, "Active days (30)", String.valueOf(j.optInt("activeDays30", 0)));
         tile(R.id.tile_gifts, "Gifts sent", String.valueOf(j.optInt("giftsSent", 0)));
-
-        int[] d30 = ints(j.optJSONArray("daily30"), 30);
-        List<BarEntry> entries = new ArrayList<>();
-        for (int i = 0; i < d30.length; i++) entries.add(new BarEntry(i, d30[i]));
-        fill(daily, entries, new ValueFormatter() {
-            @Override public String getFormattedValue(float v) {
-                int back = 29 - (int) v;
-                return back == 0 ? "today" : back % 7 == 0 ? back + "d" : "";
-            }
-        });
-
-        int[] wd = ints(j.optJSONArray("weekdays"), 7);
-        int maxWd = 1;
-        for (int v : wd) maxWd = Math.max(maxWd, v);
-        weekdays.removeAllViews();
-        for (int i = 0; i < 7; i++) weekdays.addView(weekdayRow(DAYS[i], wd[i], maxWd));
-
-        // The node counts hours in UTC; show them in the phone's own time.
-        int[] utc = ints(j.optJSONArray("hoursUtc"), 24);
-        int offset = Math.round(TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 3_600_000f);
-        List<BarEntry> hourEntries = new ArrayList<>();
-        for (int h = 0; h < 24; h++) hourEntries.add(new BarEntry(h, utc[((h - offset) % 24 + 24) % 24]));
-        fill(hours, hourEntries, new ValueFormatter() {
-            @Override public String getFormattedValue(float v) { int h = (int) v; return h % 6 == 0 ? h + ":00" : ""; }
-        });
 
         note.setText(j.optBoolean("automated", false)
                 ? "Your recent reading looks automated, so it is not adding to your trust score right now. Reading at natural times, at your own pace, counts again."

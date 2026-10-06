@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: My Activity now tracks the whole app
+
+What the app does. From this build the app counts how it is used, on the phone only: screens opened, taps, visits, time in the app, by day, weekday and hour. Only counts are kept (no content, no text, nothing sent to the node or Firestore). My Activity shows the daily chart, busiest days, peak hours (in the phone's time), time today and over 30 days, visits, taps and the most opened screens. The verified-reads tiles still come from the node. Counting starts when the new build is installed, so charts fill up over the following days.
+
+What you do. Install the new build. Nothing on the server.
+
 ## 6 Oct 2026: one-time wallet link, article options, activity fixes
 
 What the app does. (1) Posting in Learn no longer links or binds anything. It only checks that the profile already shows your active wallet; if not, it says to open Profile and tap "Bind this device" once. That button now binds the phone and then links the wallet to the account, shows the real answer from the network (no old "not accepting links" text), and stays visible until both are done. (2) The Activity tiles on a profile now have real margins (the spacing was being overwritten). (3) "My Learn contributions" rows have a More menu: Edit (title and text), Visibility (Public, Followers, Only me), Copy text, Delete. Followers-only and Only-me articles are hidden from other people in the Learn feed. (4) My Activity now explains errors (clock off, no answer) with tap to retry, shows axes on empty charts, and says that your own posts do not count.

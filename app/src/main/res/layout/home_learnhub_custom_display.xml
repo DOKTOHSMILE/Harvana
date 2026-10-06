@@ -56,9 +56,10 @@
 					android:textStyle="bold"
 					android:textColor="@color/colorTextPrimary"
 					android:textSize="14.5sp"
-					android:maxLines="2"
-					android:ellipsize="end"
-					android:focusable="false" />
+					android:focusable="false"
+					android:singleLine="true"
+					android:maxLines="1"
+					android:ellipsize="end" />
 				<TextView
 					android:id="@+id/category_text"
 					android:layout_width="wrap_content"
@@ -67,7 +68,10 @@
 					android:text="Savings · 0 Views"
 					android:textSize="12sp"
 					android:textColor="@color/colorTextTertiary"
-					android:focusable="false" />
+					android:focusable="false"
+					android:singleLine="true"
+					android:maxLines="1"
+					android:ellipsize="end" />
 			</LinearLayout>
 		</LinearLayout>
 	</com.google.android.material.card.MaterialCardView>

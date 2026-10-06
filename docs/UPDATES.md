@@ -685,3 +685,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 - **Written once:** a vote notice has a fixed id built from the proposal, and a join-request notice one built from the person and the hour, so a retry or a second screen cannot write a second copy.
 - **Notifications:** a vote is one notification however many notice documents exist for it; the confirmation of a transfer replaces its "on its way" notification (and copies already in the inbox are tidied when the list opens).
 - Separate transfers of the same amount to the same person are different transactions and stay separate.
+
+## Home rows stay one line
+- The text in Home's Upcoming payments, Learn Hub and Trending groups rows is now a single line, cut with "…" when it is too long, so every row keeps the same height (the goal-reached message and long article titles used to wrap onto a second line).

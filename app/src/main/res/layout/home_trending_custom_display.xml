@@ -55,7 +55,10 @@
 					android:textStyle="bold"
 					android:textColor="@color/colorTextPrimary"
 					android:layout_weight="1"
-					android:focusable="false" />
+					android:focusable="false"
+					android:singleLine="true"
+					android:maxLines="1"
+					android:ellipsize="end" />
 				<TextView
 					android:id="@+id/textview3"
 					android:layout_width="match_parent"
@@ -64,7 +67,10 @@
 					android:text="Location · members · freq"
 					android:textSize="12sp"
 					android:textColor="@color/colorTextTertiary"
-					android:focusable="false" />
+					android:focusable="false"
+					android:singleLine="true"
+					android:maxLines="1"
+					android:ellipsize="end" />
 			</LinearLayout>
 			<LinearLayout
 				android:id="@+id/linear3"

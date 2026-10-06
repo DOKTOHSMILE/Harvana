@@ -53,7 +53,10 @@
 					android:text="Group name"
 					android:textSize="14sp"
 					android:textStyle="bold"
-					android:focusable="false" />
+					android:focusable="false"
+					android:singleLine="true"
+					android:maxLines="1"
+					android:ellipsize="end" />
 				<TextView
 					android:id="@+id/textview3"
 					android:layout_width="wrap_content"
@@ -61,7 +64,10 @@
 					android:layout_marginTop="1dp"
 					android:text="0 HARV · Weekly"
 					android:textSize="12sp"
-					android:focusable="false" />
+					android:focusable="false"
+					android:singleLine="true"
+					android:maxLines="1"
+					android:ellipsize="end" />
 				<TextView
 					android:id="@+id/textview5"
 					android:layout_width="match_parent"
@@ -70,7 +76,10 @@
 					android:text=""
 					android:textSize="12sp"
 					android:textColor="@color/colorTextSecondary"
-					android:focusable="false" />
+					android:focusable="false"
+					android:singleLine="true"
+					android:maxLines="1"
+					android:ellipsize="end" />
 			</LinearLayout>
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/cardview3"

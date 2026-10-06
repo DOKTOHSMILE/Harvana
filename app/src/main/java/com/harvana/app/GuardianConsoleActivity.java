@@ -290,7 +290,7 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 	private void _confirmAndSign(String orderId, String resolution, TextView tvSigCounts,
 	Button btnReleaseBuyer, Button btnReturnSeller) {
 		String actionLabel = "RELEASE_TO_BUYER".equals(resolution) ? ("release this trade's " + com.harvana.app.CoinInfo.ticker() + " to the buyer") : ("return this trade's " + com.harvana.app.CoinInfo.ticker() + " to the seller");
-		new androidx.appcompat.app.AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Confirm your vote")
 		.setMessage("You're about to " + actionLabel + ". This adds your signature toward resolving this dispute \u2014 it only takes effect once enough guardians agree.")
 		.setPositiveButton("Sign & Submit", (dialog, which) -> _doSign(orderId, resolution, tvSigCounts, btnReleaseBuyer, btnReturnSeller))

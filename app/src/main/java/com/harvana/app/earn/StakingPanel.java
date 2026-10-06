@@ -592,7 +592,7 @@ public final class StakingPanel {
     }
 
     private void showFullUnbondingBottomSheet(List<JSONObject> allRows) {
-        BottomSheetDialog sheet = new BottomSheetDialog(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
 
         LinearLayout root = new LinearLayout(host);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -640,7 +640,7 @@ public final class StakingPanel {
     }
 
     private void showUnbondDetailsSheet(JSONObject u) {
-        BottomSheetDialog sheet = new BottomSheetDialog(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
 
         LinearLayout root = new LinearLayout(host);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -763,7 +763,7 @@ public final class StakingPanel {
     private void askUnstake() {
         long lockedUntil = lockedUntil();
         if (lockedUntil > 0) {
-            new androidx.appcompat.app.AlertDialog.Builder(host)
+            new com.harvana.app.ui.SheetDialog.Builder(host)
                     .setTitle("Principal locked")
                     .setMessage("Your stake is locked until " + dateTime(lockedUntil)
                             + ". You cannot unstake before then. You can still claim rewards once every 24 hours.")
@@ -771,7 +771,7 @@ public final class StakingPanel {
                     .show();
             return;
         }
-        BottomSheetDialog sheet = new BottomSheetDialog(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
 
         LinearLayout root = new LinearLayout(host);
         root.setOrientation(LinearLayout.VERTICAL);

@@ -651,7 +651,7 @@ public class MainActivity extends AppCompatActivity {
 	private void _showVersionDialog() {
 		String v = "unknown";
 		try { v = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception ignored) { }
-		new androidx.appcompat.app.AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 			.setTitle("Harvana")
 			.setMessage("You are on version " + v + ".\n\nThis build is installed directly, so new versions arrive as a new install from the team, not through an app store update.")
 			.setPositiveButton("OK", null).show();

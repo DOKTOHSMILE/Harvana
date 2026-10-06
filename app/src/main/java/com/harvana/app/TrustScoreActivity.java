@@ -224,7 +224,7 @@ public class TrustScoreActivity extends AppCompatActivity {
     }
 
     private void bindDevice() {
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        new com.harvana.app.ui.SheetDialog.Builder(this)
             .setTitle("Bind this device?")
             .setMessage("This ties the wallet to this phone and sets the base score to 10. It does not upload an ID. One device hash can be bound to one wallet.")
             .setNegativeButton("Cancel", null)

@@ -41,7 +41,7 @@ public final class GroupChatConnector {
 
     private static void confirmOpen(Activity a, String url) {
         String platform = ChatLink.platformOf(url);
-        new AlertDialog.Builder(a)
+        new com.harvana.app.ui.SheetDialog.Builder(a)
             .setTitle("Open the group chat")
             .setMessage("This chat is on " + platform + ", outside Harvana. The group admin runs it.\n\n"
                 + "Never share your recovery words, passphrase or PIN there. Payments happen only inside the Harvana app.")
@@ -54,7 +54,7 @@ public final class GroupChatConnector {
 
     private static void none(Activity a, String groupId, boolean isAdmin) {
         if (isAdmin) { edit(a, groupId); return; }
-        new AlertDialog.Builder(a).setTitle("No group chat yet")
+        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("No group chat yet")
             .setMessage("The admin hasn't added a chat link yet.")
             .setPositiveButton("OK", null).show();
     }
@@ -64,7 +64,7 @@ public final class GroupChatConnector {
         EditText in = new EditText(a);
         in.setHint("Paste your group chat link");
         in.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
-        new AlertDialog.Builder(a)
+        new com.harvana.app.ui.SheetDialog.Builder(a)
             .setTitle("Group chat link")
             .setMessage("Add a WhatsApp, Telegram, Signal, Discord or Facebook group link. Only members of this group can see it.")
             .setView(in)

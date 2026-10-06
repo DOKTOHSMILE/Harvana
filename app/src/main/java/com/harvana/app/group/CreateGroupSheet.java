@@ -30,7 +30,7 @@ public final class CreateGroupSheet {
     private CreateGroupSheet() {}
 
     public static void show(Context ctx) {
-        final BottomSheetDialog dialog = new BottomSheetDialog(ctx);
+        final BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(ctx);
         final float d = ctx.getResources().getDisplayMetrics().density;
 
         LinearLayout root = new LinearLayout(ctx);

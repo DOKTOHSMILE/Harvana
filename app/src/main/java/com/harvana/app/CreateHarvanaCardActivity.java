@@ -322,7 +322,7 @@ public class CreateHarvanaCardActivity extends AppCompatActivity {
       finishSuccessfully();
       return;
     }
-    new AlertDialog.Builder(this).setTitle("Skip the backup card?").setMessage(
+    new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Skip the backup card?").setMessage(
         "Without a saved Harvana Access Card, this wallet has no backup yet. If you lose this device, the funds are gone. Are you sure you want to cancel wallet creation?")
         .setPositiveButton("Cancel Wallet Creation", (d, w) -> {
           com.harvana.app.wallet.PhraseHandoff.clear();

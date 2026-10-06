@@ -553,7 +553,7 @@ public class SendAssetActivity extends AppCompatActivity {
 	}
 	
 	private void _showTransferConfirmSheet(TransactionRouter.PreparedTransfer prepared, String symbol) {
-		final BottomSheetDialog dialog = new BottomSheetDialog(this);
+		final BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(this);
 		View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_transfer_confirm, null);
 		dialog.setContentView(sheetView);
 		dialog.setCancelable(false);
@@ -677,7 +677,7 @@ public class SendAssetActivity extends AppCompatActivity {
 	}
 	
 	public void _showScannerBottomSheet() {
-		mScannerDialog = new BottomSheetDialog(this);
+		mScannerDialog = new com.harvana.app.ui.AppSheet(this);
 		View bottomSheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_scanner, null);
 		mScannerDialog.setContentView(bottomSheetView);
 		
@@ -760,7 +760,7 @@ public class SendAssetActivity extends AppCompatActivity {
 	
 	private void _showTransferSuccessSheet(String amountText, String recipientAddress, String txHash) {
 		final com.google.android.material.bottomsheet.BottomSheetDialog dialog =
-		new com.google.android.material.bottomsheet.BottomSheetDialog(SendAssetActivity.this);
+		new com.harvana.app.ui.AppSheet(SendAssetActivity.this);
 		
 		View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_transfer_success, null);
 		dialog.setContentView(sheetView);

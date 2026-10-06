@@ -71,7 +71,7 @@ public class NoticesFragmentLogic {
         box.setPadding(48, 24, 48, 0);
         box.addView(title);
         box.addView(body);
-        new AlertDialog.Builder(activity)
+        new com.harvana.app.ui.SheetDialog.Builder(activity)
                 .setTitle("Post notice")
                 .setView(box)
                 .setPositiveButton("Post", (d, w) -> {

@@ -534,7 +534,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 	
 	private void _showMemberSheet(HashMap<String, Object> member, boolean isPending) {
 		if (getContext() == null) return;
-		final BottomSheetDialog dialog = new BottomSheetDialog(getContext());
+		final BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(getContext());
 		View sheet = LayoutInflater.from(getContext()).inflate(R.layout.bottom_sheet_member_detail, null);
 		dialog.setContentView(sheet);
 		com.harvana.app.group.BottomSheetUtils.expandFullScreen(dialog, sheet);
@@ -606,7 +606,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 					// when they open this complete member.
 					sheet.post(() -> {
 						if (getActivity() == null || getActivity().isFinishing()) return;
-						new android.app.AlertDialog.Builder(getActivity())
+						new com.harvana.app.ui.SheetDialog.Builder(getActivity())
 						.setTitle("Fixed month complete")
 						.setMessage("This member paid 31/31 days. Close the month and return 30 days to them?")
 						.setPositiveButton("Close month", (d, w) ->
@@ -921,7 +921,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 *  reviewed; nothing here confirms or acts on anything. */
 	private void _showReportSheet(String reportedUid) {
 		if (getContext() == null) return;
-		final BottomSheetDialog dialog = new BottomSheetDialog(getContext());
+		final BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(getContext());
 		View sheet = LayoutInflater.from(getContext()).inflate(R.layout.bottom_sheet_submit_report, null);
 		dialog.setContentView(sheet);
 		com.harvana.app.group.BottomSheetUtils.expandFullScreen(dialog, sheet);

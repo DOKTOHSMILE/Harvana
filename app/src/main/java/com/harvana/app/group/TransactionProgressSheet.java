@@ -34,7 +34,7 @@ public final class TransactionProgressSheet {
 
 	private TransactionProgressSheet(Context context, String title, double amountHarv) {
 		this.context = context;
-		dialog = new BottomSheetDialog(context);
+		dialog = new com.harvana.app.ui.AppSheet(context);
 		root = LayoutInflater.from(context).inflate(R_layout("bottom_sheet_transaction_progress"), null);
 		dialog.setContentView(root);
 		dialog.setCancelable(false);

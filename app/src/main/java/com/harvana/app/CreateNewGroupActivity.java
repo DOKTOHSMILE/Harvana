@@ -627,7 +627,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 					Object label = pendingChatLinks.get(i).get("label");
 					names[i] = label == null ? "Chat" : String.valueOf(label);
 				}
-				new androidx.appcompat.app.AlertDialog.Builder(this)
+				new com.harvana.app.ui.SheetDialog.Builder(this)
 						.setTitle("Remove a chat")
 						.setItems(names, (d, which) -> {
 							if (which >= 0 && which < pendingChatLinks.size()) pendingChatLinks.remove(which);
@@ -1371,7 +1371,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private void _createRotatingOnChain() {
 		final String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
 		if (wallet == null || wallet.isEmpty() || com.harvana.app.wallet.WalletManager.loadPrivateKey(this, wallet) == null) {
-			new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("You need a wallet first")
+			new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("You need a wallet first")
 			.setMessage("A rotating group runs on the network and is paid from your wallet. Create or restore a wallet, then try again.")
 			.setPositiveButton("OK", null).show();
 			return;
@@ -1434,7 +1434,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 	private String _requireWalletOrExplain() {
 		final String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
 		if (wallet == null || wallet.isEmpty() || com.harvana.app.wallet.WalletManager.loadPrivateKey(this, wallet) == null) {
-			new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("You need a wallet first")
+			new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("You need a wallet first")
 			.setMessage("This group runs on the network and is paid from your wallet.")
 			.setPositiveButton("OK", null).show();
 			return null;

@@ -197,7 +197,7 @@ public class FriendsActivity extends AppCompatActivity {
     private void askUsername() {
         final EditText input = SocialUi.edit(this, "@username");
         input.setPadding(SocialUi.dp(this, 24), SocialUi.dp(this, 16), SocialUi.dp(this, 24), SocialUi.dp(this, 8));
-        new AlertDialog.Builder(this).setTitle("Find by username")
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Find by username")
             .setMessage("Type their exact username. There is no public member list.")
             .setView(input)
             .setPositiveButton("Find", (d, w) -> lookup(input.getText().toString()))
@@ -209,7 +209,7 @@ public class FriendsActivity extends AppCompatActivity {
             if (person == null) { Toast.makeText(this, err == null ? "Not found." : err, Toast.LENGTH_LONG).show(); return; }
             if (followingIds().contains(person.uid)) { openProfile(person); return; }
             for (Person b : blockedList) if (b.uid.equals(person.uid)) { Toast.makeText(this, "You blocked " + person.name + ". Unblock them from the Blocked tab first.", Toast.LENGTH_LONG).show(); return; }
-            new AlertDialog.Builder(this).setTitle(person.name + (person.handle().isEmpty() ? "" : "  " + person.handle()))
+            new com.harvana.app.ui.SheetDialog.Builder(this).setTitle(person.name + (person.handle().isEmpty() ? "" : "  " + person.handle()))
                 .setPositiveButton("Follow", (d, w) -> follow(person))
                 .setNeutralButton("View profile", (d, w) -> openProfile(person))
                 .setNegativeButton("Cancel", null).show();
@@ -228,7 +228,7 @@ public class FriendsActivity extends AppCompatActivity {
     private boolean blockedLoaded;
 
     private void blockAsk(Person p) {
-        new AlertDialog.Builder(this).setTitle("Block " + p.name + "?")
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Block " + p.name + "?")
             .setMessage("They are removed from your followers and friends, you stop following them, and they cannot follow you or see your contact links. "
                 + "Their Learn posts are hidden from you. They are not told. You can unblock them any time from the Blocked tab.")
             .setPositiveButton("Block", (d, w) -> SocialStore.block(p, (ok, e) -> runOnUiThread(() -> {
@@ -278,7 +278,7 @@ public class FriendsActivity extends AppCompatActivity {
     }
 
     private void unfollowAsk(Person p) {
-        new AlertDialog.Builder(this).setTitle("Unfollow " + p.name + "?")
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Unfollow " + p.name + "?")
             .setMessage("They leave your friends list, and they will no longer see your contact links.")
             .setPositiveButton("Unfollow", (d, w) -> SocialStore.unfollow(p.uid, (ok, e) -> runOnUiThread(this::reload)))
             .setNegativeButton("Cancel", null).show();
@@ -508,7 +508,7 @@ public class FriendsActivity extends AppCompatActivity {
                 LinearLayout buttons = new LinearLayout(this);
                 buttons.setOrientation(LinearLayout.HORIZONTAL);
                 buttons.setPadding(SocialUi.dp(this, 64), 0, 0, SocialUi.dp(this, 10));
-                TextView confirm = pill("Confirm", true, v -> new AlertDialog.Builder(this).setTitle("Confirm " + p.name + "?")
+                TextView confirm = pill("Confirm", true, v -> new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Confirm " + p.name + "?")
                     .setMessage("You are saying you know " + p.name + " and are referring them. You will confirm with your PIN. "
                         + "If they default in a group, your trust score drops.")
                     .setPositiveButton("Confirm", (d, w) -> ReferralStore.approve(this, a, (ok, err) -> runOnUiThread(() -> {
@@ -584,7 +584,7 @@ public class FriendsActivity extends AppCompatActivity {
     /** Contact links of a mutual friend (also used from the public profile). */
     static void openCard(androidx.appcompat.app.AppCompatActivity a, Person p) {
         SocialStore.contactsOf(p.uid, (card, err) -> a.runOnUiThread(() -> {
-            AlertDialog.Builder d = new AlertDialog.Builder(a).setTitle(p.name + (p.handle().isEmpty() ? "" : "  " + p.handle()));
+            com.harvana.app.ui.SheetDialog.Builder d = new com.harvana.app.ui.SheetDialog.Builder(a).setTitle(p.name + (p.handle().isEmpty() ? "" : "  " + p.handle()));
             if (card == null) {
                 d.setMessage("NOT_MUTUAL".equals(err)
                     ? "You can see how to reach " + p.name + " once you follow each other."

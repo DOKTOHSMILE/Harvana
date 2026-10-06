@@ -355,7 +355,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 	}
 	private void _showExportOptionsBottomSheet() {
 		final com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog = 
-		new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+		new com.harvana.app.ui.AppSheet(this);
 		View sheetView = LayoutInflater.from(this).inflate(R.layout.dialog_export_options, null);
 		bottomSheetDialog.setContentView(sheetView);
 		

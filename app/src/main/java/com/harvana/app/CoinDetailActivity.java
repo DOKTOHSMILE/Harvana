@@ -524,7 +524,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 	}
 	
 	public void _receiveBottomSheet() {
-		final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(CoinDetailActivity.this);
+		final BottomSheetDialog bottomSheetDialog = new com.harvana.app.ui.AppSheet(CoinDetailActivity.this);
 		View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_receive, null);
 		bottomSheetDialog.setContentView(sheetView);
 		
@@ -651,7 +651,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 	
 	private void _showTransferSuccessSheet(String amountText, String recipientAddress, String txHash) {
 		final com.google.android.material.bottomsheet.BottomSheetDialog dialog =
-		new com.google.android.material.bottomsheet.BottomSheetDialog(CoinDetailActivity.this);
+		new com.harvana.app.ui.AppSheet(CoinDetailActivity.this);
 		
 		View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_transfer_success, null);
 		dialog.setContentView(sheetView);
@@ -818,7 +818,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 	
 	public void _showScannerBottomSheet() {
 		final com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog = 
-		new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+		new com.harvana.app.ui.AppSheet(this);
 		
 		View bottomSheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_scanner, null);
 		bottomSheetDialog.setContentView(bottomSheetView);

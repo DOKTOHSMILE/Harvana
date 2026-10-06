@@ -171,7 +171,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 	}
 	
 	private void _confirmDelete(PaymentMethod method) {
-		new androidx.appcompat.app.AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Remove payment method")
 		.setMessage("Remove \"" + method.label + "\"? This only removes it from this device — it doesn't affect any listing you've already posted with it.")
 		.setPositiveButton("Remove", (dialog, which) -> {

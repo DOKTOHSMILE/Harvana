@@ -866,7 +866,7 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 			if (!circleId.isEmpty()) {
 				// Rotating group: the last step is to lock the bond on the network.
 				sending = false;
-				new androidx.appcompat.app.AlertDialog.Builder(this)
+				new com.harvana.app.ui.SheetDialog.Builder(this)
 				.setTitle("One more step")
 				.setMessage("You're in the group. Open it to take your place on the network: lock your bond, start your savings line or make your first deposit, depending on the group.")
 				.setCancelable(false)

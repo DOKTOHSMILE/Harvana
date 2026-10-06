@@ -29,7 +29,7 @@ public final class InviteMemberSheet {
         }
         float d = a.getResources().getDisplayMetrics().density;
         int pad = (int) (16 * d);
-        BottomSheetDialog dlg = new BottomSheetDialog(a);
+        BottomSheetDialog dlg = new com.harvana.app.ui.AppSheet(a);
         LinearLayout root = new LinearLayout(a);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(pad, pad, pad, pad);

@@ -26,7 +26,7 @@ public class ContactsAccessActivity extends Activity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         if (b != null) return;
-        new AlertDialog.Builder(this)
+        new com.harvana.app.ui.SheetDialog.Builder(this)
             .setTitle("Find friends in your contacts")
             .setMessage("Harvana can show which of your contacts already use the app.\n\n"
                 + "Your contacts stay on your phone: numbers and emails are scrambled before they are compared, "

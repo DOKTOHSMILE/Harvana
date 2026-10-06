@@ -58,7 +58,7 @@ public final class PeoplePicker {
         MaterialButton contacts = SocialUi.button(a, "Contacts", true);
         friends.setOnClickListener(v -> chooseFriends(a, sel, refresh));
         username.setOnClickListener(v -> byUsername(a, sel, refresh));
-        contacts.setOnClickListener(v -> new AlertDialog.Builder(a).setTitle("From my contacts")
+        contacts.setOnClickListener(v -> new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("From my contacts")
             .setItems(new String[]{"Members already on Harvana", "Invite a contact by email"}, (d, which) -> {
                 if (which == 0) ContactsFinder.find(a, matches -> chooseMatches(a, sel, matches, refresh));
                 else ContactPickerActivity.pickEmail(a, (email, name) -> a.runOnUiThread(() -> {
@@ -96,7 +96,7 @@ public final class PeoplePicker {
             names[i] = (m.contactName == null || m.contactName.isEmpty() ? m.person.name : m.contactName) + (m.person.handle().isEmpty() ? "" : "  " + m.person.handle());
             checked[i] = sel.hasPerson(m.person.uid);
         }
-        new AlertDialog.Builder(a).setTitle("Contacts on Harvana")
+        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Contacts on Harvana")
             .setMultiChoiceItems(names, checked, (d, which, on) -> checked[which] = on)
             .setPositiveButton("Add", (d, w) -> {
                 for (int i = 0; i < matches.size(); i++) {
@@ -110,7 +110,7 @@ public final class PeoplePicker {
     private static void byUsername(Activity a, Selection sel, Runnable refresh) {
         final EditText et = SocialUi.edit(a, "@username");
         et.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
-        new AlertDialog.Builder(a).setTitle("Find by username").setView(et)
+        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Find by username").setView(et)
             .setPositiveButton("Add", (d, w) -> SocialStore.findByUsername(et.getText().toString(), (p, err) -> a.runOnUiThread(() -> {
                 if (p == null) { Toast.makeText(a, err, Toast.LENGTH_LONG).show(); return; }
                 if (!sel.hasPerson(p.uid)) sel.people.add(p);

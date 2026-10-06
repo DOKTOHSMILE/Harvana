@@ -255,7 +255,7 @@ public class GroupDetailsLogic {
 
     private void showApprovePicker(List<Map<String, Object>> items) {
         if (activity == null || activity.isFinishing()) return;
-        BottomSheetDialog dialog = new BottomSheetDialog(activity);
+        BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(activity);
         int layoutId = activity.getResources().getIdentifier(
                 "bottom_sheet_payout_requests", "layout", activity.getPackageName());
         if (layoutId == 0) {
@@ -361,7 +361,7 @@ public class GroupDetailsLogic {
         LinearLayout wrap = new LinearLayout(activity);
         wrap.setPadding(48, 24, 48, 0);
         wrap.addView(input);
-        new AlertDialog.Builder(activity)
+        new com.harvana.app.ui.SheetDialog.Builder(activity)
                 .setTitle("Member wallet")
                 .setView(wrap)
                 .setPositiveButton("Approve", (d, w) -> {
@@ -442,7 +442,7 @@ public class GroupDetailsLogic {
             return;
         }
 
-        final BottomSheetDialog sheet = new BottomSheetDialog(activity);
+        final BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(activity);
         View root = LayoutInflater.from(activity).inflate(layoutId, null);
         sheet.setContentView(root);
 

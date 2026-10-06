@@ -424,7 +424,7 @@ public class PublicProfileActivity extends AppCompatActivity {
             block.setText(isBlocked ? "Unblock this member" : "Block this member");
             block.setOnClickListener(v -> {
                 if (isBlocked) SocialStore.unblock(card.uid, (ok, e) -> runOnUiThread(() -> { toast(ok ? "Unblocked." : e); load(); }));
-                else new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Block " + (card.name.isEmpty() ? "this member" : card.name) + "?")
+                else new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Block " + (card.name.isEmpty() ? "this member" : card.name) + "?")
                     .setMessage("They are removed from your followers, you stop following them, and they cannot follow you again. Their Learn posts are hidden from you. They are not told.")
                     .setNegativeButton("Cancel", null)
                     .setPositiveButton("Block", (d, w) -> SocialStore.block(person(), (ok, e) -> runOnUiThread(() -> { toast(ok ? "Blocked." : e); load(); }))).show();
@@ -811,7 +811,7 @@ public class PublicProfileActivity extends AppCompatActivity {
                     break;
                 }
                 default:
-                    new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Delete this article?")
+                    new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Delete this article?")
                         .setMessage("\u201c" + title + "\u201d is removed for everyone. This cannot be undone.")
                         .setNegativeButton("Cancel", null)
                         .setPositiveButton("Delete", (dl, w) -> d.getReference().delete()
@@ -827,7 +827,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         final String[] keys = {"public", "followers", "private"};
         final String[] names = {"Public \u2014 everyone in Learn", "Followers \u2014 only people who follow me", "Only me \u2014 hidden from everyone else"};
         int checked = "followers".equals(current) ? 1 : "private".equals(current) ? 2 : 0;
-        new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Who can see this article?")
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Who can see this article?")
             .setSingleChoiceItems(names, checked, (dl, which) -> {
                 dl.dismiss();
                 java.util.Map<String, Object> up = new java.util.HashMap<>();
@@ -855,7 +855,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         b.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(8000)});
         box.addView(t);
         box.addView(b);
-        new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Edit article").setView(box)
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Edit article").setView(box)
             .setNegativeButton("Cancel", null)
             .setPositiveButton("Save", (dl, w) -> {
                 String nt = t.getText().toString().trim(), nb = b.getText().toString().trim();

@@ -204,7 +204,7 @@ public class EmailAuthFragment extends Fragment {
 			if (!isAdded()) return;
 			setBusy(false);
 			if (task.isSuccessful()) {
-				new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+				new com.harvana.app.ui.SheetDialog.Builder(requireContext())
 					.setTitle("Check your email")
 					.setMessage("If an account exists for " + email + ", we sent a link to choose a new password. "
 						+ "It can take a few minutes. Check your spam folder too.")

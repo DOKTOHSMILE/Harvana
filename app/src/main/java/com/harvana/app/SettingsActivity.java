@@ -626,7 +626,7 @@ public class SettingsActivity extends AppCompatActivity {
 			if (SUPPORTED_CURRENCIES[i][0].equals(current)) selectedIndex = i;
 		}
 		
-		new androidx.appcompat.app.AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Currency")
 		.setSingleChoiceItems(labels, selectedIndex, (dialog, which) -> {
 			String chosenSymbol = SUPPORTED_CURRENCIES[which][0];
@@ -639,7 +639,7 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _showDataStorageDialog() {
-		new androidx.appcompat.app.AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Clear cached data")
 		.setMessage("This clears locally cached profile and balance data used for instant, offline-friendly loading. Nothing on your account is affected — the app will simply re-fetch everything fresh the next time you're online.")
 		.setPositiveButton("Clear Cache", (dialog, which) -> {
@@ -651,7 +651,7 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _showLanguagePicker() {
-		new androidx.appcompat.app.AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Language")
 		.setMessage("English is currently the only supported language. More languages are planned for a future update.")
 		.setPositiveButton("OK", null)
@@ -665,7 +665,7 @@ public class SettingsActivity extends AppCompatActivity {
 	private void _showThemePicker() {
 		String mode = ThemeManager.getMode(this);
 		int checked = "light".equals(mode) ? 1 : "dark".equals(mode) ? 2 : 0;
-		new androidx.appcompat.app.AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Appearance")
 		.setSingleChoiceItems(new String[]{ThemeManager.systemLabel(this), "Light", "Dark"}, checked, (dialog, which) -> {
 			// The whole app re-themes immediately: AppCompat restarts every open screen in the new mode.
@@ -679,7 +679,7 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _confirmLogOut() {
-		new androidx.appcompat.app.AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Log Out")
 		.setMessage("Are you sure you want to sign out of your account?")
 		.setPositiveButton("Log Out", (dialog, which) -> _performLogOut())

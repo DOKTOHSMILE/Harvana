@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: bottom sheets instead of dialogs, everywhere
+
+What the app does. The 78 places that opened a pop-up dialog (confirmations, "Deposit amount", PIN entry, pickers, "type CLOSE to confirm", and so on) now open a Material bottom sheet that rises from the bottom, with a small grab bar and rounded top corners, and keeps the same buttons. Every bottom sheet that was already in the app (more than a hundred) now goes through one shared base (`AppSheet`) so they all have the same 24dp rounded corners, open fully, and shrink above the keyboard. A sheet with a text field puts the cursor in the first field and brings the keyboard up, and the field and the buttons stay above the keyboard so you can see and edit what you type. Square-backed content is clipped to the curve. The little "Working..." progress pop-ups are not changed. What you do: install the new build.
+
 ## 6 Oct 2026: group tabs fill the width when there is no Loans tab
 
 What the app does. On a group's page, a group without loans has five tabs (Overview, Members, Payments, Notice, History) and they now share the full width evenly instead of sitting at the left with History half off screen. A group with loans keeps the six scrolling tabs. What you do: install the new build.

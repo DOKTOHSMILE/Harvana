@@ -554,7 +554,7 @@ public class NodeGroupActivity extends AppCompatActivity {
         if (old > 0) target.setText(String.valueOf(old / 100_000_000.0).replaceAll("\\.0$", ""));
         box.addView(name);
         box.addView(target);
-        new AlertDialog.Builder(this).setTitle("Start a new goal").setView(box).setNegativeButton("Cancel", null)
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Start a new goal").setView(box).setNegativeButton("Cancel", null)
             .setPositiveButton("Continue", (d, w) -> {
                 final String n = name.getText().toString().trim();
                 final long raw = CircleUi.toRaw(target.getText().toString());
@@ -735,7 +735,7 @@ public class NodeGroupActivity extends AppCompatActivity {
         lockDays.setHint("Lock for how many days? (leave empty for a flexible line)");
         lockDays.setInputType(InputType.TYPE_CLASS_NUMBER);
         box.addView(lockDays);
-        new AlertDialog.Builder(this).setTitle("Start my savings line")
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Start my savings line")
             .setMessage("A flexible line can be withdrawn with admin approval. A locked line can't be touched before its date.")
             .setView(box).setNegativeButton("Cancel", null)
             .setPositiveButton("Start", (d, w) -> {
@@ -759,7 +759,7 @@ public class NodeGroupActivity extends AppCompatActivity {
             final EditText days = new EditText(this);
             days.setHint("How many days to save now?");
             days.setInputType(InputType.TYPE_CLASS_NUMBER);
-            new AlertDialog.Builder(this).setTitle("Save several days").setView(days).setNegativeButton("Cancel", null)
+            new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Save several days").setView(days).setNegativeButton("Cancel", null)
                 .setPositiveButton("Save", (d, w) -> {
                     int n = 0;
                     try { n = Integer.parseInt(days.getText().toString().trim()); } catch (Exception ignored) { }
@@ -783,7 +783,7 @@ public class NodeGroupActivity extends AppCompatActivity {
         final EditText e = new EditText(this);
         e.setHint(hint);
         e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        new AlertDialog.Builder(this).setTitle(title).setView(e).setNegativeButton("Cancel", null)
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle(title).setView(e).setNegativeButton("Cancel", null)
             .setPositiveButton("Continue", (d, w) -> {
                 long raw = CircleUi.toRaw(e.getText().toString());
                 if (raw <= 0) { toast("Enter an amount."); return; }
@@ -803,7 +803,7 @@ public class NodeGroupActivity extends AppCompatActivity {
         final EditText text = new EditText(this);
         text.setHint(textHint);
         box.addView(text);
-        new AlertDialog.Builder(this).setTitle(title)
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle(title)
             .setMessage("Everyone who can vote will see this. Be clear and honest: the description is permanent.")
             .setView(box).setNegativeButton("Cancel", null)
             .setPositiveButton("Send", (d, w) -> {

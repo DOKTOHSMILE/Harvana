@@ -69,7 +69,7 @@ public final class GroupChatSheet {
 
     private static void present(Activity activity, String groupId, boolean admin, List<Link> links) {
         if (activity.isFinishing()) return;
-        BottomSheetDialog sheet = new BottomSheetDialog(activity, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(activity, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
         float d = activity.getResources().getDisplayMetrics().density;
         int pad = (int) (20 * d);
 
@@ -157,7 +157,7 @@ public final class GroupChatSheet {
             remove.setPadding((int) (12 * d), (int) (8 * d), 0, (int) (8 * d));
             remove.setOnClickListener(v -> {
                 v.setClickable(false);
-                new AlertDialog.Builder(activity)
+                new com.harvana.app.ui.SheetDialog.Builder(activity)
                         .setTitle("Remove this chat?")
                         .setMessage(link.label + " will no longer show for members.")
                         .setNegativeButton("Keep", (d1, w) -> v.setClickable(true))
@@ -178,7 +178,7 @@ public final class GroupChatSheet {
     }
 
     private static void confirmLeave(Activity activity, Link link) {
-        new AlertDialog.Builder(activity)
+        new com.harvana.app.ui.SheetDialog.Builder(activity)
                 .setTitle("You are leaving Harvana")
                 .setMessage("This opens " + link.kindName() + " outside the app so the group can talk there. Harvana cannot see that conversation.")
                 .setNegativeButton("Stay", null)
@@ -196,7 +196,7 @@ public final class GroupChatSheet {
 
     private static void askAdd(Activity activity, String groupId, List<Link> existing, OnLink onLink) {
         if (activity.isFinishing()) return;
-        BottomSheetDialog sheet = new BottomSheetDialog(activity, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(activity, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
         float d = activity.getResources().getDisplayMetrics().density;
         int pad = (int) (20 * d);
         LinearLayout root = new LinearLayout(activity);

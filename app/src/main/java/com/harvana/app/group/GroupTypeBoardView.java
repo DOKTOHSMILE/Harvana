@@ -95,7 +95,7 @@ public final class GroupTypeBoardView {
 
     public static void showDetail(Context c, GroupTypeBoard.Cell cell) {
         if (c == null || cell == null) return;
-        new AlertDialog.Builder(c)
+        new com.harvana.app.ui.SheetDialog.Builder(c)
                 .setTitle(cell.title.isEmpty() ? "Payment" : cell.title)
                 .setMessage(cell.body)
                 .setPositiveButton("OK", null)

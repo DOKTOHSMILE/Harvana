@@ -31,7 +31,7 @@ public final class ContactsFinder {
         final EditText et = new EditText(a);
         et.setHint("e.g. 234");
         et.setInputType(InputType.TYPE_CLASS_NUMBER);
-        new AlertDialog.Builder(a).setTitle("Your country code")
+        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Your country code")
             .setMessage("Needed to read local numbers like 0801… correctly. Nigeria is 234, Ghana 233, Kenya 254, UK 44.")
             .setView(et)
             .setPositiveButton("Continue", (d, w) -> {

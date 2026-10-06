@@ -199,7 +199,7 @@ public final class PaymentConfirmSheet {
 		sheetBg.setCornerRadii(new float[]{r, r, r, r, 0, 0, 0, 0});
 		scroll.setBackground(sheetBg);
 
-		BottomSheetDialog dialog = new BottomSheetDialog(context);
+		BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(context);
 		dialog.setContentView(scroll);
 		dialog.setOnShowListener(shown -> {
 			FrameLayout sheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);

@@ -83,7 +83,7 @@ public class WelcomeActivity extends AppCompatActivity {
         fbauth = FirebaseAuth.getInstance();
 
         btnGetStarted.setOnClickListener(_v -> {
-            new android.app.AlertDialog.Builder(this)
+            new com.harvana.app.ui.SheetDialog.Builder(this)
                 .setTitle("Before you start")
                 .setMessage("Harvana keeps your name, phone and wallet address so a circle can trust you. Contributions, loans and tips are in HARV, and every transfer shows the network fee before you confirm. Mining is optional and can heat the phone. The current admin of a circle sees member payment cards. Everyone else sees only their own.\n\nBy continuing you accept that.")
                 .setPositiveButton("I agree", (d, w) -> {
@@ -135,7 +135,7 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     private void showLoginBottomSheet() {
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog bottomSheetDialog = new com.harvana.app.ui.AppSheet(this, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
         
         LinearLayout sheetLayout = new LinearLayout(this);
         sheetLayout.setOrientation(LinearLayout.VERTICAL);

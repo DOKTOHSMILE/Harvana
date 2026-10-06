@@ -215,7 +215,7 @@ public class RestoreWalletActivity extends AppCompatActivity {
 	}
 	
 	private void showScannerBottomSheet() {
-		scannerDialog = new BottomSheetDialog(this);
+		scannerDialog = new com.harvana.app.ui.AppSheet(this);
 		View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_scanner, null);
 		scannerDialog.setContentView(sheetView);
 		
@@ -279,7 +279,7 @@ public class RestoreWalletActivity extends AppCompatActivity {
 	private String pendingManualDigitCode;
 	
 	private void showManualCodeBottomSheet() {
-		BottomSheetDialog dialog = new BottomSheetDialog(this);
+		BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(this);
 		View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_manual_code, null);
 		dialog.setContentView(sheetView);
 		
@@ -321,7 +321,7 @@ public class RestoreWalletActivity extends AppCompatActivity {
 	// ── Shared: password entry after either QR scan or manual code entry ──
 	
 	private void showPasswordBottomSheet(boolean fromManualCode) {
-		BottomSheetDialog dialog = new BottomSheetDialog(this);
+		BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(this);
 		View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_card_password, null);
 		dialog.setContentView(sheetView);
 		

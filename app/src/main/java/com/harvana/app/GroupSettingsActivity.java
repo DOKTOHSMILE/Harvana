@@ -602,7 +602,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 					@Override public void treasurer(final String uid, final String name, final String wallet, final boolean make) {
 						final String me = WalletManager.getActiveWalletAddress(GroupSettingsActivity.this);
 						final GroupIdentity gid = GroupIdentityResolver.resolve(groupId, groupData);
-						new AlertDialog.Builder(GroupSettingsActivity.this)
+						new com.harvana.app.ui.SheetDialog.Builder(GroupSettingsActivity.this)
 							.setTitle(make ? "Make " + name + " treasurer?" : "Remove " + name + " as treasurer?")
 							.setMessage(make
 								? "The treasurer can approve members' withdrawal requests and ask for payouts and milestone releases. A payout the treasurer asks for is paid only after the group votes and you vote yes as well. The treasurer gets no extra vote. You can remove the role at any time."
@@ -619,7 +619,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 					@Override public void proposeTreasurer(final String name, final String wallet) {
 						final String me = WalletManager.getActiveWalletAddress(GroupSettingsActivity.this);
 						final GroupIdentity gid = GroupIdentityResolver.resolve(groupId, groupData);
-						new AlertDialog.Builder(GroupSettingsActivity.this)
+						new com.harvana.app.ui.SheetDialog.Builder(GroupSettingsActivity.this)
 							.setTitle(wallet.isEmpty() ? "Propose removing the treasurer?" : "Propose " + name + " as treasurer?")
 							.setMessage("The group votes on this. " + (wallet.isEmpty() ? "It passes on the usual group vote." : "It passes only if the group votes yes and the admin votes yes too.")
 								+ " The vote stays open for 14 days. Only one proposal can be open at a time.")
@@ -642,7 +642,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 								}));
 					}
 					@Override public void remove(final String uid, final String name) {
-						new AlertDialog.Builder(GroupSettingsActivity.this).setTitle("Remove " + name + "?")
+						new com.harvana.app.ui.SheetDialog.Builder(GroupSettingsActivity.this).setTitle("Remove " + name + "?")
 							.setMessage("They lose access to this group and cannot send a new join request unless you unblock them.")
 							.setNegativeButton("Cancel", null)
 							.setPositiveButton("Remove", (dl, w) -> JoinRequestManager.kickMember(GroupSettingsActivity.this, groupId, uid,
@@ -976,7 +976,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		}
 		
 		btnUnblock.setOnClickListener(v -> {
-			new AlertDialog.Builder(this)
+			new com.harvana.app.ui.SheetDialog.Builder(this)
 			.setTitle("Unblock Member")
 			.setMessage("Are you sure you want to unblock this user? They will be able to send join requests again.")
 			.setPositiveButton("Unblock", (dialog, which) -> {
@@ -1178,7 +1178,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			labels[i] = name + (slot > 0 ? " · Slot " + slot : "");
 		}
 		
-		new AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Transfer admin role")
 		.setItems(labels, (dialog, which) -> {
 			Map<String, Object> target = candidates.get(which);
@@ -1191,7 +1191,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _confirmTransferAdmin(String myUid, String targetUid, String targetName) {
-		new AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Transfer admin to " + targetName + "?")
 		.setMessage("You will become a regular member and lose admin control over this group, including its settings and wallet. This can only be undone by " + targetName + " transferring it back to you.")
 		.setPositiveButton("Transfer", (dialog, which) ->
@@ -1330,7 +1330,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _showRestoreSheet() {
-		final BottomSheetDialog dialog = new BottomSheetDialog(this);
+		final BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(this);
 		View sheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_recovery_phrase_old, null);
 		dialog.setContentView(sheetView);
 		
@@ -1431,7 +1431,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		final EditText pass = new EditText(this);
 		pass.setHint("Access Card passphrase");
 		pass.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-		new androidx.appcompat.app.AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 			.setTitle("Restore from Access Card")
 			.setMessage("Enter the passphrase you chose when the card was created.")
 			.setView(pass)
@@ -1653,11 +1653,11 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		confirm.setTextColor(UiColors.textPrimary());
 		box.addView(confirm);
 
-		androidx.appcompat.app.AlertDialog dialog = ThemedDialogs.alert(this)
+		com.harvana.app.ui.SheetDialog dialog = ThemedDialogs.alert(this)
 			.setTitle(dec.headline).setView(box)
 			.setPositiveButton(delete ? "Delete" : "Close group", null)
 			.setNegativeButton("Cancel", null).create();
-		dialog.setOnShowListener(x -> dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+		dialog.setOnShowListener(x -> dialog.getButton(com.harvana.app.ui.SheetDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
 			if (!confirm.getText().toString().trim().equalsIgnoreCase(phrase)) {
 				confirm.setError("Type " + phrase + " exactly");
 				return;

@@ -599,7 +599,7 @@ public class AssetFragmentActivity extends Fragment {
 	public void _showScannerBottomSheet() {
 		
 		final com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog = 
-		new com.google.android.material.bottomsheet.BottomSheetDialog(requireContext());
+		new com.harvana.app.ui.AppSheet(requireContext());
 		
 		View bottomSheetView = getActivity().getLayoutInflater().inflate(R.layout.bottom_sheet_scanner, null);
 		bottomSheetDialog.setContentView(bottomSheetView);

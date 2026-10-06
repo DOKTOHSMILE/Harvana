@@ -635,7 +635,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
     private void create() {
         final String wallet = WalletManager.getActiveWalletAddress(this);
         if (wallet == null || wallet.isEmpty() || WalletManager.loadPrivateKey(this, wallet) == null) {
-            new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("You need a wallet first")
+            new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("You need a wallet first")
                     .setMessage("The network fee is paid from your wallet. Create or restore one, then try again.")
                     .setPositiveButton("OK", null).show();
             return;

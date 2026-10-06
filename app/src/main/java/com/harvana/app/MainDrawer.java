@@ -202,7 +202,7 @@ final class MainDrawer {
         dismiss();
         String mode = ThemeManager.getMode(a);
         int checked = "light".equals(mode) ? 1 : "dark".equals(mode) ? 2 : 0;
-        new androidx.appcompat.app.AlertDialog.Builder(a).setTitle("Appearance")
+        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Appearance")
             .setSingleChoiceItems(new String[]{ThemeManager.systemLabel(a), "Light", "Dark"}, checked, (dlg, which) -> {
                 if (which == 1) ThemeManager.setLightMode(a); else if (which == 2) ThemeManager.setDarkMode(a); else ThemeManager.setSystemMode(a);
                 dlg.dismiss();
@@ -217,7 +217,7 @@ final class MainDrawer {
     }
 
     private void confirmLogOut() {
-        new androidx.appcompat.app.AlertDialog.Builder(a).setTitle("Log out?")
+        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Log out?")
             .setMessage("You will need to sign in again. Your wallet stays safe on this phone as long as you keep your recovery phrase.")
             .setPositiveButton("Log out", (x, y) -> host.logOut())
             .setNegativeButton("Cancel", null).show();

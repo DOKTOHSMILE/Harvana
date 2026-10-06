@@ -216,7 +216,7 @@ public final class LearnPostBinder {
     }
 
     private static void confirmDelete(Activity host, Post post) {
-        new androidx.appcompat.app.AlertDialog.Builder(host)
+        new com.harvana.app.ui.SheetDialog.Builder(host)
             .setTitle("Delete this post?")
             .setMessage("It is removed for everyone, including its comments and reactions. This cannot be undone.")
             .setNegativeButton("Cancel", null)

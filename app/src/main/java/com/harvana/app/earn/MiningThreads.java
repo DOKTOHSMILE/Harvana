@@ -107,7 +107,7 @@ public final class MiningThreads {
             status.setText(label(threads, cores));
             return;
         }
-        new AlertDialog.Builder(c)
+        new com.harvana.app.ui.SheetDialog.Builder(c)
             .setTitle("This can overheat the phone")
             .setMessage("Using every core keeps the CPU at the top of its range. The phone can get hot, slow down, and shut itself off. Leave one core free unless you accept that.")
             .setPositiveButton("Use " + threads + " anyway", (d, w) -> {

@@ -117,7 +117,7 @@ public class LoansFragmentLogic {
 		}
 
 		private void confirmApprove(final String loanId, final String borrowerWallet, final double principal) {
-			new AlertDialog.Builder(activity)
+			new com.harvana.app.ui.SheetDialog.Builder(activity)
 					.setTitle("Approve loan?")
 					.setMessage("Disburse " + com.harvana.app.wallet.BalanceFormatter.smart(principal)
 							+ " from group wallet to " + shortAddr(borrowerWallet))

@@ -575,7 +575,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		}
 		
 		final com.google.android.material.bottomsheet.BottomSheetDialog sheet =
-		new com.google.android.material.bottomsheet.BottomSheetDialog(getContext());
+		new com.harvana.app.ui.AppSheet(getContext());
 		View root = LayoutInflater.from(getContext()).inflate(layoutId, null);
 		sheet.setContentView(root);
 		com.harvana.app.group.BottomSheetUtils.expandFullScreen(sheet, root);
@@ -883,7 +883,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		}
 		
 		final com.google.android.material.bottomsheet.BottomSheetDialog sheet =
-		new com.google.android.material.bottomsheet.BottomSheetDialog(getContext());
+		new com.harvana.app.ui.AppSheet(getContext());
 		View root = LayoutInflater.from(getContext()).inflate(layoutId, null);
 		sheet.setContentView(root);
 		com.harvana.app.group.BottomSheetUtils.expandFullScreen(sheet, root);
@@ -1283,7 +1283,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		if (getContext() == null) return;
 		
 		final com.google.android.material.bottomsheet.BottomSheetDialog sheet =
-		new com.google.android.material.bottomsheet.BottomSheetDialog(getContext());
+		new com.harvana.app.ui.AppSheet(getContext());
 		View root = LayoutInflater.from(getContext()).inflate(R.layout.bottom_sheet_loan_detail, null);
 		sheet.setContentView(root);
 		com.harvana.app.group.BottomSheetUtils.expandFullScreen(sheet, root);

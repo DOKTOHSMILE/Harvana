@@ -56,7 +56,7 @@ public final class GroupWelcomeSheet {
     }
 
     private static void showNeedWallet(Activity a) {
-        new androidx.appcompat.app.AlertDialog.Builder(a)
+        new com.harvana.app.ui.SheetDialog.Builder(a)
             .setTitle("You need a wallet first")
             .setMessage("Groups run on the Harvana network, and every payment is signed by your own wallet. "
                 + "Create a wallet (or restore yours) to join a group.")
@@ -80,7 +80,7 @@ public final class GroupWelcomeSheet {
         final boolean[] seenEnd = new boolean[pages];
         final boolean[] agreed = new boolean[pages];
 
-        final BottomSheetDialog dlg = new BottomSheetDialog(a);
+        final BottomSheetDialog dlg = new com.harvana.app.ui.AppSheet(a);
         dlg.setCancelable(false);                                    // leaving is the Cancel button, never a stray swipe
         LinearLayout root = new LinearLayout(a);
         root.setOrientation(LinearLayout.VERTICAL);

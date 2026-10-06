@@ -32,7 +32,7 @@ public final class LearnGift {
         if (poster.wallet.equalsIgnoreCase(me)) { toast(host, "That is your own post."); return; }
         String who = poster.name.isEmpty() ? "this author" : poster.name;
 
-        new AlertDialog.Builder(host)
+        new com.harvana.app.ui.SheetDialog.Builder(host)
                 .setTitle("Gift " + who)
                 .setItems(LABELS, (d, which) -> confirm(host, contentId, poster, me, who, AMOUNTS[which]))
                 .setNegativeButton("Cancel", null)

@@ -135,7 +135,7 @@ public class WalletListActivity extends AppCompatActivity {
 	}
 	
 	private void showAddWalletChooser() {
-		new AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Add a Wallet")
 		.setItems(new String[]{"Create New Wallet", "Restore Existing Wallet"}, (dialog, which) -> {
 			if (which == 0) {
@@ -166,7 +166,7 @@ public class WalletListActivity extends AppCompatActivity {
 	}
 	
 	private void showWalletOptions(WalletListManager.WalletEntry entry) {
-		new AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle(entry.label)
 		.setItems(new String[]{"Rename", "Remove from list"}, (dialog, which) -> {
 			if (which == 0) {
@@ -182,7 +182,7 @@ public class WalletListActivity extends AppCompatActivity {
 		final EditText input = new EditText(this);
 		input.setText(entry.label);
 		input.setSelection(input.getText().length());
-		new AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Rename Wallet")
 		.setView(input)
 		.setPositiveButton("Save", (d, w) -> {
@@ -211,7 +211,7 @@ public class WalletListActivity extends AppCompatActivity {
 			return;
 		}
 		
-		new AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Remove from list?")
 		.setMessage("This only removes " + entry.label + " from this list — its funds and keys are not affected, and you can add it back anytime by restoring it again.")
 		.setPositiveButton("Remove", (d, w) -> {

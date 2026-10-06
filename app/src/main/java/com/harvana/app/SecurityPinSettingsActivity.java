@@ -220,7 +220,7 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 		EditText etInput = dialogView.findViewById(R.id.et_pin_dialog_input);
 		tvMessage.setText(message);
 		
-		new AlertDialog.Builder(this)
+		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setView(dialogView)
 		.setPositiveButton("Continue", (dialog, which) -> {
 			String entered = etInput.getText().toString().trim();

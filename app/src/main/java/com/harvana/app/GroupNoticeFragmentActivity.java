@@ -272,7 +272,7 @@ public class GroupNoticeFragmentActivity extends Fragment {
 		if (getActivity() == null) return;
 		
 		com.google.android.material.bottomsheet.BottomSheetDialog dialog =
-		new com.google.android.material.bottomsheet.BottomSheetDialog(getActivity());
+		new com.harvana.app.ui.AppSheet(getActivity());
 		int layoutId = getResources().getIdentifier("bottom_sheet_post_notice", "layout", getContext().getPackageName());
 		if (layoutId == 0) {
 			SketchwareUtil.showMessage(getContext(), "Error: bottom_sheet_post_notice.xml layout not found!");

@@ -348,7 +348,7 @@ public class HistoryFragmentActivity extends Fragment {
 	private void _showExportOptionsBottomSheet() {
 		if (getContext() == null) return;
 		final com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog = 
-		new com.google.android.material.bottomsheet.BottomSheetDialog(getContext());
+		new com.harvana.app.ui.AppSheet(getContext());
 		View sheetView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_export_options, null);
 		bottomSheetDialog.setContentView(sheetView);
 		

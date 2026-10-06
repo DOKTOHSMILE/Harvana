@@ -135,7 +135,7 @@ public final class NodePayActions {
         lockDays.setHint("Lock for how many days? Leave empty for a flexible line");
         lockDays.setInputType(InputType.TYPE_CLASS_NUMBER);
         box.addView(lockDays);
-        new AlertDialog.Builder(c.activity).setTitle("Start my savings line")
+        new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle("Start my savings line")
                 .setMessage("A flexible line can be withdrawn after the admin approves. A locked line cannot be touched before its date.")
                 .setView(box).setNegativeButton("Cancel", null)
                 .setPositiveButton("Start", (d, w) -> {
@@ -159,7 +159,7 @@ public final class NodePayActions {
             EditText days = new EditText(c.activity);
             days.setHint("How many days to save now?");
             days.setInputType(InputType.TYPE_CLASS_NUMBER);
-            new AlertDialog.Builder(c.activity).setTitle("Save several days").setView(days).setNegativeButton("Cancel", null)
+            new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle("Save several days").setView(days).setNegativeButton("Cancel", null)
                     .setPositiveButton("Save", (d, w) -> {
                         int n = 0;
                         try { n = Integer.parseInt(days.getText().toString().trim()); } catch (Exception ignored) { }
@@ -180,7 +180,7 @@ public final class NodePayActions {
         EditText e = new EditText(c.activity);
         e.setHint(hint);
         e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        new AlertDialog.Builder(c.activity).setTitle(title).setView(e).setNegativeButton("Cancel", null)
+        new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle(title).setView(e).setNegativeButton("Cancel", null)
                 .setPositiveButton("Continue", (d, w) -> {
                     long raw = CircleUi.toRaw(e.getText().toString());
                     if (raw <= 0) { toast(c, "Enter an amount."); return; }
@@ -203,7 +203,7 @@ public final class NodePayActions {
         EditText text = new EditText(c.activity);
         text.setHint(textHint);
         box.addView(text);
-        new AlertDialog.Builder(c.activity).setTitle(title).setView(box).setNegativeButton("Cancel", null)
+        new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle(title).setView(box).setNegativeButton("Cancel", null)
                 .setPositiveButton("Send", (d, w) -> {
                     long raw = CircleUi.toRaw(amount.getText().toString());
                     String t = text.getText().toString().trim();

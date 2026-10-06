@@ -297,7 +297,7 @@ public class DiscoverFragmentActivity extends Fragment {
 		if (getActivity() == null) return;
 		
 		com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog = 
-		new com.google.android.material.bottomsheet.BottomSheetDialog(getActivity());
+		new com.harvana.app.ui.AppSheet(getActivity());
 		
 		// Root layout for the bottom sheet configured to match parent height
 		android.widget.LinearLayout layout = new android.widget.LinearLayout(getActivity());

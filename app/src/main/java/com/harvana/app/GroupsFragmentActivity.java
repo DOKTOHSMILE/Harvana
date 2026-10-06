@@ -162,7 +162,7 @@ public class GroupsFragmentActivity extends Fragment {
 		final EditText input = new EditText(getContext());
 		input.setHint("CIRC-…");
 		input.setSingleLine(true);
-		new androidx.appcompat.app.AlertDialog.Builder(getContext())
+		new com.harvana.app.ui.SheetDialog.Builder(getContext())
 				.setTitle("Open a circle")
 				.setMessage("Paste the circle ID someone shared with you.")
 				.setView(input)

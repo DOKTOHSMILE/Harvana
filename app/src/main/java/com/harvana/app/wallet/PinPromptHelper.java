@@ -132,7 +132,7 @@ public final class PinPromptHelper {
         context.getResources().getIdentifier("tv_pin_dialog_error", "id", context.getPackageName()));
         tvMessage.setText(message);
 
-        AlertDialog dialog = ThemedDialogs.alert(context)
+        com.harvana.app.ui.SheetDialog dialog = ThemedDialogs.alert(context)
         .setView(dialogView)
         .setPositiveButton("Confirm", null)
         .setNegativeButton("Cancel", null)
@@ -140,7 +140,7 @@ public final class PinPromptHelper {
 
         dialog.setOnShowListener(d -> {
             ThemedDialogs.paintButtons(dialog);
-            Button confirmButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            Button confirmButton = dialog.getButton(com.harvana.app.ui.SheetDialog.BUTTON_POSITIVE);
             confirmButton.setOnClickListener(v -> {
                 String entered = etInput.getText().toString().trim();
                 long locked = SecureWalletStorage.pinLockRemainingMs(context);

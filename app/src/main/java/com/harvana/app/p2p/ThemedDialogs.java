@@ -33,21 +33,9 @@ public final class ThemedDialogs {
 
 	private ThemedDialogs() {}
 
-	public static AlertDialog.Builder alert(Context context) {
-		TypedValue tv = new TypedValue();
-		int theme = R.style.HarvanaAlertDialog;
-		if (context.getTheme().resolveAttribute(androidx.appcompat.R.attr.alertDialogTheme, tv, true) && tv.resourceId != 0) {
-			theme = tv.resourceId;
-		}
-		return new AlertDialog.Builder(context, theme) {
-			@Override
-			public AlertDialog show() {
-				AlertDialog dialog = create();
-				dialog.setOnShowListener(d -> paintButtons(dialog));
-				dialog.show();
-				return dialog;
-			}
-		};
+	/** An alert, shown as a bottom sheet. The builder calls are the same as an alert dialog's. */
+	public static com.harvana.app.ui.SheetDialog.Builder alert(Context context) {
+		return new com.harvana.app.ui.SheetDialog.Builder(context);
 	}
 
 	public static BottomSheetDialog sheet(Context context) {
@@ -57,7 +45,7 @@ public final class ThemedDialogs {
 			&& tv.resourceId != 0) {
 			theme = tv.resourceId;
 		}
-		return new BottomSheetDialog(context, theme);
+		return new com.harvana.app.ui.AppSheet(context, theme);
 	}
 
 	public static int surface(Context context) {
@@ -182,26 +170,10 @@ public final class ThemedDialogs {
 		input.setHintTextColor(onSurfaceVariant(context));
 	}
 
-	/** Force AlertDialog action buttons to the accent colour after show() —
-	 *  some OEM overlays still ignore buttonBarPositiveButtonStyle. */
-	public static void paintButtons(AlertDialog dialog) {
-		if (dialog == null) return;
-		int accent = accent(dialog.getContext());
-		if (dialog.getButton(AlertDialog.BUTTON_POSITIVE) != null) {
-			dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(accent);
-		}
-		if (dialog.getButton(AlertDialog.BUTTON_NEGATIVE) != null) {
-			dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(accent);
-		}
-		if (dialog.getButton(AlertDialog.BUTTON_NEUTRAL) != null) {
-			dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(accent);
-		}
-	}
+	/** Kept for older callers: the sheet's buttons are already painted in the accent colour. */
+	public static void paintButtons(Object dialog) { }
 
-	public static AlertDialog show(AlertDialog.Builder builder) {
-		AlertDialog dialog = builder.create();
-		dialog.setOnShowListener(d -> paintButtons(dialog));
-		dialog.show();
-		return dialog;
+	public static com.harvana.app.ui.SheetDialog show(com.harvana.app.ui.SheetDialog.Builder builder) {
+		return builder.show();
 	}
 }

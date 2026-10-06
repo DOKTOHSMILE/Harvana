@@ -366,7 +366,7 @@ public final class SettingsSections {
         TextView t = text(sb.toString().trim(), 14, false, UiColors.textPrimary());
         int p = (int) (20 * d);
         t.setPadding(p, p / 2, p, p / 2);
-        final androidx.appcompat.app.AlertDialog[] dlg = new androidx.appcompat.app.AlertDialog[1];
+        final com.harvana.app.ui.SheetDialog[] dlg = new com.harvana.app.ui.SheetDialog[1];
         LinearLayout box = new LinearLayout(a);
         box.setOrientation(LinearLayout.VERTICAL);
         box.addView(t);
@@ -384,7 +384,7 @@ public final class SettingsSections {
         }
         ScrollView sv = new ScrollView(a);
         sv.addView(box);
-        androidx.appcompat.app.AlertDialog.Builder b = new androidx.appcompat.app.AlertDialog.Builder(a).setTitle(name).setView(sv)
+        com.harvana.app.ui.SheetDialog.Builder b = new com.harvana.app.ui.SheetDialog.Builder(a).setTitle(name).setView(sv)
             .setPositiveButton("Close", null);
         if (viewerIsAdmin && !me && !admin && !uid.isEmpty()) {
             b.setNeutralButton("Make admin", (dl, w) -> host.makeAdmin(uid, name));
@@ -454,7 +454,7 @@ public final class SettingsSections {
         t.setPadding(p, p / 2, p, p / 2);
         ScrollView sv = new ScrollView(a);
         sv.addView(t);
-        new androidx.appcompat.app.AlertDialog.Builder(a).setTitle("Group contract").setView(sv).setPositiveButton("Close", null).show();
+        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Group contract").setView(sv).setPositiveButton("Close", null).show();
     }
 
     private static String str(Map<String, Object> m, String k, String fb) {

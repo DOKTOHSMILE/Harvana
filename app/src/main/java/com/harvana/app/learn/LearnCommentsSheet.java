@@ -24,7 +24,7 @@ public final class LearnCommentsSheet {
     private LearnCommentsSheet() {}
 
     public static void show(Activity host, String contentId, Runnable onPosted) {
-        BottomSheetDialog sheet = new BottomSheetDialog(host);
+        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(host);
         LinearLayout root = new LinearLayout(host);
         root.setOrientation(LinearLayout.VERTICAL);
         int pad = dp(host, 18);

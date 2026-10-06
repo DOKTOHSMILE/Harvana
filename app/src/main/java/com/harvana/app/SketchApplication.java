@@ -83,7 +83,10 @@ public class SketchApplication extends Application {
                     if (!privateDir.exists()) privateDir.mkdirs();
                     File privateCrashFile = new File(privateDir, fileName);
                     FileWriter privWriter = new FileWriter(privateCrashFile);
-                    privWriter.append("FATAL CRASH DETECTED:\n\n").append(stackTrace);
+                    com.harvana.app.utils.CrashExplainer.Result why = com.harvana.app.utils.CrashExplainer.explain(stackTrace);
+                    privWriter.append("FATAL CRASH DETECTED:\n\nCrash meaning:\n").append(why.meaning)
+                            .append(why.where.isEmpty() ? "" : "\nWhere: " + why.where)
+                            .append("\n\nCrash message:\n").append(stackTrace);
                     privWriter.flush();
                     privWriter.close();
                 } catch (Exception e) {

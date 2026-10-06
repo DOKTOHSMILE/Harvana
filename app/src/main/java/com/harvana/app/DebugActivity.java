@@ -22,6 +22,8 @@ import android.widget.Toast;
 public class DebugActivity extends Activity {
 
     private String crashLog = "";
+    private String meaningReport = "";
+    private TextView meaningWhere, meaningText, adviceText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,47 @@ public class DebugActivity extends Activity {
         subtitleText.setLayoutParams(subtitleParams);
         rootLayout.addView(subtitleText);
 
+        // 2b. Plain-English card: what went wrong, where, and what to try.
+        LinearLayout meaningCard = new LinearLayout(this);
+        meaningCard.setOrientation(LinearLayout.VERTICAL);
+        meaningCard.setPadding(p16, p16, p16, p16);
+        GradientDrawable meaningBg = new GradientDrawable();
+        meaningBg.setColor(0xFF131F33);
+        meaningBg.setCornerRadius(12 * density);
+        meaningBg.setStroke(1, 0xFF1E2D4A);
+        meaningCard.setBackground(meaningBg);
+        LinearLayout.LayoutParams meaningParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        meaningParams.setMargins(0, 0, 0, p16);
+        meaningCard.setLayoutParams(meaningParams);
+
+        TextView meaningLabel = new TextView(this);
+        meaningLabel.setText("Crash meaning:");
+        meaningLabel.setTextColor(0xFF7DD3FC);
+        meaningLabel.setTextSize(12f);
+        meaningLabel.setTypeface(null, android.graphics.Typeface.BOLD);
+        meaningCard.addView(meaningLabel);
+
+        meaningText = new TextView(this);
+        meaningText.setTextColor(Color.WHITE);
+        meaningText.setTextSize(15f);
+        meaningText.setTextIsSelectable(true);
+        meaningText.setPadding(0, (int) (6 * density), 0, 0);
+        meaningCard.addView(meaningText);
+
+        meaningWhere = new TextView(this);
+        meaningWhere.setTextColor(0xFF8C9BAE);
+        meaningWhere.setTextSize(12.5f);
+        meaningWhere.setPadding(0, (int) (10 * density), 0, 0);
+        meaningCard.addView(meaningWhere);
+
+        adviceText = new TextView(this);
+        adviceText.setTextColor(0xFFB6E3C2);
+        adviceText.setTextSize(13f);
+        adviceText.setPadding(0, (int) (10 * density), 0, 0);
+        meaningCard.addView(adviceText);
+        rootLayout.addView(meaningCard);
+
         // 3. Error Log Card Container (Rounded Card UI)
         LinearLayout cardLayout = new LinearLayout(this);
         cardLayout.setOrientation(LinearLayout.VERTICAL);
@@ -77,6 +120,15 @@ public class DebugActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f); // Weight 1 to expand
         cardParams.setMargins(0, 0, 0, p16);
         cardLayout.setLayoutParams(cardParams);
+
+        // The raw message, for the developer, under its own tag.
+        TextView messageLabel = new TextView(this);
+        messageLabel.setText("Crash message:");
+        messageLabel.setTextColor(0xFFFF9B9B);
+        messageLabel.setTextSize(12f);
+        messageLabel.setTypeface(null, android.graphics.Typeface.BOLD);
+        messageLabel.setPadding(0, 0, 0, (int) (8 * density));
+        cardLayout.addView(messageLabel);
 
         // Error TextView
         TextView errorText = new TextView(this);
@@ -102,7 +154,7 @@ public class DebugActivity extends Activity {
             public void onClick(View v) {
                 if (!crashLog.isEmpty()) {
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("Crash Log", crashLog);
+                    ClipData clip = ClipData.newPlainText("Crash Log", meaningReport + "Crash message:\n" + crashLog);
                     clipboard.setPrimaryClip(clip);
                     Toast.makeText(DebugActivity.this, "Crash log copied to clipboard", Toast.LENGTH_SHORT).show();
                 } else {
@@ -143,7 +195,16 @@ public class DebugActivity extends Activity {
 
         if (crashLog != null && !crashLog.isEmpty()) {
             errorText.setText(crashLog);
+            com.harvana.app.utils.CrashExplainer.Result r = com.harvana.app.utils.CrashExplainer.explain(crashLog);
+            meaningText.setText(r.meaning);
+            meaningWhere.setText(r.where.isEmpty() ? "" : "Where: " + r.where);
+            meaningWhere.setVisibility(r.where.isEmpty() ? View.GONE : View.VISIBLE);
+            adviceText.setText(r.advice);
+            meaningReport = "Crash meaning:\n" + r.meaning + (r.where.isEmpty() ? "" : "\nWhere: " + r.where) + "\n\n";
         } else {
+            meaningText.setText("No crash was recorded for this run.");
+            meaningWhere.setVisibility(View.GONE);
+            adviceText.setVisibility(View.GONE);
             errorText.setText("No active crash logs found in memory.\n\nIf you experienced a silent crash, check your device storage or internal IDE folder under Android/data/com.harvana.app/files/CrashLogs.");
         }
     }

@@ -239,7 +239,7 @@ public final class StakingPanel {
 
     private void setupAssetSpinner() {
         assetAdapter = new ArrayAdapter<String>(
-                host, android.R.layout.simple_spinner_item, assetDisplayNames) {
+                host, com.harvana.app.R.layout.spinner_item, assetDisplayNames) {
             @NonNull
             @Override
             public View getView(int pos, View convertView, @NonNull ViewGroup parent) {
@@ -259,7 +259,7 @@ public final class StakingPanel {
                 return tv;
             }
         };
-        assetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        assetAdapter.setDropDownViewResource(com.harvana.app.R.layout.spinner_dropdown_item);
         spAsset.setAdapter(assetAdapter);
     }
 

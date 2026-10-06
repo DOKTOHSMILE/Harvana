@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: spinner text and lists follow the theme everywhere
+
+What the app does. Every drop-down picker in the app (Location country, state and city on group creation and profile, the Learn category, asset pickers, sort, frequency, visibility and the rest) now shows its selected value and its list in the palette's text colour on the surface colour, so it is readable in both the light and dark theme. Before, the value could come out dark grey on the dark page, which made the Location pickers on "New goal group" look empty. Two layouts (`spinner_item`, `spinner_dropdown_item`) now replace Android's stock ones in all 27 places an adapter was built, and a theme style gives every list a surface background and an accent highlight. What you do: install the new build.
+
 ## 6 Oct 2026: contract pages no longer repeat each other
 
 What the app does. The group contract pages say each thing once. The "money rules" page is gone for goal and savings groups (its contribution, payout rule and withdrawal lines were already on the "In short" and "where the money goes" pages) and now only appears for a circle that has a grace period, penalty or commission. The "About" page no longer repeats who the admin is, the "How Harvana keeps it safe" page no longer repeats that you sign with your wallet or the circle bond, the worked example is one or two lines of numbers (a savings group has none), the treasurer line no longer repeats the voting weights, and "Words explained" lists only words no earlier page explains. What you do: install the new build. Contracts people already signed stay valid.

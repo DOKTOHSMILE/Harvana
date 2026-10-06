@@ -349,7 +349,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		}
 		
 		ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
-		this, android.R.layout.simple_spinner_dropdown_item, CATEGORIES);
+		this, com.harvana.app.R.layout.spinner_dropdown_item, CATEGORIES);
 		spinner_learn_category.setAdapter(categoryAdapter);
 		
 		btn_learn_post.setOnClickListener(v -> _submit());

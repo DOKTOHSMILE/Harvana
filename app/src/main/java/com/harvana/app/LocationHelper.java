@@ -155,10 +155,10 @@ public class LocationHelper {
 	public void setSpinnerData(Spinner spinner, List<String> items) {
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(
 		context,
-		android.R.layout.simple_spinner_item,
+		com.harvana.app.R.layout.spinner_item,
 		items
 		);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		adapter.setDropDownViewResource(com.harvana.app.R.layout.spinner_dropdown_item);
 		spinner.setAdapter(adapter);
 	}
 	

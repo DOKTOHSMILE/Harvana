@@ -4,6 +4,8 @@
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="popupMenuStyle">@style/HarvanaPopupMenu</item>
         <item name="actionOverflowMenuStyle">@style/HarvanaPopupMenu</item>
+        <!-- every spinner list opens on the surface colour with palette text -->
+        <item name="spinnerStyle">@style/HarvanaSpinner</item>
         <!-- one back arrow for every screen -->
         <item name="homeAsUpIndicator">@drawable/ic_nav_back</item>
         <!-- Plain TextViews (titles, subtitles) use the primary text colour instead of a washed-out default -->
@@ -58,11 +60,17 @@
     </style>
     <style name="AppTheme.DebugActivity" parent="AppTheme" />
 
+    <style name="HarvanaSpinner" parent="Widget.AppCompat.Spinner">
+        <item name="android:popupBackground">@color/colorSurface</item>
+        <item name="android:dropDownSelector">@color/colorAccentRipple</item>
+    </style>
+
     <style name="WhiteSpinnerTheme" parent="ThemeOverlay.AppCompat.Dark">
         <item name="android:textColorPrimary">@color/colorTextPrimary</item>
         <item name="android:textColor">@color/colorTextPrimary</item>
         <item name="android:textSize">20sp</item>
         <item name="colorControlNormal">@color/colorTextPrimary</item>
+        <item name="spinnerStyle">@style/HarvanaSpinner</item>
     </style>
 
     <style name="HarvanaTextView" parent="android:Widget.TextView">

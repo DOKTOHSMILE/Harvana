@@ -837,15 +837,15 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 		
 		frequencyList = new ArrayList<>(Arrays.asList("SELECT FREQUENCY", "Daily", "Weekly", "Bi-weekly", "Monthly"));
-		spinner_frequency.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, frequencyList));
-		spinner_frequency_fixed.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, frequencyList));
-		spinner_frequency_accumulative.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, frequencyList));
+		spinner_frequency.setAdapter(new ArrayAdapter<String>(getBaseContext(), com.harvana.app.R.layout.spinner_dropdown_item, frequencyList));
+		spinner_frequency_fixed.setAdapter(new ArrayAdapter<String>(getBaseContext(), com.harvana.app.R.layout.spinner_dropdown_item, frequencyList));
+		spinner_frequency_accumulative.setAdapter(new ArrayAdapter<String>(getBaseContext(), com.harvana.app.R.layout.spinner_dropdown_item, frequencyList));
 		
 		visibilityList = new ArrayList<>(Arrays.asList("SELECT VISIBILITY", "Public", "Private"));
-		spinner_visibility.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, visibilityList));
+		spinner_visibility.setAdapter(new ArrayAdapter<String>(getBaseContext(), com.harvana.app.R.layout.spinner_dropdown_item, visibilityList));
 		
 		ArrayList<String> approvalMethodList = new ArrayList<>(Arrays.asList("Group Admin", "Member Vote (60% required)"));
-		spinner_approval_method.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, approvalMethodList));
+		spinner_approval_method.setAdapter(new ArrayAdapter<String>(getBaseContext(), com.harvana.app.R.layout.spinner_dropdown_item, approvalMethodList));
 		
 		fields_approval_method.setVisibility(switch_require_approval.isChecked() ? View.VISIBLE : View.GONE);
 		switch_require_approval.setOnCheckedChangeListener((buttonView, isChecked) ->
@@ -861,19 +861,19 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		});
 		
 		drawTimingList = new ArrayList<>(Arrays.asList("SELECT DRAW TIMING", "Once at Cycle Start", "Re-draw Each Round"));
-		spinner_draw_timing.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, drawTimingList));
+		spinner_draw_timing.setAdapter(new ArrayAdapter<String>(getBaseContext(), com.harvana.app.R.layout.spinner_dropdown_item, drawTimingList));
 		
 		defaultConsequenceList = new ArrayList<>(Arrays.asList("SELECT CONSEQUENCE", "Warning", "Penalty Fee", "Skip Next Turn", "Remove from Group"));
-		spinner_default_consequence.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, defaultConsequenceList));
+		spinner_default_consequence.setAdapter(new ArrayAdapter<String>(getBaseContext(), com.harvana.app.R.layout.spinner_dropdown_item, defaultConsequenceList));
 		
 		disbursementRuleList = new ArrayList<>(Arrays.asList("SELECT DISBURSEMENT", "All at Once at Goal", "Admin-Triggered", "Released in Milestones", "Emergency Grants"));
-		spinner_disbursement_rule.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, disbursementRuleList));
+		spinner_disbursement_rule.setAdapter(new ArrayAdapter<String>(getBaseContext(), com.harvana.app.R.layout.spinner_dropdown_item, disbursementRuleList));
 		
 		withdrawalRuleList = new ArrayList<>(Arrays.asList("SELECT WITHDRAWAL RULE", "Anytime", "Cycle-End Only"));
-		spinner_withdrawal_rule.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, withdrawalRuleList));
+		spinner_withdrawal_rule.setAdapter(new ArrayAdapter<String>(getBaseContext(), com.harvana.app.R.layout.spinner_dropdown_item, withdrawalRuleList));
 		
 		ArrayList<String> loanInterestPeriodList = new ArrayList<>(Arrays.asList("Daily"));
-		spinner_loan_interest_period.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, loanInterestPeriodList));
+		spinner_loan_interest_period.setAdapter(new ArrayAdapter<String>(getBaseContext(), com.harvana.app.R.layout.spinner_dropdown_item, loanInterestPeriodList));
 		spinner_loan_interest_period.setSelection(0);
 		
 		helper = new LocationHelper(this);

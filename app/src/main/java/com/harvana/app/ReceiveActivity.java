@@ -193,7 +193,7 @@ public class ReceiveActivity extends AppCompatActivity {
 		assetList.add((com.harvana.app.CoinInfo.name() + " (" + com.harvana.app.CoinInfo.ticker() + ")"));
 		
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-		this, android.R.layout.simple_spinner_item, assetList) {
+		this, com.harvana.app.R.layout.spinner_item, assetList) {
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				TextView tv = (TextView) super.getView(position, convertView, parent);
@@ -212,7 +212,7 @@ public class ReceiveActivity extends AppCompatActivity {
 				return tv;
 			}
 		};
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		adapter.setDropDownViewResource(com.harvana.app.R.layout.spinner_dropdown_item);
 		if (spinnerAssets != null) spinnerAssets.setAdapter(adapter);
 	}
 	

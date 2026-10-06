@@ -319,7 +319,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		final ArrayList<String> assetDisplayNames = new ArrayList<>();
 		
 		final ArrayAdapter<String> assetAdapter = new ArrayAdapter<String>(
-		this, android.R.layout.simple_spinner_item, assetDisplayNames) {
+		this, com.harvana.app.R.layout.spinner_item, assetDisplayNames) {
 			@NonNull
 			@Override
 			public View getView(int pos, View convertView, @NonNull ViewGroup parent) {
@@ -340,7 +340,7 @@ public class SendAssetActivity extends AppCompatActivity {
 				return tv;
 			}
 		};
-		assetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		assetAdapter.setDropDownViewResource(com.harvana.app.R.layout.spinner_dropdown_item);
 		if (spAsset != null) spAsset.setAdapter(assetAdapter);
 		
 		com.harvana.app.sync.HarvanaNodeClient.getWallet(myAddress,

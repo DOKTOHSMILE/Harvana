@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A row in a spinner's list. Palette colours, a surface background and a comfortable touch height. -->
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:minHeight="48dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:singleLine="true"
+    android:ellipsize="end"
+    android:background="@color/colorSurface"
+    android:textColor="@color/colorTextPrimary"
+    android:textSize="15sp" />

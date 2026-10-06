@@ -447,17 +447,17 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		if (groupId == null) groupId = "";
 		
 		String[] visibilityOptions = new String[]{"Public", "Private", "Invite-only"};
-		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, visibilityOptions);
+		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, com.harvana.app.R.layout.spinner_dropdown_item, visibilityOptions);
 		spinVisibility.setAdapter(adapter);
 		
 		// Same option sets as CreateNewGroupActivity's own disbursement/
 		// withdrawal spinners, so a value saved here means the same thing
 		// there and vice versa.
 		String[] disbursementOptions = new String[]{"All at Once at Goal", "Admin-Triggered"};
-		spinDisbursementRule.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, disbursementOptions));
+		spinDisbursementRule.setAdapter(new ArrayAdapter<>(this, com.harvana.app.R.layout.spinner_dropdown_item, disbursementOptions));
 		
 		String[] withdrawalOptions = new String[]{"Anytime", "Cycle-End Only"};
-		spinWithdrawalRule.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, withdrawalOptions));
+		spinWithdrawalRule.setAdapter(new ArrayAdapter<>(this, com.harvana.app.R.layout.spinner_dropdown_item, withdrawalOptions));
 		
 		_setupGroupNotificationToggles();
 		

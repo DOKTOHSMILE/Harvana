@@ -281,7 +281,7 @@ public class DiscoverFragmentActivity extends Fragment {
 		_loadPublicGroups();
 		ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(
 		getContext(),
-		android.R.layout.simple_spinner_dropdown_item,
+		com.harvana.app.R.layout.spinner_dropdown_item,
 		new String[]{"Most Members", "On network", "Newest"});
 		sp_sort.setAdapter(sortAdapter);
 	}

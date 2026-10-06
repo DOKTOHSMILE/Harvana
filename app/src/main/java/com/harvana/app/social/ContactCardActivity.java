@@ -121,7 +121,7 @@ public class ContactCardActivity extends AppCompatActivity {
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setPadding(0, SocialUi.dp(this, 6), 0, 0);
         Spinner sp = new Spinner(this);
-        sp.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, ContactLinks.TYPES));
+        sp.setAdapter(new ArrayAdapter<>(this, com.harvana.app.R.layout.spinner_dropdown_item, ContactLinks.TYPES));
         for (int i = 0; i < ContactLinks.TYPES.length; i++) if (ContactLinks.TYPES[i].equals(type)) sp.setSelection(i);
         row.addView(sp, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.1f));
         EditText val = SocialUi.edit(this, "Username or number");

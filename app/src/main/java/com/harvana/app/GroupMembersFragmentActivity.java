@@ -942,7 +942,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 		ArrayList<String> reasons = new ArrayList<>(Arrays.asList(
 		"Select a reason", "Scam", "Fraud", "Misconduct", "Bad behavior", "Other"));
 		if (reasonSpinner != null) {
-			reasonSpinner.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, reasons));
+			reasonSpinner.setAdapter(new ArrayAdapter<>(getContext(), com.harvana.app.R.layout.spinner_dropdown_item, reasons));
 		}
 		
 		if (btnCancel != null) btnCancel.setOnClickListener(v -> dialog.dismiss());

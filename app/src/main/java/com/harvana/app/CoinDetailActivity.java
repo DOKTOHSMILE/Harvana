@@ -587,7 +587,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		final List<String> assetList = new ArrayList<>();
 		assetList.add((com.harvana.app.CoinInfo.name() + " (" + com.harvana.app.CoinInfo.ticker() + ")"));
 		
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, assetList) {
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, com.harvana.app.R.layout.spinner_item, assetList) {
 			@NonNull
 			@Override
 			public View getView(int position, View convertView, @NonNull ViewGroup parent) {
@@ -607,7 +607,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 				return tv;
 			}
 		};
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		adapter.setDropDownViewResource(com.harvana.app.R.layout.spinner_dropdown_item);
 		if (spinnerAssets != null) spinnerAssets.setAdapter(adapter);
 		
 		View.OnClickListener copyListener = v -> {

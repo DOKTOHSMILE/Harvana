@@ -327,8 +327,15 @@ public final class HarvanaNodeClient {
 	
 	public static void submitP2PCancelListing(String listingId, String sellerAddress, long nonce,
 	String signatureB64, String publicKeyB64, JsonCallback cb) {
+		submitP2PCancelListing(listingId, sellerAddress, nonce, signatureB64, publicKeyB64, null, cb);
+	}
+	
+	/** feeTxHash: the network-fee transfer that pays for the cancellation (the node refuses without it). */
+	public static void submitP2PCancelListing(String listingId, String sellerAddress, long nonce,
+	String signatureB64, String publicKeyB64, String feeTxHash, JsonCallback cb) {
 		try {
 			JSONObject body = new JSONObject();
+			if (feeTxHash != null) body.put("feeTxHash", feeTxHash);
 			body.put("listingId",     listingId);
 			body.put("sellerAddress", sellerAddress);
 			body.put("nonce",         nonce);

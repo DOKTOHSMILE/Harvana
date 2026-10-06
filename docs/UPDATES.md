@@ -554,3 +554,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 - Claiming staking rewards, unstaking, claiming a savings payout, withdrawing a circle bond and requesting a goal payout now each charge a network fee from your own wallet, like a send does. You need a little HARV in the wallet or the action is refused with "Network fee not paid".
 - The app sends a tiny fee transfer first (history shows it as "Network fee · For claiming staking rewards" with a receipt icon), then the action. The fee success sheet is not shown; the action's own sheet is.
 - Stakes already paid gas.
+
+## One fee rule everywhere (needs the node jar with the fee policy)
+- Loan requests, goal-group requests and votes that can release money, and cancelling a P2P listing now also pay the network fee from your wallet first (history shows "Network fee"), the same as claims and unstakes. Creating a savings or goal group also charges gas on its creation fee, like circles.

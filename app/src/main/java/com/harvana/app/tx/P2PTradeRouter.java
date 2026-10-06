@@ -144,9 +144,19 @@ public final class P2PTradeRouter {
 				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String canonical = "P2P_CANCEL_LISTING:" + listingId + ":" + sellerAddress + ":" + nonce;
 				
-				_signAndSubmit(context, sellerAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
-				HarvanaNodeClient.submitP2PCancelListing(listingId, sellerAddress, nonce, sigB64, pubKeyB64,
-				_wrap(cb)));
+				// No action is free: the fee transfer first (the wallet must hold HARV), then the cancellation.
+				TransactionRouter.routeTransaction(context, sellerAddress, sellerAddress,
+				new java.math.BigDecimal("0.00000001"), null, "ACTION_FEE:P2P_CANCEL_LISTING:" + nonce,
+				new TransactionRouter.RouterCallback() {
+					@Override public void onSuccess(String feeTxHash) {
+						_signAndSubmit(context, sellerAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
+						HarvanaNodeClient.submitP2PCancelListing(listingId, sellerAddress, nonce, sigB64, pubKeyB64,
+						feeTxHash, _wrap(cb)));
+					}
+					@Override public void onError(String code, String msg) {
+						callback.onError("Network fee not paid. Every action needs a small fee in HARV from your wallet. " + (msg == null ? "" : msg));
+					}
+				});
 			}
 			
 			@Override

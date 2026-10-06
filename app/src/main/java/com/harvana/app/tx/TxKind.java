@@ -27,7 +27,7 @@ public final class TxKind {
             String what = parts.length > 1 ? parts[1] : "";
             String label = what.startsWith("STAKING_CLAIM") ? "claiming staking rewards" : what.startsWith("STAKING_UNSTAKE") ? "unstaking"
                     : what.startsWith("ACCUM_CLAIM") ? "a savings payout" : what.startsWith("CIRCLE_WITHDRAW") ? "withdrawing a bond"
-                    : what.startsWith("FIXED_DISBURSE") ? "a goal payout" : "an action";
+                    : what.startsWith("FIXED_DISBURSE") ? "a goal payout" : what.startsWith("FIXED_") ? "a goal group action" : what.startsWith("GENLOAN") ? "a loan request" : what.startsWith("P2P_CANCEL") ? "cancelling a listing" : "an action";
             return new TxKind("Network fee", "For " + label, R.drawable.ic_tx_fee);
         }
         if (m.startsWith("STAKE_LOCK:")) {

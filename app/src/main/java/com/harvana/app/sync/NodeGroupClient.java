@@ -621,6 +621,12 @@ public final class NodeGroupClient {
             case "/api/v1/accum/claim": return "ACCUM_CLAIM";
             case "/api/v1/circle/withdraw-bond": return "CIRCLE_WITHDRAW";
             case "/api/v1/fixed/request-disbursement": return "FIXED_DISBURSE";
+            case "/api/v1/fixed/request-milestone": return "FIXED_REQUEST_MILESTONE";
+            case "/api/v1/fixed/request-grant": return "FIXED_REQUEST_GRANT";
+            case "/api/v1/fixed/vote-disbursement": return "FIXED_VOTE_DISBURSEMENT";
+            case "/api/v1/fixed/vote-milestone": return "FIXED_VOTE_MILESTONE";
+            case "/api/v1/fixed/vote-grant": return "FIXED_VOTE_GRANT";
+            case "/api/v1/genloan/request": return "GENLOAN_REQUEST";
             default: return null;
         }
     }

@@ -24,8 +24,10 @@
 				android:layout_height="48dp"
 				android:padding="12dp"
 				android:background="?attr/selectableItemBackgroundBorderless"
-				android:src="@drawable/icon_arrow_back_round"
+				android:src="@drawable/ic_arrow_back"
+				android:contentDescription="Back"
 				android:scaleType="centerInside"
+				app:tint="@color/colorTextPrimary"
 				android:layout_marginStart="4dp" />
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/cardview3"

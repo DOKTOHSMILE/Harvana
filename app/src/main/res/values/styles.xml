@@ -2,6 +2,8 @@
 <resources>
 
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- one back arrow for every screen -->
+        <item name="homeAsUpIndicator">@drawable/ic_nav_back</item>
         <!-- Plain TextViews (titles, subtitles) use the primary text colour instead of a washed-out default -->
         <item name="android:textViewStyle">@style/HarvanaTextView</item>
         <item name="appBarColor">@color/colorAccent</item>

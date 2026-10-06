@@ -10,14 +10,15 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
+        android:theme="@style/AppTheme.AppBarOverlay"
         app:elevation="0dp">
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="?attr/appBarColor"
             app:title="Harvana Protocol"
-            app:titleTextColor="@color/colorTextPrimary"/>
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView

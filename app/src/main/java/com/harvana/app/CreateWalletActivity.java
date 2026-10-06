@@ -107,6 +107,10 @@ public class CreateWalletActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		// The layout's toolbar was never installed as the action bar, so this screen had no back arrow and no title.
+		setSupportActionBar(toolbar);
+		if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		toolbar.setNavigationOnClickListener(v -> finish());
 		com.harvana.app.utils.AppBar.header(this, "Create wallet", "Your new seed phrase", R.id.tv_title);
 	}
 	

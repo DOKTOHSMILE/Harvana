@@ -77,7 +77,7 @@
 								android:layout_width="18dp"
 								android:layout_height="18dp"
 								android:scaleType="centerInside"
-								android:src="@android:drawable/ic_menu_search"
+								android:src="@drawable/icon_search_twotone"
 								app:tint="@color/colorTextTertiary" />
 							<TextView
 								android:id="@+id/tv_search"

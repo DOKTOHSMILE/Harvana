@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Harvana duotone icon: line over a soft fill. Shape from Fluent UI System Icons "search" (MIT, see docs/THIRD_PARTY_NOTICES.md). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-	android:width="24dp" android:height="24dp"
-	android:viewportWidth="24" android:viewportHeight="24">
-	<path android:fillColor="#FFFFFFFF" android:pathData="M15.5,14h-0.79l-0.28,-0.27A6.47,6.47 0,0 0,16 9.5 6.5,6.5 0,1 0,9.5 16c1.61,0 3.09,-0.59 4.23,-1.57l0.27,0.28v0.79l5,4.99L20.49,19l-4.99,-5zM9.5,14C7.01,14 5,11.99 5,9.5S7.01,5 9.5,5 14,7.01 14,9.5 11.99,14 9.5,14zM3.41,2.86L2,4.27l2.1,2.1C3.41,7.36 3,8.39 3,9.5 3,13.09 5.91,16 9.5,16c1.11,0 2.14,-0.41 3.13,-1.1l2.1,2.1 1.41,-1.41L3.41,2.86z" />
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="@color/colorAccent" android:fillAlpha="0.4"
+        android:pathData="M15.8432 17.3679C14.4988 18.392 12.8204 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 12.8768 18.3537 14.6027 17.2715 15.9672L21.6982 20.2841C22.0936 20.6697 22.1015 21.3028 21.7159 21.6982C21.3303 22.0936 20.6972 22.1015 20.3018 21.7159L15.8432 17.3679ZM17 11C17 7.68629 14.3137 5 11 5C7.68629 5 5 7.68629 5 11C5 14.3137 7.68629 17 11 17C14.3137 17 17 14.3137 17 11Z"/>
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M16.1017 17.1624C14.717 18.3101 12.9391 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 12.9391 18.3101 14.717 17.1624 16.1018L21.7803 20.7197C22.0732 21.0126 22.0732 21.4874 21.7803 21.7803C21.4874 22.0732 21.0125 22.0732 20.7196 21.7803L16.1017 17.1624ZM17.5 11C17.5 7.41015 14.5899 4.5 11 4.5C7.41015 4.5 4.5 7.41015 4.5 11C4.5 14.5899 7.41015 17.5 11 17.5C14.5899 17.5 17.5 14.5899 17.5 11Z"/>
 </vector>

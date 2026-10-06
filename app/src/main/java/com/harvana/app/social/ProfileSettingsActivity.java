@@ -87,7 +87,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         sub.setPadding(0, SocialUi.dp(this, 2), 0, 0);
         words.addView(sub);
         row.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        row.addView(SocialUi.text(this, "›", 22, true, UiColors.accent()));
+        row.addView(SocialUi.chevron(this));
         row.setClickable(true);
         row.setOnClickListener(v -> startActivity(new Intent(this, target)));
         card.addView(row);

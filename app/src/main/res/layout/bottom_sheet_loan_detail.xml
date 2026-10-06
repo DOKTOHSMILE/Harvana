@@ -57,8 +57,11 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:padding="8dp"
-			android:text="✕"
-			android:textSize="16sp"
+			android:text=""
+			android:contentDescription="Close"
+			app:icon="@drawable/ic_close"
+			app:iconPadding="0dp"
+			app:iconGravity="textStart"
 			android:focusable="false"
 			android:layout_marginStart="8dp"
 	android:textAllCaps="false"/>

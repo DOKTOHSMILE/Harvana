@@ -104,7 +104,7 @@
 					android:layout_height="22dp"
 					android:padding="2dp"
 					android:scaleType="centerInside"
-					android:src="@android:drawable/ic_menu_send"
+					android:src="@drawable/ic_action_send"
 					android:focusable="false"
 					android:layout_marginStart="12dp"
 					android:contentDescription="CopyAddress"
@@ -125,7 +125,7 @@
 				android:layout_height="250dp"
 				android:layout_margin="20dp"
 				android:scaleType="centerInside"
-				android:src="@android:drawable/ic_menu_camera"
+				android:src="@drawable/ic_camera"
 				android:focusable="false" />
 		</LinearLayout>
 		<TextView

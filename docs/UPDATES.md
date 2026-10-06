@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: new icons across the whole app
+
+What the app does. Every icon in the app (163 of them: bottom bar, buttons, menus, transaction types, profile, wallet, groups, Learn Hub, notifications) is redrawn in one Harvana duotone style: a clean line over a soft gold fill. Where a screen colours an icon, both tones take that colour, so the two-tone look stays. Android's built-in system icons that were still used (info, alert, search, gallery, camera, send, more, and the notification icon) are replaced by the same set, and the text characters used as icons (✕ close, ⋮ menu, › chevrons) are now real icons. Kept as they are: the HARV coin and logo, the launcher icon and the 3D handshake reaction. What you do: install the new build.
+
 ## 6 Oct 2026: handshake reaction on Learn posts
 
 What the app does. The fire reaction on Learn posts is now a handshake: the 3D 🤝 handshake (yellow, as in Fluent Emoji) with a transparent background (Microsoft Fluent Emoji, MIT, see docs/THIRD_PARTY_NOTICES.md), meaning you agree with the author. Before you react it shows in grey (same 3D shape, no colour); when you tap it, it pops and turns yellow. Tap again to take it back. Counts and who reacted are unchanged (same records as before). What you do: install the new build.

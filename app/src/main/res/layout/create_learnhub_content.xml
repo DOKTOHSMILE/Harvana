@@ -201,7 +201,7 @@
 							android:layout_width="36dp"
 							android:layout_height="36dp"
 							android:scaleType="center"
-							android:src="@android:drawable/ic_menu_gallery"
+							android:src="@drawable/icon_gallery"
 							app:tint="@color/colorTextTertiary" />
 						<TextView
 							android:id="@+id/textview30"

@@ -1,1 +1,9 @@
-<?xml version='1.0' encoding='UTF-8' standalone='yes' ?><vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="24.0" android:viewportHeight="24.0"><path android:pathData="M12 1L3 5v6c0 5.55 3.84 10.74 9 12c5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" android:fillColor="#FFFFFF" /></vector>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Harvana duotone icon: line over a soft fill. Shape from Fluent UI System Icons "shield" (MIT, see docs/THIRD_PARTY_NOTICES.md). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="@color/colorAccent" android:fillAlpha="0.4"
+        android:pathData="M3 5.75C3 5.33579 3.33579 5 3.75 5C6.41341 5 9.00797 4.05652 11.55 2.15C11.8167 1.95 12.1833 1.95 12.45 2.15C14.992 4.05652 17.5866 5 20.25 5C20.6642 5 21 5.33579 21 5.75V11C21 16.0012 18.0424 19.6757 12.2749 21.9478C12.0982 22.0174 11.9018 22.0174 11.7251 21.9478C5.95756 19.6757 3 16.0012 3 11V5.75Z"/>
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M3 5.75C3 5.33579 3.33579 5 3.75 5C6.41341 5 9.00797 4.05652 11.55 2.15C11.8167 1.95 12.1833 1.95 12.45 2.15C14.992 4.05652 17.5866 5 20.25 5C20.6642 5 21 5.33579 21 5.75V11C21 16.0012 18.0424 19.6757 12.2749 21.9478C12.0982 22.0174 11.9018 22.0174 11.7251 21.9478C5.95756 19.6757 3 16.0012 3 11V5.75ZM4.5 6.47793V11C4.5 15.2556 6.95337 18.3789 12 20.4419C17.0466 18.3789 19.5 15.2556 19.5 11V6.47793C16.9227 6.32585 14.4192 5.38829 12 3.67782C9.58084 5.38829 7.07735 6.32585 4.5 6.47793Z"/>
+</vector>

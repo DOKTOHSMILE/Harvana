@@ -50,11 +50,10 @@ public class ImageViewerActivity extends AppCompatActivity {
         root.addView(zoom, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         final ProgressBar busy = new ProgressBar(this);
         root.addView(busy, new FrameLayout.LayoutParams((int) (40 * d), (int) (40 * d), Gravity.CENTER));
-        TextView close = new TextView(this);
-        close.setText("✕");
-        close.setTextColor(Color.WHITE);
-        close.setTextSize(20f);
-        close.setGravity(Gravity.CENTER);
+        android.widget.ImageView close = new android.widget.ImageView(this);
+        close.setImageResource(com.harvana.app.R.drawable.ic_close);
+        close.setColorFilter(Color.WHITE);
+        close.setPadding((int) (11 * d), (int) (11 * d), (int) (11 * d), (int) (11 * d));
         close.setBackgroundColor(0x66000000);
         close.setContentDescription("Close");
         close.setOnClickListener(v -> finish());

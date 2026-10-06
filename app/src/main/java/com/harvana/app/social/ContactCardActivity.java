@@ -127,7 +127,11 @@ public class ContactCardActivity extends AppCompatActivity {
         EditText val = SocialUi.edit(this, "Username or number");
         val.setText(value == null || "null".equals(value) ? "" : value);
         row.addView(val, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.6f));
-        MaterialButton rm = SocialUi.button(this, "✕", true);
+        MaterialButton rm = SocialUi.button(this, "", true);
+        rm.setIconResource(com.harvana.app.R.drawable.ic_close);
+        rm.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
+        rm.setIconPadding(0);
+        rm.setContentDescription("Remove");
         rm.setMinWidth(0); rm.setMinimumWidth(0);
         row.addView(rm);
         Object[] entry = {sp, val, row};

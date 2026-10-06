@@ -78,7 +78,7 @@ public class TransactionNotification {
 		try {
 			app.getResources().getDrawable(iconRes, null);
 		} catch (Exception e) {
-			iconRes = android.R.drawable.ic_dialog_info;
+			iconRes = R.drawable.ic_stat_notify;
 		}
 		
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(app, CHANNEL_ID)

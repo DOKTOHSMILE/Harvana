@@ -27,6 +27,16 @@ public final class SocialUi {
         return t;
     }
 
+    /** The row chevron (duotone icon, accent colour) used where a row opens another page. */
+    public static android.widget.ImageView chevron(Context c) {
+        android.widget.ImageView v = new android.widget.ImageView(c);
+        v.setImageResource(com.harvana.app.R.drawable.ic_arrow_right);
+        androidx.core.widget.ImageViewCompat.setImageTintList(v, android.content.res.ColorStateList.valueOf(com.harvana.app.utils.UiColors.accent()));
+        int s = dp(c, 20);
+        v.setLayoutParams(new android.widget.LinearLayout.LayoutParams(s, s));
+        return v;
+    }
+
     public static MaterialButton button(Context c, String label, boolean outlined) {
         MaterialButton b = outlined
             ? new MaterialButton(c, null, com.google.android.material.R.attr.materialButtonOutlinedStyle)

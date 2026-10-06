@@ -169,7 +169,7 @@ public final class NotificationCenter {
         NotificationCompat.Builder b = new NotificationCompat.Builder(c, channel)
             .setContentTitle(it.title).setContentText(it.body)
             .setStyle(new NotificationCompat.BigTextStyle().bigText(it.body))
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(com.harvana.app.R.drawable.ic_stat_notify)
             .setColor(UiColors.accent())
             .setContentIntent(pi).setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH);

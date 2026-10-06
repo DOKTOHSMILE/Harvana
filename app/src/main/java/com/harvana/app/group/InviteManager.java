@@ -184,7 +184,7 @@ public final class InviteManager {
         NotificationCompat.Builder b = new NotificationCompat.Builder(app, CHANNEL)
             .setContentTitle("You're invited to " + group)
             .setContentText(inviter + " invited you. Tap to read the details before you decide.")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(com.harvana.app.R.drawable.ic_stat_notify)
             .setColor(UiColors.accent())
             .setContentIntent(pi)
             .setAutoCancel(true)

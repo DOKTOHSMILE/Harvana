@@ -371,7 +371,7 @@ public class EditProfileActivity extends AppCompatActivity {
         words.addView(SocialUi.text(this, title, 15, true, UiColors.textPrimary()));
         words.addView(SocialUi.text(this, caption, 12, false, UiColors.textSecondary()));
         row.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        row.addView(SocialUi.text(this, "›", 22, true, UiColors.accent()));
+        row.addView(SocialUi.chevron(this));
         row.setClickable(true);
         row.setOnClickListener(v -> startActivity(new Intent(this, target)));
         return row;

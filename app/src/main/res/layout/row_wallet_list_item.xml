@@ -84,7 +84,7 @@
 				android:minWidth="0dp"
 				android:minHeight="0dp"
 				android:padding="0dp"
-				app:icon="@android:drawable/ic_menu_more"
+				app:icon="@drawable/ic_more_vert"
 				app:iconPadding="0dp"
 				app:iconGravity="textStart"
 				app:iconSize="24dp"

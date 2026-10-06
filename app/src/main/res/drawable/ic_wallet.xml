@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Harvana duotone icon: line over a soft fill. Shape from Fluent UI System Icons "wallet" (MIT, see docs/THIRD_PARTY_NOTICES.md). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M21,7.28V5c0,-1.1 -0.9,-2 -2,-2H5c-1.1,0 -2,0.9 -2,2v14c0,1.1 0.9,2 2,2h14c1.1,0 2,-0.9 2,-2v-2.28c0.59,-0.35 1,-0.98 1,-1.72v-4c0,-0.74 -0.41,-1.37 -1,-1.72zM12,12.5h9v3h-9v-3zM5,19V5h14v2H12c-1.1,0 -2,0.9 -2,2v6c0,1.1 0.9,2 2,2h7v2H5z" />
-
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="@color/colorAccent" android:fillAlpha="0.4"
+        android:pathData="M3 5V17.75C3 19.5449 4.45508 21 6.25 21H18.25C20.0449 21 21.5 19.5449 21.5 17.75V9.25C21.5 7.71321 20.4333 6.42555 19 6.08697V5.25C19 4.00736 17.9926 3 16.75 3H5.25C4.09186 3 3.13809 3.87501 3.01373 5H3ZM5.25 6C4.83579 6 4.5 5.66421 4.5 5.25C4.5 4.83579 4.83579 4.5 5.25 4.5H16.75C17.1642 4.5 17.5 4.83579 17.5 5.25V6H5.25ZM16.25 13H18.25C18.6642 13 19 13.3358 19 13.75C19 14.1642 18.6642 14.5 18.25 14.5H16.25C15.8358 14.5 15.5 14.1642 15.5 13.75C15.5 13.3358 15.8358 13 16.25 13Z"/>
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M15.5 13.75C15.5 13.3358 15.8358 13 16.25 13H18.25C18.6642 13 19 13.3358 19 13.75C19 14.1642 18.6642 14.5 18.25 14.5H16.25C15.8358 14.5 15.5 14.1642 15.5 13.75ZM3 5H3.01373C3.13809 3.87501 4.09186 3 5.25 3H16.75C17.9926 3 19 4.00736 19 5.25V6.08697C20.4333 6.42555 21.5 7.71321 21.5 9.25V17.75C21.5 19.5449 20.0449 21 18.25 21H6.25C4.45508 21 3 19.5449 3 17.75V5ZM18.25 7.5H4.5V17.75C4.5 18.7165 5.2835 19.5 6.25 19.5H18.25C19.2165 19.5 20 18.7165 20 17.75V9.25C20 8.2835 19.2165 7.5 18.25 7.5ZM17.5 6V5.25C17.5 4.83579 17.1642 4.5 16.75 4.5H5.25C4.83579 4.5 4.5 4.83579 4.5 5.25C4.5 5.66421 4.83579 6 5.25 6H17.5Z"/>
 </vector>

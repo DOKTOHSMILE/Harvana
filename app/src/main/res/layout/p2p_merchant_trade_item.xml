@@ -69,14 +69,14 @@
 						android:textSize="10sp"
 						android:focusable="false" />
 				</LinearLayout>
-				<TextView
+				<ImageView
 					android:id="@+id/tv_trade_menu"
 					android:layout_width="38dp"
 					android:layout_height="38dp"
-					android:gravity="center_horizontal|center_vertical"
-					android:text="⋮"
-					android:textSize="21sp"
-					android:textColor="@color/colorP2pTextPrimary"
+					android:padding="9dp"
+					android:src="@drawable/ic_more_vert"
+					android:contentDescription="More"
+					app:tint="@color/colorP2pTextPrimary"
 					android:focusable="false" />
 			</LinearLayout>
 			<LinearLayout

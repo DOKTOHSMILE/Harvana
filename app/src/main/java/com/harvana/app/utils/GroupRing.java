@@ -15,6 +15,9 @@ import java.util.Locale;
 public final class GroupRing {
     private GroupRing() {}
 
+    /** The ring is 1dp wide everywhere. */
+    public static final float RING_DP = 1f;
+
     public static final int ROTATING = 0xFF3B82F6, ACCUM = 0xFF10B981, FIXED = 0xFFA855F7, OTHER = 0xFF94A3B8;
 
     public static int color(String groupType) {
@@ -43,7 +46,7 @@ public final class GroupRing {
         g.setColor(fill);
         g.setStroke(ring, color(groupType));
         v.setBackground(g);
-        int gap = ring + Math.round(1.5f * d);                 // a hair of space so the ring reads as a ring, not an outline of the picture
+        int gap = ring + Math.round(1f * d);                 // a hair of space so the ring reads as a ring, not an outline of the picture
         v.setPadding(gap, gap, gap, gap);
         v.setContentDescription("Group type: " + (color(groupType) == OTHER ? "other" : colorName(groupType)));
         v.setClipToOutline(true);
@@ -57,7 +60,7 @@ public final class GroupRing {
      * (0 keeps whatever drawable the view already has). Safe on recycled views: a view that showed a picture before is reset.
      */
     public static void show(ImageView v, String groupType, String photoUrl, int placeholderRes) {
-        apply(v, groupType, 3f, Color.TRANSPARENT);
+        apply(v, groupType, RING_DP, Color.TRANSPARENT);
         try {
             if (photoUrl != null && photoUrl.startsWith("http")) {
                 v.setImageTintList(null);
@@ -71,5 +74,5 @@ public final class GroupRing {
         } catch (Exception ignored) { }
     }
 
-    public static void apply(ImageView v, String groupType) { apply(v, groupType, 3f, Color.TRANSPARENT); }
+    public static void apply(ImageView v, String groupType) { apply(v, groupType, RING_DP, Color.TRANSPARENT); }
 }

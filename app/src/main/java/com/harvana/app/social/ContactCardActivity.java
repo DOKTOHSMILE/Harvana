@@ -120,7 +120,7 @@ public class ContactCardActivity extends AppCompatActivity {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setPadding(0, SocialUi.dp(this, 6), 0, 0);
-        Spinner sp = new Spinner(this);
+        Spinner sp = new com.harvana.app.ui.MaterialSpinner(this);
         sp.setAdapter(new ArrayAdapter<>(this, com.harvana.app.R.layout.spinner_dropdown_item, ContactLinks.TYPES));
         for (int i = 0; i < ContactLinks.TYPES.length; i++) if (ContactLinks.TYPES[i].equals(type)) sp.setSelection(i);
         row.addView(sp, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.1f));

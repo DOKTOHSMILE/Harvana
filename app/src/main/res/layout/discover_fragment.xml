@@ -164,7 +164,7 @@
 							app:cardElevation="0dp"
 							app:cardCornerRadius="12dp"
 	app:strokeWidth="0dp">
-							<Spinner
+							<com.harvana.app.ui.MaterialSpinner
 								android:id="@+id/sp_sort"
 								android:layout_width="match_parent"
 								android:layout_height="match_parent"

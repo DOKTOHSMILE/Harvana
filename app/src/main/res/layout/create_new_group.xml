@@ -554,7 +554,7 @@
 							android:text="Frequency"
 							android:textSize="13sp"
 							android:textStyle="bold" />
-						<Spinner
+						<com.harvana.app.ui.MaterialSpinner
 							android:id="@+id/spinner_frequency"
 							android:layout_width="match_parent"
 							android:layout_height="46dp"
@@ -894,7 +894,7 @@
 								android:text="Draw Timing"
 								android:textSize="13sp"
 								android:textStyle="bold" />
-							<Spinner
+							<com.harvana.app.ui.MaterialSpinner
 								android:id="@+id/spinner_draw_timing"
 								android:layout_width="match_parent"
 								android:layout_height="46dp"
@@ -1165,7 +1165,7 @@
 								android:text="If a Payment Is Missed"
 								android:textSize="12sp"
 								android:textStyle="bold" />
-							<Spinner
+							<com.harvana.app.ui.MaterialSpinner
 								android:id="@+id/spinner_default_consequence"
 								android:layout_width="match_parent"
 								android:layout_height="46dp"
@@ -1223,7 +1223,7 @@
 							android:text="Frequency"
 							android:textSize="13sp"
 							android:textStyle="bold" />
-						<Spinner
+						<com.harvana.app.ui.MaterialSpinner
 							android:id="@+id/spinner_frequency_fixed"
 							android:layout_width="match_parent"
 							android:layout_height="46dp"
@@ -1306,7 +1306,7 @@
 							android:text="Disbursement Rule"
 							android:textSize="13sp"
 							android:textStyle="bold" />
-						<Spinner
+						<com.harvana.app.ui.MaterialSpinner
 							android:id="@+id/spinner_disbursement_rule"
 							android:layout_width="match_parent"
 							android:layout_height="46dp"
@@ -1363,7 +1363,7 @@
 							android:text="Frequency"
 							android:textSize="13sp"
 							android:textStyle="bold" />
-						<Spinner
+						<com.harvana.app.ui.MaterialSpinner
 							android:id="@+id/spinner_frequency_accumulative"
 							android:layout_width="match_parent"
 							android:layout_height="46dp"
@@ -1458,7 +1458,7 @@
 									android:text="Withdrawal Rule"
 									android:textSize="12sp"
 									android:textStyle="bold" />
-								<Spinner
+								<com.harvana.app.ui.MaterialSpinner
 									android:id="@+id/spinner_withdrawal_rule"
 									android:layout_width="match_parent"
 									android:layout_height="46dp"
@@ -1481,7 +1481,7 @@
 								android:text="Charged per day, only for the days a loan is held"
 								android:textSize="12sp"
 								android:textStyle="bold" />
-							<Spinner
+							<com.harvana.app.ui.MaterialSpinner
 								android:id="@+id/spinner_loan_interest_period"
 								android:layout_width="match_parent"
 								android:layout_height="46dp"
@@ -1557,7 +1557,7 @@
 									android:text="State"
 									android:textSize="13sp"
 									android:textStyle="bold" />
-								<Spinner
+								<com.harvana.app.ui.MaterialSpinner
 									android:id="@+id/spinner_state"
 									android:layout_width="match_parent"
 									android:layout_height="46dp"
@@ -1580,7 +1580,7 @@
 									android:text="City / LGA"
 									android:textSize="13sp"
 									android:textStyle="bold" />
-								<Spinner
+								<com.harvana.app.ui.MaterialSpinner
 									android:id="@+id/spinner_city"
 									android:layout_width="match_parent"
 									android:layout_height="46dp"
@@ -1598,7 +1598,7 @@
 							android:text="Visibility"
 							android:textSize="13sp"
 							android:textStyle="bold" />
-						<Spinner
+						<com.harvana.app.ui.MaterialSpinner
 							android:id="@+id/spinner_visibility"
 							android:layout_width="match_parent"
 							android:layout_height="46dp"
@@ -1703,7 +1703,7 @@
 								android:text="Who Reviews New Members\\?"
 								android:textSize="13sp"
 								android:textStyle="bold" />
-							<Spinner
+							<com.harvana.app.ui.MaterialSpinner
 								android:id="@+id/spinner_approval_method"
 								android:layout_width="match_parent"
 								android:layout_height="46dp"

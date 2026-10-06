@@ -791,7 +791,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
     }
 
     private Spinner spinner() {
-        Spinner s = new Spinner(this);
+        Spinner s = new com.harvana.app.ui.MaterialSpinner(this);
         s.setMinimumHeight(dp(48));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(6);

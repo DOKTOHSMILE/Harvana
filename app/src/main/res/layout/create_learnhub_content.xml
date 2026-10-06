@@ -148,7 +148,7 @@
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorCardStroke"
 				app:strokeWidth="1dp">
-				<Spinner
+				<com.harvana.app.ui.MaterialSpinner
 					android:id="@+id/spinner_learn_category"
 					android:layout_width="match_parent"
 					android:layout_height="50dp"

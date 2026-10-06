@@ -175,7 +175,7 @@
 								app:cardElevation="0dp"
 								app:strokeWidth="1dp"
 								app:strokeColor="@color/colorCardStroke">
-								<Spinner
+								<com.harvana.app.ui.MaterialSpinner
 									android:id="@+id/spinVisibility"
 									android:layout_width="120dp"
 									android:layout_height="40dp"
@@ -744,7 +744,7 @@
 								app:cardElevation="0dp"
 								app:strokeWidth="1dp"
 								app:strokeColor="@color/colorCardStroke">
-								<Spinner
+								<com.harvana.app.ui.MaterialSpinner
 									android:id="@+id/spinDisbursementRule"
 									android:layout_width="170dp"
 									android:layout_height="40dp"
@@ -862,7 +862,7 @@
 								app:cardElevation="0dp"
 								app:strokeWidth="1dp"
 								app:strokeColor="@color/colorCardStroke">
-								<Spinner
+								<com.harvana.app.ui.MaterialSpinner
 									android:id="@+id/spinWithdrawalRule"
 									android:layout_width="150dp"
 									android:layout_height="40dp"

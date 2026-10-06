@@ -601,3 +601,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Spacing safety net
 - `utils/SmartSpacing.java` runs on every screen, sheet and dialog: buttons and fields that sit directly against a neighbour in a vertical list get an 8dp gap (12dp after a field); two buttons side by side with no gap get 8dp between them. Layouts that already have spacing, toggle groups, divided lists and views tagged `keep_tight` are left alone.
+
+## Material dropdowns
+- All 27 spinners (plus two built in code) are now `ui/MaterialSpinner`: the Material outlined-field look with rounded outline, surface fill, 52dp touch target and rounded popup. It keeps the normal Spinner behaviour, so choosing and reading values did not change. Inside a card it stays borderless so there is no double outline.

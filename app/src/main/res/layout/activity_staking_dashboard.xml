@@ -295,7 +295,7 @@
                                 android:hint="0.00"/>
                             
                             <!-- Dropdown Spinner for Coin -->
-                            <Spinner
+                            <com.harvana.app.ui.MaterialSpinner
                                 android:id="@+id/spAsset"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"

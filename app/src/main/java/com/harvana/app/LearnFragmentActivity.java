@@ -387,6 +387,8 @@ public class LearnFragmentActivity extends Fragment {
 	
 	private void _initAdapters() {
 		recyclerview1.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+		recyclerview1.setItemAnimator(null);                       // chips must not animate or change width when pressed
+		recyclerview1.setHasFixedSize(true);
 		recyclerview1.setAdapter(new CategoryAdapter(CATEGORIES));
 		
 		recyclerview2.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
@@ -417,13 +419,14 @@ public class LearnFragmentActivity extends Fragment {
 				: androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorSurfaceRaised));
 			}
 			if (holder.label != null) {
-				holder.label.setTextColor(0xFFFFFFFF);
-				holder.label.setAlpha(isSelected ? 1f : 0.8f);
+				holder.label.setTextColor(isSelected ? 0xFFFFFFFF
+					: androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextPrimary));
 			}
 			
 			holder.itemView.setOnClickListener(v -> {
+				String before = selectedCategory;
 				selectedCategory = category;
-				notifyDataSetChanged();
+				for (int i = 0; i < categories.length; i++) if (categories[i].equals(before) || categories[i].equals(category)) notifyItemChanged(i);
 				if (FOR_YOU.equals(category) || LATEST.equals(category)) _rerank();
 				_showWaiting();
 				_show();

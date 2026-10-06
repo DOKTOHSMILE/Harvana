@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: Learn filter chips
+
+What the app does. The Learn filter chips (For you, Latest, categories) now show their text in the page's normal text colour when not selected (it was white on cream in the light theme, so it could not be read), keep one fixed height and bold weight, and no longer animate or change width when pressed. What you do: install the new build.
+
 ## 6 Oct 2026: Devices list
 
 What the app does. Profile, Activity tab, new "Devices" button: a list of the phones the account has been signed in on. This phone is on top ("Signed in now"); under "Other phones" each earlier phone shows its make and model, when it signed in, and when it was signed out (or when it was last seen). The list is kept in the account's own `USERS/{uid}/private/devices` document (one entry per phone, newest twelve), updated whenever a phone opens the app or signs in; a fresh sign-in marks the other phones signed out. Because an account is signed in on one phone at a time, there is no "sign out other sessions" button.

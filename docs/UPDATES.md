@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: one button look across the app
+
+What the app does. Every Material button now defaults to the same look, in bottom sheets and on screens alike: 12dp corners, 48dp tall, bold sentence-case text, filled accent for the main action and an outlined accent edge for the others. Buttons that set their own colours or shape in their layout keep those; the rest, including the cramped "Log out" and "Confirm" buttons on the sheets, now match. Install the build from the latest push: the "Log out" sheet in your screenshot is from the build before the sheet buttons were restyled. What you do: install the new build.
+
 ## 6 Oct 2026: trending groups button shows Pending approval
 
 What the app does. On Home, "Trending Public Groups": the button on each group says "Pending approval" (dimmed) when you have already sent a request to join it, and "Join" when you have not (it used to say "View" for both). Tapping the card still opens the group's page. What you do: install the new build.

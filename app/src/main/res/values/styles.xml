@@ -6,6 +6,8 @@
         <item name="actionOverflowMenuStyle">@style/HarvanaPopupMenu</item>
         <!-- every spinner list opens on the surface colour with palette text -->
         <item name="spinnerStyle">@style/HarvanaSpinner</item>
+        <item name="materialButtonStyle">@style/HarvanaButton</item>
+        <item name="materialButtonOutlinedStyle">@style/HarvanaButton.Outlined</item>
         <!-- one back arrow for every screen -->
         <item name="homeAsUpIndicator">@drawable/ic_nav_back</item>
         <!-- Plain TextViews (titles, subtitles) use the primary text colour instead of a washed-out default -->
@@ -62,6 +64,38 @@
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- One button look for the whole app: 12dp corners, 48dp tall, bold sentence-case text. Filled = accent, outlined = accent edge. -->
+    <style name="HarvanaButton" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">12dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="backgroundTint">@color/colorAccent</item>
+        <item name="android:textColor">@color/colorTextOnAccent</item>
+    </style>
+
+    <style name="HarvanaButton.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="cornerRadius">12dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="strokeColor">@color/colorAccent</item>
+        <item name="strokeWidth">1.5dp</item>
+        <item name="android:textColor">@color/colorAccent</item>
     </style>
 
     <style name="HarvanaSpinner" parent="Widget.AppCompat.Spinner">

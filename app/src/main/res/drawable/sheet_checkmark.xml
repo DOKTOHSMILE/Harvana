@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The tick at the end of a chosen row in a bottom-sheet list. Nothing is drawn when the row is not chosen. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true" android:drawable="@drawable/ic_learn_check" />
+    <item android:drawable="@android:color/transparent" />
+</selector>

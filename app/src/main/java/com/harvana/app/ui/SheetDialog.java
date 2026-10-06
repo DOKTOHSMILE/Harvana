@@ -147,14 +147,11 @@ public class SheetDialog extends AppSheet {
                     row.setMinHeight((int) (50 * dp));
                     row.setGravity(Gravity.CENTER_VERTICAL);
                     row.setPadding(0, 0, 0, 0);
-                    if (singleChoice) {
-                        row.setCheckMarkDrawable(android.R.drawable.btn_radio);
-                        row.setChecked(i == checked);
-                        rows[i] = row;
-                    } else if (multiChecked != null) {
-                        row.setCheckMarkDrawable(android.R.drawable.checkbox_off_background);
-                        row.setCheckMarkDrawable(android.R.drawable.btn_check);
-                        row.setChecked(multiChecked[i]);
+                    if (singleChoice || multiChecked != null) {
+                        row.setCheckMarkDrawable(com.harvana.app.R.drawable.sheet_checkmark);
+                        if (row.getCheckMarkDrawable() != null) row.getCheckMarkDrawable().mutate().setTint(UiColors.accent());
+                        row.setChecked(singleChoice ? i == checked : multiChecked[i]);
+                        if (singleChoice) rows[i] = row;
                     }
                     row.setOnClickListener(v -> {
                         if (multiChecked != null) {

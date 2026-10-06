@@ -12,6 +12,7 @@
 		android:layout_height="match_parent"
 		android:orientation="vertical">
 		<LinearLayout
+			android:tag="bar_top"
 			android:id="@+id/linear57"
 			android:layout_width="match_parent"
 			android:background="@color/colorBackground"

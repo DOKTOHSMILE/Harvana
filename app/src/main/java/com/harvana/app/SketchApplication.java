@@ -29,6 +29,8 @@ public class SketchApplication extends Application {
         // Saved theme (System / Light / Dark) must be applied before any screen is created.
         com.harvana.app.utils.ThemeManager.applySavedTheme(this);
         com.harvana.app.utils.ThemeManager.keepAppContextInSync(this);
+        // App bar, status bar and bottom bar take the colour of the page they are on, on every screen.
+        com.harvana.app.utils.BarMatcher.install(this);
         
         // EXPLICIT INITIALIZATION: Forces Firebase to wake up early
         FirebaseApp.initializeApp(this);

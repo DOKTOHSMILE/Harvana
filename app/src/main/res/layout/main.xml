@@ -48,6 +48,7 @@
 		</FrameLayout>
 		<com.google.android.material.card.MaterialCardView
 			android:id="@+id/cardview2"
+			android:tag="bar_bottom"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			app:cardBackgroundColor="@color/colorBackground"

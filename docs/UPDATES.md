@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: Devices list
+
+What the app does. Profile, Activity tab, new "Devices" button: a list of the phones the account has been signed in on. This phone is on top ("Signed in now"); under "Other phones" each earlier phone shows its make and model, when it signed in, and when it was signed out (or when it was last seen). The list is kept in the account's own `USERS/{uid}/private/devices` document (one entry per phone, newest twelve), updated whenever a phone opens the app or signs in; a fresh sign-in marks the other phones signed out. Because an account is signed in on one phone at a time, there is no "sign out other sessions" button.
+
+What you do. Install the new build. No rules change (the existing owner-only rule for `USERS/{uid}/private/{doc}` covers it). Phones on an older build do not appear until they update.
+
 ## 6 Oct 2026: app activity feeds the trust score (liveness check)
 
 What the app does. The activity the app counts on the phone now doubles as a liveness check on the account. On each day the account was really used (at least 8 taps and screens, counted in UTC days) the app tells the node, signed by the wallet, which days those were: only the day numbers, never what was done. The node adds them to the "days active in the last 30" part of the trust score (the engagement component: up to 12 days is full marks for that part). A day that also had a counted read still counts once. Sent at most every 6 hours, when the app is closed or the Home screen opens. Together with one phone per account this makes an idle or abandoned account earn nothing from it.

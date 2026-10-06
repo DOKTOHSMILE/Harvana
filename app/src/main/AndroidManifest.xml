@@ -418,6 +418,10 @@
 			android:exported="false"
 			android:screenOrientation="portrait" />
 		<activity
+			android:name=".social.DevicesActivity"
+			android:exported="false"
+			android:screenOrientation="portrait" />
+		<activity
 			android:name=".ActivityStatsActivity"
 			android:exported="false"
 			android:screenOrientation="portrait" />

@@ -960,6 +960,11 @@ public class PublicProfileActivity extends AppCompatActivity {
                 MaterialButton see = SocialUi.button(this, "See my activity", true);
                 see.setOnClickListener(v -> startActivity(new Intent(this, ActivityStatsActivity.class)));
                 tabContent.addView(see, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 48)));
+                MaterialButton dev = SocialUi.button(this, "Devices", true);
+                dev.setOnClickListener(v -> startActivity(new Intent(this, DevicesActivity.class)));
+                LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 48));
+                dlp.topMargin = SocialUi.dp(this, 8);
+                tabContent.addView(dev, dlp);
             }
         } else {
             tabContent.addView(sharedCard());

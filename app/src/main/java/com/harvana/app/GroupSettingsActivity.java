@@ -590,7 +590,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 						new AlertDialog.Builder(GroupSettingsActivity.this)
 							.setTitle(make ? "Make " + name + " treasurer?" : "Remove " + name + " as treasurer?")
 							.setMessage(make
-								? "The treasurer can approve members' withdrawal requests and ask for payouts and milestone releases. Nothing is paid without the group's rules, and the treasurer gets no extra vote. You can remove the role at any time."
+								? "The treasurer can approve members' withdrawal requests and ask for payouts and milestone releases. A payout the treasurer asks for is paid only after the group votes and you vote yes as well. The treasurer gets no extra vote. You can remove the role at any time."
 								: "They go back to being an ordinary member.")
 							.setNegativeButton("Cancel", null)
 							.setPositiveButton("Continue", (dl, w) -> com.harvana.app.wallet.PinPromptHelper.authorize(GroupSettingsActivity.this,

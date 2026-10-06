@@ -313,7 +313,7 @@ public final class SettingsSections {
         } else {
             if (treasurer) {
                 if (accum) sb.append(yes(true)).append("Approve members' withdrawal requests (the money still goes only to the member it belongs to)\n");
-                if (fixed) sb.append(yes(true)).append("Ask for payouts and milestone releases (the group still votes before anything is paid)\n");
+                if (fixed) sb.append(yes(true)).append("Ask for payouts and milestone releases (the group votes, and the admin must vote yes too before anything is paid)\n");
                 sb.append("\nThe treasurer has no extra vote and cannot change settings, the admin seat, or who is in the group.\n");
             }
             sb.append(no()).append("Remove members, change settings or close the group (admin only)\n");

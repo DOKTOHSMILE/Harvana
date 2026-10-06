@@ -693,7 +693,9 @@ public class DiscoverFragmentActivity extends Fragment {
 				// pending request can't be sent twice.
 				boolean isPending = pendingGroupIds.contains(gid);
 				btn_join.setEnabled(!isPending);
-				btn_join.setText(isPending ? "Pending approval" : "Join");
+				btn_join.setText(isPending ? "Pending" : "Join");
+				btn_join.setSingleLine(true);
+				btn_join.setMaxLines(1);
 				btn_join.setOnClickListener(isPending ? null : v -> {
 					if (gid.isEmpty()) return;
 					Intent i = new Intent();

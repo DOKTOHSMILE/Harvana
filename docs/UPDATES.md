@@ -604,3 +604,7 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Material dropdowns
 - All 27 spinners (plus two built in code) are now `ui/MaterialSpinner`: the Material outlined-field look with rounded outline, surface fill, 52dp touch target and rounded popup. It keeps the normal Spinner behaviour, so choosing and reading values did not change. Inside a card it stays borderless so there is no double outline.
+
+## Home: Learn Hub card
+- The Learn Hub card on Home now reads the same posts as the Learn tab (it was reading an old list, so it always said "No Learn Hub posts yet"). It shows the newest 3 public posts with cover image, title, category, views and how long ago, and tapping opens Learn. The empty and offline messages are padded and use the soft text colour.
+- The "Pending approval" button on trending/discover groups now reads "Pending" on one line so it no longer wraps.

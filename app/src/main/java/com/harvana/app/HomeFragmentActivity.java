@@ -901,73 +901,73 @@ public class HomeFragmentActivity extends Fragment {
 	private void _loadLearnHubPreview() {
 		if (linear_learn_hub == null || getContext() == null) return;
 		if (linear_learn_hub.getChildCount() == 0) linear_learn_hub.addView(com.harvana.app.utils.Shimmer.rows(getContext(), 2));   // first load only
-		FirebaseDatabase.getInstance().getReference("learnhub")
-		.limitToLast(2)
-		.addListenerForSingleValueEvent(new ValueEventListener() {
-			@Override
-			public void onDataChange(@NonNull DataSnapshot snapshot) {
-				if (!isAdded() || getActivity() == null) return;
-				ArrayList<DataSnapshot> items = new ArrayList<>();
-				for (DataSnapshot c : snapshot.getChildren()) items.add(c);
-				Collections.reverse(items);
-				getActivity().runOnUiThread(() -> {
-					linear_learn_hub.removeAllViews();
-					LayoutInflater inf = LayoutInflater.from(getContext());
-					int n = 0;
-					for (DataSnapshot c : items) {
-						if (n >= 2) break;
-						View item = inf.inflate(R.layout.home_learnhub_custom_display,
-						linear_learn_hub, false);
-						TextView title = item.findViewById(R.id.title_text);
-						TextView cat = item.findViewById(R.id.category_text);
-						String t = c.child("title").getValue(String.class);
-						String category = c.child("category").getValue(String.class);
-						Object views = c.child("views").getValue();
-						if (title != null) {
-							title.setText(t != null ? t : "Learn article");
-							try {
-								title.setTextColor(getResources().getColor(R.color.colorTextPrimary));
-							} catch (Exception ignored) {}
-						}
-						if (cat != null)
-						cat.setText((category != null ? category : "Finance")
-						+ " · " + (views != null ? views : "0") + " views");
-						item.setOnClickListener(v ->
-						_openTab(new LearnFragmentActivity(), R.id.menu_learn));
-						linear_learn_hub.addView(item);
-						n++;
-					}
-					if (n == 0) {
-						TextView empty = new TextView(getContext());
-						empty.setText("No Learn Hub posts yet.");
-						empty.setTextSize(13f);
-						empty.setPadding(0, 16, 0, 8);
-						linear_learn_hub.addView(empty);
-					}
-				});
+		final com.google.firebase.auth.FirebaseUser me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+		if (me == null) { _showLearnHubEmpty("Sign in to see Learn Hub posts."); return; }
+		// Same source as the Learn tab (Firestore LEARN_CONTENT), newest public posts first.
+		com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("LEARN_CONTENT").get()
+		.addOnCompleteListener(task -> {
+			if (!isAdded() || getActivity() == null) return;
+			if (!task.isSuccessful() || task.getResult() == null) { _showLearnHubEmpty("Open Learn Hub for tips."); return; }
+			ArrayList<java.util.Map<String, Object>> posts = new ArrayList<>();
+			for (com.google.firebase.firestore.QueryDocumentSnapshot d : task.getResult()) {
+				java.util.Map<String, Object> m = new java.util.HashMap<>(com.harvana.app.firestore.GroupFirestoreManager.readFromSdk(d.getData()));
+				Object vis = m.get("visibility");
+				String v = vis == null ? "" : String.valueOf(vis);
+				boolean own = me.getUid().equals(String.valueOf(m.get("authorUid")));
+				if (own || v.isEmpty() || "public".equals(v)) posts.add(m);
 			}
-			
-			@Override
-			public void onCancelled(@NonNull DatabaseError error) {
-				if (!isAdded() || getActivity() == null) return;
-				getActivity().runOnUiThread(() -> {
-					linear_learn_hub.removeAllViews();
-					TextView empty = new TextView(getContext());
-					empty.setText("Open Learn Hub for tips.");
-					empty.setTextSize(13f);
-					linear_learn_hub.addView(empty);
-				});
+			Collections.sort(posts, (x, y) -> Long.compare(
+				y.get("createdAt") instanceof Number ? ((Number) y.get("createdAt")).longValue() : 0L,
+				x.get("createdAt") instanceof Number ? ((Number) x.get("createdAt")).longValue() : 0L));
+			linear_learn_hub.removeAllViews();
+			if (posts.isEmpty()) { _showLearnHubEmpty("No Learn Hub posts yet. Be the first to share something."); return; }
+			LayoutInflater inf = LayoutInflater.from(getContext());
+			int n = 0;
+			for (java.util.Map<String, Object> m : posts) {
+				if (n >= 3) break;
+				View item = inf.inflate(R.layout.home_learnhub_custom_display, linear_learn_hub, false);
+				TextView title = item.findViewById(R.id.title_text);
+				TextView cat = item.findViewById(R.id.category_text);
+				android.widget.ImageView img = item.findViewById(R.id.imageview1);
+				String t = m.get("title") == null ? "" : String.valueOf(m.get("title"));
+				String category = m.get("category") == null ? "Finance" : String.valueOf(m.get("category"));
+				long views = m.get("views") instanceof Number ? ((Number) m.get("views")).longValue() : 0L;
+				long at = m.get("createdAt") instanceof Number ? ((Number) m.get("createdAt")).longValue() : 0L;
+				String image = m.get("imageUrl") == null ? "" : String.valueOf(m.get("imageUrl"));
+				if (title != null) title.setText(t.isEmpty() ? "Learn article" : t);
+				if (cat != null) {
+					String when = at > 0 ? " · " + android.text.format.DateUtils.getRelativeTimeSpanString(at, System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS) : "";
+					cat.setText(category + " · " + views + (views == 1 ? " view" : " views") + when);
+				}
+				if (img != null && !image.isEmpty()) com.bumptech.glide.Glide.with(this).load(image).centerCrop().into(img);
+				item.setOnClickListener(v -> _openTab(new LearnFragmentActivity(), R.id.menu_learn));
+				linear_learn_hub.addView(item);
+				n++;
 			}
 		});
 	}
-	
+
+	private void _showLearnHubEmpty(String message) {
+		if (linear_learn_hub == null || getContext() == null) return;
+		linear_learn_hub.removeAllViews();
+		TextView empty = new TextView(getContext());
+		empty.setText(message);
+		empty.setTextSize(13f);
+		empty.setTextColor(getResources().getColor(R.color.colorTextTertiary));
+		int pad = (int) (10 * getResources().getDisplayMetrics().density);
+		empty.setPadding(pad, pad / 2, pad, pad / 2);
+		linear_learn_hub.addView(empty);
+	}
+
 	/** Groups I have already asked to join and am waiting on. Their button says "Pending approval" instead of "Join". */
 	private final java.util.Set<String> trendingPending = new java.util.HashSet<>();
 	
 	private void _styleTrendingButton(TextView join, String gid) {
 		boolean pending = trendingPending.contains(gid);
 		join.setTag(gid);
-		join.setText(pending ? "Pending approval" : "Join");
+		join.setText(pending ? "Pending" : "Join");
+		join.setSingleLine(true);
+		join.setMaxLines(1);
 		join.setAlpha(pending ? 0.65f : 1f);
 	}
 	

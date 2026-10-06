@@ -469,20 +469,29 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				org.json.JSONArray members = json.optJSONArray("members");
 				int round = json.optInt("currentRound", 0);
 				String who = "—";
+				String addrFound = "", stateFound = "";
 				if (members != null) {
 					for (int i = 0; i < members.length(); i++) {
 						org.json.JSONObject m = members.optJSONObject(i);
 						if (m != null && m.optInt("payoutRound") == round) {
-							String addr = m.optString("address", "");
-							who = addr.length() > 10 ? addr.substring(0, 6) + "…" + addr.substring(addr.length() - 4) : addr;
-							who = who + " · " + m.optString("state", "");
+							addrFound = m.optString("address", "");
+							stateFound = m.optString("state", "");
+							who = (addrFound.length() > 10 ? addrFound.substring(0, 6) + "…" + addrFound.substring(addrFound.length() - 4) : addrFound) + " · " + stateFound;
 						}
 					}
 				}
 				final String recipient = who;
+				final String recipientAddr = addrFound, recipientState = stateFound;
 				getActivity().runOnUiThread(() -> {
 					if (tv_rotating_next != null) tv_rotating_next.setText("This round's recipient: " + recipient);
 				});
+				// show the name they chose in the app instead of the address, once it is found
+				if (recipientAddr.startsWith("HV0x")) {
+					com.harvana.app.trust.WalletProfiles.resolve(recipientAddr, card -> {
+						if (card == null || card.name.isEmpty() || getActivity() == null || tv_rotating_next == null) return;
+						tv_rotating_next.setText("This round's recipient: " + card.name + (recipientState.isEmpty() ? "" : " · " + recipientState));
+					});
+				}
 			}
 			@Override public void onError(String error) { }
 		});

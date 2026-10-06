@@ -142,7 +142,13 @@ public final class MemberNameResolver {
         Map<String, String> walletToUid = groupWalletToUid.get(groupId);
         String uid = walletToUid != null ? walletToUid.get(walletAddress.toLowerCase()) : null;
         if (uid == null) {
-            cb.onResolved(fallback);
+            // not in the group's own roster (a network-only member): try the name on their public profile card
+            if (walletAddress.startsWith("HV0x")) {
+                com.harvana.app.trust.WalletProfiles.resolve(walletAddress, card ->
+                        cb.onResolved(card != null && !card.name.isEmpty() ? card.name : fallback));
+            } else {
+                cb.onResolved(fallback);
+            }
             return;
         }
         resolve(context, uid, fallback, cb);

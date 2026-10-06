@@ -389,6 +389,17 @@ public class GroupMembersFragmentActivity extends Fragment {
 						String state = str(row, "state", "");
 						if (!state.isEmpty()) show.put("paymentStatus", state);
 						displayMembers.add(show);
+						if (str(show, "memberUid", "").isEmpty() && wallet.startsWith("HV0x")) {
+							// the network knows this member by wallet only: look up the name they chose in the app
+							final HashMap<String, Object> target = show;
+							com.harvana.app.trust.WalletProfiles.resolve(wallet, card -> {
+								if (card == null || card.name.isEmpty() || getActivity() == null) return;
+								target.put("displayName", card.name);
+								target.put("resolvedName", card.name);
+								target.put("resolvedUsername", card.username);
+								if (recycler_members != null && recycler_members.getAdapter() != null) recycler_members.getAdapter().notifyDataSetChanged();
+							});
+						}
 					}
 					if (tv_members_count != null) tv_members_count.setText("Members · " + displayMembers.size() + " on the network");
 					if (tv_members_empty != null) tv_members_empty.setVisibility(displayMembers.isEmpty() ? View.VISIBLE : View.GONE);
@@ -1060,9 +1071,10 @@ public class GroupMembersFragmentActivity extends Fragment {
 			}
 			
 			if (memberUid.isEmpty() && h.name != null) {
-				// Known only by wallet on the network (no app profile linked): show a name instead of a loading bar that never ends.
-				h.name.setText("Member" + (slotObj != null ? " \u00B7 Slot " + slotObj : ""));
-				if (h.initials != null) h.initials.setText("M");
+				// Known only by wallet on the network: the name they chose in the app when it can be found, otherwise a plain label.
+				String resolved = str(member, "resolvedName", "");
+				h.name.setText(!resolved.isEmpty() ? resolved : "Member" + (slotObj != null ? " \u00B7 Slot " + slotObj : ""));
+				if (h.initials != null) h.initials.setText(!resolved.isEmpty() ? com.harvana.app.ui.AvatarView.initialsOf(resolved) : "M");
 			}
 			if (!memberUid.isEmpty()) {
 				// 1. Instantly load from cache to prevent "Loading..." or "Member" flashes

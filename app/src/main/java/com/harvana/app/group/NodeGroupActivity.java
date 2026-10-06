@@ -115,7 +115,15 @@ public class NodeGroupActivity extends AppCompatActivity {
             content.addView(com.harvana.app.utils.Shimmer.cards(this, 3));
         }
         NodeGroupClient.Callback onGroup = new NodeGroupClient.Callback() {
-            @Override public void onSuccess(JSONObject json) { group = JsonMaps.toMap(json); loadMember(); }
+            @Override public void onSuccess(JSONObject json) {
+                group = JsonMaps.toMap(json);
+                // The group page can come from a saved copy in Firestore. Ask the node itself whether it still has the group.
+                NodeGroupClient.existsOnNode(family, nodeId, exists -> {
+                    boolean gone = Boolean.FALSE.equals(exists);
+                    if (gone != notOnNetwork) { notOnNetwork = gone; runOnUiThread(() -> { if (group != null) render(); }); }
+                });
+                loadMember();
+            }
             @Override public void onError(String e) {
                 refresh.setRefreshing(false);
                 message(e != null && e.contains("404") ? "This group doesn't exist on the network." : "Couldn't load the group: " + e);
@@ -288,10 +296,22 @@ public class NodeGroupActivity extends AppCompatActivity {
         return FixedSnapshot.of(group, member, me == null ? "" : me);
     }
 
+    /** True when the node answered "not found" for this group while the page shows a saved copy of it. */
+    private boolean notOnNetwork;
+
     private void render() {
         refresh.setRefreshing(false);
         content.removeAllViews();
         GroupSnapshot s = snapshot();
+
+        if (notOnNetwork) {
+            LinearLayout warn = CircleUi.card(this);
+            warn.addView(CircleUi.text(this, "Not on the network", 15, R.color.colorWarning, true));
+            warn.addView(CircleUi.text(this, "The network no longer has this group (it was reset, or it never finished being created). "
+                    + "The numbers below are an old saved copy. Payments, votes and payout requests for it will be refused. "
+                    + "Create the group again to use it.", 12.5f, R.color.colorTextSecondary, false));
+            content.addView(warn);
+        }
 
         LinearLayout head = new LinearLayout(this);
         head.setGravity(android.view.Gravity.CENTER_VERTICAL);

@@ -102,6 +102,11 @@ public final class CircleUi {
     public static String friendly(String error) {
         if (error == null) return "Something went wrong.";
         String e = error.toUpperCase();
+        if (e.contains("GROUP_NOT_FOUND") || e.contains("CIRCLE_NOT_FOUND"))
+            return "The network doesn't have this group. What the app shows is an old saved copy, so this action can't go through.";
+        if (e.contains("NOT_ADMIN_TRIGGERED_RULE")) return "This goal doesn't pay out by an admin request. Its rule decides how the money leaves.";
+        if (e.contains("FIXED_GROUP_NOT_ACTIVE")) return "This goal group isn't active, so it can't take that action.";
+        if (e.contains("NOT_THE_GROUP_ADMIN")) return "Only the group's admin can do this.";
         if (e.contains("INSUFFICIENT_BALANCE")) return "Not enough available balance for the bond or the creation fee.";
         if (e.contains("INVALID_MEMBER_LIMIT")) return "A circle needs between 3 and 12 members.";
         if (e.contains("INVALID_CYCLE_DURATION")) return "Cycle length must be between 1 and 30 days.";

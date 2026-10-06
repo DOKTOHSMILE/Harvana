@@ -403,6 +403,24 @@ public final class NodeGroupClient {
         };
     }
 
+    /**
+     * Asks the node itself, skipping the saved copy in Firestore: does it still have this group? {@code answer} gets true when it does,
+     * false only on a clear "not found", and null when the node could not be reached (so a bad connection is never reported as a missing group).
+     */
+    public interface Exists { void answer(Boolean exists); }
+
+    public static void existsOnNode(String family, String groupId, Exists answer) {
+        String path = "CIRCLE".equals(family) ? "/api/v1/circle/" + groupId
+                : "ACCUM".equals(family) ? "/api/v1/accum/group/" + groupId : "/api/v1/fixed/group/" + groupId;
+        read(path, new Callback() {
+            @Override public void onSuccess(JSONObject json) { answer.answer(Boolean.TRUE); }
+            @Override public void onError(String error) {
+                String e = error == null ? "" : error.toUpperCase();
+                answer.answer(e.contains("404") || e.contains("NOT_FOUND") ? Boolean.FALSE : null);
+            }
+        });
+    }
+
     private static void read(String path, Callback cb) {
         HarvanaNodeClient.nodeGet(path, new HarvanaNodeClient.JsonCallback() {
             @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }

@@ -290,3 +290,7 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 ## 5 Oct 2026 — Cure a default
 - On a circle's Defaults card, a member who defaulted sees what it would cost to put it right (the part of their bond the default used, not the penalty), the date it must be done by, and how many cures they have used (2 allowed for life). One tap, review and PIN. It goes back into their own bond and the default stops counting against them. When the node says it is not allowed (window passed, bond did not cover the shortfall, limit reached) the card says why and points to the group's forgiveness vote.
 - Needs the matching node build. The signed message is in `GroupCanonical` with a test.
+
+## Profile layout and flexible Learn crop
+- Profile now reads like a social profile: cover, picture on the left over the cover, name with the trust chip, @username, bio, a facts line (where, age, joined), and Following / Followers counts (tap to open Friends). On your own profile there are two wide buttons, Share and Edit profile; Settings, QR code and privacy are in the top-right menu.
+- Learn cover crop is free: drag the corners or edges to pick any shape.

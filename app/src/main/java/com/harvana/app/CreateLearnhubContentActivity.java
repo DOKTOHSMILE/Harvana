@@ -249,7 +249,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		"Group Savings", "Crypto & Blockchain"
 	};
 	private static final int RC_READ_IMAGES = 501;
-	private static final int RC_PICK_IMAGE = 502;
+	private static final int RC_PICK_IMAGE = 502, RC_CROP_IMAGE = 503;
 	private String uploadedImageUrl = null;
 	private boolean uploadInProgress = false;
 	
@@ -283,6 +283,11 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == RC_PICK_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+			// Crop first, with a free box: an article cover can be any shape (aspect 0 means flexible).
+			startActivityForResult(com.harvana.app.utils.CropImageActivity.intent(this, data.getData(), 0f, 1280, "Crop cover", false), RC_CROP_IMAGE);
+			return;
+		}
+		if (requestCode == RC_CROP_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
 			Uri pickedUri = data.getData();
 			iv_learn_image_preview.setVisibility(View.VISIBLE);
 			layout_image_placeholder.setVisibility(View.GONE);

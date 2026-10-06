@@ -77,7 +77,7 @@ public class CropImageActivity extends AppCompatActivity {
         bottom.setOrientation(LinearLayout.VERTICAL);
         bottom.setGravity(Gravity.CENTER_HORIZONTAL);
         bottom.setPadding((int) (24 * d), (int) (10 * d), (int) (24 * d), (int) (24 * d));
-        TextView hint = text("Drag to move. Pinch to zoom.", 13, false);
+        TextView hint = text(aspect <= 0f ? "Drag the corners or edges to choose the area. Drag inside to move it." : "Drag to move. Pinch to zoom.", 13, false);
         hint.setTextColor(0xFFB6BDC8);
         hint.setPadding(0, 0, 0, (int) (12 * d));
         bottom.addView(hint);

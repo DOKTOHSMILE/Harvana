@@ -118,6 +118,7 @@ public class PublicProfileActivity extends AppCompatActivity {
             menu.add(0, 4, 3, "Profile privacy");
             menu.add(0, 5, 4, "Edit profile");
             menu.add(0, 6, 5, "My QR code");
+            menu.add(0, 9, 6, "Settings");
         } else {
             menu.add(0, 1, 0, "Share profile");
             if (!card.username.isEmpty()) menu.add(0, 2, 1, "Copy username");
@@ -137,6 +138,7 @@ public class PublicProfileActivity extends AppCompatActivity {
             case 4: startActivity(new Intent(this, ProfilePrivacyActivity.class)); return true;
             case 5: startActivity(new Intent(this, EditProfileActivity.class)); return true;
             case 6: startActivity(new Intent(this, ProfileQrActivity.class)); return true;
+            case 9: startActivity(new Intent(this, ProfileSettingsActivity.class)); return true;
             case 7: FriendsActivity.openCard(this, person()); return true;
             case 8: SocialStore.unfollow(card.uid, (ok, e) -> runOnUiThread(() -> { if (!ok) toast(e); load(); })); return true;
             default: return super.onOptionsItemSelected(item);
@@ -170,8 +172,6 @@ public class PublicProfileActivity extends AppCompatActivity {
         root.addView(topArea(mine));
         root.addView(header(mine));
         root.addView(actionRow(mine));
-        if (mine) root.addView(friendsRow());
-        root.addView(infoCard(mine));
         if (mine && selfData != null) root.addView(personalCard());
         root.addView(tabs());
         tabContent = new LinearLayout(this);
@@ -221,13 +221,13 @@ public class PublicProfileActivity extends AppCompatActivity {
      * no negative margin or drawing outside its parent (an earlier version hid half of it behind the cover).
      */
     private View topArea(boolean mine) {
-        int size = SocialUi.dp(this, 70);           // 70 x 70 dp, on the right
+        int size = SocialUi.dp(this, 70);           // 70 x 70 dp, on the left over the cover
         FrameLayout top = new FrameLayout(this);
         top.setClipChildren(false);
         top.addView(coverBanner(mine));
-        FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(size, size, Gravity.TOP | Gravity.END);
+        FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(size, size, Gravity.TOP | Gravity.START);
         fp.topMargin = coverHeight() - size / 2;
-        fp.setMarginEnd(SocialUi.dp(this, 4));
+        fp.setMarginStart(SocialUi.dp(this, 2));
         top.addView(avatarView(size), fp);
         top.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, coverHeight() + size / 2));
         return top;
@@ -255,35 +255,99 @@ public class PublicProfileActivity extends AppCompatActivity {
         return face;
     }
 
+    /**
+     * The identity block, laid out like a social profile: name with the trust chip, @username, bio, a line of facts (where, age, since when)
+     * and the follower counts. Left aligned under the picture.
+     */
     private View header(boolean mine) {
         LinearLayout h = new LinearLayout(this);
         h.setOrientation(LinearLayout.VERTICAL);
-        h.setGravity(Gravity.CENTER_HORIZONTAL);
-        h.setPadding(0, 0, 0, SocialUi.dp(this, 18));
+        h.setPadding(SocialUi.dp(this, 2), SocialUi.dp(this, 6), 0, SocialUi.dp(this, 14));
         int tint = card.scored() ? ProfileTrust.tierColor(tierName()) : 0xFF8B98AD;
-        TextView name = SocialUi.text(this, card.name.isEmpty() ? (card.username.isEmpty() ? "Member" : "@" + card.username) : card.name, 24, true, UiColors.textPrimary());
-        name.setGravity(Gravity.CENTER);
-        name.setPadding(0, SocialUi.dp(this, 14), 0, 0);
-        h.addView(name);
 
-        String status = mine ? "online" : PublicProfileStore.presence(card.lastActiveAt, System.currentTimeMillis());
-        if (!status.isEmpty()) {
-            TextView st = SocialUi.text(this, status, 14, false, "online".equals(status) ? UiColors.accent() : UiColors.textSecondary());
-            st.setGravity(Gravity.CENTER);
-            st.setPadding(0, SocialUi.dp(this, 2), 0, 0);
-            h.addView(st);
+        LinearLayout nameRow = new LinearLayout(this);
+        nameRow.setGravity(Gravity.CENTER_VERTICAL);
+        TextView name = SocialUi.text(this, card.name.isEmpty() ? (card.username.isEmpty() ? "Member" : "@" + card.username) : card.name, 22, true, UiColors.textPrimary());
+        name.setMaxLines(2);
+        name.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        nameRow.addView(name, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        TextView chip = pill(card.scored() ? ("New".equals(tierName()) ? "New · " + card.trustPercent + "%" : card.trustPercent + "% · " + tierName()) : "Not scored yet", tint);
+        ((LinearLayout.LayoutParams) chip.getLayoutParams()).setMarginStart(SocialUi.dp(this, 8));
+        nameRow.addView(chip);
+        h.addView(nameRow);
+
+        String status = mine ? "" : PublicProfileStore.presence(card.lastActiveAt, System.currentTimeMillis());
+        String handle = card.username.isEmpty() ? "" : "@" + card.username;
+        String second = handle + (!handle.isEmpty() && !status.isEmpty() ? "  \u00b7  " : "") + status;
+        if (!second.isEmpty()) {
+            TextView t = SocialUi.text(this, second, 14, false, UiColors.textSecondary());
+            t.setPadding(0, SocialUi.dp(this, 2), 0, 0);
+            h.addView(t);
         }
-        LinearLayout pills = new LinearLayout(this);
-        pills.setOrientation(LinearLayout.HORIZONTAL);
-        pills.setGravity(Gravity.CENTER);
-        pills.setPadding(0, SocialUi.dp(this, 12), 0, 0);
-        pills.addView(pill(card.scored() ? ("New".equals(tierName()) ? "New · " + card.trustPercent + "%" : card.trustPercent + "% · " + tierName()) : "Not scored yet", tint));
         if (!mine) {
             String rel = card.iFollow && card.followsMe ? "Friends" : card.iFollow ? "You follow" : card.followsMe ? "Follows you" : "";
-            if (!rel.isEmpty()) pills.addView(pill(rel, UiColors.textSecondary()));
+            if (!rel.isEmpty()) {
+                TextView r = SocialUi.text(this, rel, 12.5f, true, UiColors.accent());
+                r.setPadding(0, SocialUi.dp(this, 4), 0, 0);
+                h.addView(r);
+            }
         }
-        h.addView(pills);
+        if (!card.bio.isEmpty()) {
+            TextView bio = SocialUi.text(this, card.bio, 15, false, UiColors.textPrimary());
+            bio.setPadding(0, SocialUi.dp(this, 12), 0, 0);
+            h.addView(bio);
+        }
+
+        // Where, age, since when. Country and state are always public; city and age only if the member allows them.
+        java.util.List<String> facts = new java.util.ArrayList<>();
+        String where = card.country.isEmpty() ? "" : (card.state.isEmpty() ? card.country : card.state + ", " + card.country);
+        if (mine && selfData != null && selfData.get("city") != null && !String.valueOf(selfData.get("city")).trim().isEmpty() && !where.isEmpty()) {
+            where = String.valueOf(selfData.get("city")).trim() + ", " + where;
+        } else if (!card.city.isEmpty() && !where.isEmpty()) {
+            where = card.city + ", " + where;
+        }
+        if (!where.isEmpty()) facts.add(where);
+        if (!mine && card.showAge && card.age >= 0) facts.add(card.age + " years old");
+        if (card.memberSince > 0) facts.add("Joined " + new SimpleDateFormat("MMM yyyy", Locale.US).format(new Date(card.memberSince)));
+        if (!facts.isEmpty()) {
+            TextView meta = SocialUi.text(this, android.text.TextUtils.join("   \u00b7   ", facts), 13, false, UiColors.textSecondary());
+            meta.setPadding(0, SocialUi.dp(this, 10), 0, 0);
+            h.addView(meta);
+        }
+
+        // Counts. Mine: who I follow and who follows me (opens Friends). Others: the public counts only.
+        final TextView counts = SocialUi.text(this, "", 14, false, UiColors.textSecondary());
+        counts.setPadding(0, SocialUi.dp(this, 10), 0, 0);
+        if (mine) {
+            counts.setText(countsLine);
+            SocialStore.following((following, e1) -> SocialStore.followers((followers, e2) -> runOnUiThread(() -> {
+                countsLine = countsText(following == null ? 0 : following.size(), "Following", followers == null ? 0 : followers.size(), "Followers");
+                counts.setText(countsLine);
+            })));
+            counts.setOnClickListener(v -> startActivity(new Intent(this, FriendsActivity.class)));
+        } else if (card.groups >= 0) {
+            counts.setText(countsText(card.groups, card.groups == 1 ? "Group" : "Groups", Math.max(0, card.cycles), "Cycles completed"));
+        }
+        if (counts.getText().length() > 0 || mine) h.addView(counts);
         return h;
+    }
+
+    private CharSequence countsLine = "";
+
+    /** "188 Following   123 Followers" with the numbers in bold. */
+    private CharSequence countsText(int a, String aLabel, int b, String bLabel) {
+        android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder();
+        int[] parts = {a, b};
+        String[] labels = {aLabel, bLabel};
+        for (int i = 0; i < 2; i++) {
+            if (i > 0) sb.append("   ");
+            int start = sb.length();
+            sb.append(String.valueOf(parts[i]));
+            sb.setSpan(new android.text.style.StyleSpan(Typeface.BOLD), start, sb.length(), 0);
+            sb.setSpan(new android.text.style.ForegroundColorSpan(UiColors.textPrimary()), start, sb.length(), 0);
+            sb.append(' ').append(labels[i]);
+        }
+        return sb;
     }
 
     private String tierName() { return card.trustTier.isEmpty() ? ProfileTrust.tierFor(Math.max(0, card.trustPercent)) : card.trustTier; }
@@ -317,9 +381,9 @@ public class PublicProfileActivity extends AppCompatActivity {
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setPadding(0, 0, 0, SocialUi.dp(this, 14));
         if (mine) {
-            row.addView(actionTile(R.drawable.ic_pf_edit, "Edit info", v -> startActivity(new Intent(this, EditProfileActivity.class))));
-            row.addView(actionTile(R.drawable.ic_pf_qr, "QR code", v -> startActivity(new Intent(this, ProfileQrActivity.class))));
-            row.addView(actionTile(R.drawable.ic_pf_settings, "Settings", v -> startActivity(new Intent(this, ProfileSettingsActivity.class))));
+            // Two wide pill buttons, like a social profile. Settings, the QR code and privacy are in the menu at the top right.
+            row.addView(pillButton("Share", v -> shareProfile()));
+            row.addView(pillButton("Edit profile", v -> startActivity(new Intent(this, EditProfileActivity.class))));
             return row;
         }
         TextView follow = actionTile(R.drawable.ic_pf_person_add, card.iFollow ? "Unfollow" : (card.followsMe ? "Follow back" : "Follow"), null);
@@ -349,6 +413,23 @@ public class PublicProfileActivity extends AppCompatActivity {
     }
 
     /** An icon over a label in a rounded block; the whole block is the tap target. The label is the tile's text, so it can change. */
+    private TextView pillButton(String label, View.OnClickListener click) {
+        TextView t = SocialUi.text(this, label, 15, true, UiColors.textPrimary());
+        t.setGravity(Gravity.CENTER);
+        GradientDrawable g = new GradientDrawable();
+        g.setCornerRadius(SocialUi.dp(this, 24));
+        g.setColor(0x00000000);
+        g.setStroke(SocialUi.dp(this, 1), (UiColors.textTertiary() & 0x00FFFFFF) | 0xAA000000);
+        t.setBackground(new android.graphics.drawable.RippleDrawable(
+                android.content.res.ColorStateList.valueOf((UiColors.accent() & 0x00FFFFFF) | 0x33000000), g, null));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, SocialUi.dp(this, 44), 1f);
+        lp.setMargins(SocialUi.dp(this, 4), 0, SocialUi.dp(this, 4), 0);
+        t.setLayoutParams(lp);
+        t.setClickable(true);
+        t.setOnClickListener(click);
+        return t;
+    }
+
     private TextView actionTile(int icon, String label, View.OnClickListener click) {
         TextView t = new TextView(this);
         t.setText(label);

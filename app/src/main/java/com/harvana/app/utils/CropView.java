@@ -26,6 +26,13 @@ public class CropView extends View {
     private boolean circleGuide;
     private float minScale = 1f, maxScale = 8f;
     private boolean ready;
+    // Free (flexible) mode: the picture stays fitted and the person moves and resizes the crop box itself.
+    private boolean free;
+    private static final int NONE = 0, MOVE = 1, L = 2, T = 4, R = 8, B = 16;
+    private int grab = NONE;
+    private float lastX, lastY;
+    private final float slop;
+    private final float minBox;
 
     private final Paint dim = new Paint();
     private final Paint line = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -38,6 +45,8 @@ public class CropView extends View {
     public CropView(Context c) {
         super(c);
         float d = c.getResources().getDisplayMetrics().density;
+        slop = 28 * d;
+        minBox = 56 * d;
         dim.setColor(0xB3000000);
         line.setColor(Color.WHITE); line.setStyle(Paint.Style.STROKE); line.setStrokeWidth(2 * d);
         thin.setColor(0x66FFFFFF); thin.setStyle(Paint.Style.STROKE); thin.setStrokeWidth(1 * d);
@@ -63,10 +72,14 @@ public class CropView extends View {
         });
     }
 
-    /** @param aspect frame width divided by frame height; @param circle draw a round guide inside the frame (for profile pictures) */
+    /**
+     * @param aspect frame width divided by frame height; zero or less means a free box the person resizes
+     * @param circle draw a round guide inside the frame (for profile pictures)
+     */
     public void setup(Bitmap bmp, float aspect, boolean circle) {
         this.bitmap = bmp;
-        this.aspect = aspect;
+        this.free = aspect <= 0f;
+        this.aspect = free ? 1f : aspect;
         this.circleGuide = circle;
         this.ready = false;
         layoutFrame();
@@ -78,6 +91,7 @@ public class CropView extends View {
     private void layoutFrame() {
         int w = getWidth(), h = getHeight();
         if (w == 0 || h == 0 || bitmap == null) return;
+        if (free) { layoutFree(w, h); return; }
         float pad = 20 * getResources().getDisplayMetrics().density;
         float fw = w - 2 * pad, fh = fw / aspect;
         if (fh > h - 2 * pad) { fh = h - 2 * pad; fw = fh * aspect; }
@@ -89,6 +103,23 @@ public class CropView extends View {
         matrix.postTranslate(frame.centerX() - bitmap.getWidth() * minScale / 2f, frame.centerY() - bitmap.getHeight() * minScale / 2f);
         ready = true;
     }
+
+    /** Free mode: the whole picture is fitted on screen and the box starts around most of it. */
+    private void layoutFree(int w, int h) {
+        float pad = 20 * getResources().getDisplayMetrics().density;
+        float fit = Math.min((w - 2 * pad) / bitmap.getWidth(), (h - 2 * pad) / bitmap.getHeight());
+        float iw = bitmap.getWidth() * fit, ih = bitmap.getHeight() * fit;
+        float left = (w - iw) / 2f, top = (h - ih) / 2f;
+        matrix.reset();
+        matrix.postScale(fit, fit);
+        matrix.postTranslate(left, top);
+        imageBox.set(left, top, left + iw, top + ih);
+        float inset = Math.min(iw, ih) * 0.08f;
+        frame.set(left + inset, top + inset, left + iw - inset, top + ih - inset);
+        ready = true;
+    }
+
+    private final RectF imageBox = new RectF();
 
     private float scale() { matrix.getValues(v); return v[Matrix.MSCALE_X]; }
 
@@ -104,8 +135,47 @@ public class CropView extends View {
         matrix.postTranslate(dx, dy);
     }
 
+    private void startGrab(float x, float y) {
+        grab = NONE;
+        boolean nearL = Math.abs(x - frame.left) < slop, nearR = Math.abs(x - frame.right) < slop;
+        boolean nearT = Math.abs(y - frame.top) < slop, nearB = Math.abs(y - frame.bottom) < slop;
+        boolean withinX = x > frame.left - slop && x < frame.right + slop, withinY = y > frame.top - slop && y < frame.bottom + slop;
+        if (nearL && withinY) grab |= L;
+        if (nearR && withinY) grab |= R;
+        if (nearT && withinX) grab |= T;
+        if (nearB && withinX) grab |= B;
+        if (grab == NONE && frame.contains(x, y)) grab = MOVE;
+        lastX = x;
+        lastY = y;
+    }
+
+    private void dragBox(float x, float y) {
+        float dx = x - lastX, dy = y - lastY;
+        lastX = x;
+        lastY = y;
+        if (grab == MOVE) {
+            dx = Math.max(imageBox.left - frame.left, Math.min(imageBox.right - frame.right, dx));
+            dy = Math.max(imageBox.top - frame.top, Math.min(imageBox.bottom - frame.bottom, dy));
+            frame.offset(dx, dy);
+            return;
+        }
+        if ((grab & L) != 0) frame.left = Math.max(imageBox.left, Math.min(frame.right - minBox, frame.left + dx));
+        if ((grab & R) != 0) frame.right = Math.min(imageBox.right, Math.max(frame.left + minBox, frame.right + dx));
+        if ((grab & T) != 0) frame.top = Math.max(imageBox.top, Math.min(frame.bottom - minBox, frame.top + dy));
+        if ((grab & B) != 0) frame.bottom = Math.min(imageBox.bottom, Math.max(frame.top + minBox, frame.bottom + dy));
+    }
+
     @Override public boolean onTouchEvent(MotionEvent e) {
         getParent().requestDisallowInterceptTouchEvent(true);
+        if (free) {
+            if (!ready) return true;
+            switch (e.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN: startGrab(e.getX(), e.getY()); break;
+                case MotionEvent.ACTION_MOVE: if (grab != NONE) { dragBox(e.getX(), e.getY()); invalidate(); } break;
+                default: grab = NONE; break;
+            }
+            return true;
+        }
         scaler.onTouchEvent(e);
         mover.onTouchEvent(e);
         return true;
@@ -124,6 +194,15 @@ public class CropView extends View {
             c.drawLine(frame.left + frame.width() * i / 3f, frame.top, frame.left + frame.width() * i / 3f, frame.bottom, thin);
             c.drawLine(frame.left, frame.top + frame.height() * i / 3f, frame.right, frame.top + frame.height() * i / 3f, thin);
         }
+        if (free) {
+            float arm = 22 * getResources().getDisplayMetrics().density;
+            line.setStrokeWidth(4 * getResources().getDisplayMetrics().density);
+            c.drawLine(frame.left, frame.top, frame.left + arm, frame.top, line);       c.drawLine(frame.left, frame.top, frame.left, frame.top + arm, line);
+            c.drawLine(frame.right, frame.top, frame.right - arm, frame.top, line);     c.drawLine(frame.right, frame.top, frame.right, frame.top + arm, line);
+            c.drawLine(frame.left, frame.bottom, frame.left + arm, frame.bottom, line); c.drawLine(frame.left, frame.bottom, frame.left, frame.bottom - arm, line);
+            c.drawLine(frame.right, frame.bottom, frame.right - arm, frame.bottom, line); c.drawLine(frame.right, frame.bottom, frame.right, frame.bottom - arm, line);
+            line.setStrokeWidth(2 * getResources().getDisplayMetrics().density);
+        }
         if (circleGuide) c.drawCircle(frame.centerX(), frame.centerY(), Math.min(frame.width(), frame.height()) / 2f, line);
     }
 
@@ -137,7 +216,7 @@ public class CropView extends View {
                 Math.min(bitmap.getWidth(), Math.round(src.right)), Math.min(bitmap.getHeight(), Math.round(src.bottom)));
         if (s.width() <= 0 || s.height() <= 0) return null;
         int outW = Math.min(maxWidth, s.width());
-        int outH = Math.max(1, Math.round(outW / aspect));
+        int outH = free ? Math.max(1, Math.round(outW * (float) s.height() / s.width())) : Math.max(1, Math.round(outW / aspect));
         Bitmap out = Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888);
         new Canvas(out).drawBitmap(bitmap, s, new Rect(0, 0, outW, outH), pic);
         return out;

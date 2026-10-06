@@ -183,7 +183,15 @@ public class GroupDetailsLogic {
                 i.putExtra("firestoreGroupId", groupId);
                 activity.startActivity(i);
             });
-            if (btnLoanOrTransfer != null) btnLoanOrTransfer.setVisibility(android.view.View.GONE);
+            if (btnLoanOrTransfer == null) return;
+            // Goal groups keep one ledger per goal inside the same group: the second button opens every goal it has run.
+            if ("FIXED".equals(com.harvana.app.sync.NodeGroupClient.familyOf(identity.protocolId()))) {
+                btnLoanOrTransfer.setVisibility(android.view.View.VISIBLE);
+                btnLoanOrTransfer.setText("Goals");
+                btnLoanOrTransfer.setOnClickListener(v -> GoalHistoryActivity.open(activity, identity.protocolId(), ""));
+            } else {
+                btnLoanOrTransfer.setVisibility(android.view.View.GONE);
+            }
             return;
         }
         GroupTypeUiController.configureFooterButtons(

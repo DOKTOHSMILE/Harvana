@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: contract pages no longer repeat each other
+
+What the app does. The group contract pages say each thing once. The "money rules" page is gone for goal and savings groups (its contribution, payout rule and withdrawal lines were already on the "In short" and "where the money goes" pages) and now only appears for a circle that has a grace period, penalty or commission. The "About" page no longer repeats who the admin is, the "How Harvana keeps it safe" page no longer repeats that you sign with your wallet or the circle bond, the worked example is one or two lines of numbers (a savings group has none), the treasurer line no longer repeats the voting weights, and "Words explained" lists only words no earlier page explains. What you do: install the new build. Contracts people already signed stay valid.
+
 ## 6 Oct 2026: block members (friends and followers)
 
 What the app does. You can now block a member from three places: the ⋯ menu on a row in Friends, Following or Followers ("Block"), and the "Block this member" link on their profile. Blocking removes them from your followers and friends, makes you stop following them, hides their Learn posts from your feed, and stops them following you again (they just get "You can't follow this member." and are not told they are blocked). A new "Blocked" tab on the Friends screen lists everyone you blocked with an Unblock button; the profile link also turns into "Unblock this member". Unblocking does not restore the old follows: you both start fresh. Because blocking removes the follow, a blocked member can no longer read your contact links or pinch you.

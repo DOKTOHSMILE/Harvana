@@ -78,37 +78,21 @@ public final class GroupContract {
         String desc = str(g, "groupDescription", str(g, "description", ""));
         if (!desc.isEmpty()) about.add(desc);
         if (slots > 0) about.add("Size: up to " + slots + " members.");
-        if (GroupKinds.isOnChain(g)) {
-            about.add("The admin is the person who created the group. Joining is open: anyone can lock their bond and take a place until the group is full. The network, not the admin, holds the money and sets the payout order.");
-        } else {
-            about.add("The admin is the person who created the group. The admin sets the rules below, accepts or removes members, and looks after the group wallet.");
-        }
+        // For a group on the network the section above already says who started it and where the money sits; do not say it twice.
+        if (!GroupKinds.isOnChain(g)) about.add("The admin is the person who created the group. The admin sets the rules below, accepts or removes members, and looks after the group wallet.");
         out.add(about);
 
-        // 4. Money rules.
+        // 4. Money rules: only rules that no earlier page states (contribution, slot, late payment and the payout rule are already covered).
         Section money = new Section("The money rules");
-        if (amount > 0) {
-            money.add("Contribution: " + fmt(amount) + " " + ticker + (freq.isEmpty() ? "" : " (" + freq + ")") + ".");
-        }
         if (rotating) {
-            money.add("Each member has a slot number. Your slot decides which round you receive the pot.");
-            money.add("If someone pays late, the member whose turn it is has to wait. So please pay on time.");
             double grace = num(g, "gracePeriodDays");
             if (grace > 0) money.add("Grace period: you have " + fmt(grace) + " extra day(s) after the due date before your payment counts as late.");
             String cons = str(g, "defaultConsequence", "");
             if (!cons.isEmpty()) money.add("If you fail to pay: " + cons + ".");
             double comm = num(g, "commissionPercent");
             if (comm > 0) money.add("Commission: " + fmt(comm) + "% is taken from each payout.");
-        } else if (fixed) {
-            String rule = str(g, "disbursementRule", "");
-            if (!rule.isEmpty()) money.add("How money is paid out: " + rule + ".");
-            money.add("You cannot withdraw your deposit by yourself. Payouts, milestones and emergency grants each need a group vote.");
-        } else if (accum) {
-            String w = str(g, "withdrawalRule", "");
-            money.add("You build your own savings line inside the group and can add to it.");
-            if (!w.isEmpty()) money.add("Withdrawal rule: " + w + ".");
         }
-        out.add(money);
+        if (!money.points.isEmpty()) out.add(money);
 
         // 5. Loans.
         if (loans) {
@@ -138,13 +122,9 @@ public final class GroupContract {
 
         // 7. How the network records it.
         Section node = new Section("How Harvana keeps it safe");
-        node.add("Your payments are transactions on the Harvana network. You sign each one with your own wallet, so nobody can move your money without you.");
+        node.add("Your payments are transactions on the Harvana network.");
         node.add("You need a wallet on this phone and you must have written down its 12 recovery words. Nobody, not even Harvana, can recover them for you.");
-        if (rotating) {
-            node.add("Joining a circle registers your wallet with the network and locks a bond that covers missed payments (with a penalty).");
-        } else {
-            node.add("The network records you as a member when you make your first payment or start your savings line.");
-        }
+        if (!rotating) node.add("The network records you as a member when you make your first payment or start your savings line.");
         node.add("When you sign below, your wallet records that you read and agreed to this page. It is not a payment. No money moves.");
         out.add(node);
 
@@ -160,24 +140,18 @@ public final class GroupContract {
         out.add(leaving);
 
         // 9. Words explained.
+        // Only words no earlier page explains.
         Section words = new Section("Words explained");
         if (rotating) {
             words.add("Round: one payment period. Everyone pays once per round.");
             words.add("Slot: your place in line to receive the pot.");
-            words.add("Pot: all the money the other members pay in during one round. It goes to the member whose turn it is.");
-            words.add("Bond: a deposit locked when you join. It is returned if you pay on time.");
+            words.add("Pot: all the money the other members pay in during one round.");
             words.add("Grace period: extra days allowed before a payment counts as late.");
         }
         if (fixed) {
-            words.add("Goal: the total amount the group wants to save.");
             words.add("Milestone: a step toward the goal that needs money released.");
             words.add("Emergency grant: help for a member in urgent need, paid only if the group votes yes.");
         }
-        if (accum) {
-            words.add("Savings line: your own saving plan inside the group.");
-            words.add("Interest: extra money you earn for saving.");
-        }
-        words.add("Vote weight: how much your vote counts.");
         words.add("Trust score: a number showing how reliably you pay. It grows when you pay on time.");
         words.add("Wallet: your account on the network. Only you can sign for it.");
         out.add(words);
@@ -217,8 +191,8 @@ public final class GroupContract {
         else if (r.contains("milestone")) s.add("When it is paid: in parts. Each part is asked for, voted on by the group, and only then sent.");
         else if (grants) s.add("When it is paid: only after a member asks, the group votes yes, and the network sends it.");
         else s.add("When it is paid: by the payout rule the admin chose, shown below.");
-        s.add("If the goal is never reached: the money stays in the group wallet and leaves only by a group vote. You cannot take your deposit back by yourself.");
-        s.add("A treasurer is optional. The group may have none, in which case the admin handles payout requests. If there is one, the admin named them, or the group voted them in with the admin's yes. A treasurer can ask for a payout or a milestone release, but it is paid only after the group votes and the admin votes yes too. The treasurer has no extra vote and can be removed by the admin, or by a group vote.");
+        s.add("If the goal is never reached: the money stays in the group wallet and leaves only by a group vote.");
+        s.add("A treasurer is optional. The group may have none, in which case the admin handles payout requests. If there is one, the admin named them, or the group voted them in with the admin's yes. A treasurer can ask for a payout or a milestone release, but it is paid only after the group votes and the admin votes yes too. The treasurer can be removed by the admin, or by a group vote.");
         return s;
     }
 
@@ -253,7 +227,7 @@ public final class GroupContract {
         s.add("Where your savings go: every amount you save goes from your own wallet into the group wallet and is recorded on your own savings line. Nothing is held in a Harvana company wallet on the way.");
         s.add("Whose money it is: what is in your line is yours. The network keeps a separate record for each member, so the admin cannot take your line.");
         String w = str(g, "withdrawalRule", "");
-        s.add("A treasurer is optional. The group may have none, in which case the admin approves withdrawal requests. If there is one, the admin named them, or the group voted them in with the admin's yes. A treasurer can approve a member's withdrawal request, but the money still goes only to the member it belongs to. The treasurer has no extra vote and can be removed by the admin, or by a group vote.");
+        s.add("A treasurer is optional. The group may have none, in which case the admin approves withdrawal requests. If there is one, the admin named them, or the group voted them in with the admin's yes. A treasurer can approve a member's withdrawal request, but the money still goes only to the member it belongs to. The treasurer can be removed by the admin, or by a group vote.");
         s.add("How your money comes back: it is paid from the group wallet to your own wallet when you claim it" + (w.isEmpty() ? "" : ", under the group's withdrawal rule (" + w + ")")
             + ". The admin has to approve a withdrawal request, and an unpaid loan can be taken from your savings.");
         return s;
@@ -278,29 +252,20 @@ public final class GroupContract {
         String per = freq.isEmpty() ? "each round" : "every " + everyWord(freq);
         if (rotating && slots > 1) {
             double pot = amount * (slots - 1);
-            ex.add("Say " + slots + " people join and each pays " + fmt(amount) + " " + ticker + " " + per + ".");
-            ex.add("The person whose turn it is does not pay that round. So each round the pot is " + fmt(pot) + " " + ticker + " (" + (slots - 1) + " x " + fmt(amount) + ").");
-            ex.add("One person takes the whole pot each round, in slot order. After " + slots + " rounds everyone has received the pot once.");
-            ex.add("Over the whole circle you pay " + fmt(pot) + " " + ticker + " in total (every round except your own) and you receive " + fmt(pot) + " " + ticker + " once, before any commission. It is a way to get a large sum at once, not a way to earn extra.");
+            ex.add("With " + slots + " people each paying " + fmt(amount) + " " + ticker + " " + per + ", the pot each round is " + fmt(pot) + " " + ticker
+                + " (" + (slots - 1) + " x " + fmt(amount) + "), because the person whose turn it is does not pay.");
+            ex.add("After " + slots + " rounds everyone has received the pot once. Over the whole circle you pay " + fmt(pot) + " " + ticker + " (every round except your own) and receive "
+                + fmt(pot) + " " + ticker + " once, before any commission.");
             return ex;
         }
         if (fixed) {
             double goal = num(g, "targetGoalAmount");
-            ex.add("If you pay " + fmt(amount) + " " + ticker + " " + per + ", it goes into the shared pool.");
-            if (goal > 0) {
-                long times = (long) Math.ceil(goal / amount);
-                ex.add("If you were the only one paying, reaching " + fmt(goal) + " " + ticker + " would take " + times + " payments. With more members it is faster.");
-            }
-            ex.add("Money only comes out by the group's rule and vote, never because one person asks.");
+            if (goal <= 0) return null;
+            long times = (long) Math.ceil(goal / amount);
+            ex.add("Paying " + fmt(amount) + " " + ticker + " " + per + ", one person alone would reach the " + fmt(goal) + " " + ticker + " goal in " + times + " payments. With more members it is faster.");
             return ex;
         }
-        if (accum) {
-            double rate = num(g, "loanInterestRate");
-            ex.add("If you save " + fmt(amount) + " " + ticker + " " + per + ", that money sits in your own line.");
-            ex.add("At the end of your saving period you can take your savings back" + (rate > 0 ? ", with interest as set by the group" : "") + ".");
-            return ex;
-        }
-        return null;
+        return null;                       // a savings group's example would only repeat the pages before it
     }
 
     private static String everyWord(String freq) {

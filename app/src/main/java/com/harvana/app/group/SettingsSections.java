@@ -36,6 +36,8 @@ public final class SettingsSections {
         void invite();
         void transferAdmin();
         void leave();
+        void makeAdmin(String uid, String name);
+        void remove(String uid, String name);
     }
 
     public static final String[] NAMES = {"General", "Access", "Members", "Money & rules", "Network", "More"};
@@ -61,7 +63,7 @@ public final class SettingsSections {
     }
 
     /** Call after every (re)build of the page. The views are the page's own cards; null ones are skipped. */
-    public void apply(String groupId, Map<String, Object> g, boolean isAdmin, int memberCount, boolean onChain,
+    public void apply(String groupId, Map<String, Object> g, boolean isAdmin, int memberCount, boolean onChain, java.util.List<Map<String, Object>> members,
                       View hero, View about, View access, View money, View rules, View wallet, View notifications,
                       View blockedHeader, View networkPanel, View closeSection) {
         for (int i = page.getChildCount() - 1; i >= 0; i--) if (TAG_EXTRA.equals(page.getChildAt(i).getTag())) page.removeViewAt(i);
@@ -84,6 +86,7 @@ public final class SettingsSections {
 
         add(extra(inviteCard(groupId, g, isAdmin)), ACCESS);
         add(extra(membersCard(isAdmin, memberCount)), MEMBERS);
+        add(extra(memberListCard(g, isAdmin, members)), MEMBERS);
         add(extra(infoCard(groupId, g, onChain)), MORE);
         if (closeSection != null) { page.removeView(closeSection); page.addView(closeSection); add(closeSection, MORE); }
         add(extra(leaveCard()), MORE);
@@ -205,6 +208,126 @@ public final class SettingsSections {
                 : "The admin manages who joins and who is removed.", 12.5f, false, UiColors.textSecondary()));
         if (isAdmin) c.addView(button("Transfer admin role", false, v -> host.transferAdmin()));
         return c;
+    }
+
+    // ── member list with roles and permissions ──
+
+    private static final long VOTE_WAIT_MS = 48L * 3_600_000L;
+
+    private View memberListCard(Map<String, Object> g, boolean isAdmin, java.util.List<Map<String, Object>> members) {
+        LinearLayout c = card();
+        c.addView(text("Roles and permissions", 16, true, UiColors.textPrimary()));
+        c.addView(text("Tap a member to see what they can do. These come from the group's rules; they are not switches.", 12.5f, false, UiColors.textSecondary()));
+        String adminUid = str(g, "creatorId", "");
+        String myUid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
+                : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+        java.util.List<Map<String, Object>> rows = new ArrayList<>();
+        if (members != null) for (Map<String, Object> m : members) {
+            String st = str(m, "status", "ACTIVE");
+            if ("ACTIVE".equalsIgnoreCase(st)) rows.add(m);
+        }
+        java.util.Collections.sort(rows, (x, y) -> {
+            boolean ax = str(x, "memberUid", "").equals(adminUid), ay = str(y, "memberUid", "").equals(adminUid);
+            if (ax != ay) return ax ? -1 : 1;
+            return str(x, "displayName", str(x, "name", "")).compareToIgnoreCase(str(y, "displayName", str(y, "name", "")));
+        });
+        if (rows.isEmpty()) { c.addView(text("No active members loaded yet.", 13, false, UiColors.textSecondary())); return c; }
+        for (Map<String, Object> m : rows) c.addView(memberRow(g, m, adminUid, myUid, isAdmin));
+        return c;
+    }
+
+    private View memberRow(Map<String, Object> g, Map<String, Object> m, String adminUid, String myUid, boolean viewerIsAdmin) {
+        final String uid = str(m, "memberUid", "");
+        final String name = str(m, "displayName", str(m, "name", "Member"));
+        final boolean admin = !uid.isEmpty() && uid.equals(adminUid);
+        LinearLayout r = new LinearLayout(a);
+        r.setGravity(Gravity.CENTER_VERTICAL);
+        r.setPadding(0, (int) (10 * d), 0, (int) (10 * d));
+        TextView face = new TextView(a);
+        face.setText(name.isEmpty() ? "?" : name.substring(0, 1).toUpperCase(Locale.US));
+        face.setGravity(Gravity.CENTER);
+        face.setTypeface(null, Typeface.BOLD);
+        face.setTextColor(UiColors.accent());
+        GradientDrawable disc = new GradientDrawable();
+        disc.setShape(GradientDrawable.OVAL);
+        disc.setColor((UiColors.accent() & 0x00FFFFFF) | 0x33000000);
+        face.setBackground(disc);
+        r.addView(face, new LinearLayout.LayoutParams((int) (40 * d), (int) (40 * d)));
+        LinearLayout mid = new LinearLayout(a);
+        mid.setOrientation(LinearLayout.VERTICAL);
+        mid.setPadding((int) (12 * d), 0, (int) (8 * d), 0);
+        mid.addView(text(name + (uid.equals(myUid) ? " (you)" : ""), 14.5f, true, UiColors.textPrimary()));
+        int slot = (int) num(m, "slot");
+        String sub = (admin ? "Admin" : "Member") + (slot > 0 && str(g, "groupType", "").toLowerCase(Locale.US).contains("rotating") ? " \u00b7 Slot " + slot : "");
+        mid.addView(text(sub, 12, false, UiColors.textSecondary()));
+        r.addView(mid, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        TextView badge = text(admin ? "ADMIN" : "MEMBER", 11, true, admin ? 0xFF1A1208 : UiColors.textSecondary());
+        badge.setPadding((int) (10 * d), (int) (4 * d), (int) (10 * d), (int) (4 * d));
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(12 * d);
+        bg.setColor(admin ? UiColors.accent() : (UiColors.textTertiary() & 0x00FFFFFF) | 0x22000000);
+        badge.setBackground(bg);
+        r.addView(badge);
+        r.setClickable(true);
+        r.setOnClickListener(v -> showMember(g, m, uid, name, admin, uid.equals(myUid), viewerIsAdmin));
+        return r;
+    }
+
+    private void showMember(Map<String, Object> g, Map<String, Object> m, final String uid, final String name, boolean admin,
+                            boolean me, boolean viewerIsAdmin) {
+        String type = str(g, "groupType", "").toLowerCase(Locale.US);
+        boolean fixed = type.contains("fixed"), accum = type.contains("accumul"), rotating = type.contains("rotating");
+        boolean membersInvite = Boolean.TRUE.equals(g.get("membersCanInvite"));
+        long joined = 0;
+        Object ja = m.get("joinedAt");
+        if (ja instanceof Number) joined = ((Number) ja).longValue();
+        boolean waited = joined > 0 && System.currentTimeMillis() - joined >= VOTE_WAIT_MS;
+        StringBuilder sb = new StringBuilder();
+        sb.append(admin ? "Role: Admin\n" : "Role: Member\n");
+        if (joined > 0) sb.append("Joined: ").append(new SimpleDateFormat("d MMM yyyy", Locale.US).format(new Date(joined))).append("\n");
+        String wallet = str(m, "walletAddress", str(m, "wallet", ""));
+        if (!wallet.isEmpty()) sb.append("Wallet: ").append(wallet.length() > 14 ? wallet.substring(0, 8) + "\u2026" + wallet.substring(wallet.length() - 4) : wallet).append("\n");
+        sb.append("\nWHAT THIS PERSON CAN DO\n");
+        sb.append(yes(true)).append("Pay into the group from their own wallet\n");
+        sb.append(yes(admin || membersInvite)).append("Invite people").append(admin || membersInvite ? "" : " (the admin has switched this off for members)").append("\n");
+        if (fixed || accum) {
+            sb.append(yes(waited)).append("Vote on big decisions (needs one payment and 48 hours in the group")
+              .append(joined > 0 ? waited ? "; 48 hours have passed)" : "; 48 hours have not passed yet)" : ")").append("\n");
+        }
+        if (admin) {
+            sb.append(yes(true)).append("Accept, remove and block members\n");
+            sb.append(yes(true)).append("Change the group profile and settings\n");
+            if (fixed || accum) sb.append(yes(true)).append("Ask for payouts, milestones and approve withdrawals (the group still votes where the rules say so)\n");
+            sb.append(yes(true)).append("Hand the admin role to another member\n");
+            sb.append(yes(true)).append("Close the group\n");
+            sb.append("\nThe admin's vote counts 40% on big decisions. The admin cannot take money from anyone's wallet, and cannot move the group wallet without the group's rules.\n");
+        } else {
+            sb.append(no()).append("Remove members, change settings or close the group (admin only)\n");
+            if (accum) sb.append(yes(true)).append("Save in their own line and ask to withdraw it (the admin approves)\n");
+            if (rotating) sb.append(yes(true)).append("Receive the pot on their turn\n");
+            if (fixed) sb.append(no()).append("Take their deposit out alone (the group votes)\n");
+        }
+        TextView t = text(sb.toString().trim(), 14, false, UiColors.textPrimary());
+        int p = (int) (20 * d);
+        t.setPadding(p, p / 2, p, p / 2);
+        ScrollView sv = new ScrollView(a);
+        sv.addView(t);
+        androidx.appcompat.app.AlertDialog.Builder b = new androidx.appcompat.app.AlertDialog.Builder(a).setTitle(name).setView(sv)
+            .setPositiveButton("Close", null);
+        if (viewerIsAdmin && !me && !admin && !uid.isEmpty()) {
+            b.setNeutralButton("Make admin", (dl, w) -> host.makeAdmin(uid, name));
+            b.setNegativeButton("Remove", (dl, w) -> host.remove(uid, name));
+        }
+        b.show();
+    }
+
+    private static String yes(boolean on) { return on ? "\u2705  " : "\u274C  "; }
+    private static String no() { return "\u274C  "; }
+
+    private static double num(Map<String, Object> m, String k) {
+        Object o = m == null ? null : m.get(k);
+        if (o instanceof Number) return ((Number) o).doubleValue();
+        try { return o == null ? 0 : Double.parseDouble(String.valueOf(o)); } catch (Exception e) { return 0; }
     }
 
     private View infoCard(String groupId, Map<String, Object> g, boolean onChain) {

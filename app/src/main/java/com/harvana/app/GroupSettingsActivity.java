@@ -561,9 +561,24 @@ public class GroupSettingsActivity extends AppCompatActivity {
 					@Override public void invite() { com.harvana.app.group.InviteMemberSheet.show(GroupSettingsActivity.this, groupId, groupData); }
 					@Override public void transferAdmin() { _showTransferAdminDialog(); }
 					@Override public void leave() { _confirmLeaveGroup(); }
+					@Override public void makeAdmin(String uid, String name) {
+						String me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
+							: com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+						_confirmTransferAdmin(me, uid, name);
+					}
+					@Override public void remove(final String uid, final String name) {
+						new AlertDialog.Builder(GroupSettingsActivity.this).setTitle("Remove " + name + "?")
+							.setMessage("They lose access to this group and cannot send a new join request unless you unblock them.")
+							.setNegativeButton("Cancel", null)
+							.setPositiveButton("Remove", (dl, w) -> JoinRequestManager.kickMember(GroupSettingsActivity.this, groupId, uid,
+								new JoinRequestManager.Callback() {
+									@Override public void onSuccess(String message) { runOnUiThread(() -> { Toast.makeText(GroupSettingsActivity.this, message, Toast.LENGTH_SHORT).show(); _loadMembers(); }); }
+									@Override public void onError(String error) { runOnUiThread(() -> Toast.makeText(GroupSettingsActivity.this, error, Toast.LENGTH_LONG).show()); }
+								})).show();
+					}
 				});
 		}
-		sections.apply(groupId, groupData, isAdmin, memberRows == null ? 0 : memberRows.size(), _isOnChain(),
+		sections.apply(groupId, groupData, isAdmin, memberRows == null ? 0 : memberRows.size(), _isOnChain(), memberRows,
 			cardHero, cardview13, cardview11, cardview15, cardview19, cardview20, cardview10, linear72, networkPanelHost, closeSection);
 	}
 	

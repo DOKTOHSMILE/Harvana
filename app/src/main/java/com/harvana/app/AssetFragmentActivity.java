@@ -131,6 +131,9 @@ public class AssetFragmentActivity extends Fragment {
 		linear54 = _view.findViewById(R.id.linear54);
 		tv_fiat_value = _view.findViewById(R.id.tv_fiat_value);
 		imageview4 = _view.findViewById(R.id.imageview4);
+		com.harvana.app.utils.BalancePrivacy.bindEye(imageview3);
+		com.harvana.app.utils.BalancePrivacy.bindEye(imageview4);
+		com.harvana.app.utils.BalancePrivacy.guard(tv_fiat_value);
 		cardview1 = _view.findViewById(R.id.cardview1);
 		cardview2 = _view.findViewById(R.id.cardview2);
 		cardview3 = _view.findViewById(R.id.cardview3);

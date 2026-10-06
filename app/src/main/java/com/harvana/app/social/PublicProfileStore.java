@@ -52,6 +52,41 @@ public final class PublicProfileStore {
         SharedGroup(String id, String name) { this.id = id; this.name = name; }
     }
 
+    /** A group row from its Firestore document (the name is stored as groupName; older documents may have name). */
+    static SharedGroup groupFromDoc(String gid, Map<String, Object> gd) {
+        String gname = str(gd.get("groupName"));
+        if (gname.isEmpty()) gname = str(gd.get("name"));
+        SharedGroup sg = new SharedGroup(gid, gname.isEmpty() ? "Untitled group" : gname);
+        sg.type = str(gd.get("groupType"));
+        sg.frequency = str(gd.get("frequency"));
+        sg.state = str(gd.get("state"));
+        for (String k : new String[] {"groupPhoto", "groupImage", "imageUrl", "photoUrl", "icon"}) {
+            String v = str(gd.get(k));
+            if (v.startsWith("http")) { sg.photo = v; break; }
+        }
+        sg.members = num(gd.get("membersCount"), 0);
+        sg.round = num(gd.get("currentRound"), 0);
+        sg.slots = num(gd.get("totalSlots"), 0);
+        sg.amount = gd.get("contributionAmount") instanceof Number ? ((Number) gd.get("contributionAmount")).doubleValue() : 0.0;
+        sg.nodeKey = com.harvana.app.trust.NetworkTrust.groupKey(gd);
+        return sg;
+    }
+
+    /** The groups this member is the admin (creator) of, newest first. Only ever asked for the signed-in member's own profile. */
+    public static void adminGroups(String uid, Cb<List<SharedGroup>> cb) {
+        BG.execute(() -> {
+            try {
+                List<SharedGroup> out = new ArrayList<>();
+                for (DocumentSnapshot d : Tasks.await(db().collection("GROUPS").whereEqualTo("creatorId", uid).get(), T, TimeUnit.SECONDS).getDocuments()) {
+                    Map<String, Object> gd = d.getData() == null ? new HashMap<>() : d.getData();
+                    if (com.harvana.app.group.GroupKinds.isLegacyRotating(gd)) continue;        // old test data stays hidden
+                    out.add(groupFromDoc(d.getId(), gd));
+                }
+                cb.done(out, null);
+            } catch (Exception e) { cb.done(null, e.getMessage() == null ? e.toString() : e.getMessage()); }
+        });
+    }
+
     public static final class Card {
         public String uid = "", pid = "", name = "", username = "", icon = "", cover = "", wallet = "", trustTier = "";
         public String country = "", state = "", city = "", bio = "";
@@ -137,23 +172,7 @@ public final class PublicProfileStore {
                         try {
                             DocumentSnapshot g = Tasks.await(db().collection("GROUPS").document(gid).get(), T, TimeUnit.SECONDS);
                             Map<String, Object> gd = g.exists() && g.getData() != null ? g.getData() : new HashMap<>();
-                            // The group's name is stored as groupName (older documents may have name).
-                            String gname = str(gd.get("groupName"));
-                            if (gname.isEmpty()) gname = str(gd.get("name"));
-                            SharedGroup sg = new SharedGroup(gid, gname.isEmpty() ? "Untitled group" : gname);
-                            sg.type = str(gd.get("groupType"));
-                            sg.frequency = str(gd.get("frequency"));
-                            sg.state = str(gd.get("state"));
-                            for (String k : new String[] {"groupPhoto", "groupImage", "imageUrl", "photoUrl", "icon"}) {
-                                String v = str(gd.get(k));
-                                if (v.startsWith("http")) { sg.photo = v; break; }
-                            }
-                            sg.members = num(gd.get("membersCount"), 0);
-                            sg.round = num(gd.get("currentRound"), 0);
-                            sg.slots = num(gd.get("totalSlots"), 0);
-                            sg.amount = gd.get("contributionAmount") instanceof Number ? ((Number) gd.get("contributionAmount")).doubleValue() : 0.0;
-                            sg.nodeKey = com.harvana.app.trust.NetworkTrust.groupKey(gd);
-                            c.sharedGroups.add(sg);
+                            c.sharedGroups.add(groupFromDoc(gid, gd));
                         } catch (Exception ignored) { }
                     }
                 }

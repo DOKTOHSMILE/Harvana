@@ -153,6 +153,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		tv_coin_info_note = findViewById(R.id.tv_coin_info_note);
 		img_coin_logo = findViewById(R.id.img_coin_logo);
 		tv_coin_balance = findViewById(R.id.tv_coin_balance);
+		com.harvana.app.utils.BalancePrivacy.guard(tv_coin_balance);
 		tv_wallet_address = findViewById(R.id.tv_wallet_address);
 		linear11 = findViewById(R.id.linear11);
 		tv_coin_description = findViewById(R.id.tv_coin_description);

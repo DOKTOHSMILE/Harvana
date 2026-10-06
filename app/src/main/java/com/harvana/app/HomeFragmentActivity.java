@@ -283,6 +283,12 @@ public class HomeFragmentActivity extends Fragment {
 		tv_local_currency_eqv = _view.findViewById(R.id.tv_local_currency_eqv);
 		tv_harv_balance = _view.findViewById(R.id.tv_harv_balance);
 		imageview61 = _view.findViewById(R.id.imageview61);
+		// The eye: one saved show/hide switch for every balance in the app (see BalancePrivacy).
+		com.harvana.app.utils.BalancePrivacy.bindEye(imageview61);
+		com.harvana.app.utils.BalancePrivacy.guard(tv_harv_balance);
+		com.harvana.app.utils.BalancePrivacy.guard(tv_local_currency_eqv);
+		com.harvana.app.utils.BalancePrivacy.guard(text_val_saved);
+		com.harvana.app.utils.BalancePrivacy.guard(text_val_loans);
 		linear223 = _view.findViewById(R.id.linear223);
 		cardview32 = _view.findViewById(R.id.cardview32);
 		linear222 = _view.findViewById(R.id.linear222);

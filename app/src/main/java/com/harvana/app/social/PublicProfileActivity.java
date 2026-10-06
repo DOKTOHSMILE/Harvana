@@ -969,11 +969,13 @@ public class PublicProfileActivity extends AppCompatActivity {
         c.addView(SocialUi.text(this, "Activity", 16, true, UiColors.textPrimary()));
         LinearLayout grid = new LinearLayout(this);
         grid.setOrientation(LinearLayout.VERTICAL);
-        grid.setPadding(0, SocialUi.dp(this, 10), 0, 0);
+        grid.setPadding(0, SocialUi.dp(this, 12), 0, 0);
         LinearLayout r1 = new LinearLayout(this);
+        r1.setBaselineAligned(false);
         r1.addView(countTile("Groups", card.groups), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         r1.addView(countTile("Cycles completed", card.cycles), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         LinearLayout r2 = new LinearLayout(this);
+        r2.setBaselineAligned(false);
         r2.addView(countTile("Loans", card.loans), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         r2.addView(countTile("Pending loans", card.pendingLoans), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         grid.addView(r1);
@@ -985,22 +987,25 @@ public class PublicProfileActivity extends AppCompatActivity {
         return c;
     }
 
+    /** One count in the Activity grid: compact (about 60 dp), number on top in the accent colour, label under it, with space between tiles. */
     private View countTile(String label, int value) {
         LinearLayout t = new LinearLayout(this);
         t.setOrientation(LinearLayout.VERTICAL);
-        t.setGravity(Gravity.CENTER);
-        int pad = SocialUi.dp(this, 12);
-        t.setPadding(pad, pad, pad, pad);
+        t.setGravity(Gravity.CENTER_VERTICAL);
+        t.setPadding(SocialUi.dp(this, 14), SocialUi.dp(this, 8), SocialUi.dp(this, 14), SocialUi.dp(this, 8));
+        t.setMinimumHeight(SocialUi.dp(this, 60));
         GradientDrawable g = new GradientDrawable();
         g.setCornerRadius(SocialUi.dp(this, 14));
-        g.setColor((UiColors.textTertiary() & 0x00FFFFFF) | 0x14000000);
+        g.setColor((UiColors.accent() & 0x00FFFFFF) | 0x12000000);
+        g.setStroke(SocialUi.dp(this, 1), (UiColors.accent() & 0x00FFFFFF) | 0x26000000);
         t.setBackground(g);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        lp.setMargins(SocialUi.dp(this, 4), SocialUi.dp(this, 4), SocialUi.dp(this, 4), SocialUi.dp(this, 4));
+        int m = SocialUi.dp(this, 5);
+        lp.setMargins(m, m, m, m);                                  // space between the tiles and from the card edge
         t.setLayoutParams(lp);
-        t.addView(SocialUi.text(this, value < 0 ? "—" : String.valueOf(value), 22, true, UiColors.textPrimary()));
-        TextView l = SocialUi.text(this, label, 11.5f, false, UiColors.textSecondary());
-        l.setGravity(Gravity.CENTER);
+        t.addView(SocialUi.text(this, value < 0 ? "\u2014" : String.valueOf(value), 20, true, UiColors.accent()));
+        TextView l = SocialUi.text(this, label, 12, false, UiColors.textSecondary());
+        l.setPadding(0, SocialUi.dp(this, 1), 0, 0);
         t.addView(l);
         return t;
     }
@@ -1083,14 +1088,40 @@ public class PublicProfileActivity extends AppCompatActivity {
         return row;
     }
 
+    private java.util.List<PublicProfileStore.SharedGroup> adminGroupsCache;
+
+    private void fillAdminGroups(LinearLayout list, java.util.List<PublicProfileStore.SharedGroup> groups) {
+        list.removeAllViews();
+        if (groups.isEmpty()) {
+            TextView none = SocialUi.text(this, "You are not the admin of any group yet. Create one from the Groups tab.", 13, false, UiColors.textSecondary());
+            none.setPadding(0, SocialUi.dp(this, 10), 0, 0);
+            list.addView(none);
+            return;
+        }
+        for (PublicProfileStore.SharedGroup g : groups) list.addView(sharedGroupRow(g));
+    }
+
     private View sharedCard() {
         boolean mine = isMe();
         LinearLayout c = SocialUi.card(this);
         c.addView(SocialUi.text(this, mine ? "Your groups" : "Groups you share", 16, true, UiColors.textPrimary()));
         if (mine) {
-            TextView note = SocialUi.text(this, "Others only see how many groups you are in. Group names show only for groups you both belong to.", 13, false, UiColors.textSecondary());
-            note.setPadding(0, SocialUi.dp(this, 6), 0, 0);
+            TextView note = SocialUi.text(this, "Groups you are the admin of. Others only see how many groups you are in; group names show only for groups you both belong to.", 13, false, UiColors.textSecondary());
+            note.setPadding(0, SocialUi.dp(this, 6), 0, SocialUi.dp(this, 2));
             c.addView(note);
+            final LinearLayout list = new LinearLayout(this);
+            list.setOrientation(LinearLayout.VERTICAL);
+            c.addView(list);
+            if (adminGroupsCache != null) fillAdminGroups(list, adminGroupsCache);
+            else {
+                list.addView(com.harvana.app.utils.Shimmer.lines(this, 3));
+                PublicProfileStore.adminGroups(card.uid, (groups, err) -> runOnUiThread(() -> {
+                    if (isFinishing()) return;
+                    if (groups == null) { list.removeAllViews(); list.addView(SocialUi.text(this, "Couldn't load your groups: " + err, 13, false, UiColors.textSecondary())); return; }
+                    adminGroupsCache = groups;
+                    fillAdminGroups(list, groups);
+                }));
+            }
             return c;
         }
         if (card.sharedGroups.isEmpty()) {

@@ -258,6 +258,8 @@ public class WalletAssetFragmentActivity extends Fragment {
 			final TextView tv_asset_balance = _view.findViewById(R.id.tv_asset_balance);
 			final TextView tv_asset_symbol = _view.findViewById(R.id.tv_asset_symbol);
 			final TextView tv_asset_amount = _view.findViewById(R.id.tv_asset_amount);
+			com.harvana.app.utils.BalancePrivacy.guard(tv_asset_balance);
+			com.harvana.app.utils.BalancePrivacy.guard(tv_asset_amount);
 			
 			HashMap<String, Object> item = _data.get(_position);
 			

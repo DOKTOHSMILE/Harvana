@@ -4,9 +4,9 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
-	android:padding="24dp"
-	android:orientation="vertical"
-	android:background="?attr/colorSurface">
+	android:paddingTop="4dp"
+	android:paddingBottom="4dp"
+	android:orientation="vertical">
 	<TextView
 		android:id="@+id/tv_pin_dialog_message"
 		android:layout_width="match_parent"

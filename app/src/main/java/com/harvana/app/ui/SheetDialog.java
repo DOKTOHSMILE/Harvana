@@ -172,22 +172,27 @@ public class SheetDialog extends AppSheet {
             if (positive != null || negative != null || neutral != null) {
                 LinearLayout bar = new LinearLayout(context);
                 bar.setOrientation(LinearLayout.HORIZONTAL);
-                bar.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+                bar.setGravity(Gravity.CENTER_VERTICAL);
                 LinearLayout.LayoutParams bl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                bl.topMargin = (int) (12 * dp);
+                bl.topMargin = (int) (16 * dp);
+                int gap = (int) (4 * dp);
                 if (neutral != null) {
                     d.buttons[2] = button(context, d, neutral, neutralL, DialogInterface.BUTTON_NEUTRAL, false, dp);
-                    bar.addView(d.buttons[2]);
-                    View spacer = new View(context);
-                    bar.addView(spacer, new LinearLayout.LayoutParams(0, 1, 1f));
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+                    lp.setMargins(gap, 0, gap, 0);
+                    bar.addView(d.buttons[2], lp);
                 }
                 if (negative != null) {
                     d.buttons[1] = button(context, d, negative, negativeL, DialogInterface.BUTTON_NEGATIVE, false, dp);
-                    bar.addView(d.buttons[1]);
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+                    lp.setMargins(gap, 0, gap, 0);
+                    bar.addView(d.buttons[1], lp);
                 }
                 if (positive != null) {
                     d.buttons[0] = button(context, d, positive, positiveL, DialogInterface.BUTTON_POSITIVE, true, dp);
-                    bar.addView(d.buttons[0]);
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, (negative != null || neutral != null) ? 1.4f : 1f);
+                    lp.setMargins(gap, 0, gap, 0);
+                    bar.addView(d.buttons[0], lp);
                 }
                 root.addView(bar, bl);
             }
@@ -209,23 +214,34 @@ public class SheetDialog extends AppSheet {
             return d;
         }
 
+        /** The same two button looks the rest of the app uses: filled accent for the main action, outlined accent for the others. */
         private static Button button(Context c, final SheetDialog d, CharSequence text, final DialogInterface.OnClickListener l,
                                      final int which, boolean main, float dp) {
-            MaterialButton b = new MaterialButton(c, null, main ? 0 : com.google.android.material.R.attr.borderlessButtonStyle);
+            MaterialButton b = main
+                    ? new MaterialButton(c)
+                    : new MaterialButton(c, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
             b.setText(text);
             b.setAllCaps(false);
             b.setTextSize(15);
             b.setTypeface(null, Typeface.BOLD);
+            b.setSingleLine(false);
+            b.setMaxLines(2);
+            b.setGravity(Gravity.CENTER);
+            b.setInsetTop(0);
+            b.setInsetBottom(0);
+            b.setMinHeight((int) (48 * dp));
+            b.setMinimumHeight((int) (48 * dp));
+            b.setCornerRadius((int) (12 * dp));
+            b.setPadding((int) (14 * dp), 0, (int) (14 * dp), 0);
             if (main) {
                 b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(UiColors.accent()));
                 b.setTextColor(UiColors.onAccent());
-                b.setCornerRadius((int) (12 * dp));
             } else {
+                b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT));
                 b.setTextColor(UiColors.accent());
+                b.setStrokeColor(android.content.res.ColorStateList.valueOf(UiColors.accent()));
+                b.setStrokeWidth((int) (1.5f * dp));
             }
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (int) (46 * dp));
-            lp.setMarginStart((int) (8 * dp));
-            b.setLayoutParams(lp);
             b.setOnClickListener(v -> {
                 if (l != null) l.onClick(d, which);
                 d.dismiss();                                                  // like an alert dialog, a button closes it

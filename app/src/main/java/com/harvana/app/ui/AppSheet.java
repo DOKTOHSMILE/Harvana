@@ -1,9 +1,11 @@
 package com.harvana.app.ui;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.graphics.Outline;
+import android.graphics.drawable.GradientDrawable;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -12,8 +14,6 @@ import android.widget.FrameLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.shape.MaterialShapeDrawable;
-import com.google.android.material.shape.ShapeAppearanceModel;
 import com.harvana.app.utils.UiColors;
 
 /**
@@ -37,22 +37,44 @@ public class AppSheet extends BottomSheetDialog {
         }
     }
 
+    private GradientDrawable fill;
+
     @Override
     protected void onStart() {
         super.onStart();
-        FrameLayout sheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        final FrameLayout sheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (sheet != null) {
-            float r = CORNER_DP * getContext().getResources().getDisplayMetrics().density;
-            ShapeAppearanceModel shape = ShapeAppearanceModel.builder().setTopLeftCornerSize(r).setTopRightCornerSize(r).build();
-            MaterialShapeDrawable bg = new MaterialShapeDrawable(shape);
-            bg.setFillColor(ColorStateList.valueOf(UiColors.surface()));
-            sheet.setBackground(bg);
-            sheet.setClipToOutline(true);                       // content with its own square background is clipped to the curve
+            style(sheet);
+            // Material and some screens replace the sheet's background after it is laid out (to square, transparent or an elevation-tinted
+            // grey). Put the rounded surface back every time, so no sheet is ever left with flat edges.
+            sheet.addOnLayoutChangeListener((v, l, t, r, bt, ol, ot, or, ob) -> style(sheet));
         }
         BottomSheetBehavior<FrameLayout> b = getBehavior();
         b.setSkipCollapsed(true);
         b.setState(BottomSheetBehavior.STATE_EXPANDED);
         focusFirstField();
+    }
+
+    /** Rounded top corners on the sheet itself, and everything inside is clipped to the curve, whatever background it paints. */
+    private void style(FrameLayout sheet) {
+        final float r = CORNER_DP * getContext().getResources().getDisplayMetrics().density;
+        if (fill == null) {
+            fill = new GradientDrawable();
+            fill.setShape(GradientDrawable.RECTANGLE);
+            fill.setCornerRadii(new float[]{r, r, r, r, 0f, 0f, 0f, 0f});
+            fill.setColor(com.google.android.material.color.MaterialColors.getColor(getContext(),
+                    com.google.android.material.R.attr.colorSurface, UiColors.surface()));
+        }
+        if (sheet.getBackground() != fill) sheet.setBackground(fill);
+        if (!sheet.getClipToOutline()) {
+            sheet.setOutlineProvider(new ViewOutlineProvider() {
+                @Override public void getOutline(View view, Outline outline) {
+                    // a rounded rectangle taller than the sheet: only the top corners show
+                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight() + (int) r, r);
+                }
+            });
+            sheet.setClipToOutline(true);
+        }
     }
 
     /** A sheet with a text field opens with the cursor in the first one and the keyboard up. */

@@ -961,8 +961,42 @@ public class HomeFragmentActivity extends Fragment {
 		});
 	}
 	
+	/** Groups I have already asked to join and am waiting on. Their button says "Pending approval" instead of "Join". */
+	private final java.util.Set<String> trendingPending = new java.util.HashSet<>();
+	
+	private void _styleTrendingButton(TextView join, String gid) {
+		boolean pending = trendingPending.contains(gid);
+		join.setTag(gid);
+		join.setText(pending ? "Pending approval" : "Join");
+		join.setAlpha(pending ? 0.65f : 1f);
+	}
+	
+	private void _applyTrendingPending() {
+		if (linear_trending_groups == null) return;
+		for (int i = 0; i < linear_trending_groups.getChildCount(); i++) {
+			TextView join = linear_trending_groups.getChildAt(i).findViewById(R.id.btn_join);
+			if (join != null && join.getTag() instanceof String) _styleTrendingButton(join, (String) join.getTag());
+		}
+	}
+	
+	private void _loadPendingRequests() {
+		final String uid = FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+		if (uid.isEmpty() || getContext() == null) return;
+		com.harvana.app.firestore.UserProfileManager.getInstance(getContext()).getProfile(uid,
+			new com.harvana.app.firestore.UserProfileManager.DocCallback() {
+				@Override public void onSuccess(Map<String, Object> data) {
+					trendingPending.clear();
+					Object raw = data == null ? null : data.get("pendingGroupIds");
+					if (raw instanceof List) for (Object o : (List<?>) raw) if (o != null) trendingPending.add(o.toString());
+					if (getActivity() != null) getActivity().runOnUiThread(() -> _applyTrendingPending());
+				}
+				@Override public void onError(String error) { }
+			});
+	}
+	
 	private void _loadTrendingGroups() {
 		if (linear_trending_groups == null || getContext() == null) return;
+		_loadPendingRequests();
 		if (linear_trending_groups.getChildCount() == 0) {          // first load only; later loads keep what is shown until new data arrives
 			linear_trending_groups.addView(com.harvana.app.utils.Shimmer.rows(getContext(), 2));
 			if (linear10 != null) linear10.setVisibility(View.GONE);
@@ -1053,7 +1087,7 @@ public class HomeFragmentActivity extends Fragment {
 							}
 						}
 						if (join != null) {
-							join.setText("View");
+							_styleTrendingButton(join, gid);
 							final String joinGid = gid;
 							join.setOnClickListener(v -> {
 								if (joinGid.isEmpty()) { _openTab(new DiscoverFragmentActivity(), R.id.menu_discover); return; }

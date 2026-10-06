@@ -80,29 +80,37 @@ public final class NotificationRouter {
         try { c.startActivity(i); } catch (Exception ignored) { }
     }
 
-    /** Reads the transaction from the network and opens its detail page; the wallet tab if it cannot be read. */
+    /** Reads the transaction (and how many blocks confirm it) from the network and opens its detail page; the wallet tab if it cannot be read. */
     private static void openTransaction(final Context c, final String hash) {
         HarvanaNodeClient.nodeGet("/api/v1/tx/" + hash, new HarvanaNodeClient.JsonCallback() {
-            @Override public void onSuccess(JSONObject tx) {
-                Intent i = new Intent(c, TransactionDetailActivity.class);
-                long conf = tx.optLong("confirmations", 0L);
-                long block = tx.optLong("blockHeight", tx.optLong("block", 0L));
-                i.putExtra("txHash", hash);
-                i.putExtra("status", conf > 0 || block > 0 ? "confirmed" : "pending");
-                i.putExtra("senderAddress", tx.optString("from", ""));
-                i.putExtra("recipientAddress", tx.optString("to", ""));
-                i.putExtra("tokenSymbol", com.harvana.app.CoinInfo.ticker());
-                i.putExtra("value", HarvanaNodeClient.toHarvDisplay(tx.optLong("amount", 0L)));
-                i.putExtra("harvFee", HarvanaNodeClient.toHarvDisplay(tx.optLong("gas", tx.optLong("fee", 0L))));
-                i.putExtra("burnAmount", tx.optDouble("burnAmount", 0.0));
-                i.putExtra("timestamp", tx.optLong("timestamp", System.currentTimeMillis()));
-                i.putExtra("memo", tx.optString("memo", ""));
-                i.putExtra("confirmations", conf);
-                i.putExtra("blockNumber", block);
-                i.putExtra("nonce", tx.optLong("nonce", 0L));
-                start(c, i);
+            @Override public void onSuccess(final JSONObject tx) {
+                // The detail lookup does not carry the confirmation count; the status lookup does.
+                HarvanaNodeClient.nodeGet("/api/v1/tx/status/" + hash, new HarvanaNodeClient.JsonCallback() {
+                    @Override public void onSuccess(JSONObject st) { startDetail(c, hash, tx, st.optLong("confirmations", 0L)); }
+                    @Override public void onError(String error) { startDetail(c, hash, tx, 0L); }
+                });
             }
             @Override public void onError(String error) { start(c, main(c, "asset")); }
         });
+    }
+
+    private static void startDetail(Context c, String hash, JSONObject tx, long confirmations) {
+        long block = tx.optLong("blockHeight", tx.optLong("block", 0L));
+        long conf = confirmations > 0 ? confirmations : (block >= 0 && tx.has("blockHeight") ? 1L : 0L);
+        Intent i = new Intent(c, TransactionDetailActivity.class);
+        i.putExtra("txHash", hash);
+        i.putExtra("status", conf > 0 ? "confirmed" : "pending");
+        i.putExtra("senderAddress", tx.optString("from", ""));
+        i.putExtra("recipientAddress", tx.optString("to", ""));
+        i.putExtra("tokenSymbol", com.harvana.app.CoinInfo.ticker());
+        i.putExtra("value", HarvanaNodeClient.toHarvDisplay(tx.optLong("amount", 0L)));
+        i.putExtra("harvFee", HarvanaNodeClient.toHarvDisplay(tx.optLong("gas", tx.optLong("fee", 0L))));
+        i.putExtra("burnAmount", tx.optDouble("burnAmount", 0.0));
+        i.putExtra("timestamp", tx.optLong("timestamp", System.currentTimeMillis()));
+        i.putExtra("memo", tx.optString("memo", ""));
+        i.putExtra("confirmations", conf);
+        i.putExtra("blockNumber", block);
+        i.putExtra("nonce", tx.optLong("nonce", 0L));
+        start(c, i);
     }
 }

@@ -73,7 +73,7 @@
 							android:layout_height="16dp"
 							android:src="@drawable/ic_info"
 							android:scaleType="centerInside"
-							app:tint="@color/colorAccent" />
+							app:tint="@color/colorAccent" android:duplicateParentState="true" />
 						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_search_transactions"
 							android:layout_width="0dp"

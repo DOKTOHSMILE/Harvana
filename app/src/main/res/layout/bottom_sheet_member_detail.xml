@@ -153,7 +153,7 @@
 							android:src="@drawable/icon_groups_outline"
 							android:scaleType="centerInside"
 							android:focusable="false"
-							app:tint="@color/colorAccent" />
+							app:tint="@color/colorAccent" android:duplicateParentState="true" />
 						<LinearLayout
 							android:id="@+id/linear61"
 							android:layout_width="0dp"
@@ -199,7 +199,7 @@
 							android:src="@drawable/icon_check_circle_round"
 							android:scaleType="centerInside"
 							android:focusable="false"
-							app:tint="@color/colorAccent" />
+							app:tint="@color/colorAccent" android:duplicateParentState="true" />
 						<LinearLayout
 							android:id="@+id/linear64"
 							android:layout_width="0dp"
@@ -269,7 +269,7 @@
 							android:src="@drawable/icon_health_and_safety_outline"
 							android:scaleType="centerInside"
 							android:focusable="false"
-							app:tint="@color/colorAccent" />
+							app:tint="@color/colorAccent" android:duplicateParentState="true" />
 						<LinearLayout
 							android:id="@+id/linear67"
 							android:layout_width="0dp"
@@ -315,7 +315,7 @@
 							android:src="@drawable/icon_work_twotone"
 							android:scaleType="centerInside"
 							android:focusable="false"
-							app:tint="@color/colorAccent" />
+							app:tint="@color/colorAccent" android:duplicateParentState="true" />
 						<LinearLayout
 							android:id="@+id/linear70"
 							android:layout_width="0dp"
@@ -361,7 +361,7 @@
 							android:src="@drawable/icon_location_on_outline"
 							android:scaleType="centerInside"
 							android:focusable="false"
-							app:tint="@color/colorAccent" />
+							app:tint="@color/colorAccent" android:duplicateParentState="true" />
 						<LinearLayout
 							android:id="@+id/linear73"
 							android:layout_width="0dp"
@@ -431,7 +431,7 @@
 							android:src="@drawable/icon_local_phone_twotone"
 							android:scaleType="centerInside"
 							android:focusable="false"
-							app:tint="@color/colorAccent" />
+							app:tint="@color/colorAccent" android:duplicateParentState="true" />
 						<LinearLayout
 							android:id="@+id/linear76"
 							android:layout_width="0dp"
@@ -478,7 +478,7 @@
 							android:src="@drawable/icon_alternate_email_twotone"
 							android:scaleType="centerInside"
 							android:focusable="false"
-							app:tint="@color/colorAccent" />
+							app:tint="@color/colorAccent" android:duplicateParentState="true" />
 						<LinearLayout
 							android:id="@+id/linear79"
 							android:layout_width="0dp"
@@ -550,7 +550,7 @@
 							android:src="@drawable/icon_account_balance_wallet_outline_"
 							android:scaleType="centerInside"
 							android:focusable="false"
-							app:tint="@color/colorAccent" />
+							app:tint="@color/colorAccent" android:duplicateParentState="true" />
 						<LinearLayout
 							android:id="@+id/linear82"
 							android:layout_width="0dp"
@@ -597,7 +597,7 @@
 							android:src="@drawable/icon_money_twotone"
 							android:scaleType="centerInside"
 							android:focusable="false"
-							app:tint="@color/colorAccent" />
+							app:tint="@color/colorAccent" android:duplicateParentState="true" />
 						<LinearLayout
 							android:id="@+id/linear85"
 							android:layout_width="0dp"

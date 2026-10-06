@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Harvana duotone icon: line over a soft fill. Shape from Fluent UI System Icons "arrow_up_right" (MIT, see docs/THIRD_PARTY_NOTICES.md). -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="48dp" android:height="48dp" android:viewportWidth="24" android:viewportHeight="24" android:autoMirrored="true">
-    <path android:fillColor="@color/colorAccent" android:fillAlpha="0.4"
-        android:pathData="M11 3C10.4477 3 10 3.44772 10 4C10 4.55228 10.4477 5 11 5H17.5857L3.29289 19.2928C2.90237 19.6833 2.90237 20.3164 3.29289 20.707C3.68342 21.0975 4.31658 21.0975 4.70711 20.707L19 6.41408V13C19 13.5523 19.4477 14 20 14C20.5523 14 21 13.5523 21 13V4C21 3.44772 20.5523 3 20 3H11Z"/>
-    <path android:fillColor="#FFFFFF"
-        android:pathData="M10.7507 3C10.3365 3 10.0007 3.33579 10.0007 3.75C10.0007 4.16421 10.3365 4.5 10.7507 4.5H18.4198L3.22003 19.6998C2.92145 19.9983 2.92145 20.4824 3.22003 20.781C3.5186 21.0796 4.00269 21.0796 4.30126 20.781L19.5007 5.58158V13.25C19.5007 13.6642 19.8365 14 20.2507 14C20.6649 14 21.0007 13.6642 21.0007 13.25V3.75C21.0007 3.33579 20.6649 3 20.2507 3H10.7507Z"/>
-</vector>
+<!-- Harvana icon: line at rest; pressed, selected, checked or activated it fills in one colour with depth (see icon_call_made_twotone_on). -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android" android:enterFadeDuration="140" android:exitFadeDuration="220">
+    <item android:state_pressed="true" android:drawable="@drawable/icon_call_made_twotone_on"/>
+    <item android:state_checked="true" android:drawable="@drawable/icon_call_made_twotone_on"/>
+    <item android:state_selected="true" android:drawable="@drawable/icon_call_made_twotone_on"/>
+    <item android:state_activated="true" android:drawable="@drawable/icon_call_made_twotone_on"/>
+    <item android:drawable="@drawable/icon_call_made_twotone_line"/>
+</selector>

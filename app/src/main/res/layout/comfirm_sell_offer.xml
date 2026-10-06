@@ -559,7 +559,7 @@
 								android:src="@drawable/ic_person"
 								android:scaleType="centerInside"
 								android:backgroundTint="@color/colorP2pSurfaceAlt"
-								app:tint="@color/colorP2pAccent" />
+								app:tint="@color/colorP2pAccent" android:duplicateParentState="true" />
 							<TextView
 								android:id="@+id/textview22"
 								android:layout_width="match_parent"

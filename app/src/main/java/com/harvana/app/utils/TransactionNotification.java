@@ -71,8 +71,8 @@ public class TransactionNotification {
 		PendingIntent pi = PendingIntent.getActivity(app, 0, tapIntent, flags);
 		
 		int iconRes = isIncoming
-		? R.drawable.icon_call_received_twotone
-		: R.drawable.icon_call_made_twotone;
+		? R.drawable.icon_call_received_twotone_line
+		: R.drawable.icon_call_made_twotone_line;
 		
 		// Fallback if those drawables are missing
 		try {

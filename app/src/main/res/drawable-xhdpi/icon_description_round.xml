@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Harvana duotone icon: line over a soft fill. Shape from Fluent UI System Icons "document_text" (MIT, see docs/THIRD_PARTY_NOTICES.md). -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="48dp" android:height="48dp" android:viewportWidth="24" android:viewportHeight="24">
-    <path android:fillColor="@color/colorAccent" android:fillAlpha="0.4"
-        android:pathData="M12 8V2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V10H14C12.8954 10 12 9.10457 12 8ZM8.25 11.5H15.75C16.1642 11.5 16.5 11.8358 16.5 12.25C16.5 12.6642 16.1642 13 15.75 13H8.25C7.83579 13 7.5 12.6642 7.5 12.25C7.5 11.8358 7.83579 11.5 8.25 11.5ZM8.25 14.25H15.75C16.1642 14.25 16.5 14.5858 16.5 15C16.5 15.4142 16.1642 15.75 15.75 15.75H8.25C7.83579 15.75 7.5 15.4142 7.5 15C7.5 14.5858 7.83579 14.25 8.25 14.25ZM8.25 17H15.75C16.1642 17 16.5 17.3358 16.5 17.75C16.5 18.1642 16.1642 18.5 15.75 18.5H8.25C7.83579 18.5 7.5 18.1642 7.5 17.75C7.5 17.3358 7.83579 17 8.25 17ZM13.5 8V2.5L19.5 8.5H14C13.7239 8.5 13.5 8.27614 13.5 8Z"/>
-    <path android:fillColor="#FFFFFF"
-        android:pathData="M8.75 11.5C8.33579 11.5 8 11.8358 8 12.25C8 12.6642 8.33579 13 8.75 13H15.25C15.6642 13 16 12.6642 16 12.25C16 11.8358 15.6642 11.5 15.25 11.5H8.75ZM8.75 14.25C8.33579 14.25 8 14.5858 8 15C8 15.4142 8.33579 15.75 8.75 15.75H15.25C15.6642 15.75 16 15.4142 16 15C16 14.5858 15.6642 14.25 15.25 14.25H8.75ZM8.75 17C8.33579 17 8 17.3358 8 17.75C8 18.1642 8.33579 18.5 8.75 18.5H15.25C15.6642 18.5 16 18.1642 16 17.75C16 17.3358 15.6642 17 15.25 17H8.75ZM13.585 2.586L19.414 8.414C19.789 8.789 20 9.298 20 9.828V20C20 21.104 19.104 22 18 22H6C4.896 22 4 21.104 4 20V4C4 2.896 4.896 2 6 2H12.172C12.6865 2 13.2194 2.22035 13.585 2.586ZM18 20.5C18.276 20.5 18.5 20.275 18.5 20V10H14C12.896 10 12 9.104 12 8V3.5H6C5.724 3.5 5.5 3.725 5.5 4V20C5.5 20.275 5.724 20.5 6 20.5H18ZM17.378 8.5L13.5 4.621V8C13.5 8.275 13.724 8.5 14 8.5H17.378Z"/>
-</vector>
+<!-- Harvana icon: line at rest; pressed, selected, checked or activated it fills in one colour with depth (see icon_description_round_on). -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android" android:enterFadeDuration="140" android:exitFadeDuration="220">
+    <item android:state_pressed="true" android:drawable="@drawable/icon_description_round_on"/>
+    <item android:state_checked="true" android:drawable="@drawable/icon_description_round_on"/>
+    <item android:state_selected="true" android:drawable="@drawable/icon_description_round_on"/>
+    <item android:state_activated="true" android:drawable="@drawable/icon_description_round_on"/>
+    <item android:drawable="@drawable/icon_description_round_line"/>
+</selector>

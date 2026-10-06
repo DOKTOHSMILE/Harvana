@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Harvana duotone icon: line over a soft fill. Shape from Fluent UI System Icons "caret_down" (MIT, see docs/THIRD_PARTY_NOTICES.md). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#F1F5F9" android:fillAlpha="0.4"
+        android:pathData="M6.10204 8C5.0281 8 4.45412 9.2649 5.16132 10.0731L10.6831 16.3838C11.3804 17.1806 12.6199 17.1806 13.3172 16.3838L18.839 10.0731C19.5462 9.2649 18.9722 8 17.8983 8H6.10204Z"/>
+    <path android:fillColor="#F1F5F9"
+        android:pathData="M5.16132 10.0731C4.45412 9.2649 5.0281 8 6.10204 8H17.8983C18.9722 8 19.5462 9.2649 18.839 10.0731L13.3172 16.3838C12.6199 17.1806 11.3804 17.1806 10.6831 16.3838L5.16132 10.0731ZM6.65298 9.5L11.812 15.396C11.9116 15.5099 12.0887 15.5099 12.1883 15.396L17.3473 9.5H6.65298Z"/>
+</vector>

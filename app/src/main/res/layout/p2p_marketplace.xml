@@ -136,7 +136,7 @@
 						android:layout_width="20dp"
 						android:layout_height="match_parent"
 						android:src="@drawable/icon_arrow_drop_down_round"
-						android:scaleType="centerInside" />
+						android:scaleType="centerInside" android:duplicateParentState="true" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 			<Space

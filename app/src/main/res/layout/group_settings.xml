@@ -62,7 +62,7 @@
 							android:src="@drawable/ic_groups"
 							android:scaleType="center"
 							android:backgroundTint="@color/colorAccentSoft"
-							app:tint="@color/colorAccent" />
+							app:tint="@color/colorAccent" android:duplicateParentState="true" />
 						<LinearLayout
 							android:id="@+id/linear41"
 							android:layout_width="0dp"
@@ -144,7 +144,7 @@
 								android:src="@drawable/ic_shield"
 								android:scaleType="center"
 								android:backgroundTint="@color/colorInfoSoft"
-								app:tint="@color/colorInfo" />
+								app:tint="@color/colorInfo" android:duplicateParentState="true" />
 							<LinearLayout
 								android:id="@+id/linear44"
 								android:layout_width="0dp"
@@ -315,7 +315,7 @@
 								android:src="@drawable/ic_description"
 								android:scaleType="centerInside"
 								android:backgroundTint="@color/colorInfoSoft"
-								app:tint="@color/colorInfo" />
+								app:tint="@color/colorInfo" android:duplicateParentState="true" />
 							<LinearLayout
 								android:id="@+id/linear53"
 								android:layout_width="0dp"
@@ -499,7 +499,7 @@
 									android:layout_height="18dp"
 									android:src="@drawable/ic_arrow_right"
 									android:scaleType="center"
-									app:tint="@color/colorTextTertiary" />
+									app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
 							</LinearLayout>
 							<com.google.android.material.divider.MaterialDivider
 								android:id="@+id/view59"
@@ -909,7 +909,7 @@
 							android:layout_height="20dp"
 							android:src="@drawable/ic_info"
 							android:scaleType="center"
-							app:tint="@color/colorInfo" />
+							app:tint="@color/colorInfo" android:duplicateParentState="true" />
 						<TextView
 							android:id="@+id/tvRuleInfoBanner"
 							android:layout_width="0dp"
@@ -951,7 +951,7 @@
 								android:src="@drawable/ic_wallet"
 								android:scaleType="centerInside"
 								android:backgroundTint="@color/colorInfoSoft"
-								app:tint="@color/colorInfo" />
+								app:tint="@color/colorInfo" android:duplicateParentState="true" />
 							<LinearLayout
 								android:id="@+id/linear70"
 								android:layout_width="0dp"
@@ -1009,7 +1009,7 @@
 									android:layout_height="20dp"
 									android:src="@drawable/ic_warning"
 									android:scaleType="centerInside"
-									app:tint="@color/colorError" />
+									app:tint="@color/colorError" android:duplicateParentState="true" />
 								<TextView
 									android:id="@+id/textview74"
 									android:layout_width="0dp"
@@ -1117,7 +1117,7 @@
 								android:src="@drawable/ic_notifications"
 								android:scaleType="center"
 								android:backgroundTint="@color/colorAccentSoft"
-								app:tint="@color/colorAccent" />
+								app:tint="@color/colorAccent" android:duplicateParentState="true" />
 							<LinearLayout
 								android:id="@+id/linear34"
 								android:layout_width="0dp"
@@ -1163,7 +1163,7 @@
 						android:layout_height="20dp"
 						android:src="@drawable/ic_block"
 						android:scaleType="center"
-						app:tint="@color/colorTextTertiary" />
+						app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
 					<TextView
 						android:id="@+id/textview75"
 						android:layout_width="wrap_content"
@@ -1211,7 +1211,7 @@
 						android:layout_height="14dp"
 						android:src="@drawable/ic_block"
 						android:scaleType="center"
-						app:tint="@color/colorTextTertiary" />
+						app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
 					<TextView
 						android:id="@+id/textview76"
 						android:layout_width="wrap_content"

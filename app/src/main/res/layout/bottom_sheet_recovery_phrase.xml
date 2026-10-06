@@ -59,7 +59,7 @@
 					android:src="@drawable/ic_info"
 					android:focusable="false"
 					android:layout_marginEnd="12dp"
-					app:tint="@color/colorWarningDark" />
+					app:tint="@color/colorWarningDark" android:duplicateParentState="true" />
 				<TextView
 					android:id="@+id/textview10"
 					android:layout_width="0dp"

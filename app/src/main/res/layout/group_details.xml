@@ -114,7 +114,7 @@
 								android:layout_height="32dp"
 								android:src="@drawable/ic_wallet"
 								android:scaleType="centerInside"
-								app:tint="@color/colorAccent" />
+								app:tint="@color/colorAccent" android:duplicateParentState="true" />
 							<LinearLayout
 								android:id="@+id/linear30"
 								android:layout_width="match_parent"
@@ -166,7 +166,7 @@
 								android:layout_height="32dp"
 								android:src="@drawable/ic_groups"
 								android:scaleType="centerInside"
-								app:tint="@color/colorSecondaryAccent" />
+								app:tint="@color/colorSecondaryAccent" android:duplicateParentState="true" />
 							<LinearLayout
 								android:id="@+id/linear31"
 								android:layout_width="match_parent"
@@ -217,7 +217,7 @@
 								android:layout_height="32dp"
 								android:src="@drawable/ic_receipt"
 								android:scaleType="centerInside"
-								app:tint="@color/colorAmber" />
+								app:tint="@color/colorAmber" android:duplicateParentState="true" />
 							<LinearLayout
 								android:id="@+id/linear32"
 								android:layout_width="match_parent"

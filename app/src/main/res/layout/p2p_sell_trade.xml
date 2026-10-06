@@ -288,7 +288,7 @@
 									android:layout_height="17dp"
 									android:src="@drawable/icon_check_circle_round"
 									android:scaleType="centerInside"
-									android:layout_marginStart="5dp" />
+									android:layout_marginStart="5dp" android:duplicateParentState="true" />
 							</LinearLayout>
 							<TextView
 								android:id="@+id/tv_sell_buyer_info"
@@ -764,7 +764,7 @@
 						android:layout_width="52dp"
 						android:layout_height="52dp"
 						android:src="@drawable/ic_check_circle"
-						android:scaleType="center" />
+						android:scaleType="center" android:duplicateParentState="true" />
 					<TextView
 						android:id="@+id/tv_sell_completed_title"
 						android:layout_width="wrap_content"

@@ -194,7 +194,7 @@
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_learn_comment"
-                        app:tint="@color/colorTextTertiary" />
+                        app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
                     <TextView
                         android:id="@+id/tv_comment"
                         android:layout_width="wrap_content"
@@ -222,7 +222,7 @@
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_learn_share"
-                        app:tint="@color/colorTextTertiary" />
+                        app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/ll_gift"
@@ -240,7 +240,7 @@
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_learn_gift"
-                        app:tint="@color/colorAccent" />
+                        app:tint="@color/colorAccent" android:duplicateParentState="true" />
                     <TextView
                         android:id="@+id/tv_gift"
                         android:layout_width="wrap_content"

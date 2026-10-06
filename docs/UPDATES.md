@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: icons fill in 3D when tapped
+
+What the app does. Every icon now has two looks: the duotone line at rest, and a filled version shaded for depth (lit from the top, soft shadow) in one single colour, the icon's own colour or the colour the screen gives it. The icon fades into the filled look while it is pressed, and stays filled while it is selected or checked (the current bottom-bar tab, toggles, selected chips). Icons inside a tappable row fill when the row is pressed. Icons that have their own tap action keep their own pressed state. What you do: install the new build.
+
 ## 6 Oct 2026: new icons across the whole app
 
 What the app does. Every icon in the app (163 of them: bottom bar, buttons, menus, transaction types, profile, wallet, groups, Learn Hub, notifications) is redrawn in one Harvana duotone style: a clean line over a soft gold fill. Where a screen colours an icon, both tones take that colour, so the two-tone look stays. Android's built-in system icons that were still used (info, alert, search, gallery, camera, send, more, and the notification icon) are replaced by the same set, and the text characters used as icons (✕ close, ⋮ menu, › chevrons) are now real icons. Kept as they are: the HARV coin and logo, the launcher icon and the 3D handshake reaction. What you do: install the new build.

@@ -55,7 +55,7 @@
 							android:layout_marginRight="5dp"
 							android:src="@drawable/icon_account_balance_wallet_outline_"
 							android:scaleType="centerInside"
-							android:tint="@color/colorTextTertiary" />
+							android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
 						<TextView
 							android:id="@+id/tv_active_wallet_label"
 							android:layout_width="match_parent"
@@ -116,7 +116,7 @@
 							android:padding="6dp"
 							android:src="@drawable/icon_visibility_twotone"
 							android:scaleType="centerInside"
-							app:tint="@color/colorTextTertiary" />
+							app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
 					</LinearLayout>
 				</LinearLayout>
 				<LinearLayout
@@ -220,7 +220,7 @@
 								android:padding="2dp"
 								android:src="@drawable/icon_currency_exchange_twotone"
 								android:scaleType="centerInside"
-								app:tint="@color/colorAccent" />
+								app:tint="@color/colorAccent" android:duplicateParentState="true" />
 							<TextView
 								android:id="@+id/textview6"
 								android:layout_width="wrap_content"

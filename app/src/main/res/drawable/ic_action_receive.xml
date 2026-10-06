@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Harvana duotone icon: line over a soft fill. Shape from Fluent UI System Icons "arrow_download" (MIT, see docs/THIRD_PARTY_NOTICES.md). -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
-    <path android:fillColor="@color/colorAccent" android:fillAlpha="0.4"
-        android:pathData="M13 3C13 2.44772 12.5523 2 12 2C11.4477 2 11 2.44772 11 3V15.0858L7.70711 11.7929C7.31658 11.4024 6.68342 11.4024 6.29289 11.7929C5.90237 12.1834 5.90237 12.8166 6.29289 13.2071L11.2929 18.2071C11.6834 18.5976 12.3166 18.5976 12.7071 18.2071L17.7071 13.2071C18.0976 12.8166 18.0976 12.1834 17.7071 11.7929C17.3166 11.4024 16.6834 11.4024 16.2929 11.7929L13 15.0858V3ZM5 20C4.44772 20 4 20.4477 4 21C4 21.5523 4.44772 22 5 22H19C19.5523 22 20 21.5523 20 21C20 20.4477 19.5523 20 19 20H5Z"/>
-    <path android:fillColor="#FFFFFFFF"
-        android:pathData="M18.2498 20.5009C18.664 20.5008 19 20.8365 19 21.2507C19 21.6649 18.6644 22.0008 18.2502 22.0009L5.25022 22.0047C4.836 22.0048 4.5 21.6691 4.5 21.2549C4.5 20.8407 4.83557 20.5048 5.24978 20.5047L18.2498 20.5009ZM11.6482 2.01271L11.75 2.00586C12.1297 2.00586 12.4435 2.28801 12.4932 2.65409L12.5 2.75586L12.499 16.4409L16.2208 12.7205C16.4871 12.4543 16.9038 12.4301 17.1974 12.648L17.2815 12.7206C17.5477 12.9869 17.5719 13.4036 17.354 13.6972L17.2814 13.7813L12.2837 18.7779C12.0176 19.044 11.6012 19.0683 11.3076 18.8507L11.2235 18.7782L6.22003 13.7816C5.92694 13.4889 5.92661 13.014 6.21931 12.7209C6.48539 12.4545 6.90204 12.43 7.1958 12.6477L7.27997 12.7202L10.999 16.4339L11 2.75586C11 2.37616 11.2822 2.06237 11.6482 2.01271L11.75 2.00586L11.6482 2.01271Z"/>
-</vector>
+<!-- Harvana icon: line at rest; pressed, selected, checked or activated it fills in one colour with depth (see ic_action_receive_on). -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android" android:enterFadeDuration="140" android:exitFadeDuration="220">
+    <item android:state_pressed="true" android:drawable="@drawable/ic_action_receive_on"/>
+    <item android:state_checked="true" android:drawable="@drawable/ic_action_receive_on"/>
+    <item android:state_selected="true" android:drawable="@drawable/ic_action_receive_on"/>
+    <item android:state_activated="true" android:drawable="@drawable/ic_action_receive_on"/>
+    <item android:drawable="@drawable/ic_action_receive_line"/>
+</selector>

@@ -44,7 +44,7 @@
 						android:padding="9dp"
 						android:background="@drawable/bg_settings_icon_badge"
 						android:src="@drawable/ic_wallet"
-						android:scaleType="centerInside" />
+						android:scaleType="centerInside" android:duplicateParentState="true" />
 					<TextView
 						android:id="@+id/textview50"
 						android:layout_width="0dp"
@@ -97,7 +97,7 @@
 							android:focusable="false"
 							android:layout_marginStart="12dp"
 							android:contentDescription="CopyAddress"
-							app:tint="@color/colorTextSecondary" />
+							app:tint="@color/colorTextSecondary" android:duplicateParentState="true" />
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>
 				<com.google.android.material.divider.MaterialDivider

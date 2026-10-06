@@ -66,7 +66,7 @@
 						android:src="@drawable/icon_arrow_drop_down_round"
 						android:scaleType="centerInside"
 						android:layout_marginStart="2dp"
-						app:tint="@color/colorP2pTextSecondary" />
+						app:tint="@color/colorP2pTextSecondary" android:duplicateParentState="true" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 			<com.google.android.material.card.MaterialCardView
@@ -108,7 +108,7 @@
 						android:src="@drawable/icon_arrow_drop_down_round"
 						android:scaleType="centerInside"
 						android:layout_marginStart="4dp"
-						app:tint="@color/colorP2pTextSecondary" />
+						app:tint="@color/colorP2pTextSecondary" android:duplicateParentState="true" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 			<com.google.android.material.card.MaterialCardView
@@ -148,7 +148,7 @@
 						android:src="@drawable/icon_arrow_drop_down_round"
 						android:scaleType="centerInside"
 						android:layout_marginStart="4dp"
-						app:tint="@color/colorP2pTextSecondary" />
+						app:tint="@color/colorP2pTextSecondary" android:duplicateParentState="true" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 			<Space

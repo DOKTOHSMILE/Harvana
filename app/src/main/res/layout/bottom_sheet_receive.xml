@@ -126,7 +126,7 @@
 				android:layout_margin="20dp"
 				android:scaleType="centerInside"
 				android:src="@drawable/ic_camera"
-				android:focusable="false" />
+				android:focusable="false" android:duplicateParentState="true" />
 		</LinearLayout>
 		<TextView
 			android:id="@+id/textview18"

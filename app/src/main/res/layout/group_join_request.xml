@@ -73,7 +73,7 @@
 									android:layout_width="28dp"
 									android:layout_height="28dp"
 									android:src="@drawable/icon_groups_3_round"
-									android:scaleType="centerInside" />
+									android:scaleType="centerInside" android:duplicateParentState="true" />
 							</com.google.android.material.card.MaterialCardView>
 							<LinearLayout
 								android:id="@+id/linear68"
@@ -105,7 +105,7 @@
 										android:layout_height="13dp"
 										android:src="@drawable/icon_location_on_outline"
 										android:scaleType="centerInside"
-										app:tint="@color/colorTextTertiary" />
+										app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
 									<TextView
 										android:id="@+id/tv_group_location"
 										android:layout_width="wrap_content"
@@ -388,7 +388,7 @@
 								android:layout_marginTop="2dp"
 								android:src="@drawable/icon_check_circle_round"
 								android:scaleType="centerInside"
-								app:tint="@color/colorAccent" />
+								app:tint="@color/colorAccent" android:duplicateParentState="true" />
 							<TextView
 								android:id="@+id/textview50"
 								android:layout_width="0dp"
@@ -413,7 +413,7 @@
 								android:layout_marginTop="2dp"
 								android:src="@drawable/icon_check_circle_round"
 								android:scaleType="centerInside"
-								app:tint="@color/colorAccent" />
+								app:tint="@color/colorAccent" android:duplicateParentState="true" />
 							<TextView
 								android:id="@+id/textview51"
 								android:layout_width="0dp"
@@ -438,7 +438,7 @@
 								android:layout_marginTop="2dp"
 								android:src="@drawable/icon_check_circle_round"
 								android:scaleType="centerInside"
-								app:tint="@color/colorAccent" />
+								app:tint="@color/colorAccent" android:duplicateParentState="true" />
 							<TextView
 								android:id="@+id/textview52"
 								android:layout_width="0dp"
@@ -462,7 +462,7 @@
 								android:layout_marginTop="2dp"
 								android:src="@drawable/icon_check_circle_round"
 								android:scaleType="centerInside"
-								app:tint="@color/colorAccent" />
+								app:tint="@color/colorAccent" android:duplicateParentState="true" />
 							<TextView
 								android:id="@+id/textview53"
 								android:layout_width="0dp"
@@ -516,7 +516,7 @@
 								android:layout_height="15dp"
 								android:src="@drawable/icon_access_time_outline"
 								android:scaleType="centerInside"
-								app:tint="@color/colorTextTertiary" />
+								app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
 							<TextView
 								android:id="@+id/textview55"
 								android:layout_width="0dp"
@@ -547,7 +547,7 @@
 								android:layout_height="15dp"
 								android:src="@drawable/icon_access_time_outline"
 								android:scaleType="centerInside"
-								app:tint="@color/colorTextTertiary" />
+								app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
 							<TextView
 								android:id="@+id/textview57"
 								android:layout_width="0dp"
@@ -577,7 +577,7 @@
 								android:layout_height="15dp"
 								android:src="@drawable/icon_access_time_outline"
 								android:scaleType="centerInside"
-								app:tint="@color/colorTextTertiary" />
+								app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
 							<TextView
 								android:id="@+id/textview59"
 								android:layout_width="0dp"

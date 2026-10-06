@@ -40,7 +40,7 @@
 					android:src="@drawable/icon_call_received_twotone"
 					android:scaleType="centerInside"
 					app:tint="@color/colorAccent"
-					android:focusable="false" />
+					android:focusable="false" android:duplicateParentState="true" />
 			</com.google.android.material.card.MaterialCardView>
 			<LinearLayout
 				android:id="@+id/linear11"

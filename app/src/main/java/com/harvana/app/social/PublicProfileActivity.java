@@ -192,6 +192,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         banner.addView(pic, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         if (card.cover.startsWith("http")) {
             try { com.bumptech.glide.Glide.with(this).load(card.cover).centerCrop().into(pic); } catch (Exception ignored) { }
+            banner.setOnClickListener(v -> com.harvana.app.utils.ImageViewerActivity.open(this, card.cover));      // tap to see it whole
         }
         if (mine) {
             TextView edit = pill(card.cover.isEmpty() ? "Add cover" : "Change cover", UiColors.textPrimary());
@@ -212,7 +213,8 @@ public class PublicProfileActivity extends AppCompatActivity {
         return banner;
     }
 
-    private int coverHeight() { return SocialUi.dp(this, 150); }
+    /** The cover is as wide as the screen and 2 high for every 5 wide, the shape people crop to in Edit profile. */
+    private int coverHeight() { return Math.round(getResources().getDisplayMetrics().widthPixels / 2.5f); }
 
     /**
      * The cover with the round picture on it, as one frame: the picture is drawn after the cover, so it always sits on top, and it needs
@@ -248,6 +250,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         if (card.icon.startsWith("http")) {
             try { com.bumptech.glide.Glide.with(this).load(card.icon).circleCrop().into(photo); initials.setVisibility(View.INVISIBLE); }
             catch (Exception ignored) { }
+            face.setOnClickListener(v -> com.harvana.app.utils.ImageViewerActivity.open(this, card.icon));        // tap to see it whole
         }
         return face;
     }

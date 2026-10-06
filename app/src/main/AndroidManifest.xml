@@ -256,6 +256,14 @@
 			android:exported="false"
 			android:windowSoftInputMode="adjustResize" />
 		<activity
+			android:name=".utils.CropImageActivity"
+			android:exported="false"
+			android:configChanges="orientation|screenSize|keyboardHidden" />
+		<activity
+			android:name=".utils.ImageViewerActivity"
+			android:exported="false"
+			android:configChanges="orientation|screenSize|keyboardHidden" />
+		<activity
 			android:name=".social.FindContactsActivity"
 			android:label="Find friends"
 			android:exported="false"

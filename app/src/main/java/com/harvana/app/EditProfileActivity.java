@@ -55,7 +55,9 @@ public class EditProfileActivity extends AppCompatActivity {
     private TextView initials, photoStatus;
     private ProgressBar photoBusy;
     private String newIcon;      // set once a picked photo has been uploaded
-    private static final int RC_COVER = 613;
+    private static final int RC_COVER = 613, RC_CROP_PHOTO = 614, RC_CROP_COVER = 615;
+    /** The cover is shown 5 wide to 2 high on every profile, so that is the shape the person crops to. */
+    static final float COVER_ASPECT = 2.5f;
     private String newCover;     // set once a picked cover has been uploaded; "" means remove it
     private ImageView coverView;
     private TextView coverStatus;
@@ -171,7 +173,8 @@ public class EditProfileActivity extends AppCompatActivity {
         coverBusy.setVisibility(View.GONE);
         frame.addView(coverBusy, new FrameLayout.LayoutParams(SocialUi.dp(this, 36), SocialUi.dp(this, 36), Gravity.CENTER));
         showCover(s("cover"));
-        box.addView(frame, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 130)));
+        int previewWidth = getResources().getDisplayMetrics().widthPixels - 2 * SocialUi.dp(this, 16);
+        box.addView(frame, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Math.round(previewWidth / COVER_ASPECT)));   // same shape as on the profile
 
         LinearLayout buttons = new LinearLayout(this);
         buttons.setPadding(0, SocialUi.dp(this, 10), 0, 0);
@@ -258,8 +261,12 @@ public class EditProfileActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int req, int res, Intent result) {
         super.onActivityResult(req, res, result);
-        if (req == RC_COVER && res == RESULT_OK && result != null && result.getData() != null) { uploadCover(result.getData()); return; }
-        if (req != RC_PHOTO || res != RESULT_OK || result == null || result.getData() == null) return;
+        if (res != RESULT_OK || result == null || result.getData() == null) return;
+        // A picked picture is cropped by hand first (square for the profile picture, wide for the cover); the crop is what gets uploaded.
+        if (req == RC_COVER) { startActivityForResult(com.harvana.app.utils.CropImageActivity.intent(this, result.getData(), COVER_ASPECT, 1280, "Crop cover", false), RC_CROP_COVER); return; }
+        if (req == RC_PHOTO) { startActivityForResult(com.harvana.app.utils.CropImageActivity.intent(this, result.getData(), 1f, 512, "Crop profile photo", true), RC_CROP_PHOTO); return; }
+        if (req == RC_CROP_COVER) { uploadCover(result.getData()); return; }
+        if (req != RC_CROP_PHOTO) return;
         final Uri picked = result.getData();
         Glide.with(this).load(picked).circleCrop().into(photo);
         initials.setVisibility(View.INVISIBLE);

@@ -117,7 +117,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview24"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -205,7 +205,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview25"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -313,7 +313,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview26"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -354,7 +354,7 @@
 								android:padding="14dp"
 								android:gravity="center_vertical"
 								android:orientation="horizontal">
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/imageview27"
 									android:layout_width="26dp"
 									android:layout_height="26dp"
@@ -383,7 +383,7 @@
 										android:text="Members take turns receiving the full pot"
 										android:textSize="11sp" />
 								</LinearLayout>
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/check_type_rotating"
 									android:layout_width="20dp"
 									android:layout_height="20dp"
@@ -410,7 +410,7 @@
 								android:padding="14dp"
 								android:gravity="center_vertical"
 								android:orientation="horizontal">
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/imageview28"
 									android:layout_width="26dp"
 									android:layout_height="26dp"
@@ -439,7 +439,7 @@
 										android:text="Everyone saves toward one shared goal"
 										android:textSize="11sp" />
 								</LinearLayout>
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/check_type_fixed"
 									android:layout_width="20dp"
 									android:layout_height="20dp"
@@ -466,7 +466,7 @@
 								android:padding="14dp"
 								android:gravity="center_vertical"
 								android:orientation="horizontal">
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/imageview29"
 									android:layout_width="26dp"
 									android:layout_height="26dp"
@@ -495,7 +495,7 @@
 										android:text="Savings grow together, with internal loans"
 										android:textSize="11sp" />
 								</LinearLayout>
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/check_type_accumulative"
 									android:layout_width="20dp"
 									android:layout_height="20dp"
@@ -529,7 +529,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview30"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -664,7 +664,7 @@
 									android:padding="12dp"
 									android:gravity="center_horizontal"
 									android:orientation="vertical">
-									<ImageView
+									<com.google.android.material.imageview.ShapeableImageView
 										android:id="@+id/imageview31"
 										android:layout_width="22dp"
 										android:layout_height="22dp"
@@ -706,7 +706,7 @@
 									android:padding="12dp"
 									android:gravity="center_horizontal"
 									android:orientation="vertical">
-									<ImageView
+									<com.google.android.material.imageview.ShapeableImageView
 										android:id="@+id/imageview32"
 										android:layout_width="22dp"
 										android:layout_height="22dp"
@@ -756,7 +756,7 @@
 									android:padding="12dp"
 									android:gravity="center_horizontal"
 									android:orientation="vertical">
-									<ImageView
+									<com.google.android.material.imageview.ShapeableImageView
 										android:id="@+id/imageview33"
 										android:layout_width="22dp"
 										android:layout_height="22dp"
@@ -798,7 +798,7 @@
 									android:padding="12dp"
 									android:gravity="center_horizontal"
 									android:orientation="vertical">
-									<ImageView
+									<com.google.android.material.imageview.ShapeableImageView
 										android:id="@+id/imageview34"
 										android:layout_width="22dp"
 										android:layout_height="22dp"
@@ -848,7 +848,7 @@
 									android:padding="12dp"
 									android:gravity="center_horizontal"
 									android:orientation="vertical">
-									<ImageView
+									<com.google.android.material.imageview.ShapeableImageView
 										android:id="@+id/imageview35"
 										android:layout_width="22dp"
 										android:layout_height="22dp"
@@ -947,7 +947,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:visibility="gone">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview36"
 								android:layout_width="16dp"
 								android:layout_height="16dp"
@@ -1059,7 +1059,7 @@
 								android:background="@drawable/field_background"
 								android:gravity="center_vertical"
 								android:orientation="horizontal">
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/imageview37"
 									android:layout_width="16dp"
 									android:layout_height="16dp"
@@ -1198,7 +1198,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview38"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -1338,7 +1338,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview39"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -1520,7 +1520,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview40"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -1629,7 +1629,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview41"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -1653,7 +1653,7 @@
 							android:layout_marginTop="18dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview42"
 								android:layout_width="22dp"
 								android:layout_height="22dp"
@@ -1732,7 +1732,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview43"
 								android:layout_width="22dp"
 								android:layout_height="22dp"
@@ -1781,7 +1781,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview44"
 								android:layout_width="22dp"
 								android:layout_height="22dp"
@@ -1830,7 +1830,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview45"
 								android:layout_width="22dp"
 								android:layout_height="22dp"
@@ -1885,7 +1885,7 @@
 						android:padding="18dp"
 						android:gravity="center_vertical"
 						android:orientation="horizontal">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview3"
 							android:layout_width="22dp"
 							android:layout_height="22dp"

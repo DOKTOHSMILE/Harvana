@@ -41,7 +41,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:background="@drawable/bg_checkbox_unselected" />
-		<ImageView
+		<com.google.android.material.imageview.ShapeableImageView
 			android:id="@+id/iv_payment_option_check"
 			android:focusable="false"
 			android:layout_width="14dp"

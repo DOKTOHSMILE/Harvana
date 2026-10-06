@@ -22,7 +22,7 @@
 			android:padding="18dp"
 			android:gravity="center_vertical"
 			android:orientation="horizontal">
-			<ImageView
+			<com.google.android.material.imageview.ShapeableImageView
 				android:id="@+id/ivMethodIcon"
 				android:focusable="false"
 				android:layout_width="40dp"
@@ -78,7 +78,7 @@
 					android:textColor="@color/colorTextSecondary"
 					android:textSize="12.5sp" />
 			</LinearLayout>
-			<ImageView
+			<com.google.android.material.imageview.ShapeableImageView
 				android:id="@+id/btnMethodMenu"
 				android:layout_width="24dp"
 				android:layout_height="24dp"

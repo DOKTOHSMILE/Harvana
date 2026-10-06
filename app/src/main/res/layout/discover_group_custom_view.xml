@@ -27,7 +27,7 @@
 				android:layout_height="wrap_content"
 				android:gravity="center_vertical"
 				android:orientation="horizontal">
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/iv_group_photo"
 					android:layout_width="32dp"
 					android:layout_height="32dp"
@@ -67,7 +67,7 @@
 				android:layout_marginTop="8dp"
 				android:gravity="center_vertical"
 				android:orientation="horizontal">
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/imageview1"
 					android:layout_width="14dp"
 					android:layout_height="14dp"
@@ -92,7 +92,7 @@
 					android:orientation="horizontal"
 					android:layout_weight="1"
 					android:layout_marginStart="12dp">
-					<ImageView
+					<com.google.android.material.imageview.ShapeableImageView
 						android:id="@+id/imageview2"
 						android:layout_width="14dp"
 						android:layout_height="14dp"
@@ -110,7 +110,7 @@
 						android:layout_marginStart="4dp"
 						android:focusable="false" />
 				</LinearLayout>
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/imageview3"
 					android:layout_width="14dp"
 					android:layout_height="14dp"
@@ -313,7 +313,7 @@
 						android:layout_height="24dp"
 						android:background="@color/whiteFaint10"
 						android:orientation="vertical" />
-					<ImageView
+					<com.google.android.material.imageview.ShapeableImageView
 						android:id="@+id/imageview4"
 						android:layout_width="36dp"
 						android:layout_height="36dp"

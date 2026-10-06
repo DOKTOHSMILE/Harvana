@@ -114,7 +114,7 @@
                 android:lineSpacingMultiplier="1.2"
                 android:textIsSelectable="false" />
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/iv_cover"
                 android:layout_width="match_parent"
                 android:layout_height="190dp"
@@ -148,7 +148,7 @@
                     android:background="@drawable/bg_learn_action"
                     android:contentDescription="Fire"
                     android:orientation="horizontal">
-                    <ImageView
+                    <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/iv_fire"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
@@ -177,7 +177,7 @@
                     android:background="@drawable/bg_learn_action"
                     android:contentDescription="Comments"
                     android:orientation="horizontal">
-                    <ImageView
+                    <com.google.android.material.imageview.ShapeableImageView
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_learn_comment"
@@ -205,7 +205,7 @@
                     android:background="@drawable/bg_learn_action"
                     android:contentDescription="Share"
                     android:orientation="horizontal">
-                    <ImageView
+                    <com.google.android.material.imageview.ShapeableImageView
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_learn_share"
@@ -223,13 +223,13 @@
                     android:background="@drawable/bg_learn_action"
                     android:contentDescription="Gift"
                     android:orientation="horizontal">
-                    <ImageView
+                    <com.google.android.material.imageview.ShapeableImageView
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_learn_gift"
                         app:tint="@color/colorAccent" />
                 </LinearLayout>
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/iv_more"
                     android:layout_width="34dp"
                     android:layout_height="34dp"

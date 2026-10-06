@@ -60,7 +60,7 @@ public class ScanQrCodeActivity extends AppCompatActivity {
 	private CoordinatorLayout _coordinator;
 	
 	private CodeScannerView scanner_view;
-	private ImageButton btn_pick_from_gallery;
+	private android.view.View btn_pick_from_gallery;
 	private TextView tv_scan_error;
 	
 	@Override
@@ -101,7 +101,7 @@ public class ScanQrCodeActivity extends AppCompatActivity {
 		scannerView = findViewById(R.id.scanner_view);
 		tvError = findViewById(R.id.tv_scan_error);
 		
-		android.widget.ImageButton btnGallery = findViewById(R.id.btn_pick_from_gallery);
+		android.view.View btnGallery = findViewById(R.id.btn_pick_from_gallery);
 		if (btnGallery != null) {
 			btnGallery.setOnClickListener(v -> onPickFromGalleryClicked());
 		}

@@ -128,7 +128,7 @@
 							android:focusable="true"
 							android:focusableInTouchMode="true"
 							android:cursorVisible="true" />
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/btnPaste"
 							android:layout_width="22dp"
 							android:layout_height="22dp"
@@ -139,7 +139,7 @@
 							android:layout_marginEnd="6dp"
 							app:tint="@color/colorTextSecondary"
 							android:focusable="false" />
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/btnScan"
 							android:layout_width="22dp"
 							android:layout_height="22dp"

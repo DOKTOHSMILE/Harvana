@@ -54,7 +54,7 @@
 						android:padding="20dp"
 						android:gravity="center_vertical"
 						android:orientation="horizontal">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview16"
 							android:layout_width="56dp"
 							android:layout_height="56dp"
@@ -83,7 +83,7 @@
 								android:layout_marginTop="2dp"
 								android:gravity="center_vertical"
 								android:orientation="horizontal">
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/ivHeroTypeIcon"
 									android:layout_width="16dp"
 									android:layout_height="16dp"
@@ -136,7 +136,7 @@
 							android:padding="16dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview17"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -197,7 +197,7 @@
 							android:padding="16dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview18"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -246,7 +246,7 @@
 							android:padding="16dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview19"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -307,7 +307,7 @@
 							android:layout_marginBottom="12dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview20"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -392,7 +392,7 @@
 							android:padding="16dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview21"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -463,7 +463,7 @@
 								android:gravity="center_vertical"
 								android:orientation="horizontal"
 								android:focusable="true">
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/imageview22"
 									android:layout_width="38dp"
 									android:layout_height="38dp"
@@ -493,7 +493,7 @@
 										android:text="Slots — · Round —"
 										android:textSize="11.5sp" />
 								</LinearLayout>
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/imageview23"
 									android:layout_width="18dp"
 									android:layout_height="18dp"
@@ -514,7 +514,7 @@
 								android:padding="16dp"
 								android:gravity="center_vertical"
 								android:orientation="horizontal">
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/imageview24"
 									android:layout_width="38dp"
 									android:layout_height="38dp"
@@ -577,7 +577,7 @@
 								android:padding="16dp"
 								android:gravity="center_vertical"
 								android:orientation="horizontal">
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/imageview25"
 									android:layout_width="38dp"
 									android:layout_height="38dp"
@@ -903,7 +903,7 @@
 						android:padding="14dp"
 						android:gravity="center_vertical"
 						android:orientation="horizontal">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview26"
 							android:layout_width="20dp"
 							android:layout_height="20dp"
@@ -943,7 +943,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview27"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -976,7 +976,7 @@
 									android:maxLines="1"
 									android:ellipsize="middle" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/btnCopyWallet"
 								android:layout_width="32dp"
 								android:layout_height="32dp"
@@ -1003,7 +1003,7 @@
 								android:padding="12dp"
 								android:gravity="center_vertical"
 								android:orientation="horizontal">
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/imageview28"
 									android:layout_width="20dp"
 									android:layout_height="20dp"
@@ -1058,7 +1058,7 @@
 							android:padding="16dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview3"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -1109,7 +1109,7 @@
 							android:padding="16dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview4"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -1157,7 +1157,7 @@
 					android:layout_marginBottom="12dp"
 					android:gravity="center_vertical"
 					android:orientation="horizontal">
-					<ImageView
+					<com.google.android.material.imageview.ShapeableImageView
 						android:id="@+id/imageview29"
 						android:layout_width="20dp"
 						android:layout_height="20dp"
@@ -1205,7 +1205,7 @@
 					android:layout_marginTop="8dp"
 					android:gravity="center_vertical"
 					android:orientation="horizontal">
-					<ImageView
+					<com.google.android.material.imageview.ShapeableImageView
 						android:id="@+id/imageview30"
 						android:layout_width="14dp"
 						android:layout_height="14dp"

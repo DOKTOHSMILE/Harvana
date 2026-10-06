@@ -36,7 +36,7 @@
 			app:cardElevation="0dp"
 			app:strokeColor="@color/colorCardStroke"
 			app:strokeWidth="1dp">
-			<ImageView
+			<com.google.android.material.imageview.ShapeableImageView
 				android:id="@+id/imageview46"
 				android:layout_width="32dp"
 				android:layout_height="32dp"

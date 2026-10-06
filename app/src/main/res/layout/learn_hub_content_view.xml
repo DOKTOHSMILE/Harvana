@@ -28,7 +28,7 @@
 				android:id="@+id/frame_layout59"
 				android:layout_width="match_parent"
 				android:layout_height="175dp">
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/imageview_cover"
 					android:layout_width="match_parent"
 					android:layout_height="match_parent"

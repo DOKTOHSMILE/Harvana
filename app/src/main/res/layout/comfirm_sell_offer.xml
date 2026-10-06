@@ -25,7 +25,7 @@
 				android:layout_height="wrap_content"
 				android:gravity="center_vertical"
 				android:orientation="horizontal">
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/btn_confirm_sell_back"
 					android:layout_width="24dp"
 					android:layout_height="24dp"
@@ -449,7 +449,7 @@
 							android:gravity="center_horizontal"
 							android:orientation="vertical"
 							android:layout_weight="1">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview1"
 								android:layout_width="36dp"
 								android:layout_height="36dp"
@@ -483,7 +483,7 @@
 							android:gravity="center_horizontal"
 							android:orientation="vertical"
 							android:layout_weight="1">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview2"
 								android:layout_width="36dp"
 								android:layout_height="36dp"
@@ -517,7 +517,7 @@
 							android:gravity="center_horizontal"
 							android:orientation="vertical"
 							android:layout_weight="1">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview3"
 								android:layout_width="36dp"
 								android:layout_height="36dp"
@@ -551,7 +551,7 @@
 							android:gravity="center_horizontal"
 							android:orientation="vertical"
 							android:layout_weight="1">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview4"
 								android:layout_width="36dp"
 								android:layout_height="36dp"

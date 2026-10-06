@@ -61,7 +61,7 @@
 							android:id="@+id/seller_avatar_container"
 							android:layout_width="32dp"
 							android:layout_height="32dp">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/seller_avatar"
 								android:layout_width="32dp"
 								android:layout_height="32dp"
@@ -101,7 +101,7 @@
 									android:textStyle="bold"
 									android:ellipsize="end"
 									android:maxLines="1" />
-								<ImageView
+								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/seller_verified"
 									android:layout_width="16dp"
 									android:layout_height="16dp"
@@ -620,7 +620,7 @@
 					android:padding="14dp"
 					android:gravity="center_vertical"
 					android:orientation="horizontal">
-					<ImageView
+					<com.google.android.material.imageview.ShapeableImageView
 						android:id="@+id/escrow_icon"
 						android:layout_width="22dp"
 						android:layout_height="22dp"

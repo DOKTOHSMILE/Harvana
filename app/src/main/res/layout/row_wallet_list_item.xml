@@ -74,15 +74,22 @@
 					android:focusable="false"
 					android:fontFamily="monospace" />
 			</LinearLayout>
-			<ImageButton
+			<com.google.android.material.button.MaterialButton
 				android:id="@+id/btn_wallet_options"
+				style="@style/Widget.MaterialComponents.Button.TextButton"
 				android:layout_width="40dp"
 				android:layout_height="40dp"
-				android:background="?android:attr/selectableItemBackgroundBorderless"
-				android:scaleType="centerInside"
-				android:src="@android:drawable/ic_menu_more"
-				android:focusable="false"
-				android:contentDescription="Walletoptions" />
+				android:insetTop="0dp"
+				android:insetBottom="0dp"
+				android:minWidth="0dp"
+				android:minHeight="0dp"
+				android:padding="0dp"
+				app:icon="@android:drawable/ic_menu_more"
+				app:iconPadding="0dp"
+				app:iconGravity="textStart"
+				app:iconSize="24dp"
+				app:iconTint="@color/colorTextSecondary"
+				android:contentDescription="Wallet options" />
 		</LinearLayout>
 	</com.google.android.material.card.MaterialCardView>
 </LinearLayout>

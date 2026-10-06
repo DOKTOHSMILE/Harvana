@@ -593,3 +593,8 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 ## Even buttons and spacing in the invite and contract sheets
 - Join-group contract: Cancel, Back and the sign button are the same width and 50dp high, on one line; the last page's button now reads "Sign contract".
 - Invite sheet: Add friends, Username and Contacts are three equal 50dp buttons with gaps; the card, email field, message field and the two bottom buttons have proper margins and side padding.
+
+## More Material
+- All 258 icon images in the layouts are now `ShapeableImageView` (notification layouts excluded: they cannot use it).
+- The back button in the shared header, the wallet options button and the QR gallery button are Material icon buttons; the loading spinner on the reward table is a Material circular indicator.
+- Still not Material: 27 spinners (dropdowns; each needs its own code change to become Material dropdown menus), the stage dots and trust ring (custom drawn), and notification layouts.

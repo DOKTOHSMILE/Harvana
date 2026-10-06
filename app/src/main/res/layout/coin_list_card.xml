@@ -33,7 +33,7 @@
 				app:cardCornerRadius="360dp"
 				app:cardElevation="0dp"
 	app:strokeWidth="0dp">
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/iv_asset_logo"
 					android:layout_width="match_parent"
 					android:layout_height="match_parent"

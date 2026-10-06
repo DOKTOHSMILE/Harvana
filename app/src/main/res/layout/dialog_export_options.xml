@@ -26,7 +26,7 @@
 		android:focusable="true"
 		android:paddingVertical="12dp"
 		android:paddingHorizontal="4dp">
-		<ImageView
+		<com.google.android.material.imageview.ShapeableImageView
 			android:id="@+id/imageview9"
 			android:layout_width="22dp"
 			android:layout_height="22dp"
@@ -46,7 +46,7 @@
 			android:layout_weight="1"
 			android:layout_marginStart="14dp"
 			android:focusable="false" />
-		<ImageView
+		<com.google.android.material.imageview.ShapeableImageView
 			android:id="@+id/imageview10"
 			android:layout_width="16dp"
 			android:layout_height="16dp"
@@ -71,7 +71,7 @@
 		android:focusable="true"
 		android:paddingVertical="12dp"
 		android:paddingHorizontal="4dp">
-		<ImageView
+		<com.google.android.material.imageview.ShapeableImageView
 			android:id="@+id/imageview11"
 			android:layout_width="22dp"
 			android:layout_height="22dp"
@@ -91,7 +91,7 @@
 			android:layout_weight="1"
 			android:layout_marginStart="14dp"
 			android:focusable="false" />
-		<ImageView
+		<com.google.android.material.imageview.ShapeableImageView
 			android:id="@+id/imageview12"
 			android:layout_width="16dp"
 			android:layout_height="16dp"
@@ -116,7 +116,7 @@
 		android:focusable="true"
 		android:paddingVertical="12dp"
 		android:paddingHorizontal="4dp">
-		<ImageView
+		<com.google.android.material.imageview.ShapeableImageView
 			android:id="@+id/imageview13"
 			android:layout_width="22dp"
 			android:layout_height="22dp"
@@ -136,7 +136,7 @@
 			android:layout_weight="1"
 			android:layout_marginStart="14dp"
 			android:focusable="false" />
-		<ImageView
+		<com.google.android.material.imageview.ShapeableImageView
 			android:id="@+id/imageview14"
 			android:layout_width="16dp"
 			android:layout_height="16dp"
@@ -161,7 +161,7 @@
 		android:focusable="true"
 		android:paddingVertical="12dp"
 		android:paddingHorizontal="4dp">
-		<ImageView
+		<com.google.android.material.imageview.ShapeableImageView
 			android:id="@+id/imageview15"
 			android:layout_width="22dp"
 			android:layout_height="22dp"
@@ -181,7 +181,7 @@
 			android:layout_weight="1"
 			android:layout_marginStart="14dp"
 			android:focusable="false" />
-		<ImageView
+		<com.google.android.material.imageview.ShapeableImageView
 			android:id="@+id/imageview16"
 			android:layout_width="16dp"
 			android:layout_height="16dp"

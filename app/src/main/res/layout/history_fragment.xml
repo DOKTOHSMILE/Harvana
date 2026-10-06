@@ -67,7 +67,7 @@
 						android:orientation="horizontal"
 						android:paddingStart="14dp"
 						android:paddingEnd="14dp">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview17"
 							android:layout_width="16dp"
 							android:layout_height="16dp"
@@ -99,7 +99,7 @@
 					app:cardElevation="0dp"
 					app:strokeWidth="1dp"
 					app:strokeColor="@color/colorCardStroke">
-					<ImageView
+					<com.google.android.material.imageview.ShapeableImageView
 						android:id="@+id/btn_filter_transactions"
 						android:layout_width="match_parent"
 						android:layout_height="match_parent"
@@ -118,7 +118,7 @@
 					app:cardElevation="0dp"
 					app:strokeWidth="1dp"
 					app:strokeColor="@color/colorCardStroke">
-					<ImageView
+					<com.google.android.material.imageview.ShapeableImageView
 						android:id="@+id/btn_export_transactions"
 						android:layout_width="match_parent"
 						android:layout_height="match_parent"

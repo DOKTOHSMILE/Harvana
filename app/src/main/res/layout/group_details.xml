@@ -36,7 +36,7 @@
 					android:layout_height="wrap_content"
 					android:gravity="center_vertical"
 					android:orientation="horizontal">
-					<ImageView
+					<com.google.android.material.imageview.ShapeableImageView
 						android:id="@+id/iv_group_icon"
 						android:layout_width="40dp"
 						android:layout_height="40dp"
@@ -108,7 +108,7 @@
 							android:padding="10dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview11"
 								android:layout_width="32dp"
 								android:layout_height="32dp"
@@ -160,7 +160,7 @@
 							android:padding="10dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview12"
 								android:layout_width="32dp"
 								android:layout_height="32dp"
@@ -211,7 +211,7 @@
 							android:padding="10dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview13"
 								android:layout_width="32dp"
 								android:layout_height="32dp"
@@ -291,7 +291,7 @@
 				android:paddingStart="16dp"
 				android:paddingEnd="16dp"
 				app:layout_collapseMode="pin">
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/imageview1"
 					android:layout_width="24dp"
 					android:layout_height="24dp"
@@ -303,7 +303,7 @@
 					android:layout_width="0dp"
 					android:layout_height="match_parent"
 					android:layout_weight="1" />
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/btn_group_chats"
 					android:layout_width="24dp"
 					android:layout_height="24dp"
@@ -315,7 +315,7 @@
 					android:scaleType="centerInside"
 					android:src="@drawable/ic_chat"
 					app:tint="@color/colorTextSecondary" />
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/btn_group_overflow"
 					android:layout_width="24dp"
 					android:layout_height="24dp"

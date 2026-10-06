@@ -54,7 +54,7 @@
 					android:layout_gravity="center_horizontal|center_vertical"
 					android:focusable="false"
 					android:visibility="gone" />
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/iv_stage_1_check"
 					android:layout_width="22dp"
 					android:layout_height="22dp"
@@ -106,7 +106,7 @@
 					android:layout_gravity="center_horizontal|center_vertical"
 					android:focusable="false"
 					android:visibility="gone" />
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/iv_stage_2_check"
 					android:layout_width="22dp"
 					android:layout_height="22dp"
@@ -158,7 +158,7 @@
 					android:layout_gravity="center_horizontal|center_vertical"
 					android:focusable="false"
 					android:visibility="gone" />
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/iv_stage_3_check"
 					android:layout_width="22dp"
 					android:layout_height="22dp"
@@ -201,7 +201,7 @@
 				android:id="@+id/frame_layout29"
 				android:layout_width="28dp"
 				android:layout_height="28dp">
-				<ImageView
+				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/iv_stage_4_check"
 					android:layout_width="22dp"
 					android:layout_height="22dp"

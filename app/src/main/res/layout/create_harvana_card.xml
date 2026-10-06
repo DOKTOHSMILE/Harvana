@@ -76,7 +76,7 @@
 						android:paddingBottom="8dp"
 						android:gravity="center_vertical"
 						android:orientation="horizontal">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/swatch_classic"
 							android:layout_width="70dp"
 							android:layout_height="45dp"
@@ -85,7 +85,7 @@
 							android:scaleType="centerInside"
 							android:layout_marginEnd="16dp"
 							android:focusable="true" />
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/swatch_obsidian"
 							android:layout_width="70dp"
 							android:layout_height="45dp"
@@ -94,7 +94,7 @@
 							android:scaleType="centerInside"
 							android:layout_marginEnd="16dp"
 							android:focusable="true" />
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/swatch_gold"
 							android:layout_width="70dp"
 							android:layout_height="45dp"
@@ -103,7 +103,7 @@
 							android:scaleType="centerInside"
 							android:layout_marginEnd="16dp"
 							android:focusable="true" />
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/swatch_oasis"
 							android:layout_width="70dp"
 							android:layout_height="45dp"
@@ -112,7 +112,7 @@
 							android:scaleType="centerInside"
 							android:layout_marginEnd="16dp"
 							android:focusable="true" />
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/swatch_node"
 							android:layout_width="70dp"
 							android:layout_height="45dp"
@@ -121,7 +121,7 @@
 							android:scaleType="centerInside"
 							android:layout_marginEnd="16dp"
 							android:focusable="true" />
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/swatch_cyber"
 							android:layout_width="70dp"
 							android:layout_height="45dp"
@@ -130,7 +130,7 @@
 							android:scaleType="centerInside"
 							android:layout_marginEnd="16dp"
 							android:focusable="true" />
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/swatch_mint"
 							android:layout_width="70dp"
 							android:layout_height="45dp"
@@ -161,7 +161,7 @@
 						app:cardBackgroundColor="@android:color/transparent"
 						app:cardCornerRadius="16dp"
 						app:cardElevation="12dp">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/iv_card_front"
 							android:layout_width="360dp"
 							android:layout_height="wrap_content"
@@ -179,7 +179,7 @@
 						android:layout_marginStart="16dp"
 						app:cardCornerRadius="16dp"
 						app:cardElevation="12dp">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/iv_card_back"
 							android:layout_width="360dp"
 							android:layout_height="wrap_content"

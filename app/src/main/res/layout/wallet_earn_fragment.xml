@@ -163,7 +163,7 @@
                             android:layout_height="56dp"
                             android:gravity="center_horizontal|center_vertical"
                             android:orientation="horizontal">
-                            <ImageView
+                            <com.google.android.material.imageview.ShapeableImageView
                                 android:id="@+id/imageview1"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"

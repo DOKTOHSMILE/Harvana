@@ -32,17 +32,26 @@
 			app:flashButtonColor="#FFFFFF"
 			app:frameColor="@color/colorAccent"
 			app:maskColor="#77000000" />
-		<ImageButton
+		<com.google.android.material.button.MaterialButton
 			android:id="@+id/btn_pick_from_gallery"
+			style="@style/Widget.MaterialComponents.Button.TextButton"
 			android:layout_width="56dp"
 			android:layout_height="56dp"
-			android:layout_margin="24dp"
-			android:padding="14dp"
-			android:background="@drawable/circle_button_bg_accent"
-			android:src="@drawable/icon_gallery"
-			android:scaleType="center"
-			android:layout_gravity="bottom|end"
-			android:contentDescription="PickQRcodeimagefromgallery" />
+			android:insetTop="0dp"
+			android:insetBottom="0dp"
+			android:minWidth="0dp"
+			android:minHeight="0dp"
+			android:padding="0dp"
+			app:icon="@drawable/icon_gallery"
+			app:iconPadding="0dp"
+			app:iconGravity="textStart"
+			app:iconSize="24dp"
+			app:iconTint="@color/colorTextOnAccent"
+				android:backgroundTint="@color/colorAccent"
+				app:cornerRadius="28dp"
+				android:layout_margin="24dp"
+				android:layout_gravity="bottom|end"
+			android:contentDescription="Pick QR code image from gallery" />
 		<TextView
 			android:id="@+id/tv_scan_error"
 			android:layout_width="wrap_content"

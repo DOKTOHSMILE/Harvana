@@ -268,7 +268,7 @@ public class WalletListActivity extends AppCompatActivity {
 			TextView tvLabel;
 			TextView tvAddress;
 			TextView tvActiveBadge;
-			ImageButton btnOptions;
+			android.view.View btnOptions;
 			
 			ViewHolder(View itemView) {
 				super(itemView);

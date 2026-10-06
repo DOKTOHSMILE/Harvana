@@ -58,7 +58,7 @@
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
 						android:focusable="true">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/ivSettingsAvatar"
 							android:layout_width="40dp"
 							android:layout_height="40dp"
@@ -155,7 +155,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview1"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -187,7 +187,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview2"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -210,7 +210,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview3"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -242,7 +242,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview4"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -265,7 +265,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview5"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -297,7 +297,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview6"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -320,7 +320,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview7"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -352,7 +352,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview8"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -399,7 +399,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview9"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -431,7 +431,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview10"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -454,7 +454,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview11"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -486,7 +486,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview12"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -509,7 +509,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview13"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -541,7 +541,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview14"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -564,7 +564,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview15"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -596,7 +596,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview16"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -643,7 +643,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview17"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -675,7 +675,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview18"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -698,7 +698,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview19"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -730,7 +730,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview20"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -753,7 +753,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview21"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -785,7 +785,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview22"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -808,7 +808,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview23"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -840,7 +840,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview24"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -887,7 +887,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview25"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -919,7 +919,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview26"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -942,7 +942,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview27"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -974,7 +974,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview28"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -997,7 +997,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview29"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -1029,7 +1029,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview30"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -1052,7 +1052,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview31"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -1084,7 +1084,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview32"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -1131,7 +1131,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview33"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -1163,7 +1163,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview34"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -1186,7 +1186,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview35"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -1218,7 +1218,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview36"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -1241,7 +1241,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview37"
 								android:layout_width="38dp"
 								android:layout_height="38dp"
@@ -1273,7 +1273,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview38"
 								android:layout_width="18dp"
 								android:layout_height="18dp"
@@ -1296,7 +1296,7 @@
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
 							android:focusable="true">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview39"
 								android:layout_width="38dp"
 								android:layout_height="38dp"

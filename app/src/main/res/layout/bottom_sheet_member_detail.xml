@@ -65,7 +65,7 @@
 							android:id="@+id/frame_layout58"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent">
-							<ImageView
+							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/iv_detail_avatar"
 								android:layout_width="match_parent"
 								android:layout_height="match_parent"
@@ -146,7 +146,7 @@
 						android:orientation="horizontal"
 						android:paddingHorizontal="16dp"
 						android:paddingVertical="10dp">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview10"
 							android:layout_width="20dp"
 							android:layout_height="20dp"
@@ -192,7 +192,7 @@
 						android:orientation="horizontal"
 						android:paddingHorizontal="16dp"
 						android:paddingVertical="10dp">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview11"
 							android:layout_width="20dp"
 							android:layout_height="20dp"
@@ -262,7 +262,7 @@
 						android:orientation="horizontal"
 						android:paddingHorizontal="16dp"
 						android:paddingVertical="10dp">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview12"
 							android:layout_width="20dp"
 							android:layout_height="20dp"
@@ -308,7 +308,7 @@
 						android:orientation="horizontal"
 						android:paddingHorizontal="16dp"
 						android:paddingVertical="10dp">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview13"
 							android:layout_width="20dp"
 							android:layout_height="20dp"
@@ -354,7 +354,7 @@
 						android:orientation="horizontal"
 						android:paddingHorizontal="16dp"
 						android:paddingVertical="10dp">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview14"
 							android:layout_width="20dp"
 							android:layout_height="20dp"
@@ -424,7 +424,7 @@
 						android:orientation="horizontal"
 						android:paddingHorizontal="16dp"
 						android:paddingVertical="10dp">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview15"
 							android:layout_width="20dp"
 							android:layout_height="20dp"
@@ -471,7 +471,7 @@
 						android:orientation="horizontal"
 						android:paddingHorizontal="16dp"
 						android:paddingVertical="10dp">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview16"
 							android:layout_width="20dp"
 							android:layout_height="20dp"
@@ -543,7 +543,7 @@
 						android:orientation="horizontal"
 						android:paddingHorizontal="16dp"
 						android:paddingVertical="10dp">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview17"
 							android:layout_width="20dp"
 							android:layout_height="20dp"
@@ -590,7 +590,7 @@
 						android:orientation="horizontal"
 						android:paddingHorizontal="16dp"
 						android:paddingVertical="10dp">
-						<ImageView
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/imageview18"
 							android:layout_width="20dp"
 							android:layout_height="20dp"

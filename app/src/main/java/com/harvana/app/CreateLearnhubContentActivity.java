@@ -483,7 +483,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		tv_learn_error.setVisibility(View.GONE);
 		btn_learn_post.setEnabled(false);
 		final boolean needsUpload = pendingLearnImage != null && uploadedImageUrl == null;
-		final ProgressDialog progress = new ProgressDialog(this);
+		final com.harvana.app.ui.ProgressSheet progress = new com.harvana.app.ui.ProgressSheet(this);
 		progress.setMessage(needsUpload ? "Uploading the picture…" : "Publishing…");
 		progress.setCancelable(false);
 		progress.show();

@@ -1,6 +1,6 @@
 package com.harvana.app;
 
-import android.app.ProgressDialog;
+
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -643,7 +643,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         // The picture uploads now, before the group is made. If it fails nothing has been created and no fee has been spent; the same
         // name is reused on a retry, so a failed attempt never leaves extra pictures behind.
         if (photoUri != null && photoUrl.isEmpty()) {
-            final ProgressDialog up = ProgressDialog.show(this, null, "Uploading the group picture…", true, false);
+            final com.harvana.app.ui.ProgressSheet up = com.harvana.app.ui.ProgressSheet.show(this, null, "Uploading the group picture…", true, false);
             com.harvana.app.utils.GroupPhotoPickerActivity.upload(this, photoUri, groupDocId(), new com.harvana.app.utils.ImageHost.Callback() {
                 @Override public void onSuccess(String url) { up.dismiss(); photoUrl = url; photoUri = null; create(); }
                 @Override public void onError(String message) { up.dismiss(); toast("Couldn't upload the group picture: " + message + " The group was not created. Try again, or remove the picture."); }
@@ -655,7 +655,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         rows.add(new String[] {"Locked now", "Nothing"});
         rows.add(new String[] {"Group wallet", "Made and held by the network."});
         PaymentConfirmSheet.reviewThenAuthorize(this, "Create this group", CircleUi.harv(FEE_RAW), rows, () -> {
-            final ProgressDialog pd = ProgressDialog.show(this, null, "Creating on the network…", true, false);
+            final com.harvana.app.ui.ProgressSheet pd = com.harvana.app.ui.ProgressSheet.show(this, null, "Creating on the network…", true, false);
             NodeGroupClient.Callback done = new NodeGroupClient.Callback() {
                 @Override public void onSuccess(JSONObject json) {
                     String id = json.optString("circleId", json.optString("groupId", ""));
@@ -743,7 +743,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         }
         if (!chatLinks.isEmpty()) g.put("chatLinks", new ArrayList<>(chatLinks));
 
-        final ProgressDialog saving = ProgressDialog.show(this, null, "Saving your group…", true, false);
+        final com.harvana.app.ui.ProgressSheet saving = com.harvana.app.ui.ProgressSheet.show(this, null, "Saving your group…", true, false);
         final boolean onNode = pendingNodeId != null;
         if (onNode) GroupSaver.queue(getApplicationContext(), uid, id, g);
         GroupSaver.save(getApplicationContext(), uid, id, g, error -> runOnUiThread(() -> {

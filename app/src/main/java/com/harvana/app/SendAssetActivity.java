@@ -499,7 +499,7 @@ public class SendAssetActivity extends AppCompatActivity {
 					return;
 				}
 				
-				android.app.ProgressDialog progress = new android.app.ProgressDialog(this);
+				com.harvana.app.ui.ProgressSheet progress = new com.harvana.app.ui.ProgressSheet(this);
 				progress.setMessage("Broadcasting to node…");
 				progress.setCancelable(false);
 				

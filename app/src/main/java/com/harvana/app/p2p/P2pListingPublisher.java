@@ -1,7 +1,7 @@
 package com.harvana.app.p2p;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+
 
 import com.harvana.app.tx.P2PTradeRouter;
 import com.harvana.app.wallet.PaymentMethod;
@@ -144,7 +144,7 @@ public final class P2pListingPublisher {
 			com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(activity,
 			"SELL".equals(listingSide) ? "Publish sell offer" : "Publish buy request",
 			com.harvana.app.wallet.BalanceFormatter.smart(amountHarv), rows, () -> {
-			final ProgressDialog progress = new ProgressDialog(activity, com.harvana.app.R.style.HarvanaP2pAlertDialog);
+			final com.harvana.app.ui.ProgressSheet progress = new com.harvana.app.ui.ProgressSheet(activity);
 			progress.setMessage("SELL".equals(listingSide) ? "Publishing offer…" : "Publishing request…");
 			progress.setCancelable(false);
 			progress.show();

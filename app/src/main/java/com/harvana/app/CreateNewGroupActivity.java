@@ -1395,7 +1395,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		rows.add(new String[]{"Payout", "Only what the other members pay. Bonds stay locked."});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
 		"Create this rotating group", com.harvana.app.circle.CircleUi.harv(fee), rows, () -> {
-			final ProgressDialog pd = ProgressDialog.show(this, null, "Creating on the network…", true, false);
+			final com.harvana.app.ui.ProgressSheet pd = com.harvana.app.ui.ProgressSheet.show(this, null, "Creating on the network…", true, false);
 			com.harvana.app.sync.NodeGroupClient.createCircle(getApplicationContext(), wallet, contributionRaw, members, cycleHours,
 			new com.harvana.app.sync.NodeGroupClient.Callback() {
 				@Override public void onSuccess(org.json.JSONObject json) {
@@ -1533,7 +1533,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 		rows.add(new String[]{"Group wallet", "Assigned by the network. This phone does not create one."});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, title, "1 HARV", rows, () -> {
-			final ProgressDialog pd = ProgressDialog.show(this, null, "Creating on the network…", true, false);
+			final com.harvana.app.ui.ProgressSheet pd = com.harvana.app.ui.ProgressSheet.show(this, null, "Creating on the network…", true, false);
 			create.run(new com.harvana.app.sync.NodeGroupClient.Callback() {
 				@Override public void onSuccess(org.json.JSONObject json) {
 					final String id = json.optString(idKey, json.optString("circleId", ""));
@@ -1646,7 +1646,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			newGroupMap.put("loanInterestPeriod", "DAILY");
 		}
 		
-		final ProgressDialog groupProgress = new ProgressDialog(CreateNewGroupActivity.this);
+		final com.harvana.app.ui.ProgressSheet groupProgress = new com.harvana.app.ui.ProgressSheet(CreateNewGroupActivity.this);
 		groupProgress.setMessage("Saving your group...");
 		groupProgress.setCancelable(false);
 		groupProgress.show();

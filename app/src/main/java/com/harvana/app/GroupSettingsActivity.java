@@ -1,6 +1,6 @@
 package com.harvana.app;
 
-import android.app.ProgressDialog;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -1408,7 +1408,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	
 	/** New-phone recovery: download the group's published encrypted card, decrypt with the admin passphrase. */
 	private void _restoreFromCard() {
-		final ProgressDialog pd = ProgressDialog.show(this, null, "Fetching backup card…", true, false);
+		final com.harvana.app.ui.ProgressSheet pd = com.harvana.app.ui.ProgressSheet.show(this, null, "Fetching backup card…", true, false);
 		com.harvana.app.group.GroupCardStore.fetch(this, groupId, new com.harvana.app.group.GroupCardStore.Callback() {
 			@Override public void onSuccess(Map<String, Object> card) {
 				runOnUiThread(() -> {
@@ -1438,7 +1438,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			.setNegativeButton("Cancel", null)
 			.setPositiveButton("Restore", (dlg, w) -> {
 				final String pw = pass.getText().toString();
-				final ProgressDialog pd = ProgressDialog.show(this, null, "Decrypting…", true, false);
+				final com.harvana.app.ui.ProgressSheet pd = com.harvana.app.ui.ProgressSheet.show(this, null, "Decrypting…", true, false);
 				new Thread(() -> {
 					try {
 						com.harvana.app.wallet.HarvanaCardCrypto.DecryptResult r =
@@ -1670,7 +1670,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	}
 
 	private void _runClose(boolean delete, String reason) {
-		final android.app.ProgressDialog pd = new android.app.ProgressDialog(this);
+		final com.harvana.app.ui.ProgressSheet pd = new com.harvana.app.ui.ProgressSheet(this);
 		pd.setMessage(delete ? "Deleting\u2026" : "Closing the group\u2026");
 		pd.setCancelable(false);
 		pd.show();

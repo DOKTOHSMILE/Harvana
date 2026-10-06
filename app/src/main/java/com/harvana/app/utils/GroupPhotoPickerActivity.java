@@ -1,7 +1,7 @@
 package com.harvana.app.utils;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -23,7 +23,7 @@ public class GroupPhotoPickerActivity extends AppCompatActivity {
         return new Intent(c, GroupPhotoPickerActivity.class);
     }
 
-    private ProgressDialog busy;
+    private com.harvana.app.ui.ProgressSheet busy;
 
     @Override
     protected void onCreate(Bundle b) {

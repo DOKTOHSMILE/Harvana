@@ -322,6 +322,7 @@ public class LearnFragmentActivity extends Fragment {
 				i.putExtra(LearnReadActivity.EXTRA_BODY, post.body);
 				i.putExtra(LearnReadActivity.EXTRA_CATEGORY, post.category);
 				i.putExtra(LearnReadActivity.EXTRA_IMAGE, post.imageUrl);
+				i.putExtra(LearnReadActivity.EXTRA_VIDEO, post.videoUrl);
 				i.putExtra(LearnReadActivity.EXTRA_AUTHOR, post.authorUid);
 				i.putExtra(LearnReadActivity.EXTRA_CREATED, post.createdAt);
 				i.putExtra(LearnReadActivity.EXTRA_VIEWS, post.views);

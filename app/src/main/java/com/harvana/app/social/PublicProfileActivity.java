@@ -167,7 +167,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         // The cover reaches the screen edges and the picture overlaps it, so the root must not clip to its padding.
         root.setClipToPadding(false);
         root.setClipChildren(false);
-        root.addView(coverBanner(mine));
+        root.addView(topArea(mine));
         root.addView(header(mine));
         root.addView(actionRow(mine));
         if (mine) root.addView(friendsRow());
@@ -206,19 +206,31 @@ public class PublicProfileActivity extends AppCompatActivity {
             edit.setOnClickListener(v -> startActivity(new Intent(this, EditProfileActivity.class)));
             banner.addView(edit, ep);
         }
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 150));
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, coverHeight());
         lp.setMargins(-side, 0, -side, 0);
         banner.setLayoutParams(lp);
         return banner;
     }
 
-    private View header(boolean mine) {
-        LinearLayout h = new LinearLayout(this);
-        h.setOrientation(LinearLayout.VERTICAL);
-        h.setGravity(Gravity.CENTER_HORIZONTAL);
-        h.setClipChildren(false);
-        h.setPadding(0, 0, 0, SocialUi.dp(this, 18));
+    private int coverHeight() { return SocialUi.dp(this, 150); }
+
+    /**
+     * The cover with the round picture on it, as one frame: the picture is drawn after the cover, so it always sits on top, and it needs
+     * no negative margin or drawing outside its parent (an earlier version hid half of it behind the cover).
+     */
+    private View topArea(boolean mine) {
         int size = SocialUi.dp(this, 104);
+        FrameLayout top = new FrameLayout(this);
+        top.setClipChildren(false);
+        top.addView(coverBanner(mine));
+        FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(size, size, Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        fp.topMargin = coverHeight() - size / 2;
+        top.addView(avatarView(size), fp);
+        top.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, coverHeight() + size / 2));
+        return top;
+    }
+
+    private View avatarView(int size) {
         int tint = card.scored() ? ProfileTrust.tierColor(tierName()) : 0xFF8B98AD;
         FrameLayout face = new FrameLayout(this);
         TextView initials = SocialUi.text(this, initialsOf(), 34, true, UiColors.onAccent());
@@ -236,10 +248,15 @@ public class PublicProfileActivity extends AppCompatActivity {
             try { com.bumptech.glide.Glide.with(this).load(card.icon).circleCrop().into(photo); initials.setVisibility(View.INVISIBLE); }
             catch (Exception ignored) { }
         }
-        LinearLayout.LayoutParams faceLp = new LinearLayout.LayoutParams(size, size);
-        faceLp.topMargin = -size / 2;           // the picture sits half over the cover
-        h.addView(face, faceLp);
+        return face;
+    }
 
+    private View header(boolean mine) {
+        LinearLayout h = new LinearLayout(this);
+        h.setOrientation(LinearLayout.VERTICAL);
+        h.setGravity(Gravity.CENTER_HORIZONTAL);
+        h.setPadding(0, 0, 0, SocialUi.dp(this, 18));
+        int tint = card.scored() ? ProfileTrust.tierColor(tierName()) : 0xFF8B98AD;
         TextView name = SocialUi.text(this, card.name.isEmpty() ? (card.username.isEmpty() ? "Member" : "@" + card.username) : card.name, 24, true, UiColors.textPrimary());
         name.setGravity(Gravity.CENTER);
         name.setPadding(0, SocialUi.dp(this, 14), 0, 0);
@@ -626,6 +643,7 @@ public class PublicProfileActivity extends AppCompatActivity {
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_BODY, d.getString("description") == null ? "" : d.getString("description"))
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_CATEGORY, d.getString("category") == null ? "" : d.getString("category"))
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_IMAGE, d.getString("imageUrl") == null ? "" : d.getString("imageUrl"))
+                .putExtra(com.harvana.app.LearnReadActivity.EXTRA_VIDEO, d.getString("videoUrl") == null ? "" : d.getString("videoUrl"))
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_AUTHOR, d.getString("authorUid") == null ? "" : d.getString("authorUid"))
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_CREATED, num(d.get("createdAt")))
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_VIEWS, views)));

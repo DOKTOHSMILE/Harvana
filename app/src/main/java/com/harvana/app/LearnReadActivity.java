@@ -33,7 +33,7 @@ import java.util.Set;
 public class LearnReadActivity extends AppCompatActivity {
 
     public static final String EXTRA_ID = "id", EXTRA_TITLE = "title", EXTRA_BODY = "body", EXTRA_CATEGORY = "category",
-            EXTRA_IMAGE = "imageUrl", EXTRA_AUTHOR = "authorUid", EXTRA_CREATED = "createdAt", EXTRA_VIEWS = "views";
+            EXTRA_IMAGE = "imageUrl", EXTRA_VIDEO = "videoUrl", EXTRA_AUTHOR = "authorUid", EXTRA_CREATED = "createdAt", EXTRA_VIEWS = "views";
 
     private static final String PREFS = "learn_reads";
     private static final String KEY_DONE = "done_ids";
@@ -60,7 +60,7 @@ public class LearnReadActivity extends AppCompatActivity {
 
         post = new LearnPostBinder.Post();
         post.id = str(EXTRA_ID); post.title = str(EXTRA_TITLE); post.body = str(EXTRA_BODY); post.category = str(EXTRA_CATEGORY);
-        post.imageUrl = str(EXTRA_IMAGE); post.authorUid = str(EXTRA_AUTHOR);
+        post.imageUrl = str(EXTRA_IMAGE); post.videoUrl = str(EXTRA_VIDEO); post.authorUid = str(EXTRA_AUTHOR);
         post.createdAt = getIntent().getLongExtra(EXTRA_CREATED, 0L);
         post.views = getIntent().getLongExtra(EXTRA_VIEWS, 0L);
         words = LearnRules.wordCount(post.title, post.body);

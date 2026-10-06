@@ -264,10 +264,54 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="24dp"
-				android:text="Picking an image above will fill this in automatically once it uploads."
+				android:text="Picking an image above fills this in once it uploads. Not posting an image? Add a video link below instead."
 				android:textColor="@color/colorTextTertiary"
 				android:textSize="11.5sp"
 				android:layout_marginStart="4dp"
+				android:focusable="false" />
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="4dp"
+				android:layout_marginBottom="6dp"
+				android:text="Video link (optional)"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="14sp"
+				android:textStyle="bold"
+				android:focusable="false" />
+			<com.google.android.material.card.MaterialCardView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="4dp"
+				app:cardBackgroundColor="@color/colorSurfaceRaised"
+				app:cardCornerRadius="14dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<EditText
+					android:id="@+id/et_learn_video_url"
+					android:layout_width="match_parent"
+					android:layout_height="50dp"
+					android:background="@android:color/transparent"
+					android:gravity="center_vertical"
+					android:textSize="14sp"
+					android:textColor="@color/colorTextPrimary"
+					android:hint="YouTube, Facebook, TikTok or Vimeo link"
+					android:inputType="textUri"
+					android:focusable="true"
+					android:focusableInTouchMode="true"
+					android:maxLength="300"
+					android:paddingHorizontal="14dp" />
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:id="@+id/tv_learn_video_status"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="4dp"
+				android:layout_marginBottom="24dp"
+				android:text="Readers press play and the video streams from the site it is on. Nothing is uploaded or stored by Harvana."
+				android:textColor="@color/colorTextTertiary"
+				android:textSize="11.5sp"
 				android:focusable="false" />
 			<TextView
 				android:id="@+id/tv_learn_error"

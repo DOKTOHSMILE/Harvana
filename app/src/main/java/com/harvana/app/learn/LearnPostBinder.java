@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -30,7 +31,7 @@ public final class LearnPostBinder {
 
     /** The post as plain values, so it can be passed to the reader in an Intent. */
     public static final class Post {
-        public String id = "", title = "", body = "", category = "", imageUrl = "", authorUid = "";
+        public String id = "", title = "", body = "", category = "", imageUrl = "", authorUid = "", videoUrl = "";
         public long createdAt, views;
 
         public static Post from(Map<String, Object> m) {
@@ -41,6 +42,7 @@ public final class LearnPostBinder {
             p.category = str(m.get("category"));
             p.imageUrl = str(m.get("imageUrl"));
             p.authorUid = str(m.get("authorUid"));
+            p.videoUrl = str(m.get("videoUrl"));
             p.createdAt = m.get("createdAt") instanceof Number ? ((Number) m.get("createdAt")).longValue() : 0L;
             p.views = m.get("views") instanceof Number ? ((Number) m.get("views")).longValue() : 0L;
             return p;
@@ -68,7 +70,8 @@ public final class LearnPostBinder {
         body.setText(post.body);
         if (fullText) { body.setMaxLines(Integer.MAX_VALUE); body.setEllipsize(null); }
         else { body.setMaxLines(5); body.setEllipsize(android.text.TextUtils.TruncateAt.END); }
-        category.setText(post.category.isEmpty() ? "General" : post.category);
+        final VideoLinks.Video video = VideoLinks.parse(post.videoUrl);
+        category.setText((post.category.isEmpty() ? "General" : post.category) + (video != null ? "  \u00b7  \u25B6 Video" : ""));
         meta.setText(LearnRules.timeAgo(post.createdAt, System.currentTimeMillis()));
         viewsLine.setText(LearnRules.compactCount(post.views) + (post.views == 1 ? " view" : " views"));
 
@@ -78,6 +81,19 @@ public final class LearnPostBinder {
         } else {
             cover.setVisibility(View.GONE);
             cover.setImageDrawable(null);
+        }
+
+        // A video post: in the full reader the player takes the cover's place. It is only a picture and a play button until pressed.
+        View oldPlayer = root.findViewWithTag("learn_video_player");
+        if (oldPlayer != null && oldPlayer.getParent() instanceof ViewGroup) ((ViewGroup) oldPlayer.getParent()).removeView(oldPlayer);
+        if (fullText && video != null && cover.getParent() instanceof android.widget.LinearLayout) {
+            android.widget.LinearLayout holder = (android.widget.LinearLayout) cover.getParent();
+            VideoPlayerView player = new VideoPlayerView(host, video);
+            player.setTag("learn_video_player");
+            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.topMargin = (int) (12 * host.getResources().getDisplayMetrics().density);
+            holder.addView(player, holder.indexOfChild(cover) + 1, lp);
+            cover.setVisibility(View.GONE);
         }
 
         // The author, with the trust score the node wrote on their profile. Shown even before it is scored, and never hideable.

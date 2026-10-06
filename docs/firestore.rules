@@ -135,7 +135,13 @@ service cloud.firestore {
         && request.resource.data.description.size() <= 600
         && request.resource.data.category is string
         && request.resource.data.imageUrl is string
-        && request.resource.data.imageUrl.matches('^https://.*')
+        // A cover image (https), or no image at all when the article carries a video link.
+        && (request.resource.data.imageUrl.matches('^https://.*')
+            || (request.resource.data.imageUrl == '' && request.resource.data.get('videoUrl', '') != ''))
+        // Optional video link: a YouTube, Facebook, TikTok or Vimeo page address. The app only plays it in that platform's own player.
+        && request.resource.data.get('videoUrl', '') is string
+        && request.resource.data.get('videoUrl', '').size() <= 400
+        && (request.resource.data.get('videoUrl', '') == '' || request.resource.data.videoUrl.matches('^https://.*'))
         && request.resource.data.createdAt is number
         && request.resource.data.views == 0;
       allow delete: if request.auth != null && resource.data.authorUid == request.auth.uid;

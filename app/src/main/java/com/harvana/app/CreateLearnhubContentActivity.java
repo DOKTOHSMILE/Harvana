@@ -77,6 +77,8 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 	private ImageView imageview2;
 	private TextView textview30;
 	private EditText et_learn_image_url;
+	private EditText et_learn_video_url;
+	private TextView tv_learn_video_status;
 	
 	private FirebaseAuth fauth;
 	private OnCompleteListener<AuthResult> _fauth_create_user_listener;
@@ -139,6 +141,25 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		imageview2 = findViewById(R.id.imageview2);
 		textview30 = findViewById(R.id.textview30);
 		et_learn_image_url = findViewById(R.id.et_learn_image_url);
+		et_learn_video_url = findViewById(R.id.et_learn_video_url);
+		tv_learn_video_status = findViewById(R.id.tv_learn_video_status);
+		final String videoHint = tv_learn_video_status.getText().toString();
+		et_learn_video_url.addTextChangedListener(new android.text.TextWatcher() {
+			@Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
+			@Override public void onTextChanged(CharSequence s, int a, int b, int c) { }
+			@Override public void afterTextChanged(android.text.Editable e) {
+				String raw = e.toString().trim();
+				com.harvana.app.learn.VideoLinks.Video v = com.harvana.app.learn.VideoLinks.parse(raw);
+				if (raw.isEmpty()) { tv_learn_video_status.setText(videoHint); tv_learn_video_status.setTextColor(getResources().getColor(R.color.colorTextTertiary)); }
+				else if (v != null) {
+					tv_learn_video_status.setText("\u2713 " + v.platform.label + " video found. Readers can play it inside your article.");
+					tv_learn_video_status.setTextColor(getResources().getColor(R.color.colorSuccess));
+				} else {
+					tv_learn_video_status.setText(com.harvana.app.learn.VideoLinks.problem(raw));
+					tv_learn_video_status.setTextColor(getResources().getColor(R.color.colorError));
+				}
+			}
+		});
 		fauth = FirebaseAuth.getInstance();
 		
 		fauth_updateEmailListener = _param1 -> {
@@ -330,8 +351,16 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 			_showError("Please enter a description.");
 			return;
 		}
-		if (imageUrl.isEmpty() || !(imageUrl.startsWith("http://") || imageUrl.startsWith("https://"))) {
-			_showError("Please add a cover image, or paste a valid image URL starting with http:// or https://");
+		// A video link can stand in for the cover image. YouTube gives its own thumbnail, which becomes the cover.
+		String videoRaw = et_learn_video_url.getText().toString().trim();
+		com.harvana.app.learn.VideoLinks.Video video = com.harvana.app.learn.VideoLinks.parse(videoRaw);
+		if (!videoRaw.isEmpty() && video == null) {
+			_showError(com.harvana.app.learn.VideoLinks.problem(videoRaw));
+			return;
+		}
+		if (video != null && imageUrl.isEmpty()) imageUrl = video.thumbnail;
+		if (video == null && (imageUrl.isEmpty() || !(imageUrl.startsWith("http://") || imageUrl.startsWith("https://")))) {
+			_showError("Please add a cover image or a video link. For an image, upload one or paste a valid URL starting with https://");
 			return;
 		}
 		if (category == null) category = CATEGORIES[0];
@@ -362,6 +391,10 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		fields.put("description", description);
 		fields.put("category", category);
 		fields.put("imageUrl", imageUrl);
+		if (video != null) {
+			fields.put("videoUrl", video.link);
+			fields.put("videoType", video.platform.label.toLowerCase());
+		}
 		fields.put("authorUid", uid);
 		fields.put("createdAt", System.currentTimeMillis());
 		fields.put("views", 0);

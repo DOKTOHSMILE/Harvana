@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.harvana.app.wallet.WalletManager;
+import com.harvana.app.sync.HarvanaNodeClient;
 
 import org.json.JSONObject;
 
@@ -23,6 +24,14 @@ public final class NodeLinkManager {
         return prefs(c).getString("status_" + address, "");
     }
 
+    private static final long RECHECK_MS = 30L * 60_000L;
+    private static long lastCheck;
+
+    /**
+     * Keeps this wallet linked to the account and bound to this phone. Device binding is asked of the node every time (at most every
+     * 30 minutes), never trusted from a saved flag: a node that was reset forgets every binding, and a saved "bound" would then
+     * hide that forever. Binding and linking are separate steps, so a link the network will not accept never blocks the binding.
+     */
     public static synchronized void ensureLinked(Context ctx, Done done) {
         final Context c = ctx.getApplicationContext();
         final String addr = WalletManager.getActiveWalletAddress(c);
@@ -32,19 +41,44 @@ public final class NodeLinkManager {
             return;
         }
         SharedPreferences p = prefs(c);
-        if (p.getBoolean("linked_" + addr, false) && p.getBoolean("bound_" + addr, false)) {
+        long now = System.currentTimeMillis();
+        if (p.getBoolean("linked_" + addr, false) && p.getBoolean("bound_" + addr, false) && now - lastCheck < RECHECK_MS) {
             com.harvana.app.identity.CombinedIdentity.stamp(c, addr);
             if (done != null) done.onDone(p.getString("status_" + addr, ""));
             return;
         }
         if (running) return;
         running = true;
+        lastCheck = now;
 
+        // 1. Is this wallet bound on the node right now?
+        HarvanaNodeClient.nodeGet("/api/v1/personhood/" + addr, new HarvanaNodeClient.JsonCallback() {
+            @Override public void onSuccess(JSONObject j) {
+                boolean bound = j.optBoolean("bound", false);
+                p.edit().putBoolean("bound_" + addr, bound).apply();
+                if (bound) link(c, addr, done);
+                else bind(c, addr, () -> link(c, addr, done));
+            }
+            @Override public void onError(String e) { link(c, addr, done); }      // node unreachable: leave the binding as it was
+        });
+    }
+
+    /** The "Bind this device" button: binds now, whatever was remembered, and reports what the node said. */
+    public static void bindNow(Context ctx, Done done) {
+        final Context c = ctx.getApplicationContext();
+        final String addr = WalletManager.getActiveWalletAddress(c);
+        if (addr == null || addr.isEmpty() || WalletManager.loadPrivateKey(c, addr) == null) { if (done != null) done.onDone("No wallet on this phone."); return; }
+        bind(c, addr, () -> { if (done != null) done.onDone(prefs(c).getString("status_" + addr, "")); });
+    }
+
+    private static void link(Context c, String addr, Done done) {
+        SharedPreferences p = prefs(c);
+        if (p.getBoolean("linked_" + addr, false)) { com.harvana.app.identity.CombinedIdentity.stamp(c, addr); finish(p, addr, "", done); return; }
         NodeIdentityClient.link(c, addr, new NodeIdentityClient.Callback() {
             @Override public void onSuccess(JSONObject j) {
                 p.edit().putBoolean("linked_" + addr, true).apply();
                 com.harvana.app.identity.CombinedIdentity.stamp(c, addr);
-                bind(c, addr, done);
+                finish(p, addr, "", done);
             }
             @Override public void onError(String e) {
                 String u = e == null ? "" : e;
@@ -56,23 +90,23 @@ public final class NodeLinkManager {
         });
     }
 
-    private static void bind(Context c, String addr, Done done) {
+    private static void bind(Context c, String addr, Runnable next) {
         SharedPreferences p = prefs(c);
         NodeIdentityClient.bindPersonhood(c, addr, new NodeIdentityClient.Callback() {
             @Override public void onSuccess(JSONObject j) {
-                p.edit().putBoolean("bound_" + addr, true).apply();
-                finish(p, addr, "Linked to your account and verified as a person on the network.", done);
+                p.edit().putBoolean("bound_" + addr, true).putString("status_" + addr, "This phone is bound to your wallet on the network.").apply();
+                next.run();
             }
             @Override public void onError(String e) {
                 String u = e == null ? "" : e;
                 if (u.contains("PERSONHOOD_ALREADY_BOUND")) {
-                    p.edit().putBoolean("bound_" + addr, true).apply();
-                    finish(p, addr, "Linked to your account and verified as a person on the network.", done);
+                    p.edit().putBoolean("bound_" + addr, true).putString("status_" + addr, "This phone is bound to your wallet on the network.").apply();
                 } else if (u.contains("DEVICE_ALREADY_BOUND")) {
-                    finish(p, addr, "Linked to your account. This phone is already verified for a different wallet.", done);
+                    p.edit().putBoolean("bound_" + addr, false).putString("status_" + addr, "This phone is already bound to a different wallet on the network. One phone can be bound to one wallet.").apply();
                 } else {
-                    finish(p, addr, "Linked to your account. Person verification is pending.", done);
+                    p.edit().putString("status_" + addr, "Device binding is pending. It will be tried again.").apply();
                 }
+                next.run();
             }
         });
     }

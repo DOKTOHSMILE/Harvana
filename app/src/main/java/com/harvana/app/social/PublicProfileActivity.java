@@ -606,6 +606,23 @@ public class PublicProfileActivity extends AppCompatActivity {
         rows.addView(factRow("Vouches", String.valueOf(score.vouches)));
         rows.addView(factRow("Badges", String.valueOf(score.badges)));
         rows.addView(factRow("Established", score.established ? "Yes" : "No"));
+        if (isMe() && !score.bound) {
+            // Binding ties the wallet to this phone (it raises the base trust score). Offered right here, not only on the Trust screen.
+            TextView bind = pillButton("Bind this device", v -> {
+                v.setEnabled(false);
+                ((TextView) v).setText("Binding…");
+                com.harvana.app.sync.NodeLinkManager.bindNow(this, status -> runOnUiThread(() -> {
+                    toast(status == null || status.isEmpty() ? "Done." : status);
+                    factsCache = null;
+                    load();
+                }));
+            });
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 44));
+            lp.topMargin = SocialUi.dp(this, 12);
+            bind.setLayoutParams(lp);
+            rows.addView(bind);
+            rows.addView(SocialUi.text(this, "Ties your wallet to this phone and lifts the base score. No ID is uploaded. One phone can be bound to one wallet.", 12, false, UiColors.textSecondary()));
+        }
     }
 
     private View factRow(String label, String value) {

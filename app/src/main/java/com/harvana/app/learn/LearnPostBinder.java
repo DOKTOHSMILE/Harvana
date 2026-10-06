@@ -67,7 +67,7 @@ public final class LearnPostBinder {
         TextView viewsLine = root.findViewById(R.id.tv_views_line);
 
         title.setText(post.title.isEmpty() ? "Untitled" : post.title);
-        body.setText(post.body);
+        LearnMarkdownView.bind(body, post.body, fullText);        // **bold**, *italic*, ## headings, lists, quotes, links
         if (fullText) { body.setMaxLines(Integer.MAX_VALUE); body.setEllipsize(null); }
         else { body.setMaxLines(3); body.setEllipsize(android.text.TextUtils.TruncateAt.END); }
         final VideoLinks.Video video = VideoLinks.parse(post.videoUrl);
@@ -188,7 +188,8 @@ public final class LearnPostBinder {
 
     private static void share(Activity host, Post post) {
         LearnInterest.get(host).record(post, LearnInterest.SHARE);
-        String snippet = post.body.length() > 280 ? post.body.substring(0, 277) + "..." : post.body;
+        String plainBody = LearnMarkdown.plain(post.body);
+        String snippet = plainBody.length() > 280 ? plainBody.substring(0, 277) + "..." : plainBody;
         Intent send = new Intent(Intent.ACTION_SEND);
         send.setType("text/plain");
         send.putExtra(Intent.EXTRA_TEXT, post.title + "\n\n" + snippet + "\n\nShared from Harvana");
@@ -200,7 +201,7 @@ public final class LearnPostBinder {
         menu.getMenu().add(0, 1, 0, "Copy text");
         menu.setOnMenuItemClickListener(item -> {
             ClipboardManager cm = (ClipboardManager) host.getSystemService(Context.CLIPBOARD_SERVICE);
-            if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("Learn Hub", post.title + "\n\n" + post.body));
+            if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("Learn Hub", post.title + "\n\n" + LearnMarkdown.plain(post.body)));
             Toast.makeText(host, "Copied", Toast.LENGTH_SHORT).show();
             return true;
         });

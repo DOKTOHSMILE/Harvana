@@ -90,7 +90,7 @@ service cloud.firestore {
         && request.resource.data.title.size() <= 120
         && request.resource.data.description is string
         && request.resource.data.description.size() > 0
-        && request.resource.data.description.size() <= 600
+        && request.resource.data.description.size() <= 8000
         && request.resource.data.category is string
         && request.resource.data.imageUrl is string
         // The cover picture is optional: none at all, or an https address.

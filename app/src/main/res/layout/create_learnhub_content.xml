@@ -101,7 +101,7 @@
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/cardview14"
 				android:layout_width="match_parent"
-				android:layout_height="140dp"
+				android:layout_height="240dp"
 				android:layout_marginTop="6dp"
 				android:layout_marginBottom="16dp"
 				app:cardBackgroundColor="@color/colorSurfaceRaised"
@@ -117,12 +117,12 @@
 					android:background="@android:color/transparent"
 					android:textSize="14sp"
 					android:textColor="@color/colorTextPrimary"
-					android:hint="What will members learn from this article\?"
+					android:hint="Write your article. You can format it: **bold**, *italic*, ## heading, - list, &gt; quote."
 					android:gravity="top|start"
 					android:inputType="textMultiLine|textCapSentences"
 					android:focusable="true"
 					android:focusableInTouchMode="true"
-					android:maxLength="600" />
+					android:maxLength="8000" />
 			</com.google.android.material.card.MaterialCardView>
 			<TextView
 				android:id="@+id/textview28"

@@ -99,6 +99,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		_setupFormatting();
 		com.harvana.app.utils.AppBar.header(this, "New Learn Hub article", "Share knowledge with members", R.id.textview24, R.id.textview25);
 	}
 	
@@ -220,6 +221,102 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 			final boolean _success = _param1.isSuccessful();
 			
 		};
+	}
+	
+	// ── formatting ───────────────────────────────────────────────
+
+	private TextView formatPreview;
+	
+	/** A row of format buttons above the description (bold, italic, heading, list, quote) and a Preview that shows the post as readers will see it. */
+	private void _setupFormatting() {
+		final EditText field = et_learn_description;
+		final View card = (View) field.getParent();
+		if (!(card.getParent() instanceof LinearLayout)) return;
+		final LinearLayout parent = (LinearLayout) card.getParent();
+		float d = getResources().getDisplayMetrics().density;
+		
+		android.widget.HorizontalScrollView scroller = new android.widget.HorizontalScrollView(this);
+		scroller.setHorizontalScrollBarEnabled(false);
+		LinearLayout bar = new LinearLayout(this);
+		bar.setOrientation(LinearLayout.HORIZONTAL);
+		scroller.addView(bar);
+		
+		final String[] labels = {"B", "I", "H", "\u2022 List", "1. List", "\u201D Quote", "Link", "Preview"};
+		for (final String label : labels) {
+			TextView t = new TextView(this);
+			t.setText(label);
+			t.setTextSize(13);
+			t.setGravity(android.view.Gravity.CENTER);
+			t.setTextColor(getResources().getColor("Preview".equals(label) ? R.color.colorAccent : R.color.colorTextPrimary));
+			if ("B".equals(label)) t.setTypeface(null, android.graphics.Typeface.BOLD);
+			if ("I".equals(label)) t.setTypeface(null, android.graphics.Typeface.ITALIC);
+			t.setPadding((int) (14 * d), 0, (int) (14 * d), 0);
+			android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+			bg.setCornerRadius(20 * d);
+			bg.setColor(getResources().getColor(R.color.colorSurfaceRaised));
+			t.setBackground(bg);
+			LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (int) (36 * d));
+			lp.setMarginEnd((int) (8 * d));
+			bar.addView(t, lp);
+			t.setOnClickListener(v -> {
+				switch (label) {
+					case "B": _wrap(field, "**", "**"); break;
+					case "I": _wrap(field, "*", "*"); break;
+					case "H": _linePrefix(field, "## "); break;
+					case "\u2022 List": _linePrefix(field, "- "); break;
+					case "1. List": _linePrefix(field, "1. "); break;
+					case "\u201D Quote": _linePrefix(field, "> "); break;
+					case "Link": _wrap(field, "[", "](https://)"); break;
+					default: _togglePreview(field); break;
+				}
+			});
+		}
+		LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		slp.topMargin = (int) (6 * d);
+		parent.addView(scroller, parent.indexOfChild(card), slp);
+		
+		formatPreview = new TextView(this);
+		formatPreview.setTextSize(14.5f);
+		formatPreview.setLineSpacing(0, 1.2f);
+		formatPreview.setTextColor(getResources().getColor(R.color.colorTextSecondary));
+		formatPreview.setPadding((int) (14 * d), (int) (12 * d), (int) (14 * d), (int) (12 * d));
+		android.graphics.drawable.GradientDrawable pbg = new android.graphics.drawable.GradientDrawable();
+		pbg.setCornerRadius(14 * d);
+		pbg.setColor(getResources().getColor(R.color.colorSurfaceRaised));
+		formatPreview.setBackground(pbg);
+		formatPreview.setVisibility(View.GONE);
+		LinearLayout.LayoutParams plp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		plp.topMargin = (int) (6 * d);
+		plp.bottomMargin = (int) (16 * d);
+		parent.addView(formatPreview, parent.indexOfChild(card) + 1, plp);
+	}
+	
+	/** Wraps the selected text (or puts the cursor between the two markers when nothing is selected). */
+	private void _wrap(EditText f, String left, String right) {
+		int a = Math.max(0, Math.min(f.getSelectionStart(), f.getSelectionEnd()));
+		int b = Math.max(0, Math.max(f.getSelectionStart(), f.getSelectionEnd()));
+		android.text.Editable e = f.getText();
+		if (b > a) { e.insert(b, right); e.insert(a, left); f.setSelection(b + left.length() + right.length()); }
+		else { e.insert(a, left + right); f.setSelection(a + left.length()); }
+		f.requestFocus();
+	}
+	
+	/** Puts a marker at the start of the current line, or takes it off if it is already there. */
+	private void _linePrefix(EditText f, String prefix) {
+		android.text.Editable e = f.getText();
+		int at = Math.max(0, f.getSelectionStart());
+		int start = e.toString().lastIndexOf('\n', at - 1) + 1;
+		if (e.toString().startsWith(prefix, start)) e.delete(start, start + prefix.length());
+		else e.insert(start, prefix);
+		f.requestFocus();
+	}
+	
+	private void _togglePreview(EditText f) {
+		if (formatPreview.getVisibility() == View.VISIBLE) { formatPreview.setVisibility(View.GONE); return; }
+		String text = f.getText().toString();
+		if (text.trim().isEmpty()) { Toast.makeText(this, "Write something first.", Toast.LENGTH_SHORT).show(); return; }
+		com.harvana.app.learn.LearnMarkdownView.bind(formatPreview, text, false);
+		formatPreview.setVisibility(View.VISIBLE);
 	}
 	
 	private void initializeLogic() {

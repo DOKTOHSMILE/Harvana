@@ -513,7 +513,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		}
 		if ("FIXED".equals(family)) {
 			double goal = json.optLong("targetGoalAmountRaw") / 100_000_000.0;
-			double raised = json.optLong("raisedAmountRaw") / 100_000_000.0;
+			double raised = (json.has("goalRaisedRaw") ? json.optLong("goalRaisedRaw") : json.optLong("raisedAmountRaw")) / 100_000_000.0;
 			String state = json.optString("state", "");
 			String ben = json.optString("beneficiaryAddress", "");
 			boolean reached = "COMPLETED".equalsIgnoreCase(state) || (goal > 0 && raised + 0.0000001 >= goal);

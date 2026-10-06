@@ -14,13 +14,17 @@ public final class FixedSnapshot {
         s.id = str(group, "groupId");
         s.state = str(group, "state");
         s.escrow = str(group, "escrowAddress");
-        long target = lng(group, "targetGoalAmountRaw"), raised = lng(group, "raisedAmountRaw");
+        long target = lng(group, "targetGoalAmountRaw"), pooled = lng(group, "raisedAmountRaw");
+        // Each goal has its own ledger inside the same group; older groups have no base and read as one goal.
+        long raised = Math.max(0L, pooled - lng(group, "goalBaseRaisedRaw"));
+        long goalNo = Math.max(1L, lng(group, "goalNumber"));
         String rule = str(group, "disbursementRule");
         boolean admin = !me.isEmpty() && me.equals(str(group, "creatorAddress"));
         s.headline = harv(raised) + " of " + harv(target);
         s.progressCurrent = (int) Math.min(1000, target > 0 ? raised * 1000 / target : 0);
         s.progressMax = 1000;
 
+        if (goalNo > 1) s.term("Goal number", String.valueOf(goalNo));
         s.term("Goal", harv(target));
         s.term("Raised", harv(raised));
         s.term("Paid out so far", harv(lng(group, "totalDisbursedRaw")));
@@ -36,7 +40,7 @@ public final class FixedSnapshot {
         boolean goalMet = target > 0 && raised >= target;
         boolean completed = "COMPLETED".equals(s.state);
         boolean open = "ACTIVE".equals(s.state) || s.state.isEmpty();
-        long left = raised - lng(group, "totalDisbursedRaw");
+        long left = pooled - lng(group, "totalDisbursedRaw") - lng(group, "paidOutBeforeGoalRaw");
         if (open && !goalMet && !completed) s.actions.add(new GroupAction(GroupAction.FIXED_DEPOSIT, "Deposit", true));
         // Reaching the goal closes deposits. It does not move the money: under every rule except "all at once" the pot stays in the
         // group wallet until the admin (or a member, for grants) asks and the group votes, so those actions stay available.

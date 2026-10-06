@@ -509,7 +509,7 @@ public final class GroupTypeBoard {
 
     private static Board fixedGoal(Map<String, Object> group, Map<String, Object> member, long nowMs, TimeZone zone) {
         double target = num(group, "targetGoalAmountRaw", 0) / RAW;
-        double raised = num(group, "raisedAmountRaw", 0) / RAW;
+        double raised = Math.max(0, num(group, "raisedAmountRaw", 0) - num(group, "goalBaseRaisedRaw", 0)) / RAW;
         double mine = member == null ? 0 : num(member, "contributedRaw", 0) / RAW;
         List<Cell> cells = new ArrayList<>();
         if (mine > 0) {

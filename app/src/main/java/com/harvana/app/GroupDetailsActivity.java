@@ -831,7 +831,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		if ("FIXED".equals(com.harvana.app.sync.NodeGroupClient.familyOf(groupId))) {
 			com.harvana.app.sync.NodeGroupClient.getFixedGroup(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
 				@Override public void onSuccess(org.json.JSONObject json) {
-					final double raised = json.optLong("raisedAmountRaw", 0L) / 100_000_000.0;
+					final double raised = (json.has("goalRaisedRaw") ? json.optLong("goalRaisedRaw", 0L) : json.optLong("raisedAmountRaw", 0L)) / 100_000_000.0;
 					runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(com.harvana.app.wallet.BalanceFormatter.smart(raised)); });
 				}
 				@Override public void onError(String error) { /* keep what is shown */ }

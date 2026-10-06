@@ -352,8 +352,12 @@ public class GroupActionsActivity extends AppCompatActivity {
         // 2. What you can do
         List<GroupAction> doable = new ArrayList<>();
         for (GroupAction a : s.actions) if (a.enabled && isRequestAction(a.id)) doable.add(a);
-        boolean newGoal = "FIXED".equals(family) && me != null && !me.isEmpty() && member != null && !member.isEmpty()
-            && ("COMPLETED".equals(str(group, "state")) || (num(group, "targetGoalAmountRaw") > 0 && num(group, "raisedAmountRaw") >= num(group, "targetGoalAmountRaw")));
+        String rule0 = str(group, "disbursementRule");
+        boolean paysOutInOne = "ALL_AT_ONCE_AT_GOAL".equals(rule0) || "ADMIN_TRIGGERED".equals(rule0);
+        long goalRaised = Math.max(0L, num(group, "raisedAmountRaw") - num(group, "goalBaseRaisedRaw"));
+        boolean reached = num(group, "targetGoalAmountRaw") > 0 && goalRaised >= num(group, "targetGoalAmountRaw");
+        boolean newGoal = "FIXED".equals(family) && me != null && !me.isEmpty() && me.equalsIgnoreCase(str(group, "creatorAddress"))
+            && (paysOutInOne ? "COMPLETED".equals(str(group, "state")) : reached);
         if (!doable.isEmpty() || newGoal) {
             content.addView(sectionHeader("What you can do", ""));
             for (GroupAction a : doable) content.addView(actionCard(a));
@@ -815,8 +819,8 @@ public class GroupActionsActivity extends AppCompatActivity {
     private View newGoalCard() {
         LinearLayout c = CircleUi.card(this);
         c.addView(CircleUi.text(this, "Start a new goal", 15, R.color.colorTextPrimary, true));
-        TextView d = CircleUi.text(this, "Creates a new goal group with the same payout rule and beneficiary, a name and target you choose, and the same profile. "
-            + "The network charges its usual creation fee.", 12.5f, R.color.colorTextSecondary, false);
+        TextView d = CircleUi.text(this, "Starts a new goal inside this same group: same members, rule and wallet, with a name and target you choose and its own ledger. "
+            + "Nobody has to join again. Only the admin can do this.", 12.5f, R.color.colorTextSecondary, false);
         d.setPadding(0, CircleUi.dp(this, 4), 0, 0);
         c.addView(d);
         c.addView(button("Start a new goal", false, v -> startNewGoal()));
@@ -825,15 +829,13 @@ public class GroupActionsActivity extends AppCompatActivity {
 
     private void startNewGoal() {
         if (group == null) return;
-        final String rule = str(group, "disbursementRule");
-        final String who = str(group, "beneficiaryAddress");
-        LinearLayout box = new LinearLayout(this);
+                LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         int pad = CircleUi.dp(this, 20);
         box.setPadding(pad, CircleUi.dp(this, 8), pad, 0);
         final EditText name = new com.google.android.material.textfield.TextInputEditText(this);
         name.setHint("Name of the new goal");
-        name.setText(groupName.isEmpty() ? "" : groupName + " 2");
+        name.setText("Goal " + (num(group, "goalNumber") > 0 ? num(group, "goalNumber") + 1 : 2));
         final EditText target = new com.google.android.material.textfield.TextInputEditText(this);
         target.setHint("Target amount");
         target.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -846,55 +848,10 @@ public class GroupActionsActivity extends AppCompatActivity {
                 final String n = name.getText().toString().trim();
                 final long raw = CircleUi.toRaw(target.getText().toString());
                 if (n.isEmpty() || raw <= 0) { toast("Enter a name and a target."); return; }
-                pay("Start a new goal", CircleUi.harv(100_000_000L),
-                    "Creation fee. Target " + CircleUi.harv(raw) + " for “" + n + "”. Nothing is locked.",
-                    () -> createGoal(n, raw, rule, who));
+                pay("Start a new goal", CircleUi.harv(raw),
+                    "New goal “" + n + "” in this group. Target shown. Nothing is locked.",
+                    () -> NodeGroupClient.startNextFixedGoal(getApplicationContext(), me, nodeId, raw, n, result("New goal started.")));
             }).show();
-    }
-
-    private void createGoal(final String goalName, final long targetRaw, String rule, String beneficiary) {
-        final String desc = fsData != null && fsData.get("groupDescription") != null ? String.valueOf(fsData.get("groupDescription")) : "";
-        NodeGroupClient.createFixedGroup(getApplicationContext(), me, targetRaw, rule, beneficiary, 0L, goalName, desc, new NodeGroupClient.Callback() {
-            @Override public void onSuccess(JSONObject json) {
-                final String id = json.optString("groupId", json.optString("circleId", ""));
-                if (id.isEmpty()) { toast("The network accepted it but returned no id."); return; }
-                NodeGroupClient.getFixedGroup(id, new NodeGroupClient.Callback() {
-                    @Override public void onSuccess(JSONObject g) { saveGoal(id, goalName, targetRaw, g.optString("escrowAddress", "")); }
-                    @Override public void onError(String e) { saveGoal(id, goalName, targetRaw, ""); }
-                });
-            }
-            @Override public void onError(String error) { toast(CircleUi.friendly(error)); runOnUiThread(GroupActionsActivity.this::load); }
-        });
-    }
-
-    private void saveGoal(String nodeGroupId, String goalName, long targetRaw, String escrow) {
-        com.google.firebase.auth.FirebaseUser u = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
-        if (u == null) { toast("Your goal exists on the network. Group ID: " + nodeGroupId); return; }
-        final String docId = java.util.UUID.randomUUID().toString();
-        java.util.Map<String, Object> g = fsData == null ? new java.util.HashMap<String, Object>() : new java.util.HashMap<>(fsData);
-        for (String k : new String[]{"groupId", "firestoreDocId", "circleId", "chatLinks", "inviteCode", "members", "memberUids"}) g.remove(k);
-        g.put("groupId", docId);
-        g.put("firestoreDocId", docId);
-        g.put("timestamp", String.valueOf(System.currentTimeMillis()));
-        g.put("groupName", goalName);
-        g.put("creatorId", u.getUid());
-        g.put("status", "Active");
-        g.put("membersCount", 1);
-        g.put("totalCollected", 0.0);
-        g.put("targetGoalAmount", targetRaw / 100_000_000.0);
-        g.put("groupWalletAddress", escrow);
-        g.put("nodeGroupId", nodeGroupId);
-        g.put("family", GroupKinds.familyOf(nodeGroupId));
-        g.put("onChain", true);
-        final Context ctx = getApplicationContext();
-        GroupSaver.queue(ctx, u.getUid(), docId, g);
-        GroupSaver.save(ctx, u.getUid(), docId, g, error -> runOnUiThread(() -> {
-            if (error != null) { toast("Your goal exists on the network, but saving its details failed. Group ID: " + nodeGroupId); return; }
-            GroupSaver.unqueue(ctx, docId);
-            toast("New goal created.");
-            startActivity(new android.content.Intent(ctx, com.harvana.app.GroupDetailsActivity.class).putExtra("groupId", docId)
-                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK));
-        }));
     }
 
     // ── plumbing ───────────────────────────────────────────────────────────

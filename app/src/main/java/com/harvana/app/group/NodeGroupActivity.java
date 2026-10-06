@@ -544,10 +544,10 @@ public class NodeGroupActivity extends AppCompatActivity {
         box.setOrientation(LinearLayout.VERTICAL);
         int pad = CircleUi.dp(this, 20);
         box.setPadding(pad, CircleUi.dp(this, 8), pad, 0);
-        final EditText name = new EditText(this);
+        final EditText name = new com.google.android.material.textfield.TextInputEditText(this);
         name.setHint("Name of the new goal");
         name.setText(groupName.isEmpty() ? "" : groupName + " 2");
-        final EditText target = new EditText(this);
+        final EditText target = new com.google.android.material.textfield.TextInputEditText(this);
         target.setHint("Target amount");
         target.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         long old = (long) num(group, "targetGoalAmountRaw");
@@ -727,11 +727,11 @@ public class NodeGroupActivity extends AppCompatActivity {
         box.setOrientation(LinearLayout.VERTICAL);
         int p = CircleUi.dp(this, 16);
         box.setPadding(p, p, p, 0);
-        final EditText daily = new EditText(this);
+        final EditText daily = new com.google.android.material.textfield.TextInputEditText(this);
         daily.setHint("Amount to save each day");
         daily.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         box.addView(daily);
-        final EditText lockDays = new EditText(this);
+        final EditText lockDays = new com.google.android.material.textfield.TextInputEditText(this);
         lockDays.setHint("Lock for how many days? (leave empty for a flexible line)");
         lockDays.setInputType(InputType.TYPE_CLASS_NUMBER);
         box.addView(lockDays);
@@ -756,7 +756,7 @@ public class NodeGroupActivity extends AppCompatActivity {
         boolean ongoing = line == null || "ONGOING".equals(str(line, "depositMode")) || str(line, "depositMode").isEmpty();
         final long dailyRaw = line == null ? 0 : num(line, "dailyAmountRaw");
         if (ongoing && dailyRaw > 0) {
-            final EditText days = new EditText(this);
+            final EditText days = new com.google.android.material.textfield.TextInputEditText(this);
             days.setHint("How many days to save now?");
             days.setInputType(InputType.TYPE_CLASS_NUMBER);
             new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Save several days").setView(days).setNegativeButton("Cancel", null)
@@ -780,7 +780,7 @@ public class NodeGroupActivity extends AppCompatActivity {
     private interface RawTextCb { void got(long raw, String text); }
 
     private void amountDialog(String title, String hint, RawCb cb) {
-        final EditText e = new EditText(this);
+        final EditText e = new com.google.android.material.textfield.TextInputEditText(this);
         e.setHint(hint);
         e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         new com.harvana.app.ui.SheetDialog.Builder(this).setTitle(title).setView(e).setNegativeButton("Cancel", null)
@@ -796,11 +796,11 @@ public class NodeGroupActivity extends AppCompatActivity {
         box.setOrientation(LinearLayout.VERTICAL);
         int p = CircleUi.dp(this, 16);
         box.setPadding(p, p, p, 0);
-        final EditText amount = new EditText(this);
+        final EditText amount = new com.google.android.material.textfield.TextInputEditText(this);
         amount.setHint("Amount");
         amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         box.addView(amount);
-        final EditText text = new EditText(this);
+        final EditText text = new com.google.android.material.textfield.TextInputEditText(this);
         text.setHint(textHint);
         box.addView(text);
         new com.harvana.app.ui.SheetDialog.Builder(this).setTitle(title)
@@ -950,12 +950,7 @@ public class NodeGroupActivity extends AppCompatActivity {
     }
 
     private Button button(String label, boolean primary, View.OnClickListener l) {
-        Button bt = new Button(this);
-        bt.setText(label);
-        bt.setAllCaps(false);
-        bt.setTextColor(CircleUi.color(this, primary ? R.color.colorTextOnAccent : R.color.colorAccentStrong));
-        bt.setBackgroundResource(primary ? R.drawable.bg_btn_primary : R.drawable.bg_btn_outline_accent);
-        bt.setOnClickListener(l);
+        Button bt = com.harvana.app.ui.Btn.of(this, label, primary, l);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, CircleUi.dp(this, 52));
         lp.topMargin = CircleUi.dp(this, 12);
         bt.setLayoutParams(lp);

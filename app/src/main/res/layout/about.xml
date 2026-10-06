@@ -117,12 +117,12 @@
 							android:scaleType="centerInside"
 							app:tint="@color/colorTextTertiary" />
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view47"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
-						android:background="@color/colorDivider"
-						android:layout_marginStart="18dp" />
+						android:layout_marginStart="18dp"
+	app:dividerColor="@color/colorDivider"/>
 					<LinearLayout
 						android:id="@+id/rowTermsOfService"
 						android:layout_width="match_parent"
@@ -148,12 +148,12 @@
 							android:scaleType="centerInside"
 							app:tint="@color/colorTextTertiary" />
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view48"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
-						android:background="@color/colorDivider"
-						android:layout_marginStart="18dp" />
+						android:layout_marginStart="18dp"
+	app:dividerColor="@color/colorDivider"/>
 					<LinearLayout
 						android:id="@+id/rowOpenSourceLicenses"
 						android:layout_width="match_parent"

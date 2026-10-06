@@ -226,7 +226,7 @@ public class FriendPickerActivity extends AppCompatActivity {
         row.addView(names, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
         if (selecting) {
-            CheckBox box = new CheckBox(this);
+            CheckBox box = new com.google.android.material.checkbox.MaterialCheckBox(this);
             box.setChecked(chosen.containsKey(p.uid));
             box.setClickable(false);
             row.addView(box);

@@ -299,14 +299,9 @@ public final class PaymentConfirmSheet {
 	}
 
 	private static Button actionButton(Context ctx, String text, boolean primary, int accent, int onAccent, float d) {
-		Button b = new Button(ctx);
-		b.setText(text);
-		b.setAllCaps(false);
+		com.google.android.material.button.MaterialButton b = primary ? com.harvana.app.ui.Btn.filled(ctx, text, null) : com.harvana.app.ui.Btn.outlined(ctx, text, null);
 		b.setTextSize(15);
 		b.setTypeface(Typeface.DEFAULT_BOLD);
-		b.setTextColor(onAccent);
-		b.setBackgroundResource(R.drawable.bg_btn_primary);
-		b.setStateListAnimator(null);
 		return b;
 	}
 

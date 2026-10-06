@@ -109,12 +109,12 @@
 						android:textSize="13.5sp"
 						android:focusable="false" />
 				</LinearLayout>
-				<View
+				<com.google.android.material.divider.MaterialDivider
 					android:id="@+id/view18"
 					android:layout_width="match_parent"
 					android:layout_height="1dp"
-					android:background="@color/colorDivider"
-					android:layout_marginVertical="12dp" />
+					android:layout_marginVertical="12dp"
+	app:dividerColor="@color/colorDivider"/>
 				<LinearLayout
 					android:id="@+id/linear19"
 					android:layout_width="match_parent"
@@ -162,12 +162,12 @@
 						android:textSize="13.5sp"
 						android:focusable="false" />
 				</LinearLayout>
-				<View
+				<com.google.android.material.divider.MaterialDivider
 					android:id="@+id/view21"
 					android:layout_width="match_parent"
 					android:layout_height="1dp"
-					android:background="@color/colorDivider"
-					android:layout_marginVertical="12dp" />
+					android:layout_marginVertical="12dp"
+	app:dividerColor="@color/colorDivider"/>
 				<LinearLayout
 					android:id="@+id/linear22"
 					android:layout_width="match_parent"

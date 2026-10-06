@@ -28,7 +28,7 @@ public final class ContactsFinder {
         SharedPreferences sp = a.getSharedPreferences("contact_discovery", Activity.MODE_PRIVATE);
         String cc = detected != null && !detected.isEmpty() ? detected : sp.getString("cc", "");
         if (!cc.isEmpty()) { next.use(cc); return; }
-        final EditText et = new EditText(a);
+        final EditText et = new com.google.android.material.textfield.TextInputEditText(a);
         et.setHint("e.g. 234");
         et.setInputType(InputType.TYPE_CLASS_NUMBER);
         new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Your country code")

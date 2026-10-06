@@ -195,12 +195,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view6"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowSecurityPrivacy"
 							android:layout_width="match_parent"
@@ -250,12 +250,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view8"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowWalletAssets"
 							android:layout_width="match_parent"
@@ -305,12 +305,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view10"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowBackupRecovery"
 							android:layout_width="match_parent"
@@ -439,12 +439,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view14"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowTransactionHistory"
 							android:layout_width="match_parent"
@@ -494,12 +494,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view16"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowLimitsFees"
 							android:layout_width="match_parent"
@@ -549,12 +549,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view18"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowTaxReports"
 							android:layout_width="match_parent"
@@ -683,12 +683,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view22"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowPrivacyVisibility"
 							android:layout_width="match_parent"
@@ -738,12 +738,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view24"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowNotifications"
 							android:layout_width="match_parent"
@@ -793,12 +793,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view26"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowBlockedUsers"
 							android:layout_width="match_parent"
@@ -927,12 +927,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view30"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowLanguage"
 							android:layout_width="match_parent"
@@ -982,12 +982,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view32"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowCurrency"
 							android:layout_width="match_parent"
@@ -1037,12 +1037,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view34"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowDataStorage"
 							android:layout_width="match_parent"
@@ -1171,12 +1171,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view38"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowAboutHarvana"
 							android:layout_width="match_parent"
@@ -1226,12 +1226,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view40"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowTermsConditions"
 							android:layout_width="match_parent"
@@ -1281,12 +1281,12 @@
 								android:scaleType="center"
 								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view42"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="66dp" />
+							android:layout_marginStart="66dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/rowLogOut"
 							android:layout_width="match_parent"

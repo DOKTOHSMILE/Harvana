@@ -81,7 +81,7 @@
 						app:cardElevation="0dp"
 						app:strokeColor="@color/colorCardStroke"
 						app:strokeWidth="1dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_first_name"
 							android:layout_width="match_parent"
 							android:layout_height="52dp"
@@ -111,7 +111,7 @@
 						app:cardElevation="0dp"
 						app:strokeColor="@color/colorCardStroke"
 						app:strokeWidth="1dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_last_name"
 							android:layout_width="match_parent"
 							android:layout_height="52dp"
@@ -181,7 +181,7 @@
 						app:cardElevation="0dp"
 						app:strokeColor="@color/colorCardStroke"
 						app:strokeWidth="1dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_email"
 							android:layout_width="match_parent"
 							android:layout_height="52dp"
@@ -216,7 +216,7 @@
 							app:cardElevation="0dp"
 							app:strokeColor="@color/colorCardStroke"
 							app:strokeWidth="1dp">
-							<EditText
+							<com.google.android.material.textfield.TextInputEditText
 								android:id="@+id/et_phone_code"
 								android:layout_width="match_parent"
 								android:layout_height="52dp"
@@ -238,7 +238,7 @@
 							app:cardElevation="0dp"
 							app:strokeColor="@color/colorCardStroke"
 							app:strokeWidth="1dp">
-							<EditText
+							<com.google.android.material.textfield.TextInputEditText
 								android:id="@+id/et_phone_number"
 								android:layout_width="match_parent"
 								android:layout_height="52dp"
@@ -370,7 +370,7 @@
 						app:cardElevation="0dp"
 						app:strokeColor="@color/colorCardStroke"
 						app:strokeWidth="1dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_address"
 							android:layout_width="match_parent"
 							android:layout_height="52dp"
@@ -399,7 +399,7 @@
 						app:cardElevation="0dp"
 						app:strokeColor="@color/colorCardStroke"
 						app:strokeWidth="1dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_occupation"
 							android:layout_width="match_parent"
 							android:layout_height="52dp"
@@ -428,7 +428,7 @@
 						app:cardElevation="0dp"
 						app:strokeColor="@color/colorCardStroke"
 						app:strokeWidth="1dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_referrer"
 							android:layout_width="match_parent"
 							android:layout_height="52dp"
@@ -474,7 +474,7 @@
 							app:cardCornerRadius="12dp"
 							app:cardElevation="0dp"
 							app:strokeWidth="0dp">
-							<TextView
+							<com.google.android.material.button.MaterialButton
 								android:id="@+id/btn_id_type_bvn"
 								android:layout_width="match_parent"
 								android:layout_height="46dp"
@@ -482,7 +482,8 @@
 								android:text="BVN"
 								android:textSize="14sp"
 								android:textStyle="bold"
-								android:textColor="@color/colorTextOnAccent" />
+								android:textColor="@color/colorTextOnAccent"
+	android:textAllCaps="false"/>
 						</com.google.android.material.card.MaterialCardView>
 						<com.google.android.material.card.MaterialCardView
 							android:id="@+id/cardview58"
@@ -495,7 +496,7 @@
 							app:cardElevation="0dp"
 							app:strokeColor="@color/colorCardStroke"
 							app:strokeWidth="1dp">
-							<TextView
+							<com.google.android.material.button.MaterialButton
 								android:id="@+id/btn_id_type_nin"
 								android:layout_width="match_parent"
 								android:layout_height="46dp"
@@ -503,7 +504,8 @@
 								android:text="NIN"
 								android:textSize="14sp"
 								android:textStyle="bold"
-								android:textColor="@color/colorTextSecondary" />
+								android:textColor="@color/colorTextSecondary"
+	android:textAllCaps="false"/>
 						</com.google.android.material.card.MaterialCardView>
 					</LinearLayout>
 					<TextView
@@ -525,7 +527,7 @@
 						app:cardElevation="0dp"
 						app:strokeColor="@color/colorCardStroke"
 						app:strokeWidth="1dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_id_number"
 							android:layout_width="match_parent"
 							android:layout_height="52dp"
@@ -565,7 +567,7 @@
 						app:cardElevation="0dp"
 						app:strokeColor="@color/colorCardStroke"
 						app:strokeWidth="1dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_kin_name"
 							android:layout_width="match_parent"
 							android:layout_height="52dp"
@@ -595,7 +597,7 @@
 						app:cardElevation="0dp"
 						app:strokeColor="@color/colorCardStroke"
 						app:strokeWidth="1dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_kin_relationship"
 							android:layout_width="match_parent"
 							android:layout_height="52dp"
@@ -624,7 +626,7 @@
 						app:cardElevation="0dp"
 						app:strokeColor="@color/colorCardStroke"
 						app:strokeWidth="1dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_kin_phone"
 							android:layout_width="match_parent"
 							android:layout_height="52dp"
@@ -728,7 +730,7 @@
 						app:cardElevation="0dp"
 						app:strokeColor="@color/colorCardStroke"
 						app:strokeWidth="1dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_kin_address"
 							android:layout_width="match_parent"
 							android:layout_height="52dp"
@@ -745,7 +747,7 @@
 						android:layout_marginBottom="8dp"
 						android:gravity="center_vertical"
 						android:orientation="horizontal">
-						<CheckBox
+						<com.google.android.material.checkbox.MaterialCheckBox
 							android:id="@+id/checkbox_terms"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
@@ -767,7 +769,7 @@
 						android:layout_marginBottom="24dp"
 						android:gravity="center_vertical"
 						android:orientation="horizontal">
-						<CheckBox
+						<com.google.android.material.checkbox.MaterialCheckBox
 							android:id="@+id/checkbox_privacy"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
@@ -790,7 +792,7 @@
 						app:cardCornerRadius="16dp"
 						app:cardElevation="0dp"
 						app:strokeWidth="0dp">
-						<TextView
+						<com.google.android.material.button.MaterialButton
 							android:id="@+id/btn_submit_profile"
 							android:layout_width="match_parent"
 							android:layout_height="52dp"
@@ -798,7 +800,8 @@
 							android:text="Create Account"
 							android:textSize="15sp"
 							android:textStyle="bold"
-							android:textColor="@color/colorTextOnAccent" />
+							android:textColor="@color/colorTextOnAccent"
+	android:textAllCaps="false"/>
 					</com.google.android.material.card.MaterialCardView>
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>

@@ -355,7 +355,7 @@ public class GroupDetailsLogic {
 
     private void promptWalletAndApprove(final String reqId, final double amt) {
         if (activity == null || activity.isFinishing()) return;
-        final EditText input = new EditText(activity);
+        final EditText input = new com.google.android.material.textfield.TextInputEditText(activity);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         input.setHint("Member HV0x wallet");
         LinearLayout wrap = new LinearLayout(activity);
@@ -470,7 +470,7 @@ public class GroupDetailsLogic {
         }
 
         // Amount card -> editable principal input.
-        final EditText amountInput = new EditText(activity);
+        final EditText amountInput = new com.google.android.material.textfield.TextInputEditText(activity);
         amountInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         amountInput.setHint(("Amount in " + com.harvana.app.CoinInfo.ticker()));
         amountInput.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
@@ -503,7 +503,7 @@ public class GroupDetailsLogic {
         // Note field: appended as its own full-width row rather than
         // squeezed into the memo row's label+value split, which is too
         // narrow for comfortable typing.
-        final EditText noteInput = new EditText(activity);
+        final EditText noteInput = new com.google.android.material.textfield.TextInputEditText(activity);
         noteInput.setHint("Note (optional)");
         noteInput.setTextSize(13);
         if (detailsColumn != null) {

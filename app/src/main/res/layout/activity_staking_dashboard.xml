@@ -283,7 +283,7 @@
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
                             android:paddingHorizontal="16dp">
-                            <EditText
+                            <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/et_amount"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
@@ -302,17 +302,18 @@
                                 android:backgroundTint="#FFFFFF"
                                 android:layout_marginEnd="8dp"/>
                             
-                            <TextView
+                            <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_max"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="MAX"
                                 android:textColor="@color/colorSuccess"
-                                android:background="#1A00FFA3"
                                 android:paddingHorizontal="8dp"
                                 android:paddingVertical="4dp"
                                 android:textStyle="bold"
-                                android:textSize="12sp"/>
+                                android:textSize="12sp"
+	app:backgroundTint="#1A00FFA3"
+	android:textAllCaps="false"/>
                         </LinearLayout>
 
                         <TextView

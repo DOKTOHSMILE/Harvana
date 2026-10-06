@@ -136,11 +136,11 @@
                 android:lineSpacingMultiplier="1.2"
                 android:textIsSelectable="false" />
 
-            <View
+            <com.google.android.material.divider.MaterialDivider
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="14dp"
-                android:background="@color/colorCardStroke" />
+	app:dividerColor="@color/colorCardStroke"/>
 
             <!-- One compact row that always fits: four reactions share the width, More sits at the far end. -->
             <LinearLayout

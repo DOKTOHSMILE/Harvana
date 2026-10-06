@@ -107,7 +107,7 @@
 						android:layout_height="56dp"
 						android:gravity="center_vertical"
 						android:orientation="horizontal">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_buy_amount"
 							android:layout_width="0dp"
 							android:layout_height="match_parent"
@@ -194,7 +194,7 @@
 							android:layout_height="56dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<EditText
+							<com.google.android.material.textfield.TextInputEditText
 								android:id="@+id/et_buy_price"
 								android:layout_width="0dp"
 								android:layout_height="match_parent"
@@ -246,7 +246,7 @@
 							android:layout_height="56dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<EditText
+							<com.google.android.material.textfield.TextInputEditText
 								android:id="@+id/et_buy_margin"
 								android:layout_width="0dp"
 								android:layout_height="match_parent"
@@ -353,11 +353,11 @@
 								android:textSize="14sp"
 								android:textStyle="bold" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view10"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 						<LinearLayout
 							android:id="@+id/row_buy_offer_duration"
 							android:layout_width="match_parent"
@@ -382,11 +382,11 @@
 								android:textSize="14sp"
 								android:textStyle="bold" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view_buy_payment_window_divider"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 						<LinearLayout
 							android:id="@+id/row_buy_payment_window"
 							android:layout_width="match_parent"
@@ -432,7 +432,7 @@
 					app:cardElevation="0dp"
 					app:strokeColor="@color/colorP2pBorder"
 					app:strokeWidth="1dp">
-					<EditText
+					<com.google.android.material.textfield.TextInputEditText
 						android:id="@+id/et_buy_terms"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
@@ -544,12 +544,12 @@
 								android:textSize="14sp"
 								android:textStyle="bold" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view13"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorP2pBorder"
-							android:layout_marginVertical="12dp" />
+							android:layout_marginVertical="12dp"
+	app:dividerColor="@color/colorP2pBorder"/>
 						<LinearLayout
 							android:id="@+id/linear14"
 							android:layout_width="match_parent"

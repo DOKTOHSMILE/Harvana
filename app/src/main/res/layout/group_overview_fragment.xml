@@ -100,13 +100,13 @@
 							app:tint="@color/colorTextSecondary" />
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>
-				<View
+				<com.google.android.material.divider.MaterialDivider
 					android:id="@+id/view18"
 					android:layout_width="match_parent"
 					android:layout_height="1dp"
 					android:layout_marginTop="14dp"
 					android:layout_marginBottom="14dp"
-					android:background="@color/colorDivider" />
+	app:dividerColor="@color/colorDivider"/>
 				<LinearLayout
 					android:id="@+id/linear19"
 					android:layout_width="match_parent"
@@ -240,11 +240,11 @@
 							android:textSize="13.5sp" />
 					</LinearLayout>
 				</LinearLayout>
-				<View
+				<com.google.android.material.divider.MaterialDivider
 					android:id="@+id/view16"
 					android:layout_width="match_parent"
 					android:layout_height="1dp"
-					android:background="@color/colorDivider" />
+	app:dividerColor="@color/colorDivider"/>
 				<LinearLayout
 					android:id="@+id/linear18"
 					android:layout_width="match_parent"
@@ -304,11 +304,11 @@
 							android:textSize="13.5sp" />
 					</LinearLayout>
 				</LinearLayout>
-				<View
+				<com.google.android.material.divider.MaterialDivider
 					android:id="@+id/view24"
 					android:layout_width="match_parent"
 					android:layout_height="1dp"
-					android:background="@color/colorDivider" />
+	app:dividerColor="@color/colorDivider"/>
 				<LinearLayout
 					android:id="@+id/linear25"
 					android:layout_width="match_parent"

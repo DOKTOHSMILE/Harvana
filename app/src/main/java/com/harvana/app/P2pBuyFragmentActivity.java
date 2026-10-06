@@ -462,7 +462,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		int colorPrimary = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorPrimary, Color.BLUE);
 		int colorOnPrimary = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorOnPrimary, Color.WHITE);
 		
-		EditText input = new EditText(requireContext());
+		EditText input = new com.google.android.material.textfield.TextInputEditText(requireContext());
 		input.setHint(("Enter " + com.harvana.app.CoinInfo.ticker() + " amount"));
 		input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		
@@ -523,7 +523,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		int colorPrimary = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorPrimary, Color.BLUE);
 		int colorOnPrimary = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorOnPrimary, Color.WHITE);
 		
-		EditText search = new EditText(requireContext());
+		EditText search = new com.google.android.material.textfield.TextInputEditText(requireContext());
 		search.setHint("Search");
 		search.setTextColor(colorOnSurface);
 		search.setHintTextColor(colorOnSurfaceVariant);
@@ -548,7 +548,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 			allLabel.setText("All Payment Methods");
 			allLabel.setTextColor(colorOnSurface);
 			
-			CheckBox allCheck = new CheckBox(requireContext());
+			CheckBox allCheck = new com.google.android.material.checkbox.MaterialCheckBox(requireContext());
 			CompoundButtonCompat.setButtonTintList(allCheck, ColorStateList.valueOf(colorPrimary));
 			allCheck.setChecked(selectedPaymentLabels.isEmpty());
 			
@@ -585,7 +585,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 				tv.setText(label);
 				tv.setTextColor(colorOnSurface);
 				
-				CheckBox cb = new CheckBox(requireContext());
+				CheckBox cb = new com.google.android.material.checkbox.MaterialCheckBox(requireContext());
 				CompoundButtonCompat.setButtonTintList(cb, ColorStateList.valueOf(colorPrimary));
 				cb.setChecked(selectedPaymentLabels.contains(label));
 				
@@ -785,7 +785,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		int colorOnSurface = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorOnSurface, Color.WHITE);
 		int colorPrimary = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorPrimary, Color.BLUE);
 		tv.setTextColor(colorOnSurface);
-		CheckBox cb = new CheckBox(requireContext());
+		CheckBox cb = new com.google.android.material.checkbox.MaterialCheckBox(requireContext());
 		androidx.core.widget.CompoundButtonCompat.setButtonTintList(cb, android.content.res.ColorStateList.valueOf(colorPrimary));
 		cb.setChecked(initial);
 		row.addView(tv);

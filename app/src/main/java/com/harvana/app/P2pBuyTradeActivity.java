@@ -870,7 +870,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	}
 	
 	private void _showDisputeDialog() {
-		EditText input = new EditText(this);
+		EditText input = new com.google.android.material.textfield.TextInputEditText(this);
 		input.setHint("What went wrong?");
 		input.setTextColor(ThemedDialogs.onSurface(this));
 		input.setHintTextColor(ThemedDialogs.onSurfaceVariant(this));

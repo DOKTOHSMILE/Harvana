@@ -250,12 +250,12 @@
 					android:textStyle="bold"
 					android:focusable="false" />
 			</LinearLayout>
-			<View
+			<com.google.android.material.divider.MaterialDivider
 				android:id="@+id/view256"
 				android:layout_width="match_parent"
 				android:layout_height="1dp"
 				android:layout_marginTop="14dp"
-				android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 			<LinearLayout
 				android:id="@+id/linear257"
 				android:layout_width="match_parent"

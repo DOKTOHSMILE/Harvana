@@ -392,7 +392,7 @@ public final class GroupChatSheet {
     }
 
     private static EditText field(Activity activity, String hint) {
-        EditText box = new EditText(activity);
+        EditText box = new com.google.android.material.textfield.TextInputEditText(activity);
         box.setHint(hint);
         box.setSingleLine(true);
         box.setTextColor(UiColors.textPrimary());

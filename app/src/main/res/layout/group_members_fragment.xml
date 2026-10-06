@@ -26,7 +26,7 @@
 			android:textStyle="bold"
 			android:textColor="@color/colorTextPrimary"
 			android:layout_weight="1" />
-		<TextView
+		<com.google.android.material.button.MaterialButton
 			android:id="@+id/btn_members_invite"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -42,7 +42,8 @@
 			android:drawableStart="@drawable/ic_groups"
 			android:drawablePadding="6dp"
 			app:drawableTint="@color/colorTextOnAccent"
-			android:visibility="gone" />
+			android:visibility="gone"
+	android:textAllCaps="false"/>
 	</LinearLayout>
 	<LinearLayout
 		android:id="@+id/panel_pending"

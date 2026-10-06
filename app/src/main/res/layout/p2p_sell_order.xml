@@ -116,7 +116,7 @@
 						android:orientation="horizontal"
 						android:paddingStart="15dp"
 						android:paddingEnd="15dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_sell_amount"
 							android:layout_width="0dp"
 							android:layout_height="match_parent"
@@ -228,7 +228,7 @@
 							android:text="₦"
 							android:textSize="20sp"
 							android:textStyle="bold" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_sell_price"
 							android:layout_width="0dp"
 							android:layout_height="match_parent"
@@ -430,12 +430,12 @@
 							android:text="Calculated automatically"
 							android:textSize="12sp" />
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view205"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
 						android:layout_marginTop="16dp"
-						android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 					<LinearLayout
 						android:id="@+id/linear206"
 						android:layout_width="match_parent"

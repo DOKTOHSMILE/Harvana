@@ -114,16 +114,17 @@
 					android:textSize="12.5sp"
 					android:focusable="false" />
 			</LinearLayout>
-			<ProgressBar
+			<com.google.android.material.progressindicator.LinearProgressIndicator
 				android:id="@+id/progressbar1"
 				android:layout_width="match_parent"
-				android:layout_height="6dp"
+				android:layout_height="wrap_content"
 				android:layout_marginTop="8dp"
 				android:progress="60"
 				android:indeterminate="false"
-				style="?android:progressBarStyleHorizontal"
-				android:progressTint="@color/colorAccent"
-				android:backgroundTint="@color/colorSurfaceAlt"
+				app:trackThickness="6dp"
+				app:trackCornerRadius="3dp"
+				app:indicatorColor="@color/colorAccent"
+				app:trackColor="@color/colorSurfaceAlt"
 				android:focusable="false" />
 		</LinearLayout>
 	</com.google.android.material.card.MaterialCardView>

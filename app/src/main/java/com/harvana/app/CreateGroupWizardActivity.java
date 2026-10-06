@@ -845,7 +845,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
     }
 
     private EditText edit(String hint, int inputType, String value) {
-        EditText e = new EditText(this);
+        EditText e = new com.google.android.material.textfield.TextInputEditText(this);
         e.setHint(hint);
         e.setInputType(inputType);
         e.setText(value);

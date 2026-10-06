@@ -184,12 +184,12 @@
 									android:paddingHorizontal="12dp" />
 							</com.google.android.material.card.MaterialCardView>
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view45"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="68dp" />
+							android:layout_marginStart="68dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/linear46"
 							android:layout_width="match_parent"
@@ -227,18 +227,18 @@
 									android:text="New members must be approved by an admin."
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<androidx.appcompat.widget.SwitchCompat
+							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switchApproval"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:textSize="12sp" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view48"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="68dp" />
+							android:layout_marginStart="68dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/linear49"
 							android:layout_width="match_parent"
@@ -276,7 +276,7 @@
 									android:text="Allow members to invite others to this group."
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<androidx.appcompat.widget.SwitchCompat
+							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switchInvite"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
@@ -347,7 +347,7 @@
 							app:cardElevation="0dp"
 							app:strokeWidth="1dp"
 							app:strokeColor="@color/colorCardStroke">
-							<EditText
+							<com.google.android.material.textfield.TextInputEditText
 								android:id="@+id/etDescription"
 								android:layout_width="match_parent"
 								android:layout_height="wrap_content"
@@ -431,7 +431,7 @@
 								app:cardElevation="0dp"
 								app:strokeWidth="1dp"
 								app:strokeColor="@color/colorCardStroke">
-								<EditText
+								<com.google.android.material.textfield.TextInputEditText
 									android:id="@+id/etContribution"
 									android:layout_width="match_parent"
 									android:layout_height="44dp"
@@ -442,12 +442,12 @@
 									android:paddingHorizontal="12dp" />
 							</com.google.android.material.card.MaterialCardView>
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view57"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="68dp" />
+							android:layout_marginStart="68dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/panel_rotating"
 							android:layout_width="match_parent"
@@ -501,12 +501,12 @@
 									android:scaleType="center"
 									app:tint="@color/colorTextTertiary" />
 							</LinearLayout>
-							<View
+							<com.google.android.material.divider.MaterialDivider
 								android:id="@+id/view59"
 								android:layout_width="match_parent"
 								android:layout_height="1dp"
-								android:background="@color/colorDivider"
-								android:layout_marginStart="68dp" />
+								android:layout_marginStart="68dp"
+	app:dividerColor="@color/colorDivider"/>
 							<LinearLayout
 								android:id="@+id/linear60"
 								android:layout_width="match_parent"
@@ -553,7 +553,7 @@
 									app:cardElevation="0dp"
 									app:strokeWidth="1dp"
 									app:strokeColor="@color/colorCardStroke">
-									<EditText
+									<com.google.android.material.textfield.TextInputEditText
 										android:id="@+id/etGracePeriod"
 										android:layout_width="match_parent"
 										android:layout_height="44dp"
@@ -564,12 +564,12 @@
 										android:paddingHorizontal="12dp" />
 								</com.google.android.material.card.MaterialCardView>
 							</LinearLayout>
-							<View
+							<com.google.android.material.divider.MaterialDivider
 								android:id="@+id/view62"
 								android:layout_width="match_parent"
 								android:layout_height="1dp"
-								android:background="@color/colorDivider"
-								android:layout_marginStart="68dp" />
+								android:layout_marginStart="68dp"
+	app:dividerColor="@color/colorDivider"/>
 							<LinearLayout
 								android:id="@+id/linear63"
 								android:layout_width="match_parent"
@@ -616,7 +616,7 @@
 									app:cardElevation="0dp"
 									app:strokeWidth="1dp"
 									app:strokeColor="@color/colorCardStroke">
-									<EditText
+									<com.google.android.material.textfield.TextInputEditText
 										android:id="@+id/etCommission"
 										android:layout_width="match_parent"
 										android:layout_height="44dp"
@@ -694,7 +694,7 @@
 								app:cardElevation="0dp"
 								app:strokeWidth="1dp"
 								app:strokeColor="@color/colorCardStroke">
-								<EditText
+								<com.google.android.material.textfield.TextInputEditText
 									android:id="@+id/etFixedGoal"
 									android:layout_width="match_parent"
 									android:layout_height="44dp"
@@ -706,12 +706,12 @@
 									android:paddingHorizontal="12dp" />
 							</com.google.android.material.card.MaterialCardView>
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view21"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="16dp" />
+							android:layout_marginStart="16dp"
+	app:dividerColor="@color/colorDivider"/>
 						<TextView
 							android:id="@+id/tv_fixed_progress"
 							android:layout_width="match_parent"
@@ -819,7 +819,7 @@
 								app:cardElevation="0dp"
 								app:strokeWidth="1dp"
 								app:strokeColor="@color/colorCardStroke">
-								<EditText
+								<com.google.android.material.textfield.TextInputEditText
 									android:id="@+id/etLoanInterestRate"
 									android:layout_width="match_parent"
 									android:layout_height="44dp"
@@ -831,12 +831,12 @@
 									android:paddingHorizontal="12dp" />
 							</com.google.android.material.card.MaterialCardView>
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view26"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="16dp" />
+							android:layout_marginStart="16dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/linear27"
 							android:layout_width="match_parent"
@@ -871,12 +871,12 @@
 									android:paddingHorizontal="12dp" />
 							</com.google.android.material.card.MaterialCardView>
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view28"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="16dp" />
+							android:layout_marginStart="16dp"
+	app:dividerColor="@color/colorDivider"/>
 						<TextView
 							android:id="@+id/tv_loan_active_count"
 							android:layout_width="match_parent"
@@ -1090,18 +1090,18 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<androidx.appcompat.widget.SwitchCompat
+							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switchMutePayments"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:textSize="12sp" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view32"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginStart="68dp" />
+							android:layout_marginStart="68dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/linear33"
 							android:layout_width="match_parent"
@@ -1141,7 +1141,7 @@
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>
-							<androidx.appcompat.widget.SwitchCompat
+							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switchMuteNotices"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"

@@ -154,8 +154,7 @@ public class GroupWalletBackupActivity extends AppCompatActivity {
     }
 
     private void addButton(String label, View.OnClickListener l) {
-        Button btn = new Button(this);
-        btn.setText(label); btn.setAllCaps(false); btn.setOnClickListener(l);
+        Button btn = com.harvana.app.ui.Btn.tonal(this, label, l);
         btn.setGravity(Gravity.CENTER);
         content.addView(btn);
     }

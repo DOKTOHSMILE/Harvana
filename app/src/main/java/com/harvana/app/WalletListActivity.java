@@ -179,7 +179,7 @@ public class WalletListActivity extends AppCompatActivity {
 	}
 	
 	private void showRenameDialog(WalletListManager.WalletEntry entry) {
-		final EditText input = new EditText(this);
+		final EditText input = new com.google.android.material.textfield.TextInputEditText(this);
 		input.setText(entry.label);
 		input.setSelection(input.getText().length());
 		new com.harvana.app.ui.SheetDialog.Builder(this)

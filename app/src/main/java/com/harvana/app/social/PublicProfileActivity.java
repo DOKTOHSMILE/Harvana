@@ -844,11 +844,11 @@ public class PublicProfileActivity extends AppCompatActivity {
         box.setOrientation(LinearLayout.VERTICAL);
         int pad = SocialUi.dp(this, 20);
         box.setPadding(pad, SocialUi.dp(this, 8), pad, 0);
-        final android.widget.EditText t = new android.widget.EditText(this);
+        final android.widget.EditText t = new com.google.android.material.textfield.TextInputEditText(this);
         t.setHint("Title");
         t.setText(d.getString("title"));
         t.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(120)});
-        final android.widget.EditText b = new android.widget.EditText(this);
+        final android.widget.EditText b = new com.google.android.material.textfield.TextInputEditText(this);
         b.setHint("Article text");
         b.setText(d.getString("description"));
         b.setMinLines(6);

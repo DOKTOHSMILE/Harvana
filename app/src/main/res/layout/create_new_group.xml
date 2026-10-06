@@ -141,7 +141,7 @@
 							android:text="Group Name"
 							android:textSize="13sp"
 							android:textStyle="bold" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/group_name_edittext1"
 							android:layout_width="match_parent"
 							android:layout_height="46dp"
@@ -169,7 +169,7 @@
 							android:text="Share the purpose, mantra, target members, and your group's belief system."
 							android:textSize="12sp"
 							android:lineSpacingExtra="2dp" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/description_edittext5"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
@@ -264,7 +264,7 @@
 									android:padding="6dp"
 									android:gravity="center_vertical"
 									android:orientation="horizontal">
-									<EditText
+									<com.google.android.material.textfield.TextInputEditText
 										android:id="@+id/rules_edittext2"
 										android:layout_width="match_parent"
 										android:layout_height="44dp"
@@ -274,7 +274,7 @@
 										android:hint="Type a rule, e.g. 'Pay by the 5th'"
 										android:layout_weight="1"
 										android:paddingHorizontal="12dp" />
-									<Button
+									<com.google.android.material.button.MaterialButton
 										android:id="@+id/button1"
 										android:layout_width="56dp"
 										android:layout_height="36dp"
@@ -577,7 +577,7 @@
 									android:text="Contribution (HARV)"
 									android:textSize="13sp"
 									android:textStyle="bold" />
-								<EditText
+								<com.google.android.material.textfield.TextInputEditText
 									android:id="@+id/contribution_amount_edittext3"
 									android:layout_width="match_parent"
 									android:layout_height="46dp"
@@ -604,7 +604,7 @@
 									android:text="Number of Slots"
 									android:textSize="13sp"
 									android:textStyle="bold" />
-								<EditText
+								<com.google.android.material.textfield.TextInputEditText
 									android:id="@+id/no_of_slots_edittext4"
 									android:layout_width="match_parent"
 									android:layout_height="46dp"
@@ -915,7 +915,7 @@
 								android:layout_marginBottom="6dp"
 								android:text="How long each round stays open for members to claim it"
 								android:textSize="11sp" />
-							<EditText
+							<com.google.android.material.textfield.TextInputEditText
 								android:id="@+id/claim_window_edittext"
 								android:layout_width="match_parent"
 								android:layout_height="46dp"
@@ -979,7 +979,7 @@
 										android:text="Max Bid Cap (%)"
 										android:textSize="12sp"
 										android:textStyle="bold" />
-									<EditText
+									<com.google.android.material.textfield.TextInputEditText
 										android:id="@+id/max_bid_cap_edittext"
 										android:layout_width="match_parent"
 										android:layout_height="46dp"
@@ -1006,7 +1006,7 @@
 										android:text="Commission (%)"
 										android:textSize="12sp"
 										android:textStyle="bold" />
-									<EditText
+									<com.google.android.material.textfield.TextInputEditText
 										android:id="@+id/commission_edittext"
 										android:layout_width="match_parent"
 										android:layout_height="46dp"
@@ -1028,7 +1028,7 @@
 								android:text="Bidding Window (minutes)"
 								android:textSize="12sp"
 								android:textStyle="bold" />
-							<EditText
+							<com.google.android.material.textfield.TextInputEditText
 								android:id="@+id/bidding_window_edittext"
 								android:layout_width="match_parent"
 								android:layout_height="46dp"
@@ -1073,12 +1073,12 @@
 							android:layout_marginTop="20dp"
 							android:orientation="vertical"
 							android:visibility="gone">
-							<View
+							<com.google.android.material.divider.MaterialDivider
 								android:id="@+id/view89"
 								android:layout_width="match_parent"
 								android:layout_height="1dp"
 								android:layout_marginBottom="16dp"
-								android:background="@color/colorDivider" />
+	app:dividerColor="@color/colorDivider"/>
 							<TextView
 								android:id="@+id/textview102"
 								android:layout_width="match_parent"
@@ -1106,7 +1106,7 @@
 										android:text="Grace Period (days)"
 										android:textSize="12sp"
 										android:textStyle="bold" />
-									<EditText
+									<com.google.android.material.textfield.TextInputEditText
 										android:id="@+id/grace_period_edittext"
 										android:layout_width="match_parent"
 										android:layout_height="46dp"
@@ -1133,7 +1133,7 @@
 										android:text="Min trust (0–26), early slots"
 										android:textSize="12sp"
 										android:textStyle="bold" />
-									<EditText
+									<com.google.android.material.textfield.TextInputEditText
 										android:id="@+id/min_trust_score_edittext"
 										android:layout_width="match_parent"
 										android:layout_height="46dp"
@@ -1228,7 +1228,7 @@
 							android:text="Contribution per Member (HARV)"
 							android:textSize="13sp"
 							android:textStyle="bold" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/contribution_amount_fixed_edittext"
 							android:layout_width="match_parent"
 							android:layout_height="46dp"
@@ -1248,7 +1248,7 @@
 							android:text="Number of Members"
 							android:textSize="13sp"
 							android:textStyle="bold" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/no_of_slots_fixed_edittext"
 							android:layout_width="match_parent"
 							android:layout_height="46dp"
@@ -1276,7 +1276,7 @@
 							android:layout_marginBottom="6dp"
 							android:text="What the group is saving toward together"
 							android:textSize="11sp" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/target_goal_edittext"
 							android:layout_width="match_parent"
 							android:layout_height="46dp"
@@ -1367,7 +1367,7 @@
 							android:text="Contribution per Member (HARV)"
 							android:textSize="13sp"
 							android:textStyle="bold" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/contribution_amount_accumulative_edittext"
 							android:layout_width="match_parent"
 							android:layout_height="46dp"
@@ -1387,7 +1387,7 @@
 							android:text="Number of Members"
 							android:textSize="13sp"
 							android:textStyle="bold" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/no_of_slots_accumulative_edittext"
 							android:layout_width="match_parent"
 							android:layout_height="46dp"
@@ -1419,7 +1419,7 @@
 									android:text="Interest per day (%)"
 									android:textSize="12sp"
 									android:textStyle="bold" />
-								<EditText
+								<com.google.android.material.textfield.TextInputEditText
 									android:id="@+id/loan_interest_rate_edittext"
 									android:layout_width="match_parent"
 									android:layout_height="46dp"
@@ -1668,7 +1668,7 @@
 									android:text="You review and accept each new member before they're in"
 									android:textSize="11sp" />
 							</LinearLayout>
-							<androidx.appcompat.widget.SwitchCompat
+							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switch_require_approval"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
@@ -1706,12 +1706,12 @@
 								android:textSize="11sp"
 								android:visibility="gone" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view105"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginVertical="16dp" />
+							android:layout_marginVertical="16dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/linear106"
 							android:layout_width="match_parent"
@@ -1747,7 +1747,7 @@
 									android:text="Not just you as the admin"
 									android:textSize="11sp" />
 							</LinearLayout>
-							<androidx.appcompat.widget.SwitchCompat
+							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switch_members_invite"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
@@ -1755,12 +1755,12 @@
 								app:thumbTint="@color/colorAccent"
 								app:trackTint="@color/colorAccentStroke" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view108"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginVertical="16dp" />
+							android:layout_marginVertical="16dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/linear109"
 							android:layout_width="match_parent"
@@ -1796,7 +1796,7 @@
 									android:text="Name, description, and rules"
 									android:textSize="11sp" />
 							</LinearLayout>
-							<androidx.appcompat.widget.SwitchCompat
+							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switch_members_edit"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
@@ -1804,12 +1804,12 @@
 								app:thumbTint="@color/colorAccent"
 								app:trackTint="@color/colorAccentStroke" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view111"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorDivider"
-							android:layout_marginVertical="16dp" />
+							android:layout_marginVertical="16dp"
+	app:dividerColor="@color/colorDivider"/>
 						<LinearLayout
 							android:id="@+id/linear112"
 							android:layout_width="match_parent"
@@ -1845,7 +1845,7 @@
 									android:text="Anyone with the link can request to join"
 									android:textSize="11sp" />
 							</LinearLayout>
-							<androidx.appcompat.widget.SwitchCompat
+							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switch_invite_link"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
@@ -1921,7 +1921,7 @@
 						android:text="None yet. Tap a saved chat here to remove it."
 						android:textColor="@color/colorTextPrimary"
 						android:textSize="13sp" />
-					<TextView
+					<com.google.android.material.button.MaterialButton
 						android:id="@+id/btn_add_chat_link"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
@@ -1930,7 +1930,8 @@
 						android:text="Add a chat"
 						android:textColor="@color/colorAccent"
 						android:textSize="14sp"
-						android:textStyle="bold" />
+						android:textStyle="bold"
+	android:textAllCaps="false"/>
 				</LinearLayout>
 				<LinearLayout
 					android:id="@+id/linear58"

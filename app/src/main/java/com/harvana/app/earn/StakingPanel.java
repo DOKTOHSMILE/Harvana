@@ -944,7 +944,7 @@ public final class StakingPanel {
         inputContainer.setPadding(dp(16), dp(12), dp(16), dp(12));
         inputContainer.setGravity(Gravity.CENTER_VERTICAL);
 
-        EditText inputEt = new EditText(host);
+        EditText inputEt = new com.google.android.material.textfield.TextInputEditText(host);
         inputEt.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         inputEt.setBackground(null);
         inputEt.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);

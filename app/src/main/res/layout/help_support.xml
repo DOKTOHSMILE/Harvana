@@ -99,12 +99,12 @@
 							android:textColor="@color/colorTextSecondary"
 							android:lineSpacingExtra="3dp" />
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view55"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
-						android:background="@color/colorDivider"
-						android:layout_marginStart="18dp" />
+						android:layout_marginStart="18dp"
+	app:dividerColor="@color/colorDivider"/>
 					<LinearLayout
 						android:id="@+id/linear56"
 						android:layout_width="match_parent"
@@ -129,12 +129,12 @@
 							android:textColor="@color/colorTextSecondary"
 							android:lineSpacingExtra="3dp" />
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view57"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
-						android:background="@color/colorDivider"
-						android:layout_marginStart="18dp" />
+						android:layout_marginStart="18dp"
+	app:dividerColor="@color/colorDivider"/>
 					<LinearLayout
 						android:id="@+id/linear58"
 						android:layout_width="match_parent"
@@ -159,12 +159,12 @@
 							android:textColor="@color/colorTextSecondary"
 							android:lineSpacingExtra="3dp" />
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view59"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
-						android:background="@color/colorDivider"
-						android:layout_marginStart="18dp" />
+						android:layout_marginStart="18dp"
+	app:dividerColor="@color/colorDivider"/>
 					<LinearLayout
 						android:id="@+id/linear60"
 						android:layout_width="match_parent"

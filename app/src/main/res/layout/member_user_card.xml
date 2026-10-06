@@ -129,11 +129,11 @@
 					app:tint="@color/colorTextTertiary"
 					android:focusable="false" />
 			</LinearLayout>
-			<View
+			<com.google.android.material.divider.MaterialDivider
 				android:id="@+id/view41"
 				android:layout_width="match_parent"
 				android:layout_height="1dp"
-				android:background="@color/colorDivider" />
+	app:dividerColor="@color/colorDivider"/>
 			<LinearLayout
 				android:id="@+id/linear42"
 				android:layout_width="match_parent"

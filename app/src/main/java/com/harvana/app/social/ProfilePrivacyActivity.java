@@ -46,14 +46,14 @@ public class ProfilePrivacyActivity extends AppCompatActivity {
 
         LinearLayout choose = SocialUi.card(this);
         choose.addView(SocialUi.text(this, "You choose", 16, true, UiColors.textPrimary()));
-        swAge = new SwitchCompat(this);
-        swCity = new SwitchCompat(this);
+        swAge = new com.google.android.material.switchmaterial.SwitchMaterial(this);
+        swCity = new com.google.android.material.switchmaterial.SwitchMaterial(this);
         choose.addView(toggleRow("Show my age", "Others see your age in years, never your date of birth.", swAge));
         choose.addView(toggleRow("Show my city", "Others see your city next to your state and country.", swCity));
         TextView bioLabel = SocialUi.text(this, "Short bio (public)", 14, true, UiColors.textPrimary());
         bioLabel.setPadding(0, SocialUi.dp(this, 18), 0, SocialUi.dp(this, 4));
         choose.addView(bioLabel);
-        bio = new EditText(this);
+        bio = new com.google.android.material.textfield.TextInputEditText(this);
         bio.setHint("Tell people a little about you");
         bio.setTextColor(UiColors.textPrimary());
         bio.setHintTextColor(UiColors.textTertiary());

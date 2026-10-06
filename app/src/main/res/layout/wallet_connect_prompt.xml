@@ -68,7 +68,7 @@
 			app:cardBackgroundColor="@color/colorAccent"
 			app:cardCornerRadius="12dp"
 			app:cardElevation="2dp">
-			<Button
+			<com.google.android.material.button.MaterialButton
 				android:id="@+id/btn_approve_connect"
 				android:layout_width="match_parent"
 				android:layout_height="50dp"
@@ -79,7 +79,7 @@
 				android:textColor="@color/colorQrBackground"
 				android:textAllCaps="false" />
 		</androidx.cardview.widget.CardView>
-		<Button
+		<com.google.android.material.button.MaterialButton
 			android:id="@+id/btn_deny_connect"
 			android:layout_width="match_parent"
 			android:layout_height="50dp"

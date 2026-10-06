@@ -153,12 +153,7 @@ public class VerifyEmailActivity extends AppCompatActivity {
     }
 
     private Button button(String label, boolean primary) {
-        Button bt = new Button(this);
-        bt.setText(label);
-        bt.setAllCaps(false);
-        bt.setTextColor(primary ? com.harvana.app.utils.UiColors.onAccent() : ContextCompat.getColor(this, R.color.colorAccent));
-        bt.setBackgroundColor(primary ? ContextCompat.getColor(this, R.color.colorAccent) : ContextCompat.getColor(this, R.color.colorSurfaceAlt));
-        return bt;
+        return primary ? com.harvana.app.ui.Btn.filled(this, label, null) : com.harvana.app.ui.Btn.tonal(this, label, null);
     }
 
     private LinearLayout.LayoutParams buttonParams() {

@@ -104,7 +104,7 @@
 						android:layout_height="56dp"
 						android:gravity="center_vertical"
 						android:orientation="horizontal">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_sell_amount"
 							android:layout_width="0dp"
 							android:layout_height="match_parent"
@@ -219,7 +219,7 @@
 							android:layout_height="56dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<EditText
+							<com.google.android.material.textfield.TextInputEditText
 								android:id="@+id/et_sell_price"
 								android:layout_width="0dp"
 								android:layout_height="match_parent"
@@ -271,7 +271,7 @@
 							android:layout_height="56dp"
 							android:gravity="center_vertical"
 							android:orientation="horizontal">
-							<EditText
+							<com.google.android.material.textfield.TextInputEditText
 								android:id="@+id/et_sell_margin"
 								android:layout_width="0dp"
 								android:layout_height="match_parent"
@@ -376,11 +376,11 @@
 								android:textSize="14sp"
 								android:textStyle="bold" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view3"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 						<LinearLayout
 							android:id="@+id/row_sell_offer_duration"
 							android:layout_width="match_parent"
@@ -405,11 +405,11 @@
 								android:textSize="14sp"
 								android:textStyle="bold" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view_sell_payment_window_divider"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 						<LinearLayout
 							android:id="@+id/row_sell_payment_window"
 							android:layout_width="match_parent"
@@ -455,7 +455,7 @@
 					app:cardElevation="0dp"
 					app:strokeColor="@color/colorP2pBorder"
 					app:strokeWidth="1dp">
-					<EditText
+					<com.google.android.material.textfield.TextInputEditText
 						android:id="@+id/et_sell_terms"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
@@ -529,7 +529,7 @@
 									android:text="Coming soon — identity verification isn't built yet"
 									android:textSize="11sp" />
 							</LinearLayout>
-							<Switch
+							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switch_sell_require_kyc"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
@@ -537,11 +537,11 @@
 								android:enabled="false"
 								android:clickable="false" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view10"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 						<LinearLayout
 							android:id="@+id/row_sell_min_account_age"
 							android:layout_width="match_parent"
@@ -566,11 +566,11 @@
 								android:textSize="14sp"
 								android:textStyle="bold" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view11"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 						<LinearLayout
 							android:id="@+id/row_sell_min_completion_rate"
 							android:layout_width="match_parent"
@@ -709,12 +709,12 @@
 								android:textSize="14sp"
 								android:textStyle="bold" />
 						</LinearLayout>
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view6"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorP2pBorder"
-							android:layout_marginVertical="12dp" />
+							android:layout_marginVertical="12dp"
+	app:dividerColor="@color/colorP2pBorder"/>
 						<LinearLayout
 							android:id="@+id/linear13"
 							android:layout_width="match_parent"

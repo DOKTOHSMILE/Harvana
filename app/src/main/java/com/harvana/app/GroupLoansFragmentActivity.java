@@ -924,7 +924,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		
 		final EditText amountInput;
 		if (partialMode) {
-			amountInput = new EditText(getContext());
+			amountInput = new com.google.android.material.textfield.TextInputEditText(getContext());
 			amountInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER
 			| android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 			// APPLIED FIX

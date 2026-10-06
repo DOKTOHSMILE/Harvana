@@ -93,12 +93,7 @@ public final class NodePayActions {
     }
 
     public static Button button(Activity a, String label, boolean primary, android.view.View.OnClickListener l) {
-        Button bt = new Button(a);
-        bt.setText(label);
-        bt.setAllCaps(false);
-        bt.setTextColor(CircleUi.color(a, primary ? R.color.colorTextOnAccent : R.color.colorAccentStrong));
-        bt.setBackgroundResource(primary ? R.drawable.bg_btn_primary : R.drawable.bg_btn_outline_accent);
-        bt.setOnClickListener(l);
+        Button bt = com.harvana.app.ui.Btn.of(a, label, primary, l);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, CircleUi.dp(a, 52));
         lp.topMargin = CircleUi.dp(a, 12);
         bt.setLayoutParams(lp);
@@ -127,11 +122,11 @@ public final class NodePayActions {
         box.setOrientation(LinearLayout.VERTICAL);
         int p = CircleUi.dp(c.activity, 16);
         box.setPadding(p, p, p, 0);
-        EditText daily = new EditText(c.activity);
+        EditText daily = new com.google.android.material.textfield.TextInputEditText(c.activity);
         daily.setHint("Amount to save each day");
         daily.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         box.addView(daily);
-        EditText lockDays = new EditText(c.activity);
+        EditText lockDays = new com.google.android.material.textfield.TextInputEditText(c.activity);
         lockDays.setHint("Lock for how many days? Leave empty for a flexible line");
         lockDays.setInputType(InputType.TYPE_CLASS_NUMBER);
         box.addView(lockDays);
@@ -156,7 +151,7 @@ public final class NodePayActions {
         boolean ongoing = c.line == null || "ONGOING".equals(str(c.line, "depositMode")) || str(c.line, "depositMode").isEmpty();
         long dailyRaw = c.line == null ? 0 : num(c.line, "dailyAmountRaw");
         if (ongoing && dailyRaw > 0) {
-            EditText days = new EditText(c.activity);
+            EditText days = new com.google.android.material.textfield.TextInputEditText(c.activity);
             days.setHint("How many days to save now?");
             days.setInputType(InputType.TYPE_CLASS_NUMBER);
             new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle("Save several days").setView(days).setNegativeButton("Cancel", null)
@@ -177,7 +172,7 @@ public final class NodePayActions {
     }
 
     private static void amount(Ctx c, String title, String hint, RawCb cb) {
-        EditText e = new EditText(c.activity);
+        EditText e = new com.google.android.material.textfield.TextInputEditText(c.activity);
         e.setHint(hint);
         e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle(title).setView(e).setNegativeButton("Cancel", null)
@@ -196,11 +191,11 @@ public final class NodePayActions {
         box.setOrientation(LinearLayout.VERTICAL);
         int p = CircleUi.dp(c.activity, 16);
         box.setPadding(p, p, p, 0);
-        EditText amount = new EditText(c.activity);
+        EditText amount = new com.google.android.material.textfield.TextInputEditText(c.activity);
         amount.setHint("Amount");
         amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         box.addView(amount);
-        EditText text = new EditText(c.activity);
+        EditText text = new com.google.android.material.textfield.TextInputEditText(c.activity);
         text.setHint(textHint);
         box.addView(text);
         new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle(title).setView(box).setNegativeButton("Cancel", null)

@@ -1428,7 +1428,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _askCardPassphrase(final String qrPayload) {
-		final EditText pass = new EditText(this);
+		final EditText pass = new com.google.android.material.textfield.TextInputEditText(this);
 		pass.setHint("Access Card passphrase");
 		pass.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
 		new com.harvana.app.ui.SheetDialog.Builder(this)
@@ -1551,7 +1551,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		// Loans on/off: turns the group's Loans tab on or off for everyone.
 		Object al = groupData.get("allowLoans");
 		boolean loansOn = !(al instanceof Boolean) || (Boolean) al;
-		androidx.appcompat.widget.SwitchCompat loanSw = new androidx.appcompat.widget.SwitchCompat(this);
+		androidx.appcompat.widget.SwitchCompat loanSw = new com.google.android.material.switchmaterial.SwitchMaterial(this);
 		loanSw.setText("Allow member loans");
 		loanSw.setTextColor(UiColors.textPrimary());
 		loanSw.setChecked(loansOn);
@@ -1646,9 +1646,9 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			? "This permanently removes the group and its records from the app. It cannot be undone."
 			: "Members are notified, joining stops, and the group leaves Discover. Everyone keeps their history and anything they are owed on the network. You can reopen it later."));
 		box.addView(msg);
-		final EditText reason = new EditText(this);
+		final EditText reason = new com.google.android.material.textfield.TextInputEditText(this);
 		if (!delete) { reason.setHint("Reason for members (optional)"); reason.setTextColor(UiColors.textPrimary()); box.addView(reason); }
-		final EditText confirm = new EditText(this);
+		final EditText confirm = new com.google.android.material.textfield.TextInputEditText(this);
 		confirm.setHint("Type " + phrase + " to confirm");
 		confirm.setTextColor(UiColors.textPrimary());
 		box.addView(confirm);

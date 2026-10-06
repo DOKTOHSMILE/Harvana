@@ -163,12 +163,11 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 		note.setText("A loan stays pending until enough guardians sign it. This does not move the money by itself.");
 		note.setTextSize(13);
 		card.addView(note);
-		EditText group = new EditText(this);
+		EditText group = new com.google.android.material.textfield.TextInputEditText(this);
 		group.setHint("Group id (ACCUM- or FIXED-)");
-		EditText loan = new EditText(this);
+		EditText loan = new com.google.android.material.textfield.TextInputEditText(this);
 		loan.setHint("Loan id (GENLOAN-)");
-		Button sign = new Button(this);
-		sign.setText("Sign this loan");
+		Button sign = com.harvana.app.ui.Btn.filled(this, "Sign this loan", null);
 		sign.setOnClickListener(v -> {
 			String gid = group.getText().toString().trim();
 			String lid = loan.getText().toString().trim();

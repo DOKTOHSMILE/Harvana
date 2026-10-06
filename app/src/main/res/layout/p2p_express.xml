@@ -242,7 +242,7 @@
 							android:text="HARV"
 							android:textSize="12sp"
 							android:textStyle="bold" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_express_amount"
 							android:layout_width="0dp"
 							android:layout_height="match_parent"
@@ -465,16 +465,17 @@
 								android:textSize="9sp" />
 						</LinearLayout>
 					</LinearLayout>
-					<TextView
+					<com.google.android.material.button.MaterialButton
 						android:id="@+id/btn_express_find_match"
 						android:layout_width="match_parent"
 						android:layout_height="52dp"
 						android:layout_marginTop="16dp"
-						android:background="@color/colorP2pAccent"
 						android:gravity="center_horizontal|center_vertical"
 						android:text="Find Express Match"
 						android:textSize="12sp"
-						android:textStyle="bold" />
+						android:textStyle="bold"
+	app:backgroundTint="@color/colorP2pAccent"
+	android:textAllCaps="false"/>
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 			<TextView

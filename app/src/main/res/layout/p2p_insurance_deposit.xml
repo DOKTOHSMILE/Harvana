@@ -106,13 +106,13 @@
 							android:paddingHorizontal="12dp"
 							android:minWidth="90dp" />
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view4"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
 						android:layout_marginTop="14dp"
 						android:layout_marginBottom="10dp"
-						android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 					<LinearLayout
 						android:id="@+id/linear5"
 						android:layout_width="match_parent"
@@ -273,13 +273,13 @@
 							android:paddingVertical="6dp"
 							android:paddingHorizontal="12dp" />
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view12"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
 						android:layout_marginTop="14dp"
 						android:layout_marginBottom="8dp"
-						android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 					<LinearLayout
 						android:id="@+id/linear13"
 						android:layout_width="match_parent"
@@ -445,7 +445,7 @@
 						android:background="@drawable/bg_p2p_input"
 						android:gravity="center_vertical"
 						android:orientation="horizontal">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_deposit_amount"
 							android:layout_width="0dp"
 							android:layout_height="match_parent"
@@ -503,18 +503,18 @@
 				android:textSize="13sp"
 				android:textColor="@color/colorError"
 				android:visibility="gone" />
-			<TextView
+			<com.google.android.material.button.MaterialButton
 				android:id="@+id/btn_submit_deposit"
 				android:layout_width="match_parent"
 				android:layout_height="56dp"
 				android:layout_marginTop="8dp"
 				android:layout_marginBottom="32dp"
-				android:background="@drawable/bg_p2p_button_primary"
 				android:gravity="center_horizontal|center_vertical"
 				android:text="Deposit HARV"
 				android:textSize="16sp"
 				android:textStyle="bold"
-				android:textColor="@color/colorTextOnAccent" />
+				android:textColor="@color/colorTextOnAccent"
+	android:textAllCaps="false"/>
 		</LinearLayout>
 	</androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

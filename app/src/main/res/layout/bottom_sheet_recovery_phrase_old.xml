@@ -106,7 +106,7 @@
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:focusable="false" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_word_1"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent"
@@ -148,7 +148,7 @@
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:focusable="false" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_word_2"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent"
@@ -196,7 +196,7 @@
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:focusable="false" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_word_3"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent"
@@ -238,7 +238,7 @@
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:focusable="false" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_word_4"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent"
@@ -286,7 +286,7 @@
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:focusable="false" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_word_5"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent"
@@ -328,7 +328,7 @@
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:focusable="false" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_word_6"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent"
@@ -376,7 +376,7 @@
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:focusable="false" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_word_7"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent"
@@ -418,7 +418,7 @@
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:focusable="false" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_word_8"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent"
@@ -466,7 +466,7 @@
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:focusable="false" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_word_9"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent"
@@ -508,7 +508,7 @@
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:focusable="false" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_word_10"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent"
@@ -556,7 +556,7 @@
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:focusable="false" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_word_11"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent"
@@ -598,7 +598,7 @@
 							android:textSize="13sp"
 							android:textStyle="bold"
 							android:focusable="false" />
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_word_12"
 							android:layout_width="match_parent"
 							android:layout_height="match_parent"
@@ -623,7 +623,7 @@
 			android:layout_marginBottom="20dp"
 			android:gravity="center_vertical"
 			android:orientation="horizontal">
-			<CheckBox
+			<com.google.android.material.checkbox.MaterialCheckBox
 				android:id="@+id/cb_agree"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"

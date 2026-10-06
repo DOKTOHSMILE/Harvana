@@ -48,7 +48,7 @@
             android:orientation="vertical"/>
 
         <!-- View More Button Footer -->
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnViewMoreUnbonding"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -59,7 +59,8 @@
             android:textColor="#F7931A"
             android:textSize="12sp"
             android:textStyle="bold"
-            android:background="?attr/selectableItemBackground"/>
+	style="@style/Widget.MaterialComponents.Button.TextButton"
+	android:textAllCaps="false"/>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -219,12 +219,12 @@
 					android:textStyle="bold"
 					android:focusable="false" />
 			</LinearLayout>
-			<View
+			<com.google.android.material.divider.MaterialDivider
 				android:id="@+id/view277"
 				android:layout_width="match_parent"
 				android:layout_height="1dp"
 				android:layout_marginTop="13dp"
-				android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 			<TextView
 				android:id="@+id/tv_my_trade_open"
 				android:layout_width="match_parent"

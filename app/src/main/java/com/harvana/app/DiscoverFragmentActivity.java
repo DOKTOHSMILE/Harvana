@@ -318,7 +318,7 @@ public class DiscoverFragmentActivity extends Fragment {
 		layout.addView(title);
 		
 		// Input EditText
-		final android.widget.EditText input = new android.widget.EditText(getActivity());
+		final android.widget.EditText input = new com.google.android.material.textfield.TextInputEditText(getActivity());
 		input.setHint("Group name…");
 		input.setText(searchQuery);
 		input.setSingleLine(true);
@@ -331,8 +331,7 @@ public class DiscoverFragmentActivity extends Fragment {
 		buttonLayout.setPadding(0, padding, 0, 0);
 		
 		// Clear Button (Neutral)
-		android.widget.Button btnClear = new android.widget.Button(getActivity(), null, android.R.attr.buttonStyleSmall);
-		btnClear.setText("Clear");
+		android.widget.Button btnClear = com.harvana.app.ui.Btn.text(getActivity(), "Clear", null);
 		btnClear.setOnClickListener(v -> {
 			searchQuery = "";
 			if (tv_search != null) tv_search.setText("Search group");
@@ -341,8 +340,7 @@ public class DiscoverFragmentActivity extends Fragment {
 		});
 		
 		// Search Button (Positive)
-		android.widget.Button btnSearch = new android.widget.Button(getActivity());
-		btnSearch.setText("Search");
+		android.widget.Button btnSearch = com.harvana.app.ui.Btn.filled(getActivity(), "Search", null);
 		btnSearch.setOnClickListener(v -> {
 			searchQuery = input.getText().toString().trim().toLowerCase(java.util.Locale.US);
 			if (tv_search != null) {

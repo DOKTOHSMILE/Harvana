@@ -206,7 +206,7 @@
 						android:textStyle="bold"
 						android:textColor="@color/colorTextOnAccent"
 						android:layout_weight="1" />
-					<TextView
+					<com.google.android.material.button.MaterialButton
 						android:id="@+id/btn_apply_loan"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
@@ -216,7 +216,8 @@
 						android:textSize="12.5sp"
 						android:backgroundTint="@color/colorSurface"
 						android:paddingHorizontal="16dp"
-						android:paddingVertical="8dp" />
+						android:paddingVertical="8dp"
+	android:textAllCaps="false"/>
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 			<TextView

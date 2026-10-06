@@ -211,17 +211,16 @@ public class DebugActivity extends Activity {
 
     // Helper method to build nice flat-style buttons programmatically
     private Button createStyledButton(String text, int bgColor, int textColor, float density) {
-        Button button = new Button(this);
+        com.google.android.material.button.MaterialButton button = new com.google.android.material.button.MaterialButton(this);
         button.setText(text);
         button.setTextColor(textColor);
         button.setTextSize(13f);
         button.setTypeface(null, android.graphics.Typeface.BOLD);
         button.setGravity(Gravity.CENTER);
         
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(bgColor);
-        bg.setCornerRadius(8 * density);
-        button.setBackground(bg);
+        button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(bgColor));
+        button.setCornerRadius((int) (10 * density));
+        button.setAllCaps(false);
         
         int padVertical = (int) (12 * density);
         button.setPadding(0, padVertical, 0, padVertical);

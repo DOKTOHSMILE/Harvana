@@ -62,9 +62,9 @@ public class NoticesFragmentLogic {
     }
 
     private void showPostDialog() {
-        EditText title = new EditText(activity);
+        EditText title = new com.google.android.material.textfield.TextInputEditText(activity);
         title.setHint("Title");
-        EditText body = new EditText(activity);
+        EditText body = new com.google.android.material.textfield.TextInputEditText(activity);
         body.setHint("Message");
         LinearLayout box = new LinearLayout(activity);
         box.setOrientation(LinearLayout.VERTICAL);

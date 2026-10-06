@@ -178,12 +178,12 @@
 								android:focusable="false" />
 						</LinearLayout>
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view62"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
-						android:background="@color/colorDivider"
-						android:layout_marginStart="48dp" />
+						android:layout_marginStart="48dp"
+	app:dividerColor="@color/colorDivider"/>
 					<LinearLayout
 						android:id="@+id/linear63"
 						android:layout_width="match_parent"
@@ -294,12 +294,12 @@
 								android:focusable="false" />
 						</LinearLayout>
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view68"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
-						android:background="@color/colorDivider"
-						android:layout_marginStart="48dp" />
+						android:layout_marginStart="48dp"
+	app:dividerColor="@color/colorDivider"/>
 					<LinearLayout
 						android:id="@+id/linear69"
 						android:layout_width="match_parent"
@@ -340,12 +340,12 @@
 								android:focusable="false" />
 						</LinearLayout>
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view71"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
-						android:background="@color/colorDivider"
-						android:layout_marginStart="48dp" />
+						android:layout_marginStart="48dp"
+	app:dividerColor="@color/colorDivider"/>
 					<LinearLayout
 						android:id="@+id/linear72"
 						android:layout_width="match_parent"
@@ -457,12 +457,12 @@
 								android:textIsSelectable="true" />
 						</LinearLayout>
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view77"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
-						android:background="@color/colorDivider"
-						android:layout_marginStart="48dp" />
+						android:layout_marginStart="48dp"
+	app:dividerColor="@color/colorDivider"/>
 					<LinearLayout
 						android:id="@+id/linear78"
 						android:layout_width="match_parent"
@@ -576,12 +576,12 @@
 								android:textIsSelectable="true" />
 						</LinearLayout>
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view83"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
-						android:background="@color/colorDivider"
-						android:layout_marginStart="48dp" />
+						android:layout_marginStart="48dp"
+	app:dividerColor="@color/colorDivider"/>
 					<LinearLayout
 						android:id="@+id/linear84"
 						android:layout_width="match_parent"

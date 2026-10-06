@@ -88,15 +88,17 @@
 							android:textSize="16sp"
 							android:textStyle="bold" />
 					</LinearLayout>
-					<ProgressBar
+					<com.google.android.material.progressindicator.LinearProgressIndicator
 						android:id="@+id/pb_sell_trade"
 						android:layout_width="match_parent"
-						android:layout_height="5dp"
+						android:layout_height="wrap_content"
 						android:layout_marginTop="12dp"
 						android:progress="50"
 						android:indeterminate="false"
-						style="?android:progressBarStyleHorizontal"
-						android:progressTint="@color/colorP2pAccent" />
+						app:trackThickness="5dp"
+						app:trackCornerRadius="3dp"
+						app:indicatorColor="@color/colorAccent"
+						app:trackColor="@color/colorSurfaceAlt" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 			<com.google.android.material.card.MaterialCardView
@@ -139,12 +141,12 @@
 						android:gravity="center_horizontal|center_vertical"
 						android:text="HARV being sold"
 						android:textSize="12sp" />
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view137"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
 						android:layout_marginTop="18dp"
-						android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 					<LinearLayout
 						android:id="@+id/linear138"
 						android:layout_width="match_parent"
@@ -429,11 +431,11 @@
 						android:layout_marginTop="16dp"
 						android:orientation="vertical"
 						android:visibility="gone">
-						<View
+						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view148"
 							android:layout_width="match_parent"
 							android:layout_height="1dp"
-							android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 						<TextView
 							android:id="@+id/tv_sell_payment_received_amount"
 							android:layout_width="match_parent"
@@ -533,7 +535,7 @@
 						android:layout_marginTop="6dp"
 						android:text="This action becomes available after the buyer marks the order as paid."
 						android:textSize="12sp" />
-					<CheckBox
+					<com.google.android.material.checkbox.MaterialCheckBox
 						android:id="@+id/cb_sell_payment_confirm"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"

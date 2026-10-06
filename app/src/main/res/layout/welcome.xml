@@ -88,7 +88,8 @@
                         android:textSize="13sp" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/colorStrokeBase" android:layout_marginTop="12dp" android:layout_marginBottom="12dp"/>
+                <com.google.android.material.divider.MaterialDivider android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginTop="12dp" android:layout_marginBottom="12dp"
+	app:dividerColor="@color/colorStrokeBase"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -109,7 +110,8 @@
                         android:textSize="13sp" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/colorStrokeBase" android:layout_marginTop="12dp" android:layout_marginBottom="12dp"/>
+                <com.google.android.material.divider.MaterialDivider android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginTop="12dp" android:layout_marginBottom="12dp"
+	app:dividerColor="@color/colorStrokeBase"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -182,13 +184,16 @@
                 android:text="Loading Please Wait...."
                 android:textColor="@color/colorTextMuted"
                 android:textSize="12sp" />
-            <ProgressBar
+            <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/progressbar1"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="4dp"
                 android:indeterminate="true"
-                android:tint="@color/colorHarvOrange" />
+                app:indicatorSize="36dp"
+                app:trackThickness="3dp"
+                app:indicatorColor="@color/colorAccent" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

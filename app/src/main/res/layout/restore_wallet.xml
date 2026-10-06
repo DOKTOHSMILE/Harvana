@@ -63,7 +63,7 @@
 						android:text="Scan the QR code on your card, then enter its password."
 						android:textSize="13sp"
 						android:textColor="@color/colorTextTertiary" />
-					<Button
+					<com.google.android.material.button.MaterialButton
 						android:id="@+id/btn_scan_card"
 						android:layout_width="match_parent"
 						android:layout_height="52dp"
@@ -72,7 +72,7 @@
 						android:textSize="12sp"
 						android:textColor="@color/colorTextOnAccent"
 						android:backgroundTint="@color/colorAccent" />
-					<Button
+					<com.google.android.material.button.MaterialButton
 						android:id="@+id/btn_enter_code_manually"
 						android:layout_width="match_parent"
 						android:layout_height="48dp"
@@ -130,7 +130,7 @@
 							android:inputType="textMultiLine|textNoSuggestions"
 							android:minLines="2" />
 					</com.google.android.material.textfield.TextInputLayout>
-					<Button
+					<com.google.android.material.button.MaterialButton
 						android:id="@+id/btn_restore_from_phrase"
 						android:layout_width="match_parent"
 						android:layout_height="52dp"

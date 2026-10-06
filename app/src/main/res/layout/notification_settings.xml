@@ -90,7 +90,7 @@
 							android:textSize="12.5sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
-					<Switch
+					<com.google.android.material.switchmaterial.SwitchMaterial
 						android:id="@+id/switchTransactionAlerts"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
@@ -139,7 +139,7 @@
 							android:textSize="12.5sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
-					<Switch
+					<com.google.android.material.switchmaterial.SwitchMaterial
 						android:id="@+id/switchPaymentReminders"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
@@ -188,7 +188,7 @@
 							android:textSize="12.5sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
-					<Switch
+					<com.google.android.material.switchmaterial.SwitchMaterial
 						android:id="@+id/switchLoanReminders"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
@@ -237,7 +237,7 @@
 							android:textSize="12.5sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
-					<Switch
+					<com.google.android.material.switchmaterial.SwitchMaterial
 						android:id="@+id/switchGroupNotices"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
@@ -286,19 +286,19 @@
 							android:textColor="@color/colorTextPrimary"
 							android:layout_weight="1"
 							android:textSize="14.5sp" />
-						<Switch
+						<com.google.android.material.switchmaterial.SwitchMaterial
 							android:id="@+id/switchSound"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:textSize="12sp"
 							android:layout_marginStart="12dp" />
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view73"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
-						android:background="@color/colorDivider"
-						android:layout_marginStart="18dp" />
+						android:layout_marginStart="18dp"
+	app:dividerColor="@color/colorDivider"/>
 					<LinearLayout
 						android:id="@+id/linear74"
 						android:layout_width="match_parent"
@@ -314,7 +314,7 @@
 							android:textColor="@color/colorTextPrimary"
 							android:layout_weight="1"
 							android:textSize="14.5sp" />
-						<Switch
+						<com.google.android.material.switchmaterial.SwitchMaterial
 							android:id="@+id/switchVibrate"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"

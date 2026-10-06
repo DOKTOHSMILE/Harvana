@@ -103,7 +103,7 @@ public final class GroupWelcomeSheet {
         bar.setMax(pages);
         root.addView(bar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (6 * d)));
 
-        final CheckBox agree = new CheckBox(a);
+        final CheckBox agree = new com.google.android.material.checkbox.MaterialCheckBox(a);
         final MaterialButton next = new MaterialButton(a);
         final MaterialButton back = new MaterialButton(a, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
         final androidx.viewpager2.widget.ViewPager2 pager = new androidx.viewpager2.widget.ViewPager2(a);

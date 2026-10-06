@@ -55,12 +55,12 @@
 			app:tint="@color/colorTextTertiary"
 			android:focusable="false" />
 	</LinearLayout>
-	<View
+	<com.google.android.material.divider.MaterialDivider
 		android:id="@+id/view7"
 		android:layout_width="match_parent"
 		android:layout_height="1dp"
-		android:background="@color/colorDivider"
-		android:layout_marginStart="36dp" />
+		android:layout_marginStart="36dp"
+	app:dividerColor="@color/colorDivider"/>
 	<LinearLayout
 		android:id="@+id/btn_export_csv"
 		android:layout_width="match_parent"
@@ -100,12 +100,12 @@
 			app:tint="@color/colorTextTertiary"
 			android:focusable="false" />
 	</LinearLayout>
-	<View
+	<com.google.android.material.divider.MaterialDivider
 		android:id="@+id/view8"
 		android:layout_width="match_parent"
 		android:layout_height="1dp"
-		android:background="@color/colorDivider"
-		android:layout_marginStart="36dp" />
+		android:layout_marginStart="36dp"
+	app:dividerColor="@color/colorDivider"/>
 	<LinearLayout
 		android:id="@+id/btn_export_docx"
 		android:layout_width="match_parent"
@@ -145,12 +145,12 @@
 			app:tint="@color/colorTextTertiary"
 			android:focusable="false" />
 	</LinearLayout>
-	<View
+	<com.google.android.material.divider.MaterialDivider
 		android:id="@+id/view9"
 		android:layout_width="match_parent"
 		android:layout_height="1dp"
-		android:background="@color/colorDivider"
-		android:layout_marginStart="36dp" />
+		android:layout_marginStart="36dp"
+	app:dividerColor="@color/colorDivider"/>
 	<LinearLayout
 		android:id="@+id/btn_export_pdf"
 		android:layout_width="match_parent"

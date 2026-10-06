@@ -57,7 +57,7 @@
 					app:cardElevation="0dp"
 					app:strokeColor="@color/colorCardStroke"
 					app:strokeWidth="1dp">
-					<EditText
+					<com.google.android.material.textfield.TextInputEditText
 						android:id="@+id/etGuardianKey"
 						android:layout_width="match_parent"
 						android:layout_height="52dp"

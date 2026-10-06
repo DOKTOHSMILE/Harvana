@@ -19,7 +19,7 @@ import android.widget.*;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Switch;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import android.widget.TextView;
 import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatActivity;
@@ -118,7 +118,7 @@ public class CreateP2pSellOfferActivity extends AppCompatActivity {
 	private View view11;
 	private LinearLayout row_sell_min_completion_rate;
 	private LinearLayout linear9;
-	private Switch switch_sell_require_kyc;
+	private SwitchMaterial switch_sell_require_kyc;
 	private TextView textview2;
 	private TextView textview3;
 	private TextView textview4;

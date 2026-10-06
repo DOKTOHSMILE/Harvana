@@ -220,7 +220,7 @@
 						android:orientation="horizontal"
 						android:paddingStart="14dp"
 						android:paddingEnd="14dp">
-						<EditText
+						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_search_groups"
 							android:layout_width="0dp"
 							android:layout_height="match_parent"
@@ -233,7 +233,7 @@
 							android:layout_weight="1" />
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>
-				<TextView
+				<com.google.android.material.button.MaterialButton
 					android:id="@+id/btn_filter_groups"
 					android:layout_width="wrap_content"
 					android:layout_height="42dp"
@@ -243,7 +243,8 @@
 					android:layout_marginStart="8dp"
 					android:paddingStart="16dp"
 					android:paddingEnd="16dp"
-					android:backgroundTint="@color/colorSurfaceRaised" />
+					android:backgroundTint="@color/colorSurfaceRaised"
+	android:textAllCaps="false"/>
 			</LinearLayout>
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/cardview10"

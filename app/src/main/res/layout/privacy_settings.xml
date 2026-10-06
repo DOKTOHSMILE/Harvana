@@ -87,7 +87,7 @@
 							android:textSize="12.5sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
-					<Switch
+					<com.google.android.material.switchmaterial.SwitchMaterial
 						android:id="@+id/switchShowTrustScore"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
@@ -134,7 +134,7 @@
 							android:textSize="12.5sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
-					<Switch
+					<com.google.android.material.switchmaterial.SwitchMaterial
 						android:id="@+id/switchShowGroups"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
@@ -181,7 +181,7 @@
 							android:textSize="12.5sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
-					<Switch
+					<com.google.android.material.switchmaterial.SwitchMaterial
 						android:id="@+id/switchShowActivity"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
@@ -228,7 +228,7 @@
 							android:textSize="12.5sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
-					<Switch
+					<com.google.android.material.switchmaterial.SwitchMaterial
 						android:id="@+id/switchAllowInvites"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"

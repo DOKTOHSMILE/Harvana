@@ -48,7 +48,7 @@ public final class SocialUi {
     }
 
     public static EditText edit(Context c, String hint) {
-        EditText e = new EditText(c);
+        EditText e = new com.google.android.material.textfield.TextInputEditText(c);
         e.setHint(hint); e.setSingleLine(true);
         e.setTextColor(UiColors.textPrimary());
         e.setHintTextColor(UiColors.textTertiary());

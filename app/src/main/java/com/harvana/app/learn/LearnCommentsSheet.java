@@ -42,7 +42,7 @@ public final class LearnCommentsSheet {
 
         LinearLayout inputRow = new LinearLayout(host);
         inputRow.setGravity(Gravity.CENTER_VERTICAL);
-        EditText input = new EditText(host);
+        EditText input = new com.google.android.material.textfield.TextInputEditText(host);
         input.setHint("Add a comment");
         input.setHintTextColor(ContextCompat.getColor(host, R.color.colorTextMuted));
         input.setTextColor(ContextCompat.getColor(host, R.color.colorTextPrimary));

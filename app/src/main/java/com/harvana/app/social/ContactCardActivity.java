@@ -68,7 +68,7 @@ public class ContactCardActivity extends AppCompatActivity {
         linkRows = new LinearLayout(this);
         linkRows.setOrientation(LinearLayout.VERTICAL);
         c.addView(linkRows);
-        discoverable = new android.widget.CheckBox(this);
+        discoverable = new com.google.android.material.checkbox.MaterialCheckBox(this);
         discoverable.setText("Let people who have my number or email in their contacts find me on Harvana");
         discoverable.setTextColor(UiColors.textPrimary());
         discoverable.setTextSize(13);

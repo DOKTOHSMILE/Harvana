@@ -18,7 +18,7 @@ import android.view.animation.*;
 import android.widget.*;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Switch;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import android.widget.TextView;
 import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatActivity;
@@ -67,7 +67,7 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 	private TextView btn_pin_action;
 	private LinearLayout linear47;
 	private LinearLayout linear48;
-	private Switch switch_biometric;
+	private SwitchMaterial switch_biometric;
 	private TextView textview57;
 	private TextView tv_biometric_status;
 	private Button btn_debug_guardian_console;

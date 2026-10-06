@@ -159,7 +159,7 @@ public class GroupsFragmentActivity extends Fragment {
 	}
 	
 	private void _promptCircleId() {
-		final EditText input = new EditText(getContext());
+		final EditText input = new com.google.android.material.textfield.TextInputEditText(getContext());
 		input.setHint("CIRC-…");
 		input.setSingleLine(true);
 		new com.harvana.app.ui.SheetDialog.Builder(getContext())

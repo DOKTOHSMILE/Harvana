@@ -468,7 +468,7 @@ public final class P2pOfferWizard {
 		}
 		for (PaymentMethod pm : all) {
 			LinearLayout row = ThemedDialogs.sheetRow(a);
-			CheckBox cb = new CheckBox(a);
+			CheckBox cb = new com.google.android.material.checkbox.MaterialCheckBox(a);
 			cb.setText((pm.label != null && !pm.label.isEmpty() ? pm.label : pm.primaryField)
 				+ "\n" + pm.displaySummary());
 			cb.setTextColor(ThemedDialogs.onSurface(a));
@@ -560,14 +560,14 @@ public final class P2pOfferWizard {
 		LinearLayout root = ThemedDialogs.sheetRoot(a);
 		root.addView(ThemedDialogs.sheetTitle(a, "Trade limit"));
 		root.addView(ThemedDialogs.sheetLabel(a, "The smallest and largest amount a single buyer can take from this listing — a real cap, not just descriptive copy, so no one trade can lock up your whole offer while unpaid."));
-		EditText minInput = new EditText(a);
+		EditText minInput = new com.google.android.material.textfield.TextInputEditText(a);
 		minInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		minInput.setTextColor(ThemedDialogs.onSurface(a));
 		minInput.setHintTextColor(ThemedDialogs.onSurfaceVariant(a));
 		minInput.setHint(("Min " + com.harvana.app.CoinInfo.ticker()));
 		if (currentMin > 0) minInput.setText(BalanceFormatter.smartDecimal(currentMin));
 		root.addView(minInput);
-		EditText maxInput = new EditText(a);
+		EditText maxInput = new com.google.android.material.textfield.TextInputEditText(a);
 		maxInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		maxInput.setTextColor(ThemedDialogs.onSurface(a));
 		maxInput.setHintTextColor(ThemedDialogs.onSurfaceVariant(a));

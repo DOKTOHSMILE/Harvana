@@ -97,11 +97,7 @@ public class EmailAuthFragment extends Fragment {
 			root.addView(tilConfirm);
 		}
 		
-		btnSubmit = new Button(requireContext());
-		btnSubmit.setText(createMode ? "Create account" : "Sign in");
-		btnSubmit.setAllCaps(false);
-		btnSubmit.setTextColor(com.harvana.app.utils.UiColors.onAccent());
-		btnSubmit.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
+		btnSubmit = com.harvana.app.ui.Btn.filled(requireContext(), createMode ? "Create account" : "Sign in", null);
 		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
 		lp.topMargin = dp(16);
 		root.addView(btnSubmit, lp);

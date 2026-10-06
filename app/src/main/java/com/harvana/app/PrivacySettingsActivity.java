@@ -17,7 +17,7 @@ import android.view.View.*;
 import android.view.animation.*;
 import android.widget.*;
 import android.widget.LinearLayout;
-import android.widget.Switch;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import android.widget.TextView;
 import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatActivity;
@@ -55,22 +55,22 @@ public class PrivacySettingsActivity extends AppCompatActivity {
 	private TextView textview102;
 	private LinearLayout linear84;
 	private LinearLayout linear85;
-	private Switch switchShowTrustScore;
+	private SwitchMaterial switchShowTrustScore;
 	private TextView textview94;
 	private TextView textview95;
 	private LinearLayout linear86;
 	private LinearLayout linear87;
-	private Switch switchShowGroups;
+	private SwitchMaterial switchShowGroups;
 	private TextView textview96;
 	private TextView textview97;
 	private LinearLayout linear88;
 	private LinearLayout linear89;
-	private Switch switchShowActivity;
+	private SwitchMaterial switchShowActivity;
 	private TextView textview98;
 	private TextView textview99;
 	private LinearLayout linear90;
 	private LinearLayout linear91;
-	private Switch switchAllowInvites;
+	private SwitchMaterial switchAllowInvites;
 	private TextView textview100;
 	private TextView textview101;
 	
@@ -154,7 +154,7 @@ public class PrivacySettingsActivity extends AppCompatActivity {
 	}
 	public static final String PREFS_NAME = "privacy_prefs";
 	private SharedPreferences prefs;
-	private void _bindToggle(Switch sw, String prefKey) {
+	private void _bindToggle(SwitchMaterial sw, String prefKey) {
 		sw.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) ->
 		prefs.edit().putBoolean(prefKey, isChecked).apply());
 	}

@@ -119,13 +119,13 @@
 								android:textSize="11sp" />
 						</LinearLayout>
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view53"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
 						android:layout_marginTop="16dp"
 						android:layout_marginBottom="15dp"
-						android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 					<LinearLayout
 						android:id="@+id/seller_stats"
 						android:layout_width="match_parent"
@@ -342,7 +342,7 @@
 					android:orientation="horizontal"
 					android:paddingStart="18dp"
 					android:paddingEnd="18dp">
-					<EditText
+					<com.google.android.material.textfield.TextInputEditText
 						android:id="@+id/amount_input"
 						android:layout_width="0dp"
 						android:layout_height="match_parent"
@@ -489,13 +489,13 @@
 							android:text="₦0.00 / HARV"
 							android:textSize="13sp" />
 					</LinearLayout>
-					<View
+					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view59"
 						android:layout_width="match_parent"
 						android:layout_height="1dp"
 						android:layout_marginTop="15dp"
 						android:layout_marginBottom="15dp"
-						android:background="@color/colorP2pBorder" />
+	app:dividerColor="@color/colorP2pBorder"/>
 					<LinearLayout
 						android:id="@+id/calculation_subtotal_row"
 						android:layout_width="match_parent"

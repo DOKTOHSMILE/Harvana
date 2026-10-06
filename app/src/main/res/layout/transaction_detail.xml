@@ -90,10 +90,10 @@
 						android:textColor="@color/colorTextTertiary"
 						android:textSize="13sp" />
 				</LinearLayout>
-				<View
+				<com.google.android.material.divider.MaterialDivider
 					android:layout_width="match_parent"
 					android:layout_height="1dp"
-					android:background="@color/colorDivider" />
+	app:dividerColor="@color/colorDivider"/>
 				<com.google.android.material.card.MaterialCardView
 					android:id="@+id/cardview8"
 					android:layout_width="match_parent"

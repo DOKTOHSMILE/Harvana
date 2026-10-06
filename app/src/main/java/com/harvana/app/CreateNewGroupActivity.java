@@ -981,7 +981,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		for (CardView c : cards) {
 			if (c == null || c.getChildCount() == 0 || !(c.getChildAt(0) instanceof LinearLayout)) continue;
 			LinearLayout host = (LinearLayout) c.getChildAt(0);
-			androidx.appcompat.widget.SwitchCompat sw = new androidx.appcompat.widget.SwitchCompat(this);
+			androidx.appcompat.widget.SwitchCompat sw = new com.google.android.material.switchmaterial.SwitchMaterial(this);
 			sw.setText("Allow member loans (adds a Loans tab)");
 			sw.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
 			sw.setPadding(0, (int) (14 * getResources().getDisplayMetrics().density), 0, 0);
@@ -995,7 +995,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 		if (card_fixed_details != null && card_fixed_details.getChildCount() > 0 && card_fixed_details.getChildAt(0) instanceof LinearLayout) {
 			LinearLayout host = (LinearLayout) card_fixed_details.getChildAt(0);
-			beneficiaryInput = new EditText(this);
+			beneficiaryInput = new com.google.android.material.textfield.TextInputEditText(this);
 			beneficiaryInput.setHint("Who receives the money? Wallet address (empty = your wallet)");
 			beneficiaryInput.setSingleLine(true);
 			beneficiaryInput.setTextSize(13);

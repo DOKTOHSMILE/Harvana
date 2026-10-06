@@ -41,13 +41,13 @@
 				android:textSize="13.5sp"
 				android:lineSpacingExtra="3dp"
 				android:focusable="false" />
-			<View
+			<com.google.android.material.divider.MaterialDivider
 				android:id="@+id/view65"
 				android:layout_width="match_parent"
 				android:layout_height="1dp"
 				android:layout_marginTop="12dp"
 				android:layout_marginBottom="10dp"
-				android:background="@color/colorDivider" />
+	app:dividerColor="@color/colorDivider"/>
 			<LinearLayout
 				android:id="@+id/linear66"
 				android:layout_width="match_parent"

@@ -98,7 +98,7 @@ public class FriendsActivity extends AppCompatActivity {
         root.addView(add, addLp);
 
         // Search
-        searchBox = new EditText(this);
+        searchBox = new com.google.android.material.textfield.TextInputEditText(this);
         searchBox.setSingleLine(true);
         searchBox.setTextSize(15);
         searchBox.setTextColor(UiColors.textPrimary());

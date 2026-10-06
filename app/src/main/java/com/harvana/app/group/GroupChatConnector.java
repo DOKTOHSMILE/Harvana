@@ -61,7 +61,7 @@ public final class GroupChatConnector {
 
     /** Admin: paste or change the chat link. */
     public static void edit(Activity a, String groupId) {
-        EditText in = new EditText(a);
+        EditText in = new com.google.android.material.textfield.TextInputEditText(a);
         in.setHint("Paste your group chat link");
         in.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
         new com.harvana.app.ui.SheetDialog.Builder(a)

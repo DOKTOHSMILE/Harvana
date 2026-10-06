@@ -107,7 +107,7 @@
 							app:cardCornerRadius="12dp"
 							app:cardElevation="0dp"
 							app:strokeWidth="0dp">
-							<TextView
+							<com.google.android.material.button.MaterialButton
 								android:id="@+id/btn_pin_action"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
@@ -116,7 +116,8 @@
 								android:textColor="@color/colorTextOnAccent"
 								android:textSize="13.5sp"
 								android:paddingHorizontal="18dp"
-								android:paddingVertical="10dp" />
+								android:paddingVertical="10dp"
+	android:textAllCaps="false"/>
 						</com.google.android.material.card.MaterialCardView>
 					</LinearLayout>
 				</LinearLayout>
@@ -163,7 +164,7 @@
 							android:textSize="12.5sp"
 							android:focusable="false" />
 					</LinearLayout>
-					<Switch
+					<com.google.android.material.switchmaterial.SwitchMaterial
 						android:id="@+id/switch_biometric"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
@@ -203,7 +204,7 @@
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorError"
 				app:strokeWidth="1dp">
-				<Button
+				<com.google.android.material.button.MaterialButton
 					android:id="@+id/btn_debug_guardian_console"
 					android:layout_width="match_parent"
 					android:layout_height="48dp"

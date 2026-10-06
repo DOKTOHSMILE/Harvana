@@ -52,11 +52,11 @@ public final class InviteMemberSheet {
         final com.harvana.app.social.PeoplePicker.Selection sel = new com.harvana.app.social.PeoplePicker.Selection();
         root.addView(com.harvana.app.social.PeoplePicker.section(a, sel));
 
-        EditText email = new EditText(a);
+        EditText email = new com.google.android.material.textfield.TextInputEditText(a);
         email.setHint("Their email address");
         email.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         root.addView(email);
-        EditText msg = new EditText(a);
+        EditText msg = new com.google.android.material.textfield.TextInputEditText(a);
         msg.setHint("Personal message (optional)");
         root.addView(msg);
 

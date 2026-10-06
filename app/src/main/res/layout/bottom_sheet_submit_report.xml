@@ -96,7 +96,7 @@
 			app:cardElevation="0dp"
 			app:strokeWidth="1dp"
 			app:strokeColor="@color/colorCardStroke">
-			<EditText
+			<com.google.android.material.textfield.TextInputEditText
 				android:id="@+id/et_report_details"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"

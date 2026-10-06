@@ -111,7 +111,7 @@ public class P2pChatActivity extends AppCompatActivity {
         bar.setOrientation(LinearLayout.HORIZONTAL);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(10), dp(6), dp(10), dp(6));
-        input = new EditText(this);
+        input = new com.google.android.material.textfield.TextInputEditText(this);
         input.setHint("Message");
         input.setTextColor(UiColors.textPrimary());
         input.setHintTextColor(UiColors.textTertiary());

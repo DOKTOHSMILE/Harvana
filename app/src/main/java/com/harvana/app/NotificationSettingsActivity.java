@@ -17,7 +17,7 @@ import android.view.View.*;
 import android.view.animation.*;
 import android.widget.*;
 import android.widget.LinearLayout;
-import android.widget.Switch;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import android.widget.TextView;
 import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatActivity;
@@ -59,22 +59,22 @@ public class NotificationSettingsActivity extends AppCompatActivity {
 	private TextView textview87;
 	private LinearLayout linear63;
 	private LinearLayout linear64;
-	private Switch switchTransactionAlerts;
+	private SwitchMaterial switchTransactionAlerts;
 	private TextView textview76;
 	private TextView textview77;
 	private LinearLayout linear65;
 	private LinearLayout linear66;
-	private Switch switchPaymentReminders;
+	private SwitchMaterial switchPaymentReminders;
 	private TextView textview78;
 	private TextView textview79;
 	private LinearLayout linear67;
 	private LinearLayout linear68;
-	private Switch switchLoanReminders;
+	private SwitchMaterial switchLoanReminders;
 	private TextView textview80;
 	private TextView textview81;
 	private LinearLayout linear69;
 	private LinearLayout linear70;
-	private Switch switchGroupNotices;
+	private SwitchMaterial switchGroupNotices;
 	private TextView textview82;
 	private TextView textview83;
 	private LinearLayout linear71;
@@ -82,9 +82,9 @@ public class NotificationSettingsActivity extends AppCompatActivity {
 	private View view73;
 	private LinearLayout linear74;
 	private TextView textview85;
-	private Switch switchSound;
+	private SwitchMaterial switchSound;
 	private TextView textview86;
-	private Switch switchVibrate;
+	private SwitchMaterial switchVibrate;
 	
 	@Override
 	protected void onCreate(Bundle _savedInstanceState) {
@@ -180,7 +180,7 @@ public class NotificationSettingsActivity extends AppCompatActivity {
 	public static final String PREFS_NAME = "notification_prefs";
 	private SharedPreferences prefs;
 	
-	private void _bindToggle(Switch sw, String prefKey) {
+	private void _bindToggle(SwitchMaterial sw, String prefKey) {
 		sw.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) ->
 		prefs.edit().putBoolean(prefKey, isChecked).apply());
 	}

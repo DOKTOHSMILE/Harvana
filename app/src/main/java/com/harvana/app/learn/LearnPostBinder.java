@@ -83,7 +83,18 @@ public final class LearnPostBinder {
         if (!post.imageUrl.isEmpty()) {
             shown.setVisibility(View.VISIBLE);
             cover.setVisibility(View.VISIBLE);
-            Glide.with(host).load(Uri.parse(post.imageUrl)).into(cover);
+            Glide.with(host).load(Uri.parse(post.imageUrl)).listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                @Override public boolean onLoadFailed(com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> t, boolean first) {
+                    // A picture that cannot load leaves no empty gap: the card is drawn as a text post.
+                    shown.setVisibility(View.GONE);
+                    if (content != null && content.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+                        ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) content.getLayoutParams();
+                        if (lp.topMargin != 0) { lp.topMargin = 0; content.setLayoutParams(lp); }
+                    }
+                    return false;
+                }
+                @Override public boolean onResourceReady(android.graphics.drawable.Drawable r, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> t, com.bumptech.glide.load.DataSource ds, boolean first) { return false; }
+            }).into(cover);
         } else {
             shown.setVisibility(View.GONE);
             cover.setImageDrawable(null);
@@ -196,10 +207,30 @@ public final class LearnPostBinder {
         host.startActivity(Intent.createChooser(send, "Share"));
     }
 
+    private static void confirmDelete(Activity host, Post post) {
+        new androidx.appcompat.app.AlertDialog.Builder(host)
+            .setTitle("Delete this post?")
+            .setMessage("It is removed for everyone, including its comments and reactions. This cannot be undone.")
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Delete", (d, w) -> com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("LEARN_CONTENT").document(post.id).delete()
+                .addOnSuccessListener(v -> {
+                    Toast.makeText(host, "Post deleted", Toast.LENGTH_SHORT).show();
+                    // In the full reader there is nothing left to read; in the feed the live list drops the card by itself.
+                    if (host instanceof com.harvana.app.LearnReadActivity) host.finish();
+                })
+                .addOnFailureListener(e -> Toast.makeText(host, "Couldn't delete: " + (e.getMessage() == null ? "try again" : e.getMessage()), Toast.LENGTH_LONG).show()))
+            .show();
+    }
+
     private static void more(Activity host, View anchor, Post post) {
         PopupMenu menu = new PopupMenu(host, anchor);
         menu.getMenu().add(0, 1, 0, "Copy text");
+        // Delete is offered to the poster only: the menu item does not exist for anyone else (and the Firestore rules refuse them too).
+        final String me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? "" : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (!me.isEmpty() && me.equals(post.authorUid)) menu.getMenu().add(0, 2, 1, "Delete post");
         menu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == 2) { confirmDelete(host, post); return true; }
             ClipboardManager cm = (ClipboardManager) host.getSystemService(Context.CLIPBOARD_SERVICE);
             if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("Learn Hub", post.title + "\n\n" + LearnMarkdown.plain(post.body)));
             Toast.makeText(host, "Copied", Toast.LENGTH_SHORT).show();

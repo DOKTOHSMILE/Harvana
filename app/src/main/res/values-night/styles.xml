@@ -2,6 +2,8 @@
 <resources>
 
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="popupMenuStyle">@style/HarvanaPopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/HarvanaPopupMenu</item>
         <!-- one back arrow for every screen -->
         <item name="homeAsUpIndicator">@drawable/ic_nav_back</item>
         <!-- Plain TextViews (titles, subtitles) use the primary text colour instead of a washed-out default -->
@@ -50,7 +52,10 @@
         <item name="colorControlNormal">?attr/onAppBarColor</item>
         <item name="colorOnSurface">?attr/onAppBarColor</item>
     </style>
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Dark" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Dark">
+        <item name="popupMenuStyle">@style/HarvanaPopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/HarvanaPopupMenu</item>
+    </style>
     <style name="AppTheme.DebugActivity" parent="AppTheme" />
 
     <style name="WhiteSpinnerTheme" parent="ThemeOverlay.AppCompat.Dark">
@@ -62,5 +67,11 @@
 
     <style name="HarvanaTextView" parent="android:Widget.TextView">
         <item name="android:textColor">@color/colorTextPrimary</item>
+    </style>
+
+    <!-- Menus: a different shade from the page, with an edge and a soft shadow. -->
+    <style name="HarvanaPopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="android:popupElevation">10dp</item>
     </style>
 </resources>

@@ -12,6 +12,7 @@
     <color name="colorAccentRipple">#1AFF9030</color>
     <!--Background & Surfaces (Deep Teal Body)-->
     <color name="colorBackground">#0B111C</color> 
+    <color name="colorPopupSurface">#1A2538</color>
     <color name="colorBackgroundDark">#070B13</color>
     <color name="colorSurface">#111827</color>
     <color name="colorSurfaceAlt">#182133</color>

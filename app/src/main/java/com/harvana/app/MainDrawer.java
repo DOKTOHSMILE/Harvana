@@ -54,8 +54,9 @@ final class MainDrawer {
         list.setOrientation(LinearLayout.VERTICAL);
         list.setPadding(0, dp(6), 0, dp(6));
         GradientDrawable bg = new GradientDrawable();
-        bg.setColor(UiColors.surface());
+        bg.setColor(androidx.core.content.ContextCompat.getColor(a, R.color.colorPopupSurface));     // not the page colour, so the menu stands out
         bg.setCornerRadius(dp(16));
+        bg.setStroke(dp(1), androidx.core.content.ContextCompat.getColor(a, R.color.colorCardStroke));
         list.setBackground(bg);
 
         row(list, R.drawable.icon_group_add_twotone, "Friends", null, () -> open(com.harvana.app.social.FriendsActivity.class));
@@ -72,7 +73,7 @@ final class MainDrawer {
         window = new PopupWindow(list, dp(232), ViewGroup.LayoutParams.WRAP_CONTENT, true);
         window.setOutsideTouchable(true);
         window.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
-        window.setElevation(dp(8));
+        window.setElevation(dp(12));
         if (anchor == null) anchor = a.findViewById(android.R.id.content);
         window.showAsDropDown(anchor, 0, dp(4), Gravity.END);
     }

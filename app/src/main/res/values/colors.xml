@@ -14,6 +14,8 @@
     <color name="colorAccentRipple">#1AFF9030</color>
     <!--Background & Surfaces-->
     <color name="colorBackground">#FFF8F0</color>
+    <!-- Menus and popups: a step darker than the page by day, a step lighter at night, so they stand out from the screen behind them. -->
+    <color name="colorPopupSurface">#F4E8D6</color>
     <!--Porcelain Body-->
     <color name="colorBackgroundDark">#F7EFE4</color>
     <color name="colorSurface">#FFFFFF</color>

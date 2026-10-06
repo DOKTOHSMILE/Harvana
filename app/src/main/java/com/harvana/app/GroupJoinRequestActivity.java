@@ -895,9 +895,9 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 				.setMessage("You're in the group. Open it to take your place on the network: lock your bond, start your savings line or make your first deposit, depending on the group.")
 				.setCancelable(false)
 				.setPositiveButton("Continue", (dd, w) -> {
-					Intent ci = new Intent(this, com.harvana.app.group.NodeGroupActivity.class);
-					ci.putExtra("nodeGroupId", circleId);
-					ci.putExtra("firestoreGroupId", groupId);
+					Intent ci = new Intent(this, GroupDetailsActivity.class);
+					ci.putExtra("groupId", groupId);
+					ci.putExtra("tab", 2);                       // Payments: lock the bond, start a savings line or deposit
 					startActivity(ci);
 					finish();
 				}).show();

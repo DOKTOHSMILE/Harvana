@@ -1,7 +1,7 @@
 # Node reconciliation report (Tier 5, partial)
 
 > **Status note (5 Oct 2026).** This report is the partial Tier 5 pass of 29 Sep 2026 and parts of it are now out of date. The app
-> now has signed group clients (`sync/NodeGroupClient`, `group/NodeGroupActivity`, `group/NodePayActions`, `group/NodeSettingsPanel`),
+> now has signed group clients (`sync/NodeGroupClient`, `group/GroupActionsActivity (the former NodeGroupActivity)`, `group/NodePayActions`, `group/NodeSettingsPanel`),
 > the referral consent signature, trust percentages published by the node, and named badges (`trust/NodeBadges`). Group logic is no
 > longer Firestore-only for groups created on the network. Where this page says the app has no client for a group action, read it as
 > "partly done"; `GROUP_SYNC_AND_VOTING.md` and `UPDATES.md` hold the current state. The node repo was edited this session at the

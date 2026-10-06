@@ -58,7 +58,8 @@ public final class NodePayActions {
             case GroupAction.ACCUM_PACK:
                 pay(c, "Request withdrawal", CircleUi.harv(c.line == null ? 0 : num(c.line, "amountPaidRaw")),
                         moneyRows(c, "Your wallet", "The admin still has to approve this"),
-                        () -> NodeGroupClient.packAccumLine(c.activity, c.me, c.nodeId, a.ref, result(c, "Withdrawal requested. Waiting for the admin.")));
+                        () -> NodeGroupClient.packAccumLine(c.activity, c.me, c.nodeId, a.ref, announced(c, "Withdrawal requested. Waiting for the admin.",
+                                GroupProposalIndex.PACK, a.ref, "Withdrawal request", "")));
                 break;
             case GroupAction.ACCUM_CLAIM:
                 pay(c, "Claim savings", CircleUi.harv(c.line == null ? 0 : num(c.line, "amountPaidRaw")),
@@ -86,7 +87,8 @@ public final class NodePayActions {
             case GroupAction.FIXED_REQUEST_GRANT:
                 reason(c, "Ask for an emergency grant", "Why do you need help?", (raw, text) ->
                         pay(c, "Request emergency grant", CircleUi.harv(raw), moneyRows(c, "Your wallet", text),
-                                () -> NodeGroupClient.requestFixedGrant(c.activity, c.me, c.nodeId, raw, text, result(c, "Grant requested"))));
+                                () -> NodeGroupClient.requestFixedGrant(c.activity, c.me, c.nodeId, raw, text, announced(c, "Grant requested. The group will vote.",
+                                GroupProposalIndex.GRANT, "", "Emergency grant request", "grantId"))));
                 break;
             default: break;
         }
@@ -236,6 +238,8 @@ public final class NodePayActions {
         return new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject json) {
                 String id = json == null ? "" : json.optString(idField, "");
+                if (!id.isEmpty()) GroupProposalIndex.post(c.activity, c.fsGroupId, milestone ? GroupProposalIndex.MILESTONE : GroupProposalIndex.DISBURSEMENT,
+                        id, milestone ? "Milestone request" : "Payout request", c.me);   // tells every member a vote is waiting
                 if (id.isEmpty()) { result(c, ok).onSuccess(json); return; }
                 NodeGroupClient.Callback voted = new NodeGroupClient.Callback() {
                     @Override public void onSuccess(JSONObject v) { result(c, ok + ". Your yes vote is in. The members vote next.").onSuccess(v); }
@@ -243,6 +247,18 @@ public final class NodePayActions {
                 };
                 if (milestone) NodeGroupClient.voteFixedMilestone(c.activity, c.me, c.nodeId, id, true, voted);
                 else NodeGroupClient.voteFixedDisbursement(c.activity, c.me, c.nodeId, id, true, voted);
+            }
+            @Override public void onError(String error) { result(c, ok).onError(error); }
+        };
+    }
+
+    /** Like result(), and also adds the request to the group's notices so every member is told a vote is waiting. */
+    private static NodeGroupClient.Callback announced(Ctx c, String ok, String kind, String knownId, String title, String idField) {
+        return new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject json) {
+                String id = knownId.isEmpty() && json != null && !idField.isEmpty() ? json.optString(idField, "") : knownId;
+                if (!id.isEmpty()) GroupProposalIndex.post(c.activity, c.fsGroupId, kind, id, title, c.me);
+                result(c, ok).onSuccess(json);
             }
             @Override public void onError(String error) { result(c, ok).onError(error); }
         };

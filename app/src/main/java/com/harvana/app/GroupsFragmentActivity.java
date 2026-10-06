@@ -228,9 +228,29 @@ public class GroupsFragmentActivity extends Fragment {
 						Toast.makeText(getContext(), "A group ID starts with CIRC-, ACCUM- or FIXED-", Toast.LENGTH_SHORT).show();
 						return;
 					}
-					Intent it = new Intent(getContext(), com.harvana.app.group.NodeGroupActivity.class);
-					it.putExtra("nodeGroupId", id);
-					startActivity(it);
+					// The group's page is found by its network id; a group nobody has saved in the app has no page to open.
+					com.harvana.app.firestore.GroupFirestoreManager.getInstance(getContext()).queryGroups("nodeGroupId", id, 1,
+						new com.harvana.app.firestore.GroupFirestoreManager.ListCallback() {
+							@Override public void onSuccess(java.util.List<java.util.Map<String, Object>> list) {
+								String docId = "";
+								if (list != null && !list.isEmpty()) {
+									Object d = list.get(0).get("_docId");
+									docId = d == null ? "" : String.valueOf(d);
+								}
+								final String open = docId;
+								if (getActivity() == null) return;
+								getActivity().runOnUiThread(() -> {
+									if (open.isEmpty()) { Toast.makeText(getContext(), "That group has no page in the app yet.", Toast.LENGTH_LONG).show(); return; }
+									Intent it = new Intent(getContext(), GroupDetailsActivity.class);
+									it.putExtra("groupId", open);
+									startActivity(it);
+								});
+							}
+							@Override public void onError(String error) {
+								if (getActivity() != null) getActivity().runOnUiThread(() ->
+									Toast.makeText(getContext(), "Couldn't look that group up. Try again.", Toast.LENGTH_LONG).show());
+							}
+						});
 				})
 				.show();
 	}

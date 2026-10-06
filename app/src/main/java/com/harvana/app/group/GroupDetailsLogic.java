@@ -178,7 +178,7 @@ public class GroupDetailsLogic {
         if (identity.onChain() && btnPayout != null) {
             btnPayout.setText("Actions & votes");
             btnPayout.setOnClickListener(v -> {
-                android.content.Intent i = new android.content.Intent(activity, NodeGroupActivity.class);
+                android.content.Intent i = new android.content.Intent(activity, GroupActionsActivity.class);
                 i.putExtra("nodeGroupId", identity.protocolId());
                 i.putExtra("firestoreGroupId", groupId);
                 activity.startActivity(i);

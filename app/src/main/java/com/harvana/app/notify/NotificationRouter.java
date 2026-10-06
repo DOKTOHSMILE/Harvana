@@ -136,7 +136,7 @@ public final class NotificationRouter {
             @Override public void onSuccess(java.util.Map<String, Object> data) {
                 com.harvana.app.group.GroupIdentity identity = com.harvana.app.group.GroupIdentityResolver.resolve(groupId, data);
                 if (identity != null && identity.onChain()) {
-                    start(c, new Intent(c, com.harvana.app.group.NodeGroupActivity.class)
+                    start(c, new Intent(c, com.harvana.app.group.GroupActionsActivity.class)
                         .putExtra("nodeGroupId", identity.protocolId()).putExtra("firestoreGroupId", groupId));
                 } else {
                     start(c, group(c, groupId, 1));

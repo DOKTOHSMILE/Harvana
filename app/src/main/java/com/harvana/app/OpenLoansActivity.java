@@ -168,16 +168,9 @@ public class OpenLoansActivity extends AppCompatActivity {
         pay.setText("Pay");
         pay.setAllCaps(false);
         pay.setOnClickListener(v -> {
-            Intent i;
-            if (!r.nodeId.isEmpty()) {
-                i = new Intent(this, com.harvana.app.group.NodeGroupActivity.class);
-                i.putExtra("nodeGroupId", r.nodeId);
-                i.putExtra("firestoreGroupId", r.groupId);
-            } else {
-                i = new Intent(this, GroupDetailsActivity.class);
-                i.putExtra("groupId", r.groupId);
-                i.putExtra("tab", 3);
-            }
+            Intent i = new Intent(this, GroupDetailsActivity.class);
+            i.putExtra("groupId", r.groupId);
+            i.putExtra("tab", 3);                       // the group's Loans tab
             startActivity(i);
         });
         if (!r.nodeId.isEmpty()) pay.setText("Open group to repay");

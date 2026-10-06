@@ -312,8 +312,8 @@
 			android:label="Notifications"
 			android:configChanges="orientation|screenSize|keyboardHidden" />
                 <activity
-                        android:name=".group.NodeGroupActivity"
-                        android:label="Group"
+                        android:name=".group.GroupActionsActivity"
+                        android:label="Actions &amp; votes"
                         android:configChanges="orientation|screenSize|keyboardHidden" />
                 <activity
                         android:name=".InvitesActivity"

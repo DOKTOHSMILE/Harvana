@@ -215,7 +215,12 @@ public final class Shimmer {
         HOLDS.put(target, h);
         target.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override public void onLayoutChange(View v, int l, int t, int r, int b, int ol, int ot, int or, int ob) {
-                if (hasContent(v)) { v.removeOnLayoutChangeListener(this); h.release(); }
+                if (hasContent(v)) {
+                    v.removeOnLayoutChangeListener(this);
+                    // Never change the view tree from inside a layout pass: the frame is still walking its children, and a
+                    // child removed now is a null the walk then trips over (NullPointerException in FrameLayout.layoutChildren).
+                    v.post(h::release);
+                }
             }
         });
         target.postDelayed(h::release, maxMs);

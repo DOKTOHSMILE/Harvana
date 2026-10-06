@@ -159,14 +159,13 @@
                     android:paddingStart="6dp"
                     android:paddingEnd="6dp"
                     android:background="@drawable/bg_learn_action"
-                    android:contentDescription="Fire"
+                    android:contentDescription="Handshake"
                     android:orientation="horizontal">
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/iv_fire"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
-                        android:src="@drawable/ic_learn_fire"
-                        app:tint="@color/colorTextTertiary" />
+                        android:src="@drawable/ic_learn_handshake" />
                     <TextView
                         android:id="@+id/tv_fire"
                         android:layout_width="wrap_content"

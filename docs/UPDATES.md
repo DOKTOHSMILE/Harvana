@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: handshake reaction on Learn posts
+
+What the app does. The fire reaction on Learn posts is now a handshake: a custom full-colour icon of two hands shaking (the front hand 🫱🏽 in a medium skin tone), meaning you agree with the author. It is dimmed until you tap it and full colour once you have. Counts and who reacted are unchanged (same records as before). What you do: install the new build.
+
 ## 6 Oct 2026: close a goal group nobody else joined and get your money back
 
 What the app does. In group settings, "Check if I can close this group" on a goal group where you are the admin and nobody else has joined now offers "Refund and delete": the network closes the group, sends everything in its wallet back to your wallet (small network fee), and the group is removed from the app. If anyone else has put money in, the network refuses. What you do: deploy the new node jar first (capital-oracle-projects `docs/DEPLOYMENT.md`, "close a goal group nobody else joined"), then install the new build.

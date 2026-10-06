@@ -179,8 +179,10 @@ public final class LearnPostBinder {
         Runnable paint = () -> {
             fireCount.setText(LearnRules.compactCount(fires[0]));
             fire.setBackgroundResource(mine[0] ? R.drawable.bg_learn_action_on : R.drawable.bg_learn_action);
-            int tint = ContextCompat.getColor(host, mine[0] ? R.color.colorAccent : R.color.colorTextTertiary);
-            fireIcon.setColorFilter(tint);
+            // The handshake keeps its own colours; it is dimmed until you have shaken hands on this post.
+            fireIcon.clearColorFilter();
+            fireIcon.setImageTintList(null);
+            fireIcon.setAlpha(mine[0] ? 1f : 0.6f);
             fireCount.setTextColor(ContextCompat.getColor(host, mine[0] ? R.color.colorAccent : R.color.colorTextSecondary));
         };
         paint.run();

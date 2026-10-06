@@ -629,3 +629,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Member photos in the Members tab
 - Members, people waiting to join and the member detail sheet now show the person's profile photo in the round badge (initials until the photo loads, or when they have none). Member and request rows use the 40dp avatar size so photos are readable (`group/MemberPhoto.java`).
+
+## Members tab no longer reloads on every resume
+- Coming back to the Members tab only reloads the list when it is more than a minute old. Accepting, voting, removing and pull-to-refresh still reload straight away.

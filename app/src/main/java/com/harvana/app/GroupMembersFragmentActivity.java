@@ -269,12 +269,16 @@ public class GroupMembersFragmentActivity extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (groupId != null && !groupId.isEmpty()) { 			
-			_loadMembers(); 		
+		// Coming back to the tab (from another tab, the lock screen, a sheet) must not redraw the list each time:
+		// reload only when what is shown is more than a minute old. Actions here reload the list themselves.
+		if (groupId != null && !groupId.isEmpty() && System.currentTimeMillis() - lastMembersLoadAt > RESUME_REFRESH_MS) {
+			_loadMembers();
 			_loadPending();
 		}
-		
 	}
+	
+	private static final long RESUME_REFRESH_MS = 60_000L;
+	private long lastMembersLoadAt = 0L;
 	
 
 	public void _MORE() {
@@ -434,6 +438,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 	
 	private void _loadMembers() {
 		if (groupId.isEmpty() || getContext() == null) return;
+		lastMembersLoadAt = System.currentTimeMillis();
 		_loadNodePaid();
 		// WhatsApp-style: show the last known member list instantly, before
 		// this Firestore REST call completes.

@@ -170,11 +170,25 @@ public final class GroupWelcomeSheet {
         cancel.setAllCaps(false);
         cancel.setOnClickListener(v -> dlg.dismiss());
         next.setAllCaps(false);
-        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        bp.setMargins((int) (3 * d), 0, (int) (3 * d), 0);
-        nav.addView(cancel, bp);
-        nav.addView(back, bp);
-        nav.addView(next, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.4f));
+        for (MaterialButton b : new MaterialButton[]{cancel, back, next}) {
+            b.setSingleLine(true);
+            b.setMaxLines(1);
+            b.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            b.setTextSize(13);
+            b.setLetterSpacing(0f);
+            b.setInsetTop(0); b.setInsetBottom(0);
+            b.setMinWidth(0); b.setMinimumWidth(0);
+            b.setPadding((int) (4 * d), 0, (int) (4 * d), 0);
+        }
+        LinearLayout.LayoutParams bpL = new LinearLayout.LayoutParams(0, (int) (50 * d), 1f);
+        bpL.setMargins(0, 0, (int) (4 * d), 0);
+        LinearLayout.LayoutParams bpM = new LinearLayout.LayoutParams(0, (int) (50 * d), 1f);
+        bpM.setMargins((int) (4 * d), 0, (int) (4 * d), 0);
+        LinearLayout.LayoutParams bpR = new LinearLayout.LayoutParams(0, (int) (50 * d), 1f);
+        bpR.setMargins((int) (4 * d), 0, 0, 0);
+        nav.addView(cancel, bpL);
+        nav.addView(back, bpM);
+        nav.addView(next, bpR);
         root.addView(nav);
 
         final Runnable refresh = () -> {
@@ -189,7 +203,7 @@ public final class GroupWelcomeSheet {
             agree.setOnCheckedChangeListener(null);
             agree.setChecked(agreed[at]);
             agree.setOnCheckedChangeListener((b2, on) -> { agreed[pager.getCurrentItem()] = on; paint(agree, next, seenEnd, agreed, pager.getCurrentItem()); });
-            next.setText(last ? "Sign contract and continue" : "Next");
+            next.setText(last ? "Sign contract" : "Next");
             paint(agree, next, seenEnd, agreed, at);
         };
         pager.registerOnPageChangeCallback(new androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {

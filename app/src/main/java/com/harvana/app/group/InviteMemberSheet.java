@@ -32,7 +32,7 @@ public final class InviteMemberSheet {
         BottomSheetDialog dlg = new com.harvana.app.ui.AppSheet(a);
         LinearLayout root = new LinearLayout(a);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(pad, pad, pad, pad);
+        root.setPadding((int) (20 * d), pad, (int) (20 * d), (int) (24 * d));
         root.setBackgroundColor(UiColors.surface());
 
         TextView t = new TextView(a);
@@ -50,15 +50,19 @@ public final class InviteMemberSheet {
         root.addView(info);
 
         final com.harvana.app.social.PeoplePicker.Selection sel = new com.harvana.app.social.PeoplePicker.Selection();
-        root.addView(com.harvana.app.social.PeoplePicker.section(a, sel));
+        LinearLayout.LayoutParams cardLp = new LinearLayout.LayoutParams(-1, -2);
+        cardLp.setMargins(0, (int) (4 * d), 0, (int) (16 * d));
+        root.addView(com.harvana.app.social.PeoplePicker.section(a, sel), cardLp);
 
         EditText email = new com.google.android.material.textfield.TextInputEditText(a);
         email.setHint("Their email address");
         email.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        root.addView(email);
+        LinearLayout.LayoutParams fieldLp = new LinearLayout.LayoutParams(-1, -2);
+        fieldLp.setMargins((int) (4 * d), 0, (int) (4 * d), (int) (12 * d));
+        root.addView(email, fieldLp);
         EditText msg = new com.google.android.material.textfield.TextInputEditText(a);
         msg.setHint("Personal message (optional)");
-        root.addView(msg);
+        root.addView(msg, fieldLp);
 
         MaterialButton send = new MaterialButton(a);
         send.setText("Send invitations");
@@ -76,7 +80,9 @@ public final class InviteMemberSheet {
                     dlg.dismiss();
                 }));
         });
-        root.addView(send);
+        LinearLayout.LayoutParams sendLp = new LinearLayout.LayoutParams(-1, (int) (52 * d));
+        sendLp.setMargins(0, (int) (12 * d), 0, (int) (8 * d));
+        root.addView(send, sendLp);
 
         MaterialButton share = new MaterialButton(a, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
         share.setText("Also share a message");
@@ -87,7 +93,7 @@ public final class InviteMemberSheet {
                 + "\" on Harvana. Install the app, sign up with this email, and open Invitations to read the details.");
             a.startActivity(Intent.createChooser(i, "Share invitation"));
         });
-        root.addView(share);
+        root.addView(share, new LinearLayout.LayoutParams(-1, (int) (52 * d)));
 
         android.widget.ScrollView scroller = new android.widget.ScrollView(a);
         scroller.setBackgroundColor(UiColors.surface());

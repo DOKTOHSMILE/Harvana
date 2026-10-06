@@ -68,10 +68,20 @@ public final class PeoplePicker {
                     refresh.run();
                 }));
             }).setNegativeButton("Cancel", null).show());
-        for (View b : new View[]{friends, username, contacts}) {
-            row.addView(b, new LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        View[] three = new View[]{friends, username, contacts};
+        for (int i = 0; i < three.length; i++) {
+            MaterialButton mb = (MaterialButton) three[i];
+            mb.setSingleLine(true); mb.setMaxLines(1);
+            mb.setTextSize(13); mb.setLetterSpacing(0f);
+            mb.setInsetTop(0); mb.setInsetBottom(0);
+            mb.setMinWidth(0); mb.setMinimumWidth(0);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, SocialUi.dp(a, 50), 1f);
+            lp.setMargins(i == 0 ? 0 : SocialUi.dp(a, 4), 0, i == three.length - 1 ? 0 : SocialUi.dp(a, 4), 0);
+            row.addView(mb, lp);
         }
-        box.addView(row);
+        LinearLayout.LayoutParams rowLp = new LinearLayout.LayoutParams(-1, -2);
+        rowLp.topMargin = SocialUi.dp(a, 8);
+        box.addView(row, rowLp);
         return box;
     }
 

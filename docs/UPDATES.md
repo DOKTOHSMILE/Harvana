@@ -589,3 +589,7 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 ## Capital letters for typing, and the last Material swaps
 - **Capitals in text fields.** Plain text fields now start each sentence with a capital, and names, cities, states, locations and similar fields capitalise every word (`utils/SmartCaps.java`, covering every screen, sheet, dialog and field built in code). Fields that must stay exactly as typed are left alone: email, passwords, user names, wallet addresses and codes, URLs, search boxes, recovery phrases, amounts, phone and ID numbers. If someone types a whole entry in lower case, the first letter of each sentence (or word) is capitalised when they leave the field; text that already has any capital is never changed.
 - **Material.** All 40 toolbars are now `MaterialToolbar` and all 52 plain cards are `MaterialCardView` (no border added). Text views become Material text views through the Material theme, and every button, text field, switch, checkbox, divider and progress bar was converted earlier. Not changed: spinners (27), icon images, the stage dots on the payment progress sheet, and notification layouts.
+
+## Even buttons and spacing in the invite and contract sheets
+- Join-group contract: Cancel, Back and the sign button are the same width and 50dp high, on one line; the last page's button now reads "Sign contract".
+- Invite sheet: Add friends, Username and Contacts are three equal 50dp buttons with gaps; the card, email field, message field and the two bottom buttons have proper margins and side padding.

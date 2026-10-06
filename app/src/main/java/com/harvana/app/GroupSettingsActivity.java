@@ -596,6 +596,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		face.setOutlineProvider(new android.view.ViewOutlineProvider() {
 			@Override public void getOutline(View v, android.graphics.Outline o) { o.setOval(0, 0, v.getWidth(), v.getHeight()); }
 		});
+		com.harvana.app.utils.GroupRing.apply(face, typeOf(), 3.5f, (UiColors.accent() & 0x00FFFFFF) | 0x33000000);
 		if (url.startsWith("http")) {
 			face.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			com.bumptech.glide.Glide.with(this).load(url).circleCrop().into(face);
@@ -603,7 +604,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		} else {
 			face.setImageResource(R.drawable.ic_groups);
 			face.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-			int pad = (int) (18 * d);
+			int pad = (int) (20 * d);
 			face.setPadding(pad, pad, pad, pad);
 			face.setColorFilter(UiColors.accent());
 		}
@@ -618,7 +619,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		t.setTextColor(UiColors.textPrimary());
 		side.addView(t);
 		TextView sub = new TextView(this);
-		sub.setText(isAdmin ? "A square picture. You choose the part to keep." : (url.isEmpty() ? "No picture yet." : "Set by the group admin."));
+		String ringNote = " The " + com.harvana.app.utils.GroupRing.colorName(typeOf()) + " ring shows the group type.";
+		sub.setText((isAdmin ? "A square picture. You choose the part to keep." : (url.isEmpty() ? "No picture yet." : "Set by the group admin.")) + ringNote);
 		sub.setTextSize(11.5f);
 		sub.setTextColor(UiColors.textSecondary());
 		side.addView(sub);

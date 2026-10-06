@@ -630,9 +630,10 @@ public class GroupsFragmentActivity extends Fragment {
 			}
 			
 			if (iv_group_card_icon != null) {
+				// A coloured ring by group type (blue rotating, green accumulative, purple fixed), with or without a picture.
+				com.harvana.app.utils.GroupRing.apply(iv_group_card_icon, _safeString(group, "groupType", ""), 3f, getResources().getColor(R.color.colorAccent));
 				String photo = _safeString(group, "groupPhoto", "");
 				if (photo.startsWith("http")) {
-					iv_group_card_icon.setBackground(null);
 					iv_group_card_icon.setScaleType(ImageView.ScaleType.CENTER_CROP);
 					try { com.bumptech.glide.Glide.with(iv_group_card_icon.getContext()).load(photo).circleCrop().into(iv_group_card_icon); } catch (Exception ignored) { }
 				}

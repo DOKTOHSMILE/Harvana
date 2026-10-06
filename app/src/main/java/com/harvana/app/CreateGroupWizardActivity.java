@@ -230,14 +230,11 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         disc.setShape(GradientDrawable.OVAL);
         disc.setColor((UiColors.accent() & 0x00FFFFFF) | 0x33000000);
         face.setBackground(disc);
-        face.setClipToOutline(true);
-        face.setOutlineProvider(new android.view.ViewOutlineProvider() {
-            @Override public void getOutline(View v, android.graphics.Outline o) { o.setOval(0, 0, v.getWidth(), v.getHeight()); }
-        });
+        com.harvana.app.utils.GroupRing.apply(face, typeLabel, 3.5f, (UiColors.accent() & 0x00FFFFFF) | 0x33000000);   // ring colour = group type
         if (photoUrl.isEmpty()) {
             face.setImageResource(R.drawable.ic_groups);
             face.setScaleType(android.widget.ImageView.ScaleType.CENTER_INSIDE);
-            face.setPadding(dp(18), dp(18), dp(18), dp(18));
+            face.setPadding(dp(20), dp(20), dp(20), dp(20));
             face.setColorFilter(UiColors.accent());
         } else {
             com.bumptech.glide.Glide.with(this).load(photoUrl).circleCrop().into(face);
@@ -247,7 +244,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         side.setOrientation(LinearLayout.VERTICAL);
         side.setPadding(dp(14), 0, 0, 0);
         side.addView(text("Group picture (optional)", 14, true, UiColors.textPrimary()));
-        side.addView(hint("A square picture. You choose the part to keep."));
+        side.addView(hint("A square picture. The ring colour shows the kind of group: blue rotating, green accumulative, purple fixed."));
         LinearLayout buttons = new LinearLayout(this);
         MaterialButton pick = button(photoUrl.isEmpty() ? "Add picture" : "Change", true);
         pick.setOnClickListener(v -> startActivityForResult(com.harvana.app.utils.GroupPhotoPickerActivity.intent(this, FirebaseAuth.getInstance().getUid()), RC_PHOTO));

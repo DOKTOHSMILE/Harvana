@@ -55,6 +55,11 @@ public class EditProfileActivity extends AppCompatActivity {
     private TextView initials, photoStatus;
     private ProgressBar photoBusy;
     private String newIcon;      // set once a picked photo has been uploaded
+    private static final int RC_COVER = 613;
+    private String newCover;     // set once a picked cover has been uploaded; "" means remove it
+    private ImageView coverView;
+    private TextView coverStatus;
+    private ProgressBar coverBusy;
 
     @Override public boolean onSupportNavigateUp() { finish(); return true; }
 
@@ -107,6 +112,8 @@ public class EditProfileActivity extends AppCompatActivity {
         page.removeAllViews();
         nameLocked = !s("v_type").isEmpty();
         newIcon = null;
+        newCover = null;
+        page.addView(coverBlock());
         page.addView(photoBlock());
 
         LinearLayout about = SocialUi.card(this);
@@ -147,6 +154,52 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override public void afterTextChanged(Editable e) { save.setEnabled(dirty()); }
         };
         for (EditText e : new EditText[] {first, last, job, address, city}) e.addTextChangedListener(w);
+    }
+
+    private View coverBlock() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(0, 0, 0, SocialUi.dp(this, 14));
+        FrameLayout frame = new FrameLayout(this);
+        GradientDrawable fallback = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                new int[] {(UiColors.accent() & 0x00FFFFFF) | 0x66000000, UiColors.surface()});
+        frame.setBackground(fallback);
+        coverView = new ImageView(this);
+        coverView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        frame.addView(coverView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        coverBusy = new ProgressBar(this);
+        coverBusy.setVisibility(View.GONE);
+        frame.addView(coverBusy, new FrameLayout.LayoutParams(SocialUi.dp(this, 36), SocialUi.dp(this, 36), Gravity.CENTER));
+        showCover(s("cover"));
+        box.addView(frame, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 130)));
+
+        LinearLayout buttons = new LinearLayout(this);
+        buttons.setPadding(0, SocialUi.dp(this, 10), 0, 0);
+        MaterialButton change = SocialUi.compactButton(this, "Change cover", true);
+        change.setOnClickListener(v -> startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_GET_CONTENT).setType("image/*"), "Choose a cover"), RC_COVER));
+        buttons.addView(change);
+        if (!s("cover").isEmpty()) {
+            MaterialButton remove = SocialUi.compactButton(this, "Remove", true);
+            LinearLayout.LayoutParams rp = (LinearLayout.LayoutParams) remove.getLayoutParams();
+            rp.setMarginStart(SocialUi.dp(this, 8));
+            remove.setOnClickListener(v -> {
+                newCover = "";
+                showCover("");
+                coverStatus.setText("Cover will be removed when you press Save changes.");
+                if (save != null) save.setEnabled(true);
+            });
+            buttons.addView(remove, rp);
+        }
+        box.addView(buttons);
+        coverStatus = SocialUi.text(this, "", 12, false, UiColors.textSecondary());
+        coverStatus.setPadding(0, SocialUi.dp(this, 6), 0, 0);
+        box.addView(coverStatus);
+        return box;
+    }
+
+    private void showCover(String url) {
+        if (url != null && url.startsWith("http")) Glide.with(this).load(url).centerCrop().into(coverView);
+        else coverView.setImageDrawable(null);
     }
 
     private View photoBlock() {
@@ -205,6 +258,7 @@ public class EditProfileActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int req, int res, Intent result) {
         super.onActivityResult(req, res, result);
+        if (req == RC_COVER && res == RESULT_OK && result != null && result.getData() != null) { uploadCover(result.getData()); return; }
         if (req != RC_PHOTO || res != RESULT_OK || result == null || result.getData() == null) return;
         final Uri picked = result.getData();
         Glide.with(this).load(picked).circleCrop().into(photo);
@@ -221,6 +275,28 @@ public class EditProfileActivity extends AppCompatActivity {
                 if (save != null) save.setEnabled(true);
             }
             @Override public void onError(String message) { photoFailed(new Exception(message)); }
+        });
+    }
+
+    private void uploadCover(final Uri picked) {
+        Glide.with(this).load(picked).centerCrop().into(coverView);
+        coverBusy.setVisibility(View.VISIBLE);
+        coverStatus.setText("Uploading…");
+        if (save != null) save.setEnabled(false);
+        com.harvana.app.utils.ImageHost.upload(this, picked, "profile_covers/" + uid, 1280, new com.harvana.app.utils.ImageHost.Callback() {
+            @Override public void onSuccess(String url) {
+                coverBusy.setVisibility(View.GONE);
+                coverStatus.setText("Cover ready. Press Save changes.");
+                newCover = url;
+                if (save != null) save.setEnabled(true);
+            }
+            @Override public void onError(String message) {
+                coverBusy.setVisibility(View.GONE);
+                coverStatus.setText("Couldn't upload the cover: " + message);
+                newCover = null;
+                showCover(s("cover"));
+                if (save != null) save.setEnabled(dirty());
+            }
         });
     }
 
@@ -284,7 +360,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private boolean dirty() {
         if (first == null) return false;
-        return newIcon != null
+        return newIcon != null || newCover != null
             || !first.getText().toString().trim().equals(s("first_name")) || !last.getText().toString().trim().equals(s("last_name"))
             || !job.getText().toString().trim().equals(s("occupation")) || !address.getText().toString().trim().equals(s("address"))
             || !city.getText().toString().trim().equals(s("city"));
@@ -309,6 +385,7 @@ public class EditProfileActivity extends AppCompatActivity {
         if (!a.equals(s("address"))) changes.put("address", a);
         if (!c.equals(s("city"))) changes.put("city", c);
         if (newIcon != null) changes.put("icon", newIcon);
+        if (newCover != null) changes.put("cover", newCover);
         if (changes.isEmpty()) { finish(); return; }
 
         save.setEnabled(false);

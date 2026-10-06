@@ -53,7 +53,7 @@ public final class PublicProfileStore {
     }
 
     public static final class Card {
-        public String uid = "", pid = "", name = "", username = "", icon = "", wallet = "", trustTier = "";
+        public String uid = "", pid = "", name = "", username = "", icon = "", cover = "", wallet = "", trustTier = "";
         public String country = "", state = "", city = "", bio = "";
         public int trustPercent = -1, age = -1;
         public boolean showAge, showCity;
@@ -84,6 +84,7 @@ public final class PublicProfileStore {
                 c.name = (str(user.get("first_name")) + " " + str(user.get("last_name"))).trim();
                 c.username = str(user.get("username"));
                 c.icon = str(user.get("icon"));
+                c.cover = str(user.get("cover"));
                 c.pid = str(user.get("pid"));
                 c.country = str(user.get("country"));
                 c.state = str(user.get("state"));

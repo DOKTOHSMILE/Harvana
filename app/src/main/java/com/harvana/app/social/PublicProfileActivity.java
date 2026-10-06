@@ -164,6 +164,10 @@ public class PublicProfileActivity extends AppCompatActivity {
     private void render() {
         root.removeAllViews();
         boolean mine = isMe();
+        // The cover reaches the screen edges and the picture overlaps it, so the root must not clip to its padding.
+        root.setClipToPadding(false);
+        root.setClipChildren(false);
+        root.addView(coverBanner(mine));
         root.addView(header(mine));
         root.addView(actionRow(mine));
         if (mine) root.addView(friendsRow());
@@ -176,11 +180,44 @@ public class PublicProfileActivity extends AppCompatActivity {
         renderTab();
     }
 
+    /** The wide picture at the top of the profile, edge to edge. A soft colour when there is none; on my own profile it says how to add one. */
+    private View coverBanner(boolean mine) {
+        int side = SocialUi.dp(this, 16);
+        FrameLayout banner = new FrameLayout(this);
+        GradientDrawable fallback = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                new int[] {(UiColors.accent() & 0x00FFFFFF) | 0x66000000, UiColors.surface()});
+        banner.setBackground(fallback);
+        ImageView pic = new ImageView(this);
+        pic.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        banner.addView(pic, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        if (card.cover.startsWith("http")) {
+            try { com.bumptech.glide.Glide.with(this).load(card.cover).centerCrop().into(pic); } catch (Exception ignored) { }
+        }
+        if (mine) {
+            TextView edit = pill(card.cover.isEmpty() ? "Add cover" : "Change cover", UiColors.textPrimary());
+            GradientDrawable chip = new GradientDrawable();
+            chip.setColor(0x99000000);
+            chip.setCornerRadius(SocialUi.dp(this, 14));
+            edit.setBackground(chip);
+            edit.setTextColor(0xFFFFFFFF);
+            FrameLayout.LayoutParams ep = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.END | Gravity.BOTTOM);
+            ep.setMargins(0, 0, side, SocialUi.dp(this, 10));
+            edit.setClickable(true);
+            edit.setOnClickListener(v -> startActivity(new Intent(this, EditProfileActivity.class)));
+            banner.addView(edit, ep);
+        }
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 150));
+        lp.setMargins(-side, 0, -side, 0);
+        banner.setLayoutParams(lp);
+        return banner;
+    }
+
     private View header(boolean mine) {
         LinearLayout h = new LinearLayout(this);
         h.setOrientation(LinearLayout.VERTICAL);
         h.setGravity(Gravity.CENTER_HORIZONTAL);
-        h.setPadding(0, SocialUi.dp(this, 4), 0, SocialUi.dp(this, 18));
+        h.setClipChildren(false);
+        h.setPadding(0, 0, 0, SocialUi.dp(this, 18));
         int size = SocialUi.dp(this, 104);
         int tint = card.scored() ? ProfileTrust.tierColor(tierName()) : 0xFF8B98AD;
         FrameLayout face = new FrameLayout(this);
@@ -199,7 +236,9 @@ public class PublicProfileActivity extends AppCompatActivity {
             try { com.bumptech.glide.Glide.with(this).load(card.icon).circleCrop().into(photo); initials.setVisibility(View.INVISIBLE); }
             catch (Exception ignored) { }
         }
-        h.addView(face, new LinearLayout.LayoutParams(size, size));
+        LinearLayout.LayoutParams faceLp = new LinearLayout.LayoutParams(size, size);
+        faceLp.topMargin = -size / 2;           // the picture sits half over the cover
+        h.addView(face, faceLp);
 
         TextView name = SocialUi.text(this, card.name.isEmpty() ? (card.username.isEmpty() ? "Member" : "@" + card.username) : card.name, 24, true, UiColors.textPrimary());
         name.setGravity(Gravity.CENTER);

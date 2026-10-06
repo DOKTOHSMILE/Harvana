@@ -823,6 +823,81 @@ public class PublicProfileActivity extends AppCompatActivity {
 
     // ── Groups in common ─────────────────────────────────────────────────
 
+    /** One shared group, laid out like a row of the Groups list: round image, name, type, members, cycle progress and trust. */
+    private View sharedGroupRow(final PublicProfileStore.SharedGroup g) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(0, SocialUi.dp(this, 14), 0, SocialUi.dp(this, 4));
+        row.setClickable(true);
+        row.setOnClickListener(v -> startActivity(new Intent(this, GroupDetailsActivity.class).putExtra("groupId", g.id)));
+
+        // Circular image: the group's photo when it has one, otherwise the HARV coin on the accent colour, as in the Groups list.
+        int size = SocialUi.dp(this, 48);
+        ImageView face = new ImageView(this);
+        face.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        GradientDrawable disc = new GradientDrawable();
+        disc.setShape(GradientDrawable.OVAL);
+        disc.setColor(UiColors.accent());
+        face.setBackground(disc);
+        face.setClipToOutline(true);
+        if (g.photo.startsWith("http")) {
+            face.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            try { com.bumptech.glide.Glide.with(this).load(g.photo).circleCrop().into(face); } catch (Exception ignored) { face.setImageResource(R.drawable.ic_coin_harv); }
+        } else {
+            face.setImageResource(R.drawable.ic_coin_harv);
+            face.setPadding(SocialUi.dp(this, 6), SocialUi.dp(this, 6), SocialUi.dp(this, 6), SocialUi.dp(this, 6));
+        }
+        row.addView(face, new LinearLayout.LayoutParams(size, size));
+
+        LinearLayout words = new LinearLayout(this);
+        words.setOrientation(LinearLayout.VERTICAL);
+        words.setPadding(SocialUi.dp(this, 12), 0, 0, 0);
+        words.addView(SocialUi.text(this, g.name, 16, true, UiColors.textPrimary()));
+
+        StringBuilder kind = new StringBuilder();
+        if (!g.state.isEmpty()) kind.append(g.state).append("  \u00b7  ");
+        kind.append(g.type.isEmpty() ? "Group" : g.type);
+        if (!g.frequency.isEmpty()) kind.append("  \u00b7  ").append(g.frequency);
+        TextView kindLine = SocialUi.text(this, kind.toString(), 12.5f, false, UiColors.textSecondary());
+        kindLine.setPadding(0, SocialUi.dp(this, 2), 0, 0);
+        words.addView(kindLine);
+
+        StringBuilder facts = new StringBuilder();
+        facts.append(g.members).append(g.members == 1 ? " member" : " members");
+        if (g.amount > 0) facts.append("  \u00b7  ").append(com.harvana.app.wallet.BalanceFormatter.smart(g.amount)).append("/slot");
+        TextView factLine = SocialUi.text(this, facts.toString(), 12.5f, false, UiColors.textSecondary());
+        factLine.setPadding(0, SocialUi.dp(this, 2), 0, 0);
+        words.addView(factLine);
+
+        if (g.slots > 0) {
+            long round = Math.max(1, g.round);
+            int pct = (int) Math.min(100, (round * 100.0) / g.slots);
+            LinearLayout cycle = new LinearLayout(this);
+            cycle.setGravity(Gravity.CENTER_VERTICAL);
+            cycle.setPadding(0, SocialUi.dp(this, 8), 0, 0);
+            cycle.addView(SocialUi.text(this, "Cycle " + round + " of " + g.slots, 11.5f, false, UiColors.textTertiary()), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            cycle.addView(SocialUi.text(this, pct + "%", 11.5f, true, UiColors.textSecondary()));
+            words.addView(cycle);
+            words.addView(bar(pct, UiColors.accent()));
+        }
+
+        final TextView trust = SocialUi.text(this, "Trust …", 12, true, UiColors.textTertiary());
+        trust.setPadding(0, SocialUi.dp(this, 6), 0, 0);
+        words.addView(trust);
+        if (g.nodeKey.isEmpty()) {
+            trust.setText("Not on the network");
+        } else {
+            com.harvana.app.trust.NetworkTrust.group(g.nodeKey, score -> runOnUiThread(() -> {
+                if (!score.published || score.summary.isEmpty()) { trust.setText("Not on the network"); return; }
+                trust.setText(score.summary);
+                if (score.percent >= 0) trust.setTextColor(ProfileTrust.tierColor(score.tier));
+            }));
+        }
+        row.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        row.addView(SocialUi.text(this, "Open  \u203A", 13, true, UiColors.accent()));
+        return row;
+    }
+
     private View sharedCard() {
         boolean mine = isMe();
         LinearLayout c = SocialUi.card(this);
@@ -840,26 +915,7 @@ public class PublicProfileActivity extends AppCompatActivity {
             c.addView(none);
             return c;
         }
-        for (PublicProfileStore.SharedGroup g : card.sharedGroups) {
-            LinearLayout row = new LinearLayout(this);
-            row.setOrientation(LinearLayout.HORIZONTAL);
-            row.setGravity(Gravity.CENTER_VERTICAL);
-            row.setPadding(0, SocialUi.dp(this, 12), 0, SocialUi.dp(this, 4));
-            TextView initial = SocialUi.text(this, g.name.isEmpty() ? "G" : g.name.substring(0, 1).toUpperCase(Locale.US), 16, true, UiColors.onAccent());
-            initial.setGravity(Gravity.CENTER);
-            GradientDrawable disc = new GradientDrawable();
-            disc.setShape(GradientDrawable.OVAL);
-            disc.setColor(UiColors.accent());
-            initial.setBackground(disc);
-            row.addView(initial, new LinearLayout.LayoutParams(SocialUi.dp(this, 40), SocialUi.dp(this, 40)));
-            TextView name = SocialUi.text(this, g.name, 15, true, UiColors.textPrimary());
-            name.setPadding(SocialUi.dp(this, 12), 0, 0, 0);
-            row.addView(name, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            row.addView(SocialUi.text(this, "Open  ›", 13, true, UiColors.accent()));
-            row.setClickable(true);
-            row.setOnClickListener(v -> startActivity(new Intent(this, GroupDetailsActivity.class).putExtra("groupId", g.id)));
-            c.addView(row);
-        }
+        for (PublicProfileStore.SharedGroup g : card.sharedGroups) c.addView(sharedGroupRow(g));
         return c;
     }
 }

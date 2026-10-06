@@ -43,8 +43,12 @@ public final class PublicProfileStore {
 
     public interface Cb<T> { void done(T value, String error); }
 
+    /** A group both people belong to, with what the Groups list shows for it. Only such groups ever reach a profile. */
     public static final class SharedGroup {
         public final String id, name;
+        public String type = "", frequency = "", state = "", photo = "", nodeKey = "";
+        public long members, round, slots;
+        public double amount;
         SharedGroup(String id, String name) { this.id = id; this.name = name; }
     }
 
@@ -130,8 +134,24 @@ public final class PublicProfileStore {
                         if (!theirGroups.contains(gid) || c.sharedGroups.size() >= 12) continue;
                         try {
                             DocumentSnapshot g = Tasks.await(db().collection("GROUPS").document(gid).get(), T, TimeUnit.SECONDS);
-                            String gname = g.exists() ? str(g.getString("name")) : "";
-                            c.sharedGroups.add(new SharedGroup(gid, gname.isEmpty() ? "Group" : gname));
+                            Map<String, Object> gd = g.exists() && g.getData() != null ? g.getData() : new HashMap<>();
+                            // The group's name is stored as groupName (older documents may have name).
+                            String gname = str(gd.get("groupName"));
+                            if (gname.isEmpty()) gname = str(gd.get("name"));
+                            SharedGroup sg = new SharedGroup(gid, gname.isEmpty() ? "Untitled group" : gname);
+                            sg.type = str(gd.get("groupType"));
+                            sg.frequency = str(gd.get("frequency"));
+                            sg.state = str(gd.get("state"));
+                            for (String k : new String[] {"groupPhoto", "groupImage", "imageUrl", "photoUrl", "icon"}) {
+                                String v = str(gd.get(k));
+                                if (v.startsWith("http")) { sg.photo = v; break; }
+                            }
+                            sg.members = num(gd.get("membersCount"), 0);
+                            sg.round = num(gd.get("currentRound"), 0);
+                            sg.slots = num(gd.get("totalSlots"), 0);
+                            sg.amount = gd.get("contributionAmount") instanceof Number ? ((Number) gd.get("contributionAmount")).doubleValue() : 0.0;
+                            sg.nodeKey = com.harvana.app.trust.NetworkTrust.groupKey(gd);
+                            c.sharedGroups.add(sg);
                         } catch (Exception ignored) { }
                     }
                 }

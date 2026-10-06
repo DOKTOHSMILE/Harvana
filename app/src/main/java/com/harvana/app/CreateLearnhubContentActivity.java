@@ -289,7 +289,31 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		plp.topMargin = (int) (6 * d);
 		plp.bottomMargin = (int) (16 * d);
 		parent.addView(formatPreview, parent.indexOfChild(card) + 1, plp);
+		
+		// The limit is visible, never hidden: 8,000 characters, counted as you type.
+		final TextView counter = new TextView(this);
+		counter.setTextSize(11.5f);
+		counter.setGravity(android.view.Gravity.END);
+		LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		clp.topMargin = (int) (-10 * d);
+		clp.bottomMargin = (int) (10 * d);
+		parent.addView(counter, parent.indexOfChild(card) + 1, clp);
+		final int max = DESCRIPTION_MAX;
+		final Runnable paint = () -> {
+			int n = field.getText().length();
+			counter.setText(String.format(java.util.Locale.US, "%,d / %,d characters", n, max));
+			counter.setTextColor(getResources().getColor(n >= max * 0.9 ? R.color.colorWarning : R.color.colorTextTertiary));
+		};
+		paint.run();
+		field.addTextChangedListener(new android.text.TextWatcher() {
+			@Override public void beforeTextChanged(CharSequence x, int a, int b, int c) { }
+			@Override public void onTextChanged(CharSequence x, int a, int b, int c) { }
+			@Override public void afterTextChanged(android.text.Editable e) { paint.run(); }
+		});
 	}
+	
+	/** The longest article, in characters. Matches android:maxLength on the field and the 8000 limit in the Firestore rules. */
+	private static final int DESCRIPTION_MAX = 8000;
 	
 	/** Wraps the selected text (or puts the cursor between the two markers when nothing is selected). */
 	private void _wrap(EditText f, String left, String right) {

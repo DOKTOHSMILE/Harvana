@@ -4,7 +4,7 @@
 
 ## 6 Oct 2026: a new goal stays in the same group
 
-What the app does. "Start a new goal" no longer creates a new group. The admin of a goal group that has reached its goal (and, for pay-out-in-one rules, been paid out) enters a name and target, and the same group starts a new goal with its own ledger: same members, rule and wallet, nobody joins again. Progress, the Overview and the board show the current goal; the running total and past goals are kept. What you do: the node needs the new jar first (capital-oracle-projects `docs/DEPLOYMENT.md`, "next goal inside the same group"), then install the new build. Until the node is updated the button will report an error from the network.
+What the app does. "Start a new goal" no longer creates a new group. The admin of a goal group that has reached its goal (and, for pay-out-in-one rules, been paid out) enters a name and target, and the same group starts a new goal with its own ledger: same members, rule and wallet, nobody joins again. Progress, the Overview and the board show the current goal; the running total and past goals are kept. The Actions & votes page lists "Past goals" (name, raised, target, closing date) for the group. What you do: the node needs the new jar first (capital-oracle-projects `docs/DEPLOYMENT.md`, "next goal inside the same group"), then install the new build. Until the node is updated the button will report an error from the network.
 
 ## 6 Oct 2026: bigger app name in the top bar
 

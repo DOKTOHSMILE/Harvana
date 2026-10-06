@@ -370,6 +370,24 @@ public class GroupActionsActivity extends AppCompatActivity {
             for (Object[] p : closed) content.addView(voteCard((String) p[0], (String) p[1], castMap(p[2]), false));
         }
 
+        // 4. Goals this group has already finished (the same group keeps one ledger per goal)
+        Object gl = group == null ? null : group.get("goals");
+        if (gl instanceof List && !((List<?>) gl).isEmpty()) {
+            List<?> goals = (List<?>) gl;
+            content.addView(sectionHeader("Past goals", String.valueOf(goals.size())));
+            for (int i = goals.size() - 1; i >= 0; i--) {
+                if (!(goals.get(i) instanceof Map)) continue;
+                Map<String, Object> g = castMap(goals.get(i));
+                LinearLayout c = CircleUi.card(this);
+                String nm = str(g, "name");
+                c.addView(CircleUi.text(this, "Goal " + num(g, "number") + (nm.isEmpty() ? "" : " · " + nm), 14, R.color.colorTextPrimary, true));
+                long closedAt = num(g, "closedTimestamp");
+                c.addView(CircleUi.text(this, CircleUi.harv(num(g, "raisedRaw")) + " raised of " + CircleUi.harv(num(g, "targetRaw"))
+                    + (closedAt > 0 ? " · closed " + date(closedAt) : ""), 12.5f, R.color.colorTextSecondary, false));
+                content.addView(c);
+            }
+        }
+
         TextView foot = CircleUi.text(this, "Deposits, contributions and savings are on the group's Payments tab.", 12, R.color.colorTextTertiary, false);
         foot.setPadding(CircleUi.dp(this, 4), CircleUi.dp(this, 18), CircleUi.dp(this, 4), 0);
         content.addView(foot);

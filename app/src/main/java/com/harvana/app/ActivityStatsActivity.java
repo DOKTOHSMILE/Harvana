@@ -103,7 +103,6 @@ public class ActivityStatsActivity extends AppCompatActivity {
         java.util.List<java.util.Map.Entry<String, Integer>> top = new ArrayList<>(t.screens.entrySet());
         java.util.Collections.sort(top, (x, y) -> y.getValue() - x.getValue());
         for (int i = 0; i < top.size() && i < 6; i++) usage.addView(usageRow(friendly(top.get(i).getKey()), top.get(i).getValue() + " opens"));
-        tile(R.id.tile_days, "Active days (30)", String.valueOf(t.activeDays30));
     }
 
     private static String minutes(long sec) { return sec < 60 ? sec + " s" : sec < 3600 ? (sec / 60) + " min" : (sec / 3600) + " h " + ((sec % 3600) / 60) + " min"; }
@@ -149,6 +148,7 @@ public class ActivityStatsActivity extends AppCompatActivity {
                 ? "No verified reads yet. Open someone else\u2019s Learn post, scroll to the end and stay a few seconds until it says \u201cCounted as a read\u201d. Your own posts do not count."
                 : "Your activity over the last 30 days.");
         tile(R.id.tile_reads, "Verified reads", String.valueOf(j.optInt("reads", 0)));
+        tile(R.id.tile_days, "Active days (30)", String.valueOf(j.optInt("activeDays30", 0)));
         tile(R.id.tile_gifts, "Gifts sent", String.valueOf(j.optInt("giftsSent", 0)));
 
         note.setText(j.optBoolean("automated", false)

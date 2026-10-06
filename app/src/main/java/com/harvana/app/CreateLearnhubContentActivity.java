@@ -62,8 +62,6 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 	private MaterialCardView cardview7;
 	private TextView textview29;
 	private MaterialCardView card_image_picker;
-	private TextView textview31;
-	private MaterialCardView cardview15;
 	private TextView textview32;
 	private TextView tv_learn_error;
 	private MaterialButton btn_learn_post;
@@ -126,8 +124,6 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		cardview7 = findViewById(R.id.cardview7);
 		textview29 = findViewById(R.id.textview29);
 		card_image_picker = findViewById(R.id.card_image_picker);
-		textview31 = findViewById(R.id.textview31);
-		cardview15 = findViewById(R.id.cardview15);
 		textview32 = findViewById(R.id.textview32);
 		tv_learn_error = findViewById(R.id.tv_learn_error);
 		btn_learn_post = findViewById(R.id.btn_learn_post);

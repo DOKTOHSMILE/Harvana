@@ -40,6 +40,8 @@ public final class GroupNoticeHelper {
     public static final String TYPE_ANNOUNCEMENT = "ANNOUNCEMENT";
     public static final String PRIORITY_NORMAL = "NORMAL";
     public static final String PRIORITY_HIGH = "HIGH";
+    /** Who a notice is for: every member (except whoever caused it), or one member. */
+    public static final String AUDIENCE_ALL = "ALL", AUDIENCE_TARGET = "TARGET";
 
     public interface Callback {
         void onSuccess(String noticeId);
@@ -66,14 +68,45 @@ public final class GroupNoticeHelper {
         return buildSystem(title, message, currentUid);
     }
 
-    public static Map<String, Object> buildSystem(String title, String message, String targetUid) {
+    /**
+     * A notice about something that happened, written by the person who caused it ("a member joined", "a loan was applied for").
+     * Every other member is told; the person who caused it is not. (Not to be confused with the reminder below.)
+     */
+    public static Map<String, Object> buildSystem(String title, String message, String actorUid) {
+        Map<String, Object> fields = base(title, message);
+        fields.put("creatorId", actorUid != null ? actorUid : "");     // kept for older readers that resolve the name from it
+        fields.put("actorUid", actorUid != null ? actorUid : "");
+        fields.put("audience", AUDIENCE_ALL);
+        return fields;
+    }
+
+    /** A notice only one member should be told about (a payment reminder to the member who still owes). */
+    public static Map<String, Object> buildTargeted(String title, String message, String targetUid, String actorUid, String category) {
+        Map<String, Object> fields = base(title, message);
+        fields.put("creatorId", targetUid != null ? targetUid : "");
+        fields.put("targetUid", targetUid != null ? targetUid : "");
+        fields.put("actorUid", actorUid != null ? actorUid : "");
+        fields.put("audience", AUDIENCE_TARGET);
+        fields.put("category", category == null ? "GROUP" : category);
+        return fields;
+    }
+
+    /** Something every member can act on: a vote is waiting. {@code page} is where the member goes (see NotificationRouter). */
+    public static Map<String, Object> buildVote(String title, String message, String actorUid, int page) {
+        Map<String, Object> fields = buildSystem(title, message, "");
+        fields.put("actorUid", actorUid != null ? actorUid : "");
+        fields.put("needsVote", true);
+        fields.put("page", page);
+        return fields;
+    }
+
+    private static Map<String, Object> base(String title, String message) {
         long now = System.currentTimeMillis();
         Map<String, Object> fields = new HashMap<>();
         fields.put("type", TYPE_SYSTEM);
         fields.put("title", title != null ? title : "Update");
         fields.put("message", message != null ? message : "");
         fields.put("sender", "System");
-        fields.put("creatorId", targetUid != null ? targetUid : ""); 
         fields.put("priority", PRIORITY_NORMAL);
         fields.put("createdAt", now);
         fields.put("timestamp", String.valueOf(now));

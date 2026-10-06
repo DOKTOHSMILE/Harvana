@@ -673,3 +673,9 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## New Group button readable
 - The "+ New Group" button on the Groups tab had no text colour, so its label was pale on the sand button and could not be read. It now uses the on-accent ink colour in day and night themes.
+
+## Group notices and notifications: wired up properly
+- **Found wrong:** system notices (a member joined, a loan was applied for, a contribution received...) were written with the person who did it as the "target", and the notification code only notified that target. So the one person who caused the event was told, under "Payment reminders", and every other member heard nothing. Votes were worse: the notice pointing at a new vote had no owner at all, so nobody was notified.
+- **Now:** every notice says who it is for. A notice about something that happened goes to every member except whoever did it, under Group notices. A payment reminder goes only to the member it names. A new vote (a payout request, milestone, emergency grant, savings pack, or someone asking to join a group that votes) is added to the group's Notice tab with a clear message and notifies every member; tapping it opens Actions & votes for a network group, or the Members tab to vote on a join request. For groups where the admin decides, the join-request notice goes to the admin only. Older notices without this information are treated the same way.
+- Notifications reach a phone when the app next syncs (it checks regularly in the background). There is no instant push without a server.
+- **Owner step:** publish the updated `docs/firestore.console.rules` (one added rule lets a person who has just asked to join post the single "Join request" notice).

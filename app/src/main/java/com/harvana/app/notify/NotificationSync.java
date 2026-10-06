@@ -149,10 +149,9 @@ public final class NotificationSync {
             String named = title.isEmpty() ? "New group notice" : title;
             if (!groupName.isEmpty() && !named.contains(groupName)) named = groupName + " · " + named;
             if (!who.isEmpty() && !msg.contains(who)) msg = who + " — " + msg;
-            // Open the page the notice is about: a new member goes to Members, a loan to Loans, a payment to Payments.
-            String about = (title + " " + msg).toLowerCase(java.util.Locale.US);
-            int page = about.contains("joined") || about.contains("new member") || about.contains("left the group") || about.contains("removed")
-                ? 1 : about.contains("loan") ? 3 : cat.equals(NotificationCenter.PAYMENT) ? 2 : 4;
+            // Open the page the notice is about: a waiting vote to Actions & votes, a new member to Members, a loan to Loans, ...
+            int page = NoticeFilter.pageFor(n, cat);
+            if (NoticeFilter.needsVote(n) && msg.isEmpty()) msg = "A vote is waiting. Open Actions & votes to vote.";
             NotificationCenter.post(c, cat, "notice_" + s(n.get("_docId")), named, msg, gid, page);
         }
         if (newest > since) sp.edit().putLong(key, newest).apply();

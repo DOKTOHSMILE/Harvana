@@ -782,6 +782,27 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 		});
 	}
 	
+	/** Tells the people who decide that someone is waiting: every member when members vote, otherwise the admin. */
+	private void _noticeJoinRequest(String requesterUid) {
+		try {
+			boolean vote = "MEMBER_VOTE".equals(loadedJoinApprovalMethod);
+			Map<String, Object> notice;
+			if (vote) {
+				notice = com.harvana.app.group.GroupNoticeHelper.buildVote("Join request",
+					"Someone asked to join. Open Members to vote Yes or No.", requesterUid, 1);
+			} else if (!loadedCreatorId.isEmpty()) {
+				notice = com.harvana.app.group.GroupNoticeHelper.buildTargeted("Join request",
+					"Someone asked to join. Open Members to accept or reject.", loadedCreatorId, requesterUid, "GROUP");
+				notice.put("page", 1);
+			} else return;
+			com.harvana.app.firestore.GroupFirestoreManager.getInstance(getApplicationContext()).addNotice(groupId, notice,
+				new com.harvana.app.firestore.GroupFirestoreManager.IdCallback() {
+					@Override public void onSuccess(String id) { }
+					@Override public void onError(String error) { }
+				});
+		} catch (Exception ignored) { }
+	}
+	
 	private void _writeJoinRequest(String currentUid, String message) {
 		Map<String, Object> requestFields = new HashMap<>();
 		requestFields.put("requesterUid", currentUid);
@@ -799,6 +820,7 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 			@Override
 			public void onSuccess(String generatedId) {
 				_markInviteAccepted();
+				_noticeJoinRequest(currentUid);
 				com.harvana.app.firestore.UserProfileManager.getInstance(getApplicationContext())
 				.addPendingGroupToProfile(currentUid, groupId,
 				new com.harvana.app.firestore.UserProfileManager.SimpleCallback() {

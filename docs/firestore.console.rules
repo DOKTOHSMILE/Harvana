@@ -294,6 +294,14 @@ service cloud.firestore {
         allow create: if isCreatorOrMember(groupId)
           && !('type' in request.resource.data.keys());
 
+        // Someone who has just asked to join may post the one "Join request" notice that tells the voters or the admin.
+        allow create: if request.auth != null
+          && exists(/databases/$(database)/documents/GROUPS/$(groupId)/joinRequests/$(request.auth.uid))
+          && request.resource.data.type == 'SYSTEM'
+          && request.resource.data.system == true
+          && request.resource.data.title == 'Join request'
+          && request.resource.data.actorUid == request.auth.uid;
+
         allow update, delete: if isGroupCreator(groupId);
       }
     }

@@ -30,17 +30,10 @@ public final class GroupProposalIndex {
 
     public static void post(Context c, String firestoreGroupId, String kind, String id, String title, String extra) {
         if (firestoreGroupId == null || firestoreGroupId.isEmpty() || id == null || id.isEmpty()) return;
-        Map<String, Object> f = new HashMap<>();
-        long now = System.currentTimeMillis();
-        f.put("type", "SYSTEM");
-        f.put("system", true);
-        f.put("title", title);
-        f.put("message", "");
-        f.put("sender", "System");
-        f.put("creatorId", "");
-        f.put("priority", "NORMAL");
-        f.put("createdAt", now);
-        f.put("timestamp", String.valueOf(now));
+        // Every member is told a vote is waiting (the pointer is also how other members find the proposal).
+        String actor = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
+            : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Map<String, Object> f = GroupNoticeHelper.buildVote(title, "A vote is waiting. Open Actions & votes to vote.", actor, 99);
         f.put("proposalKind", kind);
         f.put("proposalId", id);
         f.put("proposalExtra", extra == null ? "" : extra);

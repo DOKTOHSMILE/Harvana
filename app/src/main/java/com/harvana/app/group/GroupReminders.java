@@ -41,7 +41,8 @@ public final class GroupReminders {
         String name = memberName == null || memberName.isEmpty() ? "A member" : memberName;
         String message = name + ", your contribution" + (amountText == null || amountText.isEmpty() ? "" : " of " + amountText)
                 + " for this cycle is still due. Please pay when you can.";
-        Map<String, Object> fields = GroupNoticeHelper.buildSystem("Payment reminder", message, memberUid);
+        Map<String, Object> fields = GroupNoticeHelper.buildTargeted("Payment reminder", message, memberUid,
+                com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? "" : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid(), "PAYMENT");
         GroupFirestoreManager.getInstance(ctx.getApplicationContext()).addNotice(groupId, fields, new GroupFirestoreManager.IdCallback() {
             @Override public void onSuccess(String id) {
                 ctx.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)

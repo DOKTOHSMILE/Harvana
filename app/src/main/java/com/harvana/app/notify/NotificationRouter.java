@@ -22,6 +22,9 @@ import java.util.regex.Pattern;
 public final class NotificationRouter {
     private NotificationRouter() {}
 
+    /** Notification page code for "a vote is waiting": the group's Actions & votes screen. */
+    public static final int VOTES = 99;
+
     private static final Pattern TX_HASH = Pattern.compile("^tx_([0-9a-fA-F]{16,})_");
 
     /** Marks the notification read and opens its page. Safe from any context (a service, an activity, a trampoline). */
@@ -32,6 +35,7 @@ public final class NotificationRouter {
 
         Matcher m = TX_HASH.matcher(it.id == null ? "" : it.id);
         if (NotificationCenter.TX.equals(it.type) && m.find()) { openTransaction(c, m.group(1)); return; }
+        if (it.tab == VOTES && it.groupId != null && !it.groupId.isEmpty()) { openVotes(c, it.groupId); return; }
         if (NotificationCenter.SYSTEM.equals(it.type) && it.id != null && it.id.startsWith("learn_") && it.id.endsWith("_approved")) {
             openLearnPost(c, it.id.substring("learn_".length(), it.id.length() - "_approved".length()));
             return;
@@ -124,6 +128,22 @@ public final class NotificationRouter {
     private static String str(com.google.firebase.firestore.DocumentSnapshot d, String key) {
         Object o = d.get(key);
         return o == null ? "" : String.valueOf(o);
+    }
+
+    /** A group on the network votes on its own screen (Actions & votes); any other group votes in the Members tab. */
+    private static void openVotes(final Context c, final String groupId) {
+        com.harvana.app.firestore.GroupFirestoreManager.getInstance(c).getGroup(groupId, new com.harvana.app.firestore.GroupFirestoreManager.DocCallback() {
+            @Override public void onSuccess(java.util.Map<String, Object> data) {
+                com.harvana.app.group.GroupIdentity identity = com.harvana.app.group.GroupIdentityResolver.resolve(groupId, data);
+                if (identity != null && identity.onChain()) {
+                    start(c, new Intent(c, com.harvana.app.group.NodeGroupActivity.class)
+                        .putExtra("nodeGroupId", identity.protocolId()).putExtra("firestoreGroupId", groupId));
+                } else {
+                    start(c, group(c, groupId, 1));
+                }
+            }
+            @Override public void onError(String error) { start(c, group(c, groupId, 4)); }
+        });
     }
 
     private static Intent group(Context c, String groupId, int page) {

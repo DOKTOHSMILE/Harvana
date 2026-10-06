@@ -77,12 +77,13 @@ public final class SocialUi {
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
         row.setPadding(0, dp(c, 8), 0, dp(c, 8));
-        TextView face = text(c, p.initials(), 14, true, 0xFF1A1208);
+        TextView face = text(c, p.initials(), 10, true, 0xFFFFFFFF);
         face.setGravity(Gravity.CENTER);
-        int size = dp(c, 40);
+        int size = dp(c, 24);
         GradientDrawable disc = new GradientDrawable();
         disc.setShape(GradientDrawable.OVAL);
-        disc.setColor(0xFFF0B45A);
+        disc.setColors(new int[] {0xFF2BA597, 0xFF0B6B61});
+        disc.setOrientation(GradientDrawable.Orientation.TL_BR);
         face.setBackground(disc);
         LinearLayout.LayoutParams faceLp = new LinearLayout.LayoutParams(size, size);
         faceLp.rightMargin = dp(c, 12);

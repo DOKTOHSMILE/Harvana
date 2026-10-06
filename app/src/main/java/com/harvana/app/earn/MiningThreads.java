@@ -72,7 +72,7 @@ public final class MiningThreads {
         int max = Math.min(8, cores);
         for (int n = 1; n <= max; n++) {
             final int threads = n;
-            TextView chip = line(c, String.valueOf(n), 14, true, 0xFF1A1208);
+            TextView chip = line(c, String.valueOf(n), 14, true, UiColors.onAccent());
             chip.setGravity(Gravity.CENTER);
             int color = heat(n, cores) == 2 ? 0xFFD32F2F : heat(n, cores) == 1 ? 0xFFF08A24 : 0xFF3DDC97;
             GradientDrawable bg = new GradientDrawable();

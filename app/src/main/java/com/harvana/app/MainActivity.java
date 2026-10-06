@@ -438,7 +438,7 @@ public class MainActivity extends AppCompatActivity {
 		toolbarContainer.setPadding(16, 0, 16, 0);
 		
 		int sizePx = (int) android.util.TypedValue.applyDimension(
-		android.util.TypedValue.COMPLEX_UNIT_DIP, 40, getResources().getDisplayMetrics());
+		android.util.TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
 		
 		// 2. Avatar Setup
 		com.google.android.material.card.MaterialCardView avatarCard = new com.google.android.material.card.MaterialCardView(this);
@@ -446,13 +446,14 @@ public class MainActivity extends AppCompatActivity {
 		avatarCard.setRadius(sizePx / 2f);
 		avatarCard.setCardElevation(0f);
 		int resolvedPrimaryColor = androidx.core.content.ContextCompat.getColor(this, R.color.colorPrimary);
-		avatarCard.setCardBackgroundColor(resolvedPrimaryColor);
+		avatarCard.setCardBackgroundColor(android.graphics.Color.TRANSPARENT);
 		
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
 			avatarCard.setClipToOutline(true);
 		}
 		
-		final ImageView logoView = new ImageView(this);
+		final com.harvana.app.ui.AvatarView logoView = new com.harvana.app.ui.AvatarView(this);
+		logoView.setAvatarSize(com.harvana.app.ui.AvatarView.Size.HEADER);
 		logoView.setId(android.view.View.generateViewId());
 		logoView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 		logoView.setLayoutParams(new FrameLayout.LayoutParams(sizePx, sizePx));
@@ -693,6 +694,23 @@ public class MainActivity extends AppCompatActivity {
 	};
 	
 	public void _setToolbarInitialAvatar(final String _first, final String _last, final ImageView _img) {
+		if (_img instanceof com.harvana.app.ui.AvatarView) {
+			// the shared avatar draws its own initials (white on the blue disc) until a photo loads
+			_img.setImageDrawable(null);
+			String full = ((_first == null ? "" : _first.trim()) + " " + (_last == null ? "" : _last.trim())).trim();
+			if (full.isEmpty()) {
+				try {
+					com.google.firebase.auth.FirebaseUser u = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+					if (u != null) {
+						java.util.Map<String, Object> mine = com.harvana.app.offline.OfflineCacheManager.load(this, "profile_" + u.getUid());
+						if (mine != null) full = (String.valueOf(mine.get("first_name") == null ? "" : mine.get("first_name")) + " " + String.valueOf(mine.get("last_name") == null ? "" : mine.get("last_name"))).trim();
+						if (full.isEmpty() && u.getDisplayName() != null) full = u.getDisplayName();
+					}
+				} catch (Exception ignored) { }
+			}
+			((com.harvana.app.ui.AvatarView) _img).setPerson(full);
+			return;
+		}
 		String initials = "";
 		if (_first != null && !_first.trim().isEmpty()) {
 			initials += _first.trim().substring(0, 1).toUpperCase(Locale.US);

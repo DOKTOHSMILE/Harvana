@@ -30,22 +30,23 @@
 				android:orientation="horizontal">
 				<com.google.android.material.card.MaterialCardView
 					android:id="@+id/cardview7"
-					android:layout_width="42dp"
-					android:layout_height="42dp"
+					android:layout_width="24dp"
+					android:layout_height="24dp"
 					app:cardBackgroundColor="@color/colorP2pSurfaceAlt"
-					app:cardCornerRadius="21dp"
+					app:cardCornerRadius="12dp"
 					app:cardElevation="0dp"
 					app:strokeWidth="0dp">
 					<TextView
 						android:id="@+id/seller_initial"
 						android:layout_width="match_parent"
 						android:layout_height="match_parent"
-						android:gravity="center_horizontal|center_vertical"
+						android:gravity="center"
 						android:text="\\?"
-						android:textSize="16sp"
+						android:textSize="10sp"
 						android:textStyle="bold"
-						android:textColor="@color/colorP2pTextPrimary"
-						android:focusable="false" />
+						android:textColor="#FFFFFFFF"
+						android:focusable="false"
+	android:background="@drawable/bg_avatar"/>
 					<ImageView
 						android:id="@+id/seller_avatar"
 						android:layout_width="match_parent"

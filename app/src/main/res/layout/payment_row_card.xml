@@ -25,14 +25,14 @@
 			android:orientation="horizontal">
 			<TextView
 				android:id="@+id/tv_pay_initials"
-				android:layout_width="36dp"
-				android:layout_height="36dp"
-				android:background="@drawable/bg_chip_muted"
-				android:gravity="center_horizontal|center_vertical"
+				android:layout_width="24dp"
+				android:layout_height="24dp"
+				android:background="@drawable/bg_avatar"
+				android:gravity="center"
 				android:text="M"
-				android:textSize="13sp"
+				android:textSize="10sp"
 				android:textStyle="bold"
-				android:textColor="@color/colorAccent"
+				android:textColor="#FFFFFFFF"
 				android:focusable="false" />
 			<LinearLayout
 				android:id="@+id/linear137"

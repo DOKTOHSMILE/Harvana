@@ -181,13 +181,14 @@ public class FriendPickerActivity extends AppCompatActivity {
         row.setGravity(Gravity.CENTER_VERTICAL);
         row.setPadding(0, SocialUi.dp(this, 8), 0, SocialUi.dp(this, 8));
 
-        int size = SocialUi.dp(this, 46);
+        int size = SocialUi.dp(this, 24);
         FrameLayout face = new FrameLayout(this);
-        TextView initials = SocialUi.text(this, p.initials(), 15, true, 0xFF1A1208);
+        TextView initials = SocialUi.text(this, p.initials(), 10, true, 0xFFFFFFFF);
         initials.setGravity(Gravity.CENTER);
         android.graphics.drawable.GradientDrawable disc = new android.graphics.drawable.GradientDrawable();
         disc.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-        disc.setColor(0xFFF0B45A);
+        disc.setColors(new int[] {0xFF2BA597, 0xFF0B6B61});
+        disc.setOrientation(android.graphics.drawable.GradientDrawable.Orientation.TL_BR);
         initials.setBackground(disc);
         face.addView(initials, new FrameLayout.LayoutParams(size, size));
         ImageView photo = new ImageView(this);

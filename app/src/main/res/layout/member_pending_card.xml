@@ -25,14 +25,14 @@
 			android:orientation="horizontal">
 			<TextView
 				android:id="@+id/tv_pending_initials"
-				android:layout_width="40dp"
-				android:layout_height="40dp"
-				android:background="@drawable/bg_chip_muted"
-				android:gravity="center_horizontal|center_vertical"
+				android:layout_width="24dp"
+				android:layout_height="24dp"
+				android:background="@drawable/bg_avatar"
+				android:gravity="center"
 				android:text="\?"
-				android:textSize="15sp"
+				android:textSize="10sp"
 				android:textStyle="bold"
-				android:textColor="@color/colorAccent"
+				android:textColor="#FFFFFFFF"
 				android:focusable="false" />
 			<LinearLayout
 				android:id="@+id/linear89"

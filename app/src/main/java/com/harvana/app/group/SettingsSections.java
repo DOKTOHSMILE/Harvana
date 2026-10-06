@@ -153,7 +153,7 @@ public final class SettingsSections {
         g.setCornerRadius(18 * d);
         g.setColor(on ? UiColors.accent() : (UiColors.accent() & 0x00FFFFFF) | 0x22000000);
         c.setBackground(g);
-        c.setTextColor(on ? 0xFF1A1208 : UiColors.textPrimary());
+        c.setTextColor(on ? UiColors.onAccent() : UiColors.textPrimary());
     }
 
     // ── cards ──
@@ -313,7 +313,7 @@ public final class SettingsSections {
         String sub = (admin ? "Admin" : treas ? "Treasurer" : "Member") + (slot > 0 && str(g, "groupType", "").toLowerCase(Locale.US).contains("rotating") ? " \u00b7 Slot " + slot : "");
         mid.addView(text(sub, 12, false, UiColors.textSecondary()));
         r.addView(mid, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView badge = text(admin ? "ADMIN" : treas ? "TREASURER" : "MEMBER", 11, true, admin || treas ? 0xFF1A1208 : UiColors.textSecondary());
+        TextView badge = text(admin ? "ADMIN" : treas ? "TREASURER" : "MEMBER", 11, true, admin || treas ? UiColors.onAccent() : UiColors.textSecondary());
         badge.setPadding((int) (10 * d), (int) (4 * d), (int) (10 * d), (int) (4 * d));
         GradientDrawable bg = new GradientDrawable();
         bg.setCornerRadius(12 * d);

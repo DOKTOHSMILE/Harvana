@@ -55,10 +55,10 @@
 					android:orientation="vertical">
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview13"
-						android:layout_width="72dp"
-						android:layout_height="72dp"
+						android:layout_width="40dp"
+						android:layout_height="40dp"
 						app:cardBackgroundColor="@color/colorSurfaceAlt"
-						app:cardCornerRadius="360dp"
+						app:cardCornerRadius="20dp"
 						app:cardElevation="0dp"
 						app:strokeWidth="0dp">
 						<FrameLayout
@@ -77,11 +77,13 @@
 								android:id="@+id/tv_detail_initials"
 								android:layout_width="match_parent"
 								android:layout_height="match_parent"
-								android:gravity="center_horizontal|center_vertical"
+								android:gravity="center"
 								android:text="M"
-								android:textSize="26sp"
+								android:textSize="15sp"
 								android:textStyle="bold"
-								android:focusable="false" />
+								android:focusable="false"
+	android:background="@drawable/bg_avatar"
+	android:textColor="#FFFFFFFF"/>
 						</FrameLayout>
 					</com.google.android.material.card.MaterialCardView>
 					<TextView

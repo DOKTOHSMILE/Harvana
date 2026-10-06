@@ -5,4 +5,12 @@
     <attr name="appBarColor" format="color|reference" />
     <!-- Text and icon color drawn on top of appBarColor. -->
     <attr name="onAppBarColor" format="color|reference" />
+    <declare-styleable name="AvatarView">
+        <attr name="avatarSize" format="enum">
+            <enum name="list" value="0" />
+            <enum name="header" value="1" />
+            <enum name="profile" value="2" />
+        </attr>
+        <attr name="avatarOnline" format="boolean" />
+    </declare-styleable>
 </resources>

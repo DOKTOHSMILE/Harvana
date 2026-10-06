@@ -557,3 +557,11 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## One fee rule everywhere (needs the node jar with the fee policy)
 - Loan requests, goal-group requests and votes that can release money, and cancelling a P2P listing now also pay the network fee from your wallet first (history shows "Network fee"), the same as claims and unstakes. Creating a savings or goal group also charges gas on its creation fee, like circles.
+
+## New look: Ink Teal and Warm Sand, and one avatar scale
+- **Theme.** The whole app moves from orange on charcoal to **Ink Teal `#053D3A`** (trust, growth, calm) with **Warm Sand `#FFE2B8`** (warm, approachable). It is all in `res/values/colors.xml` and `res/values-night/colors.xml`, so every screen follows.
+  - Day: warm cream pages (`#FFF8EE`), white cards, Ink Teal text, teal `#0B5F57` buttons with white text.
+  - Night: deep teal pages (`#031F1D`), teal cards, warm white text, **Warm Sand buttons with Ink Teal text**.
+  - The wallet card is Ink Teal in both. Success is a calmer green, errors a softer red. The HARV coin is now gold.
+  - Text and button contrast checked against WCAG AA (body text 4.7 to 15:1, buttons 7.5 to 9.7:1).
+- **Avatars: three sizes, then stop.** One `AvatarView` and styles: 24dp in lists, 32dp in headers, 40dp on profiles; initials in white on a teal gradient disc when there is no photo; optional online dot (`ui/AvatarView.java`, `Avatar.Initials.*` styles). Converted: member, pending, payment and blocked rows, P2P rows and trades, Learn posts, the drawer and top bar, friends lists, profile and QR, the member sheet, group cards and settings. Left alone on purpose: the photo pickers in Edit profile and Create group (large editing previews) and the group-join icon badge.

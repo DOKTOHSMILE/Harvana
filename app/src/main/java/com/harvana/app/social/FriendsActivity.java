@@ -370,13 +370,14 @@ public class FriendsActivity extends AppCompatActivity {
         line.setGravity(Gravity.CENTER_VERTICAL);
         line.setPadding(0, SocialUi.dp(this, 10), 0, SocialUi.dp(this, 10));
 
-        int size = SocialUi.dp(this, 52);
+        int size = SocialUi.dp(this, 24);
         FrameLayout face = new FrameLayout(this);
-        TextView initials = SocialUi.text(this, p.initials(), 18, true, 0xFF1A1208);
+        TextView initials = SocialUi.text(this, p.initials(), 10, true, 0xFFFFFFFF);
         initials.setGravity(Gravity.CENTER);
         GradientDrawable disc = new GradientDrawable();
         disc.setShape(GradientDrawable.OVAL);
-        disc.setColor(0xFFF0B45A);
+        disc.setColors(new int[] {0xFF2BA597, 0xFF0B6B61});
+        disc.setOrientation(android.graphics.drawable.GradientDrawable.Orientation.TL_BR);
         initials.setBackground(disc);
         face.addView(initials, new FrameLayout.LayoutParams(size, size));
         ImageView photo = new ImageView(this);
@@ -533,13 +534,14 @@ public class FriendsActivity extends AppCompatActivity {
         LinearLayout line = new LinearLayout(this);
         line.setGravity(Gravity.CENTER_VERTICAL);
         line.setPadding(0, SocialUi.dp(this, 10), 0, SocialUi.dp(this, 10));
-        int size = SocialUi.dp(this, 52);
+        int size = SocialUi.dp(this, 24);
         FrameLayout face = new FrameLayout(this);
-        TextView initials = SocialUi.text(this, p.initials(), 18, true, 0xFF1A1208);
+        TextView initials = SocialUi.text(this, p.initials(), 10, true, 0xFFFFFFFF);
         initials.setGravity(Gravity.CENTER);
         GradientDrawable disc = new GradientDrawable();
         disc.setShape(GradientDrawable.OVAL);
-        disc.setColor(0xFFF0B45A);
+        disc.setColors(new int[] {0xFF2BA597, 0xFF0B6B61});
+        disc.setOrientation(android.graphics.drawable.GradientDrawable.Orientation.TL_BR);
         initials.setBackground(disc);
         face.addView(initials, new FrameLayout.LayoutParams(size, size));
         ImageView photo = new ImageView(this);

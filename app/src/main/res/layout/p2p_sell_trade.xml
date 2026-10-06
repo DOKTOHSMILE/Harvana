@@ -240,21 +240,22 @@
 						android:orientation="horizontal">
 						<FrameLayout
 							android:id="@+id/frame_layout4"
-							android:layout_width="52dp"
-							android:layout_height="52dp">
+							android:layout_width="40dp"
+							android:layout_height="40dp">
 							<TextView
 								android:id="@+id/tv_sell_buyer_initial"
 								android:layout_width="match_parent"
 								android:layout_height="match_parent"
-								android:background="@drawable/default_image"
-								android:gravity="center_horizontal|center_vertical"
+								android:background="@drawable/bg_avatar"
+								android:gravity="center"
 								android:text="\\\\?"
-								android:textSize="18sp"
-								android:textStyle="bold" />
+								android:textSize="15sp"
+								android:textStyle="bold"
+	android:textColor="#FFFFFFFF"/>
 							<ImageView
 								android:id="@+id/iv_sell_buyer_avatar"
-								android:layout_width="52dp"
-								android:layout_height="52dp"
+								android:layout_width="40dp"
+								android:layout_height="40dp"
 								android:src="@drawable/default_image"
 								android:scaleType="centerCrop"
 								android:visibility="gone" />

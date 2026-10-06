@@ -25,14 +25,14 @@
 			<TextView
 				android:id="@+id/tvAvatarInitials"
 				android:focusable="false"
-				android:layout_width="40dp"
-				android:layout_height="40dp"
-				android:background="@drawable/bg_settings_icon_badge"
-				android:gravity="center_horizontal|center_vertical"
+				android:layout_width="24dp"
+				android:layout_height="24dp"
+				android:background="@drawable/bg_avatar"
+				android:gravity="center"
 				android:text="S1"
-				android:textSize="13sp"
+				android:textSize="10sp"
 				android:textStyle="bold"
-				android:textColor="@color/colorAccent" />
+				android:textColor="#FFFFFFFF" />
 			<TextView
 				android:id="@+id/tvMemberDetails"
 				android:focusable="false"

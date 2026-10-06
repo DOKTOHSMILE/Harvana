@@ -122,14 +122,15 @@ public class ProfileQrActivity extends AppCompatActivity {
         cardLp.topMargin = SocialUi.dp(this, 30);
         wrap.addView(card, cardLp);
 
-        int s = SocialUi.dp(this, 72);
+        int s = SocialUi.dp(this, 40);
         FrameLayout face = new FrameLayout(this);
-        TextView initial = SocialUi.text(this, username.substring(0, 1).toUpperCase(java.util.Locale.US), 26, true, UiColors.onAccent());
+        TextView initial = SocialUi.text(this, username.substring(0, 1).toUpperCase(java.util.Locale.US), 15, true, 0xFFFFFFFF);
         initial.setGravity(Gravity.CENTER);
         GradientDrawable disc = new GradientDrawable();
         disc.setShape(GradientDrawable.OVAL);
-        disc.setColor(UiColors.accent());
-        disc.setStroke(SocialUi.dp(this, 3), 0xFFFFFFFF);
+        disc.setColors(new int[] {0xFF2BA597, 0xFF0B6B61});
+        disc.setOrientation(GradientDrawable.Orientation.TL_BR);
+        disc.setStroke(SocialUi.dp(this, 2), 0xFFFFFFFF);
         initial.setBackground(disc);
         face.addView(initial, new FrameLayout.LayoutParams(s, s));
         if (icon.startsWith("http")) {

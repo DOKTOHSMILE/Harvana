@@ -97,16 +97,10 @@ final class MainDrawer {
         g.setColor(UiColors.background());
         h.setBackground(g);
 
-        ImageView avatar = new ImageView(a);
-        avatar.setImageResource(R.drawable.ic_person);
-        avatar.setColorFilter(UiColors.textSecondary());
-        avatar.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        avatar.setPadding(dp(10), dp(10), dp(10), dp(10));
-        GradientDrawable circle = new GradientDrawable();
-        circle.setShape(GradientDrawable.OVAL);
-        circle.setColor(UiColors.surface());
-        avatar.setBackground(circle);
-        h.addView(avatar, new LinearLayout.LayoutParams(dp(56), dp(56)));
+        final com.harvana.app.ui.AvatarView avatar = new com.harvana.app.ui.AvatarView(a);
+        avatar.setAvatarSize(com.harvana.app.ui.AvatarView.Size.HEADER);
+        avatar.setPerson("");
+        h.addView(avatar, new LinearLayout.LayoutParams(dp(32), dp(32)));
 
         LinearLayout text = new LinearLayout(a);
         text.setOrientation(LinearLayout.VERTICAL);
@@ -126,11 +120,10 @@ final class MainDrawer {
                 String first = str(cached.get("first_name")), last = str(cached.get("last_name")), user = str(cached.get("username"));
                 String full = (first + " " + last).trim();
                 if (!full.isEmpty()) name.setText(full);
+                avatar.setPerson(!full.isEmpty() ? full : user);
                 if (!user.isEmpty()) sub.setText("@" + user);
                 String icon = str(cached.get("icon"));
                 if (!icon.isEmpty()) {
-                    avatar.clearColorFilter();
-                    avatar.setPadding(0, 0, 0, 0);
                     try { Glide.with(a.getApplicationContext()).load(Uri.parse(icon)).circleCrop().into(avatar); } catch (Exception ignored) { }
                 }
             }

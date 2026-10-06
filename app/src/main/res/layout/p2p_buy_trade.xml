@@ -263,10 +263,12 @@
 								android:id="@+id/seller_initial"
 								android:layout_width="40dp"
 								android:layout_height="40dp"
-								android:gravity="center_horizontal|center_vertical"
+								android:gravity="center"
 								android:text="S"
-								android:textSize="14sp"
-								android:textStyle="bold" />
+								android:textSize="15sp"
+								android:textStyle="bold"
+	android:background="@drawable/bg_avatar"
+	android:textColor="#FFFFFFFF"/>
 						</FrameLayout>
 						<LinearLayout
 							android:id="@+id/linear87"
@@ -319,10 +321,12 @@
 								android:id="@+id/buyer_initial"
 								android:layout_width="40dp"
 								android:layout_height="40dp"
-								android:gravity="center_horizontal|center_vertical"
+								android:gravity="center"
 								android:text="B"
-								android:textSize="14sp"
-								android:textStyle="bold" />
+								android:textSize="15sp"
+								android:textStyle="bold"
+	android:background="@drawable/bg_avatar"
+	android:textColor="#FFFFFFFF"/>
 						</FrameLayout>
 						<LinearLayout
 							android:id="@+id/linear89"

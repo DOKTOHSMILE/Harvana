@@ -60,9 +60,9 @@
 						android:focusable="true">
 						<ImageView
 							android:id="@+id/ivSettingsAvatar"
-							android:layout_width="52dp"
-							android:layout_height="52dp"
-							android:padding="12dp"
+							android:layout_width="40dp"
+							android:layout_height="40dp"
+							android:padding="9dp"
 							android:background="@drawable/bg_settings_icon_badge"
 							android:src="@drawable/ic_person"
 							android:scaleType="fitCenter" />

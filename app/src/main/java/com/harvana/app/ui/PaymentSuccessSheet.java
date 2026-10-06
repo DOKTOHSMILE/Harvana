@@ -134,7 +134,7 @@ public final class PaymentSuccessSheet {
         MaterialButton done = new MaterialButton(a);
         done.setText("Done");
         done.setAllCaps(false);
-        done.setTextColor(Color.BLACK);
+        done.setTextColor(color(R.color.colorTextOnAccent));
         done.setCornerRadius(dp(14));
         done.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color(R.color.colorAccent)));
         done.setOnClickListener(v -> dialog.dismiss());

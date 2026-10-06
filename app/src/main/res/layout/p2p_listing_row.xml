@@ -31,22 +31,23 @@
 				android:orientation="horizontal">
 				<com.google.android.material.card.MaterialCardView
 					android:id="@+id/cardview2"
-					android:layout_width="46dp"
-					android:layout_height="46dp"
+					android:layout_width="24dp"
+					android:layout_height="24dp"
 					app:cardBackgroundColor="@color/colorP2pSurfaceAlt"
-					app:cardCornerRadius="23dp"
+					app:cardCornerRadius="12dp"
 					app:cardElevation="0dp"
 					app:strokeWidth="0dp">
 					<com.google.android.material.textview.MaterialTextView
 						android:id="@+id/txt_avatar"
 						android:layout_width="match_parent"
 						android:layout_height="match_parent"
-						android:gravity="center_horizontal|center_vertical"
+						android:gravity="center"
 						android:text="C"
-						android:textSize="19sp"
+						android:textSize="10sp"
 						android:textStyle="bold"
-						android:textColor="@color/colorP2pTextPrimary"
-						android:focusable="false" />
+						android:textColor="#FFFFFFFF"
+						android:focusable="false"
+	android:background="@drawable/bg_avatar"/>
 				</com.google.android.material.card.MaterialCardView>
 				<LinearLayout
 					android:id="@+id/linear13"

@@ -7,7 +7,7 @@
     android:viewportHeight="108">
     <!-- disc -->
     <path
-        android:fillColor="#FF9030"
+        android:fillColor="#E9B35E"
         android:pathData="M54,2a52,52 0,1 0,0.001 0z" />
     <!-- soft highlight on the upper-left rim -->
     <path

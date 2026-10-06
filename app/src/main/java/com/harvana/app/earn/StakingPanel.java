@@ -741,7 +741,7 @@ public final class StakingPanel {
 
         if (ready) {
             actionBtn.setText("Withdraw to Wallet");
-            actionBtn.setTextColor(Color.BLACK);
+            actionBtn.setTextColor(themeColor(R.color.colorTextOnAccent));
             actionBtn.setBackgroundColor(themeColor(R.color.colorAccent));
             actionBtn.setOnClickListener(v -> {
                 sheet.dismiss();
@@ -994,7 +994,7 @@ public final class StakingPanel {
         confirmBtn.setLayoutParams(btnParams);
         confirmBtn.setText("Confirm Unstake");
         confirmBtn.setAllCaps(false);
-        confirmBtn.setTextColor(Color.BLACK);
+        confirmBtn.setTextColor(themeColor(R.color.colorTextOnAccent));
         confirmBtn.setCornerRadius(dp(12));
         confirmBtn.setBackgroundColor(themeColor(R.color.colorAccent));
 

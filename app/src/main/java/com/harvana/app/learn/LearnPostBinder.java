@@ -63,6 +63,8 @@ public final class LearnPostBinder {
         TextView name = root.findViewById(R.id.tv_name);
         TextView trust = root.findViewById(R.id.tv_trust);
         ImageView avatar = root.findViewById(R.id.iv_avatar);
+        avatar.setImageDrawable(null);
+        if (avatar instanceof com.harvana.app.ui.AvatarView) ((com.harvana.app.ui.AvatarView) avatar).setPerson("");
         ImageView cover = root.findViewById(R.id.iv_cover);
         TextView viewsLine = root.findViewById(R.id.tv_views_line);
 
@@ -141,7 +143,8 @@ public final class LearnPostBinder {
             if (!card.name.isEmpty()) name.setText(card.name);
             meta.setText((card.username.isEmpty() ? "" : "@" + card.username + " · ") + LearnRules.timeAgo(post.createdAt, System.currentTimeMillis()));
             ProfileTrust.bind(trust, card);
-            if (!card.icon.isEmpty()) Glide.with(host).load(Uri.parse(card.icon)).placeholder(R.drawable.ic_coin_harv).into(avatar);
+            if (avatar instanceof com.harvana.app.ui.AvatarView) ((com.harvana.app.ui.AvatarView) avatar).setPerson(card.name.isEmpty() ? card.username : card.name);
+            if (!card.icon.isEmpty()) Glide.with(host).load(Uri.parse(card.icon)).circleCrop().into(avatar);
         });
 
         bindCounts(host, root, post);

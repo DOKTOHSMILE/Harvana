@@ -161,7 +161,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         step = Math.min(to, stepNames.length - 1);
         dots.removeAllViews();
         for (int i = 0; i < stepNames.length; i++) {
-            TextView d = text(String.valueOf(i + 1), 12, true, i <= step ? 0xFF1A1208 : UiColors.textSecondary());
+            TextView d = text(String.valueOf(i + 1), 12, true, i <= step ? UiColors.onAccent() : UiColors.textSecondary());
             d.setGravity(Gravity.CENTER);
             GradientDrawable g = new GradientDrawable();
             g.setShape(GradientDrawable.OVAL);
@@ -825,7 +825,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
 
     private void styleChip(MaterialButton b, boolean on) {
         b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(on ? UiColors.accent() : 0x00000000));
-        b.setTextColor(on ? 0xFF1A1208 : UiColors.accent());
+        b.setTextColor(on ? UiColors.onAccent() : UiColors.accent());
     }
 
     private View stepper(int value, int min, int max, Count c) {

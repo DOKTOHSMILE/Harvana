@@ -399,6 +399,11 @@ public class PublicProfileActivity extends AppCompatActivity {
     // Friends, the trust facts, totals across groups, the business-profile card and my Learn articles are now here, for my own
     // profile only; other people's profiles never show them.
 
+    // What each section last showed, kept for the life of this screen so a refresh does not bring the placeholder back.
+    private String friendsLineCache, savedCache, loansCache;
+    private com.harvana.app.trust.NetworkTrust.Score factsCache;
+    private java.util.List<com.google.firebase.firestore.DocumentSnapshot> learnCache;
+
     private View friendsRow() {
         final LinearLayout c = SocialUi.card(this);
         LinearLayout head = new LinearLayout(this);
@@ -406,8 +411,8 @@ public class PublicProfileActivity extends AppCompatActivity {
         LinearLayout words = new LinearLayout(this);
         words.setOrientation(LinearLayout.VERTICAL);
         words.addView(SocialUi.text(this, "Friends", 16, true, UiColors.textPrimary()));
-        final TextView sub = SocialUi.text(this, "Loading…", 13, false, UiColors.textSecondary());
-        com.harvana.app.utils.Shimmer.watch(sub);
+        final TextView sub = SocialUi.text(this, friendsLineCache != null ? friendsLineCache : "Loading…", 13, false, UiColors.textSecondary());
+        if (friendsLineCache == null) com.harvana.app.utils.Shimmer.watch(sub);   // placeholder only the first time
         sub.setPadding(0, SocialUi.dp(this, 2), 0, 0);
         words.addView(sub);
         head.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
@@ -420,9 +425,10 @@ public class PublicProfileActivity extends AppCompatActivity {
             if (followers != null) for (Person p : followers) back.add(p.uid);
             java.util.List<String> names = new java.util.ArrayList<>();
             if (following != null) for (Person p : following) if (back.contains(p.uid)) names.add(p.name);
-            if (names.isEmpty()) sub.setText("No friends yet. A friend is someone you follow who follows you back.");
-            else sub.setText(names.size() + (names.size() == 1 ? " friend" : " friends") + "  \u00b7  "
-                    + android.text.TextUtils.join(", ", names.subList(0, Math.min(2, names.size()))) + (names.size() > 2 ? " and " + (names.size() - 2) + " more" : ""));
+            friendsLineCache = names.isEmpty() ? "No friends yet. A friend is someone you follow who follows you back."
+                    : names.size() + (names.size() == 1 ? " friend" : " friends") + "  \u00b7  "
+                    + android.text.TextUtils.join(", ", names.subList(0, Math.min(2, names.size()))) + (names.size() > 2 ? " and " + (names.size() - 2) + " more" : "");
+            sub.setText(friendsLineCache);
         })));
         return c;
     }
@@ -433,7 +439,8 @@ public class PublicProfileActivity extends AppCompatActivity {
         c.addView(SocialUi.text(this, "On the network", 16, true, UiColors.textPrimary()));
         final LinearLayout rows = new LinearLayout(this);
         rows.setOrientation(LinearLayout.VERTICAL);
-        rows.addView(com.harvana.app.utils.Shimmer.lines(this, 4));
+        if (factsCache != null) fillFacts(rows, factsCache);
+        else rows.addView(com.harvana.app.utils.Shimmer.lines(this, 4));
         c.addView(rows);
         String addr = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
         if (addr == null || addr.isEmpty()) {
@@ -442,13 +449,18 @@ public class PublicProfileActivity extends AppCompatActivity {
             return c;
         }
         com.harvana.app.trust.NetworkTrust.wallet(addr, score -> runOnUiThread(() -> {
-            rows.removeAllViews();
-            rows.addView(factRow("Device", score.bound ? "Bound" : "Not bound"));
-            rows.addView(factRow("Vouches", String.valueOf(score.vouches)));
-            rows.addView(factRow("Badges", String.valueOf(score.badges)));
-            rows.addView(factRow("Established", score.established ? "Yes" : "No"));
+            factsCache = score;
+            fillFacts(rows, score);
         }));
         return c;
+    }
+
+    private void fillFacts(LinearLayout rows, com.harvana.app.trust.NetworkTrust.Score score) {
+        rows.removeAllViews();
+        rows.addView(factRow("Device", score.bound ? "Bound" : "Not bound"));
+        rows.addView(factRow("Vouches", String.valueOf(score.vouches)));
+        rows.addView(factRow("Badges", String.valueOf(score.badges)));
+        rows.addView(factRow("Established", score.established ? "Yes" : "No"));
     }
 
     private View factRow(String label, String value) {
@@ -465,10 +477,9 @@ public class PublicProfileActivity extends AppCompatActivity {
         c.addView(SocialUi.text(this, "Across all groups", 16, true, UiColors.textPrimary()));
         LinearLayout row = new LinearLayout(this);
         row.setPadding(0, SocialUi.dp(this, 10), 0, 0);
-        final TextView saved = SocialUi.text(this, "Loading…", 20, true, UiColors.textPrimary());
-        final TextView loans = SocialUi.text(this, "Loading…", 20, true, UiColors.textPrimary());
-        com.harvana.app.utils.Shimmer.watch(saved);
-        com.harvana.app.utils.Shimmer.watch(loans);
+        final TextView saved = SocialUi.text(this, savedCache != null ? savedCache : "Loading…", 20, true, UiColors.textPrimary());
+        final TextView loans = SocialUi.text(this, loansCache != null ? loansCache : "Loading…", 20, true, UiColors.textPrimary());
+        if (savedCache == null) { com.harvana.app.utils.Shimmer.watch(saved); com.harvana.app.utils.Shimmer.watch(loans); }
         row.addView(totalTile("TOTAL SAVED", saved), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         row.addView(totalTile("TOTAL LOANS TAKEN", loans), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         c.addView(row);
@@ -476,8 +487,10 @@ public class PublicProfileActivity extends AppCompatActivity {
         String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
         if (me == null) { saved.setText("0 " + com.harvana.app.CoinInfo.ticker()); loans.setText("0 " + com.harvana.app.CoinInfo.ticker()); return c; }
         com.harvana.app.sync.NodePortfolio.load(this, me.getUid(), wallet, p -> runOnUiThread(() -> {
-            saved.setText(harv(p.savedHarv()));
-            loans.setText(harv(p.outstandingHarv()));
+            savedCache = harv(p.savedHarv());
+            loansCache = harv(p.outstandingHarv());
+            saved.setText(savedCache);
+            loans.setText(loansCache);
         }));
         return c;
     }
@@ -521,32 +534,39 @@ public class PublicProfileActivity extends AppCompatActivity {
         c.addView(SocialUi.text(this, "My Learn contributions", 16, true, UiColors.textPrimary()));
         final LinearLayout list = new LinearLayout(this);
         list.setOrientation(LinearLayout.VERTICAL);
-        list.addView(com.harvana.app.utils.Shimmer.rows(this, 2));
+        if (learnCache != null) fillLearn(list, learnCache);
+        else list.addView(com.harvana.app.utils.Shimmer.rows(this, 2));
         c.addView(list);
         com.google.firebase.auth.FirebaseUser me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
         if (me == null) { list.removeAllViews(); return c; }
         com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("LEARN_CONTENT")
             .whereEqualTo("authorUid", me.getUid()).limit(30).get()
             .addOnSuccessListener(qs -> {
-                list.removeAllViews();
                 java.util.List<com.google.firebase.firestore.DocumentSnapshot> docs = new java.util.ArrayList<>(qs.getDocuments());
-                java.util.Collections.sort(docs, (a, b) -> Long.compare(num(b.get("createdAt")), num(a.get("createdAt"))));
-                if (docs.isEmpty()) {
-                    TextView none = SocialUi.text(this, "No contributions yet. Articles you publish in Learn Hub show here.", 13, false, UiColors.textSecondary());
-                    none.setPadding(0, SocialUi.dp(this, 8), 0, SocialUi.dp(this, 8));
-                    list.addView(none);
-                    MaterialButton write = SocialUi.button(this, "Write an article", true);
-                    write.setOnClickListener(v -> startActivity(new Intent(this, com.harvana.app.CreateLearnhubContentActivity.class)));
-                    list.addView(write, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 46)));
-                    return;
-                }
-                for (com.google.firebase.firestore.DocumentSnapshot d : docs) list.addView(learnRow(d));
+                java.util.Collections.sort(docs, (x, y) -> Long.compare(num(y.get("createdAt")), num(x.get("createdAt"))));
+                learnCache = docs;
+                fillLearn(list, docs);
             })
             .addOnFailureListener(e -> {
+                if (learnCache != null) return;     // keep what is shown if a refresh fails
                 list.removeAllViews();
                 list.addView(SocialUi.text(this, "Couldn't load your articles.", 13, false, UiColors.textSecondary()));
             });
         return c;
+    }
+
+    private void fillLearn(LinearLayout list, java.util.List<com.google.firebase.firestore.DocumentSnapshot> docs) {
+        list.removeAllViews();
+        if (docs.isEmpty()) {
+            TextView none = SocialUi.text(this, "No contributions yet. Articles you publish in Learn Hub show here.", 13, false, UiColors.textSecondary());
+            none.setPadding(0, SocialUi.dp(this, 8), 0, SocialUi.dp(this, 8));
+            list.addView(none);
+            MaterialButton write = SocialUi.button(this, "Write an article", true);
+            write.setOnClickListener(v -> startActivity(new Intent(this, com.harvana.app.CreateLearnhubContentActivity.class)));
+            list.addView(write, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 46)));
+            return;
+        }
+        for (com.google.firebase.firestore.DocumentSnapshot d : docs) list.addView(learnRow(d));
     }
 
     private View learnRow(final com.google.firebase.firestore.DocumentSnapshot d) {

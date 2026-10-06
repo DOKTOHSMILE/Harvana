@@ -123,7 +123,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		card_apply_loan = _view.findViewById(R.id.card_apply_loan);
 		textview20 = _view.findViewById(R.id.textview20);
 		recycler_loans = _view.findViewById(R.id.recycler_loans);
-		com.harvana.app.utils.Shimmer.hold(recycler_loans, com.harvana.app.utils.Shimmer.cards(recycler_loans.getContext(), 3), 4000);
+		com.harvana.app.utils.Shimmer.hold(recycler_loans, com.harvana.app.utils.Shimmer.cards(recycler_loans.getContext(), 3), 4000, "GroupLoansFragmentActivity");
 		tv_loans_empty = _view.findViewById(R.id.tv_loans_empty);
 		cardview11 = _view.findViewById(R.id.cardview11);
 		cardview12 = _view.findViewById(R.id.cardview12);

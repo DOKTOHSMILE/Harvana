@@ -73,7 +73,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 		linear1 = _view.findViewById(R.id.linear1);
 		cardview1 = _view.findViewById(R.id.cardview1);
 		list_history = _view.findViewById(R.id.list_history);
-		com.harvana.app.utils.Shimmer.hold(list_history, com.harvana.app.utils.Shimmer.rows(list_history.getContext(), 6), 4000);
+		com.harvana.app.utils.Shimmer.hold(list_history, com.harvana.app.utils.Shimmer.rows(list_history.getContext(), 6), 4000, "WalletActivityFragmentActivity");
 		walletsp = getContext().getSharedPreferences("walletsp", Activity.MODE_PRIVATE);
 	}
 	

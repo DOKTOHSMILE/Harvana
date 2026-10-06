@@ -195,6 +195,17 @@ public final class Shimmer {
      * and position: it is moved into a frame that takes its place. Lists whose parent is a ConstraintLayout or RelativeLayout are
      * left alone, because other views point at them by id.
      */
+    private static final java.util.Set<String> SEEN = new java.util.HashSet<>();
+
+    /** True only the first time {@code key} is asked in this run of the app: shimmer is for a screen's first load, not every return to it. */
+    public static synchronized boolean first(String key) { return SEEN.add(key); }
+
+    /** Like {@link #hold(View, View, long)}, but only the first time {@code key} is used in this run of the app. */
+    public static Hold hold(View target, View skeleton, long maxMs, String key) {
+        if (!first(key)) return null;
+        return hold(target, skeleton, maxMs);
+    }
+
     public static Hold hold(View target, View skeleton, long maxMs) {
         if (target == null || !(target.getParent() instanceof ViewGroup)) return null;
         if (HOLDS.containsKey(target)) return HOLDS.get(target);

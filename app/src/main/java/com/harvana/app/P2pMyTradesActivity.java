@@ -125,7 +125,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 		my_trades_filter_scroll = findViewById(R.id.my_trades_filter_scroll);
 		linear268 = findViewById(R.id.linear268);
 		recycler_my_trades = findViewById(R.id.recycler_my_trades);
-		com.harvana.app.utils.Shimmer.hold(recycler_my_trades, com.harvana.app.utils.Shimmer.rows(recycler_my_trades.getContext(), 5), 4000);
+		com.harvana.app.utils.Shimmer.hold(recycler_my_trades, com.harvana.app.utils.Shimmer.rows(recycler_my_trades.getContext(), 5), 4000, "P2pMyTradesActivity");
 		layout_my_trades_empty = findViewById(R.id.layout_my_trades_empty);
 		card_my_trades_info = findViewById(R.id.card_my_trades_info);
 		linear260 = findViewById(R.id.linear260);

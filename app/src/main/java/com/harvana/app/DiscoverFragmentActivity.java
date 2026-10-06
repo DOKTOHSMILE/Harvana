@@ -155,7 +155,7 @@ public class DiscoverFragmentActivity extends Fragment {
 		cd_verified_only = _view.findViewById(R.id.cd_verified_only);
 		sp_sort = _view.findViewById(R.id.sp_sort);
 		listview1 = _view.findViewById(R.id.listview1);
-		com.harvana.app.utils.Shimmer.hold(listview1, com.harvana.app.utils.Shimmer.cards(listview1.getContext(), 3), 4000);
+		com.harvana.app.utils.Shimmer.hold(listview1, com.harvana.app.utils.Shimmer.cards(listview1.getContext(), 3), 4000, "DiscoverFragmentActivity");
 		fbauth = FirebaseAuth.getInstance();
 		groupsp = getContext().getSharedPreferences("groupsp", Activity.MODE_PRIVATE);
 		

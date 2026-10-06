@@ -103,7 +103,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 		panel_pending = _view.findViewById(R.id.panel_pending);
 		textview2 = _view.findViewById(R.id.textview2);
 		recycler_members = _view.findViewById(R.id.recycler_members);
-		com.harvana.app.utils.Shimmer.hold(recycler_members, com.harvana.app.utils.Shimmer.rows(recycler_members.getContext(), 5), 4000);
+		com.harvana.app.utils.Shimmer.hold(recycler_members, com.harvana.app.utils.Shimmer.rows(recycler_members.getContext(), 5), 4000, "GroupMembersFragmentActivity");
 		tv_members_empty = _view.findViewById(R.id.tv_members_empty);
 		tv_members_count = _view.findViewById(R.id.tv_members_count);
 		btn_members_invite = _view.findViewById(R.id.btn_members_invite);

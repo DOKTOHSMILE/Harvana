@@ -99,7 +99,7 @@ public class LearnFragmentActivity extends Fragment {
 		recyclerview1 = _view.findViewById(R.id.recyclerview1);
 		cardview14 = _view.findViewById(R.id.cardview14);
 		recyclerview2 = _view.findViewById(R.id.recyclerview2);
-		com.harvana.app.utils.Shimmer.hold(recyclerview2, com.harvana.app.utils.Shimmer.cards(recyclerview2.getContext(), 3), 4000);
+		com.harvana.app.utils.Shimmer.hold(recyclerview2, com.harvana.app.utils.Shimmer.cards(recyclerview2.getContext(), 3), 4000, "LearnFragmentActivity");
 		fauth = FirebaseAuth.getInstance();
 		
 		_fab.setOnClickListener(_v -> {

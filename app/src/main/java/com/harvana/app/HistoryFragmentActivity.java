@@ -88,7 +88,7 @@ public class HistoryFragmentActivity extends Fragment {
 		linear32 = _view.findViewById(R.id.linear32);
 		tv_most_recent_first = _view.findViewById(R.id.tv_most_recent_first);
 		recycler_wallet_activity = _view.findViewById(R.id.recycler_wallet_activity);
-		com.harvana.app.utils.Shimmer.hold(recycler_wallet_activity, com.harvana.app.utils.Shimmer.rows(recycler_wallet_activity.getContext(), 6), 4000);
+		com.harvana.app.utils.Shimmer.hold(recycler_wallet_activity, com.harvana.app.utils.Shimmer.rows(recycler_wallet_activity.getContext(), 6), 4000, "HistoryFragmentActivity");
 		tv_wallet_activity_empty = _view.findViewById(R.id.tv_wallet_activity_empty);
 		textview16 = _view.findViewById(R.id.textview16);
 		textview17 = _view.findViewById(R.id.textview17);

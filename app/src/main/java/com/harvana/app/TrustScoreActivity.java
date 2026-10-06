@@ -55,9 +55,15 @@ public class TrustScoreActivity extends AppCompatActivity {
     @Override protected void onResume() { super.onResume(); load(); }
     @Override public boolean onSupportNavigateUp() { finish(); return true; }
 
+    private boolean shownOnce;       // the placeholder is for the first load only, not every return to the screen
+    private boolean fetchedOnce;
+
     private void load() {
-        root.removeAllViews();
-        root.addView(com.harvana.app.utils.Shimmer.cards(this, 3));
+        if (!shownOnce) {
+            shownOnce = true;
+            root.removeAllViews();
+            root.addView(com.harvana.app.utils.Shimmer.cards(this, 3));
+        }
         address = WalletManager.getActiveWalletAddress(this);
         if (address == null || address.isEmpty()) {
             root.removeAllViews();
@@ -74,8 +80,9 @@ public class TrustScoreActivity extends AppCompatActivity {
         root.removeAllViews();
         if (person == null) {
             root.addView(tv("\u2014", 36, true, UiColors.accent()));
-            root.addView(com.harvana.app.utils.Shimmer.cards(this, 3));
+            if (!fetchedOnce) root.addView(com.harvana.app.utils.Shimmer.cards(this, 3));
             com.harvana.app.trust.NetworkTrust.wallet(address, score -> runOnUiThread(() -> {
+                fetchedOnce = true;
                 if (score.published) {
                     java.util.Map<String, Object> live = new java.util.HashMap<>();
                     live.put("trustScore", score.score);

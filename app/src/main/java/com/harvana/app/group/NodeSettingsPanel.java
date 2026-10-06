@@ -54,6 +54,13 @@ public final class NodeSettingsPanel {
         facts.setPadding(0, dp(a, 8), 0, dp(a, 4));
         facts.setVisibility(View.GONE);
         final View factsLoading = com.harvana.app.utils.Shimmer.lines(a, 4);
+        String cachedFacts = FACTS_CACHE.get(id.protocolId());
+        if (cachedFacts != null) {               // seen before: show it straight away, refresh underneath
+            facts.setText(cachedFacts);
+            facts.setTypeface(Typeface.MONOSPACE);
+            facts.setVisibility(View.VISIBLE);
+            factsLoading.setVisibility(View.GONE);
+        }
         card.addView(factsLoading);
         card.addView(facts);
         final LinearLayout actions = new LinearLayout(a);
@@ -104,6 +111,9 @@ public final class NodeSettingsPanel {
         else NodeGroupClient.getFixedMembers(id.protocolId(), c);
     }
 
+    /** The last facts shown for each group, so coming back to the panel shows them at once instead of a placeholder. */
+    private static final java.util.Map<String, String> FACTS_CACHE = new java.util.HashMap<>();
+
     private static void showFacts(Activity a, GroupIdentity id, String fsId, Map<String, Object> profile, Map<String, Object> g, String me,
                                   TextView facts, LinearLayout actions) {
         String state = str(g.get("state"), str(g.get("status"), "—"));
@@ -118,6 +128,7 @@ public final class NodeSettingsPanel {
         b.append("\nAdmin  ").append(short_(admin)).append(admin.equalsIgnoreCase(me) ? " (you)" : "");
         facts.setText(b.toString());
         facts.setTypeface(Typeface.MONOSPACE);
+        FACTS_CACHE.put(id.protocolId(), b.toString());
         actions.removeAllViews();
         actions.addView(button(a, "Copy network id", false, v -> NodePayActions.copyId(a, id.protocolId())));
         if (!"—".equals(escrow)) actions.addView(button(a, "Copy group wallet", false, v -> NodePayActions.copyId(a, escrow)));

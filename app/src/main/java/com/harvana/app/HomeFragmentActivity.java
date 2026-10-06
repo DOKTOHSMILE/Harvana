@@ -680,8 +680,7 @@ public class HomeFragmentActivity extends Fragment {
 		} else if (group_map_list.isEmpty() || myUid.isEmpty()) {
 			linear_upcoming_payments.removeAllViews();
 			if (linear7 != null) linear7.setVisibility(View.VISIBLE);
-		} else {
-			linear_upcoming_payments.removeAllViews();
+		} else if (linear_upcoming_payments.getChildCount() == 0) {   // first load only
 			linear_upcoming_payments.addView(com.harvana.app.utils.Shimmer.rows(getContext(), 2));
 			if (linear7 != null) linear7.setVisibility(View.GONE);
 		}
@@ -877,8 +876,7 @@ public class HomeFragmentActivity extends Fragment {
 	
 	private void _loadLearnHubPreview() {
 		if (linear_learn_hub == null || getContext() == null) return;
-		linear_learn_hub.removeAllViews();
-		linear_learn_hub.addView(com.harvana.app.utils.Shimmer.rows(getContext(), 2));
+		if (linear_learn_hub.getChildCount() == 0) linear_learn_hub.addView(com.harvana.app.utils.Shimmer.rows(getContext(), 2));   // first load only
 		FirebaseDatabase.getInstance().getReference("learnhub")
 		.limitToLast(2)
 		.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -941,9 +939,10 @@ public class HomeFragmentActivity extends Fragment {
 	
 	private void _loadTrendingGroups() {
 		if (linear_trending_groups == null || getContext() == null) return;
-		linear_trending_groups.removeAllViews();
-		linear_trending_groups.addView(com.harvana.app.utils.Shimmer.rows(getContext(), 2));
-		if (linear10 != null) linear10.setVisibility(View.GONE);
+		if (linear_trending_groups.getChildCount() == 0) {          // first load only; later loads keep what is shown until new data arrives
+			linear_trending_groups.addView(com.harvana.app.utils.Shimmer.rows(getContext(), 2));
+			if (linear10 != null) linear10.setVisibility(View.GONE);
+		}
 		
 		final String meUid = FirebaseAuth.getInstance().getCurrentUser() != null
 		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";

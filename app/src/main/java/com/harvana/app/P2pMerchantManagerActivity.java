@@ -122,7 +122,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 		manager_filter_scroll = findViewById(R.id.manager_filter_scroll);
 		linear244 = findViewById(R.id.linear244);
 		recycler_merchant_trades = findViewById(R.id.recycler_merchant_trades);
-		com.harvana.app.utils.Shimmer.hold(recycler_merchant_trades, com.harvana.app.utils.Shimmer.rows(recycler_merchant_trades.getContext(), 5), 4000);
+		com.harvana.app.utils.Shimmer.hold(recycler_merchant_trades, com.harvana.app.utils.Shimmer.rows(recycler_merchant_trades.getContext(), 5), 4000, "P2pMerchantManagerActivity");
 		layout_manager_empty = findViewById(R.id.layout_manager_empty);
 		card_manager_info = findViewById(R.id.card_manager_info);
 		linear239 = findViewById(R.id.linear239);

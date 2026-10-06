@@ -81,7 +81,7 @@ public class GroupNoticeFragmentActivity extends Fragment {
 	private void initialize(Bundle _savedInstanceState, View _view) {
 		linear133 = _view.findViewById(R.id.linear133);
 		recycler_notices = _view.findViewById(R.id.recycler_notices);
-		com.harvana.app.utils.Shimmer.hold(recycler_notices, com.harvana.app.utils.Shimmer.cards(recycler_notices.getContext(), 3), 4000);
+		com.harvana.app.utils.Shimmer.hold(recycler_notices, com.harvana.app.utils.Shimmer.cards(recycler_notices.getContext(), 3), 4000, "GroupNoticeFragmentActivity");
 		tv_notices_empty = _view.findViewById(R.id.tv_notices_empty);
 		textview78 = _view.findViewById(R.id.textview78);
 		btn_new_notice = _view.findViewById(R.id.btn_new_notice);

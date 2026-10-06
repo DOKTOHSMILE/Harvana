@@ -219,12 +219,13 @@ public class PublicProfileActivity extends AppCompatActivity {
      * no negative margin or drawing outside its parent (an earlier version hid half of it behind the cover).
      */
     private View topArea(boolean mine) {
-        int size = SocialUi.dp(this, 104);
+        int size = SocialUi.dp(this, 70);           // 70 x 70 dp, on the right
         FrameLayout top = new FrameLayout(this);
         top.setClipChildren(false);
         top.addView(coverBanner(mine));
-        FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(size, size, Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(size, size, Gravity.TOP | Gravity.END);
         fp.topMargin = coverHeight() - size / 2;
+        fp.setMarginEnd(SocialUi.dp(this, 4));
         top.addView(avatarView(size), fp);
         top.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, coverHeight() + size / 2));
         return top;
@@ -233,12 +234,12 @@ public class PublicProfileActivity extends AppCompatActivity {
     private View avatarView(int size) {
         int tint = card.scored() ? ProfileTrust.tierColor(tierName()) : 0xFF8B98AD;
         FrameLayout face = new FrameLayout(this);
-        TextView initials = SocialUi.text(this, initialsOf(), 34, true, UiColors.onAccent());
+        TextView initials = SocialUi.text(this, initialsOf(), 24, true, UiColors.onAccent());
         initials.setGravity(Gravity.CENTER);
         GradientDrawable disc = new GradientDrawable();
         disc.setShape(GradientDrawable.OVAL);
         disc.setColor(UiColors.accent());
-        disc.setStroke(SocialUi.dp(this, 3), tint);
+        disc.setStroke(SocialUi.dp(this, 2), tint);
         initials.setBackground(disc);
         face.addView(initials, new FrameLayout.LayoutParams(size, size));
         ImageView photo = new ImageView(this);

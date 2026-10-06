@@ -50,8 +50,17 @@ public final class TransactionProgressSheet {
 		if (btnClose != null) btnClose.setOnClickListener(v -> dialog.dismiss());
 	}
 
+	private static java.lang.ref.WeakReference<TransactionProgressSheet> active = new java.lang.ref.WeakReference<>(null);
+
+	/** The full-screen success sheet replaces this one, so it closes when a payment succeeds. */
+	public static void dismissActive() {
+		TransactionProgressSheet s = active.get();
+		if (s != null) s.dismiss();
+	}
+
 	public static TransactionProgressSheet show(Context context, String title, double amountHarv) {
 		TransactionProgressSheet sheet = new TransactionProgressSheet(context, title, amountHarv);
+		active = new java.lang.ref.WeakReference<>(sheet);
 		sheet.dialog.show();
 		sheet.advanceTo(1);
 		return sheet;

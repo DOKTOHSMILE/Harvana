@@ -478,6 +478,17 @@ public class WalletActivityFragmentActivity extends Fragment {
 				}
 			}
 			
+			// Name and icon by what the transaction is for (staking, group creation, contribution, loan, gift…)
+			if (!isFailed) {
+				com.harvana.app.tx.TxKind kind = com.harvana.app.tx.TxKind.of(
+				item.get("memo") != null ? String.valueOf(item.get("memo")) : "", isIncoming);
+				if (kind != null) {
+					if (holder.tvType != null) holder.tvType.setText(isPending ? kind.title + "…" : kind.title);
+					if (holder.tvAddress != null) holder.tvAddress.setText(kind.detail + " · " + (isIncoming ? "From: " + shortenAddress(sender) : "To: " + shortenAddress(recipient)));
+					if (holder.ivIcon != null) holder.ivIcon.setImageResource(kind.icon);
+				}
+			}
+			
 			if (holder.tvDate != null) {
 				CharSequence rel = android.text.format.DateUtils.getRelativeTimeSpanString(
 				timestamp, 

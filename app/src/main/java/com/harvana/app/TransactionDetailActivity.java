@@ -216,7 +216,8 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		boolean confirmed = status != null && (status.equalsIgnoreCase("confirmed") || status.equalsIgnoreCase("success"));
 		
 		tv_tx_value.setText(_formatUIBalance(value) + " " + tokenSymbol);
-		textview40.setText(isIncoming ? "Received" : "Sent");
+		com.harvana.app.tx.TxKind _kind = com.harvana.app.tx.TxKind.of(memo, isIncoming);
+		textview40.setText(_kind != null ? _kind.title : (isIncoming ? "Received" : "Sent"));
 		
 		if (pending) {
 			tv_tx_status.setText("●  Pending");

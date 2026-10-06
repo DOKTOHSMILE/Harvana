@@ -82,6 +82,8 @@ public final class StakingPanel {
     private final TextView unbondCount;
     private final MaterialButton claim;
     private final LinearLayout stakesList;
+    private final TextView tabLive, tabClosed, liveEmpty;
+    private final View liveSection, closedSection;
     private final TextView claimSub;
     private final LinearLayout unbondingList;
 
@@ -187,6 +189,11 @@ public final class StakingPanel {
         pageStake = activity.findViewById(R.id.page_stake);
         pagePositions = activity.findViewById(R.id.page_positions);
         stakesList = activity.findViewById(R.id.stakes_list);
+        tabLive = activity.findViewById(R.id.tab_live);
+        tabClosed = activity.findViewById(R.id.tab_closed);
+        liveEmpty = activity.findViewById(R.id.tv_live_empty);
+        liveSection = activity.findViewById(R.id.live_section);
+        closedSection = activity.findViewById(R.id.closed_section);
         tabStake = activity.findViewById(R.id.tab_stake);
         tabPositions = activity.findViewById(R.id.tab_positions);
 
@@ -195,6 +202,8 @@ public final class StakingPanel {
 
         stake.setOnClickListener(v -> doStake());
         claim.setOnClickListener(v -> doClaim());
+        tabLive.setOnClickListener(v -> showLive(true));
+        tabClosed.setOnClickListener(v -> showLive(false));
         activity.findViewById(R.id.btn_max).setOnClickListener(v -> fillMax());
 
         amount.addTextChangedListener(new TextWatcher() {
@@ -213,6 +222,7 @@ public final class StakingPanel {
         chipAll.setOnClickListener(v -> setRange(Integer.MAX_VALUE));
 
         styleChart();
+        showLive(true);
         showPage(true);
         timerHandler.post(timerRunnable);
     }
@@ -329,6 +339,18 @@ public final class StakingPanel {
             @Override public void onSuccess(JSONObject json) { observedPace = paceFromBlocks(json); paint(); }
             @Override public void onError(String error) { }
         });
+    }
+
+    /** Live stakes and closed (unstaked / withdrawn) ones sit on separate tabs so the page stays short. */
+    private void showLive(boolean live) {
+        liveSection.setVisibility(live ? View.VISIBLE : View.GONE);
+        closedSection.setVisibility(live ? View.GONE : View.VISIBLE);
+        int muted = ContextCompat.getColor(host, R.color.colorTextMuted);
+        int onAccent = ContextCompat.getColor(host, R.color.colorTextPrimaryWhite);
+        tabLive.setBackgroundResource(live ? R.drawable.bg_tab_active : 0);
+        tabLive.setTextColor(live ? onAccent : muted);
+        tabClosed.setBackgroundResource(live ? 0 : R.drawable.bg_tab_active);
+        tabClosed.setTextColor(live ? muted : onAccent);
     }
 
     private void showPage(boolean staking) {
@@ -498,6 +520,11 @@ public final class StakingPanel {
         JSONArray rows = pos.optJSONArray("unbonding");
         if (rows == null || rows.length() == 0) {
             unbondCount.setText("● 0 In Progress");
+            TextView none = new TextView(host);
+            none.setText("Nothing closed yet. Stakes you unstake show here while they return and after they are withdrawn.");
+            none.setTextColor(themeColor(R.color.colorTextMuted));
+            none.setTextSize(13);
+            unbondingList.addView(none);
             return;
         }
 
@@ -510,7 +537,7 @@ public final class StakingPanel {
         }
 
         unbondCount.setText("● " + activeRows.size() + " In Progress");
-        if (activeRows.isEmpty()) return;
+        if (activeRows.isEmpty()) { addWithdrawnRows(rows); return; }
 
         MaterialCardView containerCard = new MaterialCardView(host);
         LinearLayout.LayoutParams cardLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -553,6 +580,33 @@ public final class StakingPanel {
 
         containerCard.addView(cardInner);
         unbondingList.addView(containerCard);
+        addWithdrawnRows(rows);
+    }
+
+    /** Completed withdrawals, newest first, under the ones still returning. */
+    private void addWithdrawnRows(JSONArray rows) {
+        List<JSONObject> done = new ArrayList<>();
+        for (int i = 0; i < rows.length(); i++) {
+            JSONObject u = rows.optJSONObject(i);
+            if (u != null && "RELEASED".equals(u.optString("status"))) done.add(u);
+        }
+        if (done.isEmpty()) return;
+        java.util.Collections.sort(done, (x, y) -> Long.compare(y.optLong("releaseTimestamp", 0), x.optLong("releaseTimestamp", 0)));
+        TextView head = new TextView(host);
+        head.setText("Withdrawn");
+        head.setTextColor(themeColor(R.color.colorTextPrimary));
+        head.setTextSize(14);
+        head.setTypeface(null, android.graphics.Typeface.BOLD);
+        head.setPadding(0, dp(8), 0, dp(4));
+        unbondingList.addView(head);
+        for (JSONObject u : done) {
+            TextView row = new TextView(host);
+            row.setText(harv(u.optLong("amountRaw", 0)) + " · returned " + dateTime(u.optLong("releaseTimestamp", 0)));
+            row.setTextColor(themeColor(R.color.colorTextMuted));
+            row.setTextSize(13);
+            row.setPadding(0, dp(4), 0, dp(4));
+            unbondingList.addView(row);
+        }
     }
 
     private void applyCurvedBottomSheetBackground(LinearLayout root, BottomSheetDialog sheet) {
@@ -778,6 +832,7 @@ public final class StakingPanel {
     /** One card per stake, each with its own lock, rewards and Unstake. Claim stays a single button for all of them. */
     private void renderStakes() {
         stakesList.removeAllViews();
+        liveEmpty.setVisibility(stakes().isEmpty() ? View.VISIBLE : View.GONE);
         long now = System.currentTimeMillis();
         for (Stake s : stakes()) {
             int mult = s.multiplierBps <= 0 ? 10000 : s.multiplierBps;
@@ -837,6 +892,7 @@ public final class StakingPanel {
             unstakeBtn.setTextColor(themeColor(R.color.colorAccent));
             unstakeBtn.setStrokeColor(android.content.res.ColorStateList.valueOf(themeColor(R.color.colorCardStroke)));
             unstakeBtn.setEnabled(!busy);
+            com.harvana.app.tx.PaymentTracker.mark(unstakeBtn);
             unstakeBtn.setOnClickListener(v -> askUnstake(s));
 
             col.addView(top);

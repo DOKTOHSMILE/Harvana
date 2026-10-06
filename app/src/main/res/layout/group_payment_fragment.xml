@@ -168,6 +168,7 @@
 					app:cardCornerRadius="30dp">
 					<TextView
 						android:id="@+id/btn_pay_now"
+						android:tag="payment_button"
 						android:layout_width="match_parent"
 						android:layout_height="35dp"
 						android:paddingLeft="16dp"

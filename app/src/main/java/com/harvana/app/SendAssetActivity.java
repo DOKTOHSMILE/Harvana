@@ -622,27 +622,31 @@ public class SendAssetActivity extends AppCompatActivity {
 					btnAccept.setText("Sending…");
 					if (tvError != null) tvError.setVisibility(View.GONE);
 					
+					final com.harvana.app.tx.PaymentTracker.Handle inFlight = com.harvana.app.tx.PaymentTracker.begin();
 					TransactionRouter.executeNativeTransfer(prepared, new TransactionRouter.ExecutionCallback() {
 						@Override
 						public void onSuccess(com.harvana.app.tx.ExecutionResult result) {
 							if (fromAddress != null) PendingSpendGuard.release(SendAssetActivity.this, fromAddress);
+							final String hash = result != null && result.txHash != null ? result.txHash : "";
+							com.harvana.app.ui.PaymentSuccessSheet.Info info = new com.harvana.app.ui.PaymentSuccessSheet.Info();
+							info.title = "Transfer successful";
+							info.amount = _formatUIBalance(reqAmount) + " " + symbol;
+							info.rows = new String[][] {{"To", recipient}, {"From", fromAddress == null ? "" : fromAddress},
+									{"Network fee", _formatUIBalance(prepared.feeHarv) + " " + symbol}, {"Transaction", hash}};
+							info.txHash = hash;
+							info.note = "The network has accepted it. It shows as confirmed once the next block has it.";
+							com.harvana.app.tx.PaymentTracker.success(info);
+							com.harvana.app.tx.PaymentTracker.endWhenConfirmed(inFlight, hash, () -> com.harvana.app.tx.PaymentTracker.markConfirmed(hash));
 							runOnUiThread(() -> {
 								dialog.dismiss();
-								// THE FIX: used to setResult+finish immediately here with
-								// no confirmation shown at all unless the caller happened
-								// to be CoinDetailActivity, which showed it after the fact
-								// via these same result extras. Shown directly now.
-								
-								// APPLIED FIX
-								_showTransferSuccessSheet(
-								_formatUIBalance(reqAmount),
-								recipient,
-								result != null ? result.txHash : "");
+								setResult(RESULT_OK);
+								finish();
 							});
 						}
 						
 						@Override
 						public void onError(String error) {
+							inFlight.end();
 							if (fromAddress != null) PendingSpendGuard.release(SendAssetActivity.this, fromAddress);
 							runOnUiThread(() -> {
 								btnAccept.setEnabled(true);

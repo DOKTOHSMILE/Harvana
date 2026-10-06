@@ -419,6 +419,7 @@
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_stake"
+                            android:tag="payment_button"
                             android:layout_width="match_parent"
                             android:layout_height="56dp"
                             android:layout_marginTop="24dp"
@@ -546,6 +547,7 @@
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_claim"
+                            android:tag="payment_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Claim Now"
@@ -556,23 +558,65 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Active Positions -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Your Staking Positions"
-                    android:textColor="@color/colorTextPrimary"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:layout_marginTop="24dp"/>
-
-                <!-- one card per stake, added in code -->
+                <!-- Live / Closed switch keeps the page short -->
                 <LinearLayout
-                    android:id="@+id/stakes_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="24dp"
+                    android:orientation="horizontal"
+                    android:padding="4dp"
+                    android:background="@drawable/bg_tab_container">
+                    <TextView
+                        android:id="@+id/tab_live"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="Live"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorTextPrimary"
+                        android:background="@drawable/bg_tab_active" />
+                    <TextView
+                        android:id="@+id/tab_closed"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="Closed"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorTextMuted"
+                        android:background="@android:color/transparent" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/live_section"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical" />
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tv_live_empty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="No live stakes yet. Stake HARV on the Staking tab and each stake appears here."
+                        android:textColor="@color/colorTextMuted"
+                        android:textSize="13sp"
+                        android:visibility="gone"/>
+                    <!-- one card per stake, added in code -->
+                    <LinearLayout
+                        android:id="@+id/stakes_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="32dp"
+                        android:orientation="vertical" />
+                </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/closed_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
                 <!-- Unbonding Queue -->
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -604,6 +648,7 @@
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="32dp"
                     android:orientation="vertical" />
+                </LinearLayout>
             </LinearLayout>
 
         </LinearLayout>

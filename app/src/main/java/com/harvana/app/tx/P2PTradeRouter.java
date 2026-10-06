@@ -70,7 +70,8 @@ public final class P2PTradeRouter {
 	// Canonical (P2PClaimPaymentRequest.getCanonicalMessage()):
 	//   "P2P_CLAIM_PAYMENT:" + listingId + ":" + buyerAddress + ":" + amount + ":" + nonce
 	
-	public static void claimPayment(Context context, String listingId, String buyerAddress, long amountRaw, Callback callback) {
+	public static void claimPayment(Context context, String listingId, String buyerAddress, long amountRaw, Callback callback0) {
+		final Callback callback = _paying("Escrow funded", amountRaw, buyerAddress, callback0);
 		HarvanaNodeClient.getWallet(buyerAddress, new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
@@ -203,7 +204,8 @@ public final class P2PTradeRouter {
 	// Canonical (P2PInsuranceDepositRequest.getCanonicalMessage()):
 	//   "P2P_INSURANCE_DEPOSIT:" + traderAddress + ":" + amount + ":" + nonce
 	
-	public static void depositInsurance(Context context, String traderAddress, long amountRaw, Callback callback) {
+	public static void depositInsurance(Context context, String traderAddress, long amountRaw, Callback callback0) {
+		final Callback callback = _paying("Insurance deposit sent", amountRaw, traderAddress, callback0);
 		HarvanaNodeClient.getWallet(traderAddress, new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
@@ -220,6 +222,30 @@ public final class P2PTradeRouter {
 				callback.onError("Could not fetch current nonce: " + error);
 			}
 		});
+	}
+	
+	/** Locks the payment buttons while this runs and shows the success sheet when it works. */
+	private static Callback _paying(String title, long amountRaw, String from, Callback inner) {
+		final PaymentTracker.Handle handle = PaymentTracker.begin();
+		return new Callback() {
+			@Override public void onSuccess(JSONObject result) {
+				try {
+					com.harvana.app.ui.PaymentSuccessSheet.Info info = new com.harvana.app.ui.PaymentSuccessSheet.Info();
+					info.title = title;
+					info.amount = com.harvana.app.wallet.BalanceFormatter.smart(
+					com.harvana.app.wallet.BalanceFormatter.rawToHarv(amountRaw)) + " " + com.harvana.app.CoinInfo.ticker();
+					info.rows = new String[][] {{"From", from}, {"For", "Peer-to-peer trade"}};
+					info.note = "The network has accepted it.";
+					PaymentTracker.success(info);
+				} catch (Throwable ignored) {}
+				handle.end();
+				inner.onSuccess(result);
+			}
+			@Override public void onError(String error) {
+				handle.end();
+				inner.onError(error);
+			}
+		};
 	}
 	
 	// ── Shared signing plumbing ──────────────────────────────────────────────

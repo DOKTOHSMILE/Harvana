@@ -4,7 +4,10 @@ import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
 
+import com.harvana.app.CoinInfo;
 import com.harvana.app.crypto.Ed25519;
+import com.harvana.app.ui.PaymentSuccessSheet;
+import com.harvana.app.wallet.BalanceFormatter;
 import com.harvana.app.sync.HarvanaNodeClient;
 import com.harvana.app.wallet.WalletManager;
 import com.harvana.app.wallet.WalletNodeBridge;
@@ -69,11 +72,28 @@ public class TransactionRouter {
 
         // Native HARV — route through node
         if (contractAddress == null || contractAddress.trim().isEmpty()) {
+            // Payment buttons stay on "Pending…" from now until the chain confirms (or this fails), and the
+            // full-screen success sheet follows on whichever screen is in front.
+            final PaymentTracker.Handle inFlight = PaymentTracker.begin();
             routeNativeHarvThroughNode(req, new ExecutionCallback() {
                 @Override public void onSuccess(ExecutionResult result) {
-                    callback.onSuccess(result != null ? result.txHash : "");
+                    final String hash = result != null && result.txHash != null ? result.txHash : "";
+                    try {
+                        PaymentSuccessSheet.Info info = new PaymentSuccessSheet.Info();
+                        TxKind kind = TxKind.of(memo, false);
+                        info.title = kind != null ? kind.title : "Payment sent";
+                        info.amount = BalanceFormatter.smart(amount.doubleValue()) + " " + CoinInfo.ticker();
+                        info.rows = new String[][] {{"To", recipient}, {"From", sender},
+                                {"For", kind != null ? kind.detail : (memo == null ? "" : memo)}, {"Transaction", hash}};
+                        info.txHash = hash;
+                        info.note = "The network has accepted it. It shows as confirmed once the next block has it.";
+                        PaymentTracker.success(info);
+                    } catch (Throwable ignored) {}
+                    PaymentTracker.endWhenConfirmed(inFlight, hash, () -> PaymentTracker.markConfirmed(hash));
+                    callback.onSuccess(hash);
                 }
                 @Override public void onError(String error) {
+                    inFlight.end();
                     callback.onError("ERR_NODE_TX", error);
                 }
             });

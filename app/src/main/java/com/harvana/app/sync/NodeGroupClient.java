@@ -492,7 +492,8 @@ public final class NodeGroupClient {
         });
     }
 
-    private static void actNonce(Context context, String address, String path, long nonce, Spec spec, Callback cb) {
+    private static void actNonce(Context context, String address, String path, long nonce, Spec spec, Callback cb0) {
+        final Callback cb = wrapPayment(path, address, cb0);
         try {
             String seedB64 = WalletManager.loadPrivateKey(context, address);
             String pubB64 = WalletManager.getPublicKey(context, address);
@@ -517,7 +518,8 @@ public final class NodeGroupClient {
     }
 
     /** Fetch nextRequestNonce → build canonical → sign with the wallet key → POST. */
-    private static void act(Context context, String address, String path, Spec spec, Callback cb) {
+    private static void act(Context context, String address, String path, Spec spec, Callback cb0) {
+        final Callback cb = wrapPayment(path, address, cb0);
         HarvanaNodeClient.nodeGet("/api/v1/wallet/nonce/" + address, new HarvanaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject wallet) {
@@ -548,5 +550,56 @@ public final class NodeGroupClient {
             @Override
             public void onError(String error) { cb.onError("Could not fetch request nonce: " + error); }
         });
+    }
+
+    // ═════════════════════ payments: locked buttons + success sheet ═════════════════════
+
+    /** What the success sheet calls each money-moving action; anything not listed is not a payment. */
+    private static String paymentTitle(String path) {
+        switch (path) {
+            case "/api/v1/circle/contribute": return "Contribution sent";
+            case "/api/v1/circle/join": return "Joined the group";
+            case "/api/v1/circle/cure-default": return "Default cured";
+            case "/api/v1/accum/contribute":
+            case "/api/v1/accum/contribute-multiple":
+            case "/api/v1/accum/contribute-variable": return "Savings paid";
+            case "/api/v1/accum/backpay": return "Missed days paid back";
+            case "/api/v1/fixed/deposit": return "Deposit sent";
+            case "/api/v1/genloan/repay": return "Loan repayment sent";
+            case "/api/v1/staking/claim": return "Rewards claimed";
+            case "/api/v1/staking/unstake": return "Unstake started";
+            default: return null;
+        }
+    }
+
+    /** Locks the payment buttons while this action runs and shows the success sheet when it works. */
+    private static Callback wrapPayment(String path, String address, Callback inner) {
+        final String title = paymentTitle(path);
+        if (title == null) return inner;
+        final com.harvana.app.tx.PaymentTracker.Handle handle = com.harvana.app.tx.PaymentTracker.begin();
+        return new Callback() {
+            @Override public void onSuccess(JSONObject json) {
+                try {
+                    com.harvana.app.ui.PaymentSuccessSheet.Info info = new com.harvana.app.ui.PaymentSuccessSheet.Info();
+                    info.title = title;
+                    long raw = json == null ? 0 : json.optLong("amountRaw", json.optLong("totalRaw", 0));
+                    if (raw > 0) info.amount = com.harvana.app.wallet.BalanceFormatter.smart(
+                            com.harvana.app.wallet.BalanceFormatter.rawToHarv(raw)) + " " + com.harvana.app.CoinInfo.ticker();
+                    info.rows = new String[][] {{"From", address}};
+                    String hash = json == null ? "" : json.optString("txHash", json.optString("payoutId", ""));
+                    info.txHash = hash;
+                    info.note = path.contains("/staking/")
+                            ? "It is on its way to your wallet."
+                            : "The network has accepted it. It shows as confirmed once the next block has it.";
+                    com.harvana.app.tx.PaymentTracker.success(info);
+                } catch (Throwable ignored) {}
+                handle.end();
+                inner.onSuccess(json);
+            }
+            @Override public void onError(String error) {
+                handle.end();
+                inner.onError(error);
+            }
+        };
     }
 }

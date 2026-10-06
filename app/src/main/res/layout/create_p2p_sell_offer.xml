@@ -803,6 +803,7 @@
 					android:visibility="gone" />
 				<com.google.android.material.button.MaterialButton
 					android:id="@+id/btn_sell_deposit_harv_2"
+					android:tag="payment_button"
 					android:layout_width="match_parent"
 					android:layout_height="44dp"
 					android:layout_marginTop="8dp"
@@ -814,6 +815,7 @@
 					app:cornerRadius="12dp" />
 				<com.google.android.material.button.MaterialButton
 					android:id="@+id/btn_publish_sell_offer"
+					android:tag="payment_button"
 					android:layout_width="match_parent"
 					android:layout_height="56dp"
 					android:layout_marginTop="32dp"

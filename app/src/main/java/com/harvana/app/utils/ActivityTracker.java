@@ -61,6 +61,7 @@ public final class ActivityTracker {
         TapCounter(Window.Callback d) { super(d); }
         @Override public boolean dispatchTouchEvent(MotionEvent e) {
             if (e.getActionMasked() == MotionEvent.ACTION_UP) {
+                try { com.harvana.app.tx.PaymentTracker.noteTap(e); } catch (Throwable ignored) {}
                 pendingTaps++;
                 long now = System.currentTimeMillis();
                 if (now - lastTapSave > 5000) flushTaps();

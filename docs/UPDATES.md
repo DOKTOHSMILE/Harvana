@@ -4,7 +4,7 @@
 
 ## 6 Oct 2026: handshake reaction on Learn posts
 
-What the app does. The fire reaction on Learn posts is now a handshake: a custom full-colour icon of two hands reaching to shake, like 🫱🏽🫲🏽 (medium skin tone), meaning you agree with the author. It is dimmed until you tap it and full colour once you have. Counts and who reacted are unchanged (same records as before). What you do: install the new build.
+What the app does. The fire reaction on Learn posts is now a handshake: a custom full-colour icon of two hands crossed in a shake, like 🤝 (medium skin tones), meaning you agree with the author. It is dimmed until you tap it and full colour once you have. Counts and who reacted are unchanged (same records as before). What you do: install the new build.
 
 ## 6 Oct 2026: close a goal group nobody else joined and get your money back
 

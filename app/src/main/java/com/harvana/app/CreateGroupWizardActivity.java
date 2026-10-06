@@ -210,8 +210,8 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         }
         if (kind == Kind.ACCUM) {
             if (allowLoans) {
-                try { double r = Double.parseDouble(interest.trim()); if (r < 0 || r > 50) return "Interest must be between 0 and 50%."; }
-                catch (Exception e) { return "Enter the interest rate, from 0 to 50%."; }
+                try { double r = Double.parseDouble(interest.trim()); if (r < 0 || r > 5) return "Interest per day must be between 0 and 5%."; }
+                catch (Exception e) { return "Enter the interest per day, from 0 to 5%."; }
             }
             return null;
         }
@@ -458,11 +458,11 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         Runnable paintRate = () -> {
             rate.removeAllViews();
             if (!allowLoans) { rate.addView(hint("No lending. Savings stay in the group until members take them out.")); interest = "0"; return; }
-            rate.addView(label("Interest on a loan (0 to 50%)"));
-            EditText e = edit("e.g. 5", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, "0".equals(interest) ? "" : interest);
+            rate.addView(label("Interest per day on a loan (0 to 5%)"));
+            EditText e = edit("e.g. 0.5", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, "0".equals(interest) ? "" : interest);
             e.addTextChangedListener(watch(s -> interest = s));
             rate.addView(e);
-            rate.addView(hint("Borrowers repay with this interest. It is set once, now, and every member sees it before they save."));
+            rate.addView(hint("Interest is charged for each day a loan is held, not by the month. A borrower who repays early pays only for the days held. Example: 0.5% a day on 100 HARV held 10 days costs 5 HARV. It is set once, now, and every member sees it before they save."));
         };
         loans.setOnCheckedChangeListener((v, on) -> { allowLoans = on; paintRate.run(); });
         paintRate.run();
@@ -618,7 +618,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
             rows.add(new String[] {"Bond each member locks", CircleUi.harv(c * (members - 1))});
             rows.add(new String[] {"Payout order", "Order of joining"});
         } else if (kind == Kind.ACCUM) {
-            rows.add(new String[] {"Lending", allowLoans ? "Yes, " + interest.trim() + "% interest" : "No"});
+            rows.add(new String[] {"Lending", allowLoans ? "Yes, " + interest.trim() + "% interest per day" : "No"});
             rows.add(new String[] {"Savings can be taken out", cycleEndOnly ? "Only when the 30-day line ends" : "Any time, with your approval"});
         } else {
             rows.add(new String[] {"For", PURPOSES[purpose]});
@@ -726,7 +726,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
             g.put("contributionAmount", parse(suggestedAmount));
             g.put("totalSlots", (int) parse(expectedMembers));
             g.put("loanInterestRate", allowLoans ? parse(interest) : 0.0);
-            g.put("loanInterestPeriod", "MONTHLY");
+            g.put("loanInterestPeriod", "DAILY");
             g.put("withdrawalRule", cycleEndOnly ? "Cycle-End Only" : "Anytime");
         } else {
             g.put("contributionAmount", parse(suggestedAmount));

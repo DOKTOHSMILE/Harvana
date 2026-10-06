@@ -117,6 +117,14 @@ public final class GroupRepository {
      * (HarvanaProtocolManager.GENLOAN_MIN_DURATION_HOURS / MAX).
      * Monthly maps to 720. Daily maps to 24. Anything else is refused.
      */
+    /** GenLoan request for {@code days} days (1 to 30). Interest is charged per day, for the days the loan is actually held. */
+    public static void requestLoan(Context context, GroupIdentity id, String wallet, double principalHarv, int days, NodeGroupClient.Callback cb) {
+        if (id == null || !id.onChain()) { cb.onError("This loan is not a network loan."); return; }
+        long raw = BalanceFormatter.harvToRaw(principalHarv);
+        if (raw <= 0) { cb.onError("Enter an amount the network can record."); return; }
+        NodeGroupClient.requestLoan(context, wallet, id.protocolId(), raw, LoanInterest.clampDays(days) * 24L, cb);
+    }
+
     public static void requestLoan(Context context, GroupIdentity id, String wallet, double principalHarv, String period, NodeGroupClient.Callback cb) {
         if (id == null || !id.onChain()) {
             cb.onError("This loan is not a network loan.");

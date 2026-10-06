@@ -798,7 +798,7 @@
 									android:id="@+id/textview18"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="Interest rate (%)"
+									android:text="Interest per day (%)"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
 									android:textSize="14.5sp" />
@@ -806,7 +806,7 @@
 									android:id="@+id/textview19"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="Charged per loan"
+									android:text="Charged for each day a loan is held"
 									android:textColor="@color/colorTextTertiary"
 									android:textSize="11.5sp" />
 							</LinearLayout>

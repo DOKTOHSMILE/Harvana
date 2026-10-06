@@ -69,6 +69,12 @@ public final class GroupLoanManager {
 
     // ── Member: apply ────────────────────────────────────────────────────
 
+    public static void applyForLoan(Context context, String groupId, String borrowerWallet, double principalHarv,
+                                    double interestRatePercent, String interestPeriod, String note, Callback callback) {
+        applyForLoan(context, groupId, borrowerWallet, principalHarv, interestRatePercent, interestPeriod, note, 30, callback);
+    }
+
+    /** {@code termDays} is how long the borrower plans to keep the loan, 1 to 30. Interest runs per day for the days actually held. */
     public static void applyForLoan(Context context,
                                     String groupId,
                                     String borrowerWallet,
@@ -76,6 +82,7 @@ public final class GroupLoanManager {
                                     double interestRatePercent,
                                     String interestPeriod,
                                     String note,
+                                    int termDays,
                                     Callback callback) {
         if (callback == null) return;
 
@@ -93,7 +100,7 @@ public final class GroupLoanManager {
             @Override public void onError(String error) { callback.onError(error); }
             @Override public void onIdentity(GroupIdentity id) {
                 if (id.onChain()) {
-                    GroupRepository.requestLoan(context, id, borrowerWallet, principalHarv, interestPeriod,
+                    GroupRepository.requestLoan(context, id, borrowerWallet, principalHarv, LoanInterest.clampDays(termDays),
                             new com.harvana.app.sync.NodeGroupClient.Callback() {
                                 @Override public void onSuccess(org.json.JSONObject json) {
                                     String loanId = json.optString("loanId", "");
@@ -108,6 +115,9 @@ public final class GroupLoanManager {
                                     mirror.put("principalRaw", com.harvana.app.wallet.BalanceFormatter.harvToRaw(principalHarv));
                                     mirror.put("principalHarv", principalHarv);
                                     mirror.put("createdAt", System.currentTimeMillis());
+                                    mirror.put("interestRate", interestRatePercent);   // per day
+                                    mirror.put("interestPeriod", "DAILY");
+                                    mirror.put("termDays", LoanInterest.clampDays(termDays));
                                     GroupFirestoreManager.getInstance(context).updateLoan(id.firestoreId, loanId, mirror,
                                             new GroupFirestoreManager.SimpleCallback() {
                                                 @Override public void onSuccess() { callback.onSuccess(message); }
@@ -118,14 +128,14 @@ public final class GroupLoanManager {
                             });
                     return;
                 }
-                submitLegacyLoan(context, groupId, borrowerWallet, principalHarv, interestRatePercent, interestPeriod, note, callback);
+                submitLegacyLoan(context, groupId, borrowerWallet, principalHarv, interestRatePercent, interestPeriod, note, termDays, callback);
             }
         });
     }
 
     private static void submitLegacyLoan(Context context, String groupId, String borrowerWallet,
                                          double principalHarv, double interestRatePercent,
-                                         String interestPeriod, String note, Callback callback) {
+                                         String interestPeriod, String note, int termDays, Callback callback) {
 
         String uid = currentUid();
         String period = (interestPeriod != null && !interestPeriod.trim().isEmpty())
@@ -138,6 +148,7 @@ public final class GroupLoanManager {
         loan.put("principalHarv", principalHarv);
         loan.put("interestRate", interestRatePercent);
         loan.put("interestPeriod", period);
+        loan.put("termDays", LoanInterest.clampDays(termDays));
         loan.put("note", note != null ? note : "");
         loan.put("createdAt", System.currentTimeMillis());
 

@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: loan interest is per day, for the days held
+
+What the app does. Loan interest is now set, shown and charged per day in every group, never per month. When a group is created the rate is "Interest per day" (0 to 5%). When a member asks for a loan they choose how many days they plan to keep it (1 to 30, the network's range) and see the interest for the full term; the loan screen says that repaying earlier costs interest only for the days held. Example: 0.5% a day on 100 HARV, taken for 30 days and repaid on day 15, costs 7.5 HARV, not 15. The network already worked this way (simple daily interest by the elapsed time, fractions of a day counted, worked out when the loan is repaid), so no node change was needed; what was wrong was the app, which labelled the same number "per month" in the create screens, the contract and the loan screens. A group on the network now shows its stored number as a per-day rate, and an older app-only group with a monthly or yearly rate has it spread over 30 or 365 days so nobody's existing loan gets dearer. The contract's Loans section says it in plain words with the early-repayment example. The group settings screen saves the rate as per day (0 to 5%).
+
+What you do. Install the new build. Groups already on the network were created with the number typed as "monthly" but the network has always charged it per day: check any group whose creator typed a monthly-sounding rate (for example 5), because that group is charging 5% a day. Tell me which groups and I can suggest what to do; the rate of a group on the network cannot be changed after creation.
+
 ## 6 Oct 2026: more members vote as a group grows
 
 What the app does. Text only. The members' 60% of a group vote is now shared by 20% of the qualified members, at least 5 and at most 15 (it was always the top 5). The contract says so. A treasurer never takes one of those member places. What you do: deploy the node jar first (node `docs/DEPLOYMENT.md`, "Group treasurer role"), then install the build. Votes already open keep their voters and weights.

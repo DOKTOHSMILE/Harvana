@@ -18,7 +18,7 @@ public final class AccumSnapshot {
         s.headline = "ACTIVE".equals(s.state) ? "Personal savings lines" : s.state;
 
         long bps = lng(group, "interestRateBps");
-        s.term("Interest rate", String.format(java.util.Locale.US, "%.2f%%", bps / 100.0));
+        s.term("Interest per day", String.format(java.util.Locale.US, "%.2f%%", bps / 100.0));
         s.term("Withdrawal rule", "CYCLE_END_ONLY".equals(str(group, "withdrawalRule")) ? "Only at the end of a cycle" : "Any time (admin approves)");
         s.term("Saved by all members", harv(lng(group, "totalActiveLineBalanceRaw")));
         s.term("Admin", admin ? "You" : "Group admin");

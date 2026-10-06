@@ -566,7 +566,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 			return;
 		}
 		double bps = json.optLong("interestRateBps") / 100.0;
-		if (tv_loan_rate != null) tv_loan_rate.setText(String.format(java.util.Locale.US, "Interest: %.2f%%", bps));
+		if (tv_loan_rate != null) tv_loan_rate.setText(String.format(java.util.Locale.US, "Interest: %.2f%% a day", bps));
 		if (tv_loan_withdrawal != null) tv_loan_withdrawal.setText("Withdrawal rule: " + json.optString("withdrawalRule", "—"));
 	}
 	
@@ -654,8 +654,9 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		
 		String secondaryFinancialVal = "0%";
 		if (isAccumulative) {
-			double rate = _safeDouble(data, "loanInterestRate");
-			secondaryFinancialVal = String.format(Locale.US, "%.2f%%", rate);
+			double rate = com.harvana.app.group.LoanInterest.dailyPercent(_safeDouble(data, "loanInterestRate"),
+				_safeString(data, "loanInterestPeriod", ""), com.harvana.app.group.GroupKinds.isOnChain(data));
+			secondaryFinancialVal = String.format(Locale.US, "%.2f%% a day", rate);
 		} else {
 			String commission = _safeString(data, "commissionPercent", "0");
 			if (!commission.contains("%")) commission += "%";
@@ -793,9 +794,10 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		}
 		
 		if (accum) {
-			double rate = _safeDouble(data, "loanInterestRate");
+			double rate = com.harvana.app.group.LoanInterest.dailyPercent(_safeDouble(data, "loanInterestRate"),
+				_safeString(data, "loanInterestPeriod", ""), com.harvana.app.group.GroupKinds.isOnChain(data));
 			if (tv_loan_rate != null) {
-				tv_loan_rate.setText(String.format(Locale.US, "Interest: %.2f%%", rate));
+				tv_loan_rate.setText(String.format(Locale.US, "Interest: %.2f%% a day", rate));
 			}
 			if (tv_loan_withdrawal != null) {
 				tv_loan_withdrawal.setText("Withdrawal rule: " + _safeString(data, "withdrawalRule", "—"));

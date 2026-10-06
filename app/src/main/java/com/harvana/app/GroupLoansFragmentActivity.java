@@ -338,10 +338,13 @@ public class GroupLoansFragmentActivity extends Fragment {
 	
 	private void _applyGroupTerms(Map<String, Object> data) {
 		Object rateObj = data.get("loanInterestRate");
-		loanInterestRate = rateObj instanceof Number ? ((Number) rateObj).doubleValue() : 0;
+		double storedRate = rateObj instanceof Number ? ((Number) rateObj).doubleValue() : 0;
 		Object periodObj = data.get("loanInterestPeriod");
-		loanInterestPeriod = periodObj != null && !periodObj.toString().trim().isEmpty()
-		? periodObj.toString().trim().toUpperCase() : "MONTHLY";
+		String storedPeriod = periodObj != null ? periodObj.toString().trim() : "";
+		// Interest is always shown and charged per day. A group on the network already stores a daily rate; an older app-only group
+		// with a monthly or yearly rate has it spread over 30 or 365 days.
+		loanInterestRate = com.harvana.app.group.LoanInterest.dailyPercent(storedRate, storedPeriod, com.harvana.app.group.GroupKinds.isOnChain(data));
+		loanInterestPeriod = "DAILY";
 		Object walletObj = data.get("groupWalletAddress");
 		groupWalletAddress = walletObj != null ? walletObj.toString() : "";
 		Object creatorObj = data.get("creatorId");
@@ -617,7 +620,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		if (tvPeriodsLabel != null) {
 			String unitPlural = "DAILY".equals(loanInterestPeriod) ? "DAYS"
 			: "ANNUALLY".equals(loanInterestPeriod) ? "YEARS" : "MONTHS";
-			tvPeriodsLabel.setText("I PLAN TO REPAY IN (" + unitPlural + ")");
+			tvPeriodsLabel.setText("I PLAN TO KEEP IT FOR (1 TO 30 DAYS)");
 		}
 		
 		android.text.TextWatcher calcWatcher = new android.text.TextWatcher() {
@@ -630,7 +633,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 				int periods = 1;
 				try {
 					String raw = periodsInput != null ? periodsInput.getText().toString().trim() : "1";
-					periods = raw.isEmpty() ? 1 : Math.max(1, Integer.parseInt(raw));
+					periods = raw.isEmpty() ? 1 : com.harvana.app.group.LoanInterest.clampDays(Integer.parseInt(raw));
 				} catch (Exception ignored) {}
 				
 				if (amt <= 0) {
@@ -639,7 +642,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 					return;
 				}
 				
-				double interest = amt * (loanInterestRate / 100.0) * periods;
+				double interest = com.harvana.app.group.LoanInterest.interest(amt, loanInterestRate, periods);
 				double total = amt + interest;
 				String periodUnit = "DAILY".equals(loanInterestPeriod) ? "day"
 				: "ANNUALLY".equals(loanInterestPeriod) ? "year" : "month";
@@ -647,8 +650,8 @@ public class GroupLoansFragmentActivity extends Fragment {
 				
 				if (tvCalcEmpty != null) tvCalcEmpty.setVisibility(View.GONE);
 				if (calcRowsLayout != null) calcRowsLayout.setVisibility(View.VISIBLE);
-				if (tvCalcAfter != null) tvCalcAfter.setText("After " + periods + " " + periodLabel
-				+ " at " + loanInterestRate + "%/" + loanInterestPeriod.toLowerCase());
+				if (tvCalcAfter != null) tvCalcAfter.setText("If held " + periods + " " + periodLabel
+				+ " at " + loanInterestRate + "% a day. Repay earlier and you pay interest only for the days held.");
 				
 				// APPLIED FIX
 				if (tvCalcPrincipal != null) tvCalcPrincipal.setText(_formatUIBalance(amt));
@@ -704,19 +707,29 @@ public class GroupLoansFragmentActivity extends Fragment {
 					return;
 				}
 				String note = noteInput != null ? noteInput.getText().toString().trim() : "";
+				int days = 1;
+				try {
+					String rawDays = periodsInput != null ? periodsInput.getText().toString().trim() : "1";
+					days = rawDays.isEmpty() ? 1 : Integer.parseInt(rawDays);
+				} catch (Exception ignored) {}
+				if (days < com.harvana.app.group.LoanInterest.MIN_DAYS || days > com.harvana.app.group.LoanInterest.MAX_DAYS) {
+					SketchwareUtil.showMessage(getContext(), "Choose 1 to 30 days.");
+					return;
+				}
+				final int termDays = days;
 				sheet.dismiss();
 				com.harvana.app.group.PaymentConfirmSheet.show(getContext(), "Confirm Loan Application",
 				amount, groupWalletAddress, note.isEmpty() ? null : note, "No fee to apply",
-				() -> _submitApplication(myWallet, amount, note));
+				() -> _submitApplication(myWallet, amount, note, termDays));
 			});
 		}
 		
 		sheet.show();
 	}
 	
-	private void _submitApplication(String myWallet, double amount, String note) {
+	private void _submitApplication(String myWallet, double amount, String note, int termDays) {
 		com.harvana.app.group.GroupLoanManager.applyForLoan(getContext(), groupId, myWallet,
-		amount, loanInterestRate, loanInterestPeriod, note, new com.harvana.app.group.GroupLoanManager.Callback() {
+		amount, loanInterestRate, loanInterestPeriod, note, termDays, new com.harvana.app.group.GroupLoanManager.Callback() {
 			@Override
 			public void onSuccess(String message) {
 				if (getActivity() == null) return;

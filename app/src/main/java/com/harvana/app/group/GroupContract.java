@@ -113,11 +113,11 @@ public final class GroupContract {
         // 5. Loans.
         if (loans) {
             Section ls = new Section("Loans");
-            double rate = num(g, "loanInterestRate");
-            String period = str(g, "loanInterestPeriod", "MONTHLY").toLowerCase(Locale.US);
-            ls.add("Members of this group can borrow from the group's money.");
-            ls.add("Interest: " + fmt(rate) + "% per " + period.replace("ly", "") + ". Example: borrow 100 " + ticker + " and the interest for one "
-                + period.replace("ly", "") + " is " + fmt(rate) + " " + ticker + ".");
+            double rate = LoanInterest.dailyPercent(num(g, "loanInterestRate"), str(g, "loanInterestPeriod", ""), GroupKinds.isOnChain(g));
+            ls.add("Members of this group can borrow from the group's money, for 1 to 30 days.");
+            ls.add("Interest is charged per day: " + fmt4(rate) + "% of the amount borrowed for each day the loan is held, counted in whole and part days. It is not a monthly charge.");
+            ls.add("You pay only for the days you hold the loan. Example: borrow 100 " + ticker + " for 30 days and repay on day 15, and you pay interest for 15 days, "
+                + fmt4(LoanInterest.interest(100, rate, 15)) + " " + ticker + ", not for 30. If you keep it the full 30 days you pay " + fmt4(LoanInterest.interest(100, rate, 30)) + " " + ticker + ".");
             ls.add("You must pay a loan back in full. Unpaid loans lower your trust score and can be taken from your savings in the group.");
             out.add(ls);
         } else {
@@ -344,6 +344,11 @@ public final class GroupContract {
     /** The exact string the member's wallet signs. */
     public static String signedMessage(String groupId, String memberAddress, String contractHash, long signedAtMs) {
         return "HARVANA_GROUP_JOIN_ACK_V1:" + groupId + ":" + memberAddress + ":" + contractHash + ":" + signedAtMs;
+    }
+
+    private static String fmt4(double d) {
+        String s = String.format(Locale.US, "%.4f", d).replaceAll("0+$", "").replaceAll("\\.$", "");
+        return s.isEmpty() ? "0" : s;
     }
 
     private static String fmt(double d) {

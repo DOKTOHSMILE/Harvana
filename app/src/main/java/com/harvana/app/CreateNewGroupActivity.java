@@ -872,7 +872,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		withdrawalRuleList = new ArrayList<>(Arrays.asList("SELECT WITHDRAWAL RULE", "Anytime", "Cycle-End Only"));
 		spinner_withdrawal_rule.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, withdrawalRuleList));
 		
-		ArrayList<String> loanInterestPeriodList = new ArrayList<>(Arrays.asList("Monthly", "Daily", "Annually"));
+		ArrayList<String> loanInterestPeriodList = new ArrayList<>(Arrays.asList("Daily"));
 		spinner_loan_interest_period.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, loanInterestPeriodList));
 		spinner_loan_interest_period.setSelection(0);
 		
@@ -1267,7 +1267,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		}
 		if (!_validatePositiveDecimal(contribution_amount_accumulative_edittext, "Please enter a valid contribution amount.")) return false;
 		if (!_validateMinInt(no_of_slots_accumulative_edittext, 2, "A group needs at least 2 members.")) return false;
-		if (allowLoans && !_validateRangeDecimal(loan_interest_rate_edittext, 0, 100, "Interest rate must be between 0% and 100%.")) return false;
+		if (allowLoans && !_validateRangeDecimal(loan_interest_rate_edittext, 0, 5, "Interest per day must be between 0% and 5%.")) return false;
 		if (withdrawalRuleString.trim().isEmpty()) {
 			SketchwareUtil.showMessage(getApplicationContext(), "Please select a withdrawal rule.");
 			return false;
@@ -1449,7 +1449,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		if (allowLoans) {
 			try { ratePct = Double.parseDouble(loan_interest_rate_edittext.getText().toString().trim()); }
 			catch (Exception e) {
-				SketchwareUtil.showMessage(getApplicationContext(), "Enter an interest rate from 0 to 50.");
+				SketchwareUtil.showMessage(getApplicationContext(), "Enter the interest per day, from 0 to 5.");
 				return;
 			}
 		}
@@ -1629,10 +1629,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			newGroupMap.put("contributionAmount", Double.parseDouble(contribution_amount_accumulative_edittext.getText().toString()));
 			newGroupMap.put("totalSlots", Integer.parseInt(no_of_slots_accumulative_edittext.getText().toString()));
 			newGroupMap.put("loanInterestRate", allowLoans ? Double.parseDouble(loan_interest_rate_edittext.getText().toString()) : 0.0);
-			newGroupMap.put("loanInterestPeriod",
-			spinner_loan_interest_period.getSelectedItem() != null
-			? spinner_loan_interest_period.getSelectedItem().toString().toUpperCase()
-			: "MONTHLY");
+			newGroupMap.put("loanInterestPeriod", "DAILY");          // interest is always charged per day
 			newGroupMap.put("withdrawalRule", withdrawalRuleString.trim());
 		}
 		
@@ -1646,7 +1643,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		if (!pendingChatLinks.isEmpty()) newGroupMap.put("chatLinks", new ArrayList<>(pendingChatLinks));
 		if (allowLoans && !newGroupMap.containsKey("loanInterestRate")) {
 			newGroupMap.put("loanInterestRate", 0.0);
-			newGroupMap.put("loanInterestPeriod", "MONTHLY");
+			newGroupMap.put("loanInterestPeriod", "DAILY");
 		}
 		
 		final ProgressDialog groupProgress = new ProgressDialog(CreateNewGroupActivity.this);

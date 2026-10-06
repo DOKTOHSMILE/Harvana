@@ -109,4 +109,30 @@ public class GroupContractTest {
             assertFalse(type, all.toString().contains("no private key"));
         }
     }
+
+    @Test public void loanInterestIsPerDayAndOnlyForTheDaysHeld() {
+        assertEquals(0.5, LoanInterest.dailyPercent(0.5, "DAILY", false), 1e-9);
+        assertEquals("on the network the stored rate is already per day", 0.5, LoanInterest.dailyPercent(0.5, "MONTHLY", true), 1e-9);
+        assertEquals("an old monthly rate is spread over 30 days", 0.1, LoanInterest.dailyPercent(3.0, "MONTHLY", false), 1e-9);
+        assertEquals(5.0, LoanInterest.interest(100, 0.5, 10), 1e-9);
+        assertEquals("repaid on day 15 of 30: 15 days", 7.5, LoanInterest.interest(100, 0.5, 15), 1e-9);
+        assertEquals(15.0, LoanInterest.interest(100, 0.5, 30), 1e-9);
+        assertEquals(2.5, LoanInterest.interest(100, 0.5, 5.0), 1e-9);
+        assertEquals("half a day costs half a day", 0.25, LoanInterest.interest(100, 0.5, 0.5), 1e-9);
+        assertEquals(1, LoanInterest.clampDays(0));
+        assertEquals(30, LoanInterest.clampDays(90));
+    }
+
+    @Test public void theLoanSectionOfTheContractSaysPerDayAndShowsTheEarlyRepaymentExample() {
+        Map<String, Object> g = group("Accumulative Funds");
+        g.put("allowLoans", true); g.put("loanInterestRate", 0.5); g.put("loanInterestPeriod", "DAILY"); g.put("nodeGroupId", "ACCUM-1");
+        StringBuilder all = new StringBuilder();
+        for (GroupContract.Section s : GroupContract.sections(g, "HARV")) if (s.title.equals("Loans")) for (String p : s.points) all.append(p).append('\n');
+        String t = all.toString();
+        assertTrue(t, t.contains("per day"));
+        assertTrue(t, t.contains("not a monthly charge"));
+        assertTrue(t, t.contains("repay on day 15"));
+        assertTrue(t, t.contains("7.5 HARV"));
+        assertFalse(t, t.contains("per month"));
+    }
 }

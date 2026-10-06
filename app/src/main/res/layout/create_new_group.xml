@@ -1416,7 +1416,7 @@
 									android:id="@+id/textview117"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="Internal Loan Rate (%)"
+									android:text="Interest per day (%)"
 									android:textSize="12sp"
 									android:textStyle="bold" />
 								<EditText
@@ -1466,7 +1466,7 @@
 								android:id="@+id/textview5"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:text="Interest Rate Period"
+								android:text="Charged per day, only for the days a loan is held"
 								android:textSize="12sp"
 								android:textStyle="bold" />
 							<Spinner

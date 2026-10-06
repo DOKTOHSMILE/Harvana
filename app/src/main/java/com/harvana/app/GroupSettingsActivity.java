@@ -1099,12 +1099,13 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			String rate = etLoanInterestRate.getText().toString().trim();
 			try {
 				double r = Double.parseDouble(rate.isEmpty() ? "0" : rate);
-				if (r < 0 || r > 100) throw new IllegalArgumentException();
+				if (r < 0 || r > 5) throw new IllegalArgumentException();
 				patch.put("loanInterestRate", r);
+				patch.put("loanInterestPeriod", "DAILY");
 			} catch (Exception e) {
 				btnSaveSettings.setEnabled(true);
 				btnSaveSettings.setText("Save Settings");
-				Toast.makeText(this, "Interest rate must be between 0 and 100", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "Interest per day must be between 0 and 5", Toast.LENGTH_SHORT).show();
 				return;
 			}
 			if (spinWithdrawalRule.getSelectedItem() != null) {

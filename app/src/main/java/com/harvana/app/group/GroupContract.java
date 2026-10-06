@@ -127,7 +127,7 @@ public final class GroupContract {
         // 6. Voting.
         Section govern = new Section("How decisions are made");
         if (fixed || accum) {
-            govern.add("Big decisions are voted on. The admin's vote counts 40%. If the group has a treasurer, those 40% are shared so that the admin counts most, then the treasurer, then each member (for example about 23% and 17% in a group with five voting members). The other 60% is shared among the group's most active members (up to 5), or among all eligible members while the group is new.");
+            govern.add("Big decisions are voted on. The admin's vote counts 40%. If the group has a treasurer, those 40% are shared so that the admin counts most, then the treasurer, then each member (for example about 23% and 17% in a group with five voting members). The other 60% is shared among the group's most active members: 20% of the members, at least 5 and at most 15, so more members vote as the group grows. While the group is new, all eligible members vote.");
             govern.add("A vote passes when at least 51% of the total vote weight says yes, enough people voted (at least 2, or 15% of the group), and someone other than the person asking also said yes.");
             govern.add("You can vote once you have paid at least once and been in the group for 48 hours.");
             govern.add("The admin seat is not a vote. Only the current admin can hand it to another member, from the group settings. Members cannot vote an admin out.");

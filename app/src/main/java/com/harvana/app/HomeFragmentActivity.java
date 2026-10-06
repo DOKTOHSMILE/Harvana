@@ -715,13 +715,11 @@ public class HomeFragmentActivity extends Fragment {
 						@Override public void onSuccess(List<Map<String, Object>> members) {
 							mgr.getPayments(gid, new com.harvana.app.firestore.GroupFirestoreManager.ListCallback() {
 								@Override public void onSuccess(List<Map<String, Object>> payments) {
-									_addUpcomingRow(rows, gid, data, members, payments, myUid);
-									oneDone.run();
+									_addUpcomingRow(rows, gid, data, members, payments, myUid, oneDone);
 								}
 								@Override public void onError(String error) {
 									if (com.harvana.app.offline.NetworkStatus.isConnectivityError(error)) hadConnectivityFailure[0] = true;
-									_addUpcomingRow(rows, gid, data, members, null, myUid);
-									oneDone.run();
+									_addUpcomingRow(rows, gid, data, members, null, myUid, oneDone);
 								}
 							});
 						}
@@ -744,10 +742,10 @@ public class HomeFragmentActivity extends Fragment {
 	}
 	
 	private void _addUpcomingRow(ArrayList<HashMap<String, Object>> rows, String gid, Map<String, Object> data,
-	List<Map<String, Object>> members, List<Map<String, Object>> payments, String myUid) {
+	List<Map<String, Object>> members, List<Map<String, Object>> payments, String myUid, Runnable done) {
 		com.harvana.app.group.PaymentDueResolver.Result r = com.harvana.app.group.PaymentDueResolver.resolve(
 		data, members, payments, myUid, System.currentTimeMillis(), java.util.TimeZone.getDefault());
-		HashMap<String, Object> row = new HashMap<>();
+		final HashMap<String, Object> row = new HashMap<>();
 		row.put("groupId", gid);
 		row.put("groupName", str(data, "groupName", str(data, "name", "Group")));
 		row.put("groupPhoto", str(data, "groupPhoto", ""));
@@ -758,7 +756,27 @@ public class HomeFragmentActivity extends Fragment {
 		row.put("otherUid", r.otherMemberUid != null ? r.otherMemberUid : "");
 		row.put("statusLine", r.statusLine);
 		row.put("badge", r.badge);
-		synchronized (rows) { rows.add(row); }
+		final Runnable finish = () -> { synchronized (rows) { rows.add(row); } done.run(); };
+		// A fixed goal that has reached its target no longer takes deposits, but the saved copy of the group may not say so.
+		// Ask the network for the goal's real state before offering "Pay".
+		com.harvana.app.group.GroupIdentity identity = com.harvana.app.group.GroupIdentityResolver.resolve(gid, data);
+		boolean fixedOnChain = identity != null && identity.onChain() && "FIXED".equals(identity.family);
+		if (!"PAY".equals(r.action.name()) || !fixedOnChain) { finish.run(); return; }
+		com.harvana.app.sync.NodeGroupClient.getFixedGroup(identity.protocolId(), new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				double goal = json.optLong("targetGoalAmountRaw") / 100_000_000.0;
+				double raised = json.optLong("raisedAmountRaw") / 100_000_000.0;
+				String state = json.optString("state", "");
+				boolean closed = "COMPLETED".equalsIgnoreCase(state) || "CLOSED".equalsIgnoreCase(state) || (goal > 0 && raised + 0.0000001 >= goal);
+				if (closed) {
+					row.put("action", "NONE");
+					row.put("statusLine", "Goal reached - deposits are closed");
+					row.put("badge", "Closed");
+				}
+				finish.run();
+			}
+			@Override public void onError(String error) { finish.run(); }
+		});
 	}
 	
 	private void _finishUpcoming(String myUid, ArrayList<HashMap<String, Object>> rows,

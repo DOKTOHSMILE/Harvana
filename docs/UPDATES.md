@@ -638,3 +638,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Group rings, second fix
 - The group pictures that carry the type ring in layouts (Home upcoming and trending, Discover, Groups, group page, join request) are plain image views again, which is what the ring drawing was built for, so the ring is whole. Any group picture that is still a Material image view builds its ring with the view's own border, applied in the right order.
+
+## Home: no Pay button for a goal that no longer takes deposits
+- Home's Upcoming payments offered "Pay" for a fixed goal group that had already reached its goal. For a goal group on the network Home now asks the network for the goal's real state before offering Pay: if the goal is reached or the group is completed, the row says "Goal reached - deposits are closed", shows "Closed" and the button is disabled. The resolver also treats a group saved as completed or closed the same way.

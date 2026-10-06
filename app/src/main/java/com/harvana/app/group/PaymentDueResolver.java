@@ -54,6 +54,10 @@ public final class PaymentDueResolver {
             return none("Group is " + status.toLowerCase(Locale.US), "Idle");
         }
         if (type.contains("Accumulative")) return none("Save any time - nothing scheduled", "Idle");
+        String goalState = str(group.get("state"));
+        if (type.contains("Fixed") && ("COMPLETED".equalsIgnoreCase(goalState) || "CLOSED".equalsIgnoreCase(goalState))) {
+            return none("Goal reached - deposits are closed", "Closed");
+        }
 
         boolean bySlot = type.contains("Rotating") && group.get("currentSlot") instanceof Number
                 && ((Number) group.get("currentSlot")).intValue() > 0;

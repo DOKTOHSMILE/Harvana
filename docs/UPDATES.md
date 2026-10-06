@@ -4,7 +4,7 @@
 
 ## 6 Oct 2026: handshake reaction on Learn posts
 
-What the app does. The fire reaction on Learn posts is now a handshake: the 🤝 handshake emoji as an icon with a transparent background (rendered from Noto Color Emoji, Apache 2.0), meaning you agree with the author. It is dimmed until you tap it and full colour once you have. Counts and who reacted are unchanged (same records as before). What you do: install the new build.
+What the app does. The fire reaction on Learn posts is now a handshake: a 3D 🤝 handshake icon with a transparent background (Microsoft Fluent Emoji, MIT, see docs/THIRD_PARTY_NOTICES.md), meaning you agree with the author. It is dimmed until you tap it and full colour once you have. Counts and who reacted are unchanged (same records as before). What you do: install the new build.
 
 ## 6 Oct 2026: close a goal group nobody else joined and get your money back
 

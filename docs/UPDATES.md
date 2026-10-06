@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: deleting a group removes it from Firestore completely
+
+What the app does. Deleting a group (from group settings, after a goal group is closed and refunded, or when the app clears a group that no longer exists on the network) now removes, in order: every invitation to the group (so invitees no longer see it), the group and all of its sub-collections (members, notices, payments, loans, join and payout requests, private), the admin's profile entry, and the phone's offline copies of the group, its members and loans, and the Discover list. Records the node keeps for network groups (trust and mirrors) are the node's and stay. What you do: publish `docs/firestore.console.rules` in the Firebase console (the group's admin may now read and delete its invitations), then install the new build. Until the rules are published, invitations sent by other members to a deleted group are left in place; everything else is removed.
+
 ## 6 Oct 2026: group wallet icon without a background
 
 What the app does. On a group's Overview, the "Group wallet" icon no longer sits on a filled square: it is the plain duotone wallet icon in the accent colour, like the icons in the cards above it. What you do: install the new build.

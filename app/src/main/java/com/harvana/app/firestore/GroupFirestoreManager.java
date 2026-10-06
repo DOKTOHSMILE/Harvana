@@ -414,6 +414,30 @@ public class GroupFirestoreManager {
 		list(col("LEARN_CONTENT"), callback);
 	}
 
+	/** Deletes every document of a top-level collection whose field equals value (in batches). */
+	public void deleteTopLevelWhere(String collection, String field, String value, SimpleCallback cb) {
+		String err = precheck();
+		if (err != null) { deliver(() -> cb.onError(err)); return; }
+		BG.execute(() -> {
+			try {
+				FirebaseFirestore db = FirebaseFirestore.getInstance();
+				while (true) {
+					QuerySnapshot snap = com.google.android.gms.tasks.Tasks.await(
+						db.collection(collection).whereEqualTo(field, value).limit(400).get(), 30, TimeUnit.SECONDS);
+					if (snap.isEmpty()) break;
+					com.google.firebase.firestore.WriteBatch batch = db.batch();
+					for (DocumentSnapshot d : snap.getDocuments()) batch.delete(d.getReference());
+					com.google.android.gms.tasks.Tasks.await(batch.commit(), 30, TimeUnit.SECONDS);
+					if (snap.size() < 400) break;
+				}
+				cb.onSuccess();
+			} catch (Exception e) {
+				Throwable c = e.getCause() != null ? e.getCause() : e;
+				cb.onError(c instanceof Exception ? describe((Exception) c) : String.valueOf(c.getMessage()));
+			}
+		});
+	}
+
 	public void deleteGroupTree(String groupId, SimpleCallback cb) {
 		String err = precheck();
 		if (err != null) { deliver(() -> cb.onError(err)); return; }

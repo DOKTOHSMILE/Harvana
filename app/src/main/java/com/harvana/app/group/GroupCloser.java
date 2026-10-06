@@ -155,13 +155,26 @@ public final class GroupCloser {
         });
     }
 
-    /** Permanently removes an app-only group with nothing open. Never called for a network group. */
+    /**
+     * Permanently removes a group from Firestore and from this phone: its invitations (deleted first, while the group
+     * still exists for the rules to check the admin against), the group with every sub-collection, the deleter's
+     * profile entry and the offline copies. Called for app-only groups with nothing open, and for a goal group its admin
+     * closed on the network (records there are kept by the network itself).
+     */
     public static void delete(Context ctx, String groupId, DoneCb cb) {
         final Context c = ctx.getApplicationContext();
+        GroupFirestoreManager.getInstance(c).deleteTopLevelWhere("INVITES", "groupId", groupId, new GroupFirestoreManager.SimpleCallback() {
+            @Override public void onSuccess() { deleteTree(c, groupId, cb); }
+            @Override public void onError(String e) { deleteTree(c, groupId, cb); }   // best effort: invitations to a missing group expire anyway
+        });
+    }
+
+    private static void deleteTree(Context c, String groupId, DoneCb cb) {
         String me = FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
         GroupFirestoreManager.getInstance(c).deleteGroupTree(groupId, new GroupFirestoreManager.SimpleCallback() {
             @Override public void onSuccess() {
                 GroupSaver.unqueue(c, groupId); // a queued retry must not bring it back
+                forgetLocally(c, groupId);
                 if (!me.isEmpty()) {
                     UserProfileManager.getInstance(c).removeGroupFromProfile(me, groupId, new UserProfileManager.SimpleCallback() {
                         @Override public void onSuccess() { cb.onDone(); }
@@ -188,6 +201,14 @@ public final class GroupCloser {
             }
             @Override public void onError(String e) { cb.onError(com.harvana.app.circle.CircleUi.friendly(e)); }
         });
+    }
+
+    /** Drops this phone's cached copies of a deleted group so it cannot reappear from the offline cache. */
+    static void forgetLocally(Context c, String groupId) {
+        for (String k : new String[]{"group_" + groupId, "members_" + groupId, "loans_" + groupId, "loan_payments_" + groupId}) {
+            com.harvana.app.offline.OfflineCacheManager.remove(c, k);
+        }
+        com.harvana.app.offline.OfflineCacheManager.remove(c, "discover_groups");   // rebuilt on the next Discover load
     }
 
     private static final class NoopCb implements GroupFirestoreManager.SimpleCallback {

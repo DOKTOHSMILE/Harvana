@@ -99,12 +99,13 @@ public final class StaleGroupSweeper {
             @Override public void onSuccess() { }
             @Override public void onError(String error) { }
         });
-        OfflineCacheManager.remove(app, "group_" + gid);
+        GroupCloser.forgetLocally(app, gid);
         if (uid.equals(str(g.get("creatorId")))) {
-            // Its picture is deleted first (the node checks the admin from the group profile), then the profile itself.
+            // Its picture is deleted first (the node checks the admin from the group profile), then everything in
+            // Firestore: invitations, the group and its sub-collections (GroupCloser.delete).
             com.harvana.app.utils.MediaCleaner.delete(app, com.harvana.app.utils.MediaCleaner.GROUP_PHOTO, gid, () ->
-                GroupFirestoreManager.getInstance(app).deleteGroupTree(gid, new GroupFirestoreManager.SimpleCallback() {
-                    @Override public void onSuccess() { }
+                GroupCloser.delete(app, gid, new GroupCloser.DoneCb() {
+                    @Override public void onDone() { }
                     @Override public void onError(String error) { }
                 }));
         }

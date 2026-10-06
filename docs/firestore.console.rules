@@ -322,11 +322,13 @@ service cloud.firestore {
         && (isGroupCreator(request.resource.data.groupId)
             || (isActiveMember(request.resource.data.groupId)
                 && groupDoc(request.resource.data.groupId).membersCanInvite == true));
-      allow read: if signedIn() && (resource.data.inviterUid == request.auth.uid || inviteeIsMe());
+      // The group's admin may also read and delete its invitations (deleting a group removes them first).
+      allow read: if signedIn() && (resource.data.inviterUid == request.auth.uid || inviteeIsMe()
+        || isGroupCreator(resource.data.groupId));
       allow update: if inviteeIsMe()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'respondedAt'])
         && request.resource.data.status in ['ACCEPTED', 'DECLINED'];
-      allow delete: if signedIn() && resource.data.inviterUid == request.auth.uid;
+      allow delete: if signedIn() && (resource.data.inviterUid == request.auth.uid || isGroupCreator(resource.data.groupId));
     }
 
     // ── People: usernames, friends, contact cards ─────────────────────

@@ -219,24 +219,30 @@ public final class GroupNoticeHelper {
         return out;
     }
 
+    /**
+     * Two entries are the same notice only when they are the same stored notice, point at the same proposal, or are the same words
+     * from the same person written within two minutes of each other (a retry or a double write). The same words on different days,
+     * or for two different proposals or people, are different notices and both stay.
+     */
     private static boolean isDuplicate(List<Map<String, Object>> kept, Map<String, Object> n) {
         String title = norm(text(n, "title"));
         String message = norm(text(n, "message").isEmpty() ? text(n, "body") : text(n, "message"));
         String id = text(n, "_docId");
-        String creator = text(n, "creatorId");
+        String proposal = text(n, "proposalKind").isEmpty() ? "" : text(n, "proposalKind") + ":" + text(n, "proposalId");
+        String who = !text(n, "actorUid").isEmpty() ? text(n, "actorUid") : text(n, "creatorId");
         long at = createdAtMillis(n);
         for (Map<String, Object> k : kept) {
             if (!id.isEmpty() && id.equals(text(k, "_docId"))) return true;
-            String kt = norm(text(k, "title"));
-            if (!kt.equals(title) || title.isEmpty()) continue;
-            String km = norm(text(k, "message").isEmpty() ? text(k, "body") : text(k, "message"));
-            if (km.equals(message)) return true;
-            String kc = text(k, "creatorId");
-            long dt = Math.abs(createdAtMillis(k) - at);
-            if (dt < 120_000L && !creator.isEmpty() && creator.equals(kc)
-                    && "contribution received".equals(title)) {
-                return true;
+            if (!proposal.isEmpty()) {
+                String kp = text(k, "proposalKind").isEmpty() ? "" : text(k, "proposalKind") + ":" + text(k, "proposalId");
+                if (proposal.equals(kp)) return true;
+                continue;                                    // a proposal is only ever the same as itself
             }
+            if (title.isEmpty() || !title.equals(norm(text(k, "title")))) continue;
+            String km = norm(text(k, "message").isEmpty() ? text(k, "body") : text(k, "message"));
+            if (!km.equals(message)) continue;
+            String kwho = !text(k, "actorUid").isEmpty() ? text(k, "actorUid") : text(k, "creatorId");
+            if (Math.abs(createdAtMillis(k) - at) < 120_000L && who.equals(kwho)) return true;
         }
         return false;
     }

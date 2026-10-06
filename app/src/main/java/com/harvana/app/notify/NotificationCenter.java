@@ -66,6 +66,19 @@ public final class NotificationCenter {
         return out;
     }
 
+    /** Clears copies that were saved before this rule: a "submitted" notice whose transfer was later confirmed. */
+    public static synchronized void tidy(Context c) {
+        List<Item> items = list(c);
+        java.util.Set<String> confirmed = new java.util.HashSet<>();
+        for (Item i : items) if (i.id.startsWith("tx_") && (i.id.endsWith("_out") || i.id.endsWith("_in"))) confirmed.add(i.id.substring(0, i.id.lastIndexOf('_')));
+        boolean changed = false;
+        for (java.util.Iterator<Item> it = items.iterator(); it.hasNext(); ) {
+            Item i = it.next();
+            if (i.id.endsWith("_submitted") && confirmed.contains(i.id.substring(0, i.id.length() - "_submitted".length()))) { it.remove(); changed = true; }
+        }
+        if (changed) save(c, items);
+    }
+
     public static int unreadCount(Context c) {
         int n = 0;
         for (Item i : list(c)) if (!i.read) n++;
@@ -78,6 +91,11 @@ public final class NotificationCenter {
         Context c = ctx.getApplicationContext();
         List<Item> items = list(c);
         for (Item i : items) if (i.id.equals(dedupeKey)) return false;
+        // The confirmation of a transfer replaces its "on its way" notice instead of sitting beside it.
+        if (dedupeKey.startsWith("tx_") && (dedupeKey.endsWith("_out") || dedupeKey.endsWith("_in"))) {
+            String stem = dedupeKey.substring(0, dedupeKey.lastIndexOf('_'));
+            for (java.util.Iterator<Item> it2 = items.iterator(); it2.hasNext(); ) if (it2.next().id.equals(stem + "_submitted")) it2.remove();
+        }
         Item it = new Item();
         it.id = dedupeKey; it.type = type; it.title = title; it.body = body;
         it.groupId = groupId == null ? "" : groupId; it.tab = tab; it.createdAt = System.currentTimeMillis();

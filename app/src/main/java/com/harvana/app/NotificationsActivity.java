@@ -55,6 +55,7 @@ public class NotificationsActivity extends AppCompatActivity {
     }
     @Override protected void onResume() {
         super.onResume();
+        NotificationCenter.tidy(this);
         render();
         NotificationSync.run(this, null); // pick up anything new right now
     }

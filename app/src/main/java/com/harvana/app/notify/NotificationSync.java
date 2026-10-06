@@ -152,7 +152,10 @@ public final class NotificationSync {
             // Open the page the notice is about: a waiting vote to Actions & votes, a new member to Members, a loan to Loans, ...
             int page = NoticeFilter.pageFor(n, cat);
             if (NoticeFilter.needsVote(n) && msg.isEmpty()) msg = "A vote is waiting. Open Actions & votes to vote.";
-            NotificationCenter.post(c, cat, "notice_" + s(n.get("_docId")), named, msg, gid, page);
+            // A vote or a join request is one notification however many notice documents were written for it.
+            String key = "notice_" + s(n.get("_docId"));
+            if (!s(n.get("proposalKind")).isEmpty()) key = "vote_" + gid + "_" + s(n.get("proposalKind")) + "_" + s(n.get("proposalId"));
+            NotificationCenter.post(c, cat, key, named, msg, gid, page);
         }
         if (newest > since) sp.edit().putLong(key, newest).apply();
     }

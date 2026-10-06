@@ -37,8 +37,10 @@ public final class GroupProposalIndex {
         f.put("proposalKind", kind);
         f.put("proposalId", id);
         f.put("proposalExtra", extra == null ? "" : extra);
-        GroupFirestoreManager.getInstance(c).addNotice(firestoreGroupId, f, new GroupFirestoreManager.IdCallback() {
-            @Override public void onSuccess(String docId) { }
+        // One notice per proposal, whatever happens twice (a retry, two screens): the id is the proposal's own.
+        String noticeId = ("proposal_" + kind + "_" + id).replaceAll("[^A-Za-z0-9_-]", "_");
+        GroupFirestoreManager.getInstance(c).setNotice(firestoreGroupId, noticeId, f, new GroupFirestoreManager.SimpleCallback() {
+            @Override public void onSuccess() { }
             @Override public void onError(String error) { }
         });
     }

@@ -303,6 +303,11 @@ public class GroupFirestoreManager {
 		add(col("GROUPS", groupId, "notices"), fields, callback);
 	}
 
+	/** A notice with a fixed id, so writing it twice cannot make two. Members may create but not change a notice, so a repeat is refused. */
+	public void setNotice(String groupId, String noticeId, Map<String, Object> fields, SimpleCallback callback) {
+		set(doc("GROUPS", groupId, "notices", noticeId), fields, callback);
+	}
+
 	public void postSystemNotice(String groupId, String title, String message) {
 		Map<String, Object> fields = com.harvana.app.group.GroupNoticeHelper.buildSystem(title, message);
 		addNotice(groupId, fields, new IdCallback() {

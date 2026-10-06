@@ -795,9 +795,11 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 					"Someone asked to join. Open Members to accept or reject.", loadedCreatorId, requesterUid, "GROUP");
 				notice.put("page", 1);
 			} else return;
-			com.harvana.app.firestore.GroupFirestoreManager.getInstance(getApplicationContext()).addNotice(groupId, notice,
-				new com.harvana.app.firestore.GroupFirestoreManager.IdCallback() {
-					@Override public void onSuccess(String id) { }
+			// One notice per request (per hour, so a later request is told again), not one per tap or retry.
+			String noticeId = "joinreq_" + requesterUid + "_" + (System.currentTimeMillis() / 3_600_000L);
+			com.harvana.app.firestore.GroupFirestoreManager.getInstance(getApplicationContext()).setNotice(groupId, noticeId, notice,
+				new com.harvana.app.firestore.GroupFirestoreManager.SimpleCallback() {
+					@Override public void onSuccess() { }
 					@Override public void onError(String error) { }
 				});
 		} catch (Exception ignored) { }

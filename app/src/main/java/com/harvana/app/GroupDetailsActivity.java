@@ -667,11 +667,20 @@ public class GroupDetailsActivity extends AppCompatActivity {
 	
 	private FragmentAdapterComponentFragmentAdapter pagerAdapter;
 	
+	/** Five tabs (a group without loans) share the full width; six tabs scroll sideways as before. */
+	private void _fitTabs() {
+		if (tab_layout == null || pagerAdapter == null) return;
+		boolean fill = pagerAdapter.getCount() <= 5;
+		tab_layout.setTabMode(fill ? TabLayout.MODE_FIXED : TabLayout.MODE_SCROLLABLE);
+		tab_layout.setTabGravity(fill ? TabLayout.GRAVITY_FILL : TabLayout.GRAVITY_START);
+	}
+	
 	private void _bindHeader(Map<String, Object> data, boolean admin) {
 		if (data == null) return;
 		if (pagerAdapter != null) {
 			Object al = data.get("allowLoans");
 			pagerAdapter.setLoansEnabled(!(al instanceof Boolean) || (Boolean) al);
+			_fitTabs();
 		}
 		
 		String name = _safeString(data, "groupName", "Group");

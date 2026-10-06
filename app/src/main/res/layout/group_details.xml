@@ -353,6 +353,8 @@
 				app:tabIconTint="@color/colorAccent"
 				app:tabMode="scrollable"
 				app:tabGravity="start"
+				app:tabPaddingStart="4dp"
+				app:tabPaddingEnd="4dp"
 				app:tabRippleColor="@color/colorAccentRipple" />
 			<androidx.viewpager.widget.ViewPager
 				android:id="@+id/view_pager"

@@ -609,6 +609,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 		TextView kickBtn = sheet.findViewById(getResources().getIdentifier("btn_detail_kick", "id", requireContext().getPackageName()));
 		
 		String memberUid = str(member, "memberUid", str(member, "requesterUid", str(member, "_docId", "")));
+		com.harvana.app.group.MemberPhoto.apply(initials, memberUid);
 		
 		// Admin-only, never for a pending join request (nothing to report
 		// yet), never for yourself.
@@ -1072,7 +1073,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 			if (h.wallet != null) h.wallet.setText("—");
 			if (h.status != null) h.status.setText(str(member, "status", "Active"));
 			if (h.balance != null) h.balance.setText("");
-			if (h.initials != null) h.initials.setText("?");
+			if (h.initials != null) { h.initials.setText("?"); com.harvana.app.group.MemberPhoto.apply(h.initials, memberUid); }
 			h.itemView.setTag(memberUid);
 			h.itemView.setOnClickListener(v -> _showMemberSheet(member, false));
 			
@@ -1229,7 +1230,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 			
 			if (h.name != null) com.harvana.app.utils.Shimmer.loading(h.name);
 			if (h.meta != null) h.meta.setText("Wants to join");
-			if (h.initials != null) h.initials.setText("?");
+			if (h.initials != null) { h.initials.setText("?"); com.harvana.app.group.MemberPhoto.apply(h.initials, reqUid); }
 			
 			h.itemView.setOnClickListener(v -> _showMemberSheet(req, true));
 			

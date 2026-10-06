@@ -626,3 +626,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Join requests: where and how to vote
 - The Members tab now always shows a "JOIN REQUESTS" block at the top for admins and, in vote groups, for every member ("JOIN REQUESTS · VOTE HERE"). With a plain line of instructions: tap Vote Yes or Vote No on each request, it passes at 60% yes (with one member, your Yes is enough). When nobody is waiting it says so, instead of the block being invisible.
+
+## Member photos in the Members tab
+- Members, people waiting to join and the member detail sheet now show the person's profile photo in the round badge (initials until the photo loads, or when they have none). Member and request rows use the 40dp avatar size so photos are readable (`group/MemberPhoto.java`).

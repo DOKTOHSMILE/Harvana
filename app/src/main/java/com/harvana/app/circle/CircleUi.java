@@ -106,7 +106,10 @@ public final class CircleUi {
             return "The network doesn't have this group. What the app shows is an old saved copy, so this action can't go through.";
         if (e.contains("NOT_ADMIN_TRIGGERED_RULE")) return "This goal doesn't pay out by an admin request. Its rule decides how the money leaves.";
         if (e.contains("FIXED_GROUP_NOT_ACTIVE")) return "This goal group isn't active, so it can't take that action.";
-        if (e.contains("NOT_THE_GROUP_ADMIN")) return "Only the group's admin can do this.";
+        if (e.contains("NOT_THE_GROUP_ADMIN")) return "Only the group's admin (or its treasurer, for money requests) can do this.";
+        if (e.contains("TREASURER_NOT_A_MEMBER")) return "The treasurer must be an active member of the group.";
+        if (e.contains("TREASURER_CANNOT_BE_THE_ADMIN")) return "The admin already has every power, so they cannot also be the treasurer.";
+        if (e.contains("INVALID_TREASURER_ADDRESS")) return "That member has no wallet address on file.";
         if (e.contains("INSUFFICIENT_BALANCE")) return "Not enough available balance for the bond or the creation fee.";
         if (e.contains("INVALID_MEMBER_LIMIT")) return "A circle needs between 3 and 12 members.";
         if (e.contains("INVALID_CYCLE_DURATION")) return "Cycle length must be between 1 and 30 days.";

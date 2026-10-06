@@ -158,6 +158,16 @@ public final class NodeGroupClient {
         act(c, member, "/api/v1/accum/claim", line(groupId, lineId, member, "claim", -1), cb);
     }
 
+    /** The admin names a member as treasurer, or clears the role with an empty address. */
+    public static void setTreasurer(Context c, String admin, String groupId, String treasurer, Callback cb) {
+        act(c, admin, "/api/v1/group-roles/treasurer", new Spec() {
+            public String canonical(long n) { return GroupCanonical.groupTreasurer(groupId, admin, treasurer, n); }
+            public void fill(JSONObject b, long n) throws JSONException {
+                b.put("groupId", groupId).put("adminAddress", admin).put("treasurerAddress", treasurer);
+            }
+        }, cb);
+    }
+
     public static void approveAccumPack(Context c, String admin, String groupId, String lineId, Callback cb) {
         act(c, admin, "/api/v1/accum/approve-pack", new Spec() {
             public String canonical(long n) { return GroupCanonical.accumApprovePack(groupId, lineId, admin, n); }

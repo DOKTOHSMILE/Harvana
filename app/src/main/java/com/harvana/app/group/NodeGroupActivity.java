@@ -513,7 +513,7 @@ public class NodeGroupActivity extends AppCompatActivity {
     }
 
     private void renderPackRequests() {
-        boolean admin = group != null && me != null && me.equals(str(group, "creatorAddress"));
+        boolean admin = group != null && me != null && (me.equals(str(group, "creatorAddress")) || me.equals(str(group, "treasurerAddress")));
         if (!admin) return;
         for (Object[] p : packRequests) {
             @SuppressWarnings("unchecked") Map<String, Object> ln = (Map<String, Object>) p[1];

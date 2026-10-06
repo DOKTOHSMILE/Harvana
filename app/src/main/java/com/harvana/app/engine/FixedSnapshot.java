@@ -40,9 +40,10 @@ public final class FixedSnapshot {
         if (open && !goalMet && !completed) s.actions.add(new GroupAction(GroupAction.FIXED_DEPOSIT, "Deposit", true));
         // Reaching the goal closes deposits. It does not move the money: under every rule except "all at once" the pot stays in the
         // group wallet until the admin (or a member, for grants) asks and the group votes, so those actions stay available.
+        boolean treasurer = !me.isEmpty() && me.equals(str(group, "treasurerAddress"));
         if (open && !completed && left > 0) {
-            if ("ADMIN_TRIGGERED".equals(rule) && admin) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_DISBURSEMENT, "Request payout (group votes)", false));
-            if ("MILESTONE_BASED".equals(rule) && admin) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_MILESTONE, "Request a milestone release", false));
+            if ("ADMIN_TRIGGERED".equals(rule) && (admin || treasurer)) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_DISBURSEMENT, "Request payout (group votes)", false));
+            if ("MILESTONE_BASED".equals(rule) && (admin || treasurer)) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_MILESTONE, "Request a milestone release", false));
             if ("EMERGENCY_GRANT".equals(rule) && isMember) s.actions.add(new GroupAction(GroupAction.FIXED_REQUEST_GRANT, "Ask for an emergency grant", false));
         }
         if (goalMet || completed) {

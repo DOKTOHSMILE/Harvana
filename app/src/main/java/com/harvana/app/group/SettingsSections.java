@@ -38,7 +38,14 @@ public final class SettingsSections {
         void leave();
         void makeAdmin(String uid, String name);
         void remove(String uid, String name);
+        /** make = true names this member treasurer; false clears the role. */
+        void treasurer(String uid, String name, String wallet, boolean make);
     }
+
+    /** The treasurer's wallet as the network knows it, "" when none. Set by the page before apply(). */
+    public String treasurerWallet = "";
+    /** True for a goal or savings group on the network, the only kind that can have a treasurer. */
+    public boolean canHaveTreasurer;
 
     public static final String[] NAMES = {"General", "Access", "Members", "Money & rules", "Network", "More"};
     private static final int GENERAL = 0, ACCESS = 1, MEMBERS = 2, MONEY = 3, NETWORK = 4, MORE = 5;
@@ -240,6 +247,8 @@ public final class SettingsSections {
         final String uid = str(m, "memberUid", "");
         final String name = str(m, "displayName", str(m, "name", "Member"));
         final boolean admin = !uid.isEmpty() && uid.equals(adminUid);
+        final String walletOf = str(m, "walletAddress", str(m, "wallet", ""));
+        final boolean treas = !treasurerWallet.isEmpty() && treasurerWallet.equalsIgnoreCase(walletOf);
         LinearLayout r = new LinearLayout(a);
         r.setGravity(Gravity.CENTER_VERTICAL);
         r.setPadding(0, (int) (10 * d), 0, (int) (10 * d));
@@ -258,23 +267,23 @@ public final class SettingsSections {
         mid.setPadding((int) (12 * d), 0, (int) (8 * d), 0);
         mid.addView(text(name + (uid.equals(myUid) ? " (you)" : ""), 14.5f, true, UiColors.textPrimary()));
         int slot = (int) num(m, "slot");
-        String sub = (admin ? "Admin" : "Member") + (slot > 0 && str(g, "groupType", "").toLowerCase(Locale.US).contains("rotating") ? " \u00b7 Slot " + slot : "");
+        String sub = (admin ? "Admin" : treas ? "Treasurer" : "Member") + (slot > 0 && str(g, "groupType", "").toLowerCase(Locale.US).contains("rotating") ? " \u00b7 Slot " + slot : "");
         mid.addView(text(sub, 12, false, UiColors.textSecondary()));
         r.addView(mid, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView badge = text(admin ? "ADMIN" : "MEMBER", 11, true, admin ? 0xFF1A1208 : UiColors.textSecondary());
+        TextView badge = text(admin ? "ADMIN" : treas ? "TREASURER" : "MEMBER", 11, true, admin || treas ? 0xFF1A1208 : UiColors.textSecondary());
         badge.setPadding((int) (10 * d), (int) (4 * d), (int) (10 * d), (int) (4 * d));
         GradientDrawable bg = new GradientDrawable();
         bg.setCornerRadius(12 * d);
-        bg.setColor(admin ? UiColors.accent() : (UiColors.textTertiary() & 0x00FFFFFF) | 0x22000000);
+        bg.setColor(admin || treas ? UiColors.accent() : (UiColors.textTertiary() & 0x00FFFFFF) | 0x22000000);
         badge.setBackground(bg);
         r.addView(badge);
         r.setClickable(true);
-        r.setOnClickListener(v -> showMember(g, m, uid, name, admin, uid.equals(myUid), viewerIsAdmin));
+        r.setOnClickListener(v -> showMember(g, m, uid, name, admin, treas, walletOf, uid.equals(myUid), viewerIsAdmin));
         return r;
     }
 
     private void showMember(Map<String, Object> g, Map<String, Object> m, final String uid, final String name, boolean admin,
-                            boolean me, boolean viewerIsAdmin) {
+                            final boolean treasurer, final String wallet, boolean me, boolean viewerIsAdmin) {
         String type = str(g, "groupType", "").toLowerCase(Locale.US);
         boolean fixed = type.contains("fixed"), accum = type.contains("accumul"), rotating = type.contains("rotating");
         boolean membersInvite = Boolean.TRUE.equals(g.get("membersCanInvite"));
@@ -283,7 +292,7 @@ public final class SettingsSections {
         if (ja instanceof Number) joined = ((Number) ja).longValue();
         boolean waited = joined > 0 && System.currentTimeMillis() - joined >= VOTE_WAIT_MS;
         StringBuilder sb = new StringBuilder();
-        sb.append(admin ? "Role: Admin\n" : "Role: Member\n");
+        sb.append(admin ? "Role: Admin\n" : treasurer ? "Role: Treasurer\n" : "Role: Member\n");
         if (joined > 0) sb.append("Joined: ").append(new SimpleDateFormat("d MMM yyyy", Locale.US).format(new Date(joined))).append("\n");
         String wallet = str(m, "walletAddress", str(m, "wallet", ""));
         if (!wallet.isEmpty()) sb.append("Wallet: ").append(wallet.length() > 14 ? wallet.substring(0, 8) + "\u2026" + wallet.substring(wallet.length() - 4) : wallet).append("\n");
@@ -302,6 +311,11 @@ public final class SettingsSections {
             sb.append(yes(true)).append("Close the group\n");
             sb.append("\nThe admin's vote counts 40% on big decisions. The admin cannot take money from anyone's wallet, and cannot move the group wallet without the group's rules.\n");
         } else {
+            if (treasurer) {
+                if (accum) sb.append(yes(true)).append("Approve members' withdrawal requests (the money still goes only to the member it belongs to)\n");
+                if (fixed) sb.append(yes(true)).append("Ask for payouts and milestone releases (the group still votes before anything is paid)\n");
+                sb.append("\nThe treasurer has no extra vote and cannot change settings, the admin seat, or who is in the group.\n");
+            }
             sb.append(no()).append("Remove members, change settings or close the group (admin only)\n");
             if (accum) sb.append(yes(true)).append("Save in their own line and ask to withdraw it (the admin approves)\n");
             if (rotating) sb.append(yes(true)).append("Receive the pot on their turn\n");
@@ -310,15 +324,26 @@ public final class SettingsSections {
         TextView t = text(sb.toString().trim(), 14, false, UiColors.textPrimary());
         int p = (int) (20 * d);
         t.setPadding(p, p / 2, p, p / 2);
+        final androidx.appcompat.app.AlertDialog[] dlg = new androidx.appcompat.app.AlertDialog[1];
+        LinearLayout box = new LinearLayout(a);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.addView(t);
+        if (viewerIsAdmin && !me && !admin && !uid.isEmpty() && canHaveTreasurer && !wallet.isEmpty()) {
+            TextView tb = button(treasurer ? "Remove as treasurer" : "Make treasurer", false, v -> { if (dlg[0] != null) dlg[0].dismiss(); host.treasurer(uid, name, wallet, !treasurer); });
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) tb.getLayoutParams();
+            lp.setMargins(p, lp.topMargin, p, 0);
+            box.addView(tb);
+        }
         ScrollView sv = new ScrollView(a);
-        sv.addView(t);
+        sv.addView(box);
         androidx.appcompat.app.AlertDialog.Builder b = new androidx.appcompat.app.AlertDialog.Builder(a).setTitle(name).setView(sv)
             .setPositiveButton("Close", null);
         if (viewerIsAdmin && !me && !admin && !uid.isEmpty()) {
             b.setNeutralButton("Make admin", (dl, w) -> host.makeAdmin(uid, name));
             b.setNegativeButton("Remove", (dl, w) -> host.remove(uid, name));
         }
-        b.show();
+        dlg[0] = b.create();
+        dlg[0].show();
     }
 
     private static String yes(boolean on) { return on ? "\u2705  " : "\u274C  "; }

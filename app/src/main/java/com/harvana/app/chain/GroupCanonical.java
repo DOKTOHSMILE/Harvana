@@ -13,6 +13,10 @@ public final class GroupCanonical {
     private GroupCanonical() {}
 
     /** AccumApprovePackRequest.getCanonicalMessage() */
+    public static String groupTreasurer(String groupId, String adminAddress, String treasurerAddress, long nonce) {
+        return "HARVANA_GROUP_TREASURER_V1:" + groupId + ":" + adminAddress + ":" + treasurerAddress + ":" + nonce;
+    }
+
     public static String accumApprovePack(String groupId, String lineId, String adminAddress, long nonce) {
         return "HARVANA_ACCUM_APPROVE_PACK_V1:" + groupId + ":" + lineId + ":" + adminAddress + ":" + nonce;
     }

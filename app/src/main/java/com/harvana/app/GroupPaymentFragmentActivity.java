@@ -833,7 +833,8 @@ public class GroupPaymentFragmentActivity extends Fragment {
                         if (!a.enabled) b.setAlpha(0.55f);
                         nodeActionHost.addView(b);
                 }
-                if ("ACCUM".equals(family) && viewerIsAdmin && linkedNodeId != null) {
+                boolean treasurer = !nodeMe.isEmpty() && nodeMe.equals(String.valueOf(group == null ? "" : group.get("treasurerAddress")));
+                if ("ACCUM".equals(family) && (viewerIsAdmin || treasurer) && linkedNodeId != null) {
                         _addPackApprovals(ctx);
                 }
                 if ("FIXED".equals(family) && linkedNodeId != null) {

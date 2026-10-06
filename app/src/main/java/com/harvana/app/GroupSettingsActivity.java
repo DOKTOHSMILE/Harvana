@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import org.json.JSONObject;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -547,9 +548,26 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		_loadMembers();
 		_showNetworkPanel();
 		_organize();
+		_loadTreasurer();
 	}
 	
 	private com.harvana.app.group.SettingsSections sections;
+	private String treasurerWallet = "";
+	
+	/** Reads the treasurer's wallet from the network record of a goal or savings group, then redraws the Members section. */
+	private void _loadTreasurer() {
+		GroupIdentity gi = GroupIdentityResolver.resolve(groupId, groupData);
+		if (!gi.onChain() || !("ACCUM".equals(gi.family) || "FIXED".equals(gi.family))) return;
+		com.harvana.app.sync.NodeGroupClient.Callback got = new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(JSONObject json) {
+				treasurerWallet = json == null ? "" : json.optString("treasurerAddress", "");
+				runOnUiThread(() -> _organize());
+			}
+			@Override public void onError(String e) { }
+		};
+		if ("ACCUM".equals(gi.family)) com.harvana.app.sync.NodeGroupClient.getAccumGroup(gi.protocolId(), got);
+		else com.harvana.app.sync.NodeGroupClient.getFixedGroup(gi.protocolId(), got);
+	}
 	
 	/** Puts the page's cards into the standard sections (General, Access, Members, Money & rules, Network, More). */
 	private void _organize() {
@@ -566,6 +584,23 @@ public class GroupSettingsActivity extends AppCompatActivity {
 							: com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
 						_confirmTransferAdmin(me, uid, name);
 					}
+					@Override public void treasurer(final String uid, final String name, final String wallet, final boolean make) {
+						final String me = WalletManager.getActiveWalletAddress(GroupSettingsActivity.this);
+						final GroupIdentity gid = GroupIdentityResolver.resolve(groupId, groupData);
+						new AlertDialog.Builder(GroupSettingsActivity.this)
+							.setTitle(make ? "Make " + name + " treasurer?" : "Remove " + name + " as treasurer?")
+							.setMessage(make
+								? "The treasurer can approve members' withdrawal requests and ask for payouts and milestone releases. Nothing is paid without the group's rules, and the treasurer gets no extra vote. You can remove the role at any time."
+								: "They go back to being an ordinary member.")
+							.setNegativeButton("Cancel", null)
+							.setPositiveButton("Continue", (dl, w) -> com.harvana.app.wallet.PinPromptHelper.authorize(GroupSettingsActivity.this,
+								make ? "Name a treasurer" : "Remove the treasurer", () ->
+								com.harvana.app.sync.NodeGroupClient.setTreasurer(getApplicationContext(), me, gid.protocolId(), make ? wallet : "",
+									new com.harvana.app.sync.NodeGroupClient.Callback() {
+										@Override public void onSuccess(JSONObject json) { runOnUiThread(() -> { Toast.makeText(GroupSettingsActivity.this, make ? "Treasurer named." : "Treasurer removed.", Toast.LENGTH_SHORT).show(); _loadTreasurer(); }); }
+										@Override public void onError(String error) { runOnUiThread(() -> Toast.makeText(GroupSettingsActivity.this, com.harvana.app.circle.CircleUi.friendly(error), Toast.LENGTH_LONG).show()); }
+									}))).show();
+					}
 					@Override public void remove(final String uid, final String name) {
 						new AlertDialog.Builder(GroupSettingsActivity.this).setTitle("Remove " + name + "?")
 							.setMessage("They lose access to this group and cannot send a new join request unless you unblock them.")
@@ -578,6 +613,9 @@ public class GroupSettingsActivity extends AppCompatActivity {
 					}
 				});
 		}
+		GroupIdentity gi = GroupIdentityResolver.resolve(groupId, groupData);
+		sections.canHaveTreasurer = gi.onChain() && ("ACCUM".equals(gi.family) || "FIXED".equals(gi.family));
+		sections.treasurerWallet = treasurerWallet;
 		sections.apply(groupId, groupData, isAdmin, memberRows == null ? 0 : memberRows.size(), _isOnChain(), memberRows,
 			cardHero, cardview13, cardview11, cardview15, cardview19, cardview20, cardview10, linear72, networkPanelHost, closeSection);
 	}

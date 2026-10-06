@@ -24,8 +24,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.harvana.app.firestore.UserProfileManager;
 import com.harvana.app.offline.OfflineCacheManager;
 import com.harvana.app.social.ContactCardActivity;
@@ -214,15 +212,16 @@ public class EditProfileActivity extends AppCompatActivity {
         photoBusy.setVisibility(View.VISIBLE);
         photoStatus.setText("Uploading…");
         if (save != null) save.setEnabled(false);
-        StorageReference ref = FirebaseStorage.getInstance().getReference().child("profile_icons/" + uid + "/" + System.currentTimeMillis() + ".jpg");
-        ref.putFile(picked)
-            .addOnSuccessListener(t -> ref.getDownloadUrl().addOnSuccessListener(url -> {
+        // Shrunk to 512 px on the phone, then sent to the picture host set in res/values/image_host.xml (Firebase Storage if none).
+        com.harvana.app.utils.ImageHost.upload(this, picked, "profile_icons/" + uid, 512, new com.harvana.app.utils.ImageHost.Callback() {
+            @Override public void onSuccess(String url) {
                 photoBusy.setVisibility(View.GONE);
                 photoStatus.setText("Photo ready. Press Save changes.");
-                newIcon = url.toString();
+                newIcon = url;
                 if (save != null) save.setEnabled(true);
-            }).addOnFailureListener(this::photoFailed))
-            .addOnFailureListener(this::photoFailed);
+            }
+            @Override public void onError(String message) { photoFailed(new Exception(message)); }
+        });
     }
 
     private void photoFailed(Exception e) {

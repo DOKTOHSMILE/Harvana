@@ -286,19 +286,16 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		btn_learn_post.setEnabled(false);
 		tv_learn_error.setVisibility(View.GONE);
 		
-		String path = "learn_hub/" + uid + "/" + System.currentTimeMillis() + ".jpg";
-		StorageReference ref = FirebaseStorage.getInstance().getReference().child(path);
-		
-		ref.putFile(localUri)
-		.addOnSuccessListener(taskSnapshot -> ref.getDownloadUrl()
-		.addOnSuccessListener(downloadUri -> {
-			uploadedImageUrl = downloadUri.toString();
-			uploadInProgress = false;
-			progress_image_upload.setVisibility(View.GONE);
-			btn_learn_post.setEnabled(true);
-		})
-		.addOnFailureListener(this::_onUploadFailed))
-		.addOnFailureListener(this::_onUploadFailed);
+		// Shrunk to 1280 px on the phone, then sent to the picture host set in res/values/image_host.xml (Firebase Storage if none).
+		com.harvana.app.utils.ImageHost.upload(this, localUri, "learn_hub/" + uid, 1280, new com.harvana.app.utils.ImageHost.Callback() {
+			@Override public void onSuccess(String url) {
+				uploadedImageUrl = url;
+				uploadInProgress = false;
+				progress_image_upload.setVisibility(View.GONE);
+				btn_learn_post.setEnabled(true);
+			}
+			@Override public void onError(String message) { _onUploadFailed(new Exception(message)); }
+		});
 	}
 	
 	private void _onUploadFailed(Exception e) {

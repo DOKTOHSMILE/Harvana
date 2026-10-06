@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Where picked photos (profile pictures, Learn Hub covers) are uploaded. Leave both empty to use Firebase Storage.
+        To use Cloudinary's free plan instead: create a free account, copy the "Cloud name" from the dashboard, and under
+        Settings > Upload add an UNSIGNED upload preset (allowed formats jpg/png/webp, a size limit, a fixed folder).
+        Neither value is a secret (an unsigned preset can only upload), but limit what the preset accepts.
+    -->
+    <string name="cloudinary_cloud_name" translatable="false"></string>
+    <string name="cloudinary_upload_preset" translatable="false"></string>
+</resources>

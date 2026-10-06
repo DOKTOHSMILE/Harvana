@@ -42,6 +42,7 @@ public final class GroupCloser {
                 final String nodeId = s(group.get("nodeGroupId"));
                 f.onChain = GroupKinds.isOnChain(group);
                 f.family = f.onChain ? NodeGroupClient.familyOf(nodeId) : "";
+                f.nodeId = f.onChain ? nodeId : "";
 
                 final int[] left = {f.onChain ? 4 : 3};
                 final String[] failure = {null};
@@ -169,6 +170,23 @@ public final class GroupCloser {
                 } else cb.onDone();
             }
             @Override public void onError(String e) { cb.onError(e); }
+        });
+    }
+
+    /**
+     * A goal group nobody else joined: the node closes it and sends the group wallet back to the admin (signed with the admin's
+     * wallet, network fee included), then the app's records are deleted. Nothing is deleted if the node refuses.
+     */
+    public static void refundAndDelete(android.app.Activity a, String groupId, String nodeGroupId, DoneCb cb) {
+        final Context c = a.getApplicationContext();
+        String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(c);
+        if (wallet == null || wallet.isEmpty()) { cb.onError("Open the wallet that created this group first."); return; }
+        NodeGroupClient.closeFixedGroup(c, wallet, nodeGroupId, new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject json) {
+                com.harvana.app.trust.AppActivity.note(c, "GROUP", "Closed a goal group and asked for a refund");
+                com.harvana.app.utils.MediaCleaner.delete(a, com.harvana.app.utils.MediaCleaner.GROUP_PHOTO, groupId, () -> delete(c, groupId, cb));
+            }
+            @Override public void onError(String e) { cb.onError(com.harvana.app.circle.CircleUi.friendly(e)); }
         });
     }
 

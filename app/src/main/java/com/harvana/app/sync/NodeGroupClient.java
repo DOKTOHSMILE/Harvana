@@ -232,6 +232,14 @@ public final class NodeGroupClient {
         }, cb);
     }
 
+    /** Creator only, while nobody else has joined: closes the goal group and sends its wallet back to the creator. */
+    public static void closeFixedGroup(Context c, String admin, String groupId, Callback cb) {
+        act(c, admin, "/api/v1/fixed/close", new Spec() {
+            public String canonical(long n) { return GroupCanonical.fixedClose(groupId, admin, n); }
+            public void fill(JSONObject b, long n) throws JSONException { b.put("groupId", groupId).put("adminAddress", admin); }
+        }, cb);
+    }
+
     /** Creator only: starts the next goal inside the same group (same members, rule and wallet, new ledger). */
     public static void startNextFixedGoal(Context c, String admin, String groupId, long targetRaw, String goalName, Callback cb) {
         act(c, admin, "/api/v1/fixed/new-goal", new Spec() {
@@ -644,6 +652,7 @@ public final class NodeGroupClient {
             case "/api/v1/circle/withdraw-bond": return "CIRCLE_WITHDRAW";
             case "/api/v1/fixed/request-disbursement": return "FIXED_DISBURSE";
             case "/api/v1/fixed/new-goal": return "FIXED_NEW_GOAL";
+            case "/api/v1/fixed/close": return "FIXED_CLOSE";
             case "/api/v1/fixed/request-milestone": return "FIXED_REQUEST_MILESTONE";
             case "/api/v1/fixed/request-grant": return "FIXED_REQUEST_GRANT";
             case "/api/v1/fixed/vote-disbursement": return "FIXED_VOTE_DISBURSEMENT";

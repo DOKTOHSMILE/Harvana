@@ -73,6 +73,21 @@ public class GroupClosePolicyTest {
         assertEquals(GroupClosePolicy.Action.ARCHIVE, act(f));        // empty, nobody else in it
     }
 
+    @Test public void soleAdminGoalGroupIsRefundedThenDeleted() {
+        GroupClosePolicy.Facts f = base(); f.onChain = true; f.family = "FIXED"; f.nodeState = "ACTIVE"; f.escrowBalanceRaw = 1_000_000_000L;
+        GroupClosePolicy.Decision d = GroupClosePolicy.decide(f);
+        assertEquals(GroupClosePolicy.Action.REFUND_AND_DELETE, d.action);
+        assertTrue(d.reasons.get(0).contains("10 HARV"));
+        f.escrowBalanceRaw = -1;
+        assertEquals(GroupClosePolicy.Action.NONE, act(f));
+        f.nodeState = "CLOSING";
+        assertEquals(GroupClosePolicy.Action.NONE, act(f));
+        f.nodeState = "CLOSED"; f.escrowBalanceRaw = 0;
+        assertEquals(GroupClosePolicy.Action.DELETE, act(f));
+        f.nodeState = "ACTIVE"; f.escrowBalanceRaw = 5; f.otherActiveMembers = 1;
+        assertEquals(GroupClosePolicy.Action.NONE, act(f));
+    }
+
     @Test public void activeSavingsGroupWithMembersIsBlocked() {
         GroupClosePolicy.Facts f = base(); f.onChain = true; f.family = "FIXED"; f.nodeState = "ACTIVE"; f.escrowBalanceRaw = 0; f.otherActiveMembers = 2;
         assertEquals(GroupClosePolicy.Action.NONE, act(f));

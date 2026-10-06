@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: close a goal group nobody else joined and get your money back
+
+What the app does. In group settings, "Check if I can close this group" on a goal group where you are the admin and nobody else has joined now offers "Refund and delete": the network closes the group, sends everything in its wallet back to your wallet (small network fee), and the group is removed from the app. If anyone else has put money in, the network refuses. What you do: deploy the new node jar first (capital-oracle-projects `docs/DEPLOYMENT.md`, "close a goal group nobody else joined"), then install the new build.
+
 ## 6 Oct 2026: a new goal stays in the same group
 
 What the app does. "Start a new goal" no longer creates a new group. The admin of a goal group that has reached its goal (and, for pay-out-in-one rules, been paid out) enters a name and target, and the same group starts a new goal with its own ledger: same members, rule and wallet, nobody joins again. Progress, the Overview and the board show the current goal; the running total and past goals are kept. A new Goals screen (the "Goals" button at the foot of a goal group, or "See all goals" on Actions & votes) shows the current goal with its progress, then every finished goal newest first: raised against target, paid out or kept, start and close dates, and what you put into each goal, plus totals across all goals. What you do: the node needs the new jar first (capital-oracle-projects `docs/DEPLOYMENT.md`, "next goal inside the same group"), then install the new build. Until the node is updated the button will report an error from the network.

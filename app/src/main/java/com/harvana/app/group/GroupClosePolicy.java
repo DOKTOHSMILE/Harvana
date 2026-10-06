@@ -12,17 +12,21 @@ import java.util.List;
  * outcomes the app can offer:
  *   ARCHIVE - close the group in the app: off Discover, joining stops, members keep their history, admin can reopen.
  *   DELETE  - remove the app's own records for a group that never touched the network and has nothing open.
+ *   REFUND_AND_DELETE - a goal (FIXED) group nobody else has joined: the node closes it and sends whatever its wallet holds
+ *             back to the admin (all of it is theirs), then the app's records are removed.
  * and a third, NONE, with plain reasons and next steps when neither is safe.
  */
 public final class GroupClosePolicy {
     private GroupClosePolicy() {}
 
-    public enum Action { NONE, ARCHIVE, DELETE }
+    public enum Action { NONE, ARCHIVE, DELETE, REFUND_AND_DELETE }
 
     public static final class Facts {
         public boolean admin;
         public boolean alreadyClosed;
         public boolean onChain;
+        /** The group's id on the network (empty when not on the network). */
+        public String nodeId = "";
         /** CIRCLE, ACCUM or FIXED when onChain. */
         public String family = "";
         /** The network's state for the group ("FORMING", "ACTIVE", "COMPLETED", "ABORTED"); empty when unknown. */
@@ -86,6 +90,32 @@ public final class GroupClosePolicy {
             d.nextSteps.add("Check your connection and try again.");
             return d;
         }
+        // A goal group the admin made and nobody else joined: the network can close it and refund the admin.
+        if ("FIXED".equals(f.family) && f.otherActiveMembers == 0 && d.reasons.isEmpty()) {
+            if (state.equals("CLOSED")) {
+                Decision ok = new Decision(Action.DELETE, "Delete this group");
+                ok.reasons.add("The group is already closed on the network and its money was sent back, so it can be removed from the app.");
+                return ok;
+            }
+            if (state.equals("CLOSING")) {
+                d.reasons.add("Your refund is on its way and the network is closing the group.");
+                d.nextSteps.add("Try again in a minute, once the refund has confirmed.");
+                return d;
+            }
+            if (state.equals("ACTIVE") || state.equals("COMPLETED")) {
+                if (f.escrowBalanceRaw < 0) {
+                    d.reasons.add("We couldn't read the group's balance on the network.");
+                    d.nextSteps.add("Check your connection and try again.");
+                    return d;
+                }
+                Decision ok = new Decision(Action.REFUND_AND_DELETE, "Close and delete this group");
+                ok.reasons.add(f.escrowBalanceRaw > 0
+                    ? "Nobody else has joined. The " + harv(f.escrowBalanceRaw) + " in the group wallet is yours and goes back to your wallet."
+                    : "Nobody else has joined and the group wallet is empty.");
+                ok.reasons.add("The network closes the group (no more deposits), then it is removed from the app. A small network fee applies.");
+                return ok;
+            }
+        }
         boolean ended = state.equals("ABORTED") || state.equals("COMPLETED");
         if ("CIRCLE".equals(f.family)) {
             if (state.equals("FORMING")) {
@@ -120,5 +150,9 @@ public final class GroupClosePolicy {
         Decision ok = new Decision(Action.ARCHIVE, "Close this group");
         ok.reasons.add("Nothing is owed and nothing is open. The group's record stays on the network for good, so it is closed in the app rather than erased.");
         return ok;
+    }
+
+    static String harv(long raw) {
+        return java.math.BigDecimal.valueOf(raw, 8).stripTrailingZeros().toPlainString() + " HARV";
     }
 }

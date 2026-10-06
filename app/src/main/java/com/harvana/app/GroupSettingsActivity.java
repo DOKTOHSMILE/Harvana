@@ -1631,7 +1631,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			ThemedDialogs.show(ThemedDialogs.alert(this).setTitle(dec.headline).setMessage(sb.toString().trim()).setPositiveButton("OK", null));
 			return;
 		}
-		final boolean delete = dec.action == GroupClosePolicy.Action.DELETE;
+		final boolean refund = dec.action == GroupClosePolicy.Action.REFUND_AND_DELETE;
+		final boolean delete = dec.action == GroupClosePolicy.Action.DELETE || refund;
 		final String groupName = str(groupData, "groupName", "");
 		final String phrase = delete ? groupName : "CLOSE";
 
@@ -1642,7 +1643,9 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		TextView msg = new TextView(this);
 		msg.setTextColor(UiColors.textPrimary());
 		msg.setTextSize(13);
-		msg.setText(sb.toString().trim() + "\n\n" + (delete
+		msg.setText(sb.toString().trim() + "\n\n" + (refund
+			? "The group is closed on the network and its wallet is sent back to you. Then it is removed from the app. It cannot be undone."
+			: delete
 			? "This permanently removes the group and its records from the app. It cannot be undone."
 			: "Members are notified, joining stops, and the group leaves Discover. Everyone keeps their history and anything they are owed on the network. You can reopen it later."));
 		box.addView(msg);
@@ -1655,7 +1658,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 
 		com.harvana.app.ui.SheetDialog dialog = ThemedDialogs.alert(this)
 			.setTitle(dec.headline).setView(box)
-			.setPositiveButton(delete ? "Delete" : "Close group", null)
+			.setPositiveButton(refund ? "Refund and delete" : delete ? "Delete" : "Close group", null)
 			.setNegativeButton("Cancel", null).create();
 		dialog.setOnShowListener(x -> dialog.getButton(com.harvana.app.ui.SheetDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
 			if (!confirm.getText().toString().trim().equalsIgnoreCase(phrase)) {
@@ -1664,21 +1667,22 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			}
 			dialog.dismiss();
 			com.harvana.app.wallet.PinPromptHelper.verifyPinThenProceed(GroupSettingsActivity.this, () ->
-				_runClose(delete, reason.getText().toString().trim()));
+				_runClose(delete, refund, reason.getText().toString().trim()));
 		}));
 		dialog.show();
 	}
 
-	private void _runClose(boolean delete, String reason) {
+	private void _runClose(boolean delete, boolean refund, String reason) {
 		final com.harvana.app.ui.ProgressSheet pd = new com.harvana.app.ui.ProgressSheet(this);
-		pd.setMessage(delete ? "Deleting\u2026" : "Closing the group\u2026");
+		pd.setMessage(refund ? "Closing on the network and refunding you\u2026" : delete ? "Deleting\u2026" : "Closing the group\u2026");
 		pd.setCancelable(false);
 		pd.show();
 		GroupCloser.DoneCb cb = new GroupCloser.DoneCb() {
 			@Override public void onDone() {
 				runOnUiThread(() -> {
 					pd.dismiss();
-					Toast.makeText(GroupSettingsActivity.this, delete ? "Group deleted." : "Group closed.", Toast.LENGTH_LONG).show();
+					Toast.makeText(GroupSettingsActivity.this, refund ? "Group closed and deleted. Your refund arrives in your wallet shortly."
+						: delete ? "Group deleted." : "Group closed.", Toast.LENGTH_LONG).show();
 					if (delete) {
 						Intent home = new Intent(GroupSettingsActivity.this, MainActivity.class);
 						home.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -1696,8 +1700,14 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		// Re-check right before acting: things may have changed since the first check.
 		GroupCloser.evaluate(this, groupId, new GroupCloser.EvalCb() {
 			@Override public void onDecision(GroupClosePolicy.Decision dec, GroupClosePolicy.Facts f) {
-				if (dec.action == GroupClosePolicy.Action.NONE || (delete && dec.action != GroupClosePolicy.Action.DELETE)) {
+				boolean deleteOk = dec.action == GroupClosePolicy.Action.DELETE || dec.action == GroupClosePolicy.Action.REFUND_AND_DELETE;
+				boolean isRefund = dec.action == GroupClosePolicy.Action.REFUND_AND_DELETE;
+				if (dec.action == GroupClosePolicy.Action.NONE || (delete && !deleteOk) || refund != isRefund) {
 					runOnUiThread(() -> { pd.dismiss(); _showCloseDecision(dec); });
+					return;
+				}
+				if (dec.action == GroupClosePolicy.Action.REFUND_AND_DELETE) {
+					GroupCloser.refundAndDelete(GroupSettingsActivity.this, groupId, f.nodeId, cb);
 					return;
 				}
 				// The picture goes first: the node checks the group's admin from the group profile, which the delete removes.

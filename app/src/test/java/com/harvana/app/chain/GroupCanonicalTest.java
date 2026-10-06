@@ -217,6 +217,10 @@ public class GroupCanonicalTest {
             GroupCanonical.fixedRequestDisbursement("V_groupId:x y", "V_requesterAddress:x y", 1009L));
     }
 
+    @Test public void fixedClose() {
+        assertEquals("HARVANA_FIXED_CLOSE_V1:G:A:9", GroupCanonical.fixedClose("G", "A", 9L));
+    }
+
     @Test public void fixedNewGoal() {
         assertEquals("HARVANA_FIXED_NEW_GOAL_V1:G:A:500000000:Phase 2:7", GroupCanonical.fixedNewGoal("G", "A", 500000000L, "Phase 2", 7L));
         assertEquals("HARVANA_FIXED_NEW_GOAL_V1:G:A:1::8", GroupCanonical.fixedNewGoal("G", "A", 1L, null, 8L));

@@ -134,6 +134,11 @@ public final class GroupCanonical {
         return "HARVANA_FIXED_REQUEST_DISBURSEMENT_V1:" + groupId + ":" + requesterAddress + ":" + nonce;
     }
 
+    /** FixedCloseRequest.getCanonicalMessage() */
+    public static String fixedClose(String groupId, String adminAddress, long nonce) {
+        return "HARVANA_FIXED_CLOSE_V1:" + groupId + ":" + adminAddress + ":" + nonce;
+    }
+
     /** FixedNewGoalRequest.getCanonicalMessage() */
     public static String fixedNewGoal(String groupId, String adminAddress, long targetGoalAmountRaw, String goalName, long nonce) {
         return "HARVANA_FIXED_NEW_GOAL_V1:" + groupId + ":" + adminAddress + ":" + targetGoalAmountRaw + ":" + (goalName == null ? "" : goalName) + ":" + nonce;

@@ -7,5 +7,5 @@
         Neither value is a secret (an unsigned preset can only upload), but limit what the preset accepts.
     -->
     <string name="cloudinary_cloud_name" translatable="false">oz8n0z51</string>
-    <string name="cloudinary_upload_preset" translatable="false"></string>
+    <string name="cloudinary_upload_preset" translatable="false">harvana_unsigned</string>
 </resources>

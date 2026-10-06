@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: group contract is read page by page and says where the goal money goes
+
+What the app does. (1) The contract of a goal group has a new section, "The goal and where the money goes": the purpose (members gather money for one goal), who set it (the admin who created the group), the group wallet the network makes when the group is created (no private key, nobody can spend from it alone), that every deposit goes from the member's wallet into that group wallet (never through a Harvana company wallet), who receives the money when the goal is reached (the beneficiary wallet chosen at creation) and when (all at once, after a vote, in milestones or as grants), and what happens if the goal is never reached. New goal groups now save the beneficiary wallet in their profile so the contract can show it; older ones say "the wallet chosen when the group was created". (2) Every contract is now read one page per topic, in bold, and cannot be skipped: no swiping ahead, the "I understand and agree" box becomes tickable only after the page is read to its end, and Next works only once it is ticked. The last page shows the fingerprint and signs with the wallet and PIN, as before.
+
+What you do. Install the new build. No node or rules change. Contracts already signed stay valid; they were signed over the older text.
+
 ## 6 Oct 2026: new goal from a goal group (app only)
 
 What the app does. The board of a goal group now ends with a "+ New goal" box. Tapping it asks for a name and a target (the current target is filled in), shows the review screen with the network's 1 HARV creation fee, and asks for the PIN. It then creates a new goal group on the network with the same payout rule and beneficiary, copies the group's profile (picture, place, description, rules) into a new Firestore group with the new name and target, and opens it. Each goal is its own group with its own wallet and its own money; the old goal is left exactly as it was. Nothing changes on the node: it already lets anyone create goal groups.

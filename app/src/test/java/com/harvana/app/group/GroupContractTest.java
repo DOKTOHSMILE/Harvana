@@ -61,4 +61,22 @@ public class GroupContractTest {
         for (String p : s.get(1).points) if (p.contains("450 HARV")) hasPot = true;
         assertTrue(hasPot); // 9 x 50 (the member being paid does not pay)
     }
+
+    @Test public void goalGroupContractStatesTheGoalWhoSetItAndWhereTheMoneyGoes() {
+        Map<String, Object> g = group("Fixed Contribution");
+        g.put("disbursementRule", "Admin-Triggered");
+        g.put("beneficiaryAddress", "HV0x1111111111111111111111111111111111111111");
+        StringBuilder all = new StringBuilder();
+        boolean found = false;
+        for (GroupContract.Section s : GroupContract.sections(g, "HARV")) {
+            if (s.title.equals("The goal and where the money goes")) found = true;
+            for (String p : s.points) all.append(p).append('\n');
+        }
+        assertTrue(found);
+        String t = all.toString();
+        assertTrue(t.contains("Who set the goal"));
+        assertTrue(t.contains("group wallet"));
+        assertTrue(t.contains("HV0x1111"));
+        assertTrue(t.contains("Nothing is held in a Harvana company wallet"));
+    }
 }

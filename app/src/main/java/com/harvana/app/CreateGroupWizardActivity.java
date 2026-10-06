@@ -733,6 +733,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
             g.put("totalSlots", (int) parse(expectedMembers));
             g.put("targetGoalAmount", parse(target));
             g.put("disbursementRule", RULE_NAMES[purpose]);
+            g.put("beneficiaryAddress", purpose == 3 ? "" : beneficiaryIsMe ? String.valueOf(WalletManager.getActiveWalletAddress(this)) : beneficiary);
         }
         if (pendingNodeId != null) {
             g.put("nodeGroupId", pendingNodeId);

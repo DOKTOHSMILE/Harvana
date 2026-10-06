@@ -63,6 +63,9 @@ public final class GroupContract {
         brief.add("Your money stays in your control: every payment is signed by your own wallet. The admin cannot take money from your wallet.");
         out.add(brief);
 
+        // 1b. A goal group: what the goal is, who set it, and exactly where the money goes.
+        if (fixed) out.add(goalSection(g, name, ticker));
+
         // 2. A worked example with the group's real numbers.
         Section ex = exampleSection(rotating, fixed, accum, amount, slots, freq, ticker, g);
         if (ex != null) out.add(ex);
@@ -178,6 +181,44 @@ public final class GroupContract {
         out.add(words);
         return out;
     }
+
+    /**
+     * The heart of a goal group, spelled out: the goal, the person who set it, the group wallet that is made when the group is created,
+     * and where the money goes when the goal is reached. The money never passes through a Harvana "system wallet": members pay into the
+     * group wallet, and the network pays out of that wallet to the beneficiary.
+     */
+    static Section goalSection(Map<String, Object> g, String name, String ticker) {
+        Section s = new Section("The goal and where the money goes");
+        double goal = num(g, "targetGoalAmount");
+        String desc = str(g, "groupDescription", str(g, "description", ""));
+        s.add("The purpose of this group: members gather money together for one goal. The goal is \u201c" + name + "\u201d"
+            + (goal > 0 ? ", a total of " + fmt(goal) + " " + ticker : "") + "." + (desc.isEmpty() ? "" : " " + desc));
+        s.add("Who set the goal: the admin, the person who created this group. The admin chose the goal, the target, who receives the money and how it is paid out. These cannot be changed after the group is created.");
+        String wallet = str(g, "groupWalletAddress", "");
+        s.add("The group wallet: when the group was created, the network made a wallet just for this goal" + (wallet.isEmpty() ? "" : " (" + shortAddr(wallet) + ")")
+            + ". It has no private key, so nobody, not the admin and not Harvana, can spend from it by themselves. It only pays out by the rules of this page.");
+        s.add("Where your deposit goes: every deposit you make goes from your wallet straight into the group wallet. Nothing is held in a Harvana company wallet on the way.");
+        String ben = str(g, "beneficiaryAddress", "");
+        String rule = str(g, "disbursementRule", "");
+        boolean grants = rule.toLowerCase(Locale.US).contains("emergency");
+        if (grants) {
+            s.add("Who receives the money: no one is chosen in advance. When a member asks for an emergency grant and the group votes yes, that member is paid from the group wallet.");
+        } else {
+            s.add("Who receives the money when the goal is reached: " + (ben.isEmpty()
+                ? "the wallet chosen by the admin when the group was created (it is shown on the group page before you deposit)"
+                : shortAddr(ben) + ", chosen by the admin when the group was created") + ". The money is paid from the group wallet to that wallet.");
+        }
+        String r = rule.toLowerCase(Locale.US);
+        if (r.contains("all at once")) s.add("When it is paid: as soon as the goal is reached, the network sends the whole pot automatically. No vote is needed, and deposits stop.");
+        else if (r.contains("admin")) s.add("When it is paid: reaching the goal does not send the money. The admin asks for a payout, the group votes, and only if the vote passes is the money sent.");
+        else if (r.contains("milestone")) s.add("When it is paid: in parts. Each part is asked for, voted on by the group, and only then sent.");
+        else if (grants) s.add("When it is paid: only after a member asks, the group votes yes, and the network sends it.");
+        else s.add("When it is paid: by the payout rule the admin chose, shown below.");
+        s.add("If the goal is never reached: the money stays in the group wallet and leaves only by a group vote. You cannot take your deposit back by yourself.");
+        return s;
+    }
+
+    private static String shortAddr(String a) { return a.length() > 14 ? a.substring(0, 8) + "\u2026" + a.substring(a.length() - 4) : a; }
 
     private static Section exampleSection(boolean rotating, boolean fixed, boolean accum, double amount, long slots,
                                           String freq, String ticker, Map<String, Object> g) {

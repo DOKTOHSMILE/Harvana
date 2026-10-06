@@ -1624,6 +1624,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 			newGroupMap.put("totalSlots", Integer.parseInt(no_of_slots_fixed_edittext.getText().toString()));
 			newGroupMap.put("targetGoalAmount", Double.parseDouble(target_goal_edittext.getText().toString()));
 			newGroupMap.put("disbursementRule", disbursementRuleString.trim());
+			newGroupMap.put("beneficiaryAddress", beneficiaryInput != null ? beneficiaryInput.getText().toString().trim() : "");
 		} else if ("Accumulative Funds".equals(groupTypeString)) {
 			newGroupMap.put("contributionAmount", Double.parseDouble(contribution_amount_accumulative_edittext.getText().toString()));
 			newGroupMap.put("totalSlots", Integer.parseInt(no_of_slots_accumulative_edittext.getText().toString()));

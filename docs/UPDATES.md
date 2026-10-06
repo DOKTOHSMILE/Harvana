@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: vote weights with a treasurer: admin 25%, treasurer 15%
+
+What the app does. Nothing new to tap. Text only: the contract of goal and savings groups, the network panel and the admin's permissions page now say that when a group has a treasurer the 40% that used to be the admin's is shared, admin 25% and treasurer 15%, and the members still share 60%. Without a treasurer the admin keeps 40%. What you do: deploy the node jar first (node `docs/DEPLOYMENT.md`, "Group treasurer role"), then install the build. Votes already open keep the weights they started with.
+
 ## 6 Oct 2026: treasurer role (needs the new node jar)
 
 What the app does. In Group Settings, Members, tapping a member of a goal or savings group on the network (the admin only) now offers Make treasurer / Remove as treasurer. It asks for confirmation and the PIN, then the admin's wallet signs the change on the network. The member list shows a TREASURER badge, and the member's permissions page says what the role allows: in a savings group, approving members' withdrawal requests (the money still goes only to the member it belongs to); in a goal group, asking for payouts and milestone releases (the group still votes first). The treasurer sees the same Approve withdrawal buttons and request actions the admin sees. The treasurer gets no extra vote and cannot change settings, the admin seat or who is in the group. Circles and groups kept only in the app have no treasurer.

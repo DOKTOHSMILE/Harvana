@@ -534,7 +534,11 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 				runOnUiThread(() -> {
 					if (!isFinishing() && progress.isShowing()) progress.dismiss();
 					btn_learn_post.setEnabled(true);
-					_showError("Failed to publish: " + error);
+					boolean denied = error != null && (error.contains("PERMISSION_DENIED") || error.contains("403"));
+					_showError(denied
+						? "The server refused this post. Your post is within the app's limits, so the server's Firestore rules are probably older than the app: "
+						  + "the owner needs to publish the current rules (Learn posts up to 8,000 characters, picture optional)."
+						: "Failed to publish: " + error);
 				});
 			}
 		});

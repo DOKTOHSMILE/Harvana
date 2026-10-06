@@ -24,6 +24,7 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: write   # needed only to attach the APK to a release on tags
+      actions: write    # lets the build delete old APK artifacts so the storage quota never fills
 
     steps:
     - name: Checkout repository
@@ -59,6 +60,14 @@ jobs:
         mkdir -p dist
         cp app/build/outputs/apk/debug/*.apk "dist/harvana-${GITHUB_SHA::7}.apk"
         sha256sum dist/*.apk | tee dist/SHA256SUMS.txt
+
+    - name: Delete old APK artifacts
+      continue-on-error: true
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh api --paginate "repos/${{ github.repository }}/actions/artifacts?per_page=100" --jq '.artifacts[].id' \
+          | xargs -r -I{} gh api -X DELETE "repos/${{ github.repository }}/actions/artifacts/{}" || true
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4

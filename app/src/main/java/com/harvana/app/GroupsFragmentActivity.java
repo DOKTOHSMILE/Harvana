@@ -514,6 +514,17 @@ public class GroupsFragmentActivity extends Fragment {
 							// Update the cache with what's now genuinely fresh,
 							// so the NEXT open shows this instead of today's data.
 							com.harvana.app.offline.OfflineCacheManager.saveList(getContext(), "my_groups_" + uid, myGroups);
+							// Groups the network no longer has are removed here, carefully and in the background (see StaleGroupSweeper).
+							com.harvana.app.group.StaleGroupSweeper.sweep(getContext(), uid, new ArrayList<>(myGroups), cleared -> {
+								if (getActivity() == null) return;
+								getActivity().runOnUiThread(() -> {
+									for (java.util.Iterator<HashMap<String, Object>> it = myGroups.iterator(); it.hasNext(); ) { if (cleared.contains(String.valueOf(it.next().get("groupId")))) it.remove(); }
+									listview1.setAdapter(new Listview1Adapter(myGroups));
+									com.harvana.app.offline.OfflineCacheManager.saveList(getContext(), "my_groups_" + uid, myGroups);
+									Toast.makeText(getContext(), cleared.size() == 1 ? "Removed a group that no longer exists on the network."
+										: "Removed " + cleared.size() + " groups that no longer exist on the network.", Toast.LENGTH_LONG).show();
+								});
+							});
 						});
 					}
 				}

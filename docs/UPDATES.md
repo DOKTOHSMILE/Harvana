@@ -620,3 +620,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 ## Join requests no longer stay "Pending" for ages
 - The "Pending" mark on a group came from a list on your profile that was only cleaned up if one particular query worked. A request that was approved, rejected, withdrawn or never saved could leave the mark behind forever. Home and Discover now check each marked group's own join request directly and clear every mark that is not a real waiting request, then show Pending only for requests that are still waiting (`JoinRequestManager.reconcilePending`).
 - A request that really is waiting stays Pending until the group's admin (or the member vote) answers it. That is up to the group.
+
+## Join requests from "Actions & votes"
+- "Actions & votes" opens the network group screen (grants, payouts and their votes). Join requests are not decided there, they are accepted or voted on in the Members tab, so people looking for them found an unrelated screen. That screen now shows a "N people want to join" card with a "Review join requests" button that opens the group's Members tab.

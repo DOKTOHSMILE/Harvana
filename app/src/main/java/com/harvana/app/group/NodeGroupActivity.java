@@ -326,6 +326,42 @@ public class NodeGroupActivity extends AppCompatActivity {
             content.addView(CircleUi.text(this, "Group trust: " + trustTier.replace('_', ' ').toLowerCase(java.util.Locale.US), 12.5f, R.color.colorTextSecondary, false));
         }
 
+        // People waiting to join are voted on (or accepted) in the Members tab, not here: say so, with a way there.
+        final LinearLayout joinHolder = new LinearLayout(this);
+        joinHolder.setOrientation(LinearLayout.VERTICAL);
+        content.addView(joinHolder);
+        if (!fsGroupId.isEmpty()) {
+            com.harvana.app.firestore.GroupFirestoreManager.getInstance(this).getJoinRequests(fsGroupId,
+                new com.harvana.app.firestore.GroupFirestoreManager.ListCallback() {
+                    @Override public void onSuccess(java.util.List<java.util.Map<String, Object>> list) {
+                        int waiting = 0;
+                        if (list != null) for (java.util.Map<String, Object> r : list) {
+                            Object st = r == null ? null : r.get("status");
+                            if (st == null || "PENDING".equalsIgnoreCase(String.valueOf(st))) waiting++;
+                        }
+                        final int n = waiting;
+                        if (n == 0) return;
+                        runOnUiThread(() -> {
+                            if (isFinishing()) return;
+                            joinHolder.removeAllViews();
+                            LinearLayout card = CircleUi.card(NodeGroupActivity.this);
+                            card.addView(CircleUi.text(NodeGroupActivity.this, n == 1 ? "1 person wants to join" : n + " people want to join", 15, R.color.colorTextPrimary, true));
+                            card.addView(CircleUi.text(NodeGroupActivity.this, "Join requests are accepted or voted on in the Members tab.", 12.5f, R.color.colorTextSecondary, false));
+                            Button go = com.harvana.app.social.SocialUi.button(NodeGroupActivity.this, "Review join requests", true);
+                            go.setOnClickListener(v -> {
+                                android.content.Intent i = new android.content.Intent(NodeGroupActivity.this, com.harvana.app.GroupDetailsActivity.class);
+                                i.putExtra("groupId", fsGroupId);
+                                i.putExtra("tab", 1);
+                                startActivity(i);
+                            });
+                            card.addView(go);
+                            joinHolder.addView(card);
+                        });
+                    }
+                    @Override public void onError(String e) { }
+                });
+        }
+
         LinearLayout prog = CircleUi.card(this);
         prog.addView(CircleUi.text(this, s.headline, 16, R.color.colorTextPrimary, true));
         if (s.progressMax > 0) {

@@ -805,6 +805,45 @@ public final class JoinRequestManager {
                         });
     }
 
+    /**
+     * A "Pending" mark on my profile that no longer matches a real waiting request is cleared: the request was approved, rejected,
+     * withdrawn, or never saved (a failed write, a deleted group). Reads each marked group's join request directly, so it does
+     * not depend on the collection query the other self-heal uses. Calls back with how many marks were removed.
+     */
+    public static void reconcilePending(Context ctx, String myUid, SelfHealCallback cb) {
+        if (ctx == null || myUid == null || myUid.isEmpty()) { if (cb != null) cb.onDone(0); return; }
+        final com.harvana.app.firestore.UserProfileManager profiles = com.harvana.app.firestore.UserProfileManager.getInstance(ctx);
+        profiles.getProfile(myUid, new com.harvana.app.firestore.UserProfileManager.DocCallback() {
+            @Override public void onSuccess(Map<String, Object> profile) {
+                final java.util.List<String> marked = new java.util.ArrayList<>();
+                Object pending = profile != null ? profile.get("pendingGroupIds") : null;
+                if (pending instanceof java.util.List) for (Object g : (java.util.List<?>) pending) if (g != null) marked.add(String.valueOf(g));
+                if (marked.isEmpty()) { if (cb != null) cb.onDone(0); return; }
+                final java.util.List<String> stale = new java.util.ArrayList<>();
+                final int[] left = {marked.size()};
+                final GroupFirestoreManager mgr = GroupFirestoreManager.getInstance(ctx);
+                for (String gid : marked) {
+                    mgr.getJoinRequest(gid, myUid, new GroupFirestoreManager.DocCallback() {
+                        @Override public void onSuccess(Map<String, Object> req) {
+                            Object st = req == null ? null : req.get("status");
+                            if (st == null || !"PENDING".equalsIgnoreCase(String.valueOf(st))) stale.add(gid);
+                            finish();
+                        }
+                        @Override public void onError(String error) {
+                            if (error != null && (error.contains("404") || error.toLowerCase(java.util.Locale.US).contains("not found"))) stale.add(gid);   // no such request
+                            finish();
+                        }
+                        private void finish() {
+                            left[0]--;
+                            if (left[0] <= 0) cleanPendingNext(ctx, myUid, stale, 0, 0, cb);
+                        }
+                    });
+                }
+            }
+            @Override public void onError(String error) { if (cb != null) cb.onDone(0); }
+        });
+    }
+
     /** Strips pendingGroupIds for every request that's actually resolved. */
     private static void cleanPendingNext(Context ctx, String myUid, java.util.List<String> groupIds,
                                          int index, int healedCount, SelfHealCallback cb) {

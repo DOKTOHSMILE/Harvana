@@ -444,6 +444,9 @@ public class DiscoverFragmentActivity extends Fragment {
 					return;
 				}
 				
+				// Clear stale "Pending" marks first, so the buttons only say Pending for requests that are really waiting.
+				com.harvana.app.group.JoinRequestManager.reconcilePending(getContext(), currentUid, removedMarks -> {
+				if (getActivity() == null) return;
 				com.harvana.app.firestore.UserProfileManager.getInstance(getContext()).getProfile(currentUid,
 				new com.harvana.app.firestore.UserProfileManager.DocCallback() {
 					@Override
@@ -472,6 +475,7 @@ public class DiscoverFragmentActivity extends Fragment {
 						pendingGroupIds.clear();
 						applyGroups.run();
 					}
+				});
 				});
 			}
 			

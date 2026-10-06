@@ -616,3 +616,7 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 ## Gifts are recorded like reactions
 - When a reader sends a gift on a Learn Hub post, it is now recorded on the post (`LEARN_CONTENT/{post}/gifts/{transfer hash}`: who, to which wallet, amount, time), once per transfer, the same way reactions are recorded. The gift button shows how many gifts the post has received, counted from the records, and updates right after you send one. The author sees the count on their own post.
 - **Owner step:** publish the updated `docs/firestore.console.rules` (new `gifts` rule: signed-in users can read; a user can create only their own record; no edits or deletes).
+
+## Join requests no longer stay "Pending" for ages
+- The "Pending" mark on a group came from a list on your profile that was only cleaned up if one particular query worked. A request that was approved, rejected, withdrawn or never saved could leave the mark behind forever. Home and Discover now check each marked group's own join request directly and clear every mark that is not a real waiting request, then show Pending only for requests that are still waiting (`JoinRequestManager.reconcilePending`).
+- A request that really is waiting stays Pending until the group's admin (or the member vote) answers it. That is up to the group.

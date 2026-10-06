@@ -982,6 +982,16 @@ public class HomeFragmentActivity extends Fragment {
 	private void _loadPendingRequests() {
 		final String uid = FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
 		if (uid.isEmpty() || getContext() == null) return;
+		// Clear marks that no longer match a waiting request, then show what is really pending.
+		com.harvana.app.group.JoinRequestManager.reconcilePending(getContext(), uid, removed -> {
+			if (removed > 0 && isAdded() && getActivity() != null) getActivity().runOnUiThread(this::_loadPendingRequestsRaw);
+		});
+		_loadPendingRequestsRaw();
+	}
+	
+	private void _loadPendingRequestsRaw() {
+		final String uid = FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+		if (uid.isEmpty() || getContext() == null) return;
 		com.harvana.app.firestore.UserProfileManager.getInstance(getContext()).getProfile(uid,
 			new com.harvana.app.firestore.UserProfileManager.DocCallback() {
 				@Override public void onSuccess(Map<String, Object> data) {

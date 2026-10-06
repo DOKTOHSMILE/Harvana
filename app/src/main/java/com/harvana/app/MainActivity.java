@@ -479,7 +479,7 @@ public class MainActivity extends AppCompatActivity {
 		final int onAppBarColor = tvOn.data;
 		titleView.setText("Harvana");
 		titleView.setTextColor(onAppBarColor);
-		titleView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 18);
+		titleView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 24);
 		titleView.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
 		textContainer.addView(titleView);
 		toolbarContainer.addView(textContainer);

@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: bigger app name in the top bar
+
+What the app does. The "Harvana" name next to your photo in the top bar is larger (24sp, was 18sp). What you do: install the new build.
+
 ## 6 Oct 2026: bottom sheets reach the bottom of the screen
 
 What the app does. Every bottom sheet (all of them go through the shared sheet base) now paints the system navigation strip under it in the sheet's own colour, with light or dark navigation icons to match, so a sheet no longer ends above a darker band at the bottom of the screen. What you do: install the new build.

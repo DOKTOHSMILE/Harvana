@@ -165,7 +165,7 @@ public final class InviteManager {
                     sp.edit().putBoolean(id, true).apply();
                     com.harvana.app.notify.NotificationCenter.post(app, com.harvana.app.notify.NotificationCenter.INVITE, "invite_" + id,
                         "You're invited to " + str(inv, "groupName", "a group"),
-                        str(inv, "inviterName", "A member") + " invited you. Open to read the details before you decide.", "", -1);
+                        str(inv, "inviterName", "A member") + " invited you. Open to read the details before you decide.", str(inv, "groupId", ""), -1);
                 }
             }
             @Override public void onError(String e) { }

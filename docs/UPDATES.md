@@ -657,3 +657,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Transaction notifications show the transaction with its confirmations
 - A received, sent or signed-payment notification opens the details of that exact transaction. The transaction lookup on the network does not say how many blocks confirm it, so the router now also reads the transaction status for the confirmation count (it used to open showing zero confirmations).
+
+## Every notification opens its own item
+- An invitation notification opens that invitation (the group's details and the Join choice) instead of the invitations list; a published Learn article opens the article; a trade message opens the chat with that trader; a pinch opens the person's profile. Together with the earlier routes (transactions, group notices on the right tab, join results, friend requests) every notification type now lands on the specific thing it is about. Invitations received before this update have no group saved with them and still open the invitations list.

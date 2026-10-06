@@ -34,7 +34,7 @@ public final class NotificationSync {
                     String id = s(inv.get("_docId"));
                     NotificationCenter.post(c, NotificationCenter.INVITE, "invite_" + id,
                         "You're invited to " + s(inv.get("groupName")),
-                        s(inv.get("inviterName")) + " invited you. Open to read the details before you decide.", "", -1);
+                        s(inv.get("inviterName")) + " invited you. Open to read the details before you decide.", s(inv.get("groupId")), -1);
                 }
                 finish.run();
             }

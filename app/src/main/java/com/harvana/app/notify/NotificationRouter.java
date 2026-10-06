@@ -32,6 +32,10 @@ public final class NotificationRouter {
 
         Matcher m = TX_HASH.matcher(it.id == null ? "" : it.id);
         if (NotificationCenter.TX.equals(it.type) && m.find()) { openTransaction(c, m.group(1)); return; }
+        if (NotificationCenter.SYSTEM.equals(it.type) && it.id != null && it.id.startsWith("learn_") && it.id.endsWith("_approved")) {
+            openLearnPost(c, it.id.substring("learn_".length(), it.id.length() - "_approved".length()));
+            return;
+        }
         start(c, intentFor(c, it));
     }
 
@@ -40,9 +44,22 @@ public final class NotificationRouter {
         String id = it.id == null ? "" : it.id;
         switch (it.type == null ? "" : it.type) {
             case NotificationCenter.INVITE:
+                // The invitation itself (its group's details and the Join choice), not the list of invitations.
+                if (it.groupId != null && !it.groupId.isEmpty() && id.startsWith("invite_")) {
+                    return new Intent(c, com.harvana.app.GroupJoinRequestActivity.class)
+                        .putExtra("groupId", it.groupId).putExtra("inviteId", id.substring("invite_".length()));
+                }
                 return new Intent(c, InvitesActivity.class);
             case NotificationCenter.SOCIAL:
-                if (id.startsWith("p2pchat_")) return new Intent(c, P2pMyTradesActivity.class);
+                if (id.startsWith("p2pchat_")) {
+                    Intent chat = chatIntent(c, id);
+                    return chat != null ? chat : new Intent(c, P2pMyTradesActivity.class);
+                }
+                if (id.startsWith("pinch_")) {                    // the person who pinched: their profile
+                    String[] parts = id.split("_");
+                    if (parts.length >= 3) return new Intent(c, com.harvana.app.social.PublicProfileActivity.class)
+                        .putExtra(com.harvana.app.social.PublicProfileActivity.EXTRA_UID, parts[1]);
+                }
                 return new Intent(c, com.harvana.app.social.FriendsActivity.class);
             case NotificationCenter.TX:
                 return main(c, "asset");
@@ -61,6 +78,52 @@ public final class NotificationRouter {
             return group(c, it.groupId, page);
         }
         return new Intent(c, com.harvana.app.NotificationsActivity.class);
+    }
+
+    /** "p2pchat_{orderId}_{uidA}_{uidB}_{time}": the trade chat with the other person. Null when the id cannot be read. */
+    private static Intent chatIntent(Context c, String id) {
+        try {
+            String[] p = id.substring("p2pchat_".length()).split("_");
+            if (p.length < 4) return null;
+            String me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
+                : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+            String a = p[p.length - 3], b = p[p.length - 2];
+            String other = me.equals(a) ? b : me.equals(b) ? a : "";
+            StringBuilder order = new StringBuilder();
+            for (int i = 0; i < p.length - 3; i++) order.append(i == 0 ? "" : "_").append(p[i]);
+            if (other.isEmpty() || order.length() == 0) return null;
+            return new Intent(c, com.harvana.app.P2pChatActivity.class)
+                .putExtra(com.harvana.app.P2pChatActivity.EXTRA_ORDER, order.toString())
+                .putExtra(com.harvana.app.P2pChatActivity.EXTRA_OTHER, other);
+        } catch (Exception e) { return null; }
+    }
+
+    /** The published article itself; the Learn tab if it cannot be found. */
+    private static void openLearnPost(final Context c, final String contentId) {
+        try {
+            com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("LEARN_CONTENT").document(contentId).get()
+                .addOnCompleteListener(task -> {
+                    com.google.firebase.firestore.DocumentSnapshot d = task.isSuccessful() ? task.getResult() : null;
+                    if (d == null || !d.exists()) { start(c, main(c, "learn")); return; }
+                    Intent i = new Intent(c, com.harvana.app.LearnReadActivity.class);
+                    i.putExtra(com.harvana.app.LearnReadActivity.EXTRA_ID, d.getId());
+                    i.putExtra(com.harvana.app.LearnReadActivity.EXTRA_TITLE, str(d, "title"));
+                    i.putExtra(com.harvana.app.LearnReadActivity.EXTRA_BODY, str(d, "description"));
+                    i.putExtra(com.harvana.app.LearnReadActivity.EXTRA_CATEGORY, str(d, "category"));
+                    i.putExtra(com.harvana.app.LearnReadActivity.EXTRA_IMAGE, str(d, "imageUrl"));
+                    i.putExtra(com.harvana.app.LearnReadActivity.EXTRA_VIDEO, str(d, "videoUrl"));
+                    i.putExtra(com.harvana.app.LearnReadActivity.EXTRA_AUTHOR, str(d, "authorUid"));
+                    Long at = d.getLong("createdAt"), views = d.getLong("views");
+                    i.putExtra(com.harvana.app.LearnReadActivity.EXTRA_CREATED, at == null ? 0L : at);
+                    i.putExtra(com.harvana.app.LearnReadActivity.EXTRA_VIEWS, views == null ? 0L : views);
+                    start(c, i);
+                });
+        } catch (Exception e) { start(c, main(c, "learn")); }
+    }
+
+    private static String str(com.google.firebase.firestore.DocumentSnapshot d, String key) {
+        Object o = d.get(key);
+        return o == null ? "" : String.valueOf(o);
     }
 
     private static Intent group(Context c, String groupId, int page) {

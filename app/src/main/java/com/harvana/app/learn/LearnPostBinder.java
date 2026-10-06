@@ -179,11 +179,17 @@ public final class LearnPostBinder {
         Runnable paint = () -> {
             fireCount.setText(LearnRules.compactCount(fires[0]));
             fire.setBackgroundResource(mine[0] ? R.drawable.bg_learn_action_on : R.drawable.bg_learn_action);
-            // The handshake is a full-colour 3D image; a tint, if ever set, multiplies so the shading stays.
-            // It is dimmed until you have shaken hands on this post.
-            fireIcon.clearColorFilter();
-            androidx.core.widget.ImageViewCompat.setImageTintMode(fireIcon, android.graphics.PorterDuff.Mode.MULTIPLY);
-            fireIcon.setAlpha(mine[0] ? 1f : 0.6f);
+            // The handshake is a full-colour 3D image. Before you react it shows in grey (same 3D shape, no colour);
+            // once you have shaken hands on this post it shows in its own yellow.
+            if (mine[0]) {
+                fireIcon.clearColorFilter();
+                fireIcon.setAlpha(1f);
+            } else {
+                android.graphics.ColorMatrix grey = new android.graphics.ColorMatrix();
+                grey.setSaturation(0f);
+                fireIcon.setColorFilter(new android.graphics.ColorMatrixColorFilter(grey));
+                fireIcon.setAlpha(0.75f);
+            }
             fireCount.setTextColor(ContextCompat.getColor(host, mine[0] ? R.color.colorAccent : R.color.colorTextSecondary));
         };
         paint.run();
@@ -205,7 +211,13 @@ public final class LearnPostBinder {
             mine[0] = next;
             fires[0] = Math.max(0, fires[0] + (next ? 1 : -1));
             LearnInterest.get(host).record(post, next ? LearnInterest.FIRE : LearnInterest.UNFIRE);
-            paint.run();                                            // optimistic; undone below if the write fails
+            paint.run();
+            if (next) {                                             // a small pop as the hands turn yellow
+                fireIcon.animate().cancel();
+                fireIcon.setScaleX(0.7f); fireIcon.setScaleY(0.7f);
+                fireIcon.animate().scaleX(1f).scaleY(1f).setDuration(260)
+                    .setInterpolator(new android.view.animation.OvershootInterpolator(3f)).start();
+            }                                            // optimistic; undone below if the write fails
             LearnSocial.setFire(id, next, (ok, error) -> host.runOnUiThread(() -> {
                 if (ok) return;
                 mine[0] = !next;

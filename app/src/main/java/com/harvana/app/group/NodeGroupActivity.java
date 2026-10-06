@@ -300,6 +300,7 @@ public class NodeGroupActivity extends AppCompatActivity {
     private boolean notOnNetwork;
 
     private void render() {
+        boardPaysToday = false;
         refresh.setRefreshing(false);
         content.removeAllViews();
         GroupSnapshot s = snapshot();
@@ -381,7 +382,18 @@ public class NodeGroupActivity extends AppCompatActivity {
                             result("Paid back. It shows once the network confirms it.")));
                 }));
             }
+            boardPaysToday = sel != null;
             GroupTypeBoardView.fill(host, board, cell -> {
+                if (cell.backpayable && cell.isoDate != null) {                 // one red box: pay that day back
+                    java.util.List<String> one = new java.util.ArrayList<>();
+                    one.add(cell.isoDate);
+                    long total = (long) num(line, "dailyAmountRaw");
+                    pay("Pay back missed day", CircleUi.harv(total),
+                        moneyRows(escrowOrGroup(), "1 missed day: " + cell.isoDate),
+                        () -> NodeGroupClient.backpayAccum(getApplicationContext(), me, nodeId, str(line, "lineId"), one,
+                            result("Paid back. It shows once the network confirms it.")));
+                    return;
+                }
                 if (cell.payToday) {
                     for (GroupAction a : s.actions) {
                         if (GroupAction.ACCUM_CONTRIBUTE.equals(a.id) || GroupAction.CONTRIBUTE.equals(a.id)
@@ -399,7 +411,10 @@ public class NodeGroupActivity extends AppCompatActivity {
             content.addView(card);
         }
 
-        for (GroupAction a : s.actions) content.addView(actionButton(a));
+        for (GroupAction a : s.actions) {
+            if (boardPaysToday && GroupAction.ACCUM_CONTRIBUTE.equals(a.id)) continue;   // the calendar's today box pays it
+            content.addView(actionButton(a));
+        }
 
         renderProposals();
         renderPackRequests();
@@ -521,6 +536,9 @@ public class NodeGroupActivity extends AppCompatActivity {
     }
 
     // ── actions ────────────────────────────────────────────────────────────
+
+    /** True when the savings calendar is shown: its today box is the way to save today, so the separate button is left out. */
+    private boolean boardPaysToday;
 
     private void onAction(GroupAction a) {
         switch (a.id) {

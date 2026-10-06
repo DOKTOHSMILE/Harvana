@@ -58,7 +58,8 @@ public final class GroupTypeBoardView {
             int m = dp(c, dense ? 2 : 3);
             lp.setMargins(m, m, m, m);
             box.setOnClickListener(v -> {
-                if (pickable) { sel.toggle(cell.isoDate); fill(host, board, click, sel); if (sel.onChange != null) sel.onChange.run(); return; }
+                // Picking several starts with a long press; while days are picked a tap adds or removes one. A lone tap pays that day.
+                if (pickable && !sel.picked.isEmpty()) { sel.toggle(cell.isoDate); fill(host, board, click, sel); if (sel.onChange != null) sel.onChange.run(); return; }
                 if (click != null) click.onCell(cell);
             });
             if (pickable) box.setOnLongClickListener(v -> {

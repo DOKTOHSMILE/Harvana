@@ -484,8 +484,8 @@ public final class GroupTypeBoard {
             else if (iso.compareTo(todayIso) < 0) state = MISSED;
             else state = OPEN;
             String title = fullDate(ts, zone);
-            String body = title + "\n" + (paid ? "Saved." : state == TODAY ? "Due today." : state == MISSED ? "Not saved. Tap to pay it back." : "Coming up.");
-            Cell cell = new Cell(String.valueOf(c.get(Calendar.DAY_OF_MONTH)), MONTHS[c.get(Calendar.MONTH)], title, body, state, false);
+            String body = title + "\n" + (paid ? "Saved." : state == TODAY ? "Due today. Tap to save it." : state == MISSED ? "Not saved. Tap to pay it back." : "Coming up.");
+            Cell cell = new Cell(String.valueOf(c.get(Calendar.DAY_OF_MONTH)), MONTHS[c.get(Calendar.MONTH)], title, body, state, state == TODAY);
             cell.isoDate = iso;
             cell.backpayable = state == MISSED && dated;
             cells.add(cell);
@@ -493,7 +493,7 @@ public final class GroupTypeBoard {
         double savedHarv = line == null ? 0 : num(line, "amountPaidRaw", 0) / RAW;
         return new Board(ACCUMULATIVE, "SAVINGS STAMPS", "30-day savings line",
                 saved + " of 30 days saved · " + money(savedHarv),
-                "Each box is one day of the line. The date is written inside. Green is paid, red is missed: tap a red box (or long-press to pick several) to pay those days back.",
+                "Each box is one day of the line. The date is written inside. Green is paid, red is missed. Tap today\u2019s box to save today, or tap a red box to pay that day back. To pay several days, long-press a red box, then tap more.",
                 6, "", cells);
     }
 

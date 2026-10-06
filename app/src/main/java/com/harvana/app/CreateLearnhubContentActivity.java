@@ -235,15 +235,9 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 	// ── Image picking ────────────────────────────────────────────────────
 	
 	private void _checkPermissionAndPickImage() {
-		String permission = Build.VERSION.SDK_INT >= 33
-		? Manifest.permission.READ_MEDIA_IMAGES
-		: Manifest.permission.READ_EXTERNAL_STORAGE;
-		
-		if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
-			_launchImagePicker();
-		} else {
-			ActivityCompat.requestPermissions(this, new String[]{permission}, RC_READ_IMAGES);
-		}
+		// The system picture chooser (ACTION_GET_CONTENT) needs no storage permission: the person picks the file and the app is
+		// handed just that one. Asking for photo-library access first only blocked people who said no.
+		_launchImagePicker();
 	}
 	
 	@Override

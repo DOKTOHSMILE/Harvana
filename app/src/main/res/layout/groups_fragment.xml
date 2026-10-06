@@ -64,6 +64,7 @@
 						android:paddingTop="10dp"
 						android:paddingBottom="10dp"
 						android:text="+ New Group"
+						android:textColor="@color/colorTextOnAccent"
 						android:textSize="13sp"
 						android:textStyle="bold"
 						android:paddingStart="16dp"

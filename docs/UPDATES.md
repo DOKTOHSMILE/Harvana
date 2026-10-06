@@ -670,3 +670,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 ## One full-screen search sheet (Groups and Discover)
 - Searching on the Groups tab now opens the same full-screen sheet as Discover (before, the search box on Groups did nothing). New shared sheet `ui/SearchSheet.java`: one row, side by side, with a **close** button, the **search field** and a **clear** button. The list behind filters as you type, a line shows how many groups match, the keyboard's search key closes the sheet, close keeps what you typed and clear empties the field. Discover uses the same sheet instead of its old Clear/Search buttons.
 - Groups search matches name, type, city, state, country and frequency. The Filter button on Groups now works too: All my groups, Rotating, Accumulative, Fixed contribution, or Groups I run.
+
+## New Group button readable
+- The "+ New Group" button on the Groups tab had no text colour, so its label was pale on the sand button and could not be read. It now uses the on-accent ink colour in day and night themes.

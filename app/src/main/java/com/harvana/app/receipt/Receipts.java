@@ -12,8 +12,12 @@ public final class Receipts {
         r.title = info.title == null || info.title.isEmpty() ? "Payment receipt" : info.title;
         r.status = info.confirmed ? "CONFIRMED" : "PENDING";
         String amount = info.amount == null ? "" : info.amount.trim();
-        int sp = amount.lastIndexOf(' ');
-        if (sp > 0) { r.symbol = amount.substring(sp + 1); r.amount = amount.substring(0, sp); } else r.amount = amount;
+        // "0.1 HARV" (or an accidental "0.1 HARV HARV"): the number is the first word, the symbol the last non-numeric word.
+        String[] words = amount.isEmpty() ? new String[0] : amount.split("\\s+");
+        r.amount = words.length > 0 ? words[0] : "";
+        r.symbol = "";
+        for (int i = words.length - 1; i > 0; i--) if (!words[i].matches("[-+]?[0-9.,]+")) { r.symbol = words[i]; break; }
+        if (r.symbol.isEmpty()) r.symbol = com.harvana.app.CoinInfo.ticker();
         r.direction = -1;
         r.timestamp = System.currentTimeMillis();
         r.reference = info.txHash == null ? "" : info.txHash;

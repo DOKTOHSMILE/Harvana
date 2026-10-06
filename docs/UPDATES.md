@@ -608,3 +608,7 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 ## Home: Learn Hub card
 - The Learn Hub card on Home now reads the same posts as the Learn tab (it was reading an old list, so it always said "No Learn Hub posts yet"). It shows the newest 3 public posts with cover image, title, category, views and how long ago, and tapping opens Learn. The empty and offline messages are padded and use the soft text colour.
 - The "Pending approval" button on trending/discover groups now reads "Pending" on one line so it no longer wraps.
+
+## Every receipt has the same facts
+- Sharing a receipt from the payment success sheet now reads the transaction from the network by its hash first, so it shows the same full data as the transaction detail receipt: from, to, memo, network fee, burned, hash, block, confirmations and nonce (it used to show only a few rows). If the network cannot be reached it falls back to the short receipt.
+- Fixed the duplicated unit in the headline ("0.1 HARV HARV").

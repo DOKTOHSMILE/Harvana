@@ -123,7 +123,7 @@ public final class PaymentSuccessSheet {
 
         TextView share = text("Share receipt", 14, R.color.colorAccent, true);
         share.setPadding(0, dp(20), 0, dp(4));
-        share.setOnClickListener(v -> com.harvana.app.receipt.ReceiptShare.choose(a, com.harvana.app.receipt.Receipts.fromSuccess(info)));
+        share.setOnClickListener(v -> com.harvana.app.receipt.ReceiptLoader.forSuccess(info, r -> com.harvana.app.receipt.ReceiptShare.choose(a, r)));
         root.addView(share);
 
         MaterialButton done = new MaterialButton(a);

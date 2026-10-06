@@ -632,3 +632,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Members tab no longer reloads on every resume
 - Coming back to the Members tab only reloads the list when it is more than a minute old. Accepting, voting, removing and pull-to-refresh still reload straight away.
+
+## Group picture rings
+- The coloured ring around group pictures was cut up since the images became Material image views (they erase anything outside their own shape, which included the ring). Group pictures now use the Material round shape with a native border in the group-type colour (blue rotating, green accumulative, purple fixed, grey other), so the ring is complete everywhere (Home, Discover, Groups, invites, profiles, settings).

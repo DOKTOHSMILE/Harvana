@@ -41,6 +41,20 @@ public final class GroupRing {
     public static void apply(ImageView v, String groupType, float ringDp, int fill) {
         float d = v.getResources().getDisplayMetrics().density;
         int ring = Math.max(1, Math.round(ringDp * d));
+        if (v instanceof com.google.android.material.imageview.ShapeableImageView) {
+            // A Material image view wipes everything outside its own shape, padding included, so a ring drawn as a background
+            // in the padding would be cut. Use its native round shape and border instead.
+            com.google.android.material.imageview.ShapeableImageView sv = (com.google.android.material.imageview.ShapeableImageView) v;
+            sv.setBackground(null);
+            sv.setShapeAppearanceModel(com.google.android.material.shape.ShapeAppearanceModel.builder()
+                .setAllCorners(com.google.android.material.shape.CornerFamily.ROUNDED, new com.google.android.material.shape.RelativeCornerSize(0.5f)).build());
+            sv.setStrokeColor(android.content.res.ColorStateList.valueOf(color(groupType)));
+            sv.setStrokeWidth(ring);
+            int pad = ring + Math.round(1f * d);
+            sv.setPadding(pad, pad, pad, pad);
+            sv.setContentDescription("Group type: " + (color(groupType) == OTHER ? "other" : colorName(groupType)));
+            return;
+        }
         GradientDrawable g = new GradientDrawable();
         g.setShape(GradientDrawable.OVAL);
         g.setColor(fill);

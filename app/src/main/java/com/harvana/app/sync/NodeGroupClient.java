@@ -376,12 +376,15 @@ public final class NodeGroupClient {
         });
     }
 
-    public static void unstake(Context c, String address, long amountRaw, Callback cb) {
+    public static void unstake(Context c, String address, String lotId, long amountRaw, Callback cb) {
         withActionNonce(address, (nonce, err) -> {
             if (nonce < 0) { cb.onError(err); return; }
             actNonce(c, address, "/api/v1/staking/unstake", nonce, new Spec() {
-                public String canonical(long n) { return GroupCanonical.stakingUnstake(address, amountRaw, n); }
-                public void fill(JSONObject b, long n) throws JSONException { b.put("address", address).put("amountRaw", amountRaw); }
+                public String canonical(long n) { return GroupCanonical.stakingUnstake(address, lotId, amountRaw, n); }
+                public void fill(JSONObject b, long n) throws JSONException {
+                    b.put("address", address).put("amountRaw", amountRaw);
+                    if (lotId != null && !lotId.isEmpty()) b.put("lotId", lotId);
+                }
             }, cb);
         });
     }

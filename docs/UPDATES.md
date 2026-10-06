@@ -535,3 +535,10 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Group tabs fill the width without Loans (follow-up)
 - The tab bar re-applies its fixed/fill mode after the pager rebuilds its tabs, so a group with loans switched off now stretches its five tabs across the full width.
+
+## Staking: every stake is its own row (needs the new node jar first)
+- Each time you stake, it now shows as its own card in My Positions with its own amount, lock (7/30/90 days or flexible), multiplier, unlock date and "Earned so far". Staking again no longer merges into an earlier stake.
+- Each card has its own Unstake. A locked stake stays locked while your other stakes can be unstaked. The sheet shows which stake you are unstaking.
+- There is still one **Claim all** button: one claim pays the rewards of every stake together (once every 24 hours).
+- Your existing combined stake appears as one card with the same amount, lock and rewards.
+- Install this after the node jar is updated (node docs/DEPLOYMENT.md, "Separate stakes"). With an older jar a single stake still unstakes, several stakes do not.

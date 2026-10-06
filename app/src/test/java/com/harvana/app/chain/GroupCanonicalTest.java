@@ -292,6 +292,13 @@ public class GroupCanonicalTest {
             GroupCanonical.stakingUnstake("V_address", 1001L, 1002L));
     }
 
+    @Test public void stakingUnstake_ofOneStake_signsTheStakeId() {
+        assertEquals("HARVANA_STAKING_UNSTAKE_V2:V_address:LOT-abc:500:7",
+            GroupCanonical.stakingUnstake("V_address", "LOT-abc", 500L, 7L));
+        assertEquals("HARVANA_STAKING_UNSTAKE_V1:V_address:500:7",
+            GroupCanonical.stakingUnstake("V_address", null, 500L, 7L));
+    }
+
     @Test public void stakingUnstake_v1() {
         assertEquals("HARVANA_STAKING_UNSTAKE_V1:V_address:x y:1008:1009",
             GroupCanonical.stakingUnstake("V_address:x y", 1008L, 1009L));

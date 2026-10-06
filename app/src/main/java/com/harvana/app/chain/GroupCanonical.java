@@ -176,6 +176,12 @@ public final class GroupCanonical {
     }
 
     /** StakingUnstakeRequest.getCanonicalMessage() */
+    /** Unstake one stake (lot): the stake id is part of what is signed. */
+    public static String stakingUnstake(String address, String lotId, long amountRaw, long nonce) {
+        if (lotId == null || lotId.isEmpty()) return stakingUnstake(address, amountRaw, nonce);
+        return "HARVANA_STAKING_UNSTAKE_V2:" + address + ":" + lotId + ":" + amountRaw + ":" + nonce;
+    }
+
     public static String stakingUnstake(String address, long amountRaw, long nonce) {
         return "HARVANA_STAKING_UNSTAKE_V1:" + address + ":" + amountRaw + ":" + nonce;
     }

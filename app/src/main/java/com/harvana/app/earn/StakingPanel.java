@@ -79,12 +79,13 @@ public final class StakingPanel {
 
     // Page 2 UI
     private final TextView posTotal, posDailyPct, gridTotal, gridUnclaimed, gridApy;
-    private final TextView activeAmount, activeMonthly, activeLockType, unbondCount;
-    private final MaterialButton claim, activeUnstake;
+    private final TextView unbondCount;
+    private final MaterialButton claim;
+    private final LinearLayout stakesList;
     private final TextView claimSub;
     private final LinearLayout unbondingList;
 
-    private final View pageStake, pagePositions, activeCard;
+    private final View pageStake, pagePositions;
     private final TextView tabStake, tabPositions;
 
     private JSONObject info;
@@ -178,18 +179,14 @@ public final class StakingPanel {
         gridTotal = activity.findViewById(R.id.tv_grid_total);
         gridUnclaimed = activity.findViewById(R.id.tv_grid_unclaimed);
         gridApy = activity.findViewById(R.id.tv_grid_apy);
-        activeAmount = activity.findViewById(R.id.tv_active_amount);
-        activeMonthly = activity.findViewById(R.id.tv_active_monthly);
-        activeLockType = activity.findViewById(R.id.tv_active_lock_type);
         unbondCount = activity.findViewById(R.id.tv_unbond_count);
         claim = activity.findViewById(R.id.btn_claim);
         claimSub = activity.findViewById(R.id.tv_claim_sub);
-        activeUnstake = activity.findViewById(R.id.btn_active_unstake);
         unbondingList = activity.findViewById(R.id.unbonding_list);
 
         pageStake = activity.findViewById(R.id.page_stake);
         pagePositions = activity.findViewById(R.id.page_positions);
-        activeCard = activity.findViewById(R.id.active_card);
+        stakesList = activity.findViewById(R.id.stakes_list);
         tabStake = activity.findViewById(R.id.tab_stake);
         tabPositions = activity.findViewById(R.id.tab_positions);
 
@@ -198,7 +195,6 @@ public final class StakingPanel {
 
         stake.setOnClickListener(v -> doStake());
         claim.setOnClickListener(v -> doClaim());
-        activeUnstake.setOnClickListener(v -> askUnstake());
         activity.findViewById(R.id.btn_max).setOnClickListener(v -> fillMax());
 
         amount.addTextChangedListener(new TextWatcher() {
@@ -372,25 +368,13 @@ public final class StakingPanel {
             gridUnclaimed.setText(harv(pending));
             gridApy.setText(String.format(Locale.US, "%.2f%%", shareBps / 100.0));
 
-            activeCard.setVisibility(staked > 0 ? View.VISIBLE : View.GONE);
-            activeAmount.setText(harv(staked));
-            int lockDays = pos == null ? 0 : pos.optInt("lockDays", 0);
-            int mult = pos == null ? 10000 : pos.optInt("multiplierBps", 10000);
-            if (mult <= 0) mult = 10000;
-            long lockedUntil = lockedUntil();
-            activeLockType.setText(staked <= 0 ? "Not staked" : lockDays <= 0
-                    ? "Flexible · 1x · stays until you unstake"
-                    : lockedUntil > 0
-                    ? "Locked " + lockDays + " days · " + String.format(Locale.US, "%.2fx", mult / 10000.0) + " · unlocks " + dateTime(lockedUntil)
-                    : "Lock ended · " + String.format(Locale.US, "%.2fx", mult / 10000.0) + " · you can unstake");
-            activeMonthly.setText("0.05% of the pool drips into Claim each day");
+            renderStakes();
 
             String address = WalletManager.getActiveWalletAddress(host);
             if (address != null && staked > 0) recordSnapshot(address, pending + claimed);
             drawChart(address);
 
             stake.setEnabled(!busy);
-            activeUnstake.setEnabled(!busy);
 
             setupUnbondingViews();
             updateLiveTimers();
@@ -404,7 +388,7 @@ public final class StakingPanel {
 
         if (staked == 0 && pending == 0) {
             claim.setEnabled(false);
-            claim.setText("Claim");
+            claim.setText("Claim all");
             claimSub.setText("Stake HARV to start earning. The stake stays until you unstake.");
         } else {
             long now = System.currentTimeMillis();
@@ -419,7 +403,7 @@ public final class StakingPanel {
             } else if (pending > 0) {
                 claim.setEnabled(!busy);
                 claim.setText("Claim");
-                claimSub.setText(harv(pending) + " is ready. Claiming sends it to your wallet and leaves the stake in place. " + rule);
+                claimSub.setText(harv(pending) + " from all your stakes is ready. One claim pays them together and leaves the stakes in place. " + rule);
             } else {
                 claim.setEnabled(false);
                 claim.setText("Claim");
@@ -760,17 +744,125 @@ public final class StakingPanel {
         });
     }
 
-    private void askUnstake() {
-        long lockedUntil = lockedUntil();
+    /** One stake as the node reports it (or the single combined position of an older node). */
+    private static final class Stake {
+        String id; long amountRaw; int lockDays; int multiplierBps; long unlockTimestamp; long pendingRaw;
+    }
+
+    private java.util.List<Stake> stakes() {
+        java.util.List<Stake> out = new ArrayList<>();
+        if (pos == null) return out;
+        org.json.JSONArray arr = pos.optJSONArray("stakes");
+        if (arr != null) {
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject o = arr.optJSONObject(i);
+                if (o == null) continue;
+                Stake s = new Stake();
+                s.id = o.optString("id", null);
+                s.amountRaw = o.optLong("amountRaw", 0);
+                s.lockDays = o.optInt("lockDays", 0);
+                s.multiplierBps = o.optInt("multiplierBps", 10000);
+                s.unlockTimestamp = o.optLong("unlockTimestamp", 0);
+                s.pendingRaw = o.optLong("pendingRewardsRaw", 0);
+                if (s.amountRaw > 0) out.add(s);
+            }
+        } else if (pos.optLong("stakedRaw", 0) > 0) {
+            Stake s = new Stake();
+            s.amountRaw = pos.optLong("stakedRaw", 0);
+            s.lockDays = pos.optInt("lockDays", 0);
+            s.multiplierBps = pos.optInt("multiplierBps", 10000);
+            s.unlockTimestamp = pos.optLong("unlockTimestamp", 0);
+            s.pendingRaw = pos.optLong("accruedRaw", 0);
+            out.add(s);
+        }
+        return out;
+    }
+
+    /** One card per stake, each with its own lock, rewards and Unstake. Claim stays a single button for all of them. */
+    private void renderStakes() {
+        stakesList.removeAllViews();
+        long now = System.currentTimeMillis();
+        for (Stake s : stakes()) {
+            int mult = s.multiplierBps <= 0 ? 10000 : s.multiplierBps;
+            boolean locked = StakingRules.lockedUntil(s.amountRaw, s.unlockTimestamp, now) > 0;
+            String type = s.lockDays <= 0 ? "Flexible · 1x · stays until you unstake"
+                    : locked ? "Locked " + s.lockDays + " days · " + String.format(Locale.US, "%.2fx", mult / 10000.0) + " · unlocks " + dateTime(s.unlockTimestamp)
+                    : "Lock ended · " + String.format(Locale.US, "%.2fx", mult / 10000.0) + " · you can unstake";
+
+            com.google.android.material.card.MaterialCardView card = new com.google.android.material.card.MaterialCardView(host);
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            cp.topMargin = dp(12);
+            card.setLayoutParams(cp);
+            card.setRadius(dp(16));
+            card.setCardBackgroundColor(themeColor(R.color.colorSurface));
+            card.setStrokeColor(themeColor(R.color.colorCardStroke));
+            card.setStrokeWidth(dp(1));
+
+            LinearLayout col = new LinearLayout(host);
+            col.setOrientation(LinearLayout.VERTICAL);
+            col.setPadding(dp(16), dp(16), dp(16), dp(16));
+
+            LinearLayout top = new LinearLayout(host);
+            top.setOrientation(LinearLayout.HORIZONTAL);
+            top.setGravity(Gravity.CENTER_VERTICAL);
+            TextView amountTv = new TextView(host);
+            amountTv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+            amountTv.setText(harv(s.amountRaw));
+            amountTv.setTextColor(themeColor(R.color.colorTextPrimary));
+            amountTv.setTextSize(18);
+            amountTv.setTypeface(null, android.graphics.Typeface.BOLD);
+            TextView badge = new TextView(host);
+            badge.setText(locked ? "● Locked" : "● Active (Earning)");
+            badge.setTextColor(themeColor(locked ? R.color.colorAccent : R.color.colorSuccess));
+            badge.setTextSize(12);
+            badge.setTypeface(null, android.graphics.Typeface.BOLD);
+            top.addView(amountTv);
+            top.addView(badge);
+
+            TextView typeTv = new TextView(host);
+            typeTv.setText(type);
+            typeTv.setTextColor(themeColor(R.color.colorTextPrimary));
+            typeTv.setTextSize(13);
+            typeTv.setPadding(0, dp(8), 0, 0);
+
+            TextView earnedTv = new TextView(host);
+            earnedTv.setText("Earned so far: " + harv(s.pendingRaw));
+            earnedTv.setTextColor(themeColor(R.color.colorTextMuted));
+            earnedTv.setTextSize(12);
+            earnedTv.setPadding(0, dp(4), 0, 0);
+
+            MaterialButton unstakeBtn = new MaterialButton(host, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+            LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            bp.topMargin = dp(14);
+            unstakeBtn.setLayoutParams(bp);
+            unstakeBtn.setText("Unstake");
+            unstakeBtn.setAllCaps(false);
+            unstakeBtn.setTextColor(themeColor(R.color.colorAccent));
+            unstakeBtn.setStrokeColor(android.content.res.ColorStateList.valueOf(themeColor(R.color.colorCardStroke)));
+            unstakeBtn.setEnabled(!busy);
+            unstakeBtn.setOnClickListener(v -> askUnstake(s));
+
+            col.addView(top);
+            col.addView(typeTv);
+            col.addView(earnedTv);
+            col.addView(unstakeBtn);
+            card.addView(col);
+            stakesList.addView(card);
+        }
+    }
+
+    private void askUnstake(Stake stake) {
+        long lockedUntil = StakingRules.lockedUntil(stake.amountRaw, stake.unlockTimestamp, System.currentTimeMillis());
         if (lockedUntil > 0) {
             new com.harvana.app.ui.SheetDialog.Builder(host)
                     .setTitle("Principal locked")
-                    .setMessage("Your stake is locked until " + dateTime(lockedUntil)
-                            + ". You cannot unstake before then. You can still claim rewards once every 24 hours.")
+                    .setMessage("This stake is locked until " + dateTime(lockedUntil)
+                            + ". You cannot unstake it before then. Your other stakes are not affected, and you can still claim rewards once every 24 hours.")
                     .setPositiveButton("OK", null)
                     .show();
             return;
         }
+        final String lotId = stake.id;
         BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
 
         LinearLayout root = new LinearLayout(host);
@@ -779,16 +871,16 @@ public final class StakingPanel {
         applyCurvedBottomSheetBackground(root, sheet);
 
         TextView title = new TextView(host);
-        title.setText("Unstake Principal");
+        title.setText("Unstake this stake");
         title.setTextColor(Color.WHITE);
         title.setTextSize(20);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        long stakedRaw = pos == null ? 0 : pos.optLong("stakedRaw", 0);
+        long stakedRaw = stake.amountRaw;
         double stakedHarv = stakedRaw / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN;
 
         TextView subTitle = new TextView(host);
-        subTitle.setText("Currently Staked: " + harv(stakedRaw));
+        subTitle.setText("This stake: " + harv(stakedRaw) + (stake.lockDays > 0 ? " · " + stake.lockDays + "-day lock" : " · flexible"));
         subTitle.setTextColor(themeColor(R.color.colorTextTertiary));
         subTitle.setTextSize(13);
         subTitle.setPadding(0, dp(4), 0, dp(16));
@@ -861,7 +953,7 @@ public final class StakingPanel {
                 if (val <= 0 || val > stakedHarv) { toast("Invalid unstake amount."); return; }
                 sheet.dismiss();
                 amount.setText(valStr);
-                doUnstake();
+                doUnstake(lotId);
             } catch (Exception e) { toast("Invalid amount."); }
         });
 
@@ -903,7 +995,7 @@ public final class StakingPanel {
         });
     }
 
-    private void doUnstake() {
+    private void doUnstake(String lotId) {
         String address = WalletManager.getActiveWalletAddress(host);
         double harvAmount;
         try { harvAmount = Double.parseDouble(amount.getText().toString().trim()); }
@@ -914,7 +1006,7 @@ public final class StakingPanel {
 
         gate("Unstake HARV", harvFormatter.format(harvAmount) + " HARV", rows, () -> {
             busy = true;
-            NodeGroupClient.unstake(host, address, BalanceFormatter.harvToRaw(harvAmount), new NodeGroupClient.Callback() {
+            NodeGroupClient.unstake(host, address, lotId, BalanceFormatter.harvToRaw(harvAmount), new NodeGroupClient.Callback() {
                 @Override public void onSuccess(JSONObject json) { busy = false; amount.setText(""); toast("Unstaking. Returns in 24 hours."); refresh(); }
                 @Override public void onError(String error) { busy = false; toast(friendlyStakingError(error)); paint(); }
             });

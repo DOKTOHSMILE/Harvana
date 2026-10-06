@@ -109,14 +109,34 @@ public class ImageViewerActivity extends AppCompatActivity {
                 @Override public boolean onDoubleTap(MotionEvent e) {
                     if (bmp == null) return true;
                     float now = scale();
-                    if (now > fit * 1.5f) place(); else { matrix.postScale(3f, 3f, e.getX(), e.getY()); keepInside(); }
+                    if (now > fit * 1.5f) place();
+                    else if (face != null) zoomToFace();                            // a face: go straight to it
+                    else { matrix.postScale(3f, 3f, e.getX(), e.getY()); keepInside(); }
                     invalidate();
                     return true;
                 }
             });
         }
 
-        void show(Bitmap b) { bmp = b; place(); invalidate(); }
+        private android.graphics.RectF face;     // the main face, 0..1, or null
+
+        void show(Bitmap b) {
+            bmp = b;
+            place();
+            invalidate();
+            // Looked for off the main thread; the first double-tap then goes to the face when there is one.
+            new Thread(() -> face = com.harvana.app.utils.FaceFocus.find(b)).start();
+        }
+
+        /** Zoom so the face fills about half the screen width and sits in the middle. */
+        private void zoomToFace() {
+            float faceW = face.width() * bmp.getWidth();
+            float target = Math.max(fit * 1.6f, Math.min(fit * 6f, getWidth() * 0.5f / faceW));
+            matrix.reset();
+            matrix.postScale(target, target);
+            matrix.postTranslate(getWidth() / 2f - face.centerX() * bmp.getWidth() * target, getHeight() / 2f - face.centerY() * bmp.getHeight() * target);
+            keepInside();
+        }
 
         @Override protected void onSizeChanged(int w, int h, int ow, int oh) { super.onSizeChanged(w, h, ow, oh); if (bmp != null) place(); }
 

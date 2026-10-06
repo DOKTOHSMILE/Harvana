@@ -407,7 +407,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 			Uri pickedUri = data.getData();
 			iv_learn_image_preview.setVisibility(View.VISIBLE);
 			layout_image_placeholder.setVisibility(View.GONE);
-			Glide.with(this).load(pickedUri).centerCrop().into(iv_learn_image_preview);
+			Glide.with(this).load(pickedUri).transform(new com.harvana.app.utils.FaceCrop()).into(iv_learn_image_preview);
 			// Not uploaded yet: it goes up when Post Article is pressed, so a post that fails leaves no picture stored.
 			pendingLearnImage = pickedUri;
 			uploadedImageUrl = null;

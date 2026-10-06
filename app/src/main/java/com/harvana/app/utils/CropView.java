@@ -82,8 +82,25 @@ public class CropView extends View {
         this.aspect = free ? 1f : aspect;
         this.circleGuide = circle;
         this.ready = false;
+        this.face = FaceFocus.find(bmp);        // null when there is no clear face: the middle of the picture is used
         layoutFrame();
         invalidate();
+    }
+
+    private RectF face;
+
+    /** Fixed frame: zoom and move the picture so the face fills a good part of the frame and sits in its middle. */
+    private void focusFace() {
+        if (face == null || free) return;
+        float bw = bitmap.getWidth(), bh = bitmap.getHeight();
+        float faceH = face.height() * bh, faceW = face.width() * bw;
+        float want = Math.min(frame.height() * (aspect >= 1.6f ? 0.7f : 0.55f) / faceH, frame.width() * 0.6f / faceW);
+        float s = Math.max(minScale, Math.min(maxScale, want));
+        matrix.reset();
+        matrix.postScale(s, s);
+        float fx = face.centerX() * bw * s, fy = face.centerY() * bh * s;
+        matrix.postTranslate(frame.centerX() - fx, frame.centerY() - fy);
+        clamp();
     }
 
     @Override protected void onSizeChanged(int w, int h, int ow, int oh) { super.onSizeChanged(w, h, ow, oh); layoutFrame(); }
@@ -101,6 +118,7 @@ public class CropView extends View {
         matrix.reset();
         matrix.postScale(minScale, minScale);
         matrix.postTranslate(frame.centerX() - bitmap.getWidth() * minScale / 2f, frame.centerY() - bitmap.getHeight() * minScale / 2f);
+        focusFace();
         ready = true;
     }
 
@@ -116,6 +134,12 @@ public class CropView extends View {
         imageBox.set(left, top, left + iw, top + ih);
         float inset = Math.min(iw, ih) * 0.08f;
         frame.set(left + inset, top + inset, left + iw - inset, top + ih - inset);
+        if (face != null) {            // free box: start around the face, with room around it
+            float pw = face.width() * iw * 0.7f, ph = face.height() * ih * 0.6f;
+            RectF box = new RectF(left + face.left * iw - pw, top + face.top * ih - ph, left + face.right * iw + pw, top + face.bottom * ih + ph);
+            box.intersect(imageBox);
+            if (box.width() >= minBox && box.height() >= minBox) frame.set(box);
+        }
         ready = true;
     }
 

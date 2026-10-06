@@ -83,7 +83,7 @@ public final class LearnPostBinder {
         if (!post.imageUrl.isEmpty()) {
             shown.setVisibility(View.VISIBLE);
             cover.setVisibility(View.VISIBLE);
-            Glide.with(host).load(Uri.parse(post.imageUrl)).listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+            Glide.with(host).load(Uri.parse(post.imageUrl)).transform(new com.harvana.app.utils.FaceCrop()).listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
                 @Override public boolean onLoadFailed(com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> t, boolean first) {
                     // A picture that cannot load leaves no empty gap: the card is drawn as a text post.
                     shown.setVisibility(View.GONE);

@@ -8,6 +8,8 @@ What the app does. In Group Settings, Members, tapping a member of a goal or sav
 
 Admin co-sign: a payout or milestone request filed by the treasurer is paid only after the group votes and the admin has voted yes as well (the node records the admin as the required co-signer when the request is filed). The admin's own requests work as before, and savings withdrawal approvals need no co-sign because they pay only the member who owns the savings. The admin votes yes in the normal vote list.
 
+Optional, and two ways to decide. A group has no treasurer unless one is appointed. The admin can name or remove one alone, or any member can open "Propose as treasurer (the group votes)" on another member; the group, including the admin, then votes from Group Settings, Members, "Treasurer (optional)" card (Vote yes / Vote no). Adding someone by vote also needs the admin's yes; removing the treasurer needs only the vote. One proposal can be open at a time and it expires after 14 days. The contract of goal and savings groups now says the treasurer is optional and how they are appointed.
+
 What you do. Deploy the node jar first (node `docs/DEPLOYMENT.md`, "Group treasurer role"), then install the new app build. With an old node, a treasurer's approval is refused as "only the admin".
 
 ## 6 Oct 2026: member list with roles and permissions in Group Settings

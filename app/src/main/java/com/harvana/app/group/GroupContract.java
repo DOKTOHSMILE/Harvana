@@ -218,6 +218,7 @@ public final class GroupContract {
         else if (grants) s.add("When it is paid: only after a member asks, the group votes yes, and the network sends it.");
         else s.add("When it is paid: by the payout rule the admin chose, shown below.");
         s.add("If the goal is never reached: the money stays in the group wallet and leaves only by a group vote. You cannot take your deposit back by yourself.");
+        s.add("A treasurer is optional. The group may have none, in which case the admin handles payout requests. If there is one, the admin named them, or the group voted them in with the admin's yes. A treasurer can ask for a payout or a milestone release, but it is paid only after the group votes and the admin votes yes too. The treasurer has no extra vote and can be removed by the admin, or by a group vote.");
         return s;
     }
 
@@ -252,6 +253,7 @@ public final class GroupContract {
         s.add("Where your savings go: every amount you save goes from your own wallet into the group wallet and is recorded on your own savings line. Nothing is held in a Harvana company wallet on the way.");
         s.add("Whose money it is: what is in your line is yours. The network keeps a separate record for each member, so the admin cannot take your line.");
         String w = str(g, "withdrawalRule", "");
+        s.add("A treasurer is optional. The group may have none, in which case the admin approves withdrawal requests. If there is one, the admin named them, or the group voted them in with the admin's yes. A treasurer can approve a member's withdrawal request, but the money still goes only to the member it belongs to. The treasurer has no extra vote and can be removed by the admin, or by a group vote.");
         s.add("How your money comes back: it is paid from the group wallet to your own wallet when you claim it" + (w.isEmpty() ? "" : ", under the group's withdrawal rule (" + w + ")")
             + ". The admin has to approve a withdrawal request, and an unpaid loan can be taken from your savings.");
         return s;

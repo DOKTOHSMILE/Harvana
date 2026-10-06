@@ -158,6 +158,27 @@ public final class NodeGroupClient {
         act(c, member, "/api/v1/accum/claim", line(groupId, lineId, member, "claim", -1), cb);
     }
 
+    /** Any member proposes a treasurer (or, with an empty address, removing the current one) for the group to vote on. */
+    public static void proposeTreasurer(Context c, String proposer, String groupId, String treasurer, Callback cb) {
+        act(c, proposer, "/api/v1/group-roles/treasurer-propose", new Spec() {
+            public String canonical(long n) { return GroupCanonical.groupTreasurerPropose(groupId, proposer, treasurer, n); }
+            public void fill(JSONObject b, long n) throws JSONException {
+                b.put("groupId", groupId).put("proposerAddress", proposer).put("treasurerAddress", treasurer);
+            }
+        }, cb);
+    }
+
+    public static void voteTreasurer(Context c, String voter, String groupId, boolean yes, Callback cb) {
+        act(c, voter, "/api/v1/group-roles/treasurer-vote", new Spec() {
+            public String canonical(long n) { return GroupCanonical.groupTreasurerVote(groupId, voter, yes, n); }
+            public void fill(JSONObject b, long n) throws JSONException {
+                b.put("groupId", groupId).put("voterAddress", voter).put("yes", yes);
+            }
+        }, cb);
+    }
+
+    public static void getTreasurerProposal(String groupId, Callback cb) { read("/api/v1/group-roles/treasurer-proposal/" + groupId, cb); }
+
     /** The admin names a member as treasurer, or clears the role with an empty address. */
     public static void setTreasurer(Context c, String admin, String groupId, String treasurer, Callback cb) {
         act(c, admin, "/api/v1/group-roles/treasurer", new Spec() {

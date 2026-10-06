@@ -40,12 +40,20 @@ public final class SettingsSections {
         void remove(String uid, String name);
         /** make = true names this member treasurer; false clears the role. */
         void treasurer(String uid, String name, String wallet, boolean make);
+        /** Any member: ask the group to vote a treasurer in (wallet) or the current one out (empty wallet). */
+        void proposeTreasurer(String name, String wallet);
+        /** Cast a ballot on the open treasurer proposal. */
+        void voteTreasurer(boolean yes);
     }
 
     /** The treasurer's wallet as the network knows it, "" when none. Set by the page before apply(). */
     public String treasurerWallet = "";
     /** True for a goal or savings group on the network, the only kind that can have a treasurer. */
     public boolean canHaveTreasurer;
+    /** The open treasurer proposal from the network, or null. */
+    public org.json.JSONObject treasurerProposal;
+    /** This phone's wallet, to know whether it may vote. */
+    public String myWallet = "";
 
     public static final String[] NAMES = {"General", "Access", "Members", "Money & rules", "Network", "More"};
     private static final int GENERAL = 0, ACCESS = 1, MEMBERS = 2, MONEY = 3, NETWORK = 4, MORE = 5;
@@ -93,6 +101,7 @@ public final class SettingsSections {
 
         add(extra(inviteCard(groupId, g, isAdmin)), ACCESS);
         add(extra(membersCard(isAdmin, memberCount)), MEMBERS);
+        if (canHaveTreasurer) add(extra(treasurerCard(isAdmin)), MEMBERS);
         add(extra(memberListCard(g, isAdmin, members)), MEMBERS);
         add(extra(infoCard(groupId, g, onChain)), MORE);
         if (closeSection != null) { page.removeView(closeSection); page.addView(closeSection); add(closeSection, MORE); }
@@ -217,6 +226,40 @@ public final class SettingsSections {
         return c;
     }
 
+    /** The optional treasurer: what it is, who has it, and the open proposal to add or remove one. */
+    private View treasurerCard(boolean isAdmin) {
+        LinearLayout c = card();
+        c.addView(text("Treasurer (optional)", 16, true, UiColors.textPrimary()));
+        c.addView(text(treasurerWallet.isEmpty()
+                ? "This group has no treasurer. That is fine: the admin handles money requests. A treasurer can be added if the admin decides to, or if a member proposes one and the group, including the admin, votes yes."
+                : "This group has a treasurer. The admin can remove the role at any time, or any member can propose removing it for the group to vote on.",
+                12.5f, false, UiColors.textSecondary()));
+        org.json.JSONObject p = treasurerProposal;
+        if (p != null && "PENDING".equals(p.optString("status"))) {
+            String target = p.optString("treasurerAddress", "");
+            org.json.JSONObject votes = p.optJSONObject("votes");
+            org.json.JSONObject weights = p.optJSONObject("voterWeights");
+            int yes = 0, no = 0;
+            if (votes != null) for (java.util.Iterator<String> it = votes.keys(); it.hasNext(); ) { if (votes.optBoolean(it.next())) yes++; else no++; }
+            TextView t = text((target.isEmpty() ? "Open vote: remove the treasurer" : "Open vote: make " + shortWallet(target) + " treasurer")
+                    + "\nYes " + yes + " \u00b7 No " + no + (p.optString("cosignBy").isEmpty() ? "" : "\nAdding a treasurer also needs the admin's yes."),
+                    13.5f, true, UiColors.textPrimary());
+            c.addView(t);
+            boolean mayVote = weights != null && !myWallet.isEmpty() && weights.has(myWallet);
+            if (mayVote) {
+                c.addView(button("Vote yes", false, v -> host.voteTreasurer(true)));
+                c.addView(button("Vote no", true, v -> host.voteTreasurer(false)));
+            } else {
+                c.addView(text("Only the admin and the group's most active members vote.", 12, false, UiColors.textTertiary()));
+            }
+        } else if (!treasurerWallet.isEmpty()) {
+            c.addView(button("Propose removing the treasurer", true, v -> host.proposeTreasurer("", "")));
+        }
+        return c;
+    }
+
+    private static String shortWallet(String w) { return w.length() > 14 ? w.substring(0, 8) + "\u2026" + w.substring(w.length() - 4) : w; }
+
     // ── member list with roles and permissions ──
 
     private static final long VOTE_WAIT_MS = 48L * 3_600_000L;
@@ -328,11 +371,17 @@ public final class SettingsSections {
         LinearLayout box = new LinearLayout(a);
         box.setOrientation(LinearLayout.VERTICAL);
         box.addView(t);
-        if (viewerIsAdmin && !me && !admin && !uid.isEmpty() && canHaveTreasurer && !wallet.isEmpty()) {
-            TextView tb = button(treasurer ? "Remove as treasurer" : "Make treasurer", false, v -> { if (dlg[0] != null) dlg[0].dismiss(); host.treasurer(uid, name, wallet, !treasurer); });
-            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) tb.getLayoutParams();
-            lp.setMargins(p, lp.topMargin, p, 0);
-            box.addView(tb);
+        if (!admin && !uid.isEmpty() && canHaveTreasurer && !wallet.isEmpty() && !me) {
+            if (viewerIsAdmin) {
+                TextView tb = button(treasurer ? "Remove as treasurer" : "Make treasurer (you decide)", false, v -> { if (dlg[0] != null) dlg[0].dismiss(); host.treasurer(uid, name, wallet, !treasurer); });
+                ((LinearLayout.LayoutParams) tb.getLayoutParams()).setMargins(p, ((LinearLayout.LayoutParams) tb.getLayoutParams()).topMargin, p, 0);
+                box.addView(tb);
+            }
+            if (!treasurer) {
+                TextView pb = button("Propose as treasurer (the group votes)", false, v -> { if (dlg[0] != null) dlg[0].dismiss(); host.proposeTreasurer(name, wallet); });
+                ((LinearLayout.LayoutParams) pb.getLayoutParams()).setMargins(p, ((LinearLayout.LayoutParams) pb.getLayoutParams()).topMargin, p, 0);
+                box.addView(pb);
+            }
         }
         ScrollView sv = new ScrollView(a);
         sv.addView(box);

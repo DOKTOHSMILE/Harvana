@@ -553,6 +553,17 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	
 	private com.harvana.app.group.SettingsSections sections;
 	private String treasurerWallet = "";
+	private JSONObject treasurerProposal;
+	
+	private static String treasurerError(String e) {
+		String u = e == null ? "" : e;
+		if (u.contains("TREASURER_PROPOSAL_ALREADY_OPEN")) return "A treasurer vote is already open. Wait for it to finish.";
+		if (u.contains("NOT_AN_ELIGIBLE_VOTER")) return "Only the admin and the group's most active members can vote on this.";
+		if (u.contains("NOT_A_GROUP_MEMBER")) return "Only members of the group can propose this.";
+		if (u.contains("NO_TREASURER_TO_REMOVE")) return "This group has no treasurer to remove.";
+		if (u.contains("ALREADY_THE_TREASURER")) return "That member is already the treasurer.";
+		return com.harvana.app.circle.CircleUi.friendly(e);
+	}
 	
 	/** Reads the treasurer's wallet from the network record of a goal or savings group, then redraws the Members section. */
 	private void _loadTreasurer() {
@@ -565,6 +576,10 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			}
 			@Override public void onError(String e) { }
 		};
+		com.harvana.app.sync.NodeGroupClient.getTreasurerProposal(gi.protocolId(), new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(JSONObject json) { treasurerProposal = json; runOnUiThread(() -> _organize()); }
+			@Override public void onError(String e) { treasurerProposal = null; runOnUiThread(() -> _organize()); }
+		});
 		if ("ACCUM".equals(gi.family)) com.harvana.app.sync.NodeGroupClient.getAccumGroup(gi.protocolId(), got);
 		else com.harvana.app.sync.NodeGroupClient.getFixedGroup(gi.protocolId(), got);
 	}
@@ -601,6 +616,31 @@ public class GroupSettingsActivity extends AppCompatActivity {
 										@Override public void onError(String error) { runOnUiThread(() -> Toast.makeText(GroupSettingsActivity.this, com.harvana.app.circle.CircleUi.friendly(error), Toast.LENGTH_LONG).show()); }
 									}))).show();
 					}
+					@Override public void proposeTreasurer(final String name, final String wallet) {
+						final String me = WalletManager.getActiveWalletAddress(GroupSettingsActivity.this);
+						final GroupIdentity gid = GroupIdentityResolver.resolve(groupId, groupData);
+						new AlertDialog.Builder(GroupSettingsActivity.this)
+							.setTitle(wallet.isEmpty() ? "Propose removing the treasurer?" : "Propose " + name + " as treasurer?")
+							.setMessage("The group votes on this. " + (wallet.isEmpty() ? "It passes on the usual group vote." : "It passes only if the group votes yes and the admin votes yes too.")
+								+ " The vote stays open for 14 days. Only one proposal can be open at a time.")
+							.setNegativeButton("Cancel", null)
+							.setPositiveButton("Continue", (dl, w) -> com.harvana.app.wallet.PinPromptHelper.authorize(GroupSettingsActivity.this, "Propose a treasurer", () ->
+								com.harvana.app.sync.NodeGroupClient.proposeTreasurer(getApplicationContext(), me, gid.protocolId(), wallet,
+									new com.harvana.app.sync.NodeGroupClient.Callback() {
+										@Override public void onSuccess(JSONObject json) { runOnUiThread(() -> { Toast.makeText(GroupSettingsActivity.this, "Proposal sent. The group can vote now.", Toast.LENGTH_SHORT).show(); _loadTreasurer(); }); }
+										@Override public void onError(String error) { runOnUiThread(() -> Toast.makeText(GroupSettingsActivity.this, treasurerError(error), Toast.LENGTH_LONG).show()); }
+									}))).show();
+					}
+					@Override public void voteTreasurer(final boolean yes) {
+						final String me = WalletManager.getActiveWalletAddress(GroupSettingsActivity.this);
+						final GroupIdentity gid = GroupIdentityResolver.resolve(groupId, groupData);
+						com.harvana.app.wallet.PinPromptHelper.authorize(GroupSettingsActivity.this, "Vote on the treasurer", () ->
+							com.harvana.app.sync.NodeGroupClient.voteTreasurer(getApplicationContext(), me, gid.protocolId(), yes,
+								new com.harvana.app.sync.NodeGroupClient.Callback() {
+									@Override public void onSuccess(JSONObject json) { runOnUiThread(() -> { Toast.makeText(GroupSettingsActivity.this, json.optBoolean("finalized") ? "Decided. The change is in effect." : "Vote recorded.", Toast.LENGTH_SHORT).show(); _loadTreasurer(); }); }
+									@Override public void onError(String error) { runOnUiThread(() -> Toast.makeText(GroupSettingsActivity.this, treasurerError(error), Toast.LENGTH_LONG).show()); }
+								}));
+					}
 					@Override public void remove(final String uid, final String name) {
 						new AlertDialog.Builder(GroupSettingsActivity.this).setTitle("Remove " + name + "?")
 							.setMessage("They lose access to this group and cannot send a new join request unless you unblock them.")
@@ -616,6 +656,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		GroupIdentity gi = GroupIdentityResolver.resolve(groupId, groupData);
 		sections.canHaveTreasurer = gi.onChain() && ("ACCUM".equals(gi.family) || "FIXED".equals(gi.family));
 		sections.treasurerWallet = treasurerWallet;
+		sections.treasurerProposal = treasurerProposal;
+		sections.myWallet = String.valueOf(WalletManager.getActiveWalletAddress(this));
 		sections.apply(groupId, groupData, isAdmin, memberRows == null ? 0 : memberRows.size(), _isOnChain(), memberRows,
 			cardHero, cardview13, cardview11, cardview15, cardview19, cardview20, cardview10, linear72, networkPanelHost, closeSection);
 	}

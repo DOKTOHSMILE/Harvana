@@ -13,6 +13,14 @@ public final class GroupCanonical {
     private GroupCanonical() {}
 
     /** AccumApprovePackRequest.getCanonicalMessage() */
+    public static String groupTreasurerPropose(String groupId, String proposer, String treasurer, long nonce) {
+        return "HARVANA_GROUP_TREASURER_PROPOSE_V1:" + groupId + ":" + proposer + ":" + treasurer + ":" + nonce;
+    }
+
+    public static String groupTreasurerVote(String groupId, String voter, boolean yes, long nonce) {
+        return "HARVANA_GROUP_TREASURER_VOTE_V1:" + groupId + ":" + voter + ":" + yes + ":" + nonce;
+    }
+
     public static String groupTreasurer(String groupId, String adminAddress, String treasurerAddress, long nonce) {
         return "HARVANA_GROUP_TREASURER_V1:" + groupId + ":" + adminAddress + ":" + treasurerAddress + ":" + nonce;
     }

@@ -17,7 +17,7 @@ What the app does. Photos picked for a profile picture or a Learn Hub cover are 
 What you do (only if you want Cloudinary).
 
 1. Create a free account at cloudinary.com. Copy the **Cloud name** from the dashboard.
-2. Settings > Upload > Add upload preset: Signing mode **Unsigned**, allowed formats `jpg, png, webp`, a maximum file size (for example 2 MB), and leave the folder to the app (it sends `profile_icons/{uid}` or `learn_hub/{uid}`).
+2. Settings > Upload > Add upload preset: Signing mode **Unsigned**, allowed formats `jpg, png, webp`, a maximum file size (for example 2 MB), and set **Asset folder** to `harvana` (the app does not send a folder for Cloudinary).
 3. Put the cloud name and the preset name into `cloudinary_cloud_name` and `cloudinary_upload_preset` in `image_host.xml`, then build the app.
 
 Neither value is a secret, but an unsigned preset lets anyone who knows it upload to your account, so keep the size and format limits tight and watch the dashboard's usage. Pictures already in Firebase Storage keep working; their addresses are unchanged.

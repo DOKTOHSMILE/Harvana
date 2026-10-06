@@ -113,7 +113,8 @@ public final class ImageHost {
         String cloud = c.getString(R.string.cloudinary_cloud_name).trim();
         RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart("upload_preset", c.getString(R.string.cloudinary_upload_preset).trim())
-                .addFormDataPart("folder", folder)
+                // No "folder" field: an unsigned upload may only send a few extra fields, and the account may use dynamic folders.
+                // The folder is set once in the preset (Asset folder) instead.
                 .addFormDataPart("file", "photo.jpg", RequestBody.create(jpeg, MediaType.parse("image/jpeg")))
                 .build();
         Request req = new Request.Builder().url("https://api.cloudinary.com/v1_1/" + cloud + "/image/upload").post(body).build();

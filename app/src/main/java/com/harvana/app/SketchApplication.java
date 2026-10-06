@@ -34,6 +34,7 @@ public class SketchApplication extends Application {
         com.harvana.app.utils.ActivityTracker.install(this);
         com.harvana.app.tx.PaymentTracker.install(this);
         com.harvana.app.utils.SmartCaps.install(this);
+        com.harvana.app.utils.SmartSpacing.install(this);
         
         // EXPLICIT INITIALIZATION: Forces Firebase to wake up early
         FirebaseApp.initializeApp(this);

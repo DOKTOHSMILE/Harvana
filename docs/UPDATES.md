@@ -598,3 +598,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 - All 258 icon images in the layouts are now `ShapeableImageView` (notification layouts excluded: they cannot use it).
 - The back button in the shared header, the wallet options button and the QR gallery button are Material icon buttons; the loading spinner on the reward table is a Material circular indicator.
 - Still not Material: 27 spinners (dropdowns; each needs its own code change to become Material dropdown menus), the stage dots and trust ring (custom drawn), and notification layouts.
+
+## Spacing safety net
+- `utils/SmartSpacing.java` runs on every screen, sheet and dialog: buttons and fields that sit directly against a neighbour in a vertical list get an 8dp gap (12dp after a field); two buttons side by side with no gap get 8dp between them. Layouts that already have spacing, toggle groups, divided lists and views tagged `keep_tight` are left alone.

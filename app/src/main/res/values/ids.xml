@@ -4,4 +4,6 @@
     <item name="shimmer_watch" type="id" />
     <!-- Marks a window that SmartCaps already watches (utils/SmartCaps). -->
     <item name="smart_caps_attached" type="id" />
+    <item name="smart_spacing_attached" type="id" />
+    <item name="smart_spacing_done" type="id" />
 </resources>

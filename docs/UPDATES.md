@@ -532,3 +532,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 - Learn Hub: in the full post view, tapping the picture opens it full screen (pinch, drag, double-tap; the double-tap goes to a face when there is one). In the feed, tapping a post's picture opens the post, like its title and text do.
 
 - The Gift button's icon is now an unfilled line drawing of the Harvana coin (outer ring, thin inner ring and an outlined "H"), instead of the generic gift box. It is one colour and follows the button's accent tint. File: `res/drawable/ic_learn_gift.xml`.
+
+## Group tabs fill the width without Loans (follow-up)
+- The tab bar re-applies its fixed/fill mode after the pager rebuilds its tabs, so a group with loans switched off now stretches its five tabs across the full width.

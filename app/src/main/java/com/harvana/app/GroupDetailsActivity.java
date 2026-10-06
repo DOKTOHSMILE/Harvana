@@ -670,9 +670,18 @@ public class GroupDetailsActivity extends AppCompatActivity {
 	/** Five tabs (a group without loans) share the full width; six tabs scroll sideways as before. */
 	private void _fitTabs() {
 		if (tab_layout == null || pagerAdapter == null) return;
-		boolean fill = pagerAdapter.getCount() <= 5;
-		tab_layout.setTabMode(fill ? TabLayout.MODE_FIXED : TabLayout.MODE_SCROLLABLE);
-		tab_layout.setTabGravity(fill ? TabLayout.GRAVITY_FILL : TabLayout.GRAVITY_START);
+		final boolean fill = pagerAdapter.getCount() <= 5;
+		Runnable apply = new Runnable() {
+			@Override public void run() {
+				tab_layout.setTabMode(fill ? TabLayout.MODE_FIXED : TabLayout.MODE_SCROLLABLE);
+				tab_layout.setTabGravity(fill ? TabLayout.GRAVITY_FILL : TabLayout.GRAVITY_START);
+				tab_layout.requestLayout();
+			}
+		};
+		apply.run();
+		// the pager rebuilds its tabs after notifyDataSetChanged, so apply again once that settles
+		tab_layout.post(apply);
+		tab_layout.postDelayed(apply, 300);
 	}
 	
 	private void _bindHeader(Map<String, Object> data, boolean admin) {

@@ -365,7 +365,8 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 	};
 	private static final int RC_READ_IMAGES = 501;
 	private static final int RC_PICK_IMAGE = 502, RC_CROP_IMAGE = 503;
-	private String uploadedImageUrl = null;
+	private Uri pendingLearnImage = null;        // the cropped cover, waiting on the phone until Post Article is pressed
+	private String uploadedImageUrl = null;       // set once it has uploaded, so a retry after a failed publish does not upload it again
 	private boolean uploadInProgress = false;
 	
 	// ── Image picking ────────────────────────────────────────────────────
@@ -407,30 +408,10 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 			iv_learn_image_preview.setVisibility(View.VISIBLE);
 			layout_image_placeholder.setVisibility(View.GONE);
 			Glide.with(this).load(pickedUri).centerCrop().into(iv_learn_image_preview);
-			_uploadImage(pickedUri);
+			// Not uploaded yet: it goes up when Post Article is pressed, so a post that fails leaves no picture stored.
+			pendingLearnImage = pickedUri;
+			uploadedImageUrl = null;
 		}
-	}
-	
-	private void _uploadImage(Uri localUri) {
-		String uid = FirebaseAuth.getInstance().getCurrentUser() != null
-		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "anon";
-		
-		uploadInProgress = true;
-		uploadedImageUrl = null;
-		progress_image_upload.setVisibility(View.VISIBLE);
-		btn_learn_post.setEnabled(false);
-		tv_learn_error.setVisibility(View.GONE);
-		
-		// Shrunk to 1280 px on the phone, then sent to the picture host set in res/values/image_host.xml (Firebase Storage if none).
-		com.harvana.app.utils.ImageHost.upload(this, localUri, "learn_hub/" + uid, 1280, new com.harvana.app.utils.ImageHost.Callback() {
-			@Override public void onSuccess(String url) {
-				uploadedImageUrl = url;
-				uploadInProgress = false;
-				progress_image_upload.setVisibility(View.GONE);
-				btn_learn_post.setEnabled(true);
-			}
-			@Override public void onError(String message) { _onUploadFailed(new Exception(message)); }
-		});
 	}
 	
 	private void _onUploadFailed(Exception e) {
@@ -476,7 +457,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 			_showError(com.harvana.app.learn.VideoLinks.problem(videoRaw));
 			return;
 		}
-		if (video != null && imageUrl.isEmpty()) imageUrl = video.thumbnail;
+		if (video != null && imageUrl.isEmpty() && pendingLearnImage == null) imageUrl = video.thumbnail;
 		// A picture and a video are both optional: a post can be words only. A typed picture address must still be a web address.
 		if (video == null && !imageUrl.isEmpty() && !imageUrl.startsWith("https://")) {
 			_showError("A picture address must start with https://  Or leave the picture out.");
@@ -500,46 +481,72 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 		
 		tv_learn_error.setVisibility(View.GONE);
 		btn_learn_post.setEnabled(false);
+		final boolean needsUpload = pendingLearnImage != null && uploadedImageUrl == null;
 		final ProgressDialog progress = new ProgressDialog(this);
-		progress.setMessage("Publishing…");
+		progress.setMessage(needsUpload ? "Uploading the picture…" : "Publishing…");
 		progress.setCancelable(false);
 		progress.show();
 		
-		Map<String, Object> fields = new HashMap<>();
-		fields.put("title", title);
-		fields.put("description", description);
-		fields.put("category", category);
-		fields.put("imageUrl", imageUrl);
-		if (video != null) {
-			fields.put("videoUrl", video.link);
-			fields.put("videoType", video.platform.label.toLowerCase());
-		}
-		fields.put("authorUid", uid);
-		fields.put("createdAt", System.currentTimeMillis());
-		fields.put("views", 0);
-				
-		com.harvana.app.firestore.GroupFirestoreManager.getInstance(getApplicationContext())
-		.publishLearn(fields, new com.harvana.app.firestore.GroupFirestoreManager.IdCallback() {
-			@Override
-			public void onSuccess(String generatedId) {
-				runOnUiThread(() -> {
-					if (!isFinishing() && progress.isShowing()) progress.dismiss();
-					SketchwareUtil.showMessage(getApplicationContext(), "Published. Your article is live in Learn Hub.");
-					finish();
-				});
+		final String[] img = {imageUrl};
+		final String fTitle = title, fDescription = description, fCategory = category, fUid = uid;
+		final com.harvana.app.learn.VideoLinks.Video fVideo = video;
+		
+		// The picture uploads first. The article is published only if that works, so a failure leaves nothing stored and nothing posted.
+		final Runnable publish = () -> {
+			progress.setMessage("Publishing…");
+			Map<String, Object> fields = new HashMap<>();
+			fields.put("title", fTitle);
+			fields.put("description", fDescription);
+			fields.put("category", fCategory);
+			fields.put("imageUrl", img[0]);
+			if (fVideo != null) {
+				fields.put("videoUrl", fVideo.link);
+				fields.put("videoType", fVideo.platform.label.toLowerCase());
 			}
+			fields.put("authorUid", fUid);
+			fields.put("createdAt", System.currentTimeMillis());
+			fields.put("views", 0);
 			
-			@Override
-			public void onError(String error) {
-				runOnUiThread(() -> {
-					if (!isFinishing() && progress.isShowing()) progress.dismiss();
-					btn_learn_post.setEnabled(true);
-					boolean denied = error != null && (error.contains("PERMISSION_DENIED") || error.contains("403"));
-					_showError(denied
-						? "The server refused this post. Your post is within the app's limits, so the server's Firestore rules are probably older than the app: "
-						  + "the owner needs to publish the current rules (Learn posts up to 8,000 characters, picture optional)."
-						: "Failed to publish: " + error);
-				});
+			com.harvana.app.firestore.GroupFirestoreManager.getInstance(getApplicationContext())
+			.publishLearn(fields, new com.harvana.app.firestore.GroupFirestoreManager.IdCallback() {
+				@Override
+				public void onSuccess(String generatedId) {
+					runOnUiThread(() -> {
+						if (!isFinishing() && progress.isShowing()) progress.dismiss();
+						SketchwareUtil.showMessage(getApplicationContext(), "Published. Your article is live in Learn Hub.");
+						finish();
+					});
+				}
+				
+				@Override
+				public void onError(String error) {
+					runOnUiThread(() -> {
+						if (!isFinishing() && progress.isShowing()) progress.dismiss();
+						btn_learn_post.setEnabled(true);
+						boolean denied = error != null && (error.contains("PERMISSION_DENIED") || error.contains("403"));
+						_showError(denied
+							? "The server refused this post. Your post is within the app's limits, so the server's Firestore rules are probably older than the app: "
+							  + "the owner needs to publish the current rules (Learn posts up to 8,000 characters, picture optional)."
+							: "Failed to publish: " + error);
+					});
+				}
+			});
+		};
+		
+		if (!needsUpload) {
+			if (pendingLearnImage != null) img[0] = uploadedImageUrl;
+			publish.run();
+			return;
+		}
+		com.harvana.app.utils.ImageHost.upload(this, pendingLearnImage, "learn_hub/" + uid, 1280, new com.harvana.app.utils.ImageHost.Callback() {
+			@Override public void onSuccess(String url) {
+				uploadedImageUrl = url;
+				img[0] = url;
+				publish.run();
+			}
+			@Override public void onError(String message) {
+				if (!isFinishing() && progress.isShowing()) progress.dismiss();
+				_onUploadFailed(new Exception(message));
 			}
 		});
 	}

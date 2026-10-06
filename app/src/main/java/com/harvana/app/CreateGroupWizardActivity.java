@@ -70,6 +70,10 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
     // basics
     private String name = "", description = "", visibility = "Public", country = "", state = "", city = "";
     private String photoUrl = "";
+    private android.net.Uri photoUri;          // the cropped picture, waiting on the phone until Create group
+    private String groupDocId;                  // the group's Firestore id, fixed early so the picture can be stored under it
+
+    private String groupDocId() { if (groupDocId == null) groupDocId = java.util.UUID.randomUUID().toString(); return groupDocId; }
     private static final int RC_PHOTO = 721;
     private final List<String> rules = new ArrayList<>();
     private final List<Map<String, Object>> chatLinks = new ArrayList<>();
@@ -231,7 +235,9 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         disc.setColor((UiColors.accent() & 0x00FFFFFF) | 0x33000000);
         face.setBackground(disc);
         com.harvana.app.utils.GroupRing.apply(face, typeLabel, 1f, 0x00000000);   // ring colour = group type
-        if (photoUrl.isEmpty()) {
+        if (photoUri != null) {
+            com.bumptech.glide.Glide.with(this).load(photoUri).circleCrop().into(face);
+        } else if (photoUrl.isEmpty()) {
             face.setImageResource(R.drawable.ic_coin_harv);
             face.setScaleType(android.widget.ImageView.ScaleType.CENTER_INSIDE);
             face.setPadding(dp(20), dp(20), dp(20), dp(20));
@@ -245,12 +251,12 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         side.addView(text("Group picture (optional)", 14, true, UiColors.textPrimary()));
         side.addView(hint("A square picture. The ring colour shows the kind of group: blue rotating, green accumulative, purple fixed."));
         LinearLayout buttons = new LinearLayout(this);
-        MaterialButton pick = button(photoUrl.isEmpty() ? "Add picture" : "Change", true);
-        pick.setOnClickListener(v -> startActivityForResult(com.harvana.app.utils.GroupPhotoPickerActivity.intent(this, FirebaseAuth.getInstance().getUid()), RC_PHOTO));
+        MaterialButton pick = button(photoUri == null && photoUrl.isEmpty() ? "Add picture" : "Change", true);
+        pick.setOnClickListener(v -> startActivityForResult(com.harvana.app.utils.GroupPhotoPickerActivity.intent(this), RC_PHOTO));
         buttons.addView(pick);
-        if (!photoUrl.isEmpty()) {
+        if (photoUri != null || !photoUrl.isEmpty()) {
             MaterialButton remove = button("Remove", true);
-            remove.setOnClickListener(v -> { photoUrl = ""; go(step); });
+            remove.setOnClickListener(v -> { photoUrl = ""; photoUri = null; go(step); });
             LinearLayout.LayoutParams rl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             rl.setMarginStart(dp(8));
             buttons.addView(remove, rl);
@@ -263,9 +269,10 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int req, int res, android.content.Intent data) {
         super.onActivityResult(req, res, data);
-        if (req == RC_PHOTO && res == RESULT_OK && data != null) {
-            String url = data.getStringExtra(com.harvana.app.utils.GroupPhotoPickerActivity.RESULT_URL);
-            if (url != null && !url.isEmpty()) { photoUrl = url; go(step); }
+        if (req == RC_PHOTO && res == RESULT_OK && data != null && data.getData() != null) {
+            photoUri = data.getData();          // kept on the phone; it uploads when Create group is pressed
+            photoUrl = "";
+            go(step);
         }
     }
 
@@ -633,6 +640,16 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
                     .setPositiveButton("OK", null).show();
             return;
         }
+        // The picture uploads now, before the group is made. If it fails nothing has been created and no fee has been spent; the same
+        // name is reused on a retry, so a failed attempt never leaves extra pictures behind.
+        if (photoUri != null && photoUrl.isEmpty()) {
+            final ProgressDialog up = ProgressDialog.show(this, null, "Uploading the group picture…", true, false);
+            com.harvana.app.utils.GroupPhotoPickerActivity.upload(this, photoUri, groupDocId(), new com.harvana.app.utils.ImageHost.Callback() {
+                @Override public void onSuccess(String url) { up.dismiss(); photoUrl = url; photoUri = null; create(); }
+                @Override public void onError(String message) { up.dismiss(); toast("Couldn't upload the group picture: " + message + " The group was not created. Try again, or remove the picture."); }
+            });
+            return;
+        }
         List<String[]> rows = new ArrayList<>(termRows());
         rows.add(new String[] {"Network fee", CircleUi.harv(FEE_RAW)});
         rows.add(new String[] {"Locked now", "Nothing"});
@@ -670,7 +687,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
     /** The group's profile in Firestore: names, photos, rules, chat links. The network holds the money; this is what people read. */
     private void save(String escrow) {
         com.harvana.app.trust.AppActivity.note(this, "GROUP", "Created a group");
-        final String id = java.util.UUID.randomUUID().toString();
+        final String id = groupDocId();
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Map<String, Object> g = new HashMap<>();
         g.put("groupId", id);

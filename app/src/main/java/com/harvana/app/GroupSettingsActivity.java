@@ -573,6 +573,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	private boolean isAccum() { return typeOf().toLowerCase(Locale.US).contains("accumul"); }
 	
 	private static final int RC_GROUP_PHOTO = 731;
+	private android.net.Uri pendingGroupPhoto;      // a cropped picture waiting on the phone; it uploads when Save Settings is pressed
+	private boolean removeGroupPhoto;                // the admin pressed Remove; the picture is removed when Save Settings is pressed
 	
 	/** The group picture at the top of "About": a round preview with Change picture / Remove for the admin; members only see it. */
 	private void _buildPhotoRow() {
@@ -586,7 +588,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		row.setOrientation(LinearLayout.HORIZONTAL);
 		row.setGravity(android.view.Gravity.CENTER_VERTICAL);
 		row.setPadding(0, 0, 0, (int) (14 * d));
-		final String url = str(groupData, "groupPhoto", "");
+		final String url = removeGroupPhoto ? "" : str(groupData, "groupPhoto", "");
 		ImageView face = new ImageView(this);
 		android.graphics.drawable.GradientDrawable disc = new android.graphics.drawable.GradientDrawable();
 		disc.setShape(android.graphics.drawable.GradientDrawable.OVAL);
@@ -597,7 +599,10 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			@Override public void getOutline(View v, android.graphics.Outline o) { o.setOval(0, 0, v.getWidth(), v.getHeight()); }
 		});
 		com.harvana.app.utils.GroupRing.apply(face, typeOf(), 1f, 0x00000000);
-		if (url.startsWith("http")) {
+		if (pendingGroupPhoto != null) {
+			face.setScaleType(ImageView.ScaleType.CENTER_CROP);
+			com.bumptech.glide.Glide.with(this).load(pendingGroupPhoto).circleCrop().into(face);
+		} else if (url.startsWith("http")) {
 			face.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			com.bumptech.glide.Glide.with(this).load(url).circleCrop().into(face);
 			face.setOnClickListener(v -> com.harvana.app.utils.ImageViewerActivity.open(this, url));
@@ -618,7 +623,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		t.setTextColor(UiColors.textPrimary());
 		side.addView(t);
 		TextView sub = new TextView(this);
-		String ringNote = " The " + com.harvana.app.utils.GroupRing.colorName(typeOf()) + " ring shows the group type.";
+		String waiting = pendingGroupPhoto != null ? " New picture chosen: it uploads when you press Save Settings." : (removeGroupPhoto ? " The picture is removed when you press Save Settings." : "");
+		String ringNote = waiting + " The " + com.harvana.app.utils.GroupRing.colorName(typeOf()) + " ring shows the group type.";
 		sub.setText((isAdmin ? "A square picture. You choose the part to keep." : (url.isEmpty() ? "No picture yet." : "Set by the group admin.")) + ringNote);
 		sub.setTextSize(11.5f);
 		sub.setTextColor(UiColors.textSecondary());
@@ -627,15 +633,15 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			LinearLayout buttons = new LinearLayout(this);
 			buttons.setPadding(0, (int) (8 * d), 0, 0);
 			MaterialButton change = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
-			change.setText(url.isEmpty() ? "Add picture" : "Change picture");
+			change.setText(url.isEmpty() && pendingGroupPhoto == null ? "Add picture" : "Change picture");
 			change.setAllCaps(false);
-			change.setOnClickListener(v -> startActivityForResult(com.harvana.app.utils.GroupPhotoPickerActivity.intent(this, groupId), RC_GROUP_PHOTO));
+			change.setOnClickListener(v -> startActivityForResult(com.harvana.app.utils.GroupPhotoPickerActivity.intent(this), RC_GROUP_PHOTO));
 			buttons.addView(change);
-			if (!url.isEmpty()) {
+			if (!url.isEmpty() || pendingGroupPhoto != null) {
 				MaterialButton remove = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
 				remove.setText("Remove");
 				remove.setAllCaps(false);
-				remove.setOnClickListener(v -> _setGroupPhoto(""));
+				remove.setOnClickListener(v -> { pendingGroupPhoto = null; removeGroupPhoto = true; _buildPhotoRow(); });
 				LinearLayout.LayoutParams rl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 				rl.setMarginStart((int) (8 * d));
 				buttons.addView(remove, rl);
@@ -649,28 +655,29 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	@Override
 	protected void onActivityResult(int req, int res, Intent data) {
 		super.onActivityResult(req, res, data);
-		if (req == RC_GROUP_PHOTO && res == RESULT_OK && data != null) {
-			String url = data.getStringExtra(com.harvana.app.utils.GroupPhotoPickerActivity.RESULT_URL);
-			if (url != null && !url.isEmpty()) _setGroupPhoto(url);
+		if (req == RC_GROUP_PHOTO && res == RESULT_OK && data != null && data.getData() != null) {
+			pendingGroupPhoto = data.getData();
+			removeGroupPhoto = false;
+			_buildPhotoRow();
 		}
 	}
 	
-	/** Saves the picture straight away (it is its own action, not part of Save Settings) and redraws the row. "" removes it. */
-	private void _setGroupPhoto(String url) {
-		if (!isAdmin) return;
-		Map<String, Object> patch = new HashMap<>();
-		patch.put("groupPhoto", url);
-		GroupFirestoreManager.getInstance(this).updateGroupFields(groupId, patch, new GroupFirestoreManager.SimpleCallback() {
-			@Override public void onSuccess() {
-				groupData.put("groupPhoto", url);
-				OfflineCacheManager.save(GroupSettingsActivity.this, "group_" + groupId, groupData);
-				runOnUiThread(() -> {
-					_buildPhotoRow();
-					Toast.makeText(GroupSettingsActivity.this, url.isEmpty() ? "Group picture removed." : "Group picture updated.", Toast.LENGTH_SHORT).show();
-				});
+	/**
+	 * Called by Save Settings. A chosen picture is uploaded first, under the group's own name (so it replaces the old one and only one is
+	 * ever stored); the other settings are saved only if that works. If it fails, nothing is saved and the picture stays chosen for a retry.
+	 */
+	private void _savePhotoThen(final Map<String, Object> patch, final Runnable next) {
+		if (removeGroupPhoto) patch.put("groupPhoto", "");
+		if (pendingGroupPhoto == null) { next.run(); return; }
+		com.harvana.app.utils.GroupPhotoPickerActivity.upload(this, pendingGroupPhoto, groupId, new com.harvana.app.utils.ImageHost.Callback() {
+			@Override public void onSuccess(String url) {
+				patch.put("groupPhoto", url);       // the picture stays "chosen" until the save succeeds, so a failed save can be retried
+				next.run();
 			}
-			@Override public void onError(String error) {
-				runOnUiThread(() -> Toast.makeText(GroupSettingsActivity.this, error, Toast.LENGTH_LONG).show());
+			@Override public void onError(String message) {
+				btnSaveSettings.setEnabled(true);
+				btnSaveSettings.setText("Save Settings");
+				Toast.makeText(GroupSettingsActivity.this, "Couldn't upload the picture: " + message + " Nothing was saved. Try again.", Toast.LENGTH_LONG).show();
 			}
 		});
 	}
@@ -993,7 +1000,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		
 		patch.put("blockedMemberUids", new ArrayList<>(blockedUids));
 		
-		_patch(patch, "Settings saved successfully");
+		_savePhotoThen(patch, () -> _patch(patch, "Settings saved successfully"));
 	}
 	
 	private void _patch(Map<String, Object> patch, String okMsg) {
@@ -1003,6 +1010,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 				groupData.putAll(patch);
 				OfflineCacheManager.save(GroupSettingsActivity.this, "group_" + groupId, groupData);
 				runOnUiThread(() -> {
+					if (patch.containsKey("groupPhoto")) { pendingGroupPhoto = null; removeGroupPhoto = false; _buildPhotoRow(); }
 					btnSaveSettings.setEnabled(true);
 					btnSaveSettings.setText("Save Settings");
 					Toast.makeText(GroupSettingsActivity.this, okMsg, Toast.LENGTH_SHORT).show();

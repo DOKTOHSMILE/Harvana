@@ -11,19 +11,16 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
- * One step for a group picture, used by Create group and Group settings: choose a picture, crop it to a square (the crop screen),
- * upload it through {@link ImageHost}, and hand back the https address. It shows nothing of its own except the system picker, the
- * crop screen and a short "Uploading" box, so a screen that wants a group picture only starts it and reads {@link #RESULT_URL}.
- * Nothing is written to the group here; the caller decides when to save the address.
+ * One step for a group picture, used by Create group and Group settings: choose a picture and crop it to a square. It returns the
+ * cropped picture as a local file and uploads nothing; the caller uploads it with {@link #upload} only when the person saves, so a
+ * failed save never leaves a stray picture behind.
  */
 public class GroupPhotoPickerActivity extends AppCompatActivity {
-    public static final String RESULT_URL = "url";
-    private static final String X_KEY = "key";
     private static final int RC_PICK = 701, RC_CROP = 702;
 
-    /** @param key a short folder name for the upload, such as the group id or your uid */
-    public static Intent intent(Context c, String key) {
-        return new Intent(c, GroupPhotoPickerActivity.class).putExtra(X_KEY, key == null ? "" : key);
+    /** Choose a picture and crop it square. The result is the cropped picture as the activity's data (a local file); nothing is uploaded. */
+    public static Intent intent(Context c) {
+        return new Intent(c, GroupPhotoPickerActivity.class);
     }
 
     private ProgressDialog busy;
@@ -47,21 +44,14 @@ public class GroupPhotoPickerActivity extends AppCompatActivity {
             return;
         }
         if (req != RC_CROP) return;
-        busy = ProgressDialog.show(this, null, "Uploading…", true, false);
-        String key = getIntent().getStringExtra(X_KEY);
-        ImageHost.upload(this, data.getData(), "group_photos/" + (key == null || key.isEmpty() ? "new" : key), 512, new ImageHost.Callback() {
-            @Override public void onSuccess(String url) {
-                if (busy != null && busy.isShowing()) busy.dismiss();
-                setResult(RESULT_OK, new Intent().putExtra(RESULT_URL, url));
-                finish();
-            }
-            @Override public void onError(String message) {
-                if (busy != null && busy.isShowing()) busy.dismiss();
-                Toast.makeText(GroupPhotoPickerActivity.this, "Couldn't upload the picture: " + message, Toast.LENGTH_LONG).show();
-                setResult(RESULT_CANCELED);
-                finish();
-            }
-        });
+        // Nothing is uploaded here. The cropped picture stays on the phone and goes up when the caller saves (see upload()).
+        setResult(RESULT_OK, new Intent().setData(data.getData()));
+        finish();
+    }
+
+    /** Uploads a cropped group picture under the group's own name, so a new picture replaces the old one and only one is ever stored. */
+    public static void upload(Context c, Uri cropped, String groupId, ImageHost.Callback cb) {
+        ImageHost.upload(c, cropped, "group_photos/" + groupId, 512, "group_photos/" + groupId, cb);
     }
 
     @Override

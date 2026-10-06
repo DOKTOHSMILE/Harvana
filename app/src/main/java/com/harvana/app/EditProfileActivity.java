@@ -54,7 +54,8 @@ public class EditProfileActivity extends AppCompatActivity {
     private ImageView photo;
     private TextView initials, photoStatus;
     private ProgressBar photoBusy;
-    private String newIcon;      // set once a picked photo has been uploaded
+    private String newIcon;      // an address to save as the photo (set only by a change that needs no upload)
+    private Uri pendingIcon, pendingCover;     // cropped pictures waiting on the phone: they upload only when Save changes is pressed
     private static final int RC_COVER = 613, RC_CROP_PHOTO = 614, RC_CROP_COVER = 615;
     /** The cover is shown 5 wide to 2 high on every profile, so that is the shape the person crops to. */
     static final float COVER_ASPECT = 2.5f;
@@ -186,7 +187,7 @@ public class EditProfileActivity extends AppCompatActivity {
             LinearLayout.LayoutParams rp = (LinearLayout.LayoutParams) remove.getLayoutParams();
             rp.setMarginStart(SocialUi.dp(this, 8));
             remove.setOnClickListener(v -> {
-                newCover = "";
+                newCover = ""; pendingCover = null;
                 showCover("");
                 coverStatus.setText("Cover will be removed when you press Save changes.");
                 if (save != null) save.setEnabled(true);
@@ -265,54 +266,67 @@ public class EditProfileActivity extends AppCompatActivity {
         // A picked picture is cropped by hand first (square for the profile picture, wide for the cover); the crop is what gets uploaded.
         if (req == RC_COVER) { startActivityForResult(com.harvana.app.utils.CropImageActivity.intent(this, result.getData(), COVER_ASPECT, 1280, "Crop cover", false), RC_CROP_COVER); return; }
         if (req == RC_PHOTO) { startActivityForResult(com.harvana.app.utils.CropImageActivity.intent(this, result.getData(), 1f, 512, "Crop profile photo", true), RC_CROP_PHOTO); return; }
-        if (req == RC_CROP_COVER) { uploadCover(result.getData()); return; }
+        if (req == RC_CROP_COVER) {
+            // Nothing is uploaded yet. The crop waits on the phone and goes up when Save changes is pressed, so a failed save leaves nothing behind.
+            pendingCover = result.getData();
+            newCover = null;
+            Glide.with(this).load(pendingCover).centerCrop().into(coverView);
+            coverStatus.setText("New cover chosen. It uploads when you press Save changes.");
+            if (save != null) save.setEnabled(true);
+            return;
+        }
         if (req != RC_CROP_PHOTO) return;
-        final Uri picked = result.getData();
-        Glide.with(this).load(picked).circleCrop().into(photo);
-        initials.setVisibility(View.INVISIBLE);
-        photoBusy.setVisibility(View.VISIBLE);
-        photoStatus.setText("Uploading…");
-        if (save != null) save.setEnabled(false);
-        // Shrunk to 512 px on the phone, then sent to the picture host set in res/values/image_host.xml (Firebase Storage if none).
-        com.harvana.app.utils.ImageHost.upload(this, picked, "profile_icons/" + uid, 512, new com.harvana.app.utils.ImageHost.Callback() {
-            @Override public void onSuccess(String url) {
-                photoBusy.setVisibility(View.GONE);
-                photoStatus.setText("Photo ready. Press Save changes.");
-                newIcon = url;
-                if (save != null) save.setEnabled(true);
-            }
-            @Override public void onError(String message) { photoFailed(new Exception(message)); }
-        });
-    }
-
-    private void uploadCover(final Uri picked) {
-        Glide.with(this).load(picked).centerCrop().into(coverView);
-        coverBusy.setVisibility(View.VISIBLE);
-        coverStatus.setText("Uploading…");
-        if (save != null) save.setEnabled(false);
-        com.harvana.app.utils.ImageHost.upload(this, picked, "profile_covers/" + uid, 1280, new com.harvana.app.utils.ImageHost.Callback() {
-            @Override public void onSuccess(String url) {
-                coverBusy.setVisibility(View.GONE);
-                coverStatus.setText("Cover ready. Press Save changes.");
-                newCover = url;
-                if (save != null) save.setEnabled(true);
-            }
-            @Override public void onError(String message) {
-                coverBusy.setVisibility(View.GONE);
-                coverStatus.setText("Couldn't upload the cover: " + message);
-                newCover = null;
-                showCover(s("cover"));
-                if (save != null) save.setEnabled(dirty());
-            }
-        });
-    }
-
-    private void photoFailed(Exception e) {
-        photoBusy.setVisibility(View.GONE);
-        photoStatus.setText("Couldn't upload the photo: " + (e.getMessage() == null ? "try again" : e.getMessage()));
+        pendingIcon = result.getData();
         newIcon = null;
-        showPhoto(s("icon"));
-        if (save != null) save.setEnabled(dirty());
+        Glide.with(this).load(pendingIcon).circleCrop().into(photo);
+        initials.setVisibility(View.INVISIBLE);
+        photoStatus.setText("New photo chosen. It uploads when you press Save changes.");
+        if (save != null) save.setEnabled(true);
+    }
+
+    /**
+     * Uploads the waiting pictures, one after the other, and only then calls {@code next}. A picture is stored under a fixed name per person
+     * ("profile_icons/uid"), so each new one replaces the last and only one photo is ever kept. If an upload fails nothing else is saved.
+     */
+    private void uploadPending(final Map<String, Object> changes, final Runnable next) {
+        if (pendingIcon != null) {
+            photoBusy.setVisibility(View.VISIBLE);
+            photoStatus.setText("Uploading photo…");
+            com.harvana.app.utils.ImageHost.upload(this, pendingIcon, "profile_icons/" + uid, 512, "profile_icons/" + uid, new com.harvana.app.utils.ImageHost.Callback() {
+                @Override public void onSuccess(String url) {
+                    photoBusy.setVisibility(View.GONE);
+                    photoStatus.setText("");
+                    changes.put("icon", url);
+                    pendingIcon = null;
+                    uploadPending(changes, next);
+                }
+                @Override public void onError(String message) { uploadFailed("photo", message, photoBusy, photoStatus); }
+            });
+            return;
+        }
+        if (pendingCover != null) {
+            coverBusy.setVisibility(View.VISIBLE);
+            coverStatus.setText("Uploading cover…");
+            com.harvana.app.utils.ImageHost.upload(this, pendingCover, "profile_covers/" + uid, 1280, "profile_covers/" + uid, new com.harvana.app.utils.ImageHost.Callback() {
+                @Override public void onSuccess(String url) {
+                    coverBusy.setVisibility(View.GONE);
+                    coverStatus.setText("");
+                    changes.put("cover", url);
+                    pendingCover = null;
+                    uploadPending(changes, next);
+                }
+                @Override public void onError(String message) { uploadFailed("cover", message, coverBusy, coverStatus); }
+            });
+            return;
+        }
+        next.run();
+    }
+
+    private void uploadFailed(String what, String message, ProgressBar busy, TextView status) {
+        busy.setVisibility(View.GONE);
+        status.setText("Couldn't upload the " + what + ": " + message + " Nothing was saved. Press Save changes to try again.");
+        save.setText("Save changes");
+        save.setEnabled(true);
     }
 
     // ── Fields ───────────────────────────────────────────────────────────
@@ -367,7 +381,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private boolean dirty() {
         if (first == null) return false;
-        return newIcon != null || newCover != null
+        return newIcon != null || newCover != null || pendingIcon != null || pendingCover != null
             || !first.getText().toString().trim().equals(s("first_name")) || !last.getText().toString().trim().equals(s("last_name"))
             || !job.getText().toString().trim().equals(s("occupation")) || !address.getText().toString().trim().equals(s("address"))
             || !city.getText().toString().trim().equals(s("city"));
@@ -393,10 +407,15 @@ public class EditProfileActivity extends AppCompatActivity {
         if (!c.equals(s("city"))) changes.put("city", c);
         if (newIcon != null) changes.put("icon", newIcon);
         if (newCover != null) changes.put("cover", newCover);
-        if (changes.isEmpty()) { finish(); return; }
+        if (changes.isEmpty() && pendingIcon == null && pendingCover == null) { finish(); return; }
 
         save.setEnabled(false);
         save.setText("Saving…");
+        // Pictures upload first; the rest is saved only if they succeed.
+        uploadPending(changes, () -> commit(changes));
+    }
+
+    private void commit(final Map<String, Object> changes) {
         UserProfileManager.getInstance(getApplicationContext()).updateProfileFields(uid, changes, new UserProfileManager.SimpleCallback() {
             @Override public void onSuccess() {
                 Map<String, Object> merged = new HashMap<>(data);

@@ -56,15 +56,24 @@ public final class ImageHost {
      * @param maxPx  longest side after shrinking: 512 for a profile picture, 1280 for a cover
      */
     public static void upload(Context context, final Uri uri, final String folder, final int maxPx, final Callback cb) {
+        upload(context, uri, folder, maxPx, null, cb);
+    }
+
+    /**
+     * Same, but with a fixed name for the picture. Uploading again under the same name replaces the earlier file, so a person or a group
+     * never has more than one picture stored: pass {@code "profile_icons/" + uid}, {@code "group_photos/" + groupId} and so on.
+     * (Cloudinary replaces only if the upload preset has Overwrite switched on. If it does not, the picture still uploads, under a new name.)
+     */
+    public static void upload(Context context, final Uri uri, final String folder, final int maxPx, final String publicId, final Callback cb) {
         final Context app = context.getApplicationContext();
         BG.execute(() -> {
             try {
                 final byte[] jpeg = shrink(app, uri, maxPx);
                 if (cloudinaryConfigured(app)) {
-                    String url = toCloudinary(app, jpeg, folder);
+                    String url = toCloudinary(app, jpeg, publicId);
                     MAIN.post(() -> cb.onSuccess(url));
                 } else {
-                    toFirebase(jpeg, folder, cb);
+                    toFirebase(jpeg, folder, publicId != null, cb);
                 }
             } catch (Exception e) {
                 final String m = e.getMessage() == null ? "Couldn't upload the picture." : e.getMessage();
@@ -109,33 +118,44 @@ public final class ImageHost {
 
     // ── Destinations ─────────────────────────────────────────────────────
 
-    private static String toCloudinary(Context c, byte[] jpeg, String folder) throws Exception {
+    private static String toCloudinary(Context c, byte[] jpeg, String publicId) throws Exception {
+        String url = sendToCloudinary(c, jpeg, publicId);
+        if (url == null) url = sendToCloudinary(c, jpeg, null);     // the host kept an older file under that name: store this one under a fresh name
+        return url;
+    }
+
+    /** Returns the picture's address, or null when a fixed name was asked for but the host would not replace the earlier file. */
+    private static String sendToCloudinary(Context c, byte[] jpeg, String publicId) throws Exception {
         String cloud = c.getString(R.string.cloudinary_cloud_name).trim();
-        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("upload_preset", c.getString(R.string.cloudinary_upload_preset).trim())
-                // No "folder" field: an unsigned upload may only send a few extra fields, and the account may use dynamic folders.
-                // The folder is set once in the preset (Asset folder) instead.
-                .addFormDataPart("file", "photo.jpg", RequestBody.create(jpeg, MediaType.parse("image/jpeg")))
-                .build();
+        MultipartBody.Builder mb = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("upload_preset", c.getString(R.string.cloudinary_upload_preset).trim());
+        // No "folder" field: an unsigned upload may only send a few extra fields, and the account may use dynamic folders.
+        // The folder is set once in the preset (Asset folder) instead. public_id is one of the fields an unsigned upload may send.
+        if (publicId != null && !publicId.isEmpty()) mb.addFormDataPart("public_id", publicId);
+        RequestBody body = mb.addFormDataPart("file", "photo.jpg", RequestBody.create(jpeg, MediaType.parse("image/jpeg"))).build();
         Request req = new Request.Builder().url("https://api.cloudinary.com/v1_1/" + cloud + "/image/upload").post(body).build();
         try (Response r = HTTP.newCall(req).execute()) {
             String text = r.body() == null ? "" : r.body().string();
             if (!r.isSuccessful()) {
                 String why = "";
                 try { why = new JSONObject(text).getJSONObject("error").optString("message"); } catch (Exception ignored) { }
+                if (publicId != null && why.toLowerCase(java.util.Locale.US).contains("already exists")) return null;
                 throw new Exception("The picture host said no" + (why.isEmpty() ? " (" + r.code() + ")" : ": " + why));
             }
-            String url = new JSONObject(text).optString("secure_url", "");
+            JSONObject json = new JSONObject(text);
+            if (publicId != null && json.optBoolean("existing", false)) return null;     // it returned the old file without replacing it
+            String url = json.optString("secure_url", "");
             if (!url.startsWith("https://")) throw new Exception("The picture host sent no address.");
             return url;
         }
     }
 
-    private static void toFirebase(byte[] jpeg, String folder, final Callback cb) {
-        final StorageReference ref = FirebaseStorage.getInstance().getReference().child(folder + "/" + System.currentTimeMillis() + ".jpg");
+    private static void toFirebase(byte[] jpeg, String folder, boolean fixedName, final Callback cb) {
+        final StorageReference ref = FirebaseStorage.getInstance().getReference().child(folder + "/" + (fixedName ? "current" : String.valueOf(System.currentTimeMillis())) + ".jpg");
         ref.putBytes(jpeg)
                 .addOnSuccessListener(t -> ref.getDownloadUrl()
-                        .addOnSuccessListener(u -> cb.onSuccess(u.toString()))
+                        // A replaced file keeps its address, so a version is added to make every screen load the new picture.
+                        .addOnSuccessListener(u -> cb.onSuccess(fixedName ? u.toString() + (u.toString().contains("?") ? "&" : "?") + "v=" + System.currentTimeMillis() : u.toString()))
                         .addOnFailureListener(e -> cb.onError(e.getMessage() == null ? "Couldn't upload the picture." : e.getMessage())))
                 .addOnFailureListener(e -> cb.onError(e.getMessage() == null ? "Couldn't upload the picture." : e.getMessage()));
     }

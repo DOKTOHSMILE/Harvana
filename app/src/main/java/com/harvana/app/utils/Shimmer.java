@@ -181,7 +181,10 @@ public final class Shimmer {
             if (released) return;
             released = true;
             target.setVisibility(View.VISIBLE);
-            if (skeleton.getParent() instanceof ViewGroup) ((ViewGroup) skeleton.getParent()).removeView(skeleton);
+            // Hide the placeholder, do not remove it: taking a child out of its parent can race with that parent's layout pass
+            // (the parent walks its children by index and finds a null), which crashed pages inside a ViewPager2. A GONE view
+            // costs nothing and does not draw or animate.
+            skeleton.setVisibility(View.GONE);
             HOLDS.remove(target);
         }
     }

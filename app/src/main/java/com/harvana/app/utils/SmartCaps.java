@@ -42,7 +42,7 @@ public final class SmartCaps {
                     + "|slug|json|hex|base64|paste|scan|hv0x|0x|enter group|group id|loan id|genloan|decimals|percent|%|\\bage\\b|\\byear\\b|\\bdate\\b|\\btime\\b");
 
     /** Fields whose every word starts with a capital. */
-    private static final Pattern WORDS = Pattern.compile(
+    private static final Pattern WORD_FIELDS = Pattern.compile(
             "name|surname|first|last|city|town|state|country|location|occupation|company|bank|merchant|street|address|village|lga|region");
 
     public static void install(Application app) {
@@ -123,7 +123,7 @@ public final class SmartCaps {
                 .toLowerCase(Locale.US);
         if (KEEP.matcher(hay).find()) return NONE;
         if (variation == InputType.TYPE_TEXT_VARIATION_PERSON_NAME || variation == InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS) return WORDS;
-        return WORDS.matcher(hay).find() ? WORDS : SENTENCES;
+        return WORD_FIELDS.matcher(hay).find() ? WORDS : SENTENCES;
     }
 
     /** When someone leaves a field typed entirely in lower case, capitalises the start of each sentence (or word). */

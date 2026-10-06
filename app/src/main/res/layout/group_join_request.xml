@@ -68,7 +68,7 @@
 								app:cardCornerRadius="28dp"
 								app:cardElevation="0dp"
 	app:strokeWidth="0dp">
-								<com.google.android.material.imageview.ShapeableImageView
+								<ImageView
 									android:id="@+id/img_group_avatar"
 									android:layout_width="28dp"
 									android:layout_height="28dp"

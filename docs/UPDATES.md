@@ -635,3 +635,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Group picture rings
 - The coloured ring around group pictures was cut up since the images became Material image views (they erase anything outside their own shape, which included the ring). Group pictures now use the Material round shape with a native border in the group-type colour (blue rotating, green accumulative, purple fixed, grey other), so the ring is complete everywhere (Home, Discover, Groups, invites, profiles, settings).
+
+## Group rings, second fix
+- The group pictures that carry the type ring in layouts (Home upcoming and trending, Discover, Groups, group page, join request) are plain image views again, which is what the ring drawing was built for, so the ring is whole. Any group picture that is still a Material image view builds its ring with the view's own border, applied in the right order.

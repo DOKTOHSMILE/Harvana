@@ -46,12 +46,12 @@ public final class GroupRing {
             // in the padding would be cut. Use its native round shape and border instead.
             com.google.android.material.imageview.ShapeableImageView sv = (com.google.android.material.imageview.ShapeableImageView) v;
             sv.setBackground(null);
-            sv.setShapeAppearanceModel(com.google.android.material.shape.ShapeAppearanceModel.builder()
-                .setAllCorners(com.google.android.material.shape.CornerFamily.ROUNDED, new com.google.android.material.shape.RelativeCornerSize(0.5f)).build());
+            int pad = ring + Math.round(1f * d);
+            sv.setPadding(pad, pad, pad, pad);                       // padding first: the shape is measured from it
             sv.setStrokeColor(android.content.res.ColorStateList.valueOf(color(groupType)));
             sv.setStrokeWidth(ring);
-            int pad = ring + Math.round(1f * d);
-            sv.setPadding(pad, pad, pad, pad);
+            sv.setShapeAppearanceModel(com.google.android.material.shape.ShapeAppearanceModel.builder()
+                .setAllCorners(com.google.android.material.shape.CornerFamily.ROUNDED, new com.google.android.material.shape.RelativeCornerSize(0.5f)).build());
             sv.setContentDescription("Group type: " + (color(groupType) == OTHER ? "other" : colorName(groupType)));
             return;
         }

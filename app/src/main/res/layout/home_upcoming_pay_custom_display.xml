@@ -29,7 +29,7 @@
 				app:cardElevation="0dp"
 				app:cardCornerRadius="360dp"
      	app:strokeWidth="0dp">
-				<com.google.android.material.imageview.ShapeableImageView
+				<ImageView
 					android:id="@+id/imageview1"
 					android:layout_width="45dp"
 					android:layout_height="45dp"

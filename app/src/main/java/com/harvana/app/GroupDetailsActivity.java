@@ -334,8 +334,13 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		
 		_setupTabs();
 		_wireGroupLogic();
-		int startTab = getIntent().getIntExtra("tab", -1);
-		if (startTab >= 0 && view_pager != null) view_pager.setCurrentItem(startTab);
+		// "tab" is the page (0 Overview, 1 Members, 2 Payments, 3 Loans, 4 Notice, 5 History), not a position: a group with
+		// no Loans tab has one page fewer, so the position is looked up once the group says whether it has loans.
+		startPage = getIntent().getIntExtra("tab", -1);
+		if (startPage >= 0 && view_pager != null && pagerAdapter != null) {
+			int at = pagerAdapter.positionOfPage(startPage);
+			if (at >= 0) view_pager.setCurrentItem(at);
+		}
 		if (btn_group_overflow != null) {
 			btn_group_overflow.setOnClickListener(v -> {
 				Intent i = new Intent(getApplicationContext(), GroupSettingsActivity.class);
@@ -666,6 +671,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 	}
 	
 	private FragmentAdapterComponentFragmentAdapter pagerAdapter;
+	private int startPage = -1;
 	
 	/** Five tabs (a group without loans) share the full width; six tabs scroll sideways as before. */
 	private void _fitTabs() {
@@ -690,6 +696,11 @@ public class GroupDetailsActivity extends AppCompatActivity {
 			Object al = data.get("allowLoans");
 			pagerAdapter.setLoansEnabled(!(al instanceof Boolean) || (Boolean) al);
 			_fitTabs();
+			if (startPage >= 0 && view_pager != null) {
+				int at = pagerAdapter.positionOfPage(startPage);
+				if (at >= 0) view_pager.setCurrentItem(at);
+				startPage = -1;
+			}
 		}
 		
 		String name = _safeString(data, "groupName", "Group");

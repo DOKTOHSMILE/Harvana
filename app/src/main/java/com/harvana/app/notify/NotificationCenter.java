@@ -144,7 +144,8 @@ public final class NotificationCenter {
             ch.enableVibration(vibrate);
             nm.createNotificationChannel(ch);
         }
-        Intent tap = new Intent(c, NotificationsActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        Intent tap = new Intent(c, NotificationRouteActivity.class).putExtra(NotificationRouteActivity.EXTRA_ID, it.id)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         int flags = PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0);
         PendingIntent pi = PendingIntent.getActivity(c, it.id.hashCode(), tap, flags);
         NotificationCompat.Builder b = new NotificationCompat.Builder(c, channel)

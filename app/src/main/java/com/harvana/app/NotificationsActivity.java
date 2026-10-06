@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.harvana.app.notify.NotificationCenter;
+import com.harvana.app.notify.NotificationRouter;
 import com.harvana.app.notify.NotificationSync;
 import com.harvana.app.utils.StatusBarUtil;
 import com.harvana.app.utils.UiColors;
@@ -100,22 +101,7 @@ public class NotificationsActivity extends AppCompatActivity {
     }
 
     private void open(NotificationCenter.Item it) {
-        NotificationCenter.markRead(this, it.id);
-        Intent i;
-        switch (it.type) {
-            case NotificationCenter.INVITE: i = new Intent(this, InvitesActivity.class); break;
-            case NotificationCenter.SOCIAL: i = new Intent(this, com.harvana.app.social.FriendsActivity.class); break;
-            case NotificationCenter.TX:
-                i = new Intent(this, MainActivity.class).putExtra("open_fragment", "asset")
-                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                break;
-            default:
-                if (!it.groupId.isEmpty()) {
-                    i = new Intent(this, GroupDetailsActivity.class).putExtra("groupId", it.groupId);
-                    if (it.tab >= 0) i.putExtra("tab", it.tab);
-                } else return;
-        }
-        startActivity(i);
+        NotificationRouter.open(this, it);
     }
 
     private static String ago(long t) {

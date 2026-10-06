@@ -302,6 +302,12 @@
 			android:label="Open loans"
 			android:configChanges="orientation|screenSize|keyboardHidden" />
 		<activity
+			android:name=".notify.NotificationRouteActivity"
+			android:exported="false"
+			android:excludeFromRecents="true"
+			android:noHistory="true"
+			android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+		<activity
 			android:name=".NotificationsActivity"
 			android:label="Notifications"
 			android:configChanges="orientation|screenSize|keyboardHidden" />

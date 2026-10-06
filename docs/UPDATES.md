@@ -650,3 +650,7 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Shorter rows on Home
 - Upcoming payments and Trending public groups rows are shorter: less vertical padding, a 36dp group picture (was 45dp), slightly smaller title and detail text, a tighter badge, and the Join button is the same compact 32dp pill as Pay.
+
+## Notifications open the page they are about
+- Tapping a notification, in the Notifications list or in the phone's notification shade, now goes to that notification's own page through one shared router (`notify/NotificationRouter.java`): a payment or transfer opens that transaction's details (read from the network by its hash), a group notice opens that group on the right tab (a new member opens Members, a loan Loans, a payment reminder Payments, other notices Notice), an invitation opens Invitations, an approved join request opens the group, a declined one opens Discover, a trade message opens My trades, a friend request opens Friends, and a Learn review result opens Learn. Before, the shade always opened the inbox list, and a payment notification only went to the wallet tab.
+- Group pages now take the tab as a page (Overview, Members, Payments, Loans, Notice, History), so a group without a Loans tab still opens the right one (Notice used to land on History).

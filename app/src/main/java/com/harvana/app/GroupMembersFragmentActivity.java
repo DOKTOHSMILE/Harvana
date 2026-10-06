@@ -1059,6 +1059,11 @@ public class GroupMembersFragmentActivity extends Fragment {
 				}
 			}
 			
+			if (memberUid.isEmpty() && h.name != null) {
+				// Known only by wallet on the network (no app profile linked): show a name instead of a loading bar that never ends.
+				h.name.setText("Member" + (slotObj != null ? " \u00B7 Slot " + slotObj : ""));
+				if (h.initials != null) h.initials.setText("M");
+			}
 			if (!memberUid.isEmpty()) {
 				// 1. Instantly load from cache to prevent "Loading..." or "Member" flashes
 				Map<String, Object> cachedProfile = com.harvana.app.offline.OfflineCacheManager.load(getContext(), "member_profile_" + memberUid);

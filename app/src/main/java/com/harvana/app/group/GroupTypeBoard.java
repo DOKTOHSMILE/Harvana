@@ -51,6 +51,8 @@ public final class GroupTypeBoard {
         public String isoDate = "";
         /** A missed day the member can still pay for. */
         public boolean backpayable;
+        /** Today or an upcoming unpaid day of a daily savings line: can be paid ahead, from today in order. */
+        public boolean forwardPayable;
 
         public Cell(String top, String bottom, String title, String body, int state, boolean payToday) {
             this.top = top == null ? "" : top;
@@ -471,6 +473,8 @@ public final class GroupTypeBoard {
         boolean dated = rawDates instanceof List;
         if (dated) for (Object d : (List<?>) rawDates) paidDates.add(String.valueOf(d));
         String todayIso = isoDay(nowMs);
+        String depositMode = line == null ? "" : str(line, "depositMode", "");
+        boolean ongoingDaily = !"VARIABLE_AMOUNT".equals(depositMode) && !"SINGLE_LUMP_SUM".equals(depositMode);
         int saved = 0;
         for (int i = 0; i < 30; i++) {
             long ts = start + i * DAY_MS;
@@ -488,12 +492,16 @@ public final class GroupTypeBoard {
             Cell cell = new Cell(String.valueOf(c.get(Calendar.DAY_OF_MONTH)), MONTHS[c.get(Calendar.MONTH)], title, body, state, state == TODAY);
             cell.isoDate = iso;
             cell.backpayable = state == MISSED && dated;
+            cell.forwardPayable = (state == TODAY || state == OPEN) && ongoingDaily;
             cells.add(cell);
         }
+        boolean todayOpen = false;                                   // days ahead are paid from today, so none can be picked once today is saved
+        for (Cell c : cells) if (c.state == TODAY) todayOpen = true;
+        if (!todayOpen) for (Cell c : cells) c.forwardPayable = false;
         double savedHarv = line == null ? 0 : num(line, "amountPaidRaw", 0) / RAW;
         return new Board(ACCUMULATIVE, "SAVINGS STAMPS", "30-day savings line",
                 saved + " of 30 days saved · " + money(savedHarv),
-                "Each box is one day of the line. The date is written inside. Green is paid, red is missed. Tap today\u2019s box to save today, or tap a red box to pay that day back. To pay several days, long-press a red box, then tap more.",
+                "Each box is one day of the line. The date is written inside. Green is paid, red is missed. Tap a box to pay that day (red = pay it back, blue = today, grey = pay ahead from today). To pay several days, long-press a box, then tap more.",
                 6, "", cells);
     }
 

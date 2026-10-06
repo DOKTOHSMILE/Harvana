@@ -71,8 +71,8 @@ public final class BackpayBar {
         sel.onChange = () -> {
             int n = sel.picked.size();
             bar.setVisibility(n == 0 ? View.GONE : View.VISIBLE);
-            title.setText(n + (n == 1 ? " missed day selected" : " missed days selected"));
-            sub.setText(String.format(Locale.US, "%s HARV to pay them back", trim(dailyHarv * n)));
+            title.setText(n + (n == 1 ? " day selected" : " days selected"));
+            sub.setText(String.format(Locale.US, "%s HARV to pay them", trim(dailyHarv * n)));
             if (previous != null) previous.run();
         };
         return bar;

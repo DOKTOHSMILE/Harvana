@@ -374,24 +374,16 @@ public class NodeGroupActivity extends AppCompatActivity {
             final GroupTypeBoardView.Selection sel = "ACCUM".equals(family) && line != null ? new GroupTypeBoardView.Selection() : null;
             if (sel != null) {
                 double daily = num(line, "dailyAmountRaw") / 100_000_000.0;
-                card.addView(BackpayBar.create(this, sel, daily, dates -> {
-                    long total = (long) num(line, "dailyAmountRaw") * dates.size();
-                    pay("Pay back missed days", CircleUi.harv(total),
-                        moneyRows(escrowOrGroup(), dates.size() + (dates.size() == 1 ? " missed day" : " missed days")),
-                        () -> NodeGroupClient.backpayAccum(getApplicationContext(), me, nodeId, str(line, "lineId"), dates,
-                            result("Paid back. It shows once the network confirms it.")));
-                }));
+                card.addView(BackpayBar.create(this, sel, daily, dates -> paySelection(dates)));
             }
             boardPaysToday = sel != null;
             GroupTypeBoardView.fill(host, board, cell -> {
-                if (cell.backpayable && cell.isoDate != null) {                 // one red box: pay that day back
-                    java.util.List<String> one = new java.util.ArrayList<>();
-                    one.add(cell.isoDate);
-                    long total = (long) num(line, "dailyAmountRaw");
-                    pay("Pay back missed day", CircleUi.harv(total),
-                        moneyRows(escrowOrGroup(), "1 missed day: " + cell.isoDate),
-                        () -> NodeGroupClient.backpayAccum(getApplicationContext(), me, nodeId, str(line, "lineId"), one,
-                            result("Paid back. It shows once the network confirms it.")));
+                if (cell.backpayable || (cell.forwardPayable && !cell.payToday)) {   // one box: pay that day (ahead days are paid in order from today)
+                    java.util.List<String> upTo = new java.util.ArrayList<>();
+                    for (GroupTypeBoard.Cell c : board.cells) {
+                        if (cell.backpayable ? c.isoDate.equals(cell.isoDate) : (c.forwardPayable && c.isoDate.compareTo(cell.isoDate) <= 0)) upTo.add(c.isoDate);
+                    }
+                    paySelection(upTo);
                     return;
                 }
                 if (cell.payToday) {
@@ -536,6 +528,42 @@ public class NodeGroupActivity extends AppCompatActivity {
     }
 
     // ── actions ────────────────────────────────────────────────────────────
+
+    /**
+     * Pays the picked day boxes of the savings line. Missed days go through back-pay (those exact dates); today and days ahead are
+     * paid in order from today as one multi-day contribution. A mix is two payments, back-pay first, behind one review and PIN.
+     */
+    private void paySelection(java.util.List<String> dates) {
+        if (dates == null || dates.isEmpty() || line == null) return;
+        final String todayIso = GroupTypeBoard.isoDay(System.currentTimeMillis());
+        final java.util.List<String> back = new java.util.ArrayList<>(), ahead = new java.util.ArrayList<>();
+        for (String d : dates) { if (d.compareTo(todayIso) < 0) back.add(d); else ahead.add(d); }
+        final long daily = (long) num(line, "dailyAmountRaw");
+        final String lineId = str(line, "lineId");
+        long total = daily * dates.size();
+        String what = (back.isEmpty() ? "" : back.size() + (back.size() == 1 ? " missed day" : " missed days"))
+                + (back.isEmpty() || ahead.isEmpty() ? "" : " and ")
+                + (ahead.isEmpty() ? "" : ahead.size() + (ahead.size() == 1 ? " day" : " days") + " from today");
+        final Context ctx = getApplicationContext();
+        pay(dates.size() == 1 ? "Pay for this day" : "Pay for " + dates.size() + " days", CircleUi.harv(total),
+            moneyRows(escrowOrGroup(), what + " at " + CircleUi.harv(daily) + " each"),
+            () -> {
+                if (back.isEmpty()) {
+                    if (ahead.size() == 1) NodeGroupClient.contributeAccum(ctx, me, nodeId, lineId, result("Saved"));
+                    else NodeGroupClient.contributeAccumMultiple(ctx, me, nodeId, lineId, daily * ahead.size(), result("Saved"));
+                    return;
+                }
+                NodeGroupClient.backpayAccum(ctx, me, nodeId, lineId, back, ahead.isEmpty()
+                    ? result("Paid back. It shows once the network confirms it.")
+                    : new NodeGroupClient.Callback() {
+                        @Override public void onSuccess(JSONObject json) {
+                            if (ahead.size() == 1) NodeGroupClient.contributeAccum(ctx, me, nodeId, lineId, result("Saved"));
+                            else NodeGroupClient.contributeAccumMultiple(ctx, me, nodeId, lineId, daily * ahead.size(), result("Saved"));
+                        }
+                        @Override public void onError(String error) { toast(CircleUi.friendly(error)); load(); }
+                    });
+            });
+    }
 
     /** True when the savings calendar is shown: its today box is the way to save today, so the separate button is left out. */
     private boolean boardPaysToday;

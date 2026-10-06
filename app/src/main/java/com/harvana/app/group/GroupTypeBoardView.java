@@ -27,6 +27,14 @@ public final class GroupTypeBoardView {
         /** Called after every change so the screen can update its "Pay N days" bar. */
         public Runnable onChange;
         void toggle(String iso) { if (!picked.remove(iso)) picked.add(iso); }
+        /** Days ahead are paid in order from today, so picking one picks every unpaid day up to it; unpicking one drops the later ones. */
+        void toggleForward(GroupTypeBoard.Board board, GroupTypeBoard.Cell cell) {
+            if (picked.contains(cell.isoDate)) {
+                for (GroupTypeBoard.Cell c : board.cells) if (c.forwardPayable && c.isoDate.compareTo(cell.isoDate) >= 0) picked.remove(c.isoDate);
+            } else {
+                for (GroupTypeBoard.Cell c : board.cells) if (c.forwardPayable && c.isoDate.compareTo(cell.isoDate) <= 0) picked.add(c.isoDate);
+            }
+        }
         public void clear() { picked.clear(); }
     }
 
@@ -51,7 +59,7 @@ public final class GroupTypeBoardView {
             final GroupTypeBoard.Cell cell = board.cells.get(i);
             boolean dense = cols >= 6;
             LinearLayout box = cellBox(c, cell, dense);
-            final boolean pickable = sel != null && cell.backpayable;
+            final boolean pickable = sel != null && (cell.backpayable || cell.forwardPayable);
             if (pickable && sel.picked.contains(cell.isoDate)) markPicked(c, box, cell, dense);
             int height = dp(c, dense ? 34 : 46);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, height, 1f);
@@ -59,11 +67,11 @@ public final class GroupTypeBoardView {
             lp.setMargins(m, m, m, m);
             box.setOnClickListener(v -> {
                 // Picking several starts with a long press; while days are picked a tap adds or removes one. A lone tap pays that day.
-                if (pickable && !sel.picked.isEmpty()) { sel.toggle(cell.isoDate); fill(host, board, click, sel); if (sel.onChange != null) sel.onChange.run(); return; }
+                if (pickable && !sel.picked.isEmpty()) { toggleCell(sel, board, cell); fill(host, board, click, sel); if (sel.onChange != null) sel.onChange.run(); return; }
                 if (click != null) click.onCell(cell);
             });
             if (pickable) box.setOnLongClickListener(v -> {
-                sel.toggle(cell.isoDate);
+                toggleCell(sel, board, cell);
                 fill(host, board, click, sel);
                 if (sel.onChange != null) sel.onChange.run();
                 return true;
@@ -79,6 +87,10 @@ public final class GroupTypeBoardView {
                 }
             }
         }
+    }
+
+    private static void toggleCell(Selection sel, GroupTypeBoard.Board board, GroupTypeBoard.Cell cell) {
+        if (cell.forwardPayable) sel.toggleForward(board, cell); else sel.toggle(cell.isoDate);
     }
 
     public static void showDetail(Context c, GroupTypeBoard.Cell cell) {

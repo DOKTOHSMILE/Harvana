@@ -641,3 +641,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Home: no Pay button for a goal that no longer takes deposits
 - Home's Upcoming payments offered "Pay" for a fixed goal group that had already reached its goal. For a goal group on the network Home now asks the network for the goal's real state before offering Pay: if the goal is reached or the group is completed, the row says "Goal reached - deposits are closed", shows "Closed" and the button is disabled. The resolver also treats a group saved as completed or closed the same way.
+
+## Home Pay button follows the same rules as the Payments tab, for every network group
+- Before Home offers "Pay" for a rotating circle or a goal group on the network, it now reads the group and your membership from the network and applies the same rules the Payments tab uses. The button is disabled, with the reason and a short badge (Closed, Paid, Waiting, Not due), when: the goal is reached or the group is completed; the circle is still forming; you already paid this round; it is your turn to be paid; your membership defaulted; or the group is paused. It stays "Pay" only when the group would accept a payment from you.

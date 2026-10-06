@@ -757,26 +757,49 @@ public class HomeFragmentActivity extends Fragment {
 		row.put("statusLine", r.statusLine);
 		row.put("badge", r.badge);
 		final Runnable finish = () -> { synchronized (rows) { rows.add(row); } done.run(); };
-		// A fixed goal that has reached its target no longer takes deposits, but the saved copy of the group may not say so.
-		// Ask the network for the goal's real state before offering "Pay".
-		com.harvana.app.group.GroupIdentity identity = com.harvana.app.group.GroupIdentityResolver.resolve(gid, data);
-		boolean fixedOnChain = identity != null && identity.onChain() && "FIXED".equals(identity.family);
-		if (!"PAY".equals(r.action.name()) || !fixedOnChain) { finish.run(); return; }
-		com.harvana.app.sync.NodeGroupClient.getFixedGroup(identity.protocolId(), new com.harvana.app.sync.NodeGroupClient.Callback() {
-			@Override public void onSuccess(org.json.JSONObject json) {
-				double goal = json.optLong("targetGoalAmountRaw") / 100_000_000.0;
-				double raised = json.optLong("raisedAmountRaw") / 100_000_000.0;
-				String state = json.optString("state", "");
-				boolean closed = "COMPLETED".equalsIgnoreCase(state) || "CLOSED".equalsIgnoreCase(state) || (goal > 0 && raised + 0.0000001 >= goal);
-				if (closed) {
-					row.put("action", "NONE");
-					row.put("statusLine", "Goal reached - deposits are closed");
-					row.put("badge", "Closed");
-				}
-				finish.run();
+		// The saved copy of a network group can be out of date (a goal reached, a circle still forming, this round already paid,
+		// a membership that defaulted). Before offering "Pay", ask the network and apply the same rules the Payments tab uses.
+		final com.harvana.app.group.GroupIdentity identity = com.harvana.app.group.GroupIdentityResolver.resolve(gid, data);
+		boolean checkable = identity != null && identity.onChain() && ("FIXED".equals(identity.family) || "CIRCLE".equals(identity.family));
+		if (!"PAY".equals(r.action.name()) || !checkable) { finish.run(); return; }
+		final String me = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(getContext());
+		final String family = identity.family;
+		final String nodeId = identity.protocolId();
+		final com.harvana.app.sync.NodeGroupClient.Callback onGroup = new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject groupJson) {
+				final Map<String, Object> group = com.harvana.app.utils.JsonMaps.toMap(groupJson);
+				com.harvana.app.sync.NodeGroupClient.Callback onMember = new com.harvana.app.sync.NodeGroupClient.Callback() {
+					@Override public void onSuccess(org.json.JSONObject memberJson) { decide(group, com.harvana.app.utils.JsonMaps.toMap(memberJson)); }
+					@Override public void onError(String error) { decide(group, null); }
+				};
+				if (me == null || me.isEmpty()) { decide(group, null); return; }
+				if ("CIRCLE".equals(family)) com.harvana.app.sync.NodeGroupClient.getCircleMember(nodeId, me, onMember);
+				else com.harvana.app.sync.NodeGroupClient.getFixedMember(nodeId, me, onMember);
 			}
 			@Override public void onError(String error) { finish.run(); }
-		});
+			private void decide(Map<String, Object> group, Map<String, Object> member) {
+				try {
+					com.harvana.app.engine.GroupSnapshot snap = "CIRCLE".equals(family)
+						? com.harvana.app.engine.CircleSnapshot.of(group, member)
+						: com.harvana.app.engine.FixedSnapshot.of(group, member, me == null ? "" : me);
+					boolean canPay = false;
+					String reason = "";
+					for (com.harvana.app.engine.GroupAction a : snap.actions) {
+						if (a.enabled && (com.harvana.app.engine.GroupAction.CONTRIBUTE.equals(a.id) || com.harvana.app.engine.GroupAction.FIXED_DEPOSIT.equals(a.id))) canPay = true;
+						if (!a.enabled && reason.isEmpty()) reason = a.label;
+					}
+					if (!canPay && !snap.actions.isEmpty()) {
+						String low = reason.toLowerCase(java.util.Locale.US);
+						row.put("action", "NONE");
+						row.put("statusLine", reason.isEmpty() ? "Nothing to pay right now" : (reason.length() > 70 ? reason.substring(0, 67) + "..." : reason));
+						row.put("badge", low.contains("already paid") ? "Paid" : low.contains("waiting") ? "Waiting" : low.contains("being paid") ? "Not due" : "Closed");
+					}
+				} catch (Exception ignored) { }
+				finish.run();
+			}
+		};
+		if ("CIRCLE".equals(family)) com.harvana.app.sync.NodeGroupClient.getCircle(nodeId, onGroup);
+		else com.harvana.app.sync.NodeGroupClient.getFixedGroup(nodeId, onGroup);
 	}
 	
 	private void _finishUpcoming(String myUid, ArrayList<HashMap<String, Object>> rows,

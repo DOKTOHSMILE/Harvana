@@ -830,8 +830,15 @@ public class HomeFragmentActivity extends Fragment {
 		return "PAY".equals(action) ? 0 : ("REMIND".equals(action) ? 1 : 2);
 	}
 	
-	private void _renderUpcoming(ArrayList<HashMap<String, Object>> rows) {
+	private void _renderUpcoming(ArrayList<HashMap<String, Object>> allRows) {
 		if (!isAdded() || linear_upcoming_payments == null || getActivity() == null) return;
+		// Only groups with something to do are listed: a payment to make, or a member to remind. A group with nothing due
+		// (idle, goal reached, already paid) is left off Home; its page is still under Groups.
+		final ArrayList<HashMap<String, Object>> rows = new ArrayList<>();
+		for (HashMap<String, Object> r : allRows) {
+			String action = str(r, "action", "NONE");
+			if ("PAY".equals(action) || "REMIND".equals(action)) rows.add(r);
+		}
 		getActivity().runOnUiThread(() -> {
 			linear_upcoming_payments.removeAllViews();
 			int show = Math.min(2, rows.size());

@@ -179,7 +179,7 @@ public final class LearnPostBinder {
         Runnable paint = () -> {
             fireCount.setText(LearnRules.compactCount(fires[0]));
             fire.setBackgroundResource(mine[0] ? R.drawable.bg_learn_action_on : R.drawable.bg_learn_action);
-            // The handshake is a white 3D image: any tint set on it (layout or code) multiplies, so the shading stays.
+            // The handshake is a full-colour 3D image; a tint, if ever set, multiplies so the shading stays.
             // It is dimmed until you have shaken hands on this post.
             fireIcon.clearColorFilter();
             androidx.core.widget.ImageViewCompat.setImageTintMode(fireIcon, android.graphics.PorterDuff.Mode.MULTIPLY);

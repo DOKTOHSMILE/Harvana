@@ -11,7 +11,6 @@ import android.os.SystemClock;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -140,31 +139,6 @@ public final class Shimmer {
         return box;
     }
 
-    /** Puts {@code placeholder} into an empty-able host, replacing what is there. Call {@code host.removeAllViews()} when the data arrives. */
-    public static void show(ViewGroup host, View placeholder) {
-        host.removeAllViews();
-        host.addView(placeholder, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-    }
-
-    /**
-     * A full-size shimmer laid over an existing screen until the data is in (for screens built in XML, where the real views are
-     * already there). Returns the overlay; call {@link #hide(View)} to remove it.
-     */
-    public static View overlay(FrameLayout host, View placeholder) {
-        FrameLayout shield = new FrameLayout(host.getContext());
-        shield.setBackgroundColor(UiColors.background());
-        shield.setClickable(true);
-        shield.addView(placeholder, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        int pad = dp(host.getContext(), 16);
-        shield.setPadding(pad, pad, pad, pad);
-        host.addView(shield, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        return shield;
-    }
-
-    public static void hide(View overlay) {
-        if (overlay != null && overlay.getParent() instanceof ViewGroup) ((ViewGroup) overlay.getParent()).removeView(overlay);
-    }
-
     // ── Holding a list or section until its data is in ─────────────────────────────
 
     private static final java.util.Map<View, Hold> HOLDS = new java.util.WeakHashMap<>();
@@ -176,25 +150,21 @@ public final class Shimmer {
         private boolean released;
         private Hold(View target, View skeleton) { this.target = target; this.skeleton = skeleton; }
 
-        /** Shows the real view and removes the placeholder. Safe to call again. */
+        /**
+         * Shows the real view and hides the placeholder. Safe to call again, from any moment. It only changes visibility: it never
+         * adds or removes a view, so it cannot upset a parent that is in the middle of laying out its children.
+         */
         public void release() {
             if (released) return;
             released = true;
-            target.setVisibility(View.VISIBLE);
-            // Hide the placeholder, do not remove it: taking a child out of its parent can race with that parent's layout pass
-            // (the parent walks its children by index and finds a null), which crashed pages inside a ViewPager2. A GONE view
-            // costs nothing and does not draw or animate.
-            skeleton.setVisibility(View.GONE);
+            try {
+                target.setVisibility(View.VISIBLE);
+                skeleton.setVisibility(View.GONE);
+            } catch (Throwable ignored) { }
             HOLDS.remove(target);
         }
     }
 
-    /**
-     * Shows {@code skeleton} in place of {@code target} (a list or a section built in XML) until the target has content, or
-     * {@code maxMs} has passed (so an empty or failed load still ends in the screen's own empty state). The target keeps its id
-     * and position: it is moved into a frame that takes its place. Lists whose parent is a ConstraintLayout or RelativeLayout are
-     * left alone, because other views point at them by id.
-     */
     private static final java.util.Set<String> SEEN = new java.util.HashSet<>();
 
     /** True only the first time {@code key} is asked in this run of the app: shimmer is for a screen's first load, not every return to it. */
@@ -206,39 +176,52 @@ public final class Shimmer {
         return hold(target, skeleton, maxMs);
     }
 
+    /**
+     * Shows {@code skeleton} above {@code target} (a list built in XML) until the target has content, or {@code maxMs} has passed
+     * (so an empty or failed load still ends in the screen's own empty state).
+     *
+     * How, and why it is built this way: the placeholder is added as a sibling just before the target, once, while the screen is
+     * being set up; the target is made invisible. Nothing is moved, wrapped or removed afterwards: when data arrives only the two
+     * visibilities change. (An earlier version wrapped the target in a new frame and later removed the placeholder, and a removal
+     * during a layout pass crashed pages inside a ViewPager2.) Only a vertical LinearLayout parent is supported, which is what these
+     * screens use; any other parent is left alone, and any failure leaves the screen exactly as it was.
+     */
     public static Hold hold(View target, View skeleton, long maxMs) {
-        if (target == null || !(target.getParent() instanceof ViewGroup)) return null;
-        if (HOLDS.containsKey(target)) return HOLDS.get(target);
-        ViewGroup parent = (ViewGroup) target.getParent();
-        String pc = parent.getClass().getName();
-        if (pc.contains("ConstraintLayout") || parent instanceof android.widget.RelativeLayout) return null;
-        if (hasContent(target)) return null;
+        try {
+            if (target == null || skeleton == null || !(target.getParent() instanceof android.widget.LinearLayout)) return null;
+            if (HOLDS.containsKey(target)) return HOLDS.get(target);
+            android.widget.LinearLayout parent = (android.widget.LinearLayout) target.getParent();
+            if (parent.getOrientation() != android.widget.LinearLayout.VERTICAL) return null;
+            if (hasContent(target)) return null;
 
-        int index = parent.indexOfChild(target);
-        ViewGroup.LayoutParams lp = target.getLayoutParams();
-        FrameLayout frame = new FrameLayout(target.getContext());
-        parent.removeViewAt(index);
-        parent.addView(frame, index, lp);
-        frame.addView(target, new FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            lp.height == ViewGroup.LayoutParams.MATCH_PARENT ? ViewGroup.LayoutParams.MATCH_PARENT : ViewGroup.LayoutParams.WRAP_CONTENT));
-        target.setVisibility(View.INVISIBLE);
-        frame.addView(skeleton, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
-        final Hold h = new Hold(target, skeleton);
-        HOLDS.put(target, h);
-        target.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override public void onLayoutChange(View v, int l, int t, int r, int b, int ol, int ot, int or, int ob) {
-                if (hasContent(v)) {
-                    v.removeOnLayoutChangeListener(this);
-                    // Never change the view tree from inside a layout pass: the frame is still walking its children, and a
-                    // child removed now is a null the walk then trips over (NullPointerException in FrameLayout.layoutChildren).
-                    v.post(h::release);
-                }
+            int index = parent.indexOfChild(target);
+            if (index < 0) return null;
+            LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            ViewGroup.LayoutParams tlp = target.getLayoutParams();
+            if (tlp instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams m = (ViewGroup.MarginLayoutParams) tlp;
+                slp.setMargins(m.leftMargin, m.topMargin, m.rightMargin, 0);
             }
-        });
-        target.postDelayed(h::release, maxMs);
-        return h;
+            if (skeleton.getParent() instanceof ViewGroup) return null;
+            parent.addView(skeleton, index, slp);
+            target.setVisibility(View.INVISIBLE);
+
+            final Hold h = new Hold(target, skeleton);
+            HOLDS.put(target, h);
+            target.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                @Override public void onLayoutChange(View v, int l, int t, int r, int b, int ol, int ot, int or, int ob) {
+                    if (hasContent(v)) {
+                        v.removeOnLayoutChangeListener(this);
+                        v.post(h::release);      // after the pass, so nothing changes while the parent is laying out
+                    }
+                }
+            });
+            target.postDelayed(h::release, maxMs);
+            return h;
+        } catch (Throwable t) {
+            try { if (target != null) target.setVisibility(View.VISIBLE); } catch (Throwable ignored) { }
+            return null;
+        }
     }
 
     /** Ends the hold on {@code target} now, for loads that finish with nothing to show. */

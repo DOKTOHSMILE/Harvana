@@ -324,8 +324,8 @@ public class CompleteProfileFragmentActivity extends Fragment {
 		
 		// 2. Use getParentFragmentManager() instead of getActivity().getSupportFragmentManager()
 		tv_dob.setOnClickListener(v -> {
-			DialogFragment newFragment = new DatePickerFragment();
-			newFragment.show(getParentFragmentManager(), "datePicker");
+			com.harvana.app.ui.DateSheet.show(getContext(), "Date of birth", true, (y, m, d) ->
+				tv_dob.setText(String.format(java.util.Locale.US, "%02d/%02d/%04d", d, m + 1, y)));
 		});
 		
 		helper.setSpinnerData(spinner_country, helper.getCountryNames());

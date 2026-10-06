@@ -66,19 +66,32 @@ public class ActivityStatsActivity extends AppCompatActivity {
             state.setText("Create or import a wallet to see your activity. Reads and gifts are recorded against your wallet.");
             return;
         }
-        NodeEngagementClient.ownerStats(getApplicationContext(), wallet, new NodeEngagementClient.Callback() {
-            @Override public void onSuccess(JSONObject json) { runOnUiThread(() -> show(json)); }
-            @Override public void onError(String error) {
-                runOnUiThread(() -> state.setText("Could not load your activity right now. Check your connection and try again."));
-            }
-        });
+        load(wallet);
+        state.setOnClickListener(v -> load(wallet));
         NetworkTrust.wallet(wallet, score -> runOnUiThread(() ->
                 tile(R.id.tile_trust, "Trust score", score.published && score.percent >= 0 ? score.percent + "% · " + score.tier : "Not scored yet")));
     }
 
+    private void load(String wallet) {
+        state.setText("Loading your activity\u2026");
+        NodeEngagementClient.ownerStats(getApplicationContext(), wallet, new NodeEngagementClient.Callback() {
+            @Override public void onSuccess(JSONObject json) { runOnUiThread(() -> show(json)); }
+            @Override public void onError(String error) {
+                runOnUiThread(() -> state.setText("Could not load your activity: " + why(error) + " Tap here to try again."));
+            }
+        });
+    }
+
+    private static String why(String e) {
+        if (e == null || e.isEmpty()) return "the network did not answer.";
+        if (e.contains("STALE_TIMESTAMP")) return "your phone's clock is off. Set it to automatic time.";
+        if (e.contains("INVALID_SIGNATURE") || e.contains("PUBLIC_KEY")) return "this wallet could not be verified.";
+        return "the network did not answer (" + (e.length() > 50 ? e.substring(0, 50) : e) + ").";
+    }
+
     private void show(JSONObject j) {
         state.setText(j.optInt("reads", 0) == 0
-                ? "No verified reads yet. Open a Learn Hub post and read it to the end to start."
+                ? "No verified reads yet. Open someone else\u2019s Learn post, scroll to the end and stay a few seconds until it says \u201cCounted as a read\u201d. Your own posts do not count."
                 : "Your reading over the last 30 days.");
         tile(R.id.tile_reads, "Verified reads", String.valueOf(j.optInt("reads", 0)));
         tile(R.id.tile_days, "Active days (30)", String.valueOf(j.optInt("activeDays30", 0)));
@@ -145,6 +158,9 @@ public class ActivityStatsActivity extends AppCompatActivity {
         set.setDrawValues(false);
         BarData data = new BarData(set);
         data.setBarWidth(0.6f);
+        float top = 4f;
+        for (BarEntry e : entries) top = Math.max(top, e.getY() + 1f);
+        chart.getAxisLeft().setAxisMaximum(top);
         chart.setData(data);
         chart.getXAxis().setValueFormatter(xLabels);
         chart.getXAxis().setLabelCount(entries.size(), false);
@@ -162,6 +178,7 @@ public class ActivityStatsActivity extends AppCompatActivity {
         chart.getAxisRight().setEnabled(false);
         chart.getAxisLeft().setTextColor(text);
         chart.getAxisLeft().setAxisMinimum(0f);
+        chart.getAxisLeft().setAxisMaximum(4f);
         chart.getAxisLeft().setGranularity(1f);
         chart.getAxisLeft().setGridColor(ContextCompat.getColor(this, R.color.colorCardStroke));
         chart.getAxisLeft().setDrawAxisLine(false);

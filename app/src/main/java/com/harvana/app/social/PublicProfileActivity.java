@@ -606,7 +606,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         rows.addView(factRow("Vouches", String.valueOf(score.vouches)));
         rows.addView(factRow("Badges", String.valueOf(score.badges)));
         rows.addView(factRow("Established", score.established ? "Yes" : "No"));
-        if (isMe() && !score.bound) {
+        if (isMe() && (!score.bound || !com.harvana.app.sync.NodeLinkManager.isLinked(this))) {
             // Binding ties the wallet to this phone (it raises the base trust score). Offered right here, not only on the Trust screen.
             TextView bind = pillButton("Bind this device", v -> {
                 v.setEnabled(false);
@@ -733,15 +733,25 @@ public class PublicProfileActivity extends AppCompatActivity {
 
     private View learnRow(final com.google.firebase.firestore.DocumentSnapshot d) {
         LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.VERTICAL);
-        row.setPadding(0, SocialUi.dp(this, 12), 0, 0);
-        String title = d.getString("title") == null ? "Untitled" : d.getString("title");
-        row.addView(SocialUi.text(this, title, 15, true, UiColors.textPrimary()));
-        long views = num(d.get("views"));
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(0, SocialUi.dp(this, 12), 0, SocialUi.dp(this, 4));
+        final String title = d.getString("title") == null ? "Untitled" : d.getString("title");
+        final long views = num(d.get("views"));
+        final String vis = visibilityOf(d);
+        LinearLayout text = new LinearLayout(this);
+        text.setOrientation(LinearLayout.VERTICAL);
+        text.addView(SocialUi.text(this, title, 15, true, UiColors.textPrimary()));
         TextView meta = SocialUi.text(this, (d.getString("category") == null ? "General" : d.getString("category"))
-                + "  \u00b7  " + views + (views == 1 ? " view" : " views"), 12, false, UiColors.textSecondary());
+                + "  \u00b7  " + views + (views == 1 ? " view" : " views") + "  \u00b7  " + visibilityLabel(vis), 12, false, UiColors.textSecondary());
         meta.setPadding(0, SocialUi.dp(this, 2), 0, 0);
-        row.addView(meta);
+        text.addView(meta);
+        row.addView(text, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        TextView more = SocialUi.text(this, "\u22EE", 22, true, UiColors.textSecondary());
+        more.setGravity(Gravity.CENTER);
+        more.setPadding(SocialUi.dp(this, 12), SocialUi.dp(this, 4), SocialUi.dp(this, 4), SocialUi.dp(this, 4));
+        more.setOnClickListener(v -> learnMenu(v, d, title, vis));
+        row.addView(more);
         row.setClickable(true);
         row.setOnClickListener(v -> startActivity(new Intent(this, com.harvana.app.LearnReadActivity.class)
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_ID, d.getId())
@@ -754,6 +764,92 @@ public class PublicProfileActivity extends AppCompatActivity {
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_CREATED, num(d.get("createdAt")))
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_VIEWS, views)));
         return row;
+    }
+
+    private static String visibilityOf(com.google.firebase.firestore.DocumentSnapshot d) {
+        String v = d.getString("visibility");
+        return "followers".equals(v) || "private".equals(v) ? v : "public";
+    }
+
+    private static String visibilityLabel(String v) {
+        return "followers".equals(v) ? "Followers" : "private".equals(v) ? "Only me" : "Public";
+    }
+
+    /** More menu on one of my articles: open, edit, who can see it, delete. */
+    private void learnMenu(View anchor, final com.google.firebase.firestore.DocumentSnapshot d, final String title, final String vis) {
+        android.widget.PopupMenu m = new android.widget.PopupMenu(this, anchor);
+        m.getMenu().add(0, 1, 0, "Edit");
+        m.getMenu().add(0, 2, 1, "Visibility: " + visibilityLabel(vis));
+        m.getMenu().add(0, 3, 2, "Copy text");
+        m.getMenu().add(0, 4, 3, "Delete");
+        m.setOnMenuItemClickListener(it -> {
+            switch (it.getItemId()) {
+                case 1: editLearn(d); break;
+                case 2: pickVisibility(d, vis); break;
+                case 3: {
+                    android.content.ClipboardManager cm = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                    if (cm != null) cm.setPrimaryClip(android.content.ClipData.newPlainText("article", title + "\n\n" + (d.getString("description") == null ? "" : d.getString("description"))));
+                    toast("Copied.");
+                    break;
+                }
+                default:
+                    new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Delete this article?")
+                        .setMessage("\u201c" + title + "\u201d is removed for everyone. This cannot be undone.")
+                        .setNegativeButton("Cancel", null)
+                        .setPositiveButton("Delete", (dl, w) -> d.getReference().delete()
+                            .addOnSuccessListener(x -> { learnCache.remove(d); toast("Deleted."); load(); })
+                            .addOnFailureListener(e -> toast("Couldn't delete it. Try again."))).show();
+            }
+            return true;
+        });
+        m.show();
+    }
+
+    private void pickVisibility(final com.google.firebase.firestore.DocumentSnapshot d, String current) {
+        final String[] keys = {"public", "followers", "private"};
+        final String[] names = {"Public \u2014 everyone in Learn", "Followers \u2014 only people who follow me", "Only me \u2014 hidden from everyone else"};
+        int checked = "followers".equals(current) ? 1 : "private".equals(current) ? 2 : 0;
+        new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Who can see this article?")
+            .setSingleChoiceItems(names, checked, (dl, which) -> {
+                dl.dismiss();
+                java.util.Map<String, Object> up = new java.util.HashMap<>();
+                up.put("visibility", keys[which]);
+                d.getReference().update(up)
+                    .addOnSuccessListener(x -> { toast("Now: " + visibilityLabel(keys[which]) + "."); load(); })
+                    .addOnFailureListener(e -> toast("Couldn't change it. The new rules may not be published yet."));
+            }).setNegativeButton("Cancel", null).show();
+    }
+
+    private void editLearn(final com.google.firebase.firestore.DocumentSnapshot d) {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        int pad = SocialUi.dp(this, 20);
+        box.setPadding(pad, SocialUi.dp(this, 8), pad, 0);
+        final android.widget.EditText t = new android.widget.EditText(this);
+        t.setHint("Title");
+        t.setText(d.getString("title"));
+        t.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(120)});
+        final android.widget.EditText b = new android.widget.EditText(this);
+        b.setHint("Article text");
+        b.setText(d.getString("description"));
+        b.setMinLines(6);
+        b.setGravity(Gravity.TOP);
+        b.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(8000)});
+        box.addView(t);
+        box.addView(b);
+        new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Edit article").setView(box)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Save", (dl, w) -> {
+                String nt = t.getText().toString().trim(), nb = b.getText().toString().trim();
+                if (nt.isEmpty() || nb.isEmpty()) { toast("Title and text can't be empty."); return; }
+                java.util.Map<String, Object> up = new java.util.HashMap<>();
+                up.put("title", nt);
+                up.put("description", nb);
+                up.put("editedAt", System.currentTimeMillis());
+                d.getReference().update(up)
+                    .addOnSuccessListener(x -> { toast("Saved."); load(); })
+                    .addOnFailureListener(e -> toast("Couldn't save. The new rules may not be published yet."));
+            }).show();
     }
 
     private static long num(Object o) { return o instanceof Number ? ((Number) o).longValue() : 0L; }
@@ -969,15 +1065,15 @@ public class PublicProfileActivity extends AppCompatActivity {
         c.addView(SocialUi.text(this, "Activity", 16, true, UiColors.textPrimary()));
         LinearLayout grid = new LinearLayout(this);
         grid.setOrientation(LinearLayout.VERTICAL);
-        grid.setPadding(0, SocialUi.dp(this, 12), 0, 0);
+        grid.setPadding(SocialUi.dp(this, 2), SocialUi.dp(this, 10), SocialUi.dp(this, 2), SocialUi.dp(this, 2));
         LinearLayout r1 = new LinearLayout(this);
         r1.setBaselineAligned(false);
-        r1.addView(countTile("Groups", card.groups), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        r1.addView(countTile("Cycles completed", card.cycles), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        r1.addView(countTile("Groups", card.groups));
+        r1.addView(countTile("Cycles completed", card.cycles));
         LinearLayout r2 = new LinearLayout(this);
         r2.setBaselineAligned(false);
-        r2.addView(countTile("Loans", card.loans), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        r2.addView(countTile("Pending loans", card.pendingLoans), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        r2.addView(countTile("Loans", card.loans));
+        r2.addView(countTile("Pending loans", card.pendingLoans));
         grid.addView(r1);
         grid.addView(r2);
         c.addView(grid);
@@ -1000,7 +1096,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         g.setStroke(SocialUi.dp(this, 1), (UiColors.accent() & 0x00FFFFFF) | 0x26000000);
         t.setBackground(g);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        int m = SocialUi.dp(this, 5);
+        int m = SocialUi.dp(this, 6);
         lp.setMargins(m, m, m, m);                                  // space between the tiles and from the card edge
         t.setLayoutParams(lp);
         t.addView(SocialUi.text(this, value < 0 ? "\u2014" : String.valueOf(value), 20, true, UiColors.accent()));

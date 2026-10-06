@@ -73,12 +73,30 @@ public final class NodeLinkManager {
         link(c, addr, status -> { if (done != null) done.onDone(status); });
     }
 
-    /** The "Bind this device" button: binds now, whatever was remembered, and reports what the node said. */
+    /** True when this phone has seen the node accept the link for the active wallet. */
+    public static boolean isLinked(Context c) {
+        String addr = WalletManager.getActiveWalletAddress(c);
+        return addr != null && prefs(c).getBoolean("linked_" + addr, false);
+    }
+
+    /** The "Bind this device" button: binds, then links the wallet to the account, and reports what the node really said. */
     public static void bindNow(Context ctx, Done done) {
         final Context c = ctx.getApplicationContext();
         final String addr = WalletManager.getActiveWalletAddress(c);
         if (addr == null || addr.isEmpty() || WalletManager.loadPrivateKey(c, addr) == null) { if (done != null) done.onDone("No wallet on this phone."); return; }
-        bind(c, addr, () -> { if (done != null) done.onDone(prefs(c).getString("status_" + addr, "")); });
+        SharedPreferences p = prefs(c);
+        p.edit().remove("status_" + addr).remove("linked_" + addr).apply();         // never show an old answer
+        bind(c, addr, () -> {
+            String bindStatus = p.getString("status_" + addr, "");
+            if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) { if (done != null) done.onDone(bindStatus); return; }
+            link(c, addr, linkStatus -> {
+                String out = linkStatus.isEmpty()
+                        ? bindStatus + (p.getBoolean("linked_" + addr, false) ? " Your wallet is linked to your account." : "")
+                        : bindStatus + " " + linkStatus;
+                p.edit().putString("status_" + addr, out.trim()).apply();
+                if (done != null) done.onDone(out.trim());
+            });
+        });
     }
 
     private static void link(Context c, String addr, Done done) {

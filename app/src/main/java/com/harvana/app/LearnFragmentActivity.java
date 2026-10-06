@@ -197,6 +197,31 @@ public class LearnFragmentActivity extends Fragment {
 	private static long timeOf(Map<String, Object> m) { Object o = m.get("createdAt"); return o instanceof Number ? ((Number) o).longValue() : 0L; }
 	private static String strOf(Map<String, Object> m, String k) { Object o = m.get(k); return o == null ? "" : String.valueOf(o); }
 	
+	private List<HashMap<String, Object>> lastPosts;
+	private java.util.Set<String> followingUids;
+	
+	/** Posts the author set to Followers or Only me are hidden from everyone else (the author always sees their own). */
+	private List<HashMap<String, Object>> visibleTo(List<HashMap<String, Object>> posts) {
+		if (followingUids == null) {
+			followingUids = new java.util.HashSet<>();
+			com.harvana.app.social.SocialStore.following((people, err) -> {
+				if (err != null || people == null || getActivity() == null) { followingUids = null; return; }
+				for (com.harvana.app.social.Person pr : people) followingUids.add(pr.uid);
+				if (lastPosts != null) getActivity().runOnUiThread(() -> _onData(lastPosts, false));
+			});
+		}
+		String mine = me();
+		ArrayList<HashMap<String, Object>> out = new ArrayList<>();
+		for (HashMap<String, Object> m : posts) {
+			String v = strOf(m, "visibility");
+			String author = strOf(m, "authorUid");
+			boolean own = !mine.isEmpty() && mine.equals(author);
+			if (own || v.isEmpty() || "public".equals(v)) { out.add(m); continue; }
+			if ("followers".equals(v) && followingUids.contains(author)) out.add(m);
+		}
+		return out;
+	}
+	
 	private String me() {
 		com.google.firebase.auth.FirebaseUser u = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
 		return u == null ? "" : u.getUid();
@@ -247,6 +272,8 @@ public class LearnFragmentActivity extends Fragment {
 	/** Takes the posts from the cache or from Firestore. The first load orders the feed; later loads only merge. */
 	private void _onData(List<HashMap<String, Object>> posts, boolean fromCache) {
 		if (getActivity() == null) return;
+		lastPosts = posts;
+		posts = visibleTo(posts);
 		HashMap<String, HashMap<String, Object>> incoming = new HashMap<>();
 		for (HashMap<String, Object> m : posts) { String id = idOf(m); if (!id.isEmpty()) incoming.put(id, m); }
 		

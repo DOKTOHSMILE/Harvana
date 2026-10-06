@@ -52,5 +52,24 @@ public final class GroupRing {
         });
     }
 
+    /**
+     * Shows a group on a round image: the ring for its type, and its picture when it has one, otherwise {@code placeholderRes}
+     * (0 keeps whatever drawable the view already has). Safe on recycled views: a view that showed a picture before is reset.
+     */
+    public static void show(ImageView v, String groupType, String photoUrl, int placeholderRes) {
+        apply(v, groupType, 3f, Color.TRANSPARENT);
+        try {
+            if (photoUrl != null && photoUrl.startsWith("http")) {
+                v.setImageTintList(null);
+                v.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                com.bumptech.glide.Glide.with(v.getContext().getApplicationContext()).load(photoUrl).circleCrop().into(v);
+            } else {
+                com.bumptech.glide.Glide.with(v.getContext().getApplicationContext()).clear(v);
+                if (placeholderRes != 0) v.setImageResource(placeholderRes);
+                v.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            }
+        } catch (Exception ignored) { }
+    }
+
     public static void apply(ImageView v, String groupType) { apply(v, groupType, 3f, Color.TRANSPARENT); }
 }

@@ -79,7 +79,15 @@ public class InvitesActivity extends AppCompatActivity {
         lp.bottomMargin = dp(12);
         c.setLayoutParams(lp);
 
-        c.addView(tv(s(inv, "groupName"), 17, true, UiColors.textPrimary()));
+        LinearLayout head = new LinearLayout(this);
+        head.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        final android.widget.ImageView face = new android.widget.ImageView(this);
+        com.harvana.app.utils.GroupRing.show(face, "", "", R.drawable.ic_coin_harv);
+        head.addView(face, new LinearLayout.LayoutParams(dp(44), dp(44)));
+        TextView groupTitle = tv(s(inv, "groupName"), 17, true, UiColors.textPrimary());
+        groupTitle.setPadding(dp(12), 0, 0, 0);
+        head.addView(groupTitle, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        c.addView(head);
         c.addView(tv(s(inv, "inviterName") + " invited you", 13, false, UiColors.textSecondary()));
         String msg = s(inv, "message");
         if (!msg.isEmpty()) c.addView(tv("“" + msg + "”", 13, false, UiColors.textPrimary()));
@@ -89,7 +97,10 @@ public class InvitesActivity extends AppCompatActivity {
 
         GroupFirestoreManager.getInstance(this).getGroup(gid, new GroupFirestoreManager.DocCallback() {
             @Override public void onSuccess(Map<String, Object> g) {
-                runOnUiThread(() -> summary.setText(summaryOf(g)));
+                runOnUiThread(() -> {
+                    summary.setText(summaryOf(g));
+                    com.harvana.app.utils.GroupRing.show(face, s(g, "groupType"), s(g, "groupPhoto"), R.drawable.ic_coin_harv);
+                });
             }
             @Override public void onError(String e) {
                 runOnUiThread(() -> summary.setText("Group details unavailable right now."));

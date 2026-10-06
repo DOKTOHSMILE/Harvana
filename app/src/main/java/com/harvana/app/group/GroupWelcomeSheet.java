@@ -78,7 +78,15 @@ public final class GroupWelcomeSheet {
         root.setBackgroundColor(UiColors.surface());
 
         TextView title = text(a, "Welcome to " + str(group, "groupName", "this group"), 20, true, UiColors.textPrimary());
-        root.addView(title);
+        LinearLayout head = new LinearLayout(a);
+        head.setOrientation(LinearLayout.HORIZONTAL);
+        head.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        android.widget.ImageView face = new android.widget.ImageView(a);
+        com.harvana.app.utils.GroupRing.show(face, str(group, "groupType", ""), str(group, "groupPhoto", ""), com.harvana.app.R.drawable.ic_coin_harv);
+        head.addView(face, new LinearLayout.LayoutParams((int) (48 * d), (int) (48 * d)));
+        title.setPadding((int) (12 * d), 0, 0, 0);
+        head.addView(title, new LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        root.addView(head);
         root.addView(text(a, "Read how this group works before you join. You will sign it with your wallet.", 13, false, UiColors.textSecondary()));
 
         ScrollView sv = new ScrollView(a);

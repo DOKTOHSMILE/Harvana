@@ -30,7 +30,7 @@ public class OpenLoansActivity extends AppCompatActivity {
     private TextView summary;
 
     private static final class Row {
-        String groupId, groupName, nodeId = "";
+        String groupId, groupName, nodeId = "", groupPhoto = "", groupType = "";
         double principal, repaid;
     }
 
@@ -87,6 +87,9 @@ public class OpenLoansActivity extends AppCompatActivity {
         });
     }
 
+    /** group id -> {picture, type}, filled as each group document arrives, so a loan row can show its group's picture. */
+    private final java.util.Map<String, String[]> photos = new java.util.concurrent.ConcurrentHashMap<>();
+
     private void fetchLegacy(String uid, List<String> ids, List<Row> rows) {
         if (ids.isEmpty()) { runOnUiThread(() -> show(rows)); return; }
         final AtomicInteger left = new AtomicInteger(ids.size());
@@ -95,6 +98,7 @@ public class OpenLoansActivity extends AppCompatActivity {
             GroupFirestoreManager m = GroupFirestoreManager.getInstance(this);
             m.getGroup(groupId, new GroupFirestoreManager.DocCallback() {
                 @Override public void onSuccess(Map<String, Object> grp) {
+                    photos.put(groupId, new String[] {s(grp.get("groupPhoto")), s(grp.get("groupType"))});
                     loans(m, uid, groupId, s(grp.get("groupName")), rows, left);
                 }
                 @Override public void onError(String e) { loans(m, uid, groupId, "Group", rows, left); }
@@ -110,6 +114,8 @@ public class OpenLoansActivity extends AppCompatActivity {
                         if (!"ACTIVE".equalsIgnoreCase(s(l.get("status"))) || !uid.equals(s(l.get("borrowerUid")))) continue;
                         Row r = new Row();
                         r.groupId = gid; r.groupName = name;
+                        String[] pt = photos.get(gid);
+                        if (pt != null) { r.groupPhoto = pt[0]; r.groupType = pt[1]; }
                         r.principal = n(l.get("principalHarv")) > 0 ? n(l.get("principalHarv")) : n(l.get("amountHarv"));
                         r.repaid = n(l.get("repaidAmountHarv"));
                         rows.add(r);
@@ -147,7 +153,15 @@ public class OpenLoansActivity extends AppCompatActivity {
         lp.topMargin = dp(10);
         c.setLayoutParams(lp);
         double left = Math.max(0, r.principal - r.repaid);
-        c.addView(tv(r.groupName, 16, true, UiColors.textPrimary()));
+        LinearLayout head = new LinearLayout(this);
+        head.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        android.widget.ImageView face = new android.widget.ImageView(this);
+        com.harvana.app.utils.GroupRing.show(face, r.groupType, r.groupPhoto, R.drawable.ic_coin_harv);
+        head.addView(face, new LinearLayout.LayoutParams(dp(40), dp(40)));
+        TextView groupTitle = tv(r.groupName, 16, true, UiColors.textPrimary());
+        groupTitle.setPadding(dp(12), 0, 0, 0);
+        head.addView(groupTitle, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        c.addView(head);
         c.addView(tv("Borrowed " + fmt(r.principal) + " " + CoinInfo.ticker() + " · Repaid " + fmt(r.repaid), 13, false, UiColors.textSecondary()));
         c.addView(tv("Still to pay: " + fmt(left) + " " + CoinInfo.ticker(), 14, true, UiColors.accent()));
         MaterialButton pay = new MaterialButton(this);

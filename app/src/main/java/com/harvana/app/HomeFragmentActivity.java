@@ -743,6 +743,8 @@ public class HomeFragmentActivity extends Fragment {
 		HashMap<String, Object> row = new HashMap<>();
 		row.put("groupId", gid);
 		row.put("groupName", str(data, "groupName", str(data, "name", "Group")));
+		row.put("groupPhoto", str(data, "groupPhoto", ""));
+		row.put("groupType", str(data, "groupType", ""));
 		row.put("amount", num(data, "contributionAmount"));
 		row.put("frequency", str(data, "frequency", ""));
 		row.put("action", r.action.name());
@@ -793,6 +795,8 @@ public class HomeFragmentActivity extends Fragment {
 				final String otherUid = str(row, "otherUid", "");
 				final String amountText = com.harvana.app.wallet.BalanceFormatter.smart(num(row, "amount"));
 				
+				ImageView face = item.findViewById(R.id.imageview1);
+				if (face != null) com.harvana.app.utils.GroupRing.show(face, str(row, "groupType", ""), str(row, "groupPhoto", ""), R.drawable.ic_coin_harv);
 				if (name != null) name.setText(str(row, "groupName", "Group"));
 				if (meta != null) meta.setText(amountText + (str(row, "frequency", "").isEmpty() ? "" : " · " + str(row, "frequency", "")));
 				if (statusLine != null) statusLine.setText(str(row, "statusLine", ""));
@@ -996,6 +1000,8 @@ public class HomeFragmentActivity extends Fragment {
 						String gid = str(g, "_docId", str(g, "groupId", str(g, "id", "")));
 						
 						if (name != null) name.setText(gname);
+						ImageView face = item.findViewById(R.id.imageview1);
+						if (face != null) com.harvana.app.utils.GroupRing.show(face, str(g, "groupType", ""), str(g, "groupPhoto", ""), R.drawable.ic_coin_harv);
 						if (verified != null) verified.setVisibility(View.GONE);
 						if (meta != null)
 						meta.setText(loc + " · " + members + " members · " + freq);

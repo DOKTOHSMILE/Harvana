@@ -628,6 +628,8 @@ public class DiscoverFragmentActivity extends Fragment {
 			
 			HashMap<String, Object> group = _data.get(_position);
 			if (tv_groupName != null) tv_groupName.setText(_safeString(group, "groupName", "Untitled Group"));
+			ImageView iv_group_photo = _view.findViewById(R.id.iv_group_photo);
+			if (iv_group_photo != null) com.harvana.app.utils.GroupRing.show(iv_group_photo, _safeString(group, "groupType", ""), _safeString(group, "groupPhoto", ""), R.drawable.ic_coin_harv);
 			if (tv_status != null) {
 				tv_status.setText(_safeString(group, "status", "Active"));
 			}

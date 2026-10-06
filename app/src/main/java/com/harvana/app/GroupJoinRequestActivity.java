@@ -435,6 +435,20 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 		}
 		
 		if (tv_group_name != null) tv_group_name.setText(loadedGroupName);
+		ImageView avatar = findViewById(R.id.img_group_avatar);
+		if (avatar != null) {
+			String photo = _str(data, "groupPhoto", "");
+			float dd = getResources().getDisplayMetrics().density;
+			ViewGroup.LayoutParams alp = avatar.getLayoutParams();
+			alp.width = (int) (56 * dd); alp.height = (int) (56 * dd);             // fill the round frame instead of a small icon
+			avatar.setLayoutParams(alp);
+			com.harvana.app.utils.GroupRing.show(avatar, _str(data, "groupType", ""), photo, 0);
+			if (!photo.startsWith("http")) {
+				int pad = (int) (14 * dd);
+				avatar.setPadding(pad, pad, pad, pad);
+				avatar.setImageTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
+			}
+		}
 		
 		String city = _str(data, "city", _str(data, "groupCity", ""));
 		String state = _str(data, "state", _str(data, "groupState", ""));

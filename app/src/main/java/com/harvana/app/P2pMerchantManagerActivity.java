@@ -245,7 +245,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 		t.setText(title);
 		t.setTextSize(17f);
 		t.setTypeface(null, android.graphics.Typeface.BOLD);
-		t.setTextColor(android.graphics.Color.WHITE);
+		t.setTextColor(com.harvana.app.utils.UiColors.onFill(fill));
 		t.setGravity(android.view.Gravity.CENTER);
 		box.addView(t);
 		TextView c = new TextView(this);

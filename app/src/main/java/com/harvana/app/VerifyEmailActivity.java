@@ -156,7 +156,7 @@ public class VerifyEmailActivity extends AppCompatActivity {
         Button bt = new Button(this);
         bt.setText(label);
         bt.setAllCaps(false);
-        bt.setTextColor(primary ? Color.WHITE : ContextCompat.getColor(this, R.color.colorAccent));
+        bt.setTextColor(primary ? com.harvana.app.utils.UiColors.onAccent() : ContextCompat.getColor(this, R.color.colorAccent));
         bt.setBackgroundColor(primary ? ContextCompat.getColor(this, R.color.colorAccent) : ContextCompat.getColor(this, R.color.colorSurfaceAlt));
         return bt;
     }

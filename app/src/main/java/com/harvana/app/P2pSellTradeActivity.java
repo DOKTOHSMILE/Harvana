@@ -354,7 +354,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		TextView expressStatus = new TextView(this);
 		expressStatus.setText("WAITING");
 		expressStatus.setTextSize(10f); // Smaller text size for an indicator
-		expressStatus.setTextColor(Color.WHITE); 
+		expressStatus.setTextColor(com.harvana.app.utils.UiColors.onAccent()); 
 		expressStatus.setPadding(24, 12, 24, 12); // Left, Top, Right, Bottom padding
 		expressStatus.setGravity(android.view.Gravity.CENTER);
 		

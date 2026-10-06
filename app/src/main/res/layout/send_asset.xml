@@ -500,7 +500,7 @@
 				android:layout_height="52dp"
 				android:text="Send Funds"
 				android:textStyle="bold"
-				android:textColor="@color/colorTextPrimaryWhite"
+				android:textColor="@color/colorTextOnAccent"
 				android:layout_weight="1"
 				android:textSize="14.5sp"
 				android:layout_marginStart="8dp"

@@ -390,7 +390,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 		String walletAddress) {
 			this.items         = items;
 			this.walletAddress = walletAddress != null ? walletAddress : "";
-			this.COLOR_FAILED   = androidx.core.content.ContextCompat.getColor(context, R.color.colorTextDark);
+			this.COLOR_FAILED   = androidx.core.content.ContextCompat.getColor(context, R.color.colorError);
 			this.COLOR_INCOMING = androidx.core.content.ContextCompat.getColor(context, R.color.colorAccent);
 			this.COLOR_PENDING  = androidx.core.content.ContextCompat.getColor(context, R.color.colorWarning);
 			this.COLOR_OUTGOING = androidx.core.content.ContextCompat.getColor(context, R.color.colorError);

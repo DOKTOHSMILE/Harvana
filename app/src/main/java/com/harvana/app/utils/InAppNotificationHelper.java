@@ -70,7 +70,7 @@ public class InAppNotificationHelper {
                     TextView tvMessage = new TextView(activity);
                     tvMessage.setText(message);
                     tvMessage.setTextSize(13f);
-                    tvMessage.setTextColor(Color.WHITE);
+                    tvMessage.setTextColor(UiColors.textSecondary());
 
                     textLayout.addView(tvTitle);
                     textLayout.addView(tvMessage);

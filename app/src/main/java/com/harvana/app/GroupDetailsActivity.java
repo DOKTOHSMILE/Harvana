@@ -828,6 +828,39 @@ public class GroupDetailsActivity extends AppCompatActivity {
 			return;
 		}
 		
+		// A rotating circle and a savings group also live on the network: their payments never reach the Firestore
+		// payments list, so Collected read 0 for them. A circle's total is what its members have paid in (paidRaw per
+		// member); a savings group's is what every member currently has saved.
+		final String family = com.harvana.app.sync.NodeGroupClient.familyOf(groupId);
+		if ("CIRCLE".equals(family)) {
+			com.harvana.app.sync.NodeGroupClient.getCircleMembers(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
+				@Override public void onSuccess(org.json.JSONObject json) {
+					long paid = 0L;
+					org.json.JSONArray members = json.optJSONArray("members");
+					if (members != null) {
+						for (int i = 0; i < members.length(); i++) {
+							org.json.JSONObject m = members.optJSONObject(i);
+							if (m != null) paid += m.optLong("paidRaw", 0L);
+						}
+					}
+					final double collected = paid / 100_000_000.0;
+					runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(com.harvana.app.wallet.BalanceFormatter.smart(collected)); });
+				}
+				@Override public void onError(String error) { /* keep what is shown */ }
+			});
+			return;
+		}
+		if ("ACCUM".equals(family)) {
+			com.harvana.app.sync.NodeGroupClient.getAccumGroup(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
+				@Override public void onSuccess(org.json.JSONObject json) {
+					final double saved = json.optLong("totalActiveLineBalanceRaw", 0L) / 100_000_000.0;
+					runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(com.harvana.app.wallet.BalanceFormatter.smart(saved)); });
+				}
+				@Override public void onError(String error) { /* keep what is shown */ }
+			});
+			return;
+		}
+		
 		Map<String, Object> cachedTotal = com.harvana.app.offline.OfflineCacheManager.load(
 		getApplicationContext(), "group_total_contributions_" + groupId);
 		if (cachedTotal != null && cachedTotal.get("total") instanceof Number) {

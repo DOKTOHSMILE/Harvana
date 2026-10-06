@@ -1757,7 +1757,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			btnRestoreWallet.setText("Restore group wallet");
 			btnRestoreWallet.setIconResource(R.drawable.ic_shield);
 			btnRestoreWallet.setBackgroundTintList(ColorStateList.valueOf(UiColors.success()));
-			btnRestoreWallet.setTextColor(Color.WHITE);
+			btnRestoreWallet.setTextColor(com.harvana.app.utils.UiColors.onAccent());
 		}
 	}
 	

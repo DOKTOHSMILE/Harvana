@@ -107,7 +107,7 @@
 				android:text="+ Add Payment Method"
 				android:textSize="15sp"
 				android:textStyle="bold"
-				android:textColor="@color/colorTextPrimaryWhite"
+				android:textColor="@color/colorTextOnAccent"
 				android:textAllCaps="false"
 				app:backgroundTint="@color/colorAccent"
 				app:cornerRadius="14dp"

@@ -48,7 +48,7 @@ public class DebugActivity extends Activity {
         // 2. Header Section (Title & Subtitle)
         TextView titleText = new TextView(this);
         titleText.setText("⚠️ Application Crash");
-        titleText.setTextColor(Color.WHITE);
+        titleText.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
         titleText.setTextSize(20f);
         titleText.setTypeface(null, android.graphics.Typeface.BOLD);
         rootLayout.addView(titleText);
@@ -85,7 +85,7 @@ public class DebugActivity extends Activity {
         meaningCard.addView(meaningLabel);
 
         meaningText = new TextView(this);
-        meaningText.setTextColor(Color.WHITE);
+        meaningText.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
         meaningText.setTextSize(15f);
         meaningText.setTextIsSelectable(true);
         meaningText.setPadding(0, (int) (6 * density), 0, 0);

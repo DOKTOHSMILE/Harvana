@@ -68,7 +68,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="1.00x" 
-                    android:textColor="#FFFFFF" 
+                    android:textColor="@color/colorTextPrimary" 
                     android:textSize="12sp" 
                     android:gravity="end" 
                     android:textStyle="bold"/>
@@ -86,7 +86,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0.05% / day" 
-                    android:textColor="#FFFFFF" 
+                    android:textColor="@color/colorTextPrimary" 
                     android:textSize="12sp" 
                     android:gravity="end" 
                     android:textStyle="bold"/>

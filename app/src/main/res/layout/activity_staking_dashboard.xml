@@ -349,7 +349,7 @@
                                 app:strokeWidth="1dp"
                                 app:cardCornerRadius="8dp">
                                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="8dp" android:gravity="center">
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Free" android:textColor="@color/colorTextPrimaryWhite" android:textSize="13sp" android:textStyle="bold"/>
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Free" android:textColor="@color/colorTextPrimary" android:textSize="13sp" android:textStyle="bold"/>
                                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1x · until you unstake" android:textColor="@color/colorTextMuted" android:textSize="10sp"/>
                                 </LinearLayout>
                             </com.google.android.material.card.MaterialCardView>
@@ -365,7 +365,7 @@
                                 app:strokeWidth="1dp"
                                 app:cardCornerRadius="8dp">
                                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="8dp" android:gravity="center">
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="7 days" android:textColor="@color/colorTextPrimaryWhite" android:textSize="13sp" android:textStyle="bold"/>
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="7 days" android:textColor="@color/colorTextPrimary" android:textSize="13sp" android:textStyle="bold"/>
                                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1.25x weight" android:textColor="@color/colorTextMuted" android:textSize="10sp"/>
                                 </LinearLayout>
                             </com.google.android.material.card.MaterialCardView>
@@ -381,7 +381,7 @@
                                 app:strokeWidth="1dp"
                                 app:cardCornerRadius="8dp">
                                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="8dp" android:gravity="center">
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="30 days" android:textColor="@color/colorTextPrimaryWhite" android:textSize="13sp" android:textStyle="bold"/>
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="30 days" android:textColor="@color/colorTextPrimary" android:textSize="13sp" android:textStyle="bold"/>
                                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1.75x weight" android:textColor="@color/colorTextMuted" android:textSize="10sp"/>
                                 </LinearLayout>
                             </com.google.android.material.card.MaterialCardView>
@@ -397,7 +397,7 @@
                                 app:strokeWidth="1dp"
                                 app:cardCornerRadius="8dp">
                                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="8dp" android:gravity="center">
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="90 days" android:textColor="@color/colorTextPrimaryWhite" android:textSize="13sp" android:textStyle="bold"/>
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="90 days" android:textColor="@color/colorTextPrimary" android:textSize="13sp" android:textStyle="bold"/>
                                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="2.5x weight" android:textColor="@color/colorTextMuted" android:textSize="10sp"/>
                                 </LinearLayout>
                             </com.google.android.material.card.MaterialCardView>

@@ -301,7 +301,7 @@
 						android:background="@android:color/transparent"
 						android:text="Request to join"
 						android:textStyle="bold"
-						android:textColor="@color/colorTextOnAccent"
+						android:textColor="@color/colorAccent"
 						android:layout_weight="1"
 						android:textSize="14.5sp" />
 					<LinearLayout

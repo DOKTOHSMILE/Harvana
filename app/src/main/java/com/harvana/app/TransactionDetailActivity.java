@@ -417,24 +417,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 	}
 	
 	private void _shareExportedFile(File file, String mimeType, String subject) {
-		Toast.makeText(this, "Saved to " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
-		try {
-			Uri contentUri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
-			Intent shareIntent = new Intent(Intent.ACTION_SEND);
-			shareIntent.setType(mimeType);
-			shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
-			shareIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-			shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-			startActivity(Intent.createChooser(shareIntent, "Export Complete"));
-		} catch (IllegalArgumentException ex) {
-			StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-			StrictMode.setVmPolicy(builder.build());
-			Uri contentUri = Uri.fromFile(file);
-			Intent shareIntent = new Intent(Intent.ACTION_SEND);
-			shareIntent.setType(mimeType);
-			shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
-			startActivity(Intent.createChooser(shareIntent, "Export Complete"));
-		}
+		com.harvana.app.receipt.ReceiptShare.shareFile(this, file, mimeType, subject);
 	}
 	
 	private Bitmap _getAppLogo() {
@@ -555,143 +538,28 @@ public class TransactionDetailActivity extends AppCompatActivity {
 	}
 	
 	
-	private void _exportTransactionsToImage() {
-		if (!_checkStoragePermission()) return;
-		try {
-			// Create a high-res canvas canvas 
-			int w = 840;
-			int h = 1600; 
-			Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-			Canvas canvas = new Canvas(bitmap);
-			
-			// 1. Draw Receipt Background (Matching your app's Dark Theme)
-			canvas.drawColor(Color.parseColor("#0B132B")); 
-			
-			Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-			
-			// 2. Draw Header & Logo
-			Bitmap logo = _getAppLogo();
-			if (logo != null) {
-				// Scale logo slightly for the high-res canvas
-				Bitmap scaledLogo = Bitmap.createScaledBitmap(logo, 72, 72, true);
-				canvas.drawBitmap(scaledLogo, 40, 40, paint);
-			}
-			
-			paint.setColor(Color.WHITE);
-			paint.setTextSize(26f);
-			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-			canvas.drawText("Transaction Receipt", 130, 70, paint);
-			
-			paint.setColor(Color.parseColor("#8592AD"));
-			paint.setTextSize(16f);
-			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
-			String genDate = new SimpleDateFormat("MMM dd, yyyy · HH:mm", Locale.getDefault()).format(new Date());
-			canvas.drawText("Harvana Protocol Network  ·  Generated: " + genDate, 130, 100, paint);
-			
-			// Header Separator Line
-			paint.setColor(Color.parseColor("#1C2A4A"));
-			paint.setStrokeWidth(2f);
-			canvas.drawLine(40, 140, w - 40, 140, paint);
-			
-			int y = 220;
-			
-			// 3. Draw Main Value & Status
-			SharedPreferences prefs = getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
-			String activeAddress = prefs.getString("active_wallet_address", "").trim();
-			if (activeAddress.isEmpty()) {
-				activeAddress = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
-				if (activeAddress == null) activeAddress = "";
-			}
-			boolean isIncoming = recipient != null && !recipient.isEmpty() && recipient.equalsIgnoreCase(activeAddress);
-			
-			String valuePrefix = isIncoming ? "+ " : "- ";
-			String tokenSymbol = getIntent().getStringExtra("tokenSymbol");
-			if (tokenSymbol == null || tokenSymbol.isEmpty()) tokenSymbol = com.harvana.app.CoinInfo.ticker();
-			
-			// APPLIED FIX
-			String amountStr = valuePrefix + _formatUIBalance(value) + " " + tokenSymbol;
-			
-			paint.setTextAlign(Paint.Align.CENTER);
-			paint.setTextSize(46f);
-			paint.setColor(Color.WHITE);
-			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-			canvas.drawText(amountStr, w / 2f, y, paint);
-			
-			y += 50;
-			String safeStatus = (status == null) ? "UNKNOWN" : status.toUpperCase();
-			paint.setTextSize(20f);
-			if (safeStatus.equals("PENDING")) {
-				paint.setColor(Color.parseColor("#FF9800"));
-			} else if (safeStatus.equals("CONFIRMED") || safeStatus.equals("SUCCESS")) {
-				paint.setColor(Color.parseColor("#4CAF50"));
-			} else {
-				paint.setColor(Color.parseColor("#F44336"));
-			}
-			canvas.drawText(safeStatus, w / 2f, y, paint);
-			
-			// Reset text alignment for rows
-			paint.setTextAlign(Paint.Align.LEFT);
-			y += 90;
-			int paddingX = 50;
-			
-			// 4. Draw Section: Routing
-			paint.setColor(Color.WHITE);
-			paint.setTextSize(22f);
-			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-			canvas.drawText("Routing", paddingX, y, paint);
-			y += 45;
-			y = _drawCanvasRow(canvas, paint, "From Address", sender, paddingX, y);
-			y = _drawCanvasRow(canvas, paint, "To Address", recipient, paddingX, y);
-			y = _drawCanvasRow(canvas, paint, "Memo / Note", (memo != null && !memo.trim().isEmpty()) ? memo : "None", paddingX, y);
-			
-			y += 20;
-			
-			// 5. Draw Section: Network Data
-			paint.setColor(Color.WHITE);
-			paint.setTextSize(22f);
-			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-			canvas.drawText("Network Data", paddingX, y, paint);
-			y += 45;
-			
-			// APPLIED FIX
-			y = _drawCanvasRow(canvas, paint, "Network Fee", _formatUIBalance(harvFee) + (" " + com.harvana.app.CoinInfo.ticker()), paddingX, y);
-			y = _drawCanvasRow(canvas, paint, "Amount Burned", _formatUIBalance(burnAmount) + (" " + com.harvana.app.CoinInfo.ticker()), paddingX, y);
-			
-			SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
-			sdf.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));
-			y = _drawCanvasRow(canvas, paint, "Timestamp", sdf.format(new Date(timestamp)), paddingX, y);
-			
-			y += 20;
-			
-			// 6. Draw Section: Blockchain Details
-			paint.setColor(Color.WHITE);
-			paint.setTextSize(22f);
-			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-			canvas.drawText("Blockchain Details", paddingX, y, paint);
-			y += 45;
-			y = _drawCanvasRow(canvas, paint, "Transaction Hash", txHash != null && !txHash.isEmpty() ? txHash : "N/A", paddingX, y);
-			y = _drawCanvasRow(canvas, paint, "Block Number", blockNumber > 0 ? String.valueOf(blockNumber) : "Pending", paddingX, y);
-			y = _drawCanvasRow(canvas, paint, "Confirmations", confirmations > 0 ? confirmations + "+" : "0 (Pending)", paddingX, y);
-			y = _drawCanvasRow(canvas, paint, "Nonce", String.valueOf(nonce), paddingX, y);
-			
-			// 7. Crop the bitmap height precisely to where the text ended (plus bottom margin)
-			int finalHeight = y + 60;
-			Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, 0, 0, w, Math.min(finalHeight, h));
-			
-			// 8. Save & Share
-			String timeStampName = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-			File imageFile = _getSafeExportFile("receipt_" + timeStampName + ".png");
-			FileOutputStream fos = new FileOutputStream(imageFile);
-			croppedBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-			fos.flush();
-			fos.close();
-			
-			_shareExportedFile(imageFile, "image/png", "Transaction Receipt Image");
-			
-		} catch (Exception e) {
-			Toast.makeText(this, "Image export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+	private com.harvana.app.receipt.Receipt _buildReceipt() {
+		SharedPreferences prefs = getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
+		String activeAddress = prefs.getString("active_wallet_address", "").trim();
+		if (activeAddress.isEmpty()) {
+			activeAddress = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
+			if (activeAddress == null) activeAddress = "";
 		}
+		boolean incoming = recipient != null && !recipient.isEmpty() && recipient.equalsIgnoreCase(activeAddress);
+		String symbol = getIntent().getStringExtra("tokenSymbol");
+		if (symbol == null || symbol.isEmpty()) symbol = com.harvana.app.CoinInfo.ticker();
+		com.harvana.app.tx.TxKind kind = com.harvana.app.tx.TxKind.of(memo, incoming);
+		return com.harvana.app.receipt.Receipts.fromTransaction(kind != null ? kind.title : null, incoming, status,
+		_formatUIBalance(value), symbol, timestamp, sender, recipient, memo,
+		_formatUIBalance(harvFee) + " " + symbol, _formatUIBalance(burnAmount) + " " + symbol,
+		txHash, blockNumber, (long) confirmations, nonce);
 	}
+	
+	/** Shares the receipt as an image: the same drawing everywhere in the app. */
+	private void _exportTransactionsToImage() {
+		com.harvana.app.receipt.ReceiptShare.image(this, _buildReceipt());
+	}
+	
 	
 	private void _exportTransactionsToDocx() {
 		if (!_checkStoragePermission()) return;
@@ -750,137 +618,11 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		}
 	}
 	
+	/** Shares the receipt as a PDF: the same drawing everywhere in the app. */
 	private void _exportTransactionsToPdf() {
-		if (!_checkStoragePermission()) return;
-		try {
-			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-			File pdfFile = _getSafeExportFile("receipt_" + timeStamp + ".pdf");
-			
-			android.graphics.pdf.PdfDocument pdfDocument = new android.graphics.pdf.PdfDocument();
-			// Standard A4 dimensions (595 x 842)
-			android.graphics.pdf.PdfDocument.PageInfo pageInfo = new android.graphics.pdf.PdfDocument.PageInfo.Builder(595, 842, 1).create();
-			android.graphics.pdf.PdfDocument.Page page = pdfDocument.startPage(pageInfo);
-			
-			Canvas canvas = page.getCanvas();
-			Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-			
-			// 1. Draw Dark Background
-			canvas.drawColor(Color.parseColor("#0B132B")); 
-			
-			// 2. Draw Header & Logo
-			Bitmap logo = _getAppLogo();
-			if (logo != null) {
-				Bitmap scaledLogo = Bitmap.createScaledBitmap(logo, 48, 48, true);
-				canvas.drawBitmap(scaledLogo, 35, 35, paint);
-			}
-			
-			paint.setColor(Color.WHITE);
-			paint.setTextSize(20f);
-			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-			canvas.drawText("Transaction Receipt", 100, 55, paint);
-			
-			paint.setColor(Color.parseColor("#8592AD"));
-			paint.setTextSize(12f);
-			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
-			String genDate = new SimpleDateFormat("MMM dd, yyyy · HH:mm", Locale.getDefault()).format(new Date());
-			canvas.drawText("Harvana Protocol Network  ·  Generated: " + genDate, 100, 75, paint);
-			
-			paint.setColor(Color.parseColor("#1C2A4A"));
-			paint.setStrokeWidth(1.5f);
-			canvas.drawLine(35, 110, 560, 110, paint);
-			
-			int y = 170;
-			
-			// 3. Draw Main Value & Status
-			SharedPreferences prefs = getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
-			String activeAddress = prefs.getString("active_wallet_address", "").trim();
-			if (activeAddress.isEmpty()) {
-				activeAddress = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
-				if (activeAddress == null) activeAddress = "";
-			}
-			boolean isIncoming = recipient != null && !recipient.isEmpty() && recipient.equalsIgnoreCase(activeAddress);
-			
-			String valuePrefix = isIncoming ? "+ " : "- ";
-			String tokenSymbol = getIntent().getStringExtra("tokenSymbol");
-			if (tokenSymbol == null || tokenSymbol.isEmpty()) tokenSymbol = com.harvana.app.CoinInfo.ticker();
-			
-			// APPLIED FIX
-			String amountStr = valuePrefix + _formatUIBalance(value) + " " + tokenSymbol;
-			
-			paint.setTextAlign(Paint.Align.CENTER);
-			paint.setTextSize(34f);
-			paint.setColor(Color.WHITE);
-			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-			canvas.drawText(amountStr, 595 / 2f, y, paint);
-			
-			y += 35;
-			String safeStatus = (status == null) ? "UNKNOWN" : status.toUpperCase();
-			paint.setTextSize(16f);
-			if (safeStatus.equals("PENDING")) {
-				paint.setColor(Color.parseColor("#FF9800"));
-			} else if (safeStatus.equals("CONFIRMED") || safeStatus.equals("SUCCESS")) {
-				paint.setColor(Color.parseColor("#4CAF50"));
-			} else {
-				paint.setColor(Color.parseColor("#F44336"));
-			}
-			canvas.drawText(safeStatus, 595 / 2f, y, paint);
-			
-			// Reset text alignment for rows
-			paint.setTextAlign(Paint.Align.LEFT);
-			y += 65;
-			int paddingX = 40;
-			
-			// 4. Draw Section: Routing
-			paint.setColor(Color.WHITE);
-			paint.setTextSize(16f);
-			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-			canvas.drawText("Routing", paddingX, y, paint);
-			y += 35;
-			y = _drawPdfRow(canvas, paint, "From Address", sender, paddingX, y);
-			y = _drawPdfRow(canvas, paint, "To Address", recipient, paddingX, y);
-			y = _drawPdfRow(canvas, paint, "Memo / Note", (memo != null && !memo.trim().isEmpty()) ? memo : "None", paddingX, y);
-			
-			y += 15;
-			
-			// 5. Draw Section: Network Data
-			paint.setColor(Color.WHITE);
-			paint.setTextSize(16f);
-			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-			canvas.drawText("Network Data", paddingX, y, paint);
-			y += 35;
-			
-			// APPLIED FIX
-			y = _drawPdfRow(canvas, paint, "Network Fee", _formatUIBalance(harvFee) + (" " + com.harvana.app.CoinInfo.ticker()), paddingX, y);
-			y = _drawPdfRow(canvas, paint, "Amount Burned", _formatUIBalance(burnAmount) + (" " + com.harvana.app.CoinInfo.ticker()), paddingX, y);
-			
-			SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
-			sdf.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));
-			y = _drawPdfRow(canvas, paint, "Timestamp", sdf.format(new Date(timestamp)), paddingX, y);
-			
-			y += 15;
-			
-			// 6. Draw Section: Blockchain Details
-			paint.setColor(Color.WHITE);
-			paint.setTextSize(16f);
-			paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-			canvas.drawText("Blockchain Details", paddingX, y, paint);
-			y += 35;
-			y = _drawPdfRow(canvas, paint, "Transaction Hash", txHash != null && !txHash.isEmpty() ? txHash : "N/A", paddingX, y);
-			y = _drawPdfRow(canvas, paint, "Block Number", blockNumber > 0 ? String.valueOf(blockNumber) : "Pending", paddingX, y);
-			y = _drawPdfRow(canvas, paint, "Confirmations", confirmations > 0 ? confirmations + "+" : "0 (Pending)", paddingX, y);
-			y = _drawPdfRow(canvas, paint, "Nonce", String.valueOf(nonce), paddingX, y);
-			
-			pdfDocument.finishPage(page);
-			FileOutputStream fos = new FileOutputStream(pdfFile);
-			pdfDocument.writeTo(fos);
-			pdfDocument.close();
-			fos.close();
-			
-			_shareExportedFile(pdfFile, "application/pdf", "Transaction Receipt PDF");
-		} catch (Exception e) {
-			Toast.makeText(this, "PDF export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-		}
+		com.harvana.app.receipt.ReceiptShare.pdf(this, _buildReceipt());
 	}
+	
 	
 	// Dedicated helper for scaling text correctly on the A4 PDF Canvas
 	private int _drawPdfRow(Canvas canvas, Paint paint, String label, String value, int x, int y) {

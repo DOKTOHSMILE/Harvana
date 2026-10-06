@@ -324,7 +324,7 @@ public class SendAssetActivity extends AppCompatActivity {
 			@Override
 			public View getView(int pos, View convertView, @NonNull ViewGroup parent) {
 				TextView tv = (TextView) super.getView(pos, convertView, parent);
-				tv.setTextColor(Color.WHITE);
+				tv.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
 				tv.setTextSize(18);
 				tv.setPadding(24, 16, 24, 16);
 				return tv;
@@ -333,7 +333,7 @@ public class SendAssetActivity extends AppCompatActivity {
 			@Override
 			public View getDropDownView(int pos, View convertView, @NonNull ViewGroup parent) {
 				TextView tv = (TextView) super.getDropDownView(pos, convertView, parent);
-				tv.setTextColor(Color.WHITE);
+				tv.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
 				tv.setTextSize(18);
 				tv.setPadding(24, 24, 24, 24);
 				tv.setBackgroundColor(UiColors.surface());
@@ -712,13 +712,13 @@ public class SendAssetActivity extends AppCompatActivity {
 		
 		View candidateTitle = bottomSheetView.findViewById(R.id.textview2);
 		if (candidateTitle instanceof TextView) {
-			((TextView) candidateTitle).setTextColor(Color.WHITE);
+			((TextView) candidateTitle).setTextColor(com.harvana.app.utils.UiColors.textPrimary());
 			candidateTitle.setPadding(0, 50, 0, 50);
 		} else if (bottomSheetView instanceof ViewGroup) {
 			ViewGroup vg = (ViewGroup) bottomSheetView;
 			if (vg.getChildCount() > 0 && vg.getChildAt(0) instanceof TextView) {
 				TextView tv = (TextView) vg.getChildAt(0);
-				tv.setTextColor(Color.WHITE);
+				tv.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
 				tv.setPadding(0, 50, 0, 50);
 			}
 		}

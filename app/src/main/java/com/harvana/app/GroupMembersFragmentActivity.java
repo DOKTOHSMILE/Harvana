@@ -398,8 +398,32 @@ public class GroupMembersFragmentActivity extends Fragment {
 		});
 	}
 
+	/** What each member has paid in, by wallet, as the network records it (rotating circles). */
+	private final java.util.Map<String, Long> nodePaid = new java.util.HashMap<>();
+	
+	private void _loadNodePaid() {
+		if (!"CIRCLE".equals(com.harvana.app.sync.NodeGroupClient.familyOf(groupId))) return;
+		com.harvana.app.sync.NodeGroupClient.getCircleMembers(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				org.json.JSONArray arr = json.optJSONArray("members");
+				if (arr == null) return;
+				for (int i = 0; i < arr.length(); i++) {
+					org.json.JSONObject m = arr.optJSONObject(i);
+					if (m == null) continue;
+					String addr = m.optString("address", m.optString("memberAddress", ""));
+					if (!addr.isEmpty()) nodePaid.put(addr.toLowerCase(Locale.US), m.optLong("paidRaw", 0L));
+				}
+				if (getActivity() != null) getActivity().runOnUiThread(() -> {
+					if (recycler_members != null && recycler_members.getAdapter() != null) recycler_members.getAdapter().notifyDataSetChanged();
+				});
+			}
+			@Override public void onError(String error) { }
+		});
+	}
+	
 	private void _loadMembers() {
 		if (groupId.isEmpty() || getContext() == null) return;
+		_loadNodePaid();
 		// WhatsApp-style: show the last known member list instantly, before
 		// this Firestore REST call completes.
 		List<HashMap<String, Object>> cachedMembers =
@@ -1027,6 +1051,8 @@ public class GroupMembersFragmentActivity extends Fragment {
 				String memberWallet = str(member, "walletAddress", str(member, "wallet_address", ""));
 				if (memberWallet.startsWith("HV0x")) {
 					h.wallet.setText(_shortAddr(memberWallet));
+					Long paid = nodePaid.get(memberWallet.toLowerCase(Locale.US));
+					if (h.contributions != null && paid != null) h.contributions.setText(com.harvana.app.wallet.BalanceFormatter.smart(paid / 100_000_000.0) + " HARV");
 					_fetchBalance(memberWallet, h.balance);
 				} else {
 					h.wallet.setText("No wallet");
@@ -1126,9 +1152,10 @@ public class GroupMembersFragmentActivity extends Fragment {
 		}
 		
 		class VH extends RecyclerView.ViewHolder {
-			TextView name, wallet, slot, status, role, initials, balance;
+			TextView name, wallet, slot, status, role, initials, balance, contributions;
 			VH(View v) {
 				super(v);
+				contributions = _id(v, "tv_member_contributions");
 				name = _id(v, "tv_member_name");
 				wallet = _id(v, "tv_member_wallet");
 				slot = _id(v, "tv_member_slot");

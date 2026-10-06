@@ -250,7 +250,7 @@ public final class StakingPanel {
             @Override
             public View getView(int pos, View convertView, @NonNull ViewGroup parent) {
                 TextView tv = (TextView) super.getView(pos, convertView, parent);
-                tv.setTextColor(Color.WHITE);
+                tv.setTextColor(themeColor(R.color.colorTextPrimary));
                 tv.setTextSize(18);
                 return tv;
             }
@@ -258,7 +258,7 @@ public final class StakingPanel {
             @Override
             public View getDropDownView(int pos, View convertView, @NonNull ViewGroup parent) {
                 TextView tv = (TextView) super.getDropDownView(pos, convertView, parent);
-                tv.setTextColor(Color.WHITE);
+                tv.setTextColor(themeColor(R.color.colorTextPrimary));
                 tv.setTextSize(16);
                 tv.setPadding(24, 24, 24, 24);
                 tv.setBackgroundColor(themeColor(R.color.colorSurface));
@@ -474,7 +474,7 @@ public final class StakingPanel {
         TextView amountTv = new TextView(host);
         amountTv.setId(View.generateViewId());
         amountTv.setText(harv(u.optLong("amountRaw", 0)));
-        amountTv.setTextColor(Color.WHITE);
+        amountTv.setTextColor(themeColor(R.color.colorTextPrimary));
         amountTv.setTextSize(15);
         amountTv.setTypeface(null, android.graphics.Typeface.BOLD);
 
@@ -684,13 +684,13 @@ public final class StakingPanel {
 
         TextView title = new TextView(host);
         title.setText("Withdrawal Details");
-        title.setTextColor(Color.WHITE);
+        title.setTextColor(themeColor(R.color.colorTextPrimary));
         title.setTextSize(20);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
 
         TextView amountTv = new TextView(host);
         amountTv.setText(harv(u.optLong("amountRaw", 0)));
-        amountTv.setTextColor(Color.WHITE);
+        amountTv.setTextColor(themeColor(R.color.colorTextPrimary));
         amountTv.setTextSize(32);
         amountTv.setTypeface(null, android.graphics.Typeface.BOLD);
         amountTv.setPadding(0, dp(16), 0, dp(4));
@@ -749,7 +749,7 @@ public final class StakingPanel {
             });
         } else {
             actionBtn.setText("Got it");
-            actionBtn.setTextColor(Color.WHITE);
+            actionBtn.setTextColor(themeColor(R.color.colorTextPrimary));
             actionBtn.setBackgroundColor(themeColor(R.color.colorCardStroke));
             actionBtn.setOnClickListener(v -> sheet.dismiss());
         }
@@ -778,7 +778,7 @@ public final class StakingPanel {
 
         TextView valTv = new TextView(host);
         valTv.setText(value);
-        valTv.setTextColor(Color.WHITE);
+        valTv.setTextColor(themeColor(R.color.colorTextPrimary));
         valTv.setTextSize(13);
         valTv.setTypeface(null, android.graphics.Typeface.BOLD);
 
@@ -925,7 +925,7 @@ public final class StakingPanel {
 
         TextView title = new TextView(host);
         title.setText("Unstake this stake");
-        title.setTextColor(Color.WHITE);
+        title.setTextColor(themeColor(R.color.colorTextPrimary));
         title.setTextSize(20);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
 
@@ -949,13 +949,13 @@ public final class StakingPanel {
         inputEt.setBackground(null);
         inputEt.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         inputEt.setHint("0.00");
-        inputEt.setTextColor(Color.WHITE);
+        inputEt.setTextColor(themeColor(R.color.colorTextPrimary));
         inputEt.setTextSize(18);
         inputEt.setHintTextColor(themeColor(R.color.colorTextMuted));
 
         TextView currencyTv = new TextView(host);
         currencyTv.setText("HARV");
-        currencyTv.setTextColor(Color.WHITE);
+        currencyTv.setTextColor(themeColor(R.color.colorTextPrimary));
         currencyTv.setTypeface(null, android.graphics.Typeface.BOLD);
 
         inputContainer.addView(inputEt);

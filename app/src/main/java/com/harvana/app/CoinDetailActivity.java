@@ -592,7 +592,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 			@Override
 			public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 				TextView tv = (TextView) super.getView(position, convertView, parent);
-				tv.setTextColor(Color.WHITE);
+				tv.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
 				tv.setTextSize(16);
 				tv.setPadding(24, 16, 24, 16);
 				return tv;
@@ -600,7 +600,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 			@Override
 			public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
 				TextView tv = (TextView) super.getDropDownView(position, convertView, parent);
-				tv.setTextColor(Color.WHITE);
+				tv.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
 				tv.setTextSize(16);
 				tv.setPadding(32, 28, 32, 28);
 				tv.setBackgroundColor(UiColors.surface());
@@ -852,7 +852,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		});
 		
 		android.widget.TextView tvTitle = (android.widget.TextView) ((android.widget.LinearLayout) bottomSheetView).getChildAt(0);
-		tvTitle.setTextColor(android.graphics.Color.WHITE);
+		tvTitle.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
 		tvTitle.setPadding(0, 50, 0, 50); 
 		
 		com.budiyev.android.codescanner.CodeScannerView scannerComponent = bottomSheetView.findViewById(R.id.scanner_view);

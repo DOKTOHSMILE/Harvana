@@ -38,7 +38,7 @@
 				android:text="Insured Trader Status"
 				android:textSize="22sp"
 				android:textStyle="bold"
-				android:textColor="@android:color/white" />
+				android:textColor="@color/colorTextPrimary" />
 			<TextView
 				android:id="@+id/textview82"
 				android:layout_width="match_parent"
@@ -82,7 +82,7 @@
 								android:text="Insurance Shield"
 								android:textSize="15sp"
 								android:textStyle="bold"
-								android:textColor="@android:color/white" />
+								android:textColor="@color/colorTextPrimary" />
 							<TextView
 								android:id="@+id/textview84"
 								android:layout_width="wrap_content"
@@ -101,7 +101,7 @@
 							android:text="Checking…"
 							android:textStyle="bold"
 							android:textSize="11.5sp"
-							android:textColor="@android:color/white"
+							android:textColor="@color/colorTextPrimary"
 							android:paddingVertical="6dp"
 							android:paddingHorizontal="12dp"
 							android:minWidth="90dp" />
@@ -134,7 +134,7 @@
 							android:text="0.00 HARV"
 							android:textSize="13sp"
 							android:textStyle="bold"
-							android:textColor="@android:color/white" />
+							android:textColor="@color/colorTextPrimary" />
 					</LinearLayout>
 					<LinearLayout
 						android:id="@+id/linear6"
@@ -157,7 +157,7 @@
 							android:text="0.00 HARV"
 							android:textSize="13sp"
 							android:textStyle="bold"
-							android:textColor="@android:color/white" />
+							android:textColor="@color/colorTextPrimary" />
 					</LinearLayout>
 					<LinearLayout
 						android:id="@+id/linear7"
@@ -180,7 +180,7 @@
 							android:text="Checking…"
 							android:textSize="13sp"
 							android:textStyle="bold"
-							android:textColor="@android:color/white" />
+							android:textColor="@color/colorTextPrimary" />
 					</LinearLayout>
 				</LinearLayout>
 			</androidx.cardview.widget.CardView>
@@ -205,7 +205,7 @@
 						android:text="Why become an Insured Trader\?"
 						android:textSize="15sp"
 						android:textStyle="bold"
-						android:textColor="@android:color/white" />
+						android:textColor="@color/colorTextPrimary" />
 					<TextView
 						android:id="@+id/textview5"
 						android:layout_width="match_parent"
@@ -250,7 +250,7 @@
 								android:text="Trader Requirements"
 								android:textSize="15sp"
 								android:textStyle="bold"
-								android:textColor="@android:color/white" />
+								android:textColor="@color/colorTextPrimary" />
 							<TextView
 								android:id="@+id/textview7"
 								android:layout_width="wrap_content"
@@ -269,7 +269,7 @@
 							android:text="Checking…"
 							android:textStyle="bold"
 							android:textSize="11.5sp"
-							android:textColor="@android:color/white"
+							android:textColor="@color/colorTextPrimary"
 							android:paddingVertical="6dp"
 							android:paddingHorizontal="12dp" />
 					</LinearLayout>
@@ -302,7 +302,7 @@
 							android:text="Fully verified identity"
 							android:textSize="13sp"
 							android:layout_weight="1"
-							android:textColor="@android:color/white"
+							android:textColor="@color/colorTextPrimary"
 							android:layout_marginStart="10dp" />
 					</LinearLayout>
 					<LinearLayout
@@ -327,7 +327,7 @@
 							android:text="Clean standing — zero active reports"
 							android:textSize="13sp"
 							android:layout_weight="1"
-							android:textColor="@android:color/white"
+							android:textColor="@color/colorTextPrimary"
 							android:layout_marginStart="10dp" />
 					</LinearLayout>
 					<LinearLayout
@@ -352,7 +352,7 @@
 							android:text="Insurance collateral meets minimum"
 							android:textSize="13sp"
 							android:layout_weight="1"
-							android:textColor="@android:color/white"
+							android:textColor="@color/colorTextPrimary"
 							android:layout_marginStart="10dp" />
 					</LinearLayout>
 					<LinearLayout
@@ -377,7 +377,7 @@
 							android:text="Minimum completed trades threshold"
 							android:textSize="13sp"
 							android:layout_weight="1"
-							android:textColor="@android:color/white"
+							android:textColor="@color/colorTextPrimary"
 							android:layout_marginStart="10dp" />
 					</LinearLayout>
 					<LinearLayout
@@ -402,7 +402,7 @@
 							android:text="Trade reliability metrics"
 							android:textSize="13sp"
 							android:layout_weight="1"
-							android:textColor="@android:color/white"
+							android:textColor="@color/colorTextPrimary"
 							android:layout_marginStart="10dp" />
 					</LinearLayout>
 				</LinearLayout>
@@ -415,7 +415,7 @@
 				android:text="Deposit Insurance Collateral"
 				android:textSize="13sp"
 				android:textStyle="bold"
-				android:textColor="@android:color/white" />
+				android:textColor="@color/colorTextPrimary" />
 			<androidx.cardview.widget.CardView
 				android:id="@+id/layout_deposit_card"
 				android:layout_width="match_parent"
@@ -455,7 +455,7 @@
 							android:inputType="numberDecimal"
 							android:layout_weight="1"
 							android:background="@null"
-							android:textColor="@android:color/white"
+							android:textColor="@color/colorTextPrimary"
 							android:paddingStart="16dp"
 							android:paddingEnd="8dp" />
 						<TextView
@@ -465,7 +465,7 @@
 							android:text="HARV"
 							android:textSize="14sp"
 							android:textStyle="bold"
-							android:textColor="@android:color/white"
+							android:textColor="@color/colorTextPrimary"
 							android:paddingStart="8dp"
 							android:paddingEnd="16dp" />
 					</LinearLayout>
@@ -490,7 +490,7 @@
 							android:text="…"
 							android:textStyle="bold"
 							android:textSize="12.5sp"
-							android:textColor="@android:color/white" />
+							android:textColor="@color/colorTextPrimary" />
 					</LinearLayout>
 				</LinearLayout>
 			</androidx.cardview.widget.CardView>

@@ -368,7 +368,7 @@ public class LearnFragmentActivity extends Fragment {
 			newPill = new TextView(getContext());
 			newPill.setTextSize(13);
 			newPill.setTypeface(null, Typeface.BOLD);
-			newPill.setTextColor(0xFFFFFFFF);
+			newPill.setTextColor(com.harvana.app.utils.UiColors.onAccent());
 			newPill.setGravity(Gravity.CENTER);
 			float d = getResources().getDisplayMetrics().density;
 			newPill.setPadding((int) (16 * d), (int) (8 * d), (int) (16 * d), (int) (8 * d));
@@ -429,7 +429,7 @@ public class LearnFragmentActivity extends Fragment {
 				: androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorSurfaceRaised));
 			}
 			if (holder.label != null) {
-				holder.label.setTextColor(isSelected ? 0xFFFFFFFF
+				holder.label.setTextColor(isSelected ? com.harvana.app.utils.UiColors.onAccent()
 					: androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextPrimary));
 			}
 			

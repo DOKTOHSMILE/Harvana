@@ -1124,7 +1124,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				: getResources().getColor(R.color.colorSurfaceAlt));
 			}
 			if (h.label != null) {
-				h.label.setTextColor(paid ? 0xFFFFFFFF : getResources().getColor(R.color.colorTextPrimary));
+				h.label.setTextColor(paid ? com.harvana.app.utils.UiColors.onAccent() : getResources().getColor(R.color.colorTextPrimary));
 			}
 		}
 		

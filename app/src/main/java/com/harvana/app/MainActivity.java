@@ -278,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
 			TextView b = new TextView(this);
 			b.setText(n > 99 ? "99+" : String.valueOf(n));
 			b.setTextSize(9);
-			b.setTextColor(android.graphics.Color.WHITE);
+			b.setTextColor(com.harvana.app.utils.UiColors.onAccent());
 			b.setGravity(android.view.Gravity.CENTER);
 			b.setBackgroundResource(R.drawable.dot_online);
 			b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(this, R.color.colorError)));

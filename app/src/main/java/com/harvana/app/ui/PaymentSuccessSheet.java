@@ -38,9 +38,11 @@ public final class PaymentSuccessSheet {
     private final TextView status;
     private final SpinnerDrawable ring;
     private final Context ctx;
+    private final Info info;
 
     private PaymentSuccessSheet(Activity a, Info info) {
         ctx = a;
+        this.info = info;
         dialog = new AppSheet(a);
 
         LinearLayout root = new LinearLayout(a);
@@ -52,7 +54,7 @@ public final class PaymentSuccessSheet {
         tick.setText("✓");
         tick.setGravity(Gravity.CENTER);
         tick.setTextSize(44);
-        tick.setTextColor(Color.WHITE);
+        tick.setTextColor(color(R.color.colorTextOnAccent));
         tick.setTypeface(null, Typeface.BOLD);
         android.graphics.drawable.GradientDrawable disc = new android.graphics.drawable.GradientDrawable();
         disc.setShape(android.graphics.drawable.GradientDrawable.OVAL);
@@ -121,14 +123,7 @@ public final class PaymentSuccessSheet {
 
         TextView share = text("Share receipt", 14, R.color.colorAccent, true);
         share.setPadding(0, dp(20), 0, dp(4));
-        share.setOnClickListener(v -> {
-            StringBuilder sb = new StringBuilder(info.title).append("\n\n").append(info.amount);
-            for (String[] r : info.rows) if (r != null && r.length > 1 && r[1] != null && !r[1].isEmpty()) sb.append("\n").append(r[0]).append(": ").append(r[1]);
-            android.content.Intent send = new android.content.Intent(android.content.Intent.ACTION_SEND);
-            send.setType("text/plain");
-            send.putExtra(android.content.Intent.EXTRA_TEXT, sb.toString());
-            a.startActivity(android.content.Intent.createChooser(send, "Share receipt"));
-        });
+        share.setOnClickListener(v -> com.harvana.app.receipt.ReceiptShare.choose(a, com.harvana.app.receipt.Receipts.fromSuccess(info)));
         root.addView(share);
 
         MaterialButton done = new MaterialButton(a);
@@ -160,6 +155,7 @@ public final class PaymentSuccessSheet {
     public boolean isShowing() { return dialog.isShowing(); }
 
     public void setConfirmed(boolean confirmed) {
+        info.confirmed = confirmed;
         if (confirmed) {
             ring.stop();
             status.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null);

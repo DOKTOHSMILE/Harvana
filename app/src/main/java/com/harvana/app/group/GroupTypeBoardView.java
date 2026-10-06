@@ -171,7 +171,7 @@ public final class GroupTypeBoardView {
         tick.setText("\u2713");
         tick.setTextSize(dense ? 10 : 12);
         tick.setTypeface(null, Typeface.BOLD);
-        tick.setTextColor(0xFFFFFFFF);
+        tick.setTextColor(com.harvana.app.utils.UiColors.onAccent());
         tick.setGravity(Gravity.CENTER);
         box.addView(tick);
     }

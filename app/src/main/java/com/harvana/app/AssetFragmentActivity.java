@@ -648,7 +648,7 @@ public class AssetFragmentActivity extends Fragment {
 		
 		// 2. FIX TITLE VISIBILITY (Change text to white for the dark background)
 		android.widget.TextView tvTitle = (android.widget.TextView) ((android.widget.LinearLayout) bottomSheetView).getChildAt(0);
-		tvTitle.setTextColor(android.graphics.Color.WHITE);
+		tvTitle.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
 		tvTitle.setPadding(0, 50, 0, 50); 
 		
 		// 3. FORCE SCANNER TO FILL SCREEN 

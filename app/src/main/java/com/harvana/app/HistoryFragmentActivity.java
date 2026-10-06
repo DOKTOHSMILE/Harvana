@@ -409,24 +409,8 @@ public class HistoryFragmentActivity extends Fragment {
 	}
 	
 	private void _shareExportedFile(File file, String mimeType, String subject) {
-		SketchwareUtil.showMessage(getContext(), "Saved to " + file.getAbsolutePath());
-		try {
-			Uri contentUri = androidx.core.content.FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
-			Intent shareIntent = new Intent(Intent.ACTION_SEND);
-			shareIntent.setType(mimeType);
-			shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
-			shareIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-			shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-			startActivity(Intent.createChooser(shareIntent, "Export Complete"));
-		} catch (IllegalArgumentException ex) {
-			android.os.StrictMode.VmPolicy.Builder builder = new android.os.StrictMode.VmPolicy.Builder();
-			android.os.StrictMode.setVmPolicy(builder.build());
-			Uri contentUri = Uri.fromFile(file);
-			Intent shareIntent = new Intent(Intent.ACTION_SEND);
-			shareIntent.setType(mimeType);
-			shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
-			startActivity(Intent.createChooser(shareIntent, "Export Complete"));
-		}
+		if (getActivity() == null) return;
+		com.harvana.app.receipt.ReceiptShare.shareFile(getActivity(), file, mimeType, subject);
 	}
 	
 	private Bitmap _getAppLogo() {
@@ -518,79 +502,15 @@ public class HistoryFragmentActivity extends Fragment {
 	}
 	
 	private void _exportTransactionsToImage() {
-		if (displayTransactions.isEmpty() || getContext() == null) {
+		if (displayTransactions.isEmpty() || getContext() == null || getActivity() == null) {
 			SketchwareUtil.showMessage(getContext(), "No transactions to export");
 			return;
 		}
-		if (!_checkStoragePermission()) return;
-		
 		try {
-			int limit = Math.min(displayTransactions.size(), 200);
-			int headerHeight = 150;
-			int rowHeight = 70;
-			int totalHeight = headerHeight + (limit * rowHeight) + 40; 
-			int width = 595; 
-			
-			Bitmap bitmap = Bitmap.createBitmap(width, totalHeight, Bitmap.Config.ARGB_8888);
-			Canvas canvas = new Canvas(bitmap);
-			canvas.drawColor(Color.WHITE);
-			Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-			
-			_drawDocumentHeader(canvas, paint, _getAppLogo());
-			
-			int y = headerHeight + 20;
-			
-			for (int i = 0; i < limit; i++) {
-				HashMap<String, Object> tx = displayTransactions.get(i);
-				
-				long ts = (long) num(tx, "timestamp");
-				String date = ts > 0 ? new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new java.util.Date(ts)) : "Pending";
-				String hash = str(tx, "txHash", "");
-				String from = str(tx, "from", "");
-				String to = str(tx, "to", "");
-				boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
-				String type = isOut ? "Sent" : "Received";
-				String counterparty = isOut ? to : from;
-				double amt = HarvanaNodeClient.toHarvDisplay((long) num(tx, "amount"));
-				String memo = str(tx, "memo", "");
-				String status = ((long) num(tx, "confirmations") > 0) ? "Confirmed" : "Pending";
-				
-				paint.setColor(Color.BLACK);
-				paint.setTextSize(11f);
-				paint.setFakeBoldText(true);
-				// APPLIED FIX
-				canvas.drawText(date + "  |  " + type + "  |  " + _formatUIBalance(amt) + (" " + com.harvana.app.CoinInfo.ticker() + "  |  ") + status, 40, y, paint);
-				
-				paint.setFakeBoldText(false);
-				paint.setColor(Color.DKGRAY);
-				paint.setTextSize(10f);
-				y += 15;
-				canvas.drawText("Wallet: " + counterparty, 40, y, paint);
-				y += 15;
-				canvas.drawText("TxHash: " + hash, 40, y, paint);
-				
-				if (!memo.isEmpty()) {
-					y += 15;
-					canvas.drawText("Memo: " + memo, 40, y, paint);
-				}
-				
-				y += 15;
-				paint.setColor(Color.parseColor("#EEEEEE"));
-				canvas.drawLine(40, y, 555, y, paint);
-				y += 10;
-			}
-			
-			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-			File imageFile = _getSafeExportFile("transactions_" + timeStamp + ".png");
-			FileOutputStream fos = new FileOutputStream(imageFile);
-			bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-			fos.flush();
-			fos.close();
-			
-			_shareExportedFile(imageFile, "image/png", "Group Transaction Image");
-			
-		} catch (OutOfMemoryError oom) {
-			SketchwareUtil.showMessage(getContext(), "List is too long for image. Try PDF.");
+			File pdf = _buildStatementPdf();
+			File png = com.harvana.app.receipt.ReceiptShare.cacheFile(getContext(), "images", "harvana-statement.png");
+			com.harvana.app.receipt.ReceiptShare.pdfFirstPageToPng(pdf, png);
+			com.harvana.app.receipt.ReceiptShare.send(getActivity(), png, "image/png", "Harvana transaction statement", null);
 		} catch (Exception e) {
 			SketchwareUtil.showMessage(getContext(), "Image export failed: " + e.getMessage());
 		}
@@ -646,84 +566,45 @@ public class HistoryFragmentActivity extends Fragment {
 		}
 	}
 	
-	private void _exportTransactionsToPdf() {
-		if (displayTransactions.isEmpty() || getContext() == null) {
-			SketchwareUtil.showMessage(getContext(), "No transactions to export");
-			return;
-		}
-		if (!_checkStoragePermission()) return;
-		
-		try {
-			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-			File pdfFile = _getSafeExportFile("transactions_" + timeStamp + ".pdf");
-			
-			android.graphics.pdf.PdfDocument pdfDocument = new android.graphics.pdf.PdfDocument();
-			int pageNumber = 1;
-			android.graphics.pdf.PdfDocument.PageInfo pageInfo = new android.graphics.pdf.PdfDocument.PageInfo.Builder(595, 842, pageNumber).create();
-			android.graphics.pdf.PdfDocument.Page page = pdfDocument.startPage(pageInfo);
-			
-			android.graphics.Canvas canvas = page.getCanvas();
-			android.graphics.Paint paint = new android.graphics.Paint(Paint.ANTI_ALIAS_FLAG);
-			Bitmap logo = _getAppLogo();
-			
-			_drawDocumentHeader(canvas, paint, logo);
-			int y = 140; 
-			
+	private File _buildStatementPdf() throws Exception {
+		{
+			java.util.List<com.harvana.app.receipt.ReceiptRenderer.Row> rows = new java.util.ArrayList<>();
+			double in = 0, out = 0;
 			for (HashMap<String, Object> tx : displayTransactions) {
-				if (y > 750) {
-					pdfDocument.finishPage(page);
-					pageNumber++;
-					pageInfo = new android.graphics.pdf.PdfDocument.PageInfo.Builder(595, 842, pageNumber).create();
-					page = pdfDocument.startPage(pageInfo);
-					canvas = page.getCanvas();
-					_drawDocumentHeader(canvas, paint, logo);
-					y = 140;
-				}
-				
 				long ts = (long) num(tx, "timestamp");
-				String date = ts > 0 ? new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new java.util.Date(ts)) : "Pending";
-				String hash = str(tx, "txHash", "");
 				String from = str(tx, "from", "");
 				String to = str(tx, "to", "");
 				boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
-				String type = isOut ? "Sent" : "Received";
-				String counterparty = isOut ? to : from;
 				double amt = HarvanaNodeClient.toHarvDisplay((long) num(tx, "amount"));
 				String memo = str(tx, "memo", "");
-				String status = ((long) num(tx, "confirmations") > 0) ? "Confirmed" : "Pending";
-				
-				paint.setColor(Color.BLACK);
-				paint.setTextSize(11f);
-				paint.setFakeBoldText(true);
-				// APPLIED FIX
-				canvas.drawText(date + "  |  " + type + "  |  " + _formatUIBalance(amt) + (" " + com.harvana.app.CoinInfo.ticker() + "  |  ") + status, 40, y, paint);
-				
-				paint.setFakeBoldText(false);
-				paint.setColor(Color.DKGRAY);
-				paint.setTextSize(10f);
-				y += 15;
-				canvas.drawText("Wallet: " + counterparty, 40, y, paint);
-				y += 15;
-				canvas.drawText("TxHash: " + hash, 40, y, paint);
-				
-				if (!memo.isEmpty()) {
-					y += 15;
-					canvas.drawText("Memo: " + memo, 40, y, paint);
-				}
-				
-				y += 15;
-				paint.setColor(Color.parseColor("#EEEEEE"));
-				canvas.drawLine(40, y, 555, y, paint);
-				y += 10;
+				com.harvana.app.tx.TxKind kind = com.harvana.app.tx.TxKind.of(memo, !isOut);
+				com.harvana.app.receipt.ReceiptRenderer.Row r = new com.harvana.app.receipt.ReceiptRenderer.Row();
+				r.when = ts > 0 ? new SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault()).format(new java.util.Date(ts)) : "Pending";
+				r.what = kind != null ? kind.title : (isOut ? "Sent" : "Received") + (memo.isEmpty() ? "" : " \u00B7 " + memo);
+				String counterparty = isOut ? to : from;
+				r.detail = (isOut ? "To " : "From ") + (counterparty.length() > 22 ? counterparty.substring(0, 12) + "\u2026" + counterparty.substring(counterparty.length() - 8) : counterparty);
+				r.amount = _formatUIBalance(amt) + " " + com.harvana.app.CoinInfo.ticker();
+				r.direction = isOut ? -1 : 1;
+				r.status = ((long) num(tx, "confirmations") > 0) ? "Confirmed" : "Pending";
+				if (isOut) out += amt; else in += amt;
+				rows.add(r);
 			}
-			
-			pdfDocument.finishPage(page);
-			FileOutputStream fos = new FileOutputStream(pdfFile);
-			pdfDocument.writeTo(fos);
-			pdfDocument.close();
-			fos.close();
-			
-			_shareExportedFile(pdfFile, "application/pdf", "Group Transaction PDF");
+			String stamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+			File pdf = com.harvana.app.receipt.ReceiptShare.cacheFile(getContext(), "docs", "harvana-statement-" + stamp + ".pdf");
+			com.harvana.app.receipt.ReceiptRenderer.renderStatement(getContext(), "Transaction statement",
+			"Group wallet \u00B7 " + displayTransactions.size() + " transactions", rows,
+			_formatUIBalance(in) + " " + com.harvana.app.CoinInfo.ticker(), _formatUIBalance(out) + " " + com.harvana.app.CoinInfo.ticker(), pdf);
+			return pdf;
+		}
+	}
+	
+	private void _exportTransactionsToPdf() {
+		if (displayTransactions.isEmpty() || getContext() == null || getActivity() == null) {
+			SketchwareUtil.showMessage(getContext(), "No transactions to export");
+			return;
+		}
+		try {
+			com.harvana.app.receipt.ReceiptShare.send(getActivity(), _buildStatementPdf(), "application/pdf", "Harvana transaction statement", null);
 		} catch (Exception e) {
 			SketchwareUtil.showMessage(getContext(), "PDF export failed: " + e.getMessage());
 		}

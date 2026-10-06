@@ -28,6 +28,12 @@ public final class UiColors {
     public static int textPrimary()   { return get(R.color.colorTextPrimary); }
     public static int textSecondary() { return get(R.color.colorTextSecondary); }
     public static int textTertiary()  { return get(R.color.colorTextTertiary); }
+    /** Ink or white, whichever reads on this fill. */
+    public static int onFill(int fill) {
+        double r = ((fill >> 16) & 0xFF) / 255.0, g = ((fill >> 8) & 0xFF) / 255.0, b = (fill & 0xFF) / 255.0;
+        double lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        return lum > 0.45 ? 0xFF053D3A : 0xFFFFFFFF;
+    }
     public static int success()       { return get(R.color.colorSuccess); }
     public static int warning()       { return get(R.color.colorWarning); }
     public static int error()         { return get(R.color.colorError); }

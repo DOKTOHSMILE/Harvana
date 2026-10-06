@@ -65,6 +65,6 @@
 		android:text="Continue"
 		android:textSize="14sp"
 		android:textStyle="bold"
-		android:textColor="@color/colorTextPrimaryWhite"
+		android:textColor="@color/colorTextOnAccent"
 		android:backgroundTint="@color/colorAccent" />
 </LinearLayout>

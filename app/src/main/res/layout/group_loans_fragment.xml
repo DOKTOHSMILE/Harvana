@@ -204,7 +204,7 @@
 						android:text="Apply for a Loan"
 						android:textSize="15sp"
 						android:textStyle="bold"
-						android:textColor="@color/colorTextPrimaryWhite"
+						android:textColor="@color/colorTextOnAccent"
 						android:layout_weight="1" />
 					<TextView
 						android:id="@+id/btn_apply_loan"

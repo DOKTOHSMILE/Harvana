@@ -623,3 +623,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Join requests from "Actions & votes"
 - "Actions & votes" opens the network group screen (grants, payouts and their votes). Join requests are not decided there, they are accepted or voted on in the Members tab, so people looking for them found an unrelated screen. That screen now shows a "N people want to join" card with a "Review join requests" button that opens the group's Members tab.
+
+## Join requests: where and how to vote
+- The Members tab now always shows a "JOIN REQUESTS" block at the top for admins and, in vote groups, for every member ("JOIN REQUESTS · VOTE HERE"). With a plain line of instructions: tap Vote Yes or Vote No on each request, it passes at 60% yes (with one member, your Yes is enough). When nobody is waiting it says so, instead of the block being invisible.

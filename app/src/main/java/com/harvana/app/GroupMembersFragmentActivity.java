@@ -553,8 +553,26 @@ public class GroupMembersFragmentActivity extends Fragment {
 							}
 						}
 					}
-					if (panel_pending != null)
-					panel_pending.setVisibility(pendingList.isEmpty() ? View.GONE : View.VISIBLE);
+					// This is where join requests are decided, so it always shows (with a plain how-to) for anyone who can act on them.
+					boolean voteMode = "MEMBER_VOTE".equals(joinApprovalMethod);
+					TextView label = panel_pending == null ? null : panel_pending.findViewById(R.id.tv_pending_label);
+					TextView hint = panel_pending == null ? null : panel_pending.findViewById(R.id.tv_pending_hint);
+					if (label != null) label.setText(voteMode ? "JOIN REQUESTS · VOTE HERE" : "JOIN REQUESTS");
+					if (hint != null) {
+						if (pendingList.isEmpty()) {
+							hint.setText(voteMode
+								? "No one is waiting to join. When someone asks, it appears here and every member taps Vote Yes or Vote No."
+								: "No one is waiting to join. When someone asks, it appears here and you tap Accept or Reject.");
+						} else if (voteMode) {
+							int voters = Math.max(1, activeMemberUids.size());
+							hint.setText("Tap Vote Yes or Vote No on each request. It passes when at least 60% of the " + voters
+								+ (voters == 1 ? " member votes" : " members vote") + " yes"
+								+ (voters == 1 ? ", so your Yes is enough." : "."));
+						} else {
+							hint.setText("Tap Accept to let the person in, or Reject.");
+						}
+					}
+					if (panel_pending != null) panel_pending.setVisibility(View.VISIBLE);
 					if (recycler_pending_members != null)
 					recycler_pending_members.setAdapter(new PendingAdapter(pendingList));
 				});

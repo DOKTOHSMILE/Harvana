@@ -64,6 +64,15 @@
 			android:paddingStart="16dp"
 			android:paddingEnd="16dp"
 			android:letterSpacing="0.06" />
+		<TextView
+			android:id="@+id/tv_pending_hint"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingStart="16dp"
+			android:paddingEnd="16dp"
+			android:paddingBottom="8dp"
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="12.5sp" />
 		<androidx.recyclerview.widget.RecyclerView
 			android:id="@+id/recycler_pending_members"
 			android:layout_width="match_parent"

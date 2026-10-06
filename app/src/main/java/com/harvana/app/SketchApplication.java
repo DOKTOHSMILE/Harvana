@@ -46,6 +46,9 @@ public class SketchApplication extends Application {
             Log.w("SketchApplication", "Firestore settings already applied", e);
         }
         
+        // One phone per account: a newer sign-in elsewhere signs this phone out.
+        com.harvana.app.auth.SessionGuard.install(this);
+        
         // One-time AJ0x -> HV0x wallet address migration (idempotent)
         com.harvana.app.wallet.AddressMigration.run(this);
         

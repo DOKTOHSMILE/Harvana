@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: one phone per account
+
+What the app does. An account can be signed in on one phone at a time. When you sign in on a new phone, that phone stores a session id in your own `USERS/{uid}/private/session` document, and any other phone signed in to the account notices within seconds, signs out and shows "Signed out: this account was signed in on <phone>". Only the sign-in ends: the wallet and its keys stay on the old phone, so nothing is lost. The document also records the phone's make and model and the time. Phones already signed in before this build claim the session the first time they open the new build (the last one to open it keeps it).
+
+What you do. Install the new build on every phone. No rules change: the existing owner-only rule for `USERS/{uid}/private/{doc}` already covers it. Not a security lock: it is checked by the app, so a phone running an old build is not signed out.
+
 ## 6 Oct 2026: My Activity now tracks the whole app
 
 What the app does. From this build the app counts how it is used, on the phone only: screens opened, taps, visits, time in the app, by day, weekday and hour. Only counts are kept (no content, no text, nothing sent to the node or Firestore). My Activity shows the daily chart, busiest days, peak hours (in the phone's time), time today and over 30 days, visits, taps and the most opened screens. The verified-reads tiles still come from the node. Counting starts when the new build is installed, so charts fill up over the following days.

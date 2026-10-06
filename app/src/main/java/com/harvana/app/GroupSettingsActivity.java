@@ -1010,7 +1010,11 @@ public class GroupSettingsActivity extends AppCompatActivity {
 				groupData.putAll(patch);
 				OfflineCacheManager.save(GroupSettingsActivity.this, "group_" + groupId, groupData);
 				runOnUiThread(() -> {
-					if (patch.containsKey("groupPhoto")) { pendingGroupPhoto = null; removeGroupPhoto = false; _buildPhotoRow(); }
+					if (patch.containsKey("groupPhoto")) {
+						// A removed picture is deleted from the picture host as well. (A replaced one is overwritten under the same name.)
+						if ("".equals(patch.get("groupPhoto"))) com.harvana.app.utils.MediaCleaner.delete(GroupSettingsActivity.this, com.harvana.app.utils.MediaCleaner.GROUP_PHOTO, groupId);
+						pendingGroupPhoto = null; removeGroupPhoto = false; _buildPhotoRow();
+					}
 					btnSaveSettings.setEnabled(true);
 					btnSaveSettings.setText("Save Settings");
 					Toast.makeText(GroupSettingsActivity.this, okMsg, Toast.LENGTH_SHORT).show();
@@ -1580,7 +1584,9 @@ public class GroupSettingsActivity extends AppCompatActivity {
 					runOnUiThread(() -> { pd.dismiss(); _showCloseDecision(dec); });
 					return;
 				}
-				if (dec.action == GroupClosePolicy.Action.DELETE && delete) GroupCloser.delete(GroupSettingsActivity.this, groupId, cb);
+				// The picture goes first: the node checks the group's admin from the group profile, which the delete removes.
+				if (dec.action == GroupClosePolicy.Action.DELETE && delete) com.harvana.app.utils.MediaCleaner.delete(GroupSettingsActivity.this, com.harvana.app.utils.MediaCleaner.GROUP_PHOTO, groupId,
+						() -> GroupCloser.delete(GroupSettingsActivity.this, groupId, cb));
 				else GroupCloser.archive(GroupSettingsActivity.this, groupId, str(groupData, "visibility", "Private"), reason, cb);
 			}
 			@Override public void onError(String e) { cb.onError(e); }

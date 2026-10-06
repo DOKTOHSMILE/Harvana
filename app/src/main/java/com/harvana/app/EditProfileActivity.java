@@ -422,6 +422,8 @@ public class EditProfileActivity extends AppCompatActivity {
                 merged.putAll(changes);
                 OfflineCacheManager.save(getApplicationContext(), "profile_" + uid, merged);
                 PublicProfileStore.publishMine(getApplicationContext());
+                // A cover that was removed is deleted from the picture host too, so nothing is left stored.
+                if ("".equals(changes.get("cover"))) com.harvana.app.utils.MediaCleaner.delete(getApplicationContext(), com.harvana.app.utils.MediaCleaner.PROFILE_COVER, null);
                 if (changes.get("icon") instanceof String) {            // the sign-in profile photo, which the Home header reads
                     com.google.firebase.auth.FirebaseUser au = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
                     if (au != null) au.updateProfile(new com.google.firebase.auth.UserProfileChangeRequest.Builder()

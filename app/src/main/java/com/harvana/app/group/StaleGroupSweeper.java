@@ -101,10 +101,12 @@ public final class StaleGroupSweeper {
         });
         OfflineCacheManager.remove(app, "group_" + gid);
         if (uid.equals(str(g.get("creatorId")))) {
-            GroupFirestoreManager.getInstance(app).deleteGroupTree(gid, new GroupFirestoreManager.SimpleCallback() {
-                @Override public void onSuccess() { }
-                @Override public void onError(String error) { }
-            });
+            // Its picture is deleted first (the node checks the admin from the group profile), then the profile itself.
+            com.harvana.app.utils.MediaCleaner.delete(app, com.harvana.app.utils.MediaCleaner.GROUP_PHOTO, gid, () ->
+                GroupFirestoreManager.getInstance(app).deleteGroupTree(gid, new GroupFirestoreManager.SimpleCallback() {
+                    @Override public void onSuccess() { }
+                    @Override public void onError(String error) { }
+                }));
         }
     }
 

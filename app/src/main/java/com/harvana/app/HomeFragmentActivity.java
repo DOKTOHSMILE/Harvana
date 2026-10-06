@@ -757,13 +757,26 @@ public class HomeFragmentActivity extends Fragment {
 	private void _finishUpcoming(String myUid, ArrayList<HashMap<String, Object>> rows,
 	boolean hadConnectivityFailure, List<HashMap<String, Object>> cachedRows) {
 		if (hadConnectivityFailure) {
-			if (cachedRows == null) _renderUpcoming(rows);
+			if (cachedRows == null) { java.util.Collections.sort(rows, UPCOMING_ORDER); _renderUpcoming(rows); }
 			return;
 		}
-		java.util.Collections.sort(rows, (x, y) -> Integer.compare(rank(str(x, "action", "NONE")), rank(str(y, "action", "NONE"))));
+		java.util.Collections.sort(rows, UPCOMING_ORDER);
 		com.harvana.app.offline.OfflineCacheManager.saveList(getContext(), "upcoming_payments_v2_" + myUid, rows);
 		_renderUpcoming(rows);
 	}
+	
+	/**
+	 * Upcoming payments keep one fixed order, so the list does not shuffle on every refresh. The groups' answers arrive in whatever
+	 * order the network happens to return them, so arrival order must never decide: first what needs doing (pay, remind, ...), then
+	 * the group's name, then its id, which never changes.
+	 */
+	private static final java.util.Comparator<HashMap<String, Object>> UPCOMING_ORDER = (x, y) -> {
+		int byAction = Integer.compare(rank(String.valueOf(x.get("action"))), rank(String.valueOf(y.get("action"))));
+		if (byAction != 0) return byAction;
+		int byName = String.valueOf(x.get("groupName")).compareToIgnoreCase(String.valueOf(y.get("groupName")));
+		if (byName != 0) return byName;
+		return String.valueOf(x.get("groupId")).compareTo(String.valueOf(y.get("groupId")));
+	};
 	
 	private static int rank(String action) {
 		return "PAY".equals(action) ? 0 : ("REMIND".equals(action) ? 1 : 2);
@@ -970,8 +983,13 @@ public class HomeFragmentActivity extends Fragment {
 						sorted.add(g);
 					}
 				}
-				Collections.sort(sorted, (a, b) ->
-				Double.compare(num(b, "membersCount"), num(a, "membersCount")));
+				// Most members first; equal counts fall back to name then id, so the two shown never swap places between refreshes.
+				Collections.sort(sorted, (a, b) -> {
+					int byMembers = Double.compare(num(b, "membersCount"), num(a, "membersCount"));
+					if (byMembers != 0) return byMembers;
+					int byName = str(a, "groupName", "").compareToIgnoreCase(str(b, "groupName", ""));
+					return byName != 0 ? byName : str(a, "_docId", "").compareTo(str(b, "_docId", ""));
+				});
 				getActivity().runOnUiThread(() -> {
 					linear_trending_groups.removeAllViews();
 					int show = Math.min(2, sorted.size());

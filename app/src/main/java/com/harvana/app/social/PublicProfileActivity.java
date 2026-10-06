@@ -271,7 +271,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         name.setMaxLines(2);
         name.setEllipsize(android.text.TextUtils.TruncateAt.END);
         nameRow.addView(name, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView chip = pill(card.scored() ? ("New".equals(tierName()) ? "New · " + card.trustPercent + "%" : card.trustPercent + "% · " + tierName()) : "Not scored yet", tint);
+        TextView chip = pill(card.scored() ? ("New".equals(tierName()) ? "New · " + card.trustPercent + "%" : card.trustPercent + "% · " + tierName()) : "New · not scored yet", tint);
         ((LinearLayout.LayoutParams) chip.getLayoutParams()).setMarginStart(SocialUi.dp(this, 8));
         nameRow.addView(chip);
         h.addView(nameRow);
@@ -350,7 +350,11 @@ public class PublicProfileActivity extends AppCompatActivity {
         return sb;
     }
 
-    private String tierName() { return card.trustTier.isEmpty() ? ProfileTrust.tierFor(Math.max(0, card.trustPercent)) : card.trustTier; }
+    /** The tier shown for a member. Before the network has scored them it is "New", never a made-up Bronze. */
+    private String tierName() {
+        if (!card.trustTier.isEmpty()) return card.trustTier;
+        return card.scored() ? ProfileTrust.tierFor(card.trustPercent) : "New";
+    }
 
     private TextView pill(String text, int color) {
         TextView t = SocialUi.text(this, text, 12, true, color);
@@ -860,6 +864,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         LinearLayout c = SocialUi.card(this);
         c.addView(SocialUi.text(this, "Trust score", 16, true, UiColors.textPrimary()));
         if (!card.scored()) {
+            c.addView(SocialUi.text(this, "Tier: " + tierName(), 15, true, ProfileTrust.tierColor(tierName())));
             c.addView(SocialUi.text(this, "The network hasn't published a score for this member yet.", 13, false, UiColors.textSecondary()));
             return c;
         }

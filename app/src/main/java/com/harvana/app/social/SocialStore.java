@@ -158,7 +158,10 @@ public final class SocialStore {
                 Tasks.await(b.commit(), T, TimeUnit.SECONDS);
                 com.harvana.app.trust.AppActivity.note(null, "FRIEND", "Added " + (p.name == null || p.name.isEmpty() ? "a member" : p.name));
                 cb.done(true, null);
-            } catch (Exception e) { cb.done(false, describe(e)); }
+            } catch (Exception e) {
+                String d = describe(e);
+                cb.done(false, d != null && d.toUpperCase(java.util.Locale.US).contains("PERMISSION") ? "You can't follow this member." : d);
+            }
         });
     }
 
@@ -172,6 +175,57 @@ public final class SocialStore {
                 Tasks.await(b.commit(), T, TimeUnit.SECONDS);
                 cb.done(true, null);
             } catch (Exception e) { cb.done(false, describe(e)); }
+        });
+    }
+
+    // ── block / unblock ────────────────────────────────────────────────
+
+    /**
+     * Blocks a member: they leave my followers, I stop following them, and they cannot follow me again until I unblock them
+     * (the rule on FOLLOWERS checks BLOCKS without telling them). Their Learn posts are hidden from my feed.
+     */
+    public static void block(Person p, Cb<Boolean> cb) {
+        final String uid = me();
+        if (uid.isEmpty() || uid.equals(p.uid)) { BG.execute(() -> cb.done(false, uid.equals(p.uid) ? "That's you." : "Sign in first.")); return; }
+        BG.execute(() -> {
+            try {
+                Map<String, Object> row = new HashMap<>();
+                row.put("uid", p.uid); row.put("username", p.username); row.put("name", p.name); row.put("since", System.currentTimeMillis());
+                WriteBatch b = db().batch();
+                b.set(db().collection("BLOCKS").document(uid).collection("list").document(p.uid), row);
+                b.delete(db().collection("FRIENDS").document(uid).collection("list").document(p.uid));          // I no longer follow them
+                b.delete(db().collection("FOLLOWERS").document(p.uid).collection("list").document(uid));
+                b.delete(db().collection("FOLLOWERS").document(uid).collection("list").document(p.uid));        // they no longer follow me
+                Tasks.await(b.commit(), T, TimeUnit.SECONDS);
+                blockedCache = null;
+                cb.done(true, null);
+            } catch (Exception e) { cb.done(false, describe(e)); }
+        });
+    }
+
+    public static void unblock(String otherUid, Cb<Boolean> cb) {
+        final String uid = me();
+        BG.execute(() -> {
+            try {
+                Tasks.await(db().collection("BLOCKS").document(uid).collection("list").document(otherUid).delete(), T, TimeUnit.SECONDS);
+                blockedCache = null;
+                cb.done(true, null);
+            } catch (Exception e) { cb.done(false, describe(e)); }
+        });
+    }
+
+    public static void blocked(Cb<List<Person>> cb) { list("BLOCKS", cb); }
+
+    private static java.util.Set<String> blockedCache;
+
+    /** The uids I have blocked, kept for the session and refreshed after a block or unblock. */
+    public static void blockedIds(Cb<java.util.Set<String>> cb) {
+        if (blockedCache != null) { final java.util.Set<String> c = blockedCache; BG.execute(() -> cb.done(c, null)); return; }
+        blocked((people, err) -> {
+            java.util.Set<String> s = new java.util.HashSet<>();
+            for (Person p : people) s.add(p.uid);
+            if (err == null) blockedCache = s;
+            cb.done(s, err);
         });
     }
 

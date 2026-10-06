@@ -514,9 +514,14 @@ service cloud.firestore {
     }
 
     // Who follows {owner}: the follower writes their own row; the owner reads and may remove rows.
+    // People I have blocked. Only I can read or change this list; the person blocked cannot see it, they just cannot follow me.
+    match /BLOCKS/{owner}/list/{blocked} {
+      allow read, write: if signedIn() && request.auth.uid == owner;
+    }
     match /FOLLOWERS/{owner}/list/{follower} {
       allow read: if signedIn() && request.auth.uid == owner;
-      allow create: if signedIn() && request.auth.uid == follower && request.resource.data.uid == follower;
+      allow create: if signedIn() && request.auth.uid == follower && request.resource.data.uid == follower
+        && !exists(/databases/$(database)/documents/BLOCKS/$(owner)/list/$(follower));
       allow update: if false;
       allow delete: if signedIn() && (request.auth.uid == follower || request.auth.uid == owner);
     }

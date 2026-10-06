@@ -44,7 +44,7 @@ public class FriendsActivity extends AppCompatActivity {
     private LinearLayout listBox, referralHead;
     private EditText searchBox;
     private TextView countLine;
-    private final TextView[] chips = new TextView[4];
+    private final TextView[] chips = new TextView[5];
     private TextView codeLine, codeStats;
     private String myUsername = "";
     private String filter = "";
@@ -72,8 +72,8 @@ public class FriendsActivity extends AppCompatActivity {
         chipScroll.setHorizontalScrollBarEnabled(false);
         LinearLayout chipRow = new LinearLayout(this);
         chipRow.setOrientation(LinearLayout.HORIZONTAL);
-        String[] names = {"Friends", "Following", "Followers", "Referrals"};
-        for (int i = 0; i < 4; i++) {
+        String[] names = {"Friends", "Following", "Followers", "Referrals", "Blocked"};
+        for (int i = 0; i < 5; i++) {
             final int which = i;
             TextView c = SocialUi.text(this, names[i], 14, true, UiColors.textPrimary());
             c.setGravity(Gravity.CENTER);
@@ -167,6 +167,7 @@ public class FriendsActivity extends AppCompatActivity {
     private void reload() {
         SocialStore.following((list, err) -> { following = list; followingLoaded = true; runOnUiThread(this::render); });
         SocialStore.followers((list, err) -> { followers = list; followersLoaded = true; runOnUiThread(this::render); });
+        SocialStore.blocked((list, err) -> { blockedList = list; blockedLoaded = true; runOnUiThread(this::render); });
         SocialStore.myUsername((name, err) -> runOnUiThread(() -> { myUsername = name == null ? "" : name; render(); }));
         ReferralStore.sync(this, (line, err) -> { });
         ReferralStore.asksForMe((list, err) -> { asks = list; runOnUiThread(this::render); });
@@ -207,6 +208,7 @@ public class FriendsActivity extends AppCompatActivity {
         SocialStore.findByUsername(typed, (person, err) -> runOnUiThread(() -> {
             if (person == null) { Toast.makeText(this, err == null ? "Not found." : err, Toast.LENGTH_LONG).show(); return; }
             if (followingIds().contains(person.uid)) { openProfile(person); return; }
+            for (Person b : blockedList) if (b.uid.equals(person.uid)) { Toast.makeText(this, "You blocked " + person.name + ". Unblock them from the Blocked tab first.", Toast.LENGTH_LONG).show(); return; }
             new AlertDialog.Builder(this).setTitle(person.name + (person.handle().isEmpty() ? "" : "  " + person.handle()))
                 .setPositiveButton("Follow", (d, w) -> follow(person))
                 .setNeutralButton("View profile", (d, w) -> openProfile(person))
@@ -220,6 +222,59 @@ public class FriendsActivity extends AppCompatActivity {
             else Toast.makeText(this, e, Toast.LENGTH_LONG).show();
             reload();
         }));
+    }
+
+    private List<Person> blockedList = new ArrayList<>();
+    private boolean blockedLoaded;
+
+    private void blockAsk(Person p) {
+        new AlertDialog.Builder(this).setTitle("Block " + p.name + "?")
+            .setMessage("They are removed from your followers and friends, you stop following them, and they cannot follow you or see your contact links. "
+                + "Their Learn posts are hidden from you. They are not told. You can unblock them any time from the Blocked tab.")
+            .setPositiveButton("Block", (d, w) -> SocialStore.block(p, (ok, e) -> runOnUiThread(() -> {
+                Toast.makeText(this, ok ? p.name + " is blocked." : e, ok ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG).show();
+                reload();
+            })))
+            .setNegativeButton("Cancel", null).show();
+    }
+
+    /** Everyone I have blocked, each with an Unblock button. */
+    private void renderBlocked() {
+        if (!blockedLoaded) {
+            countLine.setText("Blocked");
+            listBox.addView(com.harvana.app.utils.Shimmer.rows(this, 3));
+            return;
+        }
+        List<Person> list = new ArrayList<>();
+        for (Person p : blockedList) if (matches(p)) list.add(p);
+        countLine.setText(filter.isEmpty() ? blockedList.size() + (blockedList.size() == 1 ? " blocked member" : " blocked members") : list.size() + " of " + blockedList.size());
+        if (list.isEmpty()) {
+            TextView t = SocialUi.text(this, blockedList.isEmpty()
+                ? "You have not blocked anyone. Blocking removes someone from your followers, stops them following you and hides their Learn posts."
+                : "No blocked member matches that.", 14, false, UiColors.textSecondary());
+            t.setPadding(SocialUi.dp(this, 2), SocialUi.dp(this, 8), 0, 0);
+            listBox.addView(t);
+            return;
+        }
+        for (Person p : list) {
+            LinearLayout line = new LinearLayout(this);
+            line.setOrientation(LinearLayout.HORIZONTAL);
+            line.setGravity(Gravity.CENTER_VERTICAL);
+            line.setPadding(0, SocialUi.dp(this, 12), 0, SocialUi.dp(this, 12));
+            LinearLayout names = new LinearLayout(this);
+            names.setOrientation(LinearLayout.VERTICAL);
+            names.addView(SocialUi.text(this, p.name, 16, true, UiColors.textPrimary()));
+            if (!p.handle().isEmpty()) names.addView(SocialUi.text(this, p.handle(), 13, false, UiColors.textSecondary()));
+            line.addView(names, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            line.addView(pill("Unblock", false, v -> SocialStore.unblock(p.uid, (ok, e) -> runOnUiThread(() -> {
+                Toast.makeText(this, ok ? p.name + " is unblocked." : e, ok ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG).show();
+                reload();
+            }))));
+            listBox.addView(line);
+            View rule = new View(this);
+            rule.setBackgroundColor((UiColors.textTertiary() & 0x00FFFFFF) | 0x22000000);
+            listBox.addView(rule, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+        }
     }
 
     private void unfollowAsk(Person p) {
@@ -257,11 +312,13 @@ public class FriendsActivity extends AppCompatActivity {
         int waiting = 0;
         for (ReferralStore.Ask a : asks) if (!a.consented()) waiting++;
         chips[3].setText(waiting > 0 ? "Referrals (" + waiting + ")" : "Referrals");
-        searchBox.setHint(tab == 3 ? "Search referrals" : tab == 2 ? "Search followers" : tab == 1 ? "Search following" : "Search friends");
+        chips[4].setText("Blocked");
+        searchBox.setHint(tab == 4 ? "Search blocked" : tab == 3 ? "Search referrals" : tab == 2 ? "Search followers" : tab == 1 ? "Search following" : "Search friends");
 
         listBox.removeAllViews();
         referralHead.removeAllViews();
         if (tab == 3) { countLine.setText("Referrals"); renderReferrals(); return; }
+        if (tab == 4) { renderBlocked(); return; }
         if (!(followingLoaded && followersLoaded)) {
             countLine.setText(tab == 1 ? "Following" : tab == 2 ? "Followers" : "Friends");
             listBox.addView(com.harvana.app.utils.Shimmer.rows(this, 6));
@@ -380,12 +437,14 @@ public class FriendsActivity extends AppCompatActivity {
             m.getMenu().add(0, 1, 0, "View profile");
             if (friend) { m.getMenu().add(0, 2, 1, "Pinch"); m.getMenu().add(0, 3, 2, "Contact links"); }
             if (iFollow) m.getMenu().add(0, 4, 3, "Unfollow");
+            m.getMenu().add(0, 5, 4, "Block");
             m.setOnMenuItemClickListener(item -> {
                 switch (item.getItemId()) {
                     case 1: openProfile(p); return true;
                     case 2: pinch(p); return true;
                     case 3: openCard(this, p); return true;
                     case 4: unfollowAsk(p); return true;
+                    case 5: blockAsk(p); return true;
                     default: return false;
                 }
             });

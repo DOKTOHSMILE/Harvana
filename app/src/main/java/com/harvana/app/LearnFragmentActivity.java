@@ -199,6 +199,7 @@ public class LearnFragmentActivity extends Fragment {
 	
 	private List<HashMap<String, Object>> lastPosts;
 	private java.util.Set<String> followingUids;
+	private java.util.Set<String> blockedUids;
 	
 	/** Posts the author set to Followers or Only me are hidden from everyone else (the author always sees their own). */
 	private List<HashMap<String, Object>> visibleTo(List<HashMap<String, Object>> posts) {
@@ -210,11 +211,20 @@ public class LearnFragmentActivity extends Fragment {
 				if (lastPosts != null) getActivity().runOnUiThread(() -> _onData(lastPosts, false));
 			});
 		}
+		if (blockedUids == null) {
+			blockedUids = new java.util.HashSet<>();
+			com.harvana.app.social.SocialStore.blockedIds((ids, err) -> {
+				if (err != null || ids == null || getActivity() == null) { blockedUids = null; return; }
+				blockedUids = new java.util.HashSet<>(ids);
+				if (!blockedUids.isEmpty() && lastPosts != null) getActivity().runOnUiThread(() -> _onData(lastPosts, false));
+			});
+		}
 		String mine = me();
 		ArrayList<HashMap<String, Object>> out = new ArrayList<>();
 		for (HashMap<String, Object> m : posts) {
 			String v = strOf(m, "visibility");
 			String author = strOf(m, "authorUid");
+			if (blockedUids != null && blockedUids.contains(author)) continue;          // people I have blocked
 			boolean own = !mine.isEmpty() && mine.equals(author);
 			if (own || v.isEmpty() || "public".equals(v)) { out.add(m); continue; }
 			if ("followers".equals(v) && followingUids.contains(author)) out.add(m);

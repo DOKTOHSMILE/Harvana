@@ -413,7 +413,25 @@ public class PublicProfileActivity extends AppCompatActivity {
         else send.setOnClickListener(v -> startActivity(new Intent(this, SendAssetActivity.class).putExtra("toAddress", card.wallet)));
         row.addView(send);
         row.addView(actionTile(R.drawable.ic_pf_share, "Share", v -> shareProfile()));
-        return row;
+        LinearLayout col = new LinearLayout(this);
+        col.setOrientation(LinearLayout.VERTICAL);
+        col.addView(row);
+        final TextView block = SocialUi.text(this, "Block", 13.5f, true, UiColors.textSecondary());
+        block.setGravity(Gravity.CENTER);
+        block.setPadding(0, SocialUi.dp(this, 4), 0, SocialUi.dp(this, 10));
+        SocialStore.blockedIds((ids, err) -> runOnUiThread(() -> {
+            final boolean isBlocked = ids != null && ids.contains(card.uid);
+            block.setText(isBlocked ? "Unblock this member" : "Block this member");
+            block.setOnClickListener(v -> {
+                if (isBlocked) SocialStore.unblock(card.uid, (ok, e) -> runOnUiThread(() -> { toast(ok ? "Unblocked." : e); load(); }));
+                else new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Block " + (card.name.isEmpty() ? "this member" : card.name) + "?")
+                    .setMessage("They are removed from your followers, you stop following them, and they cannot follow you again. Their Learn posts are hidden from you. They are not told.")
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("Block", (d, w) -> SocialStore.block(person(), (ok, e) -> runOnUiThread(() -> { toast(ok ? "Blocked." : e); load(); }))).show();
+            });
+        }));
+        col.addView(block);
+        return col;
     }
 
     /** An icon over a label in a rounded block; the whole block is the tap target. The label is the tile's text, so it can change. */

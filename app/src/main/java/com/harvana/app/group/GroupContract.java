@@ -190,6 +190,7 @@ public final class GroupContract {
      * group wallet, and the network pays out of that wallet to the beneficiary.
      */
     static Section goalSection(Map<String, Object> g, String name, String ticker) {
+        if (!GroupKinds.isOnChain(g)) return keptInAppSection("The goal and where the money goes", "members gather money together for one goal");
         Section s = new Section("The goal and where the money goes");
         double goal = num(g, "targetGoalAmount");
         String desc = str(g, "groupDescription", str(g, "description", ""));
@@ -207,7 +208,7 @@ public final class GroupContract {
             s.add("Who receives the money: no one is chosen in advance. When a member asks for an emergency grant and the group votes yes, that member is paid from the group wallet.");
         } else {
             s.add("Who receives the money when the goal is reached: " + (ben.isEmpty()
-                ? "the wallet chosen by the admin when the group was created (it is shown on the group page before you deposit)"
+                ? "the wallet chosen by the admin when the group was created (it is shown on the group page)"
                 : shortAddr(ben) + ", chosen by the admin when the group was created") + ". The money is paid from the group wallet to that wallet.");
         }
         String r = rule.toLowerCase(Locale.US);
@@ -222,6 +223,7 @@ public final class GroupContract {
 
     /** A rotating circle: what it is for, who started it, and exactly where each payment and each payout goes. */
     static Section circleSection(Map<String, Object> g, String name, String ticker) {
+        if (!GroupKinds.isOnChain(g)) return keptInAppSection("The circle and where the money goes", "members take turns receiving a lump sum that all the others pay in");
         Section s = new Section("The circle and where the money goes");
         long slots = (long) num(g, "totalSlots");
         double amount = num(g, "contributionAmount");
@@ -240,6 +242,7 @@ public final class GroupContract {
 
     /** An accumulative savings group: what it is for, who started it, where a member's savings sit and how they come back. */
     static Section savingsSection(Map<String, Object> g, String name, String ticker) {
+        if (!GroupKinds.isOnChain(g)) return keptInAppSection("The savings group and where the money goes", "members save at their own pace inside one group");
         Section s = new Section("The savings group and where the money goes");
         s.add("The purpose of this group: members save at their own pace inside one group, each in their own savings line, and the group can lend from the pooled money for interest.");
         s.add("Who started it: the admin, the person who created this group. The admin set the loan interest and the withdrawal rule" + ".");
@@ -251,6 +254,16 @@ public final class GroupContract {
         String w = str(g, "withdrawalRule", "");
         s.add("How your money comes back: it is paid from the group wallet to your own wallet when you claim it" + (w.isEmpty() ? "" : ", under the group's withdrawal rule (" + w + ")")
             + ". The admin has to approve a withdrawal request, and an unpaid loan can be taken from your savings.");
+        return s;
+    }
+
+    /** An older group that exists only in the app, not on the network: no network wallet, and the admin can still change its settings. */
+    private static Section keptInAppSection(String title, String purpose) {
+        Section s = new Section(title);
+        s.add("The purpose of this group: " + purpose + ".");
+        s.add("Who started it: the admin, the person who created this group.");
+        s.add("This group is kept in the app only. It is not held on the Harvana network, so the network does not make a wallet for it or enforce its payouts. The admin looks after the group wallet and the records.");
+        s.add("The admin can change this group's settings. If the rules on this page change, read them again before you pay.");
         return s;
     }
 

@@ -55,15 +55,17 @@ public class GroupContractTest {
         Map<String, Object> g = group("Rotating Pool");
         java.util.List<GroupContract.Section> s = GroupContract.sections(g, "HARV");
         assertEquals("In short", s.get(0).title);
-        assertEquals("A simple example", s.get(1).title);
+        assertEquals("The circle and where the money goes", s.get(1).title);
+        assertEquals("A simple example", s.get(2).title);
         assertEquals("Words explained", s.get(s.size() - 1).title);
         boolean hasPot = false;
-        for (String p : s.get(1).points) if (p.contains("450 HARV")) hasPot = true;
+        for (String p : s.get(2).points) if (p.contains("450 HARV")) hasPot = true;
         assertTrue(hasPot); // 9 x 50 (the member being paid does not pay)
     }
 
     @Test public void goalGroupContractStatesTheGoalWhoSetItAndWhereTheMoneyGoes() {
         Map<String, Object> g = group("Fixed Contribution");
+        g.put("nodeGroupId", "FIXED-1");
         g.put("disbursementRule", "Admin-Triggered");
         g.put("beneficiaryAddress", "HV0x1111111111111111111111111111111111111111");
         StringBuilder all = new StringBuilder();
@@ -83,15 +85,28 @@ public class GroupContractTest {
     @Test public void everyGroupTypeStatesWhoStartedItAndWhereTheMoneyGoes() {
         String[][] kinds = {{"Rotating Pool", "The circle and where the money goes"}, {"Accumulative Funds", "The savings group and where the money goes"},
             {"Fixed Contribution", "The goal and where the money goes"}};
+        String[] ids = {"CIRC-1", "ACCUM-1", "FIXED-1"};
+        int n = 0;
         for (String[] k : kinds) {
             boolean found = false;
             StringBuilder all = new StringBuilder();
-            for (GroupContract.Section s : GroupContract.sections(group(k[0]), "HARV")) {
+            Map<String, Object> grp = group(k[0]);
+            grp.put("nodeGroupId", ids[n++]);
+            for (GroupContract.Section s : GroupContract.sections(grp, "HARV")) {
                 if (s.title.equals(k[1])) { found = true; for (String p : s.points) all.append(p); }
             }
             assertTrue(k[0], found);
             assertTrue(k[0], all.toString().contains("Who started it") || all.toString().contains("Who set the goal"));
             assertTrue(k[0], all.toString().contains("company wallet"));
+        }
+    }
+
+    @Test public void aGroupKeptOnlyInTheAppDoesNotClaimANetworkWallet() {
+        for (String type : new String[]{"Rotating Pool", "Accumulative Funds", "Fixed Contribution"}) {
+            StringBuilder all = new StringBuilder();
+            for (GroupContract.Section s : GroupContract.sections(group(type), "HARV")) for (String p : s.points) all.append(p);
+            assertTrue(type, all.toString().contains("kept in the app only"));
+            assertFalse(type, all.toString().contains("no private key"));
         }
     }
 }

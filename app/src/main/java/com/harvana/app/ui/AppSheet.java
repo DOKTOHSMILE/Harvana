@@ -34,10 +34,22 @@ public class AppSheet extends BottomSheetDialog {
         if (getWindow() != null) {
             // The sheet shrinks above the keyboard instead of sliding under it.
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+            paintNavigationBar();
         }
     }
 
     private GradientDrawable fill;
+
+    /** The strip under the sheet (the gesture or button bar) takes the sheet's own colour, so the sheet reaches the bottom of the screen. */
+    private void paintNavigationBar() {
+        android.view.Window w = getWindow();
+        if (w == null) return;
+        int surface = com.google.android.material.color.MaterialColors.getColor(getContext(),
+                com.google.android.material.R.attr.colorSurface, UiColors.surface());
+        w.setNavigationBarColor(surface);
+        boolean light = androidx.core.graphics.ColorUtils.calculateLuminance(surface) > 0.5;
+        androidx.core.view.WindowCompat.getInsetsController(w, w.getDecorView()).setAppearanceLightNavigationBars(light);
+    }
 
     @Override
     protected void onStart() {

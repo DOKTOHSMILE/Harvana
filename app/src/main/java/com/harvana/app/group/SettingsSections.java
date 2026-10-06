@@ -352,7 +352,7 @@ public final class SettingsSections {
             if (fixed || accum) sb.append(yes(true)).append("Ask for payouts, milestones and approve withdrawals (the group still votes where the rules say so)\n");
             sb.append(yes(true)).append("Hand the admin role to another member\n");
             sb.append(yes(true)).append("Close the group\n");
-            sb.append("\nThe admin's vote counts 40% on big decisions (25% when the group has a treasurer, who then holds 15%). The admin cannot take money from anyone's wallet, and cannot move the group wallet without the group's rules.\n");
+            sb.append("\nThe admin's vote counts 40% on big decisions (shared with the treasurer when there is one: the admin always holds more). The admin cannot take money from anyone's wallet, and cannot move the group wallet without the group's rules.\n");
         } else {
             if (treasurer) {
                 if (accum) sb.append(yes(true)).append("Approve members' withdrawal requests (the money still goes only to the member it belongs to)\n");

@@ -2,9 +2,9 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
-## 6 Oct 2026: vote weights with a treasurer: admin 25%, treasurer 15%
+## 6 Oct 2026: vote weights with a treasurer: officers share the 40% in order
 
-What the app does. Nothing new to tap. Text only: the contract of goal and savings groups, the network panel and the admin's permissions page now say that when a group has a treasurer the 40% that used to be the admin's is shared, admin 25% and treasurer 15%, and the members still share 60%. Without a treasurer the admin keeps 40%. What you do: deploy the node jar first (node `docs/DEPLOYMENT.md`, "Group treasurer role"), then install the build. Votes already open keep the weights they started with.
+What the app does. Text only. When a group has a treasurer the 40% that was the admin's alone is shared, calculated from how many members vote: the admin holds the most, then the treasurer, then each member, in equal steps (about 23% and 17% in a group with five voting members, 22% and 18% with four, 25% and 15% with ten). With three voting members or fewer the officers split the 40% evenly. Members still share 60%. Without a treasurer the admin keeps 40%. The contract, the network panel and the admin's permissions page say so. What you do: deploy the node jar first (node `docs/DEPLOYMENT.md`, "Group treasurer role"), then install the build. Votes already open keep the weights they started with.
 
 ## 6 Oct 2026: treasurer role (needs the new node jar)
 

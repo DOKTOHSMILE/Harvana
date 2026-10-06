@@ -173,7 +173,7 @@ public final class NodeSettingsPanel {
     // ── rules text ─────────────────────────────────────────────────────────
 
     static String rulesText(String family) {
-        String common = "When a vote is needed, the admin counts for 40% (25% if the group has a treasurer, who counts 15%) and the other members share 60% (the five who have put in the most, or everyone if fewer). "
+        String common = "When a vote is needed, the admin counts for 40% (shared with the treasurer if there is one, the admin always holding more) and the other members share 60% (the five who have put in the most, or everyone if fewer). "
                 + "A vote passes at 51% yes, with at least two yes votes and one of them from someone other than the person who asked. "
                 + "Only members who have paid in at least once and joined 48 hours ago can vote, and the voters are fixed when the vote starts. "
                 + "You can change your vote until it is decided.";

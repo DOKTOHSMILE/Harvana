@@ -308,102 +308,18 @@ public class DiscoverFragmentActivity extends Fragment {
 	}
 	private void _promptSearch() {
 		if (getActivity() == null) return;
-		
-		com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog = 
-		new com.harvana.app.ui.AppSheet(getActivity());
-		
-		// Root layout for the bottom sheet configured to match parent height
-		android.widget.LinearLayout layout = new android.widget.LinearLayout(getActivity());
-		layout.setOrientation(android.widget.LinearLayout.VERTICAL);
-		layout.setLayoutParams(new android.view.ViewGroup.LayoutParams(
-		android.view.ViewGroup.LayoutParams.MATCH_PARENT, 
-		android.view.ViewGroup.LayoutParams.MATCH_PARENT));
-		
-		int padding = (int) (16 * getResources().getDisplayMetrics().density);
-		layout.setPadding(padding, padding, padding, padding);
-		
-		// Title
-		android.widget.TextView title = new android.widget.TextView(getActivity());
-		title.setText("Search groups");
-		title.setTextSize(18);
-		title.setTypeface(null, android.graphics.Typeface.BOLD);
-		title.setPadding(0, 0, 0, padding);
-		layout.addView(title);
-		
-		// Input EditText
-		final android.widget.EditText input = new com.google.android.material.textfield.TextInputEditText(getActivity());
-		input.setHint("Group name…");
-		input.setText(searchQuery);
-		input.setSingleLine(true);
-		layout.addView(input);
-		
-		// Buttons Container (Horizontal Layout)
-		android.widget.LinearLayout buttonLayout = new android.widget.LinearLayout(getActivity());
-		buttonLayout.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-		buttonLayout.setGravity(android.view.Gravity.END);
-		buttonLayout.setPadding(0, padding, 0, 0);
-		
-		// Clear Button (Neutral)
-		android.widget.Button btnClear = com.harvana.app.ui.Btn.text(getActivity(), "Clear", null);
-		btnClear.setOnClickListener(v -> {
-			searchQuery = "";
-			if (tv_search != null) tv_search.setText("Search group");
-			_applyFilterAndSort();
-			bottomSheetDialog.dismiss();
-		});
-		
-		// Search Button (Positive)
-		android.widget.Button btnSearch = com.harvana.app.ui.Btn.filled(getActivity(), "Search", null);
-		btnSearch.setOnClickListener(v -> {
-			searchQuery = input.getText().toString().trim().toLowerCase(java.util.Locale.US);
-			if (tv_search != null) {
-				tv_search.setText(searchQuery.isEmpty() ? "Search group" : searchQuery);
+		com.harvana.app.ui.SearchSheet.show(getActivity(), "Search groups", "Group name, state or type", searchQuery,
+		new com.harvana.app.ui.SearchSheet.Listener() {
+			@Override public void onQuery(String q) {
+				searchQuery = q.toLowerCase(java.util.Locale.US);
+				if (tv_search != null) tv_search.setText(searchQuery.isEmpty() ? "Search group" : searchQuery);
+				_applyFilterAndSort();
 			}
-			_applyFilterAndSort();
-			bottomSheetDialog.dismiss();
-		});
-		
-		buttonLayout.addView(btnClear);
-		buttonLayout.addView(btnSearch);
-		layout.addView(buttonLayout);
-		
-		bottomSheetDialog.setContentView(layout);
-		
-		// Force Full-Screen State and Expand on Show
-		bottomSheetDialog.setOnShowListener(dialog -> {
-			com.google.android.material.bottomsheet.BottomSheetDialog d = 
-			(com.google.android.material.bottomsheet.BottomSheetDialog) dialog;
-			
-			android.widget.FrameLayout bottomSheet = d.findViewById(
-			com.google.android.material.R.id.design_bottom_sheet);
-			
-			if (bottomSheet != null) {
-				com.google.android.material.bottomsheet.BottomSheetBehavior<android.view.View> behavior = 
-				com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet);
-				
-				// Force the layout height to match the full screen height
-				android.view.ViewGroup.LayoutParams params = bottomSheet.getLayoutParams();
-				int screenHeight = getResources().getDisplayMetrics().heightPixels;
-				if (params != null) {
-					params.height = screenHeight;
-					bottomSheet.setLayoutParams(params);
-				}
-				
-				// Skip the collapsed state and expand completely
-				behavior.setSkipCollapsed(true);
-				behavior.setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
-			}
-			
-			// Trigger keyboard focus
-			input.requestFocus();
-			android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) 
-			getActivity().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
-			if (imm != null) {
-				imm.showSoftInput(input, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+			@Override public String summary() {
+				int n = displayGroups.size();
+				return n == 1 ? "1 group matches" : n + " groups match";
 			}
 		});
-		
-		bottomSheetDialog.show();
 	}
 	
 	private void _loadPublicGroups() {

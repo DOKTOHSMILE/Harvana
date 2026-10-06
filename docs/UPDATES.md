@@ -666,3 +666,7 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 - **Apply** saves the choice on the phone, so closing and reopening the app keeps it; the chip shows what is applied (Global, a country, "state, country" or "city, state"). **Reset to global** clears it.
 - Discover now loads up to 300 public groups (was 50) so the filter has enough to work with, and the "On network" checkbox re-filters when it is switched off as well as on.
 - Groups created without a country, state or city only appear under Global.
+
+## One full-screen search sheet (Groups and Discover)
+- Searching on the Groups tab now opens the same full-screen sheet as Discover (before, the search box on Groups did nothing). New shared sheet `ui/SearchSheet.java`: one row, side by side, with a **close** button, the **search field** and a **clear** button. The list behind filters as you type, a line shows how many groups match, the keyboard's search key closes the sheet, close keeps what you typed and clear empties the field. Discover uses the same sheet instead of its old Clear/Search buttons.
+- Groups search matches name, type, city, state, country and frequency. The Filter button on Groups now works too: All my groups, Rotating, Accumulative, Fixed contribution, or Groups I run.

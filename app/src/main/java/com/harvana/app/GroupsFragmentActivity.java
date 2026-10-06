@@ -70,6 +70,9 @@ public class GroupsFragmentActivity extends Fragment {
 	private ArrayList<HashMap<String, Object>> myGroupMap = new ArrayList<>();
 	private ArrayList<HashMap<String, Object>> generalGroup = new ArrayList<>();
 	private ArrayList<HashMap<String, Object>> myGroups = new ArrayList<>();
+	private final ArrayList<HashMap<String, Object>> shownGroups = new ArrayList<>();   // myGroups after the search and the type filter
+	private String groupQuery = "";
+	private String typeFilter = "";
 	
 	private NestedScrollView vscroll4;
 	private LinearLayout linear1;
@@ -158,6 +161,58 @@ public class GroupsFragmentActivity extends Fragment {
 		}
 	}
 	
+	private void _openGroupSearch() {
+		if (getActivity() == null) return;
+		com.harvana.app.ui.SearchSheet.show(getActivity(), "Search my groups", "Name, type, city or state", groupQuery,
+		new com.harvana.app.ui.SearchSheet.Listener() {
+			@Override public void onQuery(String q) {
+				groupQuery = q.toLowerCase(java.util.Locale.US);
+				if (et_search_groups != null) et_search_groups.setText(q);
+				_showGroups();
+			}
+			@Override public String summary() {
+				int n = shownGroups.size();
+				return n == 1 ? "1 group matches" : n + " groups match";
+			}
+		});
+	}
+	
+	private void _openTypeFilter() {
+		if (getContext() == null) return;
+		final String[] labels = {"All my groups", "Rotating", "Accumulative", "Fixed contribution", "Groups I run"};
+		final String[] keys = {"", "rotat", "accum", "fixed", "admin"};
+		new com.harvana.app.ui.SheetDialog.Builder(getContext()).setTitle("Show")
+			.setItems(labels, (dlg, which) -> {
+				typeFilter = keys[which];
+				if (btn_filter_groups != null) btn_filter_groups.setText(typeFilter.isEmpty() ? "Filter" : labels[which]);
+				_showGroups();
+			}).setNegativeButton("Cancel", null).show();
+	}
+	
+	/** Puts my groups on screen after the search words and the type filter. Every place that refreshes the list comes through here. */
+	private void _showGroups() {
+		shownGroups.clear();
+		for (HashMap<String, Object> g : myGroups) {
+			if (!typeFilter.isEmpty()) {
+				if ("admin".equals(typeFilter)) {
+					String mine = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
+						: com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+					if (mine.isEmpty() || !mine.equals(String.valueOf(g.get("creatorId")))) continue;
+				} else if (!String.valueOf(g.get("groupType")).toLowerCase(java.util.Locale.US).contains(typeFilter)) continue;
+			}
+			if (!groupQuery.isEmpty()) {
+				StringBuilder hay = new StringBuilder();
+				for (String k : new String[]{"groupName", "groupType", "city", "state", "country", "frequency"}) {
+					Object v = g.get(k);
+					if (v != null) hay.append(v).append(' ');
+				}
+				if (!hay.toString().toLowerCase(java.util.Locale.US).contains(groupQuery)) continue;
+			}
+			shownGroups.add(g);
+		}
+		if (listview1 != null) listview1.setAdapter(new Listview1Adapter(shownGroups));
+	}
+	
 	private void _promptCircleId() {
 		final EditText input = new com.google.android.material.textfield.TextInputEditText(getContext());
 		input.setHint("CIRC-…");
@@ -220,12 +275,23 @@ public class GroupsFragmentActivity extends Fragment {
 		
 		cardview1.setOnClickListener(_v -> com.harvana.app.group.CreateGroupSheet.show(getContext()));
 		
+		// Search opens the same full-screen sheet as Discover; the box on this screen only shows what was typed.
+		if (et_search_groups != null) {
+			et_search_groups.setFocusable(false);
+			et_search_groups.setCursorVisible(false);
+			et_search_groups.setOnClickListener(_v -> _openGroupSearch());
+		}
+		if (btn_filter_groups != null) {
+			btn_filter_groups.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+			btn_filter_groups.setOnClickListener(_v -> _openTypeFilter());
+		}
+		
 		listview1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> _param1, View _param2, int _param3, long _param4) {
 				final int _position = _param3;
-				if (_position < 0 || _position >= myGroups.size()) return;
-				Object gid = myGroups.get(_position).get("groupId");
+				if (_position < 0 || _position >= shownGroups.size()) return;
+				Object gid = shownGroups.get(_position).get("groupId");
 				if (gid == null || gid.toString().isEmpty()) return;
 				i.putExtra("groupId", gid.toString());
 				i.setClass(getContext().getApplicationContext(), GroupDetailsActivity.class);
@@ -391,7 +457,7 @@ public class GroupsFragmentActivity extends Fragment {
 		if (cachedGroups != null && !cachedGroups.isEmpty() && getActivity() != null) {
 			myGroups.clear();
 			myGroups.addAll(cachedGroups);
-			listview1.setAdapter(new Listview1Adapter(myGroups));
+			_showGroups();
 		}
 		
 		com.harvana.app.firestore.UserProfileManager.getInstance(getContext()).getProfile(uid,
@@ -409,7 +475,7 @@ public class GroupsFragmentActivity extends Fragment {
 					if (getActivity() == null) return;
 					getActivity().runOnUiThread(() -> {
 						myGroups.clear();
-						listview1.setAdapter(new Listview1Adapter(myGroups));
+						_showGroups();
 						com.harvana.app.utils.Shimmer.release(listview1);
 					});
 					return;
@@ -424,7 +490,7 @@ public class GroupsFragmentActivity extends Fragment {
 					if (getActivity() == null) return;
 					getActivity().runOnUiThread(() -> {
 						myGroups.clear();
-						listview1.setAdapter(new Listview1Adapter(myGroups));
+						_showGroups();
 						com.harvana.app.utils.Shimmer.release(listview1);
 					});
 					return;
@@ -510,7 +576,7 @@ public class GroupsFragmentActivity extends Fragment {
 							for (HashMap<String, Object> row : resultsByIndex) {
 								if (row != null) myGroups.add(row);
 							}
-							listview1.setAdapter(new Listview1Adapter(myGroups));
+							_showGroups();
 							// Update the cache with what's now genuinely fresh,
 							// so the NEXT open shows this instead of today's data.
 							com.harvana.app.offline.OfflineCacheManager.saveList(getContext(), "my_groups_" + uid, myGroups);
@@ -519,7 +585,7 @@ public class GroupsFragmentActivity extends Fragment {
 								if (getActivity() == null) return;
 								getActivity().runOnUiThread(() -> {
 									for (java.util.Iterator<HashMap<String, Object>> it = myGroups.iterator(); it.hasNext(); ) { if (cleared.contains(String.valueOf(it.next().get("groupId")))) it.remove(); }
-									listview1.setAdapter(new Listview1Adapter(myGroups));
+									_showGroups();
 									com.harvana.app.offline.OfflineCacheManager.saveList(getContext(), "my_groups_" + uid, myGroups);
 									Toast.makeText(getContext(), cleared.size() == 1 ? "Removed a group that no longer exists on the network."
 										: "Removed " + cleared.size() + " groups that no longer exist on the network.", Toast.LENGTH_LONG).show();

@@ -53,6 +53,8 @@ public final class GroupTypeBoard {
         public boolean backpayable;
         /** Today or an upcoming unpaid day of a daily savings line: can be paid ahead, from today in order. */
         public boolean forwardPayable;
+        /** The "+ New goal" box on a goal group: tapping it starts a new goal. */
+        public boolean newGoal;
 
         public Cell(String top, String bottom, String title, String body, int state, boolean payToday) {
             this.top = top == null ? "" : top;
@@ -240,7 +242,7 @@ public final class GroupTypeBoard {
         subtitle += ". " + com.harvana.app.engine.FixedGoalText.sentence(str(group, "disbursementRule", ""), str(group, "state", ""),
                 reached, money(raised), who);
         return new Board(FIXED, "GOAL", "Shared goal", subtitle,
-                "A box is a deposit, with the date inside. This goal does not mark a quiet day as missed.",
+                "A box is a deposit, with the date inside. This goal does not mark a quiet day as missed. Tap the + box to start a new goal.",
                 4, who, cells);
     }
 
@@ -519,6 +521,10 @@ public final class GroupTypeBoard {
                     "You have put in " + money(mine) + ".\nRecorded " + fullDate(ts, zone) + ".",
                     PAID, false));
         }
+        Cell fresh = new Cell("+", "New goal", "Start a new goal",
+                "Start another goal like this one, with its own target and its own group wallet.", OPEN, false);
+        fresh.newGoal = true;
+        cells.add(fresh);
         String rule = str(group, "disbursementRule", "");
         boolean reached = goalReached(group, raised, target);
         String who = beneficiaryPhrase(group);

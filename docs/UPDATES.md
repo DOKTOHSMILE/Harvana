@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: new goal from a goal group (app only)
+
+What the app does. The board of a goal group now ends with a "+ New goal" box. Tapping it asks for a name and a target (the current target is filled in), shows the review screen with the network's 1 HARV creation fee, and asks for the PIN. It then creates a new goal group on the network with the same payout rule and beneficiary, copies the group's profile (picture, place, description, rules) into a new Firestore group with the new name and target, and opens it. Each goal is its own group with its own wallet and its own money; the old goal is left exactly as it was. Nothing changes on the node: it already lets anyone create goal groups.
+
+What you do. Install the new build. No rules change (it writes the new group the same way the create wizard does).
+
 ## 6 Oct 2026: savings calendar pays by tapping the day
 
 What the app does. On a savings line (Payments tab) the separate "Save today" button is gone. Tap today's blue box to save today; tap a red (missed) box to pay that one day back; tap a grey upcoming box to pay ahead from today up to that day. Long-press any payable box to start picking several, then tap more and press Pay in the bar that appears. Days ahead are paid in order from today (picking one picks every day up to it); missed days are paid by their exact dates; a mix is two payments behind one review and PIN, back-pay first. Every payment still shows the review screen and asks for the PIN first. "Save several days" stays for paying ahead. What you do: install the new build. No node change. Rotating (circle) groups pay one contribution per round and goal groups take free-amount deposits, so they have no day boxes to pick; the node only accepts those as before.

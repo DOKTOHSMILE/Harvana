@@ -58,6 +58,7 @@ public class NodeGroupActivity extends AppCompatActivity {
     private String groupName = "";
     private List<String> myLabels = new ArrayList<>();
     private Button pressed;
+    private java.util.Map<String, Object> fsData;      // this group's Firestore profile, copied into a new goal
 
     @Override
     protected void onCreate(Bundle b) {
@@ -83,6 +84,7 @@ public class NodeGroupActivity extends AppCompatActivity {
             com.harvana.app.firestore.GroupFirestoreManager.getInstance(this).getGroup(fsGroupId,
                 new com.harvana.app.firestore.GroupFirestoreManager.DocCallback() {
                     @Override public void onSuccess(java.util.Map<String, Object> data) {
+                        fsData = new java.util.HashMap<>(data);
                         Object n = data.get("groupName");
                         if (n != null && !String.valueOf(n).isEmpty()) {
                             groupName = String.valueOf(n);
@@ -378,6 +380,7 @@ public class NodeGroupActivity extends AppCompatActivity {
             }
             boardPaysToday = sel != null;
             GroupTypeBoardView.fill(host, board, cell -> {
+                if (cell.newGoal) { startNewGoal(); return; }
                 if (cell.backpayable || (cell.forwardPayable && !cell.payToday)) {   // one box: pay that day (ahead days are paid in order from today)
                     java.util.List<String> upTo = new java.util.ArrayList<>();
                     for (GroupTypeBoard.Cell c : board.cells) {
@@ -528,6 +531,85 @@ public class NodeGroupActivity extends AppCompatActivity {
     }
 
     // ── actions ────────────────────────────────────────────────────────────
+
+    /**
+     * A new goal for a goal group, done entirely in the app: it is a new goal group made with the same payout rule and beneficiary, a
+     * name and a target of the member's choosing, and the same profile (picture, place, rules). The network charges its usual creation fee.
+     */
+    private void startNewGoal() {
+        if (group == null) return;
+        final String rule = str(group, "disbursementRule");
+        final String who = str(group, "beneficiaryAddress");
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        int pad = CircleUi.dp(this, 20);
+        box.setPadding(pad, CircleUi.dp(this, 8), pad, 0);
+        final EditText name = new EditText(this);
+        name.setHint("Name of the new goal");
+        name.setText(groupName.isEmpty() ? "" : groupName + " 2");
+        final EditText target = new EditText(this);
+        target.setHint("Target amount");
+        target.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        long old = (long) num(group, "targetGoalAmountRaw");
+        if (old > 0) target.setText(String.valueOf(old / 100_000_000.0).replaceAll("\\.0$", ""));
+        box.addView(name);
+        box.addView(target);
+        new AlertDialog.Builder(this).setTitle("Start a new goal").setView(box).setNegativeButton("Cancel", null)
+            .setPositiveButton("Continue", (d, w) -> {
+                final String n = name.getText().toString().trim();
+                final long raw = CircleUi.toRaw(target.getText().toString());
+                if (n.isEmpty() || raw <= 0) { toast("Enter a name and a target."); return; }
+                pay("Start a new goal", CircleUi.harv(100_000_000L),
+                    moneyRows("The network", "Creation fee. Target " + CircleUi.harv(raw) + " for \u201c" + n + "\u201d. Nothing is locked."),
+                    () -> createGoal(n, raw, rule, who));
+            }).show();
+    }
+
+    private void createGoal(final String goalName, final long targetRaw, String rule, String beneficiary) {
+        final Context ctx = getApplicationContext();
+        final String desc = fsData != null && fsData.get("groupDescription") != null ? String.valueOf(fsData.get("groupDescription")) : "";
+        NodeGroupClient.createFixedGroup(ctx, me, targetRaw, rule, beneficiary, 0L, goalName, desc, new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject json) {
+                final String id = json.optString("groupId", json.optString("circleId", ""));
+                if (id.isEmpty()) { toast("The network accepted it but returned no id."); return; }
+                NodeGroupClient.getFixedGroup(id, new NodeGroupClient.Callback() {
+                    @Override public void onSuccess(JSONObject g) { saveGoal(id, goalName, targetRaw, g.optString("escrowAddress", "")); }
+                    @Override public void onError(String e) { saveGoal(id, goalName, targetRaw, ""); }
+                });
+            }
+            @Override public void onError(String error) { toast(CircleUi.friendly(error)); load(); }
+        });
+    }
+
+    private void saveGoal(String nodeGroupId, String goalName, long targetRaw, String escrow) {
+        com.google.firebase.auth.FirebaseUser u = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (u == null) { toast("Your goal exists on the network. Group ID: " + nodeGroupId); return; }
+        final String docId = java.util.UUID.randomUUID().toString();
+        java.util.Map<String, Object> g = fsData == null ? new java.util.HashMap<String, Object>() : new java.util.HashMap<>(fsData);
+        for (String k : new String[]{"groupId", "firestoreDocId", "circleId", "chatLinks", "inviteCode", "members", "memberUids"}) g.remove(k);
+        g.put("groupId", docId);
+        g.put("firestoreDocId", docId);
+        g.put("timestamp", String.valueOf(System.currentTimeMillis()));
+        g.put("groupName", goalName);
+        g.put("creatorId", u.getUid());
+        g.put("status", "Active");
+        g.put("membersCount", 1);
+        g.put("totalCollected", 0.0);
+        g.put("targetGoalAmount", targetRaw / 100_000_000.0);
+        g.put("groupWalletAddress", escrow);
+        g.put("nodeGroupId", nodeGroupId);
+        g.put("family", GroupKinds.familyOf(nodeGroupId));
+        g.put("onChain", true);
+        final Context ctx = getApplicationContext();
+        GroupSaver.queue(ctx, u.getUid(), docId, g);
+        GroupSaver.save(ctx, u.getUid(), docId, g, error -> runOnUiThread(() -> {
+            if (error != null) { toast("Your goal exists on the network, but saving its details failed. Group ID: " + nodeGroupId); return; }
+            GroupSaver.unqueue(ctx, docId);
+            toast("New goal created.");
+            startActivity(new android.content.Intent(ctx, GroupDetailsActivity.class).putExtra("groupId", docId)
+                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK));
+        }));
+    }
 
     /**
      * Pays the picked day boxes of the savings line. Missed days go through back-pay (those exact dates); today and days ahead are

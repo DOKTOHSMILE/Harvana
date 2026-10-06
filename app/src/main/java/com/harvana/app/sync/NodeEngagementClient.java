@@ -29,6 +29,19 @@ public final class NodeEngagementClient {
         } catch (Exception e) { cb.onError(e.getMessage()); }
     }
 
+    /** Tells the node on which UTC days (yyyyMMdd) this account was really in use on the phone; feeds days-active in the trust score. */
+    public static void submitLiveness(Context c, String address, java.util.List<String> days, Callback cb) {
+        try {
+            long ts = System.currentTimeMillis();
+            String csv = android.text.TextUtils.join(",", days);
+            JSONObject body = NodeIdentityClient.signed(c, address, EngagementCanonical.liveness(address, csv, ts));
+            org.json.JSONArray arr = new org.json.JSONArray();
+            for (String d : days) arr.put(d);
+            body.put("address", address).put("days", arr).put("timestamp", ts);
+            post("/api/v1/engagement/liveness", body, cb);
+        } catch (Exception e) { cb.onError(e.getMessage()); }
+    }
+
     public static void ownerStats(Context c, String address, Callback cb) {
         try {
             long ts = System.currentTimeMillis();

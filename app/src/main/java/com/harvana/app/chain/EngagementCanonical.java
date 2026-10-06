@@ -18,4 +18,9 @@ public final class EngagementCanonical {
     public static String giftMemo(String contentId) {
         return "LEARN_GIFT:" + contentId;
     }
+
+    /** HARVANA_LIVENESS_V1:{address}:{days joined by commas}:{timestamp} */
+    public static String liveness(String address, String daysCsv, long timestamp) {
+        return "HARVANA_LIVENESS_V1:" + address + ":" + daysCsv + ":" + timestamp;
+    }
 }

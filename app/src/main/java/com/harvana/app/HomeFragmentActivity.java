@@ -473,6 +473,7 @@ public class HomeFragmentActivity extends Fragment {
 		_loadTrendingGroups();
 		if (getContext() != null) {
 			com.harvana.app.sync.NodeLinkManager.ensureLinked(getContext(), null);
+			com.harvana.app.utils.ActivityTracker.reportLiveness(getContext());
 			com.harvana.app.group.InviteManager.checkAndNotify(getContext());
 			final android.content.Context ic = getContext().getApplicationContext();
 			com.harvana.app.group.InviteManager.listMine(ic, new com.harvana.app.group.InviteManager.ListCb() {

@@ -25,6 +25,7 @@ public final class ActivityTracker {
     private static final String PREFS = "app_activity";
     private static final int KEEP_DAYS = 60;
     private static SharedPreferences prefs;
+    private static Context appCtx;
     private static int started;
     private static long foregroundSince;
     private static long lastTapSave;
@@ -33,6 +34,7 @@ public final class ActivityTracker {
     private ActivityTracker() {}
 
     public static void install(Application app) {
+        appCtx = app;
         prefs = app.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         app.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override public void onActivityStarted(Activity a) {
@@ -78,15 +80,61 @@ public final class ActivityTracker {
         foregroundSince = 0;
         bump("ms_" + dayKey(System.currentTimeMillis()), (int) Math.min(ms / 1000, Integer.MAX_VALUE));   // seconds
         bump("sessions", 1);
+        if (appCtx != null) reportLiveness(appCtx);
     }
 
     private static String dayKey(long t) { return new SimpleDateFormat("yyyyMMdd", Locale.US).format(new Date(t)); }
+
+    private static String utcDayKey(long t) {
+        SimpleDateFormat f = new SimpleDateFormat("yyyyMMdd", Locale.US);
+        f.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+        return f.format(new Date(t));
+    }
+
+    /** Interactions needed on a day before it counts as the account being in real use. */
+    public static final int LIVE_DAY_MIN = 8;
+
+    /** UTC days (yyyyMMdd) in the last 30 on which the account was really used on this phone, oldest first. */
+    public static java.util.List<String> liveDaysUtc(Context c) {
+        SharedPreferences p = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        java.util.List<String> out = new java.util.ArrayList<>();
+        long now = System.currentTimeMillis();
+        for (int back = 29; back >= 0; back--) {
+            String k = utcDayKey(now - back * 86_400_000L);
+            if (p.getInt("utc_" + k, 0) >= LIVE_DAY_MIN) out.add(k);
+        }
+        return out;
+    }
+
+    private static final long REPORT_EVERY_MS = 6L * 3_600_000L;
+
+    /**
+     * Tells the node which days the account was in real use, signed by the wallet, at most every 6 hours. Only day numbers are sent,
+     * never what was done. The node adds them to the days-active part of the trust score. Quiet when there is no wallet or no live day.
+     */
+    public static void reportLiveness(Context ctx) {
+        final Context c = ctx.getApplicationContext();
+        String addr = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(c);
+        if (addr == null || addr.isEmpty() || com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) return;
+        SharedPreferences p = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        long now = System.currentTimeMillis();
+        if (now - p.getLong("live_sent", 0) < REPORT_EVERY_MS) return;
+        java.util.List<String> days = liveDaysUtc(c);
+        if (days.isEmpty()) return;
+        p.edit().putLong("live_sent", now).apply();
+        com.harvana.app.sync.NodeEngagementClient.submitLiveness(c, addr, days, new com.harvana.app.sync.NodeEngagementClient.Callback() {
+            @Override public void onSuccess(org.json.JSONObject json) {}
+            @Override public void onError(String error) { p.edit().putLong("live_sent", 0).apply(); }   // try again next time
+        });
+    }
 
     private static void interaction(int n) {
         if (prefs == null) return;
         Calendar c = Calendar.getInstance();
         SharedPreferences.Editor e = prefs.edit();
         e.putInt("day_" + dayKey(c.getTimeInMillis()), prefs.getInt("day_" + dayKey(c.getTimeInMillis()), 0) + n);
+        String utc = utcDayKey(c.getTimeInMillis());
+        e.putInt("utc_" + utc, prefs.getInt("utc_" + utc, 0) + n);
         e.putInt("hour_" + c.get(Calendar.HOUR_OF_DAY), prefs.getInt("hour_" + c.get(Calendar.HOUR_OF_DAY), 0) + n);
         e.putInt("wd_" + (c.get(Calendar.DAY_OF_WEEK) - 1), prefs.getInt("wd_" + (c.get(Calendar.DAY_OF_WEEK) - 1), 0) + n);
         if (prefs.getLong("since", 0) == 0) e.putLong("since", c.getTimeInMillis());
@@ -137,7 +185,7 @@ public final class ActivityTracker {
         String oldest = dayKey(now - KEEP_DAYS * 86_400_000L);
         SharedPreferences.Editor e = null;
         for (String k : p.getAll().keySet()) {
-            String d = k.startsWith("day_") ? k.substring(4) : k.startsWith("ms_") ? k.substring(3) : null;
+            String d = k.startsWith("day_") ? k.substring(4) : k.startsWith("ms_") ? k.substring(3) : k.startsWith("utc_") ? k.substring(4) : null;
             if (d != null && d.compareTo(oldest) < 0) { if (e == null) e = p.edit(); e.remove(k); }
         }
         if (e != null) e.apply();

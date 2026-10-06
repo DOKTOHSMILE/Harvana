@@ -64,6 +64,7 @@ public class LearnReadActivity extends AppCompatActivity {
         post.createdAt = getIntent().getLongExtra(EXTRA_CREATED, 0L);
         post.views = getIntent().getLongExtra(EXTRA_VIEWS, 0L);
         words = LearnRules.wordCount(post.title, post.body);
+        com.harvana.app.learn.LearnInterest.get(this).record(post, com.harvana.app.learn.LearnInterest.OPEN);   // feeds the For you feed
 
         scroll = findViewById(R.id.scroll_read);
         status = findViewById(R.id.tv_read_status);
@@ -113,8 +114,12 @@ public class LearnReadActivity extends AppCompatActivity {
         super.onPause();
         ticker.removeCallbacks(tick);
         if (resumedAt > 0) { dwellMs += System.currentTimeMillis() - resumedAt; resumedAt = 0; }
+        if (!interestRead && dwellMs >= 15000) { interestRead = true; com.harvana.app.learn.LearnInterest.get(this).record(post, com.harvana.app.learn.LearnInterest.READ); }
+        com.harvana.app.learn.LearnInterest.get(this).flush();
         maybeSubmit();
     }
+
+    private boolean interestRead;
 
     private final Runnable tick = new Runnable() {
         @Override public void run() {

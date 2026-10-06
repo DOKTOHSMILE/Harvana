@@ -294,3 +294,9 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 ## Profile layout and flexible Learn crop
 - Profile now reads like a social profile: cover, picture on the left over the cover, name with the trust chip, @username, bio, a facts line (where, age, joined), and Following / Followers counts (tap to open Friends). On your own profile there are two wide buttons, Share and Edit profile; Settings, QR code and privacy are in the top-right menu.
 - Learn cover crop is free: drag the corners or edges to pick any shape.
+
+## Learn: For you feed, slimmer cards, optional pictures
+- The Learn feed now suggests posts for you. "For you" ranks by what you open, read, fire, comment on, share and gift (category and author, fading over about 10 days), freshness and popularity, pushes down posts you have already seen or opened, and mixes topics. "Latest" is plain newest first. Your interest data stays on your phone.
+- The order is set when the feed loads. New posts from others wait behind an "N new posts" button instead of shuffling the list; view counters no longer redraw cards.
+- Cards: the picture is at the top, cut by the card's curve, fading into the card; text sits under it. Body is 3 lines.
+- A picture or video link is optional: text-only posts are allowed. Owner: publish the updated docs/firestore.console.rules (image is now optional).

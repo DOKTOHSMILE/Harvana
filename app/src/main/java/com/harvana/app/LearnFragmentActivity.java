@@ -174,12 +174,33 @@ public class LearnFragmentActivity extends Fragment {
 	
 	public void _MORE() {
 	}
-	private String selectedCategory = "All";
+	private static final String FOR_YOU = "For you", LATEST = "Latest";
+	private String selectedCategory = FOR_YOU;
 	
 	private static final String[] CATEGORIES = {
-		"All", "Community Knowledge", "Finance Trends", "Investment Insights",
+		FOR_YOU, LATEST, "Community Knowledge", "Finance Trends", "Investment Insights",
 		"Group Savings", "Crypto & Blockchain"
 	};
+	
+	// ── The feed ─────────────────────────────────────────────────────
+	// The order is worked out once, when the feed loads or the reader changes the filter. After that Firestore may report changes
+	// all day (every view of a post bumps its counter), but the list on screen keeps its order: posts that arrive later wait behind
+	// a "new posts" button, and only a real change to a post's text or picture redraws that one card.
+	private final HashMap<String, HashMap<String, Object>> byId = new HashMap<>();
+	private final ArrayList<String> order = new ArrayList<>();
+	private final ArrayList<String> waiting = new ArrayList<>();
+	private final long seed = System.nanoTime();
+	private LearnContentAdapter adapter;
+	private TextView newPill;
+	
+	private static String idOf(Map<String, Object> m) { Object o = m.get("_docId"); return o == null ? "" : String.valueOf(o); }
+	private static long timeOf(Map<String, Object> m) { Object o = m.get("createdAt"); return o instanceof Number ? ((Number) o).longValue() : 0L; }
+	private static String strOf(Map<String, Object> m, String k) { Object o = m.get(k); return o == null ? "" : String.valueOf(o); }
+	
+	private String me() {
+		com.google.firebase.auth.FirebaseUser u = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+		return u == null ? "" : u.getUid();
+	}
 	
 	private void _loadContent() {
 		if (getContext() == null) return;
@@ -187,9 +208,7 @@ public class LearnFragmentActivity extends Fragment {
 		List<HashMap<String, Object>> cached = com.harvana.app.offline.OfflineCacheManager.loadList(
 		getContext(), "learn_content");
 		if (cached != null && !cached.isEmpty()) {
-			listMap.clear();
-			listMap.addAll(cached);
-			_renderFiltered();
+			_onData(cached, true);
 		}
 		
 		// Live sync: the native Firestore listener delivers the published articles now and every time
@@ -205,15 +224,8 @@ public class LearnFragmentActivity extends Fragment {
 				m.put("_docId", d.getId());
 				fresh.add(m);
 			}
-			Collections.sort(fresh, (x, y) -> {
-				long tx = x.get("createdAt") instanceof Number ? ((Number) x.get("createdAt")).longValue() : 0L;
-				long ty = y.get("createdAt") instanceof Number ? ((Number) y.get("createdAt")).longValue() : 0L;
-				return Long.compare(ty, tx);
-			});
-			listMap.clear();
-			listMap.addAll(fresh);
-			com.harvana.app.offline.OfflineCacheManager.saveList(getContext(), "learn_content", listMap);
-			_renderFiltered();
+			com.harvana.app.offline.OfflineCacheManager.saveList(getContext(), "learn_content", fresh);
+			_onData(fresh, false);
 		});
 	}
 	
@@ -222,20 +234,128 @@ public class LearnFragmentActivity extends Fragment {
 	@Override
 	public void onDestroyView() {
 		if (learnListener != null) { learnListener.remove(); learnListener = null; }
+		if (getContext() != null) com.harvana.app.learn.LearnInterest.get(getContext()).flush();
 		super.onDestroyView();
 	}
 	
-	private void _renderFiltered() {
+	@Override
+	public void onPause() {
+		super.onPause();
+		if (getContext() != null) com.harvana.app.learn.LearnInterest.get(getContext()).flush();
+	}
+	
+	/** Takes the posts from the cache or from Firestore. The first load orders the feed; later loads only merge. */
+	private void _onData(List<HashMap<String, Object>> posts, boolean fromCache) {
 		if (getActivity() == null) return;
-		ArrayList<HashMap<String, Object>> filtered = new ArrayList<>();
-		for (HashMap<String, Object> item : listMap) {
-			Object cat = item.get("category");
-			if ("All".equals(selectedCategory) || (cat != null && selectedCategory.equals(cat.toString()))) {
-				filtered.add(item);
+		HashMap<String, HashMap<String, Object>> incoming = new HashMap<>();
+		for (HashMap<String, Object> m : posts) { String id = idOf(m); if (!id.isEmpty()) incoming.put(id, m); }
+		
+		boolean firstLoad = order.isEmpty();
+		byId.clear();
+		byId.putAll(incoming);
+		listMap.clear();
+		listMap.addAll(posts);
+		
+		if (firstLoad) {
+			_rerank();
+		} else {
+			order.retainAll(incoming.keySet());                  // deleted posts leave
+			waiting.retainAll(incoming.keySet());
+			String mine = me();
+			for (String id : incoming.keySet()) {
+				if (order.contains(id) || waiting.contains(id)) continue;
+				// Something you just published goes straight to the top; other people's new posts wait behind the button.
+				if (!mine.isEmpty() && mine.equals(strOf(incoming.get(id), "authorUid"))) order.add(0, id);
+				else waiting.add(id);
 			}
 		}
-		
-		recyclerview2.setAdapter(new LearnContentAdapter(filtered));
+		_showWaiting();
+		_show();
+	}
+	
+	/** Works the order out again from everything we have: For you ranks by interest, Latest by time. */
+	private void _rerank() {
+		order.clear();
+		waiting.clear();
+		ArrayList<HashMap<String, Object>> all = new ArrayList<>(byId.values());
+		if (LATEST.equals(selectedCategory)) {
+			Collections.sort(all, (x, y) -> Long.compare(timeOf(y), timeOf(x)));
+			for (HashMap<String, Object> m : all) order.add(idOf(m));
+			return;
+		}
+		ArrayList<com.harvana.app.learn.LearnRanker.Item> items = new ArrayList<>();
+		for (HashMap<String, Object> m : all) {
+			long views = m.get("views") instanceof Number ? ((Number) m.get("views")).longValue() : 0L;
+			items.add(new com.harvana.app.learn.LearnRanker.Item(idOf(m), strOf(m, "category"), strOf(m, "authorUid"), timeOf(m), views));
+		}
+		java.util.List<com.harvana.app.learn.LearnRanker.Item> ranked = com.harvana.app.learn.LearnRanker.rank(
+			items, com.harvana.app.learn.LearnInterest.get(getContext()), System.currentTimeMillis(), me(), seed);
+		for (com.harvana.app.learn.LearnRanker.Item it : ranked) order.add(it.id);
+	}
+	
+	/** Puts the visible, filtered posts into the list, redrawing only the cards that changed. */
+	private void _show() {
+		if (getActivity() == null || recyclerview2 == null) return;
+		ArrayList<HashMap<String, Object>> shown = new ArrayList<>();
+		boolean byCategory = !FOR_YOU.equals(selectedCategory) && !LATEST.equals(selectedCategory);
+		for (String id : order) {
+			HashMap<String, Object> m = byId.get(id);
+			if (m == null) continue;
+			if (byCategory && !selectedCategory.equals(strOf(m, "category"))) continue;
+			shown.add(m);
+		}
+		if (adapter == null) {
+			adapter = new LearnContentAdapter(shown);
+			recyclerview2.setAdapter(adapter);
+			return;
+		}
+		final ArrayList<HashMap<String, Object>> before = adapter.data;
+		androidx.recyclerview.widget.DiffUtil.DiffResult diff = androidx.recyclerview.widget.DiffUtil.calculateDiff(new androidx.recyclerview.widget.DiffUtil.Callback() {
+			@Override public int getOldListSize() { return before.size(); }
+			@Override public int getNewListSize() { return shown.size(); }
+			@Override public boolean areItemsTheSame(int o, int n) { return idOf(before.get(o)).equals(idOf(shown.get(n))); }
+			@Override public boolean areContentsTheSame(int o, int n) { return signature(before.get(o)).equals(signature(shown.get(n))); }
+		});
+		adapter.data = shown;
+		diff.dispatchUpdatesTo(adapter);
+	}
+	
+	/** What a card shows. The view counter is left out on purpose: it changes all the time and is not worth a redraw. */
+	private static String signature(Map<String, Object> m) {
+		return strOf(m, "title") + "\u0001" + strOf(m, "description") + "\u0001" + strOf(m, "imageUrl") + "\u0001" + strOf(m, "videoUrl") + "\u0001" + strOf(m, "category");
+	}
+	
+	private void _showWaiting() {
+		if (getContext() == null) return;
+		if (newPill == null) {
+			newPill = new TextView(getContext());
+			newPill.setTextSize(13);
+			newPill.setTypeface(null, Typeface.BOLD);
+			newPill.setTextColor(0xFFFFFFFF);
+			newPill.setGravity(Gravity.CENTER);
+			float d = getResources().getDisplayMetrics().density;
+			newPill.setPadding((int) (16 * d), (int) (8 * d), (int) (16 * d), (int) (8 * d));
+			GradientDrawable g = new GradientDrawable();
+			g.setCornerRadius(40 * d);
+			g.setColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorAccent));
+			newPill.setBackground(g);
+			LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			lp.gravity = Gravity.CENTER_HORIZONTAL;
+			lp.topMargin = (int) (4 * d);
+			int at = linear1.indexOfChild(cardview14);
+			linear1.addView(newPill, Math.max(0, at), lp);
+			newPill.setOnClickListener(v -> {
+				_rerank();
+				_showWaiting();
+				_show();
+				recyclerview2.scrollToPosition(0);
+			});
+		}
+		if (waiting.isEmpty()) newPill.setVisibility(View.GONE);
+		else {
+			newPill.setText("\u2191  " + waiting.size() + (waiting.size() == 1 ? " new post" : " new posts"));
+			newPill.setVisibility(View.VISIBLE);
+		}
 	}
 	
 	private void _initAdapters() {
@@ -277,7 +397,10 @@ public class LearnFragmentActivity extends Fragment {
 			holder.itemView.setOnClickListener(v -> {
 				selectedCategory = category;
 				notifyDataSetChanged();
-				_renderFiltered();
+				if (FOR_YOU.equals(category) || LATEST.equals(category)) _rerank();
+				_showWaiting();
+				_show();
+				if (recyclerview2 != null) recyclerview2.scrollToPosition(0);
 			});
 		}
 		
@@ -299,7 +422,7 @@ public class LearnFragmentActivity extends Fragment {
 	}
 	
 	public class LearnContentAdapter extends RecyclerView.Adapter<LearnContentAdapter.ViewHolder> {
-		private ArrayList<HashMap<String, Object>> data;
+		ArrayList<HashMap<String, Object>> data;
 		
 		public LearnContentAdapter(ArrayList<HashMap<String, Object>> data) {
 			this.data = data;
@@ -314,6 +437,7 @@ public class LearnFragmentActivity extends Fragment {
 		@Override
 		public void onBindViewHolder(ViewHolder holder, int position) {
 			final com.harvana.app.learn.LearnPostBinder.Post post = com.harvana.app.learn.LearnPostBinder.Post.from(data.get(position));
+			holder.postId = post.id;
 			com.harvana.app.learn.LearnPostBinder.bind(getActivity(), holder.itemView, post, false, null);
 			View.OnClickListener open = v -> {
 				Intent i = new Intent(getContext(), LearnReadActivity.class);
@@ -335,11 +459,19 @@ public class LearnFragmentActivity extends Fragment {
 		}
 		
 		@Override
+		public void onViewAttachedToWindow(ViewHolder holder) {
+			super.onViewAttachedToWindow(holder);
+			// A post that came on screen counts as shown, so the next feed does not lead with it again.
+			if (getContext() != null && holder.postId != null) com.harvana.app.learn.LearnInterest.get(getContext()).shown(holder.postId);
+		}
+		
+		@Override
 		public int getItemCount() {
 			return data.size();
 		}
 		
 		public class ViewHolder extends RecyclerView.ViewHolder {
+			String postId;
 			public ViewHolder(View _view) {
 				super(_view);
 			}

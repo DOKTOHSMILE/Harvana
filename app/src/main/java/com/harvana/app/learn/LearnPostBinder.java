@@ -69,18 +69,34 @@ public final class LearnPostBinder {
         title.setText(post.title.isEmpty() ? "Untitled" : post.title);
         body.setText(post.body);
         if (fullText) { body.setMaxLines(Integer.MAX_VALUE); body.setEllipsize(null); }
-        else { body.setMaxLines(5); body.setEllipsize(android.text.TextUtils.TruncateAt.END); }
+        else { body.setMaxLines(3); body.setEllipsize(android.text.TextUtils.TruncateAt.END); }
         final VideoLinks.Video video = VideoLinks.parse(post.videoUrl);
         category.setText((post.category.isEmpty() ? "General" : post.category) + (video != null ? "  \u00b7  \u25B6 Video" : ""));
         meta.setText(LearnRules.timeAgo(post.createdAt, System.currentTimeMillis()));
         viewsLine.setText(LearnRules.compactCount(post.views) + (post.views == 1 ? " view" : " views"));
 
+        // The feed card has a frame around the picture (thumbnail on top, fading into the card, text pulled up over it). The reader
+        // has the plain picture. A post without a picture shows neither.
+        final View frame = root.findViewById(R.id.fl_cover);
+        final View content = root.findViewById(R.id.ll_content);
+        final View shown = frame != null ? frame : cover;
         if (!post.imageUrl.isEmpty()) {
+            shown.setVisibility(View.VISIBLE);
             cover.setVisibility(View.VISIBLE);
             Glide.with(host).load(Uri.parse(post.imageUrl)).into(cover);
         } else {
-            cover.setVisibility(View.GONE);
+            shown.setVisibility(View.GONE);
             cover.setImageDrawable(null);
+        }
+        if (frame != null && content != null) {
+            View card = root.findViewById(R.id.card_post);
+            if (card != null) card.setClipToOutline(true);           // the card's curve cuts the top of the picture
+            View fade = root.findViewById(R.id.v_cover_fade);
+            if (fade != null) fade.setBackground(coverFade(ContextCompat.getColor(host, R.color.colorSurface)));
+            float d = host.getResources().getDisplayMetrics().density;
+            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) content.getLayoutParams();
+            int want = post.imageUrl.isEmpty() ? 0 : -(int) (34 * d);
+            if (lp.topMargin != want) { lp.topMargin = want; content.setLayoutParams(lp); }
         }
 
         // A video post: in the full reader the player takes the cover's place. It is only a picture and a play button until pressed.
@@ -109,17 +125,28 @@ public final class LearnPostBinder {
             if (!card.icon.isEmpty()) Glide.with(host).load(Uri.parse(card.icon)).placeholder(R.drawable.ic_coin_harv).into(avatar);
         });
 
-        bindCounts(host, root, id);
+        bindCounts(host, root, post);
         root.findViewById(R.id.ll_comment).setOnClickListener(v -> LearnCommentsSheet.show(host, id, () -> {
-            bindCounts(host, root, id);
+            LearnInterest.get(host).record(post, LearnInterest.COMMENT);
+            bindCounts(host, root, post);
             if (onCommentPosted != null) onCommentPosted.run();
         }));
         root.findViewById(R.id.ll_share).setOnClickListener(v -> share(host, post));
-        root.findViewById(R.id.ll_gift).setOnClickListener(v -> LearnGift.ask(host, id, author[0]));
+        root.findViewById(R.id.ll_gift).setOnClickListener(v -> { LearnInterest.get(host).record(post, LearnInterest.GIFT); LearnGift.ask(host, id, author[0]); });
         root.findViewById(R.id.iv_more).setOnClickListener(v -> more(host, v, post));
     }
 
-    private static void bindCounts(Activity host, View root, String id) {
+    /** Clear at the top, the card's own colour at the bottom: the picture is strong at the top and slowly disappears. */
+    private static android.graphics.drawable.Drawable coverFade(int surface) {
+        int clear = surface & 0x00FFFFFF;
+        int mid = (surface & 0x00FFFFFF) | 0x55000000;
+        android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM, new int[]{clear, clear, mid, surface});
+        return g;
+    }
+
+    private static void bindCounts(Activity host, View root, Post post) {
+        final String id = post.id;
         TextView fireCount = root.findViewById(R.id.tv_fire);
         TextView commentCount = root.findViewById(R.id.tv_comment);
         View fire = root.findViewById(R.id.ll_fire);
@@ -147,6 +174,7 @@ public final class LearnPostBinder {
             boolean next = !mine[0];
             mine[0] = next;
             fires[0] = Math.max(0, fires[0] + (next ? 1 : -1));
+            LearnInterest.get(host).record(post, next ? LearnInterest.FIRE : LearnInterest.UNFIRE);
             paint.run();                                            // optimistic; undone below if the write fails
             LearnSocial.setFire(id, next, (ok, error) -> host.runOnUiThread(() -> {
                 if (ok) return;
@@ -159,6 +187,7 @@ public final class LearnPostBinder {
     }
 
     private static void share(Activity host, Post post) {
+        LearnInterest.get(host).record(post, LearnInterest.SHARE);
         String snippet = post.body.length() > 280 ? post.body.substring(0, 277) + "..." : post.body;
         Intent send = new Intent(Intent.ACTION_SEND);
         send.setType("text/plain");

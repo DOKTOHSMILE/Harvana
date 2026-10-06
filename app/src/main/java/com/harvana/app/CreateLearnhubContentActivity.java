@@ -364,8 +364,9 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 			return;
 		}
 		if (video != null && imageUrl.isEmpty()) imageUrl = video.thumbnail;
-		if (video == null && (imageUrl.isEmpty() || !(imageUrl.startsWith("http://") || imageUrl.startsWith("https://")))) {
-			_showError("Please add a cover image or a video link. For an image, upload one or paste a valid URL starting with https://");
+		// A picture and a video are both optional: a post can be words only. A typed picture address must still be a web address.
+		if (video == null && !imageUrl.isEmpty() && !imageUrl.startsWith("https://")) {
+			_showError("A picture address must start with https://  Or leave the picture out.");
 			return;
 		}
 		if (category == null) category = CATEGORIES[0];

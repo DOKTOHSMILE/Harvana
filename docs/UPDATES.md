@@ -660,3 +660,9 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Every notification opens its own item
 - An invitation notification opens that invitation (the group's details and the Join choice) instead of the invitations list; a published Learn article opens the article; a trade message opens the chat with that trader; a pinch opens the person's profile. Together with the earlier routes (transactions, group notices on the right tab, join results, friend requests) every notification type now lands on the specific thing it is about. Invitations received before this update have no group saved with them and still open the invitations list.
+
+## Discover: location filter (global, country, state, city)
+- The location chip on Discover now works. Tapping it opens a Location sheet: **Global** is the default (every group from every country). Optionally pick a **country**; once a country is picked, optionally a **state**; once a state is picked, optionally a **city**. Each list is searchable and starts with an "All ..." row. Groups are filtered to the most specific place chosen (a country shows all of that country's groups, a state only that state's, a city only that city's). "State" and "Lagos State" count as the same place.
+- **Apply** saves the choice on the phone, so closing and reopening the app keeps it; the chip shows what is applied (Global, a country, "state, country" or "city, state"). **Reset to global** clears it.
+- Discover now loads up to 300 public groups (was 50) so the filter has enough to work with, and the "On network" checkbox re-filters when it is switched off as well as on.
+- Groups created without a country, state or city only appear under Global.

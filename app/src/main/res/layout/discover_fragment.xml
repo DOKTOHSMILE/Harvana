@@ -125,7 +125,7 @@
 									android:id="@+id/textview3"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
-									android:text="Lagos, NG"
+									android:text="Global"
 									android:textSize="13sp"
 									android:textStyle="bold"
 									android:singleLine="true"

@@ -73,6 +73,7 @@ public class DiscoverFragmentActivity extends Fragment {
 	private String visibility = "";
 	private String groupId = "";
 	private String searchQuery = "";
+	private com.harvana.app.group.LocationFilter.Value locationFilter = new com.harvana.app.group.LocationFilter.Value();
 	private final Set<String> myGroupIds = new HashSet<>();
 	private final Set<String> pendingGroupIds = new HashSet<>();
 	
@@ -161,8 +162,20 @@ public class DiscoverFragmentActivity extends Fragment {
 		
 		tv_search.setOnClickListener(_v -> _promptSearch());
 		
+		// Location filter: Global until the person picks a country (then optionally a state and a city). It is saved on the phone.
+		locationFilter = com.harvana.app.group.LocationFilter.load(getContext());
+		if (textview3 != null) textview3.setText(locationFilter.label());
+		if (lr_select_location != null) lr_select_location.setOnClickListener(_v -> {
+			if (getActivity() == null) return;
+			com.harvana.app.group.LocationFilter.show(getActivity(), picked -> {
+				locationFilter = picked;
+				if (textview3 != null) textview3.setText(picked.label());
+				_applyFilterAndSort();
+			});
+		});
+		
 		cd_verified_only.setOnCheckedChangeListener((_buttonView, _isChecked) -> {
-			if (_isChecked) _applyFilterAndSort();
+			_applyFilterAndSort();
 		});
 		
 		sp_sort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -408,7 +421,7 @@ public class DiscoverFragmentActivity extends Fragment {
 		}
 		
 		com.harvana.app.firestore.GroupFirestoreManager.getInstance(getContext())
-		.queryGroups("visibility", "Public", 50, new com.harvana.app.firestore.GroupFirestoreManager.ListCallback() {
+		.queryGroups("visibility", "Public", 300, new com.harvana.app.firestore.GroupFirestoreManager.ListCallback() {
 			@Override
 			public void onSuccess(List<Map<String, Object>> groups) {
 				if (getActivity() == null) return;
@@ -498,6 +511,7 @@ public class DiscoverFragmentActivity extends Fragment {
 		
 		for (HashMap<String, Object> g : publicGroups) {
 			if (verifiedOnly && com.harvana.app.trust.NetworkTrust.groupKey(g).isEmpty()) continue;
+			if (!com.harvana.app.group.LocationFilter.matches(locationFilter, g)) continue;
 			if (!searchQuery.isEmpty()) {
 				String name = _safeString(g, "groupName", "").toLowerCase(Locale.US);
 				String state = _safeString(g, "state", "").toLowerCase(Locale.US);

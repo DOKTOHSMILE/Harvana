@@ -44,8 +44,7 @@
 						android:padding="9dp"
 						android:background="@drawable/bg_settings_icon_badge"
 						android:src="@drawable/ic_wallet"
-						android:scaleType="centerInside"
-						app:tint="@color/colorAccent" />
+						android:scaleType="centerInside" />
 					<TextView
 						android:id="@+id/textview50"
 						android:layout_width="0dp"

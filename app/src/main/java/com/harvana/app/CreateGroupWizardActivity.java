@@ -230,12 +230,11 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         disc.setShape(GradientDrawable.OVAL);
         disc.setColor((UiColors.accent() & 0x00FFFFFF) | 0x33000000);
         face.setBackground(disc);
-        com.harvana.app.utils.GroupRing.apply(face, typeLabel, 1f, (UiColors.accent() & 0x00FFFFFF) | 0x33000000);   // ring colour = group type
+        com.harvana.app.utils.GroupRing.apply(face, typeLabel, 1f, 0x00000000);   // ring colour = group type
         if (photoUrl.isEmpty()) {
-            face.setImageResource(R.drawable.ic_groups);
+            face.setImageResource(R.drawable.ic_coin_harv);
             face.setScaleType(android.widget.ImageView.ScaleType.CENTER_INSIDE);
             face.setPadding(dp(20), dp(20), dp(20), dp(20));
-            face.setColorFilter(UiColors.accent());
         } else {
             com.bumptech.glide.Glide.with(this).load(photoUrl).circleCrop().into(face);
         }

@@ -692,9 +692,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		if (iv_group_icon != null) {
 			String photo = _safeString(data, "groupPhoto", "");
 			com.harvana.app.utils.GroupRing.apply(iv_group_icon, type, 1f, 0x00000000);      // ring colour = group type
-			if (!photo.startsWith("http")) { int p = (int) (10 * getResources().getDisplayMetrics().density); iv_group_icon.setPadding(p, p, p, p); }
+			iv_group_icon.setImageTintList(null);
+			iv_group_icon.clearColorFilter();
+			if (!photo.startsWith("http")) { int p = (int) (10 * getResources().getDisplayMetrics().density); iv_group_icon.setPadding(p, p, p, p); iv_group_icon.setImageResource(R.drawable.ic_coin_harv); }
 			if (photo.startsWith("http")) {
-				iv_group_icon.clearColorFilter();
 				iv_group_icon.setScaleType(ImageView.ScaleType.CENTER_CROP);
 				try { com.bumptech.glide.Glide.with(this).load(photo).circleCrop().into(iv_group_icon); } catch (Exception ignored) { }
 				iv_group_icon.setOnClickListener(v -> com.harvana.app.utils.ImageViewerActivity.open(this, photo));

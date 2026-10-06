@@ -596,17 +596,16 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		face.setOutlineProvider(new android.view.ViewOutlineProvider() {
 			@Override public void getOutline(View v, android.graphics.Outline o) { o.setOval(0, 0, v.getWidth(), v.getHeight()); }
 		});
-		com.harvana.app.utils.GroupRing.apply(face, typeOf(), 1f, (UiColors.accent() & 0x00FFFFFF) | 0x33000000);
+		com.harvana.app.utils.GroupRing.apply(face, typeOf(), 1f, 0x00000000);
 		if (url.startsWith("http")) {
 			face.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			com.bumptech.glide.Glide.with(this).load(url).circleCrop().into(face);
 			face.setOnClickListener(v -> com.harvana.app.utils.ImageViewerActivity.open(this, url));
 		} else {
-			face.setImageResource(R.drawable.ic_groups);
+			face.setImageResource(R.drawable.ic_coin_harv);
 			face.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 			int pad = (int) (20 * d);
 			face.setPadding(pad, pad, pad, pad);
-			face.setColorFilter(UiColors.accent());
 		}
 		row.addView(face, new LinearLayout.LayoutParams((int) (76 * d), (int) (76 * d)));
 		LinearLayout side = new LinearLayout(this);

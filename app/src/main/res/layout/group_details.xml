@@ -40,9 +40,8 @@
 						android:layout_width="48dp"
 						android:layout_height="48dp"
 						android:padding="8dp"
-						android:src="@drawable/ic_groups"
-						android:scaleType="centerInside"
-						app:tint="@color/colorAccent" />
+						android:src="@drawable/ic_coin_harv"
+						android:scaleType="centerInside" />
 					<LinearLayout
 						android:id="@+id/linear25"
 						android:layout_width="0dp"

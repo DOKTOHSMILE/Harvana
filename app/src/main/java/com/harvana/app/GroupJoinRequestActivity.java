@@ -446,7 +446,7 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 			if (!photo.startsWith("http")) {
 				int pad = (int) (14 * dd);
 				avatar.setPadding(pad, pad, pad, pad);
-				avatar.setImageTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
+				avatar.setImageResource(R.drawable.ic_coin_harv);          // the real coin, untinted
 			}
 		}
 		

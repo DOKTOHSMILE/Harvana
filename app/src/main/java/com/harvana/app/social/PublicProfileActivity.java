@@ -1002,7 +1002,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         disc.setColor(UiColors.accent());
         face.setBackground(disc);
         face.setClipToOutline(true);
-        com.harvana.app.utils.GroupRing.apply(face, g.type, 1f, UiColors.accent());      // the ring colour says what kind of group it is
+        com.harvana.app.utils.GroupRing.apply(face, g.type, 1f, 0x00000000);      // the ring colour says what kind of group it is
         if (g.photo.startsWith("http")) {
             face.setScaleType(ImageView.ScaleType.CENTER_CROP);
             try { com.bumptech.glide.Glide.with(this).load(g.photo).circleCrop().into(face); } catch (Exception ignored) { face.setImageResource(R.drawable.ic_coin_harv); }

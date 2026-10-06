@@ -233,7 +233,7 @@ public final class GroupContract {
             + ". It has no private key, so nobody, not the admin and not Harvana, can spend from it by themselves.");
         s.add("Where your payments go: each round you pay from your own wallet into the circle wallet. Nothing is held in a Harvana company wallet on the way.");
         s.add("Where your bond goes: the bond you lock when you join also sits in the circle wallet. It comes back to you if you pay on time. A missed payment is covered from it, with a penalty.");
-        s.add("Who receives the money: each round, the member whose turn it is receives the pot, paid from the circle wallet to their own wallet. The order is the order of joining.");
+        s.add("Who receives the money: each round, the member whose turn it is receives the pot, paid from the circle wallet to their own wallet. The network sets the order when the circle fills: members who have already finished a circle take the first 30% of places, and everyone else follows in the order they joined.");
         s.add("If someone does not pay: the round is covered from their bond first, so the member whose turn it is is not left short. Please pay on time.");
         return s;
     }
@@ -250,7 +250,7 @@ public final class GroupContract {
         s.add("Whose money it is: what is in your line is yours. The network keeps a separate record for each member, so the admin cannot take your line.");
         String w = str(g, "withdrawalRule", "");
         s.add("How your money comes back: it is paid from the group wallet to your own wallet when you claim it" + (w.isEmpty() ? "" : ", under the group's withdrawal rule (" + w + ")")
-            + ". The admin has to approve a withdrawal request, and a loan you owe is taken from your line first.");
+            + ". The admin has to approve a withdrawal request, and an unpaid loan can be taken from your savings.");
         return s;
     }
 

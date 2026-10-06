@@ -224,6 +224,7 @@ public final class PaymentConfirmSheet {
 			dialog.dismiss();
 			if (thenPin) {
 				PinPromptHelper.authorize(context, _action(heading, hideAmount ? "" : amount), () -> {
+					com.harvana.app.tx.PaymentTracker.noteReview(hideAmount ? "" : amount, rows);   // the success sheet and receipt use what the person just approved
 					if (after != null) after.run();
 				});
 			} else if (after != null) {

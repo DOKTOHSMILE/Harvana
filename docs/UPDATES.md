@@ -697,3 +697,6 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 
 ## Home lists only groups with something to do
 - Upcoming payments on Home now lists only groups where you have a payment to make or a member to remind. Groups with nothing due (idle, goal reached, already paid, not your turn) are no longer shown there; when none is left the card shows its usual "no upcoming payments" message. The groups are all still under the Groups tab.
+
+## Success sheet and receipt show the amount and the details
+- A deposit, contribution or savings payment on a group showed no amount, only "From", on the success sheet and on the shared receipt (the network's answer to these requests carries no amount). The success sheet and receipt now use what you reviewed and approved: the amount, the group, where it goes and what it is for, with your wallet as "From". The network fee stays its own line.

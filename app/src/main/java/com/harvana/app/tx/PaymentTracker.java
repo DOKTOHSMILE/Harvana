@@ -42,6 +42,24 @@ public final class PaymentTracker {
 
     private PaymentTracker() {}
 
+    /** What the person has just reviewed and authorized: the amount and the review rows (group, to, for). */
+    public static final class Review {
+        public final String amount; public final List<String[]> rows; final long at;
+        Review(String amount, List<String[]> rows) { this.amount = amount; this.rows = rows; this.at = System.currentTimeMillis(); }
+    }
+    private static Review lastReview;
+
+    public static synchronized void noteReview(String amount, List<String[]> rows) {
+        lastReview = new Review(amount == null ? "" : amount, rows == null ? new ArrayList<String[]>() : new ArrayList<>(rows));
+    }
+
+    /** The review for the payment that just went through; null if there is none or it is old (two minutes). Read once. */
+    public static synchronized Review takeReview() {
+        Review r = lastReview;
+        lastReview = null;
+        return r != null && System.currentTimeMillis() - r.at < 2 * 60_000L ? r : null;
+    }
+
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static int inFlight;
     private static WeakReference<Activity> current = new WeakReference<>(null);

@@ -589,9 +589,21 @@ public final class NodeGroupClient {
                     com.harvana.app.ui.PaymentSuccessSheet.Info info = new com.harvana.app.ui.PaymentSuccessSheet.Info();
                     info.title = title;
                     long raw = json == null ? 0 : json.optLong("amountRaw", json.optLong("totalRaw", 0));
+                    com.harvana.app.tx.PaymentTracker.Review review = com.harvana.app.tx.PaymentTracker.takeReview();
                     if (raw > 0) info.amount = com.harvana.app.wallet.BalanceFormatter.smart(
                             com.harvana.app.wallet.BalanceFormatter.rawToHarv(raw)) + " " + com.harvana.app.CoinInfo.ticker();
-                    info.rows = new String[][] {{"From", address}};
+                    else if (review != null && !review.amount.isEmpty()) info.amount = review.amount;   // the network's answer has no amount: use what was approved
+                    java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+                    boolean hasFrom = false;
+                    if (review != null) for (String[] r : review.rows) {
+                        if (r == null || r.length < 2 || r[0] == null) continue;
+                        String label = r[0].trim();
+                        if ("Network fee".equalsIgnoreCase(label)) continue;          // the fee is its own line on the receipt
+                        if ("From".equalsIgnoreCase(label)) { hasFrom = true; rows.add(new String[]{"From", address}); continue; }
+                        rows.add(r);
+                    }
+                    if (!hasFrom) rows.add(new String[]{"From", address});
+                    info.rows = rows.toArray(new String[0][]);
                     String hash = json == null ? "" : json.optString("txHash", json.optString("payoutId", ""));
                     info.txHash = hash;
                     info.note = path.contains("/staking/")

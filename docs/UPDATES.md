@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 6 Oct 2026: notification checks read only what is new
+
+What the app does. The notification check (every 90 seconds while the app is open, every 15 minutes in the background) used to read every notice ever posted in each of your groups. It now reads only notices newer than the last one seen, at most 100 per group, and pinch checks only read pinches since the last look. Same notifications, a small fraction of the Firestore reads (about 320 to about 20 per check for a member in 3 busy groups). Firestore creates the single-field index this needs on its own. What you do: install the new build. Details: node repository `docs/PLATFORM_SCALE_TEST.md`.
+
 ## 6 Oct 2026: icons fill in 3D when tapped
 
 What the app does. Every icon now has two looks: the duotone line at rest, and a filled version shaded for depth (lit from the top, soft shadow) in one single colour, the icon's own colour or the colour the screen gives it. The icon fades into the filled look while it is pressed, and stays filled while it is selected or checked (the current bottom-bar tab, toggles, selected chips). Icons inside a tappable row fill when the row is pressed. Icons that have their own tap action keep their own pressed state. What you do: install the new build.

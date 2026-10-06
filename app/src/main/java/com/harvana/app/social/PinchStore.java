@@ -71,7 +71,13 @@ public final class PinchStore {
         BG.execute(() -> {
             try {
                 SharedPreferences sp = c.getSharedPreferences("pinch_seen", Context.MODE_PRIVATE);
-                for (QueryDocumentSnapshot d : Tasks.await(db().collection("PINCHES").document(uid).collection("from").get(), T, TimeUnit.SECONDS)) {
+                // Only pinches since the last look (with a 10-minute overlap for clock drift); the per-friend check below
+                // still drops anything already shown. Before, every run read one document per friend who ever pinched.
+                long last = sp.getLong(uid + "__polled", 0L);
+                sp.edit().putLong(uid + "__polled", System.currentTimeMillis()).apply();
+                com.google.firebase.firestore.Query q = db().collection("PINCHES").document(uid).collection("from");
+                if (last > 0) q = q.whereGreaterThan("at", new com.google.firebase.Timestamp(new java.util.Date(last - 10 * 60_000L)));
+                for (QueryDocumentSnapshot d : Tasks.await(q.limit(50).get(), T, TimeUnit.SECONDS)) {
                     com.google.firebase.Timestamp ts = d.getTimestamp("at");
                     long at = ts == null ? 0L : ts.toDate().getTime();
                     String key = uid + "_" + d.getId();

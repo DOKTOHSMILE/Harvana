@@ -111,12 +111,21 @@ public final class NotificationSync {
                 if (!(g instanceof List) || ((List<?>) g).isEmpty()) { finish.run(); return; }
                 final List<?> groups = (List<?>) g;
                 final AtomicInteger left = new AtomicInteger(groups.size());
+                final SharedPreferences seen = c.getSharedPreferences("notif_notice_seen", Context.MODE_PRIVATE);
                 for (Object o : groups) {
                     final String gid = s(o);
+                    // First look at a group: set the baseline without reading anything (processNotices did the same after
+                    // reading every notice).
+                    if (!seen.contains(uid + "_" + gid)) {
+                        seen.edit().putLong(uid + "_" + gid, System.currentTimeMillis()).apply();
+                        if (left.decrementAndGet() == 0) finish.run();
+                        continue;
+                    }
+                    final long since = seen.getLong(uid + "_" + gid, System.currentTimeMillis());
                     GroupFirestoreManager.getInstance(c).getGroup(gid, new GroupFirestoreManager.DocCallback() {
                         @Override public void onSuccess(Map<String, Object> group) {
                             final String groupName = s(group == null ? null : group.get("groupName"));
-                            GroupFirestoreManager.getInstance(c).getNotices(gid, new GroupFirestoreManager.ListCallback() {
+                            GroupFirestoreManager.getInstance(c).getNoticesSince(gid, since, 100, new GroupFirestoreManager.ListCallback() {
                                 @Override public void onSuccess(List<Map<String, Object>> notices) {
                                     processNotices(c, uid, gid, groupName, notices);
                                     if (left.decrementAndGet() == 0) finish.run();

@@ -342,6 +342,16 @@ public class GroupFirestoreManager {
 	public void getNotices(String groupId, ListCallback callback) {
 		list(col("GROUPS", groupId, "notices"), callback);
 	}
+
+	/**
+	 * Notices created after {@code sinceMs}, oldest first, at most {@code max}. The notification check uses this so each
+	 * run reads only what is new, not every notice the group ever had (that cost grew with the group's age, on every
+	 * phone, every 90 seconds). Notices without a numeric createdAt were never shown by the check, so nothing is lost.
+	 */
+	public void getNoticesSince(String groupId, long sinceMs, int max, ListCallback callback) {
+		query(col("GROUPS", groupId, "notices").whereGreaterThan("createdAt", sinceMs)
+			.orderBy("createdAt", Query.Direction.ASCENDING).limit(max), false, callback);
+	}
 	
 	public void addPayment(String groupId, Map<String, Object> fields, IdCallback callback) {
 		add(col("GROUPS", groupId, "payments"), fields, callback);

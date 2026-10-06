@@ -24,7 +24,10 @@ public final class LearnGift {
     private static final String[] LABELS = {"0.1 HARV", "0.5 HARV", "1 HARV", "5 HARV"};
     private static final String[] AMOUNTS = {"0.1", "0.5", "1", "5"};
 
-    public static void ask(Activity host, String contentId, ProfileTrust.Card poster) {
+    public static void ask(Activity host, String contentId, ProfileTrust.Card poster) { ask(host, contentId, poster, null); }
+
+    /** {@code onGifted} runs on the UI thread after a gift went through and was recorded on the post. */
+    public static void ask(Activity host, String contentId, ProfileTrust.Card poster, Runnable onGifted) {
         if (host == null || contentId == null) return;
         String me = WalletManager.getActiveWalletAddress(host);
         if (me == null || me.isEmpty()) { toast(host, "Create or import a wallet first to send a gift."); return; }
@@ -34,16 +37,19 @@ public final class LearnGift {
 
         new com.harvana.app.ui.SheetDialog.Builder(host)
                 .setTitle("Gift " + who)
-                .setItems(LABELS, (d, which) -> confirm(host, contentId, poster, me, who, AMOUNTS[which]))
+                .setItems(LABELS, (d, which) -> confirm(host, contentId, poster, me, who, AMOUNTS[which], onGifted))
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    private static void confirm(Activity host, String contentId, ProfileTrust.Card poster, String me, String who, String amount) {
+    private static void confirm(Activity host, String contentId, ProfileTrust.Card poster, String me, String who, String amount, Runnable onGifted) {
         PinPromptHelper.authorize(host, "Send a gift of " + amount + " HARV to " + who + ".", () ->
                 TransactionRouter.routeTransaction(host, me, poster.wallet, new BigDecimal(amount), null,
                         EngagementCanonical.giftMemo(contentId), new TransactionRouter.RouterCallback() {
-                            @Override public void onSuccess(String txHash) { toast(host, "Gift sent to " + who + ". Thank you."); }
+                            @Override public void onSuccess(String txHash) {
+                                toast(host, "Gift sent to " + who + ". Thank you.");
+                                LearnSocial.recordGift(contentId, txHash, amount, poster.wallet, (ok, err) -> { if (ok && onGifted != null) host.runOnUiThread(onGifted); });
+                            }
                             @Override public void onError(String code, String msg) { toast(host, msg == null || msg.isEmpty() ? "The gift could not be sent." : msg); }
                         }));
     }

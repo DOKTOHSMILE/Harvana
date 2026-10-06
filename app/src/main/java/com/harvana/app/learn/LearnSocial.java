@@ -15,6 +15,7 @@ import java.util.Map;
  * Reactions and comments on a Learn Hub post. Counts are counted from the documents, never from a number a user can write:
  *   LEARN_CONTENT/{id}/reactions/{uid}   one fire per person
  *   LEARN_CONTENT/{id}/comments/{auto}   a comment: uid, text, at
+ *   LEARN_CONTENT/{id}/gifts/{txHash}    a gift sent from the reader's wallet: uid, to, amount, txHash, at (one per transfer)
  */
 public final class LearnSocial {
     private LearnSocial() {}
@@ -34,6 +35,10 @@ public final class LearnSocial {
         return FirebaseFirestore.getInstance().collection("LEARN_CONTENT").document(contentId).collection("reactions");
     }
 
+    private static CollectionReference gifts(String contentId) {
+        return FirebaseFirestore.getInstance().collection("LEARN_CONTENT").document(contentId).collection("gifts");
+    }
+
     private static CollectionReference comments(String contentId) {
         return FirebaseFirestore.getInstance().collection("LEARN_CONTENT").document(contentId).collection("comments");
     }
@@ -45,6 +50,21 @@ public final class LearnSocial {
     public static void fireCount(String contentId, LongCallback cb) { count(reactions(contentId), cb); }
 
     public static void commentCount(String contentId, LongCallback cb) { count(comments(contentId), cb); }
+
+    public static void giftCount(String contentId, LongCallback cb) { count(gifts(contentId), cb); }
+
+    /** Records a gift the signed-in user just sent, the same way a reaction is recorded. The document id is the transfer's hash, so it is written once. */
+    public static void recordGift(String contentId, String txHash, String amount, String toWallet, DoneCallback cb) {
+        String uid = me();
+        if (uid.isEmpty() || contentId == null || contentId.isEmpty() || txHash == null || txHash.isEmpty()) { if (cb != null) cb.on(false, "Nothing to record."); return; }
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("uid", uid);
+        doc.put("to", toWallet == null ? "" : toWallet);
+        doc.put("amount", amount == null ? "" : amount);
+        doc.put("txHash", txHash);
+        doc.put("at", System.currentTimeMillis());
+        gifts(contentId).document(txHash).set(doc).addOnCompleteListener(t -> { if (cb != null) cb.on(t.isSuccessful(), t.isSuccessful() ? "" : "Could not record the gift."); });
+    }
 
     private static void count(Query q, LongCallback cb) {
         q.count().get(AggregateSource.SERVER).addOnCompleteListener(t -> cb.on(t.isSuccessful() && t.getResult() != null ? t.getResult().getCount() : 0L));

@@ -154,7 +154,7 @@ public final class LearnPostBinder {
             if (onCommentPosted != null) onCommentPosted.run();
         }));
         root.findViewById(R.id.ll_share).setOnClickListener(v -> share(host, post));
-        root.findViewById(R.id.ll_gift).setOnClickListener(v -> { LearnInterest.get(host).record(post, LearnInterest.GIFT); LearnGift.ask(host, id, author[0]); });
+        root.findViewById(R.id.ll_gift).setOnClickListener(v -> { LearnInterest.get(host).record(post, LearnInterest.GIFT); LearnGift.ask(host, id, author[0], () -> bindCounts(host, root, post)); });
         root.findViewById(R.id.iv_more).setOnClickListener(v -> more(host, v, post));
     }
 
@@ -187,6 +187,11 @@ public final class LearnPostBinder {
 
         LearnSocial.fireCount(id, n -> host.runOnUiThread(() -> { if (!id.equals(root.getTag(R.id.tv_title))) return; fires[0] = n; paint.run(); }));
         LearnSocial.hasFired(id, on -> host.runOnUiThread(() -> { if (!id.equals(root.getTag(R.id.tv_title))) return; mine[0] = on; paint.run(); }));
+        TextView giftCount = root.findViewById(R.id.tv_gift);
+        if (giftCount != null) LearnSocial.giftCount(id, n -> host.runOnUiThread(() -> {
+            if (!id.equals(root.getTag(R.id.tv_title))) return;
+            giftCount.setText(LearnRules.compactCount(n));
+        }));
         LearnSocial.commentCount(id, n -> host.runOnUiThread(() -> {
             if (!id.equals(root.getTag(R.id.tv_title))) return;
             commentCount.setText(LearnRules.compactCount(n));

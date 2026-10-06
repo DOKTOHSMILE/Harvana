@@ -122,6 +122,15 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if request.auth != null && request.auth.uid == uid;
     }
+    // A gift sent to the author of a post. The document id is the transfer hash, so each transfer is recorded once and cannot be edited.
+    match /LEARN_CONTENT/{contentId}/gifts/{txHash} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['uid', 'to', 'amount', 'txHash', 'at'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.txHash == txHash;
+      allow update, delete: if false;
+    }
     match /LEARN_CONTENT/{contentId}/comments/{commentId} {
       allow read: if request.auth != null;
       allow create: if request.auth != null

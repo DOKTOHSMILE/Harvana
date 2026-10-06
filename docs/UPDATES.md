@@ -612,3 +612,7 @@ The owner published `docs/firestore.console.rules` in the Firebase console on 1 
 ## Every receipt has the same facts
 - Sharing a receipt from the payment success sheet now reads the transaction from the network by its hash first, so it shows the same full data as the transaction detail receipt: from, to, memo, network fee, burned, hash, block, confirmations and nonce (it used to show only a few rows). If the network cannot be reached it falls back to the short receipt.
 - Fixed the duplicated unit in the headline ("0.1 HARV HARV").
+
+## Gifts are recorded like reactions
+- When a reader sends a gift on a Learn Hub post, it is now recorded on the post (`LEARN_CONTENT/{post}/gifts/{transfer hash}`: who, to which wallet, amount, time), once per transfer, the same way reactions are recorded. The gift button shows how many gifts the post has received, counted from the records, and updates right after you send one. The author sees the count on their own post.
+- **Owner step:** publish the updated `docs/firestore.console.rules` (new `gifts` rule: signed-in users can read; a user can create only their own record; no edits or deletes).

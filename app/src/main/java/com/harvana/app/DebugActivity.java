@@ -37,7 +37,7 @@ public class DebugActivity extends Activity {
         // 1. Root ScrollView Layout
         ScrollView scrollView = new ScrollView(this);
         scrollView.setFillViewport(true);
-        scrollView.setBackgroundColor(0xFF0B131F); // Modern deep slate-navy
+        scrollView.setBackgroundColor(com.harvana.app.utils.UiColors.background());
 
         // Main Container Stack
         LinearLayout rootLayout = new LinearLayout(this);

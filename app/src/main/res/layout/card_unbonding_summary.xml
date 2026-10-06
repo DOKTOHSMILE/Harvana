@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="16dp"
-    app:cardBackgroundColor="#161922"
+    app:cardBackgroundColor="@color/colorSurface"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp">
 
@@ -36,7 +36,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="3 in Progress"
-                android:textColor="#8A92A6"
+                android:textColor="@color/colorTextTertiary"
                 android:textSize="11sp"/>
         </LinearLayout>
 

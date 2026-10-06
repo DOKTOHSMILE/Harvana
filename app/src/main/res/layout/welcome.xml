@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/colorBackgroundMain"
+    android:background="@color/colorBackground"
     android:id="@+id/_main">
 
     <androidx.core.widget.NestedScrollView
@@ -45,7 +45,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Welcome to Harvana"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/colorTextPrimary"
                 android:textSize="28sp"
                 android:textStyle="bold"
                 android:layout_gravity="center_horizontal" />
@@ -84,7 +84,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:text="Secure &amp; Transparent\nDouble-confirmation payment ledger."
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/colorTextPrimary"
                         android:textSize="13sp" />
                 </LinearLayout>
 
@@ -105,7 +105,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:text="Reputation Matters\nYour Trust Score follows you across circles."
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/colorTextPrimary"
                         android:textSize="13sp" />
                 </LinearLayout>
 
@@ -125,7 +125,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:text="Earn Continuously\nStake HARV to earn daily protocol rewards."
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/colorTextPrimary"
                         android:textSize="13sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -139,7 +139,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="24dp"
-        android:background="@color/colorBackgroundMain">
+        android:background="@color/colorBackground">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_get_started"
@@ -147,11 +147,11 @@
             android:layout_height="56dp"
             android:text="Get Started"
             android:textAllCaps="false"
-            android:textColor="#000000"
+            android:textColor="@color/colorTextOnAccent"
             android:textSize="16sp"
             android:textStyle="bold"
             app:cornerRadius="12dp"
-            app:backgroundTint="@color/colorHarvOrange" />
+            app:backgroundTint="@color/colorAccent" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_login"
@@ -161,7 +161,7 @@
             android:layout_marginTop="12dp"
             android:text="Log In"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/colorTextPrimary"
             android:textSize="16sp"
             android:textStyle="bold"
             app:strokeColor="@color/colorStrokeBase"

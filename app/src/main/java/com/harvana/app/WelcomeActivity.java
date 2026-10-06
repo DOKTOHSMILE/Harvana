@@ -130,7 +130,7 @@ public class WelcomeActivity extends AppCompatActivity {
             final Window window = WelcomeActivity.this.getWindow();
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.parseColor("#080A11"));
+            window.setStatusBarColor(com.harvana.app.utils.UiColors.background());
         }
     }
 
@@ -140,26 +140,26 @@ public class WelcomeActivity extends AppCompatActivity {
         LinearLayout sheetLayout = new LinearLayout(this);
         sheetLayout.setOrientation(LinearLayout.VERTICAL);
         sheetLayout.setPadding(dp(24), dp(32), dp(24), dp(32));
-        sheetLayout.setBackgroundColor(Color.parseColor("#121623")); // Dark surface
+        sheetLayout.setBackgroundColor(com.harvana.app.utils.UiColors.surface());
 
         TextView title = new TextView(this);
         title.setText("Welcome Back");
-        title.setTextColor(Color.WHITE);
+        title.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
         title.setTextSize(22);
         title.setTypeface(null, Typeface.BOLD);
         title.setPadding(0, 0, 0, dp(8));
         
         TextView subtitle = new TextView(this);
         subtitle.setText("Select a method to log into your account.");
-        subtitle.setTextColor(Color.parseColor("#8F9BB3"));
+        subtitle.setTextColor(com.harvana.app.utils.UiColors.textSecondary());
         subtitle.setTextSize(14);
         subtitle.setPadding(0, 0, 0, dp(24));
 
         MaterialButton btnGoogle = new MaterialButton(this);
         btnGoogle.setText("Continue with Google");
         btnGoogle.setAllCaps(false);
-        btnGoogle.setTextColor(Color.BLACK);
-        btnGoogle.setBackgroundColor(Color.WHITE);
+        btnGoogle.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+        btnGoogle.setBackgroundColor(com.harvana.app.utils.UiColors.background());
         btnGoogle.setCornerRadius(dp(12));
         btnGoogle.setMinimumHeight(dp(56));
         // You can add a Google icon drawable here if you have one in your resources:
@@ -177,8 +177,8 @@ public class WelcomeActivity extends AppCompatActivity {
         btnEmail.setLayoutParams(params);
         btnEmail.setText("Sign in with Email");
         btnEmail.setAllCaps(false);
-        btnEmail.setTextColor(Color.WHITE);
-        btnEmail.setStrokeColorResource(android.R.color.darker_gray);
+        btnEmail.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+        btnEmail.setStrokeColorResource(R.color.colorCardStroke);
         btnEmail.setCornerRadius(dp(12));
         btnEmail.setMinimumHeight(dp(56));
         btnEmail.setOnClickListener(v -> {

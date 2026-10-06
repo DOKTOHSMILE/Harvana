@@ -160,7 +160,7 @@
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
 
-    <!-- P2P stays on the dark fintech board even in light mode. -->
+    <!-- P2P uses the same page, card and accent colours as every other screen (its tokens are aliases of the core ones). -->
     <style name="P2pTheme" parent="AppTheme">
         <item name="android:windowBackground">@color/colorP2pBg</item>
         <item name="colorSurface">@color/colorP2pSurface</item>

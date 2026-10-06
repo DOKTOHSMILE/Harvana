@@ -40,8 +40,8 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="16dp"
-				app:cardBackgroundColor="@color/colorP2pSurface"
-				app:cardCornerRadius="20dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorP2pBorder"
 				app:strokeWidth="1dp">
@@ -310,8 +310,8 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="14dp"
-				app:cardBackgroundColor="@color/colorP2pSurface"
-				app:cardCornerRadius="18dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorP2pBorder"
 				app:strokeWidth="1dp">

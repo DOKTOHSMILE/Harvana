@@ -41,7 +41,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="14dp"
 				android:backgroundTint="@color/colorP2pSurface"
-				app:cardCornerRadius="18dp"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorP2pBorder"
 				app:strokeWidth="1dp">
@@ -103,7 +103,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="14dp"
 				android:backgroundTint="@color/colorP2pSurface"
-				app:cardCornerRadius="20dp"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorP2pBorder"
 				app:strokeWidth="1dp">
@@ -225,7 +225,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="14dp"
 				android:backgroundTint="@color/colorP2pSurface"
-				app:cardCornerRadius="18dp"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorP2pBorder"
 				app:strokeWidth="1dp">
@@ -366,7 +366,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="14dp"
 				android:backgroundTint="@color/colorP2pSurface"
-				app:cardCornerRadius="20dp"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorP2pAccent"
 				app:strokeWidth="1dp">
@@ -442,7 +442,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="10dp"
 				android:backgroundTint="@color/colorP2pSurface"
-				app:cardCornerRadius="20dp"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorP2pBorder"
 				app:strokeWidth="1dp">
@@ -530,7 +530,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="14dp"
 				android:backgroundTint="@color/colorP2pSurface"
-				app:cardCornerRadius="18dp"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorP2pBorder"
 				app:strokeWidth="1dp">
@@ -606,7 +606,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="16dp"
 				android:backgroundTint="@color/colorP2pSurface"
-				app:cardCornerRadius="20dp"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorP2pBorder"
 				app:strokeWidth="1dp">
@@ -860,7 +860,7 @@
 				android:layout_marginTop="14dp"
 				android:visibility="gone"
 				android:backgroundTint="@color/colorP2pSurface"
-				app:cardCornerRadius="20dp"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorP2pBorder"
 				app:strokeWidth="1dp">
@@ -934,7 +934,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="14dp"
 				android:backgroundTint="@color/colorP2pSurface"
-				app:cardCornerRadius="18dp"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorP2pBorder"
 				app:strokeWidth="1dp">
@@ -1002,7 +1002,7 @@
 				android:layout_marginTop="16dp"
 				android:visibility="gone"
 				android:backgroundTint="@color/colorP2pSurface"
-				app:cardCornerRadius="20dp"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorSuccess"
 				app:strokeWidth="1dp">

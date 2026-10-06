@@ -44,7 +44,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="20dp"
+					app:cardCornerRadius="16dp"
 					app:cardElevation="0dp"
 					app:strokeWidth="1dp"
 					app:strokeColor="@color/colorCardStroke">
@@ -128,7 +128,7 @@
 								android:layout_height="wrap_content"
 								app:cardBackgroundColor="@color/colorSurfaceAlt"
 								android:layout_marginEnd="8dp"
-								app:cardCornerRadius="20dp"
+								app:cardCornerRadius="16dp"
 								app:cardElevation="0dp"
 								app:strokeWidth="0dp">
 								<TextView
@@ -147,7 +147,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								app:cardBackgroundColor="@color/colorSurfaceAlt"
-								app:cardCornerRadius="20dp"
+								app:cardCornerRadius="16dp"
 								app:cardElevation="0dp"
 								app:strokeWidth="0dp">
 								<LinearLayout
@@ -194,7 +194,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="20dp"
+					app:cardCornerRadius="16dp"
 					app:cardElevation="0dp"
 					app:strokeWidth="1dp"
 					app:strokeColor="@color/colorCardStroke">
@@ -225,7 +225,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="20dp"
+					app:cardCornerRadius="16dp"
 					app:cardElevation="0dp"
 					app:strokeWidth="1dp"
 					app:strokeColor="@color/colorCardStroke">
@@ -364,7 +364,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="20dp"
+					app:cardCornerRadius="16dp"
 					app:cardElevation="0dp"
 					app:strokeColor="@color/colorCardStroke"
 					app:strokeWidth="1dp">
@@ -492,7 +492,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="20dp"
+					app:cardCornerRadius="16dp"
 					app:cardElevation="0dp"
 					app:strokeWidth="1dp"
 					app:strokeColor="@color/colorCardStroke">
@@ -613,7 +613,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="20dp"
+					app:cardCornerRadius="16dp"
 					app:cardElevation="0dp"
 					app:strokeWidth="1dp"
 					app:strokeColor="@color/colorCardStroke">
@@ -644,7 +644,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:layout_marginTop="16dp"
-					app:cardBackgroundColor="@color/colorSurfaceAlt"
+					app:cardBackgroundColor="@color/colorSurface"
 					app:cardCornerRadius="16dp"
 					app:cardElevation="0dp"
 					app:strokeWidth="1dp"

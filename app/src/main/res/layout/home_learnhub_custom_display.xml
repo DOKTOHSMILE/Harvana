@@ -29,7 +29,7 @@
 				android:id="@+id/cardview5"
 				android:layout_width="56dp"
 				android:layout_height="56dp"
-				app:cardBackgroundColor="@color/colorSurfaceRaised"
+				app:cardBackgroundColor="@color/colorSurfaceAlt"
 				app:cardElevation="0dp"
 				app:cardCornerRadius="12dp">
 				<ImageView

@@ -12,12 +12,12 @@
     <color name="colorAccentRipple">#1AFFE2B8</color>
     <!--Background & Surfaces (Deep Teal Body)-->
     <color name="colorBackground">#031F1D</color> 
-    <color name="colorPopupSurface">#0B403B</color>
-    <color name="colorBackgroundDark">#021614</color>
+    <color name="colorPopupSurface">@color/colorSurface</color>
+    <color name="colorBackgroundDark">@color/colorBackground</color>
     <color name="colorSurface">#06312E</color>
     <color name="colorSurfaceAlt">#0A3E3A</color>
-    <color name="colorSurfaceRaised">#0F4A45</color>
-    <color name="colorSurfaceDeep">#021614</color>
+    <color name="colorSurfaceRaised">@color/colorSurfaceAlt</color>
+    <color name="colorSurfaceDeep">@color/colorSurfaceAlt</color>
     <!--Buttons-->
     <color name="colorButtonText">#053D3A</color>
     <color name="colorButtonBackground">#FFE2B8</color>
@@ -51,7 +51,7 @@
     <color name="colorPurple">#9AA7E0</color>
     <color name="colorAmber">#F2C265</color>
     <color name="colorSecondaryAccent">#9AA7E0</color>
-    <color name="colorDivider">#14544E</color>
+    <color name="colorDivider">@color/colorCardStroke</color>
     <color name="colorFieldBorder">#1B655E</color>
     <color name="colorCardStroke">#14544E</color>
     <color name="colorOverlayLight">#1AFFFFFF</color>
@@ -67,15 +67,15 @@
     <color name="colorMutedSoft">#266A8A84</color>
     <color name="colorErrorSoft">#26F0706B</color>
     <!--P2P Section (Teal Dark Adapted)-->
-    <color name="colorP2pBg">#031F1D</color>
-    <color name="colorP2pSurface">#06312E</color>
-    <color name="colorP2pSurfaceAlt">#0A3E3A</color>
-    <color name="colorP2pBorder">#14544E</color>
-    <color name="colorP2pTextPrimary">#F4EFE6</color>
-    <color name="colorP2pTextSecondary">#B7CBC6</color>
-    <color name="colorP2pTextMuted">#6A8A84</color>
-    <color name="colorP2pAccent">#FFE2B8</color>
-    <color name="colorP2pOnAccent">#053D3A</color>
+    <color name="colorP2pBg">@color/colorBackground</color>
+    <color name="colorP2pSurface">@color/colorSurface</color>
+    <color name="colorP2pSurfaceAlt">@color/colorSurfaceAlt</color>
+    <color name="colorP2pBorder">@color/colorCardStroke</color>
+    <color name="colorP2pTextPrimary">@color/colorTextPrimary</color>
+    <color name="colorP2pTextSecondary">@color/colorTextSecondary</color>
+    <color name="colorP2pTextMuted">@color/colorTextTertiary</color>
+    <color name="colorP2pAccent">@color/colorAccent</color>
+    <color name="colorP2pOnAccent">@color/colorTextOnAccent</color>
     <color name="colorP2pWarningBg">#33F2C265</color>
     <color name="colorSuccessSoft">#263DDC97</color>
     <color name="colorWarningSoft">#26F2C265</color>
@@ -84,12 +84,12 @@
     <color name="colorOnHeroFaint">#22FFFFFF</color>
     <color name="colorOnHeroStroke">#55FFFFFF</color>
     <color name="colorOnHeroMuted">#A9C4BE</color>
-<color name="colorBackgroundMain">#031F1D</color>
-<color name="colorSurfaceDark">#052B28</color>
-<color name="colorSurfaceLight">#083733</color>
+<color name="colorBackgroundMain">@color/colorBackground</color>
+<color name="colorSurfaceDark">@color/colorSurface</color>
+<color name="colorSurfaceLight">@color/colorSurfaceAlt</color>
 <color name="colorHarvOrange">#E9B35E</color>
 <color name="colorHarvOrangeDark">#C99533</color>
 <color name="colorSuccessNeon">#00FFA3</color>
 <color name="colorReadyBlue">#3B82F6</color>
-<color name="colorStrokeBase">#144842</color>
+<color name="colorStrokeBase">@color/colorCardStroke</color>
 </resources>

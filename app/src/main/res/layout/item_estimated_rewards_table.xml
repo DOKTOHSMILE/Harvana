@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="12dp"
-    app:cardBackgroundColor="#161922"
+    app:cardBackgroundColor="@color/colorSurface"
     app:cardCornerRadius="12dp"
     app:cardElevation="0dp">
 
@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Calculating reward metrics..."
-                android:textColor="#8A92A6"
+                android:textColor="@color/colorTextTertiary"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -60,7 +60,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Lock Multiplier" 
-                        android:textColor="#8A92A6" 
+                        android:textColor="@color/colorTextTertiary" 
                         android:textSize="12sp"/>
                 </LinearLayout>
                 <TextView 
@@ -79,7 +79,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Daily Pool Drip" 
-                    android:textColor="#8A92A6" 
+                    android:textColor="@color/colorTextTertiary" 
                     android:textSize="12sp"/>
                 <TextView 
                     android:id="@+id/tvTableDailyDrip" 
@@ -97,7 +97,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Est. Monthly Yield" 
-                    android:textColor="#8A92A6" 
+                    android:textColor="@color/colorTextTertiary" 
                     android:textSize="12sp"/>
                 <TextView 
                     android:id="@+id/tvTableMonthlyYield" 
@@ -115,7 +115,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Vault Security" 
-                    android:textColor="#8A92A6" 
+                    android:textColor="@color/colorTextTertiary" 
                     android:textSize="12sp"/>
                 <TextView 
                     android:layout_width="wrap_content"

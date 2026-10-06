@@ -44,7 +44,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:layout_margin="1dp"
-					app:cardBackgroundColor="@color/colorP2pSurface"
+					app:cardBackgroundColor="@color/colorSurfaceAlt"
 					app:cardCornerRadius="28dp"
 					app:cardElevation="0dp">
 					<LinearLayout
@@ -166,8 +166,8 @@
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:layout_margin="10dp"
-			app:cardBackgroundColor="@color/colorP2pSurfaceAlt"
-			app:cardCornerRadius="20dp"
+			app:cardBackgroundColor="@color/colorSurface"
+			app:cardCornerRadius="16dp"
 			app:cardElevation="0dp"
 			app:strokeColor="@color/colorP2pBorder"
 			app:strokeWidth="1dp">

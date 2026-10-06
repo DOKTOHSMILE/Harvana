@@ -411,7 +411,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="16dp"
-				app:cardBackgroundColor="@color/colorSurfaceAlt"
+				app:cardBackgroundColor="@color/colorSurface"
 				app:cardCornerRadius="12dp">
 				<LinearLayout
 					android:id="@+id/linear25"

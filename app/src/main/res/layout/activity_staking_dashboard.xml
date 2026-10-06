@@ -344,7 +344,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                app:cardBackgroundColor="@color/colorSurfaceLight"
+                                app:cardBackgroundColor="@color/colorSurfaceAlt"
                                 app:strokeColor="@color/colorAccent"
                                 app:strokeWidth="1dp"
                                 app:cardCornerRadius="8dp">
@@ -360,7 +360,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:layout_marginStart="6dp"
-                                app:cardBackgroundColor="@color/colorSurfaceLight"
+                                app:cardBackgroundColor="@color/colorSurfaceAlt"
                                 app:strokeColor="@color/colorCardStroke"
                                 app:strokeWidth="1dp"
                                 app:cardCornerRadius="8dp">
@@ -376,7 +376,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:layout_marginStart="6dp"
-                                app:cardBackgroundColor="@color/colorSurfaceLight"
+                                app:cardBackgroundColor="@color/colorSurfaceAlt"
                                 app:strokeColor="@color/colorCardStroke"
                                 app:strokeWidth="1dp"
                                 app:cardCornerRadius="8dp">
@@ -392,7 +392,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:layout_marginStart="6dp"
-                                app:cardBackgroundColor="@color/colorSurfaceLight"
+                                app:cardBackgroundColor="@color/colorSurfaceAlt"
                                 app:strokeColor="@color/colorCardStroke"
                                 app:strokeWidth="1dp"
                                 app:cardCornerRadius="8dp">

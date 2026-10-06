@@ -500,6 +500,7 @@ public class MainActivity extends AppCompatActivity {
 		logoView.setOnClickListener(openProfile);
 		
 		ab.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(appBarColor));
+		ab.setElevation(0f);                      // flat, same colour as the body
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
 			android.view.Window window = getWindow();
 			window.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);

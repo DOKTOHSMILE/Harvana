@@ -6,8 +6,8 @@
         <item name="homeAsUpIndicator">@drawable/ic_nav_back</item>
         <!-- Plain TextViews (titles, subtitles) use the primary text colour instead of a washed-out default -->
         <item name="android:textViewStyle">@style/HarvanaTextView</item>
-        <item name="appBarColor">@color/colorAccent</item>
-        <item name="onAppBarColor">@color/colorTextOnAccent</item>
+        <item name="appBarColor">@color/colorBackground</item>
+        <item name="onAppBarColor">@color/colorTextPrimary</item>
         <item name="colorSecondary">@color/colorAccent</item>
         <item name="colorOnSecondary">@color/colorTextOnAccent</item>
         <item name="colorPrimaryVariant">@color/colorAccentDark</item>
@@ -116,8 +116,6 @@
     <!-- P2P stays on the dark fintech board even in light mode. -->
     <style name="P2pTheme" parent="AppTheme">
         <item name="android:windowBackground">@color/colorP2pBg</item>
-        <item name="android:statusBarColor">?attr/appBarColor</item>
-        <item name="android:windowLightStatusBar">true</item>
         <item name="colorSurface">@color/colorP2pSurface</item>
         <item name="colorOnSurface">@color/colorP2pTextPrimary</item>
         <item name="colorOnBackground">@color/colorP2pTextPrimary</item>

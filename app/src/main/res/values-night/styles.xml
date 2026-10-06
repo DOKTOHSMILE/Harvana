@@ -6,7 +6,7 @@
         <item name="homeAsUpIndicator">@drawable/ic_nav_back</item>
         <!-- Plain TextViews (titles, subtitles) use the primary text colour instead of a washed-out default -->
         <item name="android:textViewStyle">@style/HarvanaTextView</item>
-        <item name="appBarColor">@color/colorSurface</item>
+        <item name="appBarColor">@color/colorBackground</item>
         <item name="onAppBarColor">@color/colorTextPrimary</item>
         <item name="colorSecondary">@color/colorAccent</item>
         <item name="colorOnSecondary">@color/colorTextOnAccent</item>

@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * Wallet helpers used by fragments / activities.
  * deriveAddressFromSeed accepts BOTH:
- *   - 12-word mnemonic text
+ *   - recovery phrase text (24 words for new wallets, 12 for older ones)
  *   - Base64-encoded 32-byte raw seed
  */
 public class WalletManager {
@@ -54,7 +54,7 @@ public class WalletManager {
 	
 	/**
 	 * PRIMARY method used by WalletAssetFragmentActivity.
-	 * Accepts a 12-word mnemonic OR a Base64 raw seed.
+	 * Accepts a recovery phrase (12 or 24 words) OR a Base64 raw seed.
 	 * Always returns a valid HV0x… address or null.
 	 */	
 	public static String deriveAddressFromSeed(String seed) {
@@ -62,7 +62,7 @@ public class WalletManager {
 		
 		String trimmed = seed.trim();
 		
-		// Path A — looks like a mnemonic (contains spaces / is 12 words)
+		// Path A — looks like a recovery phrase (contains spaces)
 		if (trimmed.contains(" ") || trimmed.split("\\s+").length >= 8) {
 			return WalletGenerator.deriveAddressFromMnemonic(trimmed);
 		}

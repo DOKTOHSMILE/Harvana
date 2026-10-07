@@ -123,7 +123,7 @@ public final class GroupContract {
         // 7. How the network records it.
         Section node = new Section("How Harvana keeps it safe");
         node.add("Your payments are transactions on the Harvana network.");
-        node.add("You need a wallet on this phone and you must have written down its 12 recovery words. Nobody, not even Harvana, can recover them for you.");
+        node.add("You need a wallet on this phone and you must have written down its recovery words. Nobody, not even Harvana, can recover them for you.");
         if (!rotating) node.add("The network records you as a member when you make your first payment or start your savings line.");
         node.add("When you sign below, your wallet records that you read and agreed to this page. It is not a payment. No money moves.");
         out.add(node);

@@ -112,7 +112,7 @@
 						android:id="@+id/textview6"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:text="Restore from 12-word phrase"
+						android:text="Restore from your recovery phrase"
 						android:textSize="18sp"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary" />

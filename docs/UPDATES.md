@@ -2,6 +2,24 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: 24-word recovery phrase; the same words open your Pi wallet
+
+What the app does:
+
+- **New wallets get 24 words** (256-bit, standard BIP-39) instead of 12. Create wallet shows them three to a row. So does Backup & recovery, which now also shows the Pi address the words open, with a copy button.
+- **The same 24 words also give a Pi Network wallet.** It is derived the way Pi's own wallet does it: Stellar's SEP-0005 method on path m/44'/314159'/0'. So typing these words into Pi's app opens the same Pi wallet, and a Pi passphrase restored into Harvana shows that Pi wallet and gives a HARV wallet as well. Only the Pi address ("G...") is stored; the Pi key is worked out from the phrase when needed.
+- **Your HARV address does not change.** HARV keys come from the phrase exactly as before, so every existing wallet keeps its address.
+- **Older 12-word wallets keep working:** restore, cards and sending all work as before. They have no Pi wallet, because Pi's own app uses 24 words.
+- **Restore accepts any standard length** (12, 15, 18, 21 or 24 words), checked against the BIP-39 checksum.
+- **The wallet access card holds 24-word wallets too.** The QR stays one line, and the printed digit code is 145 digits instead of 106. Old 106-digit cards still restore.
+
+Checked off the phone:
+
+- the word logic against the official BIP-39 test vectors (12 and 24 words, including a wrong checksum);
+- the Pi address method against the three published SEP-0005 vectors, all matching (`tools/PiKeysCheck.java`).
+
+What you do: install the new build, create a new wallet, and copy its 24 words into Pi's app to check that the Pi address matches the one Backup & recovery shows. Please do this with a test wallet first.
+
 ## 7 Oct 2026: share a profile as a picture and a message
 
 What the app does. Share on a profile, and Share on the My QR code screen, now send two things together:

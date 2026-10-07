@@ -130,10 +130,45 @@ public class BackupRecoveryActivity extends AppCompatActivity {
 		}
 		revealedMnemonic = mnemonic;
 		_populateWordGrid(mnemonic);
+		_showPiAddress(mnemonic);
 		layoutLockedState.setVisibility(View.GONE);
 		layoutRevealedState.setVisibility(View.VISIBLE);
 	}
 	
+	/** Under the words: the Pi wallet the same 24 words open (in Harvana and in Pi's own app), with a copy button. */
+	private void _showPiAddress(String mnemonic) {
+		android.view.ViewGroup parent = (android.view.ViewGroup) gridMnemonicWords.getParent();
+		View old = parent.findViewWithTag("pi_address_row");
+		if (old != null) parent.removeView(old);
+		String harv = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
+		String pi = com.harvana.app.wallet.PiWalletStore.get(this, harv);
+		if (pi.isEmpty()) pi = com.harvana.app.wallet.PiWalletStore.rememberFromPhrase(this, harv, mnemonic);
+		if (pi.isEmpty()) return;                      // a 12-word phrase: no Pi wallet
+		final String piAddr = pi;
+		float dd = getResources().getDisplayMetrics().density;
+		LinearLayout row = new LinearLayout(this);
+		row.setTag("pi_address_row");
+		row.setOrientation(LinearLayout.VERTICAL);
+		row.setPadding((int) (8 * dd), (int) (14 * dd), (int) (8 * dd), (int) (4 * dd));
+		MaterialTextView label = new MaterialTextView(this);
+		label.setText("These words also open your Pi wallet");
+		label.setTypeface(null, Typeface.BOLD);
+		label.setTextSize(14f);
+		row.addView(label);
+		MaterialTextView addr = new MaterialTextView(this);
+		addr.setText(piAddr.substring(0, 8) + "\u2026" + piAddr.substring(piAddr.length() - 8) + "   Copy");
+		addr.setTextSize(13f);
+		addr.setAlpha(0.8f);
+		addr.setPadding(0, (int) (4 * dd), 0, 0);
+		addr.setOnClickListener(v -> {
+			android.content.ClipboardManager cm = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+			if (cm != null) cm.setPrimaryClip(android.content.ClipData.newPlainText("Pi address", piAddr));
+			android.widget.Toast.makeText(this, "Pi address copied", android.widget.Toast.LENGTH_SHORT).show();
+		});
+		row.addView(addr);
+		parent.addView(row, parent.indexOfChild(gridMnemonicWords) + 1);
+	}
+
 	private void _populateWordGrid(String mnemonic) {
 		gridMnemonicWords.removeAllViews();
 		String[] words = mnemonic.trim().split("\\s+");
@@ -141,8 +176,11 @@ public class BackupRecoveryActivity extends AppCompatActivity {
 		// Calculate dynamic dimensions based on screen density for perfect scaling
 		float density = getResources().getDisplayMetrics().density;
 		int margin = (int) (6 * density);
-		int paddingInner = (int) (14 * density);
-		int numToWordSpacing = (int) (12 * density);
+		// 24 words read best three to a row; a 12-word phrase keeps two.
+		final int cols = words.length > 12 ? 3 : 2;
+		gridMnemonicWords.setColumnCount(cols);
+		int paddingInner = (int) ((cols == 3 ? 10 : 14) * density);
+		int numToWordSpacing = (int) ((cols == 3 ? 8 : 12) * density);
 		
 		for (int i = 0; i < words.length; i++) {
 			// 1. Create a modern outlined card for each word
@@ -168,7 +206,8 @@ public class BackupRecoveryActivity extends AppCompatActivity {
 			// 4. Style the actual seed word (Bold and prominent)
 			MaterialTextView wordView = new MaterialTextView(this);
 			wordView.setText(words[i]);
-			wordView.setTextSize(15f);
+			wordView.setTextSize(cols == 3 ? 13f : 15f);
+			wordView.setSingleLine(true);
 			wordView.setTypeface(null, Typeface.BOLD);
 			wordView.setPadding(numToWordSpacing, 0, 0, 0);
 			
@@ -179,8 +218,8 @@ public class BackupRecoveryActivity extends AppCompatActivity {
 			
 			GridLayout.LayoutParams params = new GridLayout.LayoutParams();
 			params.width = 0;
-			params.columnSpec = GridLayout.spec(i % 2, 1f);
-			params.rowSpec = GridLayout.spec(i / 2);
+			params.columnSpec = GridLayout.spec(i % cols, 1f);
+			params.rowSpec = GridLayout.spec(i / cols);
 			params.setMargins(margin, margin, margin, margin);
 			wordCard.setLayoutParams(params);
 			

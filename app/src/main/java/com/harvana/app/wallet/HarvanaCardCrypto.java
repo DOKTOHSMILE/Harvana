@@ -37,8 +37,8 @@ import javax.crypto.spec.SecretKeySpec;
  *            (19 MiB memory, 2 iterations, 1 thread) -> 256-bit key2
  *   Final:   AES key = SHA-256(key1 || key2)
  *
- * FORMAT 2 (unchanged from before this hardening): encrypts the wallet's
- * raw 16-byte BIP-39 entropy — the words are 100% deterministically
+ * FORMAT 2: encrypts the wallet's raw BIP-39 entropy (16 bytes for a 12-word wallet, 32 bytes for a 24-word one;
+ * a 24-word card is 60 bytes, 145 digits) — the words are 100% deterministically
  * reconstructible from entropy via WalletGenerator.mnemonicFromEntropy().
  * Payload is still 44 bytes: salt(8) || iv(12) || entropy_ciphertext+tag(16+8).
  *   QR code    — "HARVANACARD2:" + Base64(44 bytes)  -> ~70 characters
@@ -53,11 +53,14 @@ public final class HarvanaCardCrypto {
     private static final int SALT_LENGTH = 8;
     private static final int GCM_IV_LENGTH = 12;
     private static final int GCM_TAG_LENGTH_BITS = 64;
-    private static final int ENTROPY_LENGTH = 16;
-    private static final int TOTAL_BYTES = SALT_LENGTH + GCM_IV_LENGTH + ENTROPY_LENGTH + (GCM_TAG_LENGTH_BITS / 8); // 44
+    /** A card holds the phrase's entropy: 16 bytes for a 12-word wallet, 32 bytes for a 24-word wallet. */
+    private static final int OVERHEAD = SALT_LENGTH + GCM_IV_LENGTH + (GCM_TAG_LENGTH_BITS / 8);   // 28
+    private static final int TOTAL_BYTES = OVERHEAD + 16;      // 44: a 12-word card
+    private static final int TOTAL_BYTES_24 = OVERHEAD + 32;   // 60: a 24-word card
 
-    /** Fixed digit width for lossless round-trip — ceil(44 * log10(256)). */
+    /** Fixed digit widths for a lossless round trip: ceil(44 * log10(256)) and ceil(60 * log10(256)). */
     public static final int DIGIT_CODE_LENGTH = 106;
+    public static final int DIGIT_CODE_LENGTH_24 = 145;
 
     private static final int PBKDF2_ITERATIONS = 300_000;
     private static final int AES_KEY_LENGTH_BITS = 256;
@@ -117,7 +120,7 @@ public final class HarvanaCardCrypto {
 
         byte[] ciphertextWithTag = cipher.doFinal(entropy);
 
-        byte[] raw = new byte[TOTAL_BYTES];
+        byte[] raw = new byte[OVERHEAD + entropy.length];
         System.arraycopy(salt, 0, raw, 0, SALT_LENGTH);
         System.arraycopy(iv, 0, raw, SALT_LENGTH, GCM_IV_LENGTH);
         System.arraycopy(ciphertextWithTag, 0, raw, SALT_LENGTH + GCM_IV_LENGTH, ciphertextWithTag.length);
@@ -168,12 +171,12 @@ public final class HarvanaCardCrypto {
             return DecryptResult.fail("Enter the digit code from the back of the card.");
         }
         String cleaned = digitCode.replaceAll("[^0-9]", "");
-        if (cleaned.length() != DIGIT_CODE_LENGTH) {
-            return DecryptResult.fail("That's " + cleaned.length() + " digits — this code should be exactly "
-                    + DIGIT_CODE_LENGTH + " digits long. Check for a missing or extra digit.");
+        if (cleaned.length() != DIGIT_CODE_LENGTH && cleaned.length() != DIGIT_CODE_LENGTH_24) {
+            return DecryptResult.fail("That's " + cleaned.length() + " digits. The code should be exactly "
+                    + DIGIT_CODE_LENGTH_24 + " digits (or " + DIGIT_CODE_LENGTH + " on an older card). Check for a missing or extra digit.");
         }
         try {
-            byte[] raw = digitStringToRawBytes(cleaned);
+            byte[] raw = digitStringToRawBytes(cleaned, cleaned.length() == DIGIT_CODE_LENGTH_24 ? TOTAL_BYTES_24 : TOTAL_BYTES);
             return decryptRawBytes(context, raw, password);
         } catch (Exception e) {
             return DecryptResult.fail("Couldn't read this code. Please check it against the card.");
@@ -181,7 +184,7 @@ public final class HarvanaCardCrypto {
     }
 
     private static DecryptResult decryptRawBytes(Context context, byte[] raw, String password) {
-        if (raw == null || raw.length != TOTAL_BYTES) {
+        if (raw == null || (raw.length != TOTAL_BYTES && raw.length != TOTAL_BYTES_24)) {
             return DecryptResult.fail("This card's data looks damaged or incomplete.");
         }
         if (password == null || password.trim().isEmpty()) {
@@ -218,17 +221,18 @@ public final class HarvanaCardCrypto {
         BigInteger value = new BigInteger(1, raw);
         String digits = value.toString();
         StringBuilder sb = new StringBuilder();
-        for (int i = digits.length(); i < DIGIT_CODE_LENGTH; i++) sb.append('0');
+        int width = raw.length == TOTAL_BYTES_24 ? DIGIT_CODE_LENGTH_24 : DIGIT_CODE_LENGTH;
+        for (int i = digits.length(); i < width; i++) sb.append('0');
         sb.append(digits);
         return sb.toString();
     }
 
-    private static byte[] digitStringToRawBytes(String digits) {
+    private static byte[] digitStringToRawBytes(String digits, int totalBytes) {
         BigInteger value = new BigInteger(digits);
         byte[] rawSigned = value.toByteArray();
-        byte[] result = new byte[TOTAL_BYTES];
-        int srcStart = Math.max(0, rawSigned.length - TOTAL_BYTES);
-        int destStart = Math.max(0, TOTAL_BYTES - rawSigned.length);
+        byte[] result = new byte[totalBytes];
+        int srcStart = Math.max(0, rawSigned.length - totalBytes);
+        int destStart = Math.max(0, totalBytes - rawSigned.length);
         int copyLen = rawSigned.length - srcStart;
         System.arraycopy(rawSigned, srcStart, result, destStart, copyLen);
         return result;

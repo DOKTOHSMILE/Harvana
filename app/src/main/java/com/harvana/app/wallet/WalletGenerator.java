@@ -49,136 +49,97 @@ public class WalletGenerator {
         }
     }
     
+    /** New wallets get 24 words: the same phrase then opens the HARV wallet and the Pi wallet (PiKeys). */
+    public static final int NEW_WALLET_WORDS = 24;
+
     /**
-     * Generate a standard 12-word recovery phrase (128-bit entropy + 4-bit checksum).
+     * Generate a standard BIP-39 recovery phrase of {@link #NEW_WALLET_WORDS} words (256-bit entropy + 8-bit checksum).
      * Returns null if the BIP-39 wordlist cannot be loaded.
-     */    
+     */
     public static String generateMnemonic(Context context) {
+        return generateMnemonic(context, NEW_WALLET_WORDS);
+    }
+
+    /** A phrase of 12, 15, 18, 21 or 24 words. */
+    public static String generateMnemonic(Context context, int words) {
         loadWordList(context);
-        
-        // STRICT CHECK: Ensure exact 2048 BIP-39 wordlist size
-        if (WORDLIST == null || WORDLIST.size() != 2048) {
-            return null; // Soft-fail to prevent generating weak keys
-        }
-        
+        if (WORDLIST == null || WORDLIST.size() != 2048) return null;   // never generate from a broken list
+        if (words % 3 != 0 || words < 12 || words > 24) return null;
         try {
-            // 1. Generate 128 bits (16 bytes) of secure entropy
-            byte[] entropy = new byte[16];
+            byte[] entropy = new byte[words * 4 / 3];                   // 12 words -> 16 bytes ... 24 words -> 32 bytes
             new SecureRandom().nextBytes(entropy);
             return mnemonicFromEntropy(context, entropy);
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }
 
     /**
-     * ADDED for the Harvana Access Card digit-code feature: builds a mnemonic
-     * from GIVEN 16-byte entropy instead of generating fresh random entropy.
-     * This is the exact same bit-packing generateMnemonic() already used —
-     * factored out so the card system can encrypt just the 16-byte entropy
-     * (instead of the full ~89-byte word string) and regenerate the words
-     * deterministically on restore, cutting the printable digit code from
-     * ~320 digits down to ~106 with zero loss of security.
-     *
-     * @param entropy exactly 16 bytes. Returns null otherwise (matches this
-     *                class's existing "never throw, return null" convention).
+     * Words from given entropy (16, 20, 24, 28 or 32 bytes; standard BIP-39 bit packing with a checksum of entropy/32 bits).
+     * The Access Card stores only this entropy, and rebuilds the words from it on restore. Returns null on bad input.
      */
     public static String mnemonicFromEntropy(Context context, byte[] entropy) {
         loadWordList(context);
         if (WORDLIST == null || WORDLIST.size() != 2048) return null;
-        if (entropy == null || entropy.length != 16) return null;
-
+        if (entropy == null || entropy.length < 16 || entropy.length > 32 || entropy.length % 4 != 0) return null;
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(entropy);
-            byte checksumByte = hash[0];
-
-            boolean[] bits = new boolean[132];
-            for (int i = 0; i < 16; i++) {
-                for (int j = 0; j < 8; j++) {
-                    bits[i * 8 + j] = (entropy[i] & (1 << (7 - j))) != 0;
-                }
-            }
-            for (int i = 0; i < 4; i++) {
-                bits[128 + i] = (checksumByte & (1 << (7 - i))) != 0;
-            }
-
+            int entBits = entropy.length * 8, csBits = entBits / 32, total = entBits + csBits, words = total / 11;
+            byte[] hash = MessageDigest.getInstance("SHA-256").digest(entropy);
+            boolean[] bits = new boolean[total];
+            for (int i = 0; i < entBits; i++) bits[i] = (entropy[i / 8] & (1 << (7 - (i % 8)))) != 0;
+            for (int i = 0; i < csBits; i++) bits[entBits + i] = (hash[i / 8] & (1 << (7 - (i % 8)))) != 0;
             StringBuilder mnemonic = new StringBuilder();
-            for (int i = 0; i < 12; i++) {
-                int wordIndex = 0;
-                for (int j = 0; j < 11; j++) {
-                    wordIndex <<= 1;
-                    if (bits[i * 11 + j]) {
-                        wordIndex |= 1;
-                    }
-                }
-                if (i > 0) mnemonic.append(' ');
-                mnemonic.append(WORDLIST.get(wordIndex));
+            for (int w = 0; w < words; w++) {
+                int idx = 0;
+                for (int j = 0; j < 11; j++) { idx <<= 1; if (bits[w * 11 + j]) idx |= 1; }
+                if (w > 0) mnemonic.append(' ');
+                mnemonic.append(WORDLIST.get(idx));
             }
             return mnemonic.toString();
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }
 
     /**
-     * ADDED for the Harvana Access Card digit-code feature: the inverse of
-     * mnemonicFromEntropy() — extracts the original 16-byte entropy back
-     * out of a valid 12-word mnemonic. Validates the BIP-39 checksum in
-     * the process (same check as isValidMnemonic()) and returns null if
-     * it doesn't verify, so a card is never created from a bad phrase.
+     * The inverse: the entropy inside a valid phrase of 12, 15, 18, 21 or 24 words, after checking every word is in the list
+     * and the BIP-39 checksum verifies. Returns null otherwise, so nothing is ever built from a mistyped phrase.
      */
     public static byte[] entropyFromMnemonic(Context context, String mnemonic) {
         if (mnemonic == null) return null;
         String[] words = mnemonic.trim().toLowerCase().split("\\s+");
-        if (words.length != 12) return null;
-
+        int n = words.length;
+        if (n < 12 || n > 24 || n % 3 != 0) return null;
         loadWordList(context);
         if (WORDLIST == null || WORDLIST.size() != 2048) return null;
-
-        int[] wordIndices = new int[12];
-        for (int i = 0; i < 12; i++) {
-            int idx = WORDLIST.indexOf(words[i]);
-            if (idx < 0) return null;
-            wordIndices[i] = idx;
-        }
-
         try {
-            boolean[] bits = new boolean[132];
-            for (int i = 0; i < 12; i++) {
-                for (int j = 0; j < 11; j++) {
-                    bits[i * 11 + j] = (wordIndices[i] & (1 << (10 - j))) != 0;
-                }
+            int total = n * 11, csBits = total / 33, entBits = total - csBits;
+            boolean[] bits = new boolean[total];
+            for (int w = 0; w < n; w++) {
+                int idx = WORDLIST.indexOf(words[w]);
+                if (idx < 0) return null;
+                for (int j = 0; j < 11; j++) bits[w * 11 + j] = (idx & (1 << (10 - j))) != 0;
             }
-
-            byte[] entropy = new byte[16];
-            for (int i = 0; i < 16; i++) {
-                int b = 0;
-                for (int j = 0; j < 8; j++) {
-                    b <<= 1;
-                    if (bits[i * 8 + j]) b |= 1;
-                }
-                entropy[i] = (byte) b;
-            }
-
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(entropy);
-            byte checksumByte = hash[0];
-            for (int i = 0; i < 4; i++) {
-                boolean actualBit = bits[128 + i];
-                boolean expectedBit = (checksumByte & (1 << (7 - i))) != 0;
-                if (actualBit != expectedBit) return null; // checksum mismatch
+            byte[] entropy = new byte[entBits / 8];
+            for (int i = 0; i < entBits; i++) if (bits[i]) entropy[i / 8] |= (byte) (1 << (7 - (i % 8)));
+            byte[] hash = MessageDigest.getInstance("SHA-256").digest(entropy);
+            for (int i = 0; i < csBits; i++) {
+                boolean expected = (hash[i / 8] & (1 << (7 - (i % 8)))) != 0;
+                if (bits[entBits + i] != expected) return null;          // checksum mismatch
             }
             return entropy;
         } catch (Exception e) {
             return null;
         }
     }
-    
+
+    /** The Pi Network address ("G...") for the same phrase, or null. See PiKeys. */
+    public static String derivePiAddress(String mnemonic) {
+        try { return PiKeys.piAddress(mnemonic); } catch (Exception e) { return null; }
+    }
+
     /**
-     * Derive a deterministic HV0x… address from a 12-word mnemonic.
+     * Derive a deterministic HV0x… address from a recovery phrase (any BIP-39 length; unchanged since the first wallets).
      * Always returns 44-char "HV0x" + 40 hex, or null on failure.
      */    
     public static String deriveAddressFromMnemonic(String mnemonic) {

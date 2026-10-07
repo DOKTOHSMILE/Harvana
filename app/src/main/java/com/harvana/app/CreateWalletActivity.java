@@ -225,7 +225,7 @@ public class CreateWalletActivity extends AppCompatActivity {
 				}
 				
 				final String[] phraseWords = mnemonic.trim().split("\\s+");
-				if (phraseWords.length != 12) {
+				if (phraseWords.length != com.harvana.app.wallet.WalletGenerator.NEW_WALLET_WORDS) {
 					runOnUiThread(() -> {
 						SketchwareUtil.showMessage(context, "Invalid phrase length.");
 						finish();
@@ -255,18 +255,15 @@ public class CreateWalletActivity extends AppCompatActivity {
 					return;
 				}
 				
+				// The Pi wallet from the same 24 words (only its public address is kept).
+				com.harvana.app.wallet.PiWalletStore.rememberFromPhrase(getApplicationContext(), walletAddress, mnemonic);
 				runOnUiThread(() -> {
 					pendingMnemonic = mnemonic;
 					pendingWalletAddress = walletAddress;
 					pendingSeedB64 = seedB64;
 					pendingPubKeyB64 = pubKeyB64;
 					
-					for (int i = 0; i < 12; i++) {
-						TextView tvNum = findViewById(tvNumIds[i]);
-						TextView tvWord = findViewById(tvWordIds[i]);
-						if (tvNum != null) tvNum.setText((i + 1) + ".");
-						if (tvWord != null) tvWord.setText(phraseWords[i]);
-					}
+					_showWords(phraseWords);
 					btnFinish.setEnabled(true);
 					btnFinish.setOnClickListener(v -> {
 						if (cbAgree != null && !cbAgree.isChecked()) {
@@ -287,6 +284,46 @@ public class CreateWalletActivity extends AppCompatActivity {
 	}
 	
 	public void _MORE() {
+	}
+
+	/**
+	 * Lays out the recovery words, numbered, three to a row (24 words make 8 rows). The layout's fixed 12-word grid is
+	 * replaced: its container (the card's inner column) is cleared and refilled, so any phrase length shows correctly.
+	 */
+	private void _showWords(String[] words) {
+		TextView first = findViewById(R.id.tv_word_1);
+		if (first == null) return;
+		// tv_word_1 -> its cell -> its row -> the grid column
+		android.view.ViewGroup grid = (android.view.ViewGroup) first.getParent().getParent().getParent();
+		grid.removeAllViews();
+		final float d = getResources().getDisplayMetrics().density;
+		final int cols = 3;
+		for (int r = 0; r * cols < words.length; r++) {
+			android.widget.LinearLayout row = new android.widget.LinearLayout(this);
+			row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+			for (int c = 0; c < cols; c++) {
+				int i = r * cols + c;
+				android.widget.LinearLayout cell = new android.widget.LinearLayout(this);
+				cell.setGravity(android.view.Gravity.CENTER_VERTICAL);
+				cell.setPadding(0, (int) (5 * d), (int) (4 * d), (int) (5 * d));
+				if (i < words.length) {
+					TextView num = new TextView(this);
+					num.setText((i + 1) + ".");
+					num.setTextSize(12);
+					num.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorTextTertiary));
+					cell.addView(num, new android.widget.LinearLayout.LayoutParams((int) (24 * d), android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+					TextView w = new TextView(this);
+					w.setText(words[i]);
+					w.setTextSize(14);
+					w.setTypeface(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.BOLD);
+					w.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorTextPrimary));
+					w.setSingleLine(true);
+					cell.addView(w);
+				}
+				row.addView(cell, new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+			}
+			grid.addView(row);
+		}
 	}
 	private static final int RC_MANDATORY_CARD = 8801;
 	

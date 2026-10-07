@@ -405,6 +405,8 @@ public class RestoreWalletActivity extends AppCompatActivity {
 	// ── Shared persistence ────────────────────────────────────────────────
 	
 	private void persistAndFinish(String mnemonic, String address, String seedB64, String pubKeyB64) {
+		// The Pi wallet that belongs to the same phrase (a Pi phrase of 24 words gives the very wallet Pi's app shows).
+		com.harvana.app.wallet.PiWalletStore.rememberFromPhrase(getApplicationContext(), address, mnemonic);
 		try {
 			com.harvana.app.wallet.WalletListManager.addWalletToList(this, address, null);
 			SecureWalletStorage.saveMnemonic(this, address, mnemonic);

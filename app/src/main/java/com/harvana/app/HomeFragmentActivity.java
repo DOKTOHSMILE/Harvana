@@ -1451,6 +1451,22 @@ public class HomeFragmentActivity extends Fragment {
 			final View top = root.findViewById(R.id.linear30);
 			if (card == null || top == null || getContext() == null) return;
 			final float d = getResources().getDisplayMetrics().density;
+			// Money first: the wallet card (balance with Send, Receive and P2P) sits right under the greeting, above the
+			// group numbers, the way people expect a finance app to open.
+			final View grid = root.findViewById(R.id.layout_metric_grid);
+			if (grid != null && card.getParent() == grid.getParent() && card.getParent() instanceof android.view.ViewGroup) {
+				android.view.ViewGroup parent = (android.view.ViewGroup) card.getParent();
+				if (parent.indexOfChild(card) > parent.indexOfChild(grid)) {
+					parent.removeView(card);
+					parent.addView(card, parent.indexOfChild(grid));
+					if (card.getLayoutParams() instanceof android.view.ViewGroup.MarginLayoutParams) {
+						android.view.ViewGroup.MarginLayoutParams mlp = (android.view.ViewGroup.MarginLayoutParams) card.getLayoutParams();
+						mlp.topMargin = (int) (8 * d);
+						mlp.bottomMargin = (int) (14 * d);
+						card.setLayoutParams(mlp);
+					}
+				}
+			}
 			
 			android.widget.LinearLayout row = new android.widget.LinearLayout(getContext());
 			row.setOrientation(android.widget.LinearLayout.HORIZONTAL);

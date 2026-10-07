@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: Home opens with your money
+
+What the app does. On Home, the wallet card (balance with Send, Receive and P2P) now sits right under the greeting. The group numbers, upcoming payments, Learn Hub and trending groups follow. Before, the balance was below the stats and the payments list. What you do: install the new build.
+
 ## 7 Oct 2026: one scale for corners and text
 
 What the app does. Across 90 screens:

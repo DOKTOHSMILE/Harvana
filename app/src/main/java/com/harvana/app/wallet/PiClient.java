@@ -62,7 +62,8 @@ public final class PiClient {
         try (Response r = HTTP.newCall(new Request.Builder().url(HORIZON + "/accounts/" + address + "/payments?order=desc&limit=25").build()).execute()) {
             if (r.code() == 404) return out;
             JSONObject j = new JSONObject(r.body() == null ? "{}" : r.body().string());
-            JSONArray recs = j.optJSONObject("_embedded") == null ? null : j.getJSONObject("_embedded").optJSONArray("records");
+            JSONObject embedded = j.optJSONObject("_embedded");
+            JSONArray recs = embedded == null ? null : embedded.optJSONArray("records");
             if (recs == null) return out;
             for (int i = 0; i < recs.length(); i++) {
                 JSONObject x = recs.getJSONObject(i);
@@ -98,7 +99,8 @@ public final class PiClient {
     }
 
     private static String friendly(JSONObject err) {
-        JSONObject codes = err.optJSONObject("extras") == null ? null : err.getJSONObject("extras").optJSONObject("result_codes");
+        JSONObject extras = err.optJSONObject("extras");
+        JSONObject codes = extras == null ? null : extras.optJSONObject("result_codes");
         String s = codes == null ? "" : codes.toString();
         if (s.contains("underfunded") || s.contains("insufficient_balance")) return "Not enough Pi (the network also keeps a small reserve in every wallet).";
         if (s.contains("low_reserve")) return "A new Pi wallet must receive at least the network's minimum balance.";

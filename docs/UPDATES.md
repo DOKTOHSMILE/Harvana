@@ -2,6 +2,20 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: P2P payment proof and the network price
+
+What the app does:
+
+- **Payment proof.** On a buy trade, picking a picture of the bank transfer now uploads it and sends it to the seller as a picture in the trade chat. Until now it was only previewed on the buyer's phone.
+- **The seller sees it.** The seller's trade screen shows the latest proof; tap it to open it full size. It stays with the chat for the dispute window. A picture is not the payment, so the seller still checks their own account before releasing.
+- **Market price.** The P2P price reference now uses the network's own price of HARV (new node endpoint `/api/v1/p2p/mark`) once it is live. Until then it uses the median of open listings, as before. The screen says which one it is.
+
+What you do, in this order:
+
+1. Deploy the node jar.
+2. Publish `docs/firestore.console.rules`. Chat messages may now carry an `image` address. Without the new rules, a proof is refused.
+3. Install the new build.
+
 ## 7 Oct 2026: illustrated group contract
 
 What the app does. Each page of the group contract opens with a picture of what the page is about:

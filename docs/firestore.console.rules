@@ -444,12 +444,16 @@ service cloud.firestore {
         allow read: if signedIn() && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members;
         allow create: if signedIn()
           && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members
-          && request.resource.data.keys().hasOnly(['from', 'text', 'at'])
+          && request.resource.data.keys().hasOnly(['from', 'text', 'at', 'image'])
           && request.resource.data.from == request.auth.uid
           && request.resource.data.text is string
           && request.resource.data.text.size() > 0
           && request.resource.data.text.size() <= 500
-          && request.resource.data.at == request.time;
+          && request.resource.data.at == request.time
+          // The buyer's payment proof: an uploaded picture's https address.
+          && (!('image' in request.resource.data)
+              || (request.resource.data.image is string && request.resource.data.image.matches('^https://.+')
+                  && request.resource.data.image.size() <= 600));
         allow update: if false;
         allow delete: if signedIn()
           && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members

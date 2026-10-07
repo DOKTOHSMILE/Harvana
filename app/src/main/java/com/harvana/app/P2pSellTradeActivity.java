@@ -301,9 +301,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		myAddress = WalletManager.getActiveWalletAddress(this);
 		if (getSupportActionBar() != null) getSupportActionBar().setTitle("Sell Trade");
 		
-		// Honest, flagged gap — see class doc: no real proof-upload
-		// persistence exists yet, so this is a plain placeholder, not a
-		// broken image.
+		// The buyer's payment proof, if they sent one (it arrives through the trade chat); hidden until then.
 		iv_sell_payment_proof.setVisibility(View.GONE);
 		
 		cb_sell_payment_confirm.setOnCheckedChangeListener((buttonView, isChecked) ->
@@ -330,6 +328,18 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	private String orderId = "";
 	private String listingId = "";
 	private String buyerAddress = "";
+	/** Shows the buyer's newest payment proof; tap to open it full size. A picture is not the payment: check your account. */
+	private void _loadProof() {
+		if (chatOtherUid == null || chatOtherUid.isEmpty() || orderId == null) return;
+		com.harvana.app.p2p.P2pChatStore.latestProof(orderId, chatOtherUid, (url, at) -> runOnUiThread(() -> {
+			if (isFinishing() || url.isEmpty()) return;
+			iv_sell_payment_proof.setVisibility(View.VISIBLE);
+			com.bumptech.glide.Glide.with(this).load(url).into(iv_sell_payment_proof);
+			iv_sell_payment_proof.setContentDescription("The buyer's payment proof. Tap to open.");
+			iv_sell_payment_proof.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url))));
+		}));
+	}
+
 	private String chatOtherUid = "";
 	private String sellerAddress = "";
 	private String myAddress = "";
@@ -405,6 +415,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		_loadProof();
 		if (orderId != null && !orderId.isEmpty()
 		&& ("AWAITING_PAYMENT".equals(status) || "PAYMENT_SUBMITTED".equals(status))) {
 			_loadOrder();
@@ -457,6 +468,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			@Override
 			public void onFound(String buyerUid) {
 				chatOtherUid = buyerUid;
+				_loadProof();
 				UserProfileManager.getInstance(getApplicationContext()).getProfile(buyerUid, new UserProfileManager.DocCallback() {
 					@Override
 					public void onSuccess(Map<String, Object> profile) {

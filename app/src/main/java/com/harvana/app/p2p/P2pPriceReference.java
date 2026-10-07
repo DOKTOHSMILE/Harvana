@@ -12,10 +12,10 @@ import java.util.List;
 /**
  * Price reference for the seller screen, in kobo per 1 HARV (1 Naira = 100 kobo, the node's unit).
  *
- * The node's accepted "mark" (MarkEngine) is the ideal reference, but no REST endpoint exposes it yet
- * (HarvanaProtocolManager.getMarkStatus() has no controller). Until one exists this uses the MEDIAN of the
- * unit prices on currently open listings (GET /api/v1/p2p/listings/open). It is an approximation and is
- * labelled as such in the UI; it is NOT the mark the node enforces.
+ * First choice: the network's own price, the "mark" (GET /api/v1/p2p/mark), once it is live. Until enough trades have
+ * completed there is none, and this falls back to the MEDIAN of the unit prices on open listings
+ * (GET /api/v1/p2p/listings/open). The callback says which one it is: {@code sampleSize} is {@link #NETWORK} for the mark,
+ * otherwise the number of listings in the median.
  *
  * Deviation is advisory only: the UI flags but never blocks (the node's own mark logic decides what it accepts).
  */
@@ -29,9 +29,29 @@ public final class P2pPriceReference {
         void onResult(long medianKobo, int sampleSize);
     }
 
+    /** sampleSize value meaning "this is the network's price, not a median of listings". */
+    public static final int NETWORK = -1;
+
     private P2pPriceReference() {}
 
     public static void fetch(Callback cb) {
+        HarvanaNodeClient.nodeGet("/api/v1/p2p/mark", new HarvanaNodeClient.JsonCallback() {
+            @Override public void onSuccess(JSONObject j) {
+                long kobo = j.optLong("koboPerHarv", 0L);
+                String status = j.optString("status", "");
+                if ("LIVE".equals(j.optString("phase")) && kobo > 0 && ("OK".equals(status) || "STALE".equals(status))) cb.onResult(kobo, NETWORK);
+                else fetchMedian(cb);
+            }
+            @Override public void onError(String e) { fetchMedian(cb); }      // older node without the endpoint
+        });
+    }
+
+    /** One line for the screen saying what the reference is. */
+    public static String describe(int sampleSize) {
+        return sampleSize == NETWORK ? "the network price" : "median of " + sampleSize + " open listing" + (sampleSize == 1 ? "" : "s");
+    }
+
+    private static void fetchMedian(Callback cb) {
         HarvanaNodeClient.nodeGet("/api/v1/p2p/listings/open?page=0&size=100", new HarvanaNodeClient.JsonCallback() {
             @Override
             public void onSuccess(JSONObject json) {

@@ -31,7 +31,8 @@ import java.util.concurrent.TimeUnit;
  * would take them to an app nobody can look into).
  *
  *   P2P_CHATS/{orderId}_{uidA}_{uidB}            members [A, B] (sorted), createdAt, lastAt, lastFrom, expiresAt
- *   P2P_CHATS/{...}/messages/{id}                from, text (1 to 500), at (server time)
+ *   P2P_CHATS/{...}/messages/{id}                from, text (1 to 500), at (server time), image (optional https address:
+ *                                                the buyer's payment proof, which the seller sees on the trade)
  *
  * The id carries both people, so nobody can take over the chat of a trade they are not in by creating its document first.
  * Messages are kept for 30 days after the last one (so a dispute can be shown what was said), and the first participant to open
@@ -44,7 +45,7 @@ public final class P2pChatStore {
     public static final int MAX_TEXT = 500;
 
     public static final class Message {
-        public String id = "", from = "", text = "";
+        public String id = "", from = "", text = "", image = "";
         public long at;
     }
 
@@ -107,12 +108,61 @@ public final class P2pChatStore {
                         m.id = d.getId();
                         m.from = d.getString("from") == null ? "" : d.getString("from");
                         m.text = d.getString("text") == null ? "" : d.getString("text");
+                        m.image = d.getString("image") == null ? "" : d.getString("image");
                         Timestamp ts = d.getTimestamp("at");
                         m.at = ts == null ? System.currentTimeMillis() : ts.toDate().getTime();
                         out.add(m);
                     }
                     l.onMessages(out);
                 });
+    }
+
+    /** A payment proof: the uploaded picture's address as a message both traders see (and a dispute can be shown). */
+    public static void sendProof(String orderId, String other, String imageUrl, Done cb) {
+        if (imageUrl == null || !imageUrl.startsWith("https://")) { BG.execute(() -> cb.done(false, "The picture did not upload.")); return; }
+        ensure(orderId, other, (ok, err) -> {
+            if (!ok) { cb.done(false, err); return; }
+            final String me = me();
+            final String id = chatId(orderId, me, other);
+            try {
+                Map<String, Object> m = new HashMap<>();
+                m.put("from", me);
+                m.put("text", "Payment proof");
+                m.put("image", imageUrl);
+                m.put("at", FieldValue.serverTimestamp());
+                long now = System.currentTimeMillis();
+                Map<String, Object> head = new HashMap<>();
+                head.put("lastAt", now);
+                head.put("lastFrom", me);
+                head.put("expiresAt", now + KEEP_MS);
+                WriteBatch b = db().batch();
+                b.set(db().collection("P2P_CHATS").document(id).collection("messages").document(), m);
+                b.update(db().collection("P2P_CHATS").document(id), head);
+                Tasks.await(b.commit(), 20, TimeUnit.SECONDS);
+                cb.done(true, null);
+            } catch (Exception e) { cb.done(false, "Could not send the proof. Check your connection."); }
+        });
+    }
+
+    public interface ProofCb { void onProof(String imageUrl, long at); }
+
+    /** The newest payment proof on a trade, or "" when there is none yet (or the chat does not exist). */
+    public static void latestProof(String orderId, String other, ProofCb cb) {
+        final String id = chatId(orderId, me(), other);
+        BG.execute(() -> {
+            try {
+                for (DocumentSnapshot d : Tasks.await(db().collection("P2P_CHATS").document(id).collection("messages")
+                        .orderBy("at", Query.Direction.DESCENDING).limit(100).get(), 20, TimeUnit.SECONDS).getDocuments()) {
+                    String img = d.getString("image");
+                    if (img != null && img.startsWith("https://")) {
+                        Timestamp ts = d.getTimestamp("at");
+                        cb.onProof(img, ts == null ? 0L : ts.toDate().getTime());
+                        return;
+                    }
+                }
+            } catch (Exception ignored) { }
+            cb.onProof("", 0L);
+        });
     }
 
     public static void send(String orderId, String other, String text, Done cb) {

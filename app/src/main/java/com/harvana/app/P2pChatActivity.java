@@ -165,6 +165,18 @@ public class P2pChatActivity extends AppCompatActivity {
             if (!mine) g.setStroke(dp(1), (UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000);
             bubble.setBackground(g);
             bubble.addView(text(m.text, 14, false, mine ? getResources().getColor(R.color.colorTextOnAccent) : UiColors.textPrimary()));
+            if (!m.image.isEmpty()) {
+                // A payment proof: the picture itself, tap to open it full size.
+                android.widget.ImageView pic = new android.widget.ImageView(this);
+                pic.setAdjustViewBounds(true);
+                pic.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
+                com.bumptech.glide.Glide.with(this).load(m.image).into(pic);
+                final String url = m.image;
+                pic.setOnClickListener(v -> startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))));
+                LinearLayout.LayoutParams plp = new LinearLayout.LayoutParams(dp(200), dp(200));
+                plp.topMargin = dp(6);
+                bubble.addView(pic, plp);
+            }
             bubble.addView(text(fmt.format(new Date(m.at)), 10, false, mine ? getResources().getColor(R.color.colorTextOnAccentMuted) : UiColors.textTertiary()));
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.gravity = mine ? Gravity.END : Gravity.START;

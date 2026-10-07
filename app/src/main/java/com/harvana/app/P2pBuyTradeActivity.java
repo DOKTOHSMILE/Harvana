@@ -379,11 +379,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 			proof_placeholder.setVisibility(View.GONE);
 			proof_preview.setVisibility(View.VISIBLE);
 			Glide.with(this).load(uri).into(proof_preview);
-			// GROUND-UP, honestly scoped: this previews locally only.
-			// There's no Firestore field defined yet for a persisted
-			// payment-proof URL, and inventing one without a real place
-			// for the seller to see it would just be UI theater —
-			// flagged here rather than faking a successful upload.
+			_uploadProof(uri);
 		});
 		proof_picker.setOnClickListener(v -> imagePicker.launch("image/*"));
 		
@@ -869,6 +865,30 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		.setNegativeButton("Cancel", null));
 	}
 	
+	/**
+	 * The buyer's payment proof: the picture is shrunk and uploaded, then posted in the trade chat, where the seller sees it on
+	 * their trade screen. It stays with the chat through the dispute window. The picture is never the payment itself: the
+	 * seller still checks their own account before releasing.
+	 */
+	private void _uploadProof(android.net.Uri uri) {
+		if (chatOtherUid == null || chatOtherUid.isEmpty()) {
+			Toast.makeText(this, "The seller is still loading. Try again in a moment.", Toast.LENGTH_LONG).show();
+			return;
+		}
+		if (proof_placeholder_title != null) proof_placeholder_title.setText("Uploading your proof…");
+		Toast.makeText(this, "Uploading your proof…", Toast.LENGTH_SHORT).show();
+		com.harvana.app.utils.ImageHost.upload(getApplicationContext(), uri, "p2p_proofs/" + orderId, 1280, new com.harvana.app.utils.ImageHost.Callback() {
+			@Override public void onSuccess(String url) {
+				com.harvana.app.p2p.P2pChatStore.sendProof(orderId, chatOtherUid, url, (ok, err) -> runOnUiThread(() ->
+					Toast.makeText(P2pBuyTradeActivity.this, ok ? "Proof sent. The seller sees it on their trade and in the chat."
+						: (err == null ? "Could not send the proof." : err), Toast.LENGTH_LONG).show()));
+			}
+			@Override public void onError(String message) {
+				runOnUiThread(() -> Toast.makeText(P2pBuyTradeActivity.this, "Upload failed: " + message, Toast.LENGTH_LONG).show());
+			}
+		});
+	}
+
 	private void _showDisputeDialog() {
 		EditText input = new com.google.android.material.textfield.TextInputEditText(this);
 		input.setHint("What went wrong?");

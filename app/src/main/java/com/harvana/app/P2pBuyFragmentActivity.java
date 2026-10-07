@@ -416,7 +416,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		row.setFocusable(true);
 		// Add a click listener so the user can actually select the coin
 		row.setOnClickListener(v -> {
-			// TODO: Handle the coin selection state here
+			// HARV is the only coin traded on P2P: choosing it just closes the picker.
 			dialog.dismiss();
 		});
 		

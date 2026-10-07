@@ -400,12 +400,12 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 		com.harvana.app.p2p.P2pPriceReference.fetch((medianKobo, samples) -> {
 			if (isFinishing() || isDestroyed()) return;
 			if (medianKobo <= 0) {
-				note.setText("No market reference yet (not enough open listings). Your price is used as entered.");
+				note.setText("No market price yet. Your price is used as entered.");
 				return;
 			}
 			double dev = com.harvana.app.p2p.P2pPriceReference.deviation(myKobo, medianKobo);
 			String ref = "Market reference: " + P2pMoney.perHarv(medianKobo / 100.0, "NGN")
-					+ " (median of " + samples + " open listing" + (samples == 1 ? "" : "s") + ")";
+					+ " (" + com.harvana.app.p2p.P2pPriceReference.describe(samples) + ")";
 			if (Math.abs(dev) > com.harvana.app.p2p.P2pPriceReference.DEVIATION_FLAG) {
 				note.setText(ref + "\nYour price is " + Math.round(Math.abs(dev) * 100) + "% "
 						+ (dev > 0 ? "above" : "below")

@@ -73,6 +73,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 	
 	private LinearLayout linear1;
 	private RecyclerView recyclerview1;
+	private LinearLayout chainAssets;
 	private TextView tvNoWalletHint;
 	
 	private SharedPreferences walletsp;
@@ -93,6 +94,10 @@ public class WalletAssetFragmentActivity extends Fragment {
 		recyclerview1 = _view.findViewById(R.id.recyclerview1);
 		com.harvana.app.utils.Shimmer.hold(recyclerview1, com.harvana.app.utils.Shimmer.rows(recyclerview1.getContext(), 4), 4000, "WalletAssetFragmentActivity");
 		tvNoWalletHint = _view.findViewById(R.id.tv_no_wallet_hint);
+		chainAssets = _view.findViewById(R.id.chain_assets);
+		View addCoins = _view.findViewById(R.id.btn_add_coins);
+		if (addCoins != null) addCoins.setOnClickListener(v -> com.harvana.app.wallet.ChainAssetsSection.showPicker(getContext(),
+				() -> com.harvana.app.wallet.ChainAssetsSection.render(getContext(), chainAssets, wallet_address)));
 		walletsp = getContext().getSharedPreferences("walletsp", Activity.MODE_PRIVATE);
 	}
 	
@@ -151,6 +156,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 			return;
 		}
 		final Context context = getContext();
+		com.harvana.app.wallet.ChainAssetsSection.render(context, chainAssets, wallet_address);
 		
 		java.util.List<HashMap<String, Object>> cachedCoins =
 		com.harvana.app.wallet.WalletCache.loadList(context, "coins_" + wallet_address);

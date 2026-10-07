@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: other coins on the Assets tab, P2P icon matches Home
+
+What the app does:
+
+- **Add coins on the Assets tab.** Under HARV there is an "Add coins" button. It opens a list of Pi, Bitcoin, Litecoin, Dogecoin, Ethereum and EVM chains, Tron and Solana, each with an on/off switch. A coin that is on shows under HARV with its address and live balance; tapping it opens the chain wallets page. All coins come from the same recovery phrase. The choice is saved on the phone; all coins are off until the user turns them on.
+- **The P2P button on the Assets page uses the same icon as Home's P2P action.**
+- The Assets list now scrolls as one page, so the extra coins fit below HARV.
+
+What you do: install the build.
+
 ## 7 Oct 2026: coin page in tabs, plain "For" on transactions, trust page and settings tidy-up
 
 What the app does:

@@ -6,10 +6,14 @@
 	android:layout_height="match_parent"
 	android:orientation="vertical"
 	android:id="@+id/_main">
+	<androidx.core.widget.NestedScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:fillViewport="true">
 	<LinearLayout
 		android:id="@+id/linear1"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
+		android:layout_height="wrap_content"
 		android:orientation="vertical">
 		<TextView
 			android:id="@+id/tv_no_wallet_hint"
@@ -24,8 +28,29 @@
 		<androidx.recyclerview.widget.RecyclerView
 			android:id="@+id/recyclerview1"
 			android:layout_width="match_parent"
-			android:layout_height="match_parent"
+			android:layout_height="wrap_content"
+			android:nestedScrollingEnabled="false"
 			android:paddingBottom="4dp"
 			tools:listitem="@layout/coin_list_card" />
+		<LinearLayout
+			android:id="@+id/chain_assets"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical" />
+		<TextView
+			android:id="@+id/btn_add_coins"
+			android:layout_width="match_parent"
+			android:layout_height="48dp"
+			android:layout_marginStart="16dp"
+			android:layout_marginEnd="16dp"
+			android:layout_marginTop="8dp"
+			android:layout_marginBottom="16dp"
+			android:gravity="center"
+			android:text="+  Add coins"
+			android:textColor="@color/colorPrimary"
+			android:textSize="14sp"
+			android:textStyle="bold"
+			android:background="?attr/selectableItemBackground" />
 	</LinearLayout>
+	</androidx.core.widget.NestedScrollView>
 </LinearLayout>

@@ -218,7 +218,7 @@
 								android:layout_width="24dp"
 								android:layout_height="match_parent"
 								android:padding="2dp"
-								android:src="@drawable/icon_currency_exchange_twotone"
+								android:src="@drawable/ic_action_buy"
 								android:scaleType="centerInside"
 								app:tint="@color/colorAccent" android:duplicateParentState="true" />
 							<TextView

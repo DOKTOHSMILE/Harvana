@@ -211,7 +211,10 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			activeAddress = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
 			if (activeAddress == null) activeAddress = "";
 		}
-		boolean isIncoming = recipient != null && !recipient.isEmpty() && recipient.equalsIgnoreCase(activeAddress);
+		final String otherChain = getIntent().getStringExtra("chain");   // Pi, Bitcoin, Litecoin: not a HARV transaction
+		boolean isIncoming = otherChain != null
+		? getIntent().getBooleanExtra("incoming", false)
+		: recipient != null && !recipient.isEmpty() && recipient.equalsIgnoreCase(activeAddress);
 		boolean pending = status != null && status.equalsIgnoreCase("pending");
 		boolean confirmed = status != null && (status.equalsIgnoreCase("confirmed") || status.equalsIgnoreCase("success"));
 		
@@ -278,6 +281,25 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		tv_confirmations.setText(confirmations > 0 ? String.valueOf((long) confirmations) : "0");
 		tv_nonce.setText(String.valueOf(nonce));
 		
+		if (otherChain != null) {
+			// Another network's transaction: show the network and its explorer instead of HARV-only fields.
+			final String explorer = getIntent().getStringExtra("explorerUrl");
+			if (cardview4 != null) cardview4.setVisibility(View.VISIBLE);
+			tv_memo.setText("Network: " + otherChain + (explorer != null && explorer.startsWith("http") ? "\nTap to open it in the " + otherChain + " explorer" : ""));
+			tv_memo.setTextColor(UiColors.textPrimary());
+			tv_memo.setTag(null);
+			if (explorer != null && explorer.startsWith("http")) {
+				tv_memo.setOnClickListener(v -> {
+					try { startActivity(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(explorer))); } catch (Exception ignored) { }
+				});
+			}
+			if (tv_burn_amount.getParent() instanceof View) ((View) tv_burn_amount.getParent()).setVisibility(View.GONE);
+			if (tv_nonce.getParent() instanceof View) ((View) tv_nonce.getParent()).setVisibility(View.GONE);
+			if (confirmations <= 0 && tv_confirmations.getParent() instanceof View) ((View) tv_confirmations.getParent()).setVisibility(View.GONE);
+			if (harvFee <= 0 && tv_network_fee.getParent() instanceof View) ((View) tv_network_fee.getParent()).setVisibility(View.GONE);
+			if (blockNumber <= 0) tv_block_number.setText(pending ? "Pending" : "—");
+		}
+		
 		View.OnClickListener copyListener = v -> {
 			String text = null;
 			if (v.getTag() instanceof String) text = (String) v.getTag();
@@ -292,7 +314,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		tv_tx_hash.setOnClickListener(copyListener);
 		tv_from_address.setOnClickListener(copyListener);
 		tv_to_address.setOnClickListener(copyListener);
-		tv_memo.setOnClickListener(copyListener);
+		if (otherChain == null) tv_memo.setOnClickListener(copyListener);
 		
 		textview37.setOnClickListener(v -> {
 			boolean open = linear11.getVisibility() == View.VISIBLE;

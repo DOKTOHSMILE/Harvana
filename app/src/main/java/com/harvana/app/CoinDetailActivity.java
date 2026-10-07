@@ -950,7 +950,11 @@ public class CoinDetailActivity extends AppCompatActivity {
 			for (android.view.View v : network) if (v != null) v.setVisibility(current[0] == 2 ? android.view.View.VISIBLE : android.view.View.GONE);
 			historyHost.setVisibility(current[0] == 1 ? android.view.View.VISIBLE : android.view.View.GONE);
 			if (current[0] == 1 && getSupportFragmentManager().findFragmentById(historyHost.getId()) == null) {
-				getSupportFragmentManager().beginTransaction().replace(historyHost.getId(), new WalletActivityFragmentActivity()).commitAllowingStateLoss();
+				WalletActivityFragmentActivity historyFragment = new WalletActivityFragmentActivity();
+				Bundle onlyHarv = new Bundle();
+				onlyHarv.putBoolean("harvOnly", true);   // this page is about HARV; the wallet's Activity tab shows every coin
+				historyFragment.setArguments(onlyHarv);
+				getSupportFragmentManager().beginTransaction().replace(historyHost.getId(), historyFragment).commitAllowingStateLoss();
 			}
 		};
 		select[0].run();

@@ -119,6 +119,44 @@ public class WalletActivityFragmentActivity extends Fragment {
 
 	public void _MORE() {
 	}
+	/** Other coins' recent transactions (Pi, Bitcoin, Litecoin when turned on under Add coins). Not cached with HARV's. */
+	private final java.util.List<java.util.HashMap<String, Object>> chainTx = new java.util.ArrayList<>();
+
+	private boolean _harvOnly() {
+		return getArguments() != null && getArguments().getBoolean("harvOnly", false);
+	}
+
+	private void _loadChainHistory() {
+		if (_harvOnly() || getContext() == null) return;
+		final Context app = getContext().getApplicationContext();
+		final String addr = wallet_address;
+		new Thread(() -> {
+			java.util.List<java.util.HashMap<String, Object>> rows = com.harvana.app.wallet.ChainHistory.load(app, addr);
+			if (!isAdded() || getActivity() == null) return;
+			getActivity().runOnUiThread(() -> {
+				if (!isAdded() || getContext() == null || !addr.equals(wallet_address)) return;
+				chainTx.clear();
+				chainTx.addAll(rows);
+				if (rows.isEmpty()) return;
+				java.util.ArrayList<java.util.HashMap<String, Object>> display = new java.util.ArrayList<>(
+						com.harvana.app.wallet.PendingTxStore.loadAll(getContext(), wallet_address));
+				display.addAll(allNodeTx.isEmpty() ? _cachedHarv() : allNodeTx);
+				display.addAll(chainTx);
+				_sortByTimestampDesc(display);
+				if (list_history.getLayoutManager() == null)
+					list_history.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(getContext()));
+				list_history.setAdapter(new TransactionHistoryAdapter(getContext(), filterFailedTx(display), wallet_address));
+			});
+		}).start();
+	}
+
+	private java.util.List<java.util.HashMap<String, Object>> _cachedHarv() {
+		java.util.List<java.util.HashMap<String, Object>> c = com.harvana.app.wallet.WalletCache.loadList(getContext(), "tx_" + wallet_address);
+		java.util.List<java.util.HashMap<String, Object>> out = new java.util.ArrayList<>();
+		if (c != null) for (java.util.HashMap<String, Object> m : c) if (!"pending".equalsIgnoreCase(String.valueOf(m.get("status")))) out.add(m);
+		return out;
+	}
+
 	public void _loadTransactionHistory() {
 		if (wallet_address == null || wallet_address.trim().isEmpty()) return;
 		if (getContext() == null) return;
@@ -166,6 +204,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 		nodeHasMore = true;
 		allNodeTx.clear();
 		_fetchNodeHistoryPage();
+		_loadChainHistory();
 		
 		// Server-reported pending
 		com.harvana.app.sync.HarvanaNodeClient.getPending(wallet_address,
@@ -326,8 +365,11 @@ public class WalletActivityFragmentActivity extends Fragment {
 							list_history.setLayoutManager(
 							new androidx.recyclerview.widget.LinearLayoutManager(getContext()));
 						}
+						java.util.ArrayList<java.util.HashMap<String, Object>> withChains = new java.util.ArrayList<>(display);
+						withChains.addAll(chainTx);
+						_sortByTimestampDesc(withChains);
 						list_history.setAdapter(
-						new TransactionHistoryAdapter(getContext(), filterFailedTx(display), wallet_address));
+						new TransactionHistoryAdapter(getContext(), filterFailedTx(withChains), wallet_address));
 					} else {
 						android.util.Log.d("loadTxHistory", "Node returned no history.");
 					}
@@ -437,7 +479,9 @@ public class WalletActivityFragmentActivity extends Fragment {
 			String status = item.get("status") != null ? item.get("status").toString() : "confirmed";
 			boolean isPending = "pending".equalsIgnoreCase(status);
 			boolean isFailed  = "failed".equalsIgnoreCase(status);
-			boolean isIncoming = !recipient.isEmpty() && recipient.equalsIgnoreCase(walletAddress);
+			boolean isIncoming = item.get("incoming") instanceof Boolean
+			? (Boolean) item.get("incoming")
+			: !recipient.isEmpty() && recipient.equalsIgnoreCase(walletAddress);
 			
 			if (isFailed) {
 				if (holder.tvType != null) holder.tvType.setText("Failed " + asset);
@@ -489,6 +533,11 @@ public class WalletActivityFragmentActivity extends Fragment {
 				}
 			}
 			
+			final Object chainName = item.get("chain");
+			if (chainName != null && holder.tvAddress != null) {
+				holder.tvAddress.setText(chainName + " · " + holder.tvAddress.getText());
+			}
+			
 			if (holder.tvDate != null) {
 				CharSequence rel = android.text.format.DateUtils.getRelativeTimeSpanString(
 				timestamp, 
@@ -532,6 +581,11 @@ public class WalletActivityFragmentActivity extends Fragment {
 					if (burnObj instanceof Number)  intent.putExtra("burnAmount", ((Number) burnObj).doubleValue());
 					if (blockObj instanceof Number) intent.putExtra("blockNumber", ((Number) blockObj).longValue());
 					if (nonceObj instanceof Number) intent.putExtra("nonce", ((Number) nonceObj).longValue());
+					if (chainName != null) {
+						intent.putExtra("chain", String.valueOf(chainName));
+						intent.putExtra("explorerUrl", String.valueOf(item.get("explorerUrl")));
+						intent.putExtra("incoming", item.get("incoming") instanceof Boolean && (Boolean) item.get("incoming"));
+					}
 					
 					v.getContext().startActivity(intent);
 				});

@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: one Activity list for every coin; other-chain transaction details
+
+What the app does:
+
+- **The wallet's Activity tab lists every coin together.** Besides HARV, it shows recent Pi, Bitcoin and Litecoin transactions for the coins turned on under Add coins, newest first. Each of those rows names its network ("Bitcoin · From: …").
+- **The coin page's History tab stays HARV only.**
+- **Transaction detail for another network** shows the network, the amount, sent or received, the addresses, the transaction hash, the block and the fee where the network reports them, and opens the network's public explorer on tap. HARV-only fields (burn, nonce) are hidden for those.
+- Ethereum, Tron, Solana and Dogecoin balances show on the Assets tab; their transaction lists need a paid explorer key, so they are not listed yet.
+
+What you do: install the build.
+
 ## 7 Oct 2026: social backup card restyled; 24-word backup code fixed
 
 What the app does:

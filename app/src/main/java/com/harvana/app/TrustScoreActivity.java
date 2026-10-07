@@ -47,7 +47,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         TextView title = findViewById(R.id.header_title);
         TextView subtitle = findViewById(R.id.header_subtitle);
         title.setText("Trust score");
-        subtitle.setText("Network and activity");
+        subtitle.setText("Network and milestones");
         findViewById(R.id.header_back).setOnClickListener(v -> finish());
         root = findViewById(R.id.trust_root);
     }
@@ -166,46 +166,22 @@ public class TrustScoreActivity extends AppCompatActivity {
             }
         }
         root.addView(badges);
-        showActivity(gen, person.get("activity"), num(person.get("activityCount")));
+        showMilestones(gen);
     }
 
-    private void showActivity(int gen, Object networkLines, int networkCount) {
-        LinearLayout card = cardBox();
-        card.addView(tv("Activity", 16, true, UiColors.textPrimary()));
-        card.addView(note(networkCount + (networkCount == 1 ? " action confirmed on the network." : " actions confirmed on the network.")
-                + " What you do in the app is listed with it. Neither changes the score."));
-        java.util.List<com.harvana.app.trust.AppActivity.Event> network =
-                com.harvana.app.trust.AppActivity.fromNetwork(networkLines);
-        card.addView(tv("On the network", 14, true, UiColors.textPrimary()));
-        if (network.isEmpty()) {
-            card.addView(note("Nothing confirmed on the network yet."));
-        } else {
-            int shown = 0;
-            for (com.harvana.app.trust.AppActivity.Event e : network) {
-                if (shown++ == 8) break;
-                card.addView(line(when(e.at), e.title, "Confirmed by the network"));
-            }
-        }
-        View divider = new View(this);
-        divider.setBackgroundColor(UiColors.textTertiary());
-        LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1));
-        dlp.topMargin = dp(12);
-        dlp.bottomMargin = dp(8);
-        card.addView(divider, dlp);
-        root.addView(card);
-        com.harvana.app.trust.AppActivity.recent(events -> runOnUiThread(() -> {
-            if (gen != generation) return;
-            card.addView(tv("In the app", 14, true, UiColors.textPrimary()));
-            if (events.isEmpty()) {
-                card.addView(note("Nothing recorded in the app yet."));
-                return;
-            }
-            int shown = 0;
-            for (com.harvana.app.trust.AppActivity.Event e : events) {
-                if (shown++ == 8) break;
-                card.addView(line(when(e.at), e.title, "Recorded in the app"));
-            }
-        }));
+    /** The milestone shelf, in place of the old activity list: the same confirmed actions, turned into badges. */
+    private void showMilestones(int gen) {
+        final LinearLayout holder = new LinearLayout(this);
+        holder.setOrientation(LinearLayout.VERTICAL);
+        holder.addView(com.harvana.app.utils.Shimmer.cards(this, 2));
+        root.addView(holder);
+        String uid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
+                : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+        com.harvana.app.milestone.MilestoneLoader.load(this, address, uid, true, items -> {
+            if (gen != generation || isFinishing()) return;
+            holder.removeAllViews();
+            holder.addView(com.harvana.app.milestone.MilestoneShelf.card(this, items, true));
+        });
     }
 
     private static String when(long at) {

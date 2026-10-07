@@ -969,7 +969,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         tabContent.removeAllViews();
         if (tab == 0) {
             tabContent.addView(trustCard());
-            tabContent.addView(badgesCard());
+            tabContent.addView(milestonesCard());
             if (isMe()) tabContent.addView(networkFactsCard());
         }
         else if (tab == 1) {
@@ -1068,6 +1068,21 @@ public class PublicProfileActivity extends AppCompatActivity {
         lp.topMargin = SocialUi.dp(this, 8);
         b.setLayoutParams(lp);
         return b;
+    }
+
+    /** The milestone shelf: everything on the owner's own profile, earned badges only for everyone else. */
+    private View milestonesCard() {
+        final LinearLayout holder = new LinearLayout(this);
+        holder.setOrientation(LinearLayout.VERTICAL);
+        holder.addView(com.harvana.app.utils.Shimmer.cards(this, 1));
+        final boolean mine = isMe();
+        String wallet = mine ? com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this) : card.wallet;
+        com.harvana.app.milestone.MilestoneLoader.load(this, wallet, uid, mine, items -> {
+            if (isFinishing()) return;
+            holder.removeAllViews();
+            holder.addView(com.harvana.app.milestone.MilestoneShelf.card(this, items, mine));
+        });
+        return holder;
     }
 
     private View badgesCard() {

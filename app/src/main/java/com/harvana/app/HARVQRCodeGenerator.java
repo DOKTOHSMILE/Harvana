@@ -53,7 +53,7 @@ public class HARVQRCodeGenerator {
 	 * @param text          content to encode
 	 * @param sizePx        final bitmap size
 	 * @param logo          center logo (can be null)
-	 * @param useWhiteStyle true = classic black/white, false = Harvana dark+emerald
+	 * @param useWhiteStyle true = classic black on white, false = Harvana navy on white (both scan everywhere)
 	 */
 	public static Bitmap generateQRCode(String text, int sizePx, Bitmap logo, boolean useWhiteStyle) {
 		if (text == null || text.trim().isEmpty()) {
@@ -67,7 +67,8 @@ public class HARVQRCodeGenerator {
 			hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
 			// Higher error correction so the logo doesn't break the code
 			hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
-			hints.put(EncodeHintType.MARGIN, 1);
+			// A quiet border of 2 modules: scanners need light space around the code to find it.
+			hints.put(EncodeHintType.MARGIN, 2);
 
 			QRCodeWriter writer = new QRCodeWriter();
 			BitMatrix matrix = writer.encode(text.trim(), BarcodeFormat.QR_CODE, sizePx, sizePx, hints);
@@ -75,8 +76,10 @@ public class HARVQRCodeGenerator {
 			int width  = matrix.getWidth();
 			int height = matrix.getHeight();
 
-			int bgColor     = useWhiteStyle ? COLOR_WHITE : COLOR_BG;
-			int moduleColor = useWhiteStyle ? Color.BLACK : COLOR_MODULE;
+			// Always dark modules on a light ground. The old Harvana style (emerald on dark navy) was a light-on-dark
+			// "inverted" code that most camera scanners, including the app's own, could not read.
+			int bgColor     = COLOR_WHITE;
+			int moduleColor = useWhiteStyle ? Color.BLACK : COLOR_BG;
 
 			int[] pixels = new int[width * height];
 			for (int y = 0; y < height; y++) {

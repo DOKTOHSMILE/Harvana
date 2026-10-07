@@ -1,8 +1,8 @@
 # Third-party notices
 
-## Fluent Emoji (handshake reaction icon)
+## Fluent Emoji (handshake reaction icon and milestone badges)
 
-`app/src/main/res/drawable-nodpi/ic_learn_handshake.png` is the 3D "Handshake" emoji from Microsoft Fluent Emoji (https://github.com/microsoft/fluentui-emoji), cropped to its edges, colours unchanged. Licensed under the MIT License:
+`app/src/main/res/drawable-nodpi/ic_learn_handshake.png` is the 3D "Handshake" emoji from Microsoft Fluent Emoji (https://github.com/microsoft/fluentui-emoji), cropped to its edges, colours unchanged. The milestone badges (`res/drawable-nodpi/ms3d_*.png`) are 3D Fluent Emoji from the same repository, trimmed and resized to 192 px. Licensed under the MIT License:
 
 ```
 MIT License

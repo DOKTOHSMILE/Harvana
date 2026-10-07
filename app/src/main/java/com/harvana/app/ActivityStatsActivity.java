@@ -63,6 +63,19 @@ public class ActivityStatsActivity extends AppCompatActivity {
         styleChart(hours);
         showLocal();
 
+        // Milestones first: the activity below, turned into awards (network, Learn Hub, and habits counted on this phone).
+        final android.view.ViewGroup page = (android.view.ViewGroup) state.getParent();
+        final LinearLayout shelfHolder = new LinearLayout(this);
+        shelfHolder.setOrientation(LinearLayout.VERTICAL);
+        page.addView(shelfHolder, page.indexOfChild(state) + 1);
+        String meUid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
+                : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+        com.harvana.app.milestone.MilestoneLoader.load(this, WalletManager.getActiveWalletAddress(this), meUid, true, items -> {
+            if (isFinishing()) return;
+            shelfHolder.removeAllViews();
+            shelfHolder.addView(com.harvana.app.milestone.MilestoneShelf.card(this, items, true));
+        });
+
         String wallet = WalletManager.getActiveWalletAddress(this);
         if (wallet == null || wallet.isEmpty()) {
             state.setText("Create or import a wallet to see your activity. Reads and gifts are recorded against your wallet.");

@@ -168,7 +168,7 @@ public class ProfileQrActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode != RC_SCAN || resultCode != Activity.RESULT_OK || data == null) return;
         String text = data.getStringExtra(ScanQrCodeActivity.EXTRA_RESULT_TEXT);
-        if (text == null || !text.startsWith(LINK_PREFIX)) { Toast.makeText(this, "That is not a Harvana profile code.", Toast.LENGTH_LONG).show(); return; }
+        if (text == null || !text.startsWith(LINK_PREFIX)) { com.harvana.app.scan.QrRouter.route(this, text); return; }   // any other Harvana code opens where it belongs
         String name = text.substring(LINK_PREFIX.length()).trim();
         SocialStore.findByUsername(name, (person, err) -> runOnUiThread(() -> {
             if (person == null) { Toast.makeText(this, err == null ? "No member found." : err, Toast.LENGTH_LONG).show(); return; }

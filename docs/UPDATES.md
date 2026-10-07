@@ -2,6 +2,24 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: bank directory with logos; Pi build error fixed
+
+What the app does:
+
+- **Choosing a bank.** Adding a bank account opens a searchable list of every Nigerian bank, microfinance bank and payment app (284 of them) with logos. OPay, Moniepoint, GTBank, Access, Zenith, First Bank, UBA and the other common ones come first. Each row shows the official name, the type of institution and the bank's USSD code.
+- **Typed names are recognised.** "gtb", "GTBank" or "058" all become Guaranty Trust Bank, and the logo appears in the box as you type. The official name is what gets saved and sent with your P2P offer, so buyers see the correct bank.
+- **Account number checks.**
+  - The number must have the bank's digit count (10).
+  - For commercial banks, the CBN NUBAN check digit is tested. A number that fails gets a warning; tap Save again to keep it anyway.
+  - Payment apps such as OPay, whose account numbers are phone numbers, are not held to the check digit.
+- **Logos everywhere the account shows:** on your saved payment methods, and beside the bank name on the buyer's trade screen.
+- **Offline first.** The list and the logos of the 43 most used banks ship inside the app. Other logos load from the public directory, and a coloured badge with the bank's initials stands in when there is no network. The list refreshes itself from nigerianbanks.xyz at most once a week, which picks up newly licensed banks.
+- **Fixed:** the build failed in `wallet/PiClient.java` (an unhandled `JSONException` on line 101).
+
+The app cannot look up the account holder's name automatically yet. That needs a payment provider's secret API key (Paystack or Flutterwave), which must sit on the server, never in the app.
+
+What you do: install the build.
+
 ## 7 Oct 2026: P2P chat and My trades rebuilt
 
 What the app does:

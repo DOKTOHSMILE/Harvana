@@ -254,6 +254,14 @@ public class P2PPaymentDetailsManager {
 			accountName = String.valueOf(data.get("accountName"));
 		}
 		bank.setText(primary != null && !primary.isEmpty() ? primary : "—");
+		// The bank's logo beside its name, where the screen has a spot for it.
+		if (primary != null && !primary.isEmpty() && bank.getParent() instanceof android.view.View) {
+			android.view.View logo = ((android.view.View) bank.getParent()).findViewById(com.harvana.app.R.id.iv_bank_logo);
+			if (logo instanceof android.widget.ImageView) {
+				logo.setVisibility(android.view.View.VISIBLE);
+				com.harvana.app.banks.BankLogo.into((android.widget.ImageView) logo, primary);
+			}
+		}
 		number.setText(identifier != null && !identifier.isEmpty() ? identifier : "—");
 		name.setText(accountName != null && !accountName.isEmpty() ? accountName : "—");
 	}

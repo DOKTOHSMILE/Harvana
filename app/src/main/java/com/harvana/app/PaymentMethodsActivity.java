@@ -134,6 +134,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 			TextView tvSummary = row.findViewById(R.id.tvMethodSummary);
 			TextView tvDefaultBadge = row.findViewById(R.id.tvDefaultBadge);
 			ImageView btnMenu = row.findViewById(R.id.btnMethodMenu);
+			ImageView ivIcon = row.findViewById(R.id.ivMethodIcon);
+			if (ivIcon != null && method.type == PaymentMethod.Type.BANK) {
+				ivIcon.setPadding(0, 0, 0, 0);
+				com.harvana.app.banks.BankLogo.into(ivIcon, method.primaryField);
+			}
 			
 			tvLabel.setText(method.label != null && !method.label.isEmpty()
 			? method.label : method.primaryField);
@@ -203,6 +208,32 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 		Button btnSaveMethod = sheetView.findViewById(R.id.btnSaveMethod);
 		
 		final PaymentMethod.Type[] selectedType = {PaymentMethod.Type.BANK};
+		final ImageView ivBankLogo = sheetView.findViewById(R.id.ivBankLogo);
+		final TextView tvChooseBank = sheetView.findViewById(R.id.tvChooseBank);
+		final com.harvana.app.banks.BankDirectory.Bank[] chosenBank = {null};
+		// Shows the logo of whatever bank the name matches ("gtb" → GTBank), so a typed name is recognised too.
+		final Runnable showBank = () -> {
+			com.harvana.app.banks.BankDirectory.Bank b = com.harvana.app.banks.BankDirectory.match(this, etPrimaryField.getText().toString());
+			chosenBank[0] = b;
+			if (b != null) {
+				ivBankLogo.setVisibility(View.VISIBLE);
+				com.harvana.app.banks.BankLogo.into(ivBankLogo, b);
+			} else {
+				ivBankLogo.setVisibility(View.GONE);
+			}
+		};
+		Runnable openPicker = () -> com.harvana.app.banks.BankPickerSheet.show(this, "", bank -> {
+			etPrimaryField.setText(bank.name);
+			etPrimaryField.setSelection(bank.name.length());
+			showBank.run();
+			etAccountIdentifier.requestFocus();
+		});
+		tvChooseBank.setOnClickListener(v -> openPicker.run());
+		etPrimaryField.addTextChangedListener(new android.text.TextWatcher() {
+			@Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
+			@Override public void onTextChanged(CharSequence s, int a, int b, int c) { showBank.run(); }
+			@Override public void afterTextChanged(android.text.Editable s) {}
+		});
 		
 		Runnable applyTypeStyle = () -> {
 			boolean isBank = selectedType[0] == PaymentMethod.Type.BANK;
@@ -214,7 +245,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 			!isBank ? R.color.colorAccent : R.color.colorSurfaceRaised));
 			btnTypeMobileMoney.setTextColor(androidx.core.content.ContextCompat.getColor(this,
 			!isBank ? R.color.colorTextOnAccent : R.color.colorTextSecondary));
-			etPrimaryField.setHint(isBank ? "Bank name" : "Provider (e.g. MTN Mobile Money)");
+			etPrimaryField.setHint(isBank ? "Bank or payment app" : "Provider (e.g. MTN Mobile Money)");
+			tvChooseBank.setVisibility(isBank ? View.VISIBLE : View.GONE);
 			etAccountIdentifier.setHint(isBank ? "Account number" : "Phone number");
 		};
 		
@@ -231,6 +263,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 			cbSetAsDefault.setChecked(editingMethod.isDefault);
 		}
 		applyTypeStyle.run();
+		showBank.run();
+		if (editingMethod == null) openPicker.run();      // a new bank account starts from the list
 		sheetView.findViewById(R.id.linear2).setOnClickListener(v -> cbSetAsDefault.toggle());
 		
 		btnSaveMethod.setOnClickListener(v -> {
@@ -244,9 +278,26 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 				tvFormError.setVisibility(View.VISIBLE);
 				return;
 			}
+			// Save the official bank name, and check the account number the way the bank's own app would.
+			com.harvana.app.banks.BankDirectory.Bank bank = selectedType[0] == PaymentMethod.Type.BANK ? chosenBank[0] : null;
+			if (bank != null) {
+				primaryField = bank.name;
+				String digits = accountIdentifier.replaceAll("\\D", "");
+				if (digits.length() != bank.accountLength && !"fintech".equals(bank.kind)) {
+					tvFormError.setText(bank.display() + " account numbers have " + bank.accountLength + " digits.");
+					tvFormError.setVisibility(View.VISIBLE);
+					return;
+				}
+				if (!com.harvana.app.banks.BankDirectory.nubanLooksValid(bank, digits) && tvFormError.getTag() == null) {
+					tvFormError.setTag("warned");          // tap Save again to keep it as typed
+					tvFormError.setText("This doesn't look like a " + bank.display() + " account number. Check it, or tap Save again to keep it.");
+					tvFormError.setVisibility(View.VISIBLE);
+					return;
+				}
+			}
 			tvFormError.setVisibility(View.GONE);
 			
-			String label = nickname.isEmpty() ? primaryField : nickname;
+			String label = nickname.isEmpty() ? (bank != null ? bank.display() : primaryField) : nickname;
 			
 			if (editingMethod != null) {
 				editingMethod.type = selectedType[0];

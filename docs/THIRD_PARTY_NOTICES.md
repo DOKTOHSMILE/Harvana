@@ -55,3 +55,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## Nigerian bank directory and logos
+
+`app/src/main/assets/banks/ng_banks.json` and `app/src/main/assets/banks/logos/` come from the free public
+directory at https://nigerianbanks.xyz (project: supermx1/nigerian-banks-api), fetched 7 Oct 2026. The logos were
+scaled down to 128 px. They are the trademarks of their banks and are shown only to identify the bank a user
+chooses. The app refreshes the list from the same address at most once a week.

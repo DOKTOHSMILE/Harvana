@@ -287,8 +287,8 @@ public class CreateWalletActivity extends AppCompatActivity {
 	}
 
 	/**
-	 * Lays out the recovery words, numbered, three to a row (24 words make 8 rows). The layout's fixed 12-word grid is
-	 * replaced: its container (the card's inner column) is cleared and refilled, so any phrase length shows correctly.
+	 * Shows the recovery phrase as one block of text, words separated by spaces, that can be selected. The layout's fixed
+	 * 12-word grid is replaced by this single text, so any phrase length shows correctly.
 	 */
 	private void _showWords(String[] words) {
 		TextView first = findViewById(R.id.tv_word_1);
@@ -296,34 +296,14 @@ public class CreateWalletActivity extends AppCompatActivity {
 		// tv_word_1 -> its cell -> its row -> the grid column
 		android.view.ViewGroup grid = (android.view.ViewGroup) first.getParent().getParent().getParent();
 		grid.removeAllViews();
-		final float d = getResources().getDisplayMetrics().density;
-		final int cols = 3;
-		for (int r = 0; r * cols < words.length; r++) {
-			android.widget.LinearLayout row = new android.widget.LinearLayout(this);
-			row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-			for (int c = 0; c < cols; c++) {
-				int i = r * cols + c;
-				android.widget.LinearLayout cell = new android.widget.LinearLayout(this);
-				cell.setGravity(android.view.Gravity.CENTER_VERTICAL);
-				cell.setPadding(0, (int) (5 * d), (int) (4 * d), (int) (5 * d));
-				if (i < words.length) {
-					TextView num = new TextView(this);
-					num.setText((i + 1) + ".");
-					num.setTextSize(12);
-					num.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorTextTertiary));
-					cell.addView(num, new android.widget.LinearLayout.LayoutParams((int) (24 * d), android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-					TextView w = new TextView(this);
-					w.setText(words[i]);
-					w.setTextSize(14);
-					w.setTypeface(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.BOLD);
-					w.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorTextPrimary));
-					w.setSingleLine(true);
-					cell.addView(w);
-				}
-				row.addView(cell, new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-			}
-			grid.addView(row);
-		}
+		TextView phrase = new TextView(this);
+		phrase.setText(android.text.TextUtils.join(" ", words));
+		phrase.setTextSize(17);
+		phrase.setLineSpacing(0, 1.35f);
+		phrase.setTypeface(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.BOLD);
+		phrase.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorTextPrimary));
+		phrase.setTextIsSelectable(true);
+		grid.addView(phrase);
 	}
 	private static final int RC_MANDATORY_CARD = 8801;
 	

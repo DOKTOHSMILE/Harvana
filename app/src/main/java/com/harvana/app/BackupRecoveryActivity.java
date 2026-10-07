@@ -169,62 +169,24 @@ public class BackupRecoveryActivity extends AppCompatActivity {
 		parent.addView(row, parent.indexOfChild(gridMnemonicWords) + 1);
 	}
 
+	/** The phrase as one block of text, words separated by spaces, that can be selected. */
 	private void _populateWordGrid(String mnemonic) {
 		gridMnemonicWords.removeAllViews();
-		String[] words = mnemonic.trim().split("\\s+");
-		
-		// Calculate dynamic dimensions based on screen density for perfect scaling
+		gridMnemonicWords.setColumnCount(1);
 		float density = getResources().getDisplayMetrics().density;
-		int margin = (int) (6 * density);
-		// 24 words read best three to a row; a 12-word phrase keeps two.
-		final int cols = words.length > 12 ? 3 : 2;
-		gridMnemonicWords.setColumnCount(cols);
-		int paddingInner = (int) ((cols == 3 ? 10 : 14) * density);
-		int numToWordSpacing = (int) ((cols == 3 ? 8 : 12) * density);
-		
-		for (int i = 0; i < words.length; i++) {
-			// 1. Create a modern outlined card for each word
-			MaterialCardView wordCard = new MaterialCardView(this);
-			wordCard.setRadius(10 * density);
-			wordCard.setCardElevation(0);
-			wordCard.setStrokeWidth((int) Math.max(1, 1 * density));
-			wordCard.setStrokeColor(Color.parseColor("#33888888")); // Subtle universal grey outline
-			wordCard.setCardBackgroundColor(Color.TRANSPARENT);
-			
-			// 2. Create an inner horizontal layout
-			LinearLayout innerLayout = new LinearLayout(this);
-			innerLayout.setOrientation(LinearLayout.HORIZONTAL);
-			innerLayout.setPadding(paddingInner, paddingInner, paddingInner, paddingInner);
-			innerLayout.setGravity(Gravity.CENTER_VERTICAL);
-			
-			// 3. Style the index number (Muted and small)
-			MaterialTextView numView = new MaterialTextView(this);
-			numView.setText(String.valueOf(i + 1));
-			numView.setTextSize(13f);
-			numView.setAlpha(0.45f);
-			
-			// 4. Style the actual seed word (Bold and prominent)
-			MaterialTextView wordView = new MaterialTextView(this);
-			wordView.setText(words[i]);
-			wordView.setTextSize(cols == 3 ? 13f : 15f);
-			wordView.setSingleLine(true);
-			wordView.setTypeface(null, Typeface.BOLD);
-			wordView.setPadding(numToWordSpacing, 0, 0, 0);
-			
-			// Assembly
-			innerLayout.addView(numView);
-			innerLayout.addView(wordView);
-			wordCard.addView(innerLayout);
-			
-			GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-			params.width = 0;
-			params.columnSpec = GridLayout.spec(i % cols, 1f);
-			params.rowSpec = GridLayout.spec(i / cols);
-			params.setMargins(margin, margin, margin, margin);
-			wordCard.setLayoutParams(params);
-			
-			gridMnemonicWords.addView(wordCard);
-		}
+		MaterialTextView phrase = new MaterialTextView(this);
+		phrase.setText(mnemonic.trim().replaceAll("\\s+", " "));
+		phrase.setTextSize(17f);
+		phrase.setLineSpacing(0, 1.35f);
+		phrase.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+		phrase.setTextIsSelectable(true);
+		int pad = (int) (8 * density);
+		phrase.setPadding(pad, pad, pad, pad);
+		GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+		params.width = 0;
+		params.columnSpec = GridLayout.spec(0, 1f);
+		phrase.setLayoutParams(params);
+		gridMnemonicWords.addView(phrase);
 	}
 	
 	private void _copyToClipboard() {

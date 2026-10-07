@@ -1332,39 +1332,45 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	
 	private void _showRestoreSheet() {
 		final BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(this);
-		View sheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_recovery_phrase_old, null);
+		// One box for the whole phrase, words separated by spaces (12 or 24 words).
+		final float dd = getResources().getDisplayMetrics().density;
+		LinearLayout sheetView = new LinearLayout(this);
+		sheetView.setOrientation(LinearLayout.VERTICAL);
+		sheetView.setPadding((int) (20 * dd), (int) (20 * dd), (int) (20 * dd), (int) (24 * dd));
+		TextView title = new TextView(this);
+		title.setText("Restore group wallet");
+		title.setTextSize(20);
+		title.setTypeface(null, android.graphics.Typeface.BOLD);
+		title.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+		sheetView.addView(title);
+		TextView hint = new TextView(this);
+		hint.setText("Type or paste the group wallet's recovery words, separated by spaces.");
+		hint.setTextColor(com.harvana.app.utils.UiColors.textSecondary());
+		hint.setPadding(0, (int) (6 * dd), 0, (int) (12 * dd));
+		sheetView.addView(hint);
+		final com.google.android.material.textfield.TextInputLayout box = new com.google.android.material.textfield.TextInputLayout(this);
+		final EditText phraseField = new com.google.android.material.textfield.TextInputEditText(box.getContext());
+		phraseField.setHint("Recovery phrase");
+		phraseField.setMinLines(3);
+		phraseField.setGravity(android.view.Gravity.TOP | android.view.Gravity.START);
+		phraseField.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
+				| android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+		box.addView(phraseField);
+		sheetView.addView(box);
+		final MaterialButton btn = new MaterialButton(this);
+		LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (52 * dd));
+		blp.topMargin = (int) (16 * dd);
+		sheetView.addView(btn, blp);
 		dialog.setContentView(sheetView);
-		
-		TextView title = sheetView.findViewById(R.id.tv_title);
-		if (title != null) title.setText("Restore group wallet");
-		
-		final int[] etWordIds = {
-			R.id.et_word_1, R.id.et_word_2, R.id.et_word_3, R.id.et_word_4,
-			R.id.et_word_5, R.id.et_word_6, R.id.et_word_7, R.id.et_word_8,
-			R.id.et_word_9, R.id.et_word_10, R.id.et_word_11, R.id.et_word_12
-		};
-		final EditText[] wordFields = new EditText[12];
-		for (int i = 0; i < 12; i++) {
-			wordFields[i] = sheetView.findViewById(etWordIds[i]);
-		}
-		
-		MaterialButton btn = sheetView.findViewById(R.id.btn_restore);
-		if (btn != null) {
-			btn.setText("Restore group wallet");
-			btn.setOnClickListener(v -> {
-				StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < 12; i++) {
-					String w = wordFields[i] != null ? wordFields[i].getText().toString().trim().toLowerCase() : "";
-					if (w.isEmpty()) {
-						Toast.makeText(this, "Enter all 12 words", Toast.LENGTH_SHORT).show();
-						return;
-					}
-					if (i > 0) sb.append(' ');
-					sb.append(w);
-				}
-				_restoreGroupWallet(sb.toString(), dialog, btn);
-			});
-		}
+		btn.setText("Restore group wallet");
+		btn.setOnClickListener(v -> {
+			String phrase = phraseField.getText().toString().trim().toLowerCase().replaceAll("\\s+", " ");
+			if (!com.harvana.app.wallet.WalletGenerator.isValidMnemonic(this, phrase)) {
+				Toast.makeText(this, "Check the words: they must be 12 or 24 valid recovery words.", Toast.LENGTH_LONG).show();
+				return;
+			}
+			_restoreGroupWallet(phrase, dialog, btn);
+		});
 		dialog.show();
 	}
 	

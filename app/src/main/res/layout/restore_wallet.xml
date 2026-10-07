@@ -129,7 +129,8 @@
 							android:textSize="12sp"
 							android:textColor="@color/colorTextPrimary"
 							android:inputType="textPassword|textMultiLine|textNoSuggestions"
-							android:minLines="2" />
+							android:minLines="3"
+							android:hint="Your 12 or 24 words, separated by spaces" />
 					</com.google.android.material.textfield.TextInputLayout>
 					<com.google.android.material.button.MaterialButton
 						android:id="@+id/btn_restore_from_phrase"

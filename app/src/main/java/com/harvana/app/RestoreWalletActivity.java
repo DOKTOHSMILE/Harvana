@@ -302,9 +302,9 @@ public class RestoreWalletActivity extends AppCompatActivity {
 		
 		btnContinue.setOnClickListener(v -> {
 			String raw = etCode.getText().toString().replaceAll("[^0-9]", "");
-			if (raw.length() != HarvanaCardCrypto.DIGIT_CODE_LENGTH) {
-				tvError.setText("That's " + raw.length() + " digits — should be exactly "
-				+ HarvanaCardCrypto.DIGIT_CODE_LENGTH + ". Check for a missing or extra digit.");
+			if (raw.length() != HarvanaCardCrypto.DIGIT_CODE_LENGTH_24 && raw.length() != HarvanaCardCrypto.DIGIT_CODE_LENGTH) {
+				tvError.setText("That's " + raw.length() + " digits. A card code has " + HarvanaCardCrypto.DIGIT_CODE_LENGTH_24
+				+ " digits (" + HarvanaCardCrypto.DIGIT_CODE_LENGTH + " on an older card). Check for a missing or extra digit.");
 				tvError.setVisibility(View.VISIBLE);
 				return;
 			}

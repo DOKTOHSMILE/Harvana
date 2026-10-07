@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: social backup card restyled; 24-word backup code fixed
+
+What the app does:
+
+- **Fixed: new cards printed no backup code.** A wallet with a 24-word phrase has a 145-digit code, but the card only printed a 106-digit one, so the back of every new card had no code. Both lengths now print, in groups of five.
+- **Fixed: restoring by typing the code refused 145-digit codes.** Both lengths are accepted.
+- **Card back restyled:** "Social backup" title with three plain lines (safe to give to someone you trust, can't be opened without your password, keep the password apart), a larger framed QR with "Scan in Harvana to restore" under it, and the backup code beside it.
+- **Card front:** "Valid through: Infinity" is replaced by the month the card was made ("Issued MM/YY"), and the address label is tidied.
+
+What you do: install the build. Anyone who made a card from a 24-word wallet before this build should make a new one, so it carries the printed code.
+
 ## 7 Oct 2026: staking dashboard shows APR and APY
 
 What the app does:

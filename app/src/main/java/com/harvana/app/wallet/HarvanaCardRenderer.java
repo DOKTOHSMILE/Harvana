@@ -76,7 +76,9 @@ public final class HarvanaCardRenderer {
 		Paint labelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		labelPaint.setColor(template.textSecondary);
 		labelPaint.setTextSize(14f);
-		canvas.drawText("W A L L E T   A D D R E S S", margin, 210f, labelPaint);
+		labelPaint.setLetterSpacing(0.25f);
+		labelPaint.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
+		canvas.drawText("WALLET ADDRESS", margin, 210f, labelPaint);
 		
 		Paint addrPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		addrPaint.setColor(template.textPrimary);
@@ -128,13 +130,13 @@ public final class HarvanaCardRenderer {
 		Paint expiryLabel = new Paint(Paint.ANTI_ALIAS_FLAG);
 		expiryLabel.setColor(template.textSecondary);
 		expiryLabel.setTextSize(12f);
-		canvas.drawText("VALID THROUGH", margin + 600f, 450f, expiryLabel);
+		canvas.drawText("ISSUED", margin + 600f, 450f, expiryLabel);
 		
 		Paint expiryValue = new Paint(Paint.ANTI_ALIAS_FLAG);
 		expiryValue.setColor(template.textPrimary);
 		expiryValue.setTextSize(20f);
 		expiryValue.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD));
-		canvas.drawText("INFINITY", margin + 600f, 480f, expiryValue);
+		canvas.drawText(new java.text.SimpleDateFormat("MM/yy", java.util.Locale.US).format(new java.util.Date()), margin + 600f, 480f, expiryValue);
 		
 		// Footer & Faint Silver Stamp
 		Paint footerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -164,76 +166,78 @@ public final class HarvanaCardRenderer {
 		
 		Paint stripePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		stripePaint.setColor(Color.argb(230, 10, 10, 10));
-		canvas.drawRect(0, 50, CARD_WIDTH_PX, 170, stripePaint);
+		canvas.drawRect(0, 40, CARD_WIDTH_PX, 116, stripePaint);
 		
 		float margin = 56f;
+		int qrSize = 300;
+		float pad = 12f;
+		float qrLeft = CARD_WIDTH_PX - qrSize - margin - 4f;
+		float qrTop = 150f;
 		
-		// ── SOCIAL RECOVERY DISCLAIMER (Updated) ──
+		// ── What this card is, in plain words ──
 		Paint warnLabelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		warnLabelPaint.setColor(template.accent);
 		warnLabelPaint.setTextSize(20f);
+		warnLabelPaint.setLetterSpacing(0.08f);
 		warnLabelPaint.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
-		canvas.drawText("SOCIAL RECOVERY ENABLED", margin, 205f, warnLabelPaint);
+		canvas.drawText("SOCIAL BACKUP", margin, 166f, warnLabelPaint);
 		
 		Paint warnBodyPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		warnBodyPaint.setColor(template.textSecondary);
-		warnBodyPaint.setTextSize(16f);
-		canvas.drawText("The wallet access card is fully encrypted and safe to share", margin, 235f, warnBodyPaint);
-		canvas.drawText("for social backup. Assets cannot be accessed without the", margin, 260f, warnBodyPaint);
-		canvas.drawText("custodian's decryption password.", margin, 285f, warnBodyPaint);
+		warnBodyPaint.setTextSize(15f);
+		canvas.drawText("Encrypted. Safe to give to someone you trust.", margin, 194f, warnBodyPaint);
+		canvas.drawText("Nobody can open it without your card password.", margin, 216f, warnBodyPaint);
+		canvas.drawText("Keep the password apart from this card.", margin, 238f, warnBodyPaint);
 		
+		// ── Backup code, for when the QR can't be scanned (106 digits on a 12-word card, 145 on a 24-word card) ──
 		Paint digitLabelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		digitLabelPaint.setColor(template.textSecondary);
-		digitLabelPaint.setTextSize(14f);
-		canvas.drawText("BACKUP CODE (if QR can't be scanned)", margin, 325f, digitLabelPaint);
+		digitLabelPaint.setTextSize(13f);
+		digitLabelPaint.setLetterSpacing(0.06f);
+		digitLabelPaint.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
+		canvas.drawText("BACKUP CODE  ·  TYPE IT IF THE QR WON'T SCAN", margin, 278f, digitLabelPaint);
 		
-		if (digitCode != null && digitCode.length() == HarvanaCardCrypto.DIGIT_CODE_LENGTH) {
+		if (digitCode != null && (digitCode.length() == HarvanaCardCrypto.DIGIT_CODE_LENGTH
+				|| digitCode.length() == HarvanaCardCrypto.DIGIT_CODE_LENGTH_24)) {
 			Paint digitPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			digitPaint.setColor(template.textPrimary);
-			digitPaint.setTextSize(17f);
-			digitPaint.setTypeface(Typeface.MONOSPACE);
+			digitPaint.setTextSize(18f);
+			digitPaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD));
 			
-			String[] groups = new String[22];
-			for (int i = 0; i < 22; i++) {
+			int groupCount = (digitCode.length() + 4) / 5;
+			float colWidth = 106f;
+			float rowHeight = 30f;
+			float startY = 310f;
+			for (int i = 0; i < groupCount; i++) {
 				int start = i * 5;
-				int end = Math.min(start + 5, digitCode.length());
-				groups[i] = digitCode.substring(start, end);
-			}
-			
-			// Adjusted spacing downwards to clear the new 3-line text
-			float colWidth = 145f;
-			float rowHeight = 32f;
-			float startY = 365f; 
-			
-			for (int i = 0; i < groups.length; i++) {
-				int col = i % 4;
-				int row = i / 4;
-				float x = margin + col * colWidth;
-				float y = startY + row * rowHeight;
-				canvas.drawText(groups[i], x, y, digitPaint);
+				String group = digitCode.substring(start, Math.min(start + 5, digitCode.length()));
+				float x = margin + (i % 5) * colWidth;
+				float y = startY + (i / 5) * rowHeight;
+				canvas.drawText(group, x, y, digitPaint);
 			}
 		}
 		
-		// QR code
-		int qrSize = 280;
+		// ── QR code, framed, with a caption under it ──
 		Bitmap qr = HARVQRCodeGenerator.generateClassicQRCode(qrPayload, qrSize);
 		if (qr != null) {
-			float qrLeft = CARD_WIDTH_PX - qrSize - margin - 16f;
-			float qrTop = 195f;
-			float pad = 12f;
-			
 			Paint framePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			framePaint.setColor(template.accent);
 			RectF frameRect = new RectF(qrLeft - pad - 4f, qrTop - pad - 4f,
 			qrLeft + qrSize + pad + 4f, qrTop + qrSize + pad + 4f);
-			canvas.drawRoundRect(frameRect, 14f, 14f, framePaint);
+			canvas.drawRoundRect(frameRect, 16f, 16f, framePaint);
 			
 			Paint qrBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			qrBgPaint.setColor(Color.WHITE);
 			RectF qrBgRect = new RectF(qrLeft - pad, qrTop - pad, qrLeft + qrSize + pad, qrTop + qrSize + pad);
-			canvas.drawRoundRect(qrBgRect, 10f, 10f, qrBgPaint);
+			canvas.drawRoundRect(qrBgRect, 12f, 12f, qrBgPaint);
 			
 			canvas.drawBitmap(qr, qrLeft, qrTop, null);
+			
+			Paint capPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+			capPaint.setColor(template.textSecondary);
+			capPaint.setTextSize(14f);
+			capPaint.setTextAlign(Paint.Align.CENTER);
+			canvas.drawText("Scan in Harvana to restore", qrLeft + qrSize / 2f, qrTop + qrSize + pad + 32f, capPaint);
 		}
 		
 		// Card Type Label

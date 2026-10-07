@@ -144,14 +144,34 @@
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				android:layout_weight="1" />
-			<com.google.android.material.imageview.ShapeableImageView
-				android:id="@+id/imageview2"
+			<FrameLayout
 				android:layout_width="48dp"
-				android:layout_height="48dp"
-				android:padding="12dp"
-				android:background="?attr/selectableItemBackgroundBorderless"
-				android:src="@drawable/icon_history_twotone"
-				android:scaleType="centerInside" />
+				android:layout_height="48dp">
+				<com.google.android.material.imageview.ShapeableImageView
+					android:id="@+id/imageview2"
+					android:layout_width="48dp"
+					android:layout_height="48dp"
+					android:padding="12dp"
+					android:background="?attr/selectableItemBackgroundBorderless"
+					android:src="@drawable/icon_history_twotone"
+					android:scaleType="centerInside" />
+				<TextView
+					android:id="@+id/tv_open_trades_dot"
+					android:layout_width="wrap_content"
+					android:layout_height="16dp"
+					android:minWidth="16dp"
+					android:layout_gravity="top|end"
+					android:layout_marginTop="6dp"
+					android:layout_marginEnd="6dp"
+					android:paddingStart="4dp"
+					android:paddingEnd="4dp"
+					android:gravity="center"
+					android:background="@drawable/bg_unread_dot"
+					android:textColor="@android:color/white"
+					android:textSize="10sp"
+					android:textStyle="bold"
+					android:visibility="gone" />
+			</FrameLayout>
 			<com.google.android.material.imageview.ShapeableImageView
 				android:id="@+id/imageview3"
 				android:layout_width="48dp"

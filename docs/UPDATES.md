@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: P2P open-trades badge, seller's receiving account
+
+What the app does:
+
+- **The My trades icon on the P2P page shows a red count** of your trades that still need something: waiting for payment, waiting for your confirmation, or in dispute. It refreshes each time you come back to the page.
+- **The seller's trade page no longer says "Couldn't load your payment account".** It reads the receiving account from the seller's own offer and shows "Buyer is paying into your … account ending ….".
+
+What you do: install the build.
+
 ## 7 Oct 2026: Learn Hub reader shows comments under the post
 
 What the app does:

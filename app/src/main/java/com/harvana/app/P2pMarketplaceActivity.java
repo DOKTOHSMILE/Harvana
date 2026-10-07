@@ -155,6 +155,38 @@ public class P2pMarketplaceActivity extends AppCompatActivity {
 	
 	public void _MORE() {
 	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		_refreshOpenTradesDot();
+	}
+
+	/** Red count on the My trades icon: orders still waiting for payment, for confirmation, or in dispute. */
+	private void _refreshOpenTradesDot() {
+		final TextView dot = findViewById(R.id.tv_open_trades_dot);
+		if (dot == null) return;
+		String me = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
+		if (me == null || me.isEmpty()) { dot.setVisibility(View.GONE); return; }
+		com.harvana.app.tx.P2PTradeRouter.listMine(getApplicationContext(), me, new com.harvana.app.tx.P2PTradeRouter.Callback() {
+			@Override public void onSuccess(org.json.JSONObject result) {
+				int open = 0;
+				org.json.JSONArray arr = result.optJSONArray("listings");
+				if (arr != null) for (int k = 0; k < arr.length(); k++) {
+					org.json.JSONObject e = arr.optJSONObject(k);
+					if (e == null || !"ORDER".equals(e.optString("recordType", ""))) continue;
+					String st = e.optString("status", "");
+					if ("AWAITING_PAYMENT".equals(st) || "PAYMENT_SUBMITTED".equals(st) || "DISPUTED".equals(st)) open++;
+				}
+				final int n = open;
+				runOnUiThread(() -> {
+					dot.setText(n > 9 ? "9+" : String.valueOf(n));
+					dot.setVisibility(n > 0 ? View.VISIBLE : View.GONE);
+				});
+			}
+			@Override public void onError(String error) { }
+		});
+	}
 	private String currentSelectedCurrencyCode = com.harvana.app.p2p.P2pCurrencyFilterState.getCurrency();
 	private void _showCurrencyPickerSheet() {
 		BottomSheetDialog dialog = com.harvana.app.p2p.ThemedDialogs.sheet(this);

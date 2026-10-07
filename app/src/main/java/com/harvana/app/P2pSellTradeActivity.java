@@ -559,7 +559,37 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			}
 			@Override
 			public void onError(String error) {
-				runOnUiThread(() -> tv_sell_payment_status_description.setText("Couldn't load your payment account for this order."));
+				// No per-order copy exists (the buyer opens the order and only the seller may write it), so read the
+				// account from the seller's own listing, which the seller can always read.
+				if (listingId.isEmpty()) {
+					runOnUiThread(() -> tv_sell_payment_status_description.setText("The buyer pays into the account on your offer."));
+					return;
+				}
+				P2PPaymentDetailsManager.getInstance(getApplicationContext()).get(listingId, new P2PPaymentDetailsManager.DocCallback() {
+					@Override
+					public void onSuccess(Map<String, Object> data) {
+						String primary = null, identifier = null;
+						Object methods = data.get("paymentMethods");
+						if (methods instanceof java.util.List && !((java.util.List<?>) methods).isEmpty() && ((java.util.List<?>) methods).get(0) instanceof Map) {
+							Map<?, ?> m = (Map<?, ?>) ((java.util.List<?>) methods).get(0);
+							if (m.get("primaryField") != null) primary = String.valueOf(m.get("primaryField"));
+							if (m.get("accountIdentifier") != null) identifier = String.valueOf(m.get("accountIdentifier"));
+						}
+						if (primary == null && data.get("primaryField") != null) primary = String.valueOf(data.get("primaryField"));
+						if (identifier == null && data.get("accountIdentifier") != null) identifier = String.valueOf(data.get("accountIdentifier"));
+						final String p = primary, id = identifier;
+						runOnUiThread(() -> {
+							tv_sell_payment_reference.setText(orderId);
+							tv_sell_payment_status_description.setText(p != null && id != null
+									? "Buyer is paying into your " + p + " account ending " + _lastFour(id) + "."
+									: "The buyer pays into the account on your offer.");
+						});
+					}
+					@Override
+					public void onError(String e2) {
+						runOnUiThread(() -> tv_sell_payment_status_description.setText("The buyer pays into the account on your offer."));
+					}
+				});
 			}
 		});
 		

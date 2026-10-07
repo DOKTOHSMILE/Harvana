@@ -79,6 +79,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // The member's own action log (AppActivity): what they did in the app, newest first. Only they can read it.
+    match /USERS/{uid}/ACTIVITY/{id} {
+      allow read: if isSelf(uid);
+      allow create: if isSelf(uid)
+        && request.resource.data.keys().hasOnly(['kind', 'title', 'detail', 'at', 'source'])
+        && request.resource.data.title is string && request.resource.data.title.size() <= 80;
+      allow update, delete: if false;
+    }
+
     // Published Learn Hub articles. The author publishes and may delete their own; anyone bumps the view counter.
     match /LEARN_CONTENT/{contentId} {
       allow read: if request.auth != null;
@@ -355,9 +364,26 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.name == name
-        && name.matches('^[a-z][a-z0-9_.]{2,19}$');
+        && name.matches('^[a-z][a-z0-9_.]{2,19}$')
+        // A name someone just gave up stays theirs for 90 days (USERNAME_HOLDS, UsernameCadence.HOLD_MS).
+        && (!exists(/databases/$(database)/documents/USERNAME_HOLDS/$(name))
+            || get(/databases/$(database)/documents/USERNAME_HOLDS/$(name)).data.uid == request.auth.uid
+            || request.time > get(/databases/$(database)/documents/USERNAME_HOLDS/$(name)).data.releasedAt + duration.value(90, 'd'));
       allow update: if false;
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // The name a member gave up when they changed it, held for them for 90 days. Written in the same transaction
+    // that frees the name, only by its owner (checked against USERNAMES before the change), at server time.
+    match /USERNAME_HOLDS/{name} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create, update: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'releasedAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.releasedAt == request.time
+        && get(/databases/$(database)/documents/USERNAMES/$(name)).data.uid == request.auth.uid;
+      allow delete: if false;
     }
 
     // A pinch: a nudge to someone you follow. One document per sender and person (the id is the sender), so the same

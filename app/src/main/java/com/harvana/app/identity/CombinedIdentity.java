@@ -64,7 +64,7 @@ public final class CombinedIdentity {
                 });
     }
 
-    /** After the node accepts the link, stamp that wallet onto the account and a public Firestore identity. */
+    /** After the node accepts the link, add that wallet to the account (the first one stays the main wallet). */
     public static void stamp(Context c, String address) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null || address == null || address.isEmpty()) return;
@@ -79,17 +79,7 @@ public final class CombinedIdentity {
             Object main = snap.getValue();
             if (main == null || String.valueOf(main).trim().isEmpty()) me.child("walletAddress").setValue(address);
         });
-        load(account -> {
-            Map<String, Object> doc = new HashMap<>();
-            doc.put("address", address);
-            doc.put("uid", user.getUid());
-            doc.put("displayName", account.name);
-            doc.put("username", account.username);
-            doc.put("photoUrl", account.photo);
-            doc.put("source", "node+account");
-            doc.put("updatedAt", System.currentTimeMillis());
-            FirebaseFirestore.getInstance().collection("IDENTITY").document(address).set(doc, SetOptions.merge());
-        });
+        // No public address-to-account record: which wallets are whose is known only to the node and to the owner.
     }
 
     @SuppressWarnings("unchecked")

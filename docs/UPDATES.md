@@ -2,6 +2,25 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: audit fixes in the rules (publish the rules)
+
+What was wrong. The app writes to three places the published rules had no entry for, so Firestore refused those writes:
+
+1. **Changing a username failed** for anyone who already had one. The change also writes a 90-day hold on the old name to `USERNAME_HOLDS`, and that refusal sank the whole transaction.
+2. **Your activity log never saved** (`USERS/{uid}/ACTIVITY`).
+3. **The IDENTITY address-to-account card never saved.** Nothing reads it, and it would have shown publicly which wallets belong to whom.
+
+What changed:
+
+- `USERNAME_HOLDS` has a rule. Only the name's owner can place the hold, at server time, and the hold is checked when anyone claims a name. A released name stays reserved for its old owner for 90 days.
+- `USERS/{uid}/ACTIVITY` has a rule: only the owner can read or add to it.
+- The app no longer writes `IDENTITY`.
+
+What you do:
+
+1. Publish `docs/firestore.console.rules`.
+2. Install the new build.
+
 ## 7 Oct 2026: shorter Settings, real icons in place of placeholders
 
 What the app does:

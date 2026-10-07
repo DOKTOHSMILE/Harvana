@@ -2,6 +2,29 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: Crypto wallets — Bitcoin, Ethereum and more from the same words; the phrase as one text
+
+What the app does:
+
+- **Crypto wallets** (side menu) lists the wallets your recovery phrase also opens, each with its address, Copy, a QR code to receive, and its balance:
+  - Pi Network (24-word wallets);
+  - Bitcoin (bc1...);
+  - Ethereum, which is the same address on BNB Chain, Base and Polygon;
+  - Tron (TRX and USDT);
+  - Solana;
+  - Litecoin;
+  - Dogecoin.
+
+  They use the paths standard wallets use, so the same words open them in MetaMask, Trust Wallet, Phantom, TronLink and Electrum.
+- **Only public addresses are stored.** Keys are worked out from the phrase on the phone when needed.
+- **Balances are read from free public services:** mempool.space, litecoinspace.org, BlockCypher, publicnode.com RPCs, TronGrid, Solana's public RPC and Pi's Horizon. Nothing runs on a Harvana server, so it costs nothing to run.
+- **Receiving works now. Sending from these chains comes next.**
+- **The recovery phrase is shown as one block of text,** words separated by spaces, on Create wallet and Backup & recovery. Restore, including the group-wallet restore, takes it in one box.
+
+Checked off the phone: every chain's address for a 12-word and a 24-word phrase matched independent reference wallets (eth-account, embit and PyNaCl), including the published test addresses (`tools/chainkeys`).
+
+What you do: install the new build, open Crypto wallets, and compare one address with MetaMask or Trust Wallet loaded with the same test words.
+
 ## 7 Oct 2026: 24-word recovery phrase; the same words open your Pi wallet
 
 What the app does:

@@ -47,12 +47,7 @@ public final class PiKeys {
     /** The full 64-byte BIP-39 seed (no passphrase). */
     public static byte[] bip39Seed(String mnemonic) throws Exception {
         String m = Normalizer.normalize(mnemonic.trim().toLowerCase().replaceAll("\\s+", " "), Normalizer.Form.NFKD);
-        PBEKeySpec spec = new PBEKeySpec(m.toCharArray(), "mnemonic".getBytes(StandardCharsets.UTF_8), 2048, 512);
-        try {
-            return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512").generateSecret(spec).getEncoded();
-        } finally {
-            spec.clearPassword();
-        }
+        return com.harvana.app.crypto.Pbkdf2.hmacSha512(m.getBytes(StandardCharsets.UTF_8), "mnemonic".getBytes(StandardCharsets.UTF_8), 2048, 64);
     }
 
     /** SLIP-0010 for ed25519: every step is hardened. Returns the 32-byte private key at the path. */

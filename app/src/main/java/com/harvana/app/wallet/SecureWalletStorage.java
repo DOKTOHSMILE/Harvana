@@ -402,11 +402,9 @@ public final class SecureWalletStorage {
     }
 
     private static byte[] _pbkdf2(String pin, byte[] salt) throws Exception {
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-        // FIXED: Using PBEKeySpec from javax.crypto.spec instead of java.security.spec
-        PBEKeySpec spec = new PBEKeySpec(
-                pin.toCharArray(), salt, PIN_PBKDF2_ITERATIONS, PIN_HASH_LENGTH_BITS);
-        return factory.generateSecret(spec).getEncoded();
+        // Same bytes as SecretKeyFactory "PBKDF2WithHmacSHA512", which Android 6 and 7 do not have, so saved PINs still match.
+        return com.harvana.app.crypto.Pbkdf2.hmacSha512(pin.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                salt, PIN_PBKDF2_ITERATIONS, PIN_HASH_LENGTH_BITS / 8);
     }
 
     private static boolean _constantTimeEquals(byte[] a, byte[] b) {

@@ -236,17 +236,15 @@ public class CreateWalletActivity extends AppCompatActivity {
 				final String seedB64;
 				final String pubKeyB64;
 				try {
-					javax.crypto.spec.PBEKeySpec spec = new javax.crypto.spec.PBEKeySpec(
-					mnemonic.toCharArray(),
-					"mnemonic".getBytes(java.nio.charset.StandardCharsets.UTF_8),
-					2048, 512);
-					javax.crypto.SecretKeyFactory skf = javax.crypto.SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-					byte[] fullSeed = skf.generateSecret(spec).getEncoded();
+					// Built on HmacSHA512: SecretKeyFactory "PBKDF2WithHmacSHA512" does not exist before Android 8.
+					byte[] fullSeed = com.harvana.app.crypto.Pbkdf2.hmacSha512(
+					com.harvana.app.wallet.WalletGenerator.normalizeMnemonic(mnemonic).getBytes(java.nio.charset.StandardCharsets.UTF_8),
+					"mnemonic".getBytes(java.nio.charset.StandardCharsets.UTF_8), 2048, 64);
 					byte[] ed25519Seed = java.util.Arrays.copyOf(fullSeed, 32);
 					byte[] publicKey = com.harvana.app.crypto.Ed25519.publicKeyFromSeed(ed25519Seed);
 					seedB64 = android.util.Base64.encodeToString(ed25519Seed, android.util.Base64.NO_WRAP);
 					pubKeyB64 = android.util.Base64.encodeToString(publicKey, android.util.Base64.NO_WRAP);
-					spec.clearPassword();
+					java.util.Arrays.fill(fullSeed, (byte) 0);
 				} catch (Exception e) {
 					runOnUiThread(() -> {
 						SketchwareUtil.showMessage(context, "Key derivation failed: " + e.getMessage());

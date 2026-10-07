@@ -38,7 +38,7 @@ public class WalletGenerator {
                 new InputStreamReader(is, StandardCharsets.UTF_8))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
-                        line = line.trim().toLowerCase();
+                        line = line.trim().toLowerCase(java.util.Locale.ROOT);
                         if (!line.isEmpty()) list.add(line);
                     }
                 } catch (Exception ignored) {
@@ -49,6 +49,18 @@ public class WalletGenerator {
         }
     }
     
+    /**
+     * Canonical form of a recovery phrase: lower-case (locale independent), words separated by exactly one space.
+     * BIP-39 derives the seed from this exact string, so a phrase pasted with a double space, a line break or a capital
+     * must give the same wallet as the clean phrase. Before this, the checksum passed but the derivation used the raw
+     * text and opened a different, empty wallet.
+     */
+    public static String normalizeMnemonic(String mnemonic) {
+        if (mnemonic == null) return "";
+        String t = mnemonic.trim().toLowerCase(java.util.Locale.ROOT);
+        return t.isEmpty() ? "" : t.replaceAll("\\s+", " ");
+    }
+
     /** New wallets get 24 words: the same phrase then opens the HARV wallet and the Pi wallet (PiKeys). */
     public static final int NEW_WALLET_WORDS = 24;
 
@@ -107,7 +119,7 @@ public class WalletGenerator {
      */
     public static byte[] entropyFromMnemonic(Context context, String mnemonic) {
         if (mnemonic == null) return null;
-        String[] words = mnemonic.trim().toLowerCase().split("\\s+");
+        String[] words = normalizeMnemonic(mnemonic).split(" ");
         int n = words.length;
         if (n < 12 || n > 24 || n % 3 != 0) return null;
         loadWordList(context);
@@ -159,13 +171,11 @@ public class WalletGenerator {
      * Secure BIP-39 PBKDF2 seed derivation (Key Stretching).
      */
     private static byte[] deriveRawSeed(String mnemonic) throws Exception {
-        char[] chars = mnemonic.trim().toLowerCase().toCharArray();
         byte[] salt = "mnemonic".getBytes(StandardCharsets.UTF_8);
-        
-        // Key stretching using PBKDF2WithHmacSHA512 (Standard BIP-39 algorithm)
-        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-        PBEKeySpec spec = new PBEKeySpec(chars, salt, 2048, 512); // 2048 iterations, 512-bit output
-        byte[] fullSeed = skf.generateSecret(spec).getEncoded();
+        // BIP-39: PBKDF2-HMAC-SHA512(phrase, "mnemonic", 2048 rounds, 64 bytes). Built on HmacSHA512 because
+        // SecretKeyFactory "PBKDF2WithHmacSHA512" does not exist before Android 8 (this app supports Android 6).
+        byte[] fullSeed = com.harvana.app.crypto.Pbkdf2.hmacSha512(
+                normalizeMnemonic(mnemonic).getBytes(StandardCharsets.UTF_8), salt, 2048, 64);
         
         // Take the first 32 bytes for Ed25519 seed compatibility
         byte[] ed25519Seed = new byte[32];

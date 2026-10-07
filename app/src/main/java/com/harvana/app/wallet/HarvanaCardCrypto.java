@@ -267,9 +267,9 @@ public final class HarvanaCardCrypto {
     }
 
     private static byte[] derivePbkdf2(String password, byte[] salt) throws Exception {
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-        PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, PBKDF2_ITERATIONS, AES_KEY_LENGTH_BITS);
-        return factory.generateSecret(spec).getEncoded();
+        // Same bytes as SecretKeyFactory "PBKDF2WithHmacSHA512", which Android 6 and 7 do not have.
+        return com.harvana.app.crypto.Pbkdf2.hmacSha512(password.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                salt, PBKDF2_ITERATIONS, AES_KEY_LENGTH_BITS / 8);
     }
 
     private static byte[] deriveArgon2id(String password, byte[] salt) {

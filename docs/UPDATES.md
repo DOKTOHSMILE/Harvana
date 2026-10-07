@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: wallets on Android 6 and 7; pasted phrases open the right wallet
+
+These are fixes the miner app already had, now in Harvana too.
+
+What the app does:
+
+- **Android 6 and 7 can create and restore wallets.** The app used the phone's "PBKDF2WithHmacSHA512" function, which only exists from Android 8. On older phones, wallet creation, restore, the backup card, the transaction PIN and the Pi and other-coin wallets failed. These now use the app's own implementation, built on HmacSHA512. It gives exactly the same bytes, checked against the platform function, so every existing wallet, PIN and backup card stays valid.
+- **A phrase pasted with a double space, a line break or capitals opens the right wallet.** Before, the words passed the check, but the wallet was worked out from the raw text and a different, empty wallet opened. The phrase is now reduced to single spaces and lower case before use, and saved that way.
+
+What you do: install the build. Anyone who restored a wallet from a pasted phrase and found it empty should restore it again; the right wallet now opens.
+
 ## 7 Oct 2026: bank directory with logos; Pi build error fixed
 
 What the app does:

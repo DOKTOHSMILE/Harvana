@@ -162,7 +162,7 @@ public class RestoreWalletActivity extends AppCompatActivity {
 	private String pendingPubKeyB64;
 	
 	private void onRestoreFromPhraseClicked() {
-		String phrase = etPhrase.getText().toString().trim().toLowerCase();
+		String phrase = WalletGenerator.normalizeMnemonic(etPhrase.getText().toString());   // one space between words, so it opens the same wallet
 		if (!WalletGenerator.isValidMnemonic(this, phrase)) {
 			SketchwareUtil.showMessage(getApplicationContext(),
 			"That doesn't look like a valid recovery phrase. Check the spelling of each word.");

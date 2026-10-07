@@ -477,12 +477,17 @@ public class SettingsActivity extends AppCompatActivity {
 		if (row == null || row.getChildCount() == 0) return;
 		View icon = row.getChildAt(0);
 		if (icon instanceof ImageView) {
-			icon.setBackgroundTintList(ColorStateList.valueOf(color));
+			// A soft badge in the category colour with the icon drawn in that colour (the full-colour badge hid the icon).
+			icon.setBackgroundTintList(ColorStateList.valueOf((color & 0x00FFFFFF) | 0x2E000000));
+			((ImageView) icon).setImageTintList(ColorStateList.valueOf(color));
 		}
 	}
 	
 	private void _loadProfileHeader() {
-		String uid = authsp.getString("uid", "");
+		// The signed-in account (the old saved uid can be empty, which showed "Guest").
+		com.google.firebase.auth.FirebaseUser fu = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+		String uid = fu != null ? fu.getUid() : authsp.getString("uid", "");
+		if (fu != null && fu.getDisplayName() != null && !fu.getDisplayName().isEmpty()) tvSettingsName.setText(fu.getDisplayName());
 		if (uid.isEmpty()) {
 			tvSettingsName.setText("Guest");
 			return;
@@ -511,8 +516,9 @@ public class SettingsActivity extends AppCompatActivity {
 		String vType = _str(data, "v_type");
 		String fullName = (firstName + " " + lastName).trim();
 		tvSettingsName.setText(fullName.isEmpty() ? "Harvana Member" : fullName);
-		if (!firstName.isEmpty()) {
-			tvSettingsHandle.setText("@" + firstName.toLowerCase());
+		String username = _str(data, "username");
+		if (!username.isEmpty() && !"null".equalsIgnoreCase(username)) {
+			tvSettingsHandle.setText("@" + username);
 			tvSettingsHandle.setVisibility(View.VISIBLE);
 		} else {
 			tvSettingsHandle.setVisibility(View.GONE);

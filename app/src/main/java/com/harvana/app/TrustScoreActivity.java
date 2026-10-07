@@ -119,7 +119,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         account.addView(tv("Account", 16, true, UiColors.textPrimary()));
         TextView who = note("Reading your profile…");
         account.addView(who);
-        root.addView(account, 0);
+        // The account card is no longer shown: the name and wallet are on the profile already.
         com.harvana.app.identity.CombinedIdentity.load(a -> runOnUiThread(() -> {
             if (gen != generation) return;
             StringBuilder bld = new StringBuilder();
@@ -286,8 +286,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         wlp.topMargin = dp(8);
         wrap.setLayoutParams(wlp);
 
-        // Each page is a whole tier screen: the tier card, the road to that tier and the next badge. Built up front so the pager can be
-        // given the height of the tallest one.
+        // Only the tier card swipes (every page the same height); the rest of the screen stays put.
         final java.util.List<View> pages = new java.util.ArrayList<>();
         int screenW = getResources().getDisplayMetrics().widthPixels - dp(32);
         int tallest = 0;
@@ -295,8 +294,6 @@ public class TrustScoreActivity extends AppCompatActivity {
             LinearLayout page = new LinearLayout(this);
             page.setOrientation(LinearLayout.VERTICAL);
             page.addView(tierPage(i, current, percent), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(184)));
-            page.addView(journeyCard(p, i));
-            page.addView(nextBadgeCard(p));
             page.measure(View.MeasureSpec.makeMeasureSpec(screenW, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
             tallest = Math.max(tallest, page.getMeasuredHeight());
             pages.add(page);
@@ -537,13 +534,6 @@ public class TrustScoreActivity extends AppCompatActivity {
                 + num(p.get("giftsSent")) + " gifts sent"));
         c.addView(note("Only reads the network verified count: you reached the end, stayed long enough and read each post once. "
                 + "Reading that looks automated counts as zero."));
-        MaterialButton open = new MaterialButton(this);
-        open.setAllCaps(false);
-        open.setText("See my activity");
-        open.setOnClickListener(v -> startActivity(new android.content.Intent(this, ActivityStatsActivity.class)));
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(16);
-        c.addView(open, lp);
         return c;
     }
 

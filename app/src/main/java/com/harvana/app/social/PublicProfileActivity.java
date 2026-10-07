@@ -1100,8 +1100,6 @@ public class PublicProfileActivity extends AppCompatActivity {
     private View myDataLinks() {
         LinearLayout c = SocialUi.card(this);
         c.addView(SocialUi.text(this, "More of your data", 16, true, UiColors.textPrimary()));
-        c.addView(linkRow("My activity", "Time in the app, screens, streaks and your habit badges",
-            v -> startActivity(new Intent(this, ActivityStatsActivity.class))));
         c.addView(linkRow("Devices", "Phones signed in to your account",
             v -> startActivity(new Intent(this, DevicesActivity.class))));
         c.addView(linkRow("Trust score in full", "Every part of your score and how to raise it",

@@ -91,7 +91,8 @@ public class LearnFragmentActivity extends Fragment {
 	private void initialize(Bundle _savedInstanceState, View _view) {
 		_fab = _view.findViewById(R.id._fab);
 		View _myActivity = _view.findViewById(R.id.tv_my_activity);
-		if (_myActivity != null) _myActivity.setOnClickListener(_v -> startActivity(new Intent(getContext(), ActivityStatsActivity.class)));
+		// My Activity is no longer shown to members: the app counts usage in the background for the habit badges.
+		if (_myActivity != null) _myActivity.setVisibility(View.GONE);
 		vscroll8 = _view.findViewById(R.id.vscroll8);
 		linear1 = _view.findViewById(R.id.linear1);
 		textview1 = _view.findViewById(R.id.textview1);

@@ -17,6 +17,23 @@ public final class TxKind {
         this.icon = icon;
     }
 
+    /**
+     * The "For" line of a transaction in plain words: the kind's title and a short reference instead of the raw memo
+     * (e.g. "Savings contribution · ref 5b2cde66" instead of "ACCUM_LINE_CONTRIBUTION:ACCUM-...:LINE-5b2cde66732bb197").
+     * A memo that is plain text (a note someone typed) is shown as it is.
+     */
+    public static String describe(String memo, boolean incoming) {
+        if (memo == null || memo.trim().isEmpty()) return "";
+        String m = memo.trim();
+        if (!m.matches("^[A-Z][A-Z0-9_]+:.*")) return m;                 // a typed note
+        TxKind kind = of(m, incoming);
+        String last = m.substring(m.lastIndexOf(':') + 1);
+        int dash = last.lastIndexOf('-');
+        if (dash >= 0) last = last.substring(dash + 1);
+        String ref = last.length() > 8 ? last.substring(0, 8) : last;
+        return kind.title + (ref.isEmpty() ? "" : " \u00b7 ref " + ref);
+    }
+
     public static TxKind of(String memo, boolean incoming) {
         if (memo == null) return null;
         String m = memo.trim();

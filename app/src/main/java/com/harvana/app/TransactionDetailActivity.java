@@ -245,7 +245,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		if (memo == null || memo.trim().isEmpty()) {
 			if (cardview4 != null) cardview4.setVisibility(View.GONE);
 		} else {
-			tv_memo.setText(memo);
+			tv_memo.setText(com.harvana.app.tx.TxKind.describe(memo, isIncoming));   // plain words; the raw memo is copied on tap
 			tv_memo.setTextColor(UiColors.textPrimary());
 			tv_memo.setTag(memo);
 		}

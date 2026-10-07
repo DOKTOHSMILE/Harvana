@@ -2,6 +2,21 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: coin page in tabs, plain "For" on transactions, trust page and settings tidy-up
+
+What the app does:
+
+- **The coin page has three tabs under the balance:**
+  - Overview: the wallet address and what the coin is;
+  - History: this wallet's transactions, the same list as the wallet's Activity tab;
+  - Network: supply, holders, block height, reward and halving.
+- **Transaction detail "For" is in plain words,** such as "Savings contribution · ref 5b2cde66" or "P2P escrow · ref 16667299", instead of the raw network memo. Tapping it still copies the full memo.
+- **Trust score.** Only the tier card swipes, and every page is the same height. The Account card, the "You are at Bronze" bar and the "Next badge" card are removed.
+- **My Activity is no longer shown.** The app still counts usage in the background for the habit badges.
+- **Settings header.** It shows the signed-in name and the real @username (it showed "Guest @@handle"). The menu icons sit on soft category-coloured badges, drawn in that colour, instead of solid blobs.
+
+What you do: install the build.
+
 ## 7 Oct 2026: P2P trade notices, chat fix, clearer buyer steps
 
 What the app does:

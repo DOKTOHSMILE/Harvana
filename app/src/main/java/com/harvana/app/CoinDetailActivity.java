@@ -195,6 +195,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 	}
 	
 	private void initializeLogic() {
+		_buildSections();
 		androidx.appcompat.app.ActionBar ab = getSupportActionBar();
 		int backgroundColor = androidx.core.content.ContextCompat.getColor(this, R.color.colorBackground);
 		
@@ -889,4 +890,69 @@ public class CoinDetailActivity extends AppCompatActivity {
 	{
 	}
 	
+
+	// ── Sections: Overview · History · Network ──────────────────────────
+	private android.widget.FrameLayout historyHost;
+
+	/**
+	 * Splits the page under the balance into three tabs: Overview (address and what the coin is), History (this wallet's
+	 * transactions, the same list as the wallet's Activity tab) and Network (supply, height, reward, halving).
+	 */
+	private void _buildSections() {
+		android.view.View label = findViewById(R.id.textview14);
+		if (label == null || !(label.getParent() instanceof android.widget.LinearLayout)) return;
+		final android.widget.LinearLayout column = (android.widget.LinearLayout) label.getParent();
+		final android.view.View[] overview = {findViewById(R.id.textview15), findViewById(R.id.cardview4), findViewById(R.id.textview2), findViewById(R.id.cardview7)};
+		final android.view.View[] network = {findViewById(R.id.cardview8), findViewById(R.id.tv_coin_info_note)};
+		final float d = getResources().getDisplayMetrics().density;
+		historyHost = new android.widget.FrameLayout(this);
+		historyHost.setId(android.view.View.generateViewId());
+		historyHost.setMinimumHeight((int) (360 * d));
+		historyHost.setVisibility(android.view.View.GONE);
+
+		android.widget.LinearLayout bar = new android.widget.LinearLayout(this);
+		bar.setPadding((int) (4 * d), (int) (4 * d), (int) (4 * d), (int) (4 * d));
+		android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+		bg.setCornerRadius(24 * d);
+		bg.setColor(com.harvana.app.utils.UiColors.surface());
+		bar.setBackground(bg);
+		final String[] names = {"Overview", "History", "Network"};
+		final TextView[] tabs = new TextView[names.length];
+		final Runnable[] select = new Runnable[1];
+		final int[] current = {0};
+		for (int t = 0; t < names.length; t++) {
+			final int idx = t;
+			TextView tv = new TextView(this);
+			tv.setText(names[t]);
+			tv.setGravity(android.view.Gravity.CENTER);
+			tv.setTextSize(14);
+			tv.setTypeface(null, android.graphics.Typeface.BOLD);
+			tv.setPadding(0, (int) (10 * d), 0, (int) (10 * d));
+			tv.setOnClickListener(v -> { current[0] = idx; select[0].run(); });
+			tabs[t] = tv;
+			bar.addView(tv, new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+		}
+		android.widget.LinearLayout.LayoutParams blp = new android.widget.LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+		blp.topMargin = (int) (18 * d);
+		blp.bottomMargin = (int) (6 * d);
+		column.addView(bar, column.indexOfChild(label) + 1, blp);
+		column.addView(historyHost, column.indexOfChild(bar) + 1);
+		select[0] = () -> {
+			for (int t = 0; t < tabs.length; t++) {
+				boolean on = t == current[0];
+				android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
+				g.setCornerRadius(20 * d);
+				g.setColor(on ? com.harvana.app.utils.UiColors.accent() : android.graphics.Color.TRANSPARENT);
+				tabs[t].setBackground(g);
+				tabs[t].setTextColor(on ? com.harvana.app.utils.UiColors.onAccent() : com.harvana.app.utils.UiColors.textSecondary());
+			}
+			for (android.view.View v : overview) if (v != null) v.setVisibility(current[0] == 0 ? android.view.View.VISIBLE : android.view.View.GONE);
+			for (android.view.View v : network) if (v != null) v.setVisibility(current[0] == 2 ? android.view.View.VISIBLE : android.view.View.GONE);
+			historyHost.setVisibility(current[0] == 1 ? android.view.View.VISIBLE : android.view.View.GONE);
+			if (current[0] == 1 && getSupportFragmentManager().findFragmentById(historyHost.getId()) == null) {
+				getSupportFragmentManager().beginTransaction().replace(historyHost.getId(), new WalletActivityFragmentActivity()).commitAllowingStateLoss();
+			}
+		};
+		select[0].run();
+	}
 }

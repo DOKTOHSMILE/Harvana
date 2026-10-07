@@ -517,11 +517,8 @@ public class SettingsActivity extends AppCompatActivity {
 		} else {
 			tvSettingsHandle.setVisibility(View.GONE);
 		}
-		if (vType != null && !vType.trim().isEmpty() && !"null".equalsIgnoreCase(vType.trim())) {
-			tvSettingsVerified.setVisibility(View.VISIBLE);
-		} else {
-			tvSettingsVerified.setVisibility(View.GONE);
-		}
+		// No ID check exists (NIN/BVN were removed), so no "verified" badge is shown.
+		tvSettingsVerified.setVisibility(View.GONE);
 		
 		if (!iconStr.isEmpty() && !"null".equalsIgnoreCase(iconStr)) {
 			Glide.with(getApplicationContext())

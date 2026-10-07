@@ -532,7 +532,6 @@ public class PublicProfileActivity extends AppCompatActivity {
         String address = str(selfData, "address");
         String dob = str(selfData, "dob");
         String pid = str(selfData, "pid");
-        String verified = str(selfData, "v_type");
         int rows = 0;
         if (!phone.isEmpty()) { body.addView(infoRow(phone, "Mobile", 0, v -> startActivity(new Intent(this, ContactCardActivity.class)))); rows++; }
         if (!email.isEmpty() && !"null".equals(email)) { body.addView(infoRow(email, "Email", 0, null)); rows++; }
@@ -545,7 +544,6 @@ public class PublicProfileActivity extends AppCompatActivity {
             rows++;
         }
         if (!pid.isEmpty()) { body.addView(infoRow(pid, "Harvana ID", 0, null)); rows++; }
-        body.addView(infoRow(verified.isEmpty() ? "Not verified yet" : verified.toUpperCase(Locale.US) + " verified", "Verification", 0, null));
         MaterialButton edit = SocialUi.button(this, "Edit these details", true);
         edit.setOnClickListener(v -> startActivity(new Intent(this, EditProfileActivity.class)));
         LinearLayout.LayoutParams ep = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 46));

@@ -566,7 +566,6 @@ public class CompleteProfileFragmentActivity extends Fragment {
 		if (phoneNumber.startsWith("+")) userVMap.put("phone", phoneNumber);
 		else if (!phoneCode.isEmpty() && phoneNumber.startsWith(phoneCode.replace("+", ""))) userVMap.put("phone", "+" + phoneNumber);
 		else userVMap.put("phone", (phoneCode + (phoneNumber.startsWith("0") ? phoneNumber.substring(1) : phoneNumber)).trim());
-		userVMap.put("v_type", idDocument);
 		userVMap.put("icon", authsp.getString("photoUrl", ""));
 		userVMap.put("privacy", "true");
 		userVMap.put("country", country);

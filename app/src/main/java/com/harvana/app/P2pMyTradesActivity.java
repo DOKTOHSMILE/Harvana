@@ -228,7 +228,12 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 						if (entry != null && "ORDER".equals(entry.optString("recordType", ""))) orders.add(entry);
 					}
 				}
-				java.util.Collections.sort(orders, (a, b) -> Long.compare(b.optLong("createdTimestamp", 0), a.optLong("createdTimestamp", 0)));
+				// Trades waiting on me first (pay, or confirm and release), then the rest, newest first.
+				java.util.Collections.sort(orders, (a, b) -> {
+					int na = _needsMe(a) ? 0 : 1, nb = _needsMe(b) ? 0 : 1;
+					if (na != nb) return Integer.compare(na, nb);
+					return Long.compare(b.optLong("createdTimestamp", 0), a.optLong("createdTimestamp", 0));
+				});
 				runOnUiThread(() -> {
 					allOrders.clear();
 					allOrders.addAll(orders);
@@ -257,6 +262,13 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 		_applyFilter();
 	}
 	
+	/** True when the next step of this trade is mine: the buyer pays, the seller confirms and releases. */
+	private boolean _needsMe(JSONObject order) {
+		String st = order.optString("status", "");
+		boolean buyer = myAddress != null && myAddress.equals(order.optString("buyerAddress", ""));
+		return (buyer && "AWAITING_PAYMENT".equals(st)) || (!buyer && "PAYMENT_SUBMITTED".equals(st));
+	}
+
 	private void _applyFilter() {
 		visible.clear();
 		int ongoing = 0, completed = 0, cancelled = 0, disputed = 0;
@@ -361,12 +373,12 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 				case "AWAITING_PAYMENT":
 				layout_my_trade_state.setVisibility(View.VISIBLE);
 				tv_my_trade_state_title.setText(iWasBuyer ? "Awaiting your payment" : "Awaiting buyer's payment");
-				tv_my_trade_state_description.setText("Escrow is locked; nothing released yet.");
+				tv_my_trade_state_description.setText(iWasBuyer ? "The seller's HARV is held in escrow for you. Pay, then tap \"I have paid\"." : "Your HARV is held in escrow until the buyer pays.");
 				break;
 				case "PAYMENT_SUBMITTED":
 				layout_my_trade_state.setVisibility(View.VISIBLE);
 				tv_my_trade_state_title.setText(iWasBuyer ? "Waiting for seller to confirm" : "Confirm you've received payment");
-				tv_my_trade_state_description.setText("Payment was marked sent.");
+				tv_my_trade_state_description.setText(iWasBuyer ? "You marked the payment sent." : "The buyer says they paid. Check your account, then release.");
 				break;
 				case "DISPUTED":
 				layout_my_trade_state.setVisibility(View.VISIBLE);
@@ -377,12 +389,23 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 				layout_my_trade_state.setVisibility(View.GONE);
 			}
 			
-			tv_my_trade_open.setText("View");
-			tv_my_trade_open.setOnClickListener(v -> {
+			boolean needsMe = _needsMe(order);
+			tv_my_trade_open.setText(needsMe ? (iWasBuyer ? "Pay now" : "Confirm & release") : "View");
+			tv_my_trade_open.setTextColor(needsMe ? androidx.core.content.ContextCompat.getColor(P2pMyTradesActivity.this, R.color.colorAccent)
+					: androidx.core.content.ContextCompat.getColor(P2pMyTradesActivity.this, R.color.colorTextSecondary));
+			tv_my_trade_open.setTypeface(null, needsMe ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+			if (needsMe && tv_my_trade_state_title != null) {
+				tv_my_trade_state_title.setTextColor(androidx.core.content.ContextCompat.getColor(P2pMyTradesActivity.this, R.color.colorWarning));
+			} else if (tv_my_trade_state_title != null) {
+				tv_my_trade_state_title.setTextColor(androidx.core.content.ContextCompat.getColor(P2pMyTradesActivity.this, R.color.colorTextPrimary));
+			}
+			View.OnClickListener open = v -> {
 				Intent intent = new Intent(P2pMyTradesActivity.this, iWasBuyer ? P2pBuyTradeActivity.class : P2pSellTradeActivity.class);
 				intent.putExtra("orderId", orderId);
 				startActivity(intent);
-			});
+			};
+			tv_my_trade_open.setOnClickListener(open);
+			_view.setOnClickListener(open);   // the whole card opens the trade, not just the small link
 			
 			_view.setTag(orderId);
 			

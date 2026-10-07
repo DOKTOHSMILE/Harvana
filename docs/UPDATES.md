@@ -2,6 +2,23 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: P2P chat and My trades rebuilt
+
+What the app does:
+
+- **Trade chat:**
+  - The chat shows the other trader's name.
+  - The long warning is now one short safety card.
+  - Messages are grouped under day labels and show the time only.
+  - Quick replies sit above the box ("I've sent the payment", "Payment received", "Please check your bank app" and more).
+  - The box is a rounded field with a round send button.
+- **My trades:**
+  - Trades that wait on you come first, with a clear action: "Pay now" when you are the buyer, "Confirm & release" when you are the seller.
+  - The whole card opens the trade.
+  - The status lines say plainly who has to do what. For example, the buyer reads "The seller's HARV is held in escrow for you. Pay, then tap 'I have paid'".
+
+What you do: install the build.
+
 ## 7 Oct 2026: one Activity list for every coin; other-chain transaction details
 
 What the app does:

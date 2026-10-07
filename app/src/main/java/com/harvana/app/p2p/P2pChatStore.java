@@ -117,6 +117,15 @@ public final class P2pChatStore {
                 });
     }
 
+    /**
+     * A trade event (new order, payment sent, payment confirmed, dispute) written into the trade chat, so the other person is
+     * notified on their phone by the usual chat check, and the event stays on record for a dispute. Fire and forget.
+     */
+    public static void notice(String orderId, String other, String text) {
+        if (orderId == null || orderId.isEmpty() || other == null || other.isEmpty()) return;
+        send(orderId, other, text, (ok, err) -> { });
+    }
+
     /** A payment proof: the uploaded picture's address as a message both traders see (and a dispute can be shown). */
     public static void sendProof(String orderId, String other, String imageUrl, Done cb) {
         if (imageUrl == null || !imageUrl.startsWith("https://")) { BG.execute(() -> cb.done(false, "The picture did not upload.")); return; }
@@ -171,6 +180,11 @@ public final class P2pChatStore {
         if (t.isEmpty()) { BG.execute(() -> cb.done(false, "Write something first.")); return; }
         final String body = t.length() > MAX_TEXT ? t.substring(0, MAX_TEXT) : t;
         final String id = chatId(orderId, me, other);
+        // The chat may not exist yet (first message, or the other side has not opened it): create it, then write.
+        ensure(orderId, other, (ok, err) -> { if (!ok) { cb.done(false, err == null ? "Could not open the chat." : err); return; } sendNow(id, me, body, cb); });
+    }
+
+    private static void sendNow(String id, String me, String body, Done cb) {
         BG.execute(() -> {
             try {
                 Map<String, Object> m = new HashMap<>();

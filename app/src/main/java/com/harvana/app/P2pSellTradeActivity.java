@@ -727,6 +727,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 					@Override
 					public void onSuccess(JSONObject result) {
 						runOnUiThread(() -> _loadOrder());
+						com.harvana.app.p2p.P2pChatStore.notice(orderId, chatOtherUid, "Payment received. I released the " + com.harvana.app.CoinInfo.ticker() + " to you. Thank you!");
 					}
 					@Override
 					public void onError(String error) {
@@ -762,6 +763,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 					@Override
 					public void onSuccess(JSONObject result) {
 						runOnUiThread(() -> _loadOrder());
+						com.harvana.app.p2p.P2pChatStore.notice(orderId, chatOtherUid, "I opened a dispute on this trade: " + finalReason);
 					}
 					@Override
 					public void onError(String error) {

@@ -137,6 +137,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		
 		tv_fragment_empty_title.setText("No sellers right now");
 		tv_fragment_empty_subtitle.setText("Check back soon, or post a Buy Offer and let a seller come to you.");
+		btn_fragment_empty_cta.setText("Post a buy offer");
 		btn_fragment_empty_cta.setVisibility(View.VISIBLE);
 		btn_fragment_empty_cta.setOnClickListener(v ->
 		startActivity(new Intent(requireContext(), CreateP2pBuyOfferActivity.class)));

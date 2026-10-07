@@ -376,6 +376,8 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 	private String sellerAddress = "";
 	private String myAddress = "";
 	private double unitPrice = -1;
+	/** The seller's account, for the trade chat and its notices. */
+	private String sellerUidForChat = "";
 	private String listingCurrency = "NGN";
 	private double remainingHarv = 0;
 	private double minOrderHarv = 0;
@@ -459,6 +461,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 				}
 				Object sellerUidObj = data.get("sellerUid");
 				String sellerUid = sellerUidObj != null ? String.valueOf(sellerUidObj) : "";
+				sellerUidForChat = sellerUid;
 				
 				runOnUiThread(() -> {
 					offer_price.setText(unitPrice >= 0 ? P2pMoney.perHarv(unitPrice, listingCurrency) : "Unavailable");
@@ -658,6 +661,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 				@Override
 				public void onSuccess(JSONObject result) {
 					String newOrderId = P2pIds.orderId(result);
+					com.harvana.app.p2p.P2pChatStore.notice(newOrderId, sellerUidForChat, "New order: " + com.harvana.app.wallet.BalanceFormatter.smart(amountRaw / 100_000_000.0) + " " + com.harvana.app.CoinInfo.ticker() + ". I will pay within the payment window.");
 					String claimerUid = FirebaseAuth.getInstance().getCurrentUser() != null
 					? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
 					if (claimerUid != null && !newOrderId.isEmpty()) {

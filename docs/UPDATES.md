@@ -2,6 +2,23 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: P2P trade notices, chat fix, clearer buyer steps
+
+What the app does:
+
+- **Every step of a trade notifies the other person.** Each step writes a short line into the trade chat, and the other person's phone is notified by the usual chat check:
+  - the buyer opens an order ("New order: … HARV");
+  - the buyer marks payment sent;
+  - the seller confirms and releases;
+  - either side opens a dispute.
+
+  The lines also stay in the chat as a record for disputes.
+- **Trade chat "Could not send" is fixed.** The first message tried to update a chat that had not been created yet; the chat is now created first.
+- **The buyer no longer sees "Escrow funded"** when opening an order (the seller's HARV is what sits in escrow). The step reads "Order opened".
+- **"Become an Insured Trader" is gone** from the empty Buy and Sell lists. The button now reads "Post a buy offer" or "Post a sell offer", which is what it always did.
+
+What you do: install the build.
+
 ## 7 Oct 2026: version 1.2.0 (code 3): P2P repaired, Pi sending, real check icons
 
 What the app does:

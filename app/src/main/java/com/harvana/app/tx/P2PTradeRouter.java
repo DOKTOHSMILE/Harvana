@@ -71,7 +71,7 @@ public final class P2PTradeRouter {
 	//   "P2P_CLAIM_PAYMENT:" + listingId + ":" + buyerAddress + ":" + amount + ":" + nonce
 	
 	public static void claimPayment(Context context, String listingId, String buyerAddress, long amountRaw, Callback callback0) {
-		final Callback callback = _paying("Escrow funded", amountRaw, buyerAddress, callback0);
+		final Callback callback = _paying("Order opened", amountRaw, buyerAddress, callback0);
 		HarvanaNodeClient.getWallet(buyerAddress, new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {

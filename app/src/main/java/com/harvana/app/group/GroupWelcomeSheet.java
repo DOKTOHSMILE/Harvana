@@ -70,6 +70,25 @@ public final class GroupWelcomeSheet {
      * The contract is read one page at a time, in bold, and cannot be skipped: swiping is off, a page's box can be ticked only after its
      * text has been scrolled to the end, and Next stays off until it is ticked. The last page shows the fingerprint and signs.
      */
+    /** The illustration for a contract page, by its heading (GroupContract's section titles). */
+    static int illustration(String title) {
+        String t = title == null ? "" : title.toLowerCase(java.util.Locale.US);
+        if (t.startsWith("in short")) return com.harvana.app.R.drawable.contract_in_short;
+        if (t.startsWith("about")) return com.harvana.app.R.drawable.contract_about;
+        if (t.contains("money rules")) return com.harvana.app.R.drawable.contract_money;
+        if (t.startsWith("loans")) return com.harvana.app.R.drawable.contract_loans;
+        if (t.contains("decisions")) return com.harvana.app.R.drawable.contract_decisions;
+        if (t.contains("safe")) return com.harvana.app.R.drawable.contract_safe;
+        if (t.contains("chat")) return com.harvana.app.R.drawable.contract_chat;
+        if (t.contains("leave")) return com.harvana.app.R.drawable.contract_leave;
+        if (t.contains("words")) return com.harvana.app.R.drawable.contract_words;
+        if (t.startsWith("the goal")) return com.harvana.app.R.drawable.contract_goal;
+        if (t.startsWith("the circle")) return com.harvana.app.R.drawable.contract_circle;
+        if (t.startsWith("the savings")) return com.harvana.app.R.drawable.contract_savings;
+        if (t.contains("example")) return com.harvana.app.R.drawable.contract_example;
+        return com.harvana.app.R.drawable.contract_in_short;
+    }
+
     private static void showContract(Activity a, String groupId, Map<String, Object> group, String wallet, Listener l) {
         final String ticker = CoinInfo.ticker();
         final String hash = GroupContract.hash(groupId, group, ticker);
@@ -123,6 +142,14 @@ public final class GroupWelcomeSheet {
                 LinearLayout body = new LinearLayout(a);
                 body.setOrientation(LinearLayout.VERTICAL);
                 body.setPadding(0, (int) (10 * d), 0, (int) (10 * d));
+                // A picture first: what the page is about, understood at a glance.
+                android.widget.ImageView art = new android.widget.ImageView(a);
+                art.setImageResource(position < sections.size() ? illustration(sections.get(position).title) : com.harvana.app.R.drawable.contract_sign);
+                art.setAdjustViewBounds(true);
+                art.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
+                LinearLayout.LayoutParams alp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (150 * d));
+                alp.bottomMargin = (int) (8 * d);
+                body.addView(art, alp);
                 if (position < sections.size()) {
                     GroupContract.Section sec = sections.get(position);
                     TextView h1 = text(a, sec.title, 22, true, UiColors.accent());

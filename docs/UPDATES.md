@@ -2,6 +2,27 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: illustrated group contract
+
+What the app does. Each page of the group contract opens with a picture of what the page is about:
+
+- the group together;
+- members around the pot;
+- coins going into a shared jar;
+- one member lending to another;
+- hands raised beside a ballot box;
+- a shield over the money;
+- chat bubbles;
+- a member waving at an open door;
+- an open book of words;
+- a goal flag;
+- coins passing round a circle;
+- savings jars growing;
+- a notebook and calculator;
+- a pen signing the contract.
+
+They share one warm, textured style and a palette taken from the app. The source that draws them is in `tools/illustrations`, so new pictures will match. What you do: install the new build.
+
 ## 7 Oct 2026: one QR design across the app
 
 What the app does. Every QR code the app makes now looks the same: deep-teal rounded squares on white, teal corner eyes, and the HARV coin in the middle. That covers the receive address, the coin page, profile codes, receipts and the wallet access card. Error correction stays at the highest level, and the coin covers well under the share it can recover.

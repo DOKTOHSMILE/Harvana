@@ -210,16 +210,30 @@ public class ScanQrCodeActivity extends AppCompatActivity {
 			if (inputStream == null) return null;
 			Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 			if (bitmap == null) return null;
-			
+			// Big photos (a printed receipt, an access card on a desk) decode better scaled to a sensible size.
+			int max = Math.max(bitmap.getWidth(), bitmap.getHeight());
+			if (max > 1600) {
+				float f = 1600f / max;
+				bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(bitmap.getWidth() * f), Math.round(bitmap.getHeight() * f), true);
+			}
 			int width = bitmap.getWidth();
 			int height = bitmap.getHeight();
 			int[] pixels = new int[width * height];
 			bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
-			
+			java.util.Map<com.google.zxing.DecodeHintType, Object> hints = new java.util.EnumMap<>(com.google.zxing.DecodeHintType.class);
+			hints.put(com.google.zxing.DecodeHintType.TRY_HARDER, Boolean.TRUE);
+			hints.put(com.google.zxing.DecodeHintType.POSSIBLE_FORMATS, java.util.Collections.singletonList(com.google.zxing.BarcodeFormat.QR_CODE));
 			RGBLuminanceSource source = new RGBLuminanceSource(width, height, pixels);
-			BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(source));
-			Result result = new MultiFormatReader().decode(binaryBitmap);
-			return result.getText();
+			MultiFormatReader reader = new MultiFormatReader();
+			try {
+				return reader.decode(new BinaryBitmap(new HybridBinarizer(source)), hints).getText();
+			} catch (Exception first) {
+				// Light-on-dark codes (the app's dark cards) and uneven light: try the inverted image, then a global threshold.
+				try { return reader.decode(new BinaryBitmap(new HybridBinarizer(source.invert())), hints).getText(); }
+				catch (Exception second) {
+					return reader.decode(new BinaryBitmap(new com.google.zxing.common.GlobalHistogramBinarizer(source)), hints).getText();
+				}
+			}
 		} catch (Exception e) {
 			return null;
 		}

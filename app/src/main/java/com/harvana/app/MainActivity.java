@@ -226,8 +226,8 @@ public class MainActivity extends AppCompatActivity {
 		menu1.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		menu1.setActionView(_toolbarIcon(R.drawable.icon_qr_code_scanner_twotone, v -> {
 			Intent scanIntent = new Intent(this, com.harvana.app.ScanQrCodeActivity.class);
-			scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_TITLE, "Scan Wallet Address");
-			scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_MODE, com.harvana.app.ScanQrCodeActivity.MODE_WALLET_ADDRESS);
+			scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_TITLE, "Scan a Harvana code");
+			scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_MODE, com.harvana.app.ScanQrCodeActivity.MODE_ANY);
 			startActivityForResult(scanIntent, RC_SCAN_TO_SEND);
 		}));
 
@@ -298,8 +298,8 @@ public class MainActivity extends AppCompatActivity {
 		final String _title = (String) item.getTitle();
 		if (_id == 0) {
 			Intent scanIntent = new Intent(this, com.harvana.app.ScanQrCodeActivity.class);
-			scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_TITLE, "Scan Wallet Address");
-			scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_MODE, com.harvana.app.ScanQrCodeActivity.MODE_WALLET_ADDRESS);
+			scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_TITLE, "Scan a Harvana code");
+			scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_MODE, com.harvana.app.ScanQrCodeActivity.MODE_ANY);
 			startActivityForResult(scanIntent, RC_SCAN_TO_SEND);
 			
 		}
@@ -806,10 +806,8 @@ public class MainActivity extends AppCompatActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == RC_SCAN_TO_SEND && resultCode == RESULT_OK && data != null) {
-			String address = data.getStringExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_RESULT_TEXT);
-			Intent sendIntent = new Intent(this, SendAssetActivity.class);
-			sendIntent.putExtra("recipientAddress", address); // confirm this matches whatever extra key SendAssetActivity actually reads on launch — I haven't traced that key name yet
-			startActivity(sendIntent);
+			// Any code the app makes: an address opens Send, an access card adds the wallet, a receipt is checked on the network.
+			com.harvana.app.scan.QrRouter.route(this, data.getStringExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_RESULT_TEXT));
 		}
 	}
 	

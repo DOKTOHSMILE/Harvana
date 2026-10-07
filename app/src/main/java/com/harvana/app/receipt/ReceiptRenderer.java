@@ -89,7 +89,7 @@ public final class ReceiptRenderer {
         y += 26;
         Bitmap qr = null;
         if (r.reference != null && !r.reference.isEmpty()) {
-            try { qr = HARVQRCodeGenerator.generateQRCode(r.reference, 300); } catch (Throwable ignored) { }
+            try { qr = HARVQRCodeGenerator.generateQRCode(com.harvana.app.scan.QrRouter.receiptPayload(r.reference), 300); } catch (Throwable ignored) { }
         }
         float textRight = qr != null ? W - M - 84 : W - M;
         p.setColor(TEXT); p.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD)); p.setTextSize(12f);

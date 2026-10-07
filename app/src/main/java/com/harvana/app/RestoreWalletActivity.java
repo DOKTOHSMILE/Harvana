@@ -84,6 +84,11 @@ public class RestoreWalletActivity extends AppCompatActivity {
 		getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE, android.view.WindowManager.LayoutParams.FLAG_SECURE); // no screenshots or recents thumbnails of secrets
 		setContentView(R.layout.restore_wallet);
 		initialize(_savedInstanceState);
+		String scannedCard = getIntent().getStringExtra(EXTRA_SCANNED_CARD);
+		if (scannedCard != null && scannedCard.startsWith(HarvanaCardCrypto.FORMAT_PREFIX) && _savedInstanceState == null) {
+			pendingScannedPayload = scannedCard;
+			getWindow().getDecorView().post(() -> showPasswordBottomSheet(false));
+		}
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
 		com.harvana.app.utils.AppBar.header(this, "Restore wallet", "From your Harvana Access Card", R.id.textview3);
@@ -146,6 +151,9 @@ public class RestoreWalletActivity extends AppCompatActivity {
 	private CodeScanner codeScanner;
 	private BottomSheetDialog scannerDialog;
 	private String pendingScannedPayload;
+
+	/** A wallet access card scanned anywhere in the app (QrRouter): open straight at the card password. */
+	public static final String EXTRA_SCANNED_CARD = "scanned_card";
 	private boolean embedded;
 	
 	private String pendingMnemonic;

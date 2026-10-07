@@ -405,7 +405,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 			tv_group_trust.setText("Trust starts once this circle is on the network.");
 			return;
 		}
-		tv_group_trust.setText("Trust · waiting for Firestore…");
+		tv_group_trust.setText("Trust · loading…");
 		groupTrustReg = com.harvana.app.firestore.NodeMirrors.group(nodeId, doc -> {
 			if (getActivity() == null) return;
 			getActivity().runOnUiThread(() -> {

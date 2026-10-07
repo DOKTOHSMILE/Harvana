@@ -489,7 +489,7 @@ public final class P2pOfferWizard {
 		setText(a, "tv_" + p + "_review_amount", BalanceFormatter.smart(amount));
 		setText(a, "tv_" + p + "_review_unit_price", P2pMoney.perHarv(price, currency));
 		setText(a, "tv_" + p + "_review_total_price", P2pMoney.fiat(amount * price, currency));
-		setText(a, "tv_" + p + "_review_fee", "Set by the node at match time");
+		setText(a, "tv_" + p + "_review_fee", "Set by the network at match time");
 		setText(a, "tv_" + p + "_review_trade_limit",
 			String.format(Locale.US, "Min %s · Max %s", BalanceFormatter.smart(minOrder), BalanceFormatter.smart(maxOrder)));
 		setText(a, "tv_" + p + "_review_duration", durationLabel);

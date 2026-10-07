@@ -798,7 +798,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 			}
 			String escrowKey = com.harvana.app.wallet.WalletManager.loadPrivateKey(getActivity(), from);
 			if (escrowKey == null) {
-				cb.onError("This circle's wallet is held on the node, not on this phone. Accepting can't sign that wallet from here, so the loan was not sent. Reject still works because it moves no money.");
+				cb.onError("This circle's wallet is held on the network, not on this phone. Accepting can't sign that wallet from here, so the loan was not sent. Reject still works because it moves no money.");
 				return;
 			}
 			com.harvana.app.tx.TransactionRouter.routeTransaction(

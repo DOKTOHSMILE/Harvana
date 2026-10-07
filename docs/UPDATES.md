@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: plain words
+
+What the app does. Messages people see no longer use engine words:
+
+- "node" now reads "network";
+- "on-chain" and "blockchain" now read "on the network";
+- nonce errors now read "Couldn't reach the network";
+- "waiting for Firestore" now reads "loading".
+
+The phrasing changed in 34 places. "Escrow" stays, because it is the usual word in P2P trading. What you do: install the new build.
+
 ## 7 Oct 2026: one switch, one segmented choice, one toolbar
 
 What the app does:

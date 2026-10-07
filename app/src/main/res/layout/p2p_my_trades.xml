@@ -333,7 +333,7 @@
 						android:id="@+id/tv_my_trades_info"
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
-						android:text="Trade records show the transaction lifecycle, including payment status, escrow status and blockchain transaction references where applicable."
+						android:text="Trade records show the transaction lifecycle, including payment status, escrow status and network transaction references where applicable."
 						android:textSize="11sp"
 						android:layout_weight="1"
 						android:layout_marginStart="9dp"

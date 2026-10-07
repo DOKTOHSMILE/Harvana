@@ -89,7 +89,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:layout_marginTop="2dp"
-								android:text="On-chain collateral security"
+								android:text="Collateral held on the network"
 								android:textSize="12sp"
 								android:textColor="@color/colorP2pTextMuted" />
 						</LinearLayout>
@@ -213,7 +213,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="8dp"
-						android:text="• Instant Buyer Trust: Users prefer trading with insured merchants because your collateral protects them against bad faith actors.\n\n• Isolated Security: Your collateral is locked safely on-chain via Harvana Protocol and remains separate from your routine available trading funds.\n\n• Withdrawal Flexibility: You can unlock and withdraw your collateral anytime you have zero active offers or pending trades."
+						android:text="• Instant Buyer Trust: Users prefer trading with insured merchants because your collateral protects them against bad faith actors.\n\n• Isolated Security: Your collateral is locked safely on the network via Harvana Protocol and remains separate from your routine available trading funds.\n\n• Withdrawal Flexibility: You can unlock and withdraw your collateral anytime you have zero active offers or pending trades."
 						android:textColor="@color/colorP2pTextMuted"
 						android:textSize="12.5sp"
 						android:lineSpacingExtra="4dp" />
@@ -438,7 +438,7 @@
 						android:id="@+id/textview11"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:text="Specify the amount of HARV to lock into the on-chain insurance vault."
+						android:text="Specify the amount of HARV to lock into the on the network insurance vault."
 						android:textColor="@color/colorP2pTextMuted"
 						android:textSize="12.5sp" />
 					<LinearLayout

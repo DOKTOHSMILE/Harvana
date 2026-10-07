@@ -62,7 +62,7 @@ public final class P2PTradeRouter {
 			
 			@Override
 			public void onError(String error) {
-				callback.onError("Could not fetch current nonce: " + error);
+				callback.onError("Couldn't reach the network: " + error);
 			}
 		});
 	}
@@ -85,7 +85,7 @@ public final class P2PTradeRouter {
 			
 			@Override
 			public void onError(String error) {
-				callback.onError("Could not fetch current nonce: " + error);
+				callback.onError("Couldn't reach the network: " + error);
 			}
 		});
 	}
@@ -108,7 +108,7 @@ public final class P2PTradeRouter {
 			
 			@Override
 			public void onError(String error) {
-				callback.onError("Could not fetch current nonce: " + error);
+				callback.onError("Couldn't reach the network: " + error);
 			}
 		});
 	}
@@ -127,7 +127,7 @@ public final class P2PTradeRouter {
 			
 			@Override
 			public void onError(String error) {
-				callback.onError("Could not fetch current nonce: " + error);
+				callback.onError("Couldn't reach the network: " + error);
 			}
 		});
 	}
@@ -161,7 +161,7 @@ public final class P2PTradeRouter {
 			
 			@Override
 			public void onError(String error) {
-				callback.onError("Could not fetch current nonce: " + error);
+				callback.onError("Couldn't reach the network: " + error);
 			}
 		});
 	}
@@ -189,7 +189,7 @@ public final class P2PTradeRouter {
 			
 			@Override
 			public void onError(String error) {
-				callback.onError("Could not fetch current nonce: " + error);
+				callback.onError("Couldn't reach the network: " + error);
 			}
 		});
 	}
@@ -229,7 +229,7 @@ public final class P2PTradeRouter {
 			
 			@Override
 			public void onError(String error) {
-				callback.onError("Could not fetch current nonce: " + error);
+				callback.onError("Couldn't reach the network: " + error);
 			}
 		});
 	}

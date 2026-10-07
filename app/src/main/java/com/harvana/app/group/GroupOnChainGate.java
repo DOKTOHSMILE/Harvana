@@ -29,7 +29,7 @@ public final class GroupOnChainGate {
 
     public static void requireConfirmedTx(String txRef, Callback cb) {
         if (txRef == null || txRef.trim().isEmpty()) {
-            if (cb != null) cb.onError("Missing on-chain tx hash — cannot mark CONFIRMED");
+            if (cb != null) cb.onError("This payment has no network record yet, so it can't be marked confirmed");
             return;
         }
         final String hash = txRef.trim();
@@ -48,7 +48,7 @@ public final class GroupOnChainGate {
                 }
                 Log.w(TAG, "tx " + hash + " status=" + status + " height=" + height);
                 if (cb != null) {
-                    cb.onError("Tx is not confirmed on-chain yet (" +
+                    cb.onError("The payment is not confirmed on the network yet (" +
                             (status.isEmpty() ? "unknown" : status) + ")");
                 }
             }

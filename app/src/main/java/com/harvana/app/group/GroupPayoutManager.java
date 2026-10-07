@@ -330,7 +330,7 @@ public final class GroupPayoutManager {
                                                    String txRef,
                                                    Callback callback) {
         if (txRef == null || txRef.trim().isEmpty()) {
-            callback.onError("Payout has no on-chain tx hash — ledger not marked CONFIRMED");
+            callback.onError("The payout has no network record yet, so it is not marked as confirmed");
             return;
         }
         GroupOnChainGate.requireConfirmedTx(txRef, new GroupOnChainGate.Callback() {

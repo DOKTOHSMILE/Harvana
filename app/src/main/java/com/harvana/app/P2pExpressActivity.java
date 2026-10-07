@@ -659,7 +659,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 			card_express_quote.setVisibility(View.VISIBLE);
 			tv_express_rate.setText(("1 " + com.harvana.app.CoinInfo.ticker() + " ≈ ") + P2pMoney.fiat(matchedPrice, ccy));
 			tv_express_fiat.setText(P2pMoney.fiat(harvAmount * matchedPrice, ccy));
-			tv_express_fee.setText("Shown after confirming — set by the node, never estimated here.");
+			tv_express_fee.setText("Shown after confirming — set by the network, never estimated here.");
 			
 			tv_express_match_indicator.setText("✓");
 			tv_express_match_title.setText("Matched — best available price found");

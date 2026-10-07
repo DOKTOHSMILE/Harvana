@@ -116,7 +116,7 @@
 			android:layout_height="wrap_content"
 			android:layout_marginTop="6dp"
 			android:gravity="center_horizontal|center_vertical"
-			android:text="Your transfer is confirmed on-chain."
+			android:text="Your transfer is confirmed on the network."
 			android:textSize="13.5sp"
 			android:focusable="false"
 			android:layout_marginHorizontal="32dp" />

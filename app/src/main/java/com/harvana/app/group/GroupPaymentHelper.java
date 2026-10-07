@@ -96,7 +96,7 @@ public final class GroupPaymentHelper {
 			return;
 		}
 		if (txRef == null || txRef.trim().isEmpty()) {
-			if (callback != null) callback.onError("Missing on-chain tx hash — cannot mark CONFIRMED");
+			if (callback != null) callback.onError("This payment has no network record yet, so it can't be marked confirmed");
 			return;
 		}
 
@@ -214,7 +214,7 @@ public final class GroupPaymentHelper {
 			return;
 		}
 		if (GroupValidation.isBlank(txRef)) {
-			if (callback != null) callback.onError("Missing on-chain tx hash — cannot mark CONFIRMED");
+			if (callback != null) callback.onError("This payment has no network record yet, so it can't be marked confirmed");
 			return;
 		}
 

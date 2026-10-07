@@ -712,7 +712,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="9dp"
-						android:text="The escrow transaction protects the HARV while the fiat side of the trade is being completed. The final release must be verified from the blockchain transaction rather than relying only on the Firestore trade status."
+						android:text="The escrow transaction protects the HARV while the fiat side of the trade is being completed. The final release must be verified from the network transaction rather than relying only on the Firestore trade status."
 						android:textSize="12sp"
 						android:lineSpacingExtra="3dp" />
 				</LinearLayout>
@@ -779,7 +779,7 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="7dp"
 						android:gravity="center_horizontal|center_vertical"
-						android:text="The HARV release has been confirmed on-chain."
+						android:text="The HARV release has been confirmed on the network."
 						android:textSize="12sp" />
 					<TextView
 						android:id="@+id/tv_sell_completed_tx_hash"

@@ -461,7 +461,7 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 				btn_publish_offer.setEnabled(true);
 				ThemedDialogs.show(ThemedDialogs.alert(ComfirmSellOfferActivity.this)
 				.setTitle("Listing published, payment details failed")
-				.setMessage("Your offer is live on-chain, but saving your payment details failed: " + error
+				.setMessage("Your offer is live on the network, but saving your payment details failed: " + error
 				+ "\n\nBuyers won't see how to pay you until this is fixed. Try again from My Activity.")
 				.setPositiveButton("OK", null));
 			}

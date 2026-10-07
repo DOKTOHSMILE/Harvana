@@ -113,7 +113,7 @@ public class TrustScoreActivity extends AppCompatActivity {
             root.addView(engagementCard(person));
         } else {
             root.addView(scoreCard(score));
-            root.addView(note("The node has not worked out a percentage for this wallet yet. It appears after the next confirmed action."));
+            root.addView(note("The network has not worked out a percentage for this wallet yet. It appears after the next confirmed action."));
         }
         LinearLayout account = cardBox();
         account.addView(tv("Account", 16, true, UiColors.textPrimary()));
@@ -219,7 +219,7 @@ public class TrustScoreActivity extends AppCompatActivity {
     private void bindDevice() {
         new com.harvana.app.ui.SheetDialog.Builder(this)
             .setTitle("Bind this device?")
-            .setMessage("This ties the wallet to this phone and sets the base score to 10. It does not upload an ID. One device hash can be bound to one wallet.")
+            .setMessage("This ties the wallet to this phone and sets the base score to 10. It does not upload an ID. One phone can be bound to one wallet.")
             .setNegativeButton("Cancel", null)
             .setPositiveButton("Bind", (d, w) -> NodeIdentityClient.bindPersonhood(this, address, new NodeIdentityClient.Callback() {
                 @Override public void onSuccess(JSONObject j) {
@@ -433,7 +433,7 @@ public class TrustScoreActivity extends AppCompatActivity {
         } else if (page == cur) {
             c.addView(note("Your score is " + percent + "%."));
         }
-        c.addView(note("The node works this out and rechecks it with every confirmed action."));
+        c.addView(note("The network works this out and rechecks it with every confirmed action."));
         return c;
     }
 

@@ -219,7 +219,7 @@ public class TransactionRouter {
 
             @Override
             public void onError(String error) {
-                callback.onError("Nonce fetch failed: " + error);
+                callback.onError("Couldn't reach the network: " + error);
             }
         });
     }

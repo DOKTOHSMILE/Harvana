@@ -159,7 +159,7 @@ public final class P2pListingPublisher {
 					if (listingId.isEmpty()) {
 						activity.runOnUiThread(() -> {
 							if (!activity.isFinishing() && progress.isShowing()) progress.dismiss();
-							cb.onError("Listing went live but the node didn't return an id. Check Merchant Manager.");
+							cb.onError("Listing went live but the network didn't return an id. Check Merchant Manager.");
 						});
 						return;
 					}
@@ -181,7 +181,7 @@ public final class P2pListingPublisher {
 						@Override
 						public void onError(String firestoreError) {
 							// FIX 2: THE ROLLBACK (Orphaned Listing Prevention)
-							activity.runOnUiThread(() -> progress.setMessage("Database error. Reverting blockchain lock..."));
+							activity.runOnUiThread(() -> progress.setMessage("Database error. Undoing the lock…"));
 							
 							P2PTradeRouter.cancelListing(activity.getApplicationContext(), address, listingId, new P2PTradeRouter.Callback() {
 								@Override

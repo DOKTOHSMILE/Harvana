@@ -63,7 +63,7 @@
 					android:id="@+id/textview3"
 					android:layout_width="0dp"
 					android:layout_height="wrap_content"
-					android:text="I acknowledge that this wallet interacts with a live blockchain network. All transactions involve real assets and cannot be reversed."
+					android:text="I acknowledge that this wallet interacts with a live network. All transactions involve real assets and cannot be reversed."
 					android:textSize="13sp"
 					android:textStyle="bold"
 					android:layout_weight="1"

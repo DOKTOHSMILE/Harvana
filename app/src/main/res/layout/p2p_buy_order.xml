@@ -645,7 +645,7 @@
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="4dp"
-							android:text="The seller's HARV is secured through the escrow process. Release occurs only after the required conditions are satisfied and the blockchain transaction is verified."
+							android:text="The seller's HARV is secured through the escrow process. Release occurs only after the required conditions are satisfied and the network transaction is verified."
 							android:textSize="11sp" />
 					</LinearLayout>
 				</LinearLayout>

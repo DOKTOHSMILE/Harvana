@@ -415,7 +415,7 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 				runOnUiThread(() -> {
 					tv_criteria_volume_label.setText(String.format(Locale.US,
 					"At least %d completed trades (completed: %d)", PREMIUM_MIN_TRADES, totalTrades));
-					tv_criteria_success_rate_label.setText("Success-rate telemetry active (fully verified on-chain)");
+					tv_criteria_success_rate_label.setText("Success rate checked on the network");
 					_refreshCriteriaChecklist();
 				});
 			}

@@ -86,12 +86,12 @@ public final class ReceiptRenderer {
         p.setColor(LINE); p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1f); p.setPathEffect(new DashPathEffect(new float[] {4, 4}, 0));
         c.drawLine(M, y, W - M, y, p);
         p.setPathEffect(null); p.setStyle(Paint.Style.FILL);
-        y += 26;
         Bitmap qr = null;
         if (r.reference != null && !r.reference.isEmpty()) {
-            try { qr = HARVQRCodeGenerator.generateQRCode(com.harvana.app.scan.QrRouter.receiptPayload(r.reference), 300); } catch (Throwable ignored) { }
+            try { qr = HARVQRCodeGenerator.generateQRCode(com.harvana.app.scan.QrRouter.receiptPayload(r.reference), 480); } catch (Throwable ignored) { }
         }
-        float textRight = qr != null ? W - M - 84 : W - M;
+        y += qr != null ? 40 : 26;          // room for a code large enough to scan from paper or a screen
+        float textRight = qr != null ? W - M - 108 : W - M;
         p.setColor(TEXT); p.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD)); p.setTextSize(12f);
         c.drawText("Thank you for using Harvana", M, y, p);
         p.setColor(MUTED); p.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL)); p.setTextSize(10f);
@@ -102,7 +102,9 @@ public final class ReceiptRenderer {
         y += 6;
         c.drawText("Generated " + formatDate(System.currentTimeMillis()), M, y, p);
         if (qr != null) {
-            c.drawBitmap(Bitmap.createScaledBitmap(qr, 72, 72, true), W - M - 72, y - 76, null);
+            // Drawn into a 96-point box from the full-size bitmap (not shrunk first), so the squares stay sharp.
+            Paint smooth = new Paint(Paint.FILTER_BITMAP_FLAG);
+            c.drawBitmap(qr, null, new android.graphics.RectF(W - M - 96, y - 96, W - M, y), smooth);
             p.setTextAlign(Paint.Align.RIGHT); p.setTextSize(8f);
             c.drawText("Scan: transaction hash", W - M, y + 6, p);
             p.setTextAlign(Paint.Align.LEFT);

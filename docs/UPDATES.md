@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: one QR design across the app
+
+What the app does. Every QR code the app makes now looks the same: deep-teal rounded squares on white, teal corner eyes, and the HARV coin in the middle. That covers the receive address, the coin page, profile codes, receipts and the wallet access card. Error correction stays at the highest level, and the coin covers well under the share it can recover.
+
+Checked off the phone: a faithful copy of the design decodes with a standard QR reader for addresses, profile links, receipt links and a long access-card payload, at 300, 512 and 720px.
+
+The receipt QR is larger (96 points instead of 72) and drawn sharp. The old one was shrunk to about 1.5px per square, too small for a camera.
+
+What you do: install the new build, then scan one of each code with the app and with another phone's camera.
+
 ## 7 Oct 2026: audit fixes in the rules (publish the rules)
 
 What was wrong. The app writes to three places the published rules had no entry for, so Firestore refused those writes:

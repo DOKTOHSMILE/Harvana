@@ -98,8 +98,7 @@ public final class PiClient {
     }
 
     private static String friendly(JSONObject err) {
-        JSONObject extras = err.optJSONObject("extras");
-        JSONObject codes = extras == null ? null : extras.optJSONObject("result_codes");
+        JSONObject codes = err.optJSONObject("extras") == null ? null : err.getJSONObject("extras").optJSONObject("result_codes");
         String s = codes == null ? "" : codes.toString();
         if (s.contains("underfunded") || s.contains("insufficient_balance")) return "Not enough Pi (the network also keeps a small reserve in every wallet).";
         if (s.contains("low_reserve")) return "A new Pi wallet must receive at least the network's minimum balance.";

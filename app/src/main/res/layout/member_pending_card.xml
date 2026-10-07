@@ -57,7 +57,7 @@
 					android:layout_marginTop="2dp"
 					android:text="Wants to join"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="11.5sp"
+					android:textSize="12sp"
 					android:focusable="false" />
 			</LinearLayout>
 			<com.google.android.material.button.MaterialButton
@@ -71,7 +71,7 @@
 				android:paddingStart="12dp"
 				android:paddingEnd="12dp"
 				app:backgroundTint="@color/colorSurfaceAlt"
-				app:cornerRadius="10dp"
+				app:cornerRadius="12dp"
 				app:elevation="0dp"
 				app:strokeWidth="0dp"
 				android:focusable="false"
@@ -87,7 +87,7 @@
 				android:paddingStart="16dp"
 				android:paddingEnd="16dp"
 				app:backgroundTint="@color/colorAccent"
-				app:cornerRadius="10dp"
+				app:cornerRadius="12dp"
 				app:elevation="0dp"
 				android:focusable="false" />
 		</LinearLayout>

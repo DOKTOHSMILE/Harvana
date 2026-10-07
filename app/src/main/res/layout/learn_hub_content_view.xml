@@ -54,7 +54,7 @@
 						android:text="Savings"
 						android:textStyle="bold"
 						android:textColor="@color/colorAccent"
-						android:textSize="11.5sp"
+						android:textSize="12sp"
 						android:focusable="false" />
 				</LinearLayout>
 			</FrameLayout>

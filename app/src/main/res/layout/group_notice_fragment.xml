@@ -33,7 +33,7 @@
 			android:text="+ New Notice"
 			android:textStyle="bold"
 			android:textColor="@color/colorTextOnAccent"
-			android:textSize="12.5sp"
+			android:textSize="13sp"
 			android:paddingStart="16dp"
 			android:paddingEnd="16dp"
 			android:backgroundTint="@color/colorAccent"

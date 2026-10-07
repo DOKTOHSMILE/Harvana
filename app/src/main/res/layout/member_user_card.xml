@@ -104,7 +104,7 @@
 						android:layout_marginTop="2dp"
 						android:text="HV0x…"
 						android:textColor="@color/colorTextTertiary"
-						android:textSize="11.5sp"
+						android:textSize="12sp"
 						android:focusable="false"
 						android:maxLines="1"
 						android:ellipsize="middle" />
@@ -162,7 +162,7 @@
 						android:text="Slot 1"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="12.5sp"
+						android:textSize="13sp"
 						android:focusable="false" />
 				</LinearLayout>
 				<LinearLayout
@@ -187,7 +187,7 @@
 						android:text="—"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="12.5sp"
+						android:textSize="13sp"
 						android:focusable="false" />
 				</LinearLayout>
 				<LinearLayout

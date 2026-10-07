@@ -52,7 +52,7 @@
 						android:text="GTBank - Personal"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="14.5sp" />
+						android:textSize="15sp" />
 					<TextView
 						android:id="@+id/tvDefaultBadge"
 						android:focusable="false"
@@ -61,7 +61,7 @@
 						android:text="DEFAULT"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextOnAccent"
-						android:textSize="9.5sp"
+						android:textSize="10sp"
 						android:layout_marginStart="8dp"
 						android:backgroundTint="@color/colorAccent"
 						android:paddingHorizontal="6dp"
@@ -76,7 +76,7 @@
 					android:layout_marginTop="3dp"
 					android:text="GTBank · 0123456789 · Valentine Ade"
 					android:textColor="@color/colorTextSecondary"
-					android:textSize="12.5sp" />
+					android:textSize="13sp" />
 			</LinearLayout>
 			<com.google.android.material.imageview.ShapeableImageView
 				android:id="@+id/btnMethodMenu"

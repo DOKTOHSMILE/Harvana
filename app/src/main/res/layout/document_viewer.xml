@@ -61,7 +61,7 @@
 			android:layout_marginTop="6dp"
 			android:gravity="center_horizontal|center_vertical"
 			android:text="This will open in your device's document viewer."
-			android:textSize="13.5sp"
+			android:textSize="14sp"
 			android:lineSpacingExtra="3dp" />
 		<com.google.android.material.button.MaterialButton
 			android:id="@+id/btnOpenDocument"
@@ -75,7 +75,7 @@
 			android:textColor="@color/colorTextOnAccent"
 			android:textAllCaps="false"
 			app:backgroundTint="@color/colorAccent"
-			app:cornerRadius="14dp"
+			app:cornerRadius="12dp"
 			app:elevation="0dp" />
 		<TextView
 			android:id="@+id/tvNoViewerHint"

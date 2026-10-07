@@ -95,7 +95,7 @@
 								android:layout_height="match_parent"
 								android:gravity="center_horizontal|center_vertical"
 								android:text="✓"
-								android:textSize="9sp"
+								android:textSize="10sp"
 								android:textStyle="bold"
 								android:textColor="@color/colorP2pTextPrimary"
 								android:focusable="false" />
@@ -113,7 +113,7 @@
 							android:layout_width="8dp"
 							android:layout_height="8dp"
 							app:cardBackgroundColor="@color/colorP2pAccent"
-							app:cardCornerRadius="4dp"
+							app:cardCornerRadius="8dp"
 							app:cardElevation="0dp"
 							app:strokeWidth="0dp" />
 						<com.google.android.material.textview.MaterialTextView
@@ -305,7 +305,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="Bank"
-							android:textSize="9sp"
+							android:textSize="10sp"
 							android:textColor="@color/colorTextTertiary"
 							android:focusable="false" />
 					</LinearLayout>
@@ -339,7 +339,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="USDT"
-							android:textSize="9sp"
+							android:textSize="10sp"
 							android:textColor="@color/colorTextTertiary"
 							android:focusable="false" />
 					</LinearLayout>

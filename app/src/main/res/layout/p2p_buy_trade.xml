@@ -299,7 +299,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="SELLER"
-							android:textSize="9sp"
+							android:textSize="10sp"
 							android:textStyle="bold" />
 					</LinearLayout>
 					<LinearLayout
@@ -357,7 +357,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="BUYER"
-							android:textSize="9sp"
+							android:textSize="10sp"
 							android:textStyle="bold" />
 					</LinearLayout>
 				</LinearLayout>
@@ -396,7 +396,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="SECURED"
-							android:textSize="9sp"
+							android:textSize="10sp"
 							android:textStyle="bold" />
 					</LinearLayout>
 					<TextView
@@ -514,7 +514,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="14dp"
 				android:backgroundTint="@color/colorP2pSurface"
-				app:cardCornerRadius="15dp"
+				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
 				app:strokeColor="@color/colorAmber"
 				app:strokeWidth="1dp">
@@ -601,7 +601,7 @@
 				android:textStyle="bold"
 				android:textAllCaps="false"
 				android:backgroundTint="@color/colorP2pAccent"
-				app:cornerRadius="15dp" />
+				app:cornerRadius="12dp" />
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/timeline_card"
 				android:layout_width="match_parent"
@@ -889,7 +889,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="CONFIRMED"
-							android:textSize="9sp"
+							android:textSize="10sp"
 							android:textStyle="bold" />
 					</LinearLayout>
 					<TextView
@@ -976,7 +976,7 @@
 					android:textSize="13sp"
 					android:textAllCaps="false"
 					android:backgroundTint="@color/colorP2pSurface"
-					app:cornerRadius="14dp"
+					app:cornerRadius="12dp"
 					app:strokeColor="@color/colorAmber"
 					app:strokeWidth="1dp" />
 				<TextView

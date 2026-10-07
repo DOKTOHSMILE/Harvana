@@ -52,7 +52,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:text="Restore from Harvana Access Card"
-						android:textSize="17sp"
+						android:textSize="18sp"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary" />
 					<TextView
@@ -113,7 +113,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:text="Restore from 12-word phrase"
-						android:textSize="17sp"
+						android:textSize="18sp"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary" />
 					<com.google.android.material.textfield.TextInputLayout

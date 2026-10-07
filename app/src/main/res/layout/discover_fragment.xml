@@ -27,7 +27,7 @@
 				android:layout_marginTop="20dp"
 				android:layout_marginRight="20dp"
 				android:text="Discover Groups"
-				android:textSize="26sp"
+				android:textSize="28sp"
 				android:textStyle="bold" />
 			<TextView
 				android:id="@+id/textview2"
@@ -86,7 +86,7 @@
 								android:background="@android:color/transparent"
 								android:gravity="center_vertical"
 								android:text="Search group"
-								android:textSize="13.5sp"
+								android:textSize="14sp"
 								android:layout_marginStart="8dp" />
 						</LinearLayout>
 					</com.google.android.material.card.MaterialCardView>

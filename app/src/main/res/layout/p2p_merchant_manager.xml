@@ -87,7 +87,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="0"
-								android:textSize="21sp"
+								android:textSize="22sp"
 								android:textStyle="bold" />
 							<TextView
 								android:id="@+id/textview142"
@@ -129,7 +129,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="0"
-								android:textSize="21sp"
+								android:textSize="22sp"
 								android:textStyle="bold" />
 							<TextView
 								android:id="@+id/textview144"
@@ -256,7 +256,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:text="No merchant trades"
-					android:textSize="17sp"
+					android:textSize="18sp"
 					android:textStyle="bold" />
 				<TextView
 					android:id="@+id/textview146"

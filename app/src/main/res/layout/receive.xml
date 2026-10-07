@@ -38,7 +38,7 @@
 				android:layout_marginBottom="8dp"
 				android:text="ASSET"
 				android:textStyle="bold"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:letterSpacing="0.06" />
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/cardview1"
@@ -85,7 +85,7 @@
 						android:text="----"
 						android:singleLine="true"
 						android:layout_weight="1"
-						android:textSize="13.5sp"
+						android:textSize="14sp"
 						android:fontFamily="monospace"
 						android:ellipsize="middle" />
 					<com.google.android.material.imageview.ShapeableImageView

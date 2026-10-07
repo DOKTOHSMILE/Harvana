@@ -34,7 +34,7 @@
 			android:layout_marginBottom="16dp"
 			android:text="Transfer native coins or pegged stable assets on the HARV network."
 			android:textColor="@color/colorTextSecondary"
-			android:textSize="13.5sp"
+			android:textSize="14sp"
 			android:paddingHorizontal="20dp"
 			android:focusable="false" />
 		<androidx.core.widget.NestedScrollView
@@ -58,7 +58,7 @@
 					android:text="SELECT ASSET"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="4dp"
 					android:letterSpacing="0.06"
 					android:focusable="false" />
@@ -89,7 +89,7 @@
 					android:text="RECIPIENT ADDRESS"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="4dp"
 					android:letterSpacing="0.06"
 					android:focusable="false" />
@@ -159,7 +159,7 @@
 					android:text="AMOUNT"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="4dp"
 					android:letterSpacing="0.06"
 					android:focusable="false" />
@@ -196,7 +196,7 @@
 					android:text="MEMO (OPTIONAL)"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="4dp"
 					android:letterSpacing="0.06"
 					android:focusable="false" />
@@ -485,10 +485,10 @@
 				android:textStyle="bold"
 				android:textColor="@color/colorWarning"
 				android:layout_weight="1"
-				android:textSize="14.5sp"
+				android:textSize="15sp"
 				android:layout_marginEnd="8dp"
 				app:backgroundTint="@color/colorSurfaceRaised"
-				app:cornerRadius="14dp"
+				app:cornerRadius="12dp"
 				app:elevation="0dp"
 				app:strokeWidth="1dp"
 				app:strokeColor="@color/colorCardStroke"
@@ -502,10 +502,10 @@
 				android:textStyle="bold"
 				android:textColor="@color/colorTextOnAccent"
 				android:layout_weight="1"
-				android:textSize="14.5sp"
+				android:textSize="15sp"
 				android:layout_marginStart="8dp"
 				app:backgroundTint="@color/colorAccent"
-				app:cornerRadius="14dp"
+				app:cornerRadius="12dp"
 				app:elevation="0dp"
 				android:textAllCaps="false" />
 		</LinearLayout>

@@ -75,7 +75,7 @@
 							android:layout_height="wrap_content"
 							android:gravity="center_horizontal|center_vertical"
 							android:text="0 HARV"
-							android:textSize="26sp"
+							android:textSize="28sp"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
 							android:singleLine="true" />
@@ -96,7 +96,7 @@
 						android:text="WALLET ADDRESS"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextTertiary"
-						android:textSize="10.5sp"
+						android:textSize="11sp"
 						android:letterSpacing="0.06" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview4"
@@ -116,7 +116,7 @@
 							android:gravity="center_vertical"
 							android:text="Loading address..."
 							android:textColor="@color/colorTextSecondary"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:fontFamily="monospace"
 							android:textIsSelectable="true" />
 					</com.google.android.material.card.MaterialCardView>
@@ -130,7 +130,7 @@
 						android:textStyle="bold"
 						android:textColor="@color/colorTextTertiary"
 						android:gravity="start"
-						android:textSize="10.5sp"
+						android:textSize="11sp"
 						android:letterSpacing="0.06" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview7"
@@ -188,7 +188,7 @@
 									android:text="Current Supply"
 									android:textColor="@color/colorTextTertiary"
 									android:layout_weight="1"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 								<TextView
 									android:id="@+id/tv_stat_value_1"
@@ -197,7 +197,7 @@
 									android:text="—"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 							</LinearLayout>
 							<LinearLayout
@@ -214,7 +214,7 @@
 									android:text="Max Supply"
 									android:textColor="@color/colorTextTertiary"
 									android:layout_weight="1"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 								<TextView
 									android:id="@+id/tv_stat_value_2"
@@ -223,7 +223,7 @@
 									android:text="—"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 							</LinearLayout>
 							<LinearLayout
@@ -240,7 +240,7 @@
 									android:text="Circulating Supply"
 									android:textColor="@color/colorTextTertiary"
 									android:layout_weight="1"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 								<TextView
 									android:id="@+id/tv_stat_value_3"
@@ -249,7 +249,7 @@
 									android:text="—"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 							</LinearLayout>
 							<LinearLayout
@@ -266,7 +266,7 @@
 									android:text="Total Holders"
 									android:textColor="@color/colorTextTertiary"
 									android:layout_weight="1"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 								<TextView
 									android:id="@+id/tv_stat_value_4"
@@ -275,7 +275,7 @@
 									android:text="—"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 							</LinearLayout>
 							<LinearLayout
@@ -292,7 +292,7 @@
 									android:text="Block Height"
 									android:textColor="@color/colorTextTertiary"
 									android:layout_weight="1"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 								<TextView
 									android:id="@+id/tv_stat_value_5"
@@ -301,7 +301,7 @@
 									android:text="—"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 							</LinearLayout>
 							<LinearLayout
@@ -318,7 +318,7 @@
 									android:text="Block Reward"
 									android:textColor="@color/colorTextTertiary"
 									android:layout_weight="1"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 								<TextView
 									android:id="@+id/tv_stat_value_6"
@@ -327,7 +327,7 @@
 									android:text="—"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 							</LinearLayout>
 							<LinearLayout
@@ -344,7 +344,7 @@
 									android:text="Next Halving"
 									android:textColor="@color/colorTextTertiary"
 									android:layout_weight="1"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 								<TextView
 									android:id="@+id/tv_stat_value_7"
@@ -353,7 +353,7 @@
 									android:text="—"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 							</LinearLayout>
 							<LinearLayout
@@ -370,7 +370,7 @@
 									android:text="Network"
 									android:textColor="@color/colorTextTertiary"
 									android:layout_weight="1"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 								<TextView
 									android:id="@+id/tv_stat_value_8"
@@ -379,7 +379,7 @@
 									android:text="—"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="13.5sp"
+									android:textSize="14sp"
 									android:focusable="false" />
 							</LinearLayout>
 						</LinearLayout>
@@ -392,7 +392,7 @@
 						android:text="Figures update from the live network and may lag a few seconds behind the chain tip."
 						android:textColor="@color/colorTextTertiary"
 						android:gravity="start"
-						android:textSize="11.5sp"
+						android:textSize="12sp"
 						android:layout_marginHorizontal="4dp" />
 				</LinearLayout>
 			</androidx.core.widget.NestedScrollView>

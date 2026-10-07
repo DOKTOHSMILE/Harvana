@@ -67,7 +67,7 @@
 							android:layout_marginTop="3dp"
 							android:text="Monthly · 10 slots · Public"
 							android:textColor="@color/colorTextTertiary"
-							android:textSize="12.5sp" />
+							android:textSize="13sp" />
 					</LinearLayout>
 					<TextView
 						android:id="@+id/tv_admin_badge"
@@ -97,7 +97,7 @@
 						app:cardBackgroundColor="@color/colorSurface"
 						android:layout_weight="1"
 						android:layout_marginEnd="5dp"
-						app:cardCornerRadius="14dp"
+						app:cardCornerRadius="16dp"
 						app:cardElevation="0dp"
 						app:strokeWidth="1dp"
 						app:strokeColor="@color/colorCardStroke">
@@ -128,7 +128,7 @@
 									android:layout_height="wrap_content"
 									android:text="Collected"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="10.5sp" />
+									android:textSize="11sp" />
 								<TextView
 									android:id="@+id/tv_header_amount"
 									android:layout_width="wrap_content"
@@ -137,7 +137,7 @@
 									android:text="0 HARV"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="13.5sp" />
+									android:textSize="14sp" />
 							</LinearLayout>
 						</LinearLayout>
 					</com.google.android.material.card.MaterialCardView>
@@ -149,7 +149,7 @@
 						android:layout_weight="1"
 						android:layout_marginStart="5dp"
 						android:layout_marginEnd="5dp"
-						app:cardCornerRadius="14dp"
+						app:cardCornerRadius="16dp"
 						app:cardElevation="0dp"
 						app:strokeWidth="1dp"
 						app:strokeColor="@color/colorCardStroke">
@@ -180,7 +180,7 @@
 									android:layout_height="wrap_content"
 									android:text="Members"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="10.5sp" />
+									android:textSize="11sp" />
 								<TextView
 									android:id="@+id/tv_header_members"
 									android:layout_width="wrap_content"
@@ -189,7 +189,7 @@
 									android:text="0 / 0"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="13.5sp" />
+									android:textSize="14sp" />
 							</LinearLayout>
 						</LinearLayout>
 					</com.google.android.material.card.MaterialCardView>
@@ -200,7 +200,7 @@
 						app:cardBackgroundColor="@color/colorSurface"
 						android:layout_weight="1"
 						android:layout_marginStart="5dp"
-						app:cardCornerRadius="14dp"
+						app:cardCornerRadius="16dp"
 						app:cardElevation="0dp"
 						app:strokeWidth="1dp"
 						app:strokeColor="@color/colorCardStroke">
@@ -231,7 +231,7 @@
 									android:layout_height="wrap_content"
 									android:text="Next payout"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="10.5sp" />
+									android:textSize="11sp" />
 								<TextView
 									android:id="@+id/tv_header_next"
 									android:layout_width="wrap_content"
@@ -240,7 +240,7 @@
 									android:text="—"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="13.5sp" />
+									android:textSize="14sp" />
 							</LinearLayout>
 						</LinearLayout>
 					</com.google.android.material.card.MaterialCardView>

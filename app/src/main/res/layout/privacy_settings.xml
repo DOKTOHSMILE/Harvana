@@ -46,7 +46,7 @@
 				android:layout_marginTop="4dp"
 				android:layout_marginBottom="24dp"
 				android:text="Control what other members of your circles can see about you."
-				android:textSize="13.5sp"
+				android:textSize="14sp"
 				android:lineSpacingExtra="3dp" />
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/cardview20"
@@ -77,14 +77,14 @@
 							android:layout_height="wrap_content"
 							android:text="Show Trust Score"
 							android:textStyle="bold"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<TextView
 							android:id="@+id/textview95"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="3dp"
 							android:text="Let other members of your groups see your trust score"
-							android:textSize="12.5sp"
+							android:textSize="13sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
 					<com.google.android.material.switchmaterial.SwitchMaterial
@@ -124,14 +124,14 @@
 							android:layout_height="wrap_content"
 							android:text="Show My Groups"
 							android:textStyle="bold"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<TextView
 							android:id="@+id/textview97"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="3dp"
 							android:text="Let people viewing your profile see which groups you're in"
-							android:textSize="12.5sp"
+							android:textSize="13sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
 					<com.google.android.material.switchmaterial.SwitchMaterial
@@ -171,14 +171,14 @@
 							android:layout_height="wrap_content"
 							android:text="Show Activity Status"
 							android:textStyle="bold"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<TextView
 							android:id="@+id/textview99"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="3dp"
 							android:text="Let group members see when you were last active"
-							android:textSize="12.5sp"
+							android:textSize="13sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
 					<com.google.android.material.switchmaterial.SwitchMaterial
@@ -218,14 +218,14 @@
 							android:layout_height="wrap_content"
 							android:text="Allow Group Invites"
 							android:textStyle="bold"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<TextView
 							android:id="@+id/textview101"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="3dp"
 							android:text="Let anyone invite you to a new savings group, not just people already in one of your groups"
-							android:textSize="12.5sp"
+							android:textSize="13sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
 					<com.google.android.material.switchmaterial.SwitchMaterial

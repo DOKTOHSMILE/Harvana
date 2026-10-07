@@ -55,7 +55,7 @@
 					android:layout_height="wrap_content"
 					android:text="Sent HARV"
 					android:textStyle="bold"
-					android:textSize="14.5sp"
+					android:textSize="15sp"
 					android:focusable="false" />
 				<TextView
 					android:id="@+id/tv_tx_address"
@@ -64,7 +64,7 @@
 					android:layout_marginTop="2dp"
 					android:text="To: HV0x7a8...91f"
 					android:singleLine="true"
-					android:textSize="11.5sp"
+					android:textSize="12sp"
 					android:focusable="false"
 					android:ellipsize="middle" />
 			</LinearLayout>
@@ -81,7 +81,7 @@
 					android:layout_height="wrap_content"
 					android:text="- 50.00 HARV"
 					android:textStyle="bold"
-					android:textSize="13.5sp"
+					android:textSize="14sp"
 					android:focusable="false" />
 				<TextView
 					android:id="@+id/tv_tx_date"

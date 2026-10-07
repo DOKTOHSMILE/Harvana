@@ -44,7 +44,7 @@
 			android:layout_marginTop="4dp"
 			android:gravity="center_horizontal|center_vertical"
 			android:text="Reporting: —"
-			android:textSize="13.5sp"
+			android:textSize="14sp"
 			android:focusable="false" />
 		<TextView
 			android:id="@+id/textview66"
@@ -53,7 +53,7 @@
 			android:layout_marginTop="12dp"
 			android:gravity="center_horizontal|center_vertical"
 			android:text="A moderator reviews every report before it affects anything visible to other members. This flags it for review - it doesn't act immediately."
-			android:textSize="11.5sp"
+			android:textSize="12sp"
 			android:focusable="false"
 			android:lineSpacingExtra="2dp" />
 		<TextView
@@ -63,7 +63,7 @@
 			android:layout_marginTop="16dp"
 			android:text="REASON"
 			android:textStyle="bold"
-			android:textSize="10.5sp"
+			android:textSize="11sp"
 			android:letterSpacing="0.06"
 			android:focusable="false" />
 		<com.google.android.material.card.MaterialCardView
@@ -105,7 +105,7 @@
 				android:gravity="top"
 				android:textColor="@color/colorTextPrimary"
 				android:hint="What happened\\? Be specific - dates, amounts, what was promised vs what happened."
-				android:textSize="14.5sp"
+				android:textSize="15sp"
 				android:inputType="textMultiLine|textCapSentences"
 				android:focusable="true"
 				android:focusableInTouchMode="true"

@@ -34,7 +34,7 @@
 			android:text="Invite"
 			android:textStyle="bold"
 			android:textColor="@color/colorTextOnAccent"
-			android:textSize="13.5sp"
+			android:textSize="14sp"
 			android:layout_marginStart="8dp"
 			android:paddingHorizontal="16dp"
 			android:paddingVertical="8dp"
@@ -60,7 +60,7 @@
 			android:text="PENDING REQUESTS"
 			android:textStyle="bold"
 			android:textColor="@color/colorTextTertiary"
-			android:textSize="10.5sp"
+			android:textSize="11sp"
 			android:paddingStart="16dp"
 			android:paddingEnd="16dp"
 			android:letterSpacing="0.06" />
@@ -72,7 +72,7 @@
 			android:paddingEnd="16dp"
 			android:paddingBottom="8dp"
 			android:textColor="@color/colorTextSecondary"
-			android:textSize="12.5sp" />
+			android:textSize="13sp" />
 		<androidx.recyclerview.widget.RecyclerView
 			android:id="@+id/recycler_pending_members"
 			android:layout_width="match_parent"
@@ -91,7 +91,7 @@
 		android:text="ACTIVE MEMBERS"
 		android:textStyle="bold"
 		android:textColor="@color/colorTextTertiary"
-		android:textSize="10.5sp"
+		android:textSize="11sp"
 		android:paddingStart="16dp"
 		android:paddingEnd="16dp"
 		android:letterSpacing="0.06" />

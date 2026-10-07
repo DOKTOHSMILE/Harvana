@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: one scale for corners and text
+
+What the app does. Across 90 screens:
+
+- **Card corners** use three sizes: 12dp for small cards, 16dp for normal cards and 20dp for large panels. Pills and circles are unchanged. Before, there were 20 different radii.
+- **Button corners** are 12dp.
+- **Text** follows one scale. Half sizes such as 13.5sp moved by half a point. Text below 10sp, which was hard to read, is now 10sp. Odd headings snapped to 18, 22 or 28sp.
+
+What you do: install the new build. Tell me any screen where a line now wraps.
+
 ## 7 Oct 2026: plain words
 
 What the app does. Messages people see no longer use engine words:

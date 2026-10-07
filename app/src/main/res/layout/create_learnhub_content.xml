@@ -50,7 +50,7 @@
 				android:layout_marginBottom="24dp"
 				android:text="Share community knowledge, finance trends, or investment insights with other members."
 				android:textColor="@color/colorTextSecondary"
-				android:textSize="13.5sp"
+				android:textSize="14sp"
 				android:focusable="false" />
 			<TextView
 				android:id="@+id/textview26"
@@ -59,7 +59,7 @@
 				android:text="TITLE"
 				android:textStyle="bold"
 				android:textColor="@color/colorTextTertiary"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:layout_marginStart="4dp"
 				android:letterSpacing="0.06"
 				android:focusable="false" />
@@ -82,7 +82,7 @@
 					android:gravity="center_vertical"
 					android:textColor="@color/colorTextPrimary"
 					android:hint="e.g. How Rotating Savings Groups Work"
-					android:textSize="14.5sp"
+					android:textSize="15sp"
 					android:inputType="textCapSentences"
 					android:focusable="true"
 					android:focusableInTouchMode="true"
@@ -96,7 +96,7 @@
 				android:text="DESCRIPTION"
 				android:textStyle="bold"
 				android:textColor="@color/colorTextTertiary"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:layout_marginStart="4dp"
 				android:letterSpacing="0.06"
 				android:focusable="false" />
@@ -133,7 +133,7 @@
 				android:text="CATEGORY"
 				android:textStyle="bold"
 				android:textColor="@color/colorTextTertiary"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:layout_marginStart="4dp"
 				android:letterSpacing="0.06"
 				android:focusable="false" />
@@ -164,7 +164,7 @@
 				android:text="COVER IMAGE"
 				android:textStyle="bold"
 				android:textColor="@color/colorTextTertiary"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:layout_marginStart="4dp"
 				android:letterSpacing="0.06"
 				android:focusable="false" />
@@ -230,7 +230,7 @@
 				android:layout_marginBottom="24dp"
 				android:text="A picture or a video is optional: you can post words only."
 				android:textColor="@color/colorTextTertiary"
-				android:textSize="11.5sp"
+				android:textSize="12sp"
 				android:layout_marginStart="4dp"
 				android:focusable="false" />
 			<TextView
@@ -275,7 +275,7 @@
 				android:layout_marginBottom="24dp"
 				android:text="Readers press play and the video streams from the site it is on. Nothing is uploaded or stored by Harvana."
 				android:textColor="@color/colorTextTertiary"
-				android:textSize="11.5sp"
+				android:textSize="12sp"
 				android:focusable="false" />
 			<TextView
 				android:id="@+id/tv_learn_error"
@@ -296,7 +296,7 @@
 				android:textColor="@color/colorTextOnAccent"
 				android:textAllCaps="false"
 				app:backgroundTint="@color/colorAccent"
-				app:cornerRadius="14dp"
+				app:cornerRadius="12dp"
 				app:elevation="0dp" />
 		</LinearLayout>
 	</androidx.core.widget.NestedScrollView>

@@ -60,7 +60,7 @@
 					android:layout_height="wrap_content"
 					android:text="AMOUNT"
 					android:textStyle="bold"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:letterSpacing="0.06"
 					android:focusable="false" />
 				<TextView
@@ -69,7 +69,7 @@
 					android:layout_height="wrap_content"
 					android:layout_marginTop="6dp"
 					android:text="0.0000 HARV"
-					android:textSize="26sp"
+					android:textSize="28sp"
 					android:textStyle="bold"
 					android:focusable="false" />
 			</LinearLayout>
@@ -93,14 +93,14 @@
 					android:layout_height="wrap_content"
 					android:text="To"
 					android:layout_weight="1"
-					android:textSize="13.5sp"
+					android:textSize="14sp"
 					android:focusable="false" />
 				<TextView
 					android:id="@+id/tv_confirm_recipient"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:text="—"
-					android:textSize="13.5sp"
+					android:textSize="14sp"
 					android:fontFamily="monospace"
 					android:focusable="false" />
 			</LinearLayout>
@@ -118,13 +118,13 @@
 					android:layout_height="wrap_content"
 					android:text="Memo"
 					android:layout_weight="1"
-					android:textSize="13.5sp"
+					android:textSize="14sp"
 					android:focusable="false" />
 				<TextView
 					android:id="@+id/tv_confirm_memo"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:textSize="13.5sp"
+					android:textSize="14sp"
 					android:focusable="false" />
 			</LinearLayout>
 			<LinearLayout
@@ -140,14 +140,14 @@
 					android:layout_height="wrap_content"
 					android:text="Network fee"
 					android:layout_weight="1"
-					android:textSize="13.5sp"
+					android:textSize="14sp"
 					android:focusable="false" />
 				<TextView
 					android:id="@+id/tv_confirm_fee"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:text="—"
-					android:textSize="13.5sp"
+					android:textSize="14sp"
 					android:focusable="false" />
 			</LinearLayout>
 		</LinearLayout>

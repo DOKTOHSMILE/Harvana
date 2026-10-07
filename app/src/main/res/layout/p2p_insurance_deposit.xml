@@ -101,7 +101,7 @@
 							android:gravity="center_horizontal|center_vertical"
 							android:text="Checking…"
 							android:textStyle="bold"
-							android:textSize="11.5sp"
+							android:textSize="12sp"
 							android:textColor="@color/colorTextPrimary"
 							android:paddingVertical="6dp"
 							android:paddingHorizontal="12dp"
@@ -215,7 +215,7 @@
 						android:layout_marginTop="8dp"
 						android:text="• Instant Buyer Trust: Users prefer trading with insured merchants because your collateral protects them against bad faith actors.\n\n• Isolated Security: Your collateral is locked safely on the network via Harvana Protocol and remains separate from your routine available trading funds.\n\n• Withdrawal Flexibility: You can unlock and withdraw your collateral anytime you have zero active offers or pending trades."
 						android:textColor="@color/colorP2pTextMuted"
-						android:textSize="12.5sp"
+						android:textSize="13sp"
 						android:lineSpacingExtra="4dp" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
@@ -271,7 +271,7 @@
 							android:gravity="center_horizontal|center_vertical"
 							android:text="Checking…"
 							android:textStyle="bold"
-							android:textSize="11.5sp"
+							android:textSize="12sp"
 							android:textColor="@color/colorTextPrimary"
 							android:paddingVertical="6dp"
 							android:paddingHorizontal="12dp" />
@@ -440,7 +440,7 @@
 						android:layout_height="wrap_content"
 						android:text="Specify the amount of HARV to lock into the on the network insurance vault."
 						android:textColor="@color/colorP2pTextMuted"
-						android:textSize="12.5sp" />
+						android:textSize="13sp" />
 					<LinearLayout
 						android:id="@+id/linear19"
 						android:layout_width="match_parent"
@@ -486,14 +486,14 @@
 							android:text="Wallet available balance"
 							android:textColor="@color/colorP2pTextMuted"
 							android:layout_weight="1"
-							android:textSize="12.5sp" />
+							android:textSize="13sp" />
 						<TextView
 							android:id="@+id/tv_available_balance"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="…"
 							android:textStyle="bold"
-							android:textSize="12.5sp"
+							android:textSize="13sp"
 							android:textColor="@color/colorTextPrimary" />
 					</LinearLayout>
 				</LinearLayout>

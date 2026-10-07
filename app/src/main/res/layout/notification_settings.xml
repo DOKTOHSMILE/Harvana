@@ -47,7 +47,7 @@
 				android:layout_marginBottom="24dp"
 				android:text="Choose what Harvana notifies you about."
 				android:textColor="@color/colorTextSecondary"
-				android:textSize="13.5sp"
+				android:textSize="14sp"
 				android:lineSpacingExtra="3dp" />
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/cardview14"
@@ -79,7 +79,7 @@
 							android:text="Transaction Alerts"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<TextView
 							android:id="@+id/textview77"
 							android:layout_width="match_parent"
@@ -87,7 +87,7 @@
 							android:layout_marginTop="3dp"
 							android:text="Notify me when money moves in or out of my wallet"
 							android:textColor="@color/colorTextSecondary"
-							android:textSize="12.5sp"
+							android:textSize="13sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
 					<com.google.android.material.switchmaterial.SwitchMaterial
@@ -128,7 +128,7 @@
 							android:text="Payment Reminders"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<TextView
 							android:id="@+id/textview79"
 							android:layout_width="match_parent"
@@ -136,7 +136,7 @@
 							android:layout_marginTop="3dp"
 							android:text="Remind me before my next group contribution is due"
 							android:textColor="@color/colorTextSecondary"
-							android:textSize="12.5sp"
+							android:textSize="13sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
 					<com.google.android.material.switchmaterial.SwitchMaterial
@@ -177,7 +177,7 @@
 							android:text="Loan Reminders"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<TextView
 							android:id="@+id/textview81"
 							android:layout_width="match_parent"
@@ -185,7 +185,7 @@
 							android:layout_marginTop="3dp"
 							android:text="Remind me before a loan repayment is due"
 							android:textColor="@color/colorTextSecondary"
-							android:textSize="12.5sp"
+							android:textSize="13sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
 					<com.google.android.material.switchmaterial.SwitchMaterial
@@ -226,7 +226,7 @@
 							android:text="Group Notices"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<TextView
 							android:id="@+id/textview83"
 							android:layout_width="match_parent"
@@ -234,7 +234,7 @@
 							android:layout_marginTop="3dp"
 							android:text="Notify me about new announcements in my groups"
 							android:textColor="@color/colorTextSecondary"
-							android:textSize="12.5sp"
+							android:textSize="13sp"
 							android:lineSpacingExtra="2dp" />
 					</LinearLayout>
 					<com.google.android.material.switchmaterial.SwitchMaterial
@@ -253,7 +253,7 @@
 				android:text="ALERT STYLE"
 				android:textStyle="bold"
 				android:textColor="@color/colorTextTertiary"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:layout_marginStart="4dp"
 				android:letterSpacing="0.06" />
 			<com.google.android.material.card.MaterialCardView
@@ -285,7 +285,7 @@
 							android:text="Sound"
 							android:textColor="@color/colorTextPrimary"
 							android:layout_weight="1"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<com.google.android.material.switchmaterial.SwitchMaterial
 							android:id="@+id/switchSound"
 							android:layout_width="wrap_content"
@@ -313,7 +313,7 @@
 							android:text="Vibrate"
 							android:textColor="@color/colorTextPrimary"
 							android:layout_weight="1"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<com.google.android.material.switchmaterial.SwitchMaterial
 							android:id="@+id/switchVibrate"
 							android:layout_width="wrap_content"

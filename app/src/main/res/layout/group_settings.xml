@@ -75,7 +75,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="Type"
-								android:textSize="11.5sp" />
+								android:textSize="12sp" />
 							<LinearLayout
 								android:id="@+id/linear42"
 								android:layout_width="wrap_content"
@@ -158,13 +158,13 @@
 									android:layout_height="wrap_content"
 									android:text="Privacy"
 									android:textStyle="bold"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview58"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Visibility for this group"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.card.MaterialCardView
 								android:id="@+id/cardview12"
@@ -219,13 +219,13 @@
 									android:layout_height="wrap_content"
 									android:text="Require approval to join"
 									android:textStyle="bold"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview60"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="New members must be approved by an admin."
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switchApproval"
@@ -268,13 +268,13 @@
 									android:layout_height="wrap_content"
 									android:text="Members can invite"
 									android:textStyle="bold"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview62"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Allow members to invite others to this group."
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switchInvite"
@@ -329,13 +329,13 @@
 									android:layout_height="wrap_content"
 									android:text="About"
 									android:textStyle="bold"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview64"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Description"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 						</LinearLayout>
 						<com.google.android.material.card.MaterialCardView
@@ -414,13 +414,13 @@
 									android:layout_height="wrap_content"
 									android:text="Contribution (HARV)"
 									android:textStyle="bold"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview66"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Amount required per member"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.card.MaterialCardView
 								android:id="@+id/cardview16"
@@ -438,7 +438,7 @@
 									android:background="@android:color/transparent"
 									android:gravity="center_vertical"
 									android:inputType="numberDecimal"
-									android:textSize="14.5sp"
+									android:textSize="15sp"
 									android:paddingHorizontal="12dp" />
 							</com.google.android.material.card.MaterialCardView>
 						</LinearLayout>
@@ -485,13 +485,13 @@
 										android:layout_height="wrap_content"
 										android:text="Rotating Pool"
 										android:textStyle="bold"
-										android:textSize="14.5sp" />
+										android:textSize="15sp" />
 									<TextView
 										android:id="@+id/tvTypeSettingsSubtitle"
 										android:layout_width="wrap_content"
 										android:layout_height="wrap_content"
 										android:text="Slots — · Round —"
-										android:textSize="11.5sp" />
+										android:textSize="12sp" />
 								</LinearLayout>
 								<com.google.android.material.imageview.ShapeableImageView
 									android:id="@+id/imageview23"
@@ -536,13 +536,13 @@
 										android:layout_height="wrap_content"
 										android:text="Grace period (days)"
 										android:textStyle="bold"
-										android:textSize="14.5sp" />
+										android:textSize="15sp" />
 									<TextView
 										android:id="@+id/textview68"
 										android:layout_width="wrap_content"
 										android:layout_height="wrap_content"
 										android:text="Time allowed for payment"
-										android:textSize="11.5sp" />
+										android:textSize="12sp" />
 								</LinearLayout>
 								<com.google.android.material.card.MaterialCardView
 									android:id="@+id/cardview17"
@@ -559,7 +559,7 @@
 										android:layout_height="44dp"
 										android:background="@android:color/transparent"
 										android:gravity="center_vertical"
-										android:textSize="14.5sp"
+										android:textSize="15sp"
 										android:inputType="number"
 										android:paddingHorizontal="12dp" />
 								</com.google.android.material.card.MaterialCardView>
@@ -599,13 +599,13 @@
 										android:layout_height="wrap_content"
 										android:text="Commission %"
 										android:textStyle="bold"
-										android:textSize="14.5sp" />
+										android:textSize="15sp" />
 									<TextView
 										android:id="@+id/textview70"
 										android:layout_width="wrap_content"
 										android:layout_height="wrap_content"
 										android:text="Platform commission"
-										android:textSize="11.5sp" />
+										android:textSize="12sp" />
 								</LinearLayout>
 								<com.google.android.material.card.MaterialCardView
 									android:id="@+id/cardview18"
@@ -623,7 +623,7 @@
 										android:background="@android:color/transparent"
 										android:gravity="center_vertical"
 										android:inputType="numberDecimal"
-										android:textSize="14.5sp"
+										android:textSize="15sp"
 										android:paddingHorizontal="12dp" />
 								</com.google.android.material.card.MaterialCardView>
 							</LinearLayout>
@@ -654,7 +654,7 @@
 							android:text="Fixed Savings"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<LinearLayout
 							android:id="@+id/linear19"
 							android:layout_width="match_parent"
@@ -676,14 +676,14 @@
 									android:text="Target goal (HARV)"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview15"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Amount the group is saving toward"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.card.MaterialCardView
 								android:id="@+id/cardview6"
@@ -702,7 +702,7 @@
 									android:gravity="center_vertical"
 									android:textColor="@color/colorTextPrimary"
 									android:inputType="numberDecimal"
-									android:textSize="14.5sp"
+									android:textSize="15sp"
 									android:paddingHorizontal="12dp" />
 							</com.google.android.material.card.MaterialCardView>
 						</LinearLayout>
@@ -734,7 +734,7 @@
 								android:textStyle="bold"
 								android:textColor="@color/colorTextPrimary"
 								android:layout_weight="1"
-								android:textSize="14.5sp" />
+								android:textSize="15sp" />
 							<com.google.android.material.card.MaterialCardView
 								android:id="@+id/cardview7"
 								android:layout_width="wrap_content"
@@ -779,7 +779,7 @@
 							android:text="Loans"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<LinearLayout
 							android:id="@+id/linear24"
 							android:layout_width="match_parent"
@@ -801,14 +801,14 @@
 									android:text="Interest per day (%)"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview19"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Charged for each day a loan is held"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.card.MaterialCardView
 								android:id="@+id/cardview8"
@@ -827,7 +827,7 @@
 									android:gravity="center_vertical"
 									android:textColor="@color/colorTextPrimary"
 									android:inputType="numberDecimal"
-									android:textSize="14.5sp"
+									android:textSize="15sp"
 									android:paddingHorizontal="12dp" />
 							</com.google.android.material.card.MaterialCardView>
 						</LinearLayout>
@@ -852,7 +852,7 @@
 								android:textStyle="bold"
 								android:textColor="@color/colorTextPrimary"
 								android:layout_weight="1"
-								android:textSize="14.5sp" />
+								android:textSize="15sp" />
 							<com.google.android.material.card.MaterialCardView
 								android:id="@+id/cardview9"
 								android:layout_width="wrap_content"
@@ -965,7 +965,7 @@
 									android:layout_height="wrap_content"
 									android:text="Group wallet"
 									android:textStyle="bold"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/tvWalletAddress"
 									android:layout_width="wrap_content"
@@ -1017,7 +1017,7 @@
 									android:text="Signing key missing on this phone. Restore the 12-word group phrase to send or pay out."
 									android:textColor="@color/colorError"
 									android:layout_weight="1"
-									android:textSize="11.5sp"
+									android:textSize="12sp"
 									android:layout_marginStart="10dp"
 									android:lineSpacingExtra="2dp" />
 							</LinearLayout>
@@ -1081,14 +1081,14 @@
 									android:text="Mute payment reminders"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview22"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="For this group only"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switchMutePayments"
@@ -1132,14 +1132,14 @@
 									android:text="Mute notices"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview24"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="For this group only"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.switchmaterial.SwitchMaterial
 								android:id="@+id/switchMuteNotices"

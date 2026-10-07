@@ -41,7 +41,7 @@
 			android:layout_marginTop="4dp"
 			android:layout_marginBottom="16dp"
 			android:text="Group wallet has — available."
-			android:textSize="13.5sp"
+			android:textSize="14sp"
 			android:focusable="false" />
 	</LinearLayout>
 	<androidx.core.widget.NestedScrollView
@@ -81,7 +81,7 @@
 						android:layout_height="wrap_content"
 						android:text="HOW GROUP LOANS WORK"
 						android:textStyle="bold"
-						android:textSize="10.5sp"
+						android:textSize="11sp"
 						android:letterSpacing="0.06"
 						android:focusable="false" />
 					<LinearLayout
@@ -97,7 +97,7 @@
 							android:layout_height="wrap_content"
 							android:text="Interest rate"
 							android:layout_weight="1"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 						<TextView
 							android:id="@+id/tv_apply_interest_line"
@@ -105,7 +105,7 @@
 							android:layout_height="wrap_content"
 							android:text="—"
 							android:textStyle="bold"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 					</LinearLayout>
 					<LinearLayout
@@ -121,7 +121,7 @@
 							android:layout_height="wrap_content"
 							android:text="Est. network fee"
 							android:layout_weight="1"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 						<TextView
 							android:id="@+id/tv_apply_fee_estimate"
@@ -129,7 +129,7 @@
 							android:layout_height="wrap_content"
 							android:text="—"
 							android:textStyle="bold"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 					</LinearLayout>
 					<com.google.android.material.divider.MaterialDivider
@@ -161,7 +161,7 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="6dp"
 						android:text="The network fee above is deducted from the principal you receive, not billed on top."
-						android:textSize="11.5sp"
+						android:textSize="12sp"
 						android:focusable="false" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
@@ -171,7 +171,7 @@
 				android:layout_height="wrap_content"
 				android:text="AMOUNT (HARV)"
 				android:textStyle="bold"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:letterSpacing="0.06"
 				android:focusable="false" />
 			<com.google.android.material.card.MaterialCardView
@@ -205,7 +205,7 @@
 				android:layout_height="wrap_content"
 				android:text="I PLAN TO REPAY IN (PERIODS)"
 				android:textStyle="bold"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:letterSpacing="0.06"
 				android:focusable="false" />
 			<com.google.android.material.card.MaterialCardView
@@ -257,7 +257,7 @@
 						android:layout_height="wrap_content"
 						android:text="Enter an amount to see what you'll owe."
 						android:textStyle="bold"
-						android:textSize="13.5sp"
+						android:textSize="14sp"
 						android:focusable="false" />
 					<LinearLayout
 						android:id="@+id/layout_apply_calc_rows"
@@ -286,14 +286,14 @@
 								android:layout_height="wrap_content"
 								android:text="Principal"
 								android:layout_weight="1"
-								android:textSize="13.5sp"
+								android:textSize="14sp"
 								android:focusable="false" />
 							<TextView
 								android:id="@+id/tv_apply_calc_principal"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="—"
-								android:textSize="13.5sp"
+								android:textSize="14sp"
 								android:focusable="false" />
 						</LinearLayout>
 						<LinearLayout
@@ -309,14 +309,14 @@
 								android:layout_height="wrap_content"
 								android:text="Interest"
 								android:layout_weight="1"
-								android:textSize="13.5sp"
+								android:textSize="14sp"
 								android:focusable="false" />
 							<TextView
 								android:id="@+id/tv_apply_calc_interest"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="—"
-								android:textSize="13.5sp"
+								android:textSize="14sp"
 								android:focusable="false" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
@@ -359,7 +359,7 @@
 						android:text="Estimate only — interest keeps accruing daily on whatever's still outstanding until you repay in full, not just up to your planned date above. Repaying later costs more."
 								android:drawableStart="@drawable/ic_warning_small"
 								android:drawablePadding="4dp"
-						android:textSize="11.5sp"
+						android:textSize="12sp"
 						android:lineSpacingExtra="2dp"
 						android:focusable="false" />
 				</LinearLayout>
@@ -370,7 +370,7 @@
 				android:layout_height="wrap_content"
 				android:text="REASON (OPTIONAL)"
 				android:textStyle="bold"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:letterSpacing="0.06"
 				android:focusable="false" />
 			<com.google.android.material.card.MaterialCardView
@@ -392,7 +392,7 @@
 					android:gravity="center_vertical"
 					android:textColor="@color/colorTextPrimary"
 					android:hint="What's it for\\?"
-					android:textSize="14.5sp"
+					android:textSize="15sp"
 					android:inputType="textCapSentences"
 					android:focusable="true"
 					android:focusableInTouchMode="true"
@@ -405,7 +405,7 @@
 				android:layout_height="wrap_content"
 				android:text="DISBURSEMENT WALLET"
 				android:textStyle="bold"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:letterSpacing="0.06"
 				android:focusable="false" />
 			<TextView
@@ -414,7 +414,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="4dp"
 				android:text="—"
-				android:textSize="13.5sp"
+				android:textSize="14sp"
 				android:fontFamily="monospace"
 				android:focusable="false" />
 			<TextView
@@ -423,7 +423,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="2dp"
 				android:text="If approved, principal minus the network fee is sent to this wallet."
-				android:textSize="11.5sp"
+				android:textSize="12sp"
 				android:focusable="false" />
 		</LinearLayout>
 	</androidx.core.widget.NestedScrollView>

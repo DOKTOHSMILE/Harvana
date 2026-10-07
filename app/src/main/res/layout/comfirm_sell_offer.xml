@@ -55,7 +55,7 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="2dp"
 						android:text="Review and publish your offer"
-						android:textSize="12.5sp" />
+						android:textSize="13sp" />
 				</LinearLayout>
 				<TextView
 					android:id="@+id/textview6"
@@ -65,7 +65,7 @@
 					android:background="?attr/selectableItemBackground"
 					android:text="Safety Tips"
 					android:textStyle="bold"
-					android:textSize="12.5sp"
+					android:textSize="13sp"
 					android:focusable="true"
 					android:drawableStart="@drawable/ic_shield"
 					android:drawablePadding="6dp"
@@ -111,7 +111,7 @@
 							android:layout_height="wrap_content"
 							android:text="HV0x…"
 							android:textStyle="bold"
-							android:textSize="14.5sp"
+							android:textSize="15sp"
 							android:fontFamily="monospace" />
 						<TextView
 							android:id="@+id/tv_confirm_seller_rating"
@@ -119,13 +119,13 @@
 							android:layout_height="wrap_content"
 							android:layout_marginTop="2dp"
 							android:text="No rating yet"
-							android:textSize="11.5sp" />
+							android:textSize="12sp" />
 					</LinearLayout>
 					<TextView
 						android:id="@+id/tv_confirm_seller_status"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:textSize="11.5sp"
+						android:textSize="12sp"
 						android:visibility="gone" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
@@ -137,7 +137,7 @@
 				android:layout_marginBottom="8dp"
 				android:text="YOUR SELL OFFER"
 				android:textStyle="bold"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:layout_marginStart="4dp"
 				android:letterSpacing="0.06" />
 			<com.google.android.material.card.MaterialCardView
@@ -167,14 +167,14 @@
 							android:layout_height="wrap_content"
 							android:text="Amount to sell"
 							android:layout_weight="1"
-							android:textSize="13.5sp" />
+							android:textSize="14sp" />
 						<TextView
 							android:id="@+id/tv_confirm_amount"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="0.00 HARV"
 							android:textStyle="bold"
-							android:textSize="13.5sp" />
+							android:textSize="14sp" />
 					</LinearLayout>
 					<LinearLayout
 						android:id="@+id/linear10"
@@ -188,14 +188,14 @@
 							android:layout_height="wrap_content"
 							android:text="Price per 1 HARV"
 							android:layout_weight="1"
-							android:textSize="13.5sp" />
+							android:textSize="14sp" />
 						<TextView
 							android:id="@+id/tv_confirm_unit_price"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="₦0.00"
 							android:textStyle="bold"
-							android:textSize="13.5sp" />
+							android:textSize="14sp" />
 					</LinearLayout>
 					<com.google.android.material.divider.MaterialDivider
 						android:id="@+id/view11"
@@ -215,14 +215,14 @@
 							android:layout_height="wrap_content"
 							android:text="Buyers will pay you (est.)"
 							android:layout_weight="1"
-							android:textSize="13.5sp" />
+							android:textSize="14sp" />
 						<TextView
 							android:id="@+id/tv_confirm_buyers_pay"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="₦0.00"
 							android:textStyle="bold"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 					</LinearLayout>
 					<LinearLayout
 						android:id="@+id/linear13"
@@ -236,7 +236,7 @@
 							android:layout_height="wrap_content"
 							android:text="Trade limit"
 							android:layout_weight="1"
-							android:textSize="13.5sp" />
+							android:textSize="14sp" />
 						<TextView
 							android:id="@+id/tv_confirm_trade_limit"
 							android:layout_width="wrap_content"
@@ -256,7 +256,7 @@
 							android:layout_height="wrap_content"
 							android:text="Offer duration"
 							android:layout_weight="1"
-							android:textSize="13.5sp" />
+							android:textSize="14sp" />
 						<TextView
 							android:id="@+id/tv_confirm_duration"
 							android:layout_width="wrap_content"
@@ -296,7 +296,7 @@
 							android:text="Payment methods"
 							android:textStyle="bold"
 							android:layout_weight="1"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 						<com.google.android.material.button.MaterialButton
 							android:id="@+id/btn_confirm_edit_payment"
 							android:layout_width="wrap_content"
@@ -369,7 +369,7 @@
 				android:textStyle="bold"
 				android:textAllCaps="false"
 				app:backgroundTint="@color/colorP2pAccent"
-				app:cornerRadius="14dp"
+				app:cornerRadius="12dp"
 				app:elevation="0dp" />
 			<com.google.android.material.button.MaterialButton
 				android:id="@+id/btn_save_as_draft"
@@ -382,7 +382,7 @@
 				style="@style/Widget.MaterialComponents.Button.OutlinedButton"
 				android:textAllCaps="false"
 				app:backgroundTint="@color/colorP2pSurfaceAlt"
-				app:cornerRadius="14dp"
+				app:cornerRadius="12dp"
 				app:elevation="0dp"
 				app:strokeColor="@color/colorP2pBorder"
 				app:strokeWidth="1dp" />
@@ -397,7 +397,7 @@
 				style="@style/Widget.MaterialComponents.Button.OutlinedButton"
 				android:textAllCaps="false"
 				app:backgroundTint="@color/colorP2pSurfaceAlt"
-				app:cornerRadius="14dp"
+				app:cornerRadius="12dp"
 				app:elevation="0dp"
 				app:strokeColor="@color/colorError"
 				app:strokeWidth="1dp" />
@@ -408,7 +408,7 @@
 				android:layout_marginTop="16dp"
 				android:gravity="center_vertical"
 				android:text="P2P trades are secured by escrow. Learn more"
-				android:textSize="11.5sp"
+				android:textSize="12sp"
 				android:layout_marginStart="4dp"
 				android:drawableStart="@drawable/ic_shield"
 				android:drawablePadding="6dp"
@@ -435,7 +435,7 @@
 						android:layout_height="wrap_content"
 						android:text="How selling works"
 						android:textStyle="bold"
-						android:textSize="14.5sp" />
+						android:textSize="15sp" />
 					<LinearLayout
 						android:id="@+id/linear20"
 						android:layout_width="match_parent"

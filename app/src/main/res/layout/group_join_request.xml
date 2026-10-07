@@ -65,7 +65,7 @@
 								android:layout_width="56dp"
 								android:layout_height="56dp"
 								app:cardBackgroundColor="@color/colorSurfaceAlt"
-								app:cardCornerRadius="28dp"
+								app:cardCornerRadius="20dp"
 								app:cardElevation="0dp"
 	app:strokeWidth="0dp">
 								<ImageView
@@ -187,7 +187,7 @@
 					android:text="ABOUT THIS GROUP"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="4dp"
 					android:letterSpacing="0.06" />
 				<com.google.android.material.card.MaterialCardView
@@ -206,7 +206,7 @@
 						android:padding="18dp"
 						android:text="A rotational savings circle for small business owners in Sapele. Every member contributes weekly, and the full pot rotates to one member each cycle until everyone has received a payout."
 						android:textColor="@color/colorTextSecondary"
-						android:textSize="13.5sp"
+						android:textSize="14sp"
 						android:lineSpacingExtra="3dp" />
 				</com.google.android.material.card.MaterialCardView>
 				<TextView
@@ -218,7 +218,7 @@
 					android:text="GROUP DETAILS"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="4dp"
 					android:letterSpacing="0.06" />
 				<com.google.android.material.card.MaterialCardView
@@ -249,7 +249,7 @@
 								android:text="Admin"
 								android:textColor="@color/colorTextSecondary"
 								android:layout_weight="1"
-								android:textSize="13.5sp" />
+								android:textSize="14sp" />
 							<TextView
 								android:id="@+id/tv_join_admin_value"
 								android:layout_width="wrap_content"
@@ -257,7 +257,7 @@
 								android:text="Chidinma O."
 								android:textStyle="bold"
 								android:textColor="@color/colorTextPrimary"
-								android:textSize="13.5sp" />
+								android:textSize="14sp" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view75"
@@ -278,7 +278,7 @@
 								android:text="Members"
 								android:textColor="@color/colorTextSecondary"
 								android:layout_weight="1"
-								android:textSize="13.5sp" />
+								android:textSize="14sp" />
 							<TextView
 								android:id="@+id/tv_join_members_value"
 								android:layout_width="wrap_content"
@@ -286,7 +286,7 @@
 								android:text="14 / 20"
 								android:textStyle="bold"
 								android:textColor="@color/colorTextPrimary"
-								android:textSize="13.5sp" />
+								android:textSize="14sp" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view77"
@@ -307,7 +307,7 @@
 								android:text="Group Created"
 								android:textColor="@color/colorTextSecondary"
 								android:layout_weight="1"
-								android:textSize="13.5sp" />
+								android:textSize="14sp" />
 							<TextView
 								android:id="@+id/tv_join_created_value"
 								android:layout_width="wrap_content"
@@ -315,7 +315,7 @@
 								android:text="Feb 2026"
 								android:textStyle="bold"
 								android:textColor="@color/colorTextPrimary"
-								android:textSize="13.5sp" />
+								android:textSize="14sp" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view79"
@@ -336,7 +336,7 @@
 								android:text="Current Cycle"
 								android:textColor="@color/colorTextSecondary"
 								android:layout_weight="1"
-								android:textSize="13.5sp" />
+								android:textSize="14sp" />
 							<TextView
 								android:id="@+id/tv_join_cycle_value"
 								android:layout_width="wrap_content"
@@ -344,7 +344,7 @@
 								android:text="Cycle 6 of 20"
 								android:textStyle="bold"
 								android:textColor="@color/colorTextPrimary"
-								android:textSize="13.5sp" />
+								android:textSize="14sp" />
 						</LinearLayout>
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>
@@ -357,7 +357,7 @@
 					android:text="GROUP RULES"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="4dp"
 					android:letterSpacing="0.06" />
 				<com.google.android.material.card.MaterialCardView
@@ -396,7 +396,7 @@
 								android:text="Weekly contribution of ₦5,000 is due every Monday by 6:00 PM."
 								android:textColor="@color/colorTextSecondary"
 								android:layout_weight="1"
-								android:textSize="13.5sp"
+								android:textSize="14sp"
 								android:layout_marginStart="10dp"
 								android:lineSpacingExtra="2dp" />
 						</LinearLayout>
@@ -421,7 +421,7 @@
 								android:text="Missing two consecutive contributions without notice may result in removal from the group."
 								android:textColor="@color/colorTextSecondary"
 								android:layout_weight="1"
-								android:textSize="13.5sp"
+								android:textSize="14sp"
 								android:layout_marginStart="10dp"
 								android:lineSpacingExtra="2dp" />
 						</LinearLayout>
@@ -446,7 +446,7 @@
 								android:text="Payout order is decided by the admin at the start of each cycle and shared with all members."
 								android:textColor="@color/colorTextSecondary"
 								android:layout_weight="1"
-								android:textSize="13.5sp"
+								android:textSize="14sp"
 								android:layout_marginStart="10dp"
 								android:lineSpacingExtra="2dp" />
 						</LinearLayout>
@@ -470,7 +470,7 @@
 								android:text="Leaving before completing a full cycle forfeits any pending payout for that cycle."
 								android:textColor="@color/colorTextSecondary"
 								android:layout_weight="1"
-								android:textSize="13.5sp"
+								android:textSize="14sp"
 								android:layout_marginStart="10dp"
 								android:lineSpacingExtra="2dp" />
 						</LinearLayout>
@@ -485,7 +485,7 @@
 					android:text="RECENT ACTIVITY"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="4dp"
 					android:letterSpacing="0.06" />
 				<com.google.android.material.card.MaterialCardView
@@ -532,7 +532,7 @@
 								android:layout_height="wrap_content"
 								android:text="3d ago"
 								android:textColor="@color/colorTextTertiary"
-								android:textSize="11.5sp" />
+								android:textSize="12sp" />
 						</LinearLayout>
 						<LinearLayout
 							android:id="@+id/linear86"
@@ -563,7 +563,7 @@
 								android:layout_height="wrap_content"
 								android:text="6d ago"
 								android:textColor="@color/colorTextTertiary"
-								android:textSize="11.5sp" />
+								android:textSize="12sp" />
 						</LinearLayout>
 						<LinearLayout
 							android:id="@+id/linear87"
@@ -593,7 +593,7 @@
 								android:layout_height="wrap_content"
 								android:text="1w ago"
 								android:textColor="@color/colorTextTertiary"
-								android:textSize="11.5sp" />
+								android:textSize="12sp" />
 						</LinearLayout>
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>
@@ -606,7 +606,7 @@
 					android:text="MESSAGE TO ADMIN (OPTIONAL)"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="4dp"
 					android:letterSpacing="0.06" />
 				<com.google.android.material.card.MaterialCardView
@@ -627,7 +627,7 @@
 						android:textColor="@color/colorTextPrimary"
 						android:hint="Introduce yourself, or share why you'd like to join this group..."
 						android:gravity="top|start"
-						android:textSize="13.5sp"
+						android:textSize="14sp"
 						android:inputType="textMultiLine|textCapSentences"
 						android:maxLength="300" />
 				</com.google.android.material.card.MaterialCardView>
@@ -639,7 +639,7 @@
 					android:text="0 / 300"
 					android:textColor="@color/colorTextTertiary"
 					android:gravity="end"
-					android:textSize="11.5sp" />
+					android:textSize="12sp" />
 				<com.google.android.material.card.MaterialCardView
 					android:id="@+id/cardview41"
 					android:layout_width="match_parent"
@@ -683,7 +683,7 @@
 					android:gravity="center_horizontal"
 					android:text="Your request will be reviewed by the group admin. You'll be notified once a decision is made."
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="11.5sp" />
+					android:textSize="12sp" />
 			</LinearLayout>
 		</androidx.core.widget.NestedScrollView>
 		<LinearLayout
@@ -705,7 +705,7 @@
 				android:layout_marginEnd="8dp"
 				android:textAllCaps="false"
 				app:backgroundTint="@color/colorSurfaceRaised"
-				app:cornerRadius="14dp"
+				app:cornerRadius="12dp"
 				app:elevation="0dp"
 				app:strokeColor="@color/colorCardStroke"
 				app:strokeWidth="1dp" />
@@ -721,7 +721,7 @@
 				android:layout_marginStart="8dp"
 				android:textAllCaps="false"
 				app:backgroundTint="@color/colorAccent"
-				app:cornerRadius="14dp"
+				app:cornerRadius="12dp"
 				app:elevation="0dp" />
 		</LinearLayout>
 	</LinearLayout>

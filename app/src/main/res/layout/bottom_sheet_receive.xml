@@ -37,7 +37,7 @@
 			android:layout_marginTop="4dp"
 			android:layout_marginBottom="20dp"
 			android:text="Choose an asset to view its demo deposit address."
-			android:textSize="13.5sp"
+			android:textSize="14sp"
 			android:focusable="false" />
 		<TextView
 			android:id="@+id/textview17"
@@ -46,7 +46,7 @@
 			android:layout_marginBottom="8dp"
 			android:text="ASSET"
 			android:textStyle="bold"
-			android:textSize="10.5sp"
+			android:textSize="11sp"
 			android:letterSpacing="0.06"
 			android:focusable="false" />
 		<com.google.android.material.card.MaterialCardView
@@ -94,7 +94,7 @@
 					android:text="----"
 					android:singleLine="true"
 					android:layout_weight="1"
-					android:textSize="13.5sp"
+					android:textSize="14sp"
 					android:fontFamily="monospace"
 					android:focusable="false"
 					android:ellipsize="middle" />
@@ -159,7 +159,7 @@
 			android:text="Close"
 			android:textStyle="bold"
 			android:layout_gravity="center_horizontal"
-			android:textSize="14.5sp"
+			android:textSize="15sp"
 			android:focusable="false" />
 	</LinearLayout>
 </LinearLayout>

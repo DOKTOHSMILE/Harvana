@@ -51,7 +51,7 @@
 						android:layout_marginBottom="20dp"
 						android:text="One page, everything needed to get started."
 						android:textColor="@color/colorTextSecondary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<TextView
 						android:id="@+id/textview51"
 						android:layout_width="wrap_content"
@@ -60,7 +60,7 @@
 						android:text="PERSONAL"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextTertiary"
-						android:textSize="10.5sp"
+						android:textSize="11sp"
 						android:letterSpacing="0.06" />
 					<TextView
 						android:id="@+id/textview52"
@@ -70,7 +70,7 @@
 						android:text="First Name"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview46"
 						android:layout_width="match_parent"
@@ -88,7 +88,7 @@
 							android:padding="12dp"
 							android:background="@android:color/transparent"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp"
+							android:textSize="15sp"
 							android:inputType="textPersonName|textCapWords"
 							android:importantForAutofill="no" />
 					</com.google.android.material.card.MaterialCardView>
@@ -100,7 +100,7 @@
 						android:text="Last Name"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview47"
 						android:layout_width="match_parent"
@@ -118,7 +118,7 @@
 							android:padding="12dp"
 							android:background="@android:color/transparent"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp"
+							android:textSize="15sp"
 							android:inputType="textPersonName|textCapWords"
 							android:importantForAutofill="no" />
 					</com.google.android.material.card.MaterialCardView>
@@ -130,7 +130,7 @@
 						android:text="Date of Birth"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview48"
 						android:layout_width="match_parent"
@@ -149,7 +149,7 @@
 							android:gravity="center_vertical"
 							android:text="Tap to select"
 							android:textColor="@color/colorTextSecondary"
-							android:textSize="14.5sp"
+							android:textSize="15sp"
 							android:focusable="true" />
 					</com.google.android.material.card.MaterialCardView>
 					<TextView
@@ -160,7 +160,7 @@
 						android:text="CONTACT &amp; LOCATION"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextTertiary"
-						android:textSize="10.5sp"
+						android:textSize="11sp"
 						android:letterSpacing="0.06" />
 					<TextView
 						android:id="@+id/textview56"
@@ -170,7 +170,7 @@
 						android:text="Email"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview49"
 						android:layout_width="match_parent"
@@ -188,7 +188,7 @@
 							android:padding="12dp"
 							android:background="@android:color/transparent"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp"
+							android:textSize="15sp"
 							android:inputType="textEmailAddress" />
 					</com.google.android.material.card.MaterialCardView>
 					<TextView
@@ -199,7 +199,7 @@
 						android:text="Phone Number"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<LinearLayout
 						android:id="@+id/linear28"
 						android:layout_width="match_parent"
@@ -226,7 +226,7 @@
 								android:textColor="@color/colorTextPrimary"
 								android:hint="+234"
 								android:inputType="phone"
-								android:textSize="14.5sp" />
+								android:textSize="15sp" />
 						</com.google.android.material.card.MaterialCardView>
 						<com.google.android.material.card.MaterialCardView
 							android:id="@+id/cardview51"
@@ -246,7 +246,7 @@
 								android:background="@android:color/transparent"
 								android:textColor="@color/colorTextPrimary"
 								android:inputType="phone"
-								android:textSize="14.5sp" />
+								android:textSize="15sp" />
 						</com.google.android.material.card.MaterialCardView>
 					</LinearLayout>
 					<TextView
@@ -257,7 +257,7 @@
 						android:text="Country"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview52"
 						android:layout_width="match_parent"
@@ -297,7 +297,7 @@
 								android:text="State"
 								android:textStyle="bold"
 								android:textColor="@color/colorTextPrimary"
-								android:textSize="13.5sp" />
+								android:textSize="14sp" />
 							<com.google.android.material.card.MaterialCardView
 								android:id="@+id/cardview53"
 								android:layout_width="match_parent"
@@ -331,7 +331,7 @@
 								android:text="City"
 								android:textStyle="bold"
 								android:textColor="@color/colorTextPrimary"
-								android:textSize="13.5sp" />
+								android:textSize="14sp" />
 							<com.google.android.material.card.MaterialCardView
 								android:id="@+id/cardview54"
 								android:layout_width="match_parent"
@@ -359,7 +359,7 @@
 						android:text="Home Address"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview55"
 						android:layout_width="match_parent"
@@ -377,7 +377,7 @@
 							android:padding="12dp"
 							android:background="@android:color/transparent"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp"
+							android:textSize="15sp"
 							android:inputType="textPostalAddress" />
 					</com.google.android.material.card.MaterialCardView>
 					<TextView
@@ -388,7 +388,7 @@
 						android:text="Occupation"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview56"
 						android:layout_width="match_parent"
@@ -406,7 +406,7 @@
 							android:padding="12dp"
 							android:background="@android:color/transparent"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp"
+							android:textSize="15sp"
 							android:inputType="text|textCapWords" />
 					</com.google.android.material.card.MaterialCardView>
 					<TextView
@@ -417,7 +417,7 @@
 						android:text="Referred by (optional)"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/card_referrer"
 						android:layout_width="match_parent"
@@ -437,7 +437,7 @@
 							android:hint="@username of the friend who invited you"
 							android:textColor="@color/colorTextPrimary"
 							android:textColorHint="@color/colorTextTertiary"
-							android:textSize="14.5sp"
+							android:textSize="15sp"
 							android:inputType="textNoSuggestions|textVisiblePassword" />
 					</com.google.android.material.card.MaterialCardView>
 					<TextView
@@ -457,7 +457,7 @@
 						android:text="IDENTITY VERIFICATION"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextTertiary"
-						android:textSize="10.5sp"
+						android:textSize="11sp"
 						android:letterSpacing="0.06" />
 					<LinearLayout
 						android:id="@+id/linear32"
@@ -519,7 +519,7 @@
 						android:text="BVN Number"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview59"
 						android:visibility="gone"
@@ -538,7 +538,7 @@
 							android:padding="12dp"
 							android:background="@android:color/transparent"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp"
+							android:textSize="15sp"
 							android:inputType="number"
 							android:maxLength="11" />
 					</com.google.android.material.card.MaterialCardView>
@@ -550,7 +550,7 @@
 						android:text="NEXT OF KIN"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextTertiary"
-						android:textSize="10.5sp"
+						android:textSize="11sp"
 						android:letterSpacing="0.06" />
 					<TextView
 						android:id="@+id/textview65"
@@ -560,7 +560,7 @@
 						android:text="Full Name"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview60"
 						android:layout_width="match_parent"
@@ -578,7 +578,7 @@
 							android:padding="12dp"
 							android:background="@android:color/transparent"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp"
+							android:textSize="15sp"
 							android:inputType="textPersonName|textCapWords"
 							android:importantForAutofill="no" />
 					</com.google.android.material.card.MaterialCardView>
@@ -590,7 +590,7 @@
 						android:text="Relationship"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview61"
 						android:layout_width="match_parent"
@@ -608,7 +608,7 @@
 							android:padding="12dp"
 							android:background="@android:color/transparent"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp"
+							android:textSize="15sp"
 							android:inputType="text|textCapWords" />
 					</com.google.android.material.card.MaterialCardView>
 					<TextView
@@ -619,7 +619,7 @@
 						android:text="Phone Number"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview62"
 						android:layout_width="match_parent"
@@ -638,7 +638,7 @@
 							android:background="@android:color/transparent"
 							android:textColor="@color/colorTextPrimary"
 							android:inputType="phone"
-							android:textSize="14.5sp" />
+							android:textSize="15sp" />
 					</com.google.android.material.card.MaterialCardView>
 					<LinearLayout
 						android:id="@+id/linear33"
@@ -661,7 +661,7 @@
 								android:text="State"
 								android:textStyle="bold"
 								android:textColor="@color/colorTextPrimary"
-								android:textSize="13.5sp" />
+								android:textSize="14sp" />
 							<com.google.android.material.card.MaterialCardView
 								android:id="@+id/cardview63"
 								android:layout_width="match_parent"
@@ -695,7 +695,7 @@
 								android:text="City"
 								android:textStyle="bold"
 								android:textColor="@color/colorTextPrimary"
-								android:textSize="13.5sp" />
+								android:textSize="14sp" />
 							<com.google.android.material.card.MaterialCardView
 								android:id="@+id/cardview64"
 								android:layout_width="match_parent"
@@ -723,7 +723,7 @@
 						android:text="Address"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="13.5sp" />
+						android:textSize="14sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview65"
 						android:layout_width="match_parent"
@@ -741,7 +741,7 @@
 							android:padding="12dp"
 							android:background="@android:color/transparent"
 							android:textColor="@color/colorTextPrimary"
-							android:textSize="14.5sp"
+							android:textSize="15sp"
 							android:inputType="textPostalAddress" />
 					</com.google.android.material.card.MaterialCardView>
 					<LinearLayout

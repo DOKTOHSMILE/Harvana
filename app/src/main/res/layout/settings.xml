@@ -88,7 +88,7 @@
 								android:layout_marginTop="1dp"
 								android:text="@@handle"
 								android:textColor="@color/colorTextTertiary"
-								android:textSize="12.5sp" />
+								android:textSize="13sp" />
 							<TextView
 								android:id="@+id/tvSettingsVerified"
 								android:layout_width="wrap_content"
@@ -102,7 +102,7 @@
 								android:drawablePadding="4dp"
 								android:textStyle="bold"
 								android:textColor="@color/colorTextOnAccent"
-								android:textSize="10.5sp"
+								android:textSize="11sp"
 								android:paddingStart="10dp"
 								android:paddingEnd="10dp"
 								android:visibility="gone" />
@@ -129,7 +129,7 @@
 					android:text="Account &amp; Security"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="22dp"
 					android:letterSpacing="0.06" />
 				<com.google.android.material.card.MaterialCardView
@@ -180,14 +180,14 @@
 									android:text="Account Information"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview4"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Personal details and verification"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview2"
@@ -235,14 +235,14 @@
 									android:text="Security &amp; Privacy"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview6"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Password, PIN, biometrics"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview4"
@@ -290,14 +290,14 @@
 									android:text="Wallet &amp; Assets"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview8"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Manage your crypto wallet and assets"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview6"
@@ -345,14 +345,14 @@
 									android:text="Backup &amp; Recovery"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview10"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Backup your data and recovery phrase"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview8"
@@ -373,7 +373,7 @@
 					android:text="Finance &amp; Payments"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="22dp"
 					android:letterSpacing="0.06" />
 				<com.google.android.material.card.MaterialCardView
@@ -424,14 +424,14 @@
 									android:text="Payment Methods"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview13"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Manage payment and withdrawal methods"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview10"
@@ -479,14 +479,14 @@
 									android:text="Transaction History"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview15"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="View your transactions and activities"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview12"
@@ -534,14 +534,14 @@
 									android:text="Limits &amp; Fees"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview17"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="View limits and applicable fees"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview14"
@@ -589,14 +589,14 @@
 									android:text="Tax Reports"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview19"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Download your tax documents"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview16"
@@ -617,7 +617,7 @@
 					android:text="Community &amp; Social"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="22dp"
 					android:letterSpacing="0.06" />
 				<com.google.android.material.card.MaterialCardView
@@ -668,14 +668,14 @@
 									android:text="Groups &amp; Circles"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview22"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Manage your groups and circles"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview18"
@@ -723,14 +723,14 @@
 									android:text="Privacy &amp; Visibility"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview24"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Control who can see your activity"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview20"
@@ -778,14 +778,14 @@
 									android:text="Notifications"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview26"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Customize your notification preferences"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview22"
@@ -833,14 +833,14 @@
 									android:text="Blocked Users"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview28"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Manage blocked users and content"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview24"
@@ -861,7 +861,7 @@
 					android:text="App Preferences"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="22dp"
 					android:letterSpacing="0.06" />
 				<com.google.android.material.card.MaterialCardView
@@ -912,14 +912,14 @@
 									android:text="Theme &amp; Appearance"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/tvThemeValue"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Choose your theme and display preferences"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview26"
@@ -967,14 +967,14 @@
 									android:text="Language"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview32"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Change app language"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview28"
@@ -1022,14 +1022,14 @@
 									android:text="Currency"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/tvCurrencyValue"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Select your preferred currency"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview30"
@@ -1077,14 +1077,14 @@
 									android:text="Data &amp; Storage"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview35"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Manage data usage and storage"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview32"
@@ -1105,7 +1105,7 @@
 					android:text="Support &amp; About"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="10.5sp"
+					android:textSize="11sp"
 					android:layout_marginStart="22dp"
 					android:letterSpacing="0.06" />
 				<com.google.android.material.card.MaterialCardView
@@ -1156,14 +1156,14 @@
 									android:text="Help &amp; Support"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview38"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Get help or contact support"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview34"
@@ -1211,14 +1211,14 @@
 									android:text="About Harvana"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview40"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Learn more about Harvana"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview36"
@@ -1266,14 +1266,14 @@
 									android:text="Terms &amp; Conditions"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview42"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Read our terms and privacy policy"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview38"
@@ -1321,14 +1321,14 @@
 									android:text="Log Out"
 									android:textStyle="bold"
 									android:textColor="@color/colorError"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/textview44"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:text="Sign out of your account"
 									android:textColor="@color/colorTextTertiary"
-									android:textSize="11.5sp" />
+									android:textSize="12sp" />
 							</LinearLayout>
 						</LinearLayout>
 					</LinearLayout>
@@ -1341,7 +1341,7 @@
 					android:gravity="center_horizontal|center_vertical"
 					android:text="Harvana"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="11.5sp" />
+					android:textSize="12sp" />
 			</LinearLayout>
 		</androidx.core.widget.NestedScrollView>
 	</LinearLayout>

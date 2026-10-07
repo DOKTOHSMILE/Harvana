@@ -27,7 +27,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:textColor="@color/colorTextTertiary"
-				android:textSize="11.5sp"
+				android:textSize="12sp"
 				android:fontFamily="monospace"
 				android:focusable="false" />
 			<TextView
@@ -45,7 +45,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="2dp"
 				android:textColor="@color/colorTextSecondary"
-				android:textSize="12.5sp"
+				android:textSize="13sp"
 				android:focusable="false" />
 			<TextView
 				android:id="@+id/textview48"
@@ -55,7 +55,7 @@
 				android:text="REASON SUBMITTED"
 				android:textStyle="bold"
 				android:textColor="@color/colorTextTertiary"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:letterSpacing="0.06"
 				android:focusable="false" />
 			<TextView
@@ -64,7 +64,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="4dp"
 				android:textColor="@color/colorTextPrimary"
-				android:textSize="13.5sp"
+				android:textSize="14sp"
 				android:lineSpacingExtra="2dp"
 				android:autoLink="web"
 				android:focusable="false" />
@@ -90,7 +90,7 @@
 					android:textStyle="bold"
 					android:textColor="@color/colorTextOnAccent"
 					android:layout_weight="1"
-					android:textSize="12.5sp"
+					android:textSize="13sp"
 					android:layout_marginEnd="6dp"
 					app:backgroundTint="@color/colorAccent"
 					app:cornerRadius="12dp"
@@ -105,7 +105,7 @@
 					android:textStyle="bold"
 					android:textColor="@color/colorTextOnAccent"
 					android:layout_weight="1"
-					android:textSize="12.5sp"
+					android:textSize="13sp"
 					android:layout_marginStart="6dp"
 					app:backgroundTint="@color/colorError"
 					app:cornerRadius="12dp"

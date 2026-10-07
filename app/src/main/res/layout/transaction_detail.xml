@@ -130,7 +130,7 @@
 								android:layout_weight="1"
 								android:text="Status"
 								android:textColor="@color/colorTextSecondary"
-								android:textSize="14.5sp" />
+								android:textSize="15sp" />
 							<TextView
 								android:id="@+id/tv_tx_status"
 								android:layout_width="wrap_content"
@@ -142,7 +142,7 @@
 								android:paddingBottom="5dp"
 								android:text="Completed"
 								android:textColor="@color/colorSuccess"
-								android:textSize="12.5sp"
+								android:textSize="13sp"
 								android:textStyle="bold" />
 						</LinearLayout>
 						<LinearLayout
@@ -159,7 +159,7 @@
 								android:layout_weight="1"
 								android:text="From"
 								android:textColor="@color/colorTextSecondary"
-								android:textSize="14.5sp" />
+								android:textSize="15sp" />
 							<TextView
 								android:id="@+id/tv_from_address"
 								android:layout_width="0dp"
@@ -167,7 +167,7 @@
 								android:layout_weight="1.3"
 								android:gravity="end"
 								android:textColor="@color/colorTextPrimary"
-								android:textSize="14.5sp" />
+								android:textSize="15sp" />
 						</LinearLayout>
 						<LinearLayout
 							android:layout_width="match_parent"
@@ -182,7 +182,7 @@
 								android:layout_weight="1"
 								android:text="To"
 								android:textColor="@color/colorTextSecondary"
-								android:textSize="14.5sp" />
+								android:textSize="15sp" />
 							<TextView
 								android:id="@+id/tv_to_address"
 								android:layout_width="0dp"
@@ -190,7 +190,7 @@
 								android:layout_weight="1.3"
 								android:gravity="end"
 								android:textColor="@color/colorTextPrimary"
-								android:textSize="14.5sp" />
+								android:textSize="15sp" />
 						</LinearLayout>
 						<com.google.android.material.card.MaterialCardView
 							android:id="@+id/cardview4"
@@ -212,7 +212,7 @@
 									android:layout_weight="0.8"
 									android:text="For"
 									android:textColor="@color/colorTextSecondary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/tv_memo"
 									android:layout_width="0dp"
@@ -220,7 +220,7 @@
 									android:layout_weight="1.4"
 									android:gravity="end"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 							</LinearLayout>
 						</com.google.android.material.card.MaterialCardView>
 						<LinearLayout
@@ -238,13 +238,13 @@
 								android:layout_weight="1"
 								android:text="Network fee"
 								android:textColor="@color/colorTextSecondary"
-								android:textSize="14.5sp" />
+								android:textSize="15sp" />
 							<TextView
 								android:id="@+id/tv_network_fee"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:textColor="@color/colorTextPrimary"
-								android:textSize="14.5sp" />
+								android:textSize="15sp" />
 						</LinearLayout>
 						<TextView
 							android:id="@+id/textview37"
@@ -290,13 +290,13 @@
 									android:layout_weight="1"
 									android:text="Burn"
 									android:textColor="@color/colorTextSecondary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/tv_burn_amount"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 							</LinearLayout>
 							<com.google.android.material.card.MaterialCardView
 								android:id="@+id/cardview5"
@@ -318,7 +318,7 @@
 										android:layout_weight="0.7"
 										android:text="Reference"
 										android:textColor="@color/colorTextSecondary"
-										android:textSize="14.5sp" />
+										android:textSize="15sp" />
 									<TextView
 										android:id="@+id/tv_tx_hash"
 										android:layout_width="0dp"
@@ -343,13 +343,13 @@
 									android:layout_weight="1"
 									android:text="Block"
 									android:textColor="@color/colorTextSecondary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/tv_block_number"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 							</LinearLayout>
 							<LinearLayout
 								android:id="@+id/linear_confirmations"
@@ -365,13 +365,13 @@
 									android:layout_weight="1"
 									android:text="Confirmations"
 									android:textColor="@color/colorTextSecondary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/tv_confirmations"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 							</LinearLayout>
 							<LinearLayout
 								android:id="@+id/linear25"
@@ -387,13 +387,13 @@
 									android:layout_weight="1"
 									android:text="Nonce"
 									android:textColor="@color/colorTextSecondary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 								<TextView
 									android:id="@+id/tv_nonce"
 									android:layout_width="wrap_content"
 									android:layout_height="wrap_content"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp" />
+									android:textSize="15sp" />
 							</LinearLayout>
 						</LinearLayout>
 					</com.google.android.material.card.MaterialCardView>
@@ -449,7 +449,7 @@
 									android:layout_height="wrap_content"
 									android:text="Transaction initiated"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp"
+									android:textSize="15sp"
 									android:textStyle="bold" />
 								<TextView
 									android:layout_width="wrap_content"
@@ -486,7 +486,7 @@
 									android:layout_height="wrap_content"
 									android:text="Processing payment"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp"
+									android:textSize="15sp"
 									android:textStyle="bold" />
 								<TextView
 									android:layout_width="wrap_content"
@@ -526,7 +526,7 @@
 									android:layout_height="wrap_content"
 									android:text="Payment complete"
 									android:textColor="@color/colorTextPrimary"
-									android:textSize="14.5sp"
+									android:textSize="15sp"
 									android:textStyle="bold" />
 								<TextView
 									android:id="@+id/tv_tl3_body"
@@ -561,7 +561,7 @@
 			android:textSize="15sp"
 			android:textStyle="bold"
 			app:backgroundTint="@color/colorAccent"
-			app:cornerRadius="14dp"
+			app:cornerRadius="12dp"
 			app:elevation="0dp" />
 	</LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

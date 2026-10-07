@@ -90,7 +90,7 @@
 					android:textColor="@color/colorTextOnAccent"
 					android:textAllCaps="false"
 					app:backgroundTint="@color/colorAccent"
-					app:cornerRadius="14dp"
+					app:cornerRadius="12dp"
 					app:elevation="0dp" />
 			</LinearLayout>
 			<LinearLayout
@@ -118,7 +118,7 @@
 					android:textColor="@color/colorTextSecondary"
 					android:textAllCaps="false"
 					app:backgroundTint="@color/colorSurfaceRaised"
-					app:cornerRadius="14dp"
+					app:cornerRadius="12dp"
 					app:elevation="0dp"
 					app:strokeColor="@color/colorCardStroke"
 					app:strokeWidth="1dp" />

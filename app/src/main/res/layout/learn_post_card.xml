@@ -94,7 +94,7 @@
                             android:paddingTop="2dp"
                             android:paddingBottom="2dp"
                             android:text="Not scored yet"
-                            android:textSize="10.5sp"
+                            android:textSize="11sp"
                             android:textStyle="bold" />
                     </LinearLayout>
                     <TextView
@@ -113,7 +113,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:textColor="@color/colorAccent"
-                android:textSize="11.5sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -122,7 +122,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/colorTextPrimary"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:lineSpacingMultiplier="1.1" />
 
@@ -132,7 +132,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textColor="@color/colorTextSecondary"
-                android:textSize="14.5sp"
+                android:textSize="15sp"
                 android:lineSpacingMultiplier="1.2"
                 android:textIsSelectable="false" />
 

@@ -38,7 +38,7 @@
 				android:layout_marginTop="6dp"
 				android:text="Notice message body goes here..."
 				android:textColor="@color/colorTextSecondary"
-				android:textSize="13.5sp"
+				android:textSize="14sp"
 				android:lineSpacingExtra="3dp"
 				android:focusable="false" />
 			<com.google.android.material.divider.MaterialDivider
@@ -61,7 +61,7 @@
 					android:text="Admin"
 					android:textColor="@color/colorTextTertiary"
 					android:layout_weight="1"
-					android:textSize="11.5sp"
+					android:textSize="12sp"
 					android:focusable="false" />
 				<TextView
 					android:id="@+id/tv_notice_date"
@@ -69,7 +69,7 @@
 					android:layout_height="wrap_content"
 					android:text="—"
 					android:textColor="@color/colorTextTertiary"
-					android:textSize="11.5sp"
+					android:textSize="12sp"
 					android:focusable="false" />
 			</LinearLayout>
 		</LinearLayout>

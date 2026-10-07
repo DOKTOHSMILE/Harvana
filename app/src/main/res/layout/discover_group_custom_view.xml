@@ -306,7 +306,7 @@
 						android:textStyle="bold"
 						android:textColor="@color/colorAccent"
 						android:layout_weight="1"
-						android:textSize="14.5sp" />
+						android:textSize="15sp" />
 					<LinearLayout
 						android:id="@+id/linear10"
 						android:layout_width="1dp"

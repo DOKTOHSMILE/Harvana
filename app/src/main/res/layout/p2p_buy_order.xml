@@ -347,7 +347,7 @@
 						android:layout_width="0dp"
 						android:layout_height="match_parent"
 						android:background="@android:color/transparent"
-						android:textSize="26sp"
+						android:textSize="28sp"
 						android:textStyle="bold"
 						android:hint="0.00"
 						android:inputType="numberDecimal"
@@ -382,7 +382,7 @@
 						android:layout_marginEnd="8dp"
 						android:textAllCaps="false"
 						android:backgroundTint="@color/colorP2pSurface"
-						app:cornerRadius="11dp"
+						app:cornerRadius="12dp"
 						app:strokeColor="@color/colorP2pBorder"
 						app:strokeWidth="1dp" />
 					<com.google.android.material.button.MaterialButton
@@ -394,7 +394,7 @@
 						android:layout_marginEnd="8dp"
 						android:textAllCaps="false"
 						android:backgroundTint="@color/colorP2pSurface"
-						app:cornerRadius="11dp"
+						app:cornerRadius="12dp"
 						app:strokeColor="@color/colorP2pBorder"
 						app:strokeWidth="1dp" />
 					<com.google.android.material.button.MaterialButton
@@ -406,7 +406,7 @@
 						android:layout_marginEnd="8dp"
 						android:textAllCaps="false"
 						android:backgroundTint="@color/colorP2pSurface"
-						app:cornerRadius="11dp"
+						app:cornerRadius="12dp"
 						app:strokeColor="@color/colorP2pBorder"
 						app:strokeWidth="1dp" />
 					<com.google.android.material.button.MaterialButton
@@ -417,7 +417,7 @@
 						android:textSize="11sp"
 						android:textAllCaps="false"
 						android:backgroundTint="@color/colorP2pSurface"
-						app:cornerRadius="11dp"
+						app:cornerRadius="12dp"
 						app:strokeColor="@color/colorP2pBorder"
 						app:strokeWidth="1dp" />
 				</LinearLayout>
@@ -602,7 +602,7 @@
 				android:textStyle="bold"
 				android:textAllCaps="false"
 				android:backgroundTint="@color/colorP2pAccent"
-				app:cornerRadius="15dp" />
+				app:cornerRadius="12dp" />
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/escrow_card"
 				android:layout_width="match_parent"

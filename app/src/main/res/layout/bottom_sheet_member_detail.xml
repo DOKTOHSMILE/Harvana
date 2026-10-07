@@ -135,7 +135,7 @@
 						android:paddingRight="16dp"
 						android:text="IN THIS GROUP"
 						android:textStyle="bold"
-						android:textSize="10.5sp"
+						android:textSize="11sp"
 						android:letterSpacing="0.06"
 						android:focusable="false" />
 					<LinearLayout
@@ -166,7 +166,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="Slot"
-								android:textSize="11.5sp"
+								android:textSize="12sp"
 								android:focusable="false" />
 							<TextView
 								android:id="@+id/tv_detail_slot"
@@ -174,7 +174,7 @@
 								android:layout_height="wrap_content"
 								android:text="—"
 								android:textStyle="bold"
-								android:textSize="14.5sp"
+								android:textSize="15sp"
 								android:focusable="false" />
 						</LinearLayout>
 					</LinearLayout>
@@ -212,7 +212,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="Status"
-								android:textSize="11.5sp"
+								android:textSize="12sp"
 								android:focusable="false" />
 							<TextView
 								android:id="@+id/tv_detail_status"
@@ -220,7 +220,7 @@
 								android:layout_height="wrap_content"
 								android:text="—"
 								android:textStyle="bold"
-								android:textSize="14.5sp"
+								android:textSize="15sp"
 								android:focusable="false" />
 						</LinearLayout>
 					</LinearLayout>
@@ -251,7 +251,7 @@
 						android:paddingRight="16dp"
 						android:text="PROFILE"
 						android:textStyle="bold"
-						android:textSize="10.5sp"
+						android:textSize="11sp"
 						android:letterSpacing="0.06"
 						android:focusable="false" />
 					<LinearLayout
@@ -282,7 +282,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="Trust score"
-								android:textSize="11.5sp"
+								android:textSize="12sp"
 								android:focusable="false" />
 							<TextView
 								android:id="@+id/tv_detail_trust"
@@ -290,7 +290,7 @@
 								android:layout_height="wrap_content"
 								android:text="—"
 								android:textStyle="bold"
-								android:textSize="14.5sp"
+								android:textSize="15sp"
 								android:focusable="false" />
 						</LinearLayout>
 					</LinearLayout>
@@ -328,7 +328,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="Occupation"
-								android:textSize="11.5sp"
+								android:textSize="12sp"
 								android:focusable="false" />
 							<TextView
 								android:id="@+id/tv_detail_occupation"
@@ -336,7 +336,7 @@
 								android:layout_height="wrap_content"
 								android:text="—"
 								android:textStyle="bold"
-								android:textSize="14.5sp"
+								android:textSize="15sp"
 								android:focusable="false" />
 						</LinearLayout>
 					</LinearLayout>
@@ -374,7 +374,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="Location"
-								android:textSize="11.5sp"
+								android:textSize="12sp"
 								android:focusable="false" />
 							<TextView
 								android:id="@+id/tv_detail_location"
@@ -382,7 +382,7 @@
 								android:layout_height="wrap_content"
 								android:text="—"
 								android:textStyle="bold"
-								android:textSize="14.5sp"
+								android:textSize="15sp"
 								android:focusable="false" />
 						</LinearLayout>
 					</LinearLayout>
@@ -413,7 +413,7 @@
 						android:paddingRight="16dp"
 						android:text="CONTACT"
 						android:textStyle="bold"
-						android:textSize="10.5sp"
+						android:textSize="11sp"
 						android:letterSpacing="0.06"
 						android:focusable="false" />
 					<LinearLayout
@@ -444,7 +444,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="Phone"
-								android:textSize="11.5sp"
+								android:textSize="12sp"
 								android:focusable="false" />
 							<TextView
 								android:id="@+id/tv_detail_phone"
@@ -452,7 +452,7 @@
 								android:layout_height="wrap_content"
 								android:text="—"
 								android:textStyle="bold"
-								android:textSize="14.5sp"
+								android:textSize="15sp"
 								android:focusable="false"
 								android:textIsSelectable="true" />
 						</LinearLayout>
@@ -491,7 +491,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="Email"
-								android:textSize="11.5sp"
+								android:textSize="12sp"
 								android:focusable="false" />
 							<TextView
 								android:id="@+id/tv_detail_email"
@@ -532,7 +532,7 @@
 						android:paddingRight="16dp"
 						android:text="WALLET"
 						android:textStyle="bold"
-						android:textSize="10.5sp"
+						android:textSize="11sp"
 						android:letterSpacing="0.06"
 						android:focusable="false" />
 					<LinearLayout
@@ -563,7 +563,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="Address"
-								android:textSize="11.5sp"
+								android:textSize="12sp"
 								android:focusable="false" />
 							<TextView
 								android:id="@+id/tv_detail_wallet"
@@ -610,7 +610,7 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="Balance"
-								android:textSize="11.5sp"
+								android:textSize="12sp"
 								android:focusable="false" />
 							<TextView
 								android:id="@+id/tv_detail_balance"
@@ -633,7 +633,7 @@
 		android:layout_marginTop="12dp"
 		android:text="Report Member"
 		android:textStyle="bold"
-		android:textSize="14.5sp"
+		android:textSize="15sp"
 		android:layout_marginHorizontal="20dp"
 		app:backgroundTint="@color/colorSurfaceRaised"
 		app:cornerRadius="16dp"
@@ -649,7 +649,7 @@
 		android:text="Remove from group"
 		android:textStyle="bold"
 		android:textColor="@color/colorErrorAlt"
-		android:textSize="14.5sp"
+		android:textSize="15sp"
 		android:layout_marginHorizontal="20dp"
 		app:backgroundTint="@color/colorErrorSoft"
 		app:cornerRadius="16dp"

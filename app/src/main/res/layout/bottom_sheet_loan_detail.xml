@@ -87,7 +87,7 @@
 				android:layout_height="wrap_content"
 				android:text="BORROWER"
 				android:textStyle="bold"
-				android:textSize="10.5sp"
+				android:textSize="11sp"
 				android:letterSpacing="0.06"
 				android:focusable="false" />
 			<TextView
@@ -98,7 +98,7 @@
 				android:layout_marginBottom="16dp"
 				android:text="—"
 				android:textStyle="bold"
-				android:textSize="15.5sp"
+				android:textSize="16sp"
 				android:focusable="false" />
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/cardview3"
@@ -138,14 +138,14 @@
 							android:layout_height="wrap_content"
 							android:text="Loan ID"
 							android:layout_weight="1"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 						<TextView
 							android:id="@+id/tv_loan_detail_id"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="—"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:fontFamily="monospace"
 							android:focusable="false" />
 					</LinearLayout>
@@ -162,14 +162,14 @@
 							android:layout_height="wrap_content"
 							android:text="Disbursed"
 							android:layout_weight="1"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 						<TextView
 							android:id="@+id/tv_loan_detail_disbursed"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="—"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 					</LinearLayout>
 					<LinearLayout
@@ -185,7 +185,7 @@
 							android:layout_height="wrap_content"
 							android:text="Loan Amount (Principal)"
 							android:layout_weight="1"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 						<TextView
 							android:id="@+id/tv_loan_detail_principal"
@@ -193,7 +193,7 @@
 							android:layout_height="wrap_content"
 							android:text="—"
 							android:textStyle="bold"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 					</LinearLayout>
 					<LinearLayout
@@ -209,14 +209,14 @@
 							android:layout_height="wrap_content"
 							android:text="Interest Rate"
 							android:layout_weight="1"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 						<TextView
 							android:id="@+id/tv_loan_detail_rate"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="—"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 					</LinearLayout>
 					<LinearLayout
@@ -232,14 +232,14 @@
 							android:layout_height="wrap_content"
 							android:text="Interest Accrued So Far"
 							android:layout_weight="1"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 						<TextView
 							android:id="@+id/tv_loan_detail_interest_accrued"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="—"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 					</LinearLayout>
 					<LinearLayout
@@ -255,14 +255,14 @@
 							android:layout_height="wrap_content"
 							android:text="Total Repaid So Far"
 							android:layout_weight="1"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 						<TextView
 							android:id="@+id/tv_loan_detail_repaid"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="—"
-							android:textSize="13.5sp"
+							android:textSize="14sp"
 							android:focusable="false" />
 					</LinearLayout>
 					<com.google.android.material.divider.MaterialDivider
@@ -319,7 +319,7 @@
 				android:layout_marginTop="4dp"
 				android:layout_marginBottom="16dp"
 				android:text="No repayments recorded yet."
-				android:textSize="13.5sp"
+				android:textSize="14sp"
 				android:visibility="gone"
 				android:focusable="false" />
 			<com.google.android.material.card.MaterialCardView
@@ -345,7 +345,7 @@
 						android:layout_marginBottom="6dp"
 						android:text="How interest works here"
 						android:textStyle="bold"
-						android:textSize="13.5sp"
+						android:textSize="14sp"
 						android:focusable="false" />
 					<TextView
 						android:id="@+id/tv_loan_detail_explainer"

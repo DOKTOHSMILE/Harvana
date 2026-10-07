@@ -635,7 +635,7 @@
 				android:layout_height="wrap_content"
 				android:text="I verify that these 12 words match my original backup phrase."
 				android:layout_weight="1"
-				android:textSize="13.5sp"
+				android:textSize="14sp"
 				android:focusable="false"
 				android:layout_marginStart="8dp"
 				android:lineSpacingExtra="2dp" />

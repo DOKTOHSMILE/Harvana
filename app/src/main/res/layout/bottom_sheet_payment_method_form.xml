@@ -31,7 +31,7 @@
 			android:textStyle="bold"
 			android:textColor="@color/colorTextOnAccent"
 			android:layout_weight="1"
-			android:textSize="13.5sp"
+			android:textSize="14sp"
 			android:backgroundTint="@color/colorAccent"
 			android:textAllCaps="false" />
 		<com.google.android.material.button.MaterialButton
@@ -42,7 +42,7 @@
 			android:text="Mobile Money"
 			android:textColor="@color/colorTextSecondary"
 			android:layout_weight="1"
-			android:textSize="13.5sp"
+			android:textSize="14sp"
 			android:textAllCaps="false" />
 	</LinearLayout>
 	<TextView
@@ -54,7 +54,7 @@
 		android:text="BANK NAME"
 		android:textStyle="bold"
 		android:textColor="@color/colorTextTertiary"
-		android:textSize="10.5sp"
+		android:textSize="11sp"
 		android:layout_marginStart="4dp"
 		android:letterSpacing="0.06" />
 	<com.google.android.material.card.MaterialCardView
@@ -76,7 +76,7 @@
 			android:background="@android:color/transparent"
 			android:textColor="@color/colorTextPrimary"
 			android:hint="Bank name"
-			android:textSize="14.5sp"
+			android:textSize="15sp"
 			android:inputType="textCapWords"
 			android:paddingHorizontal="14dp" />
 	</com.google.android.material.card.MaterialCardView>
@@ -89,7 +89,7 @@
 		android:text="ACCOUNT NUMBER"
 		android:textStyle="bold"
 		android:textColor="@color/colorTextTertiary"
-		android:textSize="10.5sp"
+		android:textSize="11sp"
 		android:layout_marginStart="4dp"
 		android:letterSpacing="0.06" />
 	<com.google.android.material.card.MaterialCardView
@@ -112,7 +112,7 @@
 			android:textColor="@color/colorTextPrimary"
 			android:hint="Account number"
 			android:inputType="phone"
-			android:textSize="14.5sp"
+			android:textSize="15sp"
 			android:paddingHorizontal="14dp" />
 	</com.google.android.material.card.MaterialCardView>
 	<TextView
@@ -124,7 +124,7 @@
 		android:text="ACCOUNT HOLDER NAME"
 		android:textStyle="bold"
 		android:textColor="@color/colorTextTertiary"
-		android:textSize="10.5sp"
+		android:textSize="11sp"
 		android:layout_marginStart="4dp"
 		android:letterSpacing="0.06" />
 	<com.google.android.material.card.MaterialCardView
@@ -146,7 +146,7 @@
 			android:background="@android:color/transparent"
 			android:textColor="@color/colorTextPrimary"
 			android:hint="Account holder name"
-			android:textSize="14.5sp"
+			android:textSize="15sp"
 			android:inputType="textCapWords"
 			android:paddingHorizontal="14dp" />
 	</com.google.android.material.card.MaterialCardView>
@@ -159,7 +159,7 @@
 		android:text="NICKNAME (OPTIONAL)"
 		android:textStyle="bold"
 		android:textColor="@color/colorTextTertiary"
-		android:textSize="10.5sp"
+		android:textSize="11sp"
 		android:layout_marginStart="4dp"
 		android:letterSpacing="0.06" />
 	<com.google.android.material.card.MaterialCardView
@@ -181,7 +181,7 @@
 			android:background="@android:color/transparent"
 			android:textColor="@color/colorTextPrimary"
 			android:hint="e.g. &quot;Personal account&quot;"
-			android:textSize="14.5sp"
+			android:textSize="15sp"
 			android:paddingHorizontal="14dp" />
 	</com.google.android.material.card.MaterialCardView>
 	<LinearLayout
@@ -208,7 +208,7 @@
 			android:text="Set as default payment method"
 			android:textColor="@color/colorTextSecondary"
 			android:layout_weight="1"
-			android:textSize="13.5sp"
+			android:textSize="14sp"
 			android:layout_marginStart="8dp" />
 	</LinearLayout>
 	<TextView
@@ -230,6 +230,6 @@
 		android:textColor="@color/colorTextOnAccent"
 		android:textAllCaps="false"
 		app:backgroundTint="@color/colorAccent"
-		app:cornerRadius="14dp"
+		app:cornerRadius="12dp"
 		app:elevation="0dp" />
 </LinearLayout>

@@ -627,9 +627,21 @@ public class DiscoverFragmentActivity extends Fragment {
 				// pending request can't be sent twice.
 				boolean isPending = pendingGroupIds.contains(gid);
 				btn_join.setEnabled(!isPending);
-				btn_join.setText(isPending ? "Pending" : "Join");
+				btn_join.setText(isPending ? "Request pending" : "Request to join");
+				btn_join.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextOnAccent));
+				if (cardview5 != null) cardview5.setAlpha(isPending ? 0.6f : 1f);
 				btn_join.setSingleLine(true);
 				btn_join.setMaxLines(1);
+				final long fMembers = membersCount, fSlots = totalSlots;
+				if (imageview4 != null) imageview4.setOnClickListener(v -> new com.google.android.material.dialog.MaterialAlertDialogBuilder(v.getContext())
+						.setTitle(_safeString(group, "groupName", "Group"))
+						.setMessage("Type: " + (tv_groupType != null ? tv_groupType.getText() : "")
+								+ "\nPays: " + (tv_frequency != null ? tv_frequency.getText() : "")
+								+ "\nPer slot: " + (tv_slotAmount != null ? tv_slotAmount.getText() : "")
+								+ "\nSlots filled: " + fMembers + " / " + fSlots
+								+ "\n\nAsk to join and the group's admin reviews your request. You pay nothing until you are accepted.")
+						.setPositiveButton("Close", null)
+						.show());
 				btn_join.setOnClickListener(isPending ? null : v -> {
 					if (gid.isEmpty()) return;
 					Intent i = new Intent();

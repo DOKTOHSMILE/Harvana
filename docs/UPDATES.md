@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: notifications in tabs, Discover join button
+
+What the app does:
+
+- **Notifications are split into tabs:** All, Transactions (transfers, payments, loans), Groups (group notices, invitations, membership) and Others (account and social). Each tab shows its unread count. Items are cards with a type icon, grouped under Today, Yesterday and a date, and unread items carry a dot.
+- **Discover group cards.** The join bar showed as an empty coloured block because its text was the same colour as the bar. It now reads "Request to join", or "Request pending" when a request is waiting. The info icon opens a short summary of the group.
+
+What you do: install the build.
+
 ## 7 Oct 2026: other coins on the Assets tab, P2P icon matches Home
 
 What the app does:

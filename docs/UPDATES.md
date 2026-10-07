@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: share a profile as a picture and a message
+
+What the app does. Share on a profile, and Share on the My QR code screen, now send two things together:
+
+- **A profile card picture:** the name, @username, trust tier and the profile QR code (scanning it in Harvana offers "Add friend").
+- **A message:** for example "Valentine (@doktohsmile) on Harvana, trust 19% Bronze. Scan the QR code in the Harvana app to add me, or search @doktohsmile."
+
+Apps that take only one of the two still get something useful. Without a username there is no QR, so only the message is sent. What you do: install the new build.
+
 ## 7 Oct 2026: tier medals
 
 What the app does. Each trust tier has a 3D medal:

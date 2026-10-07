@@ -38,6 +38,8 @@ public class ProfileQrActivity extends AppCompatActivity {
     private Bitmap qr;
     private String username = "";
     private String icon = "";
+    private String displayName = "", trustTier = "";
+    private int trustPercent = -1;
 
     @Override public boolean onSupportNavigateUp() { finish(); return true; }
 
@@ -93,6 +95,9 @@ public class ProfileQrActivity extends AppCompatActivity {
                 return;
             }
             username = card.username;
+            displayName = card.name == null ? "" : card.name;
+            trustPercent = card.scored() ? card.trustPercent : -1;
+            trustTier = card.trustTier == null ? "" : card.trustTier;
             icon = card.icon;
             qr = HARVQRCodeGenerator.generateQRCode(LINK_PREFIX + username, 720, null, true);
             cardHost.addView(qrCard());
@@ -146,21 +151,10 @@ public class ProfileQrActivity extends AppCompatActivity {
         return wrap;
     }
 
+    /** Shares the profile card (photo-free picture with the QR) and a message together, like Share on the profile. */
     private void shareQr() {
         if (qr == null) return;
-        try {
-            File dir = new File(getCacheDir(), "images");
-            dir.mkdirs();
-            File f = new File(dir, "harvana-qr.png");
-            try (FileOutputStream out = new FileOutputStream(f)) { qr.compress(Bitmap.CompressFormat.PNG, 100, out); }
-            Uri uri = FileProvider.getUriForFile(this, "com.harvana.app.fileprovider", f);
-            Intent send = new Intent(Intent.ACTION_SEND).setType("image/png").putExtra(Intent.EXTRA_STREAM, uri)
-                    .putExtra(Intent.EXTRA_TEXT, "Add me on Harvana: @" + username).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(Intent.createChooser(send, "Share QR code"));
-        } catch (Exception e) {
-            startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain")
-                    .putExtra(Intent.EXTRA_TEXT, "Add me on Harvana: @" + username), "Share"));
-        }
+        ProfileShare.share(this, displayName, username, trustPercent, trustTier);
     }
 
     @Override

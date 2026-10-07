@@ -154,9 +154,8 @@ public class PublicProfileActivity extends AppCompatActivity {
     }
 
     private void shareProfile() {
-        String line = (card.name.isEmpty() ? "A member" : card.name) + (card.username.isEmpty() ? "" : " (@" + card.username + ")") + " on Harvana"
-                + (card.scored() ? ", trust " + card.trustPercent + "%" : "") + ".";
-        startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, line), "Share profile"));
+        // A card picture (name, @username, tier and the profile QR) together with a message.
+        ProfileShare.share(this, card.name, card.username, card.scored() ? card.trustPercent : -1, card.scored() ? tierName() : "");
     }
 
     private void toast(String s) { Toast.makeText(this, s == null ? "Something went wrong." : s, Toast.LENGTH_LONG).show(); }

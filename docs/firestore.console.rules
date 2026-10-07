@@ -334,6 +334,21 @@ service cloud.firestore {
     // ── People: usernames, friends, contact cards ─────────────────────
     // Usernames are unique. A name can be looked up one at a time (get) but never listed, so there is no
     // member directory to scrape.
+    // Deleted data kept for one year (docs/DATA_RETENTION.md). The app writes a copy just before it deletes
+    // something; nobody can read, change or delete the copies from the app. A TTL policy on purgeAt erases each one.
+    match /DELETED/{id} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['kind', 'path', 'data', 'deletedBy', 'deletedAt', 'purgeAt'])
+        && request.resource.data.deletedBy == request.auth.uid
+        && request.resource.data.kind is string && request.resource.data.path is string
+        && request.resource.data.data is map
+        && request.resource.data.deletedAt == request.time
+        && request.resource.data.purgeAt is timestamp
+        && request.resource.data.purgeAt > request.time + duration.value(364, 'd')
+        && request.resource.data.purgeAt < request.time + duration.value(366, 'd');
+      allow read, update, delete: if false;
+    }
+
     match /USERNAMES/{name} {
       allow get: if signedIn();
       allow list: if false;

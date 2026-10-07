@@ -813,9 +813,9 @@ public class PublicProfileActivity extends AppCompatActivity {
                 }
                 default:
                     new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Delete this article?")
-                        .setMessage("\u201c" + title + "\u201d is removed for everyone. This cannot be undone.")
+                        .setMessage("\u201c" + title + "\u201d is removed for everyone. A copy is kept privately for one year, then erased.")
                         .setNegativeButton("Cancel", null)
-                        .setPositiveButton("Delete", (dl, w) -> d.getReference().delete()
+                        .setPositiveButton("Delete", (dl, w) -> com.harvana.app.firestore.SoftDelete.archiveThenDelete("LEARN_CONTENT", d.getReference())
                             .addOnSuccessListener(x -> { learnCache.remove(d); toast("Deleted."); load(); })
                             .addOnFailureListener(e -> toast("Couldn't delete it. Try again."))).show();
             }

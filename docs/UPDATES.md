@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: deleted data is kept for a year, then erased
+
+What the app does. Deleting a group, a Learn post, a profile article or an expired trade chat still removes it from every screen at once. Before the delete, the app now writes a private copy to `DELETED`, with `purgeAt` set one year later. Nobody can read these copies from the app. The delete prompts now say this. The full design is in `docs/DATA_RETENTION.md`.
+
+What you do, in this order:
+
+1. Publish `docs/firestore.console.rules`, which adds the new `DELETED` block. Without it, every delete fails.
+2. In the Firestore console, under Time-to-live, create a policy with collection group `DELETED` and timestamp field `purgeAt`. With gcloud: `gcloud firestore fields ttls update purgeAt --collection-group=DELETED --enable-ttl`.
+3. Install the new build.
+
 ## 7 Oct 2026: one scanner for every Harvana QR code
 
 What the app does. The scan button in the top bar now reads every code the app makes and opens it in the right place: a wallet address opens Send with the recipient filled in (scanning an address used to open Send empty), a wallet access card opens Restore and asks for the card password to add the wallet, a profile code opens that member's profile, and a receipt is checked against the network ("Genuine: confirmed on the network" with block, amount, sender and recipient; "Sent, not confirmed yet"; or "Not found on the network", which means the receipt may not be genuine). Anything else is shown as text you can copy. Codes now scan reliably: the app used to draw most of its codes as emerald on dark navy (a light-on-dark code most camera scanners cannot read); every code is now dark on a light ground with a wider quiet border. New receipts carry harvana://tx/<hash>; older receipts with a bare hash still scan. Picking a QR image from the gallery also tries harder (inverted and unevenly lit photos). What you do: install the new build.

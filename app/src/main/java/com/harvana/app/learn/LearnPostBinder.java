@@ -241,10 +241,10 @@ public final class LearnPostBinder {
     private static void confirmDelete(Activity host, Post post) {
         new com.harvana.app.ui.SheetDialog.Builder(host)
             .setTitle("Delete this post?")
-            .setMessage("It is removed for everyone, including its comments and reactions. This cannot be undone.")
+            .setMessage("It is removed for everyone, including its comments and reactions. A copy is kept privately for one year in case of a dispute, then erased.")
             .setNegativeButton("Cancel", null)
-            .setPositiveButton("Delete", (d, w) -> com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                .collection("LEARN_CONTENT").document(post.id).delete()
+            .setPositiveButton("Delete", (d, w) -> com.harvana.app.firestore.SoftDelete.archiveThenDelete("LEARN_CONTENT",
+                    com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("LEARN_CONTENT").document(post.id))
                 .addOnSuccessListener(v -> {
                     Toast.makeText(host, "Post deleted", Toast.LENGTH_SHORT).show();
                     // In the full reader there is nothing left to read; in the feed the live list drops the card by itself.

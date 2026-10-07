@@ -425,9 +425,14 @@ public class GroupFirestoreManager {
 					QuerySnapshot snap = com.google.android.gms.tasks.Tasks.await(
 						db.collection(collection).whereEqualTo(field, value).limit(400).get(), 30, TimeUnit.SECONDS);
 					if (snap.isEmpty()) break;
+					// Two writes per document (archive copy + delete); a batch holds 500, so commit in groups of 200.
 					com.google.firebase.firestore.WriteBatch batch = db.batch();
-					for (DocumentSnapshot d : snap.getDocuments()) batch.delete(d.getReference());
-					com.google.android.gms.tasks.Tasks.await(batch.commit(), 30, TimeUnit.SECONDS);
+					int n = 0;
+					for (DocumentSnapshot d : snap.getDocuments()) {
+						SoftDelete.archiveAndDelete(batch, collection, d);
+						if (++n == 200) { com.google.android.gms.tasks.Tasks.await(batch.commit(), 30, TimeUnit.SECONDS); batch = db.batch(); n = 0; }
+					}
+					if (n > 0) com.google.android.gms.tasks.Tasks.await(batch.commit(), 30, TimeUnit.SECONDS);
 					if (snap.size() < 400) break;
 				}
 				cb.onSuccess();
@@ -448,15 +453,20 @@ public class GroupFirestoreManager {
 				for (String sub : subs) {
 					QuerySnapshot snap = com.google.android.gms.tasks.Tasks.await(
 						db.collection("GROUPS").document(groupId).collection(sub).get(), 30, TimeUnit.SECONDS);
+					// Each document is archived for a year (SoftDelete) and then deleted: two writes, so groups of 200.
 					com.google.firebase.firestore.WriteBatch batch = db.batch();
 					int n = 0;
 					for (DocumentSnapshot d : snap.getDocuments()) {
-						batch.delete(d.getReference());
-						if (++n == 400) { com.google.android.gms.tasks.Tasks.await(batch.commit(), 30, TimeUnit.SECONDS); batch = db.batch(); n = 0; }
+						SoftDelete.archiveAndDelete(batch, "GROUPS/" + sub, d);
+						if (++n == 200) { com.google.android.gms.tasks.Tasks.await(batch.commit(), 30, TimeUnit.SECONDS); batch = db.batch(); n = 0; }
 					}
 					if (n > 0) com.google.android.gms.tasks.Tasks.await(batch.commit(), 30, TimeUnit.SECONDS);
 				}
-				com.google.android.gms.tasks.Tasks.await(db.collection("GROUPS").document(groupId).delete(), 30, TimeUnit.SECONDS);
+				DocumentSnapshot group = com.google.android.gms.tasks.Tasks.await(db.collection("GROUPS").document(groupId).get(), 30, TimeUnit.SECONDS);
+				com.google.firebase.firestore.WriteBatch last = db.batch();
+				if (group.exists()) SoftDelete.archiveAndDelete(last, "GROUPS", group);
+				else last.delete(db.collection("GROUPS").document(groupId));
+				com.google.android.gms.tasks.Tasks.await(last.commit(), 30, TimeUnit.SECONDS);
 				cb.onSuccess();
 			} catch (Exception e) {
 				Throwable c = e.getCause() != null ? e.getCause() : e;

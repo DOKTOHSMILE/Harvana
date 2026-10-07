@@ -207,7 +207,7 @@ public class FirestoreSyncManager {
 		SyncCallback cb = noopIfNull(callback);
 		DocumentReference ref = ref(collection, documentId, cb);
 		if (ref == null) return;
-		await(ref.delete(), cb);
+		await(com.harvana.app.firestore.SoftDelete.archiveThenDelete(collection, ref), cb);   // kept for a year, then erased
 	}
 	
 	public static void batchCommit(List<BatchWrite> writes, SyncCallback callback) {

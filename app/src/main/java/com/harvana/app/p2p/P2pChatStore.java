@@ -144,10 +144,15 @@ public final class P2pChatStore {
     /** Deletes an expired chat and its messages. Only allowed (by the rules) once the keep time has passed. */
     private static void purge(String id) {
         try {
+            // Each message and then the chat is archived for a year (a trade dispute may need it) and deleted.
+            WriteBatch b = db().batch();
+            int n = 0;
             for (QueryDocumentSnapshot d : Tasks.await(db().collection("P2P_CHATS").document(id).collection("messages").limit(400).get(), 20, TimeUnit.SECONDS)) {
-                Tasks.await(d.getReference().delete(), 10, TimeUnit.SECONDS);
+                com.harvana.app.firestore.SoftDelete.archiveAndDelete(b, "P2P_CHATS/messages", d);
+                if (++n == 200) { Tasks.await(b.commit(), 20, TimeUnit.SECONDS); b = db().batch(); n = 0; }
             }
-            Tasks.await(db().collection("P2P_CHATS").document(id).delete(), 10, TimeUnit.SECONDS);
+            if (n > 0) Tasks.await(b.commit(), 20, TimeUnit.SECONDS);
+            Tasks.await(com.harvana.app.firestore.SoftDelete.archiveThenDelete("P2P_CHATS", db().collection("P2P_CHATS").document(id)), 10, TimeUnit.SECONDS);
         } catch (Exception ignored) { }
     }
 

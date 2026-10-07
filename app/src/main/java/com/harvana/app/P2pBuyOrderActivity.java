@@ -418,6 +418,9 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 				}
 				remainingHarv = HarvanaNodeClient.toHarvDisplay(listing.optLong("remainingAmount", 0));
 				minOrderHarv = HarvanaNodeClient.toHarvDisplay(listing.optLong("minOrderAmount", 0));
+				// The price the node signed into the listing (kobo per HARV); Firestore may add or confirm it.
+				long nodeKobo = listing.optLong("unitPricePerHarvRaw", 0L);
+				if (nodeKobo > 0) unitPrice = nodeKobo / 100.0;
 				
 				runOnUiThread(() -> {
 					offer_available.setText(String.format(Locale.US, ("%.4f " + com.harvana.app.CoinInfo.ticker()), remainingHarv));
@@ -427,6 +430,9 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 					quick_25.setText(BalanceFormatter.smartDecimal(remainingHarv * 0.25));
 					quick_50.setText(BalanceFormatter.smartDecimal(remainingHarv * 0.50));
 					quick_100.setText(BalanceFormatter.smartDecimal(remainingHarv * 0.75));
+					// The quick-amount chips: readable text on their dark fill (they were the same colour as the chip).
+					for (TextView q : new TextView[]{quick_25, quick_50, quick_100, quick_max}) if (q != null) q.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+					if (offer_price != null && unitPrice > 0) offer_price.setText(P2pMoney.perHarv(unitPrice, listingCurrency));
 				});
 				
 				if (sellerAddress.isEmpty()) {
@@ -446,7 +452,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 			@Override
 			public void onSuccess(Map<String, Object> data) {
 				Object priceObj = data.get("unitPrice");
-				unitPrice = priceObj instanceof Number ? ((Number) priceObj).doubleValue() : -1;
+				if (priceObj instanceof Number && ((Number) priceObj).doubleValue() > 0) unitPrice = ((Number) priceObj).doubleValue();
 				Object currencyObj = data.get("currency");
 				if (currencyObj != null && !String.valueOf(currencyObj).trim().isEmpty()) {
 					listingCurrency = String.valueOf(currencyObj).trim();

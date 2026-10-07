@@ -219,7 +219,7 @@
 						android:background="@android:color/transparent"
 						android:textSize="14sp"
 						android:textColor="@color/colorTextPrimary"
-						android:hint="What's this for\?"
+						android:hint="What's this for?"
 						android:inputType="text|textCapSentences"
 						android:paddingStart="14dp"
 						android:maxLength="200"

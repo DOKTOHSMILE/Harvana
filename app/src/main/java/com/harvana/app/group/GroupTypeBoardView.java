@@ -168,7 +168,7 @@ public final class GroupTypeBoardView {
         d.setStroke(dp(c, 3), color(c, R.color.colorAccent));
         box.setBackground(d);
         TextView tick = new TextView(c);
-        tick.setText("\u2713");
+        com.harvana.app.utils.Icons.check(tick, true);
         tick.setTextSize(dense ? 10 : 12);
         tick.setTypeface(null, Typeface.BOLD);
         tick.setTextColor(com.harvana.app.utils.UiColors.onAccent());

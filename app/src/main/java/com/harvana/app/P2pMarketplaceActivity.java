@@ -209,7 +209,7 @@ public class P2pMarketplaceActivity extends AppCompatActivity {
 			name.setTextSize(14f);
 			
 			MaterialTextView check = new MaterialTextView(this);
-			check.setText("✓");
+			com.harvana.app.utils.Icons.check(check, true);
 			check.setTextColor(colorPrimary);
 			check.setTextSize(20f);
 			check.setTypeface(null, Typeface.BOLD);

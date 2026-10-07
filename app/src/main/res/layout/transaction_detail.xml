@@ -436,7 +436,8 @@
 								android:id="@+id/textview35"
 								android:layout_width="22dp"
 								android:layout_height="wrap_content"
-								android:text="✓"
+								android:text=""
+						android:drawableStart="@drawable/ic_check_small"
 								android:textColor="@color/colorTextTertiary"
 								android:textSize="14sp" />
 							<LinearLayout
@@ -473,7 +474,8 @@
 							<TextView
 								android:layout_width="22dp"
 								android:layout_height="wrap_content"
-								android:text="✓"
+								android:text=""
+						android:drawableStart="@drawable/ic_check_small"
 								android:textColor="@color/colorTextTertiary"
 								android:textSize="14sp" />
 							<LinearLayout
@@ -511,7 +513,8 @@
 								android:id="@+id/tv_tl3_mark"
 								android:layout_width="22dp"
 								android:layout_height="wrap_content"
-								android:text="✓"
+								android:text=""
+						android:drawableStart="@drawable/ic_check_small"
 								android:textColor="@color/colorSuccess"
 								android:textSize="16sp"
 								android:textStyle="bold" />

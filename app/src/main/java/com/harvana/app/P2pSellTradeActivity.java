@@ -624,6 +624,10 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			tv_sell_payment_status.setText("Buyer marked as paid");
 			layout_sell_payment_received.setVisibility(View.VISIBLE);
 			card_sell_action_button.setVisibility(View.VISIBLE);
+			// The release controls: they were hidden in the layout and never shown, so the trade could not be finished.
+			tv_sell_action_button_description.setText("Open your bank or payment app and check that the exact amount arrived. Then tick the box and release.");
+			cb_sell_payment_confirm.setVisibility(View.VISIBLE);
+			btn_sell_confirm_payment.setVisibility(View.VISIBLE);
 			cb_sell_payment_confirm.setChecked(false);
 			btn_sell_confirm_payment.setEnabled(false);
 			_startCountdown(markedPaidTimestamp, 45);
@@ -664,21 +668,18 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		boolean paymentMarked = "PAYMENT_SUBMITTED".equals(status) || "COMPLETED".equals(status) || "DISPUTED".equals(status);
 		boolean completed = "COMPLETED".equals(status);
 		
-		_setStep(tv_sell_step_1, true);
-		_setStep(tv_sell_step_2, escrowDone);
-		_setStep(tv_sell_step_3, paymentMarked);
-		_setStep(tv_sell_step_4, completed);
-		_setStep(tv_sell_step_5, completed);
-		_setStep(tv_sell_step_6, completed);
+		String t = com.harvana.app.CoinInfo.ticker();
+		com.harvana.app.utils.Icons.step(tv_sell_step_1, "Order created", true);
+		com.harvana.app.utils.Icons.step(tv_sell_step_2, t + " locked in escrow", escrowDone);
+		com.harvana.app.utils.Icons.step(tv_sell_step_3, "Buyer marked payment sent", paymentMarked);
+		com.harvana.app.utils.Icons.step(tv_sell_step_4, "You confirmed the payment", completed);
+		com.harvana.app.utils.Icons.step(tv_sell_step_5, t + " released to the buyer", completed);
+		com.harvana.app.utils.Icons.step(tv_sell_step_6, "Trade completed", completed);
 		
 		tv_sell_escrow_badge.setText(escrowDone ? "Locked" : "Pending");
 		tv_sell_escrow_tx_hash.setText(escrowDone ? escrowTxHashValue : "—");
 	}
 	
-	private void _setStep(TextView dot, boolean done) {
-		dot.setText(done ? "✓" : "○");
-		dot.setTextColor(androidx.core.content.ContextCompat.getColor(this, done ? R.color.colorSuccess : R.color.colorTextTertiary));
-	}
 	
 	private void _startCountdown(long fromTimestamp, int minutes) {
 		countdownFired = false;

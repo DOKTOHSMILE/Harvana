@@ -147,7 +147,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 				com.harvana.app.learn.VideoLinks.Video v = com.harvana.app.learn.VideoLinks.parse(raw);
 				if (raw.isEmpty()) { tv_learn_video_status.setText(videoHint); tv_learn_video_status.setTextColor(getResources().getColor(R.color.colorTextTertiary)); }
 				else if (v != null) {
-					tv_learn_video_status.setText("\u2713 " + v.platform.label + " video found. Readers can play it inside your article.");
+					com.harvana.app.utils.Icons.checked(tv_learn_video_status, v.platform.label + " video found. Readers can play it inside your article.");
 					tv_learn_video_status.setTextColor(getResources().getColor(R.color.colorSuccess));
 				} else {
 					tv_learn_video_status.setText(com.harvana.app.learn.VideoLinks.problem(raw));

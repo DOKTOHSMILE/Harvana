@@ -314,7 +314,7 @@
 				android:id="@+id/amount_section_title"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="How much HARV do you want\\\?"
+				android:text="How much HARV do you want\\?"
 				android:textSize="16sp"
 				android:textStyle="bold" />
 			<TextView

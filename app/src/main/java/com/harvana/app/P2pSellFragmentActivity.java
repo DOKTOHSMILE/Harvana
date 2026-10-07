@@ -407,7 +407,7 @@ public class P2pSellFragmentActivity extends Fragment {
 		label.setTextColor(colorOnSurface);
 		label.setTextSize(15f);
 		MaterialTextView check = new MaterialTextView(requireContext());
-		check.setText("✓");
+		com.harvana.app.utils.Icons.check(check, true);
 		check.setTextColor(colorPrimary);
 		check.setTextSize(18f);
 		row.addView(label);

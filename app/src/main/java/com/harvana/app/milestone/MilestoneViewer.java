@@ -170,8 +170,10 @@ public final class MilestoneViewer {
                     rb.setCornerRadius(dp(a, 12));
                     rb.setColor(got ? (MilestoneCatalog.tierBackground(it.def, i + 1) & 0x00FFFFFF) | 0xFF000000 : 0x14000000);
                     row.setBackground(rb);
-                    row.addView(MilestoneShelf.text(a, (got ? "✓  " : "") + names[i], 14, true,
-                            got ? MilestoneCatalog.tierInk(it.def, i + 1) : MilestoneCatalog.CARD_MUTED), new LinearLayout.LayoutParams(0, -2, 1f));
+                    android.widget.TextView tierName = MilestoneShelf.text(a, names[i], 14, true,
+                            got ? MilestoneCatalog.tierInk(it.def, i + 1) : MilestoneCatalog.CARD_MUTED);
+                    if (got) com.harvana.app.utils.Icons.checked(tierName, names[i]);     // a real check icon, not a text tick
+                    row.addView(tierName, new LinearLayout.LayoutParams(0, -2, 1f));
                     row.addView(MilestoneShelf.text(a, it.def.tiers[i] + " " + it.def.unit, 13, false, MilestoneCatalog.CARD_MUTED));
                     LinearLayout.LayoutParams rl = new LinearLayout.LayoutParams(-1, -2);
                     rl.topMargin = dp(a, 6);

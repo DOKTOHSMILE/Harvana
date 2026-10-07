@@ -89,7 +89,18 @@ public class ChainWalletsActivity extends AppCompatActivity {
         }
         if (!pi.isEmpty()) {
             final TextView bal = text("Loading…", 15, true, UiColors.textPrimary());
-            list.addView(card("Pi Network", pi, bal, "PI"));
+            LinearLayout piCard = card("Pi Network", pi, bal, "PI");
+            LinearLayout piActions = new LinearLayout(this);
+            TextView send = text("Send Pi", 14, true, UiColors.accent());
+            send.setPadding(0, dp(6), dp(24), dp(6));
+            send.setOnClickListener(v -> sendPi(pi));
+            TextView hist = text("History", 14, true, UiColors.accent());
+            hist.setPadding(0, dp(6), 0, dp(6));
+            hist.setOnClickListener(v -> piHistory(pi));
+            piActions.addView(send);
+            piActions.addView(hist);
+            piCard.addView(piActions);
+            list.addView(piCard);
             bg.execute(() -> { String s = ChainBalances.pi(pi); runOnUiThread(() -> bal.setText(s)); });
         } else {
             list.addView(card("Pi Network", "Pi wallets use 24 words. This wallet has 12, so it has no Pi wallet. "
@@ -106,6 +117,87 @@ public class ChainWalletsActivity extends AppCompatActivity {
                 + "until then, the same words open them in any standard wallet app.", 12, false, UiColors.textTertiary());
         note.setPadding(dp(4), dp(12), dp(4), 0);
         list.addView(note);
+    }
+
+    /** Send Pi: address, amount and an optional note; reviewed, then the PIN or fingerprint, then signed on this phone. */
+    private void sendPi(String from) {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(20), dp(8), dp(20), 0);
+        final android.widget.EditText to = field("Recipient's Pi address (G...)", false);
+        final android.widget.EditText amount = field("Amount in Pi", true);
+        final android.widget.EditText memo = field("Note (optional, up to 28 letters)", false);
+        memo.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(28)});
+        box.addView(to); box.addView(amount); box.addView(memo);
+        TextView fee = text("Network fee: 0.01 Pi, paid by you. A new Pi wallet must receive at least the network's minimum balance.", 12, false, UiColors.textTertiary());
+        fee.setPadding(0, dp(8), 0, 0);
+        box.addView(fee);
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Send Pi").setView(box)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Review", (d, w) -> {
+                    final String dest = to.getText().toString().trim();
+                    final String amt = amount.getText().toString().trim();
+                    if (!com.harvana.app.wallet.PiKeys.isValidAddress(dest)) { Toast.makeText(this, "That is not a Pi address.", Toast.LENGTH_LONG).show(); return; }
+                    try { com.harvana.app.wallet.PiTx.toStroops(amt); } catch (Exception e) { Toast.makeText(this, "Enter an amount above 0, up to 7 decimals.", Toast.LENGTH_LONG).show(); return; }
+                    java.util.List<String[]> rows = new java.util.ArrayList<>();
+                    rows.add(new String[]{"To", dest.substring(0, 6) + "\u2026" + dest.substring(dest.length() - 6)});
+                    rows.add(new String[]{"Network", "Pi Network"});
+                    rows.add(new String[]{"Fee", "0.01 Pi"});
+                    if (!memo.getText().toString().trim().isEmpty()) rows.add(new String[]{"Note", memo.getText().toString().trim()});
+                    com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send Pi", amt + " Pi", rows, () -> {
+                        Toast.makeText(this, "Sending…", Toast.LENGTH_SHORT).show();
+                        final String harv = WalletManager.getActiveWalletAddress(this);
+                        bg.execute(() -> {
+                            String msg;
+                            try {
+                                String phrase = com.harvana.app.wallet.SecureWalletStorage.loadMnemonic(getApplicationContext(), harv);
+                                if (phrase == null) throw new Exception("No recovery phrase on this phone for this wallet.");
+                                String hash = com.harvana.app.wallet.PiClient.send(phrase, dest, amt, memo.getText().toString().trim());
+                                msg = "Sent " + amt + " Pi. Transaction " + (hash.length() > 10 ? hash.substring(0, 10) + "\u2026" : hash);
+                            } catch (Exception e) {
+                                msg = e.getMessage() == null ? "Could not send." : e.getMessage();
+                            }
+                            final String m = msg;
+                            runOnUiThread(() -> { Toast.makeText(this, m, Toast.LENGTH_LONG).show(); load(); });
+                        });
+                    });
+                }).show();
+    }
+
+    private void piHistory(String address) {
+        final LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(20), dp(4), dp(20), 0);
+        box.addView(text("Loading…", 14, false, UiColors.textSecondary()));
+        ScrollView sv = new ScrollView(this);
+        sv.addView(box);
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Pi history").setView(sv).setPositiveButton("Done", null).show();
+        bg.execute(() -> {
+            java.util.List<com.harvana.app.wallet.PiClient.Payment> ps;
+            String err = null;
+            try { ps = com.harvana.app.wallet.PiClient.history(address); } catch (Exception e) { ps = new java.util.ArrayList<>(); err = e.getMessage(); }
+            final java.util.List<com.harvana.app.wallet.PiClient.Payment> list2 = ps;
+            final String e2 = err;
+            runOnUiThread(() -> {
+                box.removeAllViews();
+                if (list2.isEmpty()) { box.addView(text(e2 != null ? "Couldn't load: " + e2 : "No Pi payments yet.", 14, false, UiColors.textSecondary())); return; }
+                for (com.harvana.app.wallet.PiClient.Payment p : list2) {
+                    TextView t = text(p.direction + "  " + p.amount + " Pi", 15, true, "Received".equals(p.direction) ? UiColors.success() : UiColors.textPrimary());
+                    t.setPadding(0, dp(10), 0, 0);
+                    box.addView(t);
+                    String who = p.counterparty.length() > 12 ? p.counterparty.substring(0, 6) + "\u2026" + p.counterparty.substring(p.counterparty.length() - 6) : p.counterparty;
+                    box.addView(text(("Received".equals(p.direction) ? "From " : "To ") + who + "  \u00b7  " + p.when, 12, false, UiColors.textTertiary()));
+                }
+            });
+        });
+    }
+
+    private android.widget.EditText field(String hint, boolean number) {
+        android.widget.EditText e = new android.widget.EditText(this);
+        e.setHint(hint);
+        e.setSingleLine(true);
+        if (number) e.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        return e;
     }
 
     /** One wallet: name, balance, the address, and Copy / QR. With balance null it is a plain message card. */

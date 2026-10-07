@@ -250,7 +250,7 @@
 								android:layout_height="match_parent"
 								android:background="@drawable/bg_avatar"
 								android:gravity="center"
-								android:text="\\\\?"
+								android:text="\\\?"
 								android:textSize="15sp"
 								android:textStyle="bold"
 	android:textColor="#FFFFFFFF"/>
@@ -585,7 +585,9 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="18dp"
-						android:text="✓  Order created"
+						android:text="Order created"
+						android:drawableStart="@drawable/ic_check_small"
+						android:drawablePadding="8dp"
 						android:textSize="13sp"
 						android:textStyle="bold" />
 					<TextView
@@ -593,7 +595,9 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="14dp"
-						android:text="✓  HARV secured in escrow"
+						android:text="HARV secured in escrow"
+						android:drawableStart="@drawable/ic_check_small"
+						android:drawablePadding="8dp"
 						android:textSize="13sp"
 						android:textStyle="bold" />
 					<TextView

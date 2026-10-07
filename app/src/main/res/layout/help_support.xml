@@ -85,7 +85,7 @@
 							android:id="@+id/textview64"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
-							android:text="How does a rotating savings circle work\?"
+							android:text="How does a rotating savings circle work?"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
 							android:textSize="15sp" />
@@ -115,7 +115,7 @@
 							android:id="@+id/textview66"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
-							android:text="What is my trust score\?"
+							android:text="What is my trust score?"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
 							android:textSize="15sp" />
@@ -145,7 +145,7 @@
 							android:id="@+id/textview68"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
-							android:text="What is HARV and how do I get more\?"
+							android:text="What is HARV and how do I get more?"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
 							android:textSize="15sp" />
@@ -175,7 +175,7 @@
 							android:id="@+id/textview70"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
-							android:text="What happens if I miss a payment\?"
+							android:text="What happens if I miss a payment?"
 							android:textStyle="bold"
 							android:textColor="@color/colorTextPrimary"
 							android:textSize="15sp" />

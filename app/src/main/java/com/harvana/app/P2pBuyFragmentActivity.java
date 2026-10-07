@@ -254,6 +254,9 @@ public class P2pBuyFragmentActivity extends Fragment {
 		: raw.optString("sellerAddress", "");
 		e.remainingHarv = HarvanaNodeClient.toHarvDisplay(raw.optLong("remainingAmount", 0));
 		e.minOrderHarv = HarvanaNodeClient.toHarvDisplay(raw.optLong("minOrderAmount", 0));
+		// The node signs the price into the listing (kobo per HARV): use it whenever Firestore has nothing.
+		long nodeKobo = raw.optLong("unitPricePerHarvRaw", 0L);
+		if (nodeKobo > 0) e.unitPrice = nodeKobo / 100.0;
 		
 		if (e.listingId.isEmpty() || e.posterAddress.isEmpty()) { done.onDone(e); return; }
 		
@@ -262,12 +265,14 @@ public class P2pBuyFragmentActivity extends Fragment {
 			@Override
 			public void onSuccess(Map<String, Object> data) {
 				Object priceObj = data.get("unitPrice");
-				e.unitPrice = priceObj instanceof Number ? ((Number) priceObj).doubleValue() : -1;
+				if (priceObj instanceof Number && ((Number) priceObj).doubleValue() > 0) e.unitPrice = ((Number) priceObj).doubleValue();
 				Object currencyObj = data.get("currency");
 				if (currencyObj != null && !String.valueOf(currencyObj).trim().isEmpty()) e.currency = String.valueOf(currencyObj).trim();
 				Object sellerUidObj = data.get("sellerUid");
 				e.sellerUid = sellerUidObj != null ? String.valueOf(sellerUidObj) : "";
-				Object methodsObj = data.get("paymentMethods");
+				Object namesObj = data.get("paymentMethodNames");       // the public card's method names
+				if (namesObj instanceof List) for (Object n : (List<?>) namesObj) if (n != null && !String.valueOf(n).trim().isEmpty()) e.paymentLabels.add(String.valueOf(n).trim());
+				Object methodsObj = e.paymentLabels.isEmpty() ? data.get("paymentMethods") : null;
 				if (methodsObj instanceof List) {
 					for (Object m : (List<?>) methodsObj) {
 						if (!(m instanceof Map)) continue;
@@ -427,7 +432,7 @@ public class P2pBuyFragmentActivity extends Fragment {
 		label.setTypeface(null, Typeface.BOLD); // Bolder text for main assets improves readability
 		
 		MaterialTextView check = new MaterialTextView(requireContext());
-		check.setText("✓");
+		com.harvana.app.utils.Icons.check(check, true);
 		check.setTextColor(colorPrimary); // Tie the checkmark to the app's primary theme color
 		check.setTextSize(20f);
 		check.setTypeface(null, Typeface.BOLD);

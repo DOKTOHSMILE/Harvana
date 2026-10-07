@@ -204,7 +204,7 @@
 						android:id="@+id/textview4"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="Why become an Insured Trader\?"
+						android:text="Why become an Insured Trader?"
 						android:textSize="15sp"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary" />

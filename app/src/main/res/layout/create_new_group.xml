@@ -1698,7 +1698,7 @@
 								android:id="@+id/textview7"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:text="Who Reviews New Members\\?"
+								android:text="Who Reviews New Members\?"
 								android:textSize="13sp"
 								android:textStyle="bold" />
 							<com.harvana.app.ui.MaterialSpinner

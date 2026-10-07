@@ -733,7 +733,8 @@ public class PublicProfileActivity extends AppCompatActivity {
         sub.setPadding(0, SocialUi.dp(this, 6), 0, SocialUi.dp(this, 8));
         c.addView(sub);
         for (String line : new String[] {"CAC-verified company name shown to members", "Company logo used as group avatar", "Verified Business badge on all your groups"}) {
-            TextView t = SocialUi.text(this, "\u2713  " + line, 13, false, UiColors.textPrimary());
+            TextView t = SocialUi.text(this, line, 13, false, UiColors.textPrimary());
+            com.harvana.app.utils.Icons.checked(t, line);
             t.setPadding(0, SocialUi.dp(this, 4), 0, 0);
             c.addView(t);
         }

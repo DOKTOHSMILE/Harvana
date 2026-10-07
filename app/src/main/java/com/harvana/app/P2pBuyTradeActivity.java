@@ -796,9 +796,9 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		}
 	}
 	
+	/** The step's dot: a real check icon when done, an open circle when not (no text ticks). */
 	private void _setStepDone(TextView dot, boolean done) {
-		dot.setText(done ? "✓" : "○");
-		dot.setTextColor(androidx.core.content.ContextCompat.getColor(this, done ? R.color.colorSuccess : R.color.colorTextTertiary));
+		com.harvana.app.utils.Icons.step(dot, "", done);
 	}
 	
 	// ── Countdown ────────────────────────────────────────────────────────

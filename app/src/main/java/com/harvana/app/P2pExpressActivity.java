@@ -661,7 +661,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 			tv_express_fiat.setText(P2pMoney.fiat(harvAmount * matchedPrice, ccy));
 			tv_express_fee.setText("Shown after confirming — set by the network, never estimated here.");
 			
-			tv_express_match_indicator.setText("✓");
+			com.harvana.app.utils.Icons.check(tv_express_match_indicator, true);
 			tv_express_match_title.setText("Matched — best available price found");
 			tv_express_match_description.setText(buyMode
 			? "You'll receive " + BalanceFormatter.smartDecimal(harvAmount) + (" " + com.harvana.app.CoinInfo.ticker() + ".")

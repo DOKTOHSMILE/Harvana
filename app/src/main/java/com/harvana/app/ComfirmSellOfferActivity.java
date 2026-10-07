@@ -374,7 +374,7 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 		layout_confirm_payment_methods.removeAllViews();
 		for (PaymentMethod pm : selectedMethods) {
 			TextView row = new TextView(this);
-			row.setText("✓  " + (pm.label != null && !pm.label.isEmpty() ? pm.label : pm.primaryField));
+			com.harvana.app.utils.Icons.checked(row, pm.label != null && !pm.label.isEmpty() ? pm.label : pm.primaryField);
 			int padH = (int) (16 * getResources().getDisplayMetrics().density);
 			int padV = (int) (10 * getResources().getDisplayMetrics().density);
 			row.setPadding(padH, padV, padH, padV);

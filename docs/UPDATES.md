@@ -2,6 +2,28 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: version 1.2.0 (code 3): P2P repaired, Pi sending, real check icons
+
+What the app does:
+
+- **P2P listings show their seller, price and trust to every buyer.** These lived only in the private listing record, which the rules let only the seller (or a buyer who had already claimed) read. So everyone else saw "Unavailable", "Trader" and "—", and the trade chat could not start.
+  - A new public listing card (`P2P_LISTINGS_PUBLIC`) holds the seller, price, limits, terms and the payment-method names, never account numbers. The bank details stay private.
+  - The price also falls back to the one the node signs into each listing.
+  - Listings created before this build still show the node's price, but not the seller's name. Relist them to show it.
+- **Sellers can finish a trade.** After the buyer marks "paid", the seller now sees "I have independently verified the exact payment" and "Confirm Payment Received". Both had been hidden in the layout and never shown.
+- **Trade progress** keeps each step's label, with a real check icon (filled when done, an open circle when not), on the Buy and Sell trade screens.
+- **Real check icons everywhere.** Text ticks ("✓") across P2P rows, payment lists, milestones, the Learn video note and transaction details are replaced by the app's check icon.
+- **The Buy order screen:**
+  - the 25% / 50% / 75% / Max buttons are readable (their text was the colour of their background);
+  - "How much HARV do you want?" lost its stray backslash, along with 13 other layouts.
+- **Pi sending.** Crypto wallets → Pi now has Send Pi (address, amount, optional note; reviewed, then PIN or fingerprint) and History. The transaction is built and signed on the phone. It matches the official Stellar SDK byte for byte (`tools/pi`), and is sent to Pi's own Horizon server.
+
+What you do:
+
+1. Publish `docs/firestore.console.rules`. It adds `P2P_LISTINGS_PUBLIC`.
+2. Install the build.
+3. Relist your open P2P offers, so their public card exists.
+
 ## 7 Oct 2026: Crypto wallets — Bitcoin, Ethereum and more from the same words; the phrase as one text
 
 What the app does:

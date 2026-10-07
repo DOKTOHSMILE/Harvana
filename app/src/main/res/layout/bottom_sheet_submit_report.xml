@@ -104,7 +104,7 @@
 				android:background="@android:color/transparent"
 				android:gravity="top"
 				android:textColor="@color/colorTextPrimary"
-				android:hint="What happened\\? Be specific - dates, amounts, what was promised vs what happened."
+				android:hint="What happened\? Be specific - dates, amounts, what was promised vs what happened."
 				android:textSize="15sp"
 				android:inputType="textMultiLine|textCapSentences"
 				android:focusable="true"

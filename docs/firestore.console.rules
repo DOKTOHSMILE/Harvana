@@ -505,6 +505,19 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
+    // The public card of a P2P listing: seller, price, limits, terms and payment-method names (never account numbers).
+    // Every signed-in member can read it, so buyers see who sells, the price and the trust score. Only the seller writes it.
+    match /P2P_LISTINGS_PUBLIC/{listingId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.auth.uid == request.resource.data.sellerUid
+        && request.resource.data.listingId == listingId
+        && request.resource.data.keys().hasOnly(['listingId', 'pricingType', 'unitPrice', 'marginPercent', 'paymentWindowMinutes',
+             'termsOfTrade', 'reqAccountAgeDays', 'maxOrderHarv', 'currency', 'sellerUid', 'createdAtMs', 'paymentMethodNames']);
+      allow update: if false;
+      allow delete: if signedIn() && request.auth.uid == resource.data.sellerUid;
+    }
+
     match /P2P_PAYMENT_DETAILS/{listingId} {
       allow create: if signedIn()
   && request.auth.uid == request.resource.data.sellerUid

@@ -637,7 +637,8 @@
 							android:layout_height="24dp"
 							android:background="@drawable/icon_check_circle_round"
 							android:gravity="center_horizontal|center_vertical"
-							android:text="✓"
+							android:text=""
+						android:drawableStart="@drawable/ic_check_small"
 							android:textSize="11sp"
 							android:textStyle="bold" />
 						<LinearLayout
@@ -675,7 +676,8 @@
 							android:layout_height="24dp"
 							android:background="@drawable/icon_check_circle_round"
 							android:gravity="center_horizontal|center_vertical"
-							android:text="✓"
+							android:text=""
+						android:drawableStart="@drawable/ic_check_small"
 							android:textSize="11sp"
 							android:textStyle="bold" />
 						<LinearLayout
@@ -985,7 +987,7 @@
 					android:layout_height="wrap_content"
 					android:layout_marginTop="9dp"
 					android:gravity="center_horizontal|center_vertical"
-					android:text="Need help with this trade\\\?"
+					android:text="Need help with this trade\\?"
 					android:textSize="10sp" />
 				<TextView
 					android:id="@+id/support_button"

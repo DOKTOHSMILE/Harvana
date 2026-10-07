@@ -42,6 +42,12 @@ public class P2PPaymentDetailsManager {
 	private static final Executor BG = Executors.newCachedThreadPool();
 	private static final ScheduledExecutorService TIMER = Executors.newSingleThreadScheduledExecutor();
 	private static final String COLLECTION = "P2P_PAYMENT_DETAILS";
+	/**
+	 * The public card of a listing: who sells, the price, limits, terms and the NAMES of the payment methods. No account
+	 * numbers or names. Anyone signed in can read it, so every buyer sees the seller, the price and the trust score; the
+	 * bank details stay in P2P_PAYMENT_DETAILS for the seller and the buyer who claimed.
+	 */
+	public static final String PUBLIC_COLLECTION = "P2P_LISTINGS_PUBLIC";
 	
 	private static P2PPaymentDetailsManager instance;
 	
@@ -115,7 +121,23 @@ public class P2PPaymentDetailsManager {
 		fields.put("sellerUid", sellerUid);
 		fields.put("createdAtMs", System.currentTimeMillis());
 		
-		write(doc(COLLECTION, listingId), fields, callback);
+		// The public card first (what every buyer reads), then the private one with the bank details.
+		Map<String, Object> pub = new HashMap<>();
+		for (String key : new String[]{"listingId", "pricingType", "unitPrice", "marginPercent", "paymentWindowMinutes",
+				"termsOfTrade", "reqAccountAgeDays", "maxOrderHarv", "currency", "sellerUid", "createdAtMs"}) {
+			if (fields.containsKey(key)) pub.put(key, fields.get(key));
+		}
+		java.util.List<String> methodNames = new java.util.ArrayList<>();
+		for (com.harvana.app.wallet.PaymentMethod pm : paymentMethods) {
+			String label = pm.primaryField != null && !pm.primaryField.isEmpty() ? pm.primaryField : pm.type.name();
+			methodNames.add(label);
+		}
+		pub.put("paymentMethodNames", methodNames);
+		final DocumentReference privateRef = doc(COLLECTION, listingId);
+		write(doc(PUBLIC_COLLECTION, listingId), pub, new SimpleCallback() {
+			@Override public void onSuccess() { write(privateRef, fields, callback); }
+			@Override public void onError(String error) { write(privateRef, fields, callback); }   // the private one still matters most
+		});
 	}
 	
 	/** Called by the buyer's client once they've claimed a listing —
@@ -124,7 +146,21 @@ public class P2PPaymentDetailsManager {
 *  document), replacing the old approach of the node deciding what to
 *  redact based on listing status. */	
 	public void get(String listingId, DocCallback callback) {
-		read(doc(COLLECTION, listingId), callback);
+		// Public card first (readable by everyone), then the private details where the rules allow (seller, claimed buyer);
+		// the private fields win when both exist. Listings made before the public card existed fall back to the private one.
+		read(doc(PUBLIC_COLLECTION, listingId), new DocCallback() {
+			@Override public void onSuccess(Map<String, Object> pub) {
+				read(doc(COLLECTION, listingId), new DocCallback() {
+					@Override public void onSuccess(Map<String, Object> priv) {
+						Map<String, Object> merged = new HashMap<>(pub);
+						merged.putAll(priv);
+						callback.onSuccess(merged);
+					}
+					@Override public void onError(String error) { callback.onSuccess(pub); }
+				});
+			}
+			@Override public void onError(String error) { read(doc(COLLECTION, listingId), callback); }
+		});
 	}
 	
 	/** Called right after P2PTradeRouter.claimPayment() succeeds. A

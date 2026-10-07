@@ -391,7 +391,7 @@
 					android:background="@android:color/transparent"
 					android:gravity="center_vertical"
 					android:textColor="@color/colorTextPrimary"
-					android:hint="What's it for\\?"
+					android:hint="What's it for\?"
 					android:textSize="15sp"
 					android:inputType="textCapSentences"
 					android:focusable="true"

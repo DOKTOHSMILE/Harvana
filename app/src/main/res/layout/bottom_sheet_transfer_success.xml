@@ -16,7 +16,7 @@
 			android:id="@+id/tv_success_need_help"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Need Help\\?"
+			android:text="Need Help\?"
 			android:textStyle="bold"
 			android:textSize="14sp"
 			android:focusable="false" />

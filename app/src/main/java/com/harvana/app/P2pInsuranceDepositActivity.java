@@ -457,7 +457,7 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 	}
 	
 	private void _setCheck(TextView view, boolean met) {
-		view.setText(met ? "✓" : "✗");
+		com.harvana.app.utils.Icons.check(view, met);
 		view.setTextColor(getResources().getColor(met ? R.color.colorAccent : R.color.colorError));
 	}
 	

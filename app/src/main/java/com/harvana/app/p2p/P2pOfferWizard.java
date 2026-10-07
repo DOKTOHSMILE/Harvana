@@ -504,7 +504,7 @@ public final class P2pOfferWizard {
 			} else {
 				for (PaymentMethod pm : methods) {
 					TextView t = new TextView(a);
-					t.setText("✓  " + (pm.label != null && !pm.label.isEmpty() ? pm.label : pm.displaySummary()));
+					com.harvana.app.utils.Icons.checked(t, pm.label != null && !pm.label.isEmpty() ? pm.label : pm.displaySummary());
 					t.setTextColor(ThemedDialogs.onSurface(a));
 					t.setTextSize(13.5f);
 					t.setPadding(0, 8, 0, 8);

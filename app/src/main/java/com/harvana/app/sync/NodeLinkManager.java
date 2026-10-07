@@ -51,15 +51,21 @@ public final class NodeLinkManager {
         running = true;
         lastCheck = now;
 
-        // 1. Is this wallet bound on the node right now?
+        // 1. Add this wallet to the signed-in person (first, so the node knows it is theirs before the phone is bound).
+        // 2. Bind it to this phone if the node says it is not bound yet. A phone belongs to one person; each of that
+        //    person's wallets can be bound on it. Device binding is asked of the node, never trusted from a saved flag.
+        link(c, addr, linkStatus -> ensureBound(c, addr, () -> finish(p, addr, linkStatus, done)));
+    }
+
+    private static void ensureBound(Context c, String addr, Runnable next) {
+        SharedPreferences p = prefs(c);
         HarvanaNodeClient.nodeGet("/api/v1/personhood/" + addr, new HarvanaNodeClient.JsonCallback() {
             @Override public void onSuccess(JSONObject j) {
                 boolean bound = j.optBoolean("bound", false);
                 p.edit().putBoolean("bound_" + addr, bound).apply();
-                if (bound) link(c, addr, done);
-                else bind(c, addr, () -> link(c, addr, done));
+                if (bound) next.run(); else bind(c, addr, next);
             }
-            @Override public void onError(String e) { link(c, addr, done); }      // node unreachable: leave the binding as it was
+            @Override public void onError(String e) { next.run(); }      // node unreachable: leave the binding as it was
         });
     }
 
@@ -70,7 +76,7 @@ public final class NodeLinkManager {
         if (addr == null || addr.isEmpty() || WalletManager.loadPrivateKey(c, addr) == null
                 || com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) { if (done != null) done.onDone("No wallet on this phone."); return; }
         prefs(c).edit().remove("linked_" + addr).apply();
-        link(c, addr, status -> { if (done != null) done.onDone(status); });
+        link(c, addr, status -> finish(prefs(c), addr, status, done));
     }
 
     /** True when this phone has seen the node accept the link for the active wallet. */
@@ -86,34 +92,36 @@ public final class NodeLinkManager {
         if (addr == null || addr.isEmpty() || WalletManager.loadPrivateKey(c, addr) == null) { if (done != null) done.onDone("No wallet on this phone."); return; }
         SharedPreferences p = prefs(c);
         p.edit().remove("status_" + addr).remove("linked_" + addr).apply();         // never show an old answer
-        bind(c, addr, () -> {
+        Runnable bindThenReport = () -> bind(c, addr, () -> {
             String bindStatus = p.getString("status_" + addr, "");
-            if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) { if (done != null) done.onDone(bindStatus); return; }
-            link(c, addr, linkStatus -> {
-                String out = linkStatus.isEmpty()
-                        ? bindStatus + (p.getBoolean("linked_" + addr, false) ? " Your wallet is linked to your account." : "")
-                        : bindStatus + " " + linkStatus;
-                p.edit().putString("status_" + addr, out.trim()).apply();
-                if (done != null) done.onDone(out.trim());
-            });
+            String out = bindStatus + (p.getBoolean("linked_" + addr, false) ? " This wallet is linked to your account." : "");
+            p.edit().putString("status_" + addr, out.trim()).apply();
+            if (done != null) done.onDone(out.trim());
+        });
+        // Link first: a phone already bound to another of your wallets accepts this one only once both are yours.
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) { bindThenReport.run(); return; }
+        link(c, addr, linkStatus -> {
+            if (!linkStatus.isEmpty()) p.edit().putString("link_note_" + addr, linkStatus).apply();
+            bindThenReport.run();
         });
     }
 
     private static void link(Context c, String addr, Done done) {
         SharedPreferences p = prefs(c);
-        if (p.getBoolean("linked_" + addr, false)) { com.harvana.app.identity.CombinedIdentity.stamp(c, addr); finish(p, addr, "", done); return; }
+        if (p.getBoolean("linked_" + addr, false)) { com.harvana.app.identity.CombinedIdentity.stamp(c, addr); done.onDone(""); return; }
         NodeIdentityClient.link(c, addr, new NodeIdentityClient.Callback() {
             @Override public void onSuccess(JSONObject j) {
                 p.edit().putBoolean("linked_" + addr, true).apply();
                 com.harvana.app.identity.CombinedIdentity.stamp(c, addr);
-                finish(p, addr, "", done);
+                done.onDone("");
             }
             @Override public void onError(String e) {
                 String u = e == null ? "" : e;
-                if (u.contains("IDENTITY_LINKS_DISABLED")) finish(p, addr, "The network isn't accepting account links yet.", done);
-                else if (u.contains("WALLET_ALREADY_LINKED")) finish(p, addr, "This wallet is already linked to another account.", done);
-                else if (u.contains("USER_ALREADY_LINKED")) finish(p, addr, "Your account is already linked to a different wallet. The network allows one wallet per account.", done);
-                else finish(p, addr, "", done); // transient: try again next time
+                if (u.contains("IDENTITY_LINKS_DISABLED")) done.onDone("The network isn't accepting account links yet.");
+                else if (u.contains("WALLET_ALREADY_LINKED")) done.onDone("This wallet belongs to another account. A wallet can belong to one person only.");
+                else if (u.contains("TOO_MANY_WALLETS")) done.onDone("Your account already has the most wallets the network allows (20).");
+                else if (u.contains("USER_ALREADY_LINKED")) done.onDone("The network is still on the one-wallet rule. This wallet will be added to your account after the next network update.");
+                else done.onDone(""); // transient: try again next time
             }
         });
     }
@@ -130,7 +138,7 @@ public final class NodeLinkManager {
                 if (u.contains("PERSONHOOD_ALREADY_BOUND")) {
                     p.edit().putBoolean("bound_" + addr, true).putString("status_" + addr, "This phone is bound to your wallet on the network.").apply();
                 } else if (u.contains("DEVICE_ALREADY_BOUND")) {
-                    p.edit().putBoolean("bound_" + addr, false).putString("status_" + addr, "This phone is already bound to a different wallet on the network. One phone can be bound to one wallet.").apply();
+                    p.edit().putBoolean("bound_" + addr, false).putString("status_" + addr, "This phone belongs to another person's account on the network. A phone can belong to one person; all of that person's wallets can be bound on it.").apply();
                 } else {
                     p.edit().putString("status_" + addr, "Device binding is pending. It will be tried again.").apply();
                 }

@@ -68,10 +68,17 @@ public final class CombinedIdentity {
     public static void stamp(Context c, String address) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null || address == null || address.isEmpty()) return;
+        // A new wallet is added to the person; it never replaces their main (first) wallet, so their profile, history and
+        // payments stay where they were. The node keeps the same list and counts every wallet's activity toward them.
+        com.google.firebase.database.DatabaseReference me = FirebaseDatabase.getInstance().getReference("userdb").child(user.getUid());
         Map<String, Object> profile = new HashMap<>();
-        profile.put("walletAddress", address);
         profile.put("identityLinked", true);
-        FirebaseDatabase.getInstance().getReference("userdb").child(user.getUid()).updateChildren(profile);
+        profile.put("wallets/" + address, System.currentTimeMillis());
+        me.updateChildren(profile);
+        me.child("walletAddress").get().addOnSuccessListener(snap -> {
+            Object main = snap.getValue();
+            if (main == null || String.valueOf(main).trim().isEmpty()) me.child("walletAddress").setValue(address);
+        });
         load(account -> {
             Map<String, Object> doc = new HashMap<>();
             doc.put("address", address);

@@ -2,6 +2,33 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: shorter profile and trust pages, a "My data" tab
+
+What the app does:
+
+- Profiles show only the milestones a member has reached, in one row that scrolls sideways. Tap a badge to flick through them full size. On your own profile and on the trust score page, "See all" opens the full shelf, with what is still to earn.
+- Your own profile has a new **My data** tab with:
+  - your network facts (device, vouches, established);
+  - your linked wallets;
+  - links to My activity, Devices and the full trust score;
+  - a note on how deleted data is kept.
+
+  The Trust and Activity tabs are shorter as a result.
+- On the trust score page, badges show as one line of names, with "What these mean" for the explanations.
+
+What you do: install the new build.
+
+## 7 Oct 2026: one person, many wallets
+
+What the app does. Signing in with another wallet no longer moves your account onto it. The new wallet is added to you, signed by its own key, and your first wallet stays your main one, which keeps your profile, history and gifts. The network counts every wallet's activity toward you: trust and badges are worked out across all your wallets, and a default on a new wallet lowers you, not just that wallet. A wallet can belong to one person, and a phone to one person; each of your own wallets can be bound on your phone. Your own profile lists your wallets ("Main wallet", "Also yours"). Nobody else can see that list.
+
+What you do:
+
+1. Deploy the node jar first (node repository, `docs/DEPLOYMENT.md`, "one person, many wallets").
+2. Install the new build.
+
+Without the new node, a second wallet shows "The network is still on the one-wallet rule".
+
 ## 7 Oct 2026: deleted data is kept for a year, then erased
 
 What the app does. Deleting a group, a Learn post, a profile article or an expired trade chat still removes it from every screen at once. Before the delete, the app now writes a private copy to `DELETED`, with `purgeAt` set one year later. Nobody can read these copies from the app. The delete prompts now say this. The full design is in `docs/DATA_RETENTION.md`.

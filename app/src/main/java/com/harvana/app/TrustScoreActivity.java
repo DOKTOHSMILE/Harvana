@@ -158,12 +158,29 @@ public class TrustScoreActivity extends AppCompatActivity {
             java.util.List<?> list = (java.util.List<?>) person.get("labels");
             Object notes = person.get("labelNotes");
             java.util.List<?> detail = notes instanceof java.util.List ? (java.util.List<?>) notes : java.util.Collections.emptyList();
+            // Names only, on one line; what each means opens on a tap (keeps the page short).
+            StringBuilder names = new StringBuilder();
+            final LinearLayout more = new LinearLayout(this);
+            more.setOrientation(LinearLayout.VERTICAL);
+            more.setVisibility(View.GONE);
             for (int i = 0; i < list.size(); i++) {
                 String name = String.valueOf(list.get(i));
                 String body = i < detail.size() ? String.valueOf(detail.get(i)) : name;
-                badges.addView(tv(titleOf(name), 15, true, UiColors.textPrimary()));
-                badges.addView(note(body));
+                if (names.length() > 0) names.append("  \u00B7  ");
+                names.append(titleOf(name));
+                more.addView(tv(titleOf(name), 14, true, UiColors.textPrimary()));
+                more.addView(note(body));
             }
+            badges.addView(tv(names.toString(), 14, true, UiColors.textPrimary()));
+            final TextView toggle = tv("What these mean \u25BE", 13, true, UiColors.accent());
+            toggle.setPadding(0, dp(8), 0, 0);
+            toggle.setOnClickListener(v -> {
+                boolean open = more.getVisibility() != View.VISIBLE;
+                more.setVisibility(open ? View.VISIBLE : View.GONE);
+                toggle.setText(open ? "Hide \u25B4" : "What these mean \u25BE");
+            });
+            badges.addView(toggle);
+            badges.addView(more);
         }
         root.addView(badges);
         showMilestones(gen);
@@ -173,14 +190,14 @@ public class TrustScoreActivity extends AppCompatActivity {
     private void showMilestones(int gen) {
         final LinearLayout holder = new LinearLayout(this);
         holder.setOrientation(LinearLayout.VERTICAL);
-        holder.addView(com.harvana.app.utils.Shimmer.cards(this, 2));
+        holder.addView(com.harvana.app.utils.Shimmer.cards(this, 1));
         root.addView(holder);
         String uid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
                 : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
         com.harvana.app.milestone.MilestoneLoader.load(this, address, uid, true, items -> {
             if (gen != generation || isFinishing()) return;
             holder.removeAllViews();
-            holder.addView(com.harvana.app.milestone.MilestoneShelf.card(this, items, true));
+            holder.addView(com.harvana.app.milestone.MilestoneShelf.strip(this, items, true));
         });
     }
 

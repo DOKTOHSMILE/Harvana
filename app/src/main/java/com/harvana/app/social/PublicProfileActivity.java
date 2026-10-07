@@ -625,6 +625,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         rows.addView(factRow("Vouches", String.valueOf(score.vouches)));
         rows.addView(factRow("Badges", String.valueOf(score.badges)));
         rows.addView(factRow("Established", score.established ? "Yes" : "No"));
+        if (isMe()) myWalletRows(rows);
         if (isMe() && (!score.bound || !com.harvana.app.sync.NodeLinkManager.isLinked(this))) {
             // Binding ties the wallet to this phone (it raises the base trust score). Offered right here, not only on the Trust screen.
             TextView bind = pillButton("Bind this device", v -> {
@@ -640,8 +641,39 @@ public class PublicProfileActivity extends AppCompatActivity {
             lp.topMargin = SocialUi.dp(this, 12);
             bind.setLayoutParams(lp);
             rows.addView(bind);
-            rows.addView(SocialUi.text(this, "Ties your wallet to this phone and lifts the base score. No ID is uploaded. One phone can be bound to one wallet.", 12, false, UiColors.textSecondary()));
+            rows.addView(SocialUi.text(this, "Ties your wallet to this phone and lifts the base score. No ID is uploaded. A phone belongs to one person; all your own wallets can be bound on it.", 12, false, UiColors.textSecondary()));
         }
+    }
+
+    /**
+     * The wallets the network counts as mine. Each wallet I sign in with is added to me (signed by that wallet), never
+     * swapped in: my profile and history stay on my main wallet, and what any of them does counts toward me.
+     */
+    private void myWalletRows(LinearLayout rows) {
+        final LinearLayout list = new LinearLayout(this);
+        list.setOrientation(LinearLayout.VERTICAL);
+        rows.addView(list);
+        com.harvana.app.sync.NodeIdentityClient.myWallets(new com.harvana.app.sync.NodeIdentityClient.Callback() {
+            @Override public void onSuccess(org.json.JSONObject j) {
+                org.json.JSONArray ws = j.optJSONArray("wallets");
+                runOnUiThread(() -> {
+                    list.removeAllViews();
+                    if (ws == null || ws.length() == 0) return;
+                    list.addView(factRow("Wallets", String.valueOf(ws.length())));
+                    for (int i = 0; i < ws.length(); i++) {
+                        org.json.JSONObject w = ws.optJSONObject(i);
+                        if (w == null) continue;
+                        String a = w.optString("address", "");
+                        String shortA = a.length() > 14 ? a.substring(0, 8) + "\u2026" + a.substring(a.length() - 6) : a;
+                        list.addView(factRow(w.optBoolean("main") ? "Main wallet" : "Also yours", shortA));
+                    }
+                    list.addView(SocialUi.text(PublicProfileActivity.this,
+                        "Every wallet you sign in with is added to you, signed by that wallet. Your profile stays on your main wallet, and what any of them does counts toward your trust and badges.",
+                        12, false, UiColors.textSecondary()));
+                });
+            }
+            @Override public void onError(String e) { }      // older network or offline: the list just isn't shown
+        });
     }
 
     private View factRow(String label, String value) {
@@ -936,13 +968,15 @@ public class PublicProfileActivity extends AppCompatActivity {
         g.setCornerRadius(SocialUi.dp(this, 26));
         g.setColor(UiColors.surface());
         pillBar.setBackground(g);
-        String[] names = {"Trust", "Activity", "Groups"};
+        // Your own profile has a fourth tab for your data: wallets, device, network facts, activity and devices.
+        String[] names = isMe() ? new String[]{"Trust", "Activity", "Groups", "My data"} : new String[]{"Trust", "Activity", "Groups"};
+        int side = isMe() ? 13 : 20;
         final TextView[] labels = new TextView[names.length];
         for (int i = 0; i < names.length; i++) {
             final int idx = i;
             TextView t = SocialUi.text(this, names[i], 14, true, UiColors.textSecondary());
             t.setGravity(Gravity.CENTER);
-            t.setPadding(SocialUi.dp(this, 20), SocialUi.dp(this, 9), SocialUi.dp(this, 20), SocialUi.dp(this, 9));
+            t.setPadding(SocialUi.dp(this, side), SocialUi.dp(this, 9), SocialUi.dp(this, side), SocialUi.dp(this, 9));
             t.setClickable(true);
             labels[i] = t;
             t.setOnClickListener(v -> { tab = idx; styleTabs(labels); renderTab(); });
@@ -970,24 +1004,16 @@ public class PublicProfileActivity extends AppCompatActivity {
         if (tab == 0) {
             tabContent.addView(trustCard());
             tabContent.addView(milestonesCard());
-            if (isMe()) tabContent.addView(networkFactsCard());
         }
         else if (tab == 1) {
             tabContent.addView(activityCard());
             if (isMe()) tabContent.addView(learnCard());
-            if (isMe()) {
-                MaterialButton see = SocialUi.button(this, "See my activity", true);
-                see.setOnClickListener(v -> startActivity(new Intent(this, ActivityStatsActivity.class)));
-                tabContent.addView(see, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 48)));
-                MaterialButton dev = SocialUi.button(this, "Devices", true);
-                dev.setOnClickListener(v -> startActivity(new Intent(this, DevicesActivity.class)));
-                LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 48));
-                dlp.topMargin = SocialUi.dp(this, 8);
-                tabContent.addView(dev, dlp);
-            }
-        } else {
+        } else if (tab == 2) {
             tabContent.addView(sharedCard());
             if (isMe()) { tabContent.addView(totalsCard()); tabContent.addView(businessCard()); }
+        } else {
+            tabContent.addView(networkFactsCard());          // device, vouches, established, and your wallets
+            tabContent.addView(myDataLinks());
         }
         TextView foot = SocialUi.text(this, "Trust, country and state are always public. Amounts and group names are never shown. "
                 + "Age and city are shown only if the member turns them on.", 11.5f, false, UiColors.textTertiary());
@@ -1070,7 +1096,39 @@ public class PublicProfileActivity extends AppCompatActivity {
         return b;
     }
 
-    /** The milestone shelf: everything on the owner's own profile, earned badges only for everyone else. */
+    /** Shortcuts to the rest of my own data: what the phone counted, my devices, and what the network holds. */
+    private View myDataLinks() {
+        LinearLayout c = SocialUi.card(this);
+        c.addView(SocialUi.text(this, "More of your data", 16, true, UiColors.textPrimary()));
+        c.addView(linkRow("My activity", "Time in the app, screens, streaks and your habit badges",
+            v -> startActivity(new Intent(this, ActivityStatsActivity.class))));
+        c.addView(linkRow("Devices", "Phones signed in to your account",
+            v -> startActivity(new Intent(this, DevicesActivity.class))));
+        c.addView(linkRow("Trust score in full", "Every part of your score and how to raise it",
+            v -> startActivity(new Intent(this, com.harvana.app.TrustScoreActivity.class))));
+        TextView keep = SocialUi.text(this, "Anything you delete leaves every screen at once. A private copy is kept for one year in case of a dispute, then erased.",
+            11.5f, false, UiColors.textTertiary());
+        keep.setPadding(0, SocialUi.dp(this, 12), 0, 0);
+        c.addView(keep);
+        return c;
+    }
+
+    private View linkRow(String title, String sub, View.OnClickListener go) {
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(0, SocialUi.dp(this, 12), 0, SocialUi.dp(this, 2));
+        LinearLayout words = new LinearLayout(this);
+        words.setOrientation(LinearLayout.VERTICAL);
+        words.addView(SocialUi.text(this, title, 14, true, UiColors.textPrimary()));
+        words.addView(SocialUi.text(this, sub, 12, false, UiColors.textSecondary()));
+        row.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        row.addView(SocialUi.text(this, "\u203A", 20, true, UiColors.accent()));
+        row.setClickable(true);
+        row.setOnClickListener(go);
+        return row;
+    }
+
+    /** Milestones reached, in one short row. On my own profile, "See all" opens the whole shelf with what is still to earn. */
     private View milestonesCard() {
         final LinearLayout holder = new LinearLayout(this);
         holder.setOrientation(LinearLayout.VERTICAL);
@@ -1080,7 +1138,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         com.harvana.app.milestone.MilestoneLoader.load(this, wallet, uid, mine, items -> {
             if (isFinishing()) return;
             holder.removeAllViews();
-            holder.addView(com.harvana.app.milestone.MilestoneShelf.card(this, items, mine));
+            holder.addView(com.harvana.app.milestone.MilestoneShelf.strip(this, items, mine));
         });
         return holder;
     }

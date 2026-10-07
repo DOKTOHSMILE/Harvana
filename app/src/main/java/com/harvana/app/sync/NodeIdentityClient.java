@@ -20,7 +20,8 @@ import java.security.MessageDigest;
  *  - identity link: wallet signature + Firebase ID token (the node keeps only an HMAC of the uid).
  *  - personhood bind: wallet signature over a device attestation hash (10 trust points).
  *  - lookup: the node's own trust view of any wallet.
- * The node allows ONE wallet per user and ONE wallet per device hash; extra wallets are separate identities.
+ * One person, many wallets: every wallet the user signs in with is added to them (the first stays the main one) and the
+ * node counts each wallet's activity toward the person. A wallet belongs to one person, and a phone to one person.
  */
 public final class NodeIdentityClient {
     private NodeIdentityClient() {}
@@ -58,6 +59,17 @@ public final class NodeIdentityClient {
                             post("/api/v1/identity/link", body, cb);
                         } catch (Exception e) { cb.onError(e.getMessage()); }
                     });
+        });
+    }
+
+    /** The signed-in user's own linked wallets, main first: {"wallets":[{"address","main","addedAt"}]}. */
+    public static void myWallets(Callback cb) {
+        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        if (u == null) { cb.onError("Sign in first."); return; }
+        u.getIdToken(false).addOnCompleteListener(t -> {
+            if (!t.isSuccessful() || t.getResult() == null || t.getResult().getToken() == null) { cb.onError("Could not get sign-in token."); return; }
+            try { post("/api/v1/identity/wallets", new JSONObject().put("idToken", t.getResult().getToken()), cb); }
+            catch (Exception e) { cb.onError(e.getMessage()); }
         });
     }
 

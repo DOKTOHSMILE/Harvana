@@ -99,6 +99,77 @@ public final class MilestoneShelf {
         return c;
     }
 
+    /**
+     * The short form for profiles and the trust page: only the milestones reached, in one row that scrolls sideways,
+     * highest tier first. Tap a badge to flick through them full size. On your own, "See all" opens the whole shelf
+     * with what is still to earn.
+     */
+    public static View strip(Activity a, List<MilestoneLoader.Item> items, boolean mine) {
+        LinearLayout c = new LinearLayout(a);
+        c.setOrientation(LinearLayout.VERTICAL);
+        c.setPadding(dp(a, 16), dp(a, 14), dp(a, 16), dp(a, 14));
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(dp(a, 18));
+        bg.setColor(UiColors.surface());
+        bg.setStroke(dp(a, 1), (UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000);
+        c.setBackground(bg);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(a, 12);
+        c.setLayoutParams(lp);
+
+        final List<MilestoneLoader.Item> earned = new ArrayList<>();
+        for (MilestoneLoader.Item it : items) if (it.tier > 0) earned.add(it);
+        earned.sort((x, y) -> Integer.compare(y.tier, x.tier));
+
+        LinearLayout head = new LinearLayout(a);
+        head.setGravity(Gravity.CENTER_VERTICAL);
+        head.addView(text(a, "Milestones reached", 16, true, UiColors.textPrimary()), new LinearLayout.LayoutParams(0, -2, 1f));
+        if (mine) {
+            TextView all = text(a, "See all " + items.size() + "  \u203A", 13, true, UiColors.accent());
+            all.setPadding(dp(a, 8), dp(a, 4), 0, dp(a, 4));
+            all.setOnClickListener(v -> showAll(a, items));
+            head.addView(all);
+        } else {
+            head.addView(text(a, String.valueOf(earned.size()), 14, true, UiColors.accent()));
+        }
+        c.addView(head);
+
+        if (earned.isEmpty()) {
+            TextView none = text(a, mine ? "None yet. Your first come with your first payments, votes and posts."
+                    : "No milestones reached yet.", 13, false, UiColors.textSecondary());
+            none.setPadding(0, dp(a, 8), 0, 0);
+            c.addView(none);
+            return c;
+        }
+        android.widget.HorizontalScrollView scroll = new android.widget.HorizontalScrollView(a);
+        scroll.setHorizontalScrollBarEnabled(false);
+        scroll.setClipToPadding(false);
+        LinearLayout row = new LinearLayout(a);
+        row.setPadding(0, dp(a, 10), 0, dp(a, 4));
+        for (MilestoneLoader.Item it : earned) {
+            LinearLayout.LayoutParams tl = new LinearLayout.LayoutParams(dp(a, 96), ViewGroup.LayoutParams.WRAP_CONTENT);
+            tl.setMargins(0, dp(a, 2), dp(a, 8), dp(a, 4));
+            row.addView(tile(a, earned, it, mine), tl);
+        }
+        scroll.addView(row);
+        c.addView(scroll);
+        return c;
+    }
+
+    /** The whole shelf (every family, locked ones with progress) in a full-height sheet. */
+    public static void showAll(Activity a, List<MilestoneLoader.Item> items) {
+        com.google.android.material.bottomsheet.BottomSheetDialog dlg = new com.harvana.app.ui.AppSheet(a);
+        android.widget.ScrollView sv = new android.widget.ScrollView(a);
+        LinearLayout box = new LinearLayout(a);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(a, 12), dp(a, 4), dp(a, 12), dp(a, 24));
+        box.addView(card(a, items, true));
+        sv.addView(box);
+        dlg.setContentView(sv);
+        com.harvana.app.group.BottomSheetUtils.expandFullScreen(dlg, sv);
+        dlg.show();
+    }
+
     /** One badge: the 3D badge on a light card in its tier colour, its name, and its tier or progress. Greyed while locked. */
     private static View tile(Activity a, List<MilestoneLoader.Item> all, MilestoneLoader.Item it, boolean mine) {
         LinearLayout t = new LinearLayout(a);

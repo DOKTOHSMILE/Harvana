@@ -2,6 +2,20 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: tier medals
+
+What the app does. Each trust tier has a 3D medal:
+
+- New: a green sprout;
+- Bronze: one star;
+- Silver: two stars;
+- Gold: three stars;
+- Platinum: a diamond.
+
+The tier chip on a profile ("19% · Bronze") and the small trust pills elsewhere show the medal. Tapping one opens a dialog with every tier. The tiers you have reached are in colour; the rest are grey and faded, with what each one means and the score it starts at. The top of the dialog shows how many points to the next tier.
+
+The medal sources are in `tools/illustrations/tier_*.svg`. What you do: install the new build.
+
 ## 7 Oct 2026: no "BVN/NIN verified" anywhere
 
 What the app does. The profile's personal details no longer show a "Verification" row ("BVN verified" or "NIN verified"). Settings no longer shows a "Verified Member" badge. Both came from an ID choice made at sign-up that was never checked, and sign-up no longer saves it. What you do: install the new build.

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<defs>
+<linearGradient id="f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E9EEF4"/><stop offset=".55" stop-color="#A9B4C2"/><stop offset="1" stop-color="#6C7889"/></linearGradient>
+<linearGradient id="r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6C7889"/><stop offset="1" stop-color="#E9EEF4"/></linearGradient>
+<radialGradient id="g" cx=".35" cy=".28" r=".7"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset=".5" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<filter id="s"><feGaussianBlur stdDeviation="4"/></filter></defs>
+<path d="M84 10 h36 l22 70 h-36z" fill="#3D6FB6"/><path d="M172 10 h-36 l-22 70 h36z" fill="#2A4F86"/>
+<path d="M92 10 h8 l22 70 h-8z" fill="#fff" opacity=".25"/>
+<ellipse cx="128" cy="238" rx="62" ry="9" fill="#000" opacity=".25" filter="url(#s)"/>
+<circle cx="128" cy="140" r="88" fill="#6C7889"/>
+<circle cx="128" cy="134" r="88" fill="url(#r)"/>
+<circle cx="128" cy="134" r="72" fill="url(#f)"/>
+<circle cx="128" cy="134" r="72" fill="none" stroke="#FFFFFF" stroke-opacity=".6" stroke-width="3"/>
+<g transform="translate(2,5)" opacity=".35"><polygon points="108.0,110.0 114.9,126.5 132.7,128.0 119.1,139.6 123.3,157.0 108.0,147.7 92.7,157.0 96.9,139.6 83.3,128.0 101.1,126.5" fill="#000"/><polygon points="148.0,110.0 154.9,126.5 172.7,128.0 159.1,139.6 163.3,157.0 148.0,147.7 132.7,157.0 136.9,139.6 123.3,128.0 141.1,126.5" fill="#000"/></g>
+<g><polygon points="108.0,110.0 114.9,126.5 132.7,128.0 119.1,139.6 123.3,157.0 108.0,147.7 92.7,157.0 96.9,139.6 83.3,128.0 101.1,126.5" fill="#6C7889"/><polygon points="148.0,110.0 154.9,126.5 172.7,128.0 159.1,139.6 163.3,157.0 148.0,147.7 132.7,157.0 136.9,139.6 123.3,128.0 141.1,126.5" fill="#6C7889"/></g>
+<g transform="translate(-1.5,-2)" opacity=".9"><polygon points="108.0,110.0 114.9,126.5 132.7,128.0 119.1,139.6 123.3,157.0 108.0,147.7 92.7,157.0 96.9,139.6 83.3,128.0 101.1,126.5" fill="#FFFFFF"/><polygon points="148.0,110.0 154.9,126.5 172.7,128.0 159.1,139.6 163.3,157.0 148.0,147.7 132.7,157.0 136.9,139.6 123.3,128.0 141.1,126.5" fill="#FFFFFF"/></g>
+<circle cx="128" cy="134" r="86" fill="url(#g)"/>
+</svg>

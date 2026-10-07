@@ -274,6 +274,8 @@ public class PublicProfileActivity extends AppCompatActivity {
         nameRow.addView(name, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         TextView chip = pill(card.scored() ? ("New".equals(tierName()) ? "New · " + card.trustPercent + "%" : card.trustPercent + "% · " + tierName()) : "New · not scored yet", tint);
         ((LinearLayout.LayoutParams) chip.getLayoutParams()).setMarginStart(SocialUi.dp(this, 8));
+        // The tier's medal beside the score; tap for every tier (reached in colour, the rest dimmed).
+        com.harvana.app.trust.TierBadges.decorate(this, chip, tierName(), card.trustPercent, card.scored());
         nameRow.addView(chip);
         h.addView(nameRow);
 

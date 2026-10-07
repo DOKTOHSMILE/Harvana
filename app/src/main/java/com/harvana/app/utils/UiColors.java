@@ -23,6 +23,7 @@ public final class UiColors {
 
     public static int surface()       { return get(R.color.colorSurface); }
     public static int background()    { return get(R.color.colorBackground); }
+    public static int surfaceAlt()    { return get(R.color.colorSurfaceAlt); }
     public static int accent()        { return get(R.color.colorAccent); }
     public static int onAccent()      { return get(R.color.colorTextOnAccent); }
     public static int textPrimary()   { return get(R.color.colorTextPrimary); }

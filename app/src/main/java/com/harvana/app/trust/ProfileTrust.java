@@ -117,6 +117,17 @@ public final class ProfileTrust {
         bg.setStroke(Math.max(1, (int) pill.getResources().getDisplayMetrics().density), Color.argb(120, Color.red(color), Color.green(color), Color.blue(color)));
         pill.setBackground(bg);
         pill.setTextColor(color);
+        // The tier's medal, and a tap that shows every tier.
+        String tier = c != null && c.scored() ? (c.trustTier.isEmpty() ? tierFor(c.percent) : c.trustTier) : "New";
+        if (pill.getContext() instanceof android.app.Activity) {
+            TierBadges.decorate((android.app.Activity) pill.getContext(), pill, tier, c == null ? 0 : c.percent, c != null && c.scored());
+            android.graphics.drawable.Drawable[] ds = pill.getCompoundDrawablesRelative();
+            if (ds[0] != null) {                                         // a little smaller in lists
+                int px = Math.round(16 * pill.getResources().getDisplayMetrics().density);
+                ds[0].setBounds(0, 0, px, px);
+                pill.setCompoundDrawablesRelative(ds[0], null, null, null);
+            }
+        }
     }
 
     /** Same thresholds as the node's TrustPercent (Platinum also needs strong components, which the node already applied to the tier it sent). */

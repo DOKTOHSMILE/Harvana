@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Every switch in the app: the track is a soft accent when on, a soft grey when off, so off never looks on. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:alpha="0.3" android:color="@color/colorTextTertiary"/>
+    <item android:state_checked="true" android:alpha="0.45" android:color="@color/colorAccent"/>
+    <item android:alpha="0.35" android:color="@color/colorTextTertiary"/>
+</selector>

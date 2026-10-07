@@ -7,6 +7,10 @@
         <!-- every spinner list opens on the surface colour with palette text -->
         <item name="spinnerStyle">@style/HarvanaSpinner</item>
         <item name="materialButtonStyle">@style/HarvanaButton</item>
+        <!-- one switch look everywhere (on: accent knob and soft accent track; off: white knob, grey track) -->
+        <item name="switchStyle">@style/Harvana.Switch</item>
+        <!-- every toolbar: the same bold 20sp title, 13sp subtitle and spacing as the standard header -->
+        <item name="toolbarStyle">@style/Harvana.Toolbar</item>
         <item name="materialButtonOutlinedStyle">@style/HarvanaButton.Outlined</item>
         <item name="textInputStyle">@style/Harvana.TextInputLayout</item>
         <item name="materialCardViewStyle">@style/Harvana.Card</item>

@@ -1686,9 +1686,7 @@
 								android:id="@+id/switch_require_approval"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:textSize="12sp"
-								app:thumbTint="@color/colorAccent"
-								app:trackTint="@color/colorAccentStroke" />
+								android:textSize="12sp" />
 						</LinearLayout>
 						<LinearLayout
 							android:id="@+id/fields_approval_method"
@@ -1765,9 +1763,7 @@
 								android:id="@+id/switch_members_invite"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:textSize="12sp"
-								app:thumbTint="@color/colorAccent"
-								app:trackTint="@color/colorAccentStroke" />
+								android:textSize="12sp" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view108"
@@ -1814,9 +1810,7 @@
 								android:id="@+id/switch_members_edit"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:textSize="12sp"
-								app:thumbTint="@color/colorAccent"
-								app:trackTint="@color/colorAccentStroke" />
+								android:textSize="12sp" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view111"
@@ -1863,9 +1857,7 @@
 								android:id="@+id/switch_invite_link"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:textSize="12sp"
-								app:thumbTint="@color/colorAccent"
-								app:trackTint="@color/colorAccentStroke" />
+								android:textSize="12sp" />
 						</LinearLayout>
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>

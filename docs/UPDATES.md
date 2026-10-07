@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: one switch, one segmented choice, one toolbar
+
+What the app does:
+
+- **Switches** all look the same: an accent knob on a soft accent track when on, a white (light grey at night) knob on a grey track when off. Four switches in Create group had their knob painted green, so they looked on even when off; that is fixed.
+- **Segmented choices** (Fixed or Floating price on the P2P offer screens) fill the chosen side with the accent colour. Before, the selected side barely stood out.
+- **Toolbars** all use the standard header's look: the same bold 20sp title, 13sp subtitle and spacing.
+
+What you do: install the new build.
+
 ## 7 Oct 2026: P2P payment proof and the network price
 
 What the app does:

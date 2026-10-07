@@ -187,7 +187,7 @@
 						android:text="Fixed Price"
 						android:textSize="12sp"
 						android:layout_weight="1"
-						style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+						style="@style/Harvana.Segment"
 						android:textAllCaps="false" />
 					<com.google.android.material.button.MaterialButton
 						android:id="@+id/btn_sell_price_floating"
@@ -196,7 +196,7 @@
 						android:text="Floating Price"
 						android:textSize="12sp"
 						android:layout_weight="1"
-						style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+						style="@style/Harvana.Segment"
 						android:textAllCaps="false" />
 				</com.google.android.material.button.MaterialButtonToggleGroup>
 				<LinearLayout

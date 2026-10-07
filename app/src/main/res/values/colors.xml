@@ -96,4 +96,5 @@
 <color name="colorSuccessNeon">#00FFA3</color>
 <color name="colorReadyBlue">#3B82F6</color>
 <color name="colorStrokeBase">@color/colorCardStroke</color>
+    <color name="colorSwitchThumbOff">#FFFFFFFF</color>
 </resources>

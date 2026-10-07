@@ -65,8 +65,8 @@
 								android:id="@+id/seller_avatar"
 								android:layout_width="32dp"
 								android:layout_height="32dp"
-								android:background="@drawable/default_image"
-								android:src="@drawable/default_image"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_person"
 								android:scaleType="centerInside" />
 							<TextView
 								android:id="@+id/seller_initial"

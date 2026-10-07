@@ -816,7 +816,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		if (panel_accumulative != null) panel_accumulative.setVisibility(isAccum() ? View.VISIBLE : View.GONE);
 		
 		if (isRotating()) {
-			ivHeroTypeIcon.setImageResource(R.drawable.ic_refresh);
+			ivHeroTypeIcon.setImageResource(R.drawable.ic_type_circle);
 			tvTypeSettingsTitle.setText("Rotating Pool");
 			etGracePeriod.setText(str(groupData, "gracePeriodDays", "0"));
 			etCommission.setText(str(groupData, "commissionPercent", "0"));
@@ -824,7 +824,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 			tvRuleInfoBanner.setText("Only the member whose slot is due can pay this round.");
 		} 
 		else if (isFixed()) {
-			ivHeroTypeIcon.setImageResource(R.drawable.ic_pie_chart);
+			ivHeroTypeIcon.setImageResource(R.drawable.ic_type_goal);
 			etFixedGoal.setText(numStr(groupData, "targetGoalAmount"));
 			_select(spinDisbursementRule, str(groupData, "disbursementRule", "All at Once at Goal"));
 			tv_fixed_progress.setText("Live savings progress is shown on the group's Overview tab.");
@@ -833,7 +833,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 					: "The goal amount and disbursement rule apply to future contributions once saved.");
 		} 
 		else if (isAccum()) {
-			ivHeroTypeIcon.setImageResource(R.drawable.ic_attach_money);
+			ivHeroTypeIcon.setImageResource(R.drawable.ic_type_savings);
 			etLoanInterestRate.setText(numStr(groupData, "loanInterestRate"));
 			_select(spinWithdrawalRule, str(groupData, "withdrawalRule", "Anytime"));
 			tv_loan_active_count.setText("Active loan count is shown on the group's Loans tab.");

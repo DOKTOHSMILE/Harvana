@@ -258,8 +258,8 @@
 								android:id="@+id/seller_avatar"
 								android:layout_width="40dp"
 								android:layout_height="40dp"
-								android:background="@drawable/default_image"
-								android:src="@drawable/default_image"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_person"
 								android:scaleType="centerCrop" />
 							<TextView
 								android:id="@+id/seller_initial"
@@ -316,8 +316,8 @@
 								android:id="@+id/buyer_avatar"
 								android:layout_width="40dp"
 								android:layout_height="40dp"
-								android:background="@drawable/default_image"
-								android:src="@drawable/default_image"
+								android:background="@drawable/bg_settings_icon_badge"
+								android:src="@drawable/ic_person"
 								android:scaleType="centerCrop" />
 							<TextView
 								android:id="@+id/buyer_initial"

@@ -404,6 +404,7 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 	
 	private void initializeLogic() {
+		_compactList();
 		if (getSupportActionBar() != null) {
 			getSupportActionBar().setTitle("Settings");
 			getSupportActionBar().setSubtitle("Manage your account, preferences and app experience.");
@@ -658,6 +659,45 @@ public class SettingsActivity extends AppCompatActivity {
 		.show();
 	}
 	
+	/**
+	 * Keeps Settings short: rows that repeat another screen or are not built yet are hidden (Account information is
+	 * Edit profile; groups, history and terms live on their own screens or in About; limits, tax reports and other
+	 * languages are not ready), each row shows its title only, and rows are tighter.
+	 */
+	private void _compactList() {
+		View[] hide = {rowAccountInfo, rowLimitsFees, rowTaxReports, rowGroupsCircles, rowTransactionHistory, rowTermsConditions, rowLanguage};
+		for (View row : hide) {
+			if (row == null) continue;
+			row.setVisibility(View.GONE);
+			android.view.ViewGroup parent = (android.view.ViewGroup) row.getParent();
+			int at = parent.indexOfChild(row);
+			// Its divider: the one after it, or the one before it when it was the last row in the card.
+			View after = at + 1 < parent.getChildCount() ? parent.getChildAt(at + 1) : null;
+			View before = at > 0 ? parent.getChildAt(at - 1) : null;
+			if (after instanceof com.google.android.material.divider.MaterialDivider) after.setVisibility(View.GONE);
+			else if (before instanceof com.google.android.material.divider.MaterialDivider) before.setVisibility(View.GONE);
+		}
+		final float d = getResources().getDisplayMetrics().density;
+		View[] rows = {rowSecurityPrivacy, rowWalletAssets, rowBackupRecovery, rowPaymentMethods, rowPrivacyVisibility, rowNotifications,
+			rowBlockedUsers, rowThemeAppearance, rowCurrency, rowDataStorage, rowHelpSupport, rowAboutHarvana, rowLogOut};
+		for (View r : rows) {
+			if (!(r instanceof android.view.ViewGroup)) continue;
+			android.view.ViewGroup row = (android.view.ViewGroup) r;
+			row.setPadding((int) (14 * d), (int) (9 * d), (int) (14 * d), (int) (9 * d));
+			for (int c = 0; c < row.getChildCount(); c++) {
+				View child = row.getChildAt(c);
+				if (c == 0 && child.getLayoutParams() != null) {           // the icon badge
+					child.getLayoutParams().width = (int) (34 * d);
+					child.getLayoutParams().height = (int) (34 * d);
+					child.setPadding((int) (8 * d), (int) (8 * d), (int) (8 * d), (int) (8 * d));
+				}
+				if (child instanceof LinearLayout && ((LinearLayout) child).getChildCount() > 1) {
+					((LinearLayout) child).getChildAt(1).setVisibility(View.GONE);   // the grey line under the title
+				}
+			}
+		}
+	}
+
 	private void _openActivity(Class<?> activityClass) {
 		startActivity(new Intent(this, activityClass));
 	}

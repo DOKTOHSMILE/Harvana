@@ -51,7 +51,7 @@
 						android:id="@+id/seller_avatar"
 						android:layout_width="match_parent"
 						android:layout_height="match_parent"
-						android:src="@drawable/default_image"
+						android:src="@drawable/ic_person"
 						android:scaleType="centerInside"
 						android:focusable="false"
 						android:visibility="gone" />

@@ -87,7 +87,7 @@
 									android:id="@+id/ivHeroTypeIcon"
 									android:layout_width="16dp"
 									android:layout_height="16dp"
-									android:src="@drawable/default_image"
+									android:src="@drawable/ic_type_circle"
 									android:scaleType="centerInside"
 									app:tint="@color/colorTextPrimary"
 									android:layout_marginEnd="6dp" />
@@ -202,7 +202,7 @@
 								android:layout_width="38dp"
 								android:layout_height="38dp"
 								android:padding="9dp"
-								android:src="@drawable/default_image"
+								android:src="@drawable/icon_playlist_add_check_round"
 								android:scaleType="centerInside"
 								android:backgroundTint="@color/colorAccentSoft"
 								app:tint="@color/colorAccent" />
@@ -251,7 +251,7 @@
 								android:layout_width="38dp"
 								android:layout_height="38dp"
 								android:padding="9dp"
-								android:src="@drawable/default_image"
+								android:src="@drawable/ic_pf_person_add"
 								android:scaleType="centerInside"
 								android:backgroundTint="@color/colorAccentSoft"
 								app:tint="@color/colorAccent" />
@@ -397,7 +397,7 @@
 								android:layout_width="38dp"
 								android:layout_height="38dp"
 								android:padding="9dp"
-								android:src="@drawable/default_image"
+								android:src="@drawable/ic_tx_contribution"
 								android:scaleType="centerInside"
 								android:backgroundTint="@color/colorAccentSoft"
 								app:tint="@color/colorAccent" />
@@ -468,7 +468,7 @@
 									android:layout_width="38dp"
 									android:layout_height="38dp"
 									android:padding="9dp"
-									android:src="@drawable/default_image"
+									android:src="@drawable/ic_type_circle"
 									android:scaleType="centerInside"
 									android:backgroundTint="@color/colorAccentSoft"
 									app:tint="@color/colorAccent" />
@@ -519,7 +519,7 @@
 									android:layout_width="38dp"
 									android:layout_height="38dp"
 									android:padding="9dp"
-									android:src="@drawable/default_image"
+									android:src="@drawable/icon_access_time_outline"
 									android:scaleType="centerInside"
 									android:backgroundTint="@color/colorAccentSoft"
 									app:tint="@color/colorAccent" />
@@ -582,7 +582,7 @@
 									android:layout_width="38dp"
 									android:layout_height="38dp"
 									android:padding="9dp"
-									android:src="@drawable/default_image"
+									android:src="@drawable/ic_tx_fee"
 									android:scaleType="centerInside"
 									android:backgroundTint="@color/colorAccentSoft"
 									app:tint="@color/colorAccent" />

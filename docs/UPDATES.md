@@ -2,6 +2,23 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: shorter Settings, real icons in place of placeholders
+
+What the app does:
+
+- **Settings is about half as long.** Rows are tighter and show their title only.
+- **Seven Settings rows are hidden:**
+  - Account information (same as Edit profile);
+  - Groups & circles (it is the Groups tab);
+  - Transaction history (it is on the wallet);
+  - Terms (it is inside About);
+  - Language (English only for now);
+  - Limits & fees and Tax reports (not built yet).
+- **Group settings** used a placeholder picture for each setting. Each setting now has its own icon: approval, invite, contribution, pool, grace period and commission. The group type badge uses the circle, goal or savings icon.
+- **P2P avatars** show the person icon instead of the placeholder picture.
+
+What you do: install the new build.
+
 ## 7 Oct 2026: 3D HARV coin
 
 What the app does. The HARV coin (`ic_harv_coin`) is now drawn in 3D. It keeps the same coral-to-gold colours and the white H, and adds a raised rim, a visible coin edge, an embossed H and a soft gloss. It is a 512px PNG in `drawable-nodpi`. The earlier 2142px image sat in `drawable`, where Android scales it up by screen density; on large phones that could use a lot of memory. What you do: install the new build.

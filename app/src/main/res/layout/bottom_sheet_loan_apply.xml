@@ -356,7 +356,9 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="10dp"
-						android:text="⚠ Estimate only — interest keeps accruing daily on whatever's still outstanding until you repay in full, not just up to your planned date above. Repaying later costs more."
+						android:text="Estimate only — interest keeps accruing daily on whatever's still outstanding until you repay in full, not just up to your planned date above. Repaying later costs more."
+								android:drawableStart="@drawable/ic_warning_small"
+								android:drawablePadding="4dp"
 						android:textSize="11.5sp"
 						android:lineSpacingExtra="2dp"
 						android:focusable="false" />

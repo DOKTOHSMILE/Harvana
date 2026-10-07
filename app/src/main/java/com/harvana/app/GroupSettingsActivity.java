@@ -800,7 +800,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		String type = typeOf();
 		_buildPhotoRow();
 		tvHeroTypeName.setText(type.isEmpty() ? "Unknown Type" : type);
-		tvHeroFrequency.setText("📅 " + str(groupData, "frequency", "Daily"));
+		tvHeroFrequency.setText(str(groupData, "frequency", "Daily"));
+		com.harvana.app.utils.Icons.start(tvHeroFrequency, R.drawable.ic_calendar_line, 14);
 		
 		_select(spinVisibility, str(groupData, "visibility", "Public"));
 		switchApproval.setChecked(bool(groupData, "requireApprovalToJoin", true));

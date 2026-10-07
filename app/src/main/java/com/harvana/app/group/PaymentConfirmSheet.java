@@ -107,8 +107,11 @@ public final class PaymentConfirmSheet {
 		handleLp.bottomMargin = (int) (18 * d);
 		root.addView(handle, handleLp);
 
-		TextView icon = label(context, "↗", 22, accent, true);
-		icon.setGravity(Gravity.CENTER);
+		// The app's own send icon (it used to be an arrow character).
+		android.widget.ImageView icon = new android.widget.ImageView(context);
+		icon.setImageResource(R.drawable.ic_action_send_line);
+		icon.setScaleType(android.widget.ImageView.ScaleType.CENTER_INSIDE);
+		icon.setPadding((int) (18 * d), (int) (18 * d), (int) (18 * d), (int) (18 * d));
 		GradientDrawable circle = new GradientDrawable();
 		circle.setShape(GradientDrawable.OVAL);
 		circle.setColor(color(context, R.color.colorSurfaceRaised));

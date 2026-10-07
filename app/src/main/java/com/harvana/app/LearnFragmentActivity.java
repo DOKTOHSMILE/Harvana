@@ -390,7 +390,9 @@ public class LearnFragmentActivity extends Fragment {
 		}
 		if (waiting.isEmpty()) newPill.setVisibility(View.GONE);
 		else {
-			newPill.setText("\u2191  " + waiting.size() + (waiting.size() == 1 ? " new post" : " new posts"));
+			newPill.setText(waiting.size() + (waiting.size() == 1 ? " new post" : " new posts"));
+			com.harvana.app.utils.Icons.start(newPill, com.harvana.app.R.drawable.ic_arrow_up_line, 15);
+			if (newPill.getCompoundDrawablesRelative()[0] != null) newPill.getCompoundDrawablesRelative()[0].setTint(com.harvana.app.utils.UiColors.onAccent());
 			newPill.setVisibility(View.VISIBLE);
 		}
 	}

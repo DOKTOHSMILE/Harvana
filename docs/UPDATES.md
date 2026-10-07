@@ -2,6 +2,20 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: the app's own icons where emoji and symbols stood
+
+What the app does. Seven new duotone icons in the house style, built from Fluent UI System Icons (MIT) like the rest: calendar, verified, star, warning, arrow up, cross in a circle, and an open circle. They now appear in these places:
+
+- the group settings frequency chip (was 📅);
+- the "What this person can do" list (was ✅ and ❌);
+- "Verified Member" in Settings and "Verified" on Home (was ✓);
+- the P2P rating (was ★);
+- the loan estimate warning (was ⚠);
+- the Learn "new posts" pill (was ↑);
+- the payment confirmation sheet, which shows the send icon (was ↗).
+
+Decorative sparkles and step dots stay as they are. What you do: install the new build.
+
 ## 7 Oct 2026: shorter profile and trust pages, a "My data" tab
 
 What the app does:

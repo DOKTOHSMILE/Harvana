@@ -364,6 +364,9 @@ public final class SettingsSections {
             if (fixed) sb.append(no()).append("Take their deposit out alone (the group votes)\n");
         }
         TextView t = text(sb.toString().trim(), 14, false, UiColors.textPrimary());
+        // The check and cross markers are drawn as the app's own icons.
+        t.setText(com.harvana.app.utils.Icons.inline(a, sb.toString().trim(), 18, new String[]{"\u2705", "\u274C"},
+            new int[]{com.harvana.app.R.drawable.ic_check_circle_line, com.harvana.app.R.drawable.ic_dismiss_circle_line}));
         int p = (int) (20 * d);
         t.setPadding(p, p / 2, p, p / 2);
         final com.harvana.app.ui.SheetDialog[] dlg = new com.harvana.app.ui.SheetDialog[1];

@@ -73,6 +73,58 @@ public final class LearnCommentsSheet {
         sheet.show();
     }
 
+    /** The same comments, drawn straight under the post in the reader: a header with the count, the box, then the list. */
+    public static void inline(Activity host, LinearLayout box, String contentId, Runnable onPosted) {
+        if (box == null || contentId == null || contentId.isEmpty()) return;
+        box.removeAllViews();
+        TextView title = text(host, "Comments", 17, true, R.color.colorTextPrimary);
+        title.setPadding(0, dp(host, 8), 0, dp(host, 8));
+        box.addView(title);
+
+        LinearLayout inputRow = new LinearLayout(host);
+        inputRow.setGravity(Gravity.CENTER_VERTICAL);
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+        bg.setCornerRadius(dp(host, 22));
+        bg.setColor(ContextCompat.getColor(host, R.color.colorSurfaceAlt));
+        inputRow.setBackground(bg);
+        inputRow.setPadding(dp(host, 14), dp(host, 2), dp(host, 4), dp(host, 2));
+        EditText input = new EditText(host);
+        input.setBackground(null);
+        input.setHint("Add a comment");
+        input.setTextSize(14);
+        input.setHintTextColor(ContextCompat.getColor(host, R.color.colorTextMuted));
+        input.setTextColor(ContextCompat.getColor(host, R.color.colorTextPrimary));
+        input.setMaxLines(4);
+        input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(LearnSocial.MAX_COMMENT_CHARS)});
+        MaterialButton send = new MaterialButton(host, null, com.google.android.material.R.attr.borderlessButtonStyle);
+        send.setText("Post");
+        send.setAllCaps(false);
+        inputRow.addView(input, new LinearLayout.LayoutParams(0, -2, 1f));
+        inputRow.addView(send);
+        box.addView(inputRow);
+
+        LinearLayout list = new LinearLayout(host);
+        list.setOrientation(LinearLayout.VERTICAL);
+        list.setPadding(0, dp(host, 6), 0, 0);
+        box.addView(list);
+
+        Runnable load = () -> LearnSocial.loadComments(contentId, 50, comments -> host.runOnUiThread(() -> {
+            title.setText(comments.isEmpty() ? "Comments" : "Comments (" + comments.size() + ")");
+            fill(host, list, comments);
+        }));
+        load.run();
+        send.setOnClickListener(v -> {
+            send.setEnabled(false);
+            LearnSocial.addComment(contentId, input.getText().toString(), (ok, error) -> host.runOnUiThread(() -> {
+                send.setEnabled(true);
+                if (!ok) { Toast.makeText(host, error, Toast.LENGTH_SHORT).show(); return; }
+                input.setText("");
+                load.run();
+                if (onPosted != null) onPosted.run();
+            }));
+        });
+    }
+
     private static void fill(Activity host, LinearLayout list, List<LearnSocial.Comment> comments) {
         list.removeAllViews();
         if (comments.isEmpty()) {

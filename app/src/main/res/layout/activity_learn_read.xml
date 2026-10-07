@@ -246,8 +246,7 @@
                     android:padding="8dp"
                     android:background="@drawable/bg_learn_action"
                     android:contentDescription="More"
-                    android:src="@drawable/ic_learn_more"
-                    app:tint="@color/colorTextTertiary" />
+                    android:src="@drawable/ic_learn_more" />
             </LinearLayout>
 
             <TextView
@@ -268,10 +267,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="12dp"
                 android:gravity="center_vertical"
                 android:textColor="@color/colorTextTertiary"
                 android:textSize="13sp" />
+            <LinearLayout
+                android:id="@+id/ll_inline_comments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:orientation="vertical" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

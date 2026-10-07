@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: Learn Hub reader shows comments under the post
+
+What the app does:
+
+- **Comments sit under the post** in the full reader, with the count, a comment box and the list. The comment button scrolls down to them. The feed still opens comments in a sheet.
+- **The "more" button** shows its two-tone dots instead of a flat grey blob. Its menu now has Copy text, Share, View author's profile, Show less like this, Report post (opens an email to support) and, for your own post, Delete post.
+
+What you do: install the build.
+
 ## 7 Oct 2026: notifications in tabs, Discover join button
 
 What the app does:

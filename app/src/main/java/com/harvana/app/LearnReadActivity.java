@@ -69,6 +69,11 @@ public class LearnReadActivity extends AppCompatActivity {
         scroll = findViewById(R.id.scroll_read);
         status = findViewById(R.id.tv_read_status);
         LearnPostBinder.bind(this, findViewById(android.R.id.content), post, true, null);
+        android.widget.LinearLayout comments = findViewById(R.id.ll_inline_comments);
+        com.harvana.app.learn.LearnCommentsSheet.inline(this, comments, post.id,
+                () -> com.harvana.app.learn.LearnInterest.get(this).record(post, com.harvana.app.learn.LearnInterest.COMMENT));
+        // In the reader the comments are already on the page: the comment button scrolls down to them.
+        findViewById(R.id.ll_comment).setOnClickListener(v -> scroll.smoothScrollTo(0, comments.getTop()));
 
         scroll.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, x, y, ox, oy) -> checkEnd());
         scroll.post(this::checkEnd);

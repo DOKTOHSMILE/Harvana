@@ -257,15 +257,46 @@ public final class LearnPostBinder {
     private static void more(Activity host, View anchor, Post post) {
         PopupMenu menu = new PopupMenu(host, anchor);
         menu.getMenu().add(0, 1, 0, "Copy text");
+        menu.getMenu().add(0, 3, 1, "Share");
+        if (!post.authorUid.isEmpty()) menu.getMenu().add(0, 4, 2, "View author's profile");
         // Delete is offered to the poster only: the menu item does not exist for anyone else (and the Firestore rules refuse them too).
         final String me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? "" : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
-        if (!me.isEmpty() && me.equals(post.authorUid)) menu.getMenu().add(0, 2, 1, "Delete post");
+        boolean mine = !me.isEmpty() && me.equals(post.authorUid);
+        if (!mine) {
+            menu.getMenu().add(0, 5, 3, "Show less like this");
+            menu.getMenu().add(0, 6, 4, "Report post");
+        }
+        if (mine) menu.getMenu().add(0, 2, 5, "Delete post");
         menu.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == 2) { confirmDelete(host, post); return true; }
-            ClipboardManager cm = (ClipboardManager) host.getSystemService(Context.CLIPBOARD_SERVICE);
-            if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("Learn Hub", post.title + "\n\n" + LearnMarkdown.plain(post.body)));
-            Toast.makeText(host, "Copied", Toast.LENGTH_SHORT).show();
-            return true;
+            switch (item.getItemId()) {
+                case 2: confirmDelete(host, post); return true;
+                case 3: share(host, post); return true;
+                case 4: {
+                    Intent i = new Intent(host, com.harvana.app.social.PublicProfileActivity.class);
+                    i.putExtra(com.harvana.app.social.PublicProfileActivity.EXTRA_UID, post.authorUid);
+                    host.startActivity(i);
+                    return true;
+                }
+                case 5:
+                    LearnInterest.get(host).record(post, LearnInterest.UNFIRE);
+                    LearnInterest.get(host).flush();
+                    Toast.makeText(host, "Got it. You'll see fewer posts like this.", Toast.LENGTH_SHORT).show();
+                    return true;
+                case 6: {
+                    Intent m = new Intent(Intent.ACTION_SENDTO, android.net.Uri.parse("mailto:support@harvana.app"));
+                    m.putExtra(Intent.EXTRA_SUBJECT, "Report Learn Hub post " + post.id);
+                    m.putExtra(Intent.EXTRA_TEXT, "Post: " + post.title + "\nID: " + post.id + "\n\nWhat is wrong with it:\n");
+                    try { host.startActivity(m); }
+                    catch (Exception e) { Toast.makeText(host, "No email app found. Reach us at support@harvana.app", Toast.LENGTH_LONG).show(); }
+                    return true;
+                }
+                default: {
+                    ClipboardManager cm = (ClipboardManager) host.getSystemService(Context.CLIPBOARD_SERVICE);
+                    if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("Learn Hub", post.title + "\n\n" + LearnMarkdown.plain(post.body)));
+                    Toast.makeText(host, "Copied", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            }
         });
         menu.show();
     }

@@ -259,8 +259,7 @@
                     android:padding="8dp"
                     android:background="@drawable/bg_learn_action"
                     android:contentDescription="More"
-                    android:src="@drawable/ic_learn_more"
-                    app:tint="@color/colorTextTertiary" />
+                    android:src="@drawable/ic_learn_more" />
             </LinearLayout>
 
             <TextView

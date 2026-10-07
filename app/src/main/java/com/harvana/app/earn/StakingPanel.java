@@ -294,12 +294,38 @@ public final class StakingPanel {
     }
 
     private void updateEstReward() {
-        double weight = selectedLockDays >= 90 ? 2.5 : selectedLockDays >= 30 ? 1.75 : selectedLockDays >= 7 ? 1.25 : 1.0;
+        double weight = StakingRules.weight(selectedLockDays);
         String holdText = selectedLockDays <= 0 ? "stays until you unstake" : selectedLockDays + "-day lock on the principal";
-        String text = String.format(Locale.US, "%.2fx weight. Each day 0.05%% of the pool drips into Claim. %s.", weight, holdText);
-        text += " Each stake is its own row with its own lock.";
-        tvEstRewardInput.setText(text + " Claims open once every 24 hours.");
+        double harvAmount = 0;
+        try { harvAmount = Double.parseDouble(amount.getText().toString().trim()); } catch (Exception ignored) { }
+        double[] r = rates();
+        String text;
+        if (harvAmount > 0 && r[0] > 0) {
+            double apr = StakingRules.aprFor(harvAmount, weight, r[0], r[1]);
+            double fullApr = StakingRules.aprFor(harvAmount, weight, StakingRules.FULL_POOL_DAILY_HARV * 365.0, r[1]);
+            text = String.format(Locale.US, "About %.2f%% APR (%.2f%% APY if you restake daily) at %.2fx weight: %s HARV in 30 days, %s in a year. "
+                            + "When the reward pool is full this becomes about %.2f%% APR. %s.",
+                    apr * 100, StakingRules.apy(apr) * 100, weight,
+                    fmt2(StakingRules.earned(harvAmount, apr, 30)), fmt2(StakingRules.earned(harvAmount, apr, 365)),
+                    fullApr * 100, capitalise(holdText));
+        } else {
+            text = String.format(Locale.US, "%.2fx weight. Each day 0.05%% of the pool drips into Claim. %s.", weight, capitalise(holdText));
+        }
+        tvEstRewardInput.setText(text + " Estimates move with the pool and the total staked. Claims open once every 24 hours.");
     }
+
+    /** {yearly drip in HARV, total weighted stake} from the node's /info and the observed block pace. */
+    private double[] rates() {
+        if (info == null) return new double[]{0, 0};
+        double pool = info.optLong("rewardPoolBalanceRaw", 0) / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN;
+        double secs = info.optDouble("observedBlockSeconds", observedPace);
+        double drip = StakingRules.yearlyDrip(pool, secs);
+        double baseApr = info.optLong("estimatedBaseAprBps", 0) / 10_000.0;
+        return new double[]{drip, StakingRules.totalWeight(drip, baseApr)};
+    }
+
+    private static String fmt2(double v) { return String.format(Locale.US, "%,.4f", v); }
+    private static String capitalise(String t) { return t.isEmpty() ? t : Character.toUpperCase(t.charAt(0)) + t.substring(1); }
 
     private void refresh() {
         NodeGroupClient.getStakingInfo(new NodeGroupClient.Callback() {
@@ -385,7 +411,13 @@ public final class StakingPanel {
             posDailyPct.setText(dailyPct.getText());
             gridTotal.setText(harv(staked));
             gridUnclaimed.setText(harv(pending));
-            gridApy.setText(String.format(Locale.US, "%.2f%%", shareBps / 100.0));
+            // Your rate: the flexible rate times your stake-weighted lock weight.
+            double baseApr = info == null ? 0 : info.optLong("estimatedBaseAprBps", 0) / 10_000.0;
+            double weighted = 0;
+            for (Stake st : stakes()) weighted += st.amountRaw * ((st.multiplierBps <= 0 ? 10000 : st.multiplierBps) / 10_000.0);
+            double myApr = staked > 0 ? baseApr * weighted / staked : baseApr;
+            gridApy.setText(myApr <= 0 ? "--" : String.format(Locale.US, "%.2f%% · %.2f%%", myApr * 100, StakingRules.apy(myApr) * 100));
+            updateEstReward();
 
             renderStakes();
 

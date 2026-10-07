@@ -37,4 +37,19 @@ public class StakingRulesTest {
         assertNull(StakingRules.refusalCode("Network error: timeout"));
         assertNull(StakingRules.refusalCode(null));
     }
+
+    @Test public void rewardRateFollowsTheDripAndTheWeight() {
+        double drip = StakingRules.yearlyDrip(10_000, 10);          // 5 HARV a day
+        assertEquals(1825.0, drip, 1e-9);
+        double w = StakingRules.totalWeight(drip, drip / 50_000.0);
+        assertEquals(50_000.0, w, 1e-6);
+        double apr = StakingRules.aprFor(1000, 2.5, drip, w);       // 1825 x 2.5 / 52,500
+        assertEquals(0.086904761, apr, 1e-6);
+        assertEquals(0.0908, StakingRules.apy(apr), 1e-3);
+        assertEquals(1000 * apr * 30 / 365.0, StakingRules.earned(1000, apr, 30), 1e-9);
+        assertEquals(0, StakingRules.aprFor(0, 1, drip, w), 0);
+        assertEquals(0, StakingRules.aprFor(1000, 1, 0, w), 0);
+        assertEquals(2.5, StakingRules.weight(90), 0);
+        assertEquals(1.0, StakingRules.weight(0), 0);
+    }
 }

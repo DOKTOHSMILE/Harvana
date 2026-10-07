@@ -2,6 +2,25 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: staking dashboard shows APR and APY
+
+What the app does:
+
+- **"APR · APY" replaces "Your share" on the staking dashboard.** Your APR is the network's flexible rate times your stake-weighted lock weight; APY is what that becomes if you claim and restake every day. Your share of the stake still shows above.
+- **The stake form shows a live estimate** while you type an amount and pick a lock: the APR and APY you would get, what you would earn in 30 days and in a year, and the APR once the reward pool is full.
+
+The formula (it mirrors the node's daily drip, `docs/STAKING.md` in the node repository):
+
+- yearly drip D = reward pool x 0.05% x 365, scaled by the observed block pace;
+- total weight W = the sum of every stake x its lock weight (worked back from the node's `estimatedBaseAprBps`);
+- APR of a new stake A at lock weight m = D x m / (W + A x m); your own stake is counted in the pool it shares;
+- APY = (1 + APR / 365)^365 - 1;
+- full pool: the drip equals the daily staking mint, 1,080 HARV a day.
+
+These are estimates: the rate moves with the pool and with the total staked. No node change is needed.
+
+What you do: install the build.
+
 ## 7 Oct 2026: P2P open-trades badge, seller's receiving account
 
 What the app does:

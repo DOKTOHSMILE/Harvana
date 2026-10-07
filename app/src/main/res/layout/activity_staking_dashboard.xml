@@ -502,7 +502,7 @@
                             <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:text="Unclaimed" android:textColor="@color/colorTextMuted" android:textSize="12sp" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
                             <TextView android:id="@+id/tv_grid_unclaimed" android:layout_width="0dp" android:layout_height="wrap_content" android:text="0 HARV" android:textColor="@color/colorTextPrimary" android:textSize="12sp" android:gravity="end" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
 
-                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:text="Your share" android:textColor="@color/colorTextMuted" android:textSize="12sp" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:text="APR · APY" android:textColor="@color/colorTextMuted" android:textSize="12sp" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
                             <TextView android:id="@+id/tv_grid_apy" android:layout_width="0dp" android:layout_height="wrap_content" android:text="--%" android:textColor="@color/colorTextPrimary" android:textSize="12sp" android:gravity="end" android:layout_columnWeight="1" android:layout_marginTop="8dp"/>
                         </GridLayout>
 

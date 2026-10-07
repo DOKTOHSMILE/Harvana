@@ -53,7 +53,12 @@ public final class AppBar {
         // Back arrow AFTER the toolbar is installed as the action bar: installing it resets the navigation icon.
         Drawable back = ContextCompat.getDrawable(a, R.drawable.ic_arrow_back);
         if (back != null) {
-            back = DrawableCompat.wrap(back.mutate());
+            // The arrow is a pressed-state selector that fades between states; drawn into a bitmap at once it would be caught
+            // at the start of its fade-in, fully transparent (the "missing back arrow"). Skip the fade before drawing.
+            back = back.mutate();
+            back.jumpToCurrentState();
+            if (back instanceof android.graphics.drawable.DrawableContainer) back = back.getCurrent() == null ? back : back.getCurrent().mutate();
+            back = DrawableCompat.wrap(back);
             DrawableCompat.setTint(back, on.data);
             int px = Math.round(24 * a.getResources().getDisplayMetrics().density);
             android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(px, px, android.graphics.Bitmap.Config.ARGB_8888);

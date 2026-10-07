@@ -463,10 +463,6 @@ public class CompleteProfileFragmentActivity extends Fragment {
 			et_occupation.setError("Please input your occupation");
 			return;
 		}
-		if (et_id_number.getText().toString().trim().isEmpty()) {
-			et_id_number.setError("Please input your " + idDocument.toUpperCase());
-			return;
-		}
 		if (et_kin_name.getText().toString().trim().isEmpty()) {
 			et_kin_name.setError("Please input your Next of Kin");
 			return;
@@ -579,7 +575,6 @@ public class CompleteProfileFragmentActivity extends Fragment {
 		userVMap.put("first_name", et_first_name.getText().toString().trim());
 		userVMap.put("occupation", et_occupation.getText().toString().trim());
 		userVMap.put("timestamp", String.valueOf(authc.getTimeInMillis()));
-		userVMap.put(idDocument, et_id_number.getText().toString().trim());
 		if (referrer != null && !referrer.uid.isEmpty() && !referrer.uid.equals(effectiveUid)) {
 			// Who invited this person. The referrer still has to confirm before anything is recorded on the network.
 			userVMap.put("referred_by_uid", referrer.uid);

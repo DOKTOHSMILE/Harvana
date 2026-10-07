@@ -2,6 +2,22 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 7 Oct 2026: back arrows, password eyes, friend codes, no NIN/BVN
+
+What the app does:
+
+- **Back arrows.** Every screen that uses the shared top bar shows its back arrow again. The arrow had been captured as an image before its fade-in, so it was invisible.
+- **Password eyes.** Password fields use Harvana's own eye: open while the text shows, crossed while it is hidden. These fields now have a show/hide eye too:
+  - the card password;
+  - the 12-word recovery phrase on Restore;
+  - the Access Card passphrase in group settings.
+- **Missing icons.** The eye icons and about 90 other icons were stored only for one screen density. They now live in the shared folder, so every phone finds them.
+- **Friend codes.** Scanning someone's username QR offers "Add friend" (or "View profile"). After adding, it opens their profile.
+- **No NIN/BVN.** Sign-up no longer asks for NIN or BVN.
+- **Debug button gone.** The debug label and the Guardian Console button are gone from Security settings.
+
+What you do: install the new build.
+
 ## 7 Oct 2026: the app's own icons where emoji and symbols stood
 
 What the app does. Seven new duotone icons in the house style, built from Fluent UI System Icons (MIT) like the rest: calendar, verified, star, warning, arrow up, cross in a circle, and an open circle. They now appear in these places:

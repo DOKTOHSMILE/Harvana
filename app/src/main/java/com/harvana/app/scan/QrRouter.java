@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  * Every QR code the app makes, recognised and opened in the right place:
  *   wallet address (Receive, coin page)       -> Send, recipient filled in
  *   wallet access card (HARVANACARD2:...)       -> add the wallet: restore asks for the card password
- *   profile code (harvana://user/<name>)        -> that member's profile
+ *   profile code (harvana://user/<name>)        -> add that member as a friend, then their profile
  *   receipt (harvana://tx/<hash>, or a bare hash on older receipts) -> checked on the network
  * Anything else is shown as text the user can copy.
  */
@@ -48,6 +48,29 @@ public final class QrRouter {
         return txHash == null || txHash.isEmpty() ? "" : TX_PREFIX + txHash;
     }
 
+    /**
+     * A scanned username code: offers to add that member as a friend straight away, then opens their profile.
+     * Your own code just opens your profile.
+     */
+    static void addFriend(Activity a, com.harvana.app.social.Person p) {
+        final Intent profile = new Intent(a, com.harvana.app.social.PublicProfileActivity.class)
+                .putExtra(com.harvana.app.social.PublicProfileActivity.EXTRA_UID, p.uid);
+        String me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
+                : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (p.uid.equals(me)) { a.startActivity(profile); return; }
+        String who = p.name != null && !p.name.isEmpty() ? p.name : "@" + p.username;
+        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Add " + who + "?")
+                .setMessage((p.username == null || p.username.isEmpty() ? "" : "@" + p.username + "\n\n")
+                        + "Add them as a friend to see their posts and send to them quickly.")
+                .setPositiveButton("Add friend", (d, w) -> com.harvana.app.social.SocialStore.follow(p, (ok, err) -> a.runOnUiThread(() -> {
+                    Toast.makeText(a, Boolean.TRUE.equals(ok) ? who + " added as a friend" : (err == null ? "Couldn't add them. Try again." : err),
+                            Toast.LENGTH_LONG).show();
+                    a.startActivity(profile);
+                })))
+                .setNegativeButton("View profile", (d, w) -> a.startActivity(profile))
+                .show();
+    }
+
     /** Opens whatever the code is for. */
     public static void route(Activity a, String raw) {
         String t = raw == null ? "" : raw.trim();
@@ -63,8 +86,7 @@ public final class QrRouter {
                 String name = t.substring(PROFILE_PREFIX.length()).trim();
                 com.harvana.app.social.SocialStore.findByUsername(name, (person, err) -> a.runOnUiThread(() -> {
                     if (person == null) { Toast.makeText(a, err == null ? "No member found for that code." : err, Toast.LENGTH_LONG).show(); return; }
-                    a.startActivity(new Intent(a, com.harvana.app.social.PublicProfileActivity.class)
-                            .putExtra(com.harvana.app.social.PublicProfileActivity.EXTRA_UID, person.uid));
+                    addFriend(a, person);
                 }));
                 return;
             }

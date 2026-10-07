@@ -56,8 +56,6 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 	private MaterialCardView cardview35;
 	private MaterialCardView cardview37;
 	private TextView tv_security_note;
-	private TextView textview58;
-	private MaterialCardView cardview38;
 	private LinearLayout linear44;
 	private LinearLayout linear45;
 	private LinearLayout linear46;
@@ -70,7 +68,6 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 	private SwitchMaterial switch_biometric;
 	private TextView textview57;
 	private TextView tv_biometric_status;
-	private Button btn_debug_guardian_console;
 	
 	@Override
 	protected void onCreate(Bundle _savedInstanceState) {
@@ -101,8 +98,6 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 		cardview35 = findViewById(R.id.cardview35);
 		cardview37 = findViewById(R.id.cardview37);
 		tv_security_note = findViewById(R.id.tv_security_note);
-		textview58 = findViewById(R.id.textview58);
-		cardview38 = findViewById(R.id.cardview38);
 		linear44 = findViewById(R.id.linear44);
 		linear45 = findViewById(R.id.linear45);
 		linear46 = findViewById(R.id.linear46);
@@ -115,7 +110,6 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 		switch_biometric = findViewById(R.id.switch_biometric);
 		textview57 = findViewById(R.id.textview57);
 		tv_biometric_status = findViewById(R.id.tv_biometric_status);
-		btn_debug_guardian_console = findViewById(R.id.btn_debug_guardian_console);
 	}
 	
 	private void initializeLogic() {
@@ -133,9 +127,6 @@ public class SecurityPinSettingsActivity extends AppCompatActivity {
 		// ══ TEMP DEBUG ENTRY — remove before shipping ══
 		// Guardian Console has no real entry point by design; this exists
 		// purely to reach it without ADB during testing.
-		// The guardian dispute console is not reachable from a settings screen.
-		btn_debug_guardian_console.setVisibility(View.GONE);
-		btn_debug_guardian_console.setOnClickListener(null);
 		// ══ END TEMP DEBUG ENTRY ══
 		
 		btn_pin_action.setOnClickListener(v -> {

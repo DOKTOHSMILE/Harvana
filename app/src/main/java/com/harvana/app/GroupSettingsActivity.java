@@ -1429,13 +1429,16 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	}
 	
 	private void _askCardPassphrase(final String qrPayload) {
-		final EditText pass = new com.google.android.material.textfield.TextInputEditText(this);
+		final com.google.android.material.textfield.TextInputLayout passBox = new com.google.android.material.textfield.TextInputLayout(this);
+		final EditText pass = new com.google.android.material.textfield.TextInputEditText(passBox.getContext());
 		pass.setHint("Access Card passphrase");
 		pass.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+		passBox.addView(pass);
+		passBox.setEndIconMode(com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE);   // show / hide
 		new com.harvana.app.ui.SheetDialog.Builder(this)
 			.setTitle("Restore from Access Card")
 			.setMessage("Enter the passphrase you chose when the card was created.")
-			.setView(pass)
+			.setView(passBox)
 			.setNegativeButton("Cancel", null)
 			.setPositiveButton("Restore", (dlg, w) -> {
 				final String pw = pass.getText().toString();

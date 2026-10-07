@@ -120,14 +120,15 @@
 						android:id="@+id/textinputlayout3"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:layout_marginTop="12dp">
+						android:layout_marginTop="12dp"
+						app:endIconMode="password_toggle">
 						<com.google.android.material.textfield.TextInputEditText
 							android:id="@+id/et_phrase"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:textSize="12sp"
 							android:textColor="@color/colorTextPrimary"
-							android:inputType="textMultiLine|textNoSuggestions"
+							android:inputType="textPassword|textMultiLine|textNoSuggestions"
 							android:minLines="2" />
 					</com.google.android.material.textfield.TextInputLayout>
 					<com.google.android.material.button.MaterialButton

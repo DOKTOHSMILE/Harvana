@@ -450,6 +450,7 @@
 						android:textSize="12sp" />
 					<TextView
 						android:id="@+id/textview63"
+						android:visibility="gone"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginBottom="12dp"
@@ -460,6 +461,7 @@
 						android:letterSpacing="0.06" />
 					<LinearLayout
 						android:id="@+id/linear32"
+						android:visibility="gone"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginBottom="14dp"
@@ -510,6 +512,7 @@
 					</LinearLayout>
 					<TextView
 						android:id="@+id/tv_id_number_label"
+						android:visibility="gone"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginBottom="6dp"
@@ -519,6 +522,7 @@
 						android:textSize="13.5sp" />
 					<com.google.android.material.card.MaterialCardView
 						android:id="@+id/cardview59"
+						android:visibility="gone"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginBottom="20dp"

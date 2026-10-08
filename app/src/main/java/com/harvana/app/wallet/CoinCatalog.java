@@ -20,7 +20,7 @@ public final class CoinCatalog {
     public static final String EXTRA = "assetKey";
 
     /** Harvana block explorer. {address} is replaced with the wallet address. */
-    public static final String HARV_EXPLORER = "https://harvanna.com/explorer/#/address/{address}";
+    public static final String HARV_EXPLORER = "https://harvannaprotocol.com/explorer/#/address/{address}";
 
     /** The explorer page for this coin and address, or empty when that site is not linked yet. */
     public static String explorerUrl(Coin coin, String address) {

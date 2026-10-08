@@ -42,7 +42,7 @@ public final class CoinCatalog {
             default: pattern = "";
         }
         if (pattern == null || pattern.trim().isEmpty() || a.isEmpty()) return "";
-        return pattern.replace("{address}", a);
+        return pattern.replace("{address}", android.net.Uri.encode(a));
     }
 
     public static final class Coin {

@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: explorer page stops unexpected links
+
+What the app does:
+
+- The address placed in an explorer link is encoded, so a strange address cannot change the link into a different kind of address.
+- The explorer page only follows http and https links. It does not open a file on the phone.
+
+What you do: install the build.
+
 ## 8 Oct 2026: the official HARV coin mark
 
 What the app does:

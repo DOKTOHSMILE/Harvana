@@ -35,7 +35,15 @@ public class ExplorerActivity extends AppCompatActivity {
         web = new WebView(this);
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
-        web.setWebViewClient(new WebViewClient());
+        web.getSettings().setAllowFileAccess(false);
+        web.getSettings().setAllowContentAccess(false);
+        web.setWebViewClient(new WebViewClient() {
+            @Override public boolean shouldOverrideUrlLoading(WebView view, String next) {
+                if (next == null) return true;
+                String low = next.toLowerCase(java.util.Locale.US);
+                return !(low.startsWith("https://") || low.startsWith("http://"));
+            }
+        });
         androidx.appcompat.widget.Toolbar bar = AppBar.setContent(this, web, coin.name + " explorer", host(url));
         bar.setNavigationOnClickListener(v -> goBack());
         web.loadUrl(url);

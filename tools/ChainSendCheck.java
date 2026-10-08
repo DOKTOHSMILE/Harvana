@@ -35,7 +35,40 @@ public class ChainSendCheck {
         if (!Ed25519.verify(Ed25519.publicKeyFromSeed(seed), message, sig)) fail("sol verify");
         else System.out.println("sol signature ok");
 
+        byte[] zeros = ChainSend.b58("11111111111111111111111111111111");
+        boolean allZero = zeros.length == 32;
+        for (byte z : zeros) if (z != 0) allZero = false;
+        if (!allZero) fail("solana system program decoded to " + zeros.length);
+        else System.out.println("solana program id ok");
+
+        String phrase = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+        roundTrip(phrase, ChainKeys.Chain.BTC);
+        roundTrip(phrase, ChainKeys.Chain.LTC);
+        roundTrip(phrase, ChainKeys.Chain.DOGE);
+
+        byte[] priv = ChainKeys.privateKey(phrase, ChainKeys.Chain.BTC);
+        byte[] txid = new byte[32];
+        txid[0] = 1;
+        java.util.List<BtcTx.In> ins = java.util.Collections.singletonList(new BtcTx.In(txid, 0, 100000));
+        byte[] script = ChainSend.scriptFor(ChainKeys.address(phrase, ChainKeys.Chain.BTC), ChainKeys.Chain.BTC);
+        java.util.List<BtcTx.Out> outs = java.util.Arrays.asList(new BtcTx.Out(50000, script), new BtcTx.Out(40000, script));
+        String built = BtcTx.p2wpkh(priv, ins, outs);
+        if (!built.startsWith("020000000001")) fail("segwit prefix " + built.substring(0, 16));
+        int vb = BtcTx.vbytes(built);
+        if (vb < 100 || vb > 200) fail("vbytes " + vb);
+        else System.out.println("segwit tx ok vbytes=" + vb);
+
         System.out.println("ALL PASS");
+    }
+
+    private static void roundTrip(String phrase, ChainKeys.Chain chain) throws Exception {
+        String address = ChainKeys.address(phrase, chain);
+        byte[] script = ChainSend.scriptFor(address, chain);
+        byte[] program = ChainKeys.hash160(ChainKeys.pub(ChainKeys.privateKey(phrase, chain)));
+        int at = script[0] == 0x00 ? 2 : 3;
+        byte[] got = java.util.Arrays.copyOfRange(script, at, at + 20);
+        if (!java.util.Arrays.equals(program, got)) fail(chain.ticker + " address does not pay back to itself: " + address);
+        else System.out.println(chain.ticker + " " + address + " ok");
     }
 
     private static void check(String got, String want, String name) {

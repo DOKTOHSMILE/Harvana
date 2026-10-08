@@ -39,7 +39,7 @@ final class BtcTx {
         b.put(oh);
         b.putInt(Integer.reverseBytes(locktime));
         b.putInt(Integer.reverseBytes(1));
-        return dsha(b.array());
+        return dsha(Arrays.copyOf(b.array(), b.position()));
     }
 
     static String p2wpkh(byte[] priv, List<In> ins, List<Out> outs) throws Exception {
@@ -50,7 +50,7 @@ final class BtcTx {
         scriptCode[1] = 0x76; scriptCode[2] = (byte) 0xa9; scriptCode[3] = 0x14;
         System.arraycopy(program, 0, scriptCode, 4, 20);
         scriptCode[24] = (byte) 0x88; scriptCode[25] = (byte) 0xac;
-        ByteBuffer raw = ByteBuffer.allocate(4096);
+        ByteBuffer raw = ByteBuffer.allocate(256 + ins.size() * 200 + outs.size() * 80);
         raw.putInt(Integer.reverseBytes(2));
         raw.put((byte) 0).put((byte) 1);
         raw.put(varInt(ins.size()));
@@ -85,7 +85,7 @@ final class BtcTx {
         byte[] pub = ChainKeys.pub(priv);
         byte[] program = ChainKeys.hash160(pub);
         byte[] scriptPub = p2pkhScript(program);
-        ByteBuffer raw = ByteBuffer.allocate(4096);
+        ByteBuffer raw = ByteBuffer.allocate(256 + ins.size() * 200 + outs.size() * 80);
         raw.putInt(Integer.reverseBytes(1));
         raw.put(varInt(ins.size()));
         for (int i = 0; i < ins.size(); i++) {
@@ -127,7 +127,7 @@ final class BtcTx {
     }
 
     private static byte[] legacySig(byte[] priv, List<In> ins, int index, byte[] scriptPub, List<Out> outs) throws Exception {
-        ByteBuffer b = ByteBuffer.allocate(4096);
+        ByteBuffer b = ByteBuffer.allocate(256 + ins.size() * 200 + outs.size() * 80);
         b.putInt(Integer.reverseBytes(1));
         b.put(varInt(ins.size()));
         for (int i = 0; i < ins.size(); i++) {
@@ -152,13 +152,13 @@ final class BtcTx {
     private static byte[] hashOutpoints(List<In> ins) throws Exception {
         ByteBuffer b = ByteBuffer.allocate(ins.size() * 36);
         for (In in : ins) b.put(in.txidLe).putInt(Integer.reverseBytes(in.vout));
-        return dsha(b.array());
+        return dsha(Arrays.copyOf(b.array(), b.position()));
     }
 
     private static byte[] hashSequence(List<In> ins) throws Exception {
         ByteBuffer b = ByteBuffer.allocate(ins.size() * 4);
         for (int i = 0; i < ins.size(); i++) b.putInt(Integer.reverseBytes(0xffffffff));
-        return dsha(b.array());
+        return dsha(Arrays.copyOf(b.array(), b.position()));
     }
 
     private static byte[] hashOutputs(List<Out> outs) throws Exception {
@@ -170,6 +170,28 @@ final class BtcTx {
     private static byte[] varInt(int n) {
         if (n < 0xfd) return new byte[]{(byte) n};
         return new byte[]{(byte) 0xfd, (byte) n, (byte) (n >> 8)};
+    }
+
+    /** Virtual size of a transaction this class built. SegWit counts witness bytes at a quarter weight. */
+    static int vbytes(String hex) {
+        byte[] r = EvmTx.unhex(hex);
+        if (r.length < 10 || r[4] != 0 || r[5] != 1) return r.length;
+        int i = 6;
+        int nIn = r[i++] & 0xFF;
+        int nonWitness = 4 + 1 + nIn * 41;
+        i += nIn * 41;
+        int nOut = r[i++] & 0xFF;
+        nonWitness += 1;
+        for (int o = 0; o < nOut; o++) {
+            i += 8;
+            int sl = r[i++] & 0xFF;
+            i += sl;
+            nonWitness += 8 + 1 + sl;
+        }
+        nonWitness += 4;
+        int witness = r.length - 4 - i;
+        int weight = nonWitness * 4 + 2 + witness;
+        return (weight + 3) / 4;
     }
 
     static byte[] dsha(byte[] in) throws Exception {

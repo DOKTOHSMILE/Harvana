@@ -130,7 +130,7 @@ public class ReceiveActivity extends AppCompatActivity {
 			}
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 			if (clipboard != null) {
-				ClipData clip = ClipData.newPlainText("Harvana Wallet Address", activeAddress);
+				ClipData clip = ClipData.newPlainText("Wallet address", activeAddress);
 				clipboard.setPrimaryClip(clip);
 				SketchwareUtil.showMessage(this, "Address copied!");
 			}
@@ -139,22 +139,20 @@ public class ReceiveActivity extends AppCompatActivity {
 		if (tvDepositAddress != null) tvDepositAddress.setOnClickListener(copyListener);
 		
 		if (btnShare != null) {
-			if (!validAddress) {
-				btnShare.setEnabled(false);
-				btnShare.setAlpha(0.4f);
-			} else {
-				btnShare.setOnClickListener(v -> {
-					try {
-						Bitmap bitmap = _getBitmapFromView(ivQrCode);
-						Uri imageUri = _saveImageToCache(bitmap);
-						if (imageUri != null) {
-							_shareImage(imageUri, activeAddress);
-						}
-					} catch (Exception e) {
-						SketchwareUtil.showMessage(this, "Couldn't prepare the QR image to share. Try again.");
-					}
-				});
-			}
+			btnShare.setOnClickListener(v -> {
+				if (!validAddress || activeAddress == null || activeAddress.isEmpty()) {
+					SketchwareUtil.showMessage(this, "This address is not ready yet.");
+					return;
+				}
+				try {
+					Bitmap bitmap = ivQrCode == null ? null : _getBitmapFromView(ivQrCode);
+					Uri imageUri = bitmap == null ? null : _saveImageToCache(bitmap);
+					if (imageUri != null) _shareImage(imageUri, activeAddress);
+					else SketchwareUtil.showMessage(this, "Couldn't prepare the QR image to share. Try again.");
+				} catch (Exception e) {
+					SketchwareUtil.showMessage(this, "Couldn't prepare the QR image to share. Try again.");
+				}
+			});
 		}
 		
 	}
@@ -164,6 +162,8 @@ public class ReceiveActivity extends AppCompatActivity {
 	private String activeAddress;
 	private boolean validAddress;
 	private int qrIcon = R.drawable.ic_coin_harv;
+	private String qrPayload = "";
+	private boolean addressesReady = false;
 	private void _loadQrCode() {
 		if (ivQrCode == null) return;
 		if (!validAddress) {
@@ -171,11 +171,12 @@ public class ReceiveActivity extends AppCompatActivity {
 			return;
 		}
 		final String forAddr = activeAddress;
+		final String encoded = qrPayload == null || qrPayload.isEmpty() ? activeAddress : qrPayload;
 		final int icon = qrIcon;
 		new Thread(() -> {
 			Bitmap qr = null;
 			try {
-				qr = HARVQRCodeGenerator.generateQRCodeWithLogo(ReceiveActivity.this, forAddr, 512, icon);
+				qr = HARVQRCodeGenerator.generateQRCodeWithLogo(ReceiveActivity.this, encoded, 512, icon);
 			} catch (Exception ignored) {}
 			
 			final Bitmap finalQr = qr;
@@ -240,6 +241,7 @@ public class ReceiveActivity extends AppCompatActivity {
 				if (isFinishing()) return;
 				receiveAddrs.clear();
 				receiveAddrs.putAll(found);
+				addressesReady = true;
 				if (spinnerAssets != null) _showReceiveCoin(spinnerAssets.getSelectedItemPosition());
 			});
 		}).start();
@@ -290,7 +292,15 @@ public class ReceiveActivity extends AppCompatActivity {
 		if (textview1 != null) textview1.setText(coin.name);
 		if (tvQrHint != null) tvQrHint.setText("Scan to send " + coin.ticker + " to this address");
 		if (addr == null || addr.isEmpty()) {
-			if (tvDepositAddress != null) tvDepositAddress.setText("Preparing this address…");
+			validAddress = false;
+			qrPayload = "";
+			if (tvDepositAddress != null) tvDepositAddress.setText(!addressesReady
+					? "Preparing this address…"
+					: ("PI".equals(coin.key)
+						? "This phrase has no Pi wallet. Pi needs 24 words."
+						: "This address is not ready on this phone."));
+			if (ivQrCode != null) ivQrCode.setImageDrawable(null);
+			if (btnShare != null) { btnShare.setEnabled(false); btnShare.setAlpha(0.4f); }
 			return;
 		}
 		boolean same = addr.equals(activeAddress) && coin.icon == qrIcon && validAddress
@@ -301,10 +311,22 @@ public class ReceiveActivity extends AppCompatActivity {
 		}
 		qrIcon = coin.icon;
 		activeAddress = addr;
+		qrPayload = payUri(coin.key, addr);
 		validAddress = addr.length() >= 20;
 		if (tvDepositAddress != null) tvDepositAddress.setText(addr);
+		if (btnShare != null) { btnShare.setEnabled(true); btnShare.setAlpha(1f); }
 		if (ivQrCode != null) ivQrCode.setImageDrawable(null);
 		_loadQrCode();
+	}
+
+	/** What another wallet should see when it scans. Copy and share still use the plain address. */
+	private static String payUri(String key, String address) {
+		switch (key) {
+			case "BTC": return "bitcoin:" + address;
+			case "LTC": return "litecoin:" + address;
+			case "DOGE": return "dogecoin:" + address;
+			default: return address;
+		}
 	}
 	
 	private void _shareImage(final Uri imageUri, final String text) {

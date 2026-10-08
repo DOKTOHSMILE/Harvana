@@ -597,6 +597,10 @@ public class SendAssetActivity extends AppCompatActivity {
 			SketchwareUtil.showMessage(getApplicationContext(), "Amount must be greater than zero.");
 			return;
 		}
+		if (!Boolean.TRUE.equals(asset.get("balanceReady"))) {
+			SketchwareUtil.showMessage(getApplicationContext(), "The balance is still loading. Wait a moment and try again.");
+			return;
+		}
 		java.math.BigDecimal have = asset.get("balance") instanceof java.math.BigDecimal
 				? (java.math.BigDecimal) asset.get("balance") : java.math.BigDecimal.ZERO;
 		if (amount.compareTo(have) > 0) {
@@ -656,6 +660,10 @@ public class SendAssetActivity extends AppCompatActivity {
 			SketchwareUtil.showMessage(getApplicationContext(), "Amount must be greater than zero.");
 			return;
 		}
+		if (!Boolean.TRUE.equals(asset.get("balanceReady"))) {
+			SketchwareUtil.showMessage(getApplicationContext(), "The balance is still loading. Wait a moment and try again.");
+			return;
+		}
 		java.math.BigDecimal have = asset.get("balance") instanceof java.math.BigDecimal
 				? (java.math.BigDecimal) asset.get("balance") : java.math.BigDecimal.ZERO;
 		if (amount.compareTo(have) > 0) {
@@ -684,7 +692,11 @@ public class SendAssetActivity extends AppCompatActivity {
 				try {
 					String phrase = com.harvana.app.wallet.SecureWalletStorage.getActiveMnemonic(getApplicationContext());
 					if (phrase == null || phrase.trim().isEmpty()) err = "Couldn't load the recovery phrase on this phone.";
-					else com.harvana.app.wallet.PiClient.send(phrase, recipient, amt, memo);
+					else {
+						String derived = com.harvana.app.wallet.PiKeys.piAddress(phrase);
+						if (mine != null && !mine.isEmpty() && derived != null && !mine.equals(derived)) err = "The Pi address on screen is not the one this recovery phrase opens. Open Pi again.";
+						else com.harvana.app.wallet.PiClient.send(phrase, recipient, amt, memo);
+					}
 				} catch (Exception e) {
 					err = e.getMessage() == null ? "The Pi network rejected the payment." : e.getMessage();
 				}
@@ -753,10 +765,12 @@ public class SendAssetActivity extends AppCompatActivity {
 					if (line == null) continue;
 					row.put("balanceText", line);
 					row.put("address", addrs.get(key));
+					row.put("balanceReady", true);
 					try {
 						String num = line.split(" ")[0].replace(",", "");
 						if (num.length() > 0 && Character.isDigit(num.charAt(0))) row.put("balance", new BigDecimal(num));
-					} catch (Exception ignored) {}
+						else row.put("balance", BigDecimal.ZERO);
+					} catch (Exception ignored) { row.put("balance", BigDecimal.ZERO); }
 				}
 				if (assetAdapter != null) assetAdapter.notifyDataSetChanged();
 				if (spAsset != null && spAsset.getOnItemSelectedListener() != null && spAsset.getSelectedItemPosition() >= 0) {
@@ -1187,7 +1201,12 @@ public class SendAssetActivity extends AppCompatActivity {
 		if (requestCode == RC_SCAN_RECIPIENT && resultCode == Activity.RESULT_OK && data != null) {
 			String address = data.getStringExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_RESULT_TEXT);
 			if (address != null && etRecipient != null) {
-				etRecipient.setText(address);
+				address = address.trim();
+				int scheme = address.indexOf(':');
+				if (scheme > 0 && scheme < 16) address = address.substring(scheme + 1);
+				int query = address.indexOf('?');
+				if (query > 0) address = address.substring(0, query);
+				etRecipient.setText(address.trim());
 			}
 		}
 	}

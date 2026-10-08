@@ -51,12 +51,13 @@ public final class ChainSend {
         if (!mine.equalsIgnoreCase(from)) throw new IllegalArgumentException("This phone's key does not match the address on screen. Open the coin again.");
         if (!to.matches("(?i)0x[0-9a-f]{40}")) throw new IllegalArgumentException("Enter an address that starts with 0x.");
         BigInteger value = units(amount, decimals);
-        BigInteger gasPrice = new BigInteger(rpc(rpc, "eth_gasPrice").substring(2), 16);
+        BigInteger gasPrice = qty(rpc(rpc, "eth_gasPrice")).multiply(BigInteger.valueOf(110)).divide(BigInteger.valueOf(100));
+        if (gasPrice.signum() == 0) gasPrice = BigInteger.valueOf(1_000_000_000L);
         long gas = 21000L;
-        BigInteger balance = new BigInteger(rpc(rpc, "eth_getBalance", from, "latest").substring(2), 16);
+        BigInteger balance = qty(rpc(rpc, "eth_getBalance", from, "latest"));
         BigInteger fee = gasPrice.multiply(BigInteger.valueOf(gas));
         if (balance.compareTo(value.add(fee)) < 0) throw new IllegalArgumentException("Not enough left to pay the network fee.");
-        long nonce = Long.parseLong(rpc(rpc, "eth_getTransactionCount", from, "pending").substring(2), 16);
+        long nonce = qty(rpc(rpc, "eth_getTransactionCount", from, "pending")).longValue();
         String raw = EvmTx.raw(priv, nonce, gasPrice, gas, EvmTx.unhex(to), value, chainId);
         return rpc(rpc, "eth_sendRawTransaction", "0x" + raw);
     }
@@ -80,6 +81,7 @@ public final class ChainSend {
         String mine = ChainKeys.address(mnemonic, chain);
         if (!mine.equals(from)) throw new IllegalArgumentException("This phone's key does not match the address on screen. Open the coin again.");
         long sats = exact(units(amount, 8));
+        if (sats < ("DOGE".equals(chain.ticker) ? 100000 : 546)) throw new IllegalArgumentException("That amount is too small for " + chain.ticker + ".");
         byte[] payScript = scriptFor(to, chain);
         byte[] changeScript = scriptFor(mine, chain);
         List<BtcTx.In> ins = new ArrayList<>();
@@ -92,10 +94,13 @@ public final class ChainSend {
         for (int i = 0; i < utxos.length() && ins.size() < 50; i++) {
             JSONObject u = utxos.getJSONObject(i);
             if (segwit && u.has("status") && !u.getJSONObject("status").optBoolean("confirmed", true)) continue;
-            long value = u.optLong(segwit ? "value" : "value");
+            long value = u.optLong("value");
             if (value <= 0) continue;
-            byte[] txid = BtcTx.reverse(EvmTx.unhex(u.getString(segwit ? "txid" : "tx_hash")));
-            ins.add(new BtcTx.In(txid, u.optInt(segwit ? "vout" : "tx_output_n"), value));
+            String idKey = segwit ? "txid" : "tx_hash";
+            String voutKey = segwit ? "vout" : "tx_output_n";
+            if (!u.has(idKey) || !u.has(voutKey)) continue;
+            byte[] txid = BtcTx.reverse(EvmTx.unhex(u.getString(idKey)));
+            ins.add(new BtcTx.In(txid, u.getInt(voutKey), value));
             sum += value;
             fee = (long) rate * vsize(ins.size(), 2, segwit);
             if (sum >= sats + fee) {
@@ -114,6 +119,21 @@ public final class ChainSend {
         outs.add(new BtcTx.Out(sats, payScript));
         if (change > 0) outs.add(new BtcTx.Out(change, changeScript));
         String raw = segwit ? BtcTx.p2wpkh(priv, ins, outs) : BtcTx.p2pkh(priv, ins, outs);
+        int size = segwit ? BtcTx.vbytes(raw) : raw.length() / 2;
+        long need = (long) rate * Math.max(size, 1);
+        if (need > fee) {
+            long gap = need - fee;
+            if (change >= gap) {
+                change -= gap;
+                if (change < dust) { fee += change; change = 0; }
+            } else if (sum >= sats + need) {
+                change = 0;
+            } else throw new IllegalArgumentException("Not enough confirmed coins to pay that and the network fee.");
+            outs.clear();
+            outs.add(new BtcTx.Out(sats, payScript));
+            if (change > 0) outs.add(new BtcTx.Out(change, changeScript));
+            raw = segwit ? BtcTx.p2wpkh(priv, ins, outs) : BtcTx.p2pkh(priv, ins, outs);
+        }
         if (segwit) return postText(api + "/api/tx", raw);
         JSONObject pushed = post(api + "/txs/push", "{\"tx\":\"" + raw + "\"}");
         JSONObject tx = pushed.optJSONObject("tx");
@@ -161,7 +181,7 @@ public final class ChainSend {
         sig[64] = (byte) rec;
         tx.put("signature", new JSONArray().put(EvmTx.hex(sig)));
         JSONObject out = post("https://api.trongrid.io/wallet/broadcasttransaction", tx.toString());
-        if (!out.optBoolean("result", false)) throw new IllegalArgumentException(out.optString("message", out.optString("code", "Tron rejected the payment.")));
+        if (!out.optBoolean("result", false)) throw new IllegalArgumentException(tronMessage(out));
         return tx.getString("txID");
     }
 
@@ -172,6 +192,9 @@ public final class ChainSend {
         byte[] dest = b58(to);
         if (dest.length != 32) throw new IllegalArgumentException("Enter a Solana address.");
         long lamports = exact(units(amount, 9));
+        long have = solBalance(from);
+        if (have < lamports + 5000L) throw new IllegalArgumentException("Not enough SOL left to pay the network fee.");
+        if (solBalance(to) == 0 && lamports < 890880L) throw new IllegalArgumentException("That Solana account is new. Send at least 0.00089088 SOL so the network can create it.");
         JSONObject bh = post("https://api.mainnet-beta.solana.com",
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getLatestBlockhash\",\"params\":[{\"commitment\":\"confirmed\"}]}");
         String block = bh.getJSONObject("result").getJSONObject("value").getString("blockhash");
@@ -181,6 +204,33 @@ public final class ChainSend {
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"sendTransaction\",\"params\":[\"" + b64 + "\",{\"encoding\":\"base64\"}]}");
         if (sent.has("error")) throw new IllegalArgumentException(sent.getJSONObject("error").optString("message", "Solana rejected the payment."));
         return sent.getString("result");
+    }
+
+    private static BigInteger qty(String hex) {
+        String s = hex == null ? "" : hex.trim();
+        if (s.startsWith("0x") || s.startsWith("0X")) s = s.substring(2);
+        if (s.isEmpty()) return BigInteger.ZERO;
+        return new BigInteger(s, 16);
+    }
+
+    private static long solBalance(String address) throws Exception {
+        JSONObject r = post("https://api.mainnet-beta.solana.com",
+                "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getBalance\",\"params\":[\"" + address + "\"]}");
+        if (r.has("error")) throw new IllegalArgumentException(r.getJSONObject("error").optString("message", "Solana did not answer."));
+        return r.getJSONObject("result").optLong("value");
+    }
+
+    private static String tronMessage(JSONObject out) {
+        String m = out.optString("message", "");
+        if (m.matches("[0-9a-fA-F]{8,}")) {
+            try {
+                byte[] b = EvmTx.unhex(m);
+                String text = new String(b, java.nio.charset.StandardCharsets.UTF_8).trim();
+                if (!text.isEmpty()) return text;
+            } catch (Exception ignored) {}
+        }
+        if (!m.isEmpty()) return m;
+        return out.optString("code", "Tron rejected the payment.");
     }
 
     private static BigInteger units(String amount, int decimals) {

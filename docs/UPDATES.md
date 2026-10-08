@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: send and receive checked before a real payment
+
+What the app does:
+
+- **Change comes back to your own address.** Bitcoin, Litecoin and Dogecoin were checked: the address the phrase opens, decoded again, is the same place the change is paid. A Bitcoin payment is a real SegWit transaction, and its signature matches the published BIP-143 test.
+- **The fee is measured from the transaction that will actually be sent**, then the change is reduced so the network will accept it. An amount that is too small for that coin is refused before anything is signed.
+- **Ethereum, BNB, Polygon and Base** add a little to the gas price so the payment is not left sitting. Solana refuses a payment that would not cover the network fee, and tells you when a brand-new Solana account needs at least 0.00089088 SOL.
+- **Receive.** Copy and share always use the plain address. The QR for Bitcoin, Litecoin and Dogecoin also carries the coin name, so another wallet opens the right coin. Scanning such a code into Send strips that prefix. Pi still refuses to sign if the address on screen is not the one this recovery phrase opens.
+
+What you do: install the build. Send a small amount first.
+
 ## 8 Oct 2026: send every coin, not only HARV and Pi
 
 What the app does:

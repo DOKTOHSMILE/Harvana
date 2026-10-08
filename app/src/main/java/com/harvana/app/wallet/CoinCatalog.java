@@ -76,6 +76,24 @@ public final class CoinCatalog {
                 default: return "100,000,000 per HARV";
             }
         }
+
+        /** The network name for the choice saved now, not the one from when the app started. */
+        public String liveNetwork() {
+            if (nativeHarv) return Net.TEST ? "Harvana Protocol testnet" : "Harvana Protocol";
+            switch (key) {
+                case "PI": return Net.label("Pi Network");
+                case "BTC": return Net.label("Bitcoin");
+                case "LTC": return Net.label("Litecoin");
+                case "DOGE": return Net.label("Dogecoin");
+                case "ETH":
+                case "BNB":
+                case "POL":
+                case "BASE": return Net.evm(key).name;
+                case "TRX": return Net.TEST ? "Tron Nile" : "Tron";
+                case "SOL": return Net.TEST ? "Solana devnet" : "Solana";
+                default: return network;
+            }
+        }
     }
 
     private static final List<Coin> ALL;

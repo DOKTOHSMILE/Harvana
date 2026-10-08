@@ -256,12 +256,12 @@ public class CoinDetailActivity extends AppCompatActivity {
 		if (img_coin_logo != null) img_coin_logo.setImageResource(coin.icon);
 		if (tv_coin_description != null) tv_coin_description.setText(coin.about);
 		if (textview2 != null) textview2.setText("ABOUT " + coin.name.toUpperCase(java.util.Locale.US));
-		if (tv_coin_info_note != null) tv_coin_info_note.setText(coin.network);
+		if (tv_coin_info_note != null) tv_coin_info_note.setText(coin.liveNetwork());
 		String address = walletAddress == null ? "" : walletAddress.trim();
 		if (tv_wallet_address != null) tv_wallet_address.setText(address.isEmpty() ? "Address not ready yet" : address);
 		String shown = getIntent().getStringExtra("assetBalance");
 		_presentBalance(shown, coin.ticker);
-		_setStatRow(R.id.row_current_supply, "Network", coin.network);
+		_setStatRow(R.id.row_current_supply, "Network", coin.liveNetwork());
 		_setStatRow(R.id.row_max_supply, "Standard", coin.standard);
 		_setStatRow(R.id.row_circulating_supply, "Price", "…");
 		_setStatRow(R.id.row_total_holders, "Decimals", String.valueOf(coin.decimals));
@@ -381,7 +381,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		_setStatRow(R.id.row_block_height, "Block Height", "Loading…");
 		_setStatRow(R.id.row_block_reward, "Block Reward", "Loading…");
 		_setStatRow(R.id.row_halving, "Next Halving", "Loading…");
-		_setStatRow(R.id.row_network, "Network", "Harvana Protocol testnet");
+		_setStatRow(R.id.row_network, "Network", com.harvana.app.wallet.CoinCatalog.harv().liveNetwork());
 		
 		// Total Holders — was hardcoded to "Not available" with nothing
 		// ever calling the node for it. Independent of the genesis/tip

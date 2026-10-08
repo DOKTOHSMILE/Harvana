@@ -247,7 +247,7 @@ public final class CoinDetailPages {
             }
             LinearLayout box = new LinearLayout(requireContext());
             box.setOrientation(LinearLayout.VERTICAL);
-            box.addView(stat("Network", coin.network));
+            box.addView(stat("Network", coin.liveNetwork()));
             box.addView(stat("Standard", coin.standard));
             LinearLayout priceRow = stat("Price", "…");
             TextView price = valueOf(priceRow);

@@ -25,6 +25,7 @@ public class SketchApplication extends Application {
     public void onCreate() {
         super.onCreate();
         appContext = getApplicationContext();
+        com.harvana.app.wallet.Net.load(this);
         
         // Saved theme (System / Light / Dark) must be applied before any screen is created.
         com.harvana.app.utils.ThemeManager.applySavedTheme(this);

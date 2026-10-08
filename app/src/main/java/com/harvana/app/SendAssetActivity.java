@@ -615,8 +615,8 @@ public class SendAssetActivity extends AppCompatActivity {
 		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
 		rows.add(new String[]{"To", recipient});
 		rows.add(new String[]{"From", mine});
-		rows.add(new String[]{"Network", coin.network});
-		rows.add(new String[]{"Network fee", "Paid to " + coin.network + ", not to Harvana"});
+		rows.add(new String[]{"Network", coin.liveNetwork()});
+		rows.add(new String[]{"Network fee", "Paid to " + coin.liveNetwork() + ", not to Harvana"});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send " + coin.ticker, amountText + " " + coin.ticker, rows, () -> {
 			if (isProcessingSend) return;
 			isProcessingSend = true;

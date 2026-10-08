@@ -19,11 +19,64 @@
 			android:background="?attr/appBarColor"
 			app:popupTheme="@style/AppTheme.PopupOverlay" />
 	</com.google.android.material.appbar.AppBarLayout>
-	<FrameLayout
+	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:background="@color/colorBackground"
+		android:orientation="vertical"
 		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/card_network"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="16dp"
+			android:layout_marginTop="16dp"
+			android:layout_marginRight="16dp"
+			app:cardBackgroundColor="@color/colorSurface"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeColor="@color/colorCardStroke"
+			app:strokeWidth="1dp">
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:orientation="horizontal"
+				android:padding="16dp">
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/tv_net_title"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:text="Testnet"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="16sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/tv_net_sub"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="4dp"
+						android:text="Every coin, including HARV, uses test coins."
+						android:textColor="@color/colorTextSecondary"
+						android:textSize="13sp" />
+				</LinearLayout>
+				<com.google.android.material.switchmaterial.SwitchMaterial
+					android:id="@+id/switch_testnet"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="12dp"
+					android:checked="true" />
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+		<FrameLayout
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="1">
 		<com.google.android.material.card.MaterialCardView
 			android:id="@+id/card_no_wallet"
 			android:layout_width="match_parent"
@@ -85,7 +138,8 @@
 			android:layout_height="match_parent"
 			android:padding="16dp"
 			android:clipToPadding="false" />
-	</FrameLayout>
+		</FrameLayout>
+	</LinearLayout>
 	<com.google.android.material.floatingactionbutton.FloatingActionButton
 		android:id="@+id/_fab"
 		android:layout_width="wrap_content"

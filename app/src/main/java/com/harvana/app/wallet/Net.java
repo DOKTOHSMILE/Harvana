@@ -1,13 +1,30 @@
 package com.harvana.app.wallet;
 
+import android.content.Context;
+
 /**
- * Where each coin is read and sent. Testnet is on, so a payment uses test coins from a faucet, not real money.
- * Harvana itself stays on its own node. Flip TEST to false to go back to the live networks.
+ * Where each coin is read and sent. The choice is saved on the phone.
+ * Testnet is the default, so a payment uses test coins, not real money.
  */
 public final class Net {
     private Net() {}
 
-    public static final boolean TEST = true;
+    private static final String PREFS = "harv_net";
+
+    /** True while every coin should use its test network. Read this, do not copy it. */
+    public static volatile boolean TEST = true;
+
+    public static void load(Context c) {
+        if (c == null) return;
+        TEST = c.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean("test", true);
+    }
+
+    public static void setTest(Context c, boolean test) {
+        TEST = test;
+        if (c != null) {
+            c.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean("test", test).apply();
+        }
+    }
 
     public static String label(String live) { return TEST ? live + " testnet" : live; }
 

@@ -90,7 +90,7 @@ public class PickAssetActivity extends AppCompatActivity {
             if (q.isEmpty()
                     || c.name.toLowerCase(Locale.US).contains(q)
                     || c.ticker.toLowerCase(Locale.US).contains(q)
-                    || c.network.toLowerCase(Locale.US).contains(q)
+                    || c.liveNetwork().toLowerCase(Locale.US).contains(q)
                     || c.key.toLowerCase(Locale.US).contains(q)) shown.add(c);
         }
         empty.setVisibility(shown.isEmpty() ? View.VISIBLE : View.GONE);
@@ -152,7 +152,7 @@ public class PickAssetActivity extends AppCompatActivity {
             boolean on = c.key.equals(current);
             h.icon.setImageResource(c.icon);
             h.name.setText(c.name);
-            h.net.setText(c.network);
+            h.net.setText(c.liveNetwork());
             h.tick.setText(c.ticker);
             h.tick.setTextColor(on ? com.harvana.app.utils.UiColors.accent() : com.harvana.app.utils.UiColors.textSecondary());
             h.row.setOnClickListener(v -> {

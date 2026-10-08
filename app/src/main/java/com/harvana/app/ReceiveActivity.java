@@ -287,7 +287,7 @@ public class ReceiveActivity extends AppCompatActivity {
 		if ((addr == null || addr.isEmpty()) && coin.nativeHarv) addr = activeAddress;
 		if (getSupportActionBar() != null) {
 			getSupportActionBar().setTitle("Receive " + coin.ticker);
-			getSupportActionBar().setSubtitle(coin.network);
+			getSupportActionBar().setSubtitle(coin.liveNetwork());
 		}
 		if (textview1 != null) textview1.setText(coin.name);
 		if (tvQrHint != null) tvQrHint.setText("Scan to send " + coin.ticker + " to this address");

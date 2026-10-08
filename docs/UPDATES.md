@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: testnet or mainnet from the wallet list
+
+What the app does:
+
+- **My wallet list has a switch.** On is testnet, which is how the app starts. Off is mainnet. The choice is saved, and it asks before it changes.
+- Bitcoin, Litecoin and Dogecoin show a different address on each side. Ethereum, BNB, Polygon, Base, Tron, Solana and Pi keep the same address and talk to the other network.
+- **HARV stays on harvannaprotocol.com either way.** That is the only node. The switch says so. A mainnet node has not been added.
+
+What you do: install the build, open My wallet list, and use the switch. Then go back to Assets and pull down so the balances reload.
+
 ## 8 Oct 2026: the Gson warning on the Asset page
 
 What the app does:

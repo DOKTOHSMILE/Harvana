@@ -106,9 +106,46 @@ public class WalletListActivity extends AppCompatActivity {
 			getSupportActionBar().setSubtitle("");
 		}
 		recycler_wallets.setLayoutManager(new LinearLayoutManager(this));
+		com.google.android.material.switchmaterial.SwitchMaterial netSwitch = findViewById(R.id.switch_testnet);
+		paintNetwork(netSwitch);
+		netSwitch.setOnCheckedChangeListener((button, on) -> {
+			if (painting || on == com.harvana.app.wallet.Net.TEST) return;
+			askNetwork(netSwitch, on);
+		});
 		refreshList();
 	}
 	
+	private boolean painting;
+
+	private void paintNetwork(com.google.android.material.switchmaterial.SwitchMaterial netSwitch) {
+		painting = true;
+		boolean test = com.harvana.app.wallet.Net.TEST;
+		netSwitch.setChecked(test);
+		TextView title = findViewById(R.id.tv_net_title);
+		TextView sub = findViewById(R.id.tv_net_sub);
+		if (title != null) title.setText(test ? "Testnet" : "Mainnet");
+		if (sub != null) sub.setText(test
+				? "Every coin, including HARV, uses test coins."
+				: "Live coins. HARV still uses harvannaprotocol.com, the only node.");
+		painting = false;
+	}
+
+	private void askNetwork(com.google.android.material.switchmaterial.SwitchMaterial netSwitch, boolean test) {
+		new com.harvana.app.ui.SheetDialog.Builder(this)
+				.setTitle(test ? "Use testnet?" : "Use mainnet?")
+				.setMessage(test
+						? "Every coin uses its test network. Bitcoin, Litecoin and Dogecoin will show a different address. HARV stays on harvannaprotocol.com."
+						: "Bitcoin, Ethereum, Pi and the other coins will use their live networks. That is real money. HARV stays on harvannaprotocol.com, which is still the testnet, until a mainnet node is added.")
+				.setPositiveButton("Switch", (d, w) -> {
+					com.harvana.app.wallet.Net.setTest(this, test);
+					paintNetwork(netSwitch);
+					setResult(RESULT_OK);
+				})
+				.setNegativeButton("Cancel", (d, w) -> paintNetwork(netSwitch))
+				.setOnCancelListener(d -> paintNetwork(netSwitch))
+				.show();
+	}
+
 	public void _MORE() {
 	}
 	private static final int RC_CREATE_WALLET = 9101;

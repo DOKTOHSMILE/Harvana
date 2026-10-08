@@ -29,7 +29,7 @@ public class ExplorerActivity extends AppCompatActivity {
         if (address == null) address = "";
         String url = CoinCatalog.explorerUrl(coin, address);
         if (url.isEmpty()) {
-            AppBar.setContent(this, waiting(coin, address), coin.name + " explorer", coin.network);
+            AppBar.setContent(this, waiting(coin, address), coin.name + " explorer", coin.liveNetwork());
             return;
         }
         web = new WebView(this);

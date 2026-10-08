@@ -19,7 +19,8 @@ import okhttp3.Response;
 public final class PiClient {
     private PiClient() {}
 
-    public static final String HORIZON = Net.piHorizon();
+    /** The Pi server for the network chosen on My wallet list. Read again each call, so a switch takes effect immediately. */
+    public static String horizon() { return Net.piHorizon(); }
     private static final OkHttpClient HTTP = new OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS).build();
 
@@ -39,7 +40,7 @@ public final class PiClient {
         int fee = baseFee();
         long maxTime = System.currentTimeMillis() / 1000 + 300;      // the network drops it after 5 minutes
         String env = PiTx.envelope(seed, seq, destination, PiTx.toStroops(amountPi), fee, maxTime, memo, !exists);
-        Request req = new Request.Builder().url(HORIZON + "/transactions").post(new FormBody.Builder().add("tx", env).build()).build();
+        Request req = new Request.Builder().url(horizon() + "/transactions").post(new FormBody.Builder().add("tx", env).build()).build();
         try (Response r = HTTP.newCall(req).execute()) {
             JSONObject j = new JSONObject(r.body() == null ? "{}" : r.body().string());
             if (r.isSuccessful()) return j.optString("hash", "");
@@ -49,7 +50,7 @@ public final class PiClient {
 
     /** The account JSON, or null when the network has no such account. */
     public static JSONObject account(String address) throws Exception {
-        try (Response r = HTTP.newCall(new Request.Builder().url(HORIZON + "/accounts/" + address).build()).execute()) {
+        try (Response r = HTTP.newCall(new Request.Builder().url(horizon() + "/accounts/" + address).build()).execute()) {
             if (r.code() == 404) return null;
             if (!r.isSuccessful()) throw new Exception("Pi network unavailable (" + r.code() + ")");
             return new JSONObject(r.body() == null ? "{}" : r.body().string());
@@ -59,7 +60,7 @@ public final class PiClient {
     /** The newest payments to and from an address. */
     public static List<Payment> history(String address) throws Exception {
         List<Payment> out = new ArrayList<>();
-        try (Response r = HTTP.newCall(new Request.Builder().url(HORIZON + "/accounts/" + address + "/payments?order=desc&limit=25").build()).execute()) {
+        try (Response r = HTTP.newCall(new Request.Builder().url(horizon() + "/accounts/" + address + "/payments?order=desc&limit=25").build()).execute()) {
             if (r.code() == 404) return out;
             JSONObject j = new JSONObject(r.body() == null ? "{}" : r.body().string());
             JSONObject embedded = j.optJSONObject("_embedded");
@@ -89,7 +90,7 @@ public final class PiClient {
     }
 
     private static int baseFee() {
-        try (Response r = HTTP.newCall(new Request.Builder().url(HORIZON + "/fee_stats").build()).execute()) {
+        try (Response r = HTTP.newCall(new Request.Builder().url(horizon() + "/fee_stats").build()).execute()) {
             JSONObject j = new JSONObject(r.body() == null ? "{}" : r.body().string());
             int f = Integer.parseInt(j.optString("last_ledger_base_fee", "100000"));
             return Math.max(f, 100000);

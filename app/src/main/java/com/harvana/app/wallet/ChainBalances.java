@@ -101,7 +101,7 @@ public final class ChainBalances {
     /** The Pi balance (native), or "Not active yet" for an account the Pi network has not created. */
     public static String pi(String address) {
         try {
-            Request req = new Request.Builder().url(PiClient.HORIZON + "/accounts/" + address).build();
+            Request req = new Request.Builder().url(PiClient.horizon() + "/accounts/" + address).build();
             try (Response r = HTTP.newCall(req).execute()) {
                 if (r.code() == 404) return "Not active yet";
                 JSONObject j = new JSONObject(r.body() == null ? "{}" : r.body().string());

@@ -10,6 +10,8 @@ What the app does:
 - Bitcoin, Litecoin and Dogecoin show a different address on each side. Ethereum, BNB, Polygon, Base, Tron, Solana and Pi keep the same address and talk to the other network.
 - **HARV stays on harvannaprotocol.com either way.** That is the only node. The switch says so. A mainnet node has not been added.
 
+- **Pi follows the switch at once.** A payment and a balance check read the Pi server again each time, so turning the switch does not leave Pi on the old network.
+
 What you do: install the build, open My wallet list, and use the switch. Then go back to Assets and pull down so the balances reload.
 
 ## 8 Oct 2026: the Gson warning on the Asset page

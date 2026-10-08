@@ -59,43 +59,60 @@ public final class CoinCatalog {
             this.standard = standard; this.about = about; this.icon = icon; this.decimals = decimals;
             this.chain = chain; this.evm = evm; this.nativeHarv = nativeHarv;
         }
+
+        /** The name of the smallest unit this coin is counted in. */
+        public String smallestUnit() {
+            switch (key) {
+                case "BTC": return "satoshi · 100,000,000 per BTC";
+                case "LTC": return "litoshi · 100,000,000 per LTC";
+                case "DOGE": return "koinu · 100,000,000 per DOGE";
+                case "ETH":
+                case "BASE": return "wei · 10^18 per ETH";
+                case "BNB": return "wei · 10^18 per BNB";
+                case "POL": return "wei · 10^18 per POL";
+                case "TRX": return "sun · 1,000,000 per TRX";
+                case "SOL": return "lamport · 1,000,000,000 per SOL";
+                case "PI": return "stroop · 10,000,000 per PI";
+                default: return "100,000,000 per HARV";
+            }
+        }
     }
 
     private static final List<Coin> ALL;
     static {
         List<Coin> a = new ArrayList<>();
         a.add(new Coin("HARV", "Harvana", "HARV", "Harvana Protocol", "Native coin",
-                "The coin this app settles in. Groups, staking and transfers on Harvana use HARV.",
+                "HARV is the coin of Harvana Protocol. Group savings, loans, staking and transfers in this app are settled in HARV. One HARV is 100,000,000 of the smallest unit.",
                 R.drawable.ic_coin_harv, 8, null, null, true));
         a.add(new Coin("PI", "Pi Network", "PI", Net.label("Pi Network"), "Stellar-style account",
-                "Opened by the same recovery phrase. Pi only becomes active after the Pi network creates the account.",
+                "Pi is a mobile-mined cryptocurrency. An account address starts with G and has 56 characters. A new account stays inactive until the Pi network itself creates it with a minimum balance. One Pi is 10,000,000 stroops.",
                 R.drawable.ic_coin_pi, 7, null, null, false));
-        a.add(new Coin("BTC", "Bitcoin", "BTC", Net.label("Bitcoin"), "Native SegWit (BIP-84)",
-                "Your Bitcoin address from this recovery phrase. The same words open it in other Bitcoin wallets.",
+        a.add(new Coin("BTC", "Bitcoin", "BTC", Net.label("Bitcoin"), "Native SegWit",
+                "Bitcoin is a peer-to-peer digital currency with a capped supply of 21 million. This address is native SegWit. One bitcoin is 100,000,000 satoshis, and the network fee is paid in bitcoin.",
                 R.drawable.ic_coin_btc, 8, ChainKeys.Chain.BTC, null, false));
-        a.add(new Coin("LTC", "Litecoin", "LTC", Net.label("Litecoin"), "Native SegWit (BIP-84)",
-                "Your Litecoin address from this recovery phrase.",
+        a.add(new Coin("LTC", "Litecoin", "LTC", Net.label("Litecoin"), "Native SegWit",
+                "Litecoin is a payment coin based on Bitcoin, with a block about every two and a half minutes and a capped supply of 84 million. This address is native SegWit. One litecoin is 100,000,000 litoshis.",
                 R.drawable.ic_coin_ltc, 8, ChainKeys.Chain.LTC, null, false));
-        a.add(new Coin("DOGE", "Dogecoin", "DOGE", Net.label("Dogecoin"), "Legacy address (BIP-44)",
-                "Your Dogecoin address from this recovery phrase.",
+        a.add(new Coin("DOGE", "Dogecoin", "DOGE", Net.label("Dogecoin"), "Legacy address",
+                "Dogecoin is a payment coin with a new block about every minute and no supply cap. One dogecoin is 100,000,000 koinu, and the network fee is paid in dogecoin.",
                 R.drawable.ic_coin_doge, 8, ChainKeys.Chain.DOGE, null, false));
-        a.add(new Coin("ETH", "Ethereum", "ETH", Net.evm("ETH").name, "EVM address (BIP-44)",
-                "Your Ethereum address. The same address is also used on other EVM chains, listed separately.",
+        a.add(new Coin("ETH", "Ethereum", "ETH", Net.evm("ETH").name, "EVM account",
+                "Ethereum is a programmable blockchain. Ether pays the gas fee for every transaction. One ether is 10^18 wei. The account is a 42-character address starting with 0x.",
                 R.drawable.ic_coin_eth, 18, ChainKeys.Chain.ETH, "eth", false));
-        a.add(new Coin("BNB", "BNB Chain", "BNB", Net.evm("BNB").name, "EVM address (same as Ethereum)",
-                "BNB on BNB Smart Chain. It uses the same address as your Ethereum wallet.",
+        a.add(new Coin("BNB", "BNB Chain", "BNB", Net.evm("BNB").name, "EVM account",
+                "BNB is the coin of BNB Smart Chain and pays the gas fee on that network. One BNB is 10^18 of the smallest unit. The balance here is not the BNB you may hold as a token on Ethereum.",
                 R.drawable.ic_coin_bnb, 18, ChainKeys.Chain.ETH, "bnb", false));
-        a.add(new Coin("POL", "Polygon", "POL", Net.evm("POL").name, "EVM address (same as Ethereum)",
-                "POL on Polygon. It uses the same address as your Ethereum wallet.",
+        a.add(new Coin("POL", "Polygon", "POL", Net.evm("POL").name, "EVM account",
+                "POL is the coin of the Polygon network and pays the gas fee there. One POL is 10^18 of the smallest unit. A Polygon balance is separate from an Ethereum balance.",
                 R.drawable.ic_coin_pol, 18, ChainKeys.Chain.ETH, "pol", false));
-        a.add(new Coin("BASE", "Ethereum on Base", "ETH", Net.evm("BASE").name, "EVM address (same as Ethereum)",
-                "ETH on the Base network. It uses the same address as your Ethereum wallet, but the balance is separate.",
+        a.add(new Coin("BASE", "Ethereum on Base", "ETH", Net.evm("BASE").name, "EVM account",
+                "Base is a layer-2 network built on Ethereum. The coin is ether, and it pays the gas fee on Base. This balance is not the same as ether held on Ethereum itself.",
                 R.drawable.ic_coin_base, 18, ChainKeys.Chain.ETH, "base", false));
-        a.add(new Coin("TRX", "Tron", "TRX", Net.TEST ? "Tron Nile" : "Tron", "TRON address (BIP-44)",
-                "Your Tron address from this recovery phrase.",
+        a.add(new Coin("TRX", "Tron", "TRX", Net.TEST ? "Tron Nile" : "Tron", "Tron account",
+                "Tron is a blockchain for transfers and tokens. Fees are paid in TRX. One TRX is 1,000,000 sun. An account address starts with T.",
                 R.drawable.ic_coin_trx, 6, ChainKeys.Chain.TRX, null, false));
-        a.add(new Coin("SOL", "Solana", "SOL", Net.TEST ? "Solana devnet" : "Solana", "Ed25519 (SLIP-0010)",
-                "Your Solana address from this recovery phrase. The same words open it in Phantom and other Solana wallets.",
+        a.add(new Coin("SOL", "Solana", "SOL", Net.TEST ? "Solana devnet" : "Solana", "Ed25519 account",
+                "Solana is a high-throughput blockchain. Fees are paid in SOL. One SOL is 1,000,000,000 lamports. An account address is a base58 string of about 44 characters.",
                 R.drawable.ic_coin_sol, 9, ChainKeys.Chain.SOL, null, false));
         ALL = Collections.unmodifiableList(a);
     }

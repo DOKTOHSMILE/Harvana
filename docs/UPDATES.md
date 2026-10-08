@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: a coin's about is about the coin
+
+What the app does:
+
+- **The About line describes the coin itself**: what it is, how its smallest unit works, and what pays the fee.
+- It no longer says the address comes from the same recovery phrase. The Network page shows the network, the standard, the price, the decimals, the smallest unit and which coin pays the fee.
+
+What you do: install the build and open a coin.
+
 ## 8 Oct 2026: coin and staking use a material tab
 
 What the app does:

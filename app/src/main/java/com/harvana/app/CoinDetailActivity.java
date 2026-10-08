@@ -265,9 +265,9 @@ public class CoinDetailActivity extends AppCompatActivity {
 		_setStatRow(R.id.row_max_supply, "Standard", coin.standard);
 		_setStatRow(R.id.row_circulating_supply, "Price", "…");
 		_setStatRow(R.id.row_total_holders, "Decimals", String.valueOf(coin.decimals));
-		_setStatRow(R.id.row_block_height, "Recovery phrase", "Same words as HARV");
-		_setStatRow(R.id.row_block_reward, "Receive", "On");
-		_setStatRow(R.id.row_halving, "Send from Harvana", "On");
+		_setStatRow(R.id.row_block_height, "Smallest unit", coin.smallestUnit());
+		_setStatRow(R.id.row_block_reward, "Fee paid in", "BASE".equals(coin.key) ? "ETH" : coin.ticker);
+		_setStatRow(R.id.row_halving, "Address", address.isEmpty() ? "Not ready yet" : address);
 		if (address.isEmpty() || tv_coin_balance == null) {
 			_watchMarketPrice(coin);
 			return;

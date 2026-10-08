@@ -254,9 +254,8 @@ public final class CoinDetailPages {
             if (getActivity() instanceof CoinDetailActivity) ((CoinDetailActivity) getActivity()).chainPriceLine = price;
             box.addView(priceRow);
             box.addView(stat("Decimals", String.valueOf(coin.decimals)));
-            box.addView(stat("Recovery phrase", "Same words as HARV"));
-            box.addView(stat("Receive", "On"));
-            box.addView(stat("Send from Harvana", "On"));
+            box.addView(stat("Smallest unit", coin.smallestUnit()));
+            box.addView(stat("Fee paid in", "BASE".equals(coin.key) ? "ETH" : coin.ticker));
             TextView addr = new TextView(requireContext());
             addr.setText(address().isEmpty() ? "Address not ready yet" : address());
             addr.setTextIsSelectable(true);

@@ -116,6 +116,10 @@ public class CoinDetailActivity extends AppCompatActivity {
 	private MaterialButton btn_receive;
 	private MaterialButton btn_send;
 	private com.harvana.app.wallet.CoinCatalog.Coin openCoin = com.harvana.app.wallet.CoinCatalog.harv();
+	public android.widget.TextView chainPriceLine;
+
+	public com.harvana.app.wallet.CoinCatalog.Coin openCoin() { return openCoin; }
+	public String shownAddress() { return walletAddress == null ? "" : walletAddress.trim(); }
 	
 	@Override
 	protected void onCreate(Bundle _savedInstanceState) {
@@ -209,6 +213,8 @@ public class CoinDetailActivity extends AppCompatActivity {
 	}
 	
 	private void initializeLogic() {
+		walletAddress = getIntent().getStringExtra("walletAddress");
+		wallet_address = getIntent().getStringExtra("walletAddress");
 		_buildSections();
 		androidx.appcompat.app.ActionBar ab = getSupportActionBar();
 		int backgroundColor = androidx.core.content.ContextCompat.getColor(this, R.color.colorBackground);
@@ -243,14 +249,12 @@ public class CoinDetailActivity extends AppCompatActivity {
 		setTitle(coin.name);
 		if (img_coin_logo != null) img_coin_logo.setImageResource(coin.icon);
 		if (tv_coin_description != null) tv_coin_description.setText(coin.about);
+		if (textview2 != null) textview2.setText("ABOUT " + coin.name.toUpperCase(java.util.Locale.US));
 		if (tv_coin_info_note != null) tv_coin_info_note.setText(coin.network);
 		String address = walletAddress == null ? "" : walletAddress.trim();
 		if (tv_wallet_address != null) tv_wallet_address.setText(address.isEmpty() ? "Address not ready yet" : address);
 		String shown = getIntent().getStringExtra("assetBalance");
-		if (tv_coin_balance != null) {
-			if (shown != null && !shown.isEmpty() && !"…".equals(shown)) tv_coin_balance.setText(shown + (shown.endsWith(coin.ticker) ? "" : " " + coin.ticker));
-			else tv_coin_balance.setText("…");
-		}
+		_presentBalance(shown, coin.ticker);
 		_setStatRow(R.id.row_current_supply, "Network", coin.network);
 		_setStatRow(R.id.row_max_supply, "Standard", coin.standard);
 		_setStatRow(R.id.row_circulating_supply, "Price", "…");
@@ -258,7 +262,6 @@ public class CoinDetailActivity extends AppCompatActivity {
 		_setStatRow(R.id.row_block_height, "Recovery phrase", "Same words as HARV");
 		_setStatRow(R.id.row_block_reward, "Receive", "On");
 		_setStatRow(R.id.row_halving, "Send from Harvana", "Not switched on yet");
-		_setStatRow(R.id.row_network, "Address", address.isEmpty() ? "Unavailable" : address);
 		if (address.isEmpty() || tv_coin_balance == null) {
 			_watchMarketPrice(coin);
 			return;
@@ -269,7 +272,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 			String line = com.harvana.app.wallet.ChainBalances.assetBalance(coin.key, addr);
 			runOnUiThread(() -> {
 				if (isFinishing() || tv_coin_balance == null) return;
-				tv_coin_balance.setText(line);
+				_presentBalance(line, coin.ticker);
 				_showMarketPrice(coin);
 			});
 		}).start();
@@ -280,14 +283,15 @@ public class CoinDetailActivity extends AppCompatActivity {
 		_showMarketPrice(coin);
 		com.harvana.app.wallet.AssetPrices.load(this, () -> {
 			if (isFinishing()) return;
-			if (com.harvana.app.wallet.AssetPrices.peek(this, coin.key) == null)
+			if (com.harvana.app.wallet.AssetPrices.peek(this, coin.key) == null) {
 				_setStatRow(R.id.row_circulating_supply, "Price", "Unavailable");
-			else _showMarketPrice(coin);
+				if (chainPriceLine != null) chainPriceLine.setText("Unavailable");
+			} else _showMarketPrice(coin);
 		});
 	}
 
 	/** Unit price on the Network tab, and what the balance is worth under the big number. HARV is not priced. */
-	private void _showMarketPrice(com.harvana.app.wallet.CoinCatalog.Coin coin) {
+	void _showMarketPrice(com.harvana.app.wallet.CoinCatalog.Coin coin) {
 		com.harvana.app.wallet.AssetPrices.Quote quote = com.harvana.app.wallet.AssetPrices.peek(this, coin.key);
 		if (quote == null) return;
 		_setStatRow(R.id.row_circulating_supply, "Price",
@@ -296,6 +300,27 @@ public class CoinDetailActivity extends AppCompatActivity {
 			Double amt = com.harvana.app.wallet.AssetPrices.amount(tv_coin_balance.getText());
 			if (amt != null) textview14.setText("Worth " + com.harvana.app.wallet.AssetPrices.usd(amt * quote.usd) + " · " + com.harvana.app.wallet.AssetPrices.usd(quote.usd) + " each");
 		}
+		if (chainPriceLine != null) chainPriceLine.setText(com.harvana.app.wallet.AssetPrices.usd(quote.usd) + com.harvana.app.wallet.AssetPrices.change(quote));
+	}
+
+	/** A status such as "Not active yet" stays under the number. The number itself is always an amount. */
+	private void _presentBalance(String line, String ticker) {
+		if (tv_coin_balance == null) return;
+		if (line == null || line.isEmpty() || "…".equals(line)) {
+			tv_coin_balance.setText("…");
+			return;
+		}
+		Double amt = com.harvana.app.wallet.AssetPrices.amount(line);
+		if (amt == null) {
+			tv_coin_balance.setText("0 " + ticker);
+			if (textview14 != null) textview14.setText(line);
+			return;
+		}
+		String rest = line.trim();
+		int n = 0;
+		while (n < rest.length() && (Character.isDigit(rest.charAt(n)) || rest.charAt(n) == '.' || rest.charAt(n) == ',')) n++;
+		if (n < rest.length() && rest.substring(n).trim().isEmpty() == false && !rest.endsWith(ticker)) tv_coin_balance.setText(rest);
+		else tv_coin_balance.setText(rest.endsWith(ticker) ? rest : rest + " " + ticker);
 	}
 	
 	
@@ -970,71 +995,11 @@ public class CoinDetailActivity extends AppCompatActivity {
 	
 
 	// ── Sections: Overview · History · Network ──────────────────────────
-	private android.widget.FrameLayout historyHost;
-
-	/**
-	 * Splits the page under the balance into three tabs: Overview (address and what the coin is), History (this wallet's
-	 * transactions, the same list as the wallet's Activity tab) and Network (supply, height, reward, halving).
-	 */
 	private void _buildSections() {
-		android.view.View label = findViewById(R.id.textview14);
-		if (label == null || !(label.getParent() instanceof android.widget.LinearLayout)) return;
-		final android.widget.LinearLayout column = (android.widget.LinearLayout) label.getParent();
-		final android.view.View[] overview = {findViewById(R.id.textview15), findViewById(R.id.cardview4), findViewById(R.id.textview2), findViewById(R.id.cardview7)};
-		final android.view.View[] network = {findViewById(R.id.cardview8), findViewById(R.id.tv_coin_info_note)};
-		final float d = getResources().getDisplayMetrics().density;
-		historyHost = new android.widget.FrameLayout(this);
-		historyHost.setId(android.view.View.generateViewId());
-		historyHost.setMinimumHeight((int) (360 * d));
-		historyHost.setVisibility(android.view.View.GONE);
-
-		android.widget.LinearLayout bar = new android.widget.LinearLayout(this);
-		bar.setPadding((int) (4 * d), (int) (4 * d), (int) (4 * d), (int) (4 * d));
-		android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
-		bg.setCornerRadius(24 * d);
-		bg.setColor(com.harvana.app.utils.UiColors.surface());
-		bar.setBackground(bg);
-		final String[] names = {"Overview", "History", "Network"};
-		final TextView[] tabs = new TextView[names.length];
-		final Runnable[] select = new Runnable[1];
-		final int[] current = {0};
-		for (int t = 0; t < names.length; t++) {
-			final int idx = t;
-			TextView tv = new TextView(this);
-			tv.setText(names[t]);
-			tv.setGravity(android.view.Gravity.CENTER);
-			tv.setTextSize(14);
-			tv.setTypeface(null, android.graphics.Typeface.BOLD);
-			tv.setPadding(0, (int) (10 * d), 0, (int) (10 * d));
-			tv.setOnClickListener(v -> { current[0] = idx; select[0].run(); });
-			tabs[t] = tv;
-			bar.addView(tv, new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+		for (int id : new int[]{R.id.textview15, R.id.cardview4, R.id.textview2, R.id.cardview7, R.id.cardview8, R.id.tv_coin_info_note}) {
+			android.view.View v = findViewById(id);
+			if (v != null) v.setVisibility(android.view.View.GONE);
 		}
-		android.widget.LinearLayout.LayoutParams blp = new android.widget.LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-		blp.topMargin = (int) (18 * d);
-		blp.bottomMargin = (int) (6 * d);
-		column.addView(bar, column.indexOfChild(label) + 1, blp);
-		column.addView(historyHost, column.indexOfChild(bar) + 1);
-		select[0] = () -> {
-			for (int t = 0; t < tabs.length; t++) {
-				boolean on = t == current[0];
-				android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
-				g.setCornerRadius(20 * d);
-				g.setColor(on ? com.harvana.app.utils.UiColors.accent() : android.graphics.Color.TRANSPARENT);
-				tabs[t].setBackground(g);
-				tabs[t].setTextColor(on ? com.harvana.app.utils.UiColors.onAccent() : com.harvana.app.utils.UiColors.textSecondary());
-			}
-			for (android.view.View v : overview) if (v != null) v.setVisibility(current[0] == 0 ? android.view.View.VISIBLE : android.view.View.GONE);
-			for (android.view.View v : network) if (v != null) v.setVisibility(current[0] == 2 ? android.view.View.VISIBLE : android.view.View.GONE);
-			historyHost.setVisibility(current[0] == 1 ? android.view.View.VISIBLE : android.view.View.GONE);
-			if (current[0] == 1 && getSupportFragmentManager().findFragmentById(historyHost.getId()) == null) {
-				WalletActivityFragmentActivity historyFragment = new WalletActivityFragmentActivity();
-				Bundle onlyHarv = new Bundle();
-				onlyHarv.putBoolean("harvOnly", true);   // this page is about HARV; the wallet's Activity tab shows every coin
-				historyFragment.setArguments(onlyHarv);
-				getSupportFragmentManager().beginTransaction().replace(historyHost.getId(), historyFragment).commitAllowingStateLoss();
-			}
-		};
-		select[0].run();
+		CoinDetailPages.install(this);
 	}
 }

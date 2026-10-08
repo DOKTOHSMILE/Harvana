@@ -31,25 +31,48 @@ public final class ChainHistory {
         List<HashMap<String, Object>> out = new ArrayList<>();
         if (c == null || harvAddress == null || harvAddress.isEmpty()) return out;
         Context app = c.getApplicationContext();
-        Map<ChainKeys.Chain, String> addrs = ChainWalletStore.ensure(app, harvAddress);
-        if (ChainAssetsSection.shown(app, "PI")) {
-            String pi = PiWalletStore.get(app, harvAddress);
-            if (pi != null && !pi.isEmpty()) {
-                try {
-                    for (PiClient.Payment p : PiClient.history(pi)) {
-                        boolean in = "Received".equals(p.direction);
-                        HashMap<String, Object> m = row("PI", "Pi Network", in, in ? p.counterparty : pi, in ? pi : p.counterparty,
-                                parse(p.amount), parseIso(p.when), p.hash, "https://blockexplorer.minepi.com/mainnet/transactions/" + p.hash);
-                        out.add(m);
-                    }
-                } catch (Exception ignored) { }
-            }
-        }
-        if (ChainAssetsSection.shown(app, ChainKeys.Chain.BTC.name()) && addrs.containsKey(ChainKeys.Chain.BTC))
-            mempool(out, "https://mempool.space", "BTC", "Bitcoin", addrs.get(ChainKeys.Chain.BTC));
-        if (ChainAssetsSection.shown(app, ChainKeys.Chain.LTC.name()) && addrs.containsKey(ChainKeys.Chain.LTC))
-            mempool(out, "https://litecoinspace.org", "LTC", "Litecoin", addrs.get(ChainKeys.Chain.LTC));
+        if (ChainAssetsSection.shown(app, "PI")) out.addAll(one(app, harvAddress, "PI"));
+        if (ChainAssetsSection.shown(app, ChainKeys.Chain.BTC.name())) out.addAll(one(app, harvAddress, "BTC"));
+        if (ChainAssetsSection.shown(app, ChainKeys.Chain.LTC.name())) out.addAll(one(app, harvAddress, "LTC"));
         return out;
+    }
+
+    /** Recent transactions for one coin, even if that coin is hidden on the Assets tab. */
+    public static List<HashMap<String, Object>> one(Context c, String harvAddress, String key) {
+        return one(c, harvAddress, key, null);
+    }
+
+    /** {@code knownAddress} is the address already on screen, used when the wallet store has not caught up. */
+    public static List<HashMap<String, Object>> one(Context c, String harvAddress, String key, String knownAddress) {
+        List<HashMap<String, Object>> out = new ArrayList<>();
+        if (c == null || key == null) return out;
+        if ((harvAddress == null || harvAddress.isEmpty()) && (knownAddress == null || knownAddress.isEmpty())) return out;
+        Context app = c.getApplicationContext();
+        try {
+            if ("PI".equals(key)) {
+                String pi = knownAddress != null && !knownAddress.isEmpty() ? knownAddress : PiWalletStore.get(app, harvAddress);
+                if (pi == null || pi.isEmpty()) return out;
+                for (PiClient.Payment p : PiClient.history(pi)) {
+                    boolean in = "Received".equals(p.direction);
+                    out.add(row("PI", "Pi Network", in, in ? p.counterparty : pi, in ? pi : p.counterparty,
+                            parse(p.amount), parseIso(p.when), p.hash, "https://blockexplorer.minepi.com/mainnet/transactions/" + p.hash));
+                }
+                return out;
+            }
+            Map<ChainKeys.Chain, String> addrs = harvAddress == null || harvAddress.isEmpty()
+                    ? new java.util.HashMap<>() : ChainWalletStore.ensure(app, harvAddress);
+            String addr = "BTC".equals(key) ? known(knownAddress, addrs, ChainKeys.Chain.BTC)
+                    : "LTC".equals(key) ? known(knownAddress, addrs, ChainKeys.Chain.LTC) : null;
+            if (addr == null || addr.isEmpty()) return out;
+            if ("BTC".equals(key)) mempool(out, "https://mempool.space", "BTC", "Bitcoin", addr);
+            else if ("LTC".equals(key)) mempool(out, "https://litecoinspace.org", "LTC", "Litecoin", addr);
+        } catch (Exception ignored) { }
+        return out;
+    }
+
+    private static String known(String knownAddress, Map<ChainKeys.Chain, String> addrs, ChainKeys.Chain chain) {
+        if (knownAddress != null && !knownAddress.isEmpty()) return knownAddress;
+        return addrs.get(chain);
     }
 
     /** Esplora-style explorers: the net change to this address in each transaction decides sent or received. */

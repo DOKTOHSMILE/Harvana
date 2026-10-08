@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: a receipt matches the coin
+
+What the app does:
+
+- **The receipt uses that coin's own words.** Bitcoin shows the transaction, the block, the confirmations, the size and how many inputs and outputs it has. Ethereum, BNB, Polygon and Base show the gas fee, the gas used, the gas price and the nonce. Tron shows energy and bandwidth. Solana shows the signature and the slot. Pi shows the ledger and the memo, when there is one.
+- Harvana's burn line is only on a Harvana receipt.
+
+What you do: install the build and open a transaction for each coin.
+
 ## 8 Oct 2026: a transaction stays on its receipt
 
 What the app does:

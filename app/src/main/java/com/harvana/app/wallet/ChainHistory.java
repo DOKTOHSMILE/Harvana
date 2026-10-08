@@ -189,6 +189,9 @@ public final class ChainHistory {
         HashMap<String, Object> m = row(key, n.name, false, from, to, shift(body.optString("value"), 18), time, hash, n.txPage + hash);
         m.put("status", body.optString("blockNumber").isEmpty() ? "pending" : (ok ? "confirmed" : "failed"));
         m.put("harvFee", shift(new java.math.BigInteger(Long.toString(hexLong(body.optString("gasPrice")))).multiply(java.math.BigInteger.valueOf(gasUsed)).toString(), 18));
+        m.put("gasUsed", gasUsed);
+        m.put("gasLimit", hexLong(body.optString("gas")));
+        m.put("gasPrice", hexLong(body.optString("gasPrice")));
         m.put("blockNumber", block);
         m.put("nonce", hexLong(body.optString("nonce")));
         if (block > 0 && tip >= block) m.put("confirmations", tip - block + 1);

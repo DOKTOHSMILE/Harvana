@@ -297,35 +297,18 @@ public class ReceiptActivity extends AppCompatActivity {
 		tv_nonce.setText(String.valueOf(nonce));
 		
 		if (otherChain != null) {
-			if (cardview4 != null) cardview4.setVisibility(View.VISIBLE);
-			if (cardview4 != null && cardview4.getChildCount() > 0 && cardview4.getChildAt(0) instanceof android.view.ViewGroup) {
-				android.view.ViewGroup row = (android.view.ViewGroup) cardview4.getChildAt(0);
-				if (row.getChildCount() > 0 && row.getChildAt(0) instanceof TextView) ((TextView) row.getChildAt(0)).setText("Network");
-			}
-			tv_memo.setText(otherChain);
-			tv_memo.setTextColor(UiColors.textPrimary());
-			tv_memo.setTag(null);
-			tv_memo.setOnClickListener(null);
-			if (tv_burn_amount.getParent() instanceof View) ((View) tv_burn_amount.getParent()).setVisibility(View.GONE);
-			if (linear11 != null) linear11.setVisibility(View.VISIBLE);
-			if (textview37 != null) textview37.setText("See less");
-			if (tv_nonce.getParent() instanceof View) ((View) tv_nonce.getParent()).setVisibility(View.GONE);
-			if (confirmations <= 0 && tv_confirmations.getParent() instanceof View) ((View) tv_confirmations.getParent()).setVisibility(View.GONE);
-			if (harvFee <= 0 && tv_network_fee.getParent() instanceof View) ((View) tv_network_fee.getParent()).setVisibility(View.GONE);
-			if (blockNumber <= 0) tv_block_number.setText(pending ? "Pending" : "—");
-			_showRecord(_recordJson(null, tokenSymbol), false);
 			final String lookup = getIntent().getStringExtra("assetKey") != null
 					&& !getIntent().getStringExtra("assetKey").isEmpty()
 					? getIntent().getStringExtra("assetKey") : tokenSymbol;
-			final String unit = tokenSymbol;
+			final String unit = "BASE".equals(lookup) ? "ETH" : tokenSymbol;
+			_shape(lookup, otherChain, null, unit);
 			final String hashNow = txHash == null ? "" : txHash;
 			new Thread(() -> {
 				java.util.HashMap<String, Object> fresh = com.harvana.app.wallet.ChainHistory.detail(lookup, hashNow);
 				runOnUiThread(() -> {
 					if (isFinishing()) return;
 					if (fresh != null) _applyExplorer(fresh, unit);
-					Object raw = fresh == null ? null : fresh.get("raw");
-					_showRecord(raw instanceof String && !((String) raw).isEmpty() ? (String) raw : _recordJson(fresh, unit), fresh != null);
+					_shape(lookup, otherChain, fresh, unit);
 				});
 			}).start();
 		}
@@ -357,47 +340,126 @@ public class ReceiptActivity extends AppCompatActivity {
 		// ... (Other activity code)
 	}
 	
-	private TextView recordView;
+	private android.view.ViewGroup factBox;
 
-	/** The explorer's own JSON, shown on this page. Nothing opens a website. */
-	private void _showRecord(String json, boolean loaded) {
-		if (linear16 == null) return;
-		if (recordView == null) {
-			int pad = Math.round(16 * getResources().getDisplayMetrics().density);
-			TextView title = new TextView(this);
-			title.setText("Network record");
-			title.setTextColor(UiColors.textSecondary());
-			title.setTextSize(13);
-			title.setPadding(pad, pad, pad, 0);
-			linear16.addView(title);
-			recordView = new TextView(this);
-			recordView.setTextIsSelectable(true);
-			recordView.setTextSize(11);
-			recordView.setTypeface(android.graphics.Typeface.MONOSPACE);
-			recordView.setTextColor(UiColors.textPrimary());
-			recordView.setPadding(pad, pad / 2, pad, pad);
-			linear16.addView(recordView);
+	/**
+	 * Each chain keeps the facts that belong to it. Bitcoin has a size and no nonce. Ethereum has gas and a nonce.
+	 * Solana has a slot. Pi has a ledger and a memo. Harvana's burn row is not shown for any of them.
+	 */
+	private void _shape(String key, String network, java.util.HashMap<String, Object> fresh, String unit) {
+		String k = key == null ? "" : key;
+		boolean evm = "ETH".equals(k) || "BNB".equals(k) || "POL".equals(k) || "BASE".equals(k);
+		boolean utxo = "BTC".equals(k) || "LTC".equals(k) || "DOGE".equals(k);
+		boolean sol = "SOL".equals(k);
+		boolean pi = "PI".equals(k);
+		if (textview29 != null) textview29.setText(network == null || network.isEmpty() ? "Transaction details" : network);
+		if (textview33 != null) textview33.setText(evm ? "Gas fee" : "Network fee");
+		if (textview36 != null) textview36.setText(sol ? "Signature" : "Transaction");
+		TextView blockLabel = findViewById(R.id.textview38);
+		if (blockLabel != null) blockLabel.setText(sol ? "Slot" : pi ? "Ledger" : "Block");
+		if (tv_burn_amount != null && tv_burn_amount.getParent() instanceof View) ((View) tv_burn_amount.getParent()).setVisibility(View.GONE);
+		if (tv_nonce != null && tv_nonce.getParent() instanceof View) ((View) tv_nonce.getParent()).setVisibility(evm ? View.VISIBLE : View.GONE);
+		View confRow = findViewById(R.id.linear_confirmations);
+		if (confRow != null) confRow.setVisibility(sol || pi ? View.GONE : View.VISIBLE);
+		if (linear11 != null) linear11.setVisibility(View.VISIBLE);
+		if (textview37 != null) textview37.setText("See less");
+		String memoText = fresh != null && fresh.get("memo") instanceof String ? (String) fresh.get("memo") : "";
+		if (pi && memoText != null && !memoText.trim().isEmpty() && !"none".equalsIgnoreCase(memoText.trim())) {
+			if (cardview4 != null) cardview4.setVisibility(View.VISIBLE);
+			if (cardview4 != null && cardview4.getChildCount() > 0 && cardview4.getChildAt(0) instanceof android.view.ViewGroup) {
+				android.view.ViewGroup row = (android.view.ViewGroup) cardview4.getChildAt(0);
+				if (row.getChildCount() > 0 && row.getChildAt(0) instanceof TextView) ((TextView) row.getChildAt(0)).setText("Memo");
+			}
+			tv_memo.setText(memoText);
+			tv_memo.setTag(memoText);
+		} else if (cardview4 != null) cardview4.setVisibility(View.GONE);
+		org.json.JSONObject raw = null;
+		if (fresh != null && fresh.get("raw") instanceof String) {
+			try { raw = new org.json.JSONObject((String) fresh.get("raw")); } catch (Exception ignored) { }
 		}
-		String text = json == null ? "" : json;
-		if (text.length() > 6000) text = text.substring(0, 6000) + "\n…";
-		recordView.setText(!loaded ? "Reading this transaction…" : text);
+		_facts(k, evm, utxo, sol, fresh, raw, unit);
 	}
 
-	private String _recordJson(java.util.HashMap<String, Object> fresh, String unit) {
-		try {
-			org.json.JSONObject o = new org.json.JSONObject();
-			o.put("hash", txHash == null ? "" : txHash);
-			o.put("status", fresh != null && fresh.get("status") != null ? fresh.get("status") : status);
-			o.put("from", fresh != null && fresh.get("senderAddress") != null ? fresh.get("senderAddress") : sender);
-			o.put("to", fresh != null && fresh.get("recipientAddress") != null ? fresh.get("recipientAddress") : recipient);
-			o.put("amount", (fresh != null && fresh.get("value") instanceof Number ? ((Number) fresh.get("value")).doubleValue() : value) + " " + unit);
-			if (fresh != null && fresh.get("harvFee") instanceof Number) o.put("fee", ((Number) fresh.get("harvFee")).doubleValue() + " " + unit);
-			if (fresh != null && fresh.get("blockNumber") instanceof Number) o.put("block", ((Number) fresh.get("blockNumber")).longValue());
-			if (fresh != null && fresh.get("confirmations") instanceof Number) o.put("confirmations", ((Number) fresh.get("confirmations")).longValue());
-			return o.toString(2);
-		} catch (Exception e) {
-			return "";
+	private void _facts(String key, boolean evm, boolean utxo, boolean sol, java.util.HashMap<String, Object> fresh, org.json.JSONObject raw, String unit) {
+		if (factBox == null) {
+			View block = findViewById(R.id.linear24);
+			if (block != null && block.getParent() instanceof android.view.ViewGroup) factBox = (android.view.ViewGroup) block.getParent();
 		}
+		if (factBox == null) return;
+		for (int i = factBox.getChildCount() - 1; i >= 0; i--) {
+			if ("chain_fact".equals(factBox.getChildAt(i).getTag())) factBox.removeViewAt(i);
+		}
+		if (fresh == null && raw == null) return;
+		if (evm) {
+			long used = fresh != null && fresh.get("gasUsed") instanceof Number ? ((Number) fresh.get("gasUsed")).longValue() : 0;
+			long limit = fresh != null && fresh.get("gasLimit") instanceof Number ? ((Number) fresh.get("gasLimit")).longValue() : 0;
+			long price = fresh != null && fresh.get("gasPrice") instanceof Number ? ((Number) fresh.get("gasPrice")).longValue() : 0;
+			if (price == 0 && raw != null) {
+				String hex = raw.optString("gasPrice");
+				if (hex.isEmpty()) hex = raw.optString("maxFeePerGas");
+				price = _hex(hex);
+			}
+			if (used > 0) _fact("Gas used", String.valueOf(used));
+			if (limit > 0) _fact("Gas limit", String.valueOf(limit));
+			if (price > 0) _fact("Gas price", _trim(price / 1_000_000_000d) + " Gwei");
+		} else if (utxo && raw != null) {
+			int weight = raw.optInt("weight");
+			int size = raw.optInt("vsize", raw.optInt("size"));
+			int vsize = weight > 0 ? (weight + 3) / 4 : size;
+			if (vsize > 0) _fact("Size", vsize + " vB");
+			int inputs = raw.optInt("inputs_n", raw.optJSONArray("vin") == null ? raw.optJSONArray("inputs") == null ? 0 : raw.optJSONArray("inputs").length() : raw.optJSONArray("vin").length());
+			int outputs = raw.optInt("outputs_n", raw.optJSONArray("vout") == null ? raw.optJSONArray("outputs") == null ? 0 : raw.optJSONArray("outputs").length() : raw.optJSONArray("vout").length());
+			if (inputs > 0) _fact("Inputs", String.valueOf(inputs));
+			if (outputs > 0) _fact("Outputs", String.valueOf(outputs));
+		} else if ("TRX".equals(key) && raw != null) {
+			String result = raw.optString("contractRet");
+			if (!result.isEmpty()) _fact("Result", result);
+			long energy = raw.optLong("energy_usage_total", raw.optLong("energy_usage"));
+			long net = raw.optLong("net_usage");
+			if (energy > 0) _fact("Energy", String.valueOf(energy));
+			if (net > 0) _fact("Bandwidth", String.valueOf(net));
+		} else if (sol && raw != null) {
+			org.json.JSONObject meta = raw.optJSONObject("meta");
+			if (meta != null && meta.has("computeUnitsConsumed")) _fact("Compute", String.valueOf(meta.optLong("computeUnitsConsumed")));
+		}
+	}
+
+	private void _fact(String label, String value) {
+		int pad = Math.round(12 * getResources().getDisplayMetrics().density);
+		android.widget.LinearLayout row = new android.widget.LinearLayout(this);
+		row.setTag("chain_fact");
+		row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+		row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+		row.setPadding(0, pad, 0, pad);
+		TextView l = new TextView(this);
+		l.setText(label);
+		l.setTextColor(UiColors.textSecondary());
+		l.setTextSize(15);
+		android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+		l.setLayoutParams(lp);
+		TextView v = new TextView(this);
+		v.setText(value);
+		v.setTextColor(UiColors.textPrimary());
+		v.setTextSize(15);
+		v.setGravity(android.view.Gravity.END);
+		row.addView(l);
+		row.addView(v);
+		factBox.addView(row);
+	}
+
+	private static long _hex(String hex) {
+		if (hex == null) return 0;
+		String s = hex.startsWith("0x") || hex.startsWith("0X") ? hex.substring(2) : hex;
+		if (s.isEmpty()) return 0;
+		try { return new java.math.BigInteger(s, 16).longValue(); } catch (Exception e) { return 0; }
+	}
+
+	private static String _trim(double n) {
+		String s = String.format(java.util.Locale.US, "%.4f", n);
+		int i = s.length();
+		while (i > 0 && s.charAt(i - 1) == '0') i--;
+		if (i > 0 && s.charAt(i - 1) == '.') i--;
+		return s.substring(0, i);
 	}
 
 	/** Fills the receipt with the record that coin's explorer returned. */

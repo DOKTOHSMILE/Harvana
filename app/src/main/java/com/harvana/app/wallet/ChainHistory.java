@@ -192,6 +192,7 @@ public final class ChainHistory {
         m.put("blockNumber", block);
         m.put("nonce", hexLong(body.optString("nonce")));
         if (block > 0 && tip >= block) m.put("confirmations", tip - block + 1);
+        stamp(m, body);
         return m;
     }
 
@@ -282,7 +283,14 @@ public final class ChainHistory {
         m.put("harvFee", tx.optLong("fee") / 1e8);
         m.put("blockNumber", height);
         m.put("confirmations", conf);
+        stamp(m, tx);
         return m;
+    }
+
+    private static void stamp(HashMap<String, Object> m, JSONObject raw) {
+        if (m == null || raw == null) return;
+        try { m.put("raw", raw.toString(2)); }
+        catch (Exception e) { m.put("raw", raw.toString()); }
     }
 
     private static String first(JSONArray arr, boolean inputs) {
@@ -360,6 +368,7 @@ public final class ChainHistory {
             m.put("confirmations", tx.optLong("confirmations"));
             m.put("blockNumber", tx.optLong("block_height"));
             m.put("harvFee", parse(tx.optString("fee")));
+            stamp(m, tx);
             return m;
         }
         JSONObject tx = get("https://api.blockcypher.com/v1/doge/main/txs/" + hash);
@@ -374,6 +383,7 @@ public final class ChainHistory {
         m.put("confirmations", tx.optLong("confirmations"));
         m.put("blockNumber", tx.optLong("block_height"));
         m.put("harvFee", tx.optLong("fees") / 1e8);
+        stamp(m, tx);
         return m;
     }
 
@@ -401,7 +411,10 @@ public final class ChainHistory {
     }
 
     private static HashMap<String, Object> scoutTx(String host, String ticker, String network, String hash, int decimals, String explorer) throws Exception {
-        return scout(get(host + "/api/v2/transactions/" + hash), ticker, network, "", decimals, explorer);
+        JSONObject tx = get(host + "/api/v2/transactions/" + hash);
+        HashMap<String, Object> m = scout(tx, ticker, network, "", decimals, explorer);
+        stamp(m, tx);
+        return m;
     }
 
     private static HashMap<String, Object> scout(JSONObject tx, String ticker, String network, String mine, int decimals, String txBase) {
@@ -466,6 +479,7 @@ public final class ChainHistory {
         m.put("blockNumber", tx.optLong("block"));
         m.put("harvFee", shift(String.valueOf(tx.optLong("cost", tx.optLong("fee"))), 6));
         m.put("confirmations", tx.optLong("confirmations"));
+        stamp(m, tx);
         return m;
     }
 
@@ -520,6 +534,7 @@ public final class ChainHistory {
             m.put("status", failed ? "failed" : (tx.optLong("blockTime") > 0 ? "confirmed" : "pending"));
             m.put("harvFee", fee / 1e9);
             m.put("blockNumber", tx.optLong("slot"));
+            if (mine == null || mine.isEmpty()) stamp(m, tx);
             return m;
         } catch (Exception e) {
             return null;
@@ -549,6 +564,7 @@ public final class ChainHistory {
         m.put("harvFee", shift(tx.optString("fee_charged", "0"), 7));
         m.put("blockNumber", tx.optLong("ledger"));
         m.put("memo", tx.optString("memo"));
+        stamp(m, tx);
         return m;
     }
 

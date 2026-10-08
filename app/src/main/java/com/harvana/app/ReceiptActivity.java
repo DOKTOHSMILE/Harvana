@@ -297,30 +297,36 @@ public class ReceiptActivity extends AppCompatActivity {
 		tv_nonce.setText(String.valueOf(nonce));
 		
 		if (otherChain != null) {
-			// Another network's transaction: show the network and its explorer instead of HARV-only fields.
-			final String explorer = getIntent().getStringExtra("explorerUrl");
 			if (cardview4 != null) cardview4.setVisibility(View.VISIBLE);
-			tv_memo.setText("Network: " + otherChain + (explorer != null && explorer.startsWith("http") ? "\nTap to open it in the " + otherChain + " explorer" : ""));
+			if (cardview4 != null && cardview4.getChildCount() > 0 && cardview4.getChildAt(0) instanceof android.view.ViewGroup) {
+				android.view.ViewGroup row = (android.view.ViewGroup) cardview4.getChildAt(0);
+				if (row.getChildCount() > 0 && row.getChildAt(0) instanceof TextView) ((TextView) row.getChildAt(0)).setText("Network");
+			}
+			tv_memo.setText(otherChain);
 			tv_memo.setTextColor(UiColors.textPrimary());
 			tv_memo.setTag(null);
-			if (explorer != null && explorer.startsWith("http")) {
-				tv_memo.setOnClickListener(v -> {
-					try { startActivity(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(explorer))); } catch (Exception ignored) { }
-				});
-			}
+			tv_memo.setOnClickListener(null);
 			if (tv_burn_amount.getParent() instanceof View) ((View) tv_burn_amount.getParent()).setVisibility(View.GONE);
+			if (linear11 != null) linear11.setVisibility(View.VISIBLE);
+			if (textview37 != null) textview37.setText("See less");
 			if (tv_nonce.getParent() instanceof View) ((View) tv_nonce.getParent()).setVisibility(View.GONE);
 			if (confirmations <= 0 && tv_confirmations.getParent() instanceof View) ((View) tv_confirmations.getParent()).setVisibility(View.GONE);
 			if (harvFee <= 0 && tv_network_fee.getParent() instanceof View) ((View) tv_network_fee.getParent()).setVisibility(View.GONE);
 			if (blockNumber <= 0) tv_block_number.setText(pending ? "Pending" : "—");
-			final String coinKey = getIntent().getStringExtra("assetKey") != null
+			_showRecord(_recordJson(null, tokenSymbol), false);
+			final String lookup = getIntent().getStringExtra("assetKey") != null
 					&& !getIntent().getStringExtra("assetKey").isEmpty()
 					? getIntent().getStringExtra("assetKey") : tokenSymbol;
+			final String unit = tokenSymbol;
 			final String hashNow = txHash == null ? "" : txHash;
 			new Thread(() -> {
-				java.util.HashMap<String, Object> fresh = com.harvana.app.wallet.ChainHistory.detail(coinKey, hashNow);
-				if (fresh == null) return;
-				runOnUiThread(() -> { if (!isFinishing()) _applyExplorer(fresh, coinKey); });
+				java.util.HashMap<String, Object> fresh = com.harvana.app.wallet.ChainHistory.detail(lookup, hashNow);
+				runOnUiThread(() -> {
+					if (isFinishing()) return;
+					if (fresh != null) _applyExplorer(fresh, unit);
+					Object raw = fresh == null ? null : fresh.get("raw");
+					_showRecord(raw instanceof String && !((String) raw).isEmpty() ? (String) raw : _recordJson(fresh, unit), fresh != null);
+				});
 			}).start();
 		}
 		
@@ -351,6 +357,49 @@ public class ReceiptActivity extends AppCompatActivity {
 		// ... (Other activity code)
 	}
 	
+	private TextView recordView;
+
+	/** The explorer's own JSON, shown on this page. Nothing opens a website. */
+	private void _showRecord(String json, boolean loaded) {
+		if (linear16 == null) return;
+		if (recordView == null) {
+			int pad = Math.round(16 * getResources().getDisplayMetrics().density);
+			TextView title = new TextView(this);
+			title.setText("Network record");
+			title.setTextColor(UiColors.textSecondary());
+			title.setTextSize(13);
+			title.setPadding(pad, pad, pad, 0);
+			linear16.addView(title);
+			recordView = new TextView(this);
+			recordView.setTextIsSelectable(true);
+			recordView.setTextSize(11);
+			recordView.setTypeface(android.graphics.Typeface.MONOSPACE);
+			recordView.setTextColor(UiColors.textPrimary());
+			recordView.setPadding(pad, pad / 2, pad, pad);
+			linear16.addView(recordView);
+		}
+		String text = json == null ? "" : json;
+		if (text.length() > 6000) text = text.substring(0, 6000) + "\n…";
+		recordView.setText(!loaded ? "Reading this transaction…" : text);
+	}
+
+	private String _recordJson(java.util.HashMap<String, Object> fresh, String unit) {
+		try {
+			org.json.JSONObject o = new org.json.JSONObject();
+			o.put("hash", txHash == null ? "" : txHash);
+			o.put("status", fresh != null && fresh.get("status") != null ? fresh.get("status") : status);
+			o.put("from", fresh != null && fresh.get("senderAddress") != null ? fresh.get("senderAddress") : sender);
+			o.put("to", fresh != null && fresh.get("recipientAddress") != null ? fresh.get("recipientAddress") : recipient);
+			o.put("amount", (fresh != null && fresh.get("value") instanceof Number ? ((Number) fresh.get("value")).doubleValue() : value) + " " + unit);
+			if (fresh != null && fresh.get("harvFee") instanceof Number) o.put("fee", ((Number) fresh.get("harvFee")).doubleValue() + " " + unit);
+			if (fresh != null && fresh.get("blockNumber") instanceof Number) o.put("block", ((Number) fresh.get("blockNumber")).longValue());
+			if (fresh != null && fresh.get("confirmations") instanceof Number) o.put("confirmations", ((Number) fresh.get("confirmations")).longValue());
+			return o.toString(2);
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
 	/** Fills the receipt with the record that coin's explorer returned. */
 	private void _applyExplorer(java.util.HashMap<String, Object> d, String ticker) {
 		Object v = d.get("value");

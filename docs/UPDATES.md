@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: a transaction stays on its receipt
+
+What the app does:
+
+- **Opening a transaction no longer leaves the app.** The receipt reads that coin's explorer and shows the record here: who sent it, who received it, the amount, the fee, the block and the explorer's own JSON.
+- Tap the JSON to copy it. Nothing opens a website.
+
+What you do: install the build, open a coin, then History, then a transaction.
+
 ## 8 Oct 2026: the other coins are on testnet
 
 What the app does:

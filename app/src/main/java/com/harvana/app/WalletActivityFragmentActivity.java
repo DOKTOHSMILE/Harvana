@@ -583,7 +583,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 					if (nonceObj instanceof Number) intent.putExtra("nonce", ((Number) nonceObj).longValue());
 					if (chainName != null) {
 						intent.putExtra("chain", String.valueOf(chainName));
-						intent.putExtra("explorerUrl", String.valueOf(item.get("explorerUrl")));
+						intent.putExtra("assetKey", finalAsset);
 						intent.putExtra("incoming", item.get("incoming") instanceof Boolean && (Boolean) item.get("incoming"));
 					}
 					

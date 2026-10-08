@@ -82,13 +82,10 @@ public final class StakingPanel {
     private final TextView unbondCount;
     private final MaterialButton claim;
     private final LinearLayout stakesList;
-    private final TextView tabLive, tabClosed, liveEmpty;
+    private final TextView liveEmpty;
     private final View liveSection, closedSection;
     private final TextView claimSub;
     private final LinearLayout unbondingList;
-
-    private final View pageStake, pagePositions;
-    private final TextView tabStake, tabPositions;
 
     private JSONObject info;
     private JSONObject pos;
@@ -185,25 +182,24 @@ public final class StakingPanel {
         claim = activity.findViewById(R.id.btn_claim);
         claimSub = activity.findViewById(R.id.tv_claim_sub);
         unbondingList = activity.findViewById(R.id.unbonding_list);
-
-        pageStake = activity.findViewById(R.id.page_stake);
-        pagePositions = activity.findViewById(R.id.page_positions);
         stakesList = activity.findViewById(R.id.stakes_list);
-        tabLive = activity.findViewById(R.id.tab_live);
-        tabClosed = activity.findViewById(R.id.tab_closed);
         liveEmpty = activity.findViewById(R.id.tv_live_empty);
         liveSection = activity.findViewById(R.id.live_section);
         closedSection = activity.findViewById(R.id.closed_section);
-        tabStake = activity.findViewById(R.id.tab_stake);
-        tabPositions = activity.findViewById(R.id.tab_positions);
 
         setupAssetSpinner();
         setupLockCards();
 
         stake.setOnClickListener(v -> doStake());
         claim.setOnClickListener(v -> doClaim());
-        tabLive.setOnClickListener(v -> showLive(true));
-        tabClosed.setOnClickListener(v -> showLive(false));
+        com.google.android.material.tabs.TabLayout liveTabs = activity.findViewById(R.id.tab_live_closed);
+        liveTabs.addTab(liveTabs.newTab().setText("Live"));
+        liveTabs.addTab(liveTabs.newTab().setText("Closed"));
+        liveTabs.addOnTabSelectedListener(new com.google.android.material.tabs.TabLayout.OnTabSelectedListener() {
+            @Override public void onTabSelected(com.google.android.material.tabs.TabLayout.Tab tab) { showLive(tab.getPosition() == 0); }
+            @Override public void onTabUnselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
+            @Override public void onTabReselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
+        });
         activity.findViewById(R.id.btn_max).setOnClickListener(v -> fillMax());
 
         amount.addTextChangedListener(new TextWatcher() {
@@ -212,8 +208,6 @@ public final class StakingPanel {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        tabStake.setOnClickListener(v -> showPage(true));
-        tabPositions.setOnClickListener(v -> showPage(false));
         chip1d.setOnClickListener(v -> setRange(1));
         chip3d.setOnClickListener(v -> setRange(3));
         chip7d.setOnClickListener(v -> setRange(7));
@@ -223,7 +217,6 @@ public final class StakingPanel {
 
         styleChart();
         showLive(true);
-        showPage(true);
         timerHandler.post(timerRunnable);
     }
 
@@ -371,24 +364,6 @@ public final class StakingPanel {
     private void showLive(boolean live) {
         liveSection.setVisibility(live ? View.VISIBLE : View.GONE);
         closedSection.setVisibility(live ? View.GONE : View.VISIBLE);
-        int muted = ContextCompat.getColor(host, R.color.colorTextMuted);
-        int onAccent = ContextCompat.getColor(host, R.color.colorTextPrimaryWhite);
-        tabLive.setBackgroundResource(live ? R.drawable.bg_tab_active : 0);
-        tabLive.setTextColor(live ? onAccent : muted);
-        tabClosed.setBackgroundResource(live ? 0 : R.drawable.bg_tab_active);
-        tabClosed.setTextColor(live ? muted : onAccent);
-    }
-
-    private void showPage(boolean staking) {
-        pageStake.setVisibility(staking ? View.VISIBLE : View.GONE);
-        pagePositions.setVisibility(staking ? View.GONE : View.VISIBLE);
-
-        int muted = ContextCompat.getColor(host, R.color.colorTextMuted);
-        int onAccent = ContextCompat.getColor(host, R.color.colorTextPrimaryWhite);
-        tabStake.setBackgroundResource(staking ? R.drawable.bg_tab_active : 0);
-        tabStake.setTextColor(staking ? onAccent : muted);
-        tabPositions.setBackgroundResource(staking ? 0 : R.drawable.bg_tab_active);
-        tabPositions.setTextColor(staking ? muted : onAccent);
     }
 
     private void paint() {

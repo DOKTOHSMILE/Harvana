@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: coin and staking use a material tab
+
+What the app does:
+
+- **A coin's Overview, History and Network sit on a material tab** and you can still swipe between them.
+- **Staking and My Positions do the same.** Each one is its own page. Live and Closed on My Positions use the same kind of tab.
+
+What you do: install the build, open a coin, then open Staking.
+
 ## 8 Oct 2026: a receipt matches the coin
 
 What the app does:

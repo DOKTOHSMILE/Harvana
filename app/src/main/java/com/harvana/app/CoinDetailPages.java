@@ -37,15 +37,6 @@ public final class CoinDetailPages {
         scroll.setLayoutParams(head);
 
         float d = activity.getResources().getDisplayMetrics().density;
-        LinearLayout bar = new LinearLayout(activity);
-        bar.setPadding((int) (4 * d), (int) (4 * d), (int) (4 * d), (int) (4 * d));
-        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
-        bg.setCornerRadius(24 * d);
-        bg.setColor(com.harvana.app.utils.UiColors.surface());
-        bar.setBackground(bg);
-        String[] names = {"Overview", "History", "Network"};
-        TextView[] tabs = new TextView[names.length];
-
         ViewPager2 pager = new ViewPager2(activity);
         pager.setId(View.generateViewId());
         pager.setOffscreenPageLimit(2);
@@ -54,33 +45,12 @@ public final class CoinDetailPages {
             @NonNull @Override public Fragment createFragment(int position) { return Page.newInstance(position); }
         });
 
-        for (int t = 0; t < names.length; t++) {
-            final int idx = t;
-            TextView tv = new TextView(activity);
-            tv.setText(names[t]);
-            tv.setGravity(Gravity.CENTER);
-            tv.setTextSize(14);
-            tv.setTypeface(null, android.graphics.Typeface.BOLD);
-            tv.setPadding(0, (int) (10 * d), 0, (int) (10 * d));
-            tv.setOnClickListener(v -> pager.setCurrentItem(idx, true));
-            tabs[t] = tv;
-            bar.addView(tv, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        }
-        Runnable paint = () -> {
-            int sel = pager.getCurrentItem();
-            for (int t = 0; t < tabs.length; t++) {
-                boolean on = t == sel;
-                android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
-                g.setCornerRadius(20 * d);
-                g.setColor(on ? com.harvana.app.utils.UiColors.accent() : android.graphics.Color.TRANSPARENT);
-                tabs[t].setBackground(g);
-                tabs[t].setTextColor(on ? com.harvana.app.utils.UiColors.onAccent() : com.harvana.app.utils.UiColors.textSecondary());
-            }
-        };
-        pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override public void onPageSelected(int position) { paint.run(); }
-        });
-        paint.run();
+        com.google.android.material.tabs.TabLayout tabs =
+                (com.google.android.material.tabs.TabLayout) activity.getLayoutInflater().inflate(R.layout.view_toggle_tabs, column, false);
+        tabs.setTabTextColors(com.harvana.app.utils.UiColors.textSecondary(), com.harvana.app.utils.UiColors.onAccent());
+        tabs.setSelectedTabIndicatorColor(com.harvana.app.utils.UiColors.accent());
+        String[] names = {"Overview", "History", "Network"};
+        new com.google.android.material.tabs.TabLayoutMediator(tabs, pager, (tab, position) -> tab.setText(names[position])).attach();
 
         LinearLayout host = new LinearLayout(activity);
         host.setOrientation(LinearLayout.VERTICAL);
@@ -88,7 +58,7 @@ public final class CoinDetailPages {
         barLp.topMargin = (int) (8 * d);
         barLp.leftMargin = (int) (24 * d);
         barLp.rightMargin = (int) (24 * d);
-        host.addView(bar, barLp);
+        host.addView(tabs, barLp);
         host.addView(pager, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
         int at = column.indexOfChild(scroll) + 1;

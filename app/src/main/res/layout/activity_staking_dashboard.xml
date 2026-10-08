@@ -23,6 +23,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/staking_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
@@ -36,6 +37,7 @@
 
             <!-- CUSTOM PILL TABS -->
             <LinearLayout
+                android:id="@+id/staking_pill"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:background="@drawable/bg_tab_container"
@@ -560,34 +562,23 @@
                 </com.google.android.material.card.MaterialCardView>
 
                 <!-- Live / Closed switch keeps the page short -->
-                <LinearLayout
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tab_live_closed"
                     android:layout_width="match_parent"
                     android:layout_height="44dp"
                     android:layout_marginTop="24dp"
-                    android:orientation="horizontal"
+                    android:background="@drawable/bg_tab_container"
                     android:padding="4dp"
-                    android:background="@drawable/bg_tab_container">
-                    <TextView
-                        android:id="@+id/tab_live"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Live"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary"
-                        android:background="@drawable/bg_tab_active" />
-                    <TextView
-                        android:id="@+id/tab_closed"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Closed"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextMuted"
-                        android:background="@android:color/transparent" />
-                </LinearLayout>
+                    app:tabGravity="fill"
+                    app:tabIndicator="@drawable/bg_toggle_indicator"
+                    app:tabIndicatorColor="@color/colorAccent"
+                    app:tabIndicatorFullWidth="true"
+                    app:tabIndicatorGravity="stretch"
+                    app:tabMode="fixed"
+                    app:tabRippleColor="@android:color/transparent"
+                    app:tabSelectedTextColor="@color/colorTextOnAccent"
+                    app:tabTextAppearance="@style/Harvana.Tab"
+                    app:tabTextColor="@color/colorTextSecondary" />
 
                 <LinearLayout
                     android:id="@+id/live_section"

@@ -396,6 +396,11 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:minHeight">44dp</item>
     </style>
+    <style name="Harvana.Tab" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
     <style name="Harvana.Toolbar" parent="Widget.MaterialComponents.Toolbar">
         <item name="titleTextAppearance">@style/Harvana.ToolbarTitle</item>
         <item name="subtitleTextAppearance">@style/Harvana.ToolbarSubtitle</item>

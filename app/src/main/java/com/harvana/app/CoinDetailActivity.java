@@ -253,18 +253,49 @@ public class CoinDetailActivity extends AppCompatActivity {
 		}
 		_setStatRow(R.id.row_current_supply, "Network", coin.network);
 		_setStatRow(R.id.row_max_supply, "Standard", coin.standard);
-		_setStatRow(R.id.row_circulating_supply, "Ticker", coin.ticker);
+		_setStatRow(R.id.row_circulating_supply, "Price", "…");
 		_setStatRow(R.id.row_total_holders, "Decimals", String.valueOf(coin.decimals));
 		_setStatRow(R.id.row_block_height, "Recovery phrase", "Same words as HARV");
 		_setStatRow(R.id.row_block_reward, "Receive", "On");
 		_setStatRow(R.id.row_halving, "Send from Harvana", "Not switched on yet");
 		_setStatRow(R.id.row_network, "Address", address.isEmpty() ? "Unavailable" : address);
-		if (address.isEmpty() || tv_coin_balance == null) return;
+		if (address.isEmpty() || tv_coin_balance == null) {
+			_watchMarketPrice(coin);
+			return;
+		}
 		final String addr = address;
+		_watchMarketPrice(coin);
 		new Thread(() -> {
 			String line = com.harvana.app.wallet.ChainBalances.assetBalance(coin.key, addr);
-			runOnUiThread(() -> { if (!isFinishing() && tv_coin_balance != null) tv_coin_balance.setText(line); });
+			runOnUiThread(() -> {
+				if (isFinishing() || tv_coin_balance == null) return;
+				tv_coin_balance.setText(line);
+				_showMarketPrice(coin);
+			});
 		}).start();
+	}
+
+	/** Asks once, then paints. The shared cache decides whether that ask touches the network. */
+	private void _watchMarketPrice(com.harvana.app.wallet.CoinCatalog.Coin coin) {
+		_showMarketPrice(coin);
+		com.harvana.app.wallet.AssetPrices.load(this, () -> {
+			if (isFinishing()) return;
+			if (com.harvana.app.wallet.AssetPrices.peek(this, coin.key) == null)
+				_setStatRow(R.id.row_circulating_supply, "Price", "Unavailable");
+			else _showMarketPrice(coin);
+		});
+	}
+
+	/** Unit price on the Network tab, and what the balance is worth under the big number. HARV is not priced. */
+	private void _showMarketPrice(com.harvana.app.wallet.CoinCatalog.Coin coin) {
+		com.harvana.app.wallet.AssetPrices.Quote quote = com.harvana.app.wallet.AssetPrices.peek(this, coin.key);
+		if (quote == null) return;
+		_setStatRow(R.id.row_circulating_supply, "Price",
+				com.harvana.app.wallet.AssetPrices.usd(quote.usd) + com.harvana.app.wallet.AssetPrices.change(quote));
+		if (textview14 != null && tv_coin_balance != null) {
+			Double amt = com.harvana.app.wallet.AssetPrices.amount(tv_coin_balance.getText());
+			if (amt != null) textview14.setText("Worth " + com.harvana.app.wallet.AssetPrices.usd(amt * quote.usd) + " · " + com.harvana.app.wallet.AssetPrices.usd(quote.usd) + " each");
+		}
 	}
 	
 	

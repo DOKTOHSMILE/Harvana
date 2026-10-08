@@ -102,7 +102,9 @@ public final class ChainAssetsSection {
             }
             box.post(() -> {
                 if (!sameKeys(box, show)) rebuild(c, box, show, addrs);
+                paintPrices(box);
                 for (CoinCatalog.Coin coin : show) refreshBalance(c, box, coin, addrs.get(coin.key));
+                AssetPrices.load(c, () -> paintPrices(box));
             });
         }).start();
     }
@@ -132,12 +134,27 @@ public final class ChainAssetsSection {
                 com.harvana.app.utils.BalancePrivacy.guard(bal);
             }
             if (symbol != null) symbol.setText(coin.ticker);
-            if (side != null) side.setText(coin.network);
+            AssetPrices.Quote quote = AssetPrices.peek(c, coin.key);
+            if (side != null) side.setText(quote != null ? AssetPrices.usd(quote.usd) : coin.network);
             String address = addrs.get(coin.key);
             View card = item.findViewById(R.id.cardview1);
             View.OnClickListener open = v -> openDetail(c, coin, address, bal == null ? "" : bal.getText().toString());
             if (card != null) card.setOnClickListener(open); else item.setOnClickListener(open);
             box.addView(item);
+        }
+    }
+
+    /** Writes the saved price onto each row, and leaves a row alone when its text is already that price. */
+    private static void paintPrices(LinearLayout box) {
+        if (box == null) return;
+        for (int i = 0; i < box.getChildCount(); i++) {
+            View item = box.getChildAt(i);
+            if (!(item.getTag() instanceof String)) continue;
+            TextView side = item.findViewById(R.id.tv_asset_amount);
+            AssetPrices.Quote quote = AssetPrices.peek(box.getContext(), (String) item.getTag());
+            if (side == null || quote == null) continue;
+            String next = AssetPrices.usd(quote.usd);
+            if (!next.contentEquals(side.getText())) side.setText(next);
         }
     }
 

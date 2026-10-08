@@ -97,12 +97,13 @@ public final class WalletQr {
     private static Hit bare(String t) {
         if (t.regionMatches(true, 0, "HV0x", 0, 4) && t.length() == 44 && t.substring(4).matches("[0-9a-fA-F]{40}"))
             return new Hit("HARV", "HV0x" + t.substring(4).toLowerCase(java.util.Locale.US));
-        if (t.startsWith("bc1") || t.startsWith("BC1")) return looksLike("BTC", t) ? new Hit("BTC", t.toLowerCase(java.util.Locale.US)) : null;
-        if (t.startsWith("ltc1") || t.startsWith("LTC1")) return looksLike("LTC", t) ? new Hit("LTC", t.toLowerCase(java.util.Locale.US)) : null;
+        if (t.startsWith("bc1") || t.startsWith("BC1") || t.startsWith("tb1") || t.startsWith("TB1")) return looksLike("BTC", t) ? new Hit("BTC", t.toLowerCase(java.util.Locale.US)) : null;
+        if (t.startsWith("ltc1") || t.startsWith("LTC1") || t.startsWith("tltc1") || t.startsWith("TLTC1")) return looksLike("LTC", t) ? new Hit("LTC", t.toLowerCase(java.util.Locale.US)) : null;
         if (t.matches("(?i)0x[0-9a-f]{40}")) return new Hit("ETH", t);
         if (t.startsWith("T") && t.matches("^T[1-9A-HJ-NP-Za-km-z]{33}$")) return new Hit("TRX", t);
         if (t.startsWith("G") && t.matches("^G[A-Z2-7]{55}$")) return new Hit("PI", t);
         if (t.matches("^D[1-9A-HJ-NP-Za-km-z]{25,34}$")) return new Hit("DOGE", t);
+        if (com.harvana.app.wallet.Net.TEST && t.matches("^[n2][1-9A-HJ-NP-Za-km-z]{25,34}$")) return new Hit("DOGE", t);
         if (t.matches("^[LM][1-9A-HJ-NP-Za-km-z]{25,34}$")) return new Hit("LTC", t);
         if (t.matches("^[13][1-9A-HJ-NP-Za-km-z]{24,34}$")) return new Hit("BTC", t);
         if (t.matches("^[1-9A-HJ-NP-Za-km-z]{32,44}$")) return new Hit("SOL", t);
@@ -112,9 +113,9 @@ public final class WalletQr {
     private static boolean looksLike(String key, String a) {
         switch (key) {
             case "HARV": return a.regionMatches(true, 0, "HV0x", 0, 4) && a.length() == 44;
-            case "BTC": return a.regionMatches(true, 0, "bc1", 0, 3) || a.matches("^[13][1-9A-HJ-NP-Za-km-z]{24,34}$");
-            case "LTC": return a.regionMatches(true, 0, "ltc1", 0, 4) || a.matches("^[LM][1-9A-HJ-NP-Za-km-z]{25,34}$");
-            case "DOGE": return a.matches("^D[1-9A-HJ-NP-Za-km-z]{25,34}$");
+            case "BTC": return a.regionMatches(true, 0, "bc1", 0, 3) || a.regionMatches(true, 0, "tb1", 0, 3) || a.matches("^[13][1-9A-HJ-NP-Za-km-z]{24,34}$");
+            case "LTC": return a.regionMatches(true, 0, "ltc1", 0, 4) || a.regionMatches(true, 0, "tltc1", 0, 5) || a.matches("^[LM][1-9A-HJ-NP-Za-km-z]{25,34}$");
+            case "DOGE": return a.matches("^D[1-9A-HJ-NP-Za-km-z]{25,34}$") || (com.harvana.app.wallet.Net.TEST && a.matches("^[n2][1-9A-HJ-NP-Za-km-z]{25,34}$"));
             case "ETH":
             case "BNB":
             case "POL":

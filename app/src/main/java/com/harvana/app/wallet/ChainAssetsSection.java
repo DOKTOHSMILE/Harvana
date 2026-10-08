@@ -214,13 +214,13 @@ public final class ChainAssetsSection {
                     tv.setText(number);
                     Double amt = AssetPrices.amount(number);
                     if (amt != null) tv.setTag(R.id.tv_asset_balance, amt);
-                    LinearLayout box = null;
+                    LinearLayout rows = null;
                     View p = tv;
                     while (p != null) {
-                        if (p.getId() == R.id.chain_assets && p instanceof LinearLayout) { box = (LinearLayout) p; break; }
+                        if (p.getId() == R.id.chain_assets && p instanceof LinearLayout) { rows = (LinearLayout) p; break; }
                         p = p.getParent() instanceof View ? (View) p.getParent() : null;
                     }
-                    if (box != null) paintPrices(box);
+                    if (rows != null) paintPrices(rows);
                 } else if (tv.getText() == null || tv.getText().length() == 0 || "…".equals(tv.getText().toString())) tv.setText(line);
             });
         }).start();

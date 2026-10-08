@@ -68,21 +68,22 @@ public final class ChainHistory {
                 case "PI":
                     for (PiClient.Payment p : PiClient.history(addr)) {
                         boolean in = "Received".equals(p.direction);
-                        out.add(row("PI", "Pi Network", in, in ? p.counterparty : addr, in ? addr : p.counterparty,
-                                parse(p.amount), parseIso(p.when), p.hash, "https://blockexplorer.minepi.com/mainnet/transactions/" + p.hash));
+                        out.add(row("PI", Net.label("Pi Network"), in, in ? p.counterparty : addr, in ? addr : p.counterparty,
+                                parse(p.amount), parseIso(p.when), p.hash, Net.piTxPage(p.hash)));
                     }
                     break;
-                case "BTC": mempool(out, "https://mempool.space", "BTC", "Bitcoin", addr); break;
-                case "LTC": mempool(out, "https://litecoinspace.org", "LTC", "Litecoin", addr); break;
+                case "BTC": mempool(out, Net.btcApi(), "BTC", Net.label("Bitcoin"), addr); break;
+                case "LTC": mempool(out, Net.ltcApi(), "LTC", Net.label("Litecoin"), addr); break;
                 case "DOGE": doge(out, addr); break;
-                case "ETH": blockscout(out, "https://eth.blockscout.com", "ETH", "Ethereum", addr, 18, "https://etherscan.io/tx/"); break;
-                case "BNB": blockscout(out, "https://bsc.blockscout.com", "BNB", "BNB Chain", addr, 18, "https://bscscan.com/tx/"); break;
-                case "POL": blockscout(out, "https://polygon.blockscout.com", "POL", "Polygon", addr, 18, "https://polygonscan.com/tx/"); break;
-                case "BASE": blockscout(out, "https://base.blockscout.com", "BASE", "Base", addr, 18, "https://basescan.org/tx/"); break;
+                case "ETH": evmList(out, "ETH", addr); break;
+                case "BNB": evmList(out, "BNB", addr); break;
+                case "POL": evmList(out, "POL", addr); break;
+                case "BASE": evmList(out, "BASE", addr); break;
                 case "TRX": tron(out, addr); break;
                 case "SOL": solana(out, addr); break;
                 default: break;
             }
+            remembered(c, key, out);
         } catch (Exception ignored) { }
         return out;
     }
@@ -95,13 +96,13 @@ public final class ChainHistory {
         if (key == null || hash == null || hash.isEmpty()) return null;
         try {
             switch (key) {
-                case "BTC": return mempoolTx("https://mempool.space", "BTC", "Bitcoin", hash);
-                case "LTC": return mempoolTx("https://litecoinspace.org", "LTC", "Litecoin", hash);
+                case "BTC": return mempoolTx(Net.btcApi(), "BTC", Net.label("Bitcoin"), hash);
+                case "LTC": return mempoolTx(Net.ltcApi(), "LTC", Net.label("Litecoin"), hash);
                 case "DOGE": return dogeTx(hash);
-                case "ETH": return scoutTx("https://eth.blockscout.com", "ETH", "Ethereum", hash, 18, "https://etherscan.io/tx/" + hash);
-                case "BNB": return scoutTx("https://bsc.blockscout.com", "BNB", "BNB Chain", hash, 18, "https://bscscan.com/tx/" + hash);
-                case "POL": return scoutTx("https://polygon.blockscout.com", "POL", "Polygon", hash, 18, "https://polygonscan.com/tx/" + hash);
-                case "BASE": return scoutTx("https://base.blockscout.com", "BASE", "Base", hash, 18, "https://basescan.org/tx/" + hash);
+                case "ETH":
+                case "BNB":
+                case "POL":
+                case "BASE": return evmDetail(key, hash);
                 case "TRX": return tronTx(hash);
                 case "SOL": return solTx(hash);
                 case "PI": return piTx(hash);
@@ -141,7 +142,7 @@ public final class ChainHistory {
                 long ts = st != null && st.has("block_time") ? st.optLong("block_time") * 1000L : System.currentTimeMillis();
                 String txid = tx.optString("txid");
                 HashMap<String, Object> m = row(ticker, network, in, in ? other : address, in ? address : firstOut,
-                        BigDecimal.valueOf(Math.abs(net)).movePointLeft(8).doubleValue(), ts, txid, base + "/tx/" + txid);
+                        BigDecimal.valueOf(Math.abs(net)).movePointLeft(8).doubleValue(), ts, txid, txPage(ticker, txid));
                 m.put("status", confirmed ? "confirmed" : "pending");
                 m.put("harvFee", BigDecimal.valueOf(tx.optLong("fee")).movePointLeft(8).doubleValue());
                 if (st != null) m.put("blockNumber", st.optLong("block_height"));
@@ -150,6 +151,117 @@ public final class ChainHistory {
         } catch (Exception ignored) { }
     }
 
+    private static String txPage(String ticker, String hash) {
+        return "LTC".equals(ticker) ? Net.ltcPage("tx", hash) : Net.btcPage("tx", hash);
+    }
+
+    private static void evmList(List<HashMap<String, Object>> out, String key, String address) {
+        Net.Evm n = Net.evm(key);
+        if (n.scout == null || n.scout.isEmpty()) return;
+        blockscout(out, n.scout, key, n.name, address, 18, n.txPage);
+    }
+
+    private static HashMap<String, Object> evmDetail(String key, String hash) throws Exception {
+        Net.Evm n = Net.evm(key);
+        if (n.scout != null && !n.scout.isEmpty()) {
+            try { return scoutTx(n.scout, key, n.name, hash, 18, n.txPage + hash); }
+            catch (Exception ignored) { }
+        }
+        return evmRpc(n, key, hash);
+    }
+
+    private static HashMap<String, Object> evmRpc(Net.Evm n, String key, String hash) throws Exception {
+        JSONObject tx = post(n.rpc, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"eth_getTransactionByHash\",\"params\":[\"" + hash + "\"]}");
+        JSONObject body = tx.optJSONObject("result");
+        if (body == null) return null;
+        JSONObject receipt = post(n.rpc, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"eth_getTransactionReceipt\",\"params\":[\"" + hash + "\"]}").optJSONObject("result");
+        String from = body.optString("from");
+        String to = body.optString("to");
+        long block = hexLong(body.optString("blockNumber"));
+        long tip = hexLong(post(n.rpc, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"eth_blockNumber\",\"params\":[]}").optString("result"));
+        long time = System.currentTimeMillis();
+        if (block > 0) {
+            JSONObject blk = post(n.rpc, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"eth_getBlockByNumber\",\"params\":[\"0x" + Long.toHexString(block) + "\",false]}").optJSONObject("result");
+            if (blk != null) time = hexLong(blk.optString("timestamp")) * 1000L;
+        }
+        boolean ok = receipt == null || !"0x0".equals(receipt.optString("status"));
+        long gasUsed = receipt == null ? hexLong(body.optString("gas")) : hexLong(receipt.optString("gasUsed"));
+        HashMap<String, Object> m = row(key, n.name, false, from, to, shift(body.optString("value"), 18), time, hash, n.txPage + hash);
+        m.put("status", body.optString("blockNumber").isEmpty() ? "pending" : (ok ? "confirmed" : "failed"));
+        m.put("harvFee", shift(new java.math.BigInteger(Long.toString(hexLong(body.optString("gasPrice")))).multiply(java.math.BigInteger.valueOf(gasUsed)).toString(), 18));
+        m.put("blockNumber", block);
+        m.put("nonce", hexLong(body.optString("nonce")));
+        if (block > 0 && tip >= block) m.put("confirmations", tip - block + 1);
+        return m;
+    }
+
+    private static long hexLong(String hex) {
+        if (hex == null || hex.isEmpty()) return 0;
+        String s = hex.startsWith("0x") || hex.startsWith("0X") ? hex.substring(2) : hex;
+        if (s.isEmpty()) return 0;
+        try { return new java.math.BigInteger(s, 16).longValue(); } catch (Exception e) { return 0; }
+    }
+
+    /** A payment this phone already broadcast, so it shows even before an explorer lists it. */
+    public static void remember(android.content.Context c, String key, String hash, String from, String to, String amount) {
+        if (c == null || key == null || hash == null || hash.isEmpty()) return;
+        android.content.SharedPreferences p = c.getSharedPreferences("chain_sent", android.content.Context.MODE_PRIVATE);
+        String prior = p.getString("rows", "");
+        String line = key + "\t" + hash + "\t" + (from == null ? "" : from) + "\t" + (to == null ? "" : to) + "\t" + (amount == null ? "0" : amount) + "\t" + System.currentTimeMillis();
+        StringBuilder next = new StringBuilder(line);
+        int kept = 0;
+        for (String old : prior.split("\n")) {
+            if (old.isEmpty() || old.contains("\t" + hash + "\t")) continue;
+            next.append('\n').append(old);
+            if (++kept >= 30) break;
+        }
+        p.edit().putString("rows", next.toString()).apply();
+    }
+
+    private static void remembered(android.content.Context c, String key, List<HashMap<String, Object>> out) {
+        if (c == null) return;
+        String prior = c.getSharedPreferences("chain_sent", android.content.Context.MODE_PRIVATE).getString("rows", "");
+        if (prior == null || prior.isEmpty()) return;
+        for (String line : prior.split("\n")) {
+            String[] p = line.split("\t", -1);
+            if (p.length < 6 || !key.equals(p[0])) continue;
+            boolean seen = false;
+            for (HashMap<String, Object> row : out) if (p[1].equals(String.valueOf(row.get("txHash")))) seen = true;
+            if (seen) continue;
+            double amt = parse(p[4]);
+            HashMap<String, Object> m = row(key, netName(key), false, p[2], p[3], amt, parseLong(p[5]), p[1], pageFor(key, p[1]));
+            m.put("status", "pending");
+            out.add(0, m);
+        }
+    }
+
+    private static String netName(String key) {
+        switch (key) {
+            case "BTC": return Net.label("Bitcoin");
+            case "LTC": return Net.label("Litecoin");
+            case "DOGE": return Net.label("Dogecoin");
+            case "TRX": return Net.TEST ? "Tron Nile" : "Tron";
+            case "SOL": return Net.TEST ? "Solana devnet" : "Solana";
+            case "PI": return Net.label("Pi Network");
+            default: return Net.evm(key).name;
+        }
+    }
+
+    private static String pageFor(String key, String hash) {
+        switch (key) {
+            case "BTC": return Net.btcPage("tx", hash);
+            case "LTC": return Net.ltcPage("tx", hash);
+            case "DOGE": return Net.dogeTxPage(hash);
+            case "TRX": return Net.tronTxPage(hash);
+            case "SOL": return Net.solTxPage(hash);
+            case "PI": return Net.piTxPage(hash);
+            default: return Net.evm(key).txPage + hash;
+        }
+    }
+
+    private static long parseLong(String s) {
+        try { return Long.parseLong(s); } catch (Exception e) { return System.currentTimeMillis(); }
+    }
     private static HashMap<String, Object> mempoolTx(String base, String ticker, String network, String hash) throws Exception {
         JSONObject tx = get(base + "/api/tx/" + hash);
         long tip = 0;
@@ -165,7 +277,7 @@ public final class ChainHistory {
         if (vout != null && vout.length() > 0) amount = vout.getJSONObject(0).optLong("value") / 1e8;
         HashMap<String, Object> m = row(ticker, network, false, from, to, amount,
                 st != null && st.has("block_time") ? st.optLong("block_time") * 1000L : System.currentTimeMillis(),
-                hash, base + "/tx/" + hash);
+                hash, txPage(ticker, hash));
         m.put("status", confirmed ? "confirmed" : "pending");
         m.put("harvFee", tx.optLong("fee") / 1e8);
         m.put("blockNumber", height);
@@ -182,6 +294,7 @@ public final class ChainHistory {
     }
 
     private static void doge(List<HashMap<String, Object>> out, String address) {
+        if (Net.TEST) { dogeTest(out, address); return; }
         try {
             JSONObject j = get("https://api.blockcypher.com/v1/doge/main/addrs/" + address + "?limit=20");
             JSONArray refs = j.optJSONArray("txrefs");
@@ -214,7 +327,41 @@ public final class ChainHistory {
         } catch (Exception ignored) { }
     }
 
+    private static void dogeTest(List<HashMap<String, Object>> out, String address) {
+        try {
+            JSONObject j = get(Net.dogeTxs(address));
+            JSONArray txs = j.optJSONObject("data") == null ? null : j.getJSONObject("data").optJSONArray("transactions");
+            if (txs == null) return;
+            for (int i = 0; i < txs.length(); i++) {
+                JSONObject tx = txs.getJSONObject(i);
+                double change = parse(tx.optString("balance_change"));
+                boolean in = change >= 0;
+                String hash = tx.optString("hash");
+                HashMap<String, Object> m = row("DOGE", Net.label("Dogecoin"), in, in ? "" : address, in ? address : "",
+                        Math.abs(change), tx.optLong("time") * 1000L, hash, Net.dogeTxPage(hash));
+                m.put("status", tx.optLong("block") > 0 ? "confirmed" : "pending");
+                m.put("blockNumber", tx.optLong("block"));
+                out.add(m);
+            }
+        } catch (Exception ignored) { }
+    }
+
     private static HashMap<String, Object> dogeTx(String hash) throws Exception {
+        if (Net.TEST) {
+            JSONObject tx = get(Net.dogeTx(hash)).getJSONObject("data");
+            String from = soAddr(tx.optJSONArray("inputs"));
+            String to = soAddr(tx.optJSONArray("outputs"));
+            double value = 0;
+            JSONArray outs = tx.optJSONArray("outputs");
+            if (outs != null && outs.length() > 0) value = parse(outs.getJSONObject(0).optString("value"));
+            HashMap<String, Object> m = row("DOGE", Net.label("Dogecoin"), false, from, to, value,
+                    tx.optLong("time") * 1000L, hash, Net.dogeTxPage(hash));
+            m.put("status", tx.optLong("confirmations") > 0 ? "confirmed" : "pending");
+            m.put("confirmations", tx.optLong("confirmations"));
+            m.put("blockNumber", tx.optLong("block_height"));
+            m.put("harvFee", parse(tx.optString("fee")));
+            return m;
+        }
         JSONObject tx = get("https://api.blockcypher.com/v1/doge/main/txs/" + hash);
         String from = addrOf(tx.optJSONArray("inputs"));
         String to = addrOf(tx.optJSONArray("outputs"));
@@ -228,6 +375,12 @@ public final class ChainHistory {
         m.put("blockNumber", tx.optLong("block_height"));
         m.put("harvFee", tx.optLong("fees") / 1e8);
         return m;
+    }
+
+    private static String soAddr(JSONArray arr) {
+        if (arr == null || arr.length() == 0) return "";
+        JSONObject o = arr.optJSONObject(0);
+        return o == null ? "" : o.optString("address");
     }
 
     private static String addrOf(JSONArray arr) {
@@ -274,7 +427,7 @@ public final class ChainHistory {
 
     private static void tron(List<HashMap<String, Object>> out, String address) {
         try {
-            JSONObject j = get("https://apilist.tronscanapi.com/api/transaction?sort=-timestamp&limit=20&start=0&address=" + address);
+            JSONObject j = get(Net.tronScan() + "/api/transaction?sort=-timestamp&limit=20&start=0&address=" + address);
             JSONArray data = j.optJSONArray("data");
             if (data == null) return;
             for (int i = 0; i < data.length(); i++) {
@@ -285,7 +438,7 @@ public final class ChainHistory {
                 boolean in = address.equals(to);
                 String hash = tx.optString("hash");
                 HashMap<String, Object> m = row("TRX", "Tron", in, from, to, shift(tx.optString("amount", "0"), 6),
-                        tx.optLong("timestamp"), hash, "https://tronscan.org/#/transaction/" + hash);
+                        tx.optLong("timestamp"), hash, Net.tronTxPage(hash));
                 boolean ok = "SUCCESS".equalsIgnoreCase(tx.optString("contractRet")) || tx.optBoolean("confirmed");
                 m.put("status", ok ? "confirmed" : "pending");
                 m.put("blockNumber", tx.optLong("block"));
@@ -296,12 +449,12 @@ public final class ChainHistory {
     }
 
     private static HashMap<String, Object> tronTx(String hash) throws Exception {
-        JSONObject tx = get("https://apilist.tronscanapi.com/api/transaction-info?hash=" + hash);
+        JSONObject tx = get(Net.tronScan() + "/api/transaction-info?hash=" + hash);
         String from = tx.optString("ownerAddress");
         String to = tx.optString("toAddress");
         HashMap<String, Object> m = row("TRX", "Tron", false, from, to, shift(tx.optString("contractData", ""), 6) == 0
                         ? shift(String.valueOf(tx.optLong("amount")), 6) : shift(tx.optString("amount", "0"), 6),
-                tx.optLong("timestamp"), hash, "https://tronscan.org/#/transaction/" + hash);
+                tx.optLong("timestamp"), hash, Net.tronTxPage(hash));
         JSONObject data = tx.optJSONObject("contractData");
         if (data != null) {
             if (from.isEmpty()) m.put("senderAddress", data.optString("owner_address"));
@@ -318,7 +471,7 @@ public final class ChainHistory {
 
     private static void solana(List<HashMap<String, Object>> out, String address) {
         try {
-            JSONObject sigs = post("https://api.mainnet-beta.solana.com",
+            JSONObject sigs = post(Net.solRpc(),
                     "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getSignaturesForAddress\",\"params\":[\"" + address + "\",{\"limit\":8}]}");
             JSONArray arr = sigs.optJSONArray("result");
             if (arr == null) return;
@@ -336,7 +489,7 @@ public final class ChainHistory {
 
     private static HashMap<String, Object> solParsed(String sig, String mine) {
         try {
-            JSONObject r = post("https://api.mainnet-beta.solana.com",
+            JSONObject r = post(Net.solRpc(),
                     "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getTransaction\",\"params\":[\"" + sig + "\",{\"encoding\":\"jsonParsed\",\"maxSupportedTransactionVersion\":0}]}");
             JSONObject tx = r.optJSONObject("result");
             if (tx == null) return null;
@@ -362,7 +515,7 @@ public final class ChainHistory {
             String from = in ? other : (me >= 0 ? pubkey(keys, me) : pubkey(keys, 0));
             String to = in ? (me >= 0 ? pubkey(keys, me) : mine) : other;
             HashMap<String, Object> m = row("SOL", "Solana", in, from, to, moved / 1e9,
-                    tx.optLong("blockTime") * 1000L, sig, "https://solscan.io/tx/" + sig);
+                    tx.optLong("blockTime") * 1000L, sig, Net.solTxPage(sig));
             boolean failed = meta != null && meta.has("err") && !meta.isNull("err");
             m.put("status", failed ? "failed" : (tx.optLong("blockTime") > 0 ? "confirmed" : "pending"));
             m.put("harvFee", fee / 1e9);
@@ -388,10 +541,10 @@ public final class ChainHistory {
     }
 
     private static HashMap<String, Object> piTx(String hash) throws Exception {
-        JSONObject tx = get("https://api.mainnet.minepi.com/transactions/" + hash);
+        JSONObject tx = get(Net.piHorizon() + "/transactions/" + hash);
         boolean ok = tx.optBoolean("successful", true);
         HashMap<String, Object> m = row("PI", "Pi Network", false, tx.optString("source_account"), "",
-                0, iso(tx.optString("created_at")), hash, "https://blockexplorer.minepi.com/mainnet/transactions/" + hash);
+                0, iso(tx.optString("created_at")), hash, Net.piTxPage(hash));
         m.put("status", ok ? "confirmed" : "failed");
         m.put("harvFee", shift(tx.optString("fee_charged", "0"), 7));
         m.put("blockNumber", tx.optLong("ledger"));

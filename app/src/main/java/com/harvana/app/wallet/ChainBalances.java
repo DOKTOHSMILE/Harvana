@@ -32,21 +32,18 @@ public final class ChainBalances {
     public static String describe(ChainKeys.Chain chain, String address) {
         try {
             switch (chain) {
-                case BTC: return mempool("https://mempool.space/api/address/", address, "BTC");
-                case LTC: return mempool("https://litecoinspace.org/api/address/", address, "LTC");
-                case DOGE: {
-                    JSONObject j = get("https://api.blockcypher.com/v1/doge/main/addrs/" + address + "/balance");
-                    return amount(BigInteger.valueOf(j.optLong("final_balance")), 8) + " DOGE";
-                }
+                case BTC: return mempool(Net.btcApi() + "/api/address/", address, "BTC");
+                case LTC: return mempool(Net.ltcApi() + "/api/address/", address, "LTC");
+                case DOGE: return doge(address);
                 case ETH: {
-                    String eth = amount(evmBalance("https://ethereum-rpc.publicnode.com", address), 18);
-                    String bnb = amount(evmBalance("https://bsc-rpc.publicnode.com", address), 18);
-                    String pol = amount(evmBalance("https://polygon-bor-rpc.publicnode.com", address), 18);
-                    String base = amount(evmBalance("https://base-rpc.publicnode.com", address), 18);
+                    String eth = amount(evmBalance(Net.evm("ETH").rpc, address), 18);
+                    String bnb = amount(evmBalance(Net.evm("BNB").rpc, address), 18);
+                    String pol = amount(evmBalance(Net.evm("POL").rpc, address), 18);
+                    String base = amount(evmBalance(Net.evm("BASE").rpc, address), 18);
                     return eth + " ETH · " + bnb + " BNB · " + pol + " POL · " + base + " ETH on Base";
                 }
                 case TRX: {
-                    JSONObject j = get("https://api.trongrid.io/v1/accounts/" + address);
+                    JSONObject j = get(Net.tronApi() + "/v1/accounts/" + address);
                     JSONArray data = j.optJSONArray("data");
                     if (data == null || data.length() == 0) return "0 TRX";
                     JSONObject acct = data.getJSONObject(0);
@@ -59,7 +56,7 @@ public final class ChainBalances {
                     return trx;
                 }
                 case SOL: {
-                    JSONObject r = post("https://api.mainnet-beta.solana.com",
+                    JSONObject r = post(Net.solRpc(),
                             "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getBalance\",\"params\":[\"" + address + "\"]}");
                     return amount(BigInteger.valueOf(r.getJSONObject("result").optLong("value")), 9) + " SOL";
                 }
@@ -75,24 +72,21 @@ public final class ChainBalances {
         if (key == null || address == null || address.isEmpty()) return "Balance unavailable";
         try {
             switch (key) {
-                case "BTC": return mempool("https://mempool.space/api/address/", address, "BTC");
-                case "LTC": return mempool("https://litecoinspace.org/api/address/", address, "LTC");
-                case "DOGE": {
-                    JSONObject j = get("https://api.blockcypher.com/v1/doge/main/addrs/" + address + "/balance");
-                    return amount(BigInteger.valueOf(j.optLong("final_balance")), 8) + " DOGE";
-                }
-                case "ETH": return amount(evmBalance("https://ethereum-rpc.publicnode.com", address), 18) + " ETH";
-                case "BNB": return amount(evmBalance("https://bsc-rpc.publicnode.com", address), 18) + " BNB";
-                case "POL": return amount(evmBalance("https://polygon-bor-rpc.publicnode.com", address), 18) + " POL";
-                case "BASE": return amount(evmBalance("https://base-rpc.publicnode.com", address), 18) + " ETH";
+                case "BTC": return mempool(Net.btcApi() + "/api/address/", address, "BTC");
+                case "LTC": return mempool(Net.ltcApi() + "/api/address/", address, "LTC");
+                case "DOGE": return doge(address);
+                case "ETH": return amount(evmBalance(Net.evm("ETH").rpc, address), 18) + " ETH";
+                case "BNB": return amount(evmBalance(Net.evm("BNB").rpc, address), 18) + " BNB";
+                case "POL": return amount(evmBalance(Net.evm("POL").rpc, address), 18) + " POL";
+                case "BASE": return amount(evmBalance(Net.evm("BASE").rpc, address), 18) + " ETH";
                 case "TRX": {
-                    JSONObject j = get("https://api.trongrid.io/v1/accounts/" + address);
+                    JSONObject j = get(Net.tronApi() + "/v1/accounts/" + address);
                     JSONArray data = j.optJSONArray("data");
                     if (data == null || data.length() == 0) return "0 TRX";
                     return amount(BigInteger.valueOf(data.getJSONObject(0).optLong("balance")), 6) + " TRX";
                 }
                 case "SOL": {
-                    JSONObject r = post("https://api.mainnet-beta.solana.com",
+                    JSONObject r = post(Net.solRpc(),
                             "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getBalance\",\"params\":[\"" + address + "\"]}");
                     return amount(BigInteger.valueOf(r.getJSONObject("result").optLong("value")), 9) + " SOL";
                 }
@@ -107,7 +101,7 @@ public final class ChainBalances {
     /** The Pi balance (native), or "Not active yet" for an account the Pi network has not created. */
     public static String pi(String address) {
         try {
-            Request req = new Request.Builder().url("https://api.mainnet.minepi.com/accounts/" + address).build();
+            Request req = new Request.Builder().url(PiClient.HORIZON + "/accounts/" + address).build();
             try (Response r = HTTP.newCall(req).execute()) {
                 if (r.code() == 404) return "Not active yet";
                 JSONObject j = new JSONObject(r.body() == null ? "{}" : r.body().string());
@@ -121,6 +115,17 @@ public final class ChainBalances {
         } catch (Exception e) {
             return "Balance unavailable";
         }
+    }
+
+    private static String doge(String address) throws Exception {
+        if (!Net.TEST) {
+            JSONObject j = get("https://api.blockcypher.com/v1/doge/main/addrs/" + address + "/balance");
+            return amount(BigInteger.valueOf(j.optLong("final_balance")), 8) + " DOGE";
+        }
+        JSONObject j = get(Net.dogeBalance(address));
+        JSONObject data = j.optJSONObject("data");
+        String confirmed = data == null ? "0" : data.optString("confirmed", "0");
+        return trim(confirmed) + " DOGE";
     }
 
     private static String mempool(String base, String address, String unit) throws Exception {

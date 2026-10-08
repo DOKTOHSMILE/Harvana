@@ -65,7 +65,7 @@ public final class PiTx {
         byte[] txBytes = txb.toByteArray();
 
         MessageDigest sha = MessageDigest.getInstance("SHA-256");
-        byte[] networkId = sha.digest(NETWORK_PASSPHRASE.getBytes(StandardCharsets.UTF_8));
+        byte[] networkId = sha.digest(Net.piPassphrase().getBytes(StandardCharsets.UTF_8));
         ByteArrayOutputStream payload = new ByteArrayOutputStream();
         payload.write(networkId);
         payload.write(new byte[]{0, 0, 0, 2});            // ENVELOPE_TYPE_TX

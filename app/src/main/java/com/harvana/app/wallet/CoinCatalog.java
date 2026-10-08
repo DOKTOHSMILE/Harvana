@@ -29,16 +29,16 @@ public final class CoinCatalog {
         String pattern;
         switch (coin.key) {
             case "HARV": pattern = HARV_EXPLORER; break;
-            case "PI": pattern = "https://blockexplorer.minepi.com/mainnet/accounts/{address}"; break;
-            case "BTC": pattern = "https://mempool.space/address/{address}"; break;
-            case "LTC": pattern = "https://litecoinspace.org/address/{address}"; break;
-            case "DOGE": pattern = "https://blockchair.com/dogecoin/address/{address}"; break;
-            case "ETH": pattern = "https://etherscan.io/address/{address}"; break;
-            case "BNB": pattern = "https://bscscan.com/address/{address}"; break;
-            case "POL": pattern = "https://polygonscan.com/address/{address}"; break;
-            case "BASE": pattern = "https://basescan.org/address/{address}"; break;
-            case "TRX": pattern = "https://tronscan.org/#/address/{address}"; break;
-            case "SOL": pattern = "https://solscan.io/account/{address}"; break;
+            case "PI": pattern = Net.piAddressPage("{address}"); break;
+            case "BTC": pattern = Net.btcPage("address", "{address}"); break;
+            case "LTC": pattern = Net.ltcPage("address", "{address}"); break;
+            case "DOGE": pattern = Net.dogeAddressPage("{address}"); break;
+            case "ETH": pattern = Net.evm("ETH").addressPage + "{address}"; break;
+            case "BNB": pattern = Net.evm("BNB").addressPage + "{address}"; break;
+            case "POL": pattern = Net.evm("POL").addressPage + "{address}"; break;
+            case "BASE": pattern = Net.evm("BASE").addressPage + "{address}"; break;
+            case "TRX": pattern = Net.tronAddressPage("{address}"); break;
+            case "SOL": pattern = Net.solAddressPage("{address}"); break;
             default: pattern = "";
         }
         if (pattern == null || pattern.trim().isEmpty() || a.isEmpty()) return "";
@@ -67,34 +67,34 @@ public final class CoinCatalog {
         a.add(new Coin("HARV", "Harvana", "HARV", "Harvana Protocol", "Native coin",
                 "The coin this app settles in. Groups, staking and transfers on Harvana use HARV.",
                 R.drawable.ic_coin_harv, 8, null, null, true));
-        a.add(new Coin("PI", "Pi Network", "PI", "Pi Network", "Stellar-style account",
+        a.add(new Coin("PI", "Pi Network", "PI", Net.label("Pi Network"), "Stellar-style account",
                 "Opened by the same recovery phrase. Pi only becomes active after the Pi network creates the account.",
                 R.drawable.ic_coin_pi, 7, null, null, false));
-        a.add(new Coin("BTC", "Bitcoin", "BTC", "Bitcoin", "Native SegWit (BIP-84)",
+        a.add(new Coin("BTC", "Bitcoin", "BTC", Net.label("Bitcoin"), "Native SegWit (BIP-84)",
                 "Your Bitcoin address from this recovery phrase. The same words open it in other Bitcoin wallets.",
                 R.drawable.ic_coin_btc, 8, ChainKeys.Chain.BTC, null, false));
-        a.add(new Coin("LTC", "Litecoin", "LTC", "Litecoin", "Native SegWit (BIP-84)",
+        a.add(new Coin("LTC", "Litecoin", "LTC", Net.label("Litecoin"), "Native SegWit (BIP-84)",
                 "Your Litecoin address from this recovery phrase.",
                 R.drawable.ic_coin_ltc, 8, ChainKeys.Chain.LTC, null, false));
-        a.add(new Coin("DOGE", "Dogecoin", "DOGE", "Dogecoin", "Legacy address (BIP-44)",
+        a.add(new Coin("DOGE", "Dogecoin", "DOGE", Net.label("Dogecoin"), "Legacy address (BIP-44)",
                 "Your Dogecoin address from this recovery phrase.",
                 R.drawable.ic_coin_doge, 8, ChainKeys.Chain.DOGE, null, false));
-        a.add(new Coin("ETH", "Ethereum", "ETH", "Ethereum", "EVM address (BIP-44)",
+        a.add(new Coin("ETH", "Ethereum", "ETH", Net.evm("ETH").name, "EVM address (BIP-44)",
                 "Your Ethereum address. The same address is also used on other EVM chains, listed separately.",
                 R.drawable.ic_coin_eth, 18, ChainKeys.Chain.ETH, "eth", false));
-        a.add(new Coin("BNB", "BNB Chain", "BNB", "BNB Smart Chain", "EVM address (same as Ethereum)",
+        a.add(new Coin("BNB", "BNB Chain", "BNB", Net.evm("BNB").name, "EVM address (same as Ethereum)",
                 "BNB on BNB Smart Chain. It uses the same address as your Ethereum wallet.",
                 R.drawable.ic_coin_bnb, 18, ChainKeys.Chain.ETH, "bnb", false));
-        a.add(new Coin("POL", "Polygon", "POL", "Polygon", "EVM address (same as Ethereum)",
+        a.add(new Coin("POL", "Polygon", "POL", Net.evm("POL").name, "EVM address (same as Ethereum)",
                 "POL on Polygon. It uses the same address as your Ethereum wallet.",
                 R.drawable.ic_coin_pol, 18, ChainKeys.Chain.ETH, "pol", false));
-        a.add(new Coin("BASE", "Ethereum on Base", "ETH", "Base", "EVM address (same as Ethereum)",
+        a.add(new Coin("BASE", "Ethereum on Base", "ETH", Net.evm("BASE").name, "EVM address (same as Ethereum)",
                 "ETH on the Base network. It uses the same address as your Ethereum wallet, but the balance is separate.",
                 R.drawable.ic_coin_base, 18, ChainKeys.Chain.ETH, "base", false));
-        a.add(new Coin("TRX", "Tron", "TRX", "Tron", "TRON address (BIP-44)",
+        a.add(new Coin("TRX", "Tron", "TRX", Net.TEST ? "Tron Nile" : "Tron", "TRON address (BIP-44)",
                 "Your Tron address from this recovery phrase.",
                 R.drawable.ic_coin_trx, 6, ChainKeys.Chain.TRX, null, false));
-        a.add(new Coin("SOL", "Solana", "SOL", "Solana", "Ed25519 (SLIP-0010)",
+        a.add(new Coin("SOL", "Solana", "SOL", Net.TEST ? "Solana devnet" : "Solana", "Ed25519 (SLIP-0010)",
                 "Your Solana address from this recovery phrase. The same words open it in Phantom and other Solana wallets.",
                 R.drawable.ic_coin_sol, 9, ChainKeys.Chain.SOL, null, false));
         ALL = Collections.unmodifiableList(a);

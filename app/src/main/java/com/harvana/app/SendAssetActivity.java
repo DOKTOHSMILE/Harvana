@@ -626,7 +626,8 @@ public class SendAssetActivity extends AppCompatActivity {
 				String err = null;
 				try {
 					String phrase = com.harvana.app.wallet.SecureWalletStorage.getActiveMnemonic(getApplicationContext());
-					com.harvana.app.wallet.ChainSend.send(assetKey, phrase, from, recipient, amountText);
+					String hash = com.harvana.app.wallet.ChainSend.send(assetKey, phrase, from, recipient, amountText);
+					com.harvana.app.wallet.ChainHistory.remember(getApplicationContext(), assetKey, hash, from, recipient, amountText);
 				} catch (Exception e) {
 					err = e.getMessage() == null ? "The network rejected the payment." : e.getMessage();
 				}

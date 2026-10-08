@@ -32,13 +32,13 @@ public final class ChainSend {
         if (to == null || from == null || to.trim().equalsIgnoreCase(from.trim())) throw new IllegalArgumentException("That is your own address.");
         to = to.trim();
         switch (key) {
-            case "ETH": return evm(mnemonic, from, to, amount, "https://ethereum-rpc.publicnode.com", 1, 18);
-            case "BNB": return evm(mnemonic, from, to, amount, "https://bsc-rpc.publicnode.com", 56, 18);
-            case "POL": return evm(mnemonic, from, to, amount, "https://polygon-bor-rpc.publicnode.com", 137, 18);
-            case "BASE": return evm(mnemonic, from, to, amount, "https://base-rpc.publicnode.com", 8453, 18);
-            case "BTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.BTC, "https://mempool.space", true);
-            case "LTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.LTC, "https://litecoinspace.org", true);
-            case "DOGE": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.DOGE, "https://api.blockcypher.com/v1/doge/main", false);
+            case "ETH": { Net.Evm n = Net.evm("ETH"); return evm(mnemonic, from, to, amount, n.rpc, n.chainId, 18); }
+            case "BNB": { Net.Evm n = Net.evm("BNB"); return evm(mnemonic, from, to, amount, n.rpc, n.chainId, 18); }
+            case "POL": { Net.Evm n = Net.evm("POL"); return evm(mnemonic, from, to, amount, n.rpc, n.chainId, 18); }
+            case "BASE": { Net.Evm n = Net.evm("BASE"); return evm(mnemonic, from, to, amount, n.rpc, n.chainId, 18); }
+            case "BTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.BTC, Net.btcApi(), true);
+            case "LTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.LTC, Net.ltcApi(), true);
+            case "DOGE": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.DOGE, Net.TEST ? "" : "https://api.blockcypher.com/v1/doge/main", false);
             case "TRX": return tron(mnemonic, from, to, amount);
             case "SOL": return sol(mnemonic, from, to, amount);
             default: throw new IllegalArgumentException("Sending " + key + " from Harvana is not switched on.");
@@ -135,6 +135,14 @@ public final class ChainSend {
             raw = segwit ? BtcTx.p2wpkh(priv, ins, outs) : BtcTx.p2pkh(priv, ins, outs);
         }
         if (segwit) return postText(api + "/api/tx", raw);
+        if (Net.TEST) {
+            JSONObject pushed = post(Net.dogeRpc(), "{\"jsonrpc\":\"1.0\",\"id\":1,\"method\":\"sendrawtransaction\",\"params\":[\"" + raw + "\"]}");
+            if (pushed.has("error")) {
+                JSONObject e = pushed.optJSONObject("error");
+                throw new IllegalArgumentException(e == null ? "Dogecoin rejected the payment." : e.optString("message", "Dogecoin rejected the payment."));
+            }
+            return pushed.getString("result");
+        }
         JSONObject pushed = post(api + "/txs/push", "{\"tx\":\"" + raw + "\"}");
         JSONObject tx = pushed.optJSONObject("tx");
         String hash = tx == null ? pushed.optString("hash", "") : tx.optString("hash", "");
@@ -143,9 +151,24 @@ public final class ChainSend {
     }
 
     private static JSONArray dogeUtxos(String address) throws Exception {
-        JSONObject j = get("https://api.blockcypher.com/v1/doge/main/addrs/" + address + "?unspentOnly=true&limit=50");
-        JSONArray refs = j.optJSONArray("txrefs");
-        return refs == null ? new JSONArray() : refs;
+        if (!Net.TEST) {
+            JSONObject j = get("https://api.blockcypher.com/v1/doge/main/addrs/" + address + "?unspentOnly=true&limit=50");
+            JSONArray refs = j.optJSONArray("txrefs");
+            return refs == null ? new JSONArray() : refs;
+        }
+        JSONObject j = get(Net.dogeUtxo(address));
+        JSONArray outputs = j.optJSONObject("data") == null ? null : j.getJSONObject("data").optJSONArray("outputs");
+        JSONArray refs = new JSONArray();
+        if (outputs == null) return refs;
+        for (int i = 0; i < outputs.length(); i++) {
+            JSONObject o = outputs.getJSONObject(i);
+            JSONObject r = new JSONObject();
+            r.put("tx_hash", o.optString("hash"));
+            r.put("tx_output_n", o.optInt("index"));
+            r.put("value", new java.math.BigDecimal(o.optString("value", "0")).movePointRight(8).longValue());
+            refs.put(r);
+        }
+        return refs;
     }
 
     private static int feeRate(String api) {
@@ -169,7 +192,7 @@ public final class ChainSend {
         if (!mine.equals(from)) throw new IllegalArgumentException("This phone's key does not match the address on screen. Open the coin again.");
         if (to.length() < 30 || to.charAt(0) != 'T') throw new IllegalArgumentException("Enter a Tron address. It starts with T.");
         long sun = exact(units(amount, 6));
-        JSONObject tx = post("https://api.trongrid.io/wallet/createtransaction",
+        JSONObject tx = post(Net.tronApi() + "/wallet/createtransaction",
                 "{\"owner_address\":\"" + from + "\",\"to_address\":\"" + to + "\",\"amount\":" + sun + ",\"visible\":true}");
         if (!tx.has("txID")) throw new IllegalArgumentException(tx.optString("Error", "Tron could not build the payment."));
         byte[] hash = EvmTx.unhex(tx.getString("txID"));
@@ -180,7 +203,7 @@ public final class ChainSend {
         put32(sig, 32, rs[1]);
         sig[64] = (byte) rec;
         tx.put("signature", new JSONArray().put(EvmTx.hex(sig)));
-        JSONObject out = post("https://api.trongrid.io/wallet/broadcasttransaction", tx.toString());
+        JSONObject out = post(Net.tronApi() + "/wallet/broadcasttransaction", tx.toString());
         if (!out.optBoolean("result", false)) throw new IllegalArgumentException(tronMessage(out));
         return tx.getString("txID");
     }
@@ -195,12 +218,12 @@ public final class ChainSend {
         long have = solBalance(from);
         if (have < lamports + 5000L) throw new IllegalArgumentException("Not enough SOL left to pay the network fee.");
         if (solBalance(to) == 0 && lamports < 890880L) throw new IllegalArgumentException("That Solana account is new. Send at least 0.00089088 SOL so the network can create it.");
-        JSONObject bh = post("https://api.mainnet-beta.solana.com",
+        JSONObject bh = post(Net.solRpc(),
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getLatestBlockhash\",\"params\":[{\"commitment\":\"confirmed\"}]}");
         String block = bh.getJSONObject("result").getJSONObject("value").getString("blockhash");
         byte[] tx = SolTx.transfer(seed, dest, lamports, b58(block));
         String b64 = android.util.Base64.encodeToString(tx, android.util.Base64.NO_WRAP);
-        JSONObject sent = post("https://api.mainnet-beta.solana.com",
+        JSONObject sent = post(Net.solRpc(),
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"sendTransaction\",\"params\":[\"" + b64 + "\",{\"encoding\":\"base64\"}]}");
         if (sent.has("error")) throw new IllegalArgumentException(sent.getJSONObject("error").optString("message", "Solana rejected the payment."));
         return sent.getString("result");
@@ -214,7 +237,7 @@ public final class ChainSend {
     }
 
     private static long solBalance(String address) throws Exception {
-        JSONObject r = post("https://api.mainnet-beta.solana.com",
+        JSONObject r = post(Net.solRpc(),
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getBalance\",\"params\":[\"" + address + "\"]}");
         if (r.has("error")) throw new IllegalArgumentException(r.getJSONObject("error").optString("message", "Solana did not answer."));
         return r.getJSONObject("result").optLong("value");
@@ -249,8 +272,9 @@ public final class ChainSend {
 
     static byte[] scriptFor(String address, ChainKeys.Chain chain) throws Exception {
         String a = address.trim();
-        if (a.regionMatches(true, 0, "bc1", 0, 3) || a.regionMatches(true, 0, "ltc1", 0, 4)) return BtcTx.p2wpkhScript(bech32Program(a.toLowerCase()));
-        int version = chain == ChainKeys.Chain.DOGE ? 0x1e : chain == ChainKeys.Chain.LTC ? 0x30 : 0x00;
+        if (a.regionMatches(true, 0, "bc1", 0, 3) || a.regionMatches(true, 0, "tb1", 0, 3)
+                || a.regionMatches(true, 0, "ltc1", 0, 4) || a.regionMatches(true, 0, "tltc1", 0, 5)) return BtcTx.p2wpkhScript(bech32Program(a.toLowerCase()));
+        int version = chain == ChainKeys.Chain.DOGE ? (Net.TEST ? 0x71 : 0x1e) : chain == ChainKeys.Chain.LTC ? 0x30 : 0x00;
         if (a.charAt(0) == '3' || a.charAt(0) == 'M') throw new IllegalArgumentException("That address type is not supported. Use a normal " + chain.ticker + " address.");
         return BtcTx.p2pkhScript(base58check(a, version));
     }
@@ -268,7 +292,7 @@ public final class ChainSend {
             v[i] = n;
         }
         if (polymod(hrp, v) != 1) throw new IllegalArgumentException("That address is not valid.");
-        if (v[0] != 0) throw new IllegalArgumentException("Only a native SegWit address (bc1 or ltc1) can be paid here.");
+        if (v[0] != 0) throw new IllegalArgumentException("Only a native SegWit address (tb1, bc1, tltc1 or ltc1) can be paid here.");
         int acc = 0, bits = 0, p = 0;
         byte[] out = new byte[40];
         for (int i = 1; i < v.length - 6; i++) {

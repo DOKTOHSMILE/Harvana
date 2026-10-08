@@ -47,9 +47,9 @@ public final class ChainKeys {
     public static String address(String mnemonic, Chain chain) throws Exception {
         byte[] seed = PiKeys.bip39Seed(mnemonic);
         switch (chain) {
-            case BTC: return segwit("bc", pub(derive(seed, new int[]{84 | H, H, H, 0, 0})));
-            case LTC: return segwit("ltc", pub(derive(seed, new int[]{84 | H, 2 | H, H, 0, 0})));
-            case DOGE: return base58Check((byte) 0x1e, hash160(pub(derive(seed, new int[]{44 | H, 3 | H, H, 0, 0}))));
+            case BTC: return segwit(Net.TEST ? "tb" : "bc", pub(derive(seed, btcPath())));
+            case LTC: return segwit(Net.TEST ? "tltc" : "ltc", pub(derive(seed, ltcPath())));
+            case DOGE: return base58Check((byte) (Net.TEST ? 0x71 : 0x1e), hash160(pub(derive(seed, dogePath()))));
             case ETH: return ethAddress(derive(seed, new int[]{44 | H, 60 | H, H, 0, 0}));
             case TRX: return base58Check((byte) 0x41, ethBytes(derive(seed, new int[]{44 | H, 195 | H, H, 0, 0})));
             case SOL: return base58(com.harvana.app.crypto.Ed25519.publicKeyFromSeed(PiKeys.slip10Ed25519(seed, new int[]{44, 501, 0, 0})));
@@ -61,15 +61,19 @@ public final class ChainKeys {
     public static byte[] privateKey(String mnemonic, Chain chain) throws Exception {
         byte[] seed = PiKeys.bip39Seed(mnemonic);
         switch (chain) {
-            case BTC: return derive(seed, new int[]{84 | H, H, H, 0, 0});
-            case LTC: return derive(seed, new int[]{84 | H, 2 | H, H, 0, 0});
-            case DOGE: return derive(seed, new int[]{44 | H, 3 | H, H, 0, 0});
+            case BTC: return derive(seed, btcPath());
+            case LTC: return derive(seed, ltcPath());
+            case DOGE: return derive(seed, dogePath());
             case ETH: return derive(seed, new int[]{44 | H, 60 | H, H, 0, 0});
             case TRX: return derive(seed, new int[]{44 | H, 195 | H, H, 0, 0});
             case SOL: return PiKeys.slip10Ed25519(seed, new int[]{44, 501, 0, 0});
             default: throw new IllegalArgumentException("chain");
         }
     }
+
+    private static int[] btcPath() { return new int[]{84 | H, (Net.TEST ? 1 : 0) | H, H, 0, 0}; }
+    private static int[] ltcPath() { return new int[]{84 | H, (Net.TEST ? 1 : 2) | H, H, 0, 0}; }
+    private static int[] dogePath() { return new int[]{44 | H, (Net.TEST ? 1 : 3) | H, H, 0, 0}; }
 
     // ── BIP-32 on secp256k1 ─────────────────────────────────────────────
 

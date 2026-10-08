@@ -2,6 +2,31 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: the other coins are on testnet
+
+What the app does:
+
+- **Every coin except HARV now uses a test network**, so a payment spends test coins, not real money. HARV stays on Harvana's own node.
+- **Bitcoin, Litecoin and Dogecoin show a new testnet address** (it starts with tb1, tltc1 or n). The old live address is not used. Ethereum, BNB, Polygon, Base, Tron, Solana and Pi keep the same address, but the app talks to the test network.
+- **A payment you send is kept in History** even before the explorer lists it.
+
+What you do: install the build, open each coin, copy the address, and ask that network's public faucet for test coins.
+
+| Coin | Network | Address looks like |
+|---|---|---|
+| Bitcoin | testnet4 | tb1… |
+| Litecoin | testnet | tltc1… |
+| Dogecoin | testnet | n… |
+| Ethereum | Sepolia | 0x… (same as before) |
+| BNB | BNB testnet | 0x… (same as before) |
+| Polygon | Amoy | 0x… (same as before) |
+| Base | Base Sepolia | 0x… (same as before) |
+| Tron | Nile | T… (same as before) |
+| Solana | devnet | the same address |
+| Pi | Pi testnet | G… (same as before) |
+
+Also fixed a build error on the Assets list where a balance refresh used the same name twice.
+
 ## 8 Oct 2026: a receipt reads that coin's explorer
 
 What the app does:

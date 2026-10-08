@@ -26,7 +26,7 @@ public final class ChainWalletStore {
         SharedPreferences.Editor ed = prefs(c).edit();
         boolean changed = false;
         for (ChainKeys.Chain chain : ChainKeys.Chain.values()) {
-            String key = harvAddress + "_" + chain.name();
+            String key = harvAddress + "_" + chain.name() + (Net.TEST ? "_tn" : "");
             String a = prefs(c).getString(key, "");
             if (a.isEmpty()) {
                 if (mnemonic == null) mnemonic = SecureWalletStorage.loadMnemonic(c, harvAddress);
@@ -43,7 +43,7 @@ public final class ChainWalletStore {
     /** The address already saved for this wallet and chain, or "" . Does not derive. */
     public static String saved(Context c, String harvAddress, ChainKeys.Chain chain) {
         if (c == null || harvAddress == null || chain == null) return "";
-        String a = prefs(c).getString(harvAddress + "_" + chain.name(), "");
+        String a = prefs(c).getString(harvAddress + "_" + chain.name() + (Net.TEST ? "_tn" : ""), "");
         return a == null ? "" : a;
     }
 }

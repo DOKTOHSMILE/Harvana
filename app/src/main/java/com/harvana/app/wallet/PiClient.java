@@ -19,7 +19,7 @@ import okhttp3.Response;
 public final class PiClient {
     private PiClient() {}
 
-    public static final String HORIZON = "https://api.mainnet.minepi.com";
+    public static final String HORIZON = Net.piHorizon();
     private static final OkHttpClient HTTP = new OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS).build();
 

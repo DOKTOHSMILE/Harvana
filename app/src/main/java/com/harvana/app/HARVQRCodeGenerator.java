@@ -160,6 +160,17 @@ public class HARVQRCodeGenerator {
 		} catch (Exception e) {
 			Log.w(TAG, "Could not load logo resource: " + e.getMessage());
 		}
+		if (logo == null) {
+			try {
+				android.graphics.drawable.Drawable d = androidx.core.content.ContextCompat.getDrawable(context, logoResId);
+				if (d != null) {
+					logo = Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888);
+					android.graphics.Canvas canvas = new android.graphics.Canvas(logo);
+					d.setBounds(0, 0, 128, 128);
+					d.draw(canvas);
+				}
+			} catch (Exception ignored) {}
+		}
 		return generateQRCode(text, sizePx, logo, false);
 	}
 

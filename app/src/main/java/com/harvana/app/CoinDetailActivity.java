@@ -680,7 +680,8 @@ public class CoinDetailActivity extends AppCompatActivity {
 				new Thread(() -> {
 					Bitmap qr = null;
 					try {
-						qr = HARVQRCodeGenerator.generateQRCodeWithLogo(CoinDetailActivity.this, activeAddress, 512, R.drawable.ic_coin_harv);
+						qr = HARVQRCodeGenerator.generateQRCodeWithLogo(CoinDetailActivity.this,
+								com.harvana.app.scan.WalletQr.payload("HARV", activeAddress), 512, R.drawable.ic_coin_harv);
 					} catch (Exception ignored) {}
 					final Bitmap finalQr = qr;
 					runOnUiThread(() -> {

@@ -74,10 +74,8 @@ public final class QrRouter {
     /** Opens whatever the code is for. */
     public static void route(Activity a, String raw) {
         String t = raw == null ? "" : raw.trim();
+        WalletQr.Hit wallet = WalletQr.parse(t);
         switch (kindOf(t)) {
-            case ADDRESS:
-                a.startActivity(new Intent(a, com.harvana.app.SendAssetActivity.class).putExtra("toAddress", t));
-                return;
             case ACCESS_CARD:
                 a.startActivity(new Intent(a, com.harvana.app.RestoreWalletActivity.class)
                         .putExtra(com.harvana.app.RestoreWalletActivity.EXTRA_SCANNED_CARD, t));
@@ -93,7 +91,14 @@ public final class QrRouter {
             case TRANSACTION:
                 TxVerifySheet.show(a, txHash(t));
                 return;
+            case ADDRESS:
             default:
+                if (wallet != null) {
+                    a.startActivity(new Intent(a, com.harvana.app.SendAssetActivity.class)
+                            .putExtra("toAddress", wallet.address)
+                            .putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, wallet.key));
+                    return;
+                }
                 new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Scanned code")
                         .setMessage(t.isEmpty() ? "The code was empty." : t + "\n\nThis is not a Harvana code.")
                         .setPositiveButton("Copy", (d, w) -> {

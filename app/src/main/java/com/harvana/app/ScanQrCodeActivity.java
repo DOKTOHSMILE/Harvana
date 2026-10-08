@@ -268,7 +268,7 @@ public class ScanQrCodeActivity extends AppCompatActivity {
 		}
 		switch (mode) {
 			case MODE_WALLET_ADDRESS:
-			return com.harvana.app.AddressUtil.isValidAddress(text)
+			return com.harvana.app.scan.WalletQr.parse(text) != null
 			? null : "That doesn't look like a wallet address. Try again.";
 			case MODE_HARVANA_CARD:
 			return text.startsWith(HarvanaCardCrypto.FORMAT_PREFIX)

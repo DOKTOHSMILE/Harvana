@@ -311,7 +311,7 @@ public class ReceiveActivity extends AppCompatActivity {
 		}
 		qrIcon = coin.icon;
 		activeAddress = addr;
-		qrPayload = payUri(coin.key, addr);
+		qrPayload = com.harvana.app.scan.WalletQr.payload(coin.key, addr);
 		validAddress = addr.length() >= 20;
 		if (tvDepositAddress != null) tvDepositAddress.setText(addr);
 		if (btnShare != null) { btnShare.setEnabled(true); btnShare.setAlpha(1f); }
@@ -319,16 +319,6 @@ public class ReceiveActivity extends AppCompatActivity {
 		_loadQrCode();
 	}
 
-	/** What another wallet should see when it scans. Copy and share still use the plain address. */
-	private static String payUri(String key, String address) {
-		switch (key) {
-			case "BTC": return "bitcoin:" + address;
-			case "LTC": return "litecoin:" + address;
-			case "DOGE": return "dogecoin:" + address;
-			default: return address;
-		}
-	}
-	
 	private void _shareImage(final Uri imageUri, final String text) {
 		Intent intent = new Intent(Intent.ACTION_SEND);
 		intent.setType("image/png");

@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: the scanner reads every coin's code
+
+What the app does:
+
+- **Scanning a code opens the right coin.** A Bitcoin, Litecoin, Dogecoin, Ethereum, BNB, Polygon, Base, Tron, Solana or Pi code fills the address and selects that coin. A Harvana code still opens HARV.
+- **Each receive code carries that coin**, and the picture in the middle is that coin's logo. Copy and share still give the plain address.
+
+What you do: install the build, open Receive for a coin, and scan that code from Send.
+
 ## 8 Oct 2026: the total adds every coin, in the currency you pick
 
 What the app does:

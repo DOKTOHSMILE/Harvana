@@ -246,7 +246,7 @@ public class SendAssetActivity extends AppCompatActivity {
 					ClipData.Item item = cb.getPrimaryClip().getItemAt(0);
 					if (item != null && item.getText() != null) {
 						String pasted = item.getText().toString().trim();
-						if (etRecipient != null) etRecipient.setText(pasted);
+						_applyScanned(pasted);
 						SketchwareUtil.showMessage(getApplicationContext(), "Address pasted");
 					} else {
 						SketchwareUtil.showMessage(getApplicationContext(), "Clipboard is empty");
@@ -791,16 +791,32 @@ public class SendAssetActivity extends AppCompatActivity {
 		startActivityForResult(new Intent(this, PickAssetActivity.class).putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, key), RC_PICK_ASSET);
 	}
 
-	private void _selectRequestedAsset() {
-		if (spAsset == null || walletAssets == null) return;
-		String want = getIntent().getStringExtra(com.harvana.app.wallet.CoinCatalog.EXTRA);
-		if (want == null || want.isEmpty()) return;
+	private String pendingCoin;
+
+	private void _applyScanned(String raw) {
+		com.harvana.app.scan.WalletQr.Hit hit = com.harvana.app.scan.WalletQr.parse(raw);
+		if (etRecipient != null) etRecipient.setText(hit == null ? (raw == null ? "" : raw.trim()) : hit.address);
+		if (hit != null) {
+			pendingCoin = hit.key;
+			_selectKey(hit.key);
+		}
+	}
+
+	private void _selectKey(String key) {
+		if (key == null || spAsset == null || walletAssets == null) return;
 		for (int i = 0; i < walletAssets.size(); i++) {
-			if (want.equals(String.valueOf(walletAssets.get(i).get("assetKey")))) {
+			if (key.equals(String.valueOf(walletAssets.get(i).get("assetKey")))) {
 				spAsset.setSelection(i);
+				pendingCoin = null;
 				return;
 			}
 		}
+	}
+
+	private void _selectRequestedAsset() {
+		if (spAsset == null || walletAssets == null) return;
+		String want = pendingCoin != null ? pendingCoin : getIntent().getStringExtra(com.harvana.app.wallet.CoinCatalog.EXTRA);
+		_selectKey(want);
 	}
 
 	private void _showTransferConfirmSheet(TransactionRouter.PreparedTransfer prepared, String symbol) {
@@ -1200,14 +1216,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		}
 		if (requestCode == RC_SCAN_RECIPIENT && resultCode == Activity.RESULT_OK && data != null) {
 			String address = data.getStringExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_RESULT_TEXT);
-			if (address != null && etRecipient != null) {
-				address = address.trim();
-				int scheme = address.indexOf(':');
-				if (scheme > 0 && scheme < 16) address = address.substring(scheme + 1);
-				int query = address.indexOf('?');
-				if (query > 0) address = address.substring(0, query);
-				etRecipient.setText(address.trim());
-			}
+			if (address != null) _applyScanned(address);
 		}
 	}
 	{

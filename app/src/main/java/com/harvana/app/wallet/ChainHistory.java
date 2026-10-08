@@ -32,7 +32,7 @@ public final class ChainHistory {
         if (c == null || harvAddress == null || harvAddress.isEmpty()) return out;
         Context app = c.getApplicationContext();
         Map<ChainKeys.Chain, String> addrs = ChainWalletStore.ensure(app, harvAddress);
-        if (ChainAssetsSection.shown(app, ChainAssetsSection.PI)) {
+        if (ChainAssetsSection.shown(app, "PI")) {
             String pi = PiWalletStore.get(app, harvAddress);
             if (pi != null && !pi.isEmpty()) {
                 try {

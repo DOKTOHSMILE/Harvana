@@ -686,6 +686,28 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // One shared price card for the other coins. A signed-in phone may replace it only once
+    // the copy is 8 minutes old, so the phones share one CoinGecko read instead of each calling.
+    // Display only. It never moves HARV.
+    match /MARKET_PRICES/{docId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && docId == 'spot'
+        && request.resource.data.keys().hasOnly(['source', 'updatedAt', 'quotes'])
+        && request.resource.data.source == 'app'
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.quotes is map
+        && request.resource.data.quotes.size() > 0
+        && request.resource.data.quotes.size() <= 20
+        && (
+          !exists(/databases/$(database)/documents/MARKET_PRICES/$(docId))
+          || !('updatedAt' in resource.data)
+          || !(resource.data.updatedAt is timestamp)
+          || request.time > resource.data.updatedAt + duration.value(8, 'm')
+        );
+      allow delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

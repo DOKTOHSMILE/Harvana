@@ -82,14 +82,14 @@ public final class AssetPrices {
             inFlight = true;
         }
         new Thread(() -> {
-            boolean ok = fetch();
+            boolean ok = fetch(app);
             List<Runnable> go;
             synchronized (mem) {
                 inFlight = false;
                 long now = System.currentTimeMillis();
                 if (ok) {
-                    fetchedAt = now;
-                    nextAllowed = now + FRESH_MS;
+                    fetchedAt = sharedAt > 0 ? sharedAt : now;
+                    nextAllowed = fetchedAt + FRESH_MS;
                     writeDisk(app);
                 } else {
                     nextAllowed = now + BACKOFF_MS;
@@ -130,7 +130,82 @@ public final class AssetPrices {
         catch (NumberFormatException e) { return null; }
     }
 
-    private static boolean fetch() {
+    private static long sharedAt;
+
+    /** Shared prices first. CoinGecko only when nobody has published a fresh copy. */
+    private static boolean fetch(Context app) {
+        if (app == null) return false;
+        sharedAt = 0;
+        if (readShared()) return true;
+        if (!fetchRemote()) return false;
+        writeShared();
+        return true;
+    }
+
+    private static boolean readShared() {
+        try {
+            if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) return false;
+            com.google.firebase.firestore.DocumentSnapshot snap = com.google.android.gms.tasks.Tasks.await(
+                    com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                            .collection("MARKET_PRICES").document("spot").get(),
+                    5, java.util.concurrent.TimeUnit.SECONDS);
+            if (snap == null || !snap.exists()) return false;
+            com.google.firebase.Timestamp ts = snap.getTimestamp("updatedAt");
+            if (ts == null) return false;
+            long at = ts.toDate().getTime();
+            if (System.currentTimeMillis() - at > FRESH_MS) return false;
+            Object raw = snap.get("quotes");
+            if (!(raw instanceof Map)) return false;
+            int n = 0;
+            synchronized (mem) {
+                for (Map.Entry<?, ?> e : ((Map<?, ?>) raw).entrySet()) {
+                    if (!(e.getKey() instanceof String) || !(e.getValue() instanceof Map)) continue;
+                    Map<?, ?> q = (Map<?, ?>) e.getValue();
+                    double usd = num(q.get("usd"));
+                    if (usd <= 0) continue;
+                    mem.put((String) e.getKey(), new Quote(usd, num(q.get("change"))));
+                    n++;
+                }
+            }
+            if (n == 0) return false;
+            sharedAt = at;
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private static void writeShared() {
+        try {
+            if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) return;
+            Map<String, Object> quotes = new HashMap<>();
+            synchronized (mem) {
+                for (Map.Entry<String, Quote> e : mem.entrySet()) {
+                    Map<String, Object> q = new HashMap<>();
+                    double ch = e.getValue().change;
+                    q.put("usd", e.getValue().usd);
+                    q.put("change", Double.isNaN(ch) ? 0 : ch);
+                    quotes.put(e.getKey(), q);
+                }
+            }
+            if (quotes.isEmpty()) return;
+            Map<String, Object> doc = new HashMap<>();
+            doc.put("source", "app");
+            doc.put("updatedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+            doc.put("quotes", quotes);
+            com.google.android.gms.tasks.Tasks.await(
+                    com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                            .collection("MARKET_PRICES").document("spot").set(doc),
+                    5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (Exception ignored) {}
+    }
+
+    private static double num(Object v) {
+        if (v instanceof Number) return ((Number) v).doubleValue();
+        return Double.NaN;
+    }
+
+    private static boolean fetchRemote() {
         HttpURLConnection c = null;
         try {
             c = (HttpURLConnection) new URL(ENDPOINT).openConnection();

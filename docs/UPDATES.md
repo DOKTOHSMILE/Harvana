@@ -2,6 +2,30 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: one page per coin, shared prices, Harvana explorer link
+
+What the app does:
+
+- **Every chain is its own asset.** Bitcoin, Litecoin, Dogecoin, Ethereum, BNB, Polygon, Base, Tron, Solana and Pi each have a row on Assets, the same shape as HARV, with that coin's logo. The old Crypto Wallets screen is gone. Tapping a row opens the coin page with that coin's name, logo, address and description. Send and Receive follow the coin that was opened. HARV uses the same coin logo everywhere, not a letter in a circle.
+- **The coin page is three pages you can swipe:** Overview, History, Network. Tapping a tab does the same thing.
+  - Overview names that coin. Pi says "About Pi Network", not Harvana.
+  - If the account is not active yet, the big number is `0` plus the ticker, and the reason ("Not active yet") sits underneath. It no longer replaces the balance.
+  - History lists only that coin. Pi no longer shows HARV transfers. Pi, Bitcoin and Litecoin load their own public history. The others say there are no transactions yet, because their explorers need a paid key (the 7 Oct note that said the coin page's History tab stays HARV only is out of date).
+  - Network shows that coin's own facts. A long address sits on its own line under Address, so the label is not crushed into a vertical stack.
+- **A free market price** shows for every coin except HARV (no HARV price is invented). The phone reads one shared copy at `MARKET_PRICES/spot`. If that copy is under 10 minutes old, it is used and the price site is not called. If it is older, one signed-in phone fetches the new prices and writes them for the others. A phone cannot overwrite a fresh copy.
+- **Explorer.** On a HARV coin, Explorer opens `https://harvanna.com/explorer/#/address/{address}`. The other coins still open their own public explorers. The page itself is served by the node (`/explorer/`). That jar is not on the live server yet, and `harvanna.com` does not resolve yet. Both are in the node repository's `docs/DEPLOYMENT.md` for 8 Oct 2026.
+- **Learn Hub.** A new article is signed by the wallet that is signed in, not only the wallet bound to the account.
+- **Receipt.** The transaction screen is `ReceiptActivity`, the bar says Receipt, a pending transaction uses the clock icon, and a confirmed one uses the same icon as the wallet's Activity list.
+- **Deleted groups no longer raise the count.** A group the node answers 404 for is taken off the profile instead of being counted as a group that still exists.
+- **Learn on Home** shows at most two rows, in the same card style. The "counted as a read / trust score" line is gone from a Learn post.
+- **Fixed:** the build failed in Pi history (`ChainHistory.java`), which still read a field that had been removed.
+
+What you do:
+
+1. Install this build.
+2. Publish `docs/firestore.rules` from the Firebase console. Until `MARKET_PRICES` is allowed, the shared price write is rejected and each phone fetches its own price. Nothing else in the app waits on that.
+3. The explorer button stays dark until the node jar from 8 Oct is deployed and `harvanna.com` points at the same server. Those steps are in the node repository, not here.
+
 ## 7 Oct 2026: wallets on Android 6 and 7; pasted phrases open the right wallet
 
 These are fixes the miner app already had, now in Harvana too.

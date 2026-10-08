@@ -52,6 +52,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 	private boolean nodeHasMore = true;
 	private boolean isLoadingMore = false;
 	private final java.util.ArrayList<java.util.HashMap<String, Object>> allNodeTx = new java.util.ArrayList<>();
+	private final java.util.List<java.util.HashMap<String, Object>> chainTx = new java.util.ArrayList<>();
 	
 	private LinearLayout linear1;
 	private CardView cardview1;
@@ -97,13 +98,10 @@ public class WalletActivityFragmentActivity extends Fragment {
 		}
 		
 		if (address.isEmpty()) {
-			// No wallet yet → show create wallet card
 			return;
 		}
 		
-		// We have a wallet
 		wallet_address = address;
-		
 		_loadTransactionHistory();
 	}
 	
@@ -122,21 +120,17 @@ public class WalletActivityFragmentActivity extends Fragment {
 			}
 		}
 		_loadTransactionHistory();
-		
 	}
 	
-
 	public void _MORE() {
 	}
-	/** Other coins' recent transactions (Pi, Bitcoin, Litecoin when turned on under Add coins). Not cached with HARV's. */
-	private final java.util.List<java.util.HashMap<String, Object>> chainTx = new java.util.ArrayList<>();
 
 	private boolean _harvOnly() {
 		return getArguments() != null && getArguments().getBoolean("harvOnly", false);
 	}
 
 	private void _loadChainHistory() {
-		if (_harvOnly() || getContext() == null) return;
+		if (_harvOnly() || getContext() == null || wallet_address.isEmpty()) return;
 		final Context app = getContext().getApplicationContext();
 		final String addr = wallet_address;
 		new Thread(() -> {
@@ -145,16 +139,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 			getActivity().runOnUiThread(() -> {
 				if (!isAdded() || getContext() == null || !addr.equals(wallet_address)) return;
 				chainTx.clear();
-				chainTx.addAll(rows);
-				if (rows.isEmpty()) return;
-				java.util.ArrayList<java.util.HashMap<String, Object>> display = new java.util.ArrayList<>(
-						com.harvana.app.wallet.PendingTxStore.loadAll(getContext(), wallet_address));
-				display.addAll(allNodeTx.isEmpty() ? _cachedHarv() : allNodeTx);
-				display.addAll(chainTx);
-				_sortByTimestampDesc(display);
-				if (list_history.getLayoutManager() == null)
-					list_history.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(getContext()));
-				list_history.setAdapter(new TransactionHistoryAdapter(getContext(), filterFailedTx(display), wallet_address));
+				if (rows != null) chainTx.addAll(rows);
+				_renderMergedTransactions();
 			});
 		}).start();
 	}
@@ -172,43 +158,12 @@ public class WalletActivityFragmentActivity extends Fragment {
 		
 		final Context context = getContext();
 		
-		// Render cached history instantly
 		com.harvana.app.wallet.PendingTxStore.checkStaleAndMarkFailed(context, wallet_address);
-		java.util.List<java.util.HashMap<String, Object>> cachedTx =
-		com.harvana.app.wallet.WalletCache.loadList(context, "tx_" + wallet_address);
-		java.util.List<java.util.HashMap<String, Object>> pendingTx =
-		com.harvana.app.wallet.PendingTxStore.loadAll(context, wallet_address);
-		if (cachedTx == null) cachedTx = new java.util.ArrayList<>();
 		
-		java.util.ArrayList<java.util.HashMap<String, Object>> mergedCache =
-		new java.util.ArrayList<>(pendingTx);
-		mergedCache.addAll(cachedTx);
-		_sortByTimestampDesc(mergedCache);
+		// Render cache & pending instantly without flickering
+		_renderMergedTransactions();
 		
-		if (!mergedCache.isEmpty()) {
-			if (list_history.getLayoutManager() == null) {
-				list_history.setLayoutManager(
-				new androidx.recyclerview.widget.LinearLayoutManager(context));
-			}
-			// ★ Filtered — old failed txs are hidden
-			list_history.setAdapter(
-			new TransactionHistoryAdapter(context, filterFailedTx(mergedCache), wallet_address));
-		} else {
-			// No cached/pending tx for THIS wallet yet — e.g. just switched
-			// to a wallet never viewed on this device before. Clear the
-			// list rather than leaving the previously active wallet's
-			// history visibly (and misleadingly) on screen while the fresh
-			// node fetch below is in flight.
-			if (list_history.getLayoutManager() == null) {
-				list_history.setLayoutManager(
-				new androidx.recyclerview.widget.LinearLayoutManager(context));
-			}
-			list_history.setAdapter(
-			new TransactionHistoryAdapter(context, new java.util.ArrayList<>(), wallet_address));
-		}
-		
-		// Reset pagination and fetch page 0 fresh - this is a full reload
-		// (initial open / onResume), not a "load more" continuation.
+		// Reset pagination and fetch fresh
 		nodePage = 0;
 		nodeHasMore = true;
 		allNodeTx.clear();
@@ -256,7 +211,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 						if (addedAny) {
 							com.harvana.app.wallet.WalletCache.saveList(
 							getContext(), "pending_" + wallet_address, knownPending);
-							_loadTransactionHistory();
+							_renderMergedTransactions();
 						}
 					} catch (Exception e) {
 						android.util.Log.e("loadTxHistory", "Pending parse error: " + e.getMessage());
@@ -369,19 +324,9 @@ public class WalletActivityFragmentActivity extends Fragment {
 						display.size() > PAGE_SIZE ? display.subList(0, PAGE_SIZE) : display;
 						com.harvana.app.wallet.WalletCache.saveList(
 						getContext(), "tx_" + wallet_address, toCache);
-						
-						if (list_history.getLayoutManager() == null) {
-							list_history.setLayoutManager(
-							new androidx.recyclerview.widget.LinearLayoutManager(getContext()));
-						}
-						java.util.ArrayList<java.util.HashMap<String, Object>> withChains = new java.util.ArrayList<>(display);
-						withChains.addAll(chainTx);
-						_sortByTimestampDesc(withChains);
-						list_history.setAdapter(
-						new TransactionHistoryAdapter(getContext(), filterFailedTx(withChains), wallet_address));
-					} else {
-						android.util.Log.d("loadTxHistory", "Node returned no history.");
 					}
+					
+					_renderMergedTransactions();
 				});
 			}
 			
@@ -401,6 +346,36 @@ public class WalletActivityFragmentActivity extends Fragment {
 		if (isLoadingMore || !nodeHasMore) return;
 		_fetchNodeHistoryPage();
 	}
+
+	/** Unified single rendering method to prevent UI flickering/glitching races */
+	private void _renderMergedTransactions() {
+		if (!isAdded() || getContext() == null || list_history == null) return;
+		
+		java.util.List<java.util.HashMap<String, Object>> pendingTx =
+		com.harvana.app.wallet.PendingTxStore.loadAll(getContext(), wallet_address);
+		if (pendingTx == null) pendingTx = new java.util.ArrayList<>();
+		
+		java.util.List<java.util.HashMap<String, Object>> harvTx =
+		allNodeTx.isEmpty() ? _cachedHarv() : allNodeTx;
+		
+		java.util.ArrayList<java.util.HashMap<String, Object>> display = new java.util.ArrayList<>(pendingTx);
+		display.addAll(harvTx);
+		display.addAll(chainTx);
+		
+		_sortByTimestampDesc(display);
+		java.util.ArrayList<java.util.HashMap<String, Object>> filtered = filterFailedTx(display);
+		
+		if (list_history.getLayoutManager() == null) {
+			list_history.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(getContext()));
+		}
+		
+		RecyclerView.Adapter adapter = list_history.getAdapter();
+		if (adapter instanceof TransactionHistoryAdapter) {
+			((TransactionHistoryAdapter) adapter).updateItems(filtered);
+		} else {
+			list_history.setAdapter(new TransactionHistoryAdapter(getContext(), filtered, wallet_address));
+		}
+	}
 	
 	private void _sortByTimestampDesc(java.util.List<java.util.HashMap<String, Object>> list) {
 		if (list == null) return;
@@ -412,11 +387,18 @@ public class WalletActivityFragmentActivity extends Fragment {
 	}
 	
 	private long _tsOf(java.util.HashMap<String, Object> item) {
+		if (item == null) return 0L;
 		Object v = item.get("timestamp");
 		if (v instanceof Number) {
 			long ts = ((Number) v).longValue();
 			if (ts > 0 && ts < 1_000_000_000_000L) ts *= 1000L;
 			return ts;
+		} else if (v != null) {
+			try {
+				long ts = Long.parseLong(v.toString().trim());
+				if (ts > 0 && ts < 1_000_000_000_000L) ts *= 1000L;
+				return ts;
+			} catch (Exception ignored) {}
 		}
 		return 0L;
 	}
@@ -424,7 +406,6 @@ public class WalletActivityFragmentActivity extends Fragment {
 	public void _extra_codes() {
 	}
 	
-	// --- CORRECT ADAPTER RESTORED HERE ---
 	public class TransactionHistoryAdapter extends RecyclerView.Adapter<TransactionHistoryAdapter.TxViewHolder> {
 		
 		private final java.util.List<java.util.HashMap<String, Object>> items;
@@ -439,12 +420,18 @@ public class WalletActivityFragmentActivity extends Fragment {
 		Context context,
 		java.util.List<java.util.HashMap<String, Object>> items,
 		String walletAddress) {
-			this.items         = items;
+			this.items         = items != null ? new java.util.ArrayList<>(items) : new java.util.ArrayList<>();
 			this.walletAddress = walletAddress != null ? walletAddress : "";
 			this.COLOR_FAILED   = androidx.core.content.ContextCompat.getColor(context, R.color.colorError);
 			this.COLOR_INCOMING = androidx.core.content.ContextCompat.getColor(context, R.color.colorAccent);
 			this.COLOR_PENDING  = androidx.core.content.ContextCompat.getColor(context, R.color.colorWarning);
 			this.COLOR_OUTGOING = androidx.core.content.ContextCompat.getColor(context, R.color.colorError);
+		}
+
+		public void updateItems(java.util.List<java.util.HashMap<String, Object>> newItems) {
+			items.clear();
+			if (newItems != null) items.addAll(newItems);
+			notifyDataSetChanged();
 		}
 		
 		@NonNull
@@ -531,7 +518,6 @@ public class WalletActivityFragmentActivity extends Fragment {
 				}
 			}
 			
-			// Name by what the transaction is for. The clock stays while it is pending; the real icon shows once it is confirmed.
 			if (!isFailed) {
 				com.harvana.app.tx.TxKind kind = com.harvana.app.tx.TxKind.of(
 				item.get("memo") != null ? String.valueOf(item.get("memo")) : "", isIncoming);
@@ -560,7 +546,6 @@ public class WalletActivityFragmentActivity extends Fragment {
 			final double finalAmount    = amount;
 			final String finalAsset     = asset;
 			
-			// Click Listener bound directly to the properly declared cardview1
 			if (holder.cardview1 != null) {
 				holder.cardview1.setOnClickListener(v -> {
 					Intent intent = new Intent(v.getContext(), ReceiptActivity.class);
@@ -676,7 +661,6 @@ public class WalletActivityFragmentActivity extends Fragment {
 		return clean;
 	}
 	
-	// NEW UI FORMATTER HELPER
 	private String _formatUIBalance(double v) {
 		try {
 			java.text.DecimalFormat uiDf = new java.text.DecimalFormat("#,##0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
@@ -688,5 +672,4 @@ public class WalletActivityFragmentActivity extends Fragment {
 	
 	{
 	}
-	
 }

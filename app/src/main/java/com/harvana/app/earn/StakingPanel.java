@@ -190,32 +190,37 @@ public final class StakingPanel {
         setupAssetSpinner();
         setupLockCards();
 
-        stake.setOnClickListener(v -> doStake());
-        claim.setOnClickListener(v -> doClaim());
+        if (stake != null) stake.setOnClickListener(v -> doStake());
+        if (claim != null) claim.setOnClickListener(v -> doClaim());
         com.google.android.material.tabs.TabLayout liveTabs = activity.findViewById(R.id.tab_live_closed);
-        liveTabs.addTab(liveTabs.newTab().setText("Live"));
-        liveTabs.addTab(liveTabs.newTab().setText("Closed"));
-        liveTabs.addOnTabSelectedListener(new com.google.android.material.tabs.TabLayout.OnTabSelectedListener() {
-            @Override public void onTabSelected(com.google.android.material.tabs.TabLayout.Tab tab) { showLive(tab.getPosition() == 0); }
-            @Override public void onTabUnselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
-            @Override public void onTabReselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
-        });
-        activity.findViewById(R.id.btn_max).setOnClickListener(v -> fillMax());
+        if (liveTabs != null) {
+            liveTabs.addTab(liveTabs.newTab().setText("Live"));
+            liveTabs.addTab(liveTabs.newTab().setText("Closed"));
+            liveTabs.addOnTabSelectedListener(new com.google.android.material.tabs.TabLayout.OnTabSelectedListener() {
+                @Override public void onTabSelected(com.google.android.material.tabs.TabLayout.Tab tab) { showLive(tab.getPosition() == 0); }
+                @Override public void onTabUnselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
+                @Override public void onTabReselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
+            });
+        }
+        View btnMax = activity.findViewById(R.id.btn_max);
+        if (btnMax != null) btnMax.setOnClickListener(v -> fillMax());
 
-        amount.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { updateEstReward(); }
-            @Override public void afterTextChanged(Editable s) {}
-        });
+        if (amount != null) {
+            amount.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) { updateEstReward(); }
+                @Override public void afterTextChanged(Editable s) {}
+            });
+        }
 
-        chip1d.setOnClickListener(v -> setRange(1));
-        chip3d.setOnClickListener(v -> setRange(3));
-        chip7d.setOnClickListener(v -> setRange(7));
-        chip1m.setOnClickListener(v -> setRange(30));
-        chip3m.setOnClickListener(v -> setRange(90));
-        chipAll.setOnClickListener(v -> setRange(Integer.MAX_VALUE));
+        if (chip1d != null) chip1d.setOnClickListener(v -> setRange(1));
+        if (chip3d != null) chip3d.setOnClickListener(v -> setRange(3));
+        if (chip7d != null) chip7d.setOnClickListener(v -> setRange(7));
+        if (chip1m != null) chip1m.setOnClickListener(v -> setRange(30));
+        if (chip3m != null) chip3m.setOnClickListener(v -> setRange(90));
+        if (chipAll != null) chipAll.setOnClickListener(v -> setRange(Integer.MAX_VALUE));
 
-        styleChart();
+        if (chart != null) styleChart();
         showLive(true);
         timerHandler.post(timerRunnable);
     }
@@ -237,6 +242,7 @@ public final class StakingPanel {
     }
 
     private void setupAssetSpinner() {
+        if (spAsset == null) return;
         assetAdapter = new ArrayAdapter<String>(
                 host, com.harvana.app.R.layout.spinner_item, assetDisplayNames) {
             @NonNull
@@ -264,33 +270,34 @@ public final class StakingPanel {
 
     private void setupLockCards() {
         View.OnClickListener lockClick = v -> {
-        int quiet = ContextCompat.getColor(host, R.color.colorStrokeBase);
-        int accent = ContextCompat.getColor(host, R.color.colorHarvOrange);
-        cardLockFree.setStrokeColor(quiet);
-        cardLock7.setStrokeColor(quiet);
-        cardLock30.setStrokeColor(quiet);
-        cardLock90.setStrokeColor(quiet);
-        ((MaterialCardView) v).setStrokeColor(accent);
+            int quiet = ContextCompat.getColor(host, R.color.colorStrokeBase);
+            int accent = ContextCompat.getColor(host, R.color.colorHarvOrange);
+            if (cardLockFree != null) cardLockFree.setStrokeColor(quiet);
+            if (cardLock7 != null) cardLock7.setStrokeColor(quiet);
+            if (cardLock30 != null) cardLock30.setStrokeColor(quiet);
+            if (cardLock90 != null) cardLock90.setStrokeColor(quiet);
+            ((MaterialCardView) v).setStrokeColor(accent);
 
             if (v == cardLockFree) selectedLockDays = 0;
-            if (v == cardLock7) selectedLockDays = 7;
-            if (v == cardLock30) selectedLockDays = 30;
-            if (v == cardLock90) selectedLockDays = 90;
+            else if (v == cardLock7) selectedLockDays = 7;
+            else if (v == cardLock30) selectedLockDays = 30;
+            else if (v == cardLock90) selectedLockDays = 90;
 
             updateEstReward();
         };
 
-        cardLockFree.setOnClickListener(lockClick);
-        cardLock7.setOnClickListener(lockClick);
-        cardLock30.setOnClickListener(lockClick);
-        cardLock90.setOnClickListener(lockClick);
+        if (cardLockFree != null) cardLockFree.setOnClickListener(lockClick);
+        if (cardLock7 != null) cardLock7.setOnClickListener(lockClick);
+        if (cardLock30 != null) cardLock30.setOnClickListener(lockClick);
+        if (cardLock90 != null) cardLock90.setOnClickListener(lockClick);
     }
 
     private void updateEstReward() {
+        if (tvEstRewardInput == null) return;
         double weight = StakingRules.weight(selectedLockDays);
         String holdText = selectedLockDays <= 0 ? "stays until you unstake" : selectedLockDays + "-day lock on the principal";
         double harvAmount = 0;
-        try { harvAmount = Double.parseDouble(amount.getText().toString().trim()); } catch (Exception ignored) { }
+        try { if (amount != null) harvAmount = Double.parseDouble(amount.getText().toString().trim()); } catch (Exception ignored) { }
         double[] r = rates();
         String text;
         if (harvAmount > 0 && r[0] > 0) {
@@ -346,8 +353,8 @@ public final class StakingPanel {
                         walletAssets.add(native_);
                         assetDisplayNames.add((CoinInfo.ticker()));
 
-                        assetAdapter.notifyDataSetChanged();
-                        if (!walletAssets.isEmpty()) spAsset.setSelection(0);
+                        if (assetAdapter != null) assetAdapter.notifyDataSetChanged();
+                        if (!walletAssets.isEmpty() && spAsset != null) spAsset.setSelection(0);
                         paint();
                     });
                 }
@@ -362,8 +369,8 @@ public final class StakingPanel {
 
     /** Live stakes and closed (unstaked / withdrawn) ones sit on separate tabs so the page stays short. */
     private void showLive(boolean live) {
-        liveSection.setVisibility(live ? View.VISIBLE : View.GONE);
-        closedSection.setVisibility(live ? View.GONE : View.VISIBLE);
+        if (liveSection != null) liveSection.setVisibility(live ? View.VISIBLE : View.GONE);
+        if (closedSection != null) closedSection.setVisibility(live ? View.GONE : View.VISIBLE);
     }
 
     private void paint() {
@@ -374,24 +381,24 @@ public final class StakingPanel {
             long total = info == null ? 0 : info.optLong("totalStakedRaw", 0);
             long shareBps = pos != null && pos.has("shareBps") ? pos.optLong("shareBps", 0) : (total > 0 ? staked * 10_000L / total : 0);
 
-            overviewStaked.setText(harv(staked));
-            overviewUnclaimed.setText(harv(pending));
-            available.setText("Available " + harv(walletRaw));
-            if (info != null) tvPool.setText(String.format(Locale.US, "● Reward pool %s · %d stakers · 0.05%% drips into Claim each day",
+            if (overviewStaked != null) overviewStaked.setText(harv(staked));
+            if (overviewUnclaimed != null) overviewUnclaimed.setText(harv(pending));
+            if (available != null) available.setText("Available " + harv(walletRaw));
+            if (tvPool != null && info != null) tvPool.setText(String.format(Locale.US, "● Reward pool %s · %d stakers · 0.05%% drips into Claim each day",
                     harv(info.optLong("rewardPoolBalanceRaw", 0)), info.optInt("stakerCount", 0)));
-            dailyPct.setText(staked <= 0 ? "Stake to start earning" : String.format(Locale.US, "You hold %.2f%% of the stake", shareBps / 100.0));
+            if (dailyPct != null) dailyPct.setText(staked <= 0 ? "Stake to start earning" : String.format(Locale.US, "You hold %.2f%% of the stake", shareBps / 100.0));
 
             long queued = unbondingTotal();
-            posTotal.setText(harv(staked + queued));
-            posDailyPct.setText(dailyPct.getText());
-            gridTotal.setText(harv(staked));
-            gridUnclaimed.setText(harv(pending));
+            if (posTotal != null) posTotal.setText(harv(staked + queued));
+            if (posDailyPct != null && dailyPct != null) posDailyPct.setText(dailyPct.getText());
+            if (gridTotal != null) gridTotal.setText(harv(staked));
+            if (gridUnclaimed != null) gridUnclaimed.setText(harv(pending));
             // Your rate: the flexible rate times your stake-weighted lock weight.
             double baseApr = info == null ? 0 : info.optLong("estimatedBaseAprBps", 0) / 10_000.0;
             double weighted = 0;
             for (Stake st : stakes()) weighted += st.amountRaw * ((st.multiplierBps <= 0 ? 10000 : st.multiplierBps) / 10_000.0);
             double myApr = staked > 0 ? baseApr * weighted / staked : baseApr;
-            gridApy.setText(myApr <= 0 ? "--" : String.format(Locale.US, "%.2f%% · %.2f%%", myApr * 100, StakingRules.apy(myApr) * 100));
+            if (gridApy != null) gridApy.setText(myApr <= 0 ? "--" : String.format(Locale.US, "%.2f%% · %.2f%%", myApr * 100, StakingRules.apy(myApr) * 100));
             updateEstReward();
 
             renderStakes();
@@ -400,7 +407,7 @@ public final class StakingPanel {
             if (address != null && staked > 0) recordSnapshot(address, pending + claimed);
             drawChart(address);
 
-            stake.setEnabled(!busy);
+            if (stake != null) stake.setEnabled(!busy);
 
             setupUnbondingViews();
             updateLiveTimers();
@@ -408,7 +415,7 @@ public final class StakingPanel {
     }
 
     private void updateLiveTimers() {
-        if (pos == null) return;
+        if (pos == null || claim == null || claimSub == null) return;
         long staked = pos.optLong("stakedRaw", 0);
         long pending = pos.optLong("pendingRewardsRaw", 0);
 
@@ -452,7 +459,6 @@ public final class StakingPanel {
         cl.setClickable(true);
         cl.setFocusable(true);
 
-        // Dynamically resolve theme attribute to prevent Resources$NotFoundException
         TypedValue outValue = new TypedValue();
         host.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
         cl.setBackgroundResource(outValue.resourceId);
@@ -522,11 +528,12 @@ public final class StakingPanel {
     }
 
     private void setupUnbondingViews() {
+        if (unbondingList == null) return;
         unbondingList.removeAllViews();
         if (pos == null) return;
         JSONArray rows = pos.optJSONArray("unbonding");
         if (rows == null || rows.length() == 0) {
-            unbondCount.setText("● 0 In Progress");
+            if (unbondCount != null) unbondCount.setText("● 0 In Progress");
             TextView none = new TextView(host);
             none.setText("Nothing closed yet. Stakes you unstake show here while they return and after they are withdrawn.");
             none.setTextColor(themeColor(R.color.colorTextMuted));
@@ -543,7 +550,7 @@ public final class StakingPanel {
             }
         }
 
-        unbondCount.setText("● " + activeRows.size() + " In Progress");
+        if (unbondCount != null) unbondCount.setText("● " + activeRows.size() + " In Progress");
         if (activeRows.isEmpty()) { addWithdrawnRows(rows); return; }
 
         MaterialCardView containerCard = new MaterialCardView(host);
@@ -592,6 +599,7 @@ public final class StakingPanel {
 
     /** Completed withdrawals, newest first, under the ones still returning. */
     private void addWithdrawnRows(JSONArray rows) {
+        if (unbondingList == null) return;
         List<JSONObject> done = new ArrayList<>();
         for (int i = 0; i < rows.length(); i++) {
             JSONObject u = rows.optJSONObject(i);
@@ -663,7 +671,6 @@ public final class StakingPanel {
             itemV.setLayoutParams(lp);
             listContainer.addView(itemV);
 
-            // Add lime/dark separator between rows in the bottom sheet
             if (i < allRows.size() - 1) {
                 View divider = new View(host);
                 LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1));
@@ -838,8 +845,9 @@ public final class StakingPanel {
 
     /** One card per stake, each with its own lock, rewards and Unstake. Claim stays a single button for all of them. */
     private void renderStakes() {
+        if (stakesList == null) return;
         stakesList.removeAllViews();
-        liveEmpty.setVisibility(stakes().isEmpty() ? View.VISIBLE : View.GONE);
+        if (liveEmpty != null) liveEmpty.setVisibility(stakes().isEmpty() ? View.VISIBLE : View.GONE);
         long now = System.currentTimeMillis();
         for (Stake s : stakes()) {
             int mult = s.multiplierBps <= 0 ? 10000 : s.multiplierBps;
@@ -1012,7 +1020,7 @@ public final class StakingPanel {
                 double val = Double.parseDouble(valStr);
                 if (val <= 0 || val > stakedHarv) { toast("Invalid unstake amount."); return; }
                 sheet.dismiss();
-                amount.setText(valStr);
+                if (amount != null) amount.setText(valStr);
                 doUnstake(lotId);
             } catch (Exception e) { toast("Invalid amount."); }
         });
@@ -1028,7 +1036,7 @@ public final class StakingPanel {
     }
 
     private void doStake() {
-        if (info == null) return;
+        if (info == null || amount == null) return;
         String address = WalletManager.getActiveWalletAddress(host);
         String vault = info.optString("vaultAddress", "");
         double harvAmount;
@@ -1049,7 +1057,7 @@ public final class StakingPanel {
             String memoLock = "STAKE_LOCK:" + selectedLockDays;
             TransactionRouter.routeTransaction(host, address, vault, BigDecimal.valueOf(harvAmount), null, memoLock,
                     new TransactionRouter.RouterCallback() {
-                        @Override public void onSuccess(String txHash) { busy = false; amount.setText(""); toast("Stake submitted."); refresh(); }
+                        @Override public void onSuccess(String txHash) { busy = false; if (amount != null) amount.setText(""); toast("Stake submitted."); refresh(); }
                         @Override public void onError(String code, String msg) { busy = false; toast(msg); paint(); }
                     });
         });
@@ -1058,7 +1066,7 @@ public final class StakingPanel {
     private void doUnstake(String lotId) {
         String address = WalletManager.getActiveWalletAddress(host);
         double harvAmount;
-        try { harvAmount = Double.parseDouble(amount.getText().toString().trim()); }
+        try { if (amount != null) harvAmount = Double.parseDouble(amount.getText().toString().trim()); else return; }
         catch (Exception e) { return; }
 
         ArrayList<String[]> rows = new ArrayList<>();
@@ -1067,7 +1075,7 @@ public final class StakingPanel {
         gate("Unstake HARV", harvFormatter.format(harvAmount) + " HARV", rows, () -> {
             busy = true;
             NodeGroupClient.unstake(host, address, lotId, BalanceFormatter.harvToRaw(harvAmount), new NodeGroupClient.Callback() {
-                @Override public void onSuccess(JSONObject json) { busy = false; amount.setText(""); toast("Unstaking. Returns in 24 hours."); refresh(); }
+                @Override public void onSuccess(JSONObject json) { busy = false; if (amount != null) amount.setText(""); toast("Unstaking. Returns in 24 hours."); refresh(); }
                 @Override public void onError(String error) { busy = false; toast(friendlyStakingError(error)); paint(); }
             });
         });
@@ -1091,22 +1099,24 @@ public final class StakingPanel {
 
     private void setRange(int days) {
         chartDays = days;
-        chip1d.setTextColor(themeColor(R.color.colorTextTertiary)); chip1d.setBackgroundResource(0);
-        chip3d.setTextColor(themeColor(R.color.colorTextTertiary)); chip3d.setBackgroundResource(0);
-        chip7d.setTextColor(themeColor(R.color.colorTextTertiary)); chip7d.setBackgroundResource(0);
-        chip1m.setTextColor(themeColor(R.color.colorTextTertiary)); chip1m.setBackgroundResource(0);
-        chip3m.setTextColor(themeColor(R.color.colorTextTertiary)); chip3m.setBackgroundResource(0);
-        chipAll.setTextColor(themeColor(R.color.colorTextTertiary)); chipAll.setBackgroundResource(0);
+        if (chip1d != null) { chip1d.setTextColor(themeColor(R.color.colorTextTertiary)); chip1d.setBackgroundResource(0); }
+        if (chip3d != null) { chip3d.setTextColor(themeColor(R.color.colorTextTertiary)); chip3d.setBackgroundResource(0); }
+        if (chip7d != null) { chip7d.setTextColor(themeColor(R.color.colorTextTertiary)); chip7d.setBackgroundResource(0); }
+        if (chip1m != null) { chip1m.setTextColor(themeColor(R.color.colorTextTertiary)); chip1m.setBackgroundResource(0); }
+        if (chip3m != null) { chip3m.setTextColor(themeColor(R.color.colorTextTertiary)); chip3m.setBackgroundResource(0); }
+        if (chipAll != null) { chipAll.setTextColor(themeColor(R.color.colorTextTertiary)); chipAll.setBackgroundResource(0); }
 
         TextView selected = days == 1 ? chip1d : days == 3 ? chip3d : days == 7 ? chip7d : days == 30 ? chip1m : days == 90 ? chip3m : chipAll;
-        selected.setTextColor(themeColor(R.color.colorBackground));
-        selected.setBackgroundResource(R.drawable.bg_pill_orange);
+        if (selected != null) {
+            selected.setTextColor(themeColor(R.color.colorBackground));
+            selected.setBackgroundResource(R.drawable.bg_pill_orange);
+        }
 
         drawChart(WalletManager.getActiveWalletAddress(host));
     }
 
     private void fillMax() { 
-        if (walletRaw > 0) amount.setText(harvFormatter.format(walletRaw / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN)); 
+        if (walletRaw > 0 && amount != null) amount.setText(harvFormatter.format(walletRaw / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN)); 
     }
 
     private void gate(String title, String amt, List<String[]> rows, Runnable w) { 
@@ -1161,6 +1171,7 @@ public final class StakingPanel {
     }
 
     private void styleChart() {
+        if (chart == null) return;
         chart.setNoDataText("Rewards show here as days pass.");
         chart.setNoDataTextColor(UiColors.textSecondary());
         chart.getDescription().setEnabled(false);
@@ -1179,6 +1190,7 @@ public final class StakingPanel {
     }
 
     private void drawChart(String address) {
+        if (chart == null) return;
         if (address == null) { chart.clear(); return; }
         JSONArray rows = history(address);
         if (rows.length() == 0) { chart.clear(); chart.invalidate(); return; }

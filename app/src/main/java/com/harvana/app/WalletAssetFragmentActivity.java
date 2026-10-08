@@ -299,8 +299,6 @@ public class WalletAssetFragmentActivity extends Fragment {
 			}
 			
 			// FIX 2: Symbol and logo — guard against null coin_symbol.
-			// Original called .toString().equals("") without null check → NPE
-			// if the key exists but value is null.
 			String symbol = item.get("coin_symbol") != null
 			? item.get("coin_symbol").toString() : "";
 			if (tv_asset_symbol != null) {
@@ -308,10 +306,6 @@ public class WalletAssetFragmentActivity extends Fragment {
 			}
 			
 			// FIX 3: Check logo URL is non-null AND non-empty before Glide load.
-			// The original checked containsKey("coin_logo") but not whether the
-			// value was an empty string. Glide.load("") logs an error, fails
-			// silently, and leaves the ImageView blank instead of showing the
-			// default logo. Now falls back to the app logo for empty/null URLs.
 			String logoUrl = item.containsKey("coin_logo") && item.get("coin_logo") != null
 			? item.get("coin_logo").toString().trim() : "";
 			if (iv_asset_logo != null) {
@@ -325,13 +319,12 @@ public class WalletAssetFragmentActivity extends Fragment {
 				}
 			}
 			
-			// FIX 4: coin_balance — wrap Double.parseDouble() in try/catch.
-			// The original crashed with NumberFormatException if coin_balance was
-			// null, missing, or in scientific notation (e.g. "1.5E-7").
-			// Also removed the redundant (int) cast on _position — it is already int.
-			if (tv_asset_balance != null && item.containsKey("coin_balance")) {
+			// FIX 4: coin_balance — clean any trailing coin text (e.g. " Pi") before parsing.
+			if (tv_asset_balance != null && item.containsKey("coin_balance") && item.get("coin_balance") != null) {
 				try {
-					double bal = Double.parseDouble(item.get("coin_balance").toString());
+					String rawBalance = item.get("coin_balance").toString();
+					String cleanBalance = rawBalance.split(" ")[0];
+					double bal = Double.parseDouble(cleanBalance);
 					if (bal > 999) {
 						tv_asset_balance.setText(
 						new java.text.DecimalFormat("#,##0.####").format(bal));
@@ -344,11 +337,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 				}
 			}
 			
-			// FIX 5: coin_value — wrap Double.parseDouble() in try/catch AND use
-			// the user's selected currency symbol from SharedPreferences instead of
-			// the hardcoded "₦". The original hardcode meant users who selected "$"
-			// or "GH₵" still saw "₦" on every balance row, and a non-numeric
-			// coin_value string would crash onBindViewHolder with NumberFormatException.
+			// FIX 5: coin_value — wrap Double.parseDouble() in try/catch AND use user's currency symbol.
 			if (tv_asset_amount != null && item.containsKey("coin_value")) {
 				Object savedCurrency = item.get("coin_currency");
 				String currencySymbol = com.harvana.app.wallet.FxRates.symbol(_view.getContext());
@@ -365,7 +354,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 			if (cardview1 != null) {
 				cardview1.setOnClickListener(_v -> {
 					intent.putExtra("walletAddress", activeAddress);
-					intent.setClass(_view.getContext().getApplicationContext(),
+					intent.setClass(_v.getContext().getApplicationContext(),
 					CoinDetailActivity.class);
 					startActivity(intent);
 				});

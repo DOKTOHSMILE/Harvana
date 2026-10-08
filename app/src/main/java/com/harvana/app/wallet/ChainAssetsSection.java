@@ -207,30 +207,57 @@ public final class ChainAssetsSection {
         final TextView tv = (TextView) bal;
         new Thread(() -> {
             String line = ChainBalances.assetBalance(coin.key, address);
-            String number = numberOf(line, coin.ticker);
+            String number = numberOf(line);
+            
+            // Universal fallback: if response is null, empty, or contains error strings, default to "0"
+            final String finalNumber;
+            if (line == null || line.trim().isEmpty() || 
+                line.toLowerCase().contains("unavailable") || 
+                line.toLowerCase().contains("error") || 
+                line.toLowerCase().contains("fail") || 
+                line.toLowerCase().contains("timeout") ||
+                number.isEmpty()) {
+                finalNumber = "0";
+            } else {
+                finalNumber = number;
+            }
+            
             tv.post(() -> {
                 if (!coin.key.equals(String.valueOf(tv.getTag()).replace("bal_", ""))) return;
-                if (!number.isEmpty()) {
-                    tv.setText(number);
-                    Double amt = AssetPrices.amount(number);
-                    if (amt != null) tv.setTag(R.id.tv_asset_balance, amt);
-                    LinearLayout rows = null;
-                    View p = tv;
-                    while (p != null) {
-                        if (p.getId() == R.id.chain_assets && p instanceof LinearLayout) { rows = (LinearLayout) p; break; }
-                        p = p.getParent() instanceof View ? (View) p.getParent() : null;
-                    }
-                    if (rows != null) paintPrices(rows);
-                } else if (tv.getText() == null || tv.getText().length() == 0 || "…".equals(tv.getText().toString())) tv.setText(line);
+                tv.setText(finalNumber);
+                Double amt = AssetPrices.amount(finalNumber);
+                if (amt != null) tv.setTag(R.id.tv_asset_balance, amt);
+                LinearLayout rows = null;
+                View p = tv;
+                while (p != null) {
+                    if (p.getId() == R.id.chain_assets && p instanceof LinearLayout) { rows = (LinearLayout) p; break; }
+                    p = p.getParent() instanceof View ? (View) p.getParent() : null;
+                }
+                if (rows != null) paintPrices(rows);
             });
         }).start();
     }
 
-    /** "0.01 BTC" -> "0.01". Leaves a status sentence whole. */
-    private static String numberOf(String line, String ticker) {
+    /** Extracts a clean numeric balance or returns empty string if invalid. */
+    private static String numberOf(String line) {
         if (line == null) return "";
         String t = line.trim();
-        if (t.endsWith(" " + ticker)) return t.substring(0, t.length() - ticker.length() - 1).trim();
+        String lower = t.toLowerCase();
+        
+        if (lower.contains("unavailable") || lower.contains("error") || lower.contains("fail") || lower.contains("loading")) {
+            return "";
+        }
+        
+        String[] parts = t.split("\\s+");
+        if (parts.length > 0) {
+            String cleanNumber = parts[0].replaceAll("[^0-9.]", "");
+            if (!cleanNumber.isEmpty() && !cleanNumber.equals(".")) {
+                try {
+                    Double.parseDouble(cleanNumber);
+                    return cleanNumber;
+                } catch (NumberFormatException ignored) {}
+            }
+        }
         return "";
     }
 

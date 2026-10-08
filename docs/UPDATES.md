@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: one Pi address, and Pi can be sent
+
+What the app does:
+
+- **Pi has one address.** Receive was showing the Pi address saved for this wallet. The coin page was still opening with an older address it had kept from the first time the row was drawn. The coin page, Receive, the QR and Send now all read the saved address at the moment you open them.
+- **The Receive QR matches the coin.** It no longer keeps the HARV code and the HARV logo while the text says Pi. The line under the code names the coin ("Scan to send PI to this address").
+- **Sending Pi is on.** Send, choose Pi, enter a Pi address (it starts with G) and an amount. You confirm with your PIN, and the phone signs the payment and gives it to the Pi network. The other coins can still be received. Sending them from Harvana is not switched on, because each of those networks needs its own signed transaction.
+
+What you do: install the build. Open Pi again. The address on the coin page and on Receive must be the same, the one Receive already showed.
+
 ## 8 Oct 2026: choosing a coin is its own screen
 
 What the app does:

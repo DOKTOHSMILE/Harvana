@@ -118,6 +118,21 @@ public final class CoinCatalog {
     public static Coin harv() { return ALL.get(0); }
 
     /**
+     * The address already saved for this coin. Does not derive, so it is safe on the main thread.
+     * Every screen must use this, not an address it remembered earlier: a remembered one can be from an older derivation.
+     */
+    public static String savedAddress(Context c, String harvAddress, String key) {
+        if (c == null || harvAddress == null || harvAddress.isEmpty() || key == null) return "";
+        if ("HARV".equals(key)) return harvAddress;
+        if ("PI".equals(key)) return PiWalletStore.get(c, harvAddress);
+        Coin coin = null;
+        for (Coin x : ALL) if (x.key.equals(key)) coin = x;
+        if (coin == null) return "";
+        ChainKeys.Chain chain = coin.evm != null ? ChainKeys.Chain.ETH : coin.chain;
+        return ChainWalletStore.saved(c, harvAddress, chain);
+    }
+
+    /**
      * Addresses for every coin, derived from the recovery phrase when needed.
      * Run off the main thread: the first call can take a moment.
      */

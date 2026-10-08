@@ -288,6 +288,7 @@ public class ReceiveActivity extends AppCompatActivity {
 			getSupportActionBar().setSubtitle(coin.network);
 		}
 		if (textview1 != null) textview1.setText(coin.name);
+		if (tvQrHint != null) tvQrHint.setText("Scan to send " + coin.ticker + " to this address");
 		if (addr == null || addr.isEmpty()) {
 			if (tvDepositAddress != null) tvDepositAddress.setText("Preparing this address…");
 			return;
@@ -302,6 +303,7 @@ public class ReceiveActivity extends AppCompatActivity {
 		activeAddress = addr;
 		validAddress = addr.length() >= 20;
 		if (tvDepositAddress != null) tvDepositAddress.setText(addr);
+		if (ivQrCode != null) ivQrCode.setImageDrawable(null);
 		_loadQrCode();
 	}
 	

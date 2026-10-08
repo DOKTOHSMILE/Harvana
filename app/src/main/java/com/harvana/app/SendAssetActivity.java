@@ -453,6 +453,10 @@ public class SendAssetActivity extends AppCompatActivity {
 				HashMap<String, Object> selectedAsset = walletAssets.get(assetPos);
 				String symbol = String.valueOf(selectedAsset.get("symbol"));
 				String assetKey = String.valueOf(selectedAsset.get("assetKey"));
+				if ("PI".equals(assetKey)) {
+					_sendPi(view, selectedAsset);
+					return;
+				}
 				if (assetKey != null && !assetKey.isEmpty() && !"HARV".equals(assetKey) && !"null".equals(assetKey)) {
 					com.harvana.app.wallet.CoinCatalog.Coin coin = com.harvana.app.wallet.CoinCatalog.get(assetKey);
 					SketchwareUtil.showMessage(getApplicationContext(),
@@ -582,6 +586,68 @@ public class SendAssetActivity extends AppCompatActivity {
 		}
 	}
 	
+	private void _sendPi(View sendButton, HashMap<String, Object> asset) {
+		String recipient = etRecipient != null ? etRecipient.getText().toString().trim() : "";
+		if (!com.harvana.app.wallet.PiKeys.isValidAddress(recipient)) {
+			SketchwareUtil.showMessage(getApplicationContext(), "Enter a Pi address. It starts with G and is 56 characters.");
+			return;
+		}
+		String amountText = etAmount != null ? etAmount.getText().toString().trim() : "";
+		final java.math.BigDecimal amount;
+		try { amount = new java.math.BigDecimal(amountText); }
+		catch (Exception e) { SketchwareUtil.showMessage(getApplicationContext(), "Invalid amount."); return; }
+		if (amount.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+			SketchwareUtil.showMessage(getApplicationContext(), "Amount must be greater than zero.");
+			return;
+		}
+		java.math.BigDecimal have = asset.get("balance") instanceof java.math.BigDecimal
+				? (java.math.BigDecimal) asset.get("balance") : java.math.BigDecimal.ZERO;
+		if (amount.compareTo(have) > 0) {
+			SketchwareUtil.showMessage(getApplicationContext(), "Insufficient PI balance.");
+			return;
+		}
+		String mine = String.valueOf(asset.get("address"));
+		if (recipient.equals(mine)) {
+			SketchwareUtil.showMessage(getApplicationContext(), "That is your own Pi address.");
+			return;
+		}
+		final String memo = etMemo != null && etMemo.getText() != null ? etMemo.getText().toString().trim() : "";
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"To", recipient});
+		rows.add(new String[]{"From", mine});
+		rows.add(new String[]{"Network", "Pi Network"});
+		if (!memo.isEmpty()) rows.add(new String[]{"Memo", memo});
+		rows.add(new String[]{"Network fee", "Set by the Pi network"});
+		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send PI", amountText + " PI", rows, () -> {
+			if (isProcessingSend) return;
+			isProcessingSend = true;
+			sendButton.setEnabled(false);
+			final String amt = amountText;
+			new Thread(() -> {
+				String err = null;
+				try {
+					String phrase = com.harvana.app.wallet.SecureWalletStorage.getActiveMnemonic(getApplicationContext());
+					if (phrase == null || phrase.trim().isEmpty()) err = "Couldn't load the recovery phrase on this phone.";
+					else com.harvana.app.wallet.PiClient.send(phrase, recipient, amt, memo);
+				} catch (Exception e) {
+					err = e.getMessage() == null ? "The Pi network rejected the payment." : e.getMessage();
+				}
+				final String fail = err;
+				runOnUiThread(() -> {
+					isProcessingSend = false;
+					if (isFinishing()) return;
+					sendButton.setEnabled(true);
+					if (fail != null) SketchwareUtil.showMessage(getApplicationContext(), fail);
+					else {
+						SketchwareUtil.showMessage(getApplicationContext(), "Pi sent.");
+						setResult(RESULT_OK);
+						finish();
+					}
+				});
+			}).start();
+		});
+	}
+
 	private void _coinIcon(TextView tv, int pos) {
 		int icon = com.harvana.app.R.drawable.ic_coin_harv;
 		if (walletAssets != null && pos >= 0 && pos < walletAssets.size() && walletAssets.get(pos).get("icon") instanceof Integer) {

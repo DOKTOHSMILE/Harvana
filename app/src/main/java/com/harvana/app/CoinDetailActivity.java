@@ -214,7 +214,15 @@ public class CoinDetailActivity extends AppCompatActivity {
 	
 	private void initializeLogic() {
 		walletAddress = getIntent().getStringExtra("walletAddress");
-		wallet_address = getIntent().getStringExtra("walletAddress");
+		wallet_address = walletAddress;
+		if (openCoin != null && !openCoin.nativeHarv) {
+			String saved = com.harvana.app.wallet.CoinCatalog.savedAddress(this,
+					com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this), openCoin.key);
+			if (saved != null && !saved.isEmpty()) {
+				walletAddress = saved;
+				wallet_address = saved;
+			}
+		}
 		_buildSections();
 		androidx.appcompat.app.ActionBar ab = getSupportActionBar();
 		int backgroundColor = androidx.core.content.ContextCompat.getColor(this, R.color.colorBackground);
@@ -226,8 +234,6 @@ public class CoinDetailActivity extends AppCompatActivity {
 			com.harvana.app.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
-		walletAddress = getIntent().getStringExtra("walletAddress");
-		wallet_address = getIntent().getStringExtra("walletAddress");
 		if (openCoin != null && !openCoin.nativeHarv) {
 			_showChainCoin(openCoin);
 			return;
@@ -261,7 +267,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		_setStatRow(R.id.row_total_holders, "Decimals", String.valueOf(coin.decimals));
 		_setStatRow(R.id.row_block_height, "Recovery phrase", "Same words as HARV");
 		_setStatRow(R.id.row_block_reward, "Receive", "On");
-		_setStatRow(R.id.row_halving, "Send from Harvana", "Not switched on yet");
+		_setStatRow(R.id.row_halving, "Send from Harvana", "PI".equals(coin.key) ? "On" : "Not switched on yet");
 		if (address.isEmpty() || tv_coin_balance == null) {
 			_watchMarketPrice(coin);
 			return;

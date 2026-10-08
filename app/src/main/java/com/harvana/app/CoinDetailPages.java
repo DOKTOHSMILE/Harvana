@@ -268,7 +268,7 @@ public final class CoinDetailPages {
             box.addView(stat("Decimals", String.valueOf(coin.decimals)));
             box.addView(stat("Recovery phrase", "Same words as HARV"));
             box.addView(stat("Receive", "On"));
-            box.addView(stat("Send from Harvana", "Not switched on yet"));
+            box.addView(stat("Send from Harvana", "PI".equals(coin.key) ? "On" : "Not switched on yet"));
             TextView addr = new TextView(requireContext());
             addr.setText(address().isEmpty() ? "Address not ready yet" : address());
             addr.setTextIsSelectable(true);

@@ -39,4 +39,11 @@ public final class ChainWalletStore {
         if (mnemonic != null && PiWalletStore.get(c, harvAddress).isEmpty()) PiWalletStore.rememberFromPhrase(c, harvAddress, mnemonic);
         return out;
     }
+
+    /** The address already saved for this wallet and chain, or "" . Does not derive. */
+    public static String saved(Context c, String harvAddress, ChainKeys.Chain chain) {
+        if (c == null || harvAddress == null || chain == null) return "";
+        String a = prefs(c).getString(harvAddress + "_" + chain.name(), "");
+        return a == null ? "" : a;
+    }
 }

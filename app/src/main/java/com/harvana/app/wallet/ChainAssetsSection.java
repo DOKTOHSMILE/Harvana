@@ -101,7 +101,8 @@ public final class ChainAssetsSection {
                 if (a != null && !a.isEmpty()) show.add(coin);
             }
             box.post(() -> {
-                if (!sameKeys(box, show)) rebuild(c, box, show, addrs);
+                if (!sameKeys(box, show)) rebuild(c, box, harvAddress, show, addrs);
+                else refreshOpens(c, box, harvAddress);
                 paintPrices(box);
                 for (CoinCatalog.Coin coin : show) refreshBalance(c, box, coin, addrs.get(coin.key));
                 AssetPrices.load(c, () -> paintPrices(box));
@@ -115,7 +116,7 @@ public final class ChainAssetsSection {
         return true;
     }
 
-    private static void rebuild(Context c, LinearLayout box, List<CoinCatalog.Coin> show, Map<String, String> addrs) {
+    private static void rebuild(Context c, LinearLayout box, String harvAddress, List<CoinCatalog.Coin> show, Map<String, String> addrs) {
         box.removeAllViews();
         LayoutInflater inf = LayoutInflater.from(c);
         for (CoinCatalog.Coin coin : show) {
@@ -136,12 +137,29 @@ public final class ChainAssetsSection {
             if (symbol != null) symbol.setText(coin.ticker);
             AssetPrices.Quote quote = AssetPrices.peek(c, coin.key);
             if (side != null) side.setText(quote != null ? AssetPrices.usd(quote.usd) : coin.network);
-            String address = addrs.get(coin.key);
             View card = item.findViewById(R.id.cardview1);
-            View.OnClickListener open = v -> openDetail(c, coin, address, bal == null ? "" : bal.getText().toString());
+            View.OnClickListener open = v -> openFresh(c, harvAddress, coin, bal == null ? "" : bal.getText().toString());
             if (card != null) card.setOnClickListener(open); else item.setOnClickListener(open);
             box.addView(item);
         }
+    }
+
+    /** The row stays, but its tap must read the address saved now, not the one it was built with. */
+    private static void refreshOpens(Context c, LinearLayout box, String harvAddress) {
+        for (int i = 0; i < box.getChildCount(); i++) {
+            View item = box.getChildAt(i);
+            if (!(item.getTag() instanceof String)) continue;
+            CoinCatalog.Coin coin = CoinCatalog.get((String) item.getTag());
+            TextView bal = item.findViewById(R.id.tv_asset_balance);
+            View.OnClickListener open = v -> openFresh(c, harvAddress, coin, bal == null ? "" : bal.getText().toString());
+            View card = item.findViewById(R.id.cardview1);
+            if (card != null) card.setOnClickListener(open); else item.setOnClickListener(open);
+        }
+    }
+
+    private static void openFresh(Context c, String harvAddress, CoinCatalog.Coin coin, String shownBalance) {
+        String saved = CoinCatalog.savedAddress(c, harvAddress, coin.key);
+        openDetail(c, coin, saved, shownBalance);
     }
 
     /** Writes the saved price onto each row, and leaves a row alone when its text is already that price. */

@@ -31,7 +31,7 @@ public final class LearnPostBinder {
 
     /** The post as plain values, so it can be passed to the reader in an Intent. */
     public static final class Post {
-        public String id = "", title = "", body = "", category = "", imageUrl = "", authorUid = "", videoUrl = "";
+        public String id = "", title = "", body = "", category = "", imageUrl = "", authorUid = "", authorWallet = "", videoUrl = "";
         public long createdAt, views;
 
         public static Post from(Map<String, Object> m) {
@@ -42,6 +42,7 @@ public final class LearnPostBinder {
             p.category = str(m.get("category"));
             p.imageUrl = str(m.get("imageUrl"));
             p.authorUid = str(m.get("authorUid"));
+            p.authorWallet = str(m.get("authorWallet"));
             p.videoUrl = str(m.get("videoUrl"));
             p.createdAt = m.get("createdAt") instanceof Number ? ((Number) m.get("createdAt")).longValue() : 0L;
             p.views = m.get("views") instanceof Number ? ((Number) m.get("views")).longValue() : 0L;
@@ -154,7 +155,10 @@ public final class LearnPostBinder {
             if (onCommentPosted != null) onCommentPosted.run();
         }));
         root.findViewById(R.id.ll_share).setOnClickListener(v -> share(host, post));
-        root.findViewById(R.id.ll_gift).setOnClickListener(v -> { LearnInterest.get(host).record(post, LearnInterest.GIFT); LearnGift.ask(host, id, author[0], () -> bindCounts(host, root, post)); });
+        root.findViewById(R.id.ll_gift).setOnClickListener(v -> {
+            LearnInterest.get(host).record(post, LearnInterest.GIFT);
+            LearnGift.ask(host, id, author[0], post.authorWallet, () -> bindCounts(host, root, post));
+        });
         root.findViewById(R.id.iv_more).setOnClickListener(v -> more(host, v, post));
     }
 

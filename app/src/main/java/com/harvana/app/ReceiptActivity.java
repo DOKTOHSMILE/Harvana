@@ -44,7 +44,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 
 
-public class TransactionDetailActivity extends AppCompatActivity {
+public class ReceiptActivity extends AppCompatActivity {
 	
 	private Toolbar _toolbar;
 	private AppBarLayout _app_bar;
@@ -186,7 +186,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			com.harvana.app.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
-		setTitle("");
+		setTitle("Receipt");
 		
 		txHash = getIntent().getStringExtra("txHash");
 		status = getIntent().getStringExtra("status");
@@ -221,22 +221,37 @@ public class TransactionDetailActivity extends AppCompatActivity {
 		tv_tx_value.setText(_formatUIBalance(value) + " " + tokenSymbol);
 		com.harvana.app.tx.TxKind _kind = com.harvana.app.tx.TxKind.of(memo, isIncoming);
 		textview40.setText(_kind != null ? _kind.title : (isIncoming ? "Received" : "Sent"));
-		
+
+		// Same icon the activity row uses: the kind (fee, stake, gift...) when we know it, otherwise the plain arrow.
+		boolean failed = !pending && !confirmed;
+		int icon;
+		int tint;
+		if (pending) {
+			icon = R.drawable.icon_access_time_outline;
+			tint = androidx.core.content.ContextCompat.getColor(this, R.color.colorWarning);
+		} else if (failed) {
+			icon = R.drawable.icon_call_made_twotone;
+			tint = androidx.core.content.ContextCompat.getColor(this, R.color.colorError);
+		} else if (isIncoming) {
+			icon = R.drawable.icon_call_received_twotone;
+			tint = androidx.core.content.ContextCompat.getColor(this, R.color.colorAccent);
+		} else {
+			icon = R.drawable.icon_call_made_twotone;
+			tint = androidx.core.content.ContextCompat.getColor(this, R.color.colorError);
+		}
+		if (confirmed && _kind != null) icon = _kind.icon;
+		img_status_icon.setImageResource(icon);
+		img_status_icon.setColorFilter(tint);
+
 		if (pending) {
 			tv_tx_status.setText("●  Pending");
 			tv_tx_status.setTextColor(UiColors.warning());
-			img_status_icon.setImageResource(R.drawable.icon_access_time_outline);
-			img_status_icon.setColorFilter(UiColors.warning());
 		} else if (confirmed) {
 			tv_tx_status.setText("●  Completed");
 			tv_tx_status.setTextColor(UiColors.success());
-			img_status_icon.setImageResource(isIncoming ? R.drawable.icon_call_received_twotone : R.drawable.icon_call_made_twotone);
-			img_status_icon.setColorFilter(isIncoming ? UiColors.success() : UiColors.accent());
 		} else {
 			tv_tx_status.setText("●  Failed");
 			tv_tx_status.setTextColor(UiColors.error());
-			img_status_icon.setImageResource(isIncoming ? R.drawable.icon_call_received_twotone : R.drawable.icon_call_made_twotone);
-			img_status_icon.setColorFilter(UiColors.error());
 		}
 		
 		tv_from_address.setText(_shortAddr(sender));
@@ -307,7 +322,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 			if (text != null && !text.isEmpty() && !text.equalsIgnoreCase("N/A") && !text.equalsIgnoreCase("Unknown Address") && !text.equalsIgnoreCase("None") && !"—".equals(text)) {
 				ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 				clipboard.setPrimaryClip(ClipData.newPlainText("Copied", text));
-				Toast.makeText(TransactionDetailActivity.this, "Copied", Toast.LENGTH_SHORT).show();
+				Toast.makeText(ReceiptActivity.this, "Copied", Toast.LENGTH_SHORT).show();
 			}
 		};
 		
@@ -360,7 +375,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
 				
 				// Pass 4 arguments: Activity, Title, Message, Sender
 				com.harvana.app.utils.InAppNotificationHelper.showTransactionNotification(
-				TransactionDetailActivity.this, // Replace with your current Activity
+				ReceiptActivity.this, // Replace with your current Activity
 				"Incoming Transfer", 
 				"Received " + String.format(Locale.US, "%.5f", amount) + (" " + com.harvana.app.CoinInfo.ticker()),
 				sender

@@ -7,7 +7,7 @@ import com.harvana.app.GroupDetailsActivity;
 import com.harvana.app.InvitesActivity;
 import com.harvana.app.MainActivity;
 import com.harvana.app.P2pMyTradesActivity;
-import com.harvana.app.TransactionDetailActivity;
+import com.harvana.app.ReceiptActivity;
 import com.harvana.app.sync.HarvanaNodeClient;
 
 import org.json.JSONObject;
@@ -180,7 +180,7 @@ public final class NotificationRouter {
     private static void startDetail(Context c, String hash, JSONObject tx, long confirmations) {
         long block = tx.optLong("blockHeight", tx.optLong("block", 0L));
         long conf = confirmations > 0 ? confirmations : (block >= 0 && tx.has("blockHeight") ? 1L : 0L);
-        Intent i = new Intent(c, TransactionDetailActivity.class);
+        Intent i = new Intent(c, ReceiptActivity.class);
         i.putExtra("txHash", hash);
         i.putExtra("status", conf > 0 ? "confirmed" : "pending");
         i.putExtra("senderAddress", tx.optString("from", ""));

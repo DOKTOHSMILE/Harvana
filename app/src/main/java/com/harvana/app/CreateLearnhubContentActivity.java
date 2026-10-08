@@ -427,12 +427,11 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 	// ── Submit ───────────────────────────────────────────────────────────
 	
 	private void _submit() {
-		String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
+		final String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
 		if (wallet == null || wallet.trim().isEmpty()) {
-			_showError("Create or import a wallet and link it to your account before you post. Gifts for your articles are paid to that wallet.");
+			_showError("Create or import a wallet on this phone before you post. Gifts for this article are paid to the wallet signed in now.");
 			return;
 		}
-		if (!walletLinkedOk) { _requireLinkedWallet(wallet); return; }
 		if (uploadInProgress) {
 			_showError("Please wait for the image to finish uploading.");
 			return;
@@ -505,6 +504,7 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 				fields.put("videoType", fVideo.platform.label.toLowerCase());
 			}
 			fields.put("authorUid", fUid);
+			fields.put("authorWallet", wallet);
 			fields.put("createdAt", System.currentTimeMillis());
 			fields.put("views", 0);
 			
@@ -551,40 +551,10 @@ public class CreateLearnhubContentActivity extends AppCompatActivity {
 			}
 		});
 	}
-	
-	// ── a linked wallet is required to post ──────────────────────────
-
-	private boolean walletLinkedOk;
-
-	/**
-	 * Readers gift HARV to the wallet the network has confirmed for the author's profile, so an article is only accepted from someone whose
-	 * profile has that wallet and whose active wallet is the same one. This only checks the saved link. Linking and binding the device are
-	 * done once from Profile, "Bind this device", never from here.
-	 */
-	private void _requireLinkedWallet(final String wallet) {
-		final String uid = FirebaseAuth.getInstance().getCurrentUser() == null ? "" : FirebaseAuth.getInstance().getCurrentUser().getUid();
-		tv_learn_error.setVisibility(View.GONE);
-		btn_learn_post.setEnabled(false);
-		com.harvana.app.trust.ProfileTrust.forget(uid);
-		com.harvana.app.trust.ProfileTrust.resolve(uid, card -> {
-			btn_learn_post.setEnabled(true);
-			if (!card.wallet.isEmpty() && card.wallet.equalsIgnoreCase(wallet)) {
-				walletLinkedOk = true;
-				_submit();
-				return;
-			}
-			_showError(!card.wallet.isEmpty()
-				? "Your account is linked to a different wallet than the one active on this phone. Switch to the linked wallet to post."
-				: "Your wallet is not linked to your account yet. Open your Profile and tap \"Bind this device\" once, then post again.");
-		});
-	}
 
 	private void _showError(String message) {
 		tv_learn_error.setText(message);
 		tv_learn_error.setVisibility(View.VISIBLE);
 	}
-	
-	{
-	}
-	
+
 }

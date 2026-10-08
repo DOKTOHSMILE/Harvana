@@ -522,14 +522,14 @@ public class WalletActivityFragmentActivity extends Fragment {
 				}
 			}
 			
-			// Name and icon by what the transaction is for (staking, group creation, contribution, loan, gift…)
+			// Name by what the transaction is for. The clock stays while it is pending; the real icon shows once it is confirmed.
 			if (!isFailed) {
 				com.harvana.app.tx.TxKind kind = com.harvana.app.tx.TxKind.of(
 				item.get("memo") != null ? String.valueOf(item.get("memo")) : "", isIncoming);
 				if (kind != null) {
 					if (holder.tvType != null) holder.tvType.setText(isPending ? kind.title + "…" : kind.title);
 					if (holder.tvAddress != null) holder.tvAddress.setText(kind.detail + " · " + (isIncoming ? "From: " + shortenAddress(sender) : "To: " + shortenAddress(recipient)));
-					if (holder.ivIcon != null) holder.ivIcon.setImageResource(kind.icon);
+					if (!isPending && holder.ivIcon != null) holder.ivIcon.setImageResource(kind.icon);
 				}
 			}
 			
@@ -554,7 +554,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 			// Click Listener bound directly to the properly declared cardview1
 			if (holder.cardview1 != null) {
 				holder.cardview1.setOnClickListener(v -> {
-					Intent intent = new Intent(v.getContext(), TransactionDetailActivity.class);
+					Intent intent = new Intent(v.getContext(), ReceiptActivity.class);
 					
 					intent.putExtra("txHash",           String.valueOf(item.get("txHash")));
 					intent.putExtra("status",           String.valueOf(item.get("status")));

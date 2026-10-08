@@ -126,8 +126,8 @@
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
-			android:name=".TransactionDetailActivity"
-			android:label="Transaction details"
+			android:name=".ReceiptActivity"
+			android:label="Receipt"
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity

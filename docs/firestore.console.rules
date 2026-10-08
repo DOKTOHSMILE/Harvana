@@ -109,7 +109,10 @@ service cloud.firestore {
         && request.resource.data.get('videoUrl', '').size() <= 400
         && (request.resource.data.get('videoUrl', '') == '' || request.resource.data.videoUrl.matches('^https://.*'))
         && request.resource.data.createdAt is number
-        && request.resource.data.views == 0;
+        && request.resource.data.views == 0
+        // The wallet signed in when the article was posted. Gifts for this article go there. Optional so older posts still read.
+        && request.resource.data.get('authorWallet', '') is string
+        && request.resource.data.get('authorWallet', '').size() <= 80;
       allow delete: if request.auth != null && resource.data.authorUid == request.auth.uid;
       // Anyone signed in bumps the view counter. Only the author edits the text or changes who can see the article.
       allow update: if request.auth != null

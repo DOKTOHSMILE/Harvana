@@ -674,9 +674,9 @@ public class HistoryFragmentActivity extends Fragment {
 				: getResources().getIdentifier("bg_chip_pending", "drawable", getContext().getPackageName()));
 			}
 			
-			// Attach Click Listener to launch TransactionDetailActivity
+			// Attach Click Listener to launch ReceiptActivity
 			h.itemView.setOnClickListener(v -> {
-				Intent intent = new Intent(v.getContext(), TransactionDetailActivity.class);
+				Intent intent = new Intent(v.getContext(), ReceiptActivity.class);
 				
 				intent.putExtra("txHash", txHash);
 				intent.putExtra("status", status);

@@ -387,6 +387,11 @@
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
+			android:name=".PickAssetActivity"
+			android:label="Choose asset"
+			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:windowSoftInputMode="adjustResize" />
+		<activity
 			android:name=".ReceiveActivity"
 			android:label="Receive"
 			android:configChanges="orientation|screenSize|keyboardHidden"

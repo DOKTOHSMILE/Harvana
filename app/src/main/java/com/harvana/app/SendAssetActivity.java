@@ -405,6 +405,10 @@ public class SendAssetActivity extends AppCompatActivity {
 		});
 		
 		if (spAsset != null) {
+			spAsset.setOnTouchListener((v, event) -> {
+				if (event.getAction() == android.view.MotionEvent.ACTION_UP) _openAssetPicker();
+				return true;
+			});
 			spAsset.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
@@ -638,6 +642,17 @@ public class SendAssetActivity extends AppCompatActivity {
 				}
 			});
 		}).start();
+	}
+
+	private static final int RC_PICK_ASSET = 78;
+
+	private void _openAssetPicker() {
+		String key = "HARV";
+		if (spAsset != null && walletAssets != null) {
+			int i = spAsset.getSelectedItemPosition();
+			if (i >= 0 && i < walletAssets.size()) key = String.valueOf(walletAssets.get(i).get("assetKey"));
+		}
+		startActivityForResult(new Intent(this, PickAssetActivity.class).putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, key), RC_PICK_ASSET);
 	}
 
 	private void _selectRequestedAsset() {
@@ -1038,6 +1053,15 @@ public class SendAssetActivity extends AppCompatActivity {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == RC_PICK_ASSET && resultCode == Activity.RESULT_OK && data != null && spAsset != null && walletAssets != null) {
+			String key = data.getStringExtra(com.harvana.app.wallet.CoinCatalog.EXTRA);
+			for (int i = 0; i < walletAssets.size(); i++) {
+				if (key != null && key.equals(String.valueOf(walletAssets.get(i).get("assetKey")))) {
+					spAsset.setSelection(i);
+					return;
+				}
+			}
+		}
 		if (requestCode == RC_SCAN_RECIPIENT && resultCode == Activity.RESULT_OK && data != null) {
 			String address = data.getStringExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_RESULT_TEXT);
 			if (address != null && etRecipient != null) {

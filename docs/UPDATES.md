@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: choosing a coin is its own screen
+
+What the app does:
+
+- **Send and Receive no longer open the coin list as a dropdown.** Tapping the coin opens a full screen, Choose asset, with the coin logo, name, network and ticker.
+- **Search** matches the name, the ticker or the network (for example "doge", "pi" or "base").
+- The coin that is already selected is marked. Picking one returns to Send or Receive with that coin's address and QR.
+
+What you do: install the build.
+
 ## 8 Oct 2026: one page per coin, shared prices, Harvana explorer link
 
 What the app does:

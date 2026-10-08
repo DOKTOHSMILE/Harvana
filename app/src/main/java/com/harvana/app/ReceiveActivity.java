@@ -224,6 +224,10 @@ public class ReceiveActivity extends AppCompatActivity {
 				@Override public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) { _showReceiveCoin(position); }
 				@Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
 			});
+			spinnerAssets.setOnTouchListener((v, event) -> {
+				if (event.getAction() == android.view.MotionEvent.ACTION_UP) _openAssetPicker();
+				return true;
+			});
 			String want = getIntent().getStringExtra(com.harvana.app.wallet.CoinCatalog.EXTRA);
 			if (want != null) {
 				for (int i = 0; i < receiveCoins.size(); i++) if (want.equals(receiveCoins.get(i).key)) { spinnerAssets.setSelection(i); break; }
@@ -239,6 +243,28 @@ public class ReceiveActivity extends AppCompatActivity {
 				if (spinnerAssets != null) _showReceiveCoin(spinnerAssets.getSelectedItemPosition());
 			});
 		}).start();
+	}
+
+	private static final int RC_PICK_ASSET = 77;
+
+	private void _openAssetPicker() {
+		String key = "";
+		if (spinnerAssets != null) {
+			int i = spinnerAssets.getSelectedItemPosition();
+			if (i >= 0 && i < receiveCoins.size()) key = receiveCoins.get(i).key;
+		}
+		startActivityForResult(new Intent(this, PickAssetActivity.class).putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, key), RC_PICK_ASSET);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode != RC_PICK_ASSET || resultCode != RESULT_OK || data == null || spinnerAssets == null) return;
+		String key = data.getStringExtra(com.harvana.app.wallet.CoinCatalog.EXTRA);
+		if (key == null) return;
+		for (int i = 0; i < receiveCoins.size(); i++) {
+			if (key.equals(receiveCoins.get(i).key)) { spinnerAssets.setSelection(i); return; }
+		}
 	}
 
 	private void _coinIcon(TextView tv, int pos) {

@@ -93,6 +93,9 @@ public class SendAssetActivity extends AppCompatActivity {
 	private EditText etAmount;
 	private EditText etMemo;
 	private TextView tvAvailable;
+	private ArrayList<HashMap<String, Object>> walletAssets = new ArrayList<>();
+	private ArrayList<String> assetDisplayNames = new ArrayList<>();
+	private ArrayAdapter<String> assetAdapter;
 	private LinearLayout linear19;
 	private LinearLayout linear20;
 	private LinearLayout linear21;
@@ -315,10 +318,10 @@ public class SendAssetActivity extends AppCompatActivity {
 			}
 		}
 		
-		final ArrayList<HashMap<String, Object>> walletAssets = new ArrayList<>();
-		final ArrayList<String> assetDisplayNames = new ArrayList<>();
+		walletAssets = new ArrayList<>();
+		assetDisplayNames = new ArrayList<>();
 		
-		final ArrayAdapter<String> assetAdapter = new ArrayAdapter<String>(
+		assetAdapter = new ArrayAdapter<String>(
 		this, com.harvana.app.R.layout.spinner_item, assetDisplayNames) {
 			@NonNull
 			@Override
@@ -327,6 +330,7 @@ public class SendAssetActivity extends AppCompatActivity {
 				tv.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
 				tv.setTextSize(18);
 				tv.setPadding(24, 16, 24, 16);
+				_coinIcon(tv, pos);
 				return tv;
 			}
 			
@@ -337,6 +341,7 @@ public class SendAssetActivity extends AppCompatActivity {
 				tv.setTextSize(18);
 				tv.setPadding(24, 24, 24, 24);
 				tv.setBackgroundColor(UiColors.surface());
+				_coinIcon(tv, pos);
 				return tv;
 			}
 		};
@@ -362,11 +367,15 @@ public class SendAssetActivity extends AppCompatActivity {
 					native_.put("decimals", 8);
 					native_.put("isNative", true);
 					native_.put("isListed", true);
+					native_.put("assetKey", "HARV");
+					native_.put("icon", com.harvana.app.R.drawable.ic_coin_harv);
 					walletAssets.add(native_);
 					assetDisplayNames.add((com.harvana.app.CoinInfo.name() + " (" + com.harvana.app.CoinInfo.ticker() + ")"));
 					
+					_includeChainAssets(myAddress);
 					assetAdapter.notifyDataSetChanged();
-					if (spAsset != null && !walletAssets.isEmpty()) spAsset.setSelection(0);
+					_selectRequestedAsset();
+					if (spAsset != null && !walletAssets.isEmpty() && spAsset.getSelectedItemPosition() < 0) spAsset.setSelection(0);
 				});
 			}
 			
@@ -383,9 +392,13 @@ public class SendAssetActivity extends AppCompatActivity {
 					native_.put("decimals", 8);
 					native_.put("isNative", true);
 					native_.put("isListed", true);
+					native_.put("assetKey", "HARV");
+					native_.put("icon", com.harvana.app.R.drawable.ic_coin_harv);
 					walletAssets.add(native_);
 					assetDisplayNames.add((com.harvana.app.CoinInfo.name() + " (" + com.harvana.app.CoinInfo.ticker() + ")"));
+					_includeChainAssets(myAddress);
 					assetAdapter.notifyDataSetChanged();
+					_selectRequestedAsset();
 					SketchwareUtil.showMessage(getApplicationContext(), "Could not fetch balance: " + error);
 				});
 			}
@@ -398,12 +411,18 @@ public class SendAssetActivity extends AppCompatActivity {
 					if (pos < 0 || pos >= walletAssets.size()) return;
 					
 					HashMap<String, Object> asset = walletAssets.get(pos);
-					BigDecimal balance = asset.get("balance") instanceof BigDecimal
-					? (BigDecimal) asset.get("balance") : BigDecimal.ZERO;
-					
+					String ready = asset.get("balanceText") instanceof String ? String.valueOf(asset.get("balanceText")) : "";
 					if (tvAvailable != null) {
-						// APPLIED FIX
-						tvAvailable.setText("Available: " + _formatUIBalance(balance.doubleValue()));
+						if (!ready.isEmpty()) tvAvailable.setText("Available: " + ready);
+						else {
+							BigDecimal balance = asset.get("balance") instanceof BigDecimal
+							? (BigDecimal) asset.get("balance") : BigDecimal.ZERO;
+							tvAvailable.setText("Available: " + _formatUIBalance(balance.doubleValue()) + " " + asset.get("symbol"));
+						}
+					}
+					String from = asset.get("address") instanceof String ? String.valueOf(asset.get("address")) : "";
+					if (tvSubtitle != null && getIntent().getStringExtra("fromWalletAddress") == null && !from.isEmpty()) {
+						tvSubtitle.setText("From " + from);
 					}
 				}
 				
@@ -429,6 +448,13 @@ public class SendAssetActivity extends AppCompatActivity {
 				}
 				HashMap<String, Object> selectedAsset = walletAssets.get(assetPos);
 				String symbol = String.valueOf(selectedAsset.get("symbol"));
+				String assetKey = String.valueOf(selectedAsset.get("assetKey"));
+				if (assetKey != null && !assetKey.isEmpty() && !"HARV".equals(assetKey) && !"null".equals(assetKey)) {
+					com.harvana.app.wallet.CoinCatalog.Coin coin = com.harvana.app.wallet.CoinCatalog.get(assetKey);
+					SketchwareUtil.showMessage(getApplicationContext(),
+							coin.name + " is in this wallet so you can receive it. Sending " + coin.ticker + " from Harvana is not switched on yet.");
+					return;
+				}
 				String contract = String.valueOf(selectedAsset.get("contractAddress"));
 				
 				String recipient = etRecipient != null ? etRecipient.getText().toString().trim() : "";
@@ -552,6 +578,80 @@ public class SendAssetActivity extends AppCompatActivity {
 		}
 	}
 	
+	private void _coinIcon(TextView tv, int pos) {
+		int icon = com.harvana.app.R.drawable.ic_coin_harv;
+		if (walletAssets != null && pos >= 0 && pos < walletAssets.size() && walletAssets.get(pos).get("icon") instanceof Integer) {
+			icon = (Integer) walletAssets.get(pos).get("icon");
+		}
+		android.graphics.drawable.Drawable d = androidx.core.content.ContextCompat.getDrawable(this, icon);
+		if (d == null) return;
+		int s = (int) (22 * getResources().getDisplayMetrics().density);
+		d = d.mutate();
+		d.setBounds(0, 0, s, s);
+		tv.setCompoundDrawables(d, null, null, null);
+		tv.setCompoundDrawablePadding(s / 3);
+	}
+
+	/** Adds every other coin under HARV. Balances fill in afterwards, without clearing the list. */
+	private void _includeChainAssets(String harvAddress) {
+		if (walletAssets == null || assetDisplayNames == null) return;
+		for (HashMap<String, Object> row : walletAssets) {
+			if (!"HARV".equals(String.valueOf(row.get("assetKey")))) return;
+		}
+		for (com.harvana.app.wallet.CoinCatalog.Coin c : com.harvana.app.wallet.CoinCatalog.others()) {
+			HashMap<String, Object> row = new HashMap<>();
+			row.put("contractAddress", "external");
+			row.put("symbol", c.ticker);
+			row.put("name", c.name);
+			row.put("assetKey", c.key);
+			row.put("balance", BigDecimal.ZERO);
+			row.put("icon", c.icon);
+			row.put("decimals", c.decimals);
+			walletAssets.add(row);
+			assetDisplayNames.add(c.name + " (" + c.ticker + ")");
+		}
+		final String mine = harvAddress;
+		new Thread(() -> {
+			java.util.Map<String, String> addrs = com.harvana.app.wallet.CoinCatalog.addresses(getApplicationContext(), mine);
+			java.util.Map<String, String> bals = new java.util.HashMap<>();
+			for (com.harvana.app.wallet.CoinCatalog.Coin c : com.harvana.app.wallet.CoinCatalog.others()) {
+				String a = addrs.get(c.key);
+				if (a == null || a.isEmpty()) continue;
+				bals.put(c.key, com.harvana.app.wallet.ChainBalances.assetBalance(c.key, a));
+			}
+			runOnUiThread(() -> {
+				if (isFinishing() || walletAssets == null) return;
+				for (HashMap<String, Object> row : walletAssets) {
+					String key = String.valueOf(row.get("assetKey"));
+					String line = bals.get(key);
+					if (line == null) continue;
+					row.put("balanceText", line);
+					row.put("address", addrs.get(key));
+					try {
+						String num = line.split(" ")[0].replace(",", "");
+						if (num.length() > 0 && Character.isDigit(num.charAt(0))) row.put("balance", new BigDecimal(num));
+					} catch (Exception ignored) {}
+				}
+				if (assetAdapter != null) assetAdapter.notifyDataSetChanged();
+				if (spAsset != null && spAsset.getOnItemSelectedListener() != null && spAsset.getSelectedItemPosition() >= 0) {
+					spAsset.getOnItemSelectedListener().onItemSelected(spAsset, null, spAsset.getSelectedItemPosition(), 0);
+				}
+			});
+		}).start();
+	}
+
+	private void _selectRequestedAsset() {
+		if (spAsset == null || walletAssets == null) return;
+		String want = getIntent().getStringExtra(com.harvana.app.wallet.CoinCatalog.EXTRA);
+		if (want == null || want.isEmpty()) return;
+		for (int i = 0; i < walletAssets.size(); i++) {
+			if (want.equals(String.valueOf(walletAssets.get(i).get("assetKey")))) {
+				spAsset.setSelection(i);
+				return;
+			}
+		}
+	}
+
 	private void _showTransferConfirmSheet(TransactionRouter.PreparedTransfer prepared, String symbol) {
 		final BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(this);
 		View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_transfer_confirm, null);

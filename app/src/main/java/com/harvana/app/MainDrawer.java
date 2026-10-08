@@ -59,7 +59,6 @@ final class MainDrawer {
         bg.setStroke(dp(1), androidx.core.content.ContextCompat.getColor(a, R.color.colorCardStroke));
         list.setBackground(bg);
 
-        row(list, R.drawable.icon_account_balance_wallet_twotone, "Crypto wallets", null, () -> open(ChainWalletsActivity.class));
         row(list, R.drawable.icon_group_add_twotone, "Friends", null, () -> open(com.harvana.app.social.FriendsActivity.class));
         row(list, R.drawable.icon_mark_unread_chat_alt_round, "Invitations", null, () -> open(InvitesActivity.class));
         row(list, R.drawable.icon_alternate_email_twotone, "My contact card", null, () -> open(com.harvana.app.social.ContactCardActivity.class));

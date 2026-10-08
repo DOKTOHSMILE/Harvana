@@ -60,6 +60,7 @@ public class PublicProfileActivity extends AppCompatActivity {
     private PublicProfileStore.Card card;
     private Map<String, Object> selfData;
     private int tab;
+    private String pageStamp = "";
 
     @Override
     protected void onCreate(Bundle b) {
@@ -163,6 +164,9 @@ public class PublicProfileActivity extends AppCompatActivity {
     // ── Page ─────────────────────────────────────────────────────────────
 
     private void render() {
+        String stamp = pageStamp();
+        if (stamp.equals(pageStamp) && root.getChildCount() > 1) return;
+        pageStamp = stamp;
         root.removeAllViews();
         boolean mine = isMe();
         // The cover reaches the screen edges and the picture overlaps it, so the root must not clip to its padding.
@@ -177,6 +181,16 @@ public class PublicProfileActivity extends AppCompatActivity {
         tabContent.setOrientation(LinearLayout.VERTICAL);
         root.addView(tabContent);
         renderTab();
+    }
+
+    /** Same page already on screen: do not tear it down and draw it again. */
+    private String pageStamp() {
+        if (card == null) return "";
+        String me = "";
+        if (selfData != null) me = String.valueOf(selfData.get("email")) + "|" + String.valueOf(selfData.get("phone")) + "|" + String.valueOf(selfData.get("address"));
+        return card.name + "|" + card.username + "|" + card.icon + "|" + card.cover + "|" + card.groups + "|"
+                + card.trustPercent + "|" + card.cycles + "|" + card.loans + "|" + card.pendingLoans + "|"
+                + card.bio + "|" + card.city + "|" + card.country + "|" + card.state + "|" + me;
     }
 
     /** The wide picture at the top of the profile, edge to edge. A soft colour when there is none; on my own profile it says how to add one. */
@@ -768,7 +782,13 @@ public class PublicProfileActivity extends AppCompatActivity {
         return c;
     }
 
+    private String learnIds = "unset";
+
     private void fillLearn(LinearLayout list, java.util.List<com.google.firebase.firestore.DocumentSnapshot> docs) {
+        StringBuilder ids = new StringBuilder();
+        for (com.google.firebase.firestore.DocumentSnapshot d : docs) ids.append(d.getId()).append(',');
+        if (ids.toString().equals(learnIds) && list.getChildCount() > 0) return;
+        learnIds = ids.toString();
         list.removeAllViews();
         if (docs.isEmpty()) {
             TextView none = SocialUi.text(this, "No contributions yet. Articles you publish in Learn Hub show here.", 13, false, UiColors.textSecondary());
@@ -783,38 +803,42 @@ public class PublicProfileActivity extends AppCompatActivity {
     }
 
     private View learnRow(final com.google.firebase.firestore.DocumentSnapshot d) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, SocialUi.dp(this, 12), 0, SocialUi.dp(this, 4));
+        View item = android.view.LayoutInflater.from(this).inflate(R.layout.home_learnhub_custom_display, null, false);
         final String title = d.getString("title") == null ? "Untitled" : d.getString("title");
         final long views = num(d.get("views"));
         final String vis = visibilityOf(d);
-        LinearLayout text = new LinearLayout(this);
-        text.setOrientation(LinearLayout.VERTICAL);
-        text.addView(SocialUi.text(this, title, 15, true, UiColors.textPrimary()));
-        TextView meta = SocialUi.text(this, (d.getString("category") == null ? "General" : d.getString("category"))
-                + "  \u00b7  " + views + (views == 1 ? " view" : " views") + "  \u00b7  " + visibilityLabel(vis), 12, false, UiColors.textSecondary());
-        meta.setPadding(0, SocialUi.dp(this, 2), 0, 0);
-        text.addView(meta);
-        row.addView(text, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView more = SocialUi.text(this, "\u22EE", 22, true, UiColors.textSecondary());
-        more.setGravity(Gravity.CENTER);
-        more.setPadding(SocialUi.dp(this, 12), SocialUi.dp(this, 4), SocialUi.dp(this, 4), SocialUi.dp(this, 4));
-        more.setOnClickListener(v -> learnMenu(v, d, title, vis));
-        row.addView(more);
-        row.setClickable(true);
-        row.setOnClickListener(v -> startActivity(new Intent(this, com.harvana.app.LearnReadActivity.class)
+        long at = num(d.get("createdAt"));
+        TextView titleView = item.findViewById(R.id.title_text);
+        TextView cat = item.findViewById(R.id.category_text);
+        android.widget.ImageView img = item.findViewById(R.id.imageview1);
+        if (titleView != null) titleView.setText(title);
+        if (cat != null) {
+            String when = at > 0 ? " · " + android.text.format.DateUtils.getRelativeTimeSpanString(at, System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS) : "";
+            String category = d.getString("category") == null ? "General" : d.getString("category");
+            cat.setText(category + " · " + views + (views == 1 ? " view" : " views") + when + " · " + visibilityLabel(vis));
+        }
+        String image = d.getString("imageUrl") == null ? "" : d.getString("imageUrl");
+        if (img != null && !image.isEmpty()) com.bumptech.glide.Glide.with(this).load(image).centerCrop().into(img);
+        else if (img != null) img.setImageResource(R.drawable.ic_coin_harv);
+        LinearLayout row = item.findViewById(R.id.linear1);
+        if (row != null) {
+            TextView more = SocialUi.text(this, "\u22EE", 22, true, UiColors.textSecondary());
+            more.setGravity(Gravity.CENTER);
+            more.setPadding(SocialUi.dp(this, 8), 0, 0, 0);
+            more.setOnClickListener(v -> learnMenu(v, d, title, vis));
+            row.addView(more);
+        }
+        item.setOnClickListener(v -> startActivity(new Intent(this, com.harvana.app.LearnReadActivity.class)
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_ID, d.getId())
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_TITLE, title)
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_BODY, d.getString("description") == null ? "" : d.getString("description"))
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_CATEGORY, d.getString("category") == null ? "" : d.getString("category"))
-                .putExtra(com.harvana.app.LearnReadActivity.EXTRA_IMAGE, d.getString("imageUrl") == null ? "" : d.getString("imageUrl"))
+                .putExtra(com.harvana.app.LearnReadActivity.EXTRA_IMAGE, image)
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_VIDEO, d.getString("videoUrl") == null ? "" : d.getString("videoUrl"))
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_AUTHOR, d.getString("authorUid") == null ? "" : d.getString("authorUid"))
-                .putExtra(com.harvana.app.LearnReadActivity.EXTRA_CREATED, num(d.get("createdAt")))
+                .putExtra(com.harvana.app.LearnReadActivity.EXTRA_CREATED, at)
                 .putExtra(com.harvana.app.LearnReadActivity.EXTRA_VIEWS, views)));
-        return row;
+        return item;
     }
 
     private static String visibilityOf(com.google.firebase.firestore.DocumentSnapshot d) {
@@ -1163,7 +1187,8 @@ public class PublicProfileActivity extends AppCompatActivity {
         grid.setPadding(SocialUi.dp(this, 2), SocialUi.dp(this, 10), SocialUi.dp(this, 2), SocialUi.dp(this, 2));
         LinearLayout r1 = new LinearLayout(this);
         r1.setBaselineAligned(false);
-        r1.addView(countTile("Groups", card.groups));
+        View groupsTile = countTile("Groups", card.groups);
+        r1.addView(groupsTile);
         r1.addView(countTile("Cycles completed", card.cycles));
         LinearLayout r2 = new LinearLayout(this);
         r2.setBaselineAligned(false);
@@ -1175,6 +1200,14 @@ public class PublicProfileActivity extends AppCompatActivity {
         TextView note = SocialUi.text(this, "Counts only. Amounts and group names are never shown.", 12, false, UiColors.textTertiary());
         note.setPadding(0, SocialUi.dp(this, 8), 0, 0);
         c.addView(note);
+        if (isMe()) {
+            String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
+            com.harvana.app.sync.NodePortfolio.load(this, uid, wallet == null ? "" : wallet, p -> runOnUiThread(() -> {
+                if (!(groupsTile instanceof android.view.ViewGroup) || ((android.view.ViewGroup) groupsTile).getChildCount() == 0) return;
+                android.view.View n = ((android.view.ViewGroup) groupsTile).getChildAt(0);
+                if (n instanceof TextView) ((TextView) n).setText(String.valueOf(p.groupCount()));
+            }));
+        }
         return c;
     }
 

@@ -159,20 +159,47 @@ public class UserProfileManager {
 
     /** Removes a group id from USERS/{uid}.groups. Call on leave. */
     public void removeGroupFromProfile(String uid, String groupId, SimpleCallback callback) {
+        java.util.List<String> one = new java.util.ArrayList<>();
+        one.add(groupId);
+        removeGroupsFromProfile(uid, one, callback);
+    }
+
+    /** Removes every listed group id in one write, whether each entry is a plain id or a map with an "id". */
+    public void removeGroupsFromProfile(String uid, java.util.Collection<String> groupIds, SimpleCallback callback) {
+        if (groupIds == null || groupIds.isEmpty()) { if (callback != null) callback.onSuccess(); return; }
         getProfile(uid, new DocCallback() {
-            @Override
-            public void onSuccess(Map<String, Object> data) {
-                _mergeArrayField(uid, data, "groups", groupId, false, callback);
-            }
-            @Override
-            public void onError(String error) {
-                if (error != null && error.contains("404")) {
-                    callback.onSuccess();
-                } else {
-                    callback.onError(error);
-                }
+            @Override public void onSuccess(Map<String, Object> data) { _dropGroups(uid, data, groupIds, callback); }
+            @Override public void onError(String error) {
+                if (error != null && error.contains("404")) { if (callback != null) callback.onSuccess(); }
+                else if (callback != null) callback.onError(error);
             }
         });
+    }
+
+    @SuppressWarnings("unchecked")
+    private void _dropGroups(String uid, Map<String, Object> data, java.util.Collection<String> groupIds, SimpleCallback callback) {
+        List<Object> items = new ArrayList<>();
+        Object existing = data != null ? data.get("groups") : null;
+        if (existing instanceof List) items.addAll((List<Object>) existing);
+        java.util.Set<String> drop = new java.util.HashSet<>();
+        for (String id : groupIds) if (id != null && !id.isEmpty()) drop.add(id);
+        boolean changed = false;
+        for (java.util.Iterator<Object> it = items.iterator(); it.hasNext(); ) {
+            if (drop.contains(_arrayItemId(it.next()))) { it.remove(); changed = true; }
+        }
+        if (!changed) { if (callback != null) callback.onSuccess(); return; }
+        Map<String, Object> update = new HashMap<>();
+        update.put("groups", items);
+        updateProfileFields(uid, update, callback);
+    }
+
+    private static String _arrayItemId(Object item) {
+        if (item instanceof Map) {
+            Object id = ((Map<?, ?>) item).get("id");
+            if (id == null) id = ((Map<?, ?>) item).get("groupId");
+            return id == null ? "" : String.valueOf(id);
+        }
+        return item == null ? "" : String.valueOf(item);
     }
 
     // ── Pending group ids (join requests awaiting approval) ────────────
@@ -228,7 +255,7 @@ public class UserProfileManager {
         }
         boolean present = false;
         for (Object item : items) {
-            if (item != null && value.equals(String.valueOf(item))) {
+            if (item != null && value.equals(_arrayItemId(item))) {
                 present = true;
                 break;
             }
@@ -238,7 +265,7 @@ public class UserProfileManager {
         } else if (!add && present) {
             for (java.util.Iterator<Object> it = items.iterator(); it.hasNext(); ) {
                 Object item = it.next();
-                if (item != null && value.equals(String.valueOf(item))) it.remove();
+                if (item != null && value.equals(_arrayItemId(item))) it.remove();
             }
         } else if (!add) {
             // Nothing to remove — still a no-op success, not an error.

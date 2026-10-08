@@ -435,10 +435,6 @@
 			android:name=".ActivityStatsActivity"
 			android:exported="false"
 			android:screenOrientation="portrait" />
-		<activity
-			android:name=".ChainWalletsActivity"
-			android:exported="false"
-			android:screenOrientation="portrait" />
 
 		<service
 			android:name="com.google.android.gms.auth.api.signin.RevocationBoundService"

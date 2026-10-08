@@ -68,6 +68,7 @@ public class LearnReadActivity extends AppCompatActivity {
 
         scroll = findViewById(R.id.scroll_read);
         status = findViewById(R.id.tv_read_status);
+        if (status != null) status.setVisibility(View.GONE);
         LearnPostBinder.bind(this, findViewById(android.R.id.content), post, true, null);
         android.widget.LinearLayout comments = findViewById(R.id.ll_inline_comments);
         com.harvana.app.learn.LearnCommentsSheet.inline(this, comments, post.id,
@@ -184,14 +185,7 @@ public class LearnReadActivity extends AppCompatActivity {
     }
 
     private void setStatus(String text, boolean done) {
-        if (status == null) return;
-        status.setText(text);
-        status.setTextColor(androidx.core.content.ContextCompat.getColor(this, done ? R.color.colorSuccess : R.color.colorTextTertiary));
-        status.setCompoundDrawablesWithIntrinsicBounds(done ? R.drawable.ic_learn_check : 0, 0, 0, 0);
-        status.setCompoundDrawablePadding((int) (8 * getResources().getDisplayMetrics().density));
-        if (done && status.getCompoundDrawables()[0] != null) {
-            status.getCompoundDrawables()[0].mutate().setTint(androidx.core.content.ContextCompat.getColor(this, R.color.colorSuccess));
-        }
+        if (status != null) status.setVisibility(View.GONE);
     }
 
     private Set<String> doneIds() {

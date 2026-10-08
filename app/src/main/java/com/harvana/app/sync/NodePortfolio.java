@@ -73,7 +73,17 @@ public final class NodePortfolio {
         final Portfolio p = new Portfolio();
         if (ids.isEmpty()) { finish(uid, p, cb); return; }
         final AtomicInteger left = new AtomicInteger(ids.size());
-        final Runnable one = () -> { if (left.decrementAndGet() == 0) finish(uid, p, cb); };
+        final java.util.List<String> gone = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
+        final Runnable one = () -> {
+            if (left.decrementAndGet() != 0) return;
+            if (!gone.isEmpty()) {
+                UserProfileManager.getInstance(c).removeGroupsFromProfile(uid, new java.util.ArrayList<>(gone), new UserProfileManager.SimpleCallback() {
+                    @Override public void onSuccess() {}
+                    @Override public void onError(String error) {}
+                });
+            }
+            finish(uid, p, cb);
+        };
         for (String id : ids) {
             GroupFirestoreManager.getInstance(c).getGroup(id, new GroupFirestoreManager.DocCallback() {
                 @Override public void onSuccess(Map<String, Object> fs) {
@@ -81,7 +91,11 @@ public final class NodePortfolio {
                     if (nodeId.isEmpty()) { synchronized (p.legacyGroupIds) { p.legacyGroupIds.add(id); } one.run(); return; }
                     fetchPosition(nodeId, wallet, fs, id, p, one);
                 }
-                @Override public void onError(String e) { synchronized (p.legacyGroupIds) { p.legacyGroupIds.add(id); } one.run(); }
+                @Override public void onError(String e) {
+                    // A deleted group is gone. Do not keep counting it. A network error is left alone.
+                    if (e != null && (e.contains("404") || e.toLowerCase(java.util.Locale.US).contains("not found"))) gone.add(id);
+                    one.run();
+                }
             });
         }
     }

@@ -946,6 +946,8 @@ public class HomeFragmentActivity extends Fragment {
 		startActivity(intent);
 	}
 	
+	private String learnSig = "unset";
+
 	private void _loadLearnHubPreview() {
 		if (linear_learn_hub == null || getContext() == null) return;
 		if (linear_learn_hub.getChildCount() == 0) linear_learn_hub.addView(com.harvana.app.utils.Shimmer.rows(getContext(), 2));   // first load only
@@ -967,12 +969,21 @@ public class HomeFragmentActivity extends Fragment {
 			Collections.sort(posts, (x, y) -> Long.compare(
 				y.get("createdAt") instanceof Number ? ((Number) y.get("createdAt")).longValue() : 0L,
 				x.get("createdAt") instanceof Number ? ((Number) x.get("createdAt")).longValue() : 0L));
+			StringBuilder sig = new StringBuilder();
+			int shown = 0;
+			for (java.util.Map<String, Object> m : posts) {
+				if (shown >= 2) break;
+				sig.append(m.get("title")).append('|').append(m.get("views")).append(';');
+				shown++;
+			}
+			if (sig.toString().equals(learnSig) && linear_learn_hub.getChildCount() > 0) return;
+			learnSig = sig.toString();
 			linear_learn_hub.removeAllViews();
 			if (posts.isEmpty()) { _showLearnHubEmpty("No Learn Hub posts yet. Be the first to share something."); return; }
 			LayoutInflater inf = LayoutInflater.from(getContext());
 			int n = 0;
 			for (java.util.Map<String, Object> m : posts) {
-				if (n >= 3) break;
+				if (n >= 2) break;
 				View item = inf.inflate(R.layout.home_learnhub_custom_display, linear_learn_hub, false);
 				TextView title = item.findViewById(R.id.title_text);
 				TextView cat = item.findViewById(R.id.category_text);

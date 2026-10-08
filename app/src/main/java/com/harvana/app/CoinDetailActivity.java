@@ -115,6 +115,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 	private TextView tv_stat_value_8;
 	private MaterialButton btn_receive;
 	private MaterialButton btn_send;
+	private com.harvana.app.wallet.CoinCatalog.Coin openCoin = com.harvana.app.wallet.CoinCatalog.harv();
 	
 	@Override
 	protected void onCreate(Bundle _savedInstanceState) {
@@ -184,13 +185,22 @@ public class CoinDetailActivity extends AppCompatActivity {
 		tv_stat_value_8 = findViewById(R.id.tv_stat_value_8);
 		btn_receive = findViewById(R.id.btn_receive);
 		btn_send = findViewById(R.id.btn_send);
+		openCoin = com.harvana.app.wallet.CoinCatalog.get(getIntent().getStringExtra(com.harvana.app.wallet.CoinCatalog.EXTRA));
 		
-		btn_receive.setOnClickListener(_v -> _receiveBottomSheet());
+		btn_receive.setOnClickListener(_v -> {
+			if (openCoin != null && !openCoin.nativeHarv) {
+				startActivity(new Intent(CoinDetailActivity.this, ReceiveActivity.class)
+						.putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, openCoin.key)
+						.putExtra("walletAddress", walletAddress));
+			} else {
+				_receiveBottomSheet();
+			}
+		});
 		
 		btn_send.setOnClickListener(_v -> {
 			Intent intent = new Intent(CoinDetailActivity.this, SendAssetActivity.class);
+			intent.putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, openCoin == null ? "HARV" : openCoin.key);
 			startActivityForResult(intent, SEND_ASSET_REQUEST_CODE);
-			
 		});
 	}
 	
@@ -208,6 +218,10 @@ public class CoinDetailActivity extends AppCompatActivity {
 		
 		walletAddress = getIntent().getStringExtra("walletAddress");
 		wallet_address = getIntent().getStringExtra("walletAddress");
+		if (openCoin != null && !openCoin.nativeHarv) {
+			_showChainCoin(openCoin);
+			return;
+		}
 		if (walletAddress != null && !walletAddress.trim().isEmpty()) {
 			tv_wallet_address.setText(walletAddress);
 			_getBallance(walletAddress, tv_coin_balance);
@@ -218,6 +232,35 @@ public class CoinDetailActivity extends AppCompatActivity {
 		setTitle(com.harvana.app.CoinInfo.name());
 		_loadTokenomicsInfo();
 		
+	}
+
+	/** The same detail page HARV uses, filled with this coin's own name, logo, address and facts. */
+	private void _showChainCoin(com.harvana.app.wallet.CoinCatalog.Coin coin) {
+		setTitle(coin.name);
+		if (img_coin_logo != null) img_coin_logo.setImageResource(coin.icon);
+		if (tv_coin_description != null) tv_coin_description.setText(coin.about);
+		if (tv_coin_info_note != null) tv_coin_info_note.setText(coin.network);
+		String address = walletAddress == null ? "" : walletAddress.trim();
+		if (tv_wallet_address != null) tv_wallet_address.setText(address.isEmpty() ? "Address not ready yet" : address);
+		String shown = getIntent().getStringExtra("assetBalance");
+		if (tv_coin_balance != null) {
+			if (shown != null && !shown.isEmpty() && !"…".equals(shown)) tv_coin_balance.setText(shown + (shown.endsWith(coin.ticker) ? "" : " " + coin.ticker));
+			else tv_coin_balance.setText("…");
+		}
+		_setStatRow(R.id.row_current_supply, "Network", coin.network);
+		_setStatRow(R.id.row_max_supply, "Standard", coin.standard);
+		_setStatRow(R.id.row_circulating_supply, "Ticker", coin.ticker);
+		_setStatRow(R.id.row_total_holders, "Decimals", String.valueOf(coin.decimals));
+		_setStatRow(R.id.row_block_height, "Recovery phrase", "Same words as HARV");
+		_setStatRow(R.id.row_block_reward, "Receive", "On");
+		_setStatRow(R.id.row_halving, "Send from Harvana", "Not switched on yet");
+		_setStatRow(R.id.row_network, "Address", address.isEmpty() ? "Unavailable" : address);
+		if (address.isEmpty() || tv_coin_balance == null) return;
+		final String addr = address;
+		new Thread(() -> {
+			String line = com.harvana.app.wallet.ChainBalances.assetBalance(coin.key, addr);
+			runOnUiThread(() -> { if (!isFinishing() && tv_coin_balance != null) tv_coin_balance.setText(line); });
+		}).start();
 	}
 	
 	

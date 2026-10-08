@@ -169,37 +169,39 @@ public class ReceiveActivity extends AppCompatActivity {
 			ivQrCode.setImageDrawable(null);
 			return;
 		}
-		ivQrCode.setImageDrawable(null); // clear while loading
+		final String forAddr = activeAddress;
 		new Thread(() -> {
 			Bitmap qr = null;
 			try {
-				qr = HARVQRCodeGenerator.generateQRCode(activeAddress, 512);
+				qr = HARVQRCodeGenerator.generateQRCode(forAddr, 512);
 			} catch (Exception ignored) {}
 			
 			final Bitmap finalQr = qr;
 			runOnUiThread(() -> {
 				if (isFinishing() || isDestroyed() || ivQrCode == null) return;
-				if (finalQr != null) {
-					ivQrCode.setImageBitmap(finalQr);
-				} else {
-					ivQrCode.setImageDrawable(null);
-				}
+				if (!forAddr.equals(activeAddress)) return;
+				if (finalQr != null) ivQrCode.setImageBitmap(finalQr);
 			});
 		}).start();
 	}
 	
+	private final java.util.List<com.harvana.app.wallet.CoinCatalog.Coin> receiveCoins = new java.util.ArrayList<>();
+	private final java.util.Map<String, String> receiveAddrs = new java.util.HashMap<>();
+
 	private void _setupAssetSpinner() {
-		final List<String> assetList = new ArrayList<>();
-		assetList.add((com.harvana.app.CoinInfo.name() + " (" + com.harvana.app.CoinInfo.ticker() + ")"));
-		
+		receiveCoins.clear();
+		receiveCoins.addAll(com.harvana.app.wallet.CoinCatalog.all());
+		java.util.List<String> labels = new java.util.ArrayList<>();
+		for (com.harvana.app.wallet.CoinCatalog.Coin c : receiveCoins) labels.add(c.name + " (" + c.ticker + ")");
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-		this, com.harvana.app.R.layout.spinner_item, assetList) {
+		this, com.harvana.app.R.layout.spinner_item, labels) {
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				TextView tv = (TextView) super.getView(position, convertView, parent);
 				tv.setTextColor(getResources().getColor(R.color.colorTextPrimary));
 				tv.setTextSize(16);
 				tv.setPadding(24, 16, 24, 16);
+				_coinIcon(tv, position);
 				return tv;
 			}
 			@Override
@@ -209,11 +211,67 @@ public class ReceiveActivity extends AppCompatActivity {
 				tv.setTextSize(16);
 				tv.setPadding(32, 28, 32, 28);
 				tv.setBackgroundColor(getResources().getColor(R.color.colorSurface));
+				_coinIcon(tv, position);
 				return tv;
 			}
 		};
 		adapter.setDropDownViewResource(com.harvana.app.R.layout.spinner_dropdown_item);
-		if (spinnerAssets != null) spinnerAssets.setAdapter(adapter);
+		if (spinnerAssets != null) {
+			spinnerAssets.setAdapter(adapter);
+			spinnerAssets.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+				@Override public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) { _showReceiveCoin(position); }
+				@Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+			});
+			String want = getIntent().getStringExtra(com.harvana.app.wallet.CoinCatalog.EXTRA);
+			if (want != null) {
+				for (int i = 0; i < receiveCoins.size(); i++) if (want.equals(receiveCoins.get(i).key)) { spinnerAssets.setSelection(i); break; }
+			}
+		}
+		final String harv = activeAddress;
+		new Thread(() -> {
+			java.util.Map<String, String> found = com.harvana.app.wallet.CoinCatalog.addresses(getApplicationContext(), harv);
+			runOnUiThread(() -> {
+				if (isFinishing()) return;
+				receiveAddrs.clear();
+				receiveAddrs.putAll(found);
+				if (spinnerAssets != null) _showReceiveCoin(spinnerAssets.getSelectedItemPosition());
+			});
+		}).start();
+	}
+
+	private void _coinIcon(TextView tv, int pos) {
+		int icon = pos >= 0 && pos < receiveCoins.size() ? receiveCoins.get(pos).icon : com.harvana.app.R.drawable.ic_coin_harv;
+		android.graphics.drawable.Drawable d = androidx.core.content.ContextCompat.getDrawable(this, icon);
+		if (d == null) return;
+		int s = (int) (22 * getResources().getDisplayMetrics().density);
+		d = d.mutate();
+		d.setBounds(0, 0, s, s);
+		tv.setCompoundDrawables(d, null, null, null);
+		tv.setCompoundDrawablePadding(s / 3);
+	}
+
+	private void _showReceiveCoin(int position) {
+		if (position < 0 || position >= receiveCoins.size()) return;
+		com.harvana.app.wallet.CoinCatalog.Coin coin = receiveCoins.get(position);
+		String addr = receiveAddrs.get(coin.key);
+		if ((addr == null || addr.isEmpty()) && coin.nativeHarv) addr = activeAddress;
+		if (getSupportActionBar() != null) {
+			getSupportActionBar().setTitle("Receive " + coin.ticker);
+			getSupportActionBar().setSubtitle(coin.network);
+		}
+		if (textview1 != null) textview1.setText(coin.name);
+		if (addr == null || addr.isEmpty()) {
+			if (tvDepositAddress != null) tvDepositAddress.setText("Preparing this address…");
+			return;
+		}
+		if (addr.equals(activeAddress) && validAddress && ivQrCode != null && ivQrCode.getDrawable() != null) {
+			if (tvDepositAddress != null) tvDepositAddress.setText(addr);
+			return;
+		}
+		activeAddress = addr;
+		validAddress = addr.length() >= 20;
+		if (tvDepositAddress != null) tvDepositAddress.setText(addr);
+		_loadQrCode();
 	}
 	
 	private void _shareImage(final Uri imageUri, final String text) {

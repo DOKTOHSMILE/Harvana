@@ -92,9 +92,15 @@ public class WalletAssetFragmentActivity extends Fragment {
 	private void initialize(Bundle _savedInstanceState, View _view) {
 		linear1 = _view.findViewById(R.id.linear1);
 		recyclerview1 = _view.findViewById(R.id.recyclerview1);
-		com.harvana.app.utils.Shimmer.hold(recyclerview1, com.harvana.app.utils.Shimmer.rows(recyclerview1.getContext(), 4), 4000, "WalletAssetFragmentActivity");
 		tvNoWalletHint = _view.findViewById(R.id.tv_no_wallet_hint);
 		chainAssets = _view.findViewById(R.id.chain_assets);
+		walletsp = getContext().getSharedPreferences("walletsp", Activity.MODE_PRIVATE);
+		String cachedFor = getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE).getString("active_wallet_address", "");
+		java.util.List<HashMap<String, Object>> already = cachedFor.isEmpty() ? null
+				: com.harvana.app.wallet.WalletCache.loadList(getContext(), "coins_" + cachedFor.trim());
+		if (already == null || already.isEmpty()) {
+			com.harvana.app.utils.Shimmer.hold(recyclerview1, com.harvana.app.utils.Shimmer.rows(recyclerview1.getContext(), 4), 4000, "WalletAssetFragmentActivity");
+		}
 		View addCoins = _view.findViewById(R.id.btn_add_coins);
 		if (addCoins != null) addCoins.setOnClickListener(v -> com.harvana.app.wallet.ChainAssetsSection.showPicker(getContext(),
 				() -> com.harvana.app.wallet.ChainAssetsSection.render(getContext(), chainAssets, wallet_address)));

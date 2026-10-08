@@ -2,11 +2,10 @@ package com.harvana.app.wallet;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -14,23 +13,28 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.harvana.app.ChainWalletsActivity;
+import com.harvana.app.CoinDetailActivity;
 import com.harvana.app.R;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
- * The other-chain coins shown under HARV on the Assets tab. The user picks which coins to show with
- * "Add coins"; the choice is kept per device. Addresses come from the same recovery phrase.
+ * The other coins under HARV on the Assets tab. Each coin is its own row, in the same card as HARV,
+ * and opens that coin's detail page. The member can hide a coin with "Add coins".
  */
 public final class ChainAssetsSection {
     private ChainAssetsSection() {}
 
     private static final String PREFS = "asset_chain_toggles";
-    public static final String PI = "PI";
 
     public static boolean shown(Context c, String key) {
-        return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(key, false);
+        android.content.SharedPreferences p = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        if (p.contains(key)) return p.getBoolean(key, true);
+        // The old single "Ethereum" switch used to cover BNB, Polygon and Base as well.
+        if (("BNB".equals(key) || "POL".equals(key) || "BASE".equals(key)) && p.contains("ETH")) return p.getBoolean("ETH", true);
+        return true;
     }
 
     private static void setShown(Context c, String key, boolean on) {
@@ -51,105 +55,122 @@ public final class ChainAssetsSection {
         title.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
         root.addView(title);
         TextView sub = new TextView(c);
-        sub.setText("Turn a coin on to show it next to HARV. Every coin uses your same recovery phrase.");
+        sub.setText("Each coin is its own wallet, from the same recovery phrase. Turn one off to hide it.");
         sub.setTextSize(13);
         sub.setTextColor(ContextCompat.getColor(c, R.color.colorTextSecondary));
         sub.setPadding(0, dp(c, 4), 0, dp(c, 12));
         root.addView(sub);
-        root.addView(toggleRow(c, PI, "Pi Network", "Pi", onChange));
-        for (ChainKeys.Chain ch : ChainKeys.Chain.values()) root.addView(toggleRow(c, ch.name(), ch.title, ch.ticker, onChange));
+        for (CoinCatalog.Coin coin : CoinCatalog.others()) root.addView(toggleRow(c, coin, onChange));
         d.setContentView(root);
         d.show();
     }
 
-    private static View toggleRow(Context c, String key, String name, String ticker, Runnable onChange) {
+    private static View toggleRow(Context c, CoinCatalog.Coin coin, Runnable onChange) {
         LinearLayout row = new LinearLayout(c);
-        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setGravity(android.view.Gravity.CENTER_VERTICAL);
         row.setPadding(0, dp(c, 8), 0, dp(c, 8));
-        row.addView(badge(c, ticker));
+        ImageView icon = new ImageView(c);
+        int s = dp(c, 36);
+        icon.setLayoutParams(new LinearLayout.LayoutParams(s, s));
+        icon.setImageResource(coin.icon);
+        row.addView(icon);
         TextView t = new TextView(c);
-        t.setText(name);
+        t.setText(coin.name);
         t.setTextSize(15);
         t.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
         t.setPadding(dp(c, 12), 0, 0, 0);
         row.addView(t, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
         SwitchMaterial sw = new SwitchMaterial(c);
-        sw.setChecked(shown(c, key));
-        sw.setOnCheckedChangeListener((b, on) -> { setShown(c, key, on); if (onChange != null) onChange.run(); });
+        sw.setChecked(shown(c, coin.key));
+        sw.setOnCheckedChangeListener((b, on) -> { setShown(c, coin.key, on); if (onChange != null) onChange.run(); });
         row.addView(sw);
         row.setOnClickListener(v -> sw.toggle());
         return row;
     }
 
-    /** Draws a row per shown coin into {@code box}, then fills balances in the background. */
+    /** Draws one card per shown coin. A refresh updates the numbers in place and does not clear the list first. */
     public static void render(Context c, LinearLayout box, String harvAddress) {
-        if (box == null) return;
-        box.removeAllViews();
-        if (c == null || harvAddress == null || harvAddress.isEmpty()) return;
+        if (box == null || c == null || harvAddress == null || harvAddress.isEmpty()) return;
         final Context app = c.getApplicationContext();
         new Thread(() -> {
-            Map<ChainKeys.Chain, String> addrs = ChainWalletStore.ensure(app, harvAddress);
-            String pi = PiWalletStore.get(app, harvAddress);
+            Map<String, String> addrs = CoinCatalog.addresses(app, harvAddress);
+            List<CoinCatalog.Coin> show = new ArrayList<>();
+            for (CoinCatalog.Coin coin : CoinCatalog.others()) {
+                if (!shown(app, coin.key)) continue;
+                String a = addrs.get(coin.key);
+                if (a != null && !a.isEmpty()) show.add(coin);
+            }
             box.post(() -> {
-                box.removeAllViews();
-                if (shown(app, PI) && pi != null && !pi.isEmpty()) addRow(c, box, "Pi Network", "Pi", pi, null);
-                for (Map.Entry<ChainKeys.Chain, String> e : addrs.entrySet())
-                    if (shown(app, e.getKey().name())) addRow(c, box, e.getKey().title, e.getKey().ticker, e.getValue(), e.getKey());
+                if (!sameKeys(box, show)) rebuild(c, box, show, addrs);
+                for (CoinCatalog.Coin coin : show) refreshBalance(c, box, coin, addrs.get(coin.key));
             });
         }).start();
     }
 
-    private static void addRow(Context c, LinearLayout box, String name, String ticker, String address, ChainKeys.Chain chain) {
-        LinearLayout row = new LinearLayout(c);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        int p = dp(c, 16);
-        row.setPadding(p, dp(c, 12), p, dp(c, 12));
-        row.addView(badge(c, ticker));
-        LinearLayout col = new LinearLayout(c);
-        col.setOrientation(LinearLayout.VERTICAL);
-        col.setPadding(dp(c, 12), 0, 0, 0);
-        TextView n = new TextView(c);
-        n.setText(name);
-        n.setTextSize(15);
-        n.setTypeface(Typeface.DEFAULT_BOLD);
-        n.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
-        TextView a = new TextView(c);
-        a.setText(address.length() > 16 ? address.substring(0, 8) + "…" + address.substring(address.length() - 6) : address);
-        a.setTextSize(12);
-        a.setTextColor(ContextCompat.getColor(c, R.color.colorTextTertiary));
-        col.addView(n);
-        col.addView(a);
-        row.addView(col, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-        TextView bal = new TextView(c);
-        bal.setText("…");
-        bal.setTextSize(13);
-        bal.setGravity(Gravity.END);
-        bal.setMaxWidth(dp(c, 160));
-        bal.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
-        row.addView(bal);
-        row.setBackgroundResource(android.R.drawable.list_selector_background);
-        row.setOnClickListener(v -> c.startActivity(new Intent(c, ChainWalletsActivity.class)));
-        box.addView(row);
+    private static boolean sameKeys(LinearLayout box, List<CoinCatalog.Coin> show) {
+        if (box.getChildCount() != show.size()) return false;
+        for (int i = 0; i < show.size(); i++) if (!show.get(i).key.equals(box.getChildAt(i).getTag())) return false;
+        return true;
+    }
+
+    private static void rebuild(Context c, LinearLayout box, List<CoinCatalog.Coin> show, Map<String, String> addrs) {
+        box.removeAllViews();
+        LayoutInflater inf = LayoutInflater.from(c);
+        for (CoinCatalog.Coin coin : show) {
+            View item = inf.inflate(R.layout.coin_list_card, box, false);
+            item.setTag(coin.key);
+            ImageView logo = item.findViewById(R.id.iv_asset_logo);
+            TextView name = item.findViewById(R.id.tv_asset_name);
+            TextView bal = item.findViewById(R.id.tv_asset_balance);
+            TextView symbol = item.findViewById(R.id.tv_asset_symbol);
+            TextView side = item.findViewById(R.id.tv_asset_amount);
+            if (logo != null) logo.setImageResource(coin.icon);
+            if (name != null) name.setText(coin.name);
+            if (bal != null) {
+                bal.setTag("bal_" + coin.key);
+                bal.setText("…");
+                com.harvana.app.utils.BalancePrivacy.guard(bal);
+            }
+            if (symbol != null) symbol.setText(coin.ticker);
+            if (side != null) side.setText(coin.network);
+            String address = addrs.get(coin.key);
+            View card = item.findViewById(R.id.cardview1);
+            View.OnClickListener open = v -> openDetail(c, coin, address, bal == null ? "" : bal.getText().toString());
+            if (card != null) card.setOnClickListener(open); else item.setOnClickListener(open);
+            box.addView(item);
+        }
+    }
+
+    private static void refreshBalance(Context c, LinearLayout box, CoinCatalog.Coin coin, String address) {
+        View bal = box.findViewWithTag("bal_" + coin.key);
+        if (!(bal instanceof TextView) || address == null) return;
+        final TextView tv = (TextView) bal;
         new Thread(() -> {
-            String s = chain == null ? ChainBalances.pi(address) : ChainBalances.describe(chain, address);
-            bal.post(() -> bal.setText(s));
+            String line = ChainBalances.assetBalance(coin.key, address);
+            String number = numberOf(line, coin.ticker);
+            tv.post(() -> {
+                if (!coin.key.equals(String.valueOf(tv.getTag()).replace("bal_", ""))) return;
+                if (!number.isEmpty()) tv.setText(number);
+                else if (tv.getText() == null || tv.getText().length() == 0 || "…".equals(tv.getText().toString())) tv.setText(line);
+            });
         }).start();
     }
 
-    private static TextView badge(Context c, String ticker) {
-        TextView b = new TextView(c);
-        int s = dp(c, 40);
-        b.setLayoutParams(new LinearLayout.LayoutParams(s, s));
-        b.setGravity(Gravity.CENTER);
-        b.setText(ticker.length() > 4 ? ticker.substring(0, 4) : ticker);
-        b.setTextSize(11);
-        b.setTypeface(Typeface.DEFAULT_BOLD);
-        b.setTextColor(ContextCompat.getColor(c, R.color.colorPrimary));
-        GradientDrawable g = new GradientDrawable();
-        g.setShape(GradientDrawable.OVAL);
-        g.setColor(ContextCompat.getColor(c, R.color.colorPrimary) & 0x00FFFFFF | 0x26000000);
-        b.setBackground(g);
-        return b;
+    /** "0.01 BTC" -> "0.01". Leaves a status sentence whole. */
+    private static String numberOf(String line, String ticker) {
+        if (line == null) return "";
+        String t = line.trim();
+        if (t.endsWith(" " + ticker)) return t.substring(0, t.length() - ticker.length() - 1).trim();
+        return "";
+    }
+
+    private static void openDetail(Context c, CoinCatalog.Coin coin, String address, String shownBalance) {
+        Intent i = new Intent(c, CoinDetailActivity.class);
+        i.putExtra(CoinCatalog.EXTRA, coin.key);
+        i.putExtra("walletAddress", address == null ? "" : address);
+        i.putExtra("assetBalance", shownBalance == null ? "" : shownBalance);
+        if (!(c instanceof android.app.Activity)) i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        c.startActivity(i);
     }
 
     private static int dp(Context c, int v) { return Math.round(v * c.getResources().getDisplayMetrics().density); }

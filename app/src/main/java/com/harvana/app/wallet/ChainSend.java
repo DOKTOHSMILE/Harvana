@@ -1,0 +1,323 @@
+package com.harvana.app.wallet;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+/**
+ * Sends a coin from the recovery phrase. The key never leaves the phone: this builds the transaction, signs it, and hands
+ * the signed bytes to that coin's own public network. HARV and Pi have their own senders.
+ */
+public final class ChainSend {
+    private ChainSend() {}
+
+    private static final OkHttpClient HTTP = new OkHttpClient.Builder()
+            .connectTimeout(15, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS).build();
+    private static final MediaType JSON = MediaType.parse("application/json");
+
+    /** Signs and broadcasts. Returns the transaction id the network accepted. */
+    public static String send(String key, String mnemonic, String from, String to, String amount) throws Exception {
+        if (mnemonic == null || mnemonic.trim().isEmpty()) throw new IllegalArgumentException("Couldn't load the recovery phrase on this phone.");
+        if (to == null || from == null || to.trim().equalsIgnoreCase(from.trim())) throw new IllegalArgumentException("That is your own address.");
+        to = to.trim();
+        switch (key) {
+            case "ETH": return evm(mnemonic, from, to, amount, "https://ethereum-rpc.publicnode.com", 1, 18);
+            case "BNB": return evm(mnemonic, from, to, amount, "https://bsc-rpc.publicnode.com", 56, 18);
+            case "POL": return evm(mnemonic, from, to, amount, "https://polygon-bor-rpc.publicnode.com", 137, 18);
+            case "BASE": return evm(mnemonic, from, to, amount, "https://base-rpc.publicnode.com", 8453, 18);
+            case "BTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.BTC, "https://mempool.space", true);
+            case "LTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.LTC, "https://litecoinspace.org", true);
+            case "DOGE": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.DOGE, "https://api.blockcypher.com/v1/doge/main", false);
+            case "TRX": return tron(mnemonic, from, to, amount);
+            case "SOL": return sol(mnemonic, from, to, amount);
+            default: throw new IllegalArgumentException("Sending " + key + " from Harvana is not switched on.");
+        }
+    }
+
+    private static String evm(String mnemonic, String from, String to, String amount, String rpc, long chainId, int decimals) throws Exception {
+        byte[] priv = ChainKeys.privateKey(mnemonic, ChainKeys.Chain.ETH);
+        String mine = ChainKeys.address(mnemonic, ChainKeys.Chain.ETH);
+        if (!mine.equalsIgnoreCase(from)) throw new IllegalArgumentException("This phone's key does not match the address on screen. Open the coin again.");
+        if (!to.matches("(?i)0x[0-9a-f]{40}")) throw new IllegalArgumentException("Enter an address that starts with 0x.");
+        BigInteger value = units(amount, decimals);
+        BigInteger gasPrice = new BigInteger(rpc(rpc, "eth_gasPrice").substring(2), 16);
+        long gas = 21000L;
+        BigInteger balance = new BigInteger(rpc(rpc, "eth_getBalance", from, "latest").substring(2), 16);
+        BigInteger fee = gasPrice.multiply(BigInteger.valueOf(gas));
+        if (balance.compareTo(value.add(fee)) < 0) throw new IllegalArgumentException("Not enough left to pay the network fee.");
+        long nonce = Long.parseLong(rpc(rpc, "eth_getTransactionCount", from, "pending").substring(2), 16);
+        String raw = EvmTx.raw(priv, nonce, gasPrice, gas, EvmTx.unhex(to), value, chainId);
+        return rpc(rpc, "eth_sendRawTransaction", "0x" + raw);
+    }
+
+    private static String rpc(String url, String method, String... params) throws Exception {
+        StringBuilder p = new StringBuilder();
+        for (String s : params) {
+            if (p.length() > 0) p.append(',');
+            p.append('"').append(s).append('"');
+        }
+        JSONObject r = post(url, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"" + method + "\",\"params\":[" + p + "]}");
+        if (r.has("error")) {
+            JSONObject e = r.optJSONObject("error");
+            throw new IllegalArgumentException(e == null ? "The network rejected the payment." : e.optString("message", "The network rejected the payment."));
+        }
+        return r.getString("result");
+    }
+
+    private static String utxo(String mnemonic, String from, String to, String amount, ChainKeys.Chain chain, String api, boolean segwit) throws Exception {
+        byte[] priv = ChainKeys.privateKey(mnemonic, chain);
+        String mine = ChainKeys.address(mnemonic, chain);
+        if (!mine.equals(from)) throw new IllegalArgumentException("This phone's key does not match the address on screen. Open the coin again.");
+        long sats = exact(units(amount, 8));
+        byte[] payScript = scriptFor(to, chain);
+        byte[] changeScript = scriptFor(mine, chain);
+        List<BtcTx.In> ins = new ArrayList<>();
+        long sum = 0;
+        long fee = 0;
+        long change = 0;
+        JSONArray utxos = segwit ? getArray(api + "/api/address/" + from + "/utxo") : dogeUtxos(from);
+        int rate = segwit ? feeRate(api) : 100;
+        int dust = "DOGE".equals(chain.ticker) ? 100000 : 546;
+        for (int i = 0; i < utxos.length() && ins.size() < 50; i++) {
+            JSONObject u = utxos.getJSONObject(i);
+            if (segwit && u.has("status") && !u.getJSONObject("status").optBoolean("confirmed", true)) continue;
+            long value = u.optLong(segwit ? "value" : "value");
+            if (value <= 0) continue;
+            byte[] txid = BtcTx.reverse(EvmTx.unhex(u.getString(segwit ? "txid" : "tx_hash")));
+            ins.add(new BtcTx.In(txid, u.optInt(segwit ? "vout" : "tx_output_n"), value));
+            sum += value;
+            fee = (long) rate * vsize(ins.size(), 2, segwit);
+            if (sum >= sats + fee) {
+                change = sum - sats - fee;
+                if (change < dust) {
+                    fee = (long) rate * vsize(ins.size(), 1, segwit);
+                    change = sum - sats - fee;
+                    if (change < 0) continue;
+                    if (change < dust) { fee += change; change = 0; }
+                }
+                break;
+            }
+        }
+        if (ins.isEmpty() || sum < sats + fee) throw new IllegalArgumentException("Not enough confirmed coins to pay that and the network fee.");
+        List<BtcTx.Out> outs = new ArrayList<>();
+        outs.add(new BtcTx.Out(sats, payScript));
+        if (change > 0) outs.add(new BtcTx.Out(change, changeScript));
+        String raw = segwit ? BtcTx.p2wpkh(priv, ins, outs) : BtcTx.p2pkh(priv, ins, outs);
+        if (segwit) return postText(api + "/api/tx", raw);
+        JSONObject pushed = post(api + "/txs/push", "{\"tx\":\"" + raw + "\"}");
+        JSONObject tx = pushed.optJSONObject("tx");
+        String hash = tx == null ? pushed.optString("hash", "") : tx.optString("hash", "");
+        if (hash.isEmpty()) throw new IllegalArgumentException(pushed.optString("error", "Dogecoin rejected the payment."));
+        return hash;
+    }
+
+    private static JSONArray dogeUtxos(String address) throws Exception {
+        JSONObject j = get("https://api.blockcypher.com/v1/doge/main/addrs/" + address + "?unspentOnly=true&limit=50");
+        JSONArray refs = j.optJSONArray("txrefs");
+        return refs == null ? new JSONArray() : refs;
+    }
+
+    private static int feeRate(String api) {
+        try {
+            JSONObject j = get(api + "/api/v1/fees/recommended");
+            int rate = j.optInt("halfHourFee", 0);
+            return rate > 0 ? rate : 2;
+        } catch (Exception e) {
+            return 5;
+        }
+    }
+
+    private static int vsize(int inputs, int outputs, boolean segwit) {
+        if (segwit) return 11 + 68 * inputs + 31 * outputs;
+        return 10 + 148 * inputs + 34 * outputs;
+    }
+
+    private static String tron(String mnemonic, String from, String to, String amount) throws Exception {
+        byte[] priv = ChainKeys.privateKey(mnemonic, ChainKeys.Chain.TRX);
+        String mine = ChainKeys.address(mnemonic, ChainKeys.Chain.TRX);
+        if (!mine.equals(from)) throw new IllegalArgumentException("This phone's key does not match the address on screen. Open the coin again.");
+        if (to.length() < 30 || to.charAt(0) != 'T') throw new IllegalArgumentException("Enter a Tron address. It starts with T.");
+        long sun = exact(units(amount, 6));
+        JSONObject tx = post("https://api.trongrid.io/wallet/createtransaction",
+                "{\"owner_address\":\"" + from + "\",\"to_address\":\"" + to + "\",\"amount\":" + sun + ",\"visible\":true}");
+        if (!tx.has("txID")) throw new IllegalArgumentException(tx.optString("Error", "Tron could not build the payment."));
+        byte[] hash = EvmTx.unhex(tx.getString("txID"));
+        java.math.BigInteger[] rs = EvmTx.sign(priv, hash);
+        int rec = EvmTx.recoverId(hash, rs[0], rs[1], priv);
+        byte[] sig = new byte[65];
+        put32(sig, 0, rs[0]);
+        put32(sig, 32, rs[1]);
+        sig[64] = (byte) rec;
+        tx.put("signature", new JSONArray().put(EvmTx.hex(sig)));
+        JSONObject out = post("https://api.trongrid.io/wallet/broadcasttransaction", tx.toString());
+        if (!out.optBoolean("result", false)) throw new IllegalArgumentException(out.optString("message", out.optString("code", "Tron rejected the payment.")));
+        return tx.getString("txID");
+    }
+
+    private static String sol(String mnemonic, String from, String to, String amount) throws Exception {
+        byte[] seed = ChainKeys.privateKey(mnemonic, ChainKeys.Chain.SOL);
+        String mine = ChainKeys.address(mnemonic, ChainKeys.Chain.SOL);
+        if (!mine.equals(from)) throw new IllegalArgumentException("This phone's key does not match the address on screen. Open the coin again.");
+        byte[] dest = b58(to);
+        if (dest.length != 32) throw new IllegalArgumentException("Enter a Solana address.");
+        long lamports = exact(units(amount, 9));
+        JSONObject bh = post("https://api.mainnet-beta.solana.com",
+                "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getLatestBlockhash\",\"params\":[{\"commitment\":\"confirmed\"}]}");
+        String block = bh.getJSONObject("result").getJSONObject("value").getString("blockhash");
+        byte[] tx = SolTx.transfer(seed, dest, lamports, b58(block));
+        String b64 = android.util.Base64.encodeToString(tx, android.util.Base64.NO_WRAP);
+        JSONObject sent = post("https://api.mainnet-beta.solana.com",
+                "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"sendTransaction\",\"params\":[\"" + b64 + "\",{\"encoding\":\"base64\"}]}");
+        if (sent.has("error")) throw new IllegalArgumentException(sent.getJSONObject("error").optString("message", "Solana rejected the payment."));
+        return sent.getString("result");
+    }
+
+    private static BigInteger units(String amount, int decimals) {
+        BigDecimal d;
+        try { d = new BigDecimal(amount.trim()); }
+        catch (Exception e) { throw new IllegalArgumentException("Invalid amount."); }
+        if (d.signum() <= 0) throw new IllegalArgumentException("Amount must be greater than zero.");
+        try { return d.movePointRight(decimals).toBigIntegerExact(); }
+        catch (ArithmeticException e) { throw new IllegalArgumentException("Too many decimal places for this coin."); }
+    }
+
+    private static long exact(BigInteger v) {
+        try { return v.longValueExact(); }
+        catch (ArithmeticException e) { throw new IllegalArgumentException("That amount is too large."); }
+    }
+
+    static byte[] scriptFor(String address, ChainKeys.Chain chain) throws Exception {
+        String a = address.trim();
+        if (a.regionMatches(true, 0, "bc1", 0, 3) || a.regionMatches(true, 0, "ltc1", 0, 4)) return BtcTx.p2wpkhScript(bech32Program(a.toLowerCase()));
+        int version = chain == ChainKeys.Chain.DOGE ? 0x1e : chain == ChainKeys.Chain.LTC ? 0x30 : 0x00;
+        if (a.charAt(0) == '3' || a.charAt(0) == 'M') throw new IllegalArgumentException("That address type is not supported. Use a normal " + chain.ticker + " address.");
+        return BtcTx.p2pkhScript(base58check(a, version));
+    }
+
+    private static byte[] bech32Program(String addr) {
+        int sep = addr.lastIndexOf('1');
+        if (sep < 1) throw new IllegalArgumentException("That address is not valid.");
+        String hrp = addr.substring(0, sep);
+        String data = addr.substring(sep + 1);
+        String cs = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+        int[] v = new int[data.length()];
+        for (int i = 0; i < data.length(); i++) {
+            int n = cs.indexOf(data.charAt(i));
+            if (n < 0) throw new IllegalArgumentException("That address is not valid.");
+            v[i] = n;
+        }
+        if (polymod(hrp, v) != 1) throw new IllegalArgumentException("That address is not valid.");
+        if (v[0] != 0) throw new IllegalArgumentException("Only a native SegWit address (bc1 or ltc1) can be paid here.");
+        int acc = 0, bits = 0, p = 0;
+        byte[] out = new byte[40];
+        for (int i = 1; i < v.length - 6; i++) {
+            acc = (acc << 5) | v[i];
+            bits += 5;
+            if (bits >= 8) { out[p++] = (byte) ((acc >> (bits - 8)) & 0xFF); bits -= 8; }
+        }
+        if (p != 20) throw new IllegalArgumentException("Only a normal SegWit address can be paid here.");
+        return java.util.Arrays.copyOf(out, 20);
+    }
+
+    private static int polymod(String hrp, int[] data) {
+        int[] gen = {0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3};
+        int chk = 1;
+        int[] exp = new int[hrp.length() * 2 + 1 + data.length];
+        int n = 0;
+        for (int i = 0; i < hrp.length(); i++) exp[n++] = hrp.charAt(i) >> 5;
+        exp[n++] = 0;
+        for (int i = 0; i < hrp.length(); i++) exp[n++] = hrp.charAt(i) & 31;
+        for (int x : data) exp[n++] = x;
+        for (int v : exp) {
+            int b = chk >>> 25;
+            chk = ((chk & 0x1ffffff) << 5) ^ v;
+            for (int i = 0; i < 5; i++) if (((b >> i) & 1) != 0) chk ^= gen[i];
+        }
+        return chk;
+    }
+
+    private static byte[] base58check(String addr, int version) throws Exception {
+        byte[] raw = b58(addr);
+        if (raw.length != 25 || (raw[0] & 0xFF) != version) throw new IllegalArgumentException("That address is not valid for this coin.");
+        byte[] body = java.util.Arrays.copyOf(raw, 21);
+        byte[] check = BtcTx.dsha(body);
+        for (int i = 0; i < 4; i++) if (check[i] != raw[21 + i]) throw new IllegalArgumentException("That address is not valid.");
+        return java.util.Arrays.copyOfRange(body, 1, 21);
+    }
+
+    static byte[] b58(String s) {
+        java.math.BigInteger v = java.math.BigInteger.ZERO;
+        java.math.BigInteger b = java.math.BigInteger.valueOf(58);
+        String alpha = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+        for (int i = 0; i < s.length(); i++) {
+            int n = alpha.indexOf(s.charAt(i));
+            if (n < 0) throw new IllegalArgumentException("That address is not valid.");
+            v = v.multiply(b).add(java.math.BigInteger.valueOf(n));
+        }
+        byte[] bytes = v.toByteArray();
+        if (bytes[0] == 0) bytes = java.util.Arrays.copyOfRange(bytes, 1, bytes.length);
+        int zeros = 0;
+        while (zeros < s.length() && s.charAt(zeros) == '1') zeros++;
+        byte[] out = new byte[zeros + bytes.length];
+        System.arraycopy(bytes, 0, out, zeros, bytes.length);
+        return out;
+    }
+
+    private static void put32(byte[] dest, int off, java.math.BigInteger v) {
+        byte[] b = v.toByteArray();
+        if (b.length > 32) b = java.util.Arrays.copyOfRange(b, b.length - 32, b.length);
+        System.arraycopy(b, 0, dest, off + 32 - b.length, b.length);
+    }
+
+    private static JSONObject get(String url) throws Exception {
+        try (Response r = HTTP.newCall(new Request.Builder().url(url).build()).execute()) {
+            String body = r.body() == null ? "" : r.body().string();
+            if (!r.isSuccessful()) throw new IllegalArgumentException(plain(body, r.code()));
+            return new JSONObject(body);
+        }
+    }
+
+    private static JSONArray getArray(String url) throws Exception {
+        try (Response r = HTTP.newCall(new Request.Builder().url(url).build()).execute()) {
+            String body = r.body() == null ? "[]" : r.body().string();
+            if (!r.isSuccessful()) throw new IllegalArgumentException(plain(body, r.code()));
+            return new JSONArray(body);
+        }
+    }
+
+    private static JSONObject post(String url, String json) throws Exception {
+        Request req = new Request.Builder().url(url).post(RequestBody.create(json, JSON)).build();
+        try (Response r = HTTP.newCall(req).execute()) {
+            String body = r.body() == null ? "{}" : r.body().string();
+            if (body.isEmpty()) body = "{}";
+            if (!r.isSuccessful() && !body.startsWith("{")) throw new IllegalArgumentException(plain(body, r.code()));
+            return new JSONObject(body);
+        }
+    }
+
+    private static String postText(String url, String text) throws Exception {
+        Request req = new Request.Builder().url(url).post(RequestBody.create(text, MediaType.parse("text/plain"))).build();
+        try (Response r = HTTP.newCall(req).execute()) {
+            String body = r.body() == null ? "" : r.body().string();
+            if (!r.isSuccessful()) throw new IllegalArgumentException(plain(body, r.code()));
+            return body.trim();
+        }
+    }
+
+    private static String plain(String body, int code) {
+        String t = body == null ? "" : body.replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ").trim();
+        if (t.length() > 160) t = t.substring(0, 160);
+        return t.isEmpty() ? "The network did not accept the payment (" + code + ")." : t;
+    }
+}

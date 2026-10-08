@@ -458,9 +458,7 @@ public class SendAssetActivity extends AppCompatActivity {
 					return;
 				}
 				if (assetKey != null && !assetKey.isEmpty() && !"HARV".equals(assetKey) && !"null".equals(assetKey)) {
-					com.harvana.app.wallet.CoinCatalog.Coin coin = com.harvana.app.wallet.CoinCatalog.get(assetKey);
-					SketchwareUtil.showMessage(getApplicationContext(),
-							coin.name + " is in this wallet so you can receive it. Sending " + coin.ticker + " from Harvana is not switched on yet.");
+					_sendChain(view, selectedAsset, assetKey);
 					return;
 				}
 				String contract = String.valueOf(selectedAsset.get("contractAddress"));
@@ -586,6 +584,64 @@ public class SendAssetActivity extends AppCompatActivity {
 		}
 	}
 	
+	private void _sendChain(View sendButton, HashMap<String, Object> asset, String assetKey) {
+		com.harvana.app.wallet.CoinCatalog.Coin coin = com.harvana.app.wallet.CoinCatalog.get(assetKey);
+		String recipient = etRecipient != null ? etRecipient.getText().toString().trim() : "";
+		if (recipient.isEmpty()) { SketchwareUtil.showMessage(getApplicationContext(), "Please enter a recipient address."); return; }
+		String amountText = etAmount != null ? etAmount.getText().toString().trim() : "";
+		if (amountText.isEmpty()) { SketchwareUtil.showMessage(getApplicationContext(), "Please enter an amount."); return; }
+		final java.math.BigDecimal amount;
+		try { amount = new java.math.BigDecimal(amountText); }
+		catch (Exception e) { SketchwareUtil.showMessage(getApplicationContext(), "Invalid amount."); return; }
+		if (amount.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+			SketchwareUtil.showMessage(getApplicationContext(), "Amount must be greater than zero.");
+			return;
+		}
+		java.math.BigDecimal have = asset.get("balance") instanceof java.math.BigDecimal
+				? (java.math.BigDecimal) asset.get("balance") : java.math.BigDecimal.ZERO;
+		if (amount.compareTo(have) > 0) {
+			SketchwareUtil.showMessage(getApplicationContext(), "Insufficient " + coin.ticker + " balance.");
+			return;
+		}
+		String mine = asset.get("address") instanceof String ? String.valueOf(asset.get("address")) : "";
+		if (mine.isEmpty()) {
+			SketchwareUtil.showMessage(getApplicationContext(), "This address is still loading. Try again in a moment.");
+			return;
+		}
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"To", recipient});
+		rows.add(new String[]{"From", mine});
+		rows.add(new String[]{"Network", coin.network});
+		rows.add(new String[]{"Network fee", "Paid to " + coin.network + ", not to Harvana"});
+		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send " + coin.ticker, amountText + " " + coin.ticker, rows, () -> {
+			if (isProcessingSend) return;
+			isProcessingSend = true;
+			sendButton.setEnabled(false);
+			final String from = mine;
+			new Thread(() -> {
+				String err = null;
+				try {
+					String phrase = com.harvana.app.wallet.SecureWalletStorage.getActiveMnemonic(getApplicationContext());
+					com.harvana.app.wallet.ChainSend.send(assetKey, phrase, from, recipient, amountText);
+				} catch (Exception e) {
+					err = e.getMessage() == null ? "The network rejected the payment." : e.getMessage();
+				}
+				final String fail = err;
+				runOnUiThread(() -> {
+					isProcessingSend = false;
+					if (isFinishing()) return;
+					sendButton.setEnabled(true);
+					if (fail != null) SketchwareUtil.showMessage(getApplicationContext(), fail);
+					else {
+						SketchwareUtil.showMessage(getApplicationContext(), coin.ticker + " sent.");
+						setResult(RESULT_OK);
+						finish();
+					}
+				});
+			}).start();
+		});
+	}
+
 	private void _sendPi(View sendButton, HashMap<String, Object> asset) {
 		String recipient = etRecipient != null ? etRecipient.getText().toString().trim() : "";
 		if (!com.harvana.app.wallet.PiKeys.isValidAddress(recipient)) {

@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: send every coin, not only HARV and Pi
+
+What the app does:
+
+- **Send works for every coin in the wallet.** Bitcoin, Litecoin, Dogecoin, Ethereum, BNB, Polygon, Base, Tron and Solana, as well as HARV and Pi. The phone builds the payment, signs it with the recovery phrase, and hands it to that coin's own network. The key is not sent anywhere.
+- **The fee is the network's, not Harvana's.** You review who it is going to and confirm with your PIN before anything is signed.
+- **Checked on this machine, not on a live payment:** the Bitcoin signature matches the published test in BIP-143, and a Solana transfer signature verifies. A real payment still depends on the network accepting it.
+
+What you do: install the build. Send a small amount first. The address you pay must be that coin's own kind of address (a Bitcoin address for BTC, an 0x address for ETH, BNB, Polygon and Base, and so on).
+
 ## 8 Oct 2026: one Pi address, and Pi can be sent
 
 What the app does:

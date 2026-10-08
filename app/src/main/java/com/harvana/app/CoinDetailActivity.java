@@ -267,7 +267,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		_setStatRow(R.id.row_total_holders, "Decimals", String.valueOf(coin.decimals));
 		_setStatRow(R.id.row_block_height, "Recovery phrase", "Same words as HARV");
 		_setStatRow(R.id.row_block_reward, "Receive", "On");
-		_setStatRow(R.id.row_halving, "Send from Harvana", "PI".equals(coin.key) ? "On" : "Not switched on yet");
+		_setStatRow(R.id.row_halving, "Send from Harvana", "On");
 		if (address.isEmpty() || tv_coin_balance == null) {
 			_watchMarketPrice(coin);
 			return;

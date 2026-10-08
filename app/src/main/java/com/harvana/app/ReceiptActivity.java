@@ -313,6 +313,15 @@ public class ReceiptActivity extends AppCompatActivity {
 			if (confirmations <= 0 && tv_confirmations.getParent() instanceof View) ((View) tv_confirmations.getParent()).setVisibility(View.GONE);
 			if (harvFee <= 0 && tv_network_fee.getParent() instanceof View) ((View) tv_network_fee.getParent()).setVisibility(View.GONE);
 			if (blockNumber <= 0) tv_block_number.setText(pending ? "Pending" : "—");
+			final String coinKey = getIntent().getStringExtra("assetKey") != null
+					&& !getIntent().getStringExtra("assetKey").isEmpty()
+					? getIntent().getStringExtra("assetKey") : tokenSymbol;
+			final String hashNow = txHash == null ? "" : txHash;
+			new Thread(() -> {
+				java.util.HashMap<String, Object> fresh = com.harvana.app.wallet.ChainHistory.detail(coinKey, hashNow);
+				if (fresh == null) return;
+				runOnUiThread(() -> { if (!isFinishing()) _applyExplorer(fresh, coinKey); });
+			}).start();
 		}
 		
 		View.OnClickListener copyListener = v -> {
@@ -340,6 +349,61 @@ public class ReceiptActivity extends AppCompatActivity {
 		btn_export_transaction.setOnClickListener(v -> _showExportOptionsBottomSheet());
 		
 		// ... (Other activity code)
+	}
+	
+	/** Fills the receipt with the record that coin's explorer returned. */
+	private void _applyExplorer(java.util.HashMap<String, Object> d, String ticker) {
+		Object v = d.get("value");
+		if (v instanceof Number && ((Number) v).doubleValue() > 0) {
+			value = ((Number) v).doubleValue();
+			tv_tx_value.setText(_formatUIBalance(value) + " " + ticker);
+		}
+		Object from = d.get("senderAddress");
+		if (from instanceof String && !((String) from).isEmpty()) {
+			sender = (String) from;
+			tv_from_address.setText(_shortAddr(sender));
+			tv_from_address.setTag(sender);
+		}
+		Object to = d.get("recipientAddress");
+		if (to instanceof String && !((String) to).isEmpty()) {
+			recipient = (String) to;
+			tv_to_address.setText(_shortAddr(recipient));
+			tv_to_address.setTag(recipient);
+		}
+		Object fee = d.get("harvFee");
+		if (fee instanceof Number && ((Number) fee).doubleValue() > 0 && tv_network_fee != null) {
+			if (tv_network_fee.getParent() instanceof View) ((View) tv_network_fee.getParent()).setVisibility(View.VISIBLE);
+			tv_network_fee.setText(_formatUIBalance(((Number) fee).doubleValue()) + " " + ticker);
+		}
+		Object block = d.get("blockNumber");
+		if (block instanceof Number && ((Number) block).longValue() > 0) tv_block_number.setText(String.valueOf(((Number) block).longValue()));
+		Object conf = d.get("confirmations");
+		if (conf instanceof Number && ((Number) conf).longValue() > 0 && tv_confirmations != null) {
+			if (tv_confirmations.getParent() instanceof View) ((View) tv_confirmations.getParent()).setVisibility(View.VISIBLE);
+			tv_confirmations.setText(String.valueOf(((Number) conf).longValue()));
+		}
+		Object nonceN = d.get("nonce");
+		if (nonceN instanceof Number && tv_nonce != null) tv_nonce.setText(String.valueOf(((Number) nonceN).longValue()));
+		Object st = d.get("status");
+		if (st != null && tv_tx_status != null) {
+			String s = String.valueOf(st);
+			if ("pending".equalsIgnoreCase(s)) {
+				tv_tx_status.setText("●  Pending");
+				tv_tx_status.setTextColor(UiColors.warning());
+			} else if ("failed".equalsIgnoreCase(s)) {
+				tv_tx_status.setText("●  Failed");
+				tv_tx_status.setTextColor(UiColors.error());
+			} else {
+				tv_tx_status.setText("●  Completed");
+				tv_tx_status.setTextColor(UiColors.success());
+			}
+		}
+		Object when = d.get("timestamp");
+		if (when instanceof Number && ((Number) when).longValue() > 0 && tv_timestamp != null) {
+			java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM d, yyyy | h:mma", java.util.Locale.US);
+			sdf.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));
+			tv_timestamp.setText(sdf.format(new java.util.Date(((Number) when).longValue())));
+		}
 	}
 	
 	@Override

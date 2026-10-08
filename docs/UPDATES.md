@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: a receipt reads that coin's explorer
+
+What the app does:
+
+- **History for every coin comes from that coin's own public explorer.** Bitcoin and Litecoin from mempool, Dogecoin from BlockCypher, Ethereum, BNB, Polygon and Base from Blockscout, Tron from Tronscan, Solana from the public network, Pi from Pi's own network. No paid key.
+- **Opening a transaction fills the receipt from that explorer**: who sent it, who received it, the amount, the fee, the block and how many confirmations. The network line still opens the explorer page.
+
+What you do: install the build, open a coin, then History, then a transaction.
+
 ## 8 Oct 2026: the scanner reads every coin's code
 
 What the app does:

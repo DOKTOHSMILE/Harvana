@@ -237,13 +237,31 @@ public final class CoinDetailPages {
                     icon.setImageResource(in ? R.drawable.icon_call_received_twotone : R.drawable.icon_call_made_twotone);
                     icon.setColorFilter(in ? com.harvana.app.utils.UiColors.accent() : com.harvana.app.utils.UiColors.error());
                 }
-                Object link = row.get("explorerUrl");
-                if (link instanceof String && ((String) link).startsWith("http")) {
-                    item.setOnClickListener(v -> {
-                        try { startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse((String) link))); }
-                        catch (Exception ignored) { }
-                    });
-                }
+                item.setOnClickListener(v -> {
+                    android.content.Intent i = new android.content.Intent(requireContext(), ReceiptActivity.class);
+                    i.putExtra("txHash", String.valueOf(row.get("txHash")));
+                    i.putExtra("status", String.valueOf(row.get("status")));
+                    i.putExtra("senderAddress", String.valueOf(row.get("senderAddress")));
+                    i.putExtra("recipientAddress", String.valueOf(row.get("recipientAddress")));
+                    i.putExtra("tokenSymbol", coin.ticker);
+                    i.putExtra("assetKey", coin.key);
+                    Object val = row.get("value");
+                    i.putExtra("value", val instanceof Number ? ((Number) val).doubleValue() : 0);
+                    Object ts = row.get("timestamp");
+                    i.putExtra("timestamp", ts instanceof Number ? ((Number) ts).longValue() : System.currentTimeMillis());
+                    i.putExtra("chain", String.valueOf(row.get("chain")));
+                    i.putExtra("explorerUrl", String.valueOf(row.get("explorerUrl")));
+                    i.putExtra("incoming", in);
+                    Object fee = row.get("harvFee");
+                    Object block = row.get("blockNumber");
+                    Object conf = row.get("confirmations");
+                    Object nonce = row.get("nonce");
+                    if (fee instanceof Number) i.putExtra("harvFee", ((Number) fee).doubleValue());
+                    if (block instanceof Number) i.putExtra("blockNumber", ((Number) block).longValue());
+                    if (conf instanceof Number) i.putExtra("confirmations", ((Number) conf).longValue());
+                    if (nonce instanceof Number) i.putExtra("nonce", ((Number) nonce).longValue());
+                    startActivity(i);
+                });
                 historyBox.addView(item);
             }
         }

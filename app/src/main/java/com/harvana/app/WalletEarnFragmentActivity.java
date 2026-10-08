@@ -98,6 +98,16 @@ public class WalletEarnFragmentActivity extends Fragment {
         tvLearnMore = _view.findViewById(R.id.tv_learn_more);
         btnOpenStaking = _view.findViewById(R.id.btn_open_staking);
 
+        androidx.swiperefreshlayout.widget.SwipeRefreshLayout refresh = _view.findViewById(R.id.refresh_earn);
+        if (refresh != null) {
+            refresh.setColorSchemeResources(R.color.colorAccent);
+            refresh.setProgressBackgroundColorSchemeResource(R.color.colorSurface);
+            refresh.setOnRefreshListener(() -> {
+                loadStakingSummary();
+                refresh.postDelayed(() -> { if (isAdded()) refresh.setRefreshing(false); }, 1800);
+            });
+        }
+
         setupMiniChart();
 
         btnOpenStaking.setOnClickListener(_v -> {

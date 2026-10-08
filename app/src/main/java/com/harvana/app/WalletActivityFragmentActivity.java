@@ -74,6 +74,15 @@ public class WalletActivityFragmentActivity extends Fragment {
 		cardview1 = _view.findViewById(R.id.cardview1);
 		list_history = _view.findViewById(R.id.list_history);
 		com.harvana.app.utils.Shimmer.hold(list_history, com.harvana.app.utils.Shimmer.rows(list_history.getContext(), 6), 4000, "WalletActivityFragmentActivity");
+		androidx.swiperefreshlayout.widget.SwipeRefreshLayout refresh = _view.findViewById(R.id.refresh_activity);
+		if (refresh != null) {
+			refresh.setColorSchemeResources(R.color.colorAccent);
+			refresh.setProgressBackgroundColorSchemeResource(R.color.colorSurface);
+			refresh.setOnRefreshListener(() -> {
+				_loadTransactionHistory();
+				refresh.postDelayed(() -> { if (isAdded()) refresh.setRefreshing(false); }, 1800);
+			});
+		}
 		walletsp = getContext().getSharedPreferences("walletsp", Activity.MODE_PRIVATE);
 	}
 	

@@ -2,6 +2,14 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: pull to refresh on the Asset page
+
+What the app does:
+
+- **Pull down on Assets, Activity or Earn.** The spinner shows, the numbers stay where they are, and the balances, the total and the activity list load again. Nothing is cleared first.
+
+What you do: install the build and pull down on the coin list.
+
 ## 8 Oct 2026: a coin's about is about the coin
 
 What the app does:

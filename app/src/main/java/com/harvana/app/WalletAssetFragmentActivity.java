@@ -109,6 +109,17 @@ public class WalletAssetFragmentActivity extends Fragment {
 		View addCoins = _view.findViewById(R.id.btn_add_coins);
 		if (addCoins != null) addCoins.setOnClickListener(v -> com.harvana.app.wallet.ChainAssetsSection.showPicker(getContext(),
 				() -> com.harvana.app.wallet.ChainAssetsSection.render(getContext(), chainAssets, wallet_address)));
+		androidx.swiperefreshlayout.widget.SwipeRefreshLayout refresh = _view.findViewById(R.id.refresh_assets);
+		if (refresh != null) {
+			refresh.setColorSchemeResources(R.color.colorAccent);
+			refresh.setProgressBackgroundColorSchemeResource(R.color.colorSurface);
+			refresh.setOnRefreshListener(() -> {
+				androidx.fragment.app.Fragment parent = getParentFragment();
+				if (parent instanceof AssetFragmentActivity) ((AssetFragmentActivity) parent)._loadAvailableCoins();
+				_loadAvailableCoins();
+				refresh.postDelayed(() -> { if (isAdded()) refresh.setRefreshing(false); }, 1800);
+			});
+		}
 		walletsp = getContext().getSharedPreferences("walletsp", Activity.MODE_PRIVATE);
 	}
 	

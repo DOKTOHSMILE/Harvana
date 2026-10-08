@@ -424,9 +424,13 @@ public class SendAssetActivity extends AppCompatActivity {
 							tvAvailable.setText("Available: " + _formatUIBalance(balance.doubleValue()) + " " + asset.get("symbol"));
 						}
 					}
+					String key = String.valueOf(asset.get("assetKey"));
+					if (etRecipient != null) etRecipient.setHint(_addressHint(key));
 					String from = asset.get("address") instanceof String ? String.valueOf(asset.get("address")) : "";
-					if (tvSubtitle != null && getIntent().getStringExtra("fromWalletAddress") == null && !from.isEmpty()) {
-						tvSubtitle.setText("From " + from);
+					if (tvSubtitle != null && getIntent().getStringExtra("fromWalletAddress") == null) {
+						com.harvana.app.wallet.CoinCatalog.Coin coin = com.harvana.app.wallet.CoinCatalog.get(key);
+						if (!from.isEmpty()) tvSubtitle.setText("From " + from);
+						else if (coin != null) tvSubtitle.setText("Send " + coin.ticker + " on " + coin.liveNetwork() + ".");
 					}
 				}
 				
@@ -782,6 +786,24 @@ public class SendAssetActivity extends AppCompatActivity {
 	}
 
 	private static final int RC_PICK_ASSET = 78;
+
+	private static String _addressHint(String key) {
+		boolean test = com.harvana.app.wallet.Net.TEST;
+		if (key == null) return "HV0x...";
+		switch (key) {
+			case "PI": return "G...";
+			case "BTC": return test ? "tb1..." : "bc1...";
+			case "LTC": return test ? "tltc1..." : "ltc1...";
+			case "DOGE": return test ? "n..." : "D...";
+			case "ETH":
+			case "BNB":
+			case "POL":
+			case "BASE": return "0x...";
+			case "TRX": return "T...";
+			case "SOL": return "Solana address";
+			default: return "HV0x...";
+		}
+	}
 
 	private void _openAssetPicker() {
 		String key = "HARV";

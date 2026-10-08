@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: the send address matches the coin
+
+What the app does:
+
+- On Send, the address box shows the shape of the coin you picked. Pi shows G…, Bitcoin shows tb1… or bc1…, and HARV stays HV0x….
+- The box holds 120 characters. It was stopping at 50, which cut off a Pi address.
+
+What you do: install the build, open Send, and pick Pi.
+
 ## 8 Oct 2026: explorer page stops unexpected links
 
 What the app does:

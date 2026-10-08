@@ -75,6 +75,9 @@ public class AssetFragmentActivity extends Fragment {
 	private TextView textview10;
 	private LinearLayout linear54;
 	private TextView tv_fiat_value;
+	private double harvFiat;
+	private double chainFiat;
+	private String shownSymbol;
 	private ImageView imageview4;
 	private MaterialCardView cardview1;
 	private MaterialCardView cardview2;
@@ -134,6 +137,8 @@ public class AssetFragmentActivity extends Fragment {
 		com.harvana.app.utils.BalancePrivacy.bindEye(imageview3);
 		com.harvana.app.utils.BalancePrivacy.bindEye(imageview4);
 		com.harvana.app.utils.BalancePrivacy.guard(tv_fiat_value);
+		if (tv_fiat_value != null) tv_fiat_value.setOnClickListener(v -> _pickCurrency());
+		if (textview10 != null) textview10.setOnClickListener(v -> _pickCurrency());
 		cardview1 = _view.findViewById(R.id.cardview1);
 		cardview2 = _view.findViewById(R.id.cardview2);
 		cardview3 = _view.findViewById(R.id.cardview3);
@@ -313,6 +318,14 @@ public class AssetFragmentActivity extends Fragment {
 	public void onResume() {
 		super.onResume();
 		_updateActiveWalletLabel();
+		if (getContext() != null) {
+			String symbol = com.harvana.app.wallet.FxRates.symbol(getContext());
+			if (shownSymbol != null && !shownSymbol.equals(symbol)) {
+				harvFiat = 0;
+				chainFiat = 0;
+			}
+			com.harvana.app.wallet.FxRates.load(getContext(), this::_paintTotal);
+		}
 		_loadAvailableCoins();
 	}
 	
@@ -435,29 +448,18 @@ public class AssetFragmentActivity extends Fragment {
 				if (loadedCoins == null || loadedCoins.isEmpty()) return;
 				
 				java.util.HashMap<String, Object> nativeCoin = loadedCoins.get(0);
-				Object fiatObj = nativeCoin.get("coin_value"); 
-				
+				Object fiatObj = nativeCoin.get("coin_value");
+				Object savedCurrency = nativeCoin.get("coin_currency");
 				if (fiatObj == null || tv_fiat_value == null) return;
+				if (savedCurrency != null && getContext() != null
+						&& !String.valueOf(savedCurrency).equals(com.harvana.app.wallet.FxRates.symbol(getContext()))) return;
 				
 				try {
-					// Fetch the user's preferred currency symbol from SharedPreferences
-					SharedPreferences currencySp = getContext().getSharedPreferences("currencysp", Context.MODE_PRIVATE);
-					String currencySymbol = currencySp.getString("currency", "₦");
-					
-					double fiatVal = Double.parseDouble(fiatObj.toString());
-					
-					// Format to standard 2 decimal places for fiat money
-					String formatted = fiatVal > 999
-					? new java.text.DecimalFormat("#,##0.##").format(fiatVal)
-					: new java.text.DecimalFormat("0.##").format(fiatVal);
-					
-					tv_fiat_value.setText(currencySymbol + formatted);
+					harvFiat = Double.parseDouble(fiatObj.toString());
 				} catch (NumberFormatException e) {
-					// Fallback to 0.00 with the correct symbol if parsing fails
-					SharedPreferences currencySp = getContext().getSharedPreferences("currencysp", Context.MODE_PRIVATE);
-					String currencySymbol = currencySp.getString("currency", "₦");
-					tv_fiat_value.setText(currencySymbol + "0.00");
+					harvFiat = 0;
 				}
+				_paintTotal();
 			}
 		});
 	}
@@ -532,16 +534,13 @@ public class AssetFragmentActivity extends Fragment {
 		com.harvana.app.wallet.WalletNodeBalanceHelper.load(wallet_address,
 		(bal, avail, pin, pout, pending, err) -> {
 			
-			// FIX: Exit early if offline/error to prevent 0 balance cache overwrite
 			if (err != null && !err.isEmpty()) {
 				android.util.Log.w("loadAvailableCoins", "Node fetch failed: " + err);
 				return; 
 			}
 			
 			double harvBalance = avail >= 0 ? avail : bal;
-			String currencyCode = com.harvana.app.wallet.FiatValueHelper.symbolToCurrencyCode(currencySymbol);
-			
-			com.harvana.app.wallet.FiatValueHelper.convertHarvToFiat(harvBalance, currencyCode, (fiatValue, rateAvailable) -> {
+			com.harvana.app.wallet.FiatValueHelper.valueOfHarv(context, harvBalance, currencySymbol, (fiatValue, rateAvailable) -> {
 				final ArrayList<HashMap<String, Object>> loadedCoins = new ArrayList<>();
 				
 				HashMap<String, Object> nativeCoin = new HashMap<>();
@@ -552,6 +551,7 @@ public class AssetFragmentActivity extends Fragment {
 				nativeCoin.put("coin_value", rateAvailable
 				? String.format(java.util.Locale.US, "%.2f", fiatValue)
 				: "0");
+				nativeCoin.put("coin_currency", currencySymbol);
 				nativeCoin.put("coin_logo",       "");
 				nativeCoin.put("contractAddress", "");
 				nativeCoin.put("isNative",        true);
@@ -570,6 +570,61 @@ public class AssetFragmentActivity extends Fragment {
 	
 	
 	
+	public void setChainFiat(double sum) {
+		chainFiat = sum;
+		if (getActivity() != null) getActivity().runOnUiThread(this::_paintTotal);
+	}
+
+	private void _paintTotal() {
+		if (tv_fiat_value == null || getContext() == null) return;
+		String symbol = com.harvana.app.wallet.FxRates.symbol(getContext());
+		shownSymbol = symbol;
+		tv_fiat_value.setText(com.harvana.app.wallet.FxRates.format(symbol, harvFiat + chainFiat));
+		if (textview10 != null) {
+			String code = com.harvana.app.wallet.FiatValueHelper.symbolToCurrencyCode(symbol);
+			textview10.setText("TOTAL BALANCE · " + code);
+		}
+	}
+
+	private void _pickCurrency() {
+		if (getContext() == null) return;
+		com.harvana.app.wallet.FxRates.load(getContext(), () -> {
+			if (!isAdded()) return;
+			String[][] currencies = {
+				{"₦", "NGN", "NGN — Nigerian Naira"},
+				{"$", "USD", "USD — US Dollar"},
+				{"£", "GBP", "GBP — British Pound"},
+				{"€", "EUR", "EUR — Euro"},
+				{"GH₵", "GHS", "GHS — Ghanaian Cedi"},
+				{"KSh", "KES", "KES — Kenyan Shilling"},
+				{"R", "ZAR", "ZAR — South African Rand"},
+			};
+			String current = com.harvana.app.wallet.FxRates.symbol(getContext());
+			String[] labels = new String[currencies.length];
+			int selected = 0;
+			for (int i = 0; i < currencies.length; i++) {
+				String rate = com.harvana.app.wallet.FxRates.rateLine(getContext(), currencies[i][1]);
+				labels[i] = rate.isEmpty() || "USD".equals(currencies[i][1]) ? currencies[i][2] : currencies[i][2] + "  ·  " + rate;
+				if (currencies[i][0].equals(current)) selected = i;
+			}
+			new com.harvana.app.ui.SheetDialog.Builder(requireContext())
+			.setTitle("Currency")
+			.setSingleChoiceItems(labels, selected, (dialog, which) -> {
+				com.harvana.app.wallet.FxRates.save(getContext(), currencies[which][0]);
+				harvFiat = 0;
+				chainFiat = 0;
+				shownSymbol = currencies[which][0];
+				_paintTotal();
+				dialog.dismiss();
+				_loadAvailableCoins();
+				androidx.fragment.app.Fragment page = getChildFragmentManager().findFragmentByTag("f0");
+				if (page instanceof WalletAssetFragmentActivity) ((WalletAssetFragmentActivity) page).repaintMoney();
+			})
+			.setNegativeButton("Cancel", null)
+			.show();
+		});
+	}
+
 	public void _inAppNotification() {
 	}
 	

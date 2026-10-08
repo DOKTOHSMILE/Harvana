@@ -94,6 +94,11 @@ public class WalletAssetFragmentActivity extends Fragment {
 		recyclerview1 = _view.findViewById(R.id.recyclerview1);
 		tvNoWalletHint = _view.findViewById(R.id.tv_no_wallet_hint);
 		chainAssets = _view.findViewById(R.id.chain_assets);
+		com.harvana.app.wallet.ChainAssetsSection.onTotal(chainAssets, sum -> {
+			if (!isAdded()) return;
+			androidx.fragment.app.Fragment parent = getParentFragment();
+			if (parent instanceof AssetFragmentActivity) ((AssetFragmentActivity) parent).setChainFiat(sum);
+		});
 		walletsp = getContext().getSharedPreferences("walletsp", Activity.MODE_PRIVATE);
 		String cachedFor = getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE).getString("active_wallet_address", "");
 		java.util.List<HashMap<String, Object>> already = cachedFor.isEmpty() ? null
@@ -127,7 +132,11 @@ public class WalletAssetFragmentActivity extends Fragment {
 		_loadAvailableCoins();
 	}
 	
-	@Override
+	public void repaintMoney() {
+		com.harvana.app.wallet.ChainAssetsSection.repaint(chainAssets);
+		_loadAvailableCoins();
+	}
+
 	public void onResume() {
 		super.onResume();
 		if (getContext() != null) {
@@ -181,11 +190,8 @@ public class WalletAssetFragmentActivity extends Fragment {
 			}
 			
 			double show = avail >= 0 ? avail : bal;
-			SharedPreferences currencySp = getContext().getSharedPreferences("currencysp", Context.MODE_PRIVATE);
-			String currencyCode = com.harvana.app.wallet.FiatValueHelper.symbolToCurrencyCode(
-			currencySp.getString("currency", "₦"));
-			
-			com.harvana.app.wallet.FiatValueHelper.convertHarvToFiat(show, currencyCode, (fiatValue, rateAvailable) -> {
+			String symbol = com.harvana.app.wallet.FxRates.symbol(getContext());
+			com.harvana.app.wallet.FiatValueHelper.valueOfHarv(getContext(), show, symbol, (fiatValue, rateAvailable) -> {
 				if (!isAdded() || getContext() == null) return;
 				final ArrayList<HashMap<String, Object>> loadedCoins = new ArrayList<>();
 				HashMap<String, Object> nativeCoin = new HashMap<>();
@@ -202,6 +208,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 				nativeCoin.put("coin_value", rateAvailable
 				? String.format(Locale.US, "%.2f", fiatValue)
 				: "0");
+				nativeCoin.put("coin_currency", symbol);
 				nativeCoin.put("coin_logo", "");
 				nativeCoin.put("contractAddress", "");
 				nativeCoin.put("isNative", true);
@@ -332,17 +339,15 @@ public class WalletAssetFragmentActivity extends Fragment {
 			// or "GH₵" still saw "₦" on every balance row, and a non-numeric
 			// coin_value string would crash onBindViewHolder with NumberFormatException.
 			if (tv_asset_amount != null && item.containsKey("coin_value")) {
-				try {
-					SharedPreferences currencySp = _view.getContext().getSharedPreferences("currencysp", Context.MODE_PRIVATE);
-					String currencySymbol = currencySp.getString("currency", "₦");
-					
+				Object savedCurrency = item.get("coin_currency");
+				String currencySymbol = com.harvana.app.wallet.FxRates.symbol(_view.getContext());
+				if (savedCurrency != null && !currencySymbol.equals(String.valueOf(savedCurrency))) {
+					tv_asset_amount.setText("…");
+				} else try {
 					double val = Double.parseDouble(item.get("coin_value").toString());
-					String formatted = val > 999
-					? new java.text.DecimalFormat("#,##0.##").format(val)
-					: new java.text.DecimalFormat("0.##").format(val);
-					tv_asset_amount.setText(currencySymbol + formatted);
+					tv_asset_amount.setText(com.harvana.app.wallet.FxRates.format(currencySymbol, val));
 				} catch (NumberFormatException e) {
-					tv_asset_amount.setText("₦0.00");
+					tv_asset_amount.setText(com.harvana.app.wallet.FxRates.format(currencySymbol, 0));
 				}
 			}
 			

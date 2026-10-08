@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 8 Oct 2026: the total adds every coin, in the currency you pick
+
+What the app does:
+
+- **The big number is everything you hold**, not only HARV. Each coin's row shows what that balance is worth. A coin you do not hold shows zero, not the price of one coin.
+- **Tap the total** to choose naira, dollars, pounds, euro, cedi, shilling or rand. Each choice shows what one dollar is worth in that currency. The same choice in Settings still works.
+- **The rates are fetched once and kept for twelve hours**, so the phone is not asking for a price on every row.
+
+What you do: install the build, open Assets, and tap the total.
+
 ## 8 Oct 2026: send and receive checked before a real payment
 
 What the app does:

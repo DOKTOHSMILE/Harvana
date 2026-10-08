@@ -1,5 +1,6 @@
 package com.harvana.app.wallet;
 
+import android.content.Context;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -186,5 +187,31 @@ public final class FiatValueHelper {
             case "R": return "ZAR";
             default: return "NGN";
         }
+    }
+
+    /**
+     * What a HARV balance is worth in the currency the person chose. Uses a price in that currency when
+     * someone is selling HARV in it, and otherwise turns the naira price into that currency.
+     */
+    public static void valueOfHarv(Context c, double harvAmount, String symbol, ConvertCallback callback) {
+        String code = symbolToCurrencyCode(symbol);
+        getCheapestRate(code, direct -> {
+            if (direct != null) {
+                callback.onConverted(harvAmount * direct, true);
+                return;
+            }
+            getCheapestRate("NGN", ngn -> {
+                if (ngn == null || "NGN".equals(code)) {
+                    callback.onConverted(0, ngn != null);
+                    return;
+                }
+                FxRates.load(c, () -> {
+                    double ngnPerUsd = FxRates.perUsd(c, "NGN");
+                    double wanted = FxRates.perUsd(c, code);
+                    if (ngnPerUsd <= 0 || Double.isNaN(ngnPerUsd) || Double.isNaN(wanted)) callback.onConverted(0, false);
+                    else callback.onConverted(harvAmount * ngn / ngnPerUsd * wanted, true);
+                });
+            });
+        });
     }
 }

@@ -105,7 +105,7 @@ public final class ChainAssetsSection {
                 else refreshOpens(c, box, harvAddress);
                 paintPrices(box);
                 for (CoinCatalog.Coin coin : show) refreshBalance(c, box, coin, addrs.get(coin.key));
-                AssetPrices.load(c, () -> paintPrices(box));
+                AssetPrices.load(c, () -> FxRates.load(c, () -> paintPrices(box)));
             });
         }).start();
     }
@@ -135,8 +135,10 @@ public final class ChainAssetsSection {
                 com.harvana.app.utils.BalancePrivacy.guard(bal);
             }
             if (symbol != null) symbol.setText(coin.ticker);
-            AssetPrices.Quote quote = AssetPrices.peek(c, coin.key);
-            if (side != null) side.setText(quote != null ? AssetPrices.usd(quote.usd) : coin.network);
+            if (side != null) {
+                side.setText("…");
+                com.harvana.app.utils.BalancePrivacy.guard(side);
+            }
             View card = item.findViewById(R.id.cardview1);
             View.OnClickListener open = v -> openFresh(c, harvAddress, coin, bal == null ? "" : bal.getText().toString());
             if (card != null) card.setOnClickListener(open); else item.setOnClickListener(open);
@@ -162,18 +164,41 @@ public final class ChainAssetsSection {
         openDetail(c, coin, saved, shownBalance);
     }
 
-    /** Writes the saved price onto each row, and leaves a row alone when its text is already that price. */
+    /** Draws each holding in the currency the person chose, then adds them up. */
+    public static void repaint(LinearLayout box) {
+        if (box == null) return;
+        FxRates.load(box.getContext(), () -> paintPrices(box));
+    }
+
+    public interface Total { void onSum(double fiat); }
+
+    public static void onTotal(LinearLayout box, Total sum) {
+        if (box != null) box.setTag(R.id.btn_add_coins, sum);
+    }
+
+    /** Writes the value of what is held, not the price of one coin. A row still loading is left as "…". */
     private static void paintPrices(LinearLayout box) {
         if (box == null) return;
+        double sum = 0;
+        boolean any = false;
         for (int i = 0; i < box.getChildCount(); i++) {
             View item = box.getChildAt(i);
             if (!(item.getTag() instanceof String)) continue;
             TextView side = item.findViewById(R.id.tv_asset_amount);
+            TextView bal = item.findViewById(R.id.tv_asset_balance);
+            if (side == null) continue;
+            Object heldObj = bal == null ? null : bal.getTag(R.id.tv_asset_balance);
+            if (!(heldObj instanceof Double)) continue;
             AssetPrices.Quote quote = AssetPrices.peek(box.getContext(), (String) item.getTag());
-            if (side == null || quote == null) continue;
-            String next = AssetPrices.usd(quote.usd);
+            if (quote == null) continue;
+            double usd = ((Double) heldObj) * quote.usd;
+            double fiat = FxRates.fiat(box.getContext(), usd);
+            String next = FxRates.money(box.getContext(), usd);
             if (!next.contentEquals(side.getText())) side.setText(next);
+            if (!Double.isNaN(fiat)) { sum += fiat; any = true; }
         }
+        Object listener = box.getTag(R.id.btn_add_coins);
+        if (any && listener instanceof Total) ((Total) listener).onSum(sum);
     }
 
     private static void refreshBalance(Context c, LinearLayout box, CoinCatalog.Coin coin, String address) {
@@ -185,8 +210,18 @@ public final class ChainAssetsSection {
             String number = numberOf(line, coin.ticker);
             tv.post(() -> {
                 if (!coin.key.equals(String.valueOf(tv.getTag()).replace("bal_", ""))) return;
-                if (!number.isEmpty()) tv.setText(number);
-                else if (tv.getText() == null || tv.getText().length() == 0 || "…".equals(tv.getText().toString())) tv.setText(line);
+                if (!number.isEmpty()) {
+                    tv.setText(number);
+                    Double amt = AssetPrices.amount(number);
+                    if (amt != null) tv.setTag(R.id.tv_asset_balance, amt);
+                    LinearLayout box = null;
+                    View p = tv;
+                    while (p != null) {
+                        if (p.getId() == R.id.chain_assets && p instanceof LinearLayout) { box = (LinearLayout) p; break; }
+                        p = p.getParent() instanceof View ? (View) p.getParent() : null;
+                    }
+                    if (box != null) paintPrices(box);
+                } else if (tv.getText() == null || tv.getText().length() == 0 || "…".equals(tv.getText().toString())) tv.setText(line);
             });
         }).start();
     }

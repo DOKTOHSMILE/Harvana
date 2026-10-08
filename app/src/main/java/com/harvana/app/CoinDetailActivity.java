@@ -202,6 +202,10 @@ public class CoinDetailActivity extends AppCompatActivity {
 			intent.putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, openCoin == null ? "HARV" : openCoin.key);
 			startActivityForResult(intent, SEND_ASSET_REQUEST_CODE);
 		});
+		View btnExplorer = findViewById(R.id.btn_explorer);
+		if (btnExplorer != null) btnExplorer.setOnClickListener(_v -> startActivity(new Intent(CoinDetailActivity.this, ExplorerActivity.class)
+				.putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, openCoin == null ? "HARV" : openCoin.key)
+				.putExtra("walletAddress", walletAddress == null ? "" : walletAddress)));
 	}
 	
 	private void initializeLogic() {
@@ -614,7 +618,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 				new Thread(() -> {
 					Bitmap qr = null;
 					try {
-						qr = HARVQRCodeGenerator.generateQRCode(activeAddress, 512);
+						qr = HARVQRCodeGenerator.generateQRCodeWithLogo(CoinDetailActivity.this, activeAddress, 512, R.drawable.ic_coin_harv);
 					} catch (Exception ignored) {}
 					final Bitmap finalQr = qr;
 					runOnUiThread(() -> {

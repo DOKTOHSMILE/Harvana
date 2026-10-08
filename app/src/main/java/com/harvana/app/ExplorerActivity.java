@@ -1,0 +1,100 @@
+package com.harvana.app;
+
+import android.os.Bundle;
+import android.view.Gravity;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.harvana.app.utils.AppBar;
+import com.harvana.app.utils.UiColors;
+import com.harvana.app.wallet.CoinCatalog;
+
+/**
+ * One explorer page for every coin. Coins that already have a public explorer open it here.
+ * Harvana opens here too, once {@link CoinCatalog#HARV_EXPLORER} is filled in.
+ */
+public class ExplorerActivity extends AppCompatActivity {
+    private WebView web;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        CoinCatalog.Coin coin = CoinCatalog.get(getIntent().getStringExtra(CoinCatalog.EXTRA));
+        String address = getIntent().getStringExtra("walletAddress");
+        if (address == null) address = "";
+        String url = CoinCatalog.explorerUrl(coin, address);
+        if (url.isEmpty()) {
+            AppBar.setContent(this, waiting(coin, address), coin.name + " explorer", coin.network);
+            return;
+        }
+        web = new WebView(this);
+        web.getSettings().setJavaScriptEnabled(true);
+        web.getSettings().setDomStorageEnabled(true);
+        web.setWebViewClient(new WebViewClient());
+        androidx.appcompat.widget.Toolbar bar = AppBar.setContent(this, web, coin.name + " explorer", host(url));
+        bar.setNavigationOnClickListener(v -> goBack());
+        web.loadUrl(url);
+    }
+
+    private void goBack() {
+        if (web != null && web.canGoBack()) web.goBack();
+        else finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        goBack();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (web != null) { web.destroy(); web = null; }
+        super.onDestroy();
+    }
+
+    private LinearLayout waiting(CoinCatalog.Coin coin, String address) {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setGravity(Gravity.CENTER_HORIZONTAL);
+        int p = dp(24);
+        box.setPadding(p, p, p, p);
+        box.setBackgroundColor(UiColors.background());
+        ImageView logo = new ImageView(this);
+        int s = dp(72);
+        logo.setLayoutParams(new LinearLayout.LayoutParams(s, s));
+        logo.setImageResource(coin.icon);
+        box.addView(logo);
+        TextView title = text(coin.name, 20, true, UiColors.textPrimary());
+        title.setPadding(0, dp(16), 0, 0);
+        box.addView(title);
+        box.addView(text("The Harvana explorer website isn't linked yet. This page is ready for it. When the site is up, add its address in the coin list and it will open here.", 14, false, UiColors.textSecondary()));
+        if (!address.isEmpty()) {
+            TextView addr = text(address, 13, false, UiColors.textPrimary());
+            addr.setPadding(0, dp(16), 0, 0);
+            box.addView(addr);
+        }
+        return box;
+    }
+
+    private TextView text(String value, float size, boolean bold, int color) {
+        TextView t = new TextView(this);
+        t.setText(value);
+        t.setTextSize(size);
+        t.setTextColor(color);
+        t.setGravity(Gravity.CENTER);
+        if (bold) t.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        t.setPadding(0, dp(8), 0, 0);
+        return t;
+    }
+
+    private static String host(String url) {
+        try { return android.net.Uri.parse(url).getHost(); } catch (Exception e) { return ""; }
+    }
+
+    private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
+}

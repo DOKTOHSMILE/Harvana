@@ -108,11 +108,11 @@ public class HARVQRCodeGenerator {
 			Paint w = new Paint(Paint.ANTI_ALIAS_FLAG);
 			w.setColor(PAPER);
 			c.drawCircle(cx, cy, badge / 2f + cell * 0.8f, w);
-			if (logo != null && !logo.isRecycled()) {
-				Bitmap sl = Bitmap.createScaledBitmap(logo, (int) badge, (int) badge, true);
+			Bitmap badgeArt = logo != null && !logo.isRecycled() ? logo : coinArt();
+			if (badgeArt != null && !badgeArt.isRecycled()) {
+				Bitmap sl = Bitmap.createScaledBitmap(badgeArt, Math.max(1, (int) badge), Math.max(1, (int) badge), true);
 				c.drawBitmap(sl, cx - badge / 2f, cy - badge / 2f, null);
-			} else {
-				drawCoin(c, cx, cy, badge / 2f);
+				if (sl != badgeArt) sl.recycle();
 			}
 			return out;
 		} catch (WriterException e) {
@@ -128,6 +128,14 @@ public class HARVQRCodeGenerator {
 		return (x < 7 && y < 7) || (x >= n - 7 && y < 7) || (x < 7 && y >= n - 7);
 	}
 
+	/** The one HARV coin picture, used in the middle of every code. */
+	private static Bitmap coinArt() {
+		Context c = SketchApplication.getContext();
+		if (c == null) return null;
+		try { return BitmapFactory.decodeResource(c.getResources(), R.drawable.ic_coin_harv); }
+		catch (Exception e) { return null; }
+	}
+
 	/** A finder eye: a 7-module rounded ring in teal and a 3-module rounded centre in ink. */
 	private static void drawEye(Canvas c, float l, float t, float cell) {
 		Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -141,26 +149,9 @@ public class HARVQRCodeGenerator {
 		c.drawRoundRect(new RectF(l + 2 * cell, t + 2 * cell, l + 5 * cell, t + 5 * cell), cell * 0.9f, cell * 0.9f, p);
 	}
 
-	/** The HARV coin, drawn: coral-to-gold disc with a darker edge and a white H (matches ic_harv_coin). */
-	private static void drawCoin(Canvas c, float cx, float cy, float rad) {
-		Paint edge = new Paint(Paint.ANTI_ALIAS_FLAG);
-		edge.setShader(new android.graphics.LinearGradient(cx - rad, 0, cx + rad, 0, 0xFFB8423E, 0xFFC79200, android.graphics.Shader.TileMode.CLAMP));
-		c.drawCircle(cx, cy + rad * 0.07f, rad, edge);
-		Paint face = new Paint(Paint.ANTI_ALIAS_FLAG);
-		face.setShader(new android.graphics.LinearGradient(cx - rad, 0, cx + rad, 0,
-				new int[]{0xFFFF6F6B, 0xFFFF9A38, 0xFFFFC907}, null, android.graphics.Shader.TileMode.CLAMP));
-		c.drawCircle(cx, cy - rad * 0.03f, rad * 0.97f, face);
-		Paint h = new Paint(Paint.ANTI_ALIAS_FLAG);
-		h.setColor(PAPER);
-		float bw = rad * 0.22f, hh = rad * 0.9f, gap = rad * 0.3f, top = cy - hh / 2f - rad * 0.03f;
-		c.drawRect(cx - gap - bw, top, cx - gap, top + hh, h);
-		c.drawRect(cx + gap, top, cx + gap + bw, top + hh, h);
-		c.drawRect(cx - gap, top + hh * 0.4f, cx + gap, top + hh * 0.6f, h);
-	}
-
 	/**
-	 * Convenience: generate Harvana-styled QR with app logo in the center.
-	 * Pass your logo drawable resource id (e.g. R.drawable.ic_coin_harv).
+	 * Convenience: generate Harvana-styled QR with a coin logo in the center.
+	 * Pass the coin's drawable (R.drawable.ic_coin_harv, R.drawable.ic_coin_btc, and so on).
 	 */
 	public static Bitmap generateQRCodeWithLogo(Context context, String text, int sizePx, int logoResId) {
 		Bitmap logo = null;

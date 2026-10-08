@@ -167,12 +167,20 @@ public final class ReceiptRenderer {
         p.setLetterSpacing(0f); p.setTextAlign(Paint.Align.LEFT);
     }
 
-    /** The Harvana mark: a sand disc with an Ink Teal H. */
+    /** The Harvana coin, the same picture used everywhere else. */
     private static void mark(Canvas c, Paint p, float x, float y, float size) {
+        android.content.Context ctx = com.harvana.app.SketchApplication.getContext();
+        android.graphics.Bitmap coin = null;
+        if (ctx != null) {
+            try { coin = android.graphics.BitmapFactory.decodeResource(ctx.getResources(), com.harvana.app.R.drawable.ic_coin_harv); }
+            catch (Exception ignored) {}
+        }
+        if (coin != null) {
+            Paint smooth = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+            c.drawBitmap(coin, null, new RectF(x, y, x + size, y + size), smooth);
+            return;
+        }
         p.setColor(SAND); c.drawCircle(x + size / 2, y + size / 2, size / 2, p);
-        p.setColor(INK); p.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD)); p.setTextSize(size * 0.62f); p.setTextAlign(Paint.Align.CENTER);
-        c.drawText("H", x + size / 2, y + size / 2 + size * 0.22f, p);
-        p.setTextAlign(Paint.Align.LEFT);
     }
 
     // ── statement (many transactions) ────────────────────────────────────

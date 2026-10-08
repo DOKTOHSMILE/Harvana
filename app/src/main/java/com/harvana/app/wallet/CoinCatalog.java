@@ -19,6 +19,36 @@ public final class CoinCatalog {
 
     public static final String EXTRA = "assetKey";
 
+    /**
+     * Harvana block explorer. Leave this empty until the website exists, then paste the address page
+     * with {address} where the wallet address goes, for example https://explorer.example/address/{address}.
+     * The other coins already have public explorers. This is the one line to change for Harvana.
+     */
+    public static final String HARV_EXPLORER = "";
+
+    /** The explorer page for this coin and address, or empty when that site is not linked yet. */
+    public static String explorerUrl(Coin coin, String address) {
+        if (coin == null) return "";
+        String a = address == null ? "" : address.trim();
+        String pattern;
+        switch (coin.key) {
+            case "HARV": pattern = HARV_EXPLORER; break;
+            case "PI": pattern = "https://blockexplorer.minepi.com/mainnet/accounts/{address}"; break;
+            case "BTC": pattern = "https://mempool.space/address/{address}"; break;
+            case "LTC": pattern = "https://litecoinspace.org/address/{address}"; break;
+            case "DOGE": pattern = "https://blockchair.com/dogecoin/address/{address}"; break;
+            case "ETH": pattern = "https://etherscan.io/address/{address}"; break;
+            case "BNB": pattern = "https://bscscan.com/address/{address}"; break;
+            case "POL": pattern = "https://polygonscan.com/address/{address}"; break;
+            case "BASE": pattern = "https://basescan.org/address/{address}"; break;
+            case "TRX": pattern = "https://tronscan.org/#/address/{address}"; break;
+            case "SOL": pattern = "https://solscan.io/account/{address}"; break;
+            default: pattern = "";
+        }
+        if (pattern == null || pattern.trim().isEmpty() || a.isEmpty()) return "";
+        return pattern.replace("{address}", a);
+    }
+
     public static final class Coin {
         public final String key, name, ticker, network, standard, about;
         public final int icon, decimals;

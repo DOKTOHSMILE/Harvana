@@ -58,7 +58,7 @@
 							android:layout_width="80dp"
 							android:layout_height="80dp"
 							android:src="@drawable/ic_coin_harv"
-							android:scaleType="centerInside" />
+							android:scaleType="centerCrop" />
 					</com.google.android.material.card.MaterialCardView>
 					<LinearLayout
 						android:id="@+id/linear7"
@@ -396,6 +396,23 @@
 						android:layout_marginHorizontal="4dp" />
 				</LinearLayout>
 			</androidx.core.widget.NestedScrollView>
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_explorer"
+				android:layout_width="match_parent"
+				android:layout_height="48dp"
+				android:layout_marginStart="16dp"
+				android:layout_marginEnd="16dp"
+				android:layout_marginTop="8dp"
+				android:text="Explorer"
+				android:textSize="15sp"
+				android:textStyle="bold"
+				android:textColor="@color/colorTextPrimary"
+				app:backgroundTint="@color/colorSurface"
+				app:cornerRadius="16dp"
+				app:elevation="0dp"
+				app:strokeWidth="1dp"
+				app:strokeColor="@color/colorCardStroke"
+				android:textAllCaps="false" />
 			<LinearLayout
 				android:id="@+id/layout_buttons"
 				android:layout_width="match_parent"

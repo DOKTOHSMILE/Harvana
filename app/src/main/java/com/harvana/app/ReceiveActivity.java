@@ -163,6 +163,7 @@ public class ReceiveActivity extends AppCompatActivity {
 	}
 	private String activeAddress;
 	private boolean validAddress;
+	private int qrIcon = R.drawable.ic_coin_harv;
 	private void _loadQrCode() {
 		if (ivQrCode == null) return;
 		if (!validAddress) {
@@ -170,16 +171,17 @@ public class ReceiveActivity extends AppCompatActivity {
 			return;
 		}
 		final String forAddr = activeAddress;
+		final int icon = qrIcon;
 		new Thread(() -> {
 			Bitmap qr = null;
 			try {
-				qr = HARVQRCodeGenerator.generateQRCode(forAddr, 512);
+				qr = HARVQRCodeGenerator.generateQRCodeWithLogo(ReceiveActivity.this, forAddr, 512, icon);
 			} catch (Exception ignored) {}
 			
 			final Bitmap finalQr = qr;
 			runOnUiThread(() -> {
 				if (isFinishing() || isDestroyed() || ivQrCode == null) return;
-				if (!forAddr.equals(activeAddress)) return;
+				if (!forAddr.equals(activeAddress) || icon != qrIcon) return;
 				if (finalQr != null) ivQrCode.setImageBitmap(finalQr);
 			});
 		}).start();
@@ -264,10 +266,13 @@ public class ReceiveActivity extends AppCompatActivity {
 			if (tvDepositAddress != null) tvDepositAddress.setText("Preparing this address…");
 			return;
 		}
-		if (addr.equals(activeAddress) && validAddress && ivQrCode != null && ivQrCode.getDrawable() != null) {
+		boolean same = addr.equals(activeAddress) && coin.icon == qrIcon && validAddress
+				&& ivQrCode != null && ivQrCode.getDrawable() != null;
+		if (same) {
 			if (tvDepositAddress != null) tvDepositAddress.setText(addr);
 			return;
 		}
+		qrIcon = coin.icon;
 		activeAddress = addr;
 		validAddress = addr.length() >= 20;
 		if (tvDepositAddress != null) tvDepositAddress.setText(addr);

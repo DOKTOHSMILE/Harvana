@@ -184,14 +184,12 @@ public class TrustScoreEngine {
 					Object raw = groupsSnap.getValue();
 					if (raw instanceof String) {
 						try {
-							List<Map<String, Object>> parsed = new com.google.gson.Gson().fromJson(
-							(String) raw,
-							new com.google.gson.reflect.TypeToken<List<Map<String, Object>>>() {}.getType());
-							if (parsed != null) {
-								for (Map<String, Object> entry : parsed) {
-									Object id = entry.get("id");
-									if (id != null && !id.toString().isEmpty()) groupIds.add(id.toString());
-								}
+							org.json.JSONArray parsed = new org.json.JSONArray((String) raw);
+							for (int i = 0; i < parsed.length(); i++) {
+								org.json.JSONObject entry = parsed.optJSONObject(i);
+								if (entry == null) continue;
+								String id = entry.optString("id", "");
+								if (!id.isEmpty()) groupIds.add(id);
 							}
 						} catch (Exception ignored) {}
 					} else if (raw instanceof Map) {

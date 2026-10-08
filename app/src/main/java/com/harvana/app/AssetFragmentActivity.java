@@ -259,10 +259,16 @@ public class AssetFragmentActivity extends Fragment {
 		String jsonWalletData = prefs.getString("wallet_listmap_data", "{}");
 		if (jsonWalletData != null && !jsonWalletData.isEmpty() && !jsonWalletData.equals("[]")) {
 			try {
-				java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<HashMap<String, Object>>(){}.getType();
-				wallet_data_map = new com.google.gson.Gson().fromJson(jsonWalletData, type);
+				org.json.JSONObject o = new org.json.JSONObject(jsonWalletData);
+				wallet_data_map = new HashMap<>();
+				java.util.Iterator<String> keys = o.keys();
+				while (keys.hasNext()) {
+					String k = keys.next();
+					Object v = o.get(k);
+					wallet_data_map.put(k, v == org.json.JSONObject.NULL ? null : v);
+				}
 				
-				if (wallet_data_map != null && Boolean.TRUE.equals(wallet_data_map.get("is_active"))) {
+				if (Boolean.TRUE.equals(wallet_data_map.get("is_active"))) {
 					if (wallet_data_map.get("wallet_address") != null) {
 						activeAddress = wallet_data_map.get("wallet_address").toString().trim();
 					}

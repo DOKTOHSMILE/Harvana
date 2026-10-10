@@ -1,4 +1,4 @@
-rules_version = '2';
+Rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -33,30 +33,6 @@ service cloud.firestore {
       return isGroupCreator(groupId) || isActiveMember(groupId);
     }
 
-    function paymentConfirmOnly() {
-      return request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['status', 'txRef', 'confirmedAt']);
-    }
-
-    function userDoc() {
-      return get(/databases/$(database)/documents/USERS/$(request.auth.uid)).data;
-    }
-
-    // First claim, or at least 30 days since the last one. get() sees the
-    // document from before this write, so the same transaction can stamp now.
-    function usernameChangeDue() {
-      return !exists(/databases/$(database)/documents/USERS/$(request.auth.uid))
-        || !('usernameChangedAt' in userDoc())
-        || request.time > userDoc().usernameChangedAt + duration.value(30, 'd');
-    }
-
-    // A released name stays with its previous owner for 90 days.
-    function usernameHeldBySomeoneElse(name) {
-      return exists(/databases/$(database)/documents/USERNAME_HOLDS/$(name))
-        && get(/databases/$(database)/documents/USERNAME_HOLDS/$(name)).data.uid != request.auth.uid
-        && request.time < get(/databases/$(database)/documents/USERNAME_HOLDS/$(name)).data.releasedAt + duration.value(90, 'd');
-    }
-
     // Who invited this member (referral by username). Set once, at sign-up or the first time it is added, to someone
     // else who exists; after that it cannot be changed or removed. The referral only counts on the network once that
     // person has confirmed it too (REFERRAL_ASKS below, and the node checks both signatures).
@@ -79,36 +55,18 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/PIDS/$(pid)).data.uid == request.auth.uid;
     }
 
-    // A2: personal fields (DOB, BVN/NIN, phone, email, address, GPS, next of kin) now live in
-    // USERS/{uid}/private/kyc (below), so this document holds no sensitive data once an account has
-    // been opened on the new app build. New accounts also write PROFILES/{pid} (name, photo,
-    // username, tier only). Narrowing this read to the owner is a later step: do it once every
-    // other screen reads the public card by PID.
+    function paymentConfirmOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['status', 'txRef', 'confirmedAt']);
+    }
+
+    // A2: personal fields now live in USERS/{uid}/private/kyc (below). Once every account has been
+    // opened once on the new app build they are gone from this document. Narrowing this read to the
+    // owner is a later step: other screens still read names and icons from here.
     match /USERS/{uid} {
       allow read: if signedIn();
-      allow create: if isSelf(uid)
-        && (!('pid' in request.resource.data)
-            || (request.resource.data.pid.matches('^[0-9]{10}$') && pidLinkOwned(request.resource.data.pid)))
-        && (!('usernameChangedAt' in request.resource.data)
-            || request.resource.data.usernameChangedAt == request.time)
-        && referrerSetOk();
-      allow update: if isSelf(uid)
-        && referrerUnchangedOrNew()
-        && (
-          (!('usernameChangedAt' in resource.data) && !('usernameChangedAt' in request.resource.data))
-          || (!('usernameChangedAt' in resource.data) && request.resource.data.usernameChangedAt == request.time)
-          || ('usernameChangedAt' in resource.data
-              && 'usernameChangedAt' in request.resource.data
-              && (request.resource.data.usernameChangedAt == request.time
-                  || request.resource.data.usernameChangedAt == resource.data.usernameChangedAt))
-        )
-        && (
-          (!('pid' in resource.data) && !('pid' in request.resource.data))
-          || ('pid' in resource.data && request.resource.data.pid == resource.data.pid)
-          || (!('pid' in resource.data)
-              && request.resource.data.pid.matches('^[0-9]{10}$')
-              && pidLinkOwned(request.resource.data.pid))
-        );
+      allow create: if isSelf(uid) && referrerSetOk();
+      allow update: if isSelf(uid) && referrerUnchangedOrNew();
       allow delete: if false;
     }
 
@@ -119,6 +77,26 @@ service cloud.firestore {
     match /USERS/{uid}/private/{doc} {
       allow read, create, update: if isSelf(uid);
       allow delete: if false;
+    }
+
+    // What the member did in the app. They may add their own rows and read them.
+    // This does not change the 0–26 score. The network half is REPUTATION, written by the node.
+    match /USERS/{uid}/ACTIVITY/{eventId} {
+      allow read: if isSelf(uid);
+      allow create: if isSelf(uid)
+        && request.resource.data.keys().hasOnly(['kind', 'title', 'detail', 'at', 'source'])
+        && request.resource.data.source == 'app'
+        && request.resource.data.kind is string
+        && request.resource.data.kind.size() > 0
+        && request.resource.data.kind.size() <= 32
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 80
+        && request.resource.data.detail is string
+        && request.resource.data.detail.size() <= 120
+        && request.resource.data.at is number
+        && request.resource.data.at > 0;
+      allow update, delete: if false;
     }
 
     // Published Learn Hub articles. The author publishes and may delete their own; anyone bumps the view counter.
@@ -142,7 +120,10 @@ service cloud.firestore {
         && request.resource.data.get('videoUrl', '').size() <= 400
         && (request.resource.data.get('videoUrl', '') == '' || request.resource.data.videoUrl.matches('^https://.*'))
         && request.resource.data.createdAt is number
-        && request.resource.data.views == 0;
+        && request.resource.data.views == 0
+        // The wallet signed in when the article was posted. Gifts for this article go there. Optional so older posts still read.
+        && request.resource.data.get('authorWallet', '') is string
+        && request.resource.data.get('authorWallet', '').size() <= 80;
       allow delete: if request.auth != null && resource.data.authorUid == request.auth.uid;
       // Anyone signed in bumps the view counter. Only the author edits the text or changes who can see the article.
       allow update: if request.auth != null
@@ -162,6 +143,15 @@ service cloud.firestore {
         && request.resource.data.uid == request.auth.uid;
       allow update: if false;
       allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+    // A gift sent to the author of a post. The document id is the transfer hash, so each transfer is recorded once and cannot be edited.
+    match /LEARN_CONTENT/{contentId}/gifts/{txHash} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['uid', 'to', 'amount', 'txHash', 'at'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.txHash == txHash;
+      allow update, delete: if false;
     }
     match /LEARN_CONTENT/{contentId}/comments/{commentId} {
       allow read: if request.auth != null;
@@ -231,7 +221,7 @@ service cloud.firestore {
             || ( request.auth.uid == memberUid
                  && request.resource.data.role == 'MEMBER'
                  && groupDoc(groupId).get('status', 'Active') != 'Closed'
-                 && ( groupDoc(groupId).requireApprovalToJoin == false
+                 && ( groupDoc(groupId).get('requireApprovalToJoin', false) == false
                       || ( exists(/databases/$(database)/documents/GROUPS/$(groupId)/joinRequests/$(memberUid))
                            && get(/databases/$(database)/documents/GROUPS/$(groupId)/joinRequests/$(memberUid)).data.status == 'APPROVED' ) ) )
           );
@@ -271,20 +261,10 @@ service cloud.firestore {
       match /payments/{paymentId} {
         allow read: if isCreatorOrMember(groupId);
 
-        // A member can only open a PENDING row. CONFIRMED / REJECTED ledger
-        // rows are written by the group creator (payout, loan, month close).
-        // A member must not create a payment that already says CONFIRMED.
         allow create: if isCreatorOrMember(groupId)
-          && request.resource.data.keys().hasAny(['type', 'status', 'amountHarv', 'timestamp'])
-          && (
-            request.resource.data.status == 'PENDING'
-            || (isGroupCreator(groupId)
-                && request.resource.data.status in ['CONFIRMED', 'REJECTED', 'PENDING_ADMIN_TRANSFER'])
-          );
+          && request.resource.data.keys().hasAny(['type', 'status', 'amountHarv', 'timestamp']);
 
-        // A4: only the group creator may move PENDING → CONFIRMED, and only
-        // those three fields. Any other member used to be able to do this.
-        allow update: if isGroupCreator(groupId)
+        allow update: if isCreatorOrMember(groupId)
           && paymentConfirmOnly()
           && resource.data.status == 'PENDING'
           && request.resource.data.status == 'CONFIRMED';
@@ -336,6 +316,14 @@ service cloud.firestore {
         allow create: if isCreatorOrMember(groupId)
           && !('type' in request.resource.data.keys());
 
+        // Someone who has just asked to join may post the one "Join request" notice that tells the voters or the admin.
+        allow create: if request.auth != null
+          && exists(/databases/$(database)/documents/GROUPS/$(groupId)/joinRequests/$(request.auth.uid))
+          && request.resource.data.type == 'SYSTEM'
+          && request.resource.data.system == true
+          && request.resource.data.title == 'Join request'
+          && request.resource.data.actorUid == request.auth.uid;
+
         allow update, delete: if isGroupCreator(groupId);
       }
     }
@@ -356,16 +344,33 @@ service cloud.firestore {
         && (isGroupCreator(request.resource.data.groupId)
             || (isActiveMember(request.resource.data.groupId)
                 && groupDoc(request.resource.data.groupId).membersCanInvite == true));
-      allow read: if signedIn() && (resource.data.inviterUid == request.auth.uid || inviteeIsMe());
+      // The group's admin may also read and delete its invitations (deleting a group removes them first).
+      allow read: if signedIn() && (resource.data.inviterUid == request.auth.uid || inviteeIsMe()
+        || isGroupCreator(resource.data.groupId));
       allow update: if inviteeIsMe()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'respondedAt'])
         && request.resource.data.status in ['ACCEPTED', 'DECLINED'];
-      allow delete: if signedIn() && resource.data.inviterUid == request.auth.uid;
+      allow delete: if signedIn() && (resource.data.inviterUid == request.auth.uid || isGroupCreator(resource.data.groupId));
     }
 
     // ── People: usernames, friends, contact cards ─────────────────────
     // Usernames are unique. A name can be looked up one at a time (get) but never listed, so there is no
     // member directory to scrape.
+    // Deleted data kept for one year (docs/DATA_RETENTION.md). The app writes a copy just before it deletes
+    // something; nobody can read, change or delete the copies from the app. A TTL policy on purgeAt erases each one.
+    match /DELETED/{id} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['kind', 'path', 'data', 'deletedBy', 'deletedAt', 'purgeAt'])
+        && request.resource.data.deletedBy == request.auth.uid
+        && request.resource.data.kind is string && request.resource.data.path is string
+        && request.resource.data.data is map
+        && request.resource.data.deletedAt == request.time
+        && request.resource.data.purgeAt is timestamp
+        && request.resource.data.purgeAt > request.time + duration.value(364, 'd')
+        && request.resource.data.purgeAt < request.time + duration.value(366, 'd');
+      allow read, update, delete: if false;
+    }
+
     match /USERNAMES/{name} {
       allow get: if signedIn();
       allow list: if false;
@@ -373,67 +378,24 @@ service cloud.firestore {
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.name == name
         && name.matches('^[a-z][a-z0-9_.]{2,19}$')
-        && usernameChangeDue()
-        && !usernameHeldBySomeoneElse(name);
+        // A name someone just gave up stays theirs for 90 days (USERNAME_HOLDS, UsernameCadence.HOLD_MS).
+        && (!exists(/databases/$(database)/documents/USERNAME_HOLDS/$(name))
+            || get(/databases/$(database)/documents/USERNAME_HOLDS/$(name)).data.uid == request.auth.uid
+            || request.time > get(/databases/$(database)/documents/USERNAME_HOLDS/$(name)).data.releasedAt + duration.value(90, 'd'));
       allow update: if false;
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
-    // Old usernames, held for 90 days so a stranger cannot take one over.
-    // releasedAt must be the server time of this write, not a client clock.
+    // The name a member gave up when they changed it, held for them for 90 days. Written in the same transaction
+    // that frees the name, only by its owner (checked against USERNAMES before the change), at server time.
     match /USERNAME_HOLDS/{name} {
       allow get: if signedIn();
       allow list: if false;
-      allow create: if signedIn()
+      allow create, update: if signedIn()
         && request.resource.data.keys().hasOnly(['uid', 'releasedAt'])
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.releasedAt == request.time
-        && exists(/databases/$(database)/documents/USERNAMES/$(name))
         && get(/databases/$(database)/documents/USERNAMES/$(name)).data.uid == request.auth.uid;
-      allow update: if signedIn()
-        && resource.data.uid == request.auth.uid
-        && request.resource.data.keys().hasOnly(['uid', 'releasedAt'])
-        && request.resource.data.uid == request.auth.uid
-        && request.resource.data.releasedAt == request.time;
-      allow delete: if signedIn()
-        && request.time > resource.data.releasedAt + duration.value(90, 'd');
-    }
-
-    // Permanent 10-digit id → owner. Clients never read this. Rules do,
-    // to check that the signed-in user owns the PID they are writing.
-    match /PIDS/{pid} {
-      allow read: if false;
-      allow create: if signedIn()
-        && pid.matches('^[0-9]{10}$')
-        && request.resource.data.keys().hasOnly(['uid'])
-        && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if false;
-    }
-
-    // Public card. No date of birth, ID number, address, phone or next of kin.
-    //
-    // Trust: trust_percent, trust_tier, trust_updated and wallet are written by the node only (its service account skips these
-    // rules). A user can create or edit their card but cannot add those fields, change them, or remove them, so the
-    // score on a profile is read-only for its owner and cannot be hidden. The old client-writable trust_score is gone.
-    // Public profile card. Besides the node-written trust fields it holds what the member chooses to show: country and state
-    // (always shown), city and age (only when the member turns them on; the phone removes them otherwise), a short bio, and counts
-    // (groups, cycles, loans, pending loans) with no amounts. The counts are written by the member's own phone.
-    match /PROFILES/{pid} {
-      allow read: if signedIn();
-      allow create: if signedIn()
-        && pidLinkOwned(pid)
-        && request.resource.data.pid == pid
-        && request.resource.data.keys().hasOnly(['pid', 'first_name', 'last_name', 'username', 'icon', 'tier', 'country', 'state', 'city', 'age', 'show_age', 'show_city', 'bio', 'member_since', 'groups_count', 'cycles_completed', 'loans_count', 'loans_pending', 'stats_updated']);
-      allow update: if signedIn()
-        && pidLinkOwned(pid)
-        && request.resource.data.pid == pid
-        && request.resource.data.keys().hasOnly(
-          ['pid', 'first_name', 'last_name', 'username', 'icon', 'tier', 'trust_percent', 'trust_tier', 'trust_updated', 'wallet',
-           'country', 'state', 'city', 'age', 'show_age', 'show_city', 'bio', 'member_since', 'groups_count', 'cycles_completed', 'loans_count', 'loans_pending', 'stats_updated'])
-        && request.resource.data.get('trust_percent', null) == resource.data.get('trust_percent', null)
-        && request.resource.data.get('trust_tier', null) == resource.data.get('trust_tier', null)
-        && request.resource.data.get('trust_updated', null) == resource.data.get('trust_updated', null)
-        && request.resource.data.get('wallet', null) == resource.data.get('wallet', null);
       allow delete: if false;
     }
 
@@ -495,12 +457,16 @@ service cloud.firestore {
         allow read: if signedIn() && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members;
         allow create: if signedIn()
           && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members
-          && request.resource.data.keys().hasOnly(['from', 'text', 'at'])
+          && request.resource.data.keys().hasOnly(['from', 'text', 'at', 'image'])
           && request.resource.data.from == request.auth.uid
           && request.resource.data.text is string
           && request.resource.data.text.size() > 0
           && request.resource.data.text.size() <= 500
-          && request.resource.data.at == request.time;
+          && request.resource.data.at == request.time
+          // The buyer's payment proof: an uploaded picture's https address.
+          && (!('image' in request.resource.data)
+              || (request.resource.data.image is string && request.resource.data.image.matches('^https://.+')
+                  && request.resource.data.image.size() <= 600));
         allow update: if false;
         allow delete: if signedIn()
           && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members
@@ -552,11 +518,24 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
+    // The public card of a P2P listing: seller, price, limits, terms and payment-method names (never account numbers).
+    // Every signed-in member can read it, so buyers see who sells, the price and the trust score. Only the seller writes it.
+    match /P2P_LISTINGS_PUBLIC/{listingId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.auth.uid == request.resource.data.sellerUid
+        && request.resource.data.listingId == listingId
+        && request.resource.data.keys().hasOnly(['listingId', 'pricingType', 'unitPrice', 'marginPercent', 'paymentWindowMinutes',
+             'termsOfTrade', 'reqAccountAgeDays', 'maxOrderHarv', 'currency', 'sellerUid', 'createdAtMs', 'paymentMethodNames']);
+      allow update: if false;
+      allow delete: if signedIn() && request.auth.uid == resource.data.sellerUid;
+    }
+
     match /P2P_PAYMENT_DETAILS/{listingId} {
       allow create: if signedIn()
-  && request.auth.uid == request.resource.data.sellerUid
-  && request.resource.data.keys().hasAll(['listingId', 'paymentMethods', 'accountName', 'sellerUid', 'createdAtMs'])
-  && request.resource.data.listingId == listingId;
+        && request.auth.uid == request.resource.data.sellerUid
+        && request.resource.data.keys().hasAll(['listingId', 'paymentMethods', 'accountName', 'sellerUid', 'createdAtMs'])
+        && request.resource.data.listingId == listingId;
 
       allow read: if signedIn()
         && (request.auth.uid == resource.data.sellerUid
@@ -635,9 +614,8 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
-    // The node writes these with its service account, which skips these rules.
-    // A signed-in phone may read the copy. It may not create, change, or delete it.
-    // Paste this block above the catch-all. Do not remove the rules above it.
+    // Node copies. The service account writes these and skips these rules.
+    // A signed-in phone may read them. It cannot create, change, or delete them.
     match /REPUTATION/{docId} {
       allow read: if signedIn();
       allow create, update, delete: if false;
@@ -666,45 +644,42 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // What the member did in the app. They may add their own rows and read them.
-    // This does not change the 0–26 score. The network half is REPUTATION, written by the node.
-    match /USERS/{uid}/ACTIVITY/{eventId} {
-      allow read: if isSelf(uid);
-      allow create: if isSelf(uid)
-        && request.resource.data.keys().hasOnly(['kind', 'title', 'detail', 'at', 'source'])
-        && request.resource.data.source == 'app'
-        && request.resource.data.kind is string
-        && request.resource.data.kind.size() > 0
-        && request.resource.data.kind.size() <= 32
-        && request.resource.data.title is string
-        && request.resource.data.title.size() > 0
-        && request.resource.data.title.size() <= 80
-        && request.resource.data.detail is string
-        && request.resource.data.detail.size() <= 120
-        && request.resource.data.at is number
-        && request.resource.data.at > 0;
+    // Permanent 10-digit id → owner. Clients never read this. Rules do,
+    // to check that the signed-in user owns the PID they are writing.
+    match /PIDS/{pid} {
+      allow read: if false;
+      allow create: if signedIn()
+        && pid.matches('^[0-9]{10}$')
+        && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid;
       allow update, delete: if false;
     }
 
-    // One shared price card for the other coins. A signed-in phone may replace it only once
-    // the copy is 8 minutes old, so the phones share one CoinGecko read instead of each calling.
-    // Display only. It never moves HARV.
-    match /MARKET_PRICES/{docId} {
+    // Public card. No date of birth, ID number, address, phone or next of kin.
+    //
+    // Trust: trust_percent, trust_tier, trust_updated, wallet and milestones (the badge shelf) are written by the node only (its service account skips these
+    // rules). A user can create or edit their card but cannot add those fields, change them, or remove them, so the
+    // score on a profile is read-only for its owner and cannot be hidden. The old client-writable trust_score is gone.
+    // Public profile card. Besides the node-written trust fields it holds what the member chooses to show: country and state
+    // (always shown), city and age (only when the member turns them on; the phone removes them otherwise), a short bio, and counts
+    // (groups, cycles, loans, pending loans) with no amounts. The counts are written by the member's own phone.
+    match /PROFILES/{pid} {
       allow read: if signedIn();
-      allow create, update: if signedIn()
-        && docId == 'spot'
-        && request.resource.data.keys().hasOnly(['source', 'updatedAt', 'quotes'])
-        && request.resource.data.source == 'app'
-        && request.resource.data.updatedAt == request.time
-        && request.resource.data.quotes is map
-        && request.resource.data.quotes.size() > 0
-        && request.resource.data.quotes.size() <= 20
-        && (
-          !exists(/databases/$(database)/documents/MARKET_PRICES/$(docId))
-          || !('updatedAt' in resource.data)
-          || !(resource.data.updatedAt is timestamp)
-          || request.time > resource.data.updatedAt + duration.value(8, 'm')
-        );
+      allow create: if signedIn()
+        && pidLinkOwned(pid)
+        && request.resource.data.pid == pid
+        && request.resource.data.keys().hasOnly(['pid', 'first_name', 'last_name', 'username', 'icon', 'tier', 'country', 'state', 'city', 'age', 'show_age', 'show_city', 'bio', 'member_since', 'groups_count', 'cycles_completed', 'loans_count', 'loans_pending', 'stats_updated']);
+      allow update: if signedIn()
+        && pidLinkOwned(pid)
+        && request.resource.data.pid == pid
+        && request.resource.data.keys().hasOnly(
+          ['pid', 'first_name', 'last_name', 'username', 'icon', 'tier', 'trust_percent', 'trust_tier', 'trust_updated', 'wallet', 'milestones',
+           'country', 'state', 'city', 'age', 'show_age', 'show_city', 'bio', 'member_since', 'groups_count', 'cycles_completed', 'loans_count', 'loans_pending', 'stats_updated'])
+        && request.resource.data.get('trust_percent', null) == resource.data.get('trust_percent', null)
+        && request.resource.data.get('trust_tier', null) == resource.data.get('trust_tier', null)
+        && request.resource.data.get('trust_updated', null) == resource.data.get('trust_updated', null)
+        && request.resource.data.get('wallet', null) == resource.data.get('wallet', null)
+        && request.resource.data.get('milestones', null) == resource.data.get('milestones', null);
       allow delete: if false;
     }
 

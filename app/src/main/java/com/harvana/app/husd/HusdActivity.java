@@ -33,21 +33,30 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * hUSD: dollars inside Harvana, backed one for one by USDC in the bridge vault. Deposit USDC from Base, Polygon and
- * the other supported chains without needing ETH, send hUSD to anyone on Harvana, and withdraw back to USDC.
+ * One stable asset's screen: hUSD (dollars, backed by USDC) or hEUR, hNGN and the others (each backed by a token of
+ * its own currency). Deposit the reserve token from the supported chains without needing gas, send to anyone on
+ * Harvana, and withdraw back to the reserve token. Open with extra "asset" = "HEUR", …; hUSD when absent.
  */
 public class HusdActivity extends AppCompatActivity {
 
+    public static final String EXTRA_ASSET = "asset";
+
     private String address;
+    /** "HUSD", "HEUR", …; sym "hUSD"; reserve "USDC", "EURC", … */
+    private String code = HusdClient.ASSET, sym = "hUSD", reserve = "USDC";
     private JSONObject info = new JSONObject();
     private JSONObject bal = new JSONObject();
-    private TextView tvBalance, tvSub;
+    private TextView tvBalance, tvSub, tvHow;
     private LinearLayout history;
 
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         address = WalletManager.getActiveWalletAddress(this);
+        String asked = getIntent() == null ? null : getIntent().getStringExtra(EXTRA_ASSET);
+        if (Stable.isStable(asked)) code = asked;
+        sym = Stable.symbol(code);
+        reserve = Stable.reserve(code, null);
         ScrollView sv = new ScrollView(this);
         sv.setBackgroundColor(UiColors.background());
         LinearLayout root = new LinearLayout(this);
@@ -58,13 +67,13 @@ public class HusdActivity extends AppCompatActivity {
         LinearLayout head = card();
         head.setGravity(Gravity.CENTER_HORIZONTAL);
         ImageView logo = new ImageView(this);
-        logo.setImageResource(R.drawable.ic_coin_husd);
+        logo.setImageDrawable(StableIcon.drawable(this, code));
         head.addView(logo, new LinearLayout.LayoutParams(dp(56), dp(56)));
-        tvBalance = text("… hUSD", 30, true, UiColors.textPrimary());
+        tvBalance = text("… " + sym, 30, true, UiColors.textPrimary());
         tvBalance.setGravity(Gravity.CENTER);
         com.harvana.app.utils.BalancePrivacy.guard(tvBalance);
         head.addView(tvBalance);
-        tvSub = text("1 hUSD = 1 US dollar, backed by USDC", 13, false, UiColors.textSecondary());
+        tvSub = text("1 " + sym + " = 1 " + Stable.name(code) + ", backed by " + reserve, 13, false, UiColors.textSecondary());
         tvSub.setGravity(Gravity.CENTER);
         head.addView(tvSub);
         LinearLayout actions = new LinearLayout(this);
@@ -79,10 +88,8 @@ public class HusdActivity extends AppCompatActivity {
         how.setPadding(dp(4), dp(18), 0, dp(6));
         root.addView(how);
         LinearLayout hc = card();
-        hc.addView(text("• Deposit USDC from Base, Polygon, Arbitrum, Ethereum or BNB Chain to your own deposit address. You don't need ETH or any gas.\n"
-                + "• Send hUSD to anyone on Harvana. If you hold HARV, the fee is paid in HARV; if not, it is 0.02 hUSD. Your first 3 hUSD-paid transfers are free.\n"
-                + "• Withdraw hUSD back to USDC at any address you choose. A 0.50 hUSD fee covers the gas on that chain. The minimum is 5 hUSD.",
-                13, false, UiColors.textSecondary()));
+        tvHow = text("…", 13, false, UiColors.textSecondary());
+        hc.addView(tvHow);
         root.addView(hc);
 
         TextView wtitle = text("Withdrawals", 15, true, UiColors.textPrimary());
@@ -91,7 +98,7 @@ public class HusdActivity extends AppCompatActivity {
         history = card();
         root.addView(history);
 
-        AppBar.setContent(this, sv, "hUSD", "Dollars inside Harvana");
+        AppBar.setContent(this, sv, sym, Stable.name(code) + " inside Harvana");
         load();
     }
 
@@ -99,22 +106,24 @@ public class HusdActivity extends AppCompatActivity {
 
     private void load() {
         if (address == null || address.isEmpty()) { tvBalance.setText("No wallet"); return; }
-        HusdClient.info(new HusdClient.Cb() {
+        HusdClient.info(code, new HusdClient.Cb() {
             @Override public void ok(JSONObject r) { info = r; runOnUiThread(() -> {
-                if (!r.optBoolean("active")) tvSub.setText("hUSD is not switched on yet on the network.");
+                reserve = Stable.reserve(code, r);
+                tvHow.setText(howText());
+                if (!r.optBoolean("active")) tvSub.setText(sym + " is not switched on yet on the network.");
             }); }
             @Override public void fail(String e) { }
         });
-        HusdClient.balance(address, new HusdClient.Cb() {
+        HusdClient.balance(code, address, new HusdClient.Cb() {
             @Override public void ok(JSONObject r) { bal = r; runOnUiThread(() -> {
-                tvBalance.setText(HusdClient.format(r.optLong("availableRaw")) + " hUSD");
+                tvBalance.setText(HusdClient.format(r.optLong("availableRaw")) + " " + sym);
                 long pin = r.optLong("pendingInRaw"), pout = r.optLong("pendingOutRaw");
                 String extra = pin > 0 ? " · " + HusdClient.format(pin) + " arriving" : (pout > 0 ? " · " + HusdClient.format(pout) + " leaving" : "");
                 tvSub.setText(r.optInt("freeTransfersLeft") + " free transfers left" + extra);
             }); }
             @Override public void fail(String e) { runOnUiThread(() -> tvSub.setText("Couldn't load: " + e)); }
         });
-        HusdClient.withdrawals(address, new HusdClient.Cb() {
+        HusdClient.withdrawals(code, address, new HusdClient.Cb() {
             @Override public void ok(JSONObject r) { runOnUiThread(() -> showWithdrawals(r.optJSONArray("withdrawals"))); }
             @Override public void fail(String e) { }
         });
@@ -131,9 +140,9 @@ public class HusdActivity extends AppCompatActivity {
             if (w == null) continue;
             boolean paid = "PAID".equals(w.optString("status"));
             String to = w.optString("to");
-            TextView row = text(HusdClient.format(w.optLong("amountRaw")) + " hUSD → " + w.optString("chain") + " "
+            TextView row = text(HusdClient.format(w.optLong("amountRaw")) + " " + sym + " → " + chainName(w.optString("chain")) + " "
                     + (to.length() > 12 ? to.substring(0, 6) + "…" + to.substring(to.length() - 4) : to)
-                    + "\n" + (paid ? "Paid in USDC" : "On its way: the bridge pays it after a few confirmations"),
+                    + "\n" + (paid ? "Paid in " + reserve : "On its way: the bridge pays it after a few confirmations"),
                     13, false, paid ? UiColors.textPrimary() : UiColors.warning());
             row.setPadding(0, dp(6), 0, dp(6));
             history.addView(row);
@@ -151,7 +160,7 @@ public class HusdActivity extends AppCompatActivity {
         String[] names = chains.toArray(new String[0]);
         String[] labels = new String[names.length];
         for (int i = 0; i < names.length; i++) labels[i] = chainName(names[i]);
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Send USDC from which network?")
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Send " + reserve + " from which network?")
                 .setItems(labels, (d, which) -> showDepositAddress(names[which], factories.optJSONObject(names[which]))).show();
     }
 
@@ -164,11 +173,12 @@ public class HusdActivity extends AppCompatActivity {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(20), dp(20), dp(20), dp(24));
         root.setBackgroundColor(UiColors.surface());
-        root.addView(text("Your USDC deposit address on " + chainName(chain), 17, true, UiColors.textPrimary()));
-        root.addView(text("Send only USDC on " + chainName(chain) + " to this address. Other coins or networks can't be credited.",
+        root.addView(text("Your " + reserve + " deposit address on " + chainName(chain), 17, true, UiColors.textPrimary()));
+        root.addView(text("Send only " + reserve + " on " + chainName(chain) + " to this address, for " + sym
+                + ". Other coins, other networks, and other Harvana assets' deposit addresses can't be mixed up: each has its own.",
                 13, false, UiColors.warning()));
         ImageView qr = new ImageView(this);
-        try { qr.setImageBitmap(com.harvana.app.HARVQRCodeGenerator.generateQRCodeWithLogo(this, addr, dp(220), R.drawable.ic_coin_husd)); }
+        try { qr.setImageBitmap(com.harvana.app.HARVQRCodeGenerator.unified(addr, dp(220), StableIcon.bitmap(this, code, 128))); }
         catch (Exception ignored) { }
         LinearLayout.LayoutParams qlp = new LinearLayout.LayoutParams(dp(220), dp(220));
         qlp.gravity = Gravity.CENTER_HORIZONTAL;
@@ -182,18 +192,18 @@ public class HusdActivity extends AppCompatActivity {
         MaterialButton copy = button("Copy address");
         copy.setOnClickListener(v -> {
             ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("USDC deposit address", addr));
+            if (cm != null) cm.setPrimaryClip(ClipData.newPlainText(reserve + " deposit address", addr));
             toast("Copied");
         });
         root.addView(copy);
         MaterialButton sent = button("I've sent it");
-        sent.setOnClickListener(v -> HusdClient.requestSweep(chain, address, new HusdClient.Cb() {
+        sent.setOnClickListener(v -> HusdClient.requestSweep(code, chain, address, new HusdClient.Cb() {
             @Override public void ok(JSONObject r) { runOnUiThread(() -> { sheet.dismiss();
-                toast("Thanks. Your hUSD arrives after the network confirms the deposit, usually within minutes."); }); }
+                toast("Thanks. Your " + sym + " arrives after the network confirms the deposit, usually within minutes."); }); }
             @Override public void fail(String e) { runOnUiThread(() -> toast("Couldn't reach the network: " + e)); }
         }));
         root.addView(sent);
-        root.addView(text("Minimum deposit 1 USDC. Each deposit address is yours alone and never changes.",
+        root.addView(text("Minimum deposit 1 " + reserve + ". Each deposit address is yours alone and never changes.",
                 12, false, UiColors.textTertiary()));
         sheet.setContentView(root);
         sheet.show();
@@ -205,15 +215,15 @@ public class HusdActivity extends AppCompatActivity {
         if (!active()) return;
         LinearLayout box = form();
         EditText to = field(box, "Harvana address (HV0x…)", InputType.TYPE_CLASS_TEXT);
-        EditText amount = field(box, "Amount in hUSD", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Send hUSD").setView(box)
+        EditText amount = field(box, "Amount in " + sym, InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Send " + sym).setView(box)
                 .setPositiveButton("Review", (d, w) -> {
                     String dest = to.getText().toString().trim();
                     Long units = HusdClient.parse(amount.getText().toString());
                     if (!dest.matches("^HV0x[0-9a-f]{40}$")) { toast("That isn't a Harvana address."); return; }
                     if (dest.equals(address)) { toast("That's this wallet."); return; }
                     if (units == null) { toast("Enter an amount, up to 6 decimals."); return; }
-                    confirm("Send hUSD", units, new String[][]{{"To", shortAddr(dest)}, {"Fee", feeText(false)}},
+                    confirm("Send " + sym, units, new String[][]{{"To", shortAddr(dest)}, {"Fee", feeText(false)}},
                             () -> submit(dest, units, null, "Sent"));
                 }).setNegativeButton("Cancel", null).show();
     }
@@ -222,33 +232,36 @@ public class HusdActivity extends AppCompatActivity {
 
     private void withdraw() {
         if (!active()) return;
-        JSONArray chains = info.optJSONArray("chains");
+        // Only chains where this asset has a vault (the same ones deposits use).
+        JSONObject factories = info.optJSONObject("depositFactories");
         List<String> list = new ArrayList<>();
-        if (chains != null) for (int i = 0; i < chains.length(); i++) list.add(chains.optString(i));
+        if (factories != null) for (Iterator<String> it = factories.keys(); it.hasNext(); ) list.add(it.next());
         if (list.isEmpty()) { toast("Withdrawals aren't open yet."); return; }
         String[] names = list.toArray(new String[0]);
         String[] labels = new String[names.length];
         for (int i = 0; i < names.length; i++) labels[i] = chainName(names[i]);
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Receive USDC on which network?")
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Receive " + reserve + " on which network?")
                 .setItems(labels, (d, which) -> withdrawTo(names[which])).show();
     }
 
     private void withdrawTo(String chain) {
         LinearLayout box = form();
         EditText to = field(box, "Your " + chainName(chain) + " address (0x…)", InputType.TYPE_CLASS_TEXT);
-        EditText amount = field(box, "Amount in hUSD (at least 5)", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Withdraw to USDC").setView(box)
+        long min = fee("minWithdrawRaw", 5 * HusdClient.UNIT);
+        EditText amount = field(box, "Amount in " + sym + " (at least " + HusdClient.format(min) + ")", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Withdraw to " + reserve).setView(box)
                 .setPositiveButton("Review", (d, w) -> {
                     String dest = to.getText().toString().trim();
                     Long units = HusdClient.parse(amount.getText().toString());
                     if (!HusdClient.isEvmAddress(dest)) { toast("That isn't a " + chainName(chain) + " address."); return; }
-                    if (units == null || units < 5 * HusdClient.UNIT) { toast("The minimum withdrawal is 5 hUSD."); return; }
+                    if (units == null || units < min) { toast("The minimum withdrawal is " + HusdClient.format(min) + " " + sym + "."); return; }
                     String burn = info.optString("burnAddress");
                     if (burn.isEmpty()) { toast("Withdrawals aren't open yet."); return; }
-                    confirm("Withdraw to USDC", units, new String[][]{{"To", chainName(chain) + " " + shortAddr(dest)},
-                                    {"You receive", HusdClient.format(units) + " USDC"}, {"Fee", "0.50 hUSD, plus " + feeText(true)},
+                    confirm("Withdraw to " + reserve, units, new String[][]{{"To", chainName(chain) + " " + shortAddr(dest)},
+                                    {"You receive", HusdClient.format(units) + " " + reserve},
+                                    {"Fee", HusdClient.format(fee("withdrawFeeRaw", 500_000L)) + " " + sym + ", plus " + feeText(true)},
                                     {"Arrives", "After the bridge confirms it, usually within the hour"}},
-                            () -> submit(burn, units, "HUSD_WITHDRAW:" + chain + ":" + dest, "Withdrawal sent"));
+                            () -> submit(burn, units, code + "_WITHDRAW:" + chain + ":" + dest, "Withdrawal sent"));
                 }).setNegativeButton("Cancel", null).show();
     }
 
@@ -257,12 +270,12 @@ public class HusdActivity extends AppCompatActivity {
     private void confirm(String title, long units, String[][] rows, Runnable go) {
         List<String[]> list = new ArrayList<>();
         for (String[] r : rows) list.add(r);
-        com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, title, HusdClient.format(units) + " hUSD", list, go);
+        com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, title, HusdClient.format(units) + " " + sym, list, go);
     }
 
     private void submit(String to, long units, String memo, String done) {
         toast("Sending…");
-        HusdClient.send(this, address, to, units, memo, new HusdClient.Cb() {
+        HusdClient.send(this, code, address, to, units, memo, new HusdClient.Cb() {
             @Override public void ok(JSONObject r) { runOnUiThread(() -> { toast(done + "."); load(); }); }
             @Override public void fail(String e) { runOnUiThread(() -> toast(plain(e))); }
         });
@@ -270,22 +283,36 @@ public class HusdActivity extends AppCompatActivity {
 
     private String feeText(boolean withdrawal) {
         int free = bal.optInt("freeTransfersLeft");
-        String base = "HARV gas if you hold HARV, otherwise 0.02 hUSD";
-        return !withdrawal && free > 0 ? "Free (" + free + " free transfers left) if paid in hUSD; " + base : base;
+        String base = "HARV gas if you hold HARV, otherwise " + HusdClient.format(fee("transferPaidInHusdRaw", 20_000L)) + " " + sym;
+        return !withdrawal && free > 0 ? "Free (" + free + " free transfers left) if paid in " + sym + "; " + base : base;
     }
 
-    private static String plain(String e) {
+    /** One of the node's fee figures for this asset (raw units), or {@code fallback} before /info has loaded. */
+    private long fee(String key, long fallback) {
+        JSONObject f = info.optJSONObject("fees");
+        return f != null && f.has(key) ? f.optLong(key, fallback) : fallback;
+    }
+
+    private String howText() {
+        return "• Deposit " + reserve + " from a supported network to your own " + sym + " deposit address. You don't need any gas.\n"
+                + "• Send " + sym + " to anyone on Harvana. If you hold HARV, the fee is paid in HARV; if not, it is "
+                + HusdClient.format(fee("transferPaidInHusdRaw", 20_000L)) + " " + sym + ". Your first 3 " + sym + "-paid transfers are free.\n"
+                + "• Withdraw " + sym + " back to " + reserve + " at any address you choose. A " + HusdClient.format(fee("withdrawFeeRaw", 500_000L))
+                + " " + sym + " fee covers the gas on that chain. The minimum is " + HusdClient.format(fee("minWithdrawRaw", 5 * HusdClient.UNIT)) + " " + sym + ".";
+    }
+
+    private String plain(String e) {
         if (e == null) return "Couldn't send.";
-        if (e.contains("INSUFFICIENT_HUSD")) return "Not enough hUSD for this amount and its fee.";
-        if (e.contains("HUSD_NOT_ACTIVE")) return "hUSD is not switched on yet.";
-        if (e.contains("HUSD_WITHDRAW_BELOW_MINIMUM")) return "The minimum withdrawal is 5 hUSD.";
-        if (e.contains("HUSD_SYSTEM_RECIPIENT")) return "hUSD can't be sent to that address.";
+        if (e.contains("INSUFFICIENT_" + code)) return "Not enough " + sym + " for this amount and its fee.";
+        if (e.contains(code + "_NOT_ACTIVE")) return sym + " is not switched on yet.";
+        if (e.contains(code + "_WITHDRAW_BELOW_MINIMUM")) return "That is below the minimum withdrawal.";
+        if (e.contains("_SYSTEM_RECIPIENT") || e.contains("_ONLY")) return sym + " can't be sent to that address.";
         return "Couldn't send: " + e;
     }
 
     private boolean active() {
         if (info.optBoolean("active")) return true;
-        toast("hUSD is not switched on yet on the network.");
+        toast(sym + " is not switched on yet on the network.");
         return false;
     }
 
@@ -296,6 +323,7 @@ public class HusdActivity extends AppCompatActivity {
             case "ARBITRUM": return "Arbitrum";
             case "ETHEREUM": return "Ethereum";
             case "BSC": return "BNB Chain";
+            case "CELO": return "Celo";
             default: return c;
         }
     }

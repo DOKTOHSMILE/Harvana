@@ -14,7 +14,8 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
 /**
- * hUSD, the dollar token on the Harvana chain (node: docs/HUSD.md). 1 hUSD = 1,000,000 units, like USDC.
+ * hUSD, the dollar token on the Harvana chain (node: docs/HUSD.md), and the other stable assets (hEUR, hNGN, …; see
+ * Stable), which use the same calls under /api/v1/stable/{code}. 1 unit of any of them = 1,000,000 raw units.
  * Sending is a normal signed transfer with mintId "HUSD", which the v1 signature covers:
  * from + to + amount + nonce + memo + "HUSD".
  */
@@ -33,19 +34,40 @@ public final class HusdClient {
         };
     }
 
-    public static void info(Cb cb) { HarvanaNodeClient.nodeGet("/api/v1/husd/info", wrap(cb)); }
+    public static void info(Cb cb) { info(ASSET, cb); }
+    public static void info(String code, Cb cb) { HarvanaNodeClient.nodeGet(Stable.base(code) + "/info", wrap(cb)); }
 
-    public static void balance(String address, Cb cb) { HarvanaNodeClient.nodeGet("/api/v1/husd/balance/" + address, wrap(cb)); }
-
-    public static void withdrawals(String address, Cb cb) {
-        HarvanaNodeClient.nodeGet("/api/v1/husd/withdrawals?address=" + address + "&limit=20", wrap(cb));
+    /** Every stable asset and whether it is on: {"assets":[{asset, symbol, currency, active, …}]}. An older node
+     *  without this call answers with hUSD alone, from /api/v1/husd/info. */
+    public static void list(Cb cb) {
+        HarvanaNodeClient.nodeGet("/api/v1/stable", new HarvanaNodeClient.JsonCallback() {
+            @Override public void onSuccess(JSONObject r) { cb.ok(r); }
+            @Override public void onError(String e) {
+                info(ASSET, new Cb() {
+                    @Override public void ok(JSONObject i) {
+                        try { cb.ok(new JSONObject().put("assets", new org.json.JSONArray().put(i))); }
+                        catch (Exception x) { cb.fail(String.valueOf(x.getMessage())); }
+                    }
+                    @Override public void fail(String e2) { cb.fail(e2); }
+                });
+            }
+        });
     }
 
-    /** "I sent USDC to my deposit address on this chain": the relayer forwards it into the vault, free to the member. */
-    public static void requestSweep(String chain, String address, Cb cb) {
+    public static void balance(String address, Cb cb) { balance(ASSET, address, cb); }
+    public static void balance(String code, String address, Cb cb) {
+        HarvanaNodeClient.nodeGet(Stable.base(code) + "/balance/" + address, wrap(cb));
+    }
+
+    public static void withdrawals(String code, String address, Cb cb) {
+        HarvanaNodeClient.nodeGet(Stable.base(code) + "/withdrawals?address=" + address + "&limit=20", wrap(cb));
+    }
+
+    /** "I sent the reserve token to my deposit address on this chain": the relayer forwards it, free to the member. */
+    public static void requestSweep(String code, String chain, String address, Cb cb) {
         try {
             JSONObject b = new JSONObject().put("chain", chain).put("address", address);
-            HarvanaNodeClient.nodePost("/api/v1/husd/sweep-request", b.toString(), wrap(cb));
+            HarvanaNodeClient.nodePost(Stable.base(code) + "/sweep-request", b.toString(), wrap(cb));
         } catch (Exception e) { cb.fail(String.valueOf(e.getMessage())); }
     }
 
@@ -70,6 +92,11 @@ public final class HusdClient {
      * few are free). {@code memo} is null for a transfer, or "HUSD_WITHDRAW:CHAIN:0x…" for a withdrawal.
      */
     public static void send(Context c, String from, String to, long amountUnits, String memo, Cb cb) {
+        send(c, ASSET, from, to, amountUnits, memo, cb);
+    }
+
+    /** Same for any stable asset: mintId = its code ("HEUR", "HNGN", …). */
+    public static void send(Context c, String code, String from, String to, long amountUnits, String memo, Cb cb) {
         WalletNodeBridge.fetchLiveBalance(c, from, new WalletNodeBridge.BalanceCallback() {
             @Override public void onSuccess(double harv, long confirmedNonce, long height) {
                 HarvanaNodeClient.getPending(from, new HarvanaNodeClient.JsonCallback() {
@@ -80,26 +107,26 @@ public final class HusdClient {
                             JSONObject t = arr.optJSONObject(i);
                             if (t != null && from.equalsIgnoreCase(t.optString("from"))) pending++;
                         }
-                        signAndPost(c, from, to, amountUnits, memo, confirmedNonce + 1 + pending, cb);
+                        signAndPost(c, code, from, to, amountUnits, memo, confirmedNonce + 1 + pending, cb);
                     }
-                    @Override public void onError(String e) { signAndPost(c, from, to, amountUnits, memo, confirmedNonce + 1, cb); }
+                    @Override public void onError(String e) { signAndPost(c, code, from, to, amountUnits, memo, confirmedNonce + 1, cb); }
                 });
             }
             @Override public void onError(String e) { cb.fail(e); }
         });
     }
 
-    private static void signAndPost(Context c, String from, String to, long amount, String memo, long nonce, Cb cb) {
+    private static void signAndPost(Context c, String code, String from, String to, long amount, String memo, long nonce, Cb cb) {
         try {
             String seedB64 = WalletManager.loadPrivateKey(c, from);
             String pub = WalletManager.getPublicKey(c, from);
             if (seedB64 == null || pub == null) { cb.fail("This wallet's key is not on this phone."); return; }
             String m = memo == null ? "" : memo;
-            String canonical = from + to + amount + nonce + m + ASSET;     // the node's v1 canonical message
+            String canonical = from + to + amount + nonce + m + code;     // the node's v1 canonical message
             byte[] sig = Ed25519.sign(Base64.decode(seedB64, Base64.NO_WRAP), canonical.getBytes(StandardCharsets.UTF_8));
             JSONObject body = new JSONObject();
             body.put("from", from).put("to", to).put("amount", amount).put("gas", 0).put("nonce", nonce)
-                    .put("mintId", ASSET).put("publicKey", pub).put("signature", Base64.encodeToString(sig, Base64.NO_WRAP));
+                    .put("mintId", code).put("publicKey", pub).put("signature", Base64.encodeToString(sig, Base64.NO_WRAP));
             if (!m.isEmpty()) body.put("memo", m);
             HarvanaNodeClient.nodePost("/api/v1/tx/send", body.toString(), wrap(cb));
         } catch (Exception e) {

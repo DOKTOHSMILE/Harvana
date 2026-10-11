@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A Harvana stable asset other than hUSD (hEUR, hNGN, …) where a picture can't show its own currency sign:
+     a coin with two level bars, for "stable". -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
+    <path android:fillColor="#1F4FB5" android:pathData="M24,2A22,22 0,1 1,23.99 2Z"/>
+    <path android:fillColor="#3A6FE0" android:pathData="M24,5A19,19 0,1 1,23.99 5Z"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M14,17.5h20a2,2 0,0 1,0 4h-20a2,2 0,0 1,0 -4Z"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M14,26.5h20a2,2 0,0 1,0 4h-20a2,2 0,0 1,0 -4Z"/>
+</vector>

@@ -47,14 +47,17 @@ public final class TxKind {
                     : what.startsWith("FIXED_DISBURSE") ? "a goal payout" : what.startsWith("FIXED_") ? "a goal group action" : what.startsWith("GENLOAN") ? "a loan request" : what.startsWith("P2P_CANCEL") ? "cancelling a listing" : "an action";
             return new TxKind("Network fee", "For " + label, R.drawable.ic_tx_fee);
         }
-        // hUSD bridge: USDC in from another network, or out to one.
-        if (m.startsWith("HUSD_MINT:")) {
+        // Stable-asset bridges (hUSD, hEUR, hNGN, …): the reserve token in from another network, or out to one.
+        int us = m.indexOf('_');
+        String stable = us == 4 ? m.substring(0, 4) : "";
+        if (com.harvana.app.husd.Stable.isStable(stable) && (m.startsWith(stable + "_MINT:") || m.startsWith(stable + "_WITHDRAW:"))) {
             String[] parts = m.split(":");
-            return new TxKind("Deposited hUSD", "USDC from " + com.harvana.app.husd.HusdActivity.chainName(parts.length > 1 ? parts[1] : ""), R.drawable.ic_coin_husd);
-        }
-        if (m.startsWith("HUSD_WITHDRAW:")) {
-            String[] parts = m.split(":");
-            return new TxKind("Withdrew to USDC", "To " + com.harvana.app.husd.HusdActivity.chainName(parts.length > 1 ? parts[1] : ""), R.drawable.ic_coin_husd);
+            String chain = com.harvana.app.husd.HusdActivity.chainName(parts.length > 1 ? parts[1] : "");
+            String sym = com.harvana.app.husd.Stable.symbol(stable), reserve = com.harvana.app.husd.Stable.reserve(stable, null);
+            int icon = "HUSD".equals(stable) ? R.drawable.ic_coin_husd : R.drawable.ic_coin_stable;
+            return m.startsWith(stable + "_MINT:")
+                    ? new TxKind("Deposited " + sym, reserve + " from " + chain, icon)
+                    : new TxKind("Withdrew to " + reserve, sym + " to " + chain, icon);
         }
         if (m.startsWith("STAKE_LOCK:")) {
             String days = m.substring("STAKE_LOCK:".length());

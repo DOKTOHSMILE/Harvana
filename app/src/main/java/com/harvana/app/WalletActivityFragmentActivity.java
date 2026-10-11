@@ -200,10 +200,11 @@ public class WalletActivityFragmentActivity extends Fragment {
 							entry.put("senderAddress", tx.optString("from", ""));
 							entry.put("recipientAddress", tx.optString("to", ""));
 							entry.put("memo", tx.optString("memo", "")); 
-							boolean husdTx = "HUSD".equals(tx.optString("asset", tx.optString("mintId", "")));
+							String stableCode = tx.optString("asset", tx.optString("mintId", ""));
+							boolean husdTx = com.harvana.app.husd.Stable.isStable(stableCode);
 							entry.put("value", husdTx ? tx.optLong("amount", 0L) / (double) com.harvana.app.husd.HusdClient.UNIT
 									: com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay(tx.optLong("amount", 0L)));
-							entry.put("tokenSymbol", husdTx ? "hUSD" : com.harvana.app.CoinInfo.ticker());
+							entry.put("tokenSymbol", husdTx ? com.harvana.app.husd.Stable.symbol(stableCode) : com.harvana.app.CoinInfo.ticker());
 							entry.put("status", "pending");
 							entry.put("timestamp", System.currentTimeMillis());
 							knownPending.add(entry);
@@ -263,8 +264,9 @@ public class WalletActivityFragmentActivity extends Fragment {
 								item.put("recipientAddress", recipient);
 								item.put("memo", tx.optString("memo", "")); 
 								
-								// hUSD rides on the same history; its amounts have 6 decimals, not HARV's 8.
-								boolean husd = "HUSD".equals(tx.optString("asset", tx.optString("mintId", "")));
+								// Stable assets (hUSD, hEUR, …) ride on the same history; their amounts have 6 decimals, not HARV's 8.
+								String stableAsset = tx.optString("asset", tx.optString("mintId", ""));
+								boolean husd = com.harvana.app.husd.Stable.isStable(stableAsset);
 								double displayValue;
 								if (tx.has("amount") && !tx.isNull("amount")) {
 									long rawAmount = tx.optLong("amount", 0L);
@@ -275,7 +277,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 								}
 								item.put("value", displayValue);
 								
-								item.put("tokenSymbol", husd ? "hUSD"
+								item.put("tokenSymbol", husd ? com.harvana.app.husd.Stable.symbol(stableAsset)
 										: tx.optString("tokenSymbol", tx.optString("token", com.harvana.app.CoinInfo.ticker())));
 								item.put("txHash", tx.optString("txHash", ""));
 								item.put("status", tx.optString("status", "confirmed"));

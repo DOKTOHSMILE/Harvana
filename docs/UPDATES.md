@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 11 Oct 2026: hEUR, hNGN, hGHS and other stable currencies
+
+What the app does:
+- **More stable coins besides hUSD: hEUR, hGBP, hNGN, hGHS, hKES and hZAR.** Each tracks one currency and has its own line on the Assets tab and its own screen (Deposit, Send, Withdraw). Each one appears only when the network switches it on, and none is on yet.
+- **Each line shows its value in your chosen currency** and counts in the wallet total. For example, 10,000 hNGN shows as about $6.50 if you display dollars.
+- **Each coin has its own icon** (€, £, ₦, GH₵, KSh, R) and its own deposit address, fees and minimum withdrawal. The screen reads them from the network.
+- **Activity shows these coins in their own units.** For example: "+ 5,000 hNGN", "Deposited hEUR · EURC from Base".
+
+What you do: install the build. Nothing shows until the node switches a currency on (node: `docs/STABLE_ASSETS.md`).
+
 ## 11 Oct 2026: hUSD in the Activity list
 
 What the app does, once hUSD is switched on:

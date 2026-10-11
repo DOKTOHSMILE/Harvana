@@ -289,7 +289,7 @@ public class HusdActivity extends AppCompatActivity {
         return false;
     }
 
-    static String chainName(String c) {
+    public static String chainName(String c) {
         switch (c) {
             case "BASE": return "Base";
             case "POLYGON": return "Polygon";

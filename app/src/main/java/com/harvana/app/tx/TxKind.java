@@ -47,6 +47,15 @@ public final class TxKind {
                     : what.startsWith("FIXED_DISBURSE") ? "a goal payout" : what.startsWith("FIXED_") ? "a goal group action" : what.startsWith("GENLOAN") ? "a loan request" : what.startsWith("P2P_CANCEL") ? "cancelling a listing" : "an action";
             return new TxKind("Network fee", "For " + label, R.drawable.ic_tx_fee);
         }
+        // hUSD bridge: USDC in from another network, or out to one.
+        if (m.startsWith("HUSD_MINT:")) {
+            String[] parts = m.split(":");
+            return new TxKind("Deposited hUSD", "USDC from " + com.harvana.app.husd.HusdActivity.chainName(parts.length > 1 ? parts[1] : ""), R.drawable.ic_coin_husd);
+        }
+        if (m.startsWith("HUSD_WITHDRAW:")) {
+            String[] parts = m.split(":");
+            return new TxKind("Withdrew to USDC", "To " + com.harvana.app.husd.HusdActivity.chainName(parts.length > 1 ? parts[1] : ""), R.drawable.ic_coin_husd);
+        }
         if (m.startsWith("STAKE_LOCK:")) {
             String days = m.substring("STAKE_LOCK:".length());
             return new TxKind("Staked HARV", "0".equals(days) ? "Flexible stake" : days + "-day lock", R.drawable.ic_tx_stake);

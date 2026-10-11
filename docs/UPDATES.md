@@ -2,6 +2,14 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 11 Oct 2026: hUSD in the Activity list
+
+What the app does, once hUSD is switched on:
+- **hUSD transfers show in the Activity tab in hUSD,** for example "+ 10 hUSD", including transfers still waiting to confirm. Before this fix they would have been read as HARV and shown 100 times too small.
+- **Deposits read "Deposited hUSD · USDC from Base"**, and **withdrawals read "Withdrew to USDC · To Base"**, each with the hUSD coin icon.
+
+What you do: install the build.
+
 ## 11 Oct 2026: hUSD in the app (hidden until the network switches it on)
 
 What the app does once the node reports hUSD active (`/api/v1/husd/info` → `"active": true`):

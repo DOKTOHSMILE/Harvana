@@ -203,6 +203,10 @@ public class HusdActivity extends AppCompatActivity {
             @Override public void fail(String e) { runOnUiThread(() -> toast("Couldn't reach the network: " + e)); }
         }));
         root.addView(sent);
+        long depFee = bridgeFee(chain);
+        root.addView(text("Network fee on " + chainName(chain) + ": " + HusdClient.format(depFee) + " " + sym
+                + ", taken from the deposit (twice that network's gas, for forwarding it into the vault). Send more than that.",
+                12, false, UiColors.textSecondary()));
         root.addView(text("Minimum deposit 1 " + reserve + ". Each deposit address is yours alone and never changes.",
                 12, false, UiColors.textTertiary()));
         sheet.setContentView(root);
@@ -250,7 +254,7 @@ public class HusdActivity extends AppCompatActivity {
                     if (burn.isEmpty()) { toast("Withdrawals aren't open yet."); return; }
                     confirm("Withdraw to " + reserve, units, new String[][]{{"To", chainName(chain) + " " + shortAddr(dest)},
                                     {"You receive", HusdClient.format(units) + " " + reserve},
-                                    {"Fee", HusdClient.format(fee("withdrawFeeRaw", 500_000L)) + " " + sym + ", plus " + feeText(true)},
+                                    {"Fee", HusdClient.format(bridgeFee(chain)) + " " + sym + " for " + chainName(chain) + "'s gas, plus " + feeText(true)},
                                     {"Arrives", "After the bridge confirms it, usually within the hour"}},
                             () -> submit(burn, units, code + "_WITHDRAW:" + chain + ":" + dest, "Withdrawal sent"));
                 }).setNegativeButton("Cancel", null).show();
@@ -278,6 +282,14 @@ public class HusdActivity extends AppCompatActivity {
         return !withdrawal && free > 0 ? "Free (" + free + " free transfers left) if paid in " + sym + "; " + base : base;
     }
 
+    /** The bridge fee on a chain (raw units of this coin): the node's per-chain figure, or its single older figure. */
+    private long bridgeFee(String chain) {
+        JSONObject f = info.optJSONObject("fees");
+        JSONObject per = f == null ? null : f.optJSONObject("bridgeFeeRaw");
+        if (per != null && per.has(chain)) return per.optLong(chain);
+        return fee("withdrawFeeRaw", 500_000L);
+    }
+
     /** One of the node's fee figures for this asset (raw units), or {@code fallback} before /info has loaded. */
     private long fee(String key, long fallback) {
         JSONObject f = info.optJSONObject("fees");
@@ -288,8 +300,10 @@ public class HusdActivity extends AppCompatActivity {
         return "• Deposit " + reserve + " from a supported network to your own " + sym + " deposit address. You don't need any gas.\n"
                 + "• Send " + sym + " to anyone on Harvana. If you hold HARV, the fee is paid in HARV; if not, it is "
                 + HusdClient.format(fee("transferPaidInHusdRaw", 20_000L)) + " " + sym + ". Your first 3 " + sym + "-paid transfers are free.\n"
-                + "• Withdraw " + sym + " back to " + reserve + " at any address you choose. A " + HusdClient.format(fee("withdrawFeeRaw", 500_000L))
-                + " " + sym + " fee covers the gas on that chain. The minimum is " + HusdClient.format(fee("minWithdrawRaw", 5 * HusdClient.UNIT)) + " " + sym + ".";
+                + "• Deposits and withdrawals pay twice the other network's gas, in " + sym + ": "
+                + HusdClient.format(bridgeFee("BASE")) + " on Base and similar networks, " + HusdClient.format(bridgeFee("ETHEREUM")) + " on Ethereum.\n"
+                + "• If you hold no HARV, half of a transfer's fee pays the miner who adds it to the chain.\n"
+                + "• Withdraw " + sym + " back to " + reserve + " at any address you choose. The minimum is " + HusdClient.format(fee("minWithdrawRaw", 5 * HusdClient.UNIT)) + " " + sym + ".";
     }
 
     private String plain(String e) {

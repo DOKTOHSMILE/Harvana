@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026: stable-coin fees pay the miner and the other network's gas
+
+What the app does, once a stable coin is on:
+- **Deposits show their network fee** before you send. It is twice that network's gas, taken from the deposit in the coin: 0.10 hUSD on Base and similar networks, 5.00 hUSD on Ethereum, and the same amounts converted for hNGN and the others.
+- **Withdrawals show the same fee** for the network you pick. It replaces the flat 0.50 hUSD.
+- **If you hold no HARV,** half of your transfer fee now pays the miner, and the screen says so.
+
+What you do: install the build, together with the 12 Oct node update.
+
 ## 11 Oct 2026: stable coins in P2P, and one Send screen for every coin
 
 What the app does:

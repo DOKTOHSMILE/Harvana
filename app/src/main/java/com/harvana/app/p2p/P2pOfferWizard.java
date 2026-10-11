@@ -125,7 +125,7 @@ public final class P2pOfferWizard {
 		final int[] paymentWindowMinutes = {15};
 
 		final double[] available = {-1};
-		final double[] minOrder = {1};
+		final double[] minOrder = {P2pAsset.minOrder(P2pAsset.get())};
 		final double[] maxOrder = {-1};
 		final long[] durationHours = {168};
 		final Set<String> selectedIds = new HashSet<>();
@@ -418,7 +418,7 @@ public final class P2pOfferWizard {
 			if (marginPercent < -20 || marginPercent > 20) return "Floating margin must be between -20% and +20%.";
 		}
 		if (price <= 0) return "Enter a unit price greater than zero.";
-		if (minOrder < 1) return ("Minimum trade must be at least 1 " + tk + ".");
+		if (minOrder < P2pAsset.minOrder(asset)) return ("Minimum trade must be at least " + BalanceFormatter.smartDecimal(P2pAsset.minOrder(asset)) + " " + tk + ".");
 		if (maxOrder > amount) return "Maximum trade can't be more than the total you're listing.";
 		if (minOrder > maxOrder) return "Minimum trade can't be more than the maximum trade.";
 		if (sell && methods.isEmpty()) return "Pick at least one payment method so buyers know where to pay you.";

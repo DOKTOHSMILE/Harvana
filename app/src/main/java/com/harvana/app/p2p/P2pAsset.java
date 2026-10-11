@@ -94,6 +94,17 @@ public final class P2pAsset {
         }
     }
 
+    /** The smallest single trade: 1 HARV; for a stable coin, 10x its fee (every escrow move pays the coin's fee). */
+    public static double minOrder(String code) {
+        switch (normalize(code)) {
+            case "HNGN": return 300;
+            case "HGHS": return 3;
+            case "HKES": return 25;
+            case "HZAR": return 3.6;
+            default: return 1;
+        }
+    }
+
     public static double maxListing(String code) {
         switch (normalize(code)) {
             case "HNGN": return 1_500_000_000d;

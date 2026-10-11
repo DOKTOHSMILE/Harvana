@@ -394,6 +394,19 @@ public final class NodeGroupClient {
         });
     }
 
+    /** Claims a HARV staker's share of one stable coin's fees ("HUSD", "HNGN", …). Like every claim it pays the
+     *  HARV network fee first (ACTION_FEE:STABLE_SHARE_CLAIM:<nonce>). */
+    public static void claimStableShare(Context c, String code, String address, Callback cb) {
+        String path = ("HUSD".equals(code) ? "/api/v1/husd" : "/api/v1/stable/" + code) + "/staker-share/claim";
+        withActionNonce(address, (nonce, err) -> {
+            if (nonce < 0) { cb.onError(err); return; }
+            actNonce(c, address, path, nonce, new Spec() {
+                public String canonical(long n) { return "STABLE_SHARE_CLAIM:" + code + ":" + address + ":" + n; }
+                public void fill(JSONObject b, long n) throws JSONException { b.put("address", address); }
+            }, cb);
+        });
+    }
+
     public static void unstake(Context c, String address, String lotId, long amountRaw, Callback cb) {
         withActionNonce(address, (nonce, err) -> {
             if (nonce < 0) { cb.onError(err); return; }
@@ -659,7 +672,7 @@ public final class NodeGroupClient {
             case "/api/v1/fixed/vote-milestone": return "FIXED_VOTE_MILESTONE";
             case "/api/v1/fixed/vote-grant": return "FIXED_VOTE_GRANT";
             case "/api/v1/genloan/request": return "GENLOAN_REQUEST";
-            default: return null;
+            default: return path.endsWith("/staker-share/claim") ? "STABLE_SHARE_CLAIM" : null;
         }
     }
 

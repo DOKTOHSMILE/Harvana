@@ -75,8 +75,9 @@ public final class P2pListingPublisher {
 					+ com.harvana.app.wallet.BalanceFormatter.smartDecimal(P2pAsset.maxListing(asset)) + " " + tk + " in total.");
 			return;
 		}
-		if (minOrderHarv < 1 || minOrderHarv > amountHarv) {
-			cb.onError("The minimum trade amount must be at least 1 " + tk + " and no more than the total you're listing.");
+		if (minOrderHarv < P2pAsset.minOrder(asset) || minOrderHarv > amountHarv) {
+			cb.onError("The minimum trade amount must be at least " + com.harvana.app.wallet.BalanceFormatter.smartDecimal(P2pAsset.minOrder(asset))
+					+ " " + tk + " and no more than the total you're listing.");
 			return;
 		}
 		if (P2pAsset.isStable(asset) && "MARGIN".equals(pricingType)) {

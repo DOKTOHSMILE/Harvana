@@ -2,6 +2,20 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026: About screen, and every claim pays its network fee
+
+What the app does:
+- **A new About screen** (Settings → About Harvana). It covers:
+  - what Harvana is and what you can do with it;
+  - how your money is kept safe;
+  - the mission;
+  - **"Created by Capital Oracle Projects"**;
+  - privacy, terms, help, the website and the open-source licences.
+- **Claiming your share of stable-coin fees now pays the normal HARV network fee first,** like claiming staking rewards. Nothing that reaches the network is free.
+- **P2P in stable coins:** every escrow move pays the coin's own fee, and the smallest trade is ten times that fee (1 hUSD, ₦300, …).
+
+What you do: install the build, together with the 12 Oct node update.
+
 ## 12 Oct 2026: one toggle style, 38dp tall, and the stable-coin share for HARV stakers
 
 What the app does:

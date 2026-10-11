@@ -177,12 +177,21 @@ public class WalletAssetFragmentActivity extends Fragment {
 	public void _MORE() {
 	}
 	/** Balance from node (available = spendable). No Firestore wallet sync. */
+	private LinearLayout _husdBox() {
+		return getView() == null ? null : getView().findViewById(R.id.husd_asset);
+	}
+
 	public void _loadAvailableCoins() {
 		if (getContext() == null || wallet_address == null || wallet_address.trim().isEmpty()) {
 			return;
 		}
 		final Context context = getContext();
 		com.harvana.app.wallet.ChainAssetsSection.render(context, chainAssets, wallet_address);
+		// hUSD, once the network has it switched on; its value goes into the total.
+		com.harvana.app.husd.HusdRow.render(context, _husdBox(), wallet_address, fiat -> {
+			androidx.fragment.app.Fragment parent = getParentFragment();
+			if (isAdded() && parent instanceof AssetFragmentActivity) ((AssetFragmentActivity) parent).setHusdFiat(fiat);
+		});
 		
 		java.util.List<HashMap<String, Object>> cachedCoins =
 		com.harvana.app.wallet.WalletCache.loadList(context, "coins_" + wallet_address);

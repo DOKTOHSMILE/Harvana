@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- hUSD: Harvana's dollar token. A green coin with a dollar sign. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
+    <path android:fillColor="#1B8A5A" android:pathData="M24,2A22,22 0,1 1,23.99 2Z"/>
+    <path android:fillColor="#2FB57A" android:pathData="M24,5A19,19 0,1 1,23.99 5Z"/>
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M25.6,12h-3.2v3.1c-3.5,0.6 -5.9,2.9 -5.9,6c0,3.6 2.9,5 6.4,5.8l1.2,0.3c2.2,0.5 3.1,1.1 3.1,2.3c0,1.3 -1.4,2.2 -3.4,2.2c-2.2,0 -3.6,-0.9 -3.9,-2.6h-3.6c0.3,3.2 2.6,5.3 6.1,5.8V38h3.2v-3.1c3.7,-0.5 6.2,-2.8 6.2,-6.1c0,-3.4 -2.4,-4.9 -6.4,-5.8l-1.2,-0.3c-2,-0.5 -2.9,-1.1 -2.9,-2.2c0,-1.2 1.2,-2.1 3.1,-2.1c1.8,0 3.1,0.8 3.4,2.3h3.5c-0.3,-3 -2.4,-5.1 -5.7,-5.6Z"/>
+</vector>

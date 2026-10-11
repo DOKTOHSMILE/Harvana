@@ -2,6 +2,28 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 11 Oct 2026: hUSD in the app (hidden until the network switches it on)
+
+What the app does once the node reports hUSD active (`/api/v1/husd/info` → `"active": true`):
+
+- **An hUSD line on the Assets tab** shows the balance and its value at 1 hUSD = 1 US dollar, in your currency. That value is included in the wallet total on Assets and on Home. Until hUSD is switched on, the line does not appear at all.
+- **The hUSD screen** (tap the line) shows the balance, how many free transfers are left, and anything arriving or leaving, with three actions:
+  - **Deposit:**
+    - pick the network (Base, Polygon, Arbitrum, Ethereum or BNB Chain, whichever the node lists);
+    - the app shows your own USDC deposit address with a QR code and Copy;
+    - "I've sent it" asks the relayer to forward it.
+
+    No ETH or gas is needed. The address is worked out on the phone with the same formula as the deposit contract, checked against the real contract (`DepositAddressTest`).
+  - **Send:**
+    - to any Harvana address;
+    - the confirm sheet states the fee: HARV gas if you hold HARV, otherwise 0.02 hUSD, with the first 3 free;
+    - it asks for your PIN, as every payment does.
+  - **Withdraw:**
+    - pick the network, enter your 0x address and the amount (minimum 5 hUSD; fee 0.50 hUSD);
+    - past withdrawals are listed as "On its way" or "Paid in USDC".
+
+What you do: nothing yet. hUSD stays hidden until the node's bridge is set up and switched on (node repository, `docs/HUSD.md` and `bridge/README.md`).
+
 ## 11 Oct 2026: Home in order of priority, one fiat total
 
 What the app does:

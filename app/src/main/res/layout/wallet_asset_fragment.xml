@@ -32,6 +32,11 @@
 			android:paddingBottom="4dp"
 			tools:listitem="@layout/coin_list_card" />
 		<LinearLayout
+			android:id="@+id/husd_asset"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical" />
+		<LinearLayout
 			android:id="@+id/chain_assets"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"

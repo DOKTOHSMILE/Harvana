@@ -77,6 +77,13 @@ public class AssetFragmentActivity extends Fragment {
 	private TextView tv_fiat_value;
 	private double harvFiat;
 	private double chainFiat;
+	private double husdFiat;
+
+	/** hUSD's value in the chosen currency, from its row on the Assets list (HusdRow). */
+	public void setHusdFiat(double fiat) {
+		husdFiat = fiat;
+		if (getActivity() != null) getActivity().runOnUiThread(this::_paintTotal);
+	}
 	private String shownSymbol;
 	private ImageView imageview4;
 	private MaterialCardView cardview1;
@@ -329,6 +336,7 @@ public class AssetFragmentActivity extends Fragment {
 			if (shownSymbol != null && !shownSymbol.equals(symbol)) {
 				harvFiat = 0;
 				chainFiat = 0;
+				husdFiat = 0;
 			}
 			com.harvana.app.wallet.FxRates.load(getContext(), this::_paintTotal);
 		}
@@ -585,9 +593,10 @@ public class AssetFragmentActivity extends Fragment {
 		if (tv_fiat_value == null || getContext() == null) return;
 		String symbol = com.harvana.app.wallet.FxRates.symbol(getContext());
 		shownSymbol = symbol;
-		tv_fiat_value.setText(com.harvana.app.wallet.FxRates.format(symbol, harvFiat + chainFiat));
+		double total = harvFiat + chainFiat + husdFiat;
+		tv_fiat_value.setText(com.harvana.app.wallet.FxRates.format(symbol, total));
 		// Home shows this same total (WalletTotal), so the two screens always agree.
-		com.harvana.app.wallet.WalletTotal.publish(getContext(), wallet_address, symbol, harvFiat + chainFiat);
+		com.harvana.app.wallet.WalletTotal.publish(getContext(), wallet_address, symbol, total);
 		if (textview10 != null) {
 			String code = com.harvana.app.wallet.FiatValueHelper.symbolToCurrencyCode(symbol);
 			textview10.setText("TOTAL BALANCE · " + code);
@@ -621,6 +630,7 @@ public class AssetFragmentActivity extends Fragment {
 				com.harvana.app.wallet.FxRates.save(getContext(), currencies[which][0]);
 				harvFiat = 0;
 				chainFiat = 0;
+				husdFiat = 0;
 				shownSymbol = currencies[which][0];
 				_paintTotal();
 				dialog.dismiss();

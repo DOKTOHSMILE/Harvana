@@ -52,7 +52,7 @@ public final class P2pOfferWizard {
 
 	private static final Map<AppCompatActivity, Runnable> PAYMENT_REFRESH = new WeakHashMap<>();
 
-	private static final String INSUFFICIENT_BALANCE_ERROR = ("You don't have that much " + com.harvana.app.CoinInfo.ticker() + " available.");
+	private static final String INSUFFICIENT_BALANCE_ERROR = "You don't have that much available.";
 
 	private P2pOfferWizard() {}
 
@@ -130,10 +130,13 @@ public final class P2pOfferWizard {
 		final long[] durationHours = {168};
 		final Set<String> selectedIds = new HashSet<>();
 		final String currency = P2pCurrencyFilterState.getCurrency();
+		// The coin this offer trades: HARV, or the stable asset picked in the marketplace (hUSD, hNGN, …).
+		final String asset = P2pAsset.get();
+		final String tk = P2pAsset.ticker(asset);
 
 		if (tvPriceCurrency != null) tvPriceCurrency.setText(currency);
 		if (tvDuration != null) tvDuration.setText("7 days");
-		if (tvLimit != null) tvLimit.setText(("Min 1 · Max — " + com.harvana.app.CoinInfo.ticker()));
+		if (tvLimit != null) tvLimit.setText(("Min 1 · Max — " + tk));
 		if (tvError1 != null) tvError1.setVisibility(View.GONE);
 		if (tvError2 != null) tvError2.setVisibility(View.GONE);
 
@@ -167,14 +170,18 @@ public final class P2pOfferWizard {
 		String address = WalletManager.getActiveWalletAddress(a);
 		if (sell && tvAvailable != null) {
 			tvAvailable.setText("…");
-			WalletNodeBridge.fetchLiveBalance(a, address, new WalletNodeBridge.BalanceCallback() {
-				@Override public void onSuccess(double balanceHarv, long nonce, long blockHeight) {
-					available[0] = balanceHarv;
-					tvAvailable.setText(BalanceFormatter.smart(balanceHarv));
+			P2pAsset.balance(a, asset, address, new P2pAsset.BalanceCb() {
+				@Override public void ok(double coins) {
+					a.runOnUiThread(() -> {
+						available[0] = coins;
+						tvAvailable.setText(BalanceFormatter.smart(coins) + " " + tk);
+					});
 				}
-				@Override public void onError(String error) {
-					available[0] = -1;
-					tvAvailable.setText("—");
+				@Override public void fail(String error) {
+					a.runOnUiThread(() -> {
+						available[0] = -1;
+						tvAvailable.setText("—");
+					});
 				}
 			});
 		}
@@ -198,7 +205,7 @@ public final class P2pOfferWizard {
 				if (minOrder[0] > amount && amount > 0) minOrder[0] = Math.max(1, amount);
 				if (minOrder[0] > maxOrder[0]) minOrder[0] = maxOrder[0];
 				if (tvLimit != null && amount > 0) {
-					tvLimit.setText(String.format(Locale.US, ("Min %s · Max %s " + com.harvana.app.CoinInfo.ticker()),
+					tvLimit.setText(String.format(Locale.US, ("Min %s · Max %s " + tk),
 						BalanceFormatter.smartDecimal(minOrder[0]), BalanceFormatter.smartDecimal(maxOrder[0])));
 				}
 				_refreshPricingDisplay(floatingMode[0], etPrice, etMargin, tvPriceNote,
@@ -223,7 +230,7 @@ public final class P2pOfferWizard {
 			rowLimit.setOnClickListener(v -> showLimitSheet(a, parse(etAmount), minOrder[0], maxOrder[0], (chosenMin, chosenMax) -> {
 				minOrder[0] = chosenMin;
 				maxOrder[0] = chosenMax;
-				if (tvLimit != null) tvLimit.setText(String.format(Locale.US, ("Min %s · Max %s " + com.harvana.app.CoinInfo.ticker()),
+				if (tvLimit != null) tvLimit.setText(String.format(Locale.US, ("Min %s · Max %s " + tk),
 					BalanceFormatter.smartDecimal(chosenMin), BalanceFormatter.smartDecimal(chosenMax)));
 			}));
 		}
@@ -272,7 +279,7 @@ public final class P2pOfferWizard {
 		if (btnPreview != null) btnPreview.setOnClickListener(v -> {
 			List<PaymentMethod> selected = selectedMethods(a, selectedIds);
 			double price = effectivePrice(floatingMode[0], etPrice, etMargin, indexPrice[0]);
-			String err = validate(sell, parse(etAmount), price, minOrder[0], maxOrder[0], selected, available[0],
+			String err = validate(asset, sell, parse(etAmount), price, minOrder[0], maxOrder[0], selected, available[0],
 				floatingMode[0], parseMargin(etMargin), indexPrice[0]);
 			if (btnDeposit1 != null) btnDeposit1.setVisibility(INSUFFICIENT_BALANCE_ERROR.equals(err) ? View.VISIBLE : View.GONE);
 			if (err != null) { showError(tvError1, err); return; }
@@ -291,13 +298,14 @@ public final class P2pOfferWizard {
 		if (btnPublish != null) btnPublish.setOnClickListener(v -> {
 			List<PaymentMethod> selected = selectedMethods(a, selectedIds);
 			double price = effectivePrice(floatingMode[0], etPrice, etMargin, indexPrice[0]);
-			String err = validate(sell, parse(etAmount), price, minOrder[0], maxOrder[0], selected, available[0],
+			String err = validate(asset, sell, parse(etAmount), price, minOrder[0], maxOrder[0], selected, available[0],
 				floatingMode[0], parseMargin(etMargin), indexPrice[0]);
 			if (btnDeposit2 != null) btnDeposit2.setVisibility(INSUFFICIENT_BALANCE_ERROR.equals(err) ? View.VISIBLE : View.GONE);
 			if (err != null) { showError(tvError2, err); return; }
 			showError(tvError2, null);
 			Intent confirm = new Intent(a, ComfirmSellOfferActivity.class);
 			confirm.putExtra("side", sell ? "SELL" : "BUY");
+			confirm.putExtra("asset", asset);
 			confirm.putExtra("amount", parse(etAmount));
 			confirm.putExtra("unitPrice", price);
 			confirm.putExtra("minOrderAmount", minOrder[0]);
@@ -396,20 +404,25 @@ public final class P2pOfferWizard {
 		}
 	}
 
-	private static String validate(boolean sell, double amount, double price, double minOrder, double maxOrder,
+	private static String validate(String asset, boolean sell, double amount, double price, double minOrder, double maxOrder,
 	                               List<PaymentMethod> methods, double available,
 	                               boolean floating, double marginPercent, double indexPrice) {
-		if (amount < 10 || amount > 5000) return ("A listing must be between 10 and 5,000 " + com.harvana.app.CoinInfo.ticker() + ".");
+		String tk = P2pAsset.ticker(asset);
+		double lo = P2pAsset.minListing(asset), hi = P2pAsset.maxListing(asset);
+		if (amount < lo || amount > hi) return "A listing must be between " + BalanceFormatter.smartDecimal(lo) + " and "
+				+ BalanceFormatter.smartDecimal(hi) + " " + tk + ".";
+		// Floating prices follow HARV's market; a stable coin is priced fixed.
+		if (floating && P2pAsset.isStable(asset)) return "Use a fixed price for " + tk + ".";
 		if (floating) {
 			if (indexPrice <= 0) return "No market rate available yet — floating pricing needs at least one open listing to price against. Use Fixed Price instead.";
 			if (marginPercent < -20 || marginPercent > 20) return "Floating margin must be between -20% and +20%.";
 		}
 		if (price <= 0) return "Enter a unit price greater than zero.";
-		if (minOrder < 1) return ("Minimum trade must be at least 1 " + com.harvana.app.CoinInfo.ticker() + ".");
+		if (minOrder < 1) return ("Minimum trade must be at least 1 " + tk + ".");
 		if (maxOrder > amount) return "Maximum trade can't be more than the total you're listing.";
 		if (minOrder > maxOrder) return "Minimum trade can't be more than the maximum trade.";
 		if (sell && methods.isEmpty()) return "Pick at least one payment method so buyers know where to pay you.";
-		if (sell && available < 0) return ("Couldn't load your " + com.harvana.app.CoinInfo.ticker() + " balance — go back and try again.");
+		if (sell && available < 0) return ("Couldn't load your " + tk + " balance — go back and try again.");
 		if (sell && amount > available) return INSUFFICIENT_BALANCE_ERROR;
 		return null;
 	}
@@ -487,7 +500,7 @@ public final class P2pOfferWizard {
 	                               List<PaymentMethod> methods) {
 		String p = sell ? "sell" : "buy";
 		setText(a, "tv_" + p + "_review_amount", BalanceFormatter.smart(amount));
-		setText(a, "tv_" + p + "_review_unit_price", P2pMoney.perHarv(price, currency));
+		setText(a, "tv_" + p + "_review_unit_price", P2pMoney.perUnit(price, currency, P2pAsset.get()));
 		setText(a, "tv_" + p + "_review_total_price", P2pMoney.fiat(amount * price, currency));
 		setText(a, "tv_" + p + "_review_fee", "Set by the network at match time");
 		setText(a, "tv_" + p + "_review_trade_limit",
@@ -556,6 +569,7 @@ public final class P2pOfferWizard {
 	}
 
 	private static void showLimitSheet(AppCompatActivity a, double amount, double currentMin, double currentMax, LimitPick pick) {
+		String tk = P2pAsset.ticker(P2pAsset.get());
 		BottomSheetDialog dialog = ThemedDialogs.sheet(a);
 		LinearLayout root = ThemedDialogs.sheetRoot(a);
 		root.addView(ThemedDialogs.sheetTitle(a, "Trade limit"));
@@ -564,14 +578,14 @@ public final class P2pOfferWizard {
 		minInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		minInput.setTextColor(ThemedDialogs.onSurface(a));
 		minInput.setHintTextColor(ThemedDialogs.onSurfaceVariant(a));
-		minInput.setHint(("Min " + com.harvana.app.CoinInfo.ticker()));
+		minInput.setHint(("Min " + tk));
 		if (currentMin > 0) minInput.setText(BalanceFormatter.smartDecimal(currentMin));
 		root.addView(minInput);
 		EditText maxInput = new com.google.android.material.textfield.TextInputEditText(a);
 		maxInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		maxInput.setTextColor(ThemedDialogs.onSurface(a));
 		maxInput.setHintTextColor(ThemedDialogs.onSurfaceVariant(a));
-		maxInput.setHint(("Max " + com.harvana.app.CoinInfo.ticker()));
+		maxInput.setHint(("Max " + tk));
 		double initialMax = currentMax > 0 ? currentMax : amount;
 		if (initialMax > 0) maxInput.setText(BalanceFormatter.smartDecimal(initialMax));
 		root.addView(maxInput);

@@ -30,6 +30,17 @@ public final class P2pListingPublisher {
 	String pricingType, double unitPrice, double marginPercent,
 	double minOrderHarv, double maxOrderHarv, long durationHours, int paymentWindowMinutes, String termsOfTrade, int reqAccountAgeDays, String currency,
 	List<PaymentMethod> methods, Callback callback) {
+		publish(activity, P2pAsset.HARV, side, amountHarv, pricingType, unitPrice, marginPercent, minOrderHarv, maxOrderHarv,
+				durationHours, paymentWindowMinutes, termsOfTrade, reqAccountAgeDays, currency, methods, callback);
+	}
+
+	/** Any asset: "HARV", or a stable asset (hUSD, hNGN, …) whose escrow then moves that coin. Amounts are in coins. */
+	public static void publish(Activity activity, String asset0, String side, double amountHarv,
+	String pricingType, double unitPrice, double marginPercent,
+	double minOrderHarv, double maxOrderHarv, long durationHours, int paymentWindowMinutes, String termsOfTrade, int reqAccountAgeDays, String currency,
+	List<PaymentMethod> methods, Callback callback) {
+		final String asset = P2pAsset.normalize(asset0);
+		final String tk = P2pAsset.ticker(asset);
 		
 		final Callback cb = callback != null ? callback : new Callback() {
 			@Override public void onPublished(String listingId) {}
@@ -59,12 +70,17 @@ public final class P2pListingPublisher {
 			cb.onError("Pick at least one payment method so buyers know where to pay you.");
 			return;
 		}
-		if (amountHarv < 10 || amountHarv > 5000) {
-			cb.onError("A listing must be between 10 and 5,000 HARV in total.");
+		if (amountHarv < P2pAsset.minListing(asset) || amountHarv > P2pAsset.maxListing(asset)) {
+			cb.onError("A listing must be between " + com.harvana.app.wallet.BalanceFormatter.smartDecimal(P2pAsset.minListing(asset)) + " and "
+					+ com.harvana.app.wallet.BalanceFormatter.smartDecimal(P2pAsset.maxListing(asset)) + " " + tk + " in total.");
 			return;
 		}
 		if (minOrderHarv < 1 || minOrderHarv > amountHarv) {
-			cb.onError("The minimum trade amount must be at least 1 HARV and no more than the total you're listing.");
+			cb.onError("The minimum trade amount must be at least 1 " + tk + " and no more than the total you're listing.");
+			return;
+		}
+		if (P2pAsset.isStable(asset) && "MARGIN".equals(pricingType)) {
+			cb.onError("Use a fixed price for " + tk + ".");
 			return;
 		}
 		if (maxOrderHarv > amountHarv) {
@@ -77,7 +93,8 @@ public final class P2pListingPublisher {
 		}
 		// Product rule: the maximum per trade must be at least MAX_ORDER_FLOOR_HARV, or the whole listing
 		// when the listing itself is smaller than that (the node also requires min <= max <= total).
-		final double maxFloor = Math.min(MAX_ORDER_FLOOR_HARV, amountHarv);
+		// (A HARV rule: a stable coin's trades are sized in its own currency, so it has no such floor.)
+		final double maxFloor = P2pAsset.isStable(asset) ? 0 : Math.min(MAX_ORDER_FLOOR_HARV, amountHarv);
 		if (maxOrderHarv < maxFloor) {
 			cb.onError("The maximum trade amount must be at least " + (long) maxFloor + " HARV.");
 			return;
@@ -123,14 +140,15 @@ public final class P2pListingPublisher {
 		final String listingSide = side == null || side.isEmpty() ? "SELL" : side;
 		final String fiatCode = currency == null || currency.isEmpty() ? P2pCurrencyFilterState.getCurrency() : currency;
 		
-		long amountRaw = com.harvana.app.sync.HarvanaNodeClient.toRawUnits(amountHarv);
-		long minRaw = com.harvana.app.sync.HarvanaNodeClient.toRawUnits(minOrderHarv);
+		long amountRaw = P2pAsset.toRaw(amountHarv, asset);
+		long minRaw = P2pAsset.toRaw(minOrderHarv, asset);
 		
-		final long maxRaw = com.harvana.app.sync.HarvanaNodeClient.toRawUnits(maxOrderHarv);
+		final long maxRaw = P2pAsset.toRaw(maxOrderHarv, asset);
 		final long[] priceKobo = new long[1];
 		final Runnable startPublish = () -> {
 			java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
 			rows.add(new String[]{"Side", listingSide});
+			rows.add(new String[]{"Coin", tk});
 			rows.add(new String[]{"Each trade", com.harvana.app.wallet.BalanceFormatter.smart(minOrderHarv)
 				+ " to " + com.harvana.app.wallet.BalanceFormatter.smart(maxOrderHarv)});
 			rows.add(new String[]{"Price", "MARGIN".equals(pricingType)
@@ -139,11 +157,11 @@ public final class P2pListingPublisher {
 			rows.add(new String[]{"Open for", durationHours + " hours"});
 			rows.add(new String[]{"Payment window", paymentWindowMinutes + " minutes"});
 			rows.add(new String[]{"For", "SELL".equals(listingSide)
-				? "Locks this HARV into the listing until it sells or you cancel"
-				: "Publishes a request. HARV moves when someone fills it"});
+				? "Locks this " + tk + " into the listing until it sells or you cancel"
+				: "Publishes a request. " + tk + " moves when someone fills it"});
 			com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(activity,
 			"SELL".equals(listingSide) ? "Publish sell offer" : "Publish buy request",
-			com.harvana.app.wallet.BalanceFormatter.smart(amountHarv), rows, () -> {
+			com.harvana.app.wallet.BalanceFormatter.smart(amountHarv) + " " + tk, rows, () -> {
 			final com.harvana.app.ui.ProgressSheet progress = new com.harvana.app.ui.ProgressSheet(activity);
 			progress.setMessage("SELL".equals(listingSide) ? "Publishing offer…" : "Publishing request…");
 			progress.setCancelable(false);
@@ -151,7 +169,7 @@ public final class P2pListingPublisher {
 			
 			// 1. Send the liquidity lock request to Harvanachain
 			P2PTradeRouter.createListing(activity.getApplicationContext(), address, listingSide,
-			amountRaw, minRaw, maxRaw, durationHours, paymentWindowMinutes, priceKobo[0], new P2PTradeRouter.Callback() {
+			amountRaw, minRaw, maxRaw, durationHours, paymentWindowMinutes, priceKobo[0], asset, new P2PTradeRouter.Callback() {
 				
 				@Override
 				public void onSuccess(org.json.JSONObject result) {

@@ -138,7 +138,7 @@ public class P2pSellFragmentActivity extends Fragment {
 		btn_fragment_empty_cta.setVisibility(View.VISIBLE);
 		btn_fragment_empty_cta.setOnClickListener(v ->
 		startActivity(new Intent(requireContext(), CreateP2pSellOfferActivity.class)));
-		if (textview1 != null) textview1.setText(com.harvana.app.CoinInfo.ticker());
+		if (textview1 != null) textview1.setText(com.harvana.app.p2p.P2pAsset.ticker(com.harvana.app.p2p.P2pAsset.get()));
 		
 		_main.setOnRefreshListener(this::_loadListings);
 		
@@ -156,6 +156,7 @@ public class P2pSellFragmentActivity extends Fragment {
 	public void onStart() {
 		super.onStart();
 		P2pCurrencyFilterState.addListener(currencyListener);
+		com.harvana.app.p2p.P2pAsset.addListener(assetListener);
 		_loadListings();
 	}
 	
@@ -163,17 +164,25 @@ public class P2pSellFragmentActivity extends Fragment {
 	public void onStop() {
 		super.onStop();
 		P2pCurrencyFilterState.removeListener(currencyListener);
+		com.harvana.app.p2p.P2pAsset.removeListener(assetListener);
 	}
 	public void _MORE() {
 	}
 	private SwipeRefreshLayout _main;
 	private final P2pCurrencyFilterState.Listener currencyListener = code -> _applyFilters();
+	private final com.harvana.app.p2p.P2pAsset.Listener assetListener = code -> {
+		if (!isAdded()) return;
+		if (textview1 != null) textview1.setText(com.harvana.app.p2p.P2pAsset.ticker(code));
+		_loadListings();
+	};
 	
 	private static class EnrichedListing {
 		JSONObject raw;
 		String listingId = "";
 		String posterAddress = "";
 		String posterUid = "";
+		/** "HARV" or the stable asset this listing trades (its amounts are in that asset). */
+		String asset = "HARV";
 		double remainingHarv, minOrderHarv, unitPrice = -1;
 		Set<String> paymentLabels = new LinkedHashSet<>();
 		String displayName = "Trader";
@@ -202,7 +211,7 @@ public class P2pSellFragmentActivity extends Fragment {
 	private int sortMode = 0;
 	
 	private void _loadListings() {
-		HarvanaNodeClient.getP2POpenListings(0, 50, "BUY", new HarvanaNodeClient.JsonCallback() {
+		HarvanaNodeClient.getP2POpenListings(0, 50, "BUY", com.harvana.app.p2p.P2pAsset.get(), new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject result) {
 				List<JSONObject> raws = new ArrayList<>();
@@ -245,8 +254,9 @@ public class P2pSellFragmentActivity extends Fragment {
 		e.listingId = raw.optString("listingId", "");
 		// This is always a BUY listing here, so the poster is the buyer.
 		e.posterAddress = raw.optString("buyerAddress", raw.optString("sellerAddress", ""));
-		e.remainingHarv = HarvanaNodeClient.toHarvDisplay(raw.optLong("remainingAmount", 0));
-		e.minOrderHarv = HarvanaNodeClient.toHarvDisplay(raw.optLong("minOrderAmount", 0));
+		e.asset = com.harvana.app.p2p.P2pAsset.of(raw);
+		e.remainingHarv = com.harvana.app.p2p.P2pAsset.fromRaw(raw.optLong("remainingAmount", 0), e.asset);
+		e.minOrderHarv = com.harvana.app.p2p.P2pAsset.fromRaw(raw.optLong("minOrderAmount", 0), e.asset);
 		
 		if (e.listingId.isEmpty() || e.posterAddress.isEmpty()) { done.onDone(e); return; }
 		
@@ -393,42 +403,11 @@ public class P2pSellFragmentActivity extends Fragment {
 	}
 	
 	private void _showCoinSheet() {
-		BottomSheetDialog dialog = ThemedDialogs.sheet(requireContext());
-		LinearLayout root = _sheetRoot();
-		root.addView(_sheetTitle("Select Coin"));
-		root.addView(_sheetLabel("P2P Supported Coins"));
-		
-		int colorOnSurface = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorOnSurface, Color.WHITE);
-		int colorOnSurfaceVariant = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorOnSurfaceVariant, Color.GRAY);
-		int colorPrimary = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorPrimary, Color.GREEN);
-		
-		LinearLayout row = _sheetRow();
-		MaterialTextView label = new MaterialTextView(requireContext());
-		label.setText((com.harvana.app.CoinInfo.ticker() + " — Harvana Protocol"));
-		label.setTextColor(colorOnSurface);
-		label.setTextSize(15f);
-		MaterialTextView check = new MaterialTextView(requireContext());
-		com.harvana.app.utils.Icons.check(check, true);
-		check.setTextColor(colorPrimary);
-		check.setTextSize(18f);
-		row.addView(label);
-		row.addView(_spacer());
-		row.addView(check);
-		row.setOnClickListener(v -> {
-			if (textview1 != null) textview1.setText(com.harvana.app.CoinInfo.ticker());
-			dialog.dismiss();
+		// HARV and every stable asset the network has on (hUSD, hNGN, …). The choice is shared by all P2P screens.
+		com.harvana.app.p2p.P2pCoinSheet.show(requireContext(), () -> {
+			if (textview1 != null) textview1.setText(com.harvana.app.p2p.P2pAsset.ticker(com.harvana.app.p2p.P2pAsset.get()));
+			_loadListings();
 		});
-		root.addView(row);
-		
-		MaterialTextView note = new MaterialTextView(requireContext());
-		note.setText("More assets will appear here once this system supports them — nothing else is real yet.");
-		note.setTextColor(colorOnSurfaceVariant);
-		note.setTextSize(12f);
-		note.setPadding(0, 24, 0, 0);
-		root.addView(note);
-		
-		dialog.setContentView(root);
-		dialog.show();
 	}
 	
 	private void _showAmountSheet() {
@@ -442,7 +421,7 @@ public class P2pSellFragmentActivity extends Fragment {
 		int colorOnPrimary = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorOnPrimary, Color.WHITE);
 		
 		EditText input = new com.google.android.material.textfield.TextInputEditText(requireContext());
-		input.setHint(("Enter " + com.harvana.app.CoinInfo.ticker() + " amount"));
+		input.setHint(("Enter " + com.harvana.app.p2p.P2pAsset.ticker(com.harvana.app.p2p.P2pAsset.get()) + " amount"));
 		input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		input.setTextColor(colorOnSurface);
 		input.setHintTextColor(colorOnSurfaceVariant);
@@ -780,9 +759,9 @@ public class P2pSellFragmentActivity extends Fragment {
 			seller_trusted_badge.setText(e.premium ? "Premium Trader" : (e.insured ? "Insured Trader" : ""));
 			trust_score.setText(e.trustLabel.isEmpty() ? "\u2014" : e.trustLabel);
 			trades_and_unique.setText(e.completedTrades + " trades · " + e.uniqueCounterparties + " unique");
-			sell_price.setText(e.unitPrice >= 0 ? P2pMoney.perHarv(e.unitPrice, e.currency) : "Unavailable");
-			available_amount.setText(String.format(Locale.US, ("%.4f " + com.harvana.app.CoinInfo.ticker()), e.remainingHarv));
-			trade_limits.setText(String.format(Locale.US, ("Min %.4f · Max %.4f " + com.harvana.app.CoinInfo.ticker()), e.minOrderHarv, e.remainingHarv));
+			sell_price.setText(e.unitPrice >= 0 ? P2pMoney.perUnit(e.unitPrice, e.currency, e.asset) : "Unavailable");
+			available_amount.setText(String.format(Locale.US, ("%.4f " + com.harvana.app.p2p.P2pAsset.ticker(e.asset)), e.remainingHarv));
+			trade_limits.setText(String.format(Locale.US, ("Min %.4f · Max %.4f " + com.harvana.app.p2p.P2pAsset.ticker(e.asset)), e.minOrderHarv, e.remainingHarv));
 			
 			payment_method.setVisibility(View.GONE);
 			payment_method_two.setVisibility(View.GONE);

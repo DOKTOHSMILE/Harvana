@@ -26,7 +26,12 @@ import java.util.Locale;
 /** Full-screen coin list with search. Send and Receive open this instead of a dropdown. */
 public class PickAssetActivity extends AppCompatActivity {
 
-    private final List<CoinCatalog.Coin> shown = new ArrayList<>();
+    /** Each row is a CoinCatalog.Coin, or a stable asset's code ("HUSD", "HNGN", …) when the caller asked for them. */
+    private final List<Object> shown = new ArrayList<>();
+    /** EXTRA_STABLE: Send lists Harvana's stable coins too (only those the network has on). */
+    public static final String EXTRA_STABLE = "withStable";
+    private final List<String> stable = new ArrayList<>();
+    private String lastQuery = "";
     private String current = "";
     private TextView empty;
     private RecyclerView list;
@@ -75,6 +80,13 @@ public class PickAssetActivity extends AppCompatActivity {
             @Override public void afterTextChanged(Editable s) {}
         });
         show("");
+        if (getIntent().getBooleanExtra(EXTRA_STABLE, false)) {
+            com.harvana.app.p2p.P2pAsset.loadActive(() -> runOnUiThread(() -> {
+                stable.clear();
+                for (String c : com.harvana.app.p2p.P2pAsset.available()) if (com.harvana.app.husd.Stable.isStable(c)) stable.add(c);
+                show(lastQuery);
+            }));
+        }
     }
 
     @Override
@@ -85,16 +97,29 @@ public class PickAssetActivity extends AppCompatActivity {
 
     private void show(String query) {
         String q = query == null ? "" : query.trim().toLowerCase(Locale.US);
+        lastQuery = q;
         shown.clear();
+        boolean stableAdded = false;
         for (CoinCatalog.Coin c : CoinCatalog.all()) {
             if (q.isEmpty()
                     || c.name.toLowerCase(Locale.US).contains(q)
                     || c.ticker.toLowerCase(Locale.US).contains(q)
                     || c.liveNetwork().toLowerCase(Locale.US).contains(q)
                     || c.key.toLowerCase(Locale.US).contains(q)) shown.add(c);
+            // Harvana's stable coins sit right under HARV.
+            if (!stableAdded && c.nativeHarv) { stableAdded = true; addStable(q); }
         }
+        if (!stableAdded) addStable(q);
         empty.setVisibility(shown.isEmpty() ? View.VISIBLE : View.GONE);
         if (list.getAdapter() != null) list.getAdapter().notifyDataSetChanged();
+    }
+
+    private void addStable(String q) {
+        for (String code : stable) {
+            String sym = com.harvana.app.husd.Stable.symbol(code), name = com.harvana.app.husd.Stable.name(code);
+            if (q.isEmpty() || sym.toLowerCase(Locale.US).contains(q) || name.toLowerCase(Locale.US).contains(q)
+                    || "stable harvana".contains(q)) shown.add(code);
+        }
     }
 
     private android.graphics.drawable.Drawable field() {
@@ -148,7 +173,22 @@ public class PickAssetActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull Holder h, int position) {
-            CoinCatalog.Coin c = shown.get(position);
+            Object item = shown.get(position);
+            if (item instanceof String) {
+                String code = (String) item;
+                boolean on = code.equals(current);
+                h.icon.setImageDrawable(com.harvana.app.husd.StableIcon.drawable(PickAssetActivity.this, code));
+                h.name.setText(com.harvana.app.husd.Stable.symbol(code) + " · " + com.harvana.app.husd.Stable.name(code));
+                h.net.setText("Harvana · stable coin");
+                h.tick.setText(com.harvana.app.husd.Stable.symbol(code));
+                h.tick.setTextColor(on ? com.harvana.app.utils.UiColors.accent() : com.harvana.app.utils.UiColors.textSecondary());
+                h.row.setOnClickListener(v -> {
+                    setResult(RESULT_OK, getIntent().putExtra(CoinCatalog.EXTRA, code));
+                    finish();
+                });
+                return;
+            }
+            CoinCatalog.Coin c = (CoinCatalog.Coin) item;
             boolean on = c.key.equals(current);
             h.icon.setImageResource(c.icon);
             h.name.setText(c.name);

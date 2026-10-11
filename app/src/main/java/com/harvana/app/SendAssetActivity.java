@@ -461,6 +461,12 @@ public class SendAssetActivity extends AppCompatActivity {
 					_sendPi(view, selectedAsset);
 					return;
 				}
+				// Harvana's stable coins (hUSD, hNGN, …): same screen, but they move through the stable-asset engine
+				// (mintId = the coin's code, fee in HARV gas or the coin itself), not the HARV transfer.
+				if (com.harvana.app.husd.Stable.isStable(assetKey)) {
+					_sendStable(view, selectedAsset, assetKey);
+					return;
+				}
 				if (assetKey != null && !assetKey.isEmpty() && !"HARV".equals(assetKey) && !"null".equals(assetKey)) {
 					_sendChain(view, selectedAsset, assetKey);
 					return;
@@ -723,10 +729,15 @@ public class SendAssetActivity extends AppCompatActivity {
 
 	private void _coinIcon(TextView tv, int pos) {
 		int icon = com.harvana.app.R.drawable.ic_coin_harv;
+		android.graphics.drawable.Drawable own = null;
 		if (walletAssets != null && pos >= 0 && pos < walletAssets.size() && walletAssets.get(pos).get("icon") instanceof Integer) {
 			icon = (Integer) walletAssets.get(pos).get("icon");
 		}
-		android.graphics.drawable.Drawable d = androidx.core.content.ContextCompat.getDrawable(this, icon);
+		if (walletAssets != null && pos >= 0 && pos < walletAssets.size()) {
+			Object key = walletAssets.get(pos).get("assetKey");
+			if (key != null && com.harvana.app.husd.Stable.isStable(String.valueOf(key))) own = com.harvana.app.husd.StableIcon.drawable(this, String.valueOf(key));
+		}
+		android.graphics.drawable.Drawable d = own != null ? own : androidx.core.content.ContextCompat.getDrawable(this, icon);
 		if (d == null) return;
 		int s = (int) (22 * getResources().getDisplayMetrics().density);
 		d = d.mutate();
@@ -753,6 +764,7 @@ public class SendAssetActivity extends AppCompatActivity {
 			walletAssets.add(row);
 			assetDisplayNames.add(c.name + " (" + c.ticker + ")");
 		}
+		_includeStableAssets(harvAddress);
 		final String mine = harvAddress;
 		new Thread(() -> {
 			java.util.Map<String, String> addrs = com.harvana.app.wallet.CoinCatalog.addresses(getApplicationContext(), mine);
@@ -785,6 +797,130 @@ public class SendAssetActivity extends AppCompatActivity {
 		}).start();
 	}
 
+	/** Adds Harvana's stable coins the network has on (hUSD, hNGN, …) right under HARV, with their balances. They live
+	 *  at the HARV address and are sent through the stable-asset engine (see _sendStable). */
+	private void _includeStableAssets(String harvAddress) {
+		if (harvAddress == null || harvAddress.isEmpty()) return;
+		com.harvana.app.husd.HusdClient.list(new com.harvana.app.husd.HusdClient.Cb() {
+			@Override public void ok(org.json.JSONObject r) {
+				org.json.JSONArray arr = r.optJSONArray("assets");
+				java.util.List<String> on = new java.util.ArrayList<>();
+				if (arr != null) for (int i = 0; i < arr.length(); i++) {
+					org.json.JSONObject a = arr.optJSONObject(i);
+					if (a != null && a.optBoolean("active") && com.harvana.app.husd.Stable.isStable(a.optString("asset"))) on.add(a.optString("asset"));
+				}
+				if (on.isEmpty()) return;
+				runOnUiThread(() -> {
+					if (isFinishing() || walletAssets == null || assetDisplayNames == null) return;
+					int at = 1;                                   // right after HARV
+					for (String code : on) {
+						boolean have = false;
+						for (HashMap<String, Object> row : walletAssets) if (code.equals(String.valueOf(row.get("assetKey")))) have = true;
+						if (have) continue;
+						HashMap<String, Object> row = new HashMap<>();
+						row.put("contractAddress", "stable");
+						row.put("symbol", com.harvana.app.husd.Stable.symbol(code));
+						row.put("name", com.harvana.app.husd.Stable.name(code));
+						row.put("assetKey", code);
+						row.put("balance", BigDecimal.ZERO);
+						row.put("decimals", 6);
+						row.put("address", harvAddress);
+						int pos = Math.min(at++, walletAssets.size());
+						walletAssets.add(pos, row);
+						assetDisplayNames.add(pos, com.harvana.app.husd.Stable.symbol(code) + " · " + com.harvana.app.husd.Stable.name(code));
+						com.harvana.app.husd.HusdClient.balance(code, harvAddress, new com.harvana.app.husd.HusdClient.Cb() {
+							@Override public void ok(org.json.JSONObject b) {
+								long raw = b.optLong("availableRaw");
+								runOnUiThread(() -> {
+									row.put("balance", java.math.BigDecimal.valueOf(raw, 6));
+									row.put("balanceText", com.harvana.app.husd.HusdClient.format(raw) + " " + com.harvana.app.husd.Stable.symbol(code));
+									row.put("balanceReady", true);
+									row.put("freeTransfersLeft", b.optInt("freeTransfersLeft"));
+									if (assetAdapter != null) assetAdapter.notifyDataSetChanged();
+									if (spAsset != null && spAsset.getOnItemSelectedListener() != null && spAsset.getSelectedItemPosition() >= 0) {
+										spAsset.getOnItemSelectedListener().onItemSelected(spAsset, null, spAsset.getSelectedItemPosition(), 0);
+									}
+								});
+							}
+							@Override public void fail(String e) { }
+						});
+					}
+					if (assetAdapter != null) assetAdapter.notifyDataSetChanged();
+					_selectRequestedAsset();
+				});
+			}
+			@Override public void fail(String e) { }
+		});
+	}
+
+	/** Sends a stable coin from the same Send screen. Underneath it is the stable-asset engine: a v1 transfer signed
+	 *  with mintId = the coin's code; the node takes HARV gas if the wallet has it, otherwise the coin's own small fee
+	 *  (the first 3 are free). */
+	private void _sendStable(View sendButton, HashMap<String, Object> asset, String code) {
+		String sym = com.harvana.app.husd.Stable.symbol(code);
+		String recipient = etRecipient != null ? etRecipient.getText().toString().trim() : "";
+		if (!recipient.matches("^HV0x[0-9a-fA-F]{40}$")) {
+			SketchwareUtil.showMessage(getApplicationContext(), sym + " goes to a Harvana address (HV0x…).");
+			return;
+		}
+		String amountText = etAmount != null ? etAmount.getText().toString().trim() : "";
+		Long units = com.harvana.app.husd.HusdClient.parse(amountText);
+		if (units == null) { SketchwareUtil.showMessage(getApplicationContext(), "Enter an amount, up to 6 decimals."); return; }
+		if (!Boolean.TRUE.equals(asset.get("balanceReady"))) {
+			SketchwareUtil.showMessage(getApplicationContext(), "The balance is still loading. Wait a moment and try again.");
+			return;
+		}
+		java.math.BigDecimal have = asset.get("balance") instanceof java.math.BigDecimal ? (java.math.BigDecimal) asset.get("balance") : java.math.BigDecimal.ZERO;
+		if (java.math.BigDecimal.valueOf(units, 6).compareTo(have) > 0) {
+			SketchwareUtil.showMessage(getApplicationContext(), "Insufficient " + sym + " balance.");
+			return;
+		}
+		String mine = String.valueOf(asset.get("address"));
+		if (recipient.equalsIgnoreCase(mine)) { SketchwareUtil.showMessage(getApplicationContext(), "That's this wallet."); return; }
+		final String memo = etMemo != null && etMemo.getText() != null ? etMemo.getText().toString().trim() : "";
+		if (memo.toUpperCase(java.util.Locale.ROOT).matches("^H[A-Z]{3}_.*")) {
+			SketchwareUtil.showMessage(getApplicationContext(), "That note is reserved by the network. Use a different note.");
+			return;
+		}
+		int free = asset.get("freeTransfersLeft") instanceof Integer ? (Integer) asset.get("freeTransfersLeft") : 0;
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"To", recipient});
+		rows.add(new String[]{"From", mine});
+		rows.add(new String[]{"Network", "Harvana · " + sym});
+		if (!memo.isEmpty()) rows.add(new String[]{"Note", memo});
+		rows.add(new String[]{"Network fee", free > 0
+				? "Free (" + free + " free left), or HARV gas if you hold HARV"
+				: "HARV gas if you hold HARV, otherwise a small fee in " + sym});
+		String shown = com.harvana.app.husd.HusdClient.format(units) + " " + sym;
+		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send " + sym, shown, rows, () -> {
+			if (isProcessingSend) return;
+			isProcessingSend = true;
+			sendButton.setEnabled(false);
+			com.harvana.app.husd.HusdClient.send(getApplicationContext(), code, mine, recipient, units, memo.isEmpty() ? null : memo,
+					new com.harvana.app.husd.HusdClient.Cb() {
+				@Override public void ok(org.json.JSONObject r) {
+					runOnUiThread(() -> {
+						isProcessingSend = false;
+						if (isFinishing()) return;
+						SketchwareUtil.showMessage(getApplicationContext(), sym + " sent.");
+						setResult(RESULT_OK);
+						finish();
+					});
+				}
+				@Override public void fail(String e) {
+					runOnUiThread(() -> {
+						isProcessingSend = false;
+						if (isFinishing()) return;
+						sendButton.setEnabled(true);
+						String msg = e == null ? "Couldn't send." : e.contains("INSUFFICIENT_" + code) ? "Not enough " + sym + " for this amount and its fee."
+								: e.contains(code + "_NOT_ACTIVE") ? sym + " is not switched on yet." : "Couldn't send: " + e;
+						SketchwareUtil.showMessage(getApplicationContext(), msg);
+					});
+				}
+			});
+		});
+	}
+
 	private static final int RC_PICK_ASSET = 78;
 
 	private static String _addressHint(String key) {
@@ -801,7 +937,7 @@ public class SendAssetActivity extends AppCompatActivity {
 			case "BASE": return "0x...";
 			case "TRX": return "T...";
 			case "SOL": return "Solana address";
-			default: return "HV0x...";
+			default: return "HV0x...";              // HARV and the stable coins (hUSD, hNGN, …)
 		}
 	}
 
@@ -811,7 +947,8 @@ public class SendAssetActivity extends AppCompatActivity {
 			int i = spAsset.getSelectedItemPosition();
 			if (i >= 0 && i < walletAssets.size()) key = String.valueOf(walletAssets.get(i).get("assetKey"));
 		}
-		startActivityForResult(new Intent(this, PickAssetActivity.class).putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, key), RC_PICK_ASSET);
+		startActivityForResult(new Intent(this, PickAssetActivity.class).putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, key)
+				.putExtra(PickAssetActivity.EXTRA_STABLE, true), RC_PICK_ASSET);
 	}
 
 	private String pendingCoin;

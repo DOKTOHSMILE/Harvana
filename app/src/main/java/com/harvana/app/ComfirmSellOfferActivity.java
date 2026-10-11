@@ -53,6 +53,9 @@ import org.json.*;
 
 public class ComfirmSellOfferActivity extends AppCompatActivity {
 	
+	/** "HARV" or the stable asset this offer trades (from the wizard). */
+	private String asset = "HARV";
+	
 	private NestedScrollView vscroll1;
 	private LinearLayout linear3;
 	private LinearLayout linear4;
@@ -302,6 +305,7 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 		
 		Intent in = getIntent();
 		side = in.getStringExtra("side");
+		asset = com.harvana.app.p2p.P2pAsset.normalize(in.getStringExtra("asset"));
 		if (side == null || side.isEmpty()) side = "SELL";
 		amount = in.getDoubleExtra("amount", 0);
 		unitPrice = in.getDoubleExtra("unitPrice", 0);
@@ -361,11 +365,11 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 		tv_confirm_seller_name.setText(addr.isEmpty() ? "Your wallet" : addr);
 		tv_confirm_seller_rating.setText("No rating yet");
 		
-		tv_confirm_amount.setText(BalanceFormatter.smartDecimal(amount) + (" " + com.harvana.app.CoinInfo.ticker()));
-		tv_confirm_unit_price.setText(P2pMoney.perHarv(unitPrice, currency));
+		tv_confirm_amount.setText(BalanceFormatter.smartDecimal(amount) + (" " + com.harvana.app.p2p.P2pAsset.ticker(asset)));
+		tv_confirm_unit_price.setText(P2pMoney.fiat(unitPrice, currency) + " / " + com.harvana.app.p2p.P2pAsset.ticker(asset));
 		_showPriceReference();
 		tv_confirm_buyers_pay.setText(P2pMoney.fiat(amount * unitPrice, currency));
-		tv_confirm_trade_limit.setText(String.format(Locale.US, ("Min %s " + com.harvana.app.CoinInfo.ticker() + " • Max %s " + com.harvana.app.CoinInfo.ticker()),
+		tv_confirm_trade_limit.setText(String.format(Locale.US, ("Min %s " + com.harvana.app.p2p.P2pAsset.ticker(asset) + " • Max %s " + com.harvana.app.p2p.P2pAsset.ticker(asset)),
 		BalanceFormatter.smartDecimal(minOrderAmount), BalanceFormatter.smartDecimal(maxOrderAmount)));
 		tv_confirm_duration.setText(durationLabel != null ? durationLabel : (durationHours + " hours"));
 	}
@@ -440,7 +444,7 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 		final String firebaseUid = currentUser.getUid();
 		
 		btn_publish_offer.setEnabled(false);
-		P2pListingPublisher.publish(this, side, amount, pricingType, unitPrice, marginPercent, minOrderAmount, maxOrderAmount, durationHours, paymentWindowMinutes, termsOfTrade, reqAccountAgeDays, currency, selectedMethods,
+		P2pListingPublisher.publish(this, asset, side, amount, pricingType, unitPrice, marginPercent, minOrderAmount, maxOrderAmount, durationHours, paymentWindowMinutes, termsOfTrade, reqAccountAgeDays, currency, selectedMethods,
 		new P2pListingPublisher.Callback() {
 			@Override
 			public void onPublished(String listingId) {
@@ -484,11 +488,13 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 *  anticipated ones made readable. */
 	private String _friendlyPublishError(String rawError) {
 		if (rawError == null) return "Unknown error.";
-		if (rawError.contains("AMOUNT_OUT_OF_BOUNDS")) return ("A listing must be between 10 and 5,000 " + com.harvana.app.CoinInfo.ticker() + " in total.");
-		if (rawError.contains("INVALID_MIN_ORDER_AMOUNT")) return ("The minimum trade amount must be at least 1 " + com.harvana.app.CoinInfo.ticker() + " and no more than the total you're listing.");
+		if (rawError.contains("AMOUNT_OUT_OF_BOUNDS")) return ("A listing must be between " + BalanceFormatter.smartDecimal(com.harvana.app.p2p.P2pAsset.minListing(asset))
+				+ " and " + BalanceFormatter.smartDecimal(com.harvana.app.p2p.P2pAsset.maxListing(asset)) + " " + com.harvana.app.p2p.P2pAsset.ticker(asset) + " in total.");
+		if (rawError.contains("_NOT_ACTIVE")) return com.harvana.app.p2p.P2pAsset.ticker(asset) + " isn't switched on for trading yet.";
+		if (rawError.contains("INVALID_MIN_ORDER_AMOUNT")) return ("The minimum trade amount must be at least 1 " + com.harvana.app.p2p.P2pAsset.ticker(asset) + " and no more than the total you're listing.");
 		if (rawError.contains("INVALID_DURATION")) return "Offer duration must be between 1 hour and 30 days.";
 		if (rawError.contains("SENDER_ADDRESS_FROZEN")) return "This wallet is currently frozen and can't post listings.";
-		if (rawError.contains("COIN_PAUSED")) return (com.harvana.app.CoinInfo.ticker() + " trading is temporarily paused network-wide. Try again later.");
+		if (rawError.contains("COIN_PAUSED")) return (com.harvana.app.p2p.P2pAsset.ticker(asset) + " trading is temporarily paused network-wide. Try again later.");
 		if (rawError.contains("INVALID_SIGNATURE") || rawError.contains("INVALID_NONCE")) return "Something went wrong verifying your request — please try again.";
 		return rawError;
 	}

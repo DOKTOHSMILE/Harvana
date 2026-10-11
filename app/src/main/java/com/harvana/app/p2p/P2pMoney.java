@@ -29,4 +29,9 @@ public final class P2pMoney {
 	public static String perHarv(double price, String code) {
 		return fiat(price, code) + (" / " + com.harvana.app.CoinInfo.ticker());
 	}
+
+	/** Price per 1 of the traded coin: "₦1,600.00 / hUSD", or "/ HARV". */
+	public static String perUnit(double price, String code, String asset) {
+		return fiat(price, code) + " / " + P2pAsset.ticker(asset);
+	}
 }

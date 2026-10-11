@@ -514,7 +514,8 @@ public class P2pExpressActivity extends AppCompatActivity {
 		tv_express_match_description.setText("");
 		
 		String side = buyMode ? "SELL" : "BUY";
-		HarvanaNodeClient.getP2POpenListings(0, 50, side, new HarvanaNodeClient.JsonCallback() {
+		// Express matches on HARV only (its liquidity comes from HARV insurance deposits).
+		HarvanaNodeClient.getP2POpenListings(0, 50, side, com.harvana.app.p2p.P2pAsset.HARV, new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject result) {
 				List<JSONObject> listings = new ArrayList<>();

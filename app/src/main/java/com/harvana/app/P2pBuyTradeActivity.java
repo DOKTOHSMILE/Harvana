@@ -57,6 +57,9 @@ import androidx.activity.result.contract.ActivityResultContracts;
 
 public class P2pBuyTradeActivity extends AppCompatActivity {
 	
+	/** What this order trades: "HARV" or a stable asset (hUSD, hNGN, …). Set when it loads. */
+	private String p2pAsset = "HARV";
+	
 	private Toolbar _toolbar;
 	private AppBarLayout _app_bar;
 	private CoordinatorLayout _coordinator;
@@ -366,7 +369,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		
 		if (getSupportActionBar() != null) {
 			getSupportActionBar().setTitle("P2P Trade");
-			getSupportActionBar().setSubtitle(("Order #" + com.harvana.app.CoinInfo.ticker() + "-8F42D1"));
+			getSupportActionBar().setSubtitle(("Order #" + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + "-8F42D1"));
 		}
 		
 		
@@ -490,6 +493,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		HarvanaNodeClient.getP2POrder(orderId, new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject order) {
+				p2pAsset = com.harvana.app.p2p.P2pAsset.of(order);   // HARV or a stable asset: its amounts and ticker
 				listingId = order.optString("listingId", "");
 				buyerAddress = order.optString("buyerAddress", "");
 				sellerAddress = order.optString("sellerAddress", "");
@@ -658,15 +662,15 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	}
 	
 	private void _renderValueCard() {
-		double claimedHarv = HarvanaNodeClient.toHarvDisplay(amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
-		double feeHarv = HarvanaNodeClient.toHarvDisplay(platformFeeRaw);
-		double networkFeeHarv = HarvanaNodeClient.toHarvDisplay(releaseGasRaw);
+		double claimedHarv = com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
+		double feeHarv = com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, platformFeeRaw);
+		double networkFeeHarv = com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, releaseGasRaw);
 		harv_amount_large.setText(BalanceFormatter.smart(claimedHarv));
 		String ccy = listingCurrency != null ? listingCurrency : com.harvana.app.p2p.P2pCurrencyFilterState.getCurrency();
 		fiat_amount_large.setText(unitPrice >= 0 ? com.harvana.app.p2p.P2pMoney.fiat(claimedHarv * unitPrice, ccy) : "—");
-		unit_price.setText(unitPrice >= 0 ? com.harvana.app.p2p.P2pMoney.perHarv(unitPrice, ccy) : "—");
-		maker_fee.setText(String.format(Locale.US, ("-%s " + com.harvana.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(feeHarv)));
-		network_fee.setText(String.format(Locale.US, ("-%s " + com.harvana.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(networkFeeHarv)));
+		unit_price.setText(unitPrice >= 0 ? com.harvana.app.p2p.P2pMoney.perUnit(unitPrice, ccy, p2pAsset) : "—");
+		maker_fee.setText(String.format(Locale.US, ("-%s " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)), BalanceFormatter.smartDecimal(feeHarv)));
+		network_fee.setText(String.format(Locale.US, ("-%s " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)), BalanceFormatter.smartDecimal(networkFeeHarv)));
 		payment_amount.setText(unitPrice >= 0 ? com.harvana.app.p2p.P2pMoney.fiat(claimedHarv * unitPrice, ccy) : "—");
 	}
 	
@@ -712,7 +716,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 			_setStatusBadge("Completed");
 			completed_card.setVisibility(View.VISIBLE);
 			completed_title.setText("Trade completed");
-			completed_description.setText(("The seller confirmed your payment and the " + com.harvana.app.CoinInfo.ticker() + " has been released to your wallet."));
+			completed_description.setText(("The seller confirmed your payment and the " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + " has been released to your wallet."));
 			completed_transaction.setText(releaseTxHashValue.isEmpty() ? "—" : releaseTxHashValue);
 			blockchain_card.setVisibility(View.VISIBLE);
 			blockchain_status.setText("Verified");
@@ -734,7 +738,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 			case "CANCELLED":
 			_setStatusBadge("Cancelled");
 			current_action_title.setText("This order was cancelled");
-			current_action_description.setText(("No " + com.harvana.app.CoinInfo.ticker() + " moved for this order."));
+			current_action_description.setText(("No " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + " moved for this order."));
 			action_status_card.setVisibility(View.VISIBLE);
 			timeline_card.setVisibility(View.VISIBLE);
 			break;
@@ -834,7 +838,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		.setTitle("Confirm payment sent")
 		.setMessage("Only continue if you have actually sent the fiat payment to the seller's account shown above. Falsely marking this paid can suspend your account.")
 		.setPositiveButton("I've Paid", (dialog, which) -> {
-			double claimed = com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay(amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
+			double claimed = com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
 			double fiat = unitPrice >= 0 ? claimed * unitPrice : -1;
 			java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
 			rows.add(new String[]{"You say you paid", fiat >= 0 ? com.harvana.app.p2p.P2pMoney.fiat(fiat, listingCurrency) : "The agreed fiat"});
@@ -850,7 +854,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 					@Override
 					public void onSuccess(JSONObject result) {
 						runOnUiThread(() -> _loadOrder());
-						com.harvana.app.p2p.P2pChatStore.notice(orderId, chatOtherUid, "I have sent the payment. Please check your account and release the " + com.harvana.app.CoinInfo.ticker() + ".");
+						com.harvana.app.p2p.P2pChatStore.notice(orderId, chatOtherUid, "I have sent the payment. Please check your account and release the " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + ".");
 					}
 					@Override
 					public void onError(String error) {

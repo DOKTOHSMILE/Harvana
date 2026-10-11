@@ -58,6 +58,9 @@ import com.harvana.app.p2p.ThemedDialogs;
 
 public class P2pSellOrderActivity extends AppCompatActivity {
 	
+	/** What this listing trades: "HARV" or a stable asset (hUSD, hNGN, …). Set when it loads. */
+	private String p2pAsset = "HARV";
+	
 	private Toolbar _toolbar;
 	private AppBarLayout _app_bar;
 	private CoordinatorLayout _coordinator;
@@ -235,7 +238,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 		}
 		
 		if (getSupportActionBar() != null) {
-			getSupportActionBar().setTitle(("Sell " + com.harvana.app.CoinInfo.ticker()));
+			getSupportActionBar().setTitle(("Sell " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)));
 			getSupportActionBar().setSubtitle("Set the amount and price you want to sell.");
 		}
 		
@@ -243,7 +246,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 		myAddress = WalletManager.getActiveWalletAddress(this);
 		if (getSupportActionBar() != null) {
 			getSupportActionBar().setTitle("Sell Order");
-			getSupportActionBar().setSubtitle(("Review and confirm — you'll be providing the " + com.harvana.app.CoinInfo.ticker()));
+			getSupportActionBar().setSubtitle(("Review and confirm — you'll be providing the " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)));
 		}
 		
 		// GROUND-UP FIX: price is locked from the buyer's listing, never
@@ -258,8 +261,8 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 		card_sell_preview.setVisibility(View.GONE);
 		tv_sell_amount_error.setVisibility(View.GONE);
 		btn_create_sell_order.setEnabled(false);
-		btn_create_sell_order.setText(("Sell " + com.harvana.app.CoinInfo.ticker()));
-		tv_sell_protection_description.setText(("Your " + com.harvana.app.CoinInfo.ticker() + " is held in escrow the moment this order is created — it only releases to the buyer once you confirm you've received their payment."));
+		btn_create_sell_order.setText(("Sell " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)));
+		tv_sell_protection_description.setText(("Your " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + " is held in escrow the moment this order is created — it only releases to the buyer once you confirm you've received their payment."));
 		
 		if (listingId == null || listingId.isEmpty()) {
 			_showFatalError("No listing specified.");
@@ -319,17 +322,18 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 	
 	private void _loadWalletBalance() {
 		if (myAddress == null || myAddress.isEmpty()) return;
-		WalletNodeBridge.fetchLiveBalance(this, myAddress, new WalletNodeBridge.BalanceCallback() {
+		// The listing's own coin: HARV, or the stable asset it asks for (called again once the listing has loaded).
+		com.harvana.app.p2p.P2pAsset.balance(this, p2pAsset, myAddress, new com.harvana.app.p2p.P2pAsset.BalanceCb() {
 			@Override
-			public void onSuccess(double balanceHarv, long nonce, long blockHeight) {
+			public void ok(double balanceHarv) {
 				walletBalanceHarv = balanceHarv;
 				runOnUiThread(() -> {
-					tv_sell_available_harv.setText(BalanceFormatter.smart(balanceHarv));
+					tv_sell_available_harv.setText(BalanceFormatter.smart(balanceHarv) + " " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset));
 					_refreshPresets();
 				});
 			}
 			@Override
-			public void onError(String error) {
+			public void fail(String error) {
 				runOnUiThread(() -> tv_sell_available_harv.setText("Unavailable"));
 			}
 		});
@@ -341,6 +345,9 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 		HarvanaNodeClient.getP2PListing(listingId, new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject listing) {
+				p2pAsset = com.harvana.app.p2p.P2pAsset.of(listing);   // HARV or a stable asset: its amounts and ticker
+				if (com.harvana.app.p2p.P2pAsset.isStable(p2pAsset)) _loadWalletBalance();
+				runOnUiThread(() -> { if (btn_create_sell_order != null) btn_create_sell_order.setText("Sell " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)); });
 				if (!"OPEN".equals(listing.optString("status", ""))) {
 					runOnUiThread(() -> _showFatalError("This offer is no longer open."));
 					return;
@@ -357,8 +364,8 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 					});
 					return;
 				}
-				remainingHarv = HarvanaNodeClient.toHarvDisplay(listing.optLong("remainingAmount", 0));
-				minOrderHarv = HarvanaNodeClient.toHarvDisplay(listing.optLong("minOrderAmount", 0));
+				remainingHarv = com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, listing.optLong("remainingAmount", 0));
+				minOrderHarv = com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, listing.optLong("minOrderAmount", 0));
 				// The price the node signed into the listing (kobo per HARV); the Firestore card may add or confirm it.
 				long nodeKobo = listing.optLong("unitPricePerHarvRaw", 0L);
 				if (nodeKobo > 0) unitPrice = nodeKobo / 100.0;
@@ -366,7 +373,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 				runOnUiThread(() -> {
 					if (unitPrice >= 0) et_sell_price.setText(String.format(Locale.US, "%,.2f", unitPrice));
 					tv_sell_condition_limits.setText(String.format(Locale.US,
-					("Min %.4f · Max %.4f " + com.harvana.app.CoinInfo.ticker()), minOrderHarv, remainingHarv));
+					("Min %.4f · Max %.4f " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)), minOrderHarv, remainingHarv));
 					tv_sell_condition_window.setText("You'll have 45 minutes to confirm receipt once the buyer marks payment sent.");
 					_refreshPresets();
 				});
@@ -484,15 +491,15 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 			return;
 		}
 		if (amount < minOrderHarv) {
-			_showAmountError(String.format(Locale.US, ("Minimum order is %.4f " + com.harvana.app.CoinInfo.ticker() + "."), minOrderHarv));
+			_showAmountError(String.format(Locale.US, ("Minimum order is %.4f " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + "."), minOrderHarv));
 			return;
 		}
 		if (amount > remainingHarv) {
-			_showAmountError(String.format(Locale.US, ("The buyer only wants %.4f " + com.harvana.app.CoinInfo.ticker() + "."), remainingHarv));
+			_showAmountError(String.format(Locale.US, ("The buyer only wants %.4f " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + "."), remainingHarv));
 			return;
 		}
 		if (amount > walletBalanceHarv) {
-			_showAmountError(String.format(Locale.US, ("You only have %.4f " + com.harvana.app.CoinInfo.ticker() + " available."), walletBalanceHarv));
+			_showAmountError(String.format(Locale.US, ("You only have %.4f " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + " available."), walletBalanceHarv));
 			return;
 		}
 		if (myAddress == null || myAddress.isEmpty()) {
@@ -501,7 +508,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 		}
 		
 		tv_sell_amount_error.setVisibility(View.GONE);
-		long amountRaw = HarvanaNodeClient.toRawUnits(amount);
+		long amountRaw = com.harvana.app.p2p.P2pAsset.toRaw(p2pAsset, amount);
 		pendingFeeFetch = () -> _fetchPreview(amountRaw);
 		debounceHandler.postDelayed(pendingFeeFetch, 400);
 	}
@@ -517,7 +524,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 		HarvanaNodeClient.previewP2PClaim(listingId, myAddress, amountRaw, new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject result) {
-				long currentAmountRaw = HarvanaNodeClient.toRawUnits(BalanceFormatter.parseUserInput(et_sell_amount.getText().toString()));
+				long currentAmountRaw = com.harvana.app.p2p.P2pAsset.toRaw(p2pAsset, BalanceFormatter.parseUserInput(et_sell_amount.getText().toString()));
 				if (currentAmountRaw != amountRaw) return;
 				
 				lastPreviewedAmountRaw = amountRaw;
@@ -525,8 +532,8 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 				lastNetworkFeeRaw = result.optLong("releaseGasRaw", 0);
 				lastNetAmountRaw = result.optLong("netAmountToBuyer", 0);
 				
-				double amountHarv = HarvanaNodeClient.toHarvDisplay(amountRaw);
-				double feeHarv = HarvanaNodeClient.toHarvDisplay(lastPlatformFeeRaw);
+				double amountHarv = com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, amountRaw);
+				double feeHarv = com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, lastPlatformFeeRaw);
 				double fiatTotal = unitPrice >= 0 ? amountHarv * unitPrice : -1;
 				
 				runOnUiThread(() -> {
@@ -534,7 +541,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 					tv_sell_preview_harv.setText(BalanceFormatter.smart(amountHarv));
 					tv_sell_preview_price.setText(unitPrice >= 0 ? P2pMoney.fiat(unitPrice, listingCurrency) : "—");
 					tv_sell_preview_gross.setText(fiatTotal >= 0 ? P2pMoney.fiat(fiatTotal, listingCurrency) : "—");
-					tv_sell_preview_fee.setText(String.format(Locale.US, ("%s " + com.harvana.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(feeHarv)));
+					tv_sell_preview_fee.setText(String.format(Locale.US, ("%s " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)), BalanceFormatter.smartDecimal(feeHarv)));
 					tv_sell_preview_receive.setText(fiatTotal >= 0 ? P2pMoney.fiat(fiatTotal, listingCurrency) : "—");
 					btn_create_sell_order.setEnabled(selectedMethod != null);
 					if (selectedMethod == null) {
@@ -558,18 +565,18 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 			return;
 		}
 		double amount = BalanceFormatter.parseUserInput(et_sell_amount.getText().toString());
-		long amountRaw = HarvanaNodeClient.toRawUnits(amount);
+		long amountRaw = com.harvana.app.p2p.P2pAsset.toRaw(p2pAsset, amount);
 		if (lastPreviewedAmountRaw != amountRaw) {
 			_showAmountError("Still checking this order — try again in a moment.");
 			return;
 		}
 		
-		double amountHarv = HarvanaNodeClient.toHarvDisplay(amountRaw);
+		double amountHarv = com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, amountRaw);
 		double fiatTotal = unitPrice >= 0 ? amountHarv * unitPrice : -1;
 		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
 		rows.add(new String[]{"You sell", BalanceFormatter.smart(amountHarv)});
 		rows.add(new String[]{"You should receive", fiatTotal >= 0 ? P2pMoney.fiat(fiatTotal, listingCurrency) : "The listed price"});
-		rows.add(new String[]{"Platform fee", BalanceFormatter.smart(HarvanaNodeClient.toHarvDisplay(lastPlatformFeeRaw))});
+		rows.add(new String[]{"Platform fee", BalanceFormatter.smart(com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, lastPlatformFeeRaw))});
 		rows.add(new String[]{"Paid into", selectedMethod == null ? "Your payment account" : String.valueOf(selectedMethod)});
 		rows.add(new String[]{"Network fee", "Set by the node when this order opens"});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
@@ -577,13 +584,13 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 			btn_create_sell_order.setEnabled(false);
 			btn_create_sell_order.setText("Creating order…");
 			
-			P2PTradeRouter.claimPayment(getApplicationContext(), listingId, myAddress, amountRaw, new P2PTradeRouter.Callback() {
+			P2PTradeRouter.claimPayment(getApplicationContext(), listingId, myAddress, amountRaw, p2pAsset, new P2PTradeRouter.Callback() {
 				@Override
 				public void onSuccess(JSONObject result) {
 					String newOrderId = P2pIds.orderId(result);
 					// Tell the buyer who posted the offer, through the trade chat (their phone's chat check notifies them).
 					com.harvana.app.p2p.P2pChatStore.notice(newOrderId, buyerUid, "New order: I am selling you "
-							+ BalanceFormatter.smart(amountHarv) + " " + com.harvana.app.CoinInfo.ticker()
+							+ BalanceFormatter.smart(amountHarv) + " " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)
 							+ ". It is held in escrow for you. Pay into the account on the trade screen, then tap \"I have paid\".");
 					String myUid = FirebaseAuth.getInstance().getCurrentUser() != null
 					? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
@@ -591,7 +598,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 					if (myUid == null || newOrderId.isEmpty()) {
 						runOnUiThread(() -> {
 							btn_create_sell_order.setEnabled(true);
-							btn_create_sell_order.setText(("Sell " + com.harvana.app.CoinInfo.ticker()));
+							btn_create_sell_order.setText(("Sell " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)));
 							_showAmountError("Order created, but couldn't finish setup. Check My Trades.");
 						});
 						return;
@@ -616,7 +623,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 				public void onError(String error) {
 					runOnUiThread(() -> {
 						btn_create_sell_order.setEnabled(true);
-						btn_create_sell_order.setText(("Sell " + com.harvana.app.CoinInfo.ticker()));
+						btn_create_sell_order.setText(("Sell " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)));
 						_showAmountError("Couldn't create this order — the offer may have just changed: " + error);
 					});
 				}

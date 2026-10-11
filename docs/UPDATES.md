@@ -2,6 +2,23 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 11 Oct 2026: stable coins in P2P, and one Send screen for every coin
+
+What the app does:
+- **P2P trades stable coins.** The marketplace's "Select Coin" now lists HARV plus every stable coin the network has switched on (hUSD, hNGN, hEUR, …).
+  - Picking one shows only that coin's offers.
+  - New offers you create are in that coin.
+  - Order and trade screens show amounts and prices in the coin the listing trades, for example "₦1,600.00 / hUSD".
+  - The escrow holds that coin, and you need no HARV for gas.
+  - Stable-coin offers use a fixed price.
+  - Express stays HARV-only.
+- **One Send screen.** Stable coins now appear in the normal Send screen's coin list, right under HARV, with their balances.
+  - Choosing one sends it through the stable-coin engine. The fee is HARV gas if you hold HARV, otherwise a small fee in the coin, and your first 3 are free.
+  - The other coins send as before.
+  - The Send button on a stable coin's own screen opens this same Send screen with that coin picked.
+
+What you do: install the build. The node update that adds stable-coin P2P must be on the server (node `docs/DEPLOYMENT.md`, 11 Oct "P2P can trade stable assets").
+
 ## 11 Oct 2026: hEUR, hNGN, hGHS and other stable currencies
 
 What the app does:

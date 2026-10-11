@@ -355,7 +355,8 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 			String sellerAddress = order.optString("sellerAddress", "");
 			String status = order.optString("status", "");
 			long claimedRaw = order.optLong("amount", order.optLong("netAmountToBuyer", order.optLong("buyerEntitlementRaw", 0)));
-			double harvAmount = HarvanaNodeClient.toHarvDisplay(claimedRaw);
+			final String asset = com.harvana.app.p2p.P2pAsset.of(order);           // HARV or a stable asset (its own decimals and ticker)
+			double harvAmount = com.harvana.app.p2p.P2pAsset.fromRaw(claimedRaw, asset);
 			long createdAt = order.optLong("createdTimestamp", 0);
 			String releaseTxHash = order.optString("releaseTxHash", "");
 			boolean iWasBuyer = myAddress.equals(buyerAddress);
@@ -363,7 +364,7 @@ public class P2pMyTradesActivity extends AppCompatActivity {
 			tv_my_trade_type.setText(iWasBuyer ? "Bought" : "Sold");
 			tv_my_trade_status.setText(_statusLabel(status));
 			tv_my_trade_order_id.setText(_shortId(orderId));
-			tv_my_trade_harv.setText(BalanceFormatter.smart(harvAmount));
+			tv_my_trade_harv.setText(BalanceFormatter.smart(harvAmount) + " " + com.harvana.app.p2p.P2pAsset.ticker(asset));
 			com.harvana.app.utils.Shimmer.loading(tv_my_trade_fiat);
 			tv_my_trade_date.setText(_formatDate(createdAt));
 			tv_my_trade_tx_state.setText(releaseTxHash.isEmpty() ? "No release yet" : _shortId(releaseTxHash));

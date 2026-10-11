@@ -56,6 +56,9 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class P2pSellTradeActivity extends AppCompatActivity {
 	
+	/** What this order trades: "HARV" or a stable asset (hUSD, hNGN, …). Set when it loads. */
+	private String p2pAsset = "HARV";
+	
 	private Toolbar _toolbar;
 	private AppBarLayout _app_bar;
 	private CoordinatorLayout _coordinator;
@@ -292,8 +295,8 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		}
 		
 		if (getSupportActionBar() != null) {
-			getSupportActionBar().setTitle(("Sell " + com.harvana.app.CoinInfo.ticker()));
-			getSupportActionBar().setSubtitle(("Order #" + com.harvana.app.CoinInfo.ticker() + "-000000"));
+			getSupportActionBar().setTitle(("Sell " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)));
+			getSupportActionBar().setSubtitle(("Order #" + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + "-000000"));
 		}
 		
 		
@@ -426,6 +429,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		HarvanaNodeClient.getP2POrder(orderId, new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject order) {
+				p2pAsset = com.harvana.app.p2p.P2pAsset.of(order);   // HARV or a stable asset: its amounts and ticker
 				listingId = order.optString("listingId", "");
 				buyerAddress = order.optString("buyerAddress", "");
 				sellerAddress = order.optString("sellerAddress", "");
@@ -616,14 +620,14 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	}
 	
 	private void _renderValueCard() {
-		double claimedHarv = HarvanaNodeClient.toHarvDisplay(amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
-		double feeHarv = HarvanaNodeClient.toHarvDisplay(platformFeeRaw);
+		double claimedHarv = com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
+		double feeHarv = com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, platformFeeRaw);
 		tv_sell_harv_amount.setText(BalanceFormatter.smart(claimedHarv));
-		tv_sell_value_caption.setText(("You're providing this " + com.harvana.app.CoinInfo.ticker()));
+		tv_sell_value_caption.setText(("You're providing this " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)));
 		String ccy = listingCurrency != null ? listingCurrency : com.harvana.app.p2p.P2pCurrencyFilterState.getCurrency();
 		tv_sell_fiat_amount.setText(unitPrice >= 0 ? P2pMoney.fiat(claimedHarv * unitPrice, ccy) : "—");
-		tv_sell_price.setText(unitPrice >= 0 ? P2pMoney.perHarv(unitPrice, ccy) : "—");
-		tv_sell_maker_fee.setText(String.format(Locale.US, ("-%s " + com.harvana.app.CoinInfo.ticker()), BalanceFormatter.smartDecimal(feeHarv)));
+		tv_sell_price.setText(unitPrice >= 0 ? P2pMoney.perUnit(unitPrice, ccy, p2pAsset) : "—");
+		tv_sell_maker_fee.setText(String.format(Locale.US, ("-%s " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)), BalanceFormatter.smartDecimal(feeHarv)));
 		tv_sell_payment_received_amount.setText(unitPrice >= 0 ? P2pMoney.fiat(claimedHarv * unitPrice, ccy) : "—");
 	}
 	
@@ -641,7 +645,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			_setStatusBadge("Awaiting Payment");
 			card_sell_action.setVisibility(View.VISIBLE);
 			tv_sell_action_title.setText("Waiting for the buyer to pay");
-			tv_sell_action_description.setText(("Your " + com.harvana.app.CoinInfo.ticker() + " is already locked in escrow. Nothing to do until they mark payment sent."));
+			tv_sell_action_description.setText(("Your " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + " is already locked in escrow. Nothing to do until they mark payment sent."));
 			tv_sell_payment_status.setText("Not yet paid");
 			layout_sell_payment_received.setVisibility(View.GONE);
 			break;
@@ -650,7 +654,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			_setStatusBadge("Payment Submitted");
 			card_sell_action.setVisibility(View.VISIBLE);
 			tv_sell_action_title.setText("Confirm you've received payment");
-			tv_sell_action_description.setText(("Check your account, then confirm below. " + com.harvana.app.CoinInfo.ticker() + " only releases after your confirmation."));
+			tv_sell_action_description.setText(("Check your account, then confirm below. " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + " only releases after your confirmation."));
 			tv_sell_payment_status.setText("Buyer marked as paid");
 			layout_sell_payment_received.setVisibility(View.VISIBLE);
 			card_sell_action_button.setVisibility(View.VISIBLE);
@@ -667,7 +671,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			_setStatusBadge("Completed");
 			card_sell_completed.setVisibility(View.VISIBLE);
 			tv_sell_completed_title.setText("Trade completed");
-			tv_sell_completed_description.setText(("You confirmed payment and the " + com.harvana.app.CoinInfo.ticker() + " has been released to the buyer."));
+			tv_sell_completed_description.setText(("You confirmed payment and the " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + " has been released to the buyer."));
 			tv_sell_completed_tx_hash.setText(releaseTxHashValue.isEmpty() ? "—" : releaseTxHashValue);
 			tv_sell_release_status.setText("Verified");
 			tv_sell_release_tx_hash.setText(releaseTxHashValue.isEmpty() ? "—" : releaseTxHashValue);
@@ -682,7 +686,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			case "CANCELLED":
 			_setStatusBadge("Cancelled");
 			card_sell_warning.setVisibility(View.VISIBLE);
-			tv_sell_warning.setText(("This order was cancelled. No " + com.harvana.app.CoinInfo.ticker() + " moved."));
+			tv_sell_warning.setText(("This order was cancelled. No " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + " moved."));
 			break;
 			
 			default:
@@ -698,7 +702,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		boolean paymentMarked = "PAYMENT_SUBMITTED".equals(status) || "COMPLETED".equals(status) || "DISPUTED".equals(status);
 		boolean completed = "COMPLETED".equals(status);
 		
-		String t = com.harvana.app.CoinInfo.ticker();
+		String t = com.harvana.app.p2p.P2pAsset.ticker(p2pAsset);
 		com.harvana.app.utils.Icons.step(tv_sell_step_1, "Order created", true);
 		com.harvana.app.utils.Icons.step(tv_sell_step_2, t + " locked in escrow", escrowDone);
 		com.harvana.app.utils.Icons.step(tv_sell_step_3, "Buyer marked payment sent", paymentMarked);
@@ -740,9 +744,9 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	private void _confirmReceived() {
 		ThemedDialogs.show(ThemedDialogs.alert(this)
 		.setTitle("Confirm payment received")
-		.setMessage(("Only confirm if you have genuinely verified the money is in your account. This releases the escrowed " + com.harvana.app.CoinInfo.ticker() + " to the buyer immediately and cannot be undone."))
+		.setMessage(("Only confirm if you have genuinely verified the money is in your account. This releases the escrowed " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + " to the buyer immediately and cannot be undone."))
 		.setPositiveButton("Confirm & Release", (dialog, which) -> {
-			double claimed = HarvanaNodeClient.toHarvDisplay(amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
+			double claimed = com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, amountRaw > 0 ? amountRaw : netAmountToBuyerRaw);
 			String ccy = listingCurrency == null ? "NGN" : listingCurrency;
 			java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
 			rows.add(new String[]{"Releases", BalanceFormatter.smart(claimed)});
@@ -757,7 +761,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 					@Override
 					public void onSuccess(JSONObject result) {
 						runOnUiThread(() -> _loadOrder());
-						com.harvana.app.p2p.P2pChatStore.notice(orderId, chatOtherUid, "Payment received. I released the " + com.harvana.app.CoinInfo.ticker() + " to you. Thank you!");
+						com.harvana.app.p2p.P2pChatStore.notice(orderId, chatOtherUid, "Payment received. I released the " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + " to you. Thank you!");
 					}
 					@Override
 					public void onError(String error) {

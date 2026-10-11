@@ -148,6 +148,12 @@ public final class HarvanaNodeClient {
 	public static void getP2POpenListings(int page, int size, String side, JsonCallback cb) {
 		get("/api/v1/p2p/listings/open?page=" + page + "&size=" + size + "&side=" + side, cb);
 	}
+
+	/** One asset's open listings: "HARV" or a stable asset's code (an older node, without the filter, has only HARV). */
+	public static void getP2POpenListings(int page, int size, String side, String asset, JsonCallback cb) {
+		get("/api/v1/p2p/listings/open?page=" + page + "&size=" + size + "&side=" + side
+				+ "&asset=" + com.harvana.app.p2p.P2pAsset.normalize(asset), cb);
+	}
 	
 	public static void getP2PListing(String listingId, JsonCallback cb) {
 		get("/api/v1/p2p/listing/" + listingId, cb);
@@ -252,8 +258,18 @@ public final class HarvanaNodeClient {
 	long maxOrderAmount, long durationHours, long paymentWindowMinutes, long unitPricePerHarvRaw,
 	long nonce, String signatureB64, String publicKeyB64,
 	JsonCallback cb) {
+		submitP2PCreateListing(posterAddress, side, totalAmount, minOrderAmount, maxOrderAmount, durationHours,
+				paymentWindowMinutes, unitPricePerHarvRaw, nonce, signatureB64, publicKeyB64, "HARV", cb);
+	}
+
+	/** asset: "HARV", or a stable asset's code (sent as "asset"; the node appends it to the signed message). */
+	public static void submitP2PCreateListing(String posterAddress, String side, long totalAmount, long minOrderAmount,
+	long maxOrderAmount, long durationHours, long paymentWindowMinutes, long unitPricePerHarvRaw,
+	long nonce, String signatureB64, String publicKeyB64, String asset,
+	JsonCallback cb) {
 		try {
 			JSONObject body = new JSONObject();
+			if (com.harvana.app.p2p.P2pAsset.isStable(asset)) body.put("asset", com.harvana.app.p2p.P2pAsset.normalize(asset));
 			body.put("posterAddress",   posterAddress);
 			body.put("side",            side);
 			body.put("totalAmount",     totalAmount);

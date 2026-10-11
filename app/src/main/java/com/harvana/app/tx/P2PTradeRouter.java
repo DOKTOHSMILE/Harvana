@@ -46,17 +46,26 @@ public final class P2PTradeRouter {
 	public static void createListing(Context context, String posterAddress, String side, long totalAmountRaw,
 	long minOrderAmountRaw, long maxOrderAmountRaw, long durationHours, long paymentWindowMinutes,
 	long unitPricePerHarvRaw, Callback callback) {
+		createListing(context, posterAddress, side, totalAmountRaw, minOrderAmountRaw, maxOrderAmountRaw, durationHours,
+				paymentWindowMinutes, unitPricePerHarvRaw, com.harvana.app.p2p.P2pAsset.HARV, callback);
+	}
+
+	/** Any asset: "HARV", or a stable asset ("HUSD", "HNGN", …), whose escrow then moves that asset. Amounts are in
+	 *  its own raw units (see P2pAsset). */
+	public static void createListing(Context context, String posterAddress, String side, long totalAmountRaw,
+	long minOrderAmountRaw, long maxOrderAmountRaw, long durationHours, long paymentWindowMinutes,
+	long unitPricePerHarvRaw, String asset, Callback callback) {
 		HarvanaNodeClient.getWallet(posterAddress, new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
 				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
 				String canonical = com.harvana.app.chain.P2pCanonical.createListing(posterAddress, side, totalAmountRaw,
-				minOrderAmountRaw, maxOrderAmountRaw, durationHours, paymentWindowMinutes, unitPricePerHarvRaw, nonce);
+				minOrderAmountRaw, maxOrderAmountRaw, durationHours, paymentWindowMinutes, unitPricePerHarvRaw, nonce, asset);
 				
 				_signAndSubmit(context, posterAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
 				HarvanaNodeClient.submitP2PCreateListing(posterAddress, side, totalAmountRaw, minOrderAmountRaw,
 				maxOrderAmountRaw, durationHours, paymentWindowMinutes, unitPricePerHarvRaw,
-				nonce, sigB64, pubKeyB64,
+				nonce, sigB64, pubKeyB64, asset,
 				_wrap(cb)));
 			}
 			
@@ -71,7 +80,12 @@ public final class P2PTradeRouter {
 	//   "P2P_CLAIM_PAYMENT:" + listingId + ":" + buyerAddress + ":" + amount + ":" + nonce
 	
 	public static void claimPayment(Context context, String listingId, String buyerAddress, long amountRaw, Callback callback0) {
-		final Callback callback = _paying("Order opened", amountRaw, buyerAddress, callback0);
+		claimPayment(context, listingId, buyerAddress, amountRaw, com.harvana.app.p2p.P2pAsset.HARV, callback0);
+	}
+
+	/** asset: what the listing trades ("HARV" or a stable code). Only the receipt uses it; the node knows the listing's asset. */
+	public static void claimPayment(Context context, String listingId, String buyerAddress, long amountRaw, String asset, Callback callback0) {
+		final Callback callback = _paying("Order opened", amountRaw, asset, buyerAddress, callback0);
 		HarvanaNodeClient.getWallet(buyerAddress, new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
@@ -215,7 +229,7 @@ public final class P2PTradeRouter {
 	//   "P2P_INSURANCE_DEPOSIT:" + traderAddress + ":" + amount + ":" + nonce
 	
 	public static void depositInsurance(Context context, String traderAddress, long amountRaw, Callback callback0) {
-		final Callback callback = _paying("Insurance deposit sent", amountRaw, traderAddress, callback0);
+		final Callback callback = _paying("Insurance deposit sent", amountRaw, com.harvana.app.p2p.P2pAsset.HARV, traderAddress, callback0);
 		HarvanaNodeClient.getWallet(traderAddress, new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(JSONObject walletJson) {
@@ -235,7 +249,7 @@ public final class P2PTradeRouter {
 	}
 	
 	/** Locks the payment buttons while this runs and shows the success sheet when it works. */
-	private static Callback _paying(String title, long amountRaw, String from, Callback inner) {
+	private static Callback _paying(String title, long amountRaw, String asset, String from, Callback inner) {
 		final PaymentTracker.Handle handle = PaymentTracker.begin();
 		return new Callback() {
 			@Override public void onSuccess(JSONObject result) {
@@ -243,7 +257,7 @@ public final class P2PTradeRouter {
 					com.harvana.app.ui.PaymentSuccessSheet.Info info = new com.harvana.app.ui.PaymentSuccessSheet.Info();
 					info.title = title;
 					info.amount = com.harvana.app.wallet.BalanceFormatter.smart(
-					com.harvana.app.wallet.BalanceFormatter.rawToHarv(amountRaw)) + " " + com.harvana.app.CoinInfo.ticker();
+					com.harvana.app.p2p.P2pAsset.fromRaw(amountRaw, asset)) + " " + com.harvana.app.p2p.P2pAsset.ticker(asset);
 					info.rows = new String[][] {{"From", from}, {"For", "Peer-to-peer trade"}};
 					info.note = "The network has accepted it.";
 					PaymentTracker.success(info);

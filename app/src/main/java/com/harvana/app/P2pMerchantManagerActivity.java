@@ -419,8 +419,9 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			String listingId = P2pIds.listingId(listing);
 			String side = listing.optString("side", "");
 			String status = listing.optString("status", "");
-			double totalHarv = HarvanaNodeClient.toHarvDisplay(listing.optLong("totalAmount", 0));
-			double remainingHarv = HarvanaNodeClient.toHarvDisplay(listing.optLong("remainingAmount", 0));
+			final String asset = com.harvana.app.p2p.P2pAsset.of(listing);          // HARV or a stable asset (its own decimals and ticker)
+			double totalHarv = com.harvana.app.p2p.P2pAsset.fromRaw(listing.optLong("totalAmount", 0), asset);
+			double remainingHarv = com.harvana.app.p2p.P2pAsset.fromRaw(listing.optLong("remainingAmount", 0), asset);
 			long createdAt = listing.optLong("createdTimestamp", 0);
 			long expiresAt = listing.optLong("expiresAt", 0);
 			boolean isOpen = "OPEN".equals(status);
@@ -437,7 +438,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			String stateLabel = !isOpen ? "Closed" : (hasOrders ? "Matched" : "Active");
 			tv_offer_status.setText(stateLabel);
 			tv_offer_id.setText(_shortId(listingId));
-			tv_offer_amount.setText(String.format(Locale.US, ("%.4f / %.4f " + com.harvana.app.CoinInfo.ticker()), remainingHarv, totalHarv));
+			tv_offer_amount.setText(String.format(Locale.US, ("%.4f / %.4f " + com.harvana.app.p2p.P2pAsset.ticker(asset)), remainingHarv, totalHarv));
 			com.harvana.app.utils.Shimmer.loading(tv_offer_price);
 			com.harvana.app.utils.Shimmer.loading(tv_offer_fiat_value);
 			tv_offer_orders_count.setText(myOrderCount + " order" + (myOrderCount == 1 ? "" : "s"));
@@ -451,7 +452,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			
 			tv_offer_details.setOnClickListener(v -> ThemedDialogs.show(ThemedDialogs.alert(P2pMerchantManagerActivity.this)
 			.setTitle(_shortId(listingId))
-			.setMessage((isSell ? "You are selling " : "You are buying ") + com.harvana.app.CoinInfo.ticker()
+			.setMessage((isSell ? "You are selling " : "You are buying ") + com.harvana.app.p2p.P2pAsset.ticker(asset)
 			+ "\nState: " + stateLabel + "\nTotal: " + BalanceFormatter.smart(totalHarv)
 			+ "\nRemaining: " + BalanceFormatter.smart(remainingHarv)
 			+ "\nListed: " + _formatDate(createdAt)
@@ -490,7 +491,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 						}
 						runOnUiThread(() -> {
 							if (!listingId.equals(_view.getTag())) return;
-							tv_offer_price.setText(price >= 0 ? P2pMoney.perHarv(price, ccy) : "Unavailable");
+							tv_offer_price.setText(price >= 0 ? P2pMoney.perUnit(price, ccy, asset) : "Unavailable");
 							tv_offer_fiat_value.setText(price >= 0 ? P2pMoney.fiat(remainingHarv * price, ccy) : "Unavailable");
 							if (labels.isEmpty()) {
 								tv_offer_payment_none.setVisibility(View.VISIBLE);
@@ -561,8 +562,8 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 		String[] labels = new String[matched.size()];
 		for (int i = 0; i < matched.size(); i++) {
 			JSONObject o = matched.get(i);
-			labels[i] = (_needsMe(o) ? "● " : "") + BalanceFormatter.smart(HarvanaNodeClient.toHarvDisplay(
-					o.optLong("amount", o.optLong("netAmountToBuyer", 0)))) + " · " + _orderState(o);
+			labels[i] = (_needsMe(o) ? "● " : "") + BalanceFormatter.smart(com.harvana.app.p2p.P2pAsset.fromRaw(
+					o.optLong("amount", o.optLong("netAmountToBuyer", 0)), com.harvana.app.p2p.P2pAsset.of(o))) + " " + com.harvana.app.p2p.P2pAsset.ticker(com.harvana.app.p2p.P2pAsset.of(o)) + " · " + _orderState(o);
 		}
 		ThemedDialogs.show(ThemedDialogs.alert(this).setTitle("Orders on this listing").setItems(labels, (dialog, which) -> {
 			JSONObject order = matched.get(which);

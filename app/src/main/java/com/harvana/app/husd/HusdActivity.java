@@ -211,21 +211,12 @@ public class HusdActivity extends AppCompatActivity {
 
     // ── Send ──────────────────────────────────────────────────────────────────
 
+    /** Sending uses the app's one Send screen, with this coin already picked; underneath, that screen sends it through
+     *  the stable-asset engine (SendAssetActivity._sendStable). */
     private void send() {
         if (!active()) return;
-        LinearLayout box = form();
-        EditText to = field(box, "Harvana address (HV0x…)", InputType.TYPE_CLASS_TEXT);
-        EditText amount = field(box, "Amount in " + sym, InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Send " + sym).setView(box)
-                .setPositiveButton("Review", (d, w) -> {
-                    String dest = to.getText().toString().trim();
-                    Long units = HusdClient.parse(amount.getText().toString());
-                    if (!dest.matches("^HV0x[0-9a-f]{40}$")) { toast("That isn't a Harvana address."); return; }
-                    if (dest.equals(address)) { toast("That's this wallet."); return; }
-                    if (units == null) { toast("Enter an amount, up to 6 decimals."); return; }
-                    confirm("Send " + sym, units, new String[][]{{"To", shortAddr(dest)}, {"Fee", feeText(false)}},
-                            () -> submit(dest, units, null, "Sent"));
-                }).setNegativeButton("Cancel", null).show();
+        startActivity(new android.content.Intent(this, com.harvana.app.SendAssetActivity.class)
+                .putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, code));
     }
 
     // ── Withdraw ──────────────────────────────────────────────────────────────

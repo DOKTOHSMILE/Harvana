@@ -42,17 +42,18 @@ public class NotificationsActivity extends AppCompatActivity {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(UiColors.background());
         tabs = new com.google.android.material.tabs.TabLayout(this);
-        tabs.setBackgroundColor(UiColors.background());
         tabs.setTabMode(com.google.android.material.tabs.TabLayout.MODE_SCROLLABLE);
-        tabs.setSelectedTabIndicatorColor(UiColors.accent());
-        tabs.setTabTextColors(UiColors.textSecondary(), UiColors.textPrimary());
+        com.harvana.app.utils.Toggles.pill(tabs);
         for (String t : TABS) tabs.addTab(tabs.newTab().setText(t));
         tabs.addOnTabSelectedListener(new com.google.android.material.tabs.TabLayout.OnTabSelectedListener() {
             @Override public void onTabSelected(com.google.android.material.tabs.TabLayout.Tab t) { tab = t.getPosition(); render(); }
             @Override public void onTabUnselected(com.google.android.material.tabs.TabLayout.Tab t) {}
             @Override public void onTabReselected(com.google.android.material.tabs.TabLayout.Tab t) {}
         });
-        root.addView(tabs);
+        android.widget.LinearLayout.LayoutParams tabsLp = new android.widget.LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toggle_height));
+        tabsLp.setMargins(dp(16), dp(8), dp(16), dp(4));
+        root.addView(tabs, tabsLp);
         ScrollView sv = new ScrollView(this);
         list = new LinearLayout(this);
         list.setOrientation(LinearLayout.VERTICAL);

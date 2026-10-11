@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026: one toggle style, 38dp tall, and the stable-coin share for HARV stakers
+
+What the app does:
+- **Every toggle and tab bar has the same look,** 38dp tall with a rounded selected pill. This covers Staking (both toggles), Assets / Activity, coin details, notifications, group details and the P2P price toggle.
+- **The Staking toggle is fixed.** The selected pill no longer runs past the right edge.
+- **New on the Staking page: "Your share of stable-coin fees".** Staking HARV earns half of every fee paid in hUSD, hNGN and the other stable coins by people who hold no HARV. It is shared daily by stake size and lock, and has a Claim button per coin. The card appears once a stable coin is switched on.
+
+What you do: install the build.
+
 ## 12 Oct 2026: stable-coin fees pay the miner and the other network's gas
 
 What the app does, once a stable coin is on:

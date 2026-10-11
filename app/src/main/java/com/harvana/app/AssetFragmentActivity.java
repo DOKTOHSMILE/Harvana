@@ -398,14 +398,7 @@ public class AssetFragmentActivity extends Fragment {
 	public void _setupViewPager() {
 		frag = new FragFragmentAdapter(this);  // Fragment host
 		viewpager1.setAdapter(frag);
-		tablayout1.setInlineLabel(true);
-		tablayout1.setTabTextColors(0xFF9AA3B2, getResources().getColor(R.color.colorAccent));
-		tablayout1.setTabRippleColor(new android.content.res.ColorStateList(
-		new int[][]{new int[]{android.R.attr.state_pressed}}, 
-		new int[]{requireContext().getResources().getColor(R.color.colorAccent)}
-		));
-		tablayout1.setSelectedTabIndicatorColor(getResources().getColor(R.color.colorAccent));
-		tablayout1.setSelectedTabIndicatorHeight(5);
+		com.harvana.app.utils.Toggles.pill(tablayout1);
 		
 		new TabLayoutMediator(tablayout1, viewpager1, new TabLayoutMediator.TabConfigurationStrategy() {
 			@Override

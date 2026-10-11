@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="cardElevation">1dp</dimen>
+    <!-- Every segmented toggle and tab bar in the app (owner: 35 to 40dp). -->
+    <dimen name="toggle_height">38dp</dimen>
 </resources>

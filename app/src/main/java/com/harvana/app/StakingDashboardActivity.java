@@ -58,6 +58,7 @@ public class StakingDashboardActivity extends AppCompatActivity {
 		int side = Math.round(16 * getResources().getDisplayMetrics().density);
 		host.setPadding(side, side, side, 0);
 		TabLayout tabs = (TabLayout) getLayoutInflater().inflate(R.layout.view_toggle_tabs, host, false);
+		com.harvana.app.utils.Toggles.pill(tabs);
 		ViewPager2 pager = new ViewPager2(this);
 		pager.setId(View.generateViewId());
 		pager.setOffscreenPageLimit(1);
@@ -79,6 +80,7 @@ public class StakingDashboardActivity extends AppCompatActivity {
 		if (++pagesReady == 2 && panel == null) {
 			panel = new StakingPanel(this);
 			panel.reload();
+			_refreshStableShare();
 		}
 	}
 
@@ -86,6 +88,12 @@ public class StakingDashboardActivity extends AppCompatActivity {
 	protected void onResume() {
 		super.onResume();
 		if (panel != null) panel.reload();
+		_refreshStableShare();
+	}
+
+	/** HARV stakers' share of stable-coin fees, on the Staking page (only once a stable coin is on). */
+	private void _refreshStableShare() {
+		if (pages[0] instanceof LinearLayout) com.harvana.app.husd.StakerShareCard.refresh(this, (LinearLayout) pages[0]);
 	}
 
 	public static final class StakingPage extends Fragment {

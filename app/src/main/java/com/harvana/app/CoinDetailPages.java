@@ -47,8 +47,7 @@ public final class CoinDetailPages {
 
         com.google.android.material.tabs.TabLayout tabs =
                 (com.google.android.material.tabs.TabLayout) activity.getLayoutInflater().inflate(R.layout.view_toggle_tabs, column, false);
-        tabs.setTabTextColors(com.harvana.app.utils.UiColors.textSecondary(), com.harvana.app.utils.UiColors.onAccent());
-        tabs.setSelectedTabIndicatorColor(com.harvana.app.utils.UiColors.accent());
+        com.harvana.app.utils.Toggles.pill(tabs);
         String[] names = {"Overview", "History", "Network"};
         new com.google.android.material.tabs.TabLayoutMediator(tabs, pager, (tab, position) -> tab.setText(names[position])).attach();
 

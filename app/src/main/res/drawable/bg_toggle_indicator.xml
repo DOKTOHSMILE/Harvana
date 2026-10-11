@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@android:color/white" />
-    <corners android:radius="20dp" />
-</shape>
+<!-- The selected pill of every segmented toggle. Inset 3dp inside its tab, so it always sits inside the track
+     (TabLayout ignores its own end padding when it draws the indicator, which pushed the pill past the edge). -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android" android:inset="3dp">
+    <shape>
+        <solid android:color="@android:color/white" />
+        <corners android:radius="16dp" />
+    </shape>
+</inset>

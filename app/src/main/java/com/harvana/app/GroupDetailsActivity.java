@@ -521,8 +521,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		view_pager.setAdapter(adapter);
 		tab_layout.setupWithViewPager(view_pager);
 		tab_layout.setTabMode(TabLayout.MODE_SCROLLABLE);
-		tab_layout.setTabTextColors(0xFF9AA3B2, getResources().getColor(R.color.colorAccent));
-		tab_layout.setSelectedTabIndicatorColor(getResources().getColor(R.color.colorAccent));
+		com.harvana.app.utils.Toggles.pill(tab_layout);
 		view_pager.setCurrentItem(0);
 	}
 	

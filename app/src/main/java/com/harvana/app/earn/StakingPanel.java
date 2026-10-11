@@ -193,6 +193,7 @@ public final class StakingPanel {
         if (stake != null) stake.setOnClickListener(v -> doStake());
         if (claim != null) claim.setOnClickListener(v -> doClaim());
         com.google.android.material.tabs.TabLayout liveTabs = activity.findViewById(R.id.tab_live_closed);
+        com.harvana.app.utils.Toggles.pill(liveTabs);
         if (liveTabs != null) {
             liveTabs.addTab(liveTabs.newTab().setText("Live"));
             liveTabs.addTab(liveTabs.newTab().setText("Closed"));

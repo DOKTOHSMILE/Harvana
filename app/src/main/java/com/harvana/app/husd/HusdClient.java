@@ -134,6 +134,23 @@ public final class HusdClient {
         }
     }
 
+    /** A HARV staker's share of every active stable coin's fees: {shares:[{asset, symbol, claimableRaw}], nextRequestNonce}. */
+    public static void shares(String address, Cb cb) { HarvanaNodeClient.nodeGet("/api/v1/stable-shares/" + address, wrap(cb)); }
+
+    /** Claims the whole share of one coin: signs "STABLE_SHARE_CLAIM:<CODE>:<address>:<nonce>" with the wallet key. */
+    public static void claimShare(Context c, String code, String address, long nonce, Cb cb) {
+        try {
+            String seedB64 = WalletManager.loadPrivateKey(c, address);
+            String pub = WalletManager.getPublicKey(c, address);
+            if (seedB64 == null || pub == null) { cb.fail("This wallet's key is not on this phone."); return; }
+            String msg = "STABLE_SHARE_CLAIM:" + code + ":" + address + ":" + nonce;
+            byte[] sig = Ed25519.sign(Base64.decode(seedB64, Base64.NO_WRAP), msg.getBytes(StandardCharsets.UTF_8));
+            JSONObject body = new JSONObject().put("address", address).put("nonce", nonce).put("publicKey", pub)
+                    .put("signature", Base64.encodeToString(sig, Base64.NO_WRAP));
+            HarvanaNodeClient.nodePost(Stable.base(code) + "/staker-share/claim", body.toString(), wrap(cb));
+        } catch (Exception e) { cb.fail("Signing failed: " + e.getMessage()); }
+    }
+
     /** The member's deposit address on a chain (see DepositAddress). */
     public static String depositAddress(String factory, String initCodeHash, String harvanaAddress) {
         return DepositAddress.of(factory, initCodeHash, harvanaAddress);

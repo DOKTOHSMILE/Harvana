@@ -586,6 +586,8 @@ public class AssetFragmentActivity extends Fragment {
 		String symbol = com.harvana.app.wallet.FxRates.symbol(getContext());
 		shownSymbol = symbol;
 		tv_fiat_value.setText(com.harvana.app.wallet.FxRates.format(symbol, harvFiat + chainFiat));
+		// Home shows this same total (WalletTotal), so the two screens always agree.
+		com.harvana.app.wallet.WalletTotal.publish(getContext(), wallet_address, symbol, harvFiat + chainFiat);
 		if (textview10 != null) {
 			String code = com.harvana.app.wallet.FiatValueHelper.symbolToCurrencyCode(symbol);
 			textview10.setText("TOTAL BALANCE · " + code);

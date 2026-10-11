@@ -2,6 +2,21 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 11 Oct 2026: Home in order of priority, one fiat total
+
+What the app does:
+
+- **The wallet card on Home shows one number:** the wallet's total in your currency across every coin (HARV, Pi, Bitcoin, Ethereum, Solana and the rest). It is the same figure as the Assets tab, and the line under it reads "Total balance · EUR · all coins". The HARV amount and the HARV coin logo are gone from the card, since HARV is now one coin among several; its own amount stays on the Assets tab. The eye still hides it, and Send, Receive and P2P stay under it.
+- **Home is ordered by what you come for:**
+  1. your money (the wallet card);
+  2. what needs doing now (Upcoming Payments);
+  3. how your savings stand (total saved, active groups, trust score, open loans);
+  4. groups to join (Trending Public Groups);
+  5. Learn Hub.
+- **The total appears at once**, from the last one worked out, and updates as the Assets tab refreshes the prices and balances in the background.
+
+What you do: install the build.
+
 ## 11 Oct 2026: advert carousel on the Learn Hub
 
 What the app does:

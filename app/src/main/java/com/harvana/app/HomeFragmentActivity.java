@@ -620,61 +620,45 @@ public class HomeFragmentActivity extends Fragment {
 		_loadTrendingGroups();
 	}
 	
-	private void _loadWalletBalance() {
+	/**
+	 * The wallet card shows one number: everything the wallet holds, in the chosen currency, across every coin. It is
+	 * the total the Assets tab adds up (WalletTotal), not the HARV amount, since HARV is now one coin among several.
+	 */
+	private final com.harvana.app.wallet.WalletTotal.Listener totalListener = (address, symbol, fiat) -> {
+		if (!isAdded() || getContext() == null) return;
 		String addr = WalletManager.getActiveWalletAddress(getContext());
-		SharedPreferences currencySp = getContext().getSharedPreferences("currencysp", Context.MODE_PRIVATE);
-		final String currencySymbol = currencySp.getString("currency", "₦");
-		final String currencyCode = com.harvana.app.wallet.FiatValueHelper.symbolToCurrencyCode(currencySymbol);
-		
+		if (addr != null && addr.equals(address)) _showTotal(symbol, fiat);
+	};
+
+	private void _showTotal(String symbol, double fiat) {
+		if (tv_harv_balance != null) {
+			tv_harv_balance.setText(Double.isNaN(fiat) ? symbol + " —" : com.harvana.app.wallet.FxRates.format(symbol, fiat));
+		}
+		if (tv_local_currency_eqv != null) {
+			String code = com.harvana.app.wallet.FiatValueHelper.symbolToCurrencyCode(symbol);
+			tv_local_currency_eqv.setText("Total balance · " + code + " · all coins");
+		}
+	}
+
+	private void _loadWalletBalance() {
+		if (getContext() == null) return;
+		String addr = WalletManager.getActiveWalletAddress(getContext());
+		String symbol = com.harvana.app.wallet.FxRates.symbol(getContext());
 		if (addr == null || addr.isEmpty()) {
-			if (tv_harv_balance != null) tv_harv_balance.setText("0.00");
-			if (tv_local_currency_eqv != null) tv_local_currency_eqv.setText("≈ " + currencySymbol + "0.00");
+			_showTotal(symbol, 0);
 			return;
 		}
-		
-		Map<String, Object> cachedBalance = com.harvana.app.offline.OfflineCacheManager.load(
-		getContext(), "wallet_balance_" + addr);
-		if (cachedBalance != null && cachedBalance.get("show") instanceof Number) {
-			double cachedShow = ((Number) cachedBalance.get("show")).doubleValue();
-			if (tv_harv_balance != null) tv_harv_balance.setText(_fmtAmount(cachedShow));
-			
-			if (tv_local_currency_eqv != null) {
-				com.harvana.app.wallet.FiatValueHelper.convertHarvToFiat(cachedShow, currencyCode, (fiatValue, rateAvailable) -> {
-					if (!isAdded() || getActivity() == null) return;
-					getActivity().runOnUiThread(() -> tv_local_currency_eqv.setText(rateAvailable
-					? String.format(Locale.US, "≈ %s%,.2f", currencySymbol, fiatValue)
-					: "≈ " + currencySymbol + "0.00"));
-				});
-			}
-		}
-		
-		WalletNodeBalanceHelper.load(addr, (bal, avail, pin, pout, pending, err) -> {
-			if (!isAdded() || getActivity() == null) return;
-			if (err != null && com.harvana.app.offline.NetworkStatus.isConnectivityError(err)
-			&& cachedBalance != null) {
-				return;
-			}
-			double show = avail >= 0 ? avail : bal;
-			if (err == null) {
-				Map<String, Object> toCache = new HashMap<>();
-				toCache.put("show", show);
-				com.harvana.app.offline.OfflineCacheManager.save(getContext(), "wallet_balance_" + addr, toCache);
-			}
-			getActivity().runOnUiThread(() -> {
-				if (tv_harv_balance != null)
-				tv_harv_balance.setText(_fmtAmount(show));
-				if (tv_local_currency_eqv != null) {
-					com.harvana.app.wallet.FiatValueHelper.convertHarvToFiat(show, currencyCode, (fiatValue, rateAvailable) -> {
-						if (!isAdded() || getActivity() == null) return;
-						getActivity().runOnUiThread(() -> tv_local_currency_eqv.setText(rateAvailable
-						? String.format(Locale.US, "≈ %s%,.2f", currencySymbol, fiatValue)
-						: "≈ " + currencySymbol + "0.00"));
-					});
-				}
-			});
-		});
+		// The last total at once; the Assets tab (loaded in the background with Home) publishes a fresh one.
+		_showTotal(symbol, com.harvana.app.wallet.WalletTotal.last(getContext(), addr, symbol));
+		com.harvana.app.wallet.WalletTotal.listen(totalListener);
 	}
-	
+
+	@Override
+	public void onDestroyView() {
+		com.harvana.app.wallet.WalletTotal.unlisten(totalListener);
+		super.onDestroyView();
+	}
+
 	private void _loadUpcomingPayments() {
 		if (linear_upcoming_payments == null || getContext() == null) return;
 		
@@ -1492,11 +1476,34 @@ public class HomeFragmentActivity extends Fragment {
 			box.addView(top);
 			box.addView(row);
 			card.addView(box, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			// A multi-coin wallet: no single coin's logo on the total.
+			View coin = root.findViewById(R.id.cardview27);
+			if (coin != null) coin.setVisibility(View.GONE);
+			_orderByPriority(root);
 		} catch (Exception e) {
 			android.util.Log.w("HomeFragment", "Quick actions not added", e);
 		}
 	}
 	
+	/**
+	 * Home in order of what people come for: money (the wallet card), what needs doing now (upcoming payments),
+	 * how their savings stand (the numbers), then finding groups, then Learn Hub.
+	 */
+	private void _orderByPriority(View root) {
+		int[] order = {R.id.cardview4, R.id.cardview1, R.id.layout_metric_grid, R.id.cardview3, R.id.cardview2};
+		View first = root.findViewById(order[0]);
+		if (first == null || !(first.getParent() instanceof ViewGroup)) return;
+		ViewGroup parent = (ViewGroup) first.getParent();
+		int at = parent.indexOfChild(first);
+		for (int id : order) {
+			View v = root.findViewById(id);
+			if (v == null || v.getParent() != parent) continue;
+			parent.removeView(v);
+			parent.addView(v, Math.min(at, parent.getChildCount()));
+			at = parent.indexOfChild(v) + 1;
+		}
+	}
+
 	private android.widget.LinearLayout.LayoutParams _quickActionParams(float d, boolean leftGap) {
 		android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
 		if (leftGap) lp.leftMargin = (int) (10 * d);

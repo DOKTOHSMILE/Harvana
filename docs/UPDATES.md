@@ -2,6 +2,27 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 11 Oct 2026: P2P sell orders, Merchant Manager and Express tidied
+
+What the app does:
+
+- **Selling into a buy offer:**
+  - The price now shows on older offers too. When an offer has no card in Firestore, the price signed into the offer on the network is used, the same fix the buy side got on 7 Oct.
+  - The buyer who posted the offer is told at once, in the trade chat: "New order: I am selling you … HARV. It is held in escrow for you…".
+- **Express:**
+  - The trader whose offer was matched gets the same chat notice.
+  - The confirm sheet shows their address shortened instead of the full raw address.
+- **Merchant Manager:**
+  - Each offer's Orders button says how many orders wait on you ("Orders (3) · 1 need you"), in amber.
+  - The order list is in plain words, for example "buyer says paid: confirm and release". Orders that need you are marked ●.
+  - Offer details read "You are selling HARV" and the state (Active, Matched, Closed) instead of "Side: SELL / Status: OPEN".
+  - The empty "Paused" tab is gone; the network has no pause.
+  - Buy offers are tagged green instead of the error red.
+
+What you do: install the build.
+
+**Build note:** every GitHub "Build Android APK" run since at least 7 Oct has stopped after 3 seconds, before any step ran, with no log. GitHub is refusing to start the build machine, which happens when the account's Actions are blocked (a billing problem or a spending limit). Check github.com → Settings → Billing and plans → Actions. Until then, GitHub builds no APK and nothing is compiled there; only CodeAssist on the phone builds the app.
+
 ## 11 Oct 2026: banks for international users
 
 What the app does:

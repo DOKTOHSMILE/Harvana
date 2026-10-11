@@ -169,7 +169,8 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 		recycler_merchant_trades.setLayoutManager(new LinearLayoutManager(this));
 		recycler_merchant_trades.setAdapter(adapter);
 		
-		tv_manager_info.setText("Pausing a listing isn't supported yet — cancel it and post a new one if you need to stop taking new orders temporarily. Cancelling only affects the remaining, unfilled amount; any order already claimed against this listing continues normally.");
+		tv_manager_info.setText("To stop taking new orders, cancel the offer and post a new one later. Cancelling only returns what nobody has claimed; orders already open carry on.");
+		filter_manager_paused.setVisibility(View.GONE);   // the node has no pause; the tab only ever showed nothing
 		
 		btn_create_offer.setOnClickListener(v -> _showCreateOfferChoice());
 		
@@ -432,7 +433,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			}
 			
 			tv_offer_type.setText(isSell ? "SELL" : "BUY");
-			card_offer_type.setCardBackgroundColor(getResources().getColor(isSell ? R.color.colorAccent : R.color.colorError));
+			card_offer_type.setCardBackgroundColor(getResources().getColor(isSell ? R.color.colorAccent : R.color.colorSuccess));
 			String stateLabel = !isOpen ? "Closed" : (hasOrders ? "Matched" : "Active");
 			tv_offer_status.setText(stateLabel);
 			tv_offer_id.setText(_shortId(listingId));
@@ -450,14 +451,18 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			
 			tv_offer_details.setOnClickListener(v -> ThemedDialogs.show(ThemedDialogs.alert(P2pMerchantManagerActivity.this)
 			.setTitle(_shortId(listingId))
-			.setMessage("Side: " + side + "\nStatus: " + status + "\nTotal: " + BalanceFormatter.smart(totalHarv)
+			.setMessage((isSell ? "You are selling " : "You are buying ") + com.harvana.app.CoinInfo.ticker()
+			+ "\nState: " + stateLabel + "\nTotal: " + BalanceFormatter.smart(totalHarv)
 			+ "\nRemaining: " + BalanceFormatter.smart(remainingHarv)
 			+ "\nListed: " + _formatDate(createdAt)
 			+ (expiresAt > 0 ? "\nExpires: " + _formatDate(expiresAt) : "")
 			+ "\nOrders against this listing: " + finalOrderCount)
 			.setPositiveButton("Close", null)));
 			
-			tv_offer_orders_btn.setText("Orders (" + myOrderCount + ")");
+			int needsMe = 0;
+			for (JSONObject order : allOrders) if (listingId.equals(order.optString("listingId", "")) && _needsMe(order)) needsMe++;
+			tv_offer_orders_btn.setText("Orders (" + myOrderCount + ")" + (needsMe > 0 ? " · " + needsMe + " need you" : ""));
+			tv_offer_orders_btn.setTextColor(getResources().getColor(needsMe > 0 ? R.color.colorWarning : R.color.colorAccent));
 			tv_offer_orders_btn.setOnClickListener(v -> _showOrdersForListing(listingId, side));
 			
 			tv_offer_cancel.setVisibility(isOpen ? View.VISIBLE : View.GONE);
@@ -524,6 +529,26 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 		}
 	}
 	
+	/** True when the next step of this order is mine: the buyer pays, the seller confirms and releases. */
+	private boolean _needsMe(JSONObject order) {
+		String st = order.optString("status", "");
+		boolean buyer = myAddress != null && myAddress.equals(order.optString("buyerAddress", ""));
+		return (buyer && "AWAITING_PAYMENT".equals(st)) || (!buyer && "PAYMENT_SUBMITTED".equals(st));
+	}
+
+	/** The order's state in plain words, from my side of it. */
+	private String _orderState(JSONObject order) {
+		boolean buyer = myAddress != null && myAddress.equals(order.optString("buyerAddress", ""));
+		switch (order.optString("status", "")) {
+			case "AWAITING_PAYMENT": return buyer ? "pay the seller" : "waiting for the buyer to pay";
+			case "PAYMENT_SUBMITTED": return buyer ? "waiting for the seller to release" : "buyer says paid: confirm and release";
+			case "COMPLETED": return "completed";
+			case "CANCELLED": return "cancelled";
+			case "DISPUTED": return "in dispute";
+			default: return order.optString("status", "").toLowerCase(Locale.US).replace('_', ' ');
+		}
+	}
+
 	private void _showOrdersForListing(String listingId, String side) {
 		List<JSONObject> matched = new ArrayList<>();
 		for (JSONObject order : allOrders) {
@@ -536,7 +561,8 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 		String[] labels = new String[matched.size()];
 		for (int i = 0; i < matched.size(); i++) {
 			JSONObject o = matched.get(i);
-			labels[i] = _shortId(P2pIds.orderId(o)) + " — " + o.optString("status", "");
+			labels[i] = (_needsMe(o) ? "● " : "") + BalanceFormatter.smart(HarvanaNodeClient.toHarvDisplay(
+					o.optLong("amount", o.optLong("netAmountToBuyer", 0)))) + " · " + _orderState(o);
 		}
 		ThemedDialogs.show(ThemedDialogs.alert(this).setTitle("Orders on this listing").setItems(labels, (dialog, which) -> {
 			JSONObject order = matched.get(which);
@@ -551,7 +577,7 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 	private void _confirmCancelListing(String listingId, String side, double remainingHarv) {
 		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
 		rows.add(new String[]{"For", "Stops new orders on what is still listed. Orders already opened are not touched. Locked HARV that nobody has claimed comes back to your wallet."});
-		rows.add(new String[]{"Side", side == null || side.isEmpty() ? "—" : side});
+		rows.add(new String[]{"Offer", "SELL".equals(side) ? "Selling " + com.harvana.app.CoinInfo.ticker() : "Buying " + com.harvana.app.CoinInfo.ticker()});
 		rows.add(new String[]{"Still listed", com.harvana.app.wallet.BalanceFormatter.smart(remainingHarv)});
 		rows.add(new String[]{"Returns to", "Your wallet"});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,

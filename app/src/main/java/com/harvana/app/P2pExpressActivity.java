@@ -703,7 +703,8 @@ public class P2pExpressActivity extends AppCompatActivity {
 		String ccy = P2pCurrencyFilterState.getCurrency();
 		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
 		rows.add(new String[]{"You", buyMode ? "Buy HARV" : "Sell HARV"});
-		rows.add(new String[]{"Counterparty", matchedPosterAddress == null ? "Matched trader" : matchedPosterAddress});
+		rows.add(new String[]{"Counterparty", matchedPosterAddress == null || matchedPosterAddress.length() < 14 ? "Matched trader"
+				: matchedPosterAddress.substring(0, 8) + "…" + matchedPosterAddress.substring(matchedPosterAddress.length() - 4)});
 		rows.add(new String[]{"Price", "1 HARV ≈ " + P2pMoney.fiat(matchedPrice, ccy)});
 		rows.add(new String[]{"Fiat", P2pMoney.fiat(harvAmount * matchedPrice, ccy)});
 		rows.add(new String[]{"Network fee", "Set by the node when this trade opens"});
@@ -720,6 +721,12 @@ public class P2pExpressActivity extends AppCompatActivity {
 					if (newOrderId.isEmpty()) {
 						runOnUiThread(() -> Toast.makeText(P2pExpressActivity.this, "Matched, but couldn't open the trade. Check My Trades.", Toast.LENGTH_LONG).show());
 						return;
+					}
+					// Tell the trader who posted the offer, through the trade chat (their chat check notifies them).
+					if (matchedSellerUid != null && !matchedSellerUid.isEmpty()) {
+						com.harvana.app.p2p.P2pChatStore.notice(newOrderId, matchedSellerUid, buyMode
+								? "New express order: I am buying " + BalanceFormatter.smart(harvAmount) + " " + com.harvana.app.CoinInfo.ticker() + ". I will pay within the payment window."
+								: "New express order: I am selling you " + BalanceFormatter.smart(harvAmount) + " " + com.harvana.app.CoinInfo.ticker() + ". It is held in escrow for you. Pay into the account on the trade screen.");
 					}
 					if (buyMode) {
 						if (myUid != null) {

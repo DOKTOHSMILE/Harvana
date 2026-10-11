@@ -359,8 +359,12 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 				}
 				remainingHarv = HarvanaNodeClient.toHarvDisplay(listing.optLong("remainingAmount", 0));
 				minOrderHarv = HarvanaNodeClient.toHarvDisplay(listing.optLong("minOrderAmount", 0));
+				// The price the node signed into the listing (kobo per HARV); the Firestore card may add or confirm it.
+				long nodeKobo = listing.optLong("unitPricePerHarvRaw", 0L);
+				if (nodeKobo > 0) unitPrice = nodeKobo / 100.0;
 				
 				runOnUiThread(() -> {
+					if (unitPrice >= 0) et_sell_price.setText(String.format(Locale.US, "%,.2f", unitPrice));
 					tv_sell_condition_limits.setText(String.format(Locale.US,
 					("Min %.4f · Max %.4f " + com.harvana.app.CoinInfo.ticker()), minOrderHarv, remainingHarv));
 					tv_sell_condition_window.setText("You'll have 45 minutes to confirm receipt once the buyer marks payment sent.");
@@ -381,7 +385,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 			@Override
 			public void onSuccess(Map<String, Object> data) {
 				Object priceObj = data.get("unitPrice");
-				unitPrice = priceObj instanceof Number ? ((Number) priceObj).doubleValue() : -1;
+				if (priceObj instanceof Number) unitPrice = ((Number) priceObj).doubleValue();   // else keep the node's price
 				Object currencyObj = data.get("currency");
 				if (currencyObj != null && !String.valueOf(currencyObj).trim().isEmpty()) {
 					listingCurrency = String.valueOf(currencyObj).trim();
@@ -416,7 +420,8 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 			}
 			@Override
 			public void onError(String error) {
-				runOnUiThread(() -> et_sell_price.setText(""));
+				// No offer card in Firestore (an older offer): keep the node's price if it had one.
+				runOnUiThread(() -> et_sell_price.setText(unitPrice >= 0 ? String.format(Locale.US, "%,.2f", unitPrice) : ""));
 			}
 		});
 	}
@@ -576,6 +581,10 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 				@Override
 				public void onSuccess(JSONObject result) {
 					String newOrderId = P2pIds.orderId(result);
+					// Tell the buyer who posted the offer, through the trade chat (their phone's chat check notifies them).
+					com.harvana.app.p2p.P2pChatStore.notice(newOrderId, buyerUid, "New order: I am selling you "
+							+ BalanceFormatter.smart(amountHarv) + " " + com.harvana.app.CoinInfo.ticker()
+							+ ". It is held in escrow for you. Pay into the account on the trade screen, then tap \"I have paid\".");
 					String myUid = FirebaseAuth.getInstance().getCurrentUser() != null
 					? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
 					

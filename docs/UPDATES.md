@@ -2,6 +2,41 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 11 Oct 2026: advert carousel on the Learn Hub
+
+What the app does:
+
+- **A strip of adverts sits at the top of the Learn Hub**, above the categories. Each advert:
+  - is a rounded card with a picture, a "Sponsored" tag, a title, a short line and a button;
+  - changes every 5 seconds and can be swiped by hand;
+  - holds still while touched;
+  - shows dots for its position.
+- **When no advert is running, the strip is hidden.**
+- **Tapping an advert opens its link:** an https page, or a screen in the app.
+- **Each advert counts its views** (once per visit to the page) **and its taps**, so you can see how it performs.
+
+**What you do:**
+
+1. **Publish the rules:** copy `docs/firestore.rules` into Firebase console → Firestore → Rules → Publish. It adds the `LEARN_ADS` block. Only you, in the console, can add or change adverts; the app can only read them and add one view or tap.
+2. **Add an advert:** Firebase console → Firestore → collection `LEARN_ADS` → Add document (automatic ID), with these fields:
+
+| Field | Type | What it is |
+|---|---|---|
+| `active` | boolean | `true` to run it, `false` to stop it (required) |
+| `title` | string | The headline, e.g. "Save weekly with Ajo groups" |
+| `subtitle` | string | One short line under it (optional) |
+| `imageUrl` | string | An `https://` picture, about 2:1 wide (optional; without one the card uses `color`) |
+| `color` | string | Card colour when there is no picture, e.g. `#0B5F57` (optional) |
+| `link` | string | `https://…` page, or `app:p2p`, `app:staking`, `app:my-trades`, `app:payment-methods`, `app:notifications` (optional; no link hides the button) |
+| `cta` | string | Button text, e.g. "Start saving" (optional; defaults to "Learn more") |
+| `sponsor` | string | Advertiser's name, shown after "Sponsored" (optional) |
+| `order` | number | Lower numbers come first (optional) |
+| `startsAt` / `endsAt` | number | Start and end time in milliseconds since 1970 (optional; leave out to run until switched off) |
+
+`views` and `clicks` fill in by themselves. Up to 10 running adverts are shown. Only `https` pictures and links are accepted; anything else is ignored.
+
+3. Install the build.
+
 ## 11 Oct 2026: P2P sell orders, Merchant Manager and Express tidied
 
 What the app does:

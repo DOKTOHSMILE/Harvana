@@ -168,7 +168,14 @@ public class LearnFragmentActivity extends Fragment {
 		};
 	}
 	
+	private com.harvana.app.learn.AdCarousel ads;
+
 	private void initializeLogic() {
+		// Adverts sit above the category chips; hidden while none is running.
+		if (getActivity() != null && linear1 != null) {
+			View chips = linear1.findViewById(R.id.recyclerview1);
+			ads = new com.harvana.app.learn.AdCarousel(getActivity(), linear1, chips == null ? 2 : linear1.indexOfChild(chips));
+		}
 		_initAdapters();
 		_loadContent();
 	}
@@ -275,8 +282,15 @@ public class LearnFragmentActivity extends Fragment {
 	}
 	
 	@Override
+	public void onResume() {
+		super.onResume();
+		if (ads != null) { ads.load(); ads.start(); }
+	}
+
+	@Override
 	public void onPause() {
 		super.onPause();
+		if (ads != null) ads.stop();
 		if (getContext() != null) com.harvana.app.learn.LearnInterest.get(getContext()).flush();
 	}
 	

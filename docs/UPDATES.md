@@ -6,7 +6,7 @@
 
 What the app does:
 - **More stable coins besides hUSD: hEUR, hGBP, hNGN, hGHS, hKES and hZAR.** Each tracks one currency and has its own line on the Assets tab and its own screen (Deposit, Send, Withdraw). Each one appears only when the network switches it on, and none is on yet.
-- **Each line shows its value in your chosen currency** and counts in the wallet total. For example, 10,000 hNGN shows as about $6.50 if you display dollars.
+- **Each line shows its value in your chosen currency** and counts in the wallet total. For example, hNGN is shown at the day's naira rate if you display dollars.
 - **Each coin has its own icon** (€, £, ₦, GH₵, KSh, R) and its own deposit address, fees and minimum withdrawal. The screen reads them from the network.
 - **Activity shows these coins in their own units.** For example: "+ 5,000 hNGN", "Deposited hEUR · EURC from Base".
 

@@ -21,7 +21,7 @@ public final class BankLogo {
     /** By whatever name was saved ("GTBank", "Guaranty Trust Bank"…). Unknown names get initials. */
     public static void into(ImageView v, String bankName) {
         if (v == null) return;
-        BankDirectory.Bank b = BankDirectory.match(v.getContext(), bankName);
+        BankDirectory.Bank b = BankDirectory.matchAnywhere(v.getContext(), bankName);
         if (b == null) {
             BankDirectory.Bank unknown = new BankDirectory.Bank();
             unknown.name = bankName == null || bankName.trim().isEmpty() ? "?" : bankName.trim();

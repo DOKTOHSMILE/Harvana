@@ -27,6 +27,12 @@ public class PaymentMethod {
 	public String accountIdentifier;  // account number, or phone number
 	public String accountName;        // account holder's name
 	public boolean isDefault;
+	/** Where the account is (ISO code, "OTHER" for elsewhere); "" on methods saved before countries existed (Nigeria). */
+	public String country = "";
+	/** The country's extra fields as typed (sortCode, routing, iban, bic, ifsc, bsb…). See banks/AccountRules. */
+	public java.util.Map<String, String> details = new java.util.LinkedHashMap<>();
+	/** The account number or IBAN as typed, before the details are folded into accountIdentifier. */
+	public String accountMain = "";
 
 	public PaymentMethod() {}
 
@@ -50,6 +56,11 @@ public class PaymentMethod {
 		o.put("accountIdentifier", accountIdentifier);
 		o.put("accountName", accountName);
 		o.put("isDefault", isDefault);
+		o.put("country", country == null ? "" : country);
+		o.put("accountMain", accountMain == null ? "" : accountMain);
+		JSONObject d = new JSONObject();
+		if (details != null) for (java.util.Map.Entry<String, String> e : details.entrySet()) d.put(e.getKey(), e.getValue());
+		o.put("details", d);
 		return o;
 	}
 
@@ -62,6 +73,13 @@ public class PaymentMethod {
 		pm.accountIdentifier = o.getString("accountIdentifier");
 		pm.accountName = o.getString("accountName");
 		pm.isDefault = o.optBoolean("isDefault", false);
+		pm.country = o.optString("country", "");
+		pm.accountMain = o.optString("accountMain", "");
+		JSONObject d = o.optJSONObject("details");
+		if (d != null) {
+			java.util.Iterator<String> keys = d.keys();
+			while (keys.hasNext()) { String k = keys.next(); pm.details.put(k, d.optString(k)); }
+		}
 		return pm;
 	}
 

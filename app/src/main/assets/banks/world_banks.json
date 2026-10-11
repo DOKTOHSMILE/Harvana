@@ -1,0 +1,3806 @@
+{
+"note": "Major banks and payment apps per country with their website, used for the logo. Nigeria has its full list in ng_banks.json.",
+"countries": [
+{
+"iso": "NG",
+"name": "Nigeria",
+"currency": "NGN",
+"scheme": "NUBAN",
+"banksFile": "banks/ng_banks.json",
+"banks": [
+{
+"name": "Grey",
+"short": "Grey",
+"domain": "grey.co",
+"kind": "fintech",
+"logoAsset": "banks/world/grey_co.png"
+},
+{
+"name": "Chipper Cash",
+"short": "Chipper",
+"domain": "chippercash.com",
+"kind": "fintech",
+"logoAsset": "banks/world/chippercash_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "GH",
+"name": "Ghana",
+"currency": "GHS",
+"scheme": "ACCOUNT_BRANCH",
+"banks": [
+{
+"name": "GCB Bank",
+"short": "GCB",
+"domain": "gcbbank.com.gh",
+"kind": "bank",
+"logoAsset": "banks/world/gcbbank_com_gh.png"
+},
+{
+"name": "Ecobank Ghana",
+"short": "Ecobank",
+"domain": "ecobank.com",
+"kind": "bank",
+"logoAsset": "banks/world/ecobank_com.png"
+},
+{
+"name": "Stanbic Bank Ghana",
+"short": "Stanbic",
+"domain": "stanbicbank.com.gh",
+"kind": "bank",
+"logoAsset": "banks/world/stanbicbank_com_gh.png"
+},
+{
+"name": "Absa Bank Ghana",
+"short": "Absa",
+"domain": "absa.com.gh",
+"kind": "bank",
+"logoAsset": "banks/world/absa_com_gh.png"
+},
+{
+"name": "CalBank",
+"short": "CalBank",
+"domain": "calbank.net",
+"kind": "bank",
+"logoAsset": "banks/world/calbank_net.png"
+},
+{
+"name": "Zenith Bank Ghana",
+"short": "Zenith",
+"domain": "zenithbank.com.gh",
+"kind": "bank",
+"logoAsset": "banks/world/zenithbank_com_gh.png"
+},
+{
+"name": "Fidelity Bank Ghana",
+"short": "Fidelity",
+"domain": "myfidelitybank.net",
+"kind": "bank",
+"logoAsset": "banks/world/myfidelitybank_net.png"
+},
+{
+"name": "MTN Mobile Money",
+"short": "MTN MoMo",
+"domain": "mtn.com.gh",
+"kind": "mobile_money",
+"logoAsset": "banks/world/mtn_com_gh.png"
+},
+{
+"name": "Telecel Cash",
+"short": "Telecel Cash",
+"domain": "telecel.com.gh",
+"kind": "mobile_money",
+"logoAsset": "banks/world/telecel_com_gh.png"
+},
+{
+"name": "Grey",
+"short": "Grey",
+"domain": "grey.co",
+"kind": "fintech",
+"logoAsset": "banks/world/grey_co.png"
+},
+{
+"name": "Chipper Cash",
+"short": "Chipper",
+"domain": "chippercash.com",
+"kind": "fintech",
+"logoAsset": "banks/world/chippercash_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "KE",
+"name": "Kenya",
+"currency": "KES",
+"scheme": "ACCOUNT_BRANCH",
+"banks": [
+{
+"name": "KCB Bank",
+"short": "KCB",
+"domain": "kcbgroup.com",
+"kind": "bank"
+},
+{
+"name": "Equity Bank",
+"short": "Equity",
+"domain": "equitygroupholdings.com",
+"kind": "bank"
+},
+{
+"name": "Co-operative Bank",
+"short": "Co-op Bank",
+"domain": "co-opbank.co.ke",
+"kind": "bank",
+"logoAsset": "banks/world/co_opbank_co_ke.png"
+},
+{
+"name": "NCBA Bank",
+"short": "NCBA",
+"domain": "ncbagroup.com",
+"kind": "bank",
+"logoAsset": "banks/world/ncbagroup_com.png"
+},
+{
+"name": "Absa Bank Kenya",
+"short": "Absa",
+"domain": "absabank.co.ke",
+"kind": "bank",
+"logoAsset": "banks/world/absabank_co_ke.png"
+},
+{
+"name": "Stanbic Bank Kenya",
+"short": "Stanbic",
+"domain": "stanbicbank.co.ke",
+"kind": "bank",
+"logoAsset": "banks/world/stanbicbank_co_ke.png"
+},
+{
+"name": "Standard Chartered Kenya",
+"short": "Standard Chartered",
+"domain": "sc.com",
+"kind": "bank",
+"logoAsset": "banks/world/sc_com.png"
+},
+{
+"name": "M-Pesa",
+"short": "M-Pesa",
+"domain": "safaricom.co.ke",
+"kind": "mobile_money",
+"logoAsset": "banks/world/safaricom_co_ke.png"
+},
+{
+"name": "Airtel Money",
+"short": "Airtel Money",
+"domain": "airtel.co.ke",
+"kind": "mobile_money",
+"logoAsset": "banks/world/airtel_co_ke.png"
+},
+{
+"name": "Grey",
+"short": "Grey",
+"domain": "grey.co",
+"kind": "fintech",
+"logoAsset": "banks/world/grey_co.png"
+},
+{
+"name": "Chipper Cash",
+"short": "Chipper",
+"domain": "chippercash.com",
+"kind": "fintech",
+"logoAsset": "banks/world/chippercash_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "ZA",
+"name": "South Africa",
+"currency": "ZAR",
+"scheme": "ACCOUNT_BRANCH",
+"banks": [
+{
+"name": "Standard Bank",
+"short": "Standard Bank",
+"domain": "standardbank.co.za",
+"kind": "bank",
+"logoAsset": "banks/world/standardbank_co_za.png"
+},
+{
+"name": "First National Bank",
+"short": "FNB",
+"domain": "fnb.co.za",
+"kind": "bank",
+"logoAsset": "banks/world/fnb_co_za.png"
+},
+{
+"name": "Absa",
+"short": "Absa",
+"domain": "absa.co.za",
+"kind": "bank",
+"logoAsset": "banks/world/absa_co_za.png"
+},
+{
+"name": "Nedbank",
+"short": "Nedbank",
+"domain": "nedbank.co.za",
+"kind": "bank",
+"logoAsset": "banks/world/nedbank_co_za.png"
+},
+{
+"name": "Capitec Bank",
+"short": "Capitec",
+"domain": "capitecbank.co.za",
+"kind": "bank",
+"logoAsset": "banks/world/capitecbank_co_za.png"
+},
+{
+"name": "Discovery Bank",
+"short": "Discovery",
+"domain": "discovery.co.za",
+"kind": "bank",
+"logoAsset": "banks/world/discovery_co_za.png"
+},
+{
+"name": "TymeBank",
+"short": "TymeBank",
+"domain": "tymebank.co.za",
+"kind": "fintech",
+"logoAsset": "banks/world/tymebank_co_za.png"
+},
+{
+"name": "African Bank",
+"short": "African Bank",
+"domain": "africanbank.co.za",
+"kind": "bank",
+"logoAsset": "banks/world/africanbank_co_za.png"
+},
+{
+"name": "Grey",
+"short": "Grey",
+"domain": "grey.co",
+"kind": "fintech",
+"logoAsset": "banks/world/grey_co.png"
+},
+{
+"name": "Chipper Cash",
+"short": "Chipper",
+"domain": "chippercash.com",
+"kind": "fintech",
+"logoAsset": "banks/world/chippercash_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "UG",
+"name": "Uganda",
+"currency": "UGX",
+"scheme": "ACCOUNT_BRANCH",
+"banks": [
+{
+"name": "Stanbic Bank Uganda",
+"short": "Stanbic",
+"domain": "stanbicbank.co.ug",
+"kind": "bank",
+"logoAsset": "banks/world/stanbicbank_co_ug.png"
+},
+{
+"name": "Centenary Bank",
+"short": "Centenary",
+"domain": "centenarybank.co.ug",
+"kind": "bank"
+},
+{
+"name": "dfcu Bank",
+"short": "dfcu",
+"domain": "dfcugroup.com",
+"kind": "bank",
+"logoAsset": "banks/world/dfcugroup_com.png"
+},
+{
+"name": "MTN Mobile Money",
+"short": "MTN MoMo",
+"domain": "mtn.co.ug",
+"kind": "mobile_money",
+"logoAsset": "banks/world/mtn_co_ug.png"
+},
+{
+"name": "Airtel Money",
+"short": "Airtel Money",
+"domain": "airtel.co.ug",
+"kind": "mobile_money",
+"logoAsset": "banks/world/airtel_co_ug.png"
+},
+{
+"name": "Grey",
+"short": "Grey",
+"domain": "grey.co",
+"kind": "fintech",
+"logoAsset": "banks/world/grey_co.png"
+},
+{
+"name": "Chipper Cash",
+"short": "Chipper",
+"domain": "chippercash.com",
+"kind": "fintech",
+"logoAsset": "banks/world/chippercash_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "TZ",
+"name": "Tanzania",
+"currency": "TZS",
+"scheme": "ACCOUNT_BRANCH",
+"banks": [
+{
+"name": "CRDB Bank",
+"short": "CRDB",
+"domain": "crdbbank.co.tz",
+"kind": "bank",
+"logoAsset": "banks/world/crdbbank_co_tz.png"
+},
+{
+"name": "NMB Bank",
+"short": "NMB",
+"domain": "nmbbank.co.tz",
+"kind": "bank",
+"logoAsset": "banks/world/nmbbank_co_tz.png"
+},
+{
+"name": "M-Pesa",
+"short": "M-Pesa",
+"domain": "vodacom.co.tz",
+"kind": "mobile_money",
+"logoAsset": "banks/world/vodacom_co_tz.png"
+},
+{
+"name": "Grey",
+"short": "Grey",
+"domain": "grey.co",
+"kind": "fintech",
+"logoAsset": "banks/world/grey_co.png"
+},
+{
+"name": "Chipper Cash",
+"short": "Chipper",
+"domain": "chippercash.com",
+"kind": "fintech",
+"logoAsset": "banks/world/chippercash_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "RW",
+"name": "Rwanda",
+"currency": "RWF",
+"scheme": "ACCOUNT_BRANCH",
+"banks": [
+{
+"name": "Bank of Kigali",
+"short": "Bank of Kigali",
+"domain": "bk.rw",
+"kind": "bank",
+"logoAsset": "banks/world/bk_rw.png"
+},
+{
+"name": "MTN Mobile Money",
+"short": "MTN MoMo",
+"domain": "mtn.co.rw",
+"kind": "mobile_money",
+"logoAsset": "banks/world/mtn_co_rw.png"
+},
+{
+"name": "Grey",
+"short": "Grey",
+"domain": "grey.co",
+"kind": "fintech",
+"logoAsset": "banks/world/grey_co.png"
+},
+{
+"name": "Chipper Cash",
+"short": "Chipper",
+"domain": "chippercash.com",
+"kind": "fintech",
+"logoAsset": "banks/world/chippercash_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "CM",
+"name": "Cameroon",
+"currency": "XAF",
+"scheme": "ACCOUNT_BRANCH",
+"banks": [
+{
+"name": "Ecobank",
+"short": "Ecobank",
+"domain": "ecobank.com",
+"kind": "bank",
+"logoAsset": "banks/world/ecobank_com.png"
+},
+{
+"name": "Société Générale",
+"short": "Société Générale",
+"domain": "societegenerale.com",
+"kind": "bank",
+"logoAsset": "banks/world/societegenerale_com.png"
+},
+{
+"name": "Orange Money",
+"short": "Orange Money",
+"domain": "orange.com",
+"kind": "mobile_money",
+"logoAsset": "banks/world/orange_com.png"
+},
+{
+"name": "Wave",
+"short": "Wave",
+"domain": "wave.com",
+"kind": "mobile_money",
+"logoAsset": "banks/world/wave_com.png"
+},
+{
+"name": "MTN Mobile Money",
+"short": "MTN MoMo",
+"domain": "mtn.cm",
+"kind": "mobile_money",
+"logoAsset": "banks/world/mtn_cm.png"
+},
+{
+"name": "Grey",
+"short": "Grey",
+"domain": "grey.co",
+"kind": "fintech",
+"logoAsset": "banks/world/grey_co.png"
+},
+{
+"name": "Chipper Cash",
+"short": "Chipper",
+"domain": "chippercash.com",
+"kind": "fintech",
+"logoAsset": "banks/world/chippercash_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "SN",
+"name": "Senegal",
+"currency": "XOF",
+"scheme": "ACCOUNT_BRANCH",
+"banks": [
+{
+"name": "Ecobank",
+"short": "Ecobank",
+"domain": "ecobank.com",
+"kind": "bank",
+"logoAsset": "banks/world/ecobank_com.png"
+},
+{
+"name": "Société Générale",
+"short": "Société Générale",
+"domain": "societegenerale.com",
+"kind": "bank",
+"logoAsset": "banks/world/societegenerale_com.png"
+},
+{
+"name": "Orange Money",
+"short": "Orange Money",
+"domain": "orange.com",
+"kind": "mobile_money",
+"logoAsset": "banks/world/orange_com.png"
+},
+{
+"name": "Wave",
+"short": "Wave",
+"domain": "wave.com",
+"kind": "mobile_money",
+"logoAsset": "banks/world/wave_com.png"
+},
+{
+"name": "Grey",
+"short": "Grey",
+"domain": "grey.co",
+"kind": "fintech",
+"logoAsset": "banks/world/grey_co.png"
+},
+{
+"name": "Chipper Cash",
+"short": "Chipper",
+"domain": "chippercash.com",
+"kind": "fintech",
+"logoAsset": "banks/world/chippercash_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "CI",
+"name": "Côte d'Ivoire",
+"currency": "XOF",
+"scheme": "ACCOUNT_BRANCH",
+"banks": [
+{
+"name": "Ecobank",
+"short": "Ecobank",
+"domain": "ecobank.com",
+"kind": "bank",
+"logoAsset": "banks/world/ecobank_com.png"
+},
+{
+"name": "Société Générale",
+"short": "Société Générale",
+"domain": "societegenerale.com",
+"kind": "bank",
+"logoAsset": "banks/world/societegenerale_com.png"
+},
+{
+"name": "Orange Money",
+"short": "Orange Money",
+"domain": "orange.com",
+"kind": "mobile_money",
+"logoAsset": "banks/world/orange_com.png"
+},
+{
+"name": "Wave",
+"short": "Wave",
+"domain": "wave.com",
+"kind": "mobile_money",
+"logoAsset": "banks/world/wave_com.png"
+},
+{
+"name": "Grey",
+"short": "Grey",
+"domain": "grey.co",
+"kind": "fintech",
+"logoAsset": "banks/world/grey_co.png"
+},
+{
+"name": "Chipper Cash",
+"short": "Chipper",
+"domain": "chippercash.com",
+"kind": "fintech",
+"logoAsset": "banks/world/chippercash_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "EG",
+"name": "Egypt",
+"currency": "EGP",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "National Bank of Egypt",
+"short": "NBE",
+"domain": "nbe.com.eg",
+"kind": "bank",
+"logoAsset": "banks/world/nbe_com_eg.png"
+},
+{
+"name": "Banque Misr",
+"short": "Banque Misr",
+"domain": "banquemisr.com",
+"kind": "bank",
+"logoAsset": "banks/world/banquemisr_com.png"
+},
+{
+"name": "Commercial International Bank",
+"short": "CIB",
+"domain": "cibeg.com",
+"kind": "bank",
+"logoAsset": "banks/world/cibeg_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "US",
+"name": "United States",
+"currency": "USD",
+"scheme": "ABA",
+"banks": [
+{
+"name": "JPMorgan Chase Bank",
+"short": "Chase",
+"domain": "chase.com",
+"kind": "bank",
+"logoAsset": "banks/world/chase_com.png"
+},
+{
+"name": "Bank of America",
+"short": "Bank of America",
+"domain": "bankofamerica.com",
+"kind": "bank",
+"logoAsset": "banks/world/bankofamerica_com.png"
+},
+{
+"name": "Wells Fargo",
+"short": "Wells Fargo",
+"domain": "wellsfargo.com",
+"kind": "bank",
+"logoAsset": "banks/world/wellsfargo_com.png"
+},
+{
+"name": "Citibank",
+"short": "Citi",
+"domain": "citi.com",
+"kind": "bank",
+"logoAsset": "banks/world/citi_com.png"
+},
+{
+"name": "Capital One",
+"short": "Capital One",
+"domain": "capitalone.com",
+"kind": "bank",
+"logoAsset": "banks/world/capitalone_com.png"
+},
+{
+"name": "U.S. Bank",
+"short": "U.S. Bank",
+"domain": "usbank.com",
+"kind": "bank",
+"logoAsset": "banks/world/usbank_com.png"
+},
+{
+"name": "PNC Bank",
+"short": "PNC",
+"domain": "pnc.com",
+"kind": "bank",
+"logoAsset": "banks/world/pnc_com.png"
+},
+{
+"name": "Truist",
+"short": "Truist",
+"domain": "truist.com",
+"kind": "bank",
+"logoAsset": "banks/world/truist_com.png"
+},
+{
+"name": "TD Bank",
+"short": "TD Bank",
+"domain": "td.com",
+"kind": "bank",
+"logoAsset": "banks/world/td_com.png"
+},
+{
+"name": "Ally Bank",
+"short": "Ally",
+"domain": "ally.com",
+"kind": "bank",
+"logoAsset": "banks/world/ally_com.png"
+},
+{
+"name": "Navy Federal Credit Union",
+"short": "Navy Federal",
+"domain": "navyfederal.org",
+"kind": "bank",
+"logoAsset": "banks/world/navyfederal_org.png"
+},
+{
+"name": "Chime",
+"short": "Chime",
+"domain": "chime.com",
+"kind": "fintech",
+"logoAsset": "banks/world/chime_com.png"
+},
+{
+"name": "Cash App",
+"short": "Cash App",
+"domain": "cash.app",
+"kind": "fintech",
+"logoAsset": "banks/world/cash_app.png"
+},
+{
+"name": "Venmo",
+"short": "Venmo",
+"domain": "venmo.com",
+"kind": "fintech",
+"logoAsset": "banks/world/venmo_com.png"
+},
+{
+"name": "Zelle",
+"short": "Zelle",
+"domain": "zellepay.com",
+"kind": "fintech",
+"logoAsset": "banks/world/zellepay_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "GB",
+"name": "United Kingdom",
+"currency": "GBP",
+"scheme": "SORT_CODE",
+"banks": [
+{
+"name": "Barclays",
+"short": "Barclays",
+"domain": "barclays.co.uk",
+"kind": "bank",
+"logoAsset": "banks/world/barclays_co_uk.png"
+},
+{
+"name": "HSBC UK",
+"short": "HSBC",
+"domain": "hsbc.co.uk",
+"kind": "bank",
+"logoAsset": "banks/world/hsbc_co_uk.png"
+},
+{
+"name": "Lloyds Bank",
+"short": "Lloyds",
+"domain": "lloydsbank.com",
+"kind": "bank",
+"logoAsset": "banks/world/lloydsbank_com.png"
+},
+{
+"name": "NatWest",
+"short": "NatWest",
+"domain": "natwest.com",
+"kind": "bank",
+"logoAsset": "banks/world/natwest_com.png"
+},
+{
+"name": "Santander UK",
+"short": "Santander",
+"domain": "santander.co.uk",
+"kind": "bank",
+"logoAsset": "banks/world/santander_co_uk.png"
+},
+{
+"name": "Nationwide Building Society",
+"short": "Nationwide",
+"domain": "nationwide.co.uk",
+"kind": "bank",
+"logoAsset": "banks/world/nationwide_co_uk.png"
+},
+{
+"name": "Halifax",
+"short": "Halifax",
+"domain": "halifax.co.uk",
+"kind": "bank",
+"logoAsset": "banks/world/halifax_co_uk.png"
+},
+{
+"name": "TSB Bank",
+"short": "TSB",
+"domain": "tsb.co.uk",
+"kind": "bank",
+"logoAsset": "banks/world/tsb_co_uk.png"
+},
+{
+"name": "Metro Bank",
+"short": "Metro Bank",
+"domain": "metrobankonline.co.uk",
+"kind": "bank",
+"logoAsset": "banks/world/metrobankonline_co_uk.png"
+},
+{
+"name": "Monzo",
+"short": "Monzo",
+"domain": "monzo.com",
+"kind": "fintech",
+"logoAsset": "banks/world/monzo_com.png"
+},
+{
+"name": "Starling Bank",
+"short": "Starling",
+"domain": "starlingbank.com",
+"kind": "fintech",
+"logoAsset": "banks/world/starlingbank_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "CA",
+"name": "Canada",
+"currency": "CAD",
+"scheme": "CA_TRANSIT",
+"banks": [
+{
+"name": "Royal Bank of Canada",
+"short": "RBC",
+"domain": "rbcroyalbank.com",
+"kind": "bank",
+"logoAsset": "banks/world/rbcroyalbank_com.png"
+},
+{
+"name": "TD Canada Trust",
+"short": "TD",
+"domain": "td.com",
+"kind": "bank",
+"logoAsset": "banks/world/td_com.png"
+},
+{
+"name": "Scotiabank",
+"short": "Scotiabank",
+"domain": "scotiabank.com",
+"kind": "bank",
+"logoAsset": "banks/world/scotiabank_com.png"
+},
+{
+"name": "Bank of Montreal",
+"short": "BMO",
+"domain": "bmo.com",
+"kind": "bank",
+"logoAsset": "banks/world/bmo_com.png"
+},
+{
+"name": "CIBC",
+"short": "CIBC",
+"domain": "cibc.com",
+"kind": "bank",
+"logoAsset": "banks/world/cibc_com.png"
+},
+{
+"name": "National Bank of Canada",
+"short": "National Bank",
+"domain": "nbc.ca",
+"kind": "bank",
+"logoAsset": "banks/world/nbc_ca.png"
+},
+{
+"name": "Desjardins",
+"short": "Desjardins",
+"domain": "desjardins.com",
+"kind": "bank",
+"logoAsset": "banks/world/desjardins_com.png"
+},
+{
+"name": "Tangerine",
+"short": "Tangerine",
+"domain": "tangerine.ca",
+"kind": "bank",
+"logoAsset": "banks/world/tangerine_ca.png"
+},
+{
+"name": "EQ Bank",
+"short": "EQ Bank",
+"domain": "eqbank.ca",
+"kind": "fintech",
+"logoAsset": "banks/world/eqbank_ca.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "DE",
+"name": "Germany",
+"currency": "EUR",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "Deutsche Bank",
+"short": "Deutsche Bank",
+"domain": "deutsche-bank.de",
+"kind": "bank",
+"logoAsset": "banks/world/deutsche_bank_de.png"
+},
+{
+"name": "Commerzbank",
+"short": "Commerzbank",
+"domain": "commerzbank.de",
+"kind": "bank",
+"logoAsset": "banks/world/commerzbank_de.png"
+},
+{
+"name": "Sparkasse",
+"short": "Sparkasse",
+"domain": "sparkasse.de",
+"kind": "bank",
+"logoAsset": "banks/world/sparkasse_de.png"
+},
+{
+"name": "Volksbank Raiffeisenbank",
+"short": "Volksbank",
+"domain": "vr.de",
+"kind": "bank",
+"logoAsset": "banks/world/vr_de.png"
+},
+{
+"name": "ING Deutschland",
+"short": "ING",
+"domain": "ing.de",
+"kind": "bank",
+"logoAsset": "banks/world/ing_de.png"
+},
+{
+"name": "DKB",
+"short": "DKB",
+"domain": "dkb.de",
+"kind": "bank",
+"logoAsset": "banks/world/dkb_de.png"
+},
+{
+"name": "Postbank",
+"short": "Postbank",
+"domain": "postbank.de",
+"kind": "bank",
+"logoAsset": "banks/world/postbank_de.png"
+},
+{
+"name": "HypoVereinsbank",
+"short": "HVB",
+"domain": "hypovereinsbank.de",
+"kind": "bank",
+"logoAsset": "banks/world/hypovereinsbank_de.png"
+},
+{
+"name": "N26",
+"short": "N26",
+"domain": "n26.com",
+"kind": "fintech",
+"logoAsset": "banks/world/n26_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "FR",
+"name": "France",
+"currency": "EUR",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "BNP Paribas",
+"short": "BNP Paribas",
+"domain": "mabanque.bnpparibas",
+"kind": "bank",
+"logoAsset": "banks/world/mabanque_bnpparibas.png"
+},
+{
+"name": "Société Générale",
+"short": "Société Générale",
+"domain": "societegenerale.fr",
+"kind": "bank",
+"logoAsset": "banks/world/societegenerale_fr.png"
+},
+{
+"name": "Crédit Agricole",
+"short": "Crédit Agricole",
+"domain": "credit-agricole.fr",
+"kind": "bank",
+"logoAsset": "banks/world/credit_agricole_fr.png"
+},
+{
+"name": "Crédit Mutuel",
+"short": "Crédit Mutuel",
+"domain": "creditmutuel.fr",
+"kind": "bank",
+"logoAsset": "banks/world/creditmutuel_fr.png"
+},
+{
+"name": "LCL",
+"short": "LCL",
+"domain": "lcl.fr",
+"kind": "bank",
+"logoAsset": "banks/world/lcl_fr.png"
+},
+{
+"name": "La Banque Postale",
+"short": "La Banque Postale",
+"domain": "labanquepostale.fr",
+"kind": "bank",
+"logoAsset": "banks/world/labanquepostale_fr.png"
+},
+{
+"name": "Caisse d'Epargne",
+"short": "Caisse d'Epargne",
+"domain": "caisse-epargne.fr",
+"kind": "bank",
+"logoAsset": "banks/world/caisse_epargne_fr.png"
+},
+{
+"name": "BoursoBank",
+"short": "BoursoBank",
+"domain": "boursobank.com",
+"kind": "fintech",
+"logoAsset": "banks/world/boursobank_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "ES",
+"name": "Spain",
+"currency": "EUR",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "Banco Santander",
+"short": "Santander",
+"domain": "bancosantander.es",
+"kind": "bank",
+"logoAsset": "banks/world/bancosantander_es.png"
+},
+{
+"name": "BBVA",
+"short": "BBVA",
+"domain": "bbva.es",
+"kind": "bank",
+"logoAsset": "banks/world/bbva_es.png"
+},
+{
+"name": "CaixaBank",
+"short": "CaixaBank",
+"domain": "caixabank.es",
+"kind": "bank",
+"logoAsset": "banks/world/caixabank_es.png"
+},
+{
+"name": "Banco Sabadell",
+"short": "Sabadell",
+"domain": "bancsabadell.com",
+"kind": "bank",
+"logoAsset": "banks/world/bancsabadell_com.png"
+},
+{
+"name": "Bankinter",
+"short": "Bankinter",
+"domain": "bankinter.com",
+"kind": "bank",
+"logoAsset": "banks/world/bankinter_com.png"
+},
+{
+"name": "Unicaja",
+"short": "Unicaja",
+"domain": "unicajabanco.es",
+"kind": "bank",
+"logoAsset": "banks/world/unicajabanco_es.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "IT",
+"name": "Italy",
+"currency": "EUR",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "Intesa Sanpaolo",
+"short": "Intesa Sanpaolo",
+"domain": "intesasanpaolo.com",
+"kind": "bank",
+"logoAsset": "banks/world/intesasanpaolo_com.png"
+},
+{
+"name": "UniCredit",
+"short": "UniCredit",
+"domain": "unicredit.it",
+"kind": "bank",
+"logoAsset": "banks/world/unicredit_it.png"
+},
+{
+"name": "Banco BPM",
+"short": "Banco BPM",
+"domain": "bancobpm.it",
+"kind": "bank",
+"logoAsset": "banks/world/bancobpm_it.png"
+},
+{
+"name": "Monte dei Paschi di Siena",
+"short": "MPS",
+"domain": "mps.it",
+"kind": "bank",
+"logoAsset": "banks/world/mps_it.png"
+},
+{
+"name": "BPER Banca",
+"short": "BPER",
+"domain": "bper.it",
+"kind": "bank",
+"logoAsset": "banks/world/bper_it.png"
+},
+{
+"name": "Poste Italiane",
+"short": "Poste",
+"domain": "poste.it",
+"kind": "bank",
+"logoAsset": "banks/world/poste_it.png"
+},
+{
+"name": "FinecoBank",
+"short": "Fineco",
+"domain": "finecobank.com",
+"kind": "bank",
+"logoAsset": "banks/world/finecobank_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "NL",
+"name": "Netherlands",
+"currency": "EUR",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "ING",
+"short": "ING",
+"domain": "ing.nl",
+"kind": "bank",
+"logoAsset": "banks/world/ing_nl.png"
+},
+{
+"name": "Rabobank",
+"short": "Rabobank",
+"domain": "rabobank.nl",
+"kind": "bank",
+"logoAsset": "banks/world/rabobank_nl.png"
+},
+{
+"name": "ABN AMRO",
+"short": "ABN AMRO",
+"domain": "abnamro.nl",
+"kind": "bank",
+"logoAsset": "banks/world/abnamro_nl.png"
+},
+{
+"name": "SNS",
+"short": "SNS",
+"domain": "snsbank.nl",
+"kind": "bank",
+"logoAsset": "banks/world/snsbank_nl.png"
+},
+{
+"name": "Triodos Bank",
+"short": "Triodos",
+"domain": "triodos.nl",
+"kind": "bank",
+"logoAsset": "banks/world/triodos_nl.png"
+},
+{
+"name": "bunq",
+"short": "bunq",
+"domain": "bunq.com",
+"kind": "fintech",
+"logoAsset": "banks/world/bunq_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "BE",
+"name": "Belgium",
+"currency": "EUR",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "BNP Paribas Fortis",
+"short": "BNP Paribas Fortis",
+"domain": "bnpparibasfortis.be",
+"kind": "bank",
+"logoAsset": "banks/world/bnpparibasfortis_be.png"
+},
+{
+"name": "KBC",
+"short": "KBC",
+"domain": "kbc.be",
+"kind": "bank",
+"logoAsset": "banks/world/kbc_be.png"
+},
+{
+"name": "Belfius",
+"short": "Belfius",
+"domain": "belfius.be",
+"kind": "bank",
+"logoAsset": "banks/world/belfius_be.png"
+},
+{
+"name": "ING Belgium",
+"short": "ING",
+"domain": "ing.be",
+"kind": "bank",
+"logoAsset": "banks/world/ing_be.png"
+},
+{
+"name": "Argenta",
+"short": "Argenta",
+"domain": "argenta.be",
+"kind": "bank",
+"logoAsset": "banks/world/argenta_be.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "IE",
+"name": "Ireland",
+"currency": "EUR",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "AIB",
+"short": "AIB",
+"domain": "aib.ie",
+"kind": "bank",
+"logoAsset": "banks/world/aib_ie.png"
+},
+{
+"name": "Bank of Ireland",
+"short": "Bank of Ireland",
+"domain": "bankofireland.com",
+"kind": "bank",
+"logoAsset": "banks/world/bankofireland_com.png"
+},
+{
+"name": "PTSB",
+"short": "PTSB",
+"domain": "permanenttsb.ie",
+"kind": "bank",
+"logoAsset": "banks/world/permanenttsb_ie.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "PT",
+"name": "Portugal",
+"currency": "EUR",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "Caixa Geral de Depósitos",
+"short": "CGD",
+"domain": "cgd.pt",
+"kind": "bank",
+"logoAsset": "banks/world/cgd_pt.png"
+},
+{
+"name": "Millennium bcp",
+"short": "Millennium",
+"domain": "millenniumbcp.pt",
+"kind": "bank",
+"logoAsset": "banks/world/millenniumbcp_pt.png"
+},
+{
+"name": "Novo Banco",
+"short": "Novo Banco",
+"domain": "novobanco.pt",
+"kind": "bank",
+"logoAsset": "banks/world/novobanco_pt.png"
+},
+{
+"name": "Santander Totta",
+"short": "Santander",
+"domain": "santander.pt",
+"kind": "bank",
+"logoAsset": "banks/world/santander_pt.png"
+},
+{
+"name": "Banco BPI",
+"short": "BPI",
+"domain": "bancobpi.pt",
+"kind": "bank",
+"logoAsset": "banks/world/bancobpi_pt.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "AT",
+"name": "Austria",
+"currency": "EUR",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "Erste Bank und Sparkassen",
+"short": "Erste",
+"domain": "sparkasse.at",
+"kind": "bank",
+"logoAsset": "banks/world/sparkasse_at.png"
+},
+{
+"name": "Raiffeisen",
+"short": "Raiffeisen",
+"domain": "raiffeisen.at",
+"kind": "bank",
+"logoAsset": "banks/world/raiffeisen_at.png"
+},
+{
+"name": "Bank Austria",
+"short": "Bank Austria",
+"domain": "bankaustria.at",
+"kind": "bank",
+"logoAsset": "banks/world/bankaustria_at.png"
+},
+{
+"name": "BAWAG",
+"short": "BAWAG",
+"domain": "bawag.at",
+"kind": "bank",
+"logoAsset": "banks/world/bawag_at.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "CH",
+"name": "Switzerland",
+"currency": "CHF",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "UBS",
+"short": "UBS",
+"domain": "ubs.com",
+"kind": "bank",
+"logoAsset": "banks/world/ubs_com.png"
+},
+{
+"name": "Raiffeisen",
+"short": "Raiffeisen",
+"domain": "raiffeisen.ch",
+"kind": "bank",
+"logoAsset": "banks/world/raiffeisen_ch.png"
+},
+{
+"name": "PostFinance",
+"short": "PostFinance",
+"domain": "postfinance.ch",
+"kind": "bank",
+"logoAsset": "banks/world/postfinance_ch.png"
+},
+{
+"name": "Zürcher Kantonalbank",
+"short": "ZKB",
+"domain": "zkb.ch",
+"kind": "bank"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "SE",
+"name": "Sweden",
+"currency": "SEK",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "Swedbank",
+"short": "Swedbank",
+"domain": "swedbank.se",
+"kind": "bank",
+"logoAsset": "banks/world/swedbank_se.png"
+},
+{
+"name": "Handelsbanken",
+"short": "Handelsbanken",
+"domain": "handelsbanken.se",
+"kind": "bank",
+"logoAsset": "banks/world/handelsbanken_se.png"
+},
+{
+"name": "SEB",
+"short": "SEB",
+"domain": "seb.se",
+"kind": "bank",
+"logoAsset": "banks/world/seb_se.png"
+},
+{
+"name": "Nordea",
+"short": "Nordea",
+"domain": "nordea.se",
+"kind": "bank",
+"logoAsset": "banks/world/nordea_se.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "NO",
+"name": "Norway",
+"currency": "NOK",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "DNB",
+"short": "DNB",
+"domain": "dnb.no",
+"kind": "bank",
+"logoAsset": "banks/world/dnb_no.png"
+},
+{
+"name": "Nordea",
+"short": "Nordea",
+"domain": "nordea.no",
+"kind": "bank",
+"logoAsset": "banks/world/nordea_no.png"
+},
+{
+"name": "SpareBank 1",
+"short": "SpareBank 1",
+"domain": "sparebank1.no",
+"kind": "bank",
+"logoAsset": "banks/world/sparebank1_no.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "DK",
+"name": "Denmark",
+"currency": "DKK",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "Danske Bank",
+"short": "Danske Bank",
+"domain": "danskebank.dk",
+"kind": "bank",
+"logoAsset": "banks/world/danskebank_dk.png"
+},
+{
+"name": "Nordea",
+"short": "Nordea",
+"domain": "nordea.dk",
+"kind": "bank",
+"logoAsset": "banks/world/nordea_dk.png"
+},
+{
+"name": "Jyske Bank",
+"short": "Jyske",
+"domain": "jyskebank.dk",
+"kind": "bank",
+"logoAsset": "banks/world/jyskebank_dk.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "FI",
+"name": "Finland",
+"currency": "EUR",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "Nordea",
+"short": "Nordea",
+"domain": "nordea.fi",
+"kind": "bank",
+"logoAsset": "banks/world/nordea_fi.png"
+},
+{
+"name": "OP Financial Group",
+"short": "OP",
+"domain": "op.fi",
+"kind": "bank",
+"logoAsset": "banks/world/op_fi.png"
+},
+{
+"name": "Danske Bank",
+"short": "Danske Bank",
+"domain": "danskebank.fi",
+"kind": "bank",
+"logoAsset": "banks/world/danskebank_fi.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "PL",
+"name": "Poland",
+"currency": "PLN",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "PKO Bank Polski",
+"short": "PKO BP",
+"domain": "pkobp.pl",
+"kind": "bank",
+"logoAsset": "banks/world/pkobp_pl.png"
+},
+{
+"name": "Bank Pekao",
+"short": "Pekao",
+"domain": "pekao.com.pl",
+"kind": "bank",
+"logoAsset": "banks/world/pekao_com_pl.png"
+},
+{
+"name": "Santander Bank Polska",
+"short": "Santander",
+"domain": "santander.pl",
+"kind": "bank",
+"logoAsset": "banks/world/santander_pl.png"
+},
+{
+"name": "mBank",
+"short": "mBank",
+"domain": "mbank.pl",
+"kind": "bank",
+"logoAsset": "banks/world/mbank_pl.png"
+},
+{
+"name": "ING Bank Śląski",
+"short": "ING",
+"domain": "ing.pl",
+"kind": "bank",
+"logoAsset": "banks/world/ing_pl.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "AE",
+"name": "United Arab Emirates",
+"currency": "AED",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "Emirates NBD",
+"short": "Emirates NBD",
+"domain": "emiratesnbd.com",
+"kind": "bank",
+"logoAsset": "banks/world/emiratesnbd_com.png"
+},
+{
+"name": "First Abu Dhabi Bank",
+"short": "FAB",
+"domain": "bankfab.com",
+"kind": "bank",
+"logoAsset": "banks/world/bankfab_com.png"
+},
+{
+"name": "Abu Dhabi Commercial Bank",
+"short": "ADCB",
+"domain": "adcb.com",
+"kind": "bank",
+"logoAsset": "banks/world/adcb_com.png"
+},
+{
+"name": "Dubai Islamic Bank",
+"short": "DIB",
+"domain": "dib.ae",
+"kind": "bank",
+"logoAsset": "banks/world/dib_ae.png"
+},
+{
+"name": "Mashreq",
+"short": "Mashreq",
+"domain": "mashreq.com",
+"kind": "bank",
+"logoAsset": "banks/world/mashreq_com.png"
+},
+{
+"name": "RAKBANK",
+"short": "RAKBANK",
+"domain": "rakbank.ae",
+"kind": "bank",
+"logoAsset": "banks/world/rakbank_ae.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "SA",
+"name": "Saudi Arabia",
+"currency": "SAR",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "Al Rajhi Bank",
+"short": "Al Rajhi",
+"domain": "alrajhibank.com.sa",
+"kind": "bank",
+"logoAsset": "banks/world/alrajhibank_com_sa.png"
+},
+{
+"name": "Saudi National Bank",
+"short": "SNB",
+"domain": "alahli.com",
+"kind": "bank"
+},
+{
+"name": "Riyad Bank",
+"short": "Riyad Bank",
+"domain": "riyadbank.com",
+"kind": "bank",
+"logoAsset": "banks/world/riyadbank_com.png"
+},
+{
+"name": "Saudi Awwal Bank",
+"short": "SAB",
+"domain": "sab.com",
+"kind": "bank",
+"logoAsset": "banks/world/sab_com.png"
+},
+{
+"name": "Alinma Bank",
+"short": "Alinma",
+"domain": "alinma.com",
+"kind": "bank",
+"logoAsset": "banks/world/alinma_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "TR",
+"name": "Türkiye",
+"currency": "TRY",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "Ziraat Bankası",
+"short": "Ziraat",
+"domain": "ziraatbank.com.tr",
+"kind": "bank",
+"logoAsset": "banks/world/ziraatbank_com_tr.png"
+},
+{
+"name": "İş Bankası",
+"short": "İşbank",
+"domain": "isbank.com.tr",
+"kind": "bank",
+"logoAsset": "banks/world/isbank_com_tr.png"
+},
+{
+"name": "Garanti BBVA",
+"short": "Garanti",
+"domain": "garantibbva.com.tr",
+"kind": "bank",
+"logoAsset": "banks/world/garantibbva_com_tr.png"
+},
+{
+"name": "Akbank",
+"short": "Akbank",
+"domain": "akbank.com",
+"kind": "bank",
+"logoAsset": "banks/world/akbank_com.png"
+},
+{
+"name": "Yapı Kredi",
+"short": "Yapı Kredi",
+"domain": "yapikredi.com.tr",
+"kind": "bank",
+"logoAsset": "banks/world/yapikredi_com_tr.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "PK",
+"name": "Pakistan",
+"currency": "PKR",
+"scheme": "IBAN",
+"banks": [
+{
+"name": "Habib Bank Limited",
+"short": "HBL",
+"domain": "hbl.com",
+"kind": "bank",
+"logoAsset": "banks/world/hbl_com.png"
+},
+{
+"name": "United Bank Limited",
+"short": "UBL",
+"domain": "ubldigital.com",
+"kind": "bank"
+},
+{
+"name": "MCB Bank",
+"short": "MCB",
+"domain": "mcb.com.pk",
+"kind": "bank",
+"logoAsset": "banks/world/mcb_com_pk.png"
+},
+{
+"name": "Allied Bank",
+"short": "Allied Bank",
+"domain": "abl.com",
+"kind": "bank",
+"logoAsset": "banks/world/abl_com.png"
+},
+{
+"name": "Meezan Bank",
+"short": "Meezan",
+"domain": "meezanbank.com",
+"kind": "bank",
+"logoAsset": "banks/world/meezanbank_com.png"
+},
+{
+"name": "JazzCash",
+"short": "JazzCash",
+"domain": "jazzcash.com.pk",
+"kind": "mobile_money",
+"logoAsset": "banks/world/jazzcash_com_pk.png"
+},
+{
+"name": "Easypaisa",
+"short": "Easypaisa",
+"domain": "easypaisa.com.pk",
+"kind": "mobile_money"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "IN",
+"name": "India",
+"currency": "INR",
+"scheme": "IFSC",
+"banks": [
+{
+"name": "State Bank of India",
+"short": "SBI",
+"domain": "sbi.co.in",
+"kind": "bank",
+"logoAsset": "banks/world/sbi_co_in.png"
+},
+{
+"name": "HDFC Bank",
+"short": "HDFC",
+"domain": "hdfcbank.com",
+"kind": "bank",
+"logoAsset": "banks/world/hdfcbank_com.png"
+},
+{
+"name": "ICICI Bank",
+"short": "ICICI",
+"domain": "icicibank.com",
+"kind": "bank",
+"logoAsset": "banks/world/icicibank_com.png"
+},
+{
+"name": "Axis Bank",
+"short": "Axis",
+"domain": "axisbank.com",
+"kind": "bank",
+"logoAsset": "banks/world/axisbank_com.png"
+},
+{
+"name": "Kotak Mahindra Bank",
+"short": "Kotak",
+"domain": "kotak.com",
+"kind": "bank",
+"logoAsset": "banks/world/kotak_com.png"
+},
+{
+"name": "Punjab National Bank",
+"short": "PNB",
+"domain": "pnbindia.in",
+"kind": "bank"
+},
+{
+"name": "Bank of Baroda",
+"short": "Bank of Baroda",
+"domain": "bankofbaroda.in",
+"kind": "bank",
+"logoAsset": "banks/world/bankofbaroda_in.png"
+},
+{
+"name": "Canara Bank",
+"short": "Canara",
+"domain": "canarabank.com",
+"kind": "bank",
+"logoAsset": "banks/world/canarabank_com.png"
+},
+{
+"name": "Union Bank of India",
+"short": "Union Bank",
+"domain": "unionbankofindia.co.in",
+"kind": "bank"
+},
+{
+"name": "IndusInd Bank",
+"short": "IndusInd",
+"domain": "indusind.com",
+"kind": "bank",
+"logoAsset": "banks/world/indusind_com.png"
+},
+{
+"name": "Yes Bank",
+"short": "Yes Bank",
+"domain": "yesbank.in",
+"kind": "bank",
+"logoAsset": "banks/world/yesbank_in.png"
+},
+{
+"name": "Paytm Payments Bank",
+"short": "Paytm",
+"domain": "paytm.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paytm_com.png"
+},
+{
+"name": "PhonePe (UPI)",
+"short": "PhonePe",
+"domain": "phonepe.com",
+"kind": "fintech",
+"logoAsset": "banks/world/phonepe_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "PH",
+"name": "Philippines",
+"currency": "PHP",
+"scheme": "ACCOUNT_SWIFT",
+"banks": [
+{
+"name": "BDO Unibank",
+"short": "BDO",
+"domain": "bdo.com.ph",
+"kind": "bank",
+"logoAsset": "banks/world/bdo_com_ph.png"
+},
+{
+"name": "Bank of the Philippine Islands",
+"short": "BPI",
+"domain": "bpi.com.ph",
+"kind": "bank",
+"logoAsset": "banks/world/bpi_com_ph.png"
+},
+{
+"name": "Metrobank",
+"short": "Metrobank",
+"domain": "metrobank.com.ph",
+"kind": "bank",
+"logoAsset": "banks/world/metrobank_com_ph.png"
+},
+{
+"name": "Land Bank of the Philippines",
+"short": "Landbank",
+"domain": "landbank.com",
+"kind": "bank",
+"logoAsset": "banks/world/landbank_com.png"
+},
+{
+"name": "GCash",
+"short": "GCash",
+"domain": "gcash.com",
+"kind": "mobile_money",
+"logoAsset": "banks/world/gcash_com.png"
+},
+{
+"name": "Maya",
+"short": "Maya",
+"domain": "maya.ph",
+"kind": "mobile_money",
+"logoAsset": "banks/world/maya_ph.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "ID",
+"name": "Indonesia",
+"currency": "IDR",
+"scheme": "ACCOUNT_SWIFT",
+"banks": [
+{
+"name": "Bank Central Asia",
+"short": "BCA",
+"domain": "bca.co.id",
+"kind": "bank",
+"logoAsset": "banks/world/bca_co_id.png"
+},
+{
+"name": "Bank Mandiri",
+"short": "Mandiri",
+"domain": "bankmandiri.co.id",
+"kind": "bank",
+"logoAsset": "banks/world/bankmandiri_co_id.png"
+},
+{
+"name": "Bank Rakyat Indonesia",
+"short": "BRI",
+"domain": "bri.co.id",
+"kind": "bank",
+"logoAsset": "banks/world/bri_co_id.png"
+},
+{
+"name": "Bank Negara Indonesia",
+"short": "BNI",
+"domain": "bni.co.id",
+"kind": "bank",
+"logoAsset": "banks/world/bni_co_id.png"
+},
+{
+"name": "GoPay",
+"short": "GoPay",
+"domain": "gojek.com",
+"kind": "mobile_money",
+"logoAsset": "banks/world/gojek_com.png"
+},
+{
+"name": "OVO",
+"short": "OVO",
+"domain": "ovo.id",
+"kind": "mobile_money"
+},
+{
+"name": "DANA",
+"short": "DANA",
+"domain": "dana.id",
+"kind": "mobile_money",
+"logoAsset": "banks/world/dana_id.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "MY",
+"name": "Malaysia",
+"currency": "MYR",
+"scheme": "ACCOUNT_SWIFT",
+"banks": [
+{
+"name": "Maybank",
+"short": "Maybank",
+"domain": "maybank2u.com.my",
+"kind": "bank",
+"logoAsset": "banks/world/maybank2u_com_my.png"
+},
+{
+"name": "CIMB Bank",
+"short": "CIMB",
+"domain": "cimb.com.my",
+"kind": "bank",
+"logoAsset": "banks/world/cimb_com_my.png"
+},
+{
+"name": "Public Bank",
+"short": "Public Bank",
+"domain": "pbebank.com",
+"kind": "bank",
+"logoAsset": "banks/world/pbebank_com.png"
+},
+{
+"name": "RHB Bank",
+"short": "RHB",
+"domain": "rhbgroup.com",
+"kind": "bank",
+"logoAsset": "banks/world/rhbgroup_com.png"
+},
+{
+"name": "Touch 'n Go eWallet",
+"short": "Touch 'n Go",
+"domain": "tngdigital.com.my",
+"kind": "mobile_money",
+"logoAsset": "banks/world/tngdigital_com_my.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "SG",
+"name": "Singapore",
+"currency": "SGD",
+"scheme": "ACCOUNT_SWIFT",
+"banks": [
+{
+"name": "DBS Bank",
+"short": "DBS",
+"domain": "dbs.com.sg",
+"kind": "bank",
+"logoAsset": "banks/world/dbs_com_sg.png"
+},
+{
+"name": "OCBC Bank",
+"short": "OCBC",
+"domain": "ocbc.com",
+"kind": "bank",
+"logoAsset": "banks/world/ocbc_com.png"
+},
+{
+"name": "United Overseas Bank",
+"short": "UOB",
+"domain": "uob.com.sg",
+"kind": "bank",
+"logoAsset": "banks/world/uob_com_sg.png"
+},
+{
+"name": "POSB",
+"short": "POSB",
+"domain": "posb.com.sg",
+"kind": "bank",
+"logoAsset": "banks/world/posb_com_sg.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "CN",
+"name": "China",
+"currency": "CNY",
+"scheme": "ACCOUNT_SWIFT",
+"banks": [
+{
+"name": "Industrial and Commercial Bank of China",
+"short": "ICBC",
+"domain": "icbc.com.cn",
+"kind": "bank",
+"logoAsset": "banks/world/icbc_com_cn.png"
+},
+{
+"name": "China Construction Bank",
+"short": "CCB",
+"domain": "ccb.com",
+"kind": "bank",
+"logoAsset": "banks/world/ccb_com.png"
+},
+{
+"name": "Bank of China",
+"short": "Bank of China",
+"domain": "boc.cn",
+"kind": "bank",
+"logoAsset": "banks/world/boc_cn.png"
+},
+{
+"name": "Agricultural Bank of China",
+"short": "ABC",
+"domain": "abchina.com",
+"kind": "bank",
+"logoAsset": "banks/world/abchina_com.png"
+},
+{
+"name": "Alipay",
+"short": "Alipay",
+"domain": "alipay.com",
+"kind": "fintech",
+"logoAsset": "banks/world/alipay_com.png"
+},
+{
+"name": "WeChat Pay",
+"short": "WeChat Pay",
+"domain": "pay.weixin.qq.com",
+"kind": "fintech",
+"logoAsset": "banks/world/pay_weixin_qq_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "JP",
+"name": "Japan",
+"currency": "JPY",
+"scheme": "ACCOUNT_SWIFT",
+"banks": [
+{
+"name": "MUFG Bank",
+"short": "MUFG",
+"domain": "bk.mufg.jp",
+"kind": "bank",
+"logoAsset": "banks/world/bk_mufg_jp.png"
+},
+{
+"name": "Sumitomo Mitsui Banking Corporation",
+"short": "SMBC",
+"domain": "smbc.co.jp",
+"kind": "bank",
+"logoAsset": "banks/world/smbc_co_jp.png"
+},
+{
+"name": "Mizuho Bank",
+"short": "Mizuho",
+"domain": "mizuhobank.co.jp",
+"kind": "bank",
+"logoAsset": "banks/world/mizuhobank_co_jp.png"
+},
+{
+"name": "Japan Post Bank",
+"short": "Japan Post Bank",
+"domain": "jp-bank.japanpost.jp",
+"kind": "bank",
+"logoAsset": "banks/world/jp_bank_japanpost_jp.png"
+},
+{
+"name": "Rakuten Bank",
+"short": "Rakuten Bank",
+"domain": "rakuten-bank.co.jp",
+"kind": "bank",
+"logoAsset": "banks/world/rakuten_bank_co_jp.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "AU",
+"name": "Australia",
+"currency": "AUD",
+"scheme": "BSB",
+"banks": [
+{
+"name": "Commonwealth Bank",
+"short": "CommBank",
+"domain": "commbank.com.au",
+"kind": "bank",
+"logoAsset": "banks/world/commbank_com_au.png"
+},
+{
+"name": "Westpac",
+"short": "Westpac",
+"domain": "westpac.com.au",
+"kind": "bank",
+"logoAsset": "banks/world/westpac_com_au.png"
+},
+{
+"name": "ANZ",
+"short": "ANZ",
+"domain": "anz.com.au",
+"kind": "bank",
+"logoAsset": "banks/world/anz_com_au.png"
+},
+{
+"name": "National Australia Bank",
+"short": "NAB",
+"domain": "nab.com.au",
+"kind": "bank",
+"logoAsset": "banks/world/nab_com_au.png"
+},
+{
+"name": "Macquarie Bank",
+"short": "Macquarie",
+"domain": "macquarie.com.au",
+"kind": "bank",
+"logoAsset": "banks/world/macquarie_com_au.png"
+},
+{
+"name": "ING Australia",
+"short": "ING",
+"domain": "ing.com.au",
+"kind": "bank",
+"logoAsset": "banks/world/ing_com_au.png"
+},
+{
+"name": "Bendigo Bank",
+"short": "Bendigo",
+"domain": "bendigobank.com.au",
+"kind": "bank",
+"logoAsset": "banks/world/bendigobank_com_au.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "MX",
+"name": "Mexico",
+"currency": "MXN",
+"scheme": "CLABE",
+"banks": [
+{
+"name": "BBVA México",
+"short": "BBVA",
+"domain": "bbva.mx",
+"kind": "bank",
+"logoAsset": "banks/world/bbva_mx.png"
+},
+{
+"name": "Banorte",
+"short": "Banorte",
+"domain": "banorte.com",
+"kind": "bank",
+"logoAsset": "banks/world/banorte_com.png"
+},
+{
+"name": "Santander México",
+"short": "Santander",
+"domain": "santander.com.mx",
+"kind": "bank",
+"logoAsset": "banks/world/santander_com_mx.png"
+},
+{
+"name": "Citibanamex",
+"short": "Banamex",
+"domain": "banamex.com",
+"kind": "bank",
+"logoAsset": "banks/world/banamex_com.png"
+},
+{
+"name": "HSBC México",
+"short": "HSBC",
+"domain": "hsbc.com.mx",
+"kind": "bank",
+"logoAsset": "banks/world/hsbc_com_mx.png"
+},
+{
+"name": "Banco Azteca",
+"short": "Azteca",
+"domain": "bancoazteca.com.mx",
+"kind": "bank",
+"logoAsset": "banks/world/bancoazteca_com_mx.png"
+},
+{
+"name": "Mercado Pago",
+"short": "Mercado Pago",
+"domain": "mercadopago.com.mx",
+"kind": "fintech",
+"logoAsset": "banks/world/mercadopago_com_mx.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "BR",
+"name": "Brazil",
+"currency": "BRL",
+"scheme": "PIX",
+"banks": [
+{
+"name": "Itaú Unibanco",
+"short": "Itaú",
+"domain": "itau.com.br",
+"kind": "bank",
+"logoAsset": "banks/world/itau_com_br.png"
+},
+{
+"name": "Bradesco",
+"short": "Bradesco",
+"domain": "bradesco.com.br",
+"kind": "bank",
+"logoAsset": "banks/world/bradesco_com_br.png"
+},
+{
+"name": "Banco do Brasil",
+"short": "Banco do Brasil",
+"domain": "bb.com.br",
+"kind": "bank",
+"logoAsset": "banks/world/bb_com_br.png"
+},
+{
+"name": "Caixa Econômica Federal",
+"short": "Caixa",
+"domain": "caixa.gov.br",
+"kind": "bank",
+"logoAsset": "banks/world/caixa_gov_br.png"
+},
+{
+"name": "Santander Brasil",
+"short": "Santander",
+"domain": "santander.com.br",
+"kind": "bank",
+"logoAsset": "banks/world/santander_com_br.png"
+},
+{
+"name": "Nubank",
+"short": "Nubank",
+"domain": "nubank.com.br",
+"kind": "fintech",
+"logoAsset": "banks/world/nubank_com_br.png"
+},
+{
+"name": "Banco Inter",
+"short": "Inter",
+"domain": "bancointer.com.br",
+"kind": "fintech",
+"logoAsset": "banks/world/bancointer_com_br.png"
+},
+{
+"name": "Mercado Pago",
+"short": "Mercado Pago",
+"domain": "mercadopago.com.br",
+"kind": "fintech",
+"logoAsset": "banks/world/mercadopago_com_br.png"
+},
+{
+"name": "PicPay",
+"short": "PicPay",
+"domain": "picpay.com",
+"kind": "fintech",
+"logoAsset": "banks/world/picpay_com.png"
+},
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+},
+{
+"iso": "OTHER",
+"name": "Other country",
+"currency": "",
+"scheme": "ACCOUNT_SWIFT",
+"banks": [
+{
+"name": "Wise",
+"short": "Wise",
+"domain": "wise.com",
+"kind": "fintech",
+"logoAsset": "banks/world/wise_com.png"
+},
+{
+"name": "PayPal",
+"short": "PayPal",
+"domain": "paypal.com",
+"kind": "fintech",
+"logoAsset": "banks/world/paypal_com.png"
+},
+{
+"name": "Revolut",
+"short": "Revolut",
+"domain": "revolut.com",
+"kind": "fintech",
+"logoAsset": "banks/world/revolut_com.png"
+},
+{
+"name": "Payoneer",
+"short": "Payoneer",
+"domain": "payoneer.com",
+"kind": "fintech",
+"logoAsset": "banks/world/payoneer_com.png"
+},
+{
+"name": "Skrill",
+"short": "Skrill",
+"domain": "skrill.com",
+"kind": "fintech",
+"logoAsset": "banks/world/skrill_com.png"
+}
+]
+}
+]
+}

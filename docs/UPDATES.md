@@ -2,6 +2,33 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 11 Oct 2026: banks for international users
+
+What the app does:
+
+- **Payment methods start with the country of the account.** Pick from 44 choices: Nigeria, Ghana, Kenya, South Africa, Uganda, Tanzania, Rwanda, Cameroon, Senegal, Côte d'Ivoire, Egypt, the US, the UK, Canada, 15 European countries, the UAE, Saudi Arabia, Türkiye, Pakistan, India, the Philippines, Indonesia, Malaysia, Singapore, China, Japan, Australia, Mexico, Brazil, or "Other country". The app opens on the phone's own country, then on the last one used.
+- **Each country lists its main banks, mobile money and payment apps, with logos.** For example: Chase, Barclays, Monzo, HDFC, N26, Equity, M-Pesa, MTN MoMo, Nubank. PayPal, Wise, Revolut, Payoneer and Skrill appear everywhere. 241 logos ship inside the app. A bank that isn't listed can still be used: type its name and pick "Use …".
+- **The account boxes follow the country's own format, and each is checked the way that country's banks check it:**
+  - Europe, the Gulf, Türkiye, Egypt and Pakistan: IBAN (checksum and length for that country), plus an optional BIC.
+  - UK: sort code and an 8-digit account.
+  - US: routing number (ABA checksum) and the account.
+  - Canada: institution, transit and the account.
+  - Australia: BSB and the account.
+  - India: IFSC and the account.
+  - Mexico: CLABE (check digit).
+  - Brazil: Pix key.
+  - Nigeria: the 10-digit NUBAN, as before.
+  - Elsewhere: the account number with an optional branch code and SWIFT.
+  - Mobile money asks for a phone number; payment apps ask for an e-mail, phone or @tag.
+- **Bank filled in for you:**
+  - A German, Austrian, Swiss, Dutch, Belgian, Luxembourg or Liechtenstein IBAN fills in the bank's name and BIC.
+  - An Indian IFSC fills in the bank and branch.
+  - Only the IBAN or IFSC is sent to the lookup, never the account holder's name.
+- **On your P2P offer**, all the details go together in one line, for example "Routing 021000021 · Acct 123456789" or "DE89 3704 0044 0532 0130 00 · BIC COBADEFFXXX". The buyer sees exactly what to pay into.
+- **Methods saved earlier** keep working and are treated as Nigerian.
+
+What you do: pull the latest code into CodeAssist before building. The `PiClient.java:101` error comes from an old copy of that file; the file on GitHub has been fixed since 7 Oct. Then install the build.
+
 ## 8 Oct 2026: the send address matches the coin
 
 What the app does:

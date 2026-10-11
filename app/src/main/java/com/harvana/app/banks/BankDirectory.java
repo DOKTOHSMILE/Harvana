@@ -18,7 +18,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * Every Nigerian bank, microfinance bank and payment app, with its official name, short name, transfer code, USSD
+ * Banks for every user. Nigeria: every bank, microfinance bank and payment app (ng_banks.json). Elsewhere: the main
+ * banks and payment apps of 43 more countries with their logos (world_banks.json, AccountRules for how accounts are
+ * written there). The Nigerian list is: every Nigerian bank, microfinance bank and payment app, with its official name, short name, transfer code, USSD
  * and logo. The list ships with the app (assets/banks/ng_banks.json, logos for the most used ones under
  * assets/banks/logos) so it works offline. Once a week it is refreshed from the free public directory at
  * nigerianbanks.xyz, which adds newly licensed banks and their logos; the bundled names, short names and aliases
@@ -36,7 +38,7 @@ public final class BankDirectory {
 
     public static final class Bank {
         public String name = "", shortName = "", slug = "", code = "", ussd = "", kind = "bank", country = "NG";
-        public String logoAsset = "", logoUrl = "", color = "";
+        public String logoAsset = "", logoUrl = "", color = "", domain = "";
         public int accountLength = 10;
         public List<String> aliases = new ArrayList<>();
 
@@ -50,6 +52,7 @@ public final class BankDirectory {
                 case "mortgage": return "Mortgage bank";
                 case "psb": return "Payment service bank";
                 case "fintech": return "Payment app";
+                case "mobile_money": return "Mobile money";
                 default: return "Bank";
             }
         }
@@ -62,6 +65,145 @@ public final class BankDirectory {
         }
     }
 
+    /** A country: how accounts are written there (AccountRules scheme) and its main banks and payment apps. */
+    public static final class Country {
+        public String iso = "", name = "", currency = "", scheme = "ACCOUNT_SWIFT";
+        public final List<Bank> banks = new ArrayList<>();
+
+        /** The flag emoji for the ISO code; a globe for "Other country". */
+        public String flag() {
+            if (iso.length() != 2) return "\uD83C\uDF0D";
+            int a = Character.codePointAt(iso.toUpperCase(Locale.US), 0) - 'A' + 0x1F1E6;
+            int b = Character.codePointAt(iso.toUpperCase(Locale.US), 1) - 'A' + 0x1F1E6;
+            return new String(Character.toChars(a)) + new String(Character.toChars(b));
+        }
+    }
+
+    private static List<Country> countries;
+
+    /** Every country the app knows, Nigeria and Africa first, then the rest; "Other country" last. */
+    public static synchronized List<Country> countries(Context c) {
+        if (countries != null) return countries;
+        List<Country> out = new ArrayList<>();
+        try (InputStream in = c.getAssets().open("banks/world_banks.json")) {
+            JSONArray arr = new JSONObject(readAll(in)).optJSONArray("countries");
+            if (arr != null) for (int i = 0; i < arr.length(); i++) {
+                JSONObject o = arr.optJSONObject(i);
+                if (o == null) continue;
+                Country k = new Country();
+                k.iso = o.optString("iso");
+                k.name = o.optString("name");
+                k.currency = o.optString("currency");
+                k.scheme = o.optString("scheme", "ACCOUNT_SWIFT");
+                JSONArray bs = o.optJSONArray("banks");
+                if (bs != null) for (int j = 0; j < bs.length(); j++) {
+                    Bank b = parse(bs.optJSONObject(j));
+                    b.country = k.iso;
+                    k.banks.add(b);
+                }
+                out.add(k);
+            }
+        } catch (Exception ignored) { }
+        countries = out;
+        return out;
+    }
+
+    public static Country country(Context c, String iso) {
+        for (Country k : countries(c)) if (k.iso.equalsIgnoreCase(iso == null ? "" : iso)) return k;
+        for (Country k : countries(c)) if ("OTHER".equals(k.iso)) return k;
+        Country k = new Country();
+        k.iso = "OTHER"; k.name = "Other country";
+        return k;
+    }
+
+    /** The country to open on: the last one picked, else the phone's region, else the P2P currency's, else Nigeria. */
+    public static String defaultCountry(Context c) {
+        String saved = prefs(c).getString("country", "");
+        if (!saved.isEmpty()) return saved;
+        String region = Locale.getDefault().getCountry();
+        for (Country k : countries(c)) if (k.iso.equalsIgnoreCase(region)) return k.iso;
+        return "NG";
+    }
+
+    public static void rememberCountry(Context c, String iso) { prefs(c).edit().putString("country", iso).apply(); }
+
+    /** A country's banks: Nigeria's full list, or the country's main banks; payment apps used there come after. */
+    public static List<Bank> forCountry(Context c, String iso) {
+        Country k = country(c, iso);
+        List<Bank> out = new ArrayList<>();
+        if ("NG".equalsIgnoreCase(k.iso)) out.addAll(all(c));
+        out.addAll(k.banks);
+        return out;
+    }
+
+    /** A picker's rows for one country: the popular ones first when the box is empty, matches otherwise. */
+    public static List<Bank> search(Context c, String iso, String typed) {
+        if ("NG".equalsIgnoreCase(iso)) {
+            List<Bank> out = search(c, typed);
+            for (Bank b : country(c, "NG").banks) if (hits(b, norm(typed == null ? "" : typed))) out.add(b);
+            return out;
+        }
+        String q = norm(typed == null ? "" : typed);
+        List<Bank> out = new ArrayList<>();
+        for (Bank b : forCountry(c, iso)) if (hits(b, q)) out.add(b);
+        if (!q.isEmpty() && out.isEmpty()) {
+            // Not in this country's list: look everywhere (a Ghanaian with a UK account, say).
+            for (Country k : countries(c)) for (Bank b : k.banks) if (hits(b, q) && !containsName(out, b)) out.add(b);
+        }
+        return out;
+    }
+
+    /** By name in any country (for saved methods, whose country may be unknown): Nigeria first, then the world list. */
+    public static Bank matchAnywhere(Context c, String typed) {
+        Bank b = match(c, typed);
+        if (b != null) return b;
+        String q = norm(typed);
+        if (q.isEmpty()) return null;
+        for (Country k : countries(c)) for (Bank x : k.banks) if (norm(x.name).equals(q) || norm(x.shortName).equals(q)) return x;
+        return null;
+    }
+
+    /** The bank a typed name means within one country, or null. */
+    public static Bank match(Context c, String iso, String typed) {
+        if ("NG".equalsIgnoreCase(iso)) {
+            Bank b = match(c, typed);
+            if (b != null) return b;
+        }
+        String q = norm(typed);
+        if (q.isEmpty()) return null;
+        Bank only = null;
+        for (Bank b : country(c, iso).banks) {
+            if (norm(b.name).equals(q) || norm(b.shortName).equals(q)) return b;
+            if (norm(b.name).startsWith(q) || norm(b.shortName).startsWith(q)) { if (only != null) return null; only = b; }
+        }
+        if (only != null || q.length() < 3) return only;
+        for (Bank b : country(c, iso).banks) {
+            // "momo" → MTN MoMo: inside the name, when only one bank has it.
+            if (norm(b.name).contains(q) || norm(b.shortName).contains(q)) { if (only != null) return null; only = b; }
+        }
+        return only;
+    }
+
+    private static boolean hits(Bank b, String q) {
+        if (q.isEmpty()) return true;
+        if (norm(b.name).contains(q) || norm(b.shortName).contains(q) || b.code.startsWith(q)) return true;
+        for (String a : b.aliases) if (norm(a).contains(q)) return true;
+        return false;
+    }
+
+    private static boolean containsName(List<Bank> list, Bank b) {
+        for (Bank x : list) if (x.name.equals(b.name)) return true;
+        return false;
+    }
+
+    private static String readAll(InputStream in) throws java.io.IOException {
+        java.io.ByteArrayOutputStream bo = new java.io.ByteArrayOutputStream();
+        byte[] buf = new byte[8192];
+        int n;
+        while ((n = in.read(buf)) > 0) bo.write(buf, 0, n);
+        return bo.toString("UTF-8");
+    }
+
     private static List<Bank> cache;
 
     /** All banks, the bundled list merged with the last refresh. Safe on the main thread after the first call (small JSON). */
@@ -69,10 +211,7 @@ public final class BankDirectory {
         if (cache != null) return cache;
         List<Bank> out = new ArrayList<>();
         try (InputStream in = c.getAssets().open("banks/ng_banks.json")) {
-            byte[] buf = new byte[in.available()];
-            int off = 0, n;
-            while (off < buf.length && (n = in.read(buf, off, buf.length - off)) > 0) off += n;
-            JSONArray arr = new JSONObject(new String(buf, 0, off, "UTF-8")).optJSONArray("banks");
+            JSONArray arr = new JSONObject(readAll(in)).optJSONArray("banks");
             if (arr != null) for (int i = 0; i < arr.length(); i++) out.add(parse(arr.optJSONObject(i)));
         } catch (Exception ignored) { }
         String remote = prefs(c).getString("remote", "");
@@ -191,6 +330,8 @@ public final class BankDirectory {
         b.logoAsset = o.optString("logoAsset");
         b.logoUrl = o.optString("logoUrl");
         b.color = o.optString("color");
+        b.domain = o.optString("domain");
+        b.shortName = o.has("short") ? o.optString("short") : b.shortName;
         JSONArray al = o.optJSONArray("aliases");
         if (al != null) for (int i = 0; i < al.length(); i++) b.aliases.add(al.optString(i));
         return b;

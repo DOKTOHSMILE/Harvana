@@ -62,3 +62,15 @@ SOFTWARE.
 directory at https://nigerianbanks.xyz (project: supermx1/nigerian-banks-api), fetched 7 Oct 2026. The logos were
 scaled down to 128 px. They are the trademarks of their banks and are shown only to identify the bank a user
 chooses. The app refreshes the list from the same address at most once a week.
+
+## International bank list and logos
+
+`app/src/main/assets/banks/world_banks.json` lists the main banks and payment apps of 43 countries with their
+public websites, compiled for Harvana on 11 Oct 2026. The logos in `app/src/main/assets/banks/world/` are each
+bank's own website icon, fetched once through Google's public favicon service and scaled to 96 px. They are the
+trademarks of their owners and are shown only to identify the bank a user chooses. They ship inside the app, so no
+request is made to Google or the bank when the list is opened.
+
+Account lookups use two free public services, sending only the code being checked:
+- openiban.com (IBAN → bank name and BIC, for DE, AT, CH, NL, BE, LU, LI);
+- ifsc.razorpay.com (Razorpay's open IFSC directory, IFSC → bank and branch, for India).

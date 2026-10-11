@@ -29,6 +29,11 @@ public final class BankPickerSheet {
     public interface OnPicked { void picked(BankDirectory.Bank bank); }
 
     public static void show(Activity host, String initialQuery, OnPicked cb) {
+        show(host, "NG", initialQuery, cb);
+    }
+
+    /** The banks and payment apps of one country (ISO code, or "OTHER"). */
+    public static void show(Activity host, String country, String initialQuery, OnPicked cb) {
         new Thread(() -> BankDirectory.refreshIfStale(host.getApplicationContext())).start();
         BottomSheetDialog sheet = com.harvana.app.p2p.ThemedDialogs.sheet(host);
         LinearLayout root = new LinearLayout(host);
@@ -38,7 +43,8 @@ public final class BankPickerSheet {
         root.setPadding(p, p, p, 0);
 
         TextView title = new TextView(host);
-        title.setText("Choose your bank");
+        BankDirectory.Country k = BankDirectory.country(host, country);
+        title.setText(k.flag() + "  Banks in " + k.name);
         title.setTextSize(18);
         title.setTypeface(null, Typeface.BOLD);
         title.setTextColor(UiColors.textPrimary());
@@ -67,10 +73,10 @@ public final class BankPickerSheet {
         list.setAdapter(adapter);
         root.addView(list, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (host.getResources().getDisplayMetrics().heightPixels * 0.62f)));
 
-        adapter.set(BankDirectory.search(host, search.getText().toString()));
+        adapter.set(rows(host, country, search.getText().toString()));
         search.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
-            @Override public void onTextChanged(CharSequence s, int a, int b, int c) { adapter.set(BankDirectory.search(host, s.toString())); }
+            @Override public void onTextChanged(CharSequence s, int a, int b, int c) { adapter.set(rows(host, country, s.toString())); }
             @Override public void afterTextChanged(Editable s) {}
         });
 
@@ -78,6 +84,24 @@ public final class BankPickerSheet {
         sheet.getBehavior().setState(BottomSheetBehavior.STATE_EXPANDED);
         sheet.getBehavior().setSkipCollapsed(true);
         sheet.show();
+    }
+
+    /** The matches, plus a last row to use the typed name as it is, for a bank that isn't listed. */
+    private static List<BankDirectory.Bank> rows(Activity host, String country, String typed) {
+        List<BankDirectory.Bank> out = new ArrayList<>(BankDirectory.search(host, country, typed));
+        String t = typed == null ? "" : typed.trim();
+        if (t.length() >= 2) {
+            boolean exact = false;
+            for (BankDirectory.Bank b : out) if (b.name.equalsIgnoreCase(t) || b.display().equalsIgnoreCase(t)) { exact = true; break; }
+            if (!exact) {
+                BankDirectory.Bank own = new BankDirectory.Bank();
+                own.name = t;
+                own.country = country;
+                own.kind = "custom";
+                out.add(own);
+            }
+        }
+        return out;
     }
 
     private static final class Adapter extends RecyclerView.Adapter<Adapter.Holder> {
@@ -116,8 +140,15 @@ public final class BankPickerSheet {
 
         @Override public void onBindViewHolder(Holder h, int pos) {
             BankDirectory.Bank b = items.get(pos);
+            if ("custom".equals(b.kind)) {
+                h.name.setText("Use \"" + b.name + "\"");
+                h.meta.setText("My bank isn't in the list");
+                BankLogo.into(h.logo, b);
+                h.itemView.setOnClickListener(v -> cb.picked(b));
+                return;
+            }
             h.name.setText(b.display());
-            String meta = b.shortName.isEmpty() ? b.kindLabel() : b.name;
+            String meta = b.shortName.isEmpty() || b.shortName.equals(b.name) ? b.kindLabel() : b.name;
             if (!b.ussd.isEmpty()) meta += " · " + b.ussd;
             h.meta.setText(meta);
             BankLogo.into(h.logo, b);

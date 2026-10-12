@@ -223,7 +223,7 @@ public class HusdActivity extends AppCompatActivity {
         }));
         root.addView(sent);
         long depFee = bridgeFee(chain);
-        root.addView(text("Transport fare on " + chainName(chain) + ": " + HusdClient.format(depFee) + " " + sym
+        root.addView(text("tFare on " + chainName(chain) + ": " + HusdClient.format(depFee) + " " + sym
                 + ", taken from the deposit (twice that network's gas, for forwarding it into the vault). Send more than that.",
                 12, false, UiColors.textSecondary()));
         root.addView(text("Minimum deposit 1 " + reserve + ". Each deposit address is yours alone and never changes.",
@@ -297,7 +297,7 @@ public class HusdActivity extends AppCompatActivity {
 
     private String feeText(boolean withdrawal) {
         int free = bal.optInt("freeTransfersLeft");
-        String base = "HARV transport fare if you hold HARV, otherwise " + HusdClient.format(fee("transferPaidInHusdRaw", 20_000L)) + " " + sym;
+        String base = "HARV tFare if you hold HARV, otherwise " + HusdClient.format(fee("transferPaidInHusdRaw", 20_000L)) + " " + sym;
         return !withdrawal && free > 0 ? "Free (" + free + " free transfers left) if paid in " + sym + "; " + base : base;
     }
 
@@ -321,8 +321,8 @@ public class HusdActivity extends AppCompatActivity {
         String one = sym;
         feesTable.clear()
                 .section("Sending on Harvana")
-                .row("Transport fare (with HARV)", "HARV")
-                .row("Transport fare (no HARV)", HusdClient.format(fee("transferPaidInHusdRaw", 20_000L)) + " " + one)
+                .row("tFare (with HARV)", "HARV")
+                .row("tFare (no HARV)", HusdClient.format(fee("transferPaidInHusdRaw", 20_000L)) + " " + one)
                 .row("Free transfers", "3")
                 .section("Deposits and withdrawals (" + reserve + ")")
                 .row("Deposit or withdraw on Base", HusdClient.format(bridgeFee("BASE")) + " " + one)

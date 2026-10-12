@@ -168,7 +168,7 @@ public final class P2PTradeRouter {
 						feeTxHash, _wrap(cb)));
 					}
 					@Override public void onError(String code, String msg) {
-						callback.onError("Transport fare not paid. Every action needs a small fee in HARV from your wallet. " + (msg == null ? "" : msg));
+						callback.onError("tFare not paid. Every action needs a small fee in HARV from your wallet. " + (msg == null ? "" : msg));
 					}
 				});
 			}

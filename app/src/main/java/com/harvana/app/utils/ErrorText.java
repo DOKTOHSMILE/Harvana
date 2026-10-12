@@ -172,13 +172,13 @@ public final class ErrorText {
         WORDS.put("INVALID_ADDRESS", "That isn't a valid Harvana address.");
         WORDS.put("INVALID_AMOUNT", "Enter an amount greater than zero.");
         WORDS.put("AMOUNT_TOO_SMALL", "That amount is too small.");
-        WORDS.put("INSUFFICIENT_BALANCE", "Not enough HARV in this wallet for this and its transport fare.");
-        WORDS.put("INSUFFICIENT_HARV", "Not enough HARV in this wallet for this and its transport fare.");
+        WORDS.put("INSUFFICIENT_BALANCE", "Not enough HARV in this wallet for this and its tFare.");
+        WORDS.put("INSUFFICIENT_HARV", "Not enough HARV in this wallet for this and its tFare.");
         WORDS.put("SENDER_ADDRESS_FROZEN", "This wallet is frozen and can't send right now.");
         WORDS.put("RESERVED_MEMO_PREFIX", "That note is reserved by the network. Use a different note.");
         WORDS.put("MEMO_TOO_LONG", "The note is too long.");
-        WORDS.put("ACTION_FEE_MISSING", "The small transport fare for this action wasn't paid. Make sure the wallet holds some HARV and try again.");
-        WORDS.put("ACTION_FEE_NOT_FOUND", "The transport fare for this action hasn't arrived yet. Try again in a moment.");
+        WORDS.put("ACTION_FEE_MISSING", "The small tFare for this action wasn't paid. Make sure the wallet holds some HARV and try again.");
+        WORDS.put("ACTION_FEE_NOT_FOUND", "The tFare for this action hasn't arrived yet. Try again in a moment.");
         WORDS.put("UNKNOWN_ASSET", "The network doesn't know that coin.");
         // swaps and vaults
         WORDS.put("PRICE_MOVED", "The price moved. Check the new estimate and try again.");

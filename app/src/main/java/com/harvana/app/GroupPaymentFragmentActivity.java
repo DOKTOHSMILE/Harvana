@@ -1087,7 +1087,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
                 rows.add(new String[]{"Wallet", groupWalletAddress});
                 rows.add(new String[]{"From", fromAddr});
                 rows.add(new String[]{"Schedule", frequency});
-                rows.add(new String[]{"Transport fare", "Taken from your wallet when this is sent"});
+                rows.add(new String[]{"tFare", "Taken from your wallet when this is sent"});
                 android.content.Context host = getActivity() != null ? getActivity() : getContext();
                 if (host == null) return;
                 com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(host,

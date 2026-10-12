@@ -84,7 +84,9 @@ public final class BrowserBar {
         ImageView iv = new ImageView(c);
         iv.setImageResource(icon);
         iv.setContentDescription(label);
-        iv.setScaleType(ImageView.ScaleType.CENTER);
+        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);                  // every icon drawn at 24dp, whatever its own size
+        int pad = dp(c, 10);
+        iv.setPadding(pad, pad, pad, pad);
         iv.setColorFilter(UiColors.textPrimary());
         android.util.TypedValue tv = new android.util.TypedValue();
         if (c.getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, tv, true)) iv.setBackgroundResource(tv.resourceId);

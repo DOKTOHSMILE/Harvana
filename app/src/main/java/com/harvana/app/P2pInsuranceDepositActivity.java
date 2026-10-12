@@ -484,7 +484,7 @@ public class P2pInsuranceDepositActivity extends AppCompatActivity {
 		rows.add(new String[]{"From", "Your wallet"});
 		rows.add(new String[]{"To", "Your insurance deposit"});
 		rows.add(new String[]{"For", "Collateral that stays locked while you trade"});
-		rows.add(new String[]{"Transport fare", "Taken when the deposit is sent"});
+		rows.add(new String[]{"tFare", "Taken when the deposit is sent"});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
 		"Lock insurance deposit", BalanceFormatter.smart(amount), rows, () -> {
 			tv_deposit_error.setVisibility(View.GONE);

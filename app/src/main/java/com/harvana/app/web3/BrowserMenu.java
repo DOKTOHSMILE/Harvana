@@ -85,7 +85,8 @@ public final class BrowserMenu {
         boolean saved = BrowserPrefs.isBookmarked(c, url);
         star.setImageResource(saved ? R.drawable.ic_br_bookmark_on : R.drawable.ic_br_bookmark);
         star.setColorFilter(saved ? UiColors.accent() : UiColors.textPrimary());
-        star.setScaleType(ImageView.ScaleType.CENTER);
+        star.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        star.setPadding(dp(10), dp(10), dp(10), dp(10));
         star.setContentDescription("Bookmark");
         star.setOnClickListener(v -> {
             if (url.isEmpty()) return;
@@ -131,7 +132,8 @@ public final class BrowserMenu {
         t.setPadding(dp(2), dp(10), dp(2), dp(10));
         ImageView iv = new ImageView(c);
         iv.setImageResource(icon);
-        iv.setScaleType(ImageView.ScaleType.CENTER);
+        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);                  // 24dp icon in a 48dp circle
+        iv.setPadding(dp(12), dp(12), dp(12), dp(12));
         iv.setColorFilter(on ? UiColors.onAccent() : UiColors.textPrimary());
         GradientDrawable bg = new GradientDrawable();
         bg.setShape(GradientDrawable.OVAL);
@@ -215,7 +217,8 @@ public final class BrowserMenu {
             ImageView del = new ImageView(c);
             del.setImageResource(R.drawable.ic_dismiss_circle_line);
             del.setColorFilter(UiColors.textTertiary());
-            del.setScaleType(ImageView.ScaleType.CENTER);
+            del.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            del.setPadding(dp(8), dp(8), dp(8), dp(8));
             del.setContentDescription("Remove");
             del.setOnClickListener(v -> { remove.run(o); list.removeView(row); });
             row.addView(del, new LinearLayout.LayoutParams(dp(36), dp(36)));

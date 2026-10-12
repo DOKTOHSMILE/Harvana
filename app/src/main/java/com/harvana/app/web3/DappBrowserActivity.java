@@ -611,7 +611,7 @@ public class DappBrowserActivity extends AppCompatActivity {
                 if (from == null || to == null || from.equals(to) || amt <= 0 || min <= 0) { bad(id); return; }
                 rows.add(new String[]{"You pay", fmt(amt, from)});
                 rows.add(new String[]{"You get at least", fmt(min, to)});
-                reviewAsync("Swap", fmt(amt, from), rows, id, r -> com.harvana.app.sync.NodeGroupClient.swap(this, hv, from, to, amt, min, cb(r)));
+                withFare(2, false, rows, id, () -> reviewAsync("Swap", fmt(amt, from), rows, id, r -> com.harvana.app.sync.NodeGroupClient.swap(this, hv, from, to, amt, min, cb(r))));
                 return;
             }
             case "addLiquidity": {
@@ -622,8 +622,8 @@ public class DappBrowserActivity extends AppCompatActivity {
                 rows.add(new String[]{"Pool", sym(asset) + " / HARV"});
                 rows.add(new String[]{"HARV", fmt(h, "HARV")});
                 rows.add(new String[]{sym(asset), fmt(c, asset)});
-                reviewAsync(listing ? "List coin" : "Add liquidity", fmt(c, asset), rows, id,
-                        r -> com.harvana.app.sync.NodeGroupClient.swapAdd(this, hv, asset, h, c, cb(r)));
+                withFare(3, false, rows, id, () -> reviewAsync(listing ? "List coin" : "Add liquidity", fmt(c, asset), rows, id,
+                        r -> com.harvana.app.sync.NodeGroupClient.swapAdd(this, hv, asset, h, c, cb(r))));
                 return;
             }
             case "removeLiquidity": {
@@ -632,7 +632,7 @@ public class DappBrowserActivity extends AppCompatActivity {
                 if (asset == null || "HARV".equals(asset) || shares <= 0) { bad(id); return; }
                 rows.add(new String[]{"Pool", sym(asset) + " / HARV"});
                 rows.add(new String[]{"Shares", String.format(java.util.Locale.US, "%,d", shares)});
-                reviewAsync("Remove liquidity", "", rows, id, r -> com.harvana.app.sync.NodeGroupClient.swapRemove(this, hv, asset, shares, cb(r)));
+                withFare(2, true, rows, id, () -> reviewAsync("Remove liquidity", "", rows, id, r -> com.harvana.app.sync.NodeGroupClient.swapRemove(this, hv, asset, shares, cb(r))));
                 return;
             }
             case "stake": {
@@ -681,6 +681,21 @@ public class DappBrowserActivity extends AppCompatActivity {
     }
 
     private void bad(int id) { release(); error(id, -32602, "Invalid params."); }
+
+    /** Adds the tFare row (movements × one movement's tFare, read from the node), then shows the review. */
+    private void withFare(int movements, boolean upTo, List<String[]> rows, int id, Runnable then) {
+        com.harvana.app.sync.NodeGroupClient.transport(new com.harvana.app.sync.NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject j) {
+                long one = j.optLong("perMovementRaw", 0);
+                runOnUiThread(() -> {
+                    if (busyId != id) return;
+                    rows.add(new String[]{"tFare", (upTo ? "Up to " : "") + fmt(one * movements, "HARV") + " · " + movements + " movements"});
+                    then.run();
+                });
+            }
+            @Override public void onError(String e) { runOnUiThread(() -> { release(); error(id, -32603, com.harvana.app.utils.ErrorText.plain(e)); }); }
+        });
+    }
 
     private com.harvana.app.sync.NodeGroupClient.Callback cb(Reply r) {
         return new com.harvana.app.sync.NodeGroupClient.Callback() {
@@ -778,7 +793,7 @@ public class DappBrowserActivity extends AppCompatActivity {
                     rows.add(new String[]{"Network", n.name});
                     rows.add(new String[]{"Function", data.length() >= 10 ? data.substring(0, 10) : "Transfer"});
                     if (data.length() > 2) rows.add(new String[]{"Data", ((data.length() - 2) / 2) + " bytes"});
-                    rows.add(new String[]{"Transport fare (max)", ether(fee) + " " + sym});
+                    rows.add(new String[]{"Network fee (max)", ether(fee) + " " + sym});
                     rows.add(new String[]{"Total (max)", ether(value.add(fee)) + " " + sym});
                     review("Send transaction", ether(value) + " " + sym, rows, id, () -> Web3Signer.send(this, n, account, tx, g[0], g[1]));
                 });
@@ -867,6 +882,7 @@ public class DappBrowserActivity extends AppCompatActivity {
         ImageView iv = new ImageView(this);
         iv.setImageResource(res);
         iv.setPadding(dp(8), dp(8), dp(8), dp(8));
+        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
         iv.setColorFilter(UiColors.textSecondary());
         return iv;
     }

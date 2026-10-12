@@ -208,7 +208,7 @@
 								android:id="@+id/textview44"
 								android:layout_width="0dp"
 								android:layout_height="wrap_content"
-								android:text="Transport fare"
+								android:text="tFare"
 								android:textSize="11sp"
 								android:layout_weight="1" />
 							<TextView

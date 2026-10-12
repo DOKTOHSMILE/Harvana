@@ -330,7 +330,7 @@ public final class NodePayActions {
         rows.add(new String[]{"To", to == null || to.isEmpty() ? escrow(c) : to});
         if (detail != null && !detail.isEmpty()) rows.add(new String[]{"For", detail});
         rows.add(new String[]{"From", "Your wallet"});
-        rows.add(new String[]{"Transport fare", "Taken from your wallet when this is sent"});
+        rows.add(new String[]{"tFare", "Taken from your wallet when this is sent"});
         return rows;
     }
 

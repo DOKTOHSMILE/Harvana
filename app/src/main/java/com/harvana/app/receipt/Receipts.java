@@ -47,7 +47,7 @@ public final class Receipts {
         r.timestamp = timestamp;
         r.reference = txHash == null ? "" : txHash;
         r.section("Parties").row("From", from).row("To", to).row("Memo / note", memo);
-        r.section("Fees").row("Transport fare", fee).row("Burned", burned);
+        r.section("Fees").row("tFare", fee).row("Burned", burned);
         r.section("Network").mono("Transaction hash", txHash).row("Block", block > 0 ? String.valueOf(block) : "Pending")
                 .row("Confirmations", confirmations > 0 ? confirmations + "+" : "0 (pending)").row("Nonce", String.valueOf(nonce));
         return r;

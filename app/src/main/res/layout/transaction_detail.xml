@@ -236,7 +236,7 @@
 								android:layout_width="0dp"
 								android:layout_height="wrap_content"
 								android:layout_weight="1"
-								android:text="Transport fare"
+								android:text="tFare"
 								android:textColor="@color/colorTextSecondary"
 								android:textSize="15sp" />
 							<TextView

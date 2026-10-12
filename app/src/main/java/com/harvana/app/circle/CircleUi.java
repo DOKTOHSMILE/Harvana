@@ -131,7 +131,7 @@ public final class CircleUi {
         if (com.harvana.app.utils.ErrorText.is(e, "NO_CONTRIBUTION_DUE_ON_OWN_PAYOUT_ROUND")) return "It's your turn to be paid this round, so nothing is due from you.";
         if (com.harvana.app.utils.ErrorText.is(e, "FORMATION_DEADLINE_EXPIRED")) return "This circle ran out of time to fill.";
         if (com.harvana.app.utils.ErrorText.is(e, "MEMBER_NOT_ELIGIBLE_TO_CONTRIBUTE")) return "Your place in this circle can't pay right now.";
-        if (com.harvana.app.utils.ErrorText.is(e, "MAX_FEE_TOO_LOW")) return "The transport fare changed. Please try again.";
+        if (com.harvana.app.utils.ErrorText.is(e, "MAX_FEE_TOO_LOW")) return "The tFare changed. Please try again.";
         if (com.harvana.app.utils.ErrorText.is(e, "LOCK_TEMPLATE_EXPIRED") || com.harvana.app.utils.ErrorText.is(e, "NO_PENDING_LOCK")) return "That step expired. Start the action again.";
         if (e.contains("SIGNING THE LOCK FAILED")) return "The action was accepted but your phone couldn't finish signing the payment. Open the circle again to retry.";
         return error;

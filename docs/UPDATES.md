@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): tFare everywhere, tFare on every review sheet, browser icons one size
+
+- **Name:** every Harvana "Transport fare" / gas label in the app is now **tFare** (owner). Fees on other chains keep their own names (Network fee, Gas fee for Ethereum-type chains).
+- **Review sheet** (`PaymentConfirmSheet`):
+  - every Harvana action shows its tFare;
+  - when the screen did not give one, the current tFare of one movement is read from the node (`GET /api/v1/swap/transport`);
+  - the tFare row is always visible, never behind "See more".
+- **Website actions:** swap shows 2 movements, add liquidity or list 3, remove liquidity up to 2. Stake, unstake and claim show 1.
+- **Browser icons:** the bottom bar, menu tiles, find bar and top bar draw every icon at 24dp.
+
 ## 12 Oct 2026 (night): receipt crash on swap and vault transactions fixed
 
 - Opening the receipt of a transaction whose memo the app had no name for (for example `SWAP_IN:…`, `SWAP_FARE:…`, `VAULT_LOCK:…`) crashed (`TxKind.describe`, null kind).

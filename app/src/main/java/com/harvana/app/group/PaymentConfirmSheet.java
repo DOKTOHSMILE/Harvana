@@ -50,7 +50,7 @@ public final class PaymentConfirmSheet {
 		if (memo != null && !memo.trim().isEmpty()) {
 			rows.add(new String[]{"For", memo.trim()});
 		}
-		rows.add(new String[]{"Transport fare", feeDisplay != null && !feeDisplay.trim().isEmpty()
+		rows.add(new String[]{"tFare", feeDisplay != null && !feeDisplay.trim().isEmpty()
 				? feeDisplay.trim() : "Taken when this is sent"});
 		present(context, title, com.harvana.app.wallet.BalanceFormatter.smart(amountHarv), rows, false,
 				() -> { if (onConfirm != null) onConfirm.onConfirmed(); });
@@ -92,6 +92,22 @@ public final class PaymentConfirmSheet {
 			}
 		}
 		if (purpose == null) purpose = hideAmount ? heading : heading;
+
+		// Every Harvana action shows its tFare. When the caller gave none, the current one is read from the node.
+		boolean hasFee = false, otherNetwork = false;
+		for (String[] f : facts) {
+			String l = f[0].toLowerCase(Locale.US);
+			if (l.contains("fee") || l.contains("tfare") || l.contains("gas")) hasFee = true;
+			if (l.equals("network") && !f[1].startsWith("Harvana")) otherNetwork = true;
+		}
+		final boolean fetchFare = !hasFee && !otherNetwork;
+		if (fetchFare) facts.add(new String[]{"tFare", "…"});
+		// The tFare row is never hidden behind "See more".
+		List<String[]> ordered = new ArrayList<>();
+		for (String[] f : facts) if (!isFee(f[0])) ordered.add(f);
+		int feeAt = Math.min(3, ordered.size());
+		for (String[] f : facts) if (isFee(f[0])) ordered.add(feeAt++, f);
+		facts = ordered;
 
 		int surface = color(context, R.color.colorSurface);
 		int primary = color(context, R.color.colorTextPrimary);
@@ -159,8 +175,23 @@ public final class PaymentConfirmSheet {
 
 		root.addView(statusRow(context, "Waiting for you", warning, d, secondary));
 
-		int preview = Math.min(3, facts.size());
-		for (int i = 0; i < preview; i++) root.addView(fact(context, facts.get(i)[0], facts.get(i)[1], secondary, primary, d));
+		int preview = Math.min(feeAt, facts.size());
+		TextView fareValue = null;
+		for (int i = 0; i < preview; i++) {
+			View row = fact(context, facts.get(i)[0], facts.get(i)[1], secondary, primary, d);
+			if (fetchFare && "tFare".equals(facts.get(i)[0])) fareValue = (TextView) ((LinearLayout) row).getChildAt(1);
+			root.addView(row);
+		}
+		if (fareValue != null) {
+			final TextView fv = fareValue;
+			com.harvana.app.sync.NodeGroupClient.transport(new com.harvana.app.sync.NodeGroupClient.Callback() {
+				@Override public void onSuccess(org.json.JSONObject j) {
+					long raw = j.optLong("perMovementRaw", 0);
+					fv.post(() -> fv.setText(raw > 0 ? com.harvana.app.wallet.BalanceFormatter.smart(raw / 1e8) + " HARV" : "—"));
+				}
+				@Override public void onError(String e) { fv.post(() -> fv.setText("—")); }
+			});
+		}
 
 		LinearLayout extra = new LinearLayout(context);
 		extra.setOrientation(LinearLayout.VERTICAL);
@@ -301,6 +332,11 @@ public final class PaymentConfirmSheet {
 		String l = label.toLowerCase(Locale.US);
 		return l.equals("for") || l.equals("what this pays for") || l.equals("what this is for")
 				|| l.equals("you are authorizing") || l.equals("this does") || l.equals("note");
+	}
+
+	private static boolean isFee(String label) {
+		String l = label == null ? "" : label.toLowerCase(Locale.US);
+		return l.contains("tfare") || l.contains("fee") || l.contains("gas");
 	}
 
 	private static View fact(Context ctx, String name, String value, int labelColor, int valueColor, float d) {

@@ -91,7 +91,9 @@ public final class FindBar {
         ImageView iv = new ImageView(c);
         iv.setImageResource(icon);
         iv.setContentDescription(label);
-        iv.setScaleType(ImageView.ScaleType.CENTER);
+        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        int pad = Math.round(8 * c.getResources().getDisplayMetrics().density);
+        iv.setPadding(pad, pad, pad, pad);
         iv.setColorFilter(UiColors.textPrimary());
         iv.setOnClickListener(v -> r.run());
         return iv;

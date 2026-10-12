@@ -904,9 +904,9 @@ public class SendAssetActivity extends AppCompatActivity {
 		rows.add(new String[]{"From", mine});
 		rows.add(new String[]{"Network", "Harvana · " + sym});
 		if (!memo.isEmpty()) rows.add(new String[]{"Note", memo});
-		rows.add(new String[]{"Transport fare", free > 0
-				? "Free (" + free + " free left), or HARV transport fare if you hold HARV"
-				: "HARV transport fare if you hold HARV, otherwise a small fee in " + sym});
+		rows.add(new String[]{"tFare", free > 0
+				? "Free (" + free + " free left), or HARV tFare if you hold HARV"
+				: "HARV tFare if you hold HARV, otherwise a small fee in " + sym});
 		String shown = com.harvana.app.husd.HusdClient.format(units) + " " + sym;
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send " + sym, shown, rows, () -> {
 			if (isProcessingSend) return;
@@ -1075,7 +1075,7 @@ public class SendAssetActivity extends AppCompatActivity {
 							info.title = "Transfer successful";
 							info.amount = _formatUIBalance(reqAmount) + " " + symbol;
 							info.rows = new String[][] {{"To", recipient}, {"From", fromAddress == null ? "" : fromAddress},
-									{"Transport fare", _formatUIBalance(prepared.feeHarv) + " " + symbol}, {"Transaction", hash}};
+									{"tFare", _formatUIBalance(prepared.feeHarv) + " " + symbol}, {"Transaction", hash}};
 							info.txHash = hash;
 							info.note = "The network has accepted it. It shows as confirmed once the next block has it.";
 							com.harvana.app.tx.PaymentTracker.success(info);

@@ -111,6 +111,9 @@ public final class NodeGroupClient {
 
     /** Every switched-on coin's pool: harvRaw, coinRaw, shares, open, coinRawPerHarv. */
     public static void swapPools(Callback cb) { read("/api/v1/swap/pools", cb); }
+
+    /** The tFare of one movement right now (a normal transfer's), {perMovementRaw, swapFareRaw, …}. */
+    public static void transport(Callback cb) { read("/api/v1/swap/transport", cb); }
     /** What {@code amountRaw} of {@code from} gets of {@code to} now: outRaw, priceImpactBps, feeBps, viaHarvRaw. */
     public static void swapQuote(String from, String to, long amountRaw, Callback cb) {
         HarvanaNodeClient.nodeGet("/api/v1/swap/quote?from=" + from + "&to=" + to + "&amountRaw=" + amountRaw, new HarvanaNodeClient.JsonCallback() {
@@ -740,7 +743,7 @@ public final class NodeGroupClient {
                     if (review != null) for (String[] r : review.rows) {
                         if (r == null || r.length < 2 || r[0] == null) continue;
                         String label = r[0].trim();
-                        if ("Transport fare".equalsIgnoreCase(label)) continue;          // the fee is its own line on the receipt
+                        if ("tFare".equalsIgnoreCase(label)) continue;          // the fee is its own line on the receipt
                         if ("From".equalsIgnoreCase(label)) { hasFrom = true; rows.add(new String[]{"From", address}); continue; }
                         rows.add(r);
                     }
@@ -814,7 +817,7 @@ public final class NodeGroupClient {
                 new com.harvana.app.tx.TransactionRouter.RouterCallback() {
                     @Override public void onSuccess(String txHash) { next.go(txHash); }
                     @Override public void onError(String code, String msg) {
-                        cb.onError("Transport fare not paid. Every action needs a small fee in HARV from your wallet. " + (msg == null ? "" : msg));
+                        cb.onError("tFare not paid. Every action needs a small fee in HARV from your wallet. " + (msg == null ? "" : msg));
                     }
                 });
     }

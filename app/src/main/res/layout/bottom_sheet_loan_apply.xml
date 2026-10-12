@@ -119,7 +119,7 @@
 							android:id="@+id/textview31"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:text="Est. transport fare"
+							android:text="Est. tFare"
 							android:layout_weight="1"
 							android:textSize="14sp"
 							android:focusable="false" />
@@ -160,7 +160,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="6dp"
-						android:text="The transport fare above is deducted from the principal you receive, not billed on top."
+						android:text="The tFare above is deducted from the principal you receive, not billed on top."
 						android:textSize="12sp"
 						android:focusable="false" />
 				</LinearLayout>
@@ -422,7 +422,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="2dp"
-				android:text="If approved, principal minus the transport fare is sent to this wallet."
+				android:text="If approved, principal minus the tFare is sent to this wallet."
 				android:textSize="12sp"
 				android:focusable="false" />
 		</LinearLayout>

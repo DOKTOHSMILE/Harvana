@@ -708,7 +708,7 @@ public class P2pExpressActivity extends AppCompatActivity {
 				: matchedPosterAddress.substring(0, 8) + "…" + matchedPosterAddress.substring(matchedPosterAddress.length() - 4)});
 		rows.add(new String[]{"Price", "1 HARV ≈ " + P2pMoney.fiat(matchedPrice, ccy)});
 		rows.add(new String[]{"Fiat", P2pMoney.fiat(harvAmount * matchedPrice, ccy)});
-		rows.add(new String[]{"Transport fare", "Set by the node when this trade opens"});
+		rows.add(new String[]{"tFare", "Set by the node when this trade opens"});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
 		buyMode ? "Buy on express" : "Sell on express",
 		BalanceFormatter.smart(harvAmount), rows, () -> {

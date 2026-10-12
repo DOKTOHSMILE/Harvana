@@ -706,7 +706,7 @@ public class ReceiptActivity extends AppCompatActivity {
 			FileWriter writer = new FileWriter(csvFile);
 			
 			// 1. Write standard CSV Headers
-			writer.append("Date,TxHash,Status,Amount,Token,From,To,Transport Fare,Burn Amount,Memo,Block Number,Confirmations,Nonce\n");
+			writer.append("Date,TxHash,Status,Amount,Token,From,To,tFare,Burn Amount,Memo,Block Number,Confirmations,Nonce\n");
 			
 			// 2. Safely format data to prevent CSV column breakage
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());

@@ -109,8 +109,8 @@ public class SwapOrderActivity extends AppCompatActivity {
              .row("HARV received", amount("HARV", o.optLong("harvOutRaw")), UiColors.success())
              .row(sym(code) + " received", amount(code, o.optLong("coinOutRaw")), UiColors.success());
         }
-        t.section("Transport")
-         .row("Transport fare", amount("HARV", o.optLong("transportFareRaw")))
+        t.section("tFare")
+         .row("tFare", amount("HARV", o.optLong("transportFareRaw")))
          .row("Movements", String.valueOf(o.optInt("transportMovements")));
         t.section("Record")
          .row("Started", android.text.format.DateFormat.format("d MMM yyyy, HH:mm", o.optLong("at")))
@@ -123,7 +123,7 @@ public class SwapOrderActivity extends AppCompatActivity {
         tx.setPadding(dp(4), dp(18), 0, dp(6));
         root.addView(tx);
         InfoTable txs = new InfoTable(this);
-        addTx(txs, "Transport fare", o.optString("fareTx"));
+        addTx(txs, "tFare", o.optString("fareTx"));
         addTx(txs, "In", o.optString("inTx"));
         addTx(txs, "Coin in", o.optString("coinInTx"));
         addTx(txs, "Out", o.optString("outTx"));

@@ -46,7 +46,7 @@ public final class TxKind {
             String label = what.startsWith("STAKING_CLAIM") ? "claiming staking rewards" : what.startsWith("STAKING_UNSTAKE") ? "unstaking"
                     : what.startsWith("ACCUM_CLAIM") ? "a savings payout" : what.startsWith("CIRCLE_WITHDRAW") ? "withdrawing a bond"
                     : what.startsWith("FIXED_DISBURSE") ? "a goal payout" : what.startsWith("FIXED_") ? "a goal group action" : what.startsWith("GENLOAN") ? "a loan request" : what.startsWith("P2P_CANCEL") ? "cancelling a listing" : "an action";
-            return new TxKind("Transport fare", "For " + label, R.drawable.ic_tx_fee);
+            return new TxKind("tFare", "For " + label, R.drawable.ic_tx_fee);
         }
         // Stable-asset bridges (hUSD, hEUR, hNGN, …): the reserve token in from another network, or out to one.
         int us = m.indexOf('_');
@@ -79,7 +79,7 @@ public final class TxKind {
         if (m.startsWith("Loan disbursement") || m.startsWith("GENLOAN")) return new TxKind(incoming ? "Loan received" : "Loan paid out", "Group loan", R.drawable.ic_tx_loan);
         if (m.startsWith("Fixed month close")) return new TxKind(incoming ? "Group payout" : "Group payout sent", "Goal group", R.drawable.ic_tx_group);
         if (m.startsWith("LEARN_GIFT:")) return new TxKind(incoming ? "Gift received" : "Gift sent", "Learn Hub", R.drawable.ic_tx_gift);
-        if (m.startsWith("SWAP_FARE:")) return new TxKind("Transport fare", "Swap", R.drawable.ic_tx_fee);
+        if (m.startsWith("SWAP_FARE:")) return new TxKind("tFare", "Swap", R.drawable.ic_tx_fee);
         if (m.startsWith("SWAP_IN:")) return new TxKind("Swap", "Paid into the pool", R.drawable.icon_currency_exchange_twotone);
         if (m.startsWith("SWAP_OUT:")) return new TxKind(incoming ? "Swap received" : "Swap paid out", "Swap pool", R.drawable.icon_currency_exchange_twotone);
         if (m.startsWith("SWAP_REFUND:")) return new TxKind(incoming ? "Swap refunded" : "Swap refund", "Swap pool", R.drawable.icon_currency_exchange_twotone);

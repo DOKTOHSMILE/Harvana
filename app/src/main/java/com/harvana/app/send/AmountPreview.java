@@ -76,7 +76,7 @@ public final class AmountPreview {
         availRow = row(c, availLabel, availValue);
         valueLabel = cell(c, "Value", false); valueValue = cell(c, "", true);
         valueRow = row(c, valueLabel, valueValue);
-        TextView feeLabel = cell(c, "Transport fare", false); feeValue = cell(c, "", true);
+        TextView feeLabel = cell(c, "tFare", false); feeValue = cell(c, "", true);
         feeRow = row(c, feeLabel, feeValue);
         table.addView(availRow);
         table.addView(valueRow);
@@ -190,8 +190,8 @@ public final class AmountPreview {
                 @Override public void onSuccess(JSONObject j) {
                     long gas = j.optLong("estimatedGas", 0);
                     long kobo = j.isNull("estimatedKobo") ? 0 : j.optLong("estimatedKobo", 0);
-                    String f = "Transport fare " + coinText(gas / 1e8) + " HARV" + (kobo > 0 ? " (≈ ₦" + trim(kobo / 100d) + ")" : "");
-                    main.post(() -> { if (mine == seq) fee(f.replace("Transport fare ", "")); });
+                    String f = "tFare " + coinText(gas / 1e8) + " HARV" + (kobo > 0 ? " (≈ ₦" + trim(kobo / 100d) + ")" : "");
+                    main.post(() -> { if (mine == seq) fee(f.replace("tFare ", "")); });
                 }
                 @Override public void onError(String e) { }
             });

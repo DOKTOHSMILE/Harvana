@@ -597,7 +597,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         page.addView(t);
         LinearLayout cost = card();
         cost.addView(text("What it costs you", 14, true, UiColors.textPrimary()));
-        cost.addView(pair("Transport fare", CircleUi.harv(FEE_RAW)));
+        cost.addView(pair("tFare", CircleUi.harv(FEE_RAW)));
         cost.addView(pair("Locked now", "Nothing"));
         cost.addView(pair("Group wallet", "Made and held by the network. This phone never creates or holds one."));
         if (kind == Kind.ROTATING) cost.addView(pair("Then you join", "You join first and lock the same bond as everyone else."));
@@ -636,7 +636,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         final String wallet = WalletManager.getActiveWalletAddress(this);
         if (wallet == null || wallet.isEmpty() || WalletManager.loadPrivateKey(this, wallet) == null) {
             new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("You need a wallet first")
-                    .setMessage("The transport fare is paid from your wallet. Create or restore one, then try again.")
+                    .setMessage("The tFare is paid from your wallet. Create or restore one, then try again.")
                     .setPositiveButton("OK", null).show();
             return;
         }
@@ -651,7 +651,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
             return;
         }
         List<String[]> rows = new ArrayList<>(termRows());
-        rows.add(new String[] {"Transport fare", CircleUi.harv(FEE_RAW)});
+        rows.add(new String[] {"tFare", CircleUi.harv(FEE_RAW)});
         rows.add(new String[] {"Locked now", "Nothing"});
         rows.add(new String[] {"Group wallet", "Made and held by the network."});
         PaymentConfirmSheet.reviewThenAuthorize(this, "Create this group", CircleUi.harv(FEE_RAW), rows, () -> {

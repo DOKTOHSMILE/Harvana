@@ -91,6 +91,7 @@ public class SendAssetActivity extends AppCompatActivity {
 	private ImageView btnPaste;
 	private ImageView btnScan;
 	private EditText etAmount;
+	private com.harvana.app.send.AmountPreview amountPreview;
 	private EditText etMemo;
 	private TextView tvAvailable;
 	private ArrayList<HashMap<String, Object>> walletAssets = new ArrayList<>();
@@ -311,6 +312,19 @@ public class SendAssetActivity extends AppCompatActivity {
 			finish();
 			return;
 		}
+		// What the amount is worth and the node's fee, shown before signing; the amount can be typed in money or in the coin.
+		if (etAmount != null && tvAvailable != null) {
+			amountPreview = new com.harvana.app.send.AmountPreview(this, etAmount, tvAvailable, new com.harvana.app.send.AmountPreview.Source() {
+				private HashMap<String, Object> sel() {
+					int pos = spAsset == null ? -1 : spAsset.getSelectedItemPosition();
+					return pos >= 0 && pos < walletAssets.size() ? walletAssets.get(pos) : null;
+				}
+				@Override public String assetKey() { HashMap<String, Object> a = sel(); return a == null ? "HARV" : String.valueOf(a.get("assetKey")); }
+				@Override public String symbol() { HashMap<String, Object> a = sel(); return a == null ? "HARV" : String.valueOf(a.get("symbol")); }
+				@Override public String from() { HashMap<String, Object> a = sel(); return a != null && a.get("address") instanceof String ? String.valueOf(a.get("address")) : myAddress; }
+				@Override public String to() { return etRecipient == null ? "" : etRecipient.getText().toString().trim(); }
+			});
+		}
 		if (isGroupSend) {
 			if (getSupportActionBar() != null) getSupportActionBar().setTitle("Send from Group Wallet");
 			if (tvSubtitle != null) {
@@ -425,6 +439,7 @@ public class SendAssetActivity extends AppCompatActivity {
 						}
 					}
 					String key = String.valueOf(asset.get("assetKey"));
+					if (amountPreview != null) amountPreview.assetChanged();
 					if (etRecipient != null) etRecipient.setHint(_addressHint(key));
 					String from = asset.get("address") instanceof String ? String.valueOf(asset.get("address")) : "";
 					if (tvSubtitle != null && getIntent().getStringExtra("fromWalletAddress") == null) {
@@ -444,6 +459,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		if (btnSend != null) {
 			btnSend.setOnClickListener(view -> {
 				if (isProcessingSend) return; // Prevent rapid double-taps
+				if (amountPreview != null && !amountPreview.normalise()) return;   // typed in money: turn it into the coin amount first
 				
 				if (spAsset == null || walletAssets.isEmpty()) {
 					SketchwareUtil.showMessage(getApplicationContext(), "No asset selected.");

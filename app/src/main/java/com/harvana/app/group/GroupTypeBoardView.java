@@ -21,22 +21,27 @@ public final class GroupTypeBoardView {
 
     private GroupTypeBoardView() {}
 
-    /** Which missed days the member has picked to pay back. A tap on a red box toggles it; a long press starts picking. */
+    /**
+     * The days the member has picked to pay. Days are paid in order, so the picked set is always the earliest N unpaid
+     * days: picking another box adds the next open day, unpicking removes the latest one. That way what is shown is
+     * exactly what the node will mark paid.
+     */
     public static final class Selection {
         public final java.util.TreeSet<String> picked = new java.util.TreeSet<>();
         /** Called after every change so the screen can update its "Pay N days" bar. */
         public Runnable onChange;
-        void toggle(String iso) { if (!picked.remove(iso)) picked.add(iso); }
-        /** Days ahead are paid in order from today, so picking one picks every unpaid day up to it; unpicking one drops the later ones. */
-        void toggleForward(GroupTypeBoard.Board board, GroupTypeBoard.Cell cell) {
-            if (picked.contains(cell.isoDate)) {
-                for (GroupTypeBoard.Cell c : board.cells) if (c.forwardPayable && c.isoDate.compareTo(cell.isoDate) >= 0) picked.remove(c.isoDate);
-            } else {
-                for (GroupTypeBoard.Cell c : board.cells) if (c.forwardPayable && c.isoDate.compareTo(cell.isoDate) <= 0) picked.add(c.isoDate);
-            }
+        /** Pays what is picked now (set by the pay bar); a single tap on an unpaid box uses it. */
+        public Runnable payNow;
+        void grow(GroupTypeBoard.Board board) {
+            java.util.TreeSet<String> open = new java.util.TreeSet<>();
+            for (GroupTypeBoard.Cell c : board.cells) if (openDay(c) && !picked.contains(c.isoDate)) open.add(c.isoDate);
+            if (!open.isEmpty()) picked.add(open.first());
         }
+        void shrink() { if (!picked.isEmpty()) picked.remove(picked.last()); }
         public void clear() { picked.clear(); }
     }
+
+    static boolean openDay(GroupTypeBoard.Cell c) { return (c.backpayable || c.forwardPayable) && !c.isoDate.isEmpty(); }
 
     public static void fill(LinearLayout host, GroupTypeBoard.Board board, Click click) {
         fill(host, board, click, null);
@@ -66,8 +71,16 @@ public final class GroupTypeBoardView {
             int m = dp(c, dense ? 2 : 3);
             lp.setMargins(m, m, m, m);
             box.setOnClickListener(v -> {
-                // Picking several starts with a long press; while days are picked a tap adds or removes one. A lone tap pays that day.
+                // Picking several starts with a long press; while days are picked a tap adds or removes one.
                 if (pickable && !sel.picked.isEmpty()) { toggleCell(sel, board, cell); fill(host, board, click, sel); if (sel.onChange != null) sel.onChange.run(); return; }
+                // A lone tap on an unpaid day pays one day: the earliest open one, which is this box unless an earlier day is open.
+                if (pickable && sel.payNow != null) {
+                    sel.grow(board);
+                    fill(host, board, click, sel);
+                    if (sel.onChange != null) sel.onChange.run();
+                    sel.payNow.run();
+                    return;
+                }
                 if (click != null) click.onCell(cell);
             });
             if (pickable) box.setOnLongClickListener(v -> {
@@ -90,7 +103,7 @@ public final class GroupTypeBoardView {
     }
 
     private static void toggleCell(Selection sel, GroupTypeBoard.Board board, GroupTypeBoard.Cell cell) {
-        if (cell.forwardPayable) sel.toggleForward(board, cell); else sel.toggle(cell.isoDate);
+        if (sel.picked.contains(cell.isoDate)) sel.shrink(); else sel.grow(board);
     }
 
     public static void showDetail(Context c, GroupTypeBoard.Cell cell) {

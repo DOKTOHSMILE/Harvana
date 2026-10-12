@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * The strip under a savings calendar that appears once missed days are picked: how many, what they cost, Pay and Clear.
+ * The strip under a savings calendar that appears once days are picked (past, today or ahead): how many, what they cost, Pay and Clear.
  * The cost is the daily amount times the days picked, which is exactly what the node charges.
  */
 public final class BackpayBar {
@@ -67,12 +67,13 @@ public final class BackpayBar {
         go.setOnClickListener(v -> { if (!sel.picked.isEmpty()) pay.pay(new ArrayList<>(sel.picked)); });
         bar.addView(go);
 
+        sel.payNow = () -> { if (!sel.picked.isEmpty()) pay.pay(new ArrayList<>(sel.picked)); };
         final Runnable previous = sel.onChange;
         sel.onChange = () -> {
             int n = sel.picked.size();
             bar.setVisibility(n == 0 ? View.GONE : View.VISIBLE);
             title.setText(n + (n == 1 ? " day selected" : " days selected"));
-            sub.setText(String.format(Locale.US, "%s HARV to pay them", trim(dailyHarv * n)));
+            sub.setText(String.format(Locale.US, "%s HARV · earliest unpaid days first", trim(dailyHarv * n)));
             if (previous != null) previous.run();
         };
         return bar;

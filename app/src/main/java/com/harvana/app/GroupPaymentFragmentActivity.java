@@ -904,6 +904,10 @@ public class GroupPaymentFragmentActivity extends Fragment {
         }
 
         private void _onNodeCell(com.harvana.app.group.GroupTypeBoard.Cell cell) {
+                if (cell != null && cell.newGoal && getActivity() != null) {      // the "+ New goal" box on a goal group
+                        com.harvana.app.group.GoalGroupPanel.newGoalSheet(_payCtx());
+                        return;
+                }
                 if (cell != null && cell.payToday && nodeActionHost != null && nodeActionHost.getChildCount() > 0) {
                         nodeActionHost.getChildAt(0).performClick();
                         return;

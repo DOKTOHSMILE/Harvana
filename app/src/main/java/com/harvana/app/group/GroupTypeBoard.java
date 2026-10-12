@@ -490,20 +490,19 @@ public final class GroupTypeBoard {
             else if (iso.compareTo(todayIso) < 0) state = MISSED;
             else state = OPEN;
             String title = fullDate(ts, zone);
-            String body = title + "\n" + (paid ? "Saved." : state == TODAY ? "Due today. Tap to save it." : state == MISSED ? "Not saved. Tap to pay it back." : "Coming up.");
+            String body = title + "\n" + (paid ? "Saved." : state == TODAY ? "Due today. Tap to pay it." : state == MISSED ? "Not saved. Tap to pay it." : "Coming up. Tap to pay ahead.");
             Cell cell = new Cell(String.valueOf(c.get(Calendar.DAY_OF_MONTH)), MONTHS[c.get(Calendar.MONTH)], title, body, state, state == TODAY);
             cell.isoDate = iso;
-            cell.backpayable = state == MISSED && dated;
-            cell.forwardPayable = (state == TODAY || state == OPEN) && ongoingDaily;
+            // Any unpaid day can be picked, past, today or ahead. Days are paid in order (the node pays the earliest
+            // open days), so picking a later day moves the payment down onto the first open one.
+            cell.backpayable = !paid && dated && ongoingDaily;
+            cell.forwardPayable = false;
             cells.add(cell);
         }
-        boolean todayOpen = false;                                   // days ahead are paid from today, so none can be picked once today is saved
-        for (Cell c : cells) if (c.state == TODAY) todayOpen = true;
-        if (!todayOpen) for (Cell c : cells) c.forwardPayable = false;
         double savedHarv = line == null ? 0 : num(line, "amountPaidRaw", 0) / RAW;
         return new Board(ACCUMULATIVE, "SAVINGS STAMPS", "30-day savings line",
                 saved + " of 30 days saved · " + money(savedHarv),
-                "Each box is one day of the line. The date is written inside. Green is paid, red is missed. Tap a box to pay that day (red = pay it back, blue = today, grey = pay ahead from today). To pay several days, long-press a box, then tap more.",
+                "Each box is one day of the line, with the date inside. Green is paid, red is missed, blue is today. Tap an unpaid box to pay a day; long-press to pick several, past or ahead. Days are paid in order: the earliest unpaid day is always paid first, so no day can be skipped.",
                 6, "", cells);
     }
 

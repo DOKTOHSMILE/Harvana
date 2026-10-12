@@ -2,6 +2,25 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (latest): fee before signing, amounts in money, calendar days in order, new-goal box
+
+What the app does:
+- **Send shows the fee before you sign.** As you type the amount, the line under it shows:
+  - what the amount is worth;
+  - the network fee the node will charge (for HARV, the node's own estimate, about ₦5).
+- **Type the amount in money or in the coin.** Tap "Enter in ₦" (or your currency) and type ₦5,000, $5, …; the app shows how much of the coin that is and sends that. Tap again to go back to typing the coin. Prices used:
+  - HARV at the network's price;
+  - stable coins at their currency's rate;
+  - other coins at the market price.
+- **Savings calendar:**
+  - **Tap a paid box** to see that day's details.
+  - **Tap an unpaid box** to pay one day.
+  - **Long-press** to pick several days, past or ahead. You are no longer limited to missed days.
+  - **Days are paid in order.** You cannot skip a day: if you pick a later day while an earlier one is unpaid, the payment goes to the earliest unpaid day, and the boxes show exactly which days will be paid (node change).
+- **Goal board:** the "+ New goal" box opens the new-goal form for the admin. The other boxes show the deposit's details.
+
+What the owner does: deploy the node, then build and install the app.
+
 ## 12 Oct 2026 (later): your wallets show as you, device binding, profile group cards, custom coins
 
 What the app does:

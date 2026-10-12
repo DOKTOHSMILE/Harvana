@@ -209,14 +209,15 @@ public final class NodePayActions {
                 }).show();
     }
 
-    /** Pays back the picked missed days of the member's own savings line: review, PIN, then the signed back-pay. */
+    /** Pays the picked days of the member's own savings line (past, today or ahead): review, PIN, then the signed request. */
     public static void backpay(Ctx c, java.util.List<String> dates) {
         if (c.line == null || dates == null || dates.isEmpty()) return;
         long dailyRaw = num(c.line, "dailyAmountRaw");
         long total = dailyRaw * dates.size();
         String lineId = str(c.line, "lineId");
-        pay(c, "Pay back missed days", CircleUi.harv(total),
-                moneyRows(c, escrow(c), dates.size() + (dates.size() == 1 ? " missed day" : " missed days") + " at " + CircleUi.harv(dailyRaw) + " each"),
+        // The dates are the earliest unpaid days of the line, which are the ones the node pays (days go in order).
+        pay(c, dates.size() == 1 ? "Pay " + dates.get(0) : "Pay " + dates.size() + " days", CircleUi.harv(total),
+                moneyRows(c, escrow(c), android.text.TextUtils.join(", ", dates) + " · " + CircleUi.harv(dailyRaw) + " a day"),
                 () -> NodeGroupClient.backpayAccum(c.activity, c.me, c.nodeId, lineId, dates, result(c, "Paid back. It shows once the network confirms it.")));
     }
 

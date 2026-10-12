@@ -103,30 +103,46 @@ public final class GoalGroupPanel {
         boolean inOne = "ALL_AT_ONCE_AT_GOAL".equals(str(c.group, "disbursementRule"));
         boolean ready = inOne ? "COMPLETED".equals(str(c.group, "state")) : target > 0 && raised >= target;
         if (!ready) return;
-        box.addView(NodePayActions.button(c.activity, "Start a new goal", false, v -> {
-            LinearLayout form = new LinearLayout(c.activity);
-            form.setOrientation(LinearLayout.VERTICAL);
-            int p = CircleUi.dp(c.activity, 16);
-            form.setPadding(p, p, p, 0);
-            EditText name = new com.google.android.material.textfield.TextInputEditText(c.activity);
-            name.setHint("Name of the new goal");
-            form.addView(name);
-            EditText amount = new com.google.android.material.textfield.TextInputEditText(c.activity);
-            amount.setHint("Target amount");
-            amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-            form.addView(amount);
-            new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle("Start a new goal")
-                    .setMessage("Same members, rule and wallet, with its own ledger. Nobody has to join again.")
-                    .setView(form).setNegativeButton("Cancel", null)
-                    .setPositiveButton("Continue", (d, w) -> {
-                        String n = name.getText().toString().trim();
-                        long raw = CircleUi.toRaw(amount.getText().toString());
-                        if (n.isEmpty() || raw <= 0) { NodePayActions.toast(c, "Enter a name and a target."); return; }
-                        NodePayActions.pay(c, "Start a new goal", CircleUi.harv(raw),
-                                NodePayActions.moneyRows(c, NodePayActions.escrow(c), "New goal “" + n + "”. Nothing is locked."),
-                                () -> NodeGroupClient.startNextFixedGoal(c.activity, c.me, c.nodeId, raw, n, NodePayActions.result(c, "New goal started.")));
-                    }).show();
-        }));
+        box.addView(NodePayActions.button(c.activity, "Start a new goal", false, v -> newGoalSheet(c)));
+    }
+
+    /** The "Start a new goal" form. Also opened by the "+ New goal" box on the goal board. */
+    public static void newGoalSheet(NodePayActions.Ctx c) {
+        if (c == null || c.activity == null) return;
+        if (c.me.isEmpty() || !c.me.equalsIgnoreCase(str(c.group, "creatorAddress"))) {
+            NodePayActions.toast(c, "Only the group admin can start a new goal.");
+            return;
+        }
+        long target = num(c.group, "targetGoalAmountRaw");
+        long raised = Math.max(0L, num(c.group, "raisedAmountRaw") - num(c.group, "goalBaseRaisedRaw"));
+        boolean inOne = "ALL_AT_ONCE_AT_GOAL".equals(str(c.group, "disbursementRule"));
+        boolean ready = inOne ? "COMPLETED".equals(str(c.group, "state")) : target > 0 && raised >= target;
+        if (!ready) {
+            NodePayActions.toast(c, "A new goal can start once this goal is reached" + (inOne ? " and paid out." : "."));
+            return;
+        }
+        LinearLayout form = new LinearLayout(c.activity);
+        form.setOrientation(LinearLayout.VERTICAL);
+        int p = CircleUi.dp(c.activity, 16);
+        form.setPadding(p, p, p, 0);
+        EditText name = new com.google.android.material.textfield.TextInputEditText(c.activity);
+        name.setHint("Name of the new goal");
+        form.addView(name);
+        EditText amount = new com.google.android.material.textfield.TextInputEditText(c.activity);
+        amount.setHint("Target amount");
+        amount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        form.addView(amount);
+        new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle("Start a new goal")
+                .setMessage("Same members, rule and wallet, with its own ledger. Nobody has to join again.")
+                .setView(form).setNegativeButton("Cancel", null)
+                .setPositiveButton("Continue", (d, w) -> {
+                    String n = name.getText().toString().trim();
+                    long raw = CircleUi.toRaw(amount.getText().toString());
+                    if (n.isEmpty() || raw <= 0) { NodePayActions.toast(c, "Enter a name and a target."); return; }
+                    NodePayActions.pay(c, "Start a new goal", CircleUi.harv(raw),
+                            NodePayActions.moneyRows(c, NodePayActions.escrow(c), "New goal “" + n + "”. Nothing is locked."),
+                            () -> NodeGroupClient.startNextFixedGoal(c.activity, c.me, c.nodeId, raw, n, NodePayActions.result(c, "New goal started.")));
+                }).show();
     }
 
     // ── return everyone's money ────────────────────────────────────────────

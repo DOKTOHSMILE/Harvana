@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): Home buttons and coin search
+
+- **Receive, Send, P2P, Web3** (Home): smaller buttons, icon beside the name, one compact row.
+- **Search coins and Add** (Assets): both 44dp boxes of the same height. Add no longer overlaps the list.
+- App build only.
+
 ## 12 Oct 2026 (night): browser network selector
 
 - **Network chip** (dApp browser, top bar): larger, with the chain's icon, the chain's name and a down arrow.

@@ -38,50 +38,64 @@
 			android:layout_marginBottom="4dp"
 			android:gravity="center_vertical"
 			android:orientation="horizontal">
-		<com.google.android.material.textfield.TextInputLayout
+		<com.google.android.material.card.MaterialCardView
 			android:id="@+id/til_asset_search"
-			style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
 			android:layout_width="0dp"
-			android:layout_height="wrap_content"
+			android:layout_height="44dp"
 			android:layout_weight="1"
-			android:hint="Search coins"
-			app:boxCornerRadiusTopStart="14dp"
-			app:boxCornerRadiusTopEnd="14dp"
-			app:boxCornerRadiusBottomStart="14dp"
-			app:boxCornerRadiusBottomEnd="14dp"
-			app:boxStrokeColor="@color/colorAccent"
-			app:startIconDrawable="@drawable/icon_search_24"
-			app:startIconTint="@color/colorTextSecondary"
-			app:endIconMode="clear_text">
-			<com.google.android.material.textfield.TextInputEditText
-				android:id="@+id/et_asset_search"
+			app:cardBackgroundColor="@color/colorSurface"
+			app:cardCornerRadius="12dp"
+			app:cardElevation="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<LinearLayout
 				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:imeOptions="actionSearch"
-				android:inputType="text"
-				android:maxLines="1"
-				android:textSize="14sp"
-				android:textColor="@color/colorTextPrimary" />
-		</com.google.android.material.textfield.TextInputLayout>
-		<com.google.android.material.button.MaterialButton
+				android:layout_height="match_parent"
+				android:paddingStart="12dp"
+				android:paddingEnd="8dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<ImageView
+					android:layout_width="18dp"
+					android:layout_height="18dp"
+					android:src="@drawable/icon_search_24"
+					app:tint="@color/colorTextSecondary" />
+				<EditText
+					android:id="@+id/et_asset_search"
+					android:layout_width="0dp"
+					android:layout_height="match_parent"
+					android:layout_weight="1"
+					android:layout_marginStart="8dp"
+					android:background="@android:color/transparent"
+					android:hint="Search coins"
+					android:imeOptions="actionSearch"
+					android:inputType="text"
+					android:maxLines="1"
+					android:textSize="14sp"
+					android:textColor="@color/colorTextPrimary"
+					android:textColorHint="@color/colorTextTertiary" />
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+		<com.google.android.material.card.MaterialCardView
 			android:id="@+id/btn_add_coins"
-			style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-			android:layout_width="52dp"
-			android:layout_height="52dp"
+			android:layout_width="44dp"
+			android:layout_height="44dp"
 			android:layout_marginStart="8dp"
-			android:layout_marginTop="3dp"
-			android:insetTop="0dp"
-			android:insetBottom="0dp"
-			android:minWidth="0dp"
-			android:padding="0dp"
+			android:clickable="true"
+			android:focusable="true"
 			android:contentDescription="Add coins"
-			app:icon="@drawable/icon_add_circle_outline_round"
-			app:iconSize="24dp"
-			app:iconGravity="textStart"
-			app:iconPadding="0dp"
-			app:iconTint="@color/colorAccent"
-			app:cornerRadius="14dp"
-			app:strokeColor="@color/colorAccent" />
+			app:cardBackgroundColor="@color/colorSurface"
+			app:cardCornerRadius="12dp"
+			app:cardElevation="0dp"
+			app:strokeWidth="1dp"
+			app:strokeColor="@color/colorCardStroke">
+			<ImageView
+				android:layout_width="22dp"
+				android:layout_height="22dp"
+				android:layout_gravity="center"
+				android:src="@drawable/icon_add_circle_outline_round"
+				app:tint="@color/colorAccent" />
+		</com.google.android.material.card.MaterialCardView>
 		</LinearLayout>
 		<androidx.recyclerview.widget.RecyclerView
 			android:id="@+id/recyclerview1"

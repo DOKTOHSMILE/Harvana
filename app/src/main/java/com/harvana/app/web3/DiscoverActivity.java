@@ -9,7 +9,7 @@ import androidx.core.widget.NestedScrollView;
 import com.harvana.app.utils.AppBar;
 import com.harvana.app.utils.UiColors;
 
-/** Discover (from My Asset): Harvana Swap, Harvana Staking, Harvana Explorer and other Web3 sites. */
+/** Web3 (from My Asset): Harvana Swap, Harvana Staking, Harvana Explorer and other Web3 sites. */
 public class DiscoverActivity extends AppCompatActivity {
 
     private Web3Home home;
@@ -22,7 +22,7 @@ public class DiscoverActivity extends AppCompatActivity {
         scroll.setBackgroundColor(UiColors.background());
         scroll.setFillViewport(true);
         scroll.addView(home.view(), new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        AppBar.setContent(this, scroll, "Discover", "Web3").setNavigationOnClickListener(v -> finish());
+        AppBar.setContent(this, scroll, "Web3", "dApps").setNavigationOnClickListener(v -> finish());
     }
 
     @Override

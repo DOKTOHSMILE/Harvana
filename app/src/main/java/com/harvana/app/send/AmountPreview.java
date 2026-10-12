@@ -210,12 +210,10 @@ public final class AmountPreview {
             String code = FiatValueHelper.symbolToCurrencyCode(FxRates.symbol(c));
             double displayPerUsd = FxRates.perUsd(c, code);
             if ("HARV".equals(key)) {
-                com.harvana.app.p2p.P2pPriceReference.fetch((kobo, n) -> main.post(() -> {
-                    double ngnPerUsd = FxRates.perUsd(c, "NGN");
-                    double usd = kobo > 0 && !Double.isNaN(ngnPerUsd) && ngnPerUsd > 0 ? (kobo / 100d) / ngnPerUsd : Double.NaN;
-                    set(key, usd, displayPerUsd);
+                com.harvana.app.wallet.HarvPrice.get(q -> {
+                    set(key, com.harvana.app.wallet.HarvPrice.usd(c, q), displayPerUsd);
                     then.run();
-                }));
+                });
             } else if (com.harvana.app.husd.Stable.isStable(key)) {
                 double per = FxRates.perUsd(c, com.harvana.app.husd.Stable.currency(key));
                 set(key, Double.isNaN(per) || per <= 0 ? Double.NaN : 1d / per, displayPerUsd);

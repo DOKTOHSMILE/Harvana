@@ -442,16 +442,16 @@ public final class BrowserMenu {
 
     private String homeLabel() {
         String h = BrowserPrefs.home(c);
-        return h.isEmpty() ? "Discover" : host(h);
+        return h.isEmpty() ? "Web3" : host(h);
     }
 
     private void pickHome(TextView value) {
         String current = host.web().getUrl();
         String[] items = current != null && current.startsWith("https://")
-                ? new String[]{"Discover", "This page", "Enter address"} : new String[]{"Discover", "Enter address"};
+                ? new String[]{"Web3", "This page", "Enter address"} : new String[]{"Web3", "Enter address"};
         new MaterialAlertDialogBuilder(c).setTitle("Home page").setItems(items, (d, w) -> {
             String pick = items[w];
-            if ("Discover".equals(pick)) { BrowserPrefs.setHome(c, ""); value.setText(homeLabel()); }
+            if ("Web3".equals(pick)) { BrowserPrefs.setHome(c, ""); value.setText(homeLabel()); }
             else if ("This page".equals(pick)) { BrowserPrefs.setHome(c, current); value.setText(homeLabel()); }
             else {
                 EditText in = new EditText(c);

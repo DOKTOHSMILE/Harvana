@@ -53,6 +53,18 @@ public final class FiatValueHelper {
     }
 
     public static void convertHarvToFiat(double harvAmount, String currencyCode, ConvertCallback callback) {
+        Context app = com.harvana.app.SketchApplication.getContext();
+        if (app != null) {                                              // the pools' price first
+            HarvPrice.value(app, harvAmount, currencyCode, v -> {
+                if (!Double.isNaN(v)) callback.onConverted(v, true);
+                else convertFromListings(harvAmount, currencyCode, callback);
+            });
+            return;
+        }
+        convertFromListings(harvAmount, currencyCode, callback);
+    }
+
+    private static void convertFromListings(double harvAmount, String currencyCode, ConvertCallback callback) {
         getCheapestRate(currencyCode, rate -> {
             if (rate == null) {
                 callback.onConverted(0, false);
@@ -195,6 +207,13 @@ public final class FiatValueHelper {
      */
     public static void valueOfHarv(Context c, double harvAmount, String symbol, ConvertCallback callback) {
         String code = symbolToCurrencyCode(symbol);
+        HarvPrice.value(c, harvAmount, code, v -> {                     // the pools' price first
+            if (!Double.isNaN(v)) callback.onConverted(v, true);
+            else valueFromListings(c, harvAmount, code, callback);
+        });
+    }
+
+    private static void valueFromListings(Context c, double harvAmount, String code, ConvertCallback callback) {
         getCheapestRate(code, direct -> {
             if (direct != null) {
                 callback.onConverted(harvAmount * direct, true);
@@ -202,7 +221,7 @@ public final class FiatValueHelper {
             }
             getCheapestRate("NGN", ngn -> {
                 if (ngn == null || "NGN".equals(code)) {
-                    callback.onConverted(0, ngn != null);
+                    callback.onConverted(ngn == null ? 0 : harvAmount * ngn, ngn != null);
                     return;
                 }
                 FxRates.load(c, () -> {

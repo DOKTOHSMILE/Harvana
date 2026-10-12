@@ -220,15 +220,15 @@ public final class AssetSorter {
                 double per = FxRates.perUsd(c, com.harvana.app.husd.Stable.currency(code));
                 if (!Double.isNaN(per) && per > 0) price.put(code, FxRates.money(c, 1d / per));
             }
-            // HARV: the guarded price from completed P2P trades (naira), shown in the person's currency.
-            com.harvana.app.p2p.P2pPriceReference.fetch((kobo, n) -> shown.post(() -> {
-                double ngnPerUsd = FxRates.perUsd(c, "NGN");
-                if (kobo > 0 && !Double.isNaN(ngnPerUsd) && ngnPerUsd > 0) {
-                    price.put("HARV", FxRates.money(c, (kobo / 100d) / ngnPerUsd));
-                    lastSignature = "";
-                    sync();
-                }
-            }));
+            // HARV: the swap pools' price and its 24-hour change, in the person's currency.
+            HarvPrice.get(q -> {
+                double usd = HarvPrice.usd(c, q);
+                if (Double.isNaN(usd)) return;
+                price.put("HARV", FxRates.money(c, usd));
+                if (!Double.isNaN(q.changePct)) change.put("HARV", q.changePct);
+                lastSignature = "";
+                sync();
+            });
             // Other coins: market prices.
             AssetPrices.load(c, () -> {
                 for (CoinCatalog.Coin coin : CoinCatalog.others()) {

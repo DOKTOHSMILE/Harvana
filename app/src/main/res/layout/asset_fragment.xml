@@ -272,14 +272,14 @@
 								android:layout_width="24dp"
 								android:layout_height="24dp"
 								android:padding="2dp"
-								android:src="@drawable/icon_explore_outline_line"
+								android:src="@drawable/ic_web3"
 								android:scaleType="centerInside"
 								app:tint="@color/colorAccent" android:duplicateParentState="true" />
 							<TextView
 								android:id="@+id/tv_discover"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:text="Discover"
+								android:text="Web3"
 								android:textSize="13sp"
 								android:layout_marginTop="4dp"
 								android:maxLines="1"

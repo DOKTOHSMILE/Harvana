@@ -80,7 +80,7 @@
 			android:windowSoftInputMode="adjustResize" />
 		<activity
 			android:name=".web3.DiscoverActivity"
-			android:label="Discover"
+			android:label="Web3"
 			android:exported="false"
 			android:screenOrientation="portrait" />
 		<activity

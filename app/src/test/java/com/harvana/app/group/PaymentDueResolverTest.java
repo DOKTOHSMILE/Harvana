@@ -1,6 +1,8 @@
 package com.harvana.app.group;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
@@ -102,6 +104,33 @@ public class PaymentDueResolverTest {
         g.put("nodeGroupId", "FIXED-abc");
         assertEquals(PaymentDueResolver.Action.NONE, PaymentDueResolver.resolve(g, members("me"), new ArrayList<>(), "me",
             at(2026, 9, 30, 12), UTC).action);
+    }
+
+    @Test public void goalGroupsWithAPerPeriodAmountAreDueOnlyWhenThisPeriodIsUnpaid() {
+        Map<String, Object> g = group("Fixed Contribution", "Daily", 0);
+        g.put("contributionAmount", 10);
+        g.put("targetGoalAmount", 100);
+        g.put("raisedAmount", 20);
+        List<Map<String, Object>> pays = new ArrayList<>();
+        pays.add(pay("me", "CONFIRMED", 0, at(2026, 9, 29, 10)));            // yesterday only
+        assertEquals(PaymentDueResolver.Action.PAY,
+            PaymentDueResolver.resolve(g, members("me"), pays, "me", at(2026, 9, 30, 12), UTC).action);
+        pays.add(pay("me", "CONFIRMED", 0, at(2026, 9, 30, 9)));             // today
+        assertEquals(PaymentDueResolver.Action.NONE,
+            PaymentDueResolver.resolve(g, members("me"), pays, "me", at(2026, 9, 30, 12), UTC).action);
+        g.put("raisedAmount", 100);                                           // goal reached: never due
+        assertEquals(PaymentDueResolver.Action.NONE,
+            PaymentDueResolver.resolve(g, members("me"), new ArrayList<>(), "me", at(2026, 9, 30, 12), UTC).action);
+        g.put("raisedAmount", 20);
+        g.put("state", "DISSOLVED");                                          // money returned: never due
+        assertEquals(PaymentDueResolver.Action.NONE,
+            PaymentDueResolver.resolve(g, members("me"), new ArrayList<>(), "me", at(2026, 9, 30, 12), UTC).action);
+    }
+
+    @Test public void theNetworksLastDepositCountsForThisPeriod() {
+        assertTrue(PaymentDueResolver.depositedThisPeriod("Daily", at(2026, 9, 30, 8), at(2026, 9, 30, 12), UTC));
+        assertFalse(PaymentDueResolver.depositedThisPeriod("Daily", at(2026, 9, 29, 23), at(2026, 9, 30, 12), UTC));
+        assertFalse(PaymentDueResolver.depositedThisPeriod("Daily", null, at(2026, 9, 30, 12), UTC));
     }
 
     @Test public void accumulativeGroupsHaveNoSchedule() {

@@ -54,9 +54,8 @@ public final class PaymentDueResolver {
             return none("Group is " + status.toLowerCase(Locale.US), "Idle");
         }
         if (type.contains("Accumulative")) return none("Save any time - nothing scheduled", "Idle");
-        // Goal groups have no schedule: deposit any day until the goal is reached, and a quiet day is not a missed
-        // payment. They never raise "Payment due" (owner report, 12 Oct 2026: a reached goal kept sending daily alerts).
-        if (isGoalGroup(group)) return none("Deposit any day toward the goal - nothing is due", "Idle");
+        // Goal groups: due only when it is really needed (owner, 12 Oct 2026: not forever, not never). See goalDue.
+        if (isGoalGroup(group)) return goalDue(group, payments, myUid, nowMs, tz);
 
         boolean bySlot = type.contains("Rotating") && group.get("currentSlot") instanceof Number
                 && ((Number) group.get("currentSlot")).intValue() > 0;
@@ -98,6 +97,49 @@ public final class PaymentDueResolver {
         }
         if ("PENDING".equals(myState)) return none("Your payment is confirming", "Confirming");
         return none("Everyone has paid this cycle", "Paid");
+    }
+
+    /**
+     * A goal group asks for a deposit only when all of these hold:
+     *   - the group is still collecting (not completed, closed or dissolved) and the goal is not reached;
+     *   - it was set up with an amount per period (contributionAmount and frequency); a goal without one has no
+     *     schedule, so a quiet day is never "missed";
+     *   - this member has not deposited in the current period (Firestore payments here; the network's own record,
+     *     lastDepositTimestamp, is checked by {@link #depositedThisPeriod} before anyone is alerted).
+     */
+    static Result goalDue(Map<String, Object> group, List<Map<String, Object>> payments, String myUid, long nowMs, TimeZone tz) {
+        String state = firstNonEmpty(str(group.get("nodeState")), str(group.get("state"))).toUpperCase(Locale.US);
+        if (state.contains("COMPLETE") || state.contains("CLOSED") || state.contains("DISSOLVED") || state.contains("PAID")) {
+            return none("This goal is finished - nothing is due", "Idle");
+        }
+        double target = num(group.get("targetGoalAmountRaw")) > 0 ? num(group.get("targetGoalAmountRaw")) / 1e8 : num(group.get("targetGoalAmount"));
+        double raised = num(group.get("raisedAmountRaw")) > 0 ? num(group.get("raisedAmountRaw")) / 1e8 : num(group.get("raisedAmount"));
+        if (target > 0 && raised >= target) return none("Goal reached - nothing is due", "Idle");
+        String frequency = str(group.get("frequency"));
+        if (num(group.get("contributionAmount")) <= 0 || frequency.isEmpty() || "-".equals(frequency) || "—".equals(frequency)) {
+            return none("Deposit any day toward the goal - nothing is due", "Idle");
+        }
+        long periodStart = periodStartMs(frequency, nowMs, tz);
+        String mine = memberState(payments, myUid, false, 0, periodStart);
+        if ("PAID".equals(mine)) return none("You have deposited this " + periodWord(frequency), "Paid");
+        if ("PENDING".equals(mine)) return none("Your deposit is confirming", "Confirming");
+        return new Result(Action.PAY, null, "Your " + frequency.toLowerCase(Locale.US) + " deposit toward the goal is due", "Due", 1);
+    }
+
+    /** True when the network's last deposit by this member falls in the current period of the group's frequency. */
+    public static boolean depositedThisPeriod(String frequency, Object lastDepositTimestamp, long nowMs, TimeZone tz) {
+        long last = lastDepositTimestamp instanceof Number ? ((Number) lastDepositTimestamp).longValue() : 0L;
+        return last > 0 && last >= periodStartMs(frequency, nowMs, tz);
+    }
+
+    private static String periodWord(String frequency) {
+        String f = frequency.toUpperCase(Locale.US);
+        return f.contains("DAY") ? "day" : f.contains("MONTH") ? "month" : f.contains("YEAR") || f.contains("ANNUAL") ? "year" : f.contains("QUARTER") ? "quarter" : "week";
+    }
+
+    private static double num(Object o) {
+        if (o instanceof Number) return ((Number) o).doubleValue();
+        try { return o == null ? 0 : Double.parseDouble(String.valueOf(o)); } catch (Exception e) { return 0; }
     }
 
     /** A fixed-goal group, however it was labelled when it was created. */

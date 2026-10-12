@@ -72,6 +72,33 @@ public final class DueAlertSync {
         PaymentDueResolver.Result result = PaymentDueResolver.resolve(
             data, members, payments, uid, System.currentTimeMillis(), TimeZone.getDefault());
         if (result.action != PaymentDueResolver.Action.PAY) return;
+        // A goal group: deposits made straight on the network may be missing from the saved copy, so ask the network
+        // (group state, goal reached, this member's last deposit) before alerting. Only a real missing deposit alerts.
+        com.harvana.app.group.GroupIdentity id = com.harvana.app.group.GroupIdentityResolver.resolve(gid, data);
+        if (id != null && id.onChain() && "FIXED".equals(id.family)) {
+            String me = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(c);
+            com.harvana.app.sync.NodeGroupClient.getFixedGroup(id.protocolId(), new com.harvana.app.sync.NodeGroupClient.Callback() {
+                @Override public void onSuccess(org.json.JSONObject g) {
+                    String state = g.optString("state", "");
+                    long target = g.optLong("targetGoalAmountRaw"), raised = g.optLong("raisedAmountRaw") - g.optLong("goalBaseRaisedRaw");
+                    if (!"ACTIVE".equals(state) || (target > 0 && raised >= target)) return;
+                    if (me == null || me.isEmpty()) { post(c, gid, data); return; }
+                    com.harvana.app.sync.NodeGroupClient.getFixedMember(id.protocolId(), me, new com.harvana.app.sync.NodeGroupClient.Callback() {
+                        @Override public void onSuccess(org.json.JSONObject m) {
+                            if (!PaymentDueResolver.depositedThisPeriod(text(data, "frequency", ""), m.has("lastDepositTimestamp") ? m.optLong("lastDepositTimestamp") : null,
+                                    System.currentTimeMillis(), TimeZone.getDefault())) post(c, gid, data);
+                        }
+                        @Override public void onError(String e) { post(c, gid, data); }      // not a member record yet: nothing deposited
+                    });
+                }
+                @Override public void onError(String e) { }                                  // network unknown: no alert rather than a wrong one
+            });
+            return;
+        }
+        post(c, gid, data);
+    }
+
+    private static void post(Context c, String gid, Map<String, Object> data) {
         String name = text(data, "groupName", text(data, "name", "Group"));
         String amount = BalanceFormatter.smartDecimal(number(data, "contributionAmount"));
         String day = DueCopy.dayKey(System.currentTimeMillis());

@@ -493,23 +493,15 @@ public class HomeFragmentActivity extends Fragment {
 	}
 	public void _MORE() {
 	}
-	private void _openTab(Fragment fragment, int menuId) {
+	/**
+	 * Switches to one of the main tabs through the bottom bar, the same way tapping the bar does. It used to put a new
+	 * copy of the tab's fragment into the container: MainActivity shows and hides its own tab fragments, so that copy
+	 * was never hidden and stayed painted over every tab (Learn looked frozen while the bar still changed).
+	 */
+	private void _openTab(int menuId) {
 		if (getActivity() == null) return;
-		int containerId = R.id.linear2;
-		int alt = getResources().getIdentifier("fragment_container", "id", requireContext().getPackageName());
-		if (alt != 0) containerId = alt;
-		int mainFrame = getResources().getIdentifier("frame_main", "id", requireContext().getPackageName());
-		if (mainFrame != 0) containerId = mainFrame;
-		try {
-			getParentFragmentManager().beginTransaction()
-			.replace(containerId, fragment)
-			.addToBackStack(null)
-			.commit();
-		} catch (Exception ignored) {}
 		BottomNavigationView nav = getActivity().findViewById(R.id.bottomnavigation1);
-		if (nav != null) {
-			try { nav.getMenu().findItem(menuId).setChecked(true); } catch (Exception ignored) {}
-		}
+		if (nav != null) nav.setSelectedItemId(menuId);
 	}
 	
 	private void _loadProfile() {
@@ -651,6 +643,8 @@ public class HomeFragmentActivity extends Fragment {
 		// The last total at once; the Assets tab (loaded in the background with Home) publishes a fresh one.
 		_showTotal(symbol, com.harvana.app.wallet.WalletTotal.last(getContext(), addr, symbol));
 		com.harvana.app.wallet.WalletTotal.listen(totalListener);
+		// Work the total out now, from Home itself: it used to wait until the Assets tab had been opened.
+		com.harvana.app.wallet.WalletTotal.refresh(getContext(), addr);
 	}
 
 	@Override
@@ -771,6 +765,16 @@ public class HomeFragmentActivity extends Fragment {
 					for (com.harvana.app.engine.GroupAction a : snap.actions) {
 						if (a.enabled && (com.harvana.app.engine.GroupAction.CONTRIBUTE.equals(a.id) || com.harvana.app.engine.GroupAction.FIXED_DEPOSIT.equals(a.id))) canPay = true;
 						if (!a.enabled && reason.isEmpty()) reason = a.label;
+					}
+					// A goal group with a per-period amount: the network's own record says whether this period's deposit is in.
+					if (canPay && "FIXED".equals(family) && member != null
+						&& com.harvana.app.group.PaymentDueResolver.depositedThisPeriod(str(data, "frequency", ""), member.get("lastDepositTimestamp"),
+							System.currentTimeMillis(), java.util.TimeZone.getDefault())) {
+						row.put("action", "NONE");
+						row.put("statusLine", "You have deposited this period");
+						row.put("badge", "Paid");
+						finish.run();
+						return;
 					}
 					if (!canPay && !snap.actions.isEmpty()) {
 						String low = reason.toLowerCase(java.util.Locale.US);
@@ -983,7 +987,7 @@ public class HomeFragmentActivity extends Fragment {
 					cat.setText(category + " · " + views + (views == 1 ? " view" : " views") + when);
 				}
 				if (img != null && !image.isEmpty()) com.bumptech.glide.Glide.with(this).load(image).centerCrop().into(img);
-				item.setOnClickListener(v -> _openTab(new LearnFragmentActivity(), R.id.menu_learn));
+				item.setOnClickListener(v -> _openTab(R.id.menu_learn));
 				linear_learn_hub.addView(item);
 				n++;
 			}
@@ -1143,7 +1147,7 @@ public class HomeFragmentActivity extends Fragment {
 							_styleTrendingButton(join, gid);
 							final String joinGid = gid;
 							join.setOnClickListener(v -> {
-								if (joinGid.isEmpty()) { _openTab(new DiscoverFragmentActivity(), R.id.menu_discover); return; }
+								if (joinGid.isEmpty()) { _openTab(R.id.menu_discover); return; }
 								Intent ji = new Intent(getContext(), GroupJoinRequestActivity.class);
 								ji.putExtra("groupId", joinGid);
 								startActivity(ji);

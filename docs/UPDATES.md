@@ -2,6 +2,22 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (evening): Learn tab no longer freezes, Home total on open, goal reminders only when needed
+
+What the app does:
+- **Opening Learn (or Discover) from a Home card no longer freezes the screen.**
+  - The cause: those cards put a second copy of the tab on top of the screen, and that copy was never hidden again, so the bottom bar changed but the page did not.
+  - The fix: they now switch tabs through the bottom bar, like every other Home button. The other Home buttons were checked and already did this.
+- **The Home total balance is worked out when the app opens.**
+  - It covers HARV, stable coins and every coin you show, in your currency. Before, it stayed at ₦0.00 until the Assets tab had been opened.
+  - If HARV's balance or price can't be read, the last total stays rather than showing a wrong one.
+- **Goal-group payment reminders fire only when needed:**
+  - not after the goal is reached, finished or its money returned;
+  - not for a goal with no amount per period;
+  - not when you already deposited this period. The app checks the network's own record of your last deposit (node change), so a deposit made from any screen counts.
+
+What the owner does: deploy the node, then build and install the app.
+
 ## 12 Oct 2026 (latest): fee before signing, amounts in money, calendar days in order, new-goal box
 
 What the app does:

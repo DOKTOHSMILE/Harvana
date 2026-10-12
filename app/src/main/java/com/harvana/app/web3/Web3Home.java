@@ -26,8 +26,14 @@ import org.json.JSONObject;
 /** The Earn tab as a Web3 home: search, Earn, dApps by category, recent sites. */
 public final class Web3Home {
 
-    private static final String[] TABS = {"Featured", "DEX", "Lending", "Yield", "NFT"};
+    public static final String SWAP_URL = "https://harvannaprotocol.com/swap/";
+    public static final String STAKE_URL = "https://harvannaprotocol.com/stake/";
+    public static final String EXPLORER_URL = "https://harvannaprotocol.com/explorer/";
+
+    private static final String[] TABS = {"Harvana", "Featured", "DEX", "Lending", "Yield", "NFT"};
     private static final String[][][] DAPPS = {
+        { {"Harvana Swap", SWAP_URL}, {"Harvana Staking", STAKE_URL}, {"Harvana Explorer", EXPLORER_URL},
+          {"Harvana Pools", SWAP_URL + "#pools"}, {"List a coin", SWAP_URL + "#list"} },
         { {"Uniswap", "https://app.uniswap.org"}, {"PancakeSwap", "https://pancakeswap.finance"}, {"Aave", "https://app.aave.com"},
           {"1inch", "https://app.1inch.io"}, {"Lido", "https://stake.lido.fi"}, {"OpenSea", "https://opensea.io"} },
         { {"Uniswap", "https://app.uniswap.org"}, {"PancakeSwap", "https://pancakeswap.finance"}, {"SushiSwap", "https://www.sushi.com/swap"},
@@ -45,7 +51,12 @@ public final class Web3Home {
     private TextView staked;
     private int tab = 0;
 
-    public Web3Home(Context c, Runnable openStaking, Runnable openMiner) {
+    /** The Discover page: no Earn section. */
+    public Web3Home(Context c) { this(c, null, null, false); }
+
+    public Web3Home(Context c, Runnable openStaking, Runnable openMiner) { this(c, openStaking, openMiner, true); }
+
+    private Web3Home(Context c, Runnable openStaking, Runnable openMiner, boolean showEarn) {
         this.c = c;
         root = new LinearLayout(c);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -53,14 +64,19 @@ public final class Web3Home {
 
         root.addView(search());
 
-        root.addView(heading("Earn"));
-        LinearLayout earn = card();
         staked = new TextView(c);
-        earn.addView(line(R.drawable.ic_harv_coin, "Staking", staked, openStaking));
-        TextView mine = new TextView(c);
-        mine.setText("Harvana Node Miner");
-        earn.addView(line(R.drawable.ic_harv_coin, "Mining", mine, openMiner));
-        root.addView(earn);
+        if (showEarn) {
+            root.addView(heading("Earn"));
+            LinearLayout earn = card();
+            earn.addView(line(R.drawable.ic_harv_coin, "Staking", staked, openStaking != null ? openStaking : () -> open(STAKE_URL)));
+            TextView pools = new TextView(c);
+            pools.setText("Harvana Swap");
+            earn.addView(line(R.drawable.ic_harv_coin, "Liquidity", pools, () -> open(SWAP_URL + "#liquidity")));
+            TextView mine = new TextView(c);
+            mine.setText("Harvana Node Miner");
+            earn.addView(line(R.drawable.ic_harv_coin, "Mining", mine, openMiner));
+            root.addView(earn);
+        }
         setStaked("0 HARV");
 
         root.addView(heading("Explore dApps"));
@@ -165,7 +181,8 @@ public final class Web3Home {
         row.setPadding(dp(12), dp(10), dp(12), dp(10));
         ImageView ic = new ImageView(c);
         String host = Uri.parse(url).getHost();
-        Glide.with(c).load("https://icons.duckduckgo.com/ip3/" + host + ".ico")
+        if ("harvannaprotocol.com".equals(host)) ic.setImageResource(R.drawable.ic_harv_coin);
+        else Glide.with(c).load("https://icons.duckduckgo.com/ip3/" + host + ".ico")
                 .placeholder(R.drawable.icon_search_24).error(R.drawable.icon_search_24).circleCrop().into(ic);
         row.addView(ic, new LinearLayout.LayoutParams(dp(36), dp(36)));
         LinearLayout col = new LinearLayout(c);
@@ -210,9 +227,17 @@ public final class Web3Home {
         return row;
     }
 
-    private void open(String text) {
-        Intent i = new Intent(c, DappBrowserActivity.class).putExtra(DappBrowserActivity.EXTRA_URL, text);
-        c.startActivity(i);
+    private void open(String text) { open(c, text); }
+
+    /** Opens a site: the Harvana explorer in the explorer, everything else in the dApp browser. */
+    public static void open(Context c, String text) {
+        if (text != null && text.startsWith(EXPLORER_URL)) {
+            c.startActivity(new Intent(c, com.harvana.app.ExplorerActivity.class)
+                    .putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, "HARV")
+                    .putExtra(com.harvana.app.ExplorerActivity.EXTRA_URL, text));
+            return;
+        }
+        c.startActivity(new Intent(c, DappBrowserActivity.class).putExtra(DappBrowserActivity.EXTRA_URL, text));
     }
 
     private TextView heading(String t) {

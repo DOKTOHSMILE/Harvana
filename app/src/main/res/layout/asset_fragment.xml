@@ -139,13 +139,16 @@
 							android:id="@+id/linear4"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
-							android:padding="20dp"
+							android:paddingTop="14dp"
+							android:paddingBottom="14dp"
+							android:paddingStart="4dp"
+							android:paddingEnd="4dp"
 							android:gravity="center_horizontal|center_vertical"
-							android:orientation="horizontal">
+							android:orientation="vertical">
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview1"
 								android:layout_width="24dp"
-								android:layout_height="match_parent"
+								android:layout_height="24dp"
 								android:src="@drawable/ic_action_receive"
 								android:scaleType="centerInside"
 								app:tint="@color/colorAccent" />
@@ -154,7 +157,9 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="Receive"
-								android:textSize="14sp"
+								android:textSize="13sp"
+								android:layout_marginTop="4dp"
+								android:maxLines="1"
 								android:textStyle="bold"
 								android:textColor="@color/colorTextSecondary" />
 						</LinearLayout>
@@ -175,13 +180,16 @@
 							android:id="@+id/linear5"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
-							android:padding="20dp"
+							android:paddingTop="14dp"
+							android:paddingBottom="14dp"
+							android:paddingStart="4dp"
+							android:paddingEnd="4dp"
 							android:gravity="center_horizontal|center_vertical"
-							android:orientation="horizontal">
+							android:orientation="vertical">
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview2"
 								android:layout_width="24dp"
-								android:layout_height="match_parent"
+								android:layout_height="24dp"
 								android:src="@drawable/ic_action_send"
 								android:scaleType="centerInside"
 								app:tint="@color/colorAccent" />
@@ -190,7 +198,9 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="Send"
-								android:textSize="14sp"
+								android:textSize="13sp"
+								android:layout_marginTop="4dp"
+								android:maxLines="1"
 								android:textStyle="bold"
 								android:textColor="@color/colorTextSecondary" />
 						</LinearLayout>
@@ -210,13 +220,16 @@
 							android:id="@+id/linear6"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
-							android:padding="20dp"
+							android:paddingTop="14dp"
+							android:paddingBottom="14dp"
+							android:paddingStart="4dp"
+							android:paddingEnd="4dp"
 							android:gravity="center_horizontal|center_vertical"
-							android:orientation="horizontal">
+							android:orientation="vertical">
 							<com.google.android.material.imageview.ShapeableImageView
 								android:id="@+id/imageview5"
 								android:layout_width="24dp"
-								android:layout_height="match_parent"
+								android:layout_height="24dp"
 								android:padding="2dp"
 								android:src="@drawable/ic_action_buy"
 								android:scaleType="centerInside"
@@ -226,7 +239,50 @@
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:text="P2P"
-								android:textSize="14sp"
+								android:textSize="13sp"
+								android:layout_marginTop="4dp"
+								android:maxLines="1"
+								android:textStyle="bold"
+								android:textColor="@color/colorTextSecondary" />
+						</LinearLayout>
+					</com.google.android.material.card.MaterialCardView>
+					<com.google.android.material.card.MaterialCardView
+						android:id="@+id/card_discover"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						app:cardBackgroundColor="@color/colorSurface"
+						android:layout_weight="1"
+						android:layout_marginStart="6dp"
+						app:cardCornerRadius="16dp"
+						app:cardElevation="0dp"
+						app:strokeWidth="1dp"
+						app:strokeColor="@color/colorCardStroke">
+						<LinearLayout
+							android:id="@+id/linear_discover"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:paddingTop="14dp"
+							android:paddingBottom="14dp"
+							android:paddingStart="4dp"
+							android:paddingEnd="4dp"
+							android:gravity="center_horizontal|center_vertical"
+							android:orientation="vertical">
+							<com.google.android.material.imageview.ShapeableImageView
+								android:id="@+id/iv_discover"
+								android:layout_width="24dp"
+								android:layout_height="24dp"
+								android:padding="2dp"
+								android:src="@drawable/icon_explore_outline_line"
+								android:scaleType="centerInside"
+								app:tint="@color/colorAccent" android:duplicateParentState="true" />
+							<TextView
+								android:id="@+id/tv_discover"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Discover"
+								android:textSize="13sp"
+								android:layout_marginTop="4dp"
+								android:maxLines="1"
 								android:textStyle="bold"
 								android:textColor="@color/colorTextSecondary" />
 						</LinearLayout>

@@ -84,6 +84,8 @@ public class DappBrowserActivity extends AppCompatActivity {
 
     private String chainKey;
     private String account;                     // the active wallet's EVM address, once derived
+    private String hvAccount;                   // the active wallet's Harvana address
+    private BrowserBar nav;
     private String pageOrigin = "";             // origin of the page on screen
     private JavaScriptReplyProxy proxy;         // the page's end of the bridge
     private ScriptHandler injected;
@@ -146,7 +148,10 @@ public class DappBrowserActivity extends AppCompatActivity {
 
         web = new WebView(this);
         root.addView(web, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        nav = new BrowserBar(this, web, null, this::finish);
+        root.addView(nav.view(), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         setContentView(root);
+        hvAccount = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -170,9 +175,14 @@ public class DappBrowserActivity extends AppCompatActivity {
             }
             @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap icon) {
                 pageChanged(url);
+                nav.setLoading(true);
+            }
+            @Override public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
+                nav.update();
             }
             @Override public void onPageFinished(WebView view, String url) {
                 pageChanged(url);
+                nav.setLoading(false);
                 Web3Sites.remember(DappBrowserActivity.this, url, view.getTitle());
             }
             @Override public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
@@ -302,6 +312,29 @@ public class DappBrowserActivity extends AppCompatActivity {
     private void handle(String origin, int id, String method, JSONArray params) throws Exception {
         boolean connected = account != null && Web3Sites.connected(this, account, origin);
         switch (method) {
+            case "harvana_chainId": ok(id, "harvana"); return;
+            case "harvana_accounts":
+                ok(id, hvConnected(origin) ? new JSONArray().put(hvAccount) : new JSONArray()); return;
+            case "harvana_requestAccounts":
+                if (hvAccount == null || hvAccount.isEmpty()) { error(id, 4100, "No wallet on this phone."); return; }
+                if (hvConnected(origin)) { ok(id, new JSONArray().put(hvAccount)); return; }
+                if (!claim(id)) return;
+                connect(origin, id, hvAccount, "Harvana", () -> {
+                    Web3Sites.connect(this, hvAccount, origin);
+                    ok(id, new JSONArray().put(hvAccount));
+                    emitHv("accountsChanged", new JSONArray().put(hvAccount));
+                });
+                return;
+            case "harvana_disconnect":
+                if (hvAccount != null) Web3Sites.disconnect(this, hvAccount, origin);
+                ok(id, JSONObject.NULL);
+                emitHv("accountsChanged", new JSONArray());
+                return;
+            case "harvana_sendAction":
+                if (!hvConnected(origin)) { error(id, 4100, "Not connected."); return; }
+                if (!claim(id)) return;
+                harvanaAction(origin, id, params.optJSONObject(0));
+                return;
             case "eth_chainId": ok(id, chainHex()); return;
             case "net_version": ok(id, String.valueOf(net().chainId)); return;
             case "eth_accounts": ok(id, connected ? new JSONArray().put(account) : new JSONArray()); return;
@@ -310,7 +343,11 @@ public class DappBrowserActivity extends AppCompatActivity {
                 if (account == null) { error(id, 4100, "No wallet on this phone."); return; }
                 if (connected) { okAccounts(id, method); return; }
                 if (!claim(id)) return;
-                connect(origin, id, method);
+                connect(origin, id, account, net().name, () -> {
+                    Web3Sites.connect(this, account, origin);
+                    try { okAccounts(id, method); } catch (Exception ignored) { }
+                    emit("accountsChanged", new JSONArray().put(account));
+                });
                 return;
             case "wallet_getPermissions":
                 ok(id, connected ? new JSONArray().put(new JSONObject().put("parentCapability", "eth_accounts")) : new JSONArray()); return;
@@ -377,10 +414,11 @@ public class DappBrowserActivity extends AppCompatActivity {
         else ok(id, new JSONArray().put(account));
     }
 
-    private void connect(String origin, int id, String method) {
+    /** The connect sheet: the site sees {@code addr} only after Connect. */
+    private void connect(String origin, int id, String addr, String network, Runnable granted) {
         String host = Uri.parse(origin).getHost();
         com.harvana.app.utils.InfoTable t = new com.harvana.app.utils.InfoTable(this);
-        t.row("Site", origin).row("Account", shortAddr(account)).row("Network", net().name);
+        t.row("Site", origin).row("Account", shortAddr(addr)).row("Network", network);
         final boolean[] done = {false};
         androidx.appcompat.app.AlertDialog d = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Connect to " + host).setView(padded(t.view()))
@@ -389,12 +427,145 @@ public class DappBrowserActivity extends AppCompatActivity {
                     done[0] = true;
                     release();
                     if (!origin.equals(pageOrigin)) { error(id, 4001, "User rejected the request."); return; }
-                    Web3Sites.connect(this, account, origin);
-                    try { okAccounts(id, method); } catch (Exception ignored) { }
-                    emit("accountsChanged", new JSONArray().put(account));
+                    granted.run();
                 }).create();
         d.setOnDismissListener(x -> { if (!done[0]) { release(); error(id, 4001, "User rejected the request."); } });
         d.show();
+    }
+
+    // ── Harvana chain actions (the Harvana Swap and Staking sites, or any connected site) ─────────────────────
+
+    private boolean hvConnected(String origin) {
+        return hvAccount != null && !hvAccount.isEmpty() && Web3Sites.connected(this, hvAccount, origin);
+    }
+
+    private interface Reply { void ok(Object result); void fail(String message); }
+    private interface AsyncWork { void run(Reply r); }
+
+    /** One Harvana action from the page: the app builds the review from the values, then signs and sends it itself. */
+    private void harvanaAction(String origin, int id, JSONObject a) {
+        if (a == null) { release(); error(id, -32602, "Invalid params."); return; }
+        final String hv = hvAccount;
+        List<String[]> rows = new ArrayList<>();
+        rows.add(new String[]{"Site", origin});
+        rows.add(new String[]{"Account", shortAddr(hv)});
+        rows.add(new String[]{"Network", "Harvana"});
+        String type = a.optString("type", "");
+        switch (type) {
+            case "swap": {
+                String from = code(a.optString("from")), to = code(a.optString("to"));
+                long amt = positive(a, "amountRaw"), min = positive(a, "minOutRaw");
+                if (from == null || to == null || from.equals(to) || amt <= 0 || min <= 0) { bad(id); return; }
+                rows.add(new String[]{"You pay", fmt(amt, from)});
+                rows.add(new String[]{"You get at least", fmt(min, to)});
+                reviewAsync("Swap", fmt(amt, from), rows, id, r -> com.harvana.app.sync.NodeGroupClient.swap(this, hv, from, to, amt, min, cb(r)));
+                return;
+            }
+            case "addLiquidity": {
+                String asset = code(a.optString("asset"));
+                long h = positive(a, "harvRaw"), c = positive(a, "coinRaw");
+                if (asset == null || "HARV".equals(asset) || h <= 0 || c <= 0) { bad(id); return; }
+                boolean listing = a.optBoolean("listing", false);
+                rows.add(new String[]{"Pool", sym(asset) + " / HARV"});
+                rows.add(new String[]{"HARV", fmt(h, "HARV")});
+                rows.add(new String[]{sym(asset), fmt(c, asset)});
+                reviewAsync(listing ? "List coin" : "Add liquidity", fmt(c, asset), rows, id,
+                        r -> com.harvana.app.sync.NodeGroupClient.swapAdd(this, hv, asset, h, c, cb(r)));
+                return;
+            }
+            case "removeLiquidity": {
+                String asset = code(a.optString("asset"));
+                long shares = positive(a, "shares");
+                if (asset == null || "HARV".equals(asset) || shares <= 0) { bad(id); return; }
+                rows.add(new String[]{"Pool", sym(asset) + " / HARV"});
+                rows.add(new String[]{"Shares", String.format(java.util.Locale.US, "%,d", shares)});
+                reviewAsync("Remove liquidity", "", rows, id, r -> com.harvana.app.sync.NodeGroupClient.swapRemove(this, hv, asset, shares, cb(r)));
+                return;
+            }
+            case "stake": {
+                long amt = positive(a, "amountRaw");
+                int days = a.optInt("lockDays", -1);
+                if (amt <= 0 || !(days == 0 || days == 7 || days == 30 || days == 90)) { bad(id); return; }
+                // The vault comes from the node, never from the page.
+                com.harvana.app.sync.NodeGroupClient.getStakingInfo(new com.harvana.app.sync.NodeGroupClient.Callback() {
+                    @Override public void onSuccess(JSONObject info) {
+                        runOnUiThread(() -> {
+                            String vault = info.optString("vaultAddress", "");
+                            if (vault.isEmpty() || !origin.equals(pageOrigin)) { release(); error(id, -32603, "Staking is unavailable."); return; }
+                            rows.add(new String[]{"Amount", fmt(amt, "HARV")});
+                            rows.add(new String[]{"Term", days == 0 ? "Flexible" : days + " days"});
+                            rows.add(new String[]{"To", vault});
+                            reviewAsync("Stake HARV", fmt(amt, "HARV"), rows, id, r -> com.harvana.app.tx.TransactionRouter.routeTransaction(
+                                    DappBrowserActivity.this, hv, vault, BigDecimal.valueOf(amt).movePointLeft(8), null, "STAKE_LOCK:" + days,
+                                    new com.harvana.app.tx.TransactionRouter.RouterCallback() {
+                                        @Override public void onSuccess(String txHash) { r.ok(txHash); }
+                                        @Override public void onError(String code, String msg) { r.fail(msg != null ? msg : code); }
+                                    }));
+                        });
+                    }
+                    @Override public void onError(String e) { runOnUiThread(() -> { release(); error(id, -32603, com.harvana.app.utils.ErrorText.plain(e)); }); }
+                });
+                return;
+            }
+            case "unstake": {
+                long amt = positive(a, "amountRaw");
+                String lot = a.optString("lotId", "");
+                if (amt <= 0 || !lot.matches("[A-Za-z0-9_:.-]{0,96}")) { bad(id); return; }
+                rows.add(new String[]{"Amount", fmt(amt, "HARV")});
+                if (!lot.isEmpty()) rows.add(new String[]{"Stake", lot.length() > 16 ? lot.substring(0, 16) + "…" : lot});
+                reviewAsync("Unstake HARV", fmt(amt, "HARV"), rows, id,
+                        r -> com.harvana.app.sync.NodeGroupClient.unstake(this, hv, lot.isEmpty() ? null : lot, amt, cb(r)));
+                return;
+            }
+            case "claim":
+                rows.add(new String[]{"Rewards", "All unclaimed"});
+                reviewAsync("Claim staking rewards", "", rows, id, r -> com.harvana.app.sync.NodeGroupClient.claimStakingRewards(this, hv, cb(r)));
+                return;
+            default:
+                release();
+                error(id, 4200, "Action not supported.");
+        }
+    }
+
+    private void bad(int id) { release(); error(id, -32602, "Invalid params."); }
+
+    private com.harvana.app.sync.NodeGroupClient.Callback cb(Reply r) {
+        return new com.harvana.app.sync.NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject json) { r.ok(json); }
+            @Override public void onError(String error) { r.fail(error); }
+        };
+    }
+
+    /** As {@link #review}, for work that answers through a callback (on any thread). */
+    private void reviewAsync(String title, String amount, List<String[]> rows, int id, AsyncWork work) {
+        final String originAtAsk = pageOrigin;
+        com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, title, amount, rows,
+                () -> {
+                    if (!originAtAsk.equals(pageOrigin)) { release(); error(id, 4001, "User rejected the request."); return; }
+                    work.run(new Reply() {
+                        @Override public void ok(Object result) { runOnUiThread(() -> { release(); DappBrowserActivity.this.ok(id, result); }); }
+                        @Override public void fail(String message) { runOnUiThread(() -> { release(); error(id, -32603, com.harvana.app.utils.ErrorText.plain(message)); }); }
+                    });
+                },
+                () -> { if (busyId == id) { release(); error(id, 4001, "User rejected the request."); } });
+    }
+
+    private static String code(String c) {
+        String u = c == null ? "" : c.trim().toUpperCase(java.util.Locale.ROOT);
+        return u.matches("[A-Z]{3,6}") ? u : null;
+    }
+
+    private static long positive(JSONObject a, String key) {
+        Object v = a.opt(key);
+        try { long n = v instanceof Number ? ((Number) v).longValue() : Long.parseLong(String.valueOf(v)); return n > 0 ? n : 0; }
+        catch (Exception e) { return 0; }
+    }
+
+    private static String sym(String code) { return "HARV".equals(code) ? "HARV" : "h" + code.substring(1); }
+
+    private static String fmt(long raw, String code) {
+        int dec = "HARV".equals(code) ? 8 : 6;
+        return new BigDecimal(raw).movePointLeft(dec).stripTrailingZeros().toPlainString() + " " + sym(code);
     }
 
     private void personalSign(String origin, int id, JSONArray params) {
@@ -496,6 +667,10 @@ public class DappBrowserActivity extends AppCompatActivity {
 
     private void error(int id, int code, String message) {
         try { post(new JSONObject().put("id", id).put("error", new JSONObject().put("code", code).put("message", message))); } catch (Exception ignored) { }
+    }
+
+    private void emitHv(String event, Object data) {
+        try { post(new JSONObject().put("event", event).put("data", data).put("ns", "harvana")); } catch (Exception ignored) { }
     }
 
     private void emit(String event, Object data) {

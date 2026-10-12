@@ -113,13 +113,13 @@ public class WalletEarnFragmentActivity extends Fragment {
 
         for (int k = 0; k < linear1.getChildCount(); k++) linear1.getChildAt(k).setVisibility(View.GONE);
         web3Home = new com.harvana.app.web3.Web3Home(getContext(),
-                () -> { if (getContext() != null) startActivity(new Intent(getContext(), StakingDashboardActivity.class)); },
+                () -> { if (getContext() != null) com.harvana.app.web3.Web3Home.open(getContext(), com.harvana.app.web3.Web3Home.STAKE_URL); },
                 () -> cardview7.performClick());
         linear1.addView(web3Home.view(), 0, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         btnOpenStaking.setOnClickListener(_v -> {
             if (getContext() == null) return;
-            startActivity(new Intent(getContext(), StakingDashboardActivity.class));
+            com.harvana.app.web3.Web3Home.open(getContext(), com.harvana.app.web3.Web3Home.STAKE_URL);
         });
         
         tvLearnMore.setOnClickListener(_v -> showHowItWorks());

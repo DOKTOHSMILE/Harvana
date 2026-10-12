@@ -398,8 +398,9 @@ public class SwapActivity extends AppCompatActivity {
             row.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
             LinearLayout btns = new LinearLayout(this);
             btns.setOrientation(LinearLayout.VERTICAL);
-            btns.addView(small("Add", () -> addLiquidity(p)));
-            if (my != null) btns.addView(small("Remove", () -> removeLiquidity(code, my.optLong("shares"))));
+            btns.addView(small(open ? "Add" : "List", () -> com.harvana.app.web3.Web3Home.open(this,
+                    com.harvana.app.web3.Web3Home.SWAP_URL + (open ? "#liquidity" : "#list"))));
+            if (my != null) btns.addView(small("Remove", () -> com.harvana.app.web3.Web3Home.open(this, com.harvana.app.web3.Web3Home.SWAP_URL + "#liquidity")));
             row.addView(btns);
             poolList.addView(row);
         }
@@ -412,55 +413,6 @@ public class SwapActivity extends AppCompatActivity {
             if (m != null && code.equals(m.optString("asset"))) return m;
         }
         return null;
-    }
-
-    private void addLiquidity(JSONObject p) {
-        String code = p.optString("asset");
-        boolean open = p.optBoolean("open");
-        long hR = p.optLong("harvRaw"), cR = p.optLong("coinRaw");
-        LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(dp(20), dp(8), dp(20), 0);
-        EditText eh = field(box, "HARV");
-        EditText ec = field(box, sym(code));
-        if (open) eh.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
-            @Override public void onTextChanged(CharSequence s, int a, int b, int c) { }
-            @Override public void afterTextChanged(Editable s) {
-                if (!eh.hasFocus()) return;
-                long h = raw(HARV, s.toString());
-                ec.setText(h > 0 ? plain(code, java.math.BigInteger.valueOf(h).multiply(java.math.BigInteger.valueOf(cR))
-                        .divide(java.math.BigInteger.valueOf(hR)).longValue()) : "");
-            }
-        });
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Add to the HARV / " + sym(code) + " pool").setView(box)
-                .setPositiveButton("Review", (d, w) -> {
-                    long h = raw(HARV, eh.getText().toString()), c = raw(code, ec.getText().toString());
-                    if (h <= 0 || c <= 0) { toast("Enter both amounts."); return; }
-                    List<String[]> rows = new ArrayList<>();
-                    rows.add(new String[]{"And", fmt(code, c) + " " + sym(code)});
-                    rows.add(new String[]{"Transport fare", "3 movements"});
-                    com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Add to pool", fmt(HARV, h) + " HARV", rows,
-                            () -> NodeGroupClient.swapAdd(this, address, code, h, c, done("Added.")));
-                }).setNegativeButton("Cancel", null).show();
-    }
-
-    private void removeLiquidity(String code, long shares) {
-        String[] labels = {"25%", "50%", "All of it"};
-        long[] parts = {shares / 4, shares / 2, shares};
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Take back from the HARV / " + sym(code) + " pool")
-                .setItems(labels, (d, which) -> {
-                    if (parts[which] <= 0) { toast("Too small to take back."); return; }
-                    NodeGroupClient.swapRemove(this, address, code, parts[which], done("Sent."));
-                }).show();
-    }
-
-    private NodeGroupClient.Callback done(String ok) {
-        toast("Sending…");
-        return new NodeGroupClient.Callback() {
-            @Override public void onSuccess(JSONObject r) { runOnUiThread(() -> { toast(ok); loadPools(); loadBalance(); }); }
-            @Override public void onError(String e) { runOnUiThread(() -> toast(problem(e))); }
-        };
     }
 
     // ── assets ────────────────────────────────────────────────────────────────

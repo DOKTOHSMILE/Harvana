@@ -183,6 +183,11 @@ public class AssetFragmentActivity extends Fragment {
 			startActivity(i);
 			
 		});
+
+		View discover = _view.findViewById(R.id.card_discover);
+		if (discover != null) discover.setOnClickListener(_v -> {
+			if (getContext() != null) startActivity(new Intent(getContext(), com.harvana.app.web3.DiscoverActivity.class));
+		});
 		
 		fbauth_updateEmailListener = _param1 -> {
 			final boolean _success = _param1.isSuccessful();

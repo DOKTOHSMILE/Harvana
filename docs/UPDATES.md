@@ -2,6 +2,24 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (late night): Discover, Harvana Swap and Staking websites, explorer browser buttons
+
+- **My Asset → Discover** (`web3/DiscoverActivity`). Tabs: Harvana (Harvana Swap, Harvana Staking, Harvana Explorer, Harvana Pools, List a coin), Featured, DEX, Lending, Yield, NFT. Recent.
+- **Websites** (node, `https://harvannaprotocol.com/swap/` and `/stake/`) open in the dApp browser:
+  - Swap: Swap · Pools · Liquidity · List.
+  - Staking: Stake · My positions · Payouts.
+- **Harvana wallet in the browser:** `window.harvana`. Methods: `harvana_requestAccounts`, `harvana_accounts`, `harvana_sendAction`, `harvana_disconnect`.
+  - Actions: swap, addLiquidity, removeLiquidity, stake, unstake, claim.
+  - The app builds the review from the values, then PIN or fingerprint, then signs and sends with the existing node calls.
+  - The staking vault address comes from the node, never from the page.
+- **Moved to the websites:**
+  - Staking: Earn → Staking, Earn → Liquidity, the `app:staking` advert link.
+  - Pool add, remove and list: the Swap screen's Add, List and Remove buttons.
+  - New advert links: `app:swap`, `app:discover`.
+- **Browser buttons** (`web3/BrowserBar`) on the explorer and the dApp browser: Back, Forward, Reload/Stop, Home, Share (long press: copy link). The explorer also has a progress bar and the page title. It blocks non-HTTPS links and certificate errors.
+- My Asset buttons: Receive, Send, P2P, Discover (icon above label).
+- Needs the node update for the two websites (node `docs/DEPLOYMENT.md`).
+
 ## 12 Oct 2026 (late night): Web3 browser on the Earn tab, new asset rows
 
 - **Earn tab = Web3 home:** search or dApp URL bar; *Earn* (Staking → Staking Dashboard, Mining → Harvana Node Miner); *Explore dApps* (Featured, DEX, Lending, Yield, NFT); *Recent*.

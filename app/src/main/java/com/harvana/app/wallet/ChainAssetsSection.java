@@ -21,8 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The other coins under HARV on the Assets tab. Each coin is its own row, in the same card as HARV,
- * and opens that coin's detail page. The member can hide a coin with "Add coins".
+ * The other coins under HARV on the Assets tab. Each coin is its own row, in the same list as HARV,
+ * and opens that coin's detail page. The member can hide a coin with "Add coins", or add a chain or token of their
+ * own there (CustomAssets).
  */
 public final class ChainAssetsSection {
     private ChainAssetsSection() {}
@@ -61,6 +62,15 @@ public final class ChainAssetsSection {
         sub.setPadding(0, dp(c, 4), 0, dp(c, 12));
         root.addView(sub);
         for (CoinCatalog.Coin coin : CoinCatalog.others()) root.addView(toggleRow(c, coin, onChange));
+        TextView custom = new TextView(c);
+        custom.setText("+  Add a custom chain or token");
+        custom.setTextSize(14);
+        custom.setTypeface(Typeface.DEFAULT_BOLD);
+        custom.setTextColor(ContextCompat.getColor(c, R.color.colorPrimary));
+        custom.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        custom.setMinHeight(dp(c, 48));
+        custom.setOnClickListener(v -> { d.dismiss(); CustomAssets.showAdd(c, onChange); });
+        root.addView(custom);
         d.setContentView(root);
         d.show();
     }

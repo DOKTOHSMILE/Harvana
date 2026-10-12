@@ -2,6 +2,29 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (later): your wallets show as you, device binding, profile group cards, custom coins
+
+What the app does:
+- **A payment from any of your wallets shows under your name.** Before, paying a group from a second wallet showed a nameless "Member · Slot 3".
+  - Every wallet linked to your account is now looked up on the network (`/api/v1/identity/owner/{address}`, node change) and shown as you, in members, payments and notices.
+  - On the Members tab, your wallets fold into one row: your name, "2 wallets", and contributions added up.
+  - The network still keeps one record per wallet; only the display is per person.
+- **Bind this device explains itself and fixes the usual cause.** When the phone is already bound to another wallet, the app looks for that wallet among the wallets kept on this phone:
+  - if it is there, it offers **Add and bind**: that wallet signs to join your account, then this wallet is bound too;
+  - otherwise it explains, in a dialog instead of a cut-off toast, that the phone is bound to a wallet outside your account.
+- **Profile → Groups uses the same group cards as the Groups list.** The trust line now reads "Trust 11% · New" instead of "11% New · 4 members", and "1 members" is fixed.
+- **Assets list:** each coin is a plain 48dp row with a thin divider. There are no cards around each coin.
+- **Add coins → Add a custom chain or token** (EVM networks):
+  - **a chain, by chain ID:**
+    - the name, coin, decimals, explorer and icon come from the public chain registry (the source of chainlist.org);
+    - an RPC is used only after it answers with that chain ID;
+  - **a token, by contract address,** on Ethereum, BNB Chain, Polygon, Base or a chain you added:
+    - the name, symbol and decimals are read from the contract;
+    - the icon comes from CoinGecko;
+  - the address is your Ethereum address. Rows show the balance, and their sheet copies the address or opens the explorer. **Sending from the app is not available for added chains and tokens yet.**
+
+What the owner does: deploy the node (same deploy as the goal-group change above), then build and install the app in CodeAssist.
+
 ## 12 Oct 2026: goal groups are unlocked, and their screens merged into Payments
 
 What was wrong (a goal group with money in it where nobody could do anything):

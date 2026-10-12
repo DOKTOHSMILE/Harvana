@@ -393,24 +393,87 @@ public class GroupMembersFragmentActivity extends Fragment {
 						String state = str(row, "state", "");
 						if (!state.isEmpty()) show.put("paymentStatus", state);
 						displayMembers.add(show);
-						if (str(show, "memberUid", "").isEmpty() && wallet.startsWith("HV0x")) {
-							// the network knows this member by wallet only: look up the name they chose in the app
-							final HashMap<String, Object> target = show;
-							com.harvana.app.trust.WalletProfiles.resolve(wallet, card -> {
-								if (card == null || card.name.isEmpty() || getActivity() == null) return;
-								target.put("displayName", card.name);
-								target.put("resolvedName", card.name);
-								target.put("resolvedUsername", card.username);
-								if (recycler_members != null && recycler_members.getAdapter() != null) recycler_members.getAdapter().notifyDataSetChanged();
-							});
-						}
 					}
+					_mergeSamePerson();
 					if (tv_members_count != null) tv_members_count.setText("Members · " + displayMembers.size() + " on the network");
 					if (tv_members_empty != null) tv_members_empty.setVisibility(displayMembers.isEmpty() ? View.VISIBLE : View.GONE);
 					if (recycler_members != null) recycler_members.setAdapter(new MembersAdapter(displayMembers));
 				});
 			}
 		});
+	}
+
+	/**
+	 * Finds the person behind every wallet on the roster and shows each person once. A wallet someone linked to their
+	 * account is theirs: paying from a second wallet adds to their row (name, contributions) instead of showing a
+	 * nameless extra member. The network still keeps one record per wallet; only the display is per person.
+	 */
+	private void _mergeSamePerson() {
+		final List<HashMap<String, Object>> rows = new ArrayList<>(displayMembers);
+		final java.util.concurrent.atomic.AtomicInteger left = new java.util.concurrent.atomic.AtomicInteger(0);
+		for (HashMap<String, Object> r : rows) if (str(r, "walletAddress", "").startsWith("HV0x")) left.incrementAndGet();
+		if (left.get() == 0) return;
+		for (final HashMap<String, Object> target : rows) {
+			String wallet = str(target, "walletAddress", "");
+			if (!wallet.startsWith("HV0x")) continue;
+			com.harvana.app.trust.WalletProfiles.resolve(wallet, card -> {
+				if (card != null) {
+					target.put("personPid", card.pid);
+					if (!card.name.isEmpty() && str(target, "memberUid", "").isEmpty()) {
+						target.put("displayName", card.name);
+						target.put("resolvedName", card.name);
+						target.put("resolvedUsername", card.username);
+					}
+				}
+				if (left.decrementAndGet() == 0 && getActivity() != null) _foldPeople();
+			});
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void _foldPeople() {
+		java.util.LinkedHashMap<String, HashMap<String, Object>> byPerson = new java.util.LinkedHashMap<>();
+		List<HashMap<String, Object>> out = new ArrayList<>();
+		for (HashMap<String, Object> r : displayMembers) {
+			String pid = str(r, "personPid", "");
+			HashMap<String, Object> first = pid.isEmpty() ? null : byPerson.get(pid);
+			if (first == null) {
+				if (!pid.isEmpty()) byPerson.put(pid, r);
+				out.add(r);
+				continue;
+			}
+			// The same person on another wallet: keep the row that has their account, add this wallet to it.
+			if (str(first, "memberUid", "").isEmpty() && !str(r, "memberUid", "").isEmpty()) {
+				out.set(out.indexOf(first), r);
+				byPerson.put(pid, r);
+				java.util.List<String> moved = first.get("extraWallets") instanceof java.util.List ? (java.util.List<String>) first.get("extraWallets") : new ArrayList<>();
+				moved.add(0, str(first, "walletAddress", ""));
+				r.put("extraWallets", moved);
+				continue;
+			}
+			java.util.List<String> extra = first.get("extraWallets") instanceof java.util.List ? (java.util.List<String>) first.get("extraWallets") : new ArrayList<>();
+			extra.add(str(r, "walletAddress", ""));
+			first.put("extraWallets", extra);
+		}
+		displayMembers.clear();
+		displayMembers.addAll(out);
+		activeMemberUids.clear();
+		for (HashMap<String, Object> r : displayMembers) {
+			String uid = str(r, "memberUid", "");
+			if (!uid.isEmpty()) activeMemberUids.add(uid);
+		}
+		if (tv_members_count != null) tv_members_count.setText("Members · " + displayMembers.size() + " on the network");
+		if (recycler_members != null && recycler_members.getAdapter() != null) recycler_members.getAdapter().notifyDataSetChanged();
+	}
+
+	/** Every wallet shown on one member row: their own, then any other wallet of theirs in this group. */
+	@SuppressWarnings("unchecked")
+	private static java.util.List<String> _walletsOf(Map<String, Object> member) {
+		java.util.List<String> all = new ArrayList<>();
+		String w = str(member, "walletAddress", str(member, "wallet_address", ""));
+		if (!w.isEmpty()) all.add(w);
+		if (member.get("extraWallets") instanceof java.util.List) for (Object o : (java.util.List<Object>) member.get("extraWallets")) if (o != null && !all.contains(o.toString())) all.add(o.toString());
+		return all;
 	}
 
 	/** What each member has paid in, by wallet, as the network records it (rotating circles). */
@@ -708,7 +771,9 @@ public class GroupMembersFragmentActivity extends Fragment {
 		// no fetch needed for this part.
 		String memberWallet = str(member, "walletAddress", str(member, "wallet_address", ""));
 		if (wallet != null) {
-			wallet.setText(memberWallet.startsWith("HV0x") ? memberWallet : "No wallet linked");
+			java.util.List<String> all = _walletsOf(member);
+			wallet.setText(!memberWallet.startsWith("HV0x") ? "No wallet linked"
+				: all.size() > 1 ? android.text.TextUtils.join("\n", all) : memberWallet);
 		}
 		if (memberWallet.startsWith("HV0x") && balance != null) {
 			com.harvana.app.wallet.WalletNodeBalanceHelper.load(memberWallet,
@@ -1085,8 +1150,13 @@ public class GroupMembersFragmentActivity extends Fragment {
 			if (h.wallet != null) {
 				String memberWallet = str(member, "walletAddress", str(member, "wallet_address", ""));
 				if (memberWallet.startsWith("HV0x")) {
-					h.wallet.setText(_shortAddr(memberWallet));
-					Long paid = nodePaid.get(memberWallet.toLowerCase(Locale.US));
+					java.util.List<String> wallets = _walletsOf(member);
+					h.wallet.setText(_shortAddr(memberWallet) + (wallets.size() > 1 ? " · " + wallets.size() + " wallets" : ""));
+					Long paid = null;
+					for (String w : wallets) {
+						Long p = nodePaid.get(w.toLowerCase(Locale.US));
+						if (p != null) paid = (paid == null ? 0L : paid) + p;
+					}
 					if (h.contributions != null && paid != null) h.contributions.setText(com.harvana.app.wallet.BalanceFormatter.smart(paid / 100_000_000.0));
 					_fetchBalance(memberWallet, h.balance);
 				} else {

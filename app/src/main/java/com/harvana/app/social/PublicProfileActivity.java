@@ -644,11 +644,7 @@ public class PublicProfileActivity extends AppCompatActivity {
             TextView bind = pillButton("Bind this device", v -> {
                 v.setEnabled(false);
                 ((TextView) v).setText("Binding…");
-                com.harvana.app.sync.NodeLinkManager.bindNow(this, status -> runOnUiThread(() -> {
-                    toast(status == null || status.isEmpty() ? "Done." : status);
-                    factsCache = null;
-                    load();
-                }));
+                com.harvana.app.sync.NodeLinkManager.bindNow(this, status -> runOnUiThread(() -> afterBind(status)));
             });
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 44));
             lp.topMargin = SocialUi.dp(this, 12);
@@ -656,6 +652,47 @@ public class PublicProfileActivity extends AppCompatActivity {
             rows.addView(bind);
             rows.addView(SocialUi.text(this, "Ties your wallet to this phone and lifts the base score. No ID is uploaded. A phone belongs to one person; all your own wallets can be bound on it.", 12, false, UiColors.textSecondary()));
         }
+    }
+
+    /**
+     * After "Bind this device". When the phone is already bound to another wallet, look for that wallet among the ones
+     * kept on this phone: if it is there it is this person's own, so offer to add it to the account and bind again.
+     * The answer is shown in a dialog, not a toast that cuts it off.
+     */
+    private void afterBind(String status) {
+        String me = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
+        if (!com.harvana.app.sync.NodeLinkManager.deviceConflict(this, me)) {
+            message("Bind this device", status == null || status.isEmpty() ? "Done." : status);
+            factsCache = null;
+            load();
+            return;
+        }
+        com.harvana.app.sync.NodeLinkManager.findHolder(this, me, holder -> runOnUiThread(() -> {
+            if (isFinishing()) return;
+            if (holder.isEmpty()) {
+                message("This phone is bound to another account",
+                        "The network has this phone bound to a wallet that is not on this phone and not on your account. A phone belongs to one person. "
+                        + "If that wallet was yours, sign in with it once on this phone so it is added to your account, then bind again. "
+                        + "If it is someone else's, this phone stays theirs on the network; bind your wallet on your own phone instead.");
+                factsCache = null;
+                load();
+                return;
+            }
+            String shortH = holder.length() > 14 ? holder.substring(0, 8) + "\u2026" + holder.substring(holder.length() - 6) : holder;
+            com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(this)
+                    .setTitle("Add your other wallet first")
+                    .setMessage("This phone is bound to " + shortH + ", a wallet kept on this phone that is not on your account yet. "
+                            + "Add it to your account (it signs to prove it is yours), and this wallet is then bound to the phone as well.")
+                    .setNegativeButton("Not now", (d, w) -> { factsCache = null; load(); })
+                    .setPositiveButton("Add and bind", (d, w) -> com.harvana.app.sync.NodeLinkManager.adoptHolderThenBind(this, holder,
+                            s -> runOnUiThread(() -> afterBind(s)))));
+        }));
+    }
+
+    private void message(String title, String body) {
+        if (isFinishing()) return;
+        com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(this)
+                .setTitle(title).setMessage(body).setPositiveButton("OK", null));
     }
 
     /**
@@ -1237,79 +1274,20 @@ public class PublicProfileActivity extends AppCompatActivity {
     // ── Groups in common ─────────────────────────────────────────────────
 
     /** One shared group, laid out like a row of the Groups list: round image, name, type, members, cycle progress and trust. */
+    /** One group, drawn with the same card as the Groups list (group.GroupCard). Tapping it opens the group. */
     private View sharedGroupRow(final PublicProfileStore.SharedGroup g) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setPadding(0, SocialUi.dp(this, 14), 0, SocialUi.dp(this, 4));
-        row.setClickable(true);
-        row.setOnClickListener(v -> startActivity(new Intent(this, GroupDetailsActivity.class).putExtra("groupId", g.id)));
-
-        // Circular image: the group's photo when it has one, otherwise the HARV coin on the accent colour, as in the Groups list.
-        int size = SocialUi.dp(this, 48);
-        ImageView face = new ImageView(this);
-        face.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        GradientDrawable disc = new GradientDrawable();
-        disc.setShape(GradientDrawable.OVAL);
-        disc.setColor(UiColors.accent());
-        face.setBackground(disc);
-        face.setClipToOutline(true);
-        com.harvana.app.utils.GroupRing.apply(face, g.type, 1f, 0x00000000);      // the ring colour says what kind of group it is
-        if (g.photo.startsWith("http")) {
-            face.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            try { com.bumptech.glide.Glide.with(this).load(g.photo).circleCrop().into(face); } catch (Exception ignored) { face.setImageResource(R.drawable.ic_coin_harv); }
-        } else {
-            face.setImageResource(R.drawable.ic_coin_harv);
-            face.setPadding(SocialUi.dp(this, 10), SocialUi.dp(this, 10), SocialUi.dp(this, 10), SocialUi.dp(this, 10));
-        }
-        row.addView(face, new LinearLayout.LayoutParams(size, size));
-
-        LinearLayout words = new LinearLayout(this);
-        words.setOrientation(LinearLayout.VERTICAL);
-        words.setPadding(SocialUi.dp(this, 12), 0, 0, 0);
-        words.addView(SocialUi.text(this, g.name, 16, true, UiColors.textPrimary()));
-
-        StringBuilder kind = new StringBuilder();
-        if (!g.state.isEmpty()) kind.append(g.state).append("  \u00b7  ");
-        kind.append(g.type.isEmpty() ? "Group" : g.type);
-        if (!g.frequency.isEmpty()) kind.append("  \u00b7  ").append(g.frequency);
-        TextView kindLine = SocialUi.text(this, kind.toString(), 12.5f, false, UiColors.textSecondary());
-        kindLine.setPadding(0, SocialUi.dp(this, 2), 0, 0);
-        words.addView(kindLine);
-
-        StringBuilder facts = new StringBuilder();
-        facts.append(g.members).append(g.members == 1 ? " member" : " members");
-        if (g.amount > 0) facts.append("  \u00b7  ").append(com.harvana.app.wallet.BalanceFormatter.smart(g.amount)).append("/slot");
-        TextView factLine = SocialUi.text(this, facts.toString(), 12.5f, false, UiColors.textSecondary());
-        factLine.setPadding(0, SocialUi.dp(this, 2), 0, 0);
-        words.addView(factLine);
-
-        if (g.slots > 0) {
-            long round = Math.max(1, g.round);
-            int pct = (int) Math.min(100, (round * 100.0) / g.slots);
-            LinearLayout cycle = new LinearLayout(this);
-            cycle.setGravity(Gravity.CENTER_VERTICAL);
-            cycle.setPadding(0, SocialUi.dp(this, 8), 0, 0);
-            cycle.addView(SocialUi.text(this, "Cycle " + round + " of " + g.slots, 11.5f, false, UiColors.textTertiary()), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            cycle.addView(SocialUi.text(this, pct + "%", 11.5f, true, UiColors.textSecondary()));
-            words.addView(cycle);
-            words.addView(bar(pct, UiColors.accent()));
-        }
-
-        final TextView trust = SocialUi.text(this, "Trust …", 12, true, UiColors.textTertiary());
-        trust.setPadding(0, SocialUi.dp(this, 6), 0, 0);
-        words.addView(trust);
-        if (g.nodeKey.isEmpty()) {
-            trust.setText("Not on the network");
-        } else {
-            com.harvana.app.trust.NetworkTrust.group(g.nodeKey, score -> runOnUiThread(() -> {
-                if (!score.published || score.summary.isEmpty()) { trust.setText("Not on the network"); return; }
-                trust.setText(score.summary);
-                if (score.percent >= 0) trust.setTextColor(ProfileTrust.tierColor(score.tier));
-            }));
-        }
-        row.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        row.addView(SocialUi.text(this, "Open  \u203A", 13, true, UiColors.accent()));
-        return row;
+        View v = getLayoutInflater().inflate(R.layout.group_custom_view, null);
+        String myUid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
+                : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+        com.harvana.app.group.GroupCard.bind(this, v, g.doc, myUid);
+        View.OnClickListener open = x -> startActivity(new Intent(this, GroupDetailsActivity.class).putExtra("groupId", g.id));
+        v.setOnClickListener(open);
+        View card = v.findViewById(R.id.cardview1);
+        if (card != null) card.setOnClickListener(open);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = SocialUi.dp(this, 10);
+        v.setLayoutParams(lp);
+        return v;
     }
 
     private java.util.List<PublicProfileStore.SharedGroup> adminGroupsCache;
@@ -1328,6 +1306,9 @@ public class PublicProfileActivity extends AppCompatActivity {
     private View sharedCard() {
         boolean mine = isMe();
         LinearLayout c = SocialUi.card(this);
+        // Each group is its own card (as in the Groups list), so this section is not boxed in another card.
+        c.setBackground(null);
+        c.setPadding(SocialUi.dp(this, 4), c.getPaddingTop(), SocialUi.dp(this, 4), c.getPaddingBottom());
         c.addView(SocialUi.text(this, mine ? "Your groups" : "Groups you share", 16, true, UiColors.textPrimary()));
         if (mine) {
             TextView note = SocialUi.text(this, "Groups you are the admin of. Others only see how many groups you are in; group names show only for groups you both belong to.", 13, false, UiColors.textSecondary());

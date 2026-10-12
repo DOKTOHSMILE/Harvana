@@ -108,7 +108,10 @@ public class WalletAssetFragmentActivity extends Fragment {
 		}
 		View addCoins = _view.findViewById(R.id.btn_add_coins);
 		if (addCoins != null) addCoins.setOnClickListener(v -> com.harvana.app.wallet.ChainAssetsSection.showPicker(getContext(),
-				() -> com.harvana.app.wallet.ChainAssetsSection.render(getContext(), chainAssets, wallet_address)));
+				() -> {
+					com.harvana.app.wallet.ChainAssetsSection.render(getContext(), chainAssets, wallet_address);
+					if (getView() != null) com.harvana.app.wallet.CustomAssets.render(getContext(), getView().findViewById(R.id.custom_assets), wallet_address);
+				}));
 		androidx.swiperefreshlayout.widget.SwipeRefreshLayout refresh = _view.findViewById(R.id.refresh_assets);
 		if (refresh != null) {
 			refresh.setColorSchemeResources(R.color.colorAccent);
@@ -187,6 +190,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 		}
 		final Context context = getContext();
 		com.harvana.app.wallet.ChainAssetsSection.render(context, chainAssets, wallet_address);
+		if (getView() != null) com.harvana.app.wallet.CustomAssets.render(context, getView().findViewById(R.id.custom_assets), wallet_address);
 		// hUSD, once the network has it switched on; its value goes into the total.
 		com.harvana.app.husd.HusdRow.render(context, _husdBox(), wallet_address, fiat -> {
 			androidx.fragment.app.Fragment parent = getParentFragment();
@@ -287,7 +291,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 		public void onBindViewHolder(ViewHolder _holder, final int _position) {
 			View _view = _holder.itemView;
 			
-			final com.google.android.material.card.MaterialCardView cardview1 = _view.findViewById(R.id.cardview1);
+			final View cardview1 = _view.findViewById(R.id.cardview1);
 			final LinearLayout linear7 = _view.findViewById(R.id.linear7);
 			final androidx.cardview.widget.CardView cardview_logo = _view.findViewById(R.id.cardview_logo);
 			final LinearLayout ll_asset_details = _view.findViewById(R.id.ll_asset_details);

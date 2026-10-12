@@ -49,6 +49,8 @@ public final class PublicProfileStore {
         public String type = "", frequency = "", state = "", photo = "", nodeKey = "";
         public long members, round, slots;
         public double amount;
+        /** The group document as read, for drawing the same card as the Groups list (group.GroupCard). */
+        public java.util.Map<String, Object> doc = new java.util.HashMap<>();
         SharedGroup(String id, String name) { this.id = id; this.name = name; }
     }
 
@@ -69,6 +71,9 @@ public final class PublicProfileStore {
         sg.slots = num(gd.get("totalSlots"), 0);
         sg.amount = gd.get("contributionAmount") instanceof Number ? ((Number) gd.get("contributionAmount")).doubleValue() : 0.0;
         sg.nodeKey = com.harvana.app.trust.NetworkTrust.groupKey(gd);
+        sg.doc = new java.util.HashMap<>(gd);
+        sg.doc.put("groupName", sg.name);
+        if (!sg.doc.containsKey("groupId")) sg.doc.put("groupId", gid);
         return sg;
     }
 

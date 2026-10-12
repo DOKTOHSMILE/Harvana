@@ -1,38 +1,39 @@
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools"
 	android:id="@+id/ll_asset_container"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:orientation="vertical">
-	<com.google.android.material.card.MaterialCardView
+	<!-- One plain list row (about 48dp) with a thin divider under it: no card around each asset. -->
+	<LinearLayout
 		android:id="@+id/cardview1"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_marginLeft="4dp"
-		android:layout_marginTop="4dp"
-		android:layout_marginRight="4dp"
-		app:cardBackgroundColor="@color/colorSurface"
-		app:cardCornerRadius="16dp"
-		app:cardElevation="0dp"
-		app:strokeWidth="1dp"
-		app:strokeColor="@color/colorCardStroke">
+		android:minHeight="48dp"
+		android:background="?attr/selectableItemBackground"
+		android:clickable="true"
+		android:focusable="true"
+		android:orientation="vertical">
 		<LinearLayout
 			android:id="@+id/linear7"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:padding="14dp"
+			android:minHeight="48dp"
+			android:paddingStart="12dp"
+			android:paddingEnd="12dp"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
 			android:gravity="center_vertical"
 			android:orientation="horizontal">
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/cardview_logo"
-				android:layout_width="44dp"
-				android:layout_height="44dp"
+				android:layout_width="32dp"
+				android:layout_height="32dp"
 				app:cardBackgroundColor="@color/colorSurfaceAlt"
 				app:cardCornerRadius="360dp"
 				app:cardElevation="0dp"
-	app:strokeWidth="0dp">
+				app:strokeWidth="0dp">
 				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/iv_asset_logo"
 					android:layout_width="match_parent"
@@ -56,13 +57,14 @@
 					android:text="Harvana Coin"
 					android:textStyle="bold"
 					android:textColor="@color/colorTextPrimary"
-					android:textSize="16sp"
+					android:textSize="14sp"
+					android:maxLines="1"
+					android:ellipsize="end"
 					android:focusable="false" />
 				<LinearLayout
 					android:id="@+id/linear6"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:layout_marginTop="2dp"
 					android:gravity="center_vertical"
 					android:orientation="horizontal">
 					<TextView
@@ -70,19 +72,19 @@
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:text="20.00"
-						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary"
-						android:textSize="14sp"
+						android:textSize="12sp"
 						android:focusable="false" />
 					<TextView
 						android:id="@+id/tv_asset_symbol"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:text="+2.64%"
-						android:textSize="12sp"
+						android:textSize="11sp"
 						android:textStyle="bold"
 						android:textColor="@color/colorAccent"
 						android:layout_weight="1"
+						android:maxLines="1"
 						android:focusable="false"
 						android:paddingStart="6dp" />
 					<TextView
@@ -92,10 +94,16 @@
 						android:text="₦ 0.00"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextSecondary"
-						android:textSize="14sp"
+						android:textSize="12sp"
 						android:focusable="false" />
 				</LinearLayout>
 			</LinearLayout>
 		</LinearLayout>
-	</com.google.android.material.card.MaterialCardView>
+		<View
+			android:id="@+id/asset_divider"
+			android:layout_width="match_parent"
+			android:layout_height="1dp"
+			android:layout_marginStart="56dp"
+			android:background="@color/colorCardStroke" />
+	</LinearLayout>
 </LinearLayout>

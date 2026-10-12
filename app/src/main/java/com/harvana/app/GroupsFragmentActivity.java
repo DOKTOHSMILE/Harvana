@@ -636,23 +636,6 @@ public class GroupsFragmentActivity extends Fragment {
 		return s.isEmpty() || "null".equalsIgnoreCase(s) ? fallback : s;
 	}
 	
-	private void setupCardExpansion(HashMap<String, Object> group, LinearLayout lin, ImageView img_hide, androidx.cardview.widget.CardView cad) {
-		cad.setClipToOutline(true);
-		
-		boolean isExpanded = group.containsKey("isExpanded") && (boolean) group.get("isExpanded");
-		lin.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
-		img_hide.setRotation(isExpanded ? 180f : 0f);
-		
-		img_hide.setOnClickListener(v -> {
-			boolean currentExpanded = group.containsKey("isExpanded") && (boolean) group.get("isExpanded");
-			boolean newState = !currentExpanded;
-			group.put("isExpanded", newState);
-			
-			lin.setVisibility(newState ? View.VISIBLE : View.GONE);
-			img_hide.setRotation(newState ? 180f : 0f);
-		});
-	}
-	
 	{
 	}
 	
@@ -687,131 +670,8 @@ public class GroupsFragmentActivity extends Fragment {
 				_view = _inflater.inflate(R.layout.group_custom_view, null);
 			}
 			
-			final com.google.android.material.card.MaterialCardView cardview1 = _view.findViewById(R.id.cardview1);
-			final LinearLayout linear1 = _view.findViewById(R.id.linear1);
-			final LinearLayout linear2 = _view.findViewById(R.id.linear2);
-			final LinearLayout linear85 = _view.findViewById(R.id.linear85);
-			final androidx.cardview.widget.CardView cardview2 = _view.findViewById(R.id.cardview2);
-			final LinearLayout linear78 = _view.findViewById(R.id.linear78);
-			final TextView position_textview2 = _view.findViewById(R.id.position_textview2);
-			final ImageView img_hide = _view.findViewById(R.id.img_hide);
-			final ImageView iv_group_card_icon = _view.findViewById(R.id.iv_group_card_icon);
-			final LinearLayout linear86 = _view.findViewById(R.id.linear86);
-			final TextView type_freq_textview3 = _view.findViewById(R.id.type_freq_textview3);
-			final TextView name_textview1 = _view.findViewById(R.id.name_textview1);
-			final ImageView imageview1 = _view.findViewById(R.id.imageview1);
-			final View view79 = _view.findViewById(R.id.view79);
-			final LinearLayout linear5 = _view.findViewById(R.id.linear5);
-			final com.google.android.material.progressindicator.LinearProgressIndicator current_cycle_progressbar1 = _view.findViewById(R.id.current_cycle_progressbar1);
-			final LinearLayout members_progress_indicator_linear3 = _view.findViewById(R.id.members_progress_indicator_linear3);
-			final LinearLayout linear4 = _view.findViewById(R.id.linear4);
-			final TextView current_cycle_textview4 = _view.findViewById(R.id.current_cycle_textview4);
-			final TextView current_cycle_percent_textview5 = _view.findViewById(R.id.current_cycle_percent_textview5);
-			final LinearLayout linear80 = _view.findViewById(R.id.linear80);
-			final LinearLayout linear81 = _view.findViewById(R.id.linear81);
-			final LinearLayout linear82 = _view.findViewById(R.id.linear82);
-			final TextView textview58 = _view.findViewById(R.id.textview58);
-			final TextView amount_per_slot_textview6 = _view.findViewById(R.id.amount_per_slot_textview6);
-			final TextView textview59 = _view.findViewById(R.id.textview59);
-			final TextView number_of_members_textview7 = _view.findViewById(R.id.number_of_members_textview7);
-			final TextView textview60 = _view.findViewById(R.id.textview60);
-			final TextView group_trust_score_perc_textview8 = _view.findViewById(R.id.group_trust_score_perc_textview8);
-			
-			HashMap<String, Object> group = _data.get(_position);
-			
-			// Handle expandable toggle behavior cleanly via separate method
-			setupCardExpansion(group, linear85, img_hide, cardview1);
-			
-			if (name_textview1 != null) {
-				name_textview1.setText(_safeString(group, "groupName", "Untitled Group"));
-			}
-			
-			if (iv_group_card_icon != null) {
-				// A coloured ring by group type (blue rotating, green accumulative, purple fixed), with or without a picture.
-				com.harvana.app.utils.GroupRing.apply(iv_group_card_icon, _safeString(group, "groupType", ""), 1f, 0x00000000);
-				String photo = _safeString(group, "groupPhoto", "");
-				if (photo.startsWith("http")) {
-					iv_group_card_icon.setScaleType(ImageView.ScaleType.CENTER_CROP);
-					try { com.bumptech.glide.Glide.with(iv_group_card_icon.getContext()).load(photo).circleCrop().into(iv_group_card_icon); } catch (Exception ignored) { }
-				}
-			}
-			
-			boolean isAdmin = uid.equals(_safeString(group, "creatorId", ""));
-			if (position_textview2 != null) {
-				if (isAdmin) {
-					position_textview2.setBackground(new GradientDrawable() {
-						{
-							setCornerRadius(30);
-							setStroke(2, 0xFF10B881);
-							setColor(getResources().getColor(R.color.darkFaint10));
-						}
-					});
-					position_textview2.setText("ADMIN");
-				} else {
-					position_textview2.setBackground(new GradientDrawable() {
-						{
-							setCornerRadius(30);
-							setStroke(2, 0xFF13456D);
-							setColor(getResources().getColor(R.color.darkFaint10));
-						}
-					});
-					position_textview2.setText("MEMBER");
-				}
-			}
-			
-			String state = _safeString(group, "state", "");
-			String type = _safeString(group, "groupType", "—");
-			String freq = _safeString(group, "frequency", "—");
-			if (type_freq_textview3 != null) {
-				type_freq_textview3.setText((state.isEmpty() ? "" : state + " · ") + type + " · " + freq);
-			}
-			
-			long round = (long) _safeDouble(group, "currentRound");
-			long slots = (long) _safeDouble(group, "totalSlots");
-			if (slots <= 0) slots = 1;
-			if (round <= 0) round = 1;
-			int progress = (int) Math.min(100, (round * 100.0) / slots);
-			
-			if (current_cycle_textview4 != null) {
-				current_cycle_textview4.setText("Cycle " + round + " of " + slots);
-			}
-			if (current_cycle_percent_textview5 != null) {
-				current_cycle_percent_textview5.setText(progress + "%");
-			}
-			if (current_cycle_progressbar1 != null) {
-				current_cycle_progressbar1.setProgress(progress);
-			}
-			
-			if (amount_per_slot_textview6 != null) {
-				amount_per_slot_textview6.setText(
-				com.harvana.app.wallet.BalanceFormatter.smart(_safeDouble(group, "contributionAmount")) + "/slot");
-			}
-			if (number_of_members_textview7 != null) {
-				number_of_members_textview7.setText((long) _safeDouble(group, "membersCount") + " members");
-			}
-			
-			String nodeId = com.harvana.app.trust.NetworkTrust.groupKey(group);
-			if (group_trust_score_perc_textview8 != null) {
-				group_trust_score_perc_textview8.setTag(nodeId);
-				group_trust_score_perc_textview8.setText("Trust …");
-				group_trust_score_perc_textview8.setTextColor(0xFF9E9E9E);
-				com.harvana.app.trust.NetworkTrust.group(nodeId, score -> {
-					if (getActivity() == null) return;
-					getActivity().runOnUiThread(() -> {
-						if (!nodeId.equals(group_trust_score_perc_textview8.getTag())) return;
-						if (!score.published || score.summary.isEmpty()) {
-							group_trust_score_perc_textview8.setText("Not on the network");
-							return;
-						}
-						group_trust_score_perc_textview8.setText(score.summary);
-						if (score.percent >= 0) { group_trust_score_perc_textview8.setTextColor(com.harvana.app.trust.ProfileTrust.tierColor(score.tier)); return; }
-						if ("HIGH_TRUST".equals(score.summary) || score.summary.startsWith("High trust"))
-							group_trust_score_perc_textview8.setTextColor(0xFF4CAF50);
-						else if ("ESTABLISHED".equals(score.summary) || score.summary.startsWith("Established"))
-							group_trust_score_perc_textview8.setTextColor(0xFFFF9800);
-					});
-				});
-			}
+			// The same card as on a profile's Groups tab (GroupCard).
+			com.harvana.app.group.GroupCard.bind(getActivity(), _view, _data.get(_position), uid);
 			
 			return _view;
 		}

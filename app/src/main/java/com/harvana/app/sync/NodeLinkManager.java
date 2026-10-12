@@ -130,7 +130,7 @@ public final class NodeLinkManager {
         SharedPreferences p = prefs(c);
         NodeIdentityClient.bindPersonhood(c, addr, new NodeIdentityClient.Callback() {
             @Override public void onSuccess(JSONObject j) {
-                p.edit().putBoolean("bound_" + addr, true).putString("status_" + addr, "This phone is bound to your wallet on the network.").apply();
+                p.edit().putBoolean("bound_" + addr, true).remove("conflict_" + addr).putString("status_" + addr, "This phone is bound to your wallet on the network.").apply();
                 next.run();
             }
             @Override public void onError(String e) {
@@ -138,12 +138,62 @@ public final class NodeLinkManager {
                 if (u.contains("PERSONHOOD_ALREADY_BOUND")) {
                     p.edit().putBoolean("bound_" + addr, true).putString("status_" + addr, "This phone is bound to your wallet on the network.").apply();
                 } else if (u.contains("DEVICE_ALREADY_BOUND")) {
-                    p.edit().putBoolean("bound_" + addr, false).putString("status_" + addr, "This phone belongs to another person's account on the network. A phone can belong to one person; all of that person's wallets can be bound on it.").apply();
+                    p.edit().putBoolean("bound_" + addr, false).putBoolean("conflict_" + addr, true)
+                            .putString("status_" + addr, "This phone is already bound to a wallet that is not on your account.").apply();
                 } else {
                     p.edit().putString("status_" + addr, "Device binding is pending. It will be tried again.").apply();
                 }
                 next.run();
             }
+        });
+    }
+
+    /** True when the last bind of this wallet was refused because the phone is bound to a wallet outside this account. */
+    public static boolean deviceConflict(Context c, String addr) {
+        return addr != null && prefs(c).getBoolean("conflict_" + addr, false);
+    }
+
+    public interface Holder { void found(String addressOrEmpty); }
+
+    /**
+     * Which other wallet on this phone the phone is bound to: a wallet kept here (its key is on this phone) that the
+     * network says is bound. Empty when none of the wallets here is, i.e. the phone was bound with a wallet that is gone.
+     */
+    public static void findHolder(Context ctx, String addr, Holder cb) {
+        final Context c = ctx.getApplicationContext();
+        java.util.List<String> others = new java.util.ArrayList<>();
+        for (com.harvana.app.wallet.WalletListManager.WalletEntry e : com.harvana.app.wallet.WalletListManager.getWalletList(c)) {
+            if (e == null || e.address == null || e.address.equalsIgnoreCase(addr) || WalletManager.loadPrivateKey(c, e.address) == null) continue;
+            if (!others.contains(e.address)) others.add(e.address);
+        }
+        check(others, 0, cb);
+    }
+
+    private static void check(java.util.List<String> list, int i, Holder cb) {
+        if (i >= list.size()) { cb.found(""); return; }
+        String a = list.get(i);
+        HarvanaNodeClient.nodeGet("/api/v1/personhood/" + a, new HarvanaNodeClient.JsonCallback() {
+            @Override public void onSuccess(JSONObject j) { if (j.optBoolean("bound", false)) cb.found(a); else check(list, i + 1, cb); }
+            @Override public void onError(String e) { check(list, i + 1, cb); }
+        });
+    }
+
+    /**
+     * Adds {@code holder} (a wallet on this phone that the phone is bound to) to the signed-in account, signed by that
+     * wallet, then binds the active wallet. The network allows the second wallet on the phone once both are the same person.
+     */
+    public static void adoptHolderThenBind(Context ctx, String holder, Done done) {
+        final Context c = ctx.getApplicationContext();
+        SharedPreferences p = prefs(c);
+        p.edit().remove("linked_" + holder).apply();
+        link(c, holder, linkStatus -> {
+            if (!p.getBoolean("linked_" + holder, false)) {
+                if (done != null) done.onDone(linkStatus.isEmpty() ? "That wallet could not be added to your account. Try again." : linkStatus);
+                return;
+            }
+            String addr = WalletManager.getActiveWalletAddress(c);
+            p.edit().remove("conflict_" + addr).apply();
+            bindNow(c, done);
         });
     }
 

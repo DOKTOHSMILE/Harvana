@@ -1473,6 +1473,7 @@ public class HomeFragmentActivity extends Fragment {
 			row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
 			row.addView(_quickAction(R.drawable.ic_action_receive, "Receive", ReceiveActivity.class), _quickActionParams(d, true));
 			row.addView(_quickAction(R.drawable.ic_action_buy, "P2P", P2pMarketplaceActivity.class), _quickActionParams(d, true));
+			row.addView(_quickAction(R.drawable.icon_currency_exchange_twotone, "Swap", com.harvana.app.swap.SwapActivity.class), _quickActionParams(d, true));
 			
 			card.removeView(top);
 			android.widget.LinearLayout box = new android.widget.LinearLayout(getContext());

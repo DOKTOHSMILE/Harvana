@@ -107,6 +107,50 @@ public final class NodeGroupClient {
         }, cb);
     }
 
+    // ═════════════════════════════ SWAP (HARV ↔ coins, coin ↔ coin) ═════════════════════════════
+
+    /** Every switched-on coin's pool: harvRaw, coinRaw, shares, open, coinRawPerHarv. */
+    public static void swapPools(Callback cb) { read("/api/v1/swap/pools", cb); }
+    /** What {@code amountRaw} of {@code from} gets of {@code to} now: outRaw, priceImpactBps, feeBps, viaHarvRaw. */
+    public static void swapQuote(String from, String to, long amountRaw, Callback cb) {
+        HarvanaNodeClient.nodeGet("/api/v1/swap/quote?from=" + from + "&to=" + to + "&amountRaw=" + amountRaw, new HarvanaNodeClient.JsonCallback() {
+            @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }
+            @Override public void onError(String error) { cb.onError(error); }
+        });
+    }
+    /** The wallet's pool shares and what they hold now. */
+    public static void swapPosition(String address, Callback cb) { read("/api/v1/swap/position/" + address, cb); }
+
+    /** Signed as "HARVANA_SWAP_V1:ACTION:a:b:address:x:y:nonce" (SwapController on the node). */
+    private static void swapAct(Context c, String path, String action, String a, String b, String address, long x, long y,
+                                String[] keys, Callback cb) {
+        act(c, address, path, new Spec() {
+            public String canonical(long n) { return "HARVANA_SWAP_V1:" + action + ":" + a + ":" + b + ":" + address + ":" + x + ":" + y + ":" + n; }
+            public void fill(JSONObject body, long n) throws JSONException {
+                body.put("address", address);
+                for (int i = 0; i + 1 < keys.length; i += 2) body.put(keys[i], keys[i + 1]);
+            }
+        }, cb);
+    }
+
+    /** Swap {@code amountRaw} of {@code from} ("HARV" or a coin code) for at least {@code minOutRaw} of {@code to}. */
+    public static void swap(Context c, String address, String from, String to, long amountRaw, long minOutRaw, Callback cb) {
+        swapAct(c, "/api/v1/swap/swap", "SWAP", from, to, address, amountRaw, minOutRaw,
+                new String[]{"from", from, "to", to, "amountRaw", String.valueOf(amountRaw), "minOutRaw", String.valueOf(minOutRaw)}, cb);
+    }
+
+    /** Put HARV and a coin into the coin's pool for shares. */
+    public static void swapAdd(Context c, String address, String code, long harvRaw, long coinRaw, Callback cb) {
+        swapAct(c, "/api/v1/swap/add", "ADD", code, "HARV", address, harvRaw, coinRaw,
+                new String[]{"asset", code, "harvRaw", String.valueOf(harvRaw), "coinRaw", String.valueOf(coinRaw)}, cb);
+    }
+
+    /** Turn pool shares back into HARV and the coin. */
+    public static void swapRemove(Context c, String address, String code, long shares, Callback cb) {
+        swapAct(c, "/api/v1/swap/remove", "REMOVE", code, "HARV", address, shares, 0L,
+                new String[]{"asset", code, "shares", String.valueOf(shares)}, cb);
+    }
+
     // ═════════════════════════════ CIRCLE ═════════════════════════════
 
     public static void createCircle(Context c, String creator, long contributionRaw, int memberLimit, long cycleHours, Callback cb) {
@@ -737,6 +781,9 @@ public final class NodeGroupClient {
             case "/api/v1/fixed/vote-dissolve": return "FIXED_VOTE_DISSOLVE";
             case "/api/v1/fixed/finish-dissolve": return "FIXED_FINISH_DISSOLVE";
             case "/api/v1/genloan/request": return "GENLOAN_REQUEST";
+            case "/api/v1/swap/swap": return "SWAP";
+            case "/api/v1/swap/add": return "SWAP_ADD";
+            case "/api/v1/swap/remove": return "SWAP_REMOVE";
             default:
                 if (path.endsWith("/staker-share/claim")) return "STABLE_SHARE_CLAIM";
                 if (path.startsWith("/api/v1/vault/")) {           // lock pays its own gas; the rest pay the action fee

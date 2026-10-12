@@ -84,6 +84,16 @@ public class HusdActivity extends AppCompatActivity {
         head.addView(actions);
         root.addView(head);
 
+        LinearLayout sc = card();                          // swap HARV or another coin for this one (SwapActivity)
+        sc.addView(text("Swap for " + sym, 15, true, UiColors.textPrimary()));
+        sc.addView(text("Swap HARV or another Harvana coin for " + sym + " at the pool's price, or swap " + sym + " back.",
+                13, false, UiColors.textSecondary()));
+        sc.addView(action("Swap", v -> startActivity(new android.content.Intent(this, com.harvana.app.swap.SwapActivity.class)
+                .putExtra(com.harvana.app.swap.SwapActivity.EXTRA_FROM, "HARV").putExtra(com.harvana.app.swap.SwapActivity.EXTRA_TO, code))));
+        LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        slp.topMargin = dp(12);
+        root.addView(sc, slp);
+
         if ("NGN".equals(Stable.currency(code))) {         // hNGN can also be minted against HARV (VaultActivity)
             LinearLayout vc = card();
             vc.addView(text("Mint " + sym + " with HARV", 15, true, UiColors.textPrimary()));

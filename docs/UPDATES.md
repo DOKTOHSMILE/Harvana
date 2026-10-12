@@ -2,6 +2,21 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night, last): Swap HARV and the Harvana coins
+
+What the app does:
+- **Home → Swap** (new quick action) and **every coin's page → Swap** open the new Swap screen (`swap/SwapActivity`).
+  - Pick what you pay and what you get: HARV, hNGN, hUSD or any coin that is switched on. ⇅ flips the sides; Max fills your balance.
+  - The estimate updates as you type, with the rate, the pool fee (0.3%, or 0.6% coin to coin through HARV), the price impact (amber at 5% or more) and the least you will get.
+  - You sign a minimum 1% below the estimate. If the price moves more than that before the next block, everything you paid comes back.
+- **Pools**, under the swap: each coin's HARV / coin pool, what is in it, and your share.
+  - **Add** puts HARV and the coin in. The coin amount follows the pool's price as you type; an empty pool takes its starting price from the first deposit.
+  - **Remove** takes back 25%, 50% or all of your share.
+  - Providers earn the 0.3% fee on every swap through their pool.
+- Each swap, add or remove pays the usual small HARV action fee (`ACTION_FEE:SWAP|SWAP_ADD|SWAP_REMOVE`).
+
+Operator: needs the node with `/api/v1/swap` (node `docs/DEPLOYMENT.md`, "swaps between HARV and the coins"). A pool can only swap once someone adds its first liquidity.
+
 ## 12 Oct 2026 (night): Gradle files stored for CodeAssist
 
 - `settings.gradle`, `build.gradle`, `gradle.properties`, `gradle/wrapper/gradle-wrapper.properties` and `app/build.gradle` are now in the repository, so CodeAssist can import the project as a Gradle module.

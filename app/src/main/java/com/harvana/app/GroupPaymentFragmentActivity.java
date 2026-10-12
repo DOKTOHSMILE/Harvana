@@ -893,8 +893,9 @@ public class GroupPaymentFragmentActivity extends Fragment {
                         return;
                 }
                 final com.harvana.app.group.GroupTypeBoardView.Selection sel = new com.harvana.app.group.GroupTypeBoardView.Selection();
-                double daily = ownLine.get("dailyAmountRaw") instanceof Number ? ((Number) ownLine.get("dailyAmountRaw")).doubleValue() / 100_000_000.0 : 0;
-                LinearLayout bar = com.harvana.app.group.BackpayBar.create(getContext(), sel, daily, dates -> {
+                long dailyRaw = ownLine.get("dailyAmountRaw") instanceof Number ? ((Number) ownLine.get("dailyAmountRaw")).longValue() : 0L;
+                LinearLayout bar = com.harvana.app.group.BackpayBar.create(getContext(), sel, dailyRaw,
+                                com.harvana.app.engine.Amounts.assetOf(ownLine), dates -> {
                         NodePayActions.Ctx ctx = _payCtx();
                         ctx.line = ownLine;
                         NodePayActions.backpay(ctx, dates);

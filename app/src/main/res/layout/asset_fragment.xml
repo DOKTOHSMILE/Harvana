@@ -246,7 +246,7 @@
 			app:tabIndicatorHeight="3dp"
 			app:tabMode="fixed"
 			app:tabSelectedTextColor="@color/colorTextPrimaryWhite"
-			app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget"
+			app:tabTextAppearance="@style/Harvana.Tab"
 			app:tabTextColor="@color/colorTextTertiary" />
 	</com.google.android.material.appbar.AppBarLayout>
 	<com.google.android.material.card.MaterialCardView

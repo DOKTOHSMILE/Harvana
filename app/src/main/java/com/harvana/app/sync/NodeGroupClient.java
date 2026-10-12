@@ -125,13 +125,20 @@ public final class NodeGroupClient {
     /** lineType FLEXIBLE|LOCKED (lockedUntilMs required for LOCKED); depositMode ONGOING|SINGLE_LUMP_SUM|VARIABLE_AMOUNT (maxContributionRaw required for VARIABLE_AMOUNT). */
     public static void startAccumLine(Context c, String member, String groupId, long dailyRaw, boolean autoClose,
                                       String lineType, Long lockedUntilMs, String depositMode, Long maxContributionRaw, Callback cb) {
+        startAccumLine(c, member, groupId, dailyRaw, autoClose, lineType, lockedUntilMs, depositMode, maxContributionRaw, null, cb);
+    }
+
+    /** {@code asset}: save in a stable coin (HNGN, HUSD, …) instead of HARV; amounts are then in that coin's units. */
+    public static void startAccumLine(Context c, String member, String groupId, long dailyRaw, boolean autoClose,
+                                      String lineType, Long lockedUntilMs, String depositMode, Long maxContributionRaw, String asset, Callback cb) {
         act(c, member, "/api/v1/accum/start-line", new Spec() {
             public String canonical(long n) {
-                return GroupCanonical.accumStartLine(groupId, member, dailyRaw, autoClose, lineType, lockedUntilMs, depositMode, maxContributionRaw, n);
+                return GroupCanonical.accumStartLine(groupId, member, dailyRaw, autoClose, lineType, lockedUntilMs, depositMode, maxContributionRaw, n, asset);
             }
             public void fill(JSONObject b, long n) throws JSONException {
                 b.put("groupId", groupId).put("memberAddress", member).put("dailyAmountRaw", dailyRaw)
                  .put("autoCloseEnabled", autoClose).put("lineType", lineType).put("depositMode", depositMode);
+                if (asset != null && !asset.isEmpty()) b.put("asset", asset);
                 if (lockedUntilMs != null) b.put("lockedUntilTimestamp", lockedUntilMs.longValue());
                 if (maxContributionRaw != null) b.put("maxContributionRaw", maxContributionRaw.longValue());
             }

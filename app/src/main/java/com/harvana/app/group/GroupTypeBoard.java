@@ -499,9 +499,11 @@ public final class GroupTypeBoard {
             cell.forwardPayable = false;
             cells.add(cell);
         }
-        double savedHarv = line == null ? 0 : num(line, "amountPaidRaw", 0) / RAW;
+        String coin = com.harvana.app.engine.Amounts.assetOf(line);
+        String savedText = coin.isEmpty() ? money(line == null ? 0 : num(line, "amountPaidRaw", 0) / RAW)
+                : com.harvana.app.engine.Amounts.money((long) num(line, "amountPaidRaw", 0), coin);   // a line kept in a stable coin
         return new Board(ACCUMULATIVE, "SAVINGS STAMPS", "30-day savings line",
-                saved + " of 30 days saved · " + money(savedHarv),
+                saved + " of 30 days saved · " + savedText,
                 "Each box is one day of the line, with the date inside. Green is paid, red is missed, blue is today. Tap an unpaid box to pay a day; long-press to pick several, past or ahead. Days are paid in order: the earliest unpaid day is always paid first, so no day can be skipped.",
                 6, "", cells);
     }

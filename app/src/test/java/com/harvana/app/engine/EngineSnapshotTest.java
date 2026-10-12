@@ -48,6 +48,9 @@ public class EngineSnapshotTest {
 
     @Test public void completedCircleOffersBondWithdrawal() {
         assertTrue(has(CircleSnapshot.of(circle("COMPLETED", 4), m("state", "COMPLETED")), GroupAction.WITHDRAW_BOND));
+        // A cancelled circle whose refund never arrived: the member can ask for the bond again.
+        assertTrue(has(CircleSnapshot.of(circle("ABORTED", 0), m("state", "ACTIVE", "bondRemainingRaw", 5L)), GroupAction.WITHDRAW_BOND));
+        assertFalse(has(CircleSnapshot.of(circle("ABORTED", 0), m("state", "ABORTED", "bondRemainingRaw", 0L)), GroupAction.WITHDRAW_BOND));
     }
 
     @Test public void accumStartsThenSavesThenPacksThenClaims() {
@@ -62,6 +65,12 @@ public class EngineSnapshotTest {
         assertFalse(has(AccumSnapshot.of(g, m(), locked, "me"), GroupAction.ACCUM_PACK));
         assertTrue(has(AccumSnapshot.of(g, m(), m("lineId", "L1", "status", "CLAIMABLE"), "me"), GroupAction.ACCUM_CLAIM));
         assertFalse(AccumSnapshot.of(g, m(), m("lineId", "L1", "status", "PENDING_PACK_APPROVAL"), "me").notes.isEmpty());
+        // The admin has 72 hours; after that the member claims on their own (the node allows it too).
+        long now = System.currentTimeMillis();
+        assertFalse(has(AccumSnapshot.of(g, m(), m("lineId", "L1", "status", "PENDING_PACK_APPROVAL", "packRequestedTimestamp", now - 3_600_000L), "me"),
+            GroupAction.ACCUM_CLAIM));
+        assertTrue(has(AccumSnapshot.of(g, m(), m("lineId", "L1", "status", "PENDING_PACK_APPROVAL", "packRequestedTimestamp", now - 73L * 3_600_000L), "me"),
+            GroupAction.ACCUM_CLAIM));
     }
 
     @Test public void fixedActionsFollowTheRule() {

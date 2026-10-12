@@ -29,10 +29,11 @@ public final class AccumSnapshot {
         if (hasLine) {
             long daily = lng(line, "dailyAmountRaw");
             s.my("Line type", str(line, "lineType").isEmpty() ? "FLEXIBLE" : str(line, "lineType"));
-            s.my("Daily amount", harv(daily));
+            s.my("Daily amount", money(daily, assetOf(line)));
             s.my("Days paid", String.valueOf(lng(line, "daysPaid")));
-            s.my("Saved in this line", harv(lng(line, "amountPaidRaw")));
-            if (lng(line, "payoutRaw") > 0) s.my("Payout", harv(lng(line, "payoutRaw")));
+            s.my("Saved in this line", money(lng(line, "amountPaidRaw"), assetOf(line)));
+            if (!assetOf(line).isEmpty()) s.my("Saved in", money(0, assetOf(line)).replace("0 ", "") + " (a stable coin: no price swings)");
+            if (lng(line, "payoutRaw") > 0) s.my("Payout", money(lng(line, "payoutRaw"), assetOf(line)));
             if ("LOCKED".equals(str(line, "lineType")) && lng(line, "lockedUntilTimestamp") > 0) {
                 s.my("Locked until", java.text.DateFormat.getDateInstance().format(new java.util.Date(lng(line, "lockedUntilTimestamp"))));
             }
@@ -54,15 +55,25 @@ public final class AccumSnapshot {
             } else if ("SINGLE_LUMP_SUM".equals(mode) || "VARIABLE_AMOUNT".equals(mode)) {
                 s.actions.add(new GroupAction(GroupAction.ACCUM_CONTRIBUTE_MULTI, "Add to my line", true, lineId));
             } else {
-                s.actions.add(new GroupAction(GroupAction.ACCUM_CONTRIBUTE, "Save today " + harv(daily), true, lineId));
+                s.actions.add(new GroupAction(GroupAction.ACCUM_CONTRIBUTE, "Save today " + money(daily, assetOf(line)), true, lineId));
                 s.actions.add(new GroupAction(GroupAction.ACCUM_CONTRIBUTE_MULTI, "Save several days", false, lineId));
             }
             boolean lockedNow = "LOCKED".equals(str(line, "lineType")) && lng(line, "lockedUntilTimestamp") > System.currentTimeMillis();
             if (lockedNow) s.notes.add("This line is locked and can't be withdrawn before its date.");
             else if (!lumpDone) s.actions.add(new GroupAction(GroupAction.ACCUM_PACK, "Ask to withdraw (pack)", false, lineId));
         } else if (hasLine && "PENDING_PACK_APPROVAL".equals(lineStatus)) {
-            s.actions.add(GroupAction.closed("Waiting for the admin to approve"));
-            s.notes.add("Waiting for the admin to approve your withdrawal.");
+            // The node lets the member claim on their own once the admin has been silent for 72 hours.
+            long asked = lng(line, "packRequestedTimestamp");
+            long silentUntil = asked + 72L * 60 * 60 * 1000;
+            if (asked > 0 && System.currentTimeMillis() >= silentUntil) {
+                s.actions.add(new GroupAction(GroupAction.ACCUM_CLAIM, "Claim my savings", true, str(line, "lineId")));
+                s.notes.add("The admin did not answer within 72 hours, so you can claim your savings yourself.");
+            } else {
+                s.actions.add(GroupAction.closed("Waiting for the admin to approve"));
+                long hours = asked > 0 ? Math.max(1, (silentUntil - System.currentTimeMillis() + 3_599_999L) / 3_600_000L) : 72;
+                s.notes.add("Waiting for the admin to approve your withdrawal. If they don't answer, you can claim it yourself in "
+                        + hours + (hours == 1 ? " hour." : " hours."));
+            }
         } else if (hasLine && "CLAIMABLE".equals(lineStatus)) {
             s.actions.add(new GroupAction(GroupAction.ACCUM_CLAIM, "Claim my savings", true, str(line, "lineId")));
         }

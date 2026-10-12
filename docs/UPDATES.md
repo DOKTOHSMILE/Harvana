@@ -2,6 +2,29 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (late): save in stable coins, one trust per person, history icons, notifications for every coin, group tabs
+
+What the app does:
+- **Save in a stable coin.** When starting a savings line, "Save in" offers:
+  - HARV (its price can move);
+  - any stable coin the network has switched on, such as hNGN or hUSD (keeps its value).
+  The line, its calendar, its pay sheets and its payout all show and move that coin.
+- **One trust score for all your wallets.** Once any of your wallets is bound to your phone, all of them show "device bound", and your vouches count for you as a person. Linking a new wallet updates all of them at once (node change).
+- **Group History uses the same rows and icons as your wallet's Activity list:** received, sent, pending and each kind of group payment, with the same colours.
+- **Notifications for every coin.** Besides HARV, you are told when stable coins, the other coins and the chains or tokens you added arrive or leave. The first check only records a starting point, so nothing old is announced.
+- **Group tabs** (Overview, Members, Payments, Notice, History) use a compact, sentence-case style with even spacing; so do the other tab bars that didn't use it yet.
+
+What the owner does: deploy the node, then build and install the app.
+
+## 12 Oct 2026 (audit): every group has a way out for its money
+
+The owner asked for every group type to be checked so no money can be locked. The node fixes are in the node's `docs/DEPLOYMENT.md`. In the app:
+- **Savings:** after you ask to withdraw, if the admin hasn't approved within 72 hours, a **Claim my savings** button appears and you can take your savings yourself. Until then the screen says how many hours are left.
+- **Circles that never filled:** if your bond refund didn't arrive, a **Get my bond back** button asks the network to send it again.
+- **Behind the scenes (node):** payouts out of group wallets no longer expire from the queue, so a payout can't be lost after the group already counted it as sent.
+
+What the owner does: deploy the node, then build and install the app.
+
 ## 12 Oct 2026 (night, later): search the Assets list, clearer Add coins
 
 What the app does:

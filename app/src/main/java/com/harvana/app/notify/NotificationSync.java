@@ -62,6 +62,8 @@ public final class NotificationSync {
 
         // 5. Wallet: money received, sent and payments signed (from the node's confirmed history)
         WalletTxNotifier.run(c, events -> finish.run());
+        // 5b. Every other asset (stable coins, other chains, added tokens): balance changes since the last check
+        AssetBalanceNotifier.run(c);
 
         // 7. Pinches from friends
         com.harvana.app.social.PinchStore.poll(c, uid, finish);

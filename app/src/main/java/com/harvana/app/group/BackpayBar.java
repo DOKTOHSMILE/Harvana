@@ -26,6 +26,11 @@ public final class BackpayBar {
 
     /** Builds the bar, hooks it to the selection and returns it (hidden until something is picked). */
     public static LinearLayout create(Context c, GroupTypeBoardView.Selection sel, double dailyHarv, Pay pay) {
+        return create(c, sel, Math.round(dailyHarv * 100_000_000d), "", pay);
+    }
+
+    /** {@code asset}: the line's coin ("" for HARV); the cost line is shown in it. */
+    public static LinearLayout create(Context c, GroupTypeBoardView.Selection sel, long dailyRaw, String asset, Pay pay) {
         LinearLayout bar = new LinearLayout(c);
         bar.setOrientation(LinearLayout.HORIZONTAL);
         bar.setGravity(Gravity.CENTER_VERTICAL);
@@ -73,7 +78,7 @@ public final class BackpayBar {
             int n = sel.picked.size();
             bar.setVisibility(n == 0 ? View.GONE : View.VISIBLE);
             title.setText(n + (n == 1 ? " day selected" : " days selected"));
-            sub.setText(String.format(Locale.US, "%s HARV · earliest unpaid days first", trim(dailyHarv * n)));
+            sub.setText(com.harvana.app.engine.Amounts.money(dailyRaw * n, asset) + " · earliest unpaid days first");
             if (previous != null) previous.run();
         };
         return bar;

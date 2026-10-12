@@ -50,19 +50,19 @@ public final class NodePayActions {
                 break;
             case GroupAction.START_LINE: startLine(c); break;
             case GroupAction.ACCUM_CONTRIBUTE:
-                pay(c, "Save today", CircleUi.harv(c.line == null ? 0 : num(c.line, "dailyAmountRaw")),
+                pay(c, "Save today", lineMoney(c, c.line == null ? 0 : num(c.line, "dailyAmountRaw")),
                         moneyRows(c, escrow(c), "One day on your savings line"),
                         () -> NodeGroupClient.contributeAccum(c.activity, c.me, c.nodeId, a.ref, result(c, "Saved")));
                 break;
             case GroupAction.ACCUM_CONTRIBUTE_MULTI: saveMore(c, a.ref); break;
             case GroupAction.ACCUM_PACK:
-                pay(c, "Request withdrawal", CircleUi.harv(c.line == null ? 0 : num(c.line, "amountPaidRaw")),
+                pay(c, "Request withdrawal", lineMoney(c, c.line == null ? 0 : num(c.line, "amountPaidRaw")),
                         moneyRows(c, "Your wallet", "The admin still has to approve this"),
                         () -> NodeGroupClient.packAccumLine(c.activity, c.me, c.nodeId, a.ref, announced(c, "Withdrawal requested. Waiting for the admin.",
                                 GroupProposalIndex.PACK, a.ref, "Withdrawal request", "")));
                 break;
             case GroupAction.ACCUM_CLAIM:
-                pay(c, "Claim savings", CircleUi.harv(c.line == null ? 0 : num(c.line, "amountPaidRaw")),
+                pay(c, "Claim savings", lineMoney(c, c.line == null ? 0 : num(c.line, "amountPaidRaw")),
                         moneyRows(c, "Your wallet", "Pays your savings line out to you"),
                         () -> NodeGroupClient.claimAccumLine(c.activity, c.me, c.nodeId, a.ref, result(c, "Savings claimed")));
                 break;
@@ -119,11 +119,40 @@ public final class NodePayActions {
                 NodeGroupClient.joinCircle(c.activity, c.me, c.nodeId, str(c.group, "termsHash"), result(c, "You joined")));
     }
 
+    /**
+     * Start a savings line. "Save in" chooses the coin: HARV (its price moves; for members who accept that) or a stable
+     * coin the network has switched on (hNGN, hUSD, …), which keeps its value for members who want low risk.
+     */
     private static void startLine(Ctx c) {
         LinearLayout box = new LinearLayout(c.activity);
         box.setOrientation(LinearLayout.VERTICAL);
         int p = CircleUi.dp(c.activity, 16);
         box.setPadding(p, p, p, 0);
+        final String[] asset = {""};                                   // "" = HARV
+        final java.util.List<String> codes = new java.util.ArrayList<>();
+        codes.add("");
+        com.google.android.material.button.MaterialButton coin = new com.google.android.material.button.MaterialButton(
+                c.activity, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+        coin.setAllCaps(false);
+        coin.setText("Save in: HARV (price can move)");
+        coin.setOnClickListener(v -> {
+            String[] names = new String[codes.size()];
+            for (int i = 0; i < names.length; i++) names[i] = codes.get(i).isEmpty() ? "HARV (price can move)"
+                    : com.harvana.app.husd.Stable.symbol(codes.get(i)) + " (keeps its value)";
+            com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c.activity).setTitle("Save in")
+                    .setItems(names, (dd, which) -> { asset[0] = codes.get(which); coin.setText("Save in: " + names[which]); }));
+        });
+        box.addView(coin);
+        com.harvana.app.husd.HusdClient.list(new com.harvana.app.husd.HusdClient.Cb() {
+            @Override public void ok(org.json.JSONObject r) {
+                org.json.JSONArray arr = r.optJSONArray("assets");
+                if (arr != null) for (int i = 0; i < arr.length(); i++) {
+                    org.json.JSONObject o = arr.optJSONObject(i);
+                    if (o != null && o.optBoolean("active") && com.harvana.app.husd.Stable.isStable(o.optString("asset"))) codes.add(o.optString("asset"));
+                }
+            }
+            @Override public void fail(String e) { }
+        });
         EditText daily = new com.google.android.material.textfield.TextInputEditText(c.activity);
         daily.setHint("Amount to save each day");
         daily.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -136,17 +165,29 @@ public final class NodePayActions {
                 .setMessage("A flexible line can be withdrawn after the admin approves. A locked line cannot be touched before its date.")
                 .setView(box).setNegativeButton("Cancel", null)
                 .setPositiveButton("Start", (d, w) -> {
-                    long raw = CircleUi.toRaw(daily.getText().toString());
+                    String code = asset[0];
+                    long raw = code.isEmpty() ? CircleUi.toRaw(daily.getText().toString()) : coinRaw(daily.getText().toString());
                     if (raw <= 0) { toast(c, "Enter a daily amount."); return; }
                     String days = lockDays.getText().toString().trim();
                     Long until = days.isEmpty() ? null : System.currentTimeMillis() + Long.parseLong(days) * 86_400_000L;
-                    pay(c, "Start a savings line", CircleUi.harv(raw),
-                            moneyRows(c, "Your savings line", until == null
-                                    ? "Flexible. Opening the line does not pay today."
-                                    : "Locked until the date you chose. Opening it does not pay today."),
+                    pay(c, "Start a savings line", com.harvana.app.engine.Amounts.money(raw, code),
+                            moneyRows(c, "Your savings line", (code.isEmpty() ? "Saved in HARV. " : "Saved in " + com.harvana.app.husd.Stable.symbol(code) + ", which keeps its value. ")
+                                    + (until == null ? "Flexible. Opening the line does not pay today."
+                                    : "Locked until the date you chose. Opening it does not pay today.")),
                             () -> NodeGroupClient.startAccumLine(c.activity, c.me, c.nodeId, raw, false,
-                                    until == null ? "FLEXIBLE" : "LOCKED", until, "ONGOING", null, result(c, "Savings line started")));
+                                    until == null ? "FLEXIBLE" : "LOCKED", until, "ONGOING", null, code.isEmpty() ? null : code,
+                                    result(c, "Savings line started")));
                 }).show();
+    }
+
+    /** A stable coin amount typed by the person, in the coin's smallest units (6 decimals). */
+    static long coinRaw(String text) {
+        try { return new java.math.BigDecimal(text.trim().replace(",", "")).movePointRight(6).longValue(); } catch (Exception e) { return 0; }
+    }
+
+    /** An amount of the context's savings line, in its coin. */
+    static String lineMoney(Ctx c, long raw) {
+        return com.harvana.app.engine.Amounts.money(raw, com.harvana.app.engine.Amounts.assetOf(c.line));
     }
 
     private static void saveMore(Ctx c, String lineId) {
@@ -162,14 +203,18 @@ public final class NodePayActions {
                         try { n = Integer.parseInt(days.getText().toString().trim()); } catch (Exception ignored) { }
                         if (n < 2) { toast(c, "Enter 2 or more days."); return; }
                         long total = dailyRaw * n;
-                        pay(c, "Save several days", CircleUi.harv(total),
-                                moneyRows(c, escrow(c), n + " days at " + CircleUi.harv(dailyRaw) + " each"),
+                        pay(c, "Save several days", lineMoney(c, total),
+                                moneyRows(c, escrow(c), n + " days at " + lineMoney(c, dailyRaw) + " each"),
                                 () -> NodeGroupClient.contributeAccumMultiple(c.activity, c.me, c.nodeId, lineId, total, result(c, "Saved")));
                     }).show();
         } else {
-            amount(c, "Add to my line", "Amount", raw -> pay(c, "Add to my line", CircleUi.harv(raw),
+            amount(c, "Add to my line", "Amount", typed -> {
+                // The amount box reads 8 decimals (HARV); a stable coin line counts in 6.
+                long raw = com.harvana.app.engine.Amounts.assetOf(c.line).isEmpty() ? typed : typed / 100;
+                pay(c, "Add to my line", lineMoney(c, raw),
                     moneyRows(c, escrow(c), "Extra saving on this line"),
-                    () -> NodeGroupClient.contributeAccumVariable(c.activity, c.me, c.nodeId, lineId, raw, result(c, "Saved"))));
+                    () -> NodeGroupClient.contributeAccumVariable(c.activity, c.me, c.nodeId, lineId, raw, result(c, "Saved")));
+            });
         }
     }
 
@@ -216,8 +261,8 @@ public final class NodePayActions {
         long total = dailyRaw * dates.size();
         String lineId = str(c.line, "lineId");
         // The dates are the earliest unpaid days of the line, which are the ones the node pays (days go in order).
-        pay(c, dates.size() == 1 ? "Pay " + dates.get(0) : "Pay " + dates.size() + " days", CircleUi.harv(total),
-                moneyRows(c, escrow(c), android.text.TextUtils.join(", ", dates) + " · " + CircleUi.harv(dailyRaw) + " a day"),
+        pay(c, dates.size() == 1 ? "Pay " + dates.get(0) : "Pay " + dates.size() + " days", lineMoney(c, total),
+                moneyRows(c, escrow(c), android.text.TextUtils.join(", ", dates) + " · " + lineMoney(c, dailyRaw) + " a day"),
                 () -> NodeGroupClient.backpayAccum(c.activity, c.me, c.nodeId, lineId, dates, result(c, "Paid back. It shows once the network confirms it.")));
     }
 

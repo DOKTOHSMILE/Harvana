@@ -61,8 +61,14 @@ public final class GroupCanonical {
 
     /** AccumStartLineRequest.getCanonicalMessage() */
     public static String accumStartLine(String groupId, String memberAddress, long dailyAmountRaw, boolean autoCloseEnabled, String lineType, Long lockedUntilTimestamp, String depositMode, Long maxContributionRaw, long nonce) {
+        return accumStartLine(groupId, memberAddress, dailyAmountRaw, autoCloseEnabled, lineType, lockedUntilTimestamp, depositMode, maxContributionRaw, nonce, null);
+    }
+
+    /** {@code asset}: a stable coin code to save in (HNGN, HUSD, …), or null/empty for HARV (message unchanged then). */
+    public static String accumStartLine(String groupId, String memberAddress, long dailyAmountRaw, boolean autoCloseEnabled, String lineType, Long lockedUntilTimestamp, String depositMode, Long maxContributionRaw, long nonce, String asset) {
         return "HARVANA_ACCUM_START_LINE_V1:" + groupId + ":" + memberAddress + ":" + dailyAmountRaw + ":"
-            + autoCloseEnabled + ":" + lineType + ":" + lockedUntilTimestamp + ":" + depositMode + ":" + maxContributionRaw + ":" + nonce;
+            + autoCloseEnabled + ":" + lineType + ":" + lockedUntilTimestamp + ":" + depositMode + ":" + maxContributionRaw + ":" + nonce
+            + (asset == null || asset.isEmpty() ? "" : ":" + asset);
     }
 
     /** AccumWalletRecoveryRequest.getCanonicalMessage() */

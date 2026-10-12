@@ -4,13 +4,31 @@ import java.util.Locale;
 import java.util.Map;
 
 /** Formatting and safe reads shared by the engines. */
-final class Amounts {
+public final class Amounts {
     private Amounts() {}
 
-    static String harv(long raw) {
+    public static String harv(long raw) {
         double v = raw / 100_000_000.0;
         String s = v == Math.rint(v) ? String.valueOf((long) v) : String.format(Locale.US, "%.4f", v).replaceAll("0+$", "").replaceAll("\\.$", "");
         return s + " HARV";
+    }
+
+    /**
+     * An amount of a savings line: HARV (8 decimals), or the stable coin the line is kept in (6 decimals, shown as
+     * hNGN, hUSD, …). {@code asset} is the line's "asset" field, empty for HARV.
+     */
+    public static String money(long raw, String asset) {
+        if (asset == null || asset.isEmpty() || "null".equals(asset)) return harv(raw);
+        double v = raw / 1_000_000.0;
+        String s = v == Math.rint(v) ? String.format(Locale.US, "%,d", (long) v) : String.format(Locale.US, "%,.2f", v);
+        String sym = asset.length() == 4 ? "h" + asset.substring(1) : asset;
+        return s + " " + sym;
+    }
+
+    /** The line's coin: its "asset" field, or empty for HARV. */
+    public static String assetOf(Map<String, Object> line) {
+        Object a = line == null ? null : line.get("asset");
+        return a == null ? "" : String.valueOf(a);
     }
 
     static long lng(Map<String, Object> m, String k) {

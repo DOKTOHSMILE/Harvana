@@ -342,6 +342,7 @@
 			android:layout_height="match_parent"
 			android:orientation="vertical">
 			<com.google.android.material.tabs.TabLayout
+				app:tabTextAppearance="@style/Harvana.Tab"
 				android:id="@+id/tab_layout"
 				android:layout_width="match_parent"
 				android:layout_height="@dimen/toggle_height"
@@ -353,8 +354,11 @@
 				app:tabIconTint="@color/colorAccent"
 				app:tabMode="scrollable"
 				app:tabGravity="start"
-				app:tabPaddingStart="4dp"
-				app:tabPaddingEnd="4dp"
+				android:layout_marginStart="8dp"
+				android:layout_marginEnd="8dp"
+				android:layout_marginTop="8dp"
+				app:tabPaddingStart="16dp"
+				app:tabPaddingEnd="16dp"
 				app:tabRippleColor="@color/colorAccentRipple" />
 			<androidx.viewpager.widget.ViewPager
 				android:id="@+id/view_pager"

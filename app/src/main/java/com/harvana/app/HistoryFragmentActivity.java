@@ -614,20 +614,16 @@ public class HistoryFragmentActivity extends Fragment {
 		private final List<HashMap<String, Object>> data;
 		WalletActivityAdapter(List<HashMap<String, Object>> data) { this.data = data; }
 		
+		/** The same row as the wallet's Activity list (item_transaction): same icons, colours and wording. */
 		@NonNull @Override
 		public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-			int lid = getResources().getIdentifier("payment_row_card", "layout", getContext().getPackageName());
-			View v = lid != 0
-			? LayoutInflater.from(parent.getContext()).inflate(lid, parent, false)
-			: LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_2, parent, false);
-			return new VH(v);
+			return new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_transaction, parent, false));
 		}
 		
 		@Override 
 		public void onBindViewHolder(@NonNull VH h, int pos) {
 			HashMap<String, Object> tx = data.get(pos);
 			
-			// Extract core transaction details
 			String from = str(tx, "from", "");
 			String to = str(tx, "to", "");
 			boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
@@ -639,39 +635,39 @@ public class HistoryFragmentActivity extends Fragment {
 			String txHash = str(tx, "txHash", "");
 			boolean confirmed = confirmations >= 1;
 			String status = confirmed ? "Confirmed" : "Pending";
-			
-			String time = ts > 0 ? new SimpleDateFormat("dd MMM · HH:mm", Locale.getDefault()).format(new java.util.Date(ts)) : "—";
+			String ticker = com.harvana.app.CoinInfo.ticker();
+			int incoming = androidx.core.content.ContextCompat.getColor(h.itemView.getContext(), R.color.colorAccent);
+			int outgoing = androidx.core.content.ContextCompat.getColor(h.itemView.getContext(), R.color.colorError);
+			int pending = androidx.core.content.ContextCompat.getColor(h.itemView.getContext(), R.color.colorWarning);
 			String shortAddr = counterparty.length() > 12
 			? counterparty.substring(0, 8) + "…" + counterparty.substring(counterparty.length() - 4)
 			: counterparty;
 			
-			// Bind UI elements
-			if (h.name != null) {
-				String prefix = isOut ? "Sent out · " : "Received · ";
-				// APPLIED FIX
-				String amountText = _formatUIBalance(amountHarv);
-				h.name.setText(prefix + amountText + (" " + com.harvana.app.CoinInfo.ticker()));
-				h.name.setTextColor(isOut ? 0xFFF44336 : 0xFF4CAF50);
+			// The group wallet is "me" here: money into it is received, money out of it is sent.
+			com.harvana.app.tx.TxKind kind = com.harvana.app.tx.TxKind.of(memo, !isOut);
+			if (h.icon != null) {
+				h.icon.setImageResource(!confirmed ? R.drawable.icon_access_time_outline
+					: kind != null ? kind.icon : isOut ? R.drawable.icon_call_made_twotone : R.drawable.icon_call_received_twotone);
+				h.icon.setColorFilter(!confirmed ? pending : isOut ? outgoing : incoming);
 			}
-			
-			if (h.meta != null) {
-				h.meta.setTag(counterparty);
+			if (h.type != null) {
+				String title = kind != null ? kind.title : (isOut ? "Sent " : "Received ") + ticker;
+				h.type.setText(confirmed ? title : title + "…");
+			}
+			if (h.amount != null) {
+				h.amount.setVisibility(View.VISIBLE);
+				h.amount.setText((isOut ? "- " : "+ ") + _formatUIBalance(amountHarv));
+				h.amount.setTextColor(!confirmed ? pending : isOut ? outgoing : incoming);
+			}
+			if (h.date != null) h.date.setText(ts > 0 ? new SimpleDateFormat("dd MMM · HH:mm", Locale.getDefault()).format(new java.util.Date(ts)) : "Pending");
+			if (h.address != null) {
+				h.address.setTag(counterparty);
+				h.address.setText((isOut ? "To: " : "From: ") + shortAddr);
+				// The member's name, when the wallet is someone in this group (any wallet linked to them counts).
 				com.harvana.app.group.MemberNameResolver.resolveWallet(getContext(), groupId, counterparty, shortAddr, resolvedLabel -> {
-					if (!counterparty.equals(h.meta.getTag())) return;
-					String line = resolvedLabel + " · " + time;
-					if (!memo.isEmpty()) line += " · \"" + memo + "\"";
-					if (!confirmed) line += " · pending";
-					h.meta.setText(line);
+					if (!counterparty.equals(h.address.getTag())) return;
+					h.address.setText((kind != null ? kind.detail + " · " : "") + (isOut ? "To: " : "From: ") + resolvedLabel);
 				});
-			}
-			
-			if (h.amount != null) h.amount.setVisibility(View.GONE);
-			
-			if (h.status != null) {
-				h.status.setText(status);
-				h.status.setBackgroundResource(confirmed
-				? getResources().getIdentifier("bg_chip_confirmed", "drawable", getContext().getPackageName())
-				: getResources().getIdentifier("bg_chip_pending", "drawable", getContext().getPackageName()));
 			}
 			
 			// Attach Click Listener to launch ReceiptActivity
@@ -700,19 +696,15 @@ public class HistoryFragmentActivity extends Fragment {
 		@Override public int getItemCount() { return data.size(); }
 		
 		class VH extends RecyclerView.ViewHolder {
-			TextView name, meta, amount, status;
+			ImageView icon;
+			TextView type, address, amount, date;
 			VH(View v) {
 				super(v);
-				int n = v.getResources().getIdentifier("tv_pay_name", "id", v.getContext().getPackageName());
-				int m = v.getResources().getIdentifier("tv_pay_meta", "id", v.getContext().getPackageName());
-				int a = v.getResources().getIdentifier("tv_pay_amount", "id", v.getContext().getPackageName());
-				int s = v.getResources().getIdentifier("tv_pay_status", "id", v.getContext().getPackageName());
-				if (n != 0) name = v.findViewById(n);
-				if (m != 0) meta = v.findViewById(m);
-				if (a != 0) amount = v.findViewById(a);
-				if (s != 0) status = v.findViewById(s);
-				if (name == null) name = v.findViewById(android.R.id.text1);
-				if (meta == null) meta = v.findViewById(android.R.id.text2);
+				icon = v.findViewById(R.id.iv_tx_icon);
+				type = v.findViewById(R.id.tv_tx_type);
+				address = v.findViewById(R.id.tv_tx_address);
+				amount = v.findViewById(R.id.tv_tx_amount);
+				date = v.findViewById(R.id.tv_tx_date);
 			}
 		}
 	}

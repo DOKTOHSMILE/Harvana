@@ -73,6 +73,9 @@ public final class CircleSnapshot {
             s.actions.add(new GroupAction(GroupAction.CONTRIBUTE, "Pay " + harv(contribution), true));
         } else if (isMember && "COMPLETED".equals(s.state)) {
             s.actions.add(new GroupAction(GroupAction.WITHDRAW_BOND, "Withdraw bond", true));
+        } else if (isMember && "ABORTED".equals(s.state) && !"ABORTED".equals(ms) && lng(member, "bondRemainingRaw") > 0) {
+            // The circle never filled and the bond refund has not arrived: ask the network to send it again.
+            s.actions.add(new GroupAction(GroupAction.WITHDRAW_BOND, "Get my bond back", true));
         } else if (isMember && !active && !forming) {
             s.actions.add(GroupAction.closed("Nothing to pay"));
         }

@@ -176,6 +176,8 @@ public final class CustomAssets {
     }
 
     /** Balance as a plain number string, or "" when the network did not answer. Blocking. */
+    public static String balanceOf(Asset a, String owner) { return balance(a, owner); }
+
     static String balance(Asset a, String owner) {
         try {
             BigInteger raw;

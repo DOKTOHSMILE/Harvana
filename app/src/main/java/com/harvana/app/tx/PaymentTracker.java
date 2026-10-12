@@ -39,6 +39,8 @@ public final class PaymentTracker {
     private static final String PENDING_TEXT = "Pending…";
     /** Longest wait for a confirmation before the buttons are released (about 4 minutes). */
     private static final int CONFIRM_ATTEMPTS = 60;
+    /** The longest any one payment keeps the payment buttons locked. */
+    private static final long MAX_LOCK_MS = 3 * 60_000L;
 
     private PaymentTracker() {}
 
@@ -110,6 +112,9 @@ public final class PaymentTracker {
     public static Handle begin() {
         Handle h = new Handle();
         MAIN.post(() -> { adoptLastTap(); inFlight++; refresh(); });
+        // Safety: a payment that never reports back (a lost callback, a screen closed mid-way) must not keep every
+        // payment button on "Pending…" for good. end() is idempotent, so a normal end before this changes nothing.
+        MAIN.postDelayed(h::end, MAX_LOCK_MS);
         return h;
     }
 

@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (evening): Assets sorted by value with prices; Send details as a table
+
+- **Assets:** one list, largest holding first, by its value in your currency, whatever kind of coin it is (HARV, stable coins, other coins, added tokens).
+  - Each row shows the coin's market price at the right of its name: HARV from completed P2P trades, the stable coins from exchange rates, other coins from market prices.
+  - Tapping a row opens the same screen as before.
+  - How it works (`wallet/AssetSorter`): the sections still draw their rows into their own hidden boxes, and the visible list is a sorted copy of them. HARV's row is drawn by its adapter into a plain box so it can be sorted with the others.
+- **Send:** under the amount, a small table replaces the sentence: **Available**, **Value** (or **Price** before an amount is typed), **Network fee**. Underneath, the switch to enter the amount in your currency. "Available" was being squeezed to one letter per line.
+- **"Pending…" can't get stuck:** a payment keeps the payment buttons locked for at most 3 minutes, even if it never reports back.
+
 ## 12 Oct 2026 (evening): coin rows in Activity
 
 - A pending coin transfer reads "Sending hNGN…" / "Receiving hNGN…" (the coin's name), not "HNGN".

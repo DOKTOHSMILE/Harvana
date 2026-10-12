@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -46,7 +47,11 @@ public final class AmountPreview {
     private final Context c;
     private final EditText amount;
     private final Source src;
-    private final TextView line, toggle;
+    private final TextView toggle;
+    /** The table under the amount: Available / Value (or Price) / Network fee, label left and figure right. */
+    private final TextView availLabel, availValue, valueLabel, valueValue, feeValue;
+    private final LinearLayout availRow, valueRow, feeRow;
+    private final TextView anchor;
     private final Handler main = new Handler(Looper.getMainLooper());
     private boolean moneyMode;
     /** Display money per one unit of the asset; NaN until known. */
@@ -58,22 +63,57 @@ public final class AmountPreview {
         this.c = c;
         this.amount = amount;
         this.src = src;
-        LinearLayout row = new LinearLayout(c);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        line = new TextView(c);
-        line.setTextSize(12.5f);
-        line.setTextColor(c.getResources().getColor(R.color.colorTextSecondary));
-        row.addView(line, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        this.anchor = anchor;
+        float d = c.getResources().getDisplayMetrics().density;
+        LinearLayout table = new LinearLayout(c);
+        table.setOrientation(LinearLayout.VERTICAL);
+        table.setPadding(Math.round(14 * d), Math.round(8 * d), Math.round(14 * d), Math.round(8 * d));
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+        bg.setCornerRadius(12 * d);
+        bg.setColor(c.getResources().getColor(R.color.colorSurface));
+        table.setBackground(bg);
+        availLabel = cell(c, "Available", false); availValue = cell(c, "…", true);
+        availRow = row(c, availLabel, availValue);
+        valueLabel = cell(c, "Value", false); valueValue = cell(c, "", true);
+        valueRow = row(c, valueLabel, valueValue);
+        TextView feeLabel = cell(c, "Network fee", false); feeValue = cell(c, "", true);
+        feeRow = row(c, feeLabel, feeValue);
+        table.addView(availRow);
+        table.addView(valueRow);
+        table.addView(feeRow);
         toggle = new TextView(c);
         toggle.setTextSize(12.5f);
         toggle.setTypeface(Typeface.DEFAULT_BOLD);
-        toggle.setTextColor(c.getResources().getColor(R.color.colorPrimary));
-        int p = Math.round(8 * c.getResources().getDisplayMetrics().density);
-        toggle.setPadding(p, p, 0, p);
+        toggle.setTextColor(c.getResources().getColor(R.color.colorAccent));
+        toggle.setGravity(Gravity.END);
+        int p = Math.round(6 * d);
+        toggle.setPadding(0, p, 0, 0);
         toggle.setOnClickListener(v -> switchMode());
-        row.addView(toggle);
+        table.addView(toggle, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        // Into the nearest vertical column under the amount (the "Available" line may sit in a horizontal row, which
+        // squeezed it to one letter per line), and the old line itself is replaced by the table's first row.
+        View branch = anchor;
         ViewGroup parent = anchor == null ? null : (ViewGroup) anchor.getParent();
-        if (parent != null) parent.addView(row, parent.indexOfChild(anchor) + 1);
+        while (parent instanceof LinearLayout && ((LinearLayout) parent).getOrientation() != LinearLayout.VERTICAL && parent.getParent() instanceof ViewGroup) {
+            branch = parent;
+            parent = (ViewGroup) parent.getParent();
+        }
+        if (parent != null) {
+            LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            tlp.topMargin = Math.round(6 * d);
+            parent.addView(table, parent.indexOfChild(branch) + 1, tlp);
+        }
+        if (anchor != null) {
+            mirrorAvailable();
+            anchor.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int a, int b, int e) { }
+                @Override public void onTextChanged(CharSequence s, int a, int b, int e) { }
+                @Override public void afterTextChanged(Editable s) { mirrorAvailable(); }
+            });
+            anchor.setVisibility(View.GONE);
+        }
+        valueRow.setVisibility(View.GONE);
+        feeRow.setVisibility(View.GONE);
         amount.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int d) { }
             @Override public void onTextChanged(CharSequence s, int a, int b, int d) { }
@@ -100,7 +140,7 @@ public final class AmountPreview {
     public boolean normalise() {
         if (!moneyMode) return true;
         double typed = parse(amount.getText().toString());
-        if (Double.isNaN(moneyPerUnit) || moneyPerUnit <= 0) { line.setText("No price yet for " + src.symbol() + ". Enter the amount in " + src.symbol() + "."); return false; }
+        if (Double.isNaN(moneyPerUnit) || moneyPerUnit <= 0) { value("Value", "No price yet: enter " + src.symbol()); return false; }
         moneyMode = false;
         toggle.setText("Enter in " + FxRates.symbol(c));
         amount.setText(coinText(typed / moneyPerUnit));
@@ -109,7 +149,7 @@ public final class AmountPreview {
 
     private void switchMode() {
         double typed = parse(amount.getText().toString());
-        if (Double.isNaN(moneyPerUnit) || moneyPerUnit <= 0) { line.setText("Getting the price of " + src.symbol() + "…"); price(this::refresh); return; }
+        if (Double.isNaN(moneyPerUnit) || moneyPerUnit <= 0) { value("Price", "Getting the price…"); price(this::refresh); return; }
         moneyMode = !moneyMode;
         toggle.setText(moneyMode ? "Enter in " + src.symbol() : "Enter in " + FxRates.symbol(c));
         if (!Double.isNaN(typed) && typed > 0) {
@@ -129,15 +169,14 @@ public final class AmountPreview {
         String key = src.assetKey();
         boolean known = !Double.isNaN(moneyPerUnit) && moneyPerUnit > 0;
         if (Double.isNaN(typed) || typed <= 0) {
-            line.setText(known ? "1 " + src.symbol() + " ≈ " + FxRates.format(FxRates.symbol(c), moneyPerUnit) : "");
+            value("Price", known ? "1 " + src.symbol() + " ≈ " + FxRates.format(FxRates.symbol(c), moneyPerUnit) : "");
+            feeRow.setVisibility(View.GONE);
             return;
         }
         double coins = moneyMode ? (known ? typed / moneyPerUnit : Double.NaN) : typed;
-        String worth = moneyMode
-                ? (known ? "= " + coinText(coins) + " " + src.symbol() : "")
-                : (known ? "≈ " + FxRates.format(FxRates.symbol(c), typed * moneyPerUnit) : "");
-        line.setText(worth);
-        fee(key, coins, worth);
+        if (moneyMode) value("You send", known ? coinText(coins) + " " + src.symbol() : "");
+        else value("Value", known ? "≈ " + FxRates.format(FxRates.symbol(c), typed * moneyPerUnit) : "");
+        fee(key, coins, "");
     }
 
     private void fee(String key, double coins, String worth) {
@@ -152,14 +191,14 @@ public final class AmountPreview {
                     long gas = j.optLong("estimatedGas", 0);
                     long kobo = j.isNull("estimatedKobo") ? 0 : j.optLong("estimatedKobo", 0);
                     String f = "Network fee " + coinText(gas / 1e8) + " HARV" + (kobo > 0 ? " (≈ ₦" + trim(kobo / 100d) + ")" : "");
-                    main.post(() -> { if (mine == seq) line.setText(join(worth, f)); });
+                    main.post(() -> { if (mine == seq) fee(f.replace("Network fee ", "")); });
                 }
                 @Override public void onError(String e) { }
             });
         } else if (com.harvana.app.husd.Stable.isStable(key)) {
-            line.setText(join(worth, "Network fee: HARV gas if you hold HARV, otherwise a small fee in " + src.symbol()));
+            fee("HARV gas, or a small " + src.symbol() + " fee without HARV");
         } else {
-            line.setText(join(worth, "Network fee is set by that network when sent"));
+            fee("Set by that network when sent");
         }
     }
 
@@ -194,6 +233,45 @@ public final class AmountPreview {
     private void set(String key, double usdPerUnit, double displayPerUsd) {
         pricedKey = key;
         moneyPerUnit = Double.isNaN(usdPerUnit) || Double.isNaN(displayPerUsd) ? Double.NaN : usdPerUnit * displayPerUsd;
+    }
+
+    private void value(String label, String text) {
+        valueLabel.setText(label);
+        valueValue.setText(text);
+        valueRow.setVisibility(text == null || text.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    private void fee(String text) {
+        feeValue.setText(text);
+        feeRow.setVisibility(text == null || text.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    /** The screen still writes "Available: 12.5 HARV" into its own line; the table shows the figure. */
+    private void mirrorAvailable() {
+        CharSequence t = anchor == null ? null : anchor.getText();
+        String s = t == null ? "" : t.toString().replaceFirst("^\\s*Available:?\\s*", "");
+        availValue.setText(s.isEmpty() ? "…" : s);
+        availRow.setVisibility(s.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    private static LinearLayout row(Context c, TextView label, TextView value) {
+        LinearLayout r = new LinearLayout(c);
+        r.setGravity(Gravity.CENTER_VERTICAL);
+        int p = Math.round(4 * c.getResources().getDisplayMetrics().density);
+        r.setPadding(0, p, 0, p);
+        r.addView(label, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        value.setGravity(Gravity.END);
+        r.addView(value, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.6f));
+        return r;
+    }
+
+    private static TextView cell(Context c, String text, boolean figure) {
+        TextView t = new TextView(c);
+        t.setText(text);
+        t.setTextSize(13f);
+        t.setTextColor(c.getResources().getColor(figure ? R.color.colorTextPrimary : R.color.colorTextSecondary));
+        if (figure) t.setTypeface(Typeface.DEFAULT_BOLD);
+        return t;
     }
 
     private static String join(String a, String b) { return a == null || a.isEmpty() ? b : a + "  ·  " + b; }

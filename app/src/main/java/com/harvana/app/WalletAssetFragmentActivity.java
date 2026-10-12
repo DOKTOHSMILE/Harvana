@@ -106,6 +106,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 		if (already == null || already.isEmpty()) {
 			com.harvana.app.utils.Shimmer.hold(recyclerview1, com.harvana.app.utils.Shimmer.rows(recyclerview1.getContext(), 4), 4000, "WalletAssetFragmentActivity");
 		}
+		_setupSorted(_view);
 		_setupSearch(_view);
 		View addCoins = _view.findViewById(R.id.btn_add_coins);
 		if (addCoins != null) addCoins.setOnClickListener(v -> com.harvana.app.wallet.ChainAssetsSection.showPicker(getContext(),
@@ -186,6 +187,34 @@ public class WalletAssetFragmentActivity extends Fragment {
 	}
 
 	private String assetQuery = "";
+	/** HARV's row, drawn by the list adapter into a plain box so it can sit in the one sorted list (AssetSorter). */
+	private LinearLayout harvBox;
+
+	/** One list for every asset, largest holding first, with each coin's price (wallet/AssetSorter). */
+	private void _setupSorted(View root) {
+		if (recyclerview1 == null || !(recyclerview1.getParent() instanceof ViewGroup)) return;
+		ViewGroup column = (ViewGroup) recyclerview1.getParent();
+		harvBox = new LinearLayout(getContext());
+		harvBox.setOrientation(LinearLayout.VERTICAL);
+		column.addView(harvBox, column.indexOfChild(recyclerview1) + 1);
+		recyclerview1.setVisibility(View.GONE);
+		com.harvana.app.wallet.AssetSorter.attach(harvBox, root.findViewById(R.id.husd_asset), root.findViewById(R.id.chain_assets),
+				root.findViewById(R.id.custom_assets));
+	}
+
+	/** Draws the adapter's rows (HARV) into harvBox with the adapter's own binding, so they look and act the same. */
+	private void _drawHarvRows() {
+		if (harvBox == null || recyclerview1 == null || recyclerview1.getAdapter() == null) return;
+		Recyclerview1Adapter a = (Recyclerview1Adapter) recyclerview1.getAdapter();
+		harvBox.removeAllViews();
+		for (int i = 0; i < a.getItemCount(); i++) {
+			Recyclerview1Adapter.ViewHolder h = a.onCreateViewHolder(harvBox, 0);
+			a.onBindViewHolder(h, i);
+			h.itemView.setTag("HARV");
+			harvBox.addView(h.itemView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		}
+		if (!assetQuery.isEmpty()) _applySearch();
+	}
 
 	/**
 	 * Search over every row on this page: HARV, the stable coins, the other coins and the ones added by hand. A row
@@ -209,6 +238,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 	private void _applySearch() {
 		if (getView() == null) return;
 		if (recyclerview1 != null) for (int i = 0; i < recyclerview1.getChildCount(); i++) _filterRow(recyclerview1.getChildAt(i));
+		if (harvBox != null) for (int i = 0; i < harvBox.getChildCount(); i++) _filterRow(harvBox.getChildAt(i));
 		for (int id : new int[]{R.id.husd_asset, R.id.chain_assets, R.id.custom_assets}) {
 			ViewGroup box = getView().findViewById(id);
 			if (box != null) for (int i = 0; i < box.getChildCount(); i++) _filterRow(box.getChildAt(i));
@@ -300,6 +330,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 			} else {
 				recyclerview1.getAdapter().notifyDataSetChanged();
 			}
+			_drawHarvRows();
 		});
 	}
 	

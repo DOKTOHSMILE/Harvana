@@ -280,6 +280,8 @@ public class VaultActivity extends AppCompatActivity {
         if (com.harvana.app.utils.ErrorText.is(e, "NOT_ENOUGH_COLLATERAL")) return "Not enough HARV locked for that amount.";
         if (com.harvana.app.utils.ErrorText.is(e, "WOULD_BE_UNDER_COLLATERALISED")) return "That would leave too little HARV for what you owe. Repay first.";
         if (com.harvana.app.utils.ErrorText.is(e, "PRICE_NOT_LIVE_YET") || com.harvana.app.utils.ErrorText.is(e, "PRICE_")) return priceProblem(e);
+        if (com.harvana.app.utils.ErrorText.is(e, "PRICES_DISAGREE") || com.harvana.app.utils.ErrorText.is(e, "LIQUIDATION_PENDING")
+                || com.harvana.app.utils.ErrorText.is(e, "VAULT_HOURLY_LIMIT_REACHED")) return com.harvana.app.utils.ErrorText.plain(e);
         if (com.harvana.app.utils.ErrorText.is(e, "VAULT_CAP_REACHED")) return "The network's limit for minted " + sym + " is reached for now.";
         if (com.harvana.app.utils.ErrorText.is(e, "POSITION_IS_SAFE")) return "That vault is back above the line.";
         if (com.harvana.app.utils.ErrorText.is(e, "MORE_THAN_THE_DEBT")) return "That is more than is owed.";

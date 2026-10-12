@@ -189,6 +189,10 @@ public final class ErrorText {
         WORDS.put("NOT_ENOUGH_COLLATERAL", "Not enough HARV locked for that amount.");
         WORDS.put("WOULD_BE_UNDER_COLLATERALISED", "That would leave too little HARV for what you owe. Repay first.");
         WORDS.put("VAULT_CAP_REACHED", "The network's limit for coins minted this way is reached for now.");
+        WORDS.put("PRICES_DISAGREE", "HARV's pool price and market price are too far apart. Minting and withdrawals wait until they agree.");
+        WORDS.put("LIQUIDATION_PENDING", "This vault is being liquidated. Try again in a minute.");
+        WORDS.put("LIQUIDATION_ALREADY_PENDING", "Someone is already liquidating this vault.");
+        WORDS.put("VAULT_HOURLY_LIMIT_REACHED", "The hourly limit for minting is reached. Try again next hour.");
         WORDS.put("POSITION_IS_SAFE", "That vault is back above the line.");
         WORDS.put("MORE_THAN_THE_DEBT", "That is more than is owed.");
         WORDS.put("MINT_BELOW_MINIMUM", "That is below the minimum you can mint.");

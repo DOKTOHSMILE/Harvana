@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): vault protection messages
+
+- New node refusals in plain English (`ErrorText`, `VaultActivity`):
+  - `PRICES_DISAGREE`: pool and market price too far apart.
+  - `LIQUIDATION_PENDING`: the vault is being liquidated.
+  - `LIQUIDATION_ALREADY_PENDING`: someone is already liquidating it.
+  - `VAULT_HOURLY_LIMIT_REACHED`: the hourly mint limit is reached.
+- Needs the node update (node `docs/DEPLOYMENT.md`, "the vault is protected").
+
 ## 12 Oct 2026 (night): stable coins on the same coin page; every stable coin listed; Add beside search
 
 - **One coin page for every asset.** Tapping hUSD, hNGN or any stable coin opens the same page as HARV and the other coins (`CoinDetailActivity`, extra `stable`):

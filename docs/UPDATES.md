@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): receipt crash on swap and vault transactions fixed
+
+- Opening the receipt of a transaction whose memo the app had no name for (for example `SWAP_IN:…`, `SWAP_FARE:…`, `VAULT_LOCK:…`) crashed (`TxKind.describe`, null kind).
+- Now named: Swap, Swap received, Swap refunded, Liquidity added, Liquidity removed or returned, Transport fare (swap), Vault lock or release.
+- Any other coded memo shows as words ("SWAP_FARE" → "Swap fare") instead of crashing.
+
 ## 12 Oct 2026 (late night): address bar with favicon and loading fill
 
 - dApp browser address bar is a rounded pill (`web3/LoadingPill`). It shows the favicon, a green lock on HTTPS, and the address.

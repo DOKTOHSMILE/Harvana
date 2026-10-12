@@ -32,6 +32,10 @@ public final class AssetBalanceNotifier {
         final String me = WalletManager.getActiveWalletAddress(c);
         if (me == null || me.trim().isEmpty()) return;
         final SharedPreferences sp = c.getSharedPreferences("asset_balance_notify", Context.MODE_PRIVATE);
+        // Just switched to this wallet: this pass only records the balances, so changes from while it was not the active
+        // wallet are not announced as if new.
+        final boolean quiet = !sp.getString("watching", "").isEmpty() && !me.equals(sp.getString("watching", ""));
+        sp.edit().putString("watching", me).apply();
 
         // Stable coins that are on.
         HusdClient.list(new HusdClient.Cb() {
@@ -45,7 +49,7 @@ public final class AssetBalanceNotifier {
                     HusdClient.balance(code, me, new HusdClient.Cb() {
                         @Override public void ok(JSONObject b) {
                             BigDecimal held = BigDecimal.valueOf(b.optLong("balanceRaw")).movePointLeft(6);
-                            compare(c, sp, me, code, Stable.symbol(code), held);
+                            compare(c, sp, me, code, Stable.symbol(code), held, quiet);
                         }
                         @Override public void fail(String e) { }
                     });
@@ -63,13 +67,13 @@ public final class AssetBalanceNotifier {
                     String a = addrs.get(coin.key);
                     if (a == null || a.isEmpty()) continue;
                     Double held = AssetPrices.amount(ChainBalances.assetBalance(coin.key, a));
-                    if (held != null) compare(c, sp, me, coin.key, coin.ticker, BigDecimal.valueOf(held));
+                    if (held != null) compare(c, sp, me, coin.key, coin.ticker, BigDecimal.valueOf(held), quiet);
                 }
                 String evm = CoinCatalog.savedAddress(c, me, "ETH");
                 if (evm != null && evm.startsWith("0x")) {
                     for (CustomAssets.Asset asset : CustomAssets.all(c)) {
                         String b = CustomAssets.balanceOf(asset, evm);
-                        if (!b.isEmpty()) compare(c, sp, me, asset.key(), asset.symbol, new BigDecimal(b));
+                        if (!b.isEmpty()) compare(c, sp, me, asset.key(), asset.symbol, new BigDecimal(b), quiet);
                     }
                 }
             } catch (Exception ignored) { }
@@ -87,13 +91,13 @@ public final class AssetBalanceNotifier {
                 : new String[]{"Sent " + delta + " " + symbol, "Your " + symbol + " balance is now " + now.stripTrailingZeros().toPlainString() + "."};
     }
 
-    private static synchronized void compare(Context c, SharedPreferences sp, String me, String key, String symbol, BigDecimal now) {
+    private static synchronized void compare(Context c, SharedPreferences sp, String me, String key, String symbol, BigDecimal now, boolean quiet) {
         String pref = me + ":" + key;
         String saved = sp.getString(pref, null);
         sp.edit().putString(pref, now.toPlainString()).apply();
-        if (saved == null) return;                                     // first look: only the starting point
+        if (saved == null || quiet) return;                            // first look, or just switched: only the starting point
         String[] m = message(new BigDecimal(saved), now, symbol);
         if (m == null) return;
-        NotificationCenter.post(c, NotificationCenter.TX, "asset_" + key + "_" + now.toPlainString(), m[0], m[1], "", -1);
+        NotificationCenter.post(c, NotificationCenter.TX, "asset_" + me + "_" + key + "_" + now.toPlainString(), m[0], m[1], "", -1);
     }
 }

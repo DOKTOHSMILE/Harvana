@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -44,11 +45,21 @@ public final class ChainAssetsSection {
 
     /** Opens the picker; {@code onChange} runs after any toggle so the list can redraw. */
     public static void showPicker(Context c, Runnable onChange) {
-        BottomSheetDialog d = new BottomSheetDialog(c);
+        // The app's sheet: rounded top, a small handle, opened to the full screen.
+        BottomSheetDialog d = com.harvana.app.p2p.ThemedDialogs.sheet(c);
         LinearLayout root = new LinearLayout(c);
         root.setOrientation(LinearLayout.VERTICAL);
         int p = dp(c, 20);
-        root.setPadding(p, p, p, p);
+        root.setPadding(p, dp(c, 10), p, p);
+        View handle = new View(c);
+        android.graphics.drawable.GradientDrawable hb = new android.graphics.drawable.GradientDrawable();
+        hb.setCornerRadius(dp(c, 2));
+        hb.setColor(ContextCompat.getColor(c, R.color.colorTextTertiary));
+        handle.setBackground(hb);
+        LinearLayout.LayoutParams hlp = new LinearLayout.LayoutParams(dp(c, 36), dp(c, 4));
+        hlp.gravity = android.view.Gravity.CENTER_HORIZONTAL;
+        hlp.bottomMargin = dp(c, 14);
+        root.addView(handle, hlp);
         TextView title = new TextView(c);
         title.setText("Add coins");
         title.setTextSize(18);
@@ -59,25 +70,41 @@ public final class ChainAssetsSection {
         sub.setText("Each coin is its own wallet, from the same recovery phrase. Turn one off to hide it.");
         sub.setTextSize(13);
         sub.setTextColor(ContextCompat.getColor(c, R.color.colorTextSecondary));
-        sub.setPadding(0, dp(c, 4), 0, dp(c, 12));
+        sub.setPadding(0, dp(c, 4), 0, dp(c, 8));
         root.addView(sub);
-        // Adding your own chain or token is a clear button near the top, so it is always on screen.
+        for (CoinCatalog.Coin coin : CoinCatalog.others()) root.addView(toggleRow(c, coin, onChange));
+
+        // At the end of the list: for anything not listed.
+        TextView missing = new TextView(c);
+        missing.setText("Can't find your coin? Add it yourself: any EVM chain by its chain ID, or a token by its contract address.");
+        missing.setTextSize(13);
+        missing.setGravity(android.view.Gravity.CENTER);
+        missing.setTextColor(ContextCompat.getColor(c, R.color.colorTextSecondary));
+        missing.setPadding(0, dp(c, 18), 0, dp(c, 8));
+        root.addView(missing);
         com.google.android.material.button.MaterialButton custom = new com.google.android.material.button.MaterialButton(
                 c, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
         custom.setText("Add a custom chain or token");
         custom.setAllCaps(false);
         custom.setGravity(android.view.Gravity.CENTER);
         custom.setIconResource(R.drawable.icon_add_circle_outline_round);
+        custom.setIconSize(dp(c, 24));
         custom.setIconGravity(com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_START);
         custom.setCornerRadius(dp(c, 14));
         custom.setOnClickListener(v -> { d.dismiss(); CustomAssets.showAdd(c, onChange); });
-        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(c, 52));
-        clp.bottomMargin = dp(c, 8);
-        root.addView(custom, clp);
-        for (CoinCatalog.Coin coin : CoinCatalog.others()) root.addView(toggleRow(c, coin, onChange));
+        root.addView(custom, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(c, 48)));
+
         androidx.core.widget.NestedScrollView scroll = new androidx.core.widget.NestedScrollView(c);
         scroll.addView(root);
         d.setContentView(scroll);
+        d.setOnShowListener(x -> {
+            View sheet = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (sheet != null) {
+                ViewGroup.LayoutParams lp = sheet.getLayoutParams();
+                lp.height = ViewGroup.LayoutParams.MATCH_PARENT;      // full screen
+                sheet.setLayoutParams(lp);
+            }
+        });
         d.show();
     }
 

@@ -2,6 +2,19 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): Assets list and Add coins sheet tidied; no repeated notifications on wallet switch
+
+- **Assets search box:** the search icon is 24 dp (`icon_search_24`). It used the 48 dp source vector at full size.
+- **Add coins button:** 24 dp icon, and the text, icon and outline in the accent colour. Before, the text was dark-on-dark and hard to see.
+- **Add coins sheet** (`ChainAssetsSection.showPicker`):
+  - the app's rounded sheet with a small handle, opened full screen;
+  - "Add a custom chain or token" is now at the bottom of the list, with a 24 dp icon, under the note "Can't find your coin? Add it yourself: any EVM chain by its chain ID, or a token by its contract address."
+- **Notifications no longer repeat old transactions when you switch wallets.**
+  - Each wallet kept its own "last announced" mark. Switching to a wallet that hadn't been watched for a while announced everything since that mark again.
+  - Now a wallet you switch to starts from that moment, for HARV transfers (`WalletTxNotifier`) and for coin balances (`AssetBalanceNotifier`).
+  - The last 400 announced transactions are remembered, so none is announced twice, even after the notification list is cleared.
+  - Money that arrives while the phone is off is still announced when the app next checks.
+
 ## 12 Oct 2026 (night): staking screen fixes
 
 - **My Positions showed 0 HARV even with a stake.** The panel looked its views up through the window, and the second tab's page is not attached to the window when the panel starts, so nothing on "My Positions" was ever filled in (it kept the layout's placeholder "0 HARV" and "+0.015% Daily"). It now looks inside both pages (`StakingPanel.find`). The staking data itself was fine: the Staking tab already showed the stake.

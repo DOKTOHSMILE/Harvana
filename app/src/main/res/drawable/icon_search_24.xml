@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The search icon at 24 dp (the source vector is 48 dp, which a text field's start icon would draw at full size). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:width="24dp" android:height="24dp" android:gravity="center" android:drawable="@drawable/icon_search_twotone"/>
+</layer-list>

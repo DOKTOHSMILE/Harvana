@@ -21,6 +21,9 @@ import java.util.List;
 public final class WalletTxNotifier {
     private WalletTxNotifier() {}
 
+    /** How many announced transactions are remembered, so none is announced twice. */
+    static final int TOLD_CAP = 400;
+
     public interface Done { void onDone(List<TxEvents.Event> newEvents); }
 
     public static void run(Context ctx, Done done) {
@@ -29,7 +32,11 @@ public final class WalletTxNotifier {
         if (me == null || me.trim().isEmpty()) { if (done != null) done.onDone(new ArrayList<>()); return; }
         final SharedPreferences sp = c.getSharedPreferences("wallet_tx_notify", Context.MODE_PRIVATE);
         final String key = "baseline_" + me;
-        final long baseline = sp.getLong(key, -1L);
+        // A wallet just switched to starts from now: what happened while it wasn't the active wallet is old news, and
+        // announcing it on every switch repeated old transactions. (Money that arrives while the phone is off is still announced.)
+        final boolean switched = !sp.getString("watching", "").isEmpty() && !me.equals(sp.getString("watching", ""));
+        sp.edit().putString("watching", me).apply();
+        final long baseline = switched ? -1L : sp.getLong(key, -1L);
         HarvanaNodeClient.getHistory(me, 0, 30, new HarvanaNodeClient.JsonCallback() {
             @Override public void onSuccess(JSONObject json) {
                 List<TxEvents.Tx> txs = parse(json);
@@ -42,9 +49,15 @@ public final class WalletTxNotifier {
                 }
                 List<TxEvents.Event> events = TxEvents.classify(txs, me, baseline, CoinInfo.ticker());
                 List<TxEvents.Event> fresh = new ArrayList<>();
+                java.util.Set<String> told = new java.util.LinkedHashSet<>(java.util.Arrays.asList(sp.getString("told", "").split(",")));
                 for (TxEvents.Event e : events) {
+                    if (told.contains(e.key)) continue;                     // announced before, even if since cleared
                     if (NotificationCenter.post(c, NotificationCenter.TX, e.key, e.title, e.body, "", -1)) fresh.add(e);
+                    told.add(e.key);
                 }
+                java.util.List<String> keep = new java.util.ArrayList<>(told);
+                if (keep.size() > TOLD_CAP) keep = keep.subList(keep.size() - TOLD_CAP, keep.size());
+                sp.edit().putString("told", android.text.TextUtils.join(",", keep)).apply();
                 if (newest > baseline) sp.edit().putLong(key, newest).apply();
                 if (done != null) done.onDone(fresh);
             }

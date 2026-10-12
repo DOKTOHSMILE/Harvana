@@ -27,15 +27,23 @@
 			android:textColor="@color/colorTextSecondary"
 			android:visibility="gone" />
 		<!-- Search: filters every row below (HARV, stable coins, other coins and the ones you added) by name or symbol. -->
-		<com.google.android.material.textfield.TextInputLayout
-			android:id="@+id/til_asset_search"
-			style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+		<!-- Search, and Add coins beside it. -->
+		<LinearLayout
+			android:id="@+id/row_asset_search"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginStart="12dp"
 			android:layout_marginEnd="12dp"
 			android:layout_marginTop="10dp"
 			android:layout_marginBottom="4dp"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+		<com.google.android.material.textfield.TextInputLayout
+			android:id="@+id/til_asset_search"
+			style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
 			android:hint="Search coins"
 			app:boxCornerRadiusTopStart="14dp"
 			app:boxCornerRadiusTopEnd="14dp"
@@ -55,6 +63,26 @@
 				android:textSize="14sp"
 				android:textColor="@color/colorTextPrimary" />
 		</com.google.android.material.textfield.TextInputLayout>
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_add_coins"
+			style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+			android:layout_width="52dp"
+			android:layout_height="52dp"
+			android:layout_marginStart="8dp"
+			android:layout_marginTop="3dp"
+			android:insetTop="0dp"
+			android:insetBottom="0dp"
+			android:minWidth="0dp"
+			android:padding="0dp"
+			android:contentDescription="Add coins"
+			app:icon="@drawable/icon_add_circle_outline_round"
+			app:iconSize="24dp"
+			app:iconGravity="textStart"
+			app:iconPadding="0dp"
+			app:iconTint="@color/colorAccent"
+			app:cornerRadius="14dp"
+			app:strokeColor="@color/colorAccent" />
+		</LinearLayout>
 		<androidx.recyclerview.widget.RecyclerView
 			android:id="@+id/recyclerview1"
 			android:layout_width="match_parent"
@@ -77,30 +105,6 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:orientation="vertical" />
-		<com.google.android.material.button.MaterialButton
-			android:id="@+id/btn_add_coins"
-			style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-			android:layout_width="match_parent"
-			android:layout_height="48dp"
-			android:layout_marginStart="16dp"
-			android:layout_marginEnd="16dp"
-			android:layout_marginTop="12dp"
-			android:layout_marginBottom="16dp"
-			android:insetTop="0dp"
-			android:insetBottom="0dp"
-			android:gravity="center"
-			android:text="Add coins"
-			android:textAllCaps="false"
-			android:textColor="@color/colorAccent"
-			android:textSize="14sp"
-			android:textStyle="bold"
-			app:icon="@drawable/icon_add_circle_outline_round"
-			app:iconSize="24dp"
-			app:iconGravity="textStart"
-			app:iconPadding="8dp"
-			app:iconTint="@color/colorAccent"
-			app:cornerRadius="14dp"
-			app:strokeColor="@color/colorAccent" />
 	</LinearLayout>
 	</androidx.core.widget.NestedScrollView>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

@@ -29,41 +29,31 @@ public final class HusdRow {
 
     public interface Fiat { void onFiat(double fiat); }
 
+    /** Every stable coin the person has not turned off in Add coins; the sorted list places them by value. */
     public static void render(Context c, LinearLayout box, String address, Fiat onFiat) {
         if (box == null || c == null || address == null || address.isEmpty()) return;
-        HusdClient.list(new HusdClient.Cb() {
-            @Override public void ok(JSONObject r) {
-                JSONArray arr = r.optJSONArray("assets");
-                List<String> on = new ArrayList<>();
-                if (arr != null) for (int i = 0; i < arr.length(); i++) {
-                    JSONObject a = arr.optJSONObject(i);
-                    if (a != null && a.optBoolean("active") && Stable.isStable(a.optString("asset"))) on.add(a.optString("asset"));
-                }
-                box.post(() -> {
-                    // Drop lines for assets that are no longer on.
-                    for (int i = box.getChildCount() - 1; i >= 0; i--) {
-                        Object tag = box.getChildAt(i).getTag();
-                        if (!(tag instanceof String) || !on.contains(tag)) box.removeViewAt(i);
-                    }
-                    if (on.isEmpty()) { onFiat.onFiat(0); return; }
-                    Map<String, Double> values = new HashMap<>();
-                    for (String code : on) {
-                        HusdClient.balance(code, address, new HusdClient.Cb() {
-                            @Override public void ok(JSONObject b) {
-                                box.post(() -> draw(c, box, code, b.optLong("balanceRaw"), fiat -> {
-                                    values.put(code, fiat);
-                                    double sum = 0;
-                                    for (double v : values.values()) sum += v;
-                                    onFiat.onFiat(sum);
-                                }));
-                            }
-                            @Override public void fail(String e) { }
-                        });
-                    }
-                });
-            }
-            @Override public void fail(String e) { }
-        });
+        List<String> on = new ArrayList<>();
+        for (String code : Stable.CODES) if (com.harvana.app.wallet.ChainAssetsSection.shown(c, code)) on.add(code);
+        // Drop lines for coins turned off.
+        for (int i = box.getChildCount() - 1; i >= 0; i--) {
+            Object tag = box.getChildAt(i).getTag();
+            if (!(tag instanceof String) || !on.contains(tag)) box.removeViewAt(i);
+        }
+        if (on.isEmpty()) { onFiat.onFiat(0); return; }
+        Map<String, Double> values = new HashMap<>();
+        for (String code : on) {
+            Fiat one = fiat -> {
+                values.put(code, fiat);
+                double total = 0;
+                for (double v : values.values()) total += v;
+                onFiat.onFiat(total);
+            };
+            if (lineFor(box, code) == null) draw(c, box, code, 0, f -> { });      // the line at once, the balance when it comes
+            HusdClient.balance(code, address, new HusdClient.Cb() {
+                @Override public void ok(JSONObject b) { box.post(() -> draw(c, box, code, b.optLong("balanceRaw"), one)); }
+                @Override public void fail(String e) { box.post(() -> draw(c, box, code, 0, one)); }   // not switched on yet: 0
+            });
+        }
     }
 
     private static View lineFor(LinearLayout box, String code) {
@@ -90,7 +80,7 @@ public final class HusdRow {
             if (name != null) name.setText(Stable.symbol(code));
             if (symbol != null) symbol.setText(code);
             View card = item.findViewById(R.id.cardview1);
-            View.OnClickListener open = v -> c.startActivity(new Intent(c, HusdActivity.class).putExtra(HusdActivity.EXTRA_ASSET, code));
+            View.OnClickListener open = v -> com.harvana.app.CoinDetailActivity.openStable(c, code);
             if (card != null) card.setOnClickListener(open); else item.setOnClickListener(open);
         }
         double amount = units / (double) HusdClient.UNIT;

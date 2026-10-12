@@ -372,6 +372,17 @@ public class WalletActivityFragmentActivity extends Fragment {
 		
 		_sortByTimestampDesc(display);
 		java.util.ArrayList<java.util.HashMap<String, Object>> filtered = filterFailedTx(display);
+		// One coin's page (CoinDetailActivity): only that coin's rows ("onlySymbol" = "hUSD", "HARV", …).
+		String only = getArguments() == null ? null : getArguments().getString("onlySymbol");
+		if (only != null && !only.isEmpty()) {
+			java.util.ArrayList<java.util.HashMap<String, Object>> mine = new java.util.ArrayList<>();
+			for (java.util.HashMap<String, Object> m : filtered) {
+				Object sym = m.get("tokenSymbol");
+				String t = sym == null ? com.harvana.app.CoinInfo.ticker() : String.valueOf(sym);
+				if (t.equalsIgnoreCase(only)) mine.add(m);
+			}
+			filtered = mine;
+		}
 		
 		if (list_history.getLayoutManager() == null) {
 			list_history.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(getContext()));

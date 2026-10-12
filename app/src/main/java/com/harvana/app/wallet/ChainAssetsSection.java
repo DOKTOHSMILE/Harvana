@@ -74,6 +74,15 @@ public final class ChainAssetsSection {
         root.addView(sub);
         for (CoinCatalog.Coin coin : CoinCatalog.others()) root.addView(toggleRow(c, coin, onChange));
 
+        TextView stables = new TextView(c);
+        stables.setText("Harvana stable coins");
+        stables.setTextSize(15);
+        stables.setTypeface(Typeface.DEFAULT_BOLD);
+        stables.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
+        stables.setPadding(0, dp(c, 16), 0, dp(c, 4));
+        root.addView(stables);
+        for (String code : com.harvana.app.husd.Stable.CODES) root.addView(stableRow(c, code, onChange));
+
         // At the end of the list: for anything not listed.
         TextView missing = new TextView(c);
         missing.setText("Can't find your coin? Add it yourself: any EVM chain by its chain ID, or a token by its contract address.");
@@ -106,6 +115,29 @@ public final class ChainAssetsSection {
             }
         });
         d.show();
+    }
+
+    private static View stableRow(Context c, String code, Runnable onChange) {
+        LinearLayout row = new LinearLayout(c);
+        row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        row.setPadding(0, dp(c, 8), 0, dp(c, 8));
+        ImageView icon = new ImageView(c);
+        int s = dp(c, 36);
+        icon.setLayoutParams(new LinearLayout.LayoutParams(s, s));
+        icon.setImageDrawable(com.harvana.app.husd.StableIcon.drawable(c, code));
+        row.addView(icon);
+        TextView t = new TextView(c);
+        t.setText(com.harvana.app.husd.Stable.symbol(code) + " · " + com.harvana.app.husd.Stable.name(code));
+        t.setTextSize(15);
+        t.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
+        t.setPadding(dp(c, 12), 0, 0, 0);
+        row.addView(t, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        SwitchMaterial sw = new SwitchMaterial(c);
+        sw.setChecked(shown(c, code));
+        sw.setOnCheckedChangeListener((b, on) -> { setShown(c, code, on); if (onChange != null) onChange.run(); });
+        row.addView(sw);
+        row.setOnClickListener(v -> sw.toggle());
+        return row;
     }
 
     private static View toggleRow(Context c, CoinCatalog.Coin coin, Runnable onChange) {

@@ -113,6 +113,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 				() -> {
 					com.harvana.app.wallet.ChainAssetsSection.render(getContext(), chainAssets, wallet_address);
 					if (getView() != null) com.harvana.app.wallet.CustomAssets.render(getContext(), getView().findViewById(R.id.custom_assets), wallet_address);
+					_renderStables();
 				}));
 		androidx.swiperefreshlayout.widget.SwipeRefreshLayout refresh = _view.findViewById(R.id.refresh_assets);
 		if (refresh != null) {
@@ -184,6 +185,15 @@ public class WalletAssetFragmentActivity extends Fragment {
 	/** Balance from node (available = spendable). No Firestore wallet sync. */
 	private LinearLayout _husdBox() {
 		return getView() == null ? null : getView().findViewById(R.id.husd_asset);
+	}
+
+	/** Every stable coin left on in Add coins; their value goes into the total. */
+	private void _renderStables() {
+		if (getContext() == null) return;
+		com.harvana.app.husd.HusdRow.render(getContext(), _husdBox(), wallet_address, fiat -> {
+			androidx.fragment.app.Fragment parent = getParentFragment();
+			if (isAdded() && parent instanceof AssetFragmentActivity) ((AssetFragmentActivity) parent).setHusdFiat(fiat);
+		});
 	}
 
 	private String assetQuery = "";
@@ -261,11 +271,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 		final Context context = getContext();
 		com.harvana.app.wallet.ChainAssetsSection.render(context, chainAssets, wallet_address);
 		if (getView() != null) com.harvana.app.wallet.CustomAssets.render(context, getView().findViewById(R.id.custom_assets), wallet_address);
-		// hUSD, once the network has it switched on; its value goes into the total.
-		com.harvana.app.husd.HusdRow.render(context, _husdBox(), wallet_address, fiat -> {
-			androidx.fragment.app.Fragment parent = getParentFragment();
-			if (isAdded() && parent instanceof AssetFragmentActivity) ((AssetFragmentActivity) parent).setHusdFiat(fiat);
-		});
+		_renderStables();
 		
 		java.util.List<HashMap<String, Object>> cachedCoins =
 		com.harvana.app.wallet.WalletCache.loadList(context, "coins_" + wallet_address);

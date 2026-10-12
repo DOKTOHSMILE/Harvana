@@ -120,6 +120,19 @@ public class CoinDetailActivity extends AppCompatActivity {
 
 	public com.harvana.app.wallet.CoinCatalog.Coin openCoin() { return openCoin; }
 	public String shownAddress() { return walletAddress == null ? "" : walletAddress.trim(); }
+
+	/** A stable coin ("HUSD", "HNGN", …) shown on this same page, or null. */
+	private String stableCode;
+	private com.harvana.app.husd.StableActions stable;
+	public String stableCode() { return stableCode; }
+	public com.harvana.app.husd.StableActions stable() { return stable; }
+
+	/** Opens a stable coin on the coin page every asset uses. */
+	public static void openStable(android.content.Context c, String code) {
+		c.startActivity(new Intent(c, CoinDetailActivity.class)
+				.putExtra("stable", code)
+				.putExtra("walletAddress", com.harvana.app.wallet.WalletManager.getActiveWalletAddress(c)));
+	}
 	
 	@Override
 	protected void onCreate(Bundle _savedInstanceState) {
@@ -190,8 +203,20 @@ public class CoinDetailActivity extends AppCompatActivity {
 		btn_receive = findViewById(R.id.btn_receive);
 		btn_send = findViewById(R.id.btn_send);
 		openCoin = com.harvana.app.wallet.CoinCatalog.get(getIntent().getStringExtra(com.harvana.app.wallet.CoinCatalog.EXTRA));
+		String askedStable = getIntent().getStringExtra("stable");
+		if (com.harvana.app.husd.Stable.isStable(askedStable)) {
+			stableCode = askedStable;
+			openCoin = com.harvana.app.wallet.CoinCatalog.harv();          // a stable coin lives at the Harvana address
+		}
 		
 		btn_receive.setOnClickListener(_v -> {
+			if (stable != null) {
+				new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Receive " + stable.sym)
+						.setItems(new String[]{"Harvana address", "Deposit " + stable.reserve()}, (d, w) -> {
+							if (w == 0) _receiveBottomSheet(); else stable.deposit();
+						}).show();
+				return;
+			}
 			if (openCoin != null && !openCoin.nativeHarv) {
 				startActivity(new Intent(CoinDetailActivity.this, ReceiveActivity.class)
 						.putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, openCoin.key)
@@ -202,6 +227,13 @@ public class CoinDetailActivity extends AppCompatActivity {
 		});
 		
 		btn_send.setOnClickListener(_v -> {
+			if (stable != null) {
+				new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Send " + stable.sym)
+						.setItems(new String[]{"Send on Harvana", "Withdraw to " + stable.reserve()}, (d, w) -> {
+							if (w == 0) stable.send(); else stable.withdraw();
+						}).show();
+				return;
+			}
 			Intent intent = new Intent(CoinDetailActivity.this, SendAssetActivity.class);
 			intent.putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, openCoin == null ? "HARV" : openCoin.key);
 			startActivityForResult(intent, SEND_ASSET_REQUEST_CODE);
@@ -234,6 +266,10 @@ public class CoinDetailActivity extends AppCompatActivity {
 			com.harvana.app.utils.StatusBarUtil.matchToolbar(this);
 		}
 		
+		if (stableCode != null) {
+			_showStable();
+			return;
+		}
 		if (openCoin != null && !openCoin.nativeHarv) {
 			_showChainCoin(openCoin);
 			return;
@@ -248,6 +284,38 @@ public class CoinDetailActivity extends AppCompatActivity {
 		setTitle(com.harvana.app.CoinInfo.name());
 		_loadTokenomicsInfo();
 		
+	}
+
+	/** A stable coin on the same page: its logo, balance, worth, address; Receive covers deposits, Send covers withdrawals. */
+	private void _showStable() {
+		String code = stableCode;
+		String address = walletAddress == null ? "" : walletAddress.trim();
+		stable = new com.harvana.app.husd.StableActions(this, code, address, this::_paintStable);
+		setTitle(com.harvana.app.husd.Stable.symbol(code));
+		if (img_coin_logo != null) img_coin_logo.setImageDrawable(com.harvana.app.husd.StableIcon.drawable(this, code));
+		if (tv_wallet_address != null) tv_wallet_address.setText(address.isEmpty() ? "No Wallet Address Found" : address);
+		if (tv_coin_balance != null) tv_coin_balance.setText("… " + com.harvana.app.husd.Stable.symbol(code));
+		_paintStable();
+	}
+
+	private void _paintStable() {
+		if (stable == null) return;
+		stable.load(() -> {
+			if (isFinishing() || tv_coin_balance == null) return;
+			String code = stableCode, sym = com.harvana.app.husd.Stable.symbol(code);
+			long units = stable.balance().optLong("availableRaw", stable.balance().optLong("balanceRaw", 0));
+			tv_coin_balance.setText(com.harvana.app.husd.HusdClient.format(units) + " " + sym);
+			com.harvana.app.utils.BalancePrivacy.guard(tv_coin_balance);
+			com.harvana.app.wallet.FxRates.load(this, () -> {
+				double perUsd = com.harvana.app.wallet.FxRates.perUsd(this, com.harvana.app.husd.Stable.currency(code));
+				if (Double.isNaN(perUsd) || perUsd <= 0 || textview14 == null) return;
+				double amount = units / (double) com.harvana.app.husd.HusdClient.UNIT;
+				textview14.setText("Worth " + com.harvana.app.wallet.FxRates.money(this, amount / perUsd) + " · "
+						+ com.harvana.app.wallet.FxRates.money(this, 1d / perUsd) + " each");
+				com.harvana.app.utils.BalancePrivacy.guard(textview14);
+				if (chainPriceLine != null) chainPriceLine.setText(com.harvana.app.wallet.FxRates.money(this, 1d / perUsd));
+			});
+		});
 	}
 
 	/** The same detail page HARV uses, filled with this coin's own name, logo, address and facts. */
@@ -333,6 +401,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 	@Override
 	public void onStart() {
 		super.onStart();
+		if (stable != null) _paintStable();
 		// Add to onStart
 		androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).registerReceiver(
 		globalTxReceiver, 

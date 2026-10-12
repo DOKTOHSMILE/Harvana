@@ -104,6 +104,8 @@ public final class CoinDetailPages {
                 WalletActivityFragmentActivity history = new WalletActivityFragmentActivity();
                 Bundle only = new Bundle();
                 only.putBoolean("harvOnly", true);
+                String st = stable();
+                only.putString("onlySymbol", st != null ? com.harvana.app.husd.Stable.symbol(st) : com.harvana.app.CoinInfo.ticker());
                 history.setArguments(only);
                 getChildFragmentManager().beginTransaction().replace(view.getId(), history).commitAllowingStateLoss();
             }
@@ -119,6 +121,11 @@ public final class CoinDetailPages {
             return coin == null || coin.nativeHarv;
         }
 
+        /** The stable coin this page shows ("HUSD", …), or null. */
+        private String stable() {
+            return getActivity() instanceof CoinDetailActivity ? ((CoinDetailActivity) getActivity()).stableCode() : null;
+        }
+
         private CoinCatalog.Coin coin() {
             return getActivity() instanceof CoinDetailActivity ? ((CoinDetailActivity) getActivity()).openCoin() : null;
         }
@@ -131,7 +138,8 @@ public final class CoinDetailPages {
 
         private void fillOverview(LinearLayout body) {
             CoinCatalog.Coin coin = coin();
-            String name = coin == null ? "Harvana coin" : coin.name;
+            String st = stable();
+            String name = st != null ? com.harvana.app.husd.Stable.symbol(st) : coin == null ? "Harvana coin" : coin.name;
             body.addView(label("WALLET ADDRESS"));
             TextView addr = new TextView(requireContext());
             addr.setText(address().isEmpty() ? "Address not ready yet" : address());
@@ -142,7 +150,11 @@ public final class CoinDetailPages {
             body.addView(card(addr));
             body.addView(label("ABOUT " + name.toUpperCase(Locale.US)));
             TextView about = new TextView(requireContext());
-            about.setText(coin == null
+            about.setText(st != null
+                    ? com.harvana.app.husd.Stable.symbol(st) + " is the " + com.harvana.app.husd.Stable.name(st) + " on Harvana Protocol. 1 "
+                      + com.harvana.app.husd.Stable.symbol(st) + " = 1 " + com.harvana.app.husd.Stable.name(st) + ", backed by "
+                      + com.harvana.app.husd.Stable.reserve(st, null) + ". One " + com.harvana.app.husd.Stable.symbol(st) + " is 1,000,000 of the smallest unit."
+                    : coin == null
                     ? "HARV is the native currency of Harvana Protocol, powering group savings, lending, and transfers across every Harvana group."
                     : coin.about);
             about.setTextSize(13);
@@ -237,6 +249,24 @@ public final class CoinDetailPages {
 
         private void fillNetwork(LinearLayout body) {
             CoinCatalog.Coin coin = coin();
+            String st = stable();
+            if (st != null) {                                  // a stable coin: the same rows the other coins show
+                String sym = com.harvana.app.husd.Stable.symbol(st);
+                LinearLayout box = new LinearLayout(requireContext());
+                box.setOrientation(LinearLayout.VERTICAL);
+                box.addView(stat("Network", com.harvana.app.wallet.CoinCatalog.harv().liveNetwork()));
+                box.addView(stat("Standard", "Harvana stable coin"));
+                LinearLayout priceRow = stat("Price", "…");
+                if (getActivity() instanceof CoinDetailActivity) ((CoinDetailActivity) getActivity()).chainPriceLine = valueOf(priceRow);
+                box.addView(priceRow);
+                box.addView(stat("Value", "1 " + sym + " = 1 " + com.harvana.app.husd.Stable.name(st)));
+                box.addView(stat("Backed by", com.harvana.app.husd.Stable.reserve(st, null)));
+                box.addView(stat("Decimals", "6"));
+                box.addView(stat("Smallest unit", "0.000001 " + sym));
+                box.addView(stat("tFare paid in", "HARV or " + sym));
+                body.addView(card(box));
+                return;
+            }
             if (coin == null || coin.nativeHarv) {
                 View card = take(R.id.cardview8);
                 View note = take(R.id.tv_coin_info_note);

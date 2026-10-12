@@ -2,6 +2,19 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): stable coins on the same coin page; every stable coin listed; Add beside search
+
+- **One coin page for every asset.** Tapping hUSD, hNGN or any stable coin opens the same page as HARV and the other coins (`CoinDetailActivity`, extra `stable`):
+  - icon, balance, worth and price each;
+  - Overview, History (that coin's transactions only) and Network;
+  - Explorer, Receive and Send.
+- The old stable page (Swap card, Mint/vault card, fees list, withdrawals list) is gone. `HusdActivity` now only opens the coin page for older links.
+- Receive offers Harvana address or Deposit (USDC, EURC, …). Send offers Send on Harvana or Withdraw (`husd/StableActions`).
+- **Every stable coin is listed** (hUSD, hEUR, hGBP, hNGN, hGHS, hKES, hZAR), sorted by value with every other asset. A coin not switched on yet shows 0.
+- **Add coins** has a "Harvana stable coins" section. Turn any of them off to hide it from the list.
+- **Add coins button** is a square button beside the search box, no longer under the list.
+- History on a coin page shows only that coin's transactions (`onlySymbol`). This applies to HARV too.
+
 ## 12 Oct 2026 (night): steady asset list from a saved copy; an icon for each Harvana dApp
 
 - **Asset list** (`wallet/AssetSorter`):

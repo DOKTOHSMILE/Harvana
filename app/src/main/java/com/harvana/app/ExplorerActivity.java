@@ -22,6 +22,7 @@ public class ExplorerActivity extends AppCompatActivity {
     /** Opens this page of the Harvana explorer instead of the wallet's address page. */
     public static final String EXTRA_URL = "url";
     private WebView web;
+    private com.harvana.app.web3.FindBar find;
 
     /** The Harvana explorer's page for one transaction. */
     public static void openTx(android.content.Context c, String hash) {
@@ -53,20 +54,38 @@ public class ExplorerActivity extends AppCompatActivity {
         ws.setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         ws.setSupportMultipleWindows(false);
         ws.setJavaScriptCanOpenWindowsAutomatically(false);
-        ws.setBuiltInZoomControls(true);
-        ws.setDisplayZoomControls(false);
-        if (android.os.Build.VERSION.SDK_INT >= 26) ws.setSafeBrowsingEnabled(true);
+        com.harvana.app.web3.BrowserPrefs.apply(this, web);           // zoom, desktop site, images, cookies, Safe Browsing
 
         final String home = url;
         android.widget.ProgressBar progress = new android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         progress.setMax(100);
-        com.harvana.app.web3.BrowserBar nav = new com.harvana.app.web3.BrowserBar(this, web, home, null);
+        com.harvana.app.web3.FindBar findBar = new com.harvana.app.web3.FindBar(this, web);
+        find = findBar;
+        com.harvana.app.web3.BrowserMenu menu = new com.harvana.app.web3.BrowserMenu(this, new com.harvana.app.web3.BrowserMenu.Host() {
+            @Override public WebView web() { return web; }
+            @Override public void openUrl(String u) {
+                String t = u == null ? "" : u.trim();
+                if (t.startsWith("http://")) t = "https://" + t.substring(7);
+                if (t.startsWith("https://")) web.loadUrl(t);
+            }
+            @Override public void find() { findBar.show(); }
+            @Override public void home() { web.loadUrl(home); }
+            @Override public boolean hasWallet() { return false; }
+            @Override public java.util.List<String> pageConnections() { return new java.util.ArrayList<>(); }
+            @Override public void disconnectPage() { }
+            @Override public java.util.List<String> connectedSites() { return new java.util.ArrayList<>(); }
+            @Override public void disconnectSite(String origin) { }
+        });
+        menu.attachLinkMenu();
+        menu.attachDownloads();
+        com.harvana.app.web3.BrowserBar nav = new com.harvana.app.web3.BrowserBar(this, web, home, null, menu::show);
 
         LinearLayout column = new LinearLayout(this);
         column.setOrientation(LinearLayout.VERTICAL);
         column.setBackgroundColor(UiColors.background());
         column.addView(progress, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(3)));
         column.addView(web, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+        column.addView(findBar.view(), new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         android.view.View rule = new android.view.View(this);
         rule.setBackgroundColor(UiColors.surfaceAlt());
         column.addView(rule, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, Math.max(1, dp(1) / 2)));
@@ -89,6 +108,7 @@ public class ExplorerActivity extends AppCompatActivity {
             }
             @Override public void onPageFinished(WebView view, String u) {
                 nav.setLoading(false);
+                com.harvana.app.web3.BrowserPrefs.addHistory(ExplorerActivity.this, u, view.getTitle());
                 bar.setSubtitle(host(u));
             }
             @Override public void doUpdateVisitedHistory(WebView view, String u, boolean isReload) {
@@ -118,8 +138,12 @@ public class ExplorerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (find != null && find.isShown()) { find.hide(); return; }
         goBack();
     }
+
+    @Override protected void onPause() { super.onPause(); if (web != null) web.onPause(); }
+    @Override protected void onResume() { super.onResume(); if (web != null) web.onResume(); }
 
     @Override
     protected void onDestroy() {

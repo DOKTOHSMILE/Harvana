@@ -14,7 +14,7 @@ import android.widget.Toast;
 import com.harvana.app.R;
 import com.harvana.app.utils.UiColors;
 
-/** Browser buttons under a WebView: back, forward, reload (stop while loading), home, share (long press copies). */
+/** Browser buttons under a WebView: back, forward, reload (stop while loading), home, and the menu (or share, long press copies). */
 public final class BrowserBar {
 
     private final LinearLayout bar;
@@ -22,7 +22,10 @@ public final class BrowserBar {
     private final WebView web;
     private boolean loading;
 
-    public BrowserBar(Context c, WebView web, String homeUrl, Runnable onHome) {
+    public BrowserBar(Context c, WebView web, String homeUrl, Runnable onHome) { this(c, web, homeUrl, onHome, null); }
+
+    /** With {@code onMenu}, the last button opens the browser menu instead of sharing. */
+    public BrowserBar(Context c, WebView web, String homeUrl, Runnable onHome, Runnable onMenu) {
         this.web = web;
         bar = new LinearLayout(c);
         bar.setGravity(Gravity.CENTER_VERTICAL);
@@ -33,7 +36,7 @@ public final class BrowserBar {
         forward = button(c, R.drawable.icon_arrow_forward_round_line, "Forward");
         reload = button(c, R.drawable.ic_refresh_line, "Reload");
         ImageView home = button(c, R.drawable.icon_house_outline_line, "Home");
-        ImageView share = button(c, R.drawable.icon_share_round_line, "Share");
+        ImageView share = button(c, onMenu != null ? R.drawable.ic_more_vert_line : R.drawable.icon_share_round_line, onMenu != null ? "Menu" : "Share");
         back.setOnClickListener(v -> { if (web.canGoBack()) web.goBack(); });
         forward.setOnClickListener(v -> { if (web.canGoForward()) web.goForward(); });
         reload.setOnClickListener(v -> { if (loading) web.stopLoading(); else web.reload(); });
@@ -42,6 +45,7 @@ public final class BrowserBar {
             else if (homeUrl != null) web.loadUrl(homeUrl);
         });
         share.setOnClickListener(v -> {
+            if (onMenu != null) { onMenu.run(); return; }
             String url = web.getUrl();
             if (url == null) return;
             Intent i = new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, url);

@@ -2,6 +2,27 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (late night): browser menu, settings, zoom, find, clear data
+
+dApp browser and explorer:
+- **Bottom bar:** Back · Forward · Reload/Stop · Home · Menu.
+- **Menu:** the page and a bookmark star, then Bookmarks, History, Find in page, Zoom, Desktop site, Share, Copy link, Open outside, Page info, Connected sites (dApp browser), Clear data, Settings.
+- **Zoom:** 50–250% with −, +, a slider and Reset. Pinch zoom on. The text size is kept.
+- **Find in page:** the query, match count (3/12), previous, next.
+- **Page info** (also from the lock): title, address, connection, certificate (issued to, issued by, valid from and until), zoom, desktop site, wallet connections with Disconnect.
+- **Clear data:** pick any of Cache, Cookies and site data, History, Connected sites.
+- **Settings:**
+  - General: Search engine (DuckDuckGo, Google, Brave, Bing, Startpage), Home page (Discover, this page, or an address), Text size.
+  - Content: Desktop site, Load images.
+  - Privacy and security: Cookies, Third-party cookies (off by default), Safe Browsing, Save history, Clear data on exit.
+  - Fixed: pop-ups, non-HTTPS pages, camera, microphone, location and certificate errors are always blocked.
+- **Also:**
+  - Long press a link or image: open, copy, share, open outside.
+  - Downloads: file, type, size and source shown, then handed to the phone's download app.
+  - Full-screen video.
+  - Pull to refresh (dApp browser).
+  - http links are upgraded to https.
+
 ## 12 Oct 2026 (late night): Discover, Harvana Swap and Staking websites, explorer browser buttons
 
 - **My Asset → Discover** (`web3/DiscoverActivity`). Tabs: Harvana (Harvana Swap, Harvana Staking, Harvana Explorer, Harvana Pools, List a coin), Featured, DEX, Lending, Yield, NFT. Recent.

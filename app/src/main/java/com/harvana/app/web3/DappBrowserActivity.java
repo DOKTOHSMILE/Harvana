@@ -86,6 +86,11 @@ public class DappBrowserActivity extends AppCompatActivity {
     private String account;                     // the active wallet's EVM address, once derived
     private String hvAccount;                   // the active wallet's Harvana address
     private BrowserBar nav;
+    private FindBar findBar;
+    private BrowserMenu menu;
+    private android.widget.FrameLayout frame;              // the screen; full-screen video goes on top of it
+    private View fullscreen;
+    private WebChromeClient.CustomViewCallback fullscreenDone;
     private String pageOrigin = "";             // origin of the page on screen
     private JavaScriptReplyProxy proxy;         // the page's end of the bridge
     private ScriptHandler injected;
@@ -112,7 +117,9 @@ public class DappBrowserActivity extends AppCompatActivity {
         close.setOnClickListener(v -> finish());
         bar.addView(close, new LinearLayout.LayoutParams(dp(40), dp(40)));
         lock = icon(R.drawable.icon_lock_round_line);
-        bar.addView(lock, new LinearLayout.LayoutParams(dp(28), dp(28)));
+        lock.setContentDescription("Page info");
+        lock.setOnClickListener(v -> { if (menu != null) menu.pageInfo(); });
+        bar.addView(lock, new LinearLayout.LayoutParams(dp(32), dp(32)));
         urlBar = new EditText(this);
         urlBar.setSingleLine(true);
         urlBar.setTextSize(14);
@@ -120,6 +127,7 @@ public class DappBrowserActivity extends AppCompatActivity {
         urlBar.setImeOptions(EditorInfo.IME_ACTION_GO);
         urlBar.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_URI);
         urlBar.setBackground(null);
+        urlBar.setSelectAllOnFocus(true);
         urlBar.setOnEditorActionListener((v, id, ev) -> {
             if (id == EditorInfo.IME_ACTION_GO || (ev != null && ev.getKeyCode() == KeyEvent.KEYCODE_ENTER)) { open(urlBar.getText().toString()); return true; }
             return false;
@@ -136,10 +144,6 @@ public class DappBrowserActivity extends AppCompatActivity {
         chainChip.setBackground(cb);
         chainChip.setOnClickListener(v -> pickChain());
         bar.addView(chainChip);
-        ImageView reload = icon(R.drawable.ic_refresh_line);
-        reload.setContentDescription("Reload");
-        reload.setOnClickListener(v -> web.reload());
-        bar.addView(reload, new LinearLayout.LayoutParams(dp(40), dp(40)));
         root.addView(bar);
 
         progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
@@ -147,10 +151,20 @@ public class DappBrowserActivity extends AppCompatActivity {
         root.addView(progress, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(3)));
 
         web = new WebView(this);
-        root.addView(web, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-        nav = new BrowserBar(this, web, null, this::finish);
+        androidx.swiperefreshlayout.widget.SwipeRefreshLayout pull = new androidx.swiperefreshlayout.widget.SwipeRefreshLayout(this);
+        pull.setColorSchemeResources(R.color.colorAccent);
+        pull.setProgressBackgroundColorSchemeResource(R.color.colorSurface);
+        pull.addView(web, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        pull.setOnRefreshListener(() -> { web.reload(); pull.postDelayed(() -> pull.setRefreshing(false), 900); });
+        root.addView(pull, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        findBar = new FindBar(this, web);
+        root.addView(findBar.view(), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        menu = new BrowserMenu(this, menuHost());
+        nav = new BrowserBar(this, web, null, this::goHome, menu::show);
         root.addView(nav.view(), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        setContentView(root);
+        frame = new android.widget.FrameLayout(this);
+        frame.addView(root, new android.widget.FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        setContentView(frame);
         hvAccount = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
 
         WebSettings s = web.getSettings();
@@ -165,13 +179,20 @@ public class DappBrowserActivity extends AppCompatActivity {
         s.setSupportMultipleWindows(false);
         s.setGeolocationEnabled(false);
         s.setSaveFormData(false);
-        if (Build.VERSION.SDK_INT >= 26) s.setSafeBrowsingEnabled(true);
-        CookieManager.getInstance().setAcceptThirdPartyCookies(web, false);
+        s.setMediaPlaybackRequiresUserGesture(true);
+        BrowserPrefs.apply(this, web);                                   // zoom, desktop site, images, cookies, Safe Browsing
+        menu.attachLinkMenu();
+        menu.attachDownloads();
 
         web.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req) {
                 Uri u = req.getUrl();
-                return u == null || !"https".equalsIgnoreCase(u.getScheme());      // https only; everything else stays out
+                if (u == null) return true;
+                if ("https".equalsIgnoreCase(u.getScheme())) return false;
+                if ("http".equalsIgnoreCase(u.getScheme()) && req.isForMainFrame()) {   // upgraded, never loaded as http
+                    view.loadUrl("https://" + u.toString().substring(7));
+                }
+                return true;                                                          // other schemes stay out
             }
             @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap icon) {
                 pageChanged(url);
@@ -184,6 +205,7 @@ public class DappBrowserActivity extends AppCompatActivity {
                 pageChanged(url);
                 nav.setLoading(false);
                 Web3Sites.remember(DappBrowserActivity.this, url, view.getTitle());
+                BrowserPrefs.addHistory(DappBrowserActivity.this, url, view.getTitle());
             }
             @Override public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                 handler.cancel();                                                     // never proceed past a bad certificate
@@ -196,6 +218,15 @@ public class DappBrowserActivity extends AppCompatActivity {
                 progress.setVisibility(p >= 100 ? View.INVISIBLE : View.VISIBLE);
             }
             @Override public void onPermissionRequest(PermissionRequest request) { request.deny(); }
+            @Override public void onShowCustomView(View view, CustomViewCallback done) {
+                if (fullscreen != null) { done.onCustomViewHidden(); return; }
+                fullscreen = view;
+                fullscreenDone = done;
+                view.setBackgroundColor(android.graphics.Color.BLACK);
+                frame.addView(view, new android.widget.FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            }
+            @Override public void onHideCustomView() { exitFullscreen(); }
             @Override public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback cb) { cb.invoke(origin, false, false); }
         });
 
@@ -214,15 +245,77 @@ public class DappBrowserActivity extends AppCompatActivity {
 
         String start = getIntent() == null ? null : getIntent().getStringExtra(EXTRA_URL);
         if (start != null && !start.isEmpty()) open(start);
+        else if (!BrowserPrefs.home(this).isEmpty()) open(BrowserPrefs.home(this));
+        else urlBar.requestFocus();
     }
 
-    @Override public void onBackPressed() { if (web != null && web.canGoBack()) web.goBack(); else super.onBackPressed(); }
+    @Override public void onBackPressed() {
+        if (fullscreen != null) { exitFullscreen(); return; }
+        if (findBar != null && findBar.isShown()) { findBar.hide(); return; }
+        if (web != null && web.canGoBack()) web.goBack(); else super.onBackPressed();
+    }
+
+    @Override protected void onPause() { super.onPause(); if (web != null) web.onPause(); }
+    @Override protected void onResume() { super.onResume(); if (web != null) web.onResume(); }
 
     @Override protected void onDestroy() {
         ui.removeCallbacks(giveUp);
         io.shutdownNow();
-        if (web != null) { web.stopLoading(); web.destroy(); }
+        if (web != null) {
+            if (isFinishing() && BrowserPrefs.clearOnExit(this)) {
+                BrowserPrefs.clearCache(web);
+                BrowserPrefs.clearCookiesAndSiteData(this);
+                BrowserPrefs.clearHistory(this, web);
+            }
+            web.stopLoading();
+            web.destroy();
+        }
         super.onDestroy();
+    }
+
+    private void exitFullscreen() {
+        if (fullscreen == null) return;
+        frame.removeView(fullscreen);
+        fullscreen = null;
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+        if (fullscreenDone != null) { fullscreenDone.onCustomViewHidden(); fullscreenDone = null; }
+    }
+
+    /** Home: the home page from the settings, or back to Discover. */
+    private void goHome() {
+        String h = BrowserPrefs.home(this);
+        if (h.isEmpty()) finish(); else open(h);
+    }
+
+    private BrowserMenu.Host menuHost() {
+        return new BrowserMenu.Host() {
+            @Override public WebView web() { return web; }
+            @Override public void openUrl(String url) { open(url); }
+            @Override public void find() { findBar.show(); }
+            @Override public void home() { goHome(); }
+            @Override public boolean hasWallet() { return true; }
+            @Override public List<String> pageConnections() {
+                List<String> out = new ArrayList<>();
+                if (account != null && Web3Sites.connected(DappBrowserActivity.this, account, pageOrigin)) out.add(net().name + " · " + shortAddr(account));
+                if (hvConnected(pageOrigin)) out.add("Harvana · " + shortAddr(hvAccount));
+                return out;
+            }
+            @Override public void disconnectPage() { disconnectSite(pageOrigin); }
+            @Override public List<String> connectedSites() {
+                java.util.TreeSet<String> all = new java.util.TreeSet<>();
+                if (account != null) all.addAll(Web3Sites.connectedSites(DappBrowserActivity.this, account));
+                if (hvAccount != null && !hvAccount.isEmpty()) all.addAll(Web3Sites.connectedSites(DappBrowserActivity.this, hvAccount));
+                return new ArrayList<>(all);
+            }
+            @Override public void disconnectSite(String origin) {
+                if (account != null) Web3Sites.disconnect(DappBrowserActivity.this, account, origin);
+                if (hvAccount != null && !hvAccount.isEmpty()) Web3Sites.disconnect(DappBrowserActivity.this, hvAccount, origin);
+                if (origin.equals(pageOrigin)) {
+                    emit("accountsChanged", new JSONArray());
+                    emitHv("accountsChanged", new JSONArray());
+                }
+            }
+        };
     }
 
     // ── navigation ────────────────────────────────────────────────────────────
@@ -235,7 +328,7 @@ public class DappBrowserActivity extends AppCompatActivity {
         if (t.matches("(?i)^https://\\S+$")) url = t;
         else if (t.matches("(?i)^http://\\S+$")) url = "https://" + t.substring(7);
         else if (!t.contains(" ") && t.contains(".") && !t.contains("://")) url = "https://" + t;
-        else url = "https://duckduckgo.com/?q=" + Uri.encode(t);
+        else url = BrowserPrefs.searchUrl(this, t);
         urlBar.setText(url);
         urlBar.clearFocus();
         web.loadUrl(url);

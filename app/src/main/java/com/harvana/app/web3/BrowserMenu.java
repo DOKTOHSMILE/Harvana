@@ -200,9 +200,10 @@ public final class BrowserMenu {
             row.setGravity(Gravity.CENTER_VERTICAL);
             row.setPadding(0, dp(10), 0, dp(10));
             ImageView ic = new ImageView(c);
-            ic.setImageResource("harvannaprotocol.com".equals(host(url)) ? R.drawable.ic_harv_coin : R.drawable.icon_link_twotone_line);
-            if (!"harvannaprotocol.com".equals(host(url))) ic.setColorFilter(UiColors.textSecondary());
             ic.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            if ("harvannaprotocol.com".equals(host(url))) ic.setImageResource(R.drawable.ic_harv_coin);
+            else com.bumptech.glide.Glide.with(c).load("https://icons.duckduckgo.com/ip3/" + host(url) + ".ico")
+                    .placeholder(R.drawable.icon_link_twotone_line).error(R.drawable.icon_link_twotone_line).into(ic);
             row.addView(ic, new LinearLayout.LayoutParams(dp(28), dp(28)));
             LinearLayout col = new LinearLayout(c);
             col.setOrientation(LinearLayout.VERTICAL);

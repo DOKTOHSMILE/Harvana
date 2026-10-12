@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (late night): address bar with favicon and loading fill
+
+- dApp browser address bar is a rounded pill (`web3/LoadingPill`). It shows the favicon, a green lock on HTTPS, and the address.
+- While a page loads, the pill fills from the left in the accent colour behind the address text. A bright line runs along its bottom edge. It fades out when the page is done. The thin progress bar is gone.
+- Favicon:
+  - the page's own icon;
+  - on Harvana pages, the Harvana coin;
+  - until the page's icon arrives, the site's icon from the web.
+  - Tapping it (or the lock) opens Page info.
+- Bookmarks and History rows show each site's icon.
+
 ## 12 Oct 2026 (late night): browser menu, settings, zoom, find, clear data
 
 dApp browser and explorer:

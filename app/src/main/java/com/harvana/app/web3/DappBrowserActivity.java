@@ -86,6 +86,9 @@ public class DappBrowserActivity extends AppCompatActivity {
     private String account;                     // the active wallet's EVM address, once derived
     private String hvAccount;                   // the active wallet's Harvana address
     private BrowserBar nav;
+    private LoadingPill pill;
+    private ImageView favicon;
+    private String iconOrigin = "";
     private FindBar findBar;
     private BrowserMenu menu;
     private android.widget.FrameLayout frame;              // the screen; full-screen video goes on top of it
@@ -116,10 +119,30 @@ public class DappBrowserActivity extends AppCompatActivity {
         close.setContentDescription("Close");
         close.setOnClickListener(v -> finish());
         bar.addView(close, new LinearLayout.LayoutParams(dp(40), dp(40)));
-        lock = icon(R.drawable.icon_lock_round_line);
+        // The address pill: favicon, address, and the loading fill behind the text.
+        LinearLayout addr = new LinearLayout(this);
+        addr.setGravity(Gravity.CENTER_VERTICAL);
+        addr.setPadding(dp(10), 0, dp(6), 0);
+        pill = new LoadingPill(UiColors.surfaceAlt(), UiColors.accent(), dp(20));
+        addr.setBackground(pill);
+        favicon = new ImageView(this);
+        favicon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        favicon.setContentDescription("Page info");
+        favicon.setClipToOutline(true);
+        favicon.setOutlineProvider(new android.view.ViewOutlineProvider() {
+            @Override public void getOutline(View v, android.graphics.Outline o) { o.setRoundRect(0, 0, v.getWidth(), v.getHeight(), dp(5)); }
+        });
+        favicon.setOnClickListener(v -> { if (menu != null) menu.pageInfo(); });
+        addr.addView(favicon, new LinearLayout.LayoutParams(dp(22), dp(22)));
+        lock = new ImageView(this);
+        lock.setImageResource(R.drawable.icon_lock_round_line);
+        lock.setColorFilter(UiColors.success());
         lock.setContentDescription("Page info");
         lock.setOnClickListener(v -> { if (menu != null) menu.pageInfo(); });
-        bar.addView(lock, new LinearLayout.LayoutParams(dp(32), dp(32)));
+        LinearLayout.LayoutParams lockLp = new LinearLayout.LayoutParams(dp(14), dp(14));
+        lockLp.leftMargin = dp(6);
+        addr.addView(lock, lockLp);
+        resetFavicon();
         urlBar = new EditText(this);
         urlBar.setSingleLine(true);
         urlBar.setTextSize(14);
@@ -128,11 +151,18 @@ public class DappBrowserActivity extends AppCompatActivity {
         urlBar.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_URI);
         urlBar.setBackground(null);
         urlBar.setSelectAllOnFocus(true);
+        urlBar.setTextColor(UiColors.textPrimary());
+        urlBar.setHintTextColor(UiColors.textTertiary());
+        urlBar.setPadding(dp(8), dp(10), dp(4), dp(10));
         urlBar.setOnEditorActionListener((v, id, ev) -> {
             if (id == EditorInfo.IME_ACTION_GO || (ev != null && ev.getKeyCode() == KeyEvent.KEYCODE_ENTER)) { open(urlBar.getText().toString()); return true; }
             return false;
         });
-        bar.addView(urlBar, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        addr.addView(urlBar, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        LinearLayout.LayoutParams addrLp = new LinearLayout.LayoutParams(0, dp(44), 1f);
+        addrLp.leftMargin = dp(4);
+        addrLp.rightMargin = dp(8);
+        bar.addView(addr, addrLp);
         chainChip = new TextView(this);
         chainChip.setTextSize(12);
         chainChip.setTypeface(null, Typeface.BOLD);
@@ -146,9 +176,6 @@ public class DappBrowserActivity extends AppCompatActivity {
         bar.addView(chainChip);
         root.addView(bar);
 
-        progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        progress.setMax(100);
-        root.addView(progress, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(3)));
 
         web = new WebView(this);
         androidx.swiperefreshlayout.widget.SwipeRefreshLayout pull = new androidx.swiperefreshlayout.widget.SwipeRefreshLayout(this);
@@ -197,6 +224,8 @@ public class DappBrowserActivity extends AppCompatActivity {
             @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap icon) {
                 pageChanged(url);
                 nav.setLoading(true);
+                pill.start();
+                if (!pageOrigin.equals(iconOrigin)) resetFavicon();
             }
             @Override public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
                 nav.update();
@@ -213,9 +242,13 @@ public class DappBrowserActivity extends AppCompatActivity {
             }
         });
         web.setWebChromeClient(new WebChromeClient() {
-            @Override public void onProgressChanged(WebView view, int p) {
-                progress.setProgress(p);
-                progress.setVisibility(p >= 100 ? View.INVISIBLE : View.VISIBLE);
+            @Override public void onProgressChanged(WebView view, int p) { pill.setProgress(p); }
+            @Override public void onReceivedIcon(WebView view, android.graphics.Bitmap icon) {
+                if (icon == null) return;
+                iconOrigin = pageOrigin;
+                favicon.clearColorFilter();
+                favicon.setPadding(0, 0, 0, 0);
+                favicon.setImageBitmap(icon);
             }
             @Override public void onPermissionRequest(PermissionRequest request) { request.deny(); }
             @Override public void onShowCustomView(View view, CustomViewCallback done) {
@@ -271,6 +304,33 @@ public class DappBrowserActivity extends AppCompatActivity {
             web.destroy();
         }
         super.onDestroy();
+    }
+
+    /** Before a site's own icon arrives: the Harvana coin on Harvana pages, otherwise the site's icon from the web, or a globe-like link icon. */
+    private void resetFavicon() {
+        iconOrigin = "";
+        String host = pageOrigin.isEmpty() ? "" : Uri.parse(pageOrigin).getHost();
+        if (host != null && host.endsWith("harvannaprotocol.com")) {
+            favicon.clearColorFilter();
+            favicon.setImageResource(R.drawable.ic_harv_coin);
+            iconOrigin = pageOrigin;
+            return;
+        }
+        favicon.setImageResource(R.drawable.icon_link_twotone_line);
+        favicon.setColorFilter(UiColors.textSecondary());
+        if (host != null && !host.isEmpty()) {
+            final String want = pageOrigin;
+            com.bumptech.glide.Glide.with(this).asBitmap().load("https://icons.duckduckgo.com/ip3/" + host + ".ico")
+                    .into(new com.bumptech.glide.request.target.CustomTarget<android.graphics.Bitmap>() {
+                        @Override public void onResourceReady(@androidx.annotation.NonNull android.graphics.Bitmap bmp,
+                                                              com.bumptech.glide.request.transition.Transition<? super android.graphics.Bitmap> t) {
+                            if (!want.equals(pageOrigin) || want.equals(iconOrigin) || isDestroyed()) return;   // the page's own icon wins
+                            favicon.clearColorFilter();
+                            favicon.setImageBitmap(bmp);
+                        }
+                        @Override public void onLoadCleared(android.graphics.drawable.Drawable placeholder) { }
+                    });
+        }
     }
 
     private void exitFullscreen() {
@@ -342,7 +402,7 @@ public class DappBrowserActivity extends AppCompatActivity {
             if (busyId >= 0) { ui.removeCallbacks(giveUp); busyId = -1; }
         }
         if (!urlBar.hasFocus()) urlBar.setText(url);
-        lock.setAlpha(url != null && url.startsWith("https://") ? 1f : 0.3f);
+        lock.setVisibility(url != null && url.startsWith("https://") ? View.VISIBLE : View.GONE);
     }
 
     static String origin(String url) {

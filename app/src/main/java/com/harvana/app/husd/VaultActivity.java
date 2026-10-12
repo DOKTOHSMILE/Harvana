@@ -73,18 +73,13 @@ public class VaultActivity extends AppCompatActivity {
         head.addView(a2);
         root.addView(head);
 
-        root.addView(title("How it works"));
-        LinearLayout hc = card();
-        tvHow = text("…", 13, false, UiColors.textSecondary());
-        hc.addView(tvHow);
-        root.addView(hc);
+        tvHow = text("", 13, false, UiColors.textSecondary());
 
         root.addView(title("Vaults under the line"));
         risky = card();
         root.addView(risky);
 
-        AppBar.setContent(this, sv, "Mint " + sym + " with HARV", "Lock HARV, borrow " + sym + ", repay to unlock");
-        tvHow.setText(howText());
+        AppBar.setContent(this, sv, "Mint " + sym + " with HARV", null);
         load();
     }
 
@@ -93,7 +88,7 @@ public class VaultActivity extends AppCompatActivity {
     private void load() {
         if (address == null || address.isEmpty()) { tvPrice.setText("No wallet"); return; }
         NodeGroupClient.vaultInfo(code, new NodeGroupClient.Callback() {
-            @Override public void onSuccess(JSONObject r) { runOnUiThread(() -> { info = r; tvHow.setText(howText()); showPrice(); }); }
+            @Override public void onSuccess(JSONObject r) { runOnUiThread(() -> { info = r; showPrice(); }); }
             @Override public void onError(String e) { runOnUiThread(() -> tvPrice.setText(com.harvana.app.utils.ErrorText.plain(e))); }
         });
         NodeGroupClient.vaultPosition(code, address, new NodeGroupClient.Callback() {
@@ -107,9 +102,9 @@ public class VaultActivity extends AppCompatActivity {
     }
 
     private void showPrice() {
-        if (!info.optBoolean("available")) { tvPrice.setText(sym + " isn't switched on for minting with HARV yet."); return; }
+        if (!info.optBoolean("available")) { tvPrice.setText("HARV price: —"); return; }
         if (info.optBoolean("priceOk")) {
-            tvPrice.setText("HARV price: ₦" + naira(info.optLong("koboPerHarv")) + " (from completed P2P trades)");
+            tvPrice.setText("HARV price: ₦" + naira(info.optLong("koboPerHarv")));
         } else {
             tvPrice.setText(priceProblem(info.optString("priceProblem")));
         }
@@ -160,25 +155,22 @@ public class VaultActivity extends AppCompatActivity {
     private void lock() {
         if (!ready(false)) return;
         askAmount("Lock HARV", "HARV to lock", true, raw -> confirm("Lock HARV", BalanceFormatter.rawShort(raw) + " HARV",
-                new String[][]{{"Goes to", "Your vault (only you can take it back)"},
-                        {"Counts", "Once the next block has it"},
-                        {"Transport fare", "Normal HARV transport fare"}},
-                () -> run("LOCK", raw, null, "HARV locked. It counts once the next block has it.")));
+                new String[][]{{"To", "Your vault"}},
+                () -> run("LOCK", raw, null, "HARV locked.")));
     }
 
     private void mint() {
         if (!ready(true)) return;
         long can = pos.optLong("canMintRaw");
         long min = info.optLong("minMintRaw", 1000 * HusdClient.UNIT);
-        if (can < min) { toast("Lock more HARV first: you can mint " + HusdClient.format(can) + " " + sym + " now, and the minimum is " + HusdClient.format(min) + "."); return; }
+        if (can < min) { toast("Minimum " + HusdClient.format(min) + " " + sym + ". Available: " + HusdClient.format(can) + "."); return; }
         askAmount("Mint " + sym, "Amount (up to " + HusdClient.format(can) + ")", false, raw -> {
-            if (raw > can) { toast("At most " + HusdClient.format(can) + " " + sym + " against your HARV."); return; }
-            if (raw < min) { toast("The minimum is " + HusdClient.format(min) + " " + sym + "."); return; }
+            if (raw > can) { toast("Maximum " + HusdClient.format(can) + " " + sym + "."); return; }
+            if (raw < min) { toast("Minimum " + HusdClient.format(min) + " " + sym + "."); return; }
             confirm("Mint " + sym, HusdClient.format(raw) + " " + sym, new String[][]{
                             {"You owe", HusdClient.format(pos.optLong("debtRaw") + raw) + " " + sym},
-                            {"Keep above", (info.optInt("liquidationRatioBps", 15000) / 100) + "% or the vault can be liquidated"},
-                            {"Transport fare", "A small HARV action fee"}},
-                    () -> run("MINT", raw, null, sym + " minted. It arrives with the next block."));
+                            {"Liquidation below", (info.optInt("liquidationRatioBps", 15000) / 100) + "%"}},
+                    () -> run("MINT", raw, null, sym + " minted."));
         });
     }
 
@@ -189,8 +181,7 @@ public class VaultActivity extends AppCompatActivity {
             if (raw > debt) { toast("You owe " + HusdClient.format(debt) + " " + sym + "."); return; }
             confirm("Repay " + sym, HusdClient.format(raw) + " " + sym, new String[][]{
                             {"Still owed", HusdClient.format(debt - raw) + " " + sym},
-                            {"The coins", "Are burned: they leave circulation"},
-                            {"Transport fare", "A small HARV action fee"}},
+                            },
                     () -> run("REPAY", raw, null, "Repayment sent."));
         });
     }
@@ -201,9 +192,8 @@ public class VaultActivity extends AppCompatActivity {
         askAmount("Take HARV back", "HARV (locked: " + BalanceFormatter.rawShort(coll) + ")", true, raw -> {
             if (raw > coll) { toast("Only " + BalanceFormatter.rawShort(coll) + " HARV is locked."); return; }
             confirm("Take HARV back", BalanceFormatter.rawShort(raw) + " HARV", new String[][]{
-                            {"Rule", "What stays must cover your debt " + (info.optInt("mintRatioBps", 20000) / 100) + "%"},
-                            {"Transport fare", "A small HARV action fee"}},
-                    () -> run("WITHDRAW", raw, null, "Your HARV is on its way back."));
+                            {"Locked after", BalanceFormatter.rawShort(coll - raw) + " HARV"}},
+                    () -> run("WITHDRAW", raw, null, "Sent."));
         });
     }
 
@@ -212,10 +202,9 @@ public class VaultActivity extends AppCompatActivity {
         int bonus = info.optInt("liquidationBonusBps", 1000) / 100;
         confirm("Liquidate vault", HusdClient.format(debt) + " " + sym, new String[][]{
                         {"Vault", shortAddr(owner)},
-                        {"You pay", HusdClient.format(debt) + " " + sym + " of your own (burned)"},
-                        {"You get", "That much in HARV plus " + bonus + "%, from the vault"},
-                        {"Transport fare", "A small HARV action fee"}},
-                () -> run("LIQUIDATE", 0, owner, "Liquidation sent. The HARV arrives after the next block."));
+                        {"You pay", HusdClient.format(debt) + " " + sym},
+                        {"Bonus", bonus + "%"}},
+                () -> run("LIQUIDATE", 0, owner, "Liquidation sent."));
     }
 
     private void run(String action, long raw, String owner, String done) {
@@ -263,15 +252,15 @@ public class VaultActivity extends AppCompatActivity {
 
     /** Minting and liquidating need a live HARV price; locking only needs the coin to be on. */
     private boolean ready(boolean needPrice) {
-        if (!info.optBoolean("available")) { toast(sym + " isn't switched on for minting with HARV yet."); return false; }
+        if (!info.optBoolean("available")) { toast(sym + " minting is off."); return false; }
         if (needPrice && !info.optBoolean("priceOk")) { toast(priceProblem(info.optString("priceProblem"))); return false; }
         return true;
     }
 
     private String priceProblem(String p) {
-        if (p.contains("NOT_LIVE")) return "Minting opens once HARV has a market price: the network needs 10 completed P2P trades first. You can lock HARV now.";
-        if (p.contains("STALE")) return "The HARV price is out of date (no recent P2P trades), so minting is paused for safety.";
-        return "Minting is paused: the HARV price isn't usable right now" + (p.isEmpty() ? "." : " (" + p + ").");
+        if (p.contains("NOT_LIVE")) return "HARV price: not live yet";
+        if (p.contains("STALE")) return "HARV price: out of date";
+        return "HARV price: unavailable";
     }
 
     private String howText() {

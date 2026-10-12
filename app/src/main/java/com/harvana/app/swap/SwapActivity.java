@@ -153,12 +153,8 @@ public class SwapActivity extends AppCompatActivity {
         root.addView(swapsList);
 
         TextView pt = text("Pools", 15, true, UiColors.textPrimary());
-        pt.setPadding(dp(4), dp(22), 0, dp(2));
+        pt.setPadding(dp(4), dp(22), 0, dp(6));
         root.addView(pt);
-        TextView ps = text("Every swap is priced by what is in its pool. Put HARV and a coin into a pool to earn the 0.3% each swap through it pays.",
-                12, false, UiColors.textSecondary());
-        ps.setPadding(dp(4), 0, 0, dp(6));
-        root.addView(ps);
         poolList = card();
         root.addView(poolList);
 
@@ -304,8 +300,7 @@ public class SwapActivity extends AppCompatActivity {
                         .row("Pool fee", pct(q.optLong("feeBps")) + (q.has("viaHarvRaw") ? " (2 pools)" : ""))
                         .row("Price impact", pct(impact), impact >= 500 ? UiColors.warning() : UiColors.textPrimary())
                         .row("Transport fare", fmt("HARV", fare) + " HARV")
-                        .row("Movements paid", moves + " (" + sym(from) + " in, " + sym(to) + " out)");
-                if (impact >= 500) details.note("Large price impact: this pool is small for that amount.");
+                        .row("Movements", String.valueOf(moves));
                 details.view().setVisibility(View.VISIBLE);
                 boolean enough = fromBalance < 0 || in <= fromBalance;
                 btnSwap.setEnabled(out > 0 && enough);
@@ -350,7 +345,7 @@ public class SwapActivity extends AppCompatActivity {
         long in = quote.optLong("amountInRaw"), out = quote.optLong("outRaw");
         List<String[]> rows = new ArrayList<>();
         rows.add(new String[]{"You get about", fmt(to, out) + " " + sym(to)});
-        rows.add(new String[]{"At least", fmt(to, minOut(out)) + " " + sym(to) + " (else it all comes back)"});
+        rows.add(new String[]{"At least", fmt(to, minOut(out)) + " " + sym(to)});
         rows.add(new String[]{"Price impact", pct(quote.optLong("priceImpactBps"))});
         rows.add(new String[]{"Pool fee", pct(quote.optLong("feeBps"))});
         rows.add(new String[]{"Transport fare", fmt("HARV", quote.optLong("transportFareRaw")) + " HARV · " + quote.optInt("transportMovements", 2) + " movements"});
@@ -360,7 +355,7 @@ public class SwapActivity extends AppCompatActivity {
                     toast("Swapping…");
                     NodeGroupClient.swap(this, address, from, to, in, minOut(out), new NodeGroupClient.Callback() {
                         @Override public void onSuccess(JSONObject r) { runOnUiThread(() -> {
-                            toast("Swap sent. Your " + sym(to) + " arrives after the next blocks.");
+                            toast("Swap sent.");
                             etAmount.setText("");
                             loadBalance();
                             loadPools();
@@ -394,7 +389,7 @@ public class SwapActivity extends AppCompatActivity {
             boolean open = p.optBoolean("open");
             String body = "HARV / " + sym(code) + "\n" + (open
                     ? fmt(HARV, p.optLong("harvRaw")) + " HARV + " + fmt(code, p.optLong("coinRaw")) + " " + sym(code)
-                    : "Empty: the first deposit sets the price");
+                    : "Empty");
             JSONObject my = myPosition(code);
             if (my != null) body += "\nYours: " + pct(my.optLong("shareBps")) + " = " + fmt(HARV, my.optLong("harvRaw")) + " HARV + "
                     + fmt(code, my.optLong("coinRaw")) + " " + sym(code);
@@ -428,10 +423,6 @@ public class SwapActivity extends AppCompatActivity {
         box.setPadding(dp(20), dp(8), dp(20), 0);
         EditText eh = field(box, "HARV");
         EditText ec = field(box, sym(code));
-        TextView note = text(open ? "The coin amount follows the pool's price. Anything that doesn't fit the price when it arrives comes back."
-                : "This pool is empty: the amounts you put in set its starting price. Make it match the real market price.",
-                12, false, UiColors.textSecondary());
-        box.addView(note);
         if (open) eh.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
             @Override public void onTextChanged(CharSequence s, int a, int b, int c) { }
@@ -448,11 +439,9 @@ public class SwapActivity extends AppCompatActivity {
                     if (h <= 0 || c <= 0) { toast("Enter both amounts."); return; }
                     List<String[]> rows = new ArrayList<>();
                     rows.add(new String[]{"And", fmt(code, c) + " " + sym(code)});
-                    rows.add(new String[]{"You earn", "0.3% of every swap through this pool, in proportion to your share"});
-                    rows.add(new String[]{"Take back", "Any time, at the pool's mix then (it shifts as people swap)"});
-                    rows.add(new String[]{"Transport fare", "3 movements (HARV in, coin in, any change back), paid in HARV"});
+                    rows.add(new String[]{"Transport fare", "3 movements"});
                     com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Add to pool", fmt(HARV, h) + " HARV", rows,
-                            () -> NodeGroupClient.swapAdd(this, address, code, h, c, done("Added. Your share shows once both amounts arrive.")));
+                            () -> NodeGroupClient.swapAdd(this, address, code, h, c, done("Added.")));
                 }).setNegativeButton("Cancel", null).show();
     }
 
@@ -462,7 +451,7 @@ public class SwapActivity extends AppCompatActivity {
         new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Take back from the HARV / " + sym(code) + " pool")
                 .setItems(labels, (d, which) -> {
                     if (parts[which] <= 0) { toast("Too small to take back."); return; }
-                    NodeGroupClient.swapRemove(this, address, code, parts[which], done("On its way back to your wallet."));
+                    NodeGroupClient.swapRemove(this, address, code, parts[which], done("Sent."));
                 }).show();
     }
 

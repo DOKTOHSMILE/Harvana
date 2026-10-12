@@ -55,8 +55,6 @@ public final class StakerShareCard {
         card.setBackground(bg);
         TextView title = text(a, "Your share of stable-coin fees", 16, true, UiColors.textPrimary());
         card.addView(title);
-        card.addView(text(a, "Staking HARV earns half of every fee paid in hUSD, hNGN and the other stable coins by people "
-                + "who hold no HARV. It is shared daily by stake size and lock, for stakes held the whole day.", 12, false, UiColors.textSecondary()));
 
         for (int i = 0; i < rows.length(); i++) {
             JSONObject s = rows.optJSONObject(i);

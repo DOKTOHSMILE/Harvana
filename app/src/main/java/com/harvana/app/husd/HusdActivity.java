@@ -87,8 +87,6 @@ public class HusdActivity extends AppCompatActivity {
 
         LinearLayout sc = card();                          // swap HARV or another coin for this one (SwapActivity)
         sc.addView(text("Swap for " + sym, 15, true, UiColors.textPrimary()));
-        sc.addView(text("Swap HARV or another Harvana coin for " + sym + " at the pool's price, or swap " + sym + " back.",
-                13, false, UiColors.textSecondary()));
         sc.addView(action("Swap", v -> startActivity(new android.content.Intent(this, com.harvana.app.swap.SwapActivity.class)
                 .putExtra(com.harvana.app.swap.SwapActivity.EXTRA_FROM, "HARV").putExtra(com.harvana.app.swap.SwapActivity.EXTRA_TO, code))));
         LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -98,8 +96,6 @@ public class HusdActivity extends AppCompatActivity {
         if ("NGN".equals(Stable.currency(code))) {         // hNGN can also be minted against HARV (VaultActivity)
             LinearLayout vc = card();
             vc.addView(text("Mint " + sym + " with HARV", 15, true, UiColors.textPrimary()));
-            vc.addView(text("No naira to deposit? Lock HARV and mint " + sym + " against it. Repay to unlock your HARV.",
-                    13, false, UiColors.textSecondary()));
             vc.addView(action("Open my vault", v -> startActivity(new android.content.Intent(this, VaultActivity.class)
                     .putExtra(EXTRA_ASSET, code))));
             LinearLayout.LayoutParams vlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -325,16 +321,13 @@ public class HusdActivity extends AppCompatActivity {
         String one = sym;
         feesTable.clear()
                 .section("Sending on Harvana")
-                .row("Transport fare (you hold HARV)", "Normal HARV transport fare")
+                .row("Transport fare (with HARV)", "HARV")
                 .row("Transport fare (no HARV)", HusdClient.format(fee("transferPaidInHusdRaw", 20_000L)) + " " + one)
-                .row("Free transfers", "First 3 paid in " + one)
-                .row("Who gets a no-HARV fare", "Half to the miner, half to HARV stakers")
+                .row("Free transfers", "3")
                 .section("Deposits and withdrawals (" + reserve + ")")
                 .row("Deposit or withdraw on Base", HusdClient.format(bridgeFee("BASE")) + " " + one)
                 .row("Deposit or withdraw on Ethereum", HusdClient.format(bridgeFee("ETHEREUM")) + " " + one)
-                .row("Other networks", "Twice that network's own fee")
                 .row("Minimum withdrawal", HusdClient.format(fee("minWithdrawRaw", 5 * HusdClient.UNIT)) + " " + one)
-                .row("Deposit address", "Yours alone; it never changes")
                 .row("Value", "1 " + one + " = 1 " + Stable.name(code));
     }
 

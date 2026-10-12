@@ -111,7 +111,7 @@ public class SwapOrderActivity extends AppCompatActivity {
         }
         t.section("Transport")
          .row("Transport fare", amount("HARV", o.optLong("transportFareRaw")))
-         .row("Movements paid", String.valueOf(o.optInt("transportMovements")));
+         .row("Movements", String.valueOf(o.optInt("transportMovements")));
         t.section("Record")
          .row("Started", android.text.format.DateFormat.format("d MMM yyyy, HH:mm", o.optLong("at")))
          .row("Finished", o.has("doneAt") ? android.text.format.DateFormat.format("d MMM yyyy, HH:mm", o.optLong("doneAt")) : "Waiting for blocks")

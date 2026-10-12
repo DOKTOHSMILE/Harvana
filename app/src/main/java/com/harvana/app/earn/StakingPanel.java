@@ -352,7 +352,6 @@ public final class StakingPanel {
          .row("Paid into Claim", "0.05% of the pool each day")
          .row("Claims open", "Every 24 hours")
          .row("Unstaking returns", "After 24 hours");
-        t.note("Estimates move with the pool and the total staked.");
     }
 
     /** {yearly drip in HARV, total weighted stake} from the node's /info and the observed block pace. */

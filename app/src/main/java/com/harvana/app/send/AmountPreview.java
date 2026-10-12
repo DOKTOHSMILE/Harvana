@@ -196,7 +196,7 @@ public final class AmountPreview {
                 @Override public void onError(String e) { }
             });
         } else if (com.harvana.app.husd.Stable.isStable(key)) {
-            fee("HARV transport fare, or a small " + src.symbol() + " fee without HARV");
+            fee("HARV");
         } else {
             fee("Set by that network when sent");
         }

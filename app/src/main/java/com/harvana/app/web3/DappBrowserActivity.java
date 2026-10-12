@@ -96,10 +96,30 @@ public class DappBrowserActivity extends AppCompatActivity {
     private WebChromeClient.CustomViewCallback fullscreenDone;
     private String pageOrigin = "";             // origin of the page on screen
     private JavaScriptReplyProxy proxy;         // the page's end of the bridge
-    private ScriptHandler injected;
     private boolean bridge;
     private int busyId = -1;                    // the request waiting for the person, or -1
     private final Runnable giveUp = () -> { if (busyId >= 0) { error(busyId, 4001, "User rejected the request."); busyId = -1; } };
+
+    // ── tabs (owner, 12 Oct 2026: several tabs like Chrome; minimize, use the app, come back) ─────────────
+
+    /** One open tab: its own page (made when first shown), its address, title and a snapshot for the tab grid. */
+    static final class Tab {
+        final String id;
+        WebView web;
+        String url = "", title = "";
+        android.graphics.Bitmap shot, icon;
+        ScriptHandler injected;
+        Tab(String id) { this.id = id; }
+    }
+
+    private final List<Tab> tabs = new ArrayList<>();
+    private Tab cur;
+    private android.view.ViewGroup webHolder;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout pull;
+    private TextView tabCount;
+    private View tabGrid;
+    private TextView tabGridTitle;
+    private androidx.recyclerview.widget.RecyclerView tabList;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -107,99 +127,87 @@ public class DappBrowserActivity extends AppCompatActivity {
         super.onCreate(b);
         chainKey = Web3Sites.chain(this);
         harvanaShown = Web3Sites.showHarvana(this);
+        setContentView(R.layout.activity_dapp_browser);
+        hvAccount = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
 
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(UiColors.background());
-
-        LinearLayout bar = new LinearLayout(this);
-        bar.setGravity(Gravity.CENTER_VERTICAL);
-        bar.setPadding(dp(8), dp(8), dp(8), dp(8));
-        bar.setBackgroundColor(UiColors.surface());
-        ImageView close = icon(R.drawable.ic_dismiss_circle_line);
-        close.setContentDescription("Close");
-        close.setOnClickListener(v -> finish());
-        bar.addView(close, new LinearLayout.LayoutParams(dp(40), dp(40)));
-        // The address pill: favicon, address, and the loading fill behind the text.
-        LinearLayout addr = new LinearLayout(this);
-        addr.setGravity(Gravity.CENTER_VERTICAL);
-        addr.setPadding(dp(10), 0, dp(6), 0);
-        pill = new LoadingPill(UiColors.surfaceAlt(), UiColors.accent(), dp(20));
+        frame = findViewById(R.id.browser_frame);
+        findViewById(R.id.btn_minimize).setOnClickListener(v -> minimize());
+        LinearLayout addr = findViewById(R.id.addr_pill);
+        pill = new LoadingPill(UiColors.surfaceAlt(), UiColors.accent(), dp(20));   // the loading fill behind the address
         addr.setBackground(pill);
-        favicon = new ImageView(this);
-        favicon.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        favicon.setContentDescription("Page info");
+        favicon = findViewById(R.id.page_favicon);
         favicon.setClipToOutline(true);
         favicon.setOutlineProvider(new android.view.ViewOutlineProvider() {
             @Override public void getOutline(View v, android.graphics.Outline o) { o.setRoundRect(0, 0, v.getWidth(), v.getHeight(), dp(5)); }
         });
         favicon.setOnClickListener(v -> { if (menu != null) menu.pageInfo(); });
-        addr.addView(favicon, new LinearLayout.LayoutParams(dp(22), dp(22)));
-        lock = new ImageView(this);
-        lock.setImageResource(R.drawable.icon_lock_round_line);
-        lock.setColorFilter(UiColors.success());
-        lock.setContentDescription("Page info");
+        lock = findViewById(R.id.page_lock);
         lock.setOnClickListener(v -> { if (menu != null) menu.pageInfo(); });
-        LinearLayout.LayoutParams lockLp = new LinearLayout.LayoutParams(dp(14), dp(14));
-        lockLp.leftMargin = dp(6);
-        addr.addView(lock, lockLp);
-        resetFavicon();
-        urlBar = new EditText(this);
-        urlBar.setSingleLine(true);
-        urlBar.setTextSize(14);
-        urlBar.setHint("Search or enter dApp URL");
-        urlBar.setImeOptions(EditorInfo.IME_ACTION_GO);
-        urlBar.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_URI);
-        urlBar.setBackground(null);
-        urlBar.setSelectAllOnFocus(true);
-        urlBar.setTextColor(UiColors.textPrimary());
-        urlBar.setHintTextColor(UiColors.textTertiary());
-        urlBar.setPadding(dp(8), dp(10), dp(4), dp(10));
+        urlBar = findViewById(R.id.url_bar);
         urlBar.setOnEditorActionListener((v, id, ev) -> {
             if (id == EditorInfo.IME_ACTION_GO || (ev != null && ev.getKeyCode() == KeyEvent.KEYCODE_ENTER)) { open(urlBar.getText().toString()); return true; }
             return false;
         });
-        addr.addView(urlBar, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        LinearLayout.LayoutParams addrLp = new LinearLayout.LayoutParams(0, dp(44), 1f);
-        addrLp.leftMargin = dp(4);
-        addrLp.rightMargin = dp(8);
-        bar.addView(addr, addrLp);
-        chainChip = new TextView(this);
-        chainChip.setTextSize(13.5f);
-        chainChip.setTypeface(null, Typeface.BOLD);
-        chainChip.setTextColor(UiColors.textPrimary());
-        chainChip.setGravity(Gravity.CENTER_VERTICAL);
-        chainChip.setCompoundDrawablePadding(dp(6));
-        chainChip.setMinHeight(dp(40));
-        chainChip.setPadding(dp(8), dp(6), dp(8), dp(6));
-        android.graphics.drawable.GradientDrawable cb = new android.graphics.drawable.GradientDrawable();
-        cb.setCornerRadius(dp(20));
-        cb.setStroke(Math.max(1, dp(1)), UiColors.textTertiary() & 0x33FFFFFF);
-        cb.setColor(UiColors.surfaceAlt());
-        chainChip.setBackground(cb);
+        tabCount = findViewById(R.id.btn_tabs);
+        tabCount.setOnClickListener(v -> showTabs());
+        tabCount.setOnLongClickListener(v -> { newTab(""); return true; });
+        chainChip = findViewById(R.id.chain_chip);
         chainChip.setOnClickListener(v -> pickChain());
-        bar.addView(chainChip);
-        root.addView(bar);
 
-
-        web = new WebView(this);
-        androidx.swiperefreshlayout.widget.SwipeRefreshLayout pull = new androidx.swiperefreshlayout.widget.SwipeRefreshLayout(this);
+        webHolder = findViewById(R.id.web_holder);
+        pull = findViewById(R.id.pull);
         pull.setColorSchemeResources(R.color.colorAccent);
         pull.setProgressBackgroundColorSchemeResource(R.color.colorSurface);
-        pull.addView(web, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        pull.setOnRefreshListener(() -> { web.reload(); pull.postDelayed(() -> pull.setRefreshing(false), 900); });
-        root.addView(pull, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-        findBar = new FindBar(this, web);
-        root.addView(findBar.view(), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        menu = new BrowserMenu(this, menuHost());
-        nav = new BrowserBar(this, web, null, this::goHome, menu::show);
-        root.addView(nav.view(), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        frame = new android.widget.FrameLayout(this);
-        frame.addView(root, new android.widget.FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        setContentView(frame);
-        hvAccount = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
+        pull.setOnRefreshListener(() -> { if (web != null) web.reload(); pull.postDelayed(() -> pull.setRefreshing(false), 900); });
+        pull.setOnChildScrollUpCallback((parent, child) -> web != null && web.getScrollY() > 0);
 
-        WebSettings s = web.getSettings();
+        tabGrid = findViewById(R.id.tab_grid);
+        tabGridTitle = findViewById(R.id.tab_grid_title);
+        tabList = findViewById(R.id.tab_list);
+        tabList.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(this, 2));
+        tabList.setAdapter(new TabAdapter());
+        findViewById(R.id.tab_done).setOnClickListener(v -> hideTabs());
+        findViewById(R.id.tab_new).setOnClickListener(v -> { hideTabs(); newTab(""); });
+        findViewById(R.id.tab_close_all).setOnClickListener(v -> closeAll());
+
+        bridge = WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)
+                && WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT);
+        paintChain();
+
+        io.execute(() -> {
+            try { String a = Web3Signer.address(this); ui.post(() -> account = a); }
+            catch (Exception e) { ui.post(() -> account = null); }
+        });
+
+        // The tabs left open last time come back (each loads when it is shown).
+        for (BrowserTabs.Saved t : BrowserTabs.load(this)) {
+            Tab tab = new Tab(t.id);
+            tab.url = t.url;
+            tab.title = t.title;
+            tab.shot = BrowserTabs.shot(this, t.id);
+            tabs.add(tab);
+        }
+        String start = getIntent() == null ? null : getIntent().getStringExtra(EXTRA_URL);
+        if (start != null && !start.isEmpty()) newTab(start);
+        else if (!tabs.isEmpty()) activate(tabs.get(Math.max(0, Math.min(BrowserTabs.current(this), tabs.size() - 1))));
+        else newTab(BrowserPrefs.home(this));
+    }
+
+    /** Opened again from the app (Discover, Web3, a link): the same browser comes forward; a link opens in a new tab. */
+    @Override protected void onNewIntent(android.content.Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        String url = intent == null ? null : intent.getStringExtra(EXTRA_URL);
+        if (url == null || url.isEmpty()) return;
+        hideTabs();
+        if (cur != null && cur.url.isEmpty()) open(url); else newTab(url);
+    }
+
+    /** A page for a tab: the safe settings, the clients and the wallet bridge. */
+    @SuppressLint("SetJavaScriptEnabled")
+    private WebView makeWeb(Tab tab) {
+        WebView w = new WebView(this);
+        WebSettings s = w.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(false);
@@ -212,11 +220,9 @@ public class DappBrowserActivity extends AppCompatActivity {
         s.setGeolocationEnabled(false);
         s.setSaveFormData(false);
         s.setMediaPlaybackRequiresUserGesture(true);
-        BrowserPrefs.apply(this, web);                                   // zoom, desktop site, images, cookies, Safe Browsing
-        menu.attachLinkMenu();
-        menu.attachDownloads();
+        BrowserPrefs.apply(this, w);                                     // zoom, desktop site, images, cookies, Safe Browsing
 
-        web.setWebViewClient(new WebViewClient() {
+        w.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req) {
                 Uri u = req.getUrl();
                 if (u == null) return true;
@@ -227,29 +233,37 @@ public class DappBrowserActivity extends AppCompatActivity {
                 return true;                                                          // other schemes stay out
             }
             @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap icon) {
+                tab.url = url == null ? "" : url;
+                if (view != web) return;
                 pageChanged(url);
                 nav.setLoading(true);
                 pill.start();
                 if (!pageOrigin.equals(iconOrigin) || pageOrigin.endsWith("harvannaprotocol.com")) resetFavicon();
             }
             @Override public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
-                nav.update();
+                if (view == web) nav.update();
             }
             @Override public void onPageFinished(WebView view, String url) {
-                pageChanged(url);
-                nav.setLoading(false);
+                tab.url = url == null ? "" : url;
+                tab.title = view.getTitle() == null ? "" : view.getTitle();
+                saveTabs();
                 Web3Sites.remember(DappBrowserActivity.this, url, view.getTitle());
                 BrowserPrefs.addHistory(DappBrowserActivity.this, url, view.getTitle());
+                if (view != web) return;
+                pageChanged(url);
+                nav.setLoading(false);
             }
             @Override public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                 handler.cancel();                                                     // never proceed past a bad certificate
                 Toast.makeText(DappBrowserActivity.this, "Insecure connection blocked", Toast.LENGTH_LONG).show();
             }
         });
-        web.setWebChromeClient(new WebChromeClient() {
-            @Override public void onProgressChanged(WebView view, int p) { pill.setProgress(p); }
+        w.setWebChromeClient(new WebChromeClient() {
+            @Override public void onProgressChanged(WebView view, int p) { if (view == web) pill.setProgress(p); }
+            @Override public void onReceivedTitle(WebView view, String title) { tab.title = title == null ? "" : title; }
             @Override public void onReceivedIcon(WebView view, android.graphics.Bitmap icon) {
-                if (icon == null || pageOrigin.endsWith("harvannaprotocol.com")) return;     // Harvana pages keep their own icons
+                tab.icon = icon;
+                if (view != web || icon == null || pageOrigin.endsWith("harvannaprotocol.com")) return;     // Harvana pages keep their own icons
                 iconOrigin = pageOrigin;
                 favicon.clearColorFilter();
                 favicon.setPadding(0, 0, 0, 0);
@@ -267,46 +281,191 @@ public class DappBrowserActivity extends AppCompatActivity {
             @Override public void onHideCustomView() { exitFullscreen(); }
             @Override public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback cb) { cb.invoke(origin, false, false); }
         });
-
-        bridge = WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)
-                && WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT);
         if (bridge) {
-            WebViewCompat.addWebMessageListener(web, "harvanaBridge", Collections.singleton("*"), this::onBridgeMessage);
-            inject();
+            WebViewCompat.addWebMessageListener(w, "harvanaBridge", Collections.singleton("*"), this::onBridgeMessage);
+            tab.injected = WebViewCompat.addDocumentStartJavaScript(w, Provider.script(chainHex(), String.valueOf(net().chainId)), Collections.singleton("*"));
         }
-        paintChain();
+        return w;
+    }
 
-        io.execute(() -> {
-            try { String a = Web3Signer.address(this); ui.post(() -> account = a); }
-            catch (Exception e) { ui.post(() -> account = null); }
-        });
+    /** Shows a tab: its page goes on screen and the bars, find and menu act on it. */
+    private void activate(Tab tab) {
+        if (cur != null && cur != tab) snapshot(cur);
+        if (busyId >= 0) { ui.removeCallbacks(giveUp); error(busyId, 4001, "User rejected the request."); busyId = -1; }
+        cur = tab;
+        boolean fresh = tab.web == null;
+        if (fresh) tab.web = makeWeb(tab);
+        if (web != null && web != tab.web) web.onPause();
+        web = tab.web;
+        web.onResume();
+        webHolder.removeAllViews();
+        if (web.getParent() instanceof ViewGroup) ((ViewGroup) web.getParent()).removeView(web);
+        webHolder.addView(web, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        if (findBar == null) {
+            findBar = new FindBar(this, web);
+            ((ViewGroup) findViewById(R.id.find_holder)).addView(findBar.view());
+            menu = new BrowserMenu(this, menuHost());
+            nav = new BrowserBar(this, web, null, this::goHome, menu::show);
+            ((ViewGroup) findViewById(R.id.nav_holder)).addView(nav.view());
+        } else {
+            findBar.setWeb(web);
+            nav.setWeb(web);
+        }
+        menu.attachLinkMenu();
+        menu.attachDownloads();
+        proxy = null;
+        pageOrigin = origin(tab.url);
+        urlBar.setText(tab.url);
+        lock.setVisibility(tab.url.startsWith("https://") ? View.VISIBLE : View.GONE);
+        nav.setLoading(false);
+        resetFavicon();
+        if (tab.icon != null && !pageOrigin.endsWith("harvannaprotocol.com")) { favicon.clearColorFilter(); favicon.setImageBitmap(tab.icon); iconOrigin = pageOrigin; }
+        if (fresh && !tab.url.isEmpty()) web.loadUrl(tab.url);
+        if (tab.url.isEmpty()) urlBar.requestFocus();
+        paintTabCount();
+        saveTabs();
+    }
 
-        String start = getIntent() == null ? null : getIntent().getStringExtra(EXTRA_URL);
-        if (start != null && !start.isEmpty()) open(start);
-        else if (!BrowserPrefs.home(this).isEmpty()) open(BrowserPrefs.home(this));
-        else urlBar.requestFocus();
+    /** A new tab, showing {@code url} (or empty, ready for an address). */
+    private void newTab(String url) {
+        Tab t = new Tab(Long.toString(System.currentTimeMillis(), 36) + Integer.toString(tabs.size(), 36));
+        tabs.add(t);
+        activate(t);
+        if (url != null && !url.isEmpty()) open(url);
+    }
+
+    private void closeTab(Tab t) {
+        int at = tabs.indexOf(t);
+        if (at < 0) return;
+        tabs.remove(at);
+        BrowserTabs.dropShot(this, t.id);
+        if (t.web != null) {
+            if (t.injected != null) t.injected.remove();
+            if (t.web.getParent() instanceof ViewGroup) ((ViewGroup) t.web.getParent()).removeView(t.web);
+            t.web.stopLoading();
+            t.web.destroy();
+            t.web = null;
+        }
+        if (tabs.isEmpty()) { web = null; cur = null; newTab(""); }
+        else if (t == cur) { cur = null; activate(tabs.get(Math.min(at, tabs.size() - 1))); }
+        paintTabCount();
+        saveTabs();
+        if (tabList.getAdapter() != null) tabList.getAdapter().notifyDataSetChanged();
+        if (tabGridTitle != null) tabGridTitle.setText(tabs.size() == 1 ? "1 tab" : tabs.size() + " tabs");
+    }
+
+    /** Close every tab and leave the browser (site data is cleared too when the settings say so). */
+    private void closeAll() {
+        for (Tab t : new ArrayList<>(tabs)) {
+            BrowserTabs.dropShot(this, t.id);
+            if (t.web != null) { t.web.stopLoading(); t.web.destroy(); t.web = null; }
+        }
+        tabs.clear();
+        cur = null;
+        BrowserTabs.save(this, new ArrayList<>(), 0);
+        if (BrowserPrefs.clearOnExit(this)) {
+            BrowserPrefs.clearCookiesAndSiteData(this);
+        }
+        web = null;
+        finish();
+    }
+
+    /** Back to the app; the browser and its tabs stay open behind it (Discover or Web3 brings them back). */
+    private void minimize() {
+        if (cur != null) snapshot(cur);
+        saveTabs();
+        android.content.Intent home = new android.content.Intent(this, com.harvana.app.MainActivity.class)
+                .addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(home);
+    }
+
+    private void paintTabCount() {
+        if (tabCount != null) tabCount.setText(tabs.size() > 99 ? ":D" : String.valueOf(tabs.size()));
+    }
+
+    private void saveTabs() {
+        List<BrowserTabs.Saved> out = new ArrayList<>();
+        for (Tab t : tabs) out.add(new BrowserTabs.Saved(t.id, t.url, t.title));
+        BrowserTabs.save(this, out, Math.max(0, tabs.indexOf(cur)));
+    }
+
+    /** A picture of the top of the tab's page, for the tab grid (kept on the phone with the tab). */
+    private void snapshot(Tab t) {
+        if (t == null || t.web == null || t.web.getWidth() <= 0 || t.web.getHeight() <= 0) return;
+        try {
+            int w = t.web.getWidth(), h = Math.min(t.web.getHeight(), Math.round(w * 1.15f));
+            float scale = 0.4f;
+            android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(Math.max(1, Math.round(w * scale)), Math.max(1, Math.round(h * scale)), android.graphics.Bitmap.Config.RGB_565);
+            android.graphics.Canvas c = new android.graphics.Canvas(bmp);
+            c.scale(scale, scale);
+            c.translate(-t.web.getScrollX(), -t.web.getScrollY());
+            t.web.draw(c);
+            t.shot = bmp;
+            final android.graphics.Bitmap keep = bmp;
+            final String id = t.id;
+            io.execute(() -> BrowserTabs.keepShot(this, id, keep));
+        } catch (Throwable ignored) { }
+    }
+
+    private void showTabs() {
+        if (cur != null) snapshot(cur);
+        if (findBar != null && findBar.isShown()) findBar.hide();
+        tabGridTitle.setText(tabs.size() == 1 ? "1 tab" : tabs.size() + " tabs");
+        if (tabList.getAdapter() != null) tabList.getAdapter().notifyDataSetChanged();
+        tabList.scrollToPosition(Math.max(0, tabs.indexOf(cur)));
+        tabGrid.setVisibility(View.VISIBLE);
+    }
+
+    private void hideTabs() { if (tabGrid != null) tabGrid.setVisibility(View.GONE); }
+
+    private final class TabAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<TabAdapter.H> {
+        final class H extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+            final View card; final ImageView icon, close, shot; final TextView title;
+            H(View v) {
+                super(v);
+                card = v.findViewById(R.id.tab_card);
+                icon = v.findViewById(R.id.tab_icon);
+                close = v.findViewById(R.id.tab_close);
+                shot = v.findViewById(R.id.tab_shot);
+                title = v.findViewById(R.id.tab_title);
+            }
+        }
+        @Override public H onCreateViewHolder(ViewGroup parent, int type) {
+            return new H(getLayoutInflater().inflate(R.layout.item_browser_tab, parent, false));
+        }
+        @Override public void onBindViewHolder(H h, int pos) {
+            Tab t = tabs.get(pos);
+            h.title.setText(!t.title.isEmpty() ? t.title : t.url.isEmpty() ? "New tab" : Uri.parse(t.url).getHost());
+            if (t.icon != null) { h.icon.clearColorFilter(); h.icon.setImageBitmap(t.icon); }
+            else { h.icon.setImageResource(R.drawable.icon_link_twotone_line); h.icon.setColorFilter(UiColors.textSecondary()); }
+            if (t.shot != null) h.shot.setImageBitmap(t.shot); else h.shot.setImageDrawable(null);
+            h.card.setBackgroundResource(t == cur ? R.drawable.bg_tab_card_on : R.drawable.bg_tab_card);
+            h.card.setOnClickListener(v -> { hideTabs(); activate(t); });
+            h.close.setOnClickListener(v -> closeTab(t));
+        }
+        @Override public int getItemCount() { return tabs.size(); }
     }
 
     @Override public void onBackPressed() {
         if (fullscreen != null) { exitFullscreen(); return; }
+        if (tabGrid != null && tabGrid.getVisibility() == View.VISIBLE) { hideTabs(); return; }
         if (findBar != null && findBar.isShown()) { findBar.hide(); return; }
-        if (web != null && web.canGoBack()) web.goBack(); else super.onBackPressed();
+        if (web != null && web.canGoBack()) { web.goBack(); return; }
+        if (tabs.size() > 1 && cur != null && cur.url.isEmpty()) { closeTab(cur); return; }
+        minimize();                                                      // like Chrome: the tabs stay open
     }
 
-    @Override protected void onPause() { super.onPause(); if (web != null) web.onPause(); }
+    @Override protected void onPause() { super.onPause(); if (cur != null) snapshot(cur); saveTabs(); if (web != null) web.onPause(); }
     @Override protected void onResume() { super.onResume(); if (web != null) web.onResume(); }
 
     @Override protected void onDestroy() {
         ui.removeCallbacks(giveUp);
-        io.shutdownNow();
-        if (web != null) {
-            if (isFinishing() && BrowserPrefs.clearOnExit(this)) {
-                BrowserPrefs.clearCache(web);
-                BrowserPrefs.clearCookiesAndSiteData(this);
-                BrowserPrefs.clearHistory(this, web);
-            }
-            web.stopLoading();
-            web.destroy();
+        io.shutdown();
+        for (Tab t : tabs) {
+            if (t.web == null) continue;
+            t.web.stopLoading();
+            t.web.destroy();
+            t.web = null;
         }
         super.onDestroy();
     }
@@ -350,7 +509,7 @@ public class DappBrowserActivity extends AppCompatActivity {
     /** Home: the home page from the settings, or back to Discover. */
     private void goHome() {
         String h = BrowserPrefs.home(this);
-        if (h.isEmpty()) finish(); else open(h);
+        if (h.isEmpty()) minimize(); else open(h);
     }
 
     private BrowserMenu.Host menuHost() {
@@ -450,7 +609,7 @@ public class DappBrowserActivity extends AppCompatActivity {
         chainChip.setText(harvanaShown ? "Harvana" : shortName(net().name));
         android.graphics.drawable.Drawable icon = androidx.core.content.ContextCompat.getDrawable(this, chainIcon(key));
         android.graphics.drawable.Drawable arrow = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.icon_keyboard_arrow_down_round_line);
-        if (icon != null) icon.setBounds(0, 0, dp(22), dp(22));
+        if (icon != null) icon.setBounds(0, 0, dp(24), dp(24));
         if (arrow != null) { arrow = arrow.mutate(); arrow.setTint(UiColors.textSecondary()); arrow.setBounds(0, 0, dp(18), dp(18)); }
         chainChip.setCompoundDrawables(icon, null, arrow, null);
     }
@@ -542,14 +701,19 @@ public class DappBrowserActivity extends AppCompatActivity {
         emit("chainChanged", chainHex());
     }
 
+    /** The wallet script for the chosen chain, in every open tab's page. */
     private void inject() {
-        if (injected != null) { injected.remove(); injected = null; }
-        injected = WebViewCompat.addDocumentStartJavaScript(web, Provider.script(chainHex(), String.valueOf(net().chainId)), Collections.singleton("*"));
+        for (Tab t : tabs) {
+            if (t.web == null) continue;
+            if (t.injected != null) { t.injected.remove(); t.injected = null; }
+            t.injected = WebViewCompat.addDocumentStartJavaScript(t.web, Provider.script(chainHex(), String.valueOf(net().chainId)), Collections.singleton("*"));
+        }
     }
 
     // ── the bridge ────────────────────────────────────────────────────────────
 
     private void onBridgeMessage(WebView view, WebMessageCompat message, Uri sourceOrigin, boolean isMainFrame, JavaScriptReplyProxy reply) {
+        if (view != web) return;                                          // only the tab on screen talks to the wallet
         if (!isMainFrame || sourceOrigin == null) return;                 // frames inside a page get no wallet
         String origin = origin(sourceOrigin.toString());
         if (!origin.startsWith("https://") || !origin.equals(pageOrigin)) return;

@@ -19,19 +19,19 @@
     <color name="colorSurfaceRaised">@color/colorSurfaceAlt</color>
     <color name="colorSurfaceDeep">@color/colorSurfaceAlt</color>
     <!--Buttons-->
-    <color name="colorButtonText">#111111</color>
+    <color name="colorButtonText">#053D3A</color>
     <color name="colorButtonBackground">#FFE2B8</color>
     <color name="colorButtonBorderLine">#FFE2B8</color>
     <!--Typography-->
     <color name="colorTextPrimaryWhite">#FFFFFF</color>
     <color name="colorTextPrimary">#FFFFFF</color>
     <color name="colorTextLight">#FFFFFF</color>
-    <color name="colorTextDark">#111111</color>
+    <color name="colorTextDark">#053D3A</color>
     <color name="colorTextSecondary">#A1A4AB</color>
     <color name="colorTextTertiary">#7A7D85</color>
     <color name="colorTextMuted">#5C5F66</color>
-    <color name="colorTextOnAccent">#111111</color>
-    <color name="colorTextOnAccentMuted">#4A4A4A</color>
+    <color name="colorTextOnAccent">#053D3A</color>
+    <color name="colorTextOnAccentMuted">#2F6B63</color>
     <color name="colorAddressText">#FFEBCF</color>
     <!--Semantic Colors-->
     <color name="colorSuccess">#3DDC97</color>
@@ -93,4 +93,7 @@
 <color name="colorReadyBlue">#3B82F6</color>
 <color name="colorStrokeBase">@color/colorCardStroke</color>
     <color name="colorSwitchThumbOff">#FFC4C6CB</color>
+    <!--Buttons drawn as cards (Home actions, Add): teal stays on buttons (owner, 12 Oct 2026)-->
+    <color name="colorActionSurface">#06312E</color>
+    <color name="colorActionStroke">#14544E</color>
 </resources>

@@ -19,14 +19,14 @@ public final class BrowserBar {
 
     private final LinearLayout bar;
     private final ImageView back, forward, reload;
-    private final WebView web;
+    private WebView web;
     private boolean loading;
 
     public BrowserBar(Context c, WebView web, String homeUrl, Runnable onHome) { this(c, web, homeUrl, onHome, null); }
 
     /** With {@code onMenu}, the last button opens the browser menu instead of sharing. */
-    public BrowserBar(Context c, WebView web, String homeUrl, Runnable onHome, Runnable onMenu) {
-        this.web = web;
+    public BrowserBar(Context c, WebView first, String homeUrl, Runnable onHome, Runnable onMenu) {
+        this.web = first;
         bar = new LinearLayout(c);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setBackgroundColor(UiColors.surface());
@@ -66,6 +66,9 @@ public final class BrowserBar {
     }
 
     public LinearLayout view() { return bar; }
+
+    /** The page these buttons act on (the browser's open tab). */
+    public void setWeb(WebView w) { web = w; update(); }
 
     /** Call when a page starts or finishes, and when history changes. */
     public void setLoading(boolean on) {

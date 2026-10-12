@@ -84,11 +84,11 @@
 			android:clickable="true"
 			android:focusable="true"
 			android:contentDescription="Add coins"
-			app:cardBackgroundColor="@color/colorSurface"
+			app:cardBackgroundColor="@color/colorActionSurface"
 			app:cardCornerRadius="12dp"
 			app:cardElevation="0dp"
 			app:strokeWidth="1dp"
-			app:strokeColor="@color/colorCardStroke">
+			app:strokeColor="@color/colorActionStroke">
 			<ImageView
 				android:layout_width="22dp"
 				android:layout_height="22dp"

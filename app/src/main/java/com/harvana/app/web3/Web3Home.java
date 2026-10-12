@@ -62,7 +62,23 @@ public final class Web3Home {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(16), dp(12), dp(16), dp(24));
 
-        root.addView(search());
+        // Search, and the open browser tabs beside it (tap to go back to them).
+        LinearLayout top = new LinearLayout(c);
+        top.setGravity(Gravity.CENTER_VERTICAL);
+        top.addView(search(), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        tabsBtn = new TextView(c);
+        tabsBtn.setBackgroundResource(R.drawable.bg_tab_count);
+        tabsBtn.setGravity(Gravity.CENTER);
+        tabsBtn.setTextSize(12);
+        tabsBtn.setTypeface(null, Typeface.BOLD);
+        tabsBtn.setTextColor(UiColors.textPrimary());
+        tabsBtn.setContentDescription("Open tabs");
+        tabsBtn.setOnClickListener(v -> openTabs(c));
+        LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(dp(28), dp(28));
+        tlp.leftMargin = dp(12);
+        tlp.rightMargin = dp(4);
+        top.addView(tabsBtn, tlp);
+        root.addView(top);
 
         staked = new TextView(c);
         if (showEarn) {
@@ -101,7 +117,17 @@ public final class Web3Home {
 
     public void setStaked(String text) { staked.setText(text); }
 
+    private TextView tabsBtn;
+
+    /** The browser with its open tabs, as it was left. */
+    public static void openTabs(Context c) {
+        c.startActivity(new Intent(c, DappBrowserActivity.class).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
+    }
+
     public void refreshRecent() {
+        int n0 = BrowserTabs.count(c);
+        tabsBtn.setText(String.valueOf(n0));
+        tabsBtn.setVisibility(n0 > 0 ? View.VISIBLE : View.GONE);
         recent.removeAllViews();
         JSONArray r = Web3Sites.recent(c);
         int n = Math.min(r.length(), 8);
@@ -251,7 +277,8 @@ public final class Web3Home {
                     .putExtra(com.harvana.app.ExplorerActivity.EXTRA_URL, text));
             return;
         }
-        c.startActivity(new Intent(c, DappBrowserActivity.class).putExtra(DappBrowserActivity.EXTRA_URL, text));
+        c.startActivity(new Intent(c, DappBrowserActivity.class).putExtra(DappBrowserActivity.EXTRA_URL, text)
+                .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));                    // the open browser, in a new tab
     }
 
     private TextView heading(String t) {

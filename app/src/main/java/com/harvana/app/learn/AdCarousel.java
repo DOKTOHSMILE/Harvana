@@ -196,8 +196,8 @@ public final class AdCarousel {
         Intent i = null;
         switch (link) {
             case "app:p2p": i = new Intent(host, com.harvana.app.P2pMarketplaceActivity.class); break;
-            case "app:staking": i = new Intent(host, com.harvana.app.web3.DappBrowserActivity.class).putExtra(com.harvana.app.web3.DappBrowserActivity.EXTRA_URL, com.harvana.app.web3.Web3Home.STAKE_URL); break;
-            case "app:swap": i = new Intent(host, com.harvana.app.web3.DappBrowserActivity.class).putExtra(com.harvana.app.web3.DappBrowserActivity.EXTRA_URL, com.harvana.app.web3.Web3Home.SWAP_URL); break;
+            case "app:staking": i = new Intent(host, com.harvana.app.web3.DappBrowserActivity.class).putExtra(com.harvana.app.web3.DappBrowserActivity.EXTRA_URL, com.harvana.app.web3.Web3Home.STAKE_URL).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); break;
+            case "app:swap": i = new Intent(host, com.harvana.app.web3.DappBrowserActivity.class).putExtra(com.harvana.app.web3.DappBrowserActivity.EXTRA_URL, com.harvana.app.web3.Web3Home.SWAP_URL).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); break;
             case "app:discover": i = new Intent(host, com.harvana.app.web3.DiscoverActivity.class); break;
             case "app:my-trades": i = new Intent(host, com.harvana.app.P2pMyTradesActivity.class); break;
             case "app:payment-methods": i = new Intent(host, com.harvana.app.PaymentMethodsActivity.class); break;

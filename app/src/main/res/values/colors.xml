@@ -97,4 +97,7 @@
 <color name="colorReadyBlue">#3B82F6</color>
 <color name="colorStrokeBase">@color/colorCardStroke</color>
     <color name="colorSwitchThumbOff">#FFFFFFFF</color>
+    <!--Buttons drawn as cards (Home actions, Add); teal in the dark theme-->
+    <color name="colorActionSurface">@color/colorSurface</color>
+    <color name="colorActionStroke">@color/colorCardStroke</color>
 </resources>

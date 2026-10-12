@@ -22,10 +22,10 @@ public final class FindBar {
     private final LinearLayout bar;
     private final EditText query;
     private final TextView count;
-    private final WebView web;
+    private WebView web;
 
-    public FindBar(Context c, WebView web) {
-        this.web = web;
+    public FindBar(Context c, WebView first) {
+        this.web = first;
         bar = new LinearLayout(c);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setBackgroundColor(UiColors.surface());
@@ -60,11 +60,22 @@ public final class FindBar {
         bar.addView(button(c, R.drawable.ic_br_down, "Next", () -> web.findNext(true)), new LinearLayout.LayoutParams(dp(c, 40), dp(c, 40)));
         bar.addView(button(c, R.drawable.ic_dismiss_circle_line, "Close", this::hide), new LinearLayout.LayoutParams(dp(c, 40), dp(c, 40)));
 
+        listen();
+    }
+
+    private void listen() {
         web.setFindListener((active, total, done) -> {
             if (!done) return;
             count.setText(total == 0 ? "0/0" : (active + 1) + "/" + total);
             count.setTextColor(total == 0 && query.length() > 0 ? UiColors.error() : UiColors.textSecondary());
         });
+    }
+
+    /** The page to search (the browser's open tab). */
+    public void setWeb(WebView w) {
+        if (isShown()) hide();
+        web = w;
+        listen();
     }
 
     public View view() { return bar; }

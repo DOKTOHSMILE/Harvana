@@ -2,6 +2,27 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): browser tabs; buttons stay teal
+
+**Browser tabs (like Chrome)**
+
+| Part | Now |
+|---|---|
+| Tab counter (top bar, beside the network) | Number of open tabs. Tap: tab grid. Long press: new tab. |
+| Tab grid | Two columns of page snapshots, each with the site's icon, title and close. Tap a tab to open it. New tab, Close all, Done. |
+| Minimize (top-left arrow, or Back on the first page) | Back to the app. The browser and its tabs stay open. |
+| Coming back | Web3 / Discover: tab counter beside search. A link from the app opens in a new tab of the same browser. |
+| After Android closes the browser | Tabs, titles and snapshots come back (each page reloads when shown). |
+| Wallet | Only the tab on screen can talk to the wallet. Changing network updates every tab. |
+
+- Browser top bar is now an XML layout (`activity_dapp_browser.xml`); a tab is `item_browser_tab.xml`.
+- Network icon on the chip: 24dp.
+- Close all applies "clear site data on exit" when that setting is on.
+
+**Dark theme:** buttons keep the teal look. Home's Receive, Send, P2P, Web3 and the Add coin button are teal (`colorActionSurface` `#06312E`, outline `#14544E`). Text on cream buttons is teal again (`#053D3A`).
+
+App build only.
+
 ## 12 Oct 2026 (night): groups in stable coins; Receive lists every stable coin
 
 Needs the node update of the same day (groups in stable coins). An older app cannot create groups on the new node, and this app cannot create groups on the old node.

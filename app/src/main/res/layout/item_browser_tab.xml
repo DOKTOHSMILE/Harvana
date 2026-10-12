@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One open tab in the tab grid: the site's icon, its title, close, and a snapshot of the page. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/tab_card"
+    android:layout_width="match_parent"
+    android:layout_height="220dp"
+    android:layout_margin="6dp"
+    android:background="@drawable/bg_tab_card"
+    android:orientation="vertical"
+    android:padding="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp">
+
+        <ImageView
+            android:id="@+id/tab_icon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:id="@+id/tab_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/colorTextPrimary"
+            android:textSize="12.5sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/tab_close"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Close tab"
+            android:padding="9dp"
+            android:src="@drawable/ic_dismiss_circle_line"
+            app:tint="@color/colorTextSecondary" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/tab_shot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorSurfaceAlt"
+        android:scaleType="centerCrop" />
+</LinearLayout>

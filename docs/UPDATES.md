@@ -2,6 +2,19 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): dark theme in black and grey
+
+| Part | Before | Now |
+|---|---|---|
+| Page, bars | deep teal | black `#000000` |
+| Cards | teal `#06312E` | grey `#16171A` |
+| Raised cards | teal `#0A3E3A` | grey `#1F2024` |
+| Card outline | teal `#14544E` | grey `#25262B` |
+| Text | cream / teal-grey | white `#FFFFFF`, grey `#A1A4AB`, `#7A7D85` |
+| Accent | cream `#FFE2B8` | unchanged |
+
+- Light theme unchanged. App build only.
+
 ## 12 Oct 2026 (night): Settings icons and top bar
 
 - **Settings rows:** each icon sits alone, centred, in its category colour (no coloured box behind it, no clipped edges).

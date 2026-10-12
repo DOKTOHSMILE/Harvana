@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): activity icons
+
+| Row | Icon |
+|---|---|
+| Swap, swap received, refund, liquidity | Harvana Swap's icon, in its colours |
+| A stable coin received or sent | The coin's own logo, in its colours (was a plain cream disc: the row's tint painted over it) |
+| Received, sent, failed, tFare, groups, staking | Line icon in the row's colour, as before |
+
+Rows are reused while scrolling; each row now sets its icon's tint and padding again, so a logo's settings never carry over to the next row. App build only.
+
 ## 12 Oct 2026 (night): browser tabs; buttons stay teal
 
 **Browser tabs (like Chrome)**

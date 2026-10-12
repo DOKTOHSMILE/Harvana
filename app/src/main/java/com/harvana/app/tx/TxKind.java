@@ -80,12 +80,12 @@ public final class TxKind {
         if (m.startsWith("Fixed month close")) return new TxKind(incoming ? "Group payout" : "Group payout sent", "Goal group", R.drawable.ic_tx_group);
         if (m.startsWith("LEARN_GIFT:")) return new TxKind(incoming ? "Gift received" : "Gift sent", "Learn Hub", R.drawable.ic_tx_gift);
         if (m.startsWith("SWAP_FARE:")) return new TxKind("tFare", "Swap", R.drawable.ic_tx_fee);
-        if (m.startsWith("SWAP_IN:")) return new TxKind("Swap", "Paid into the pool", R.drawable.icon_currency_exchange_twotone);
-        if (m.startsWith("SWAP_OUT:")) return new TxKind(incoming ? "Swap received" : "Swap paid out", "Swap pool", R.drawable.icon_currency_exchange_twotone);
-        if (m.startsWith("SWAP_REFUND:")) return new TxKind(incoming ? "Swap refunded" : "Swap refund", "Swap pool", R.drawable.icon_currency_exchange_twotone);
-        if (m.startsWith("SWAP_ADD:")) return new TxKind("Liquidity added", "Swap pool", R.drawable.icon_currency_exchange_twotone);
-        if (m.startsWith("SWAP_REMOVE:")) return new TxKind(incoming ? "Liquidity returned" : "Liquidity removed", "Swap pool", R.drawable.icon_currency_exchange_twotone);
-        if (m.startsWith("SWAP_")) return new TxKind("Swap", "Swap pool", R.drawable.icon_currency_exchange_twotone);
+        if (m.startsWith("SWAP_IN:")) return new TxKind("Swap", "Paid into the pool", R.drawable.icon_currency_exchange_twotone_line);
+        if (m.startsWith("SWAP_OUT:")) return new TxKind(incoming ? "Swap received" : "Swap paid out", "Swap pool", R.drawable.icon_currency_exchange_twotone_line);
+        if (m.startsWith("SWAP_REFUND:")) return new TxKind(incoming ? "Swap refunded" : "Swap refund", "Swap pool", R.drawable.icon_currency_exchange_twotone_line);
+        if (m.startsWith("SWAP_ADD:")) return new TxKind("Liquidity added", "Swap pool", R.drawable.icon_currency_exchange_twotone_line);
+        if (m.startsWith("SWAP_REMOVE:")) return new TxKind(incoming ? "Liquidity returned" : "Liquidity removed", "Swap pool", R.drawable.icon_currency_exchange_twotone_line);
+        if (m.startsWith("SWAP_")) return new TxKind("Swap", "Swap pool", R.drawable.icon_currency_exchange_twotone_line);
         if (m.startsWith("VAULT_")) return new TxKind(incoming ? "Vault release" : "Vault lock", "hNGN vault", R.drawable.ic_tx_bond);
         if (m.startsWith("P2P_")) return new TxKind("P2P escrow", "Peer-to-peer trade", R.drawable.ic_tx_p2p);
         if (m.startsWith("CIRCLE_") || m.startsWith("ACCUM_") || m.startsWith("FIXED_"))

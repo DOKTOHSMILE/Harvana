@@ -508,6 +508,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 					holder.tvAmount.setTextColor(COLOR_FAILED);
 				}
 				if (holder.ivIcon != null) {
+					_lineIcon(holder.ivIcon);
 					holder.ivIcon.setImageResource(R.drawable.ic_action_send);
 					holder.ivIcon.setColorFilter(COLOR_FAILED);
 				}
@@ -521,6 +522,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 					holder.tvAmount.setTextColor(isPending ? COLOR_PENDING : COLOR_INCOMING);
 				}
 				if (holder.ivIcon != null) {
+					_lineIcon(holder.ivIcon);
 					holder.ivIcon.setImageResource(isPending ? R.drawable.icon_access_time_outline : R.drawable.ic_action_receive);
 					holder.ivIcon.setColorFilter(isPending ? COLOR_PENDING : COLOR_INCOMING);
 				}
@@ -534,6 +536,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 					holder.tvAmount.setTextColor(isPending ? COLOR_PENDING : COLOR_OUTGOING);
 				}
 				if (holder.ivIcon != null) {
+					_lineIcon(holder.ivIcon);
 					holder.ivIcon.setImageResource(isPending ? R.drawable.icon_access_time_outline : R.drawable.ic_action_send);
 					holder.ivIcon.setColorFilter(isPending ? COLOR_PENDING : COLOR_OUTGOING);
 				}
@@ -546,9 +549,13 @@ public class WalletActivityFragmentActivity extends Fragment {
 					if (holder.tvType != null) holder.tvType.setText(isPending ? kind.title + "…" : kind.title);
 					if (holder.tvAddress != null) holder.tvAddress.setText(kind.detail + " · " + (isIncoming ? "From: " + shortenAddress(sender) : "To: " + shortenAddress(recipient)));
 					if (!isPending && holder.ivIcon != null) {
-						if (com.harvana.app.husd.Stable.isStable(coinCode)) {
-							// The coin's own logo, untinted: the row's colour filter turned it into a plain disc.
-							holder.ivIcon.clearColorFilter();
+						String memo0 = item.get("memo") != null ? String.valueOf(item.get("memo")) : "";
+						if (memo0.startsWith("SWAP_") && !memo0.startsWith("SWAP_FARE:")) {
+							_fullColourIcon(holder.ivIcon);                         // Harvana Swap's own icon
+							holder.ivIcon.setImageResource(R.drawable.ic_app_swap);
+						} else if (com.harvana.app.husd.Stable.isStable(coinCode)) {
+							// The coin's own logo, in its colours: the layout's tint painted it as a plain cream disc.
+							_fullColourIcon(holder.ivIcon);
 							holder.ivIcon.setImageDrawable(com.harvana.app.husd.StableIcon.drawable(holder.ivIcon.getContext(), coinCode));
 						} else {
 							holder.ivIcon.setImageResource(kind.icon);
@@ -652,6 +659,20 @@ public class WalletActivityFragmentActivity extends Fragment {
 		}
 	}
 	
+	/** A line icon in the row's colour, 8dp inside its circle (rows are reused, so every row sets this again). */
+	private static void _lineIcon(android.widget.ImageView iv) {
+		int p = Math.round(8 * iv.getResources().getDisplayMetrics().density);
+		iv.setPadding(p, p, p, p);
+		iv.setImageTintList(android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(iv.getContext(), R.color.colorAccent)));
+	}
+
+	/** A coin or app logo in its own colours, filling its circle. */
+	private static void _fullColourIcon(android.widget.ImageView iv) {
+		iv.clearColorFilter();
+		iv.setImageTintList(null);
+		iv.setPadding(0, 0, 0, 0);
+	}
+
 	private java.util.ArrayList<java.util.HashMap<String, Object>> filterFailedTx(
 	java.util.List<java.util.HashMap<String, Object>> source) {
 		

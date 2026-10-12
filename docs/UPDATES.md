@@ -2,6 +2,11 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): Gradle files stored for CodeAssist
+
+- `settings.gradle`, `build.gradle`, `gradle.properties`, `gradle/wrapper/gradle-wrapper.properties` and `app/build.gradle` are now in the repository, so CodeAssist can import the project as a Gradle module.
+- `app/module.toml` stays the source: after changing it, run `python3 tools/module_toml_to_gradle.py` and commit both files. CI still runs the same script before building.
+
 ## 12 Oct 2026 (night, later): mint hNGN with HARV
 
 What the app does:

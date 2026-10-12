@@ -26,7 +26,7 @@ public final class NodeEngagementClient {
             body.put("address", address).put("contentId", contentId).put("wordCount", wordCount)
                 .put("dwellMs", dwellMs).put("reachedEnd", reachedEnd).put("timestamp", ts);
             post("/api/v1/engagement/read", body, cb);
-        } catch (Exception e) { cb.onError(e.getMessage()); }
+        } catch (Exception e) { cb.onError(com.harvana.app.utils.ErrorText.of(e)); }
     }
 
     /** Tells the node on which UTC days (yyyyMMdd) this account was really in use on the phone; feeds days-active in the trust score. */
@@ -39,7 +39,7 @@ public final class NodeEngagementClient {
             for (String d : days) arr.put(d);
             body.put("address", address).put("days", arr).put("timestamp", ts);
             post("/api/v1/engagement/liveness", body, cb);
-        } catch (Exception e) { cb.onError(e.getMessage()); }
+        } catch (Exception e) { cb.onError(com.harvana.app.utils.ErrorText.of(e)); }
     }
 
     public static void ownerStats(Context c, String address, Callback cb) {
@@ -48,7 +48,7 @@ public final class NodeEngagementClient {
             JSONObject body = NodeIdentityClient.signed(c, address, EngagementCanonical.stats(address, ts));
             body.put("address", address).put("timestamp", ts);
             post("/api/v1/engagement/stats", body, cb);
-        } catch (Exception e) { cb.onError(e.getMessage()); }
+        } catch (Exception e) { cb.onError(com.harvana.app.utils.ErrorText.of(e)); }
     }
 
     private static void post(String path, JSONObject body, Callback cb) {

@@ -68,7 +68,7 @@ public final class HusdClient {
         try {
             JSONObject b = new JSONObject().put("chain", chain).put("address", address);
             HarvanaNodeClient.nodePost(Stable.base(code) + "/sweep-request", b.toString(), wrap(cb));
-        } catch (Exception e) { cb.fail(String.valueOf(e.getMessage())); }
+        } catch (Exception e) { cb.fail(com.harvana.app.utils.ErrorText.of(e)); }
     }
 
     /** "12.5" → 12,500,000 units; null for anything that isn't a positive amount with at most 6 decimals. */
@@ -130,7 +130,7 @@ public final class HusdClient {
             if (!m.isEmpty()) body.put("memo", m);
             HarvanaNodeClient.nodePost("/api/v1/tx/send", body.toString(), wrap(cb));
         } catch (Exception e) {
-            cb.fail("Signing failed: " + e.getMessage());
+            cb.fail("Signing failed: " + com.harvana.app.utils.ErrorText.of(e));
         }
     }
 

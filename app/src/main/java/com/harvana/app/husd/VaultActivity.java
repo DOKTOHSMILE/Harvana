@@ -94,7 +94,7 @@ public class VaultActivity extends AppCompatActivity {
         if (address == null || address.isEmpty()) { tvPrice.setText("No wallet"); return; }
         NodeGroupClient.vaultInfo(code, new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject r) { runOnUiThread(() -> { info = r; tvHow.setText(howText()); showPrice(); }); }
-            @Override public void onError(String e) { runOnUiThread(() -> tvPrice.setText("Couldn't reach the network: " + e)); }
+            @Override public void onError(String e) { runOnUiThread(() -> tvPrice.setText(com.harvana.app.utils.ErrorText.plain(e))); }
         });
         NodeGroupClient.vaultPosition(code, address, new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject r) { runOnUiThread(() -> { pos = r; showPosition(); }); }
@@ -288,15 +288,15 @@ public class VaultActivity extends AppCompatActivity {
 
     private String plain(String e) {
         if (e == null) return "Couldn't send.";
-        if (e.contains("NOT_ENOUGH_COLLATERAL")) return "Not enough HARV locked for that amount.";
-        if (e.contains("WOULD_BE_UNDER_COLLATERALISED")) return "That would leave too little HARV for what you owe. Repay first.";
-        if (e.contains("PRICE_NOT_LIVE_YET") || e.contains("PRICE_")) return priceProblem(e);
-        if (e.contains("VAULT_CAP_REACHED")) return "The network's limit for minted " + sym + " is reached for now.";
-        if (e.contains("POSITION_IS_SAFE")) return "That vault is back above the line.";
-        if (e.contains("MORE_THAN_THE_DEBT")) return "That is more than is owed.";
-        if (e.contains("INSUFFICIENT")) return "Not enough balance for this and its fee.";
-        if (e.contains("BELOW_MINIMUM")) return "That is below the minimum.";
-        return "Couldn't send: " + e;
+        if (com.harvana.app.utils.ErrorText.is(e, "NOT_ENOUGH_COLLATERAL")) return "Not enough HARV locked for that amount.";
+        if (com.harvana.app.utils.ErrorText.is(e, "WOULD_BE_UNDER_COLLATERALISED")) return "That would leave too little HARV for what you owe. Repay first.";
+        if (com.harvana.app.utils.ErrorText.is(e, "PRICE_NOT_LIVE_YET") || com.harvana.app.utils.ErrorText.is(e, "PRICE_")) return priceProblem(e);
+        if (com.harvana.app.utils.ErrorText.is(e, "VAULT_CAP_REACHED")) return "The network's limit for minted " + sym + " is reached for now.";
+        if (com.harvana.app.utils.ErrorText.is(e, "POSITION_IS_SAFE")) return "That vault is back above the line.";
+        if (com.harvana.app.utils.ErrorText.is(e, "MORE_THAN_THE_DEBT")) return "That is more than is owed.";
+        if (com.harvana.app.utils.ErrorText.is(e, "INSUFFICIENT")) return "Not enough balance for this and its fee.";
+        if (com.harvana.app.utils.ErrorText.is(e, "BELOW_MINIMUM")) return "That is below the minimum.";
+        return com.harvana.app.utils.ErrorText.plain(e);
     }
 
     private static String naira(long kobo) {

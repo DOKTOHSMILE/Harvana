@@ -488,14 +488,14 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 *  anticipated ones made readable. */
 	private String _friendlyPublishError(String rawError) {
 		if (rawError == null) return "Unknown error.";
-		if (rawError.contains("AMOUNT_OUT_OF_BOUNDS")) return ("A listing must be between " + BalanceFormatter.smartDecimal(com.harvana.app.p2p.P2pAsset.minListing(asset))
+		if (com.harvana.app.utils.ErrorText.is(rawError, "AMOUNT_OUT_OF_BOUNDS")) return ("A listing must be between " + BalanceFormatter.smartDecimal(com.harvana.app.p2p.P2pAsset.minListing(asset))
 				+ " and " + BalanceFormatter.smartDecimal(com.harvana.app.p2p.P2pAsset.maxListing(asset)) + " " + com.harvana.app.p2p.P2pAsset.ticker(asset) + " in total.");
-		if (rawError.contains("_NOT_ACTIVE")) return com.harvana.app.p2p.P2pAsset.ticker(asset) + " isn't switched on for trading yet.";
-		if (rawError.contains("INVALID_MIN_ORDER_AMOUNT")) return ("The minimum trade amount must be at least 1 " + com.harvana.app.p2p.P2pAsset.ticker(asset) + " and no more than the total you're listing.");
-		if (rawError.contains("INVALID_DURATION")) return "Offer duration must be between 1 hour and 30 days.";
-		if (rawError.contains("SENDER_ADDRESS_FROZEN")) return "This wallet is currently frozen and can't post listings.";
-		if (rawError.contains("COIN_PAUSED")) return (com.harvana.app.p2p.P2pAsset.ticker(asset) + " trading is temporarily paused network-wide. Try again later.");
-		if (rawError.contains("INVALID_SIGNATURE") || rawError.contains("INVALID_NONCE")) return "Something went wrong verifying your request — please try again.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "_NOT_ACTIVE")) return com.harvana.app.p2p.P2pAsset.ticker(asset) + " isn't switched on for trading yet.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_MIN_ORDER_AMOUNT")) return ("The minimum trade amount must be at least 1 " + com.harvana.app.p2p.P2pAsset.ticker(asset) + " and no more than the total you're listing.");
+		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_DURATION")) return "Offer duration must be between 1 hour and 30 days.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "SENDER_ADDRESS_FROZEN")) return "This wallet is currently frozen and can't post listings.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "COIN_PAUSED")) return (com.harvana.app.p2p.P2pAsset.ticker(asset) + " trading is temporarily paused network-wide. Try again later.");
+		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_SIGNATURE") || com.harvana.app.utils.ErrorText.is(rawError, "INVALID_NONCE")) return "Something went wrong verifying your request — please try again.";
 		return rawError;
 	}
 	

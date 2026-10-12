@@ -169,8 +169,8 @@ public class LearnReadActivity extends AppCompatActivity {
 
     private static String shortError(String e) {
         if (e == null || e.isEmpty()) return "no answer from the network";
-        if (e.contains("STALE_TIMESTAMP")) return "your phone's clock is off";
-        if (e.contains("INVALID_SIGNATURE") || e.contains("PUBLIC_KEY")) return "this wallet could not be verified";
+        if (com.harvana.app.utils.ErrorText.is(e, "STALE_TIMESTAMP")) return "your phone's clock is off";
+        if (com.harvana.app.utils.ErrorText.is(e, "INVALID_SIGNATURE") || com.harvana.app.utils.ErrorText.is(e, "PUBLIC_KEY")) return "this wallet could not be verified";
         return e.length() > 60 ? e.substring(0, 60) : e;
     }
 

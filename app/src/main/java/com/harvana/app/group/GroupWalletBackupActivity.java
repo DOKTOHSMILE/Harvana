@@ -72,7 +72,7 @@ public class GroupWalletBackupActivity extends AppCompatActivity {
                 new Thread(() -> render(card)).start();
             }
             @Override public void onError(String error) {
-                runOnUiThread(() -> fail(error != null && (error.contains("404") || error.contains("NOT_FOUND"))
+                runOnUiThread(() -> fail(error != null && (com.harvana.app.utils.ErrorText.is(error, "404") || com.harvana.app.utils.ErrorText.is(error, "NOT_FOUND"))
                     ? "The admin hasn't published a wallet card for this group yet."
                     : "Couldn't load the card: " + error));
             }
@@ -92,7 +92,7 @@ public class GroupWalletBackupActivity extends AppCompatActivity {
             Bitmap k = HarvanaCardRenderer.renderBack(this, t, qr, digits);
             runOnUiThread(() -> show(f, k));
         } catch (Exception e) {
-            runOnUiThread(() -> fail("Couldn't render the card: " + e.getMessage()));
+            runOnUiThread(() -> fail("Couldn't render the card: " + com.harvana.app.utils.ErrorText.of(e)));
         }
     }
 

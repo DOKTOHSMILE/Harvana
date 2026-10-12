@@ -557,11 +557,11 @@ public class GroupSettingsActivity extends AppCompatActivity {
 	
 	private static String treasurerError(String e) {
 		String u = e == null ? "" : e;
-		if (u.contains("TREASURER_PROPOSAL_ALREADY_OPEN")) return "A treasurer vote is already open. Wait for it to finish.";
-		if (u.contains("NOT_AN_ELIGIBLE_VOTER")) return "Only the admin and the group's most active members can vote on this.";
-		if (u.contains("NOT_A_GROUP_MEMBER")) return "Only members of the group can propose this.";
-		if (u.contains("NO_TREASURER_TO_REMOVE")) return "This group has no treasurer to remove.";
-		if (u.contains("ALREADY_THE_TREASURER")) return "That member is already the treasurer.";
+		if (com.harvana.app.utils.ErrorText.is(u, "TREASURER_PROPOSAL_ALREADY_OPEN")) return "A treasurer vote is already open. Wait for it to finish.";
+		if (com.harvana.app.utils.ErrorText.is(u, "NOT_AN_ELIGIBLE_VOTER")) return "Only the admin and the group's most active members can vote on this.";
+		if (com.harvana.app.utils.ErrorText.is(u, "NOT_A_GROUP_MEMBER")) return "Only members of the group can propose this.";
+		if (com.harvana.app.utils.ErrorText.is(u, "NO_TREASURER_TO_REMOVE")) return "This group has no treasurer to remove.";
+		if (com.harvana.app.utils.ErrorText.is(u, "ALREADY_THE_TREASURER")) return "That member is already the treasurer.";
 		return com.harvana.app.circle.CircleUi.friendly(e);
 	}
 	
@@ -1405,7 +1405,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 				runOnUiThread(() -> {
 					btn.setEnabled(true);
 					btn.setText("Restore group wallet");
-					Toast.makeText(this, "Restore failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+					Toast.makeText(this, "Restore failed: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_LONG).show();
 				});
 			}
 		}).start();
@@ -1470,7 +1470,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 					} catch (Exception e) {
 						runOnUiThread(() -> {
 							pd.dismiss();
-							Toast.makeText(this, "Restore failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+							Toast.makeText(this, "Restore failed: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_LONG).show();
 						});
 					}
 				}).start();

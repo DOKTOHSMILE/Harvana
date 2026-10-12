@@ -2,6 +2,19 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): every error in plain English, nothing about the server shown
+
+What the app does:
+- **One translator for every error** (`utils/ErrorText`).
+  - A refusal from the network is read only for its code (`{"error":"NO_LIQUIDITY_HNGN"}`) and shown as a sentence: "The HARV / hNGN pool is empty. Add HARV and the coin to it to open it."
+  - Codes without a sentence of their own are spelled out in words, so even a new one reads as English.
+  - No request path, timestamp, status word, server text, host name, file path or exception class reaches the screen any more. Before, a missing endpoint showed `HTTP 404: {"timestamp":…,"path":"/api/v1/swap/quote"}`; now it says "This isn't on the network. It may have been removed, or this part of the network isn't switched on yet."
+- **No connection, timeouts, certificate problems:** a sentence saying which, instead of Java's message.
+- **Any other failure** (receipts, exports, uploads, signing): the action's name plus "Something went wrong. Try again."; the details go to the phone's log only.
+- Screens that react to a particular code (a missing group, an already-sent request, too many requests, a frozen wallet, …) still do: `ErrorText.is(error, "CODE")` knows which code each sentence came from.
+
+The node now answers unknown addresses and unexpected failures with only a code as well (node `CleanErrorController`).
+
 ## 12 Oct 2026 (night): bigger profile photo
 
 - The round photo on a profile (yours and everyone else's) is now 80 × 80 dp, up from 40 dp. The initials and the trust-coloured ring scale with it.

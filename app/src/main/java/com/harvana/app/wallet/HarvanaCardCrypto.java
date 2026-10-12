@@ -211,7 +211,7 @@ public final class HarvanaCardCrypto {
         } catch (javax.crypto.AEADBadTagException e) {
             return DecryptResult.fail("Wrong password. Please try again.");
         } catch (Exception e) {
-            return DecryptResult.fail("Couldn't read this card: " + e.getMessage());
+            return DecryptResult.fail("Couldn't read this card: " + com.harvana.app.utils.ErrorText.of(e));
         }
     }
 

@@ -145,7 +145,7 @@ public class DocumentViewerActivity extends AppCompatActivity {
 		} catch (ActivityNotFoundException e) {
 			tvNoViewerHint.setVisibility(View.VISIBLE);
 		} catch (Exception e) {
-			Toast.makeText(this, "Couldn't open the document: " + e.getMessage(), Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Couldn't open the document: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_LONG).show();
 		}
 	}
 	

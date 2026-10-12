@@ -156,7 +156,7 @@ public final class ImageHost {
                 .addOnSuccessListener(t -> ref.getDownloadUrl()
                         // A replaced file keeps its address, so a version is added to make every screen load the new picture.
                         .addOnSuccessListener(u -> cb.onSuccess(fixedName ? u.toString() + (u.toString().contains("?") ? "&" : "?") + "v=" + System.currentTimeMillis() : u.toString()))
-                        .addOnFailureListener(e -> cb.onError(e.getMessage() == null ? "Couldn't upload the picture." : e.getMessage())))
-                .addOnFailureListener(e -> cb.onError(e.getMessage() == null ? "Couldn't upload the picture." : e.getMessage()));
+                        .addOnFailureListener(e -> cb.onErrorcom.harvana.app.utils.ErrorText.of(e)))
+                .addOnFailureListener(e -> cb.onErrorcom.harvana.app.utils.ErrorText.of(e));
     }
 }

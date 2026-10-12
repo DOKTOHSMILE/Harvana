@@ -93,7 +93,7 @@ public final class NodePortfolio {
                 }
                 @Override public void onError(String e) {
                     // A deleted group is gone. Do not keep counting it. A network error is left alone.
-                    if (e != null && (e.contains("404") || e.toLowerCase(java.util.Locale.US).contains("not found"))) gone.add(id);
+                    if (e != null && (com.harvana.app.utils.ErrorText.is(e, "404") || com.harvana.app.utils.ErrorText.is(e, "NOT_FOUND"))) gone.add(id);
                     one.run();
                 }
             });

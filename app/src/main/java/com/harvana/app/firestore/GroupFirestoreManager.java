@@ -502,7 +502,7 @@ public class GroupFirestoreManager {
 		if (err != null) { deliver(() -> cb.onError(err)); return; }
 		try {
 			await(ref.set(clean(fields)), id -> cb.onSuccess(), cb::onError);
-		} catch (Exception e) { deliver(() -> cb.onError("HTTP 400: " + e.getMessage())); }
+		} catch (Exception e) { deliver(() -> cb.onError(com.harvana.app.utils.ErrorText.fromHttp(400, ""))); }
 	}
 
 	private void merge(DocumentReference ref, Map<String, Object> fields, SimpleCallback cb) {
@@ -511,7 +511,7 @@ public class GroupFirestoreManager {
 		if (fields == null || fields.isEmpty()) { deliver(cb::onSuccess); return; }
 		try {
 			await(ref.set(clean(fields), SetOptions.mergeFields(new ArrayList<>(fields.keySet()))), id -> cb.onSuccess(), cb::onError);
-		} catch (Exception e) { deliver(() -> cb.onError("HTTP 400: " + e.getMessage())); }
+		} catch (Exception e) { deliver(() -> cb.onError(com.harvana.app.utils.ErrorText.fromHttp(400, ""))); }
 	}
 
 	private void add(CollectionReference ref, Map<String, Object> fields, IdCallback cb) {
@@ -520,7 +520,7 @@ public class GroupFirestoreManager {
 		try {
 			final DocumentReference newRef = ref.document();
 			await(newRef.set(clean(fields)), id -> cb.onSuccess(newRef.getId()), cb::onError);
-		} catch (Exception e) { deliver(() -> cb.onError("HTTP 400: " + e.getMessage())); }
+		} catch (Exception e) { deliver(() -> cb.onError(com.harvana.app.utils.ErrorText.fromHttp(400, ""))); }
 	}
 
 	private void get(DocumentReference ref, DocCallback cb) {

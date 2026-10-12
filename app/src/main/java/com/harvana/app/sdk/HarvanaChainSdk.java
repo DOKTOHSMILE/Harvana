@@ -49,7 +49,7 @@ public class HarvanaChainSdk {
 			callback.onSuccess(newAddress, mnemonic);
 			
 		} catch (Exception e) {
-			callback.onError("Failed to generate wallet: " + e.getMessage());
+			callback.onError("Failed to generate wallet: " + com.harvana.app.utils.ErrorText.of(e));
 		}
 	}
 	

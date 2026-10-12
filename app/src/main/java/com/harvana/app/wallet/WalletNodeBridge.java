@@ -59,7 +59,7 @@ public final class WalletNodeBridge {
 
                     MAIN.post(() -> callback.onSuccess(balanceHarv, nonce, blockHeight));
                 } catch (Exception e) {
-                    MAIN.post(() -> callback.onError("Failed to parse balance: " + e.getMessage()));
+                    MAIN.post(() -> callback.onError("Failed to parse balance: " + com.harvana.app.utils.ErrorText.of(e)));
                 }
             }
 

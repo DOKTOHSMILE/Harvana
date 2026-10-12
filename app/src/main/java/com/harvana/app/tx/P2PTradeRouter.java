@@ -300,7 +300,7 @@ public final class P2PTradeRouter {
 			submitFn.submit(signatureB64, publicKeyB64, callback);
 		} catch (Exception e) {
 			Log.e(TAG, "Signing failed: " + e.getMessage(), e);
-			callback.onError("Signing failed: " + e.getMessage());
+			callback.onError("Signing failed: " + com.harvana.app.utils.ErrorText.of(e));
 		}
 	}
 	

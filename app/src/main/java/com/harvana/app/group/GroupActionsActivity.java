@@ -125,7 +125,7 @@ public class GroupActionsActivity extends AppCompatActivity {
             }
             @Override public void onError(String e) {
                 refresh.setRefreshing(false);
-                message(e != null && e.contains("404") ? "This group doesn't exist on the network."
+                message(e != null && com.harvana.app.utils.ErrorText.is(e, "404") ? "This group doesn't exist on the network."
                     : "Couldn't load this group right now. Pull down to try again.");
             }
         };

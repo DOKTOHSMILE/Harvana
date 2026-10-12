@@ -391,7 +391,7 @@ public final class HarvanaCardRenderer {
 				bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
 			}
 			callback.onSuccess(uri);
-		} catch (Exception e) { callback.onError(e.getMessage() != null ? e.getMessage() : "Failed to save image."); }
+		} catch (Exception e) { callback.onError(com.harvana.app.utils.ErrorText.of(e)); }
 	}
 	
 	public static void saveAsPdf(Context context, Bitmap front, Bitmap back, String displayName, ExportCallback callback) {
@@ -427,6 +427,6 @@ public final class HarvanaCardRenderer {
 			}
 			document.close();
 			callback.onSuccess(uri);
-		} catch (Exception e) { callback.onError(e.getMessage() != null ? e.getMessage() : "Failed to save PDF."); }
+		} catch (Exception e) { callback.onError(com.harvana.app.utils.ErrorText.of(e)); }
 	}
 }

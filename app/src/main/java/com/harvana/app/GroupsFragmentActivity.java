@@ -506,7 +506,7 @@ public class GroupsFragmentActivity extends Fragment {
 			@Override
 			public void onError(String error) {
 				// 404 = no profile doc / no groups field yet — treat as empty, not an error
-				if (error != null && error.contains("404")) {
+				if (error != null && com.harvana.app.utils.ErrorText.is(error, "404")) {
 					if (getActivity() == null) return;
 					getActivity().runOnUiThread(() -> {
 						myGroups.clear();

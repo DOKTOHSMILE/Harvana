@@ -57,7 +57,7 @@ public final class NodeIdentityClient {
                             body.put("address", address).put("timestamp", ts).put("idToken", token);
                             if (!pid.isEmpty()) body.put("pid", pid);
                             post("/api/v1/identity/link", body, cb);
-                        } catch (Exception e) { cb.onError(e.getMessage()); }
+                        } catch (Exception e) { cb.onError(com.harvana.app.utils.ErrorText.of(e)); }
                     });
         });
     }
@@ -69,7 +69,7 @@ public final class NodeIdentityClient {
         u.getIdToken(false).addOnCompleteListener(t -> {
             if (!t.isSuccessful() || t.getResult() == null || t.getResult().getToken() == null) { cb.onError("Could not get sign-in token."); return; }
             try { post("/api/v1/identity/wallets", new JSONObject().put("idToken", t.getResult().getToken()), cb); }
-            catch (Exception e) { cb.onError(e.getMessage()); }
+            catch (Exception e) { cb.onError(com.harvana.app.utils.ErrorText.of(e)); }
         });
     }
 
@@ -80,7 +80,7 @@ public final class NodeIdentityClient {
             JSONObject body = signed(c, address, IdentityCanonical.personhoodBind(address, dev, ts));
             body.put("address", address).put("deviceAttestationHash", dev).put("issuedAt", ts);
             post("/api/v1/personhood/bind", body, cb);
-        } catch (Exception e) { cb.onError(e.getMessage()); }
+        } catch (Exception e) { cb.onError(com.harvana.app.utils.ErrorText.of(e)); }
     }
 
     public static void vouch(Context c, String voucher, String subject, Callback cb) {
@@ -89,7 +89,7 @@ public final class NodeIdentityClient {
             JSONObject body = signed(c, voucher, IdentityCanonical.personhoodVouch(voucher, subject, ts));
             body.put("voucherAddress", voucher).put("subjectAddress", subject).put("timestamp", ts);
             post("/api/v1/personhood/vouch", body, cb);
-        } catch (Exception e) { cb.onError(e.getMessage()); }
+        } catch (Exception e) { cb.onError(com.harvana.app.utils.ErrorText.of(e)); }
     }
 
     /** 64 hex chars. Client-asserted (the node documents real attestation as future Play Integrity work). */

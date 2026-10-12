@@ -115,14 +115,15 @@ public class FirestoreSyncManager {
 			public void onError(String error) {
 				// Unknown address on a live node is fine (balance 0 until first credit).
 				String err = error != null ? error : "";
-				boolean nodeDown = err.contains("network error")
+				boolean nodeDown = com.harvana.app.utils.ErrorText.is(err, "NETWORK")
+						|| err.contains("network error")
 						|| err.contains("failed to connect")
 						|| err.contains("Connection refused")
 						|| err.contains("Unable to resolve")
 						|| err.contains("timeout")
-						|| err.contains("ETIMEDOUT");
+						|| com.harvana.app.utils.ErrorText.is(err, "ETIMEDOUT");
 				if (nodeDown) {
-					callback.onError((com.harvana.app.CoinInfo.ticker() + " node unreachable: ") + error);
+					callback.onError(com.harvana.app.utils.ErrorText.plain(error));
 					return;
 				}
 				Map<String, Object> wallet = new HashMap<>();
@@ -153,7 +154,7 @@ public class FirestoreSyncManager {
 			try {
 				callback.onSuccess(docJson(ref.getPath(), snap.getData()).toString());
 			} catch (Exception e) {
-				callback.onError("Failed to read document: " + e.getMessage());
+				callback.onError("Failed to read document: " + com.harvana.app.utils.ErrorText.of(e));
 			}
 		});
 	}
@@ -224,7 +225,7 @@ public class FirestoreSyncManager {
 			}
 			await(batch.commit(), cb);
 		} catch (Exception e) {
-			cb.onError(e.getMessage() != null ? e.getMessage() : "Batch failed");
+			cb.onError(com.harvana.app.utils.ErrorText.of(e));
 		}
 	}
 	
@@ -247,7 +248,7 @@ public class FirestoreSyncManager {
 				}
 				callback.onSuccess(arr.toString());
 			} catch (Exception e) {
-				callback.onError(e.getMessage() != null ? e.getMessage() : "Query failed");
+				callback.onError(com.harvana.app.utils.ErrorText.of(e));
 			}
 		});
 	}

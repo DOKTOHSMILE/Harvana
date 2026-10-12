@@ -178,7 +178,7 @@ public class SwapActivity extends AppCompatActivity {
             }); }
             @Override public void onError(String e) { runOnUiThread(() -> {
                 poolList.removeAllViews();
-                poolList.addView(text("Couldn't reach the network: " + e, 13, false, UiColors.textTertiary()));
+                poolList.addView(text(com.harvana.app.utils.ErrorText.plain(e), 13, false, UiColors.textTertiary()));
             }); }
         });
         if (address == null || address.isEmpty()) return;
@@ -474,14 +474,14 @@ public class SwapActivity extends AppCompatActivity {
 
     private String problem(String e) {
         if (e == null) return "Couldn't swap.";
-        if (e.contains("NO_LIQUIDITY")) return "That pool is empty. Add HARV and the coin below to open it.";
-        if (e.contains("PRICE_MOVED")) return "The price moved. Check the new estimate and try again.";
-        if (e.contains("AMOUNT_TOO_SMALL")) return "That amount is too small to swap.";
-        if (e.contains("INSUFFICIENT")) return "Not enough balance for this and its fee.";
-        if (e.contains("_NOT_ACTIVE")) return "That coin isn't switched on yet.";
-        if (e.contains("MORE_THAN_YOUR_SHARES")) return "That is more than your share of the pool.";
-        if (e.contains("SAME_ASSET")) return "Pick two different assets.";
-        return "Couldn't swap: " + e;
+        if (com.harvana.app.utils.ErrorText.is(e, "NO_LIQUIDITY")) return "That pool is empty. Add HARV and the coin below to open it.";
+        if (com.harvana.app.utils.ErrorText.is(e, "PRICE_MOVED")) return "The price moved. Check the new estimate and try again.";
+        if (com.harvana.app.utils.ErrorText.is(e, "AMOUNT_TOO_SMALL")) return "That amount is too small to swap.";
+        if (com.harvana.app.utils.ErrorText.is(e, "INSUFFICIENT")) return "Not enough balance for this and its fee.";
+        if (com.harvana.app.utils.ErrorText.is(e, "_NOT_ACTIVE")) return "That coin isn't switched on yet.";
+        if (com.harvana.app.utils.ErrorText.is(e, "MORE_THAN_YOUR_SHARES")) return "That is more than your share of the pool.";
+        if (com.harvana.app.utils.ErrorText.is(e, "SAME_ASSET")) return "Pick two different assets.";
+        return com.harvana.app.utils.ErrorText.plain(e);
     }
 
     // ── views ─────────────────────────────────────────────────────────────────

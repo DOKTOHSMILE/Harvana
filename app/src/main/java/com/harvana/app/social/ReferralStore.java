@@ -98,7 +98,7 @@ public final class ReferralStore {
                     }
                     @Override public void onError(String error) {
                         // Recorded earlier (maybe from another install): nothing more to do. Any other refusal is tried again next time.
-                        if (error != null && error.contains("REFERRAL_ALREADY_RECORDED")) sp.edit().putBoolean("done_" + uid, true).apply();
+                        if (error != null && com.harvana.app.utils.ErrorText.is(error, "REFERRAL_ALREADY_RECORDED")) sp.edit().putBoolean("done_" + uid, true).apply();
                         done.done("", error);
                     }
                 });

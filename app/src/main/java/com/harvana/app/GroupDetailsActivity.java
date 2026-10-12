@@ -781,7 +781,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 					}
 				});
 			} catch (Exception e) {
-				cb.onError(e.getMessage());
+				cb.onError(com.harvana.app.utils.ErrorText.of(e));
 			}
 		});
 	}

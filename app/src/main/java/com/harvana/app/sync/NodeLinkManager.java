@@ -117,10 +117,10 @@ public final class NodeLinkManager {
             }
             @Override public void onError(String e) {
                 String u = e == null ? "" : e;
-                if (u.contains("IDENTITY_LINKS_DISABLED")) done.onDone("The network isn't accepting account links yet.");
-                else if (u.contains("WALLET_ALREADY_LINKED")) done.onDone("This wallet belongs to another account. A wallet can belong to one person only.");
-                else if (u.contains("TOO_MANY_WALLETS")) done.onDone("Your account already has the most wallets the network allows (20).");
-                else if (u.contains("USER_ALREADY_LINKED")) done.onDone("The network is still on the one-wallet rule. This wallet will be added to your account after the next network update.");
+                if (com.harvana.app.utils.ErrorText.is(u, "IDENTITY_LINKS_DISABLED")) done.onDone("The network isn't accepting account links yet.");
+                else if (com.harvana.app.utils.ErrorText.is(u, "WALLET_ALREADY_LINKED")) done.onDone("This wallet belongs to another account. A wallet can belong to one person only.");
+                else if (com.harvana.app.utils.ErrorText.is(u, "TOO_MANY_WALLETS")) done.onDone("Your account already has the most wallets the network allows (20).");
+                else if (com.harvana.app.utils.ErrorText.is(u, "USER_ALREADY_LINKED")) done.onDone("The network is still on the one-wallet rule. This wallet will be added to your account after the next network update.");
                 else done.onDone(""); // transient: try again next time
             }
         });
@@ -135,9 +135,9 @@ public final class NodeLinkManager {
             }
             @Override public void onError(String e) {
                 String u = e == null ? "" : e;
-                if (u.contains("PERSONHOOD_ALREADY_BOUND")) {
+                if (com.harvana.app.utils.ErrorText.is(u, "PERSONHOOD_ALREADY_BOUND")) {
                     p.edit().putBoolean("bound_" + addr, true).putString("status_" + addr, "This phone is bound to your wallet on the network.").apply();
-                } else if (u.contains("DEVICE_ALREADY_BOUND")) {
+                } else if (com.harvana.app.utils.ErrorText.is(u, "DEVICE_ALREADY_BOUND")) {
                     p.edit().putBoolean("bound_" + addr, false).putBoolean("conflict_" + addr, true)
                             .putString("status_" + addr, "This phone is already bound to a wallet that is not on your account.").apply();
                 } else {

@@ -425,7 +425,7 @@ public final class NodeGroupClient {
                 @Override public void onSuccess(JSONObject json) { cb.onSuccess(json); }
                 @Override public void onError(String error) { cb.onError(error); }
             });
-        } catch (JSONException e) { cb.onError(e.getMessage()); }
+        } catch (JSONException e) { cb.onError("The app couldn't prepare this request. Try again."); }
     }
 
     // ═════════════════════════════ ADMIN RECOVERY / REFERRAL / STAKING ═════════════════════════════
@@ -587,7 +587,7 @@ public final class NodeGroupClient {
             @Override public void onSuccess(JSONObject json) { answer.answer(Boolean.TRUE); }
             @Override public void onError(String error) {
                 String e = error == null ? "" : error.toUpperCase();
-                answer.answer(e.contains("404") || e.contains("NOT_FOUND") ? Boolean.FALSE : null);
+                answer.answer(com.harvana.app.utils.ErrorText.is(e, "404") || com.harvana.app.utils.ErrorText.is(e, "NOT_FOUND") ? Boolean.FALSE : null);
             }
         });
     }
@@ -652,7 +652,7 @@ public final class NodeGroupClient {
                     @Override public void onError(String error) { cb.onError(error); }
                 });
             } catch (Exception e) {
-                cb.onError("Signing failed: " + e.getMessage());
+                cb.onError("Your wallet couldn't sign this request. Try again.");
             }
         }, cb);
     }
@@ -685,7 +685,7 @@ public final class NodeGroupClient {
                             @Override public void onError(String error) { cb.onError(error); }
                         });
                     } catch (Exception e) {
-                        cb.onError("Signing failed: " + e.getMessage());
+                        cb.onError("Your wallet couldn't sign this request. Try again.");
                     }
                 }, cb);
             }

@@ -51,7 +51,7 @@ public final class GroupCloudFunctions {
             if (slot > 0) data.put("slot", slot);
             call("approveJoin", data, cb);
         } catch (Exception e) {
-            if (cb != null) cb.onError(e.getMessage());
+            if (cb != null) cb.onError(com.harvana.app.utils.ErrorText.of(e));
         }
     }
 
@@ -62,7 +62,7 @@ public final class GroupCloudFunctions {
             data.put("requesterUid", requesterUid);
             call("rejectJoin", data, cb);
         } catch (Exception e) {
-            if (cb != null) cb.onError(e.getMessage());
+            if (cb != null) cb.onError(com.harvana.app.utils.ErrorText.of(e));
         }
     }
 
@@ -74,7 +74,7 @@ public final class GroupCloudFunctions {
             data.put("approve", approve);
             call("castJoinVote", data, cb);
         } catch (Exception e) {
-            if (cb != null) cb.onError(e.getMessage());
+            if (cb != null) cb.onError(com.harvana.app.utils.ErrorText.of(e));
         }
     }
 
@@ -154,7 +154,7 @@ public final class GroupCloudFunctions {
                             }
                         }
                     } catch (Exception ignored) {}
-                    postError(cb, "HTTP " + code + ": " + msg);
+                    postError(cb, com.harvana.app.utils.ErrorText.withStatus(code, msg));
                 }
             } catch (Exception e) {
                 Log.w(TAG, functionName + " failed", e);

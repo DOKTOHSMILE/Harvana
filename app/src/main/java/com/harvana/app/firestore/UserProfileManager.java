@@ -80,7 +80,7 @@ public class UserProfileManager {
             if (!parts[1].isEmpty()) batch.set(_privateDoc(ref), parts[1]);
             _awaitWrite(batch.commit(), callback);
         } catch (Exception e) {
-            callback.onError("Invalid profile data: " + e.getMessage());
+            callback.onError("Invalid profile data: " + com.harvana.app.utils.ErrorText.of(e));
         }
     }
 
@@ -105,7 +105,7 @@ public class UserProfileManager {
             batch.set(_privateDoc(ref), parts[1], SetOptions.mergeFields(new ArrayList<>(parts[1].keySet())));
             _awaitWrite(batch.commit(), callback);
         } catch (Exception e) {
-            callback.onError("Invalid profile data: " + e.getMessage());
+            callback.onError("Invalid profile data: " + com.harvana.app.utils.ErrorText.of(e));
         }
     }
 
@@ -126,7 +126,7 @@ public class UserProfileManager {
             }
             @Override
             public void onError(String error) {
-                if (error != null && error.contains("404")) {
+                if (error != null && com.harvana.app.utils.ErrorText.is(error, "404")) {
                     // No profile doc / no "groups" field yet - create it fresh.
                     _mergeAndSaveGroup(uid, null, groupId, callback);
                 } else {
@@ -170,7 +170,7 @@ public class UserProfileManager {
         getProfile(uid, new DocCallback() {
             @Override public void onSuccess(Map<String, Object> data) { _dropGroups(uid, data, groupIds, callback); }
             @Override public void onError(String error) {
-                if (error != null && error.contains("404")) { if (callback != null) callback.onSuccess(); }
+                if (error != null && com.harvana.app.utils.ErrorText.is(error, "404")) { if (callback != null) callback.onSuccess(); }
                 else if (callback != null) callback.onError(error);
             }
         });
@@ -214,7 +214,7 @@ public class UserProfileManager {
             }
             @Override
             public void onError(String error) {
-                if (error != null && error.contains("404")) {
+                if (error != null && com.harvana.app.utils.ErrorText.is(error, "404")) {
                     _mergeArrayField(uid, null, "pendingGroupIds", groupId, true, callback);
                 } else {
                     callback.onError(error);
@@ -236,7 +236,7 @@ public class UserProfileManager {
             public void onError(String error) {
                 // Nothing to remove from a profile that doesn't exist / has
                 // no pendingGroupIds field yet — treat as already-clean.
-                if (error != null && error.contains("404")) {
+                if (error != null && com.harvana.app.utils.ErrorText.is(error, "404")) {
                     callback.onSuccess();
                 } else {
                     callback.onError(error);

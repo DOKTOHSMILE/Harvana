@@ -61,7 +61,7 @@ public final class HarvanaApiClient {
             CLIENT.newCall(req).enqueue(new okhttp3.Callback() {
                 @Override
                 public void onFailure(Call c, IOException e) { 
-                    mainHandler.post(() -> cb.onError(e.getMessage() != null ? e.getMessage() : "Network error")); 
+                    mainHandler.post(() -> cb.onError(com.harvana.app.utils.ErrorText.of(e))); 
                 }
                 
                 @Override
@@ -72,15 +72,15 @@ public final class HarvanaApiClient {
                         if (r.isSuccessful()) {
                             mainHandler.post(() -> cb.onSuccess(b));
                         } else {
-                            mainHandler.post(() -> cb.onError("HTTP " + r.code() + ": " + b));
+                            mainHandler.post(() -> cb.onError(com.harvana.app.utils.ErrorText.fromHttp(r.code(), b)));
                         }
                     } catch (Exception e) {
-                        mainHandler.post(() -> cb.onError("Failed to read server response: " + e.getMessage()));
+                        mainHandler.post(() -> cb.onError("Failed to read server response: " + com.harvana.app.utils.ErrorText.of(e)));
                     }
                 }
             });
         } catch (Exception e) {
-            mainHandler.post(() -> cb.onError(e.getMessage()));
+            mainHandler.post(() -> cb.onError(com.harvana.app.utils.ErrorText.of(e)));
         }
     }
 
@@ -102,7 +102,7 @@ public final class HarvanaApiClient {
             CLIENT.newCall(req).enqueue(new okhttp3.Callback() {
                 @Override
                 public void onFailure(Call c, IOException e) { 
-                    mainHandler.post(() -> cb.onError(e.getMessage() != null ? e.getMessage() : "Network error")); 
+                    mainHandler.post(() -> cb.onError(com.harvana.app.utils.ErrorText.of(e))); 
                 }
                 
                 @Override
@@ -113,15 +113,15 @@ public final class HarvanaApiClient {
                         if (r.isSuccessful()) {
                             mainHandler.post(() -> cb.onSuccess(b));
                         } else {
-                            mainHandler.post(() -> cb.onError("HTTP " + r.code() + ": " + b));
+                            mainHandler.post(() -> cb.onError(com.harvana.app.utils.ErrorText.fromHttp(r.code(), b)));
                         }
                     } catch (Exception e) {
-                        mainHandler.post(() -> cb.onError("Failed to read server response: " + e.getMessage()));
+                        mainHandler.post(() -> cb.onError("Failed to read server response: " + com.harvana.app.utils.ErrorText.of(e)));
                     }
                 }
             });
         } catch (Exception e) {
-            mainHandler.post(() -> cb.onError(e.getMessage()));
+            mainHandler.post(() -> cb.onError(com.harvana.app.utils.ErrorText.of(e)));
         }
     }
 }

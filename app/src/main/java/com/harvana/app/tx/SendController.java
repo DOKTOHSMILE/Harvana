@@ -399,11 +399,11 @@ public class SendController {
         if (code == null) return message != null ? message : "Transaction failed";
         switch (code) {
             case "ERR_NODE_TX":
-                if (message != null && message.contains("INSUFFICIENT_BALANCE"))
+                if (message != null && com.harvana.app.utils.ErrorText.is(message, "INSUFFICIENT_BALANCE"))
                     return "Insufficient balance on the blockchain. Your balance may have changed.";
-                if (message != null && message.contains("INVALID_NONCE"))
+                if (message != null && com.harvana.app.utils.ErrorText.is(message, "INVALID_NONCE"))
                     return "Nonce mismatch. Please wait a moment and try again.";
-                if (message != null && message.contains("INVALID_SIGNATURE"))
+                if (message != null && com.harvana.app.utils.ErrorText.is(message, "INVALID_SIGNATURE"))
                     return "Signature verification failed. Check that your wallet keys are correct.";
                 return "Node rejected transaction: " + message;
             case "ERR_SIGNING":

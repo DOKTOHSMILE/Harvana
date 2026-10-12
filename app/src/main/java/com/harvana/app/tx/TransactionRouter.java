@@ -289,7 +289,7 @@ public class TransactionRouter {
                                 Log.i(TAG, "Tx accepted by node: " + txHash + " status=" + status);
                                 callback.onSuccess(new ExecutionResult(txHash, status));
                             } catch (Exception e) {
-                                callback.onError("Failed to parse node response: " + e.getMessage());
+                                callback.onError("Failed to parse node response: " + com.harvana.app.utils.ErrorText.of(e));
                             }
                         }
 
@@ -302,7 +302,7 @@ public class TransactionRouter {
 
         } catch (Exception e) {
             Log.e(TAG, "Signing failed: " + e.getMessage(), e);
-            callback.onError("Signing failed: " + e.getMessage());
+            callback.onError("Signing failed: " + com.harvana.app.utils.ErrorText.of(e));
         }
     }
 

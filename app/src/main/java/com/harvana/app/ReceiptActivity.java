@@ -745,7 +745,7 @@ public class ReceiptActivity extends AppCompatActivity {
 			
 			_shareExportedFile(csvFile, "text/csv", "Transaction Receipt CSV");
 		} catch (Exception e) {
-			Toast.makeText(this, "CSV export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "CSV export failed: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -826,7 +826,7 @@ public class ReceiptActivity extends AppCompatActivity {
 			
 			_shareExportedFile(docFile, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Transaction Receipt DOCX");
 		} catch (Exception e) {
-			Toast.makeText(this, "DOCX export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "DOCX export failed: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_SHORT).show();
 		}
 	}
 	

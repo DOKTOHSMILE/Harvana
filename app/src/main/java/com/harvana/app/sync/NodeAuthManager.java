@@ -68,7 +68,7 @@ public final class NodeAuthManager {
     public static void getValidToken(TokenCallback cb) {
         Context context = com.harvana.app.SketchApplication.getContext();
         if (context == null) {
-            cb.onError("App context unavailable");
+            cb.onError("The app is still starting. Try again in a moment.");
             return;
         }
 
@@ -139,7 +139,7 @@ public final class NodeAuthManager {
 
             @Override
             public void onError(String error) {
-                boolean isRateLimited = error != null && error.contains("HTTP 429");
+                boolean isRateLimited = com.harvana.app.utils.ErrorText.is(error, "429");
                 if (isRateLimited && attempt < MAX_429_RETRIES) {
                     long delay = RETRY_BASE_DELAY_MS * (1L << attempt);
                     retryHandler.postDelayed(
@@ -148,8 +148,8 @@ public final class NodeAuthManager {
                     return;
                 }
                 failAllWaiters(isRateLimited
-                        ? "Node is rate-limiting connections right now — please try again in a moment"
-                        : (error != null ? error : "Node auth request failed"));
+                        ? "The network is busy. Try again in a moment."
+                        : com.harvana.app.utils.ErrorText.plain(error));
             }
         });
     }

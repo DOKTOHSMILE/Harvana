@@ -160,7 +160,7 @@ public class RequestNetworkController {
 					requestNetwork.getActivity().runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							requestListener.onErrorResponse(tag, e.getMessage());
+							requestListener.onErrorResponse(tag, com.harvana.app.utils.ErrorText.of(e));
 						}
 					});
 				}
@@ -182,7 +182,7 @@ public class RequestNetworkController {
 				}
 			});
 		} catch (Exception e) {
-			requestListener.onErrorResponse(tag, e.getMessage());
+			requestListener.onErrorResponse(tag, com.harvana.app.utils.ErrorText.of(e));
 		}
 	}
 }

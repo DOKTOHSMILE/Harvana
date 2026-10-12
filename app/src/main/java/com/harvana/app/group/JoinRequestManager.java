@@ -195,7 +195,7 @@ public final class JoinRequestManager {
             @Override
             public void onError(String error) {
                 // Member may already exist from a concurrent admit — still reconcile
-                if (error != null && (error.contains("409") || error.toLowerCase().contains("already"))) {
+                if (error != null && (com.harvana.app.utils.ErrorText.is(error, "409") || com.harvana.app.utils.ErrorText.is(error, "ALREADY"))) {
                     reconcileMembersCount(mgr, groupId, newMembersCount, () ->
                             finishAdmission(ctx, mgr, groupId, newMemberUid, cb));
                 } else if (cb != null) {
@@ -752,7 +752,7 @@ public final class JoinRequestManager {
 
                     @Override
                     public void onError(String error) {
-                        if (error != null && error.contains("404")) {
+                        if (error != null && com.harvana.app.utils.ErrorText.is(error, "404")) {
                             healNext(ctx, myUid, activeGroupIds, 0, 0, cb);
                             return;
                         }
@@ -830,7 +830,7 @@ public final class JoinRequestManager {
                             finish();
                         }
                         @Override public void onError(String error) {
-                            if (error != null && (error.contains("404") || error.toLowerCase(java.util.Locale.US).contains("not found"))) stale.add(gid);   // no such request
+                            if (error != null && (com.harvana.app.utils.ErrorText.is(error, "404") || com.harvana.app.utils.ErrorText.is(error, "NOT_FOUND"))) stale.add(gid);   // no such request
                             finish();
                         }
                         private void finish() {

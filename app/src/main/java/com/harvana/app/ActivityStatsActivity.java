@@ -151,8 +151,8 @@ public class ActivityStatsActivity extends AppCompatActivity {
 
     private static String why(String e) {
         if (e == null || e.isEmpty()) return "the network did not answer.";
-        if (e.contains("STALE_TIMESTAMP")) return "your phone's clock is off. Set it to automatic time.";
-        if (e.contains("INVALID_SIGNATURE") || e.contains("PUBLIC_KEY")) return "this wallet could not be verified.";
+        if (com.harvana.app.utils.ErrorText.is(e, "STALE_TIMESTAMP")) return "your phone's clock is off. Set it to automatic time.";
+        if (com.harvana.app.utils.ErrorText.is(e, "INVALID_SIGNATURE") || com.harvana.app.utils.ErrorText.is(e, "PUBLIC_KEY")) return "this wallet could not be verified.";
         return "the network did not answer (" + (e.length() > 50 ? e.substring(0, 50) : e) + ").";
     }
 

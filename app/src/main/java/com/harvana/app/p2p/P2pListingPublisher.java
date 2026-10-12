@@ -258,15 +258,15 @@ public final class P2pListingPublisher {
 	
 	public static String friendly(String rawError) {
 		if (rawError == null) return "Unknown error.";
-		if (rawError.contains("AMOUNT_OUT_OF_BOUNDS")) return "A listing must be between 10 and 5,000 HARV in total.";
-		if (rawError.contains("INVALID_MAX_ORDER_AMOUNT")) return "The maximum trade amount must be between the minimum and the total you're listing.";
-		if (rawError.contains("INVALID_PAYMENT_WINDOW")) return "Payment window must be 15, 30, 45 or 60 minutes.";
-		if (rawError.contains("INVALID_UNIT_PRICE")) return "That price isn't valid. Enter a price per HARV in Naira.";
-		if (rawError.contains("INVALID_MIN_ORDER_AMOUNT")) return "The minimum trade amount must be at least 1 HARV and no more than the total you're listing.";
-		if (rawError.contains("INVALID_DURATION")) return "Offer duration must be between 1 hour and 30 days.";
-		if (rawError.contains("SENDER_ADDRESS_FROZEN")) return "This wallet is currently frozen and can't post listings.";
-		if (rawError.contains("COIN_PAUSED")) return "HARV trading is temporarily paused network-wide. Try again later.";
-		if (rawError.contains("INVALID_SIGNATURE") || rawError.contains("INVALID_NONCE")) return "Something went wrong verifying your request — please try again.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "AMOUNT_OUT_OF_BOUNDS")) return "A listing must be between 10 and 5,000 HARV in total.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_MAX_ORDER_AMOUNT")) return "The maximum trade amount must be between the minimum and the total you're listing.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_PAYMENT_WINDOW")) return "Payment window must be 15, 30, 45 or 60 minutes.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_UNIT_PRICE")) return "That price isn't valid. Enter a price per HARV in Naira.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_MIN_ORDER_AMOUNT")) return "The minimum trade amount must be at least 1 HARV and no more than the total you're listing.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_DURATION")) return "Offer duration must be between 1 hour and 30 days.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "SENDER_ADDRESS_FROZEN")) return "This wallet is currently frozen and can't post listings.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "COIN_PAUSED")) return "HARV trading is temporarily paused network-wide. Try again later.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_SIGNATURE") || com.harvana.app.utils.ErrorText.is(rawError, "INVALID_NONCE")) return "Something went wrong verifying your request — please try again.";
 		return rawError;
 	}
 }

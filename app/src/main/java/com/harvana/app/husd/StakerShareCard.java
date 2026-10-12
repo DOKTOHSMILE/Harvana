@@ -97,7 +97,7 @@ public final class StakerShareCard {
                             @Override public void onError(String e) {
                                 a.runOnUiThread(() -> {
                                     claim.setEnabled(true);
-                                    Toast.makeText(a, e != null && e.contains("NOTHING_TO_CLAIM") ? "Nothing to claim yet." : "Couldn't claim: " + e,
+                                    Toast.makeText(a, e != null && com.harvana.app.utils.ErrorText.is(e, "NOTHING_TO_CLAIM") ? "Nothing to claim yet." : "Couldn't claim: " + e,
                                             Toast.LENGTH_LONG).show();
                                 });
                             }

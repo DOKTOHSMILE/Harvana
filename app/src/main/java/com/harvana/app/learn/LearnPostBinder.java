@@ -254,7 +254,7 @@ public final class LearnPostBinder {
                     // In the full reader there is nothing left to read; in the feed the live list drops the card by itself.
                     if (host instanceof com.harvana.app.LearnReadActivity) host.finish();
                 })
-                .addOnFailureListener(e -> Toast.makeText(host, "Couldn't delete: " + (e.getMessage() == null ? "try again" : e.getMessage()), Toast.LENGTH_LONG).show()))
+                .addOnFailureListener(e -> Toast.makeText(host, "Couldn't delete: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_LONG).show()))
             .show();
     }
 

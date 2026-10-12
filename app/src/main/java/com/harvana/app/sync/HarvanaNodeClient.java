@@ -102,7 +102,7 @@ public final class HarvanaNodeClient {
 			}
 			post("/api/v1/tx/send", body.toString(), cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build body failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -186,7 +186,7 @@ public final class HarvanaNodeClient {
 			body.put("signature", signatureB64);
 			post("/api/v1/p2p/submit-guardian-signature", body.toString(), cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build body failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -210,7 +210,7 @@ public final class HarvanaNodeClient {
 			String url = "/api/v1/p2p/insurance-status?address=" + java.net.URLEncoder.encode(address, "UTF-8");
 			get(url, cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build request failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -226,7 +226,7 @@ public final class HarvanaNodeClient {
 			body.put("publicKey",     publicKeyB64);
 			post("/api/v1/p2p/deposit-insurance", body.toString(), cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build body failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -237,7 +237,7 @@ public final class HarvanaNodeClient {
 			+ "&amount=" + amount;
 			get(url, cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build request failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -249,7 +249,7 @@ public final class HarvanaNodeClient {
 			+ "&amount=" + amount;
 			get(url, cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build request failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -283,7 +283,7 @@ public final class HarvanaNodeClient {
 			body.put("publicKey",       publicKeyB64);
 			post("/api/v1/p2p/create-listing", body.toString(), cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build body failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -302,7 +302,7 @@ public final class HarvanaNodeClient {
 			body.put("publicKey",    publicKeyB64);
 			post("/api/v1/p2p/claim-payment", body.toString(), cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build body failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -320,7 +320,7 @@ public final class HarvanaNodeClient {
 			body.put("publicKey",    publicKeyB64);
 			post("/api/v1/p2p/mark-paid", body.toString(), cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build body failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -336,7 +336,7 @@ public final class HarvanaNodeClient {
 			body.put("publicKey",     publicKeyB64);
 			post("/api/v1/p2p/confirm-received", body.toString(), cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build body failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -359,7 +359,7 @@ public final class HarvanaNodeClient {
 			body.put("publicKey",     publicKeyB64);
 			post("/api/v1/p2p/cancel-listing", body.toString(), cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build body failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -378,7 +378,7 @@ public final class HarvanaNodeClient {
 			body.put("publicKey",     publicKeyB64);
 			post("/api/v1/p2p/raise-dispute", body.toString(), cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build body failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -393,7 +393,7 @@ public final class HarvanaNodeClient {
 			body.put("publicKey", publicKeyB64);
 			post("/api/v1/p2p/list-mine", body.toString(), cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build body failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -446,7 +446,7 @@ public final class HarvanaNodeClient {
 			@Override
 			public void onError(String error) {
 				// Offline or the node unreachable: show the last saved answer, like WhatsApp shows chats offline.
-				mainHandler.post(() -> offlineOr(path, cb, "Node authentication failed: " + error));
+				mainHandler.post(() -> offlineOr(path, cb, com.harvana.app.utils.ErrorText.plain(error)));
 			}
 		});
 	}
@@ -494,7 +494,7 @@ public final class HarvanaNodeClient {
 						}
 						LockSigner.handle(result, err -> mainHandler.post(() -> {
 							if (err == null) cb.onSuccess(result);
-							else cb.onError("The action was accepted, but signing the lock failed: " + err);
+							else cb.onError("The action was accepted, but your wallet couldn't sign its payment. Try again.");
 						}));
 					}
 					@Override public void onError(String error) { cb.onError(error); }
@@ -503,7 +503,7 @@ public final class HarvanaNodeClient {
 			
 			@Override
 			public void onError(String error) {
-				mainHandler.post(() -> cb.onError("Node authentication failed: " + error));
+				mainHandler.post(() -> cb.onError(com.harvana.app.utils.ErrorText.plain(error)));
 			}
 		});
 	}
@@ -592,7 +592,7 @@ public final class HarvanaNodeClient {
 			body.put("app", "harvana-app");
 			rawPost("/api/v1/mining/auth", body.toString(), null, cb);
 		} catch (Exception e) {
-			String errorMsg = e.getMessage() != null ? e.getMessage() : "build auth request failed";
+			String errorMsg = "The app couldn't prepare this request. Try again.";
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
@@ -624,18 +624,18 @@ public final class HarvanaNodeClient {
 						NodeReadCache.put(path, body);                 // kept for offline and instant opening
 						mainHandler.post(() -> cb.onSuccess(json));
 					} catch (JSONException je) {
-						mainHandler.post(() -> cb.onError("Invalid JSON format from server"));
+						mainHandler.post(() -> cb.onError(com.harvana.app.utils.ErrorText.unreadable()));
 					}
 				} else if (code >= 500) {
 					// The node is down or overloaded: the last saved answer is better than nothing.
-					mainHandler.post(() -> offlineOr(path, cb, "HTTP " + code + ": " + body));
+					mainHandler.post(() -> offlineOr(path, cb, com.harvana.app.utils.ErrorText.fromHttp(code, body)));
 				} else {
 					// A real answer (404 not found, 400 refused): never replaced by an old copy.
-					mainHandler.post(() -> cb.onError("HTTP " + code + ": " + body));
+					mainHandler.post(() -> cb.onError(com.harvana.app.utils.ErrorText.fromHttp(code, body)));
 				}
 			} catch (Exception e) {
 				Log.e(TAG, "GET " + path, e);
-				final String errorMsg = e.getMessage() != null ? e.getMessage() : "network error";
+				final String errorMsg = com.harvana.app.utils.ErrorText.fromException(e);
 				mainHandler.post(() -> offlineOr(path, cb, errorMsg));      // no connection: show what was saved
 			} finally {
 				if (c != null) c.disconnect();
@@ -673,14 +673,14 @@ public final class HarvanaNodeClient {
 						JSONObject responseJson = new JSONObject(body);
 						mainHandler.post(() -> cb.onSuccess(responseJson));
 					} catch (JSONException je) {
-						mainHandler.post(() -> cb.onError("Invalid JSON format from server"));
+						mainHandler.post(() -> cb.onError(com.harvana.app.utils.ErrorText.unreadable()));
 					}
 				} else {
-					mainHandler.post(() -> cb.onError("HTTP " + code + ": " + body));
+					mainHandler.post(() -> cb.onError(com.harvana.app.utils.ErrorText.fromHttp(code, body)));
 				}
 			} catch (Exception e) {
 				Log.e(TAG, "POST " + path, e);
-				final String errorMsg = e.getMessage() != null ? e.getMessage() : "network error";
+				final String errorMsg = com.harvana.app.utils.ErrorText.fromException(e);
 				mainHandler.post(() -> cb.onError(errorMsg));
 			} finally {
 				if (c != null) c.disconnect();

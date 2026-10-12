@@ -255,7 +255,7 @@ public final class GroupWelcomeSheet {
                     dlg.dismiss();
                     l.onSigned(ack);
                 } catch (Exception e) {
-                    Toast.makeText(a, "Couldn't sign: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(a, "Couldn't sign: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_LONG).show();
                 }
             });
         });

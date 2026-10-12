@@ -38,7 +38,7 @@ public final class ReceiptShare {
             File f = ReceiptRenderer.renderPng(a, r, cacheFile(a, "images", "harvana-receipt-" + r.number() + ".png"));
             send(a, f, "image/png", "Harvana " + r.title.toLowerCase(java.util.Locale.US) + " " + r.number(), summary(r));
         } catch (Exception e) {
-            Toast.makeText(a, "Could not make the receipt: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(a, "Could not make the receipt: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -47,7 +47,7 @@ public final class ReceiptShare {
             File f = ReceiptRenderer.renderPdf(a, r, cacheFile(a, "docs", "harvana-receipt-" + r.number() + ".pdf"));
             send(a, f, "application/pdf", "Harvana " + r.title.toLowerCase(java.util.Locale.US) + " " + r.number(), summary(r));
         } catch (Exception e) {
-            Toast.makeText(a, "Could not make the receipt: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(a, "Could not make the receipt: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -63,7 +63,7 @@ public final class ReceiptShare {
             }
             send(a, copy, mime, subject, null);
         } catch (Exception e) {
-            Toast.makeText(a, "Could not share the file: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(a, "Could not share the file: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_LONG).show();
         }
     }
 

@@ -928,7 +928,7 @@ public class SendAssetActivity extends AppCompatActivity {
 						isProcessingSend = false;
 						if (isFinishing()) return;
 						sendButton.setEnabled(true);
-						String msg = e == null ? "Couldn't send." : e.contains("INSUFFICIENT_" + code) ? "Not enough " + sym + " for this amount and its fee."
+						String msg = e == null ? "Couldn't send." : com.harvana.app.utils.ErrorText.is(e, "INSUFFICIENT_" + code) ? "Not enough " + sym + " for this amount and its fee."
 								: e.contains(code + "_NOT_ACTIVE") ? sym + " is not switched on yet." : "Couldn't send: " + e;
 						SketchwareUtil.showMessage(getApplicationContext(), msg);
 					});

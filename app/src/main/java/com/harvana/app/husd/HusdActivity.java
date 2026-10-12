@@ -222,7 +222,7 @@ public class HusdActivity extends AppCompatActivity {
         sent.setOnClickListener(v -> HusdClient.requestSweep(code, chain, address, new HusdClient.Cb() {
             @Override public void ok(JSONObject r) { runOnUiThread(() -> { sheet.dismiss();
                 toast("Thanks. Your " + sym + " arrives after the network confirms the deposit, usually within minutes."); }); }
-            @Override public void fail(String e) { runOnUiThread(() -> toast("Couldn't reach the network: " + e)); }
+            @Override public void fail(String e) { runOnUiThread(() -> toast(com.harvana.app.utils.ErrorText.plain(e))); }
         }));
         root.addView(sent);
         long depFee = bridgeFee(chain);
@@ -330,11 +330,11 @@ public class HusdActivity extends AppCompatActivity {
 
     private String plain(String e) {
         if (e == null) return "Couldn't send.";
-        if (e.contains("INSUFFICIENT_" + code)) return "Not enough " + sym + " for this amount and its fee.";
+        if (com.harvana.app.utils.ErrorText.is(e, "INSUFFICIENT_" + code)) return "Not enough " + sym + " for this amount and its fee.";
         if (e.contains(code + "_NOT_ACTIVE")) return sym + " is not switched on yet.";
         if (e.contains(code + "_WITHDRAW_BELOW_MINIMUM")) return "That is below the minimum withdrawal.";
-        if (e.contains("_SYSTEM_RECIPIENT") || e.contains("_ONLY")) return sym + " can't be sent to that address.";
-        return "Couldn't send: " + e;
+        if (com.harvana.app.utils.ErrorText.is(e, "_SYSTEM_RECIPIENT") || com.harvana.app.utils.ErrorText.is(e, "_ONLY")) return sym + " can't be sent to that address.";
+        return com.harvana.app.utils.ErrorText.plain(e);
     }
 
     private boolean active() {

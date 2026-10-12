@@ -54,10 +54,9 @@ public final class PaymentDueResolver {
             return none("Group is " + status.toLowerCase(Locale.US), "Idle");
         }
         if (type.contains("Accumulative")) return none("Save any time - nothing scheduled", "Idle");
-        String goalState = str(group.get("state"));
-        if (type.contains("Fixed") && ("COMPLETED".equalsIgnoreCase(goalState) || "CLOSED".equalsIgnoreCase(goalState))) {
-            return none("Goal reached - deposits are closed", "Closed");
-        }
+        // Goal groups have no schedule: deposit any day until the goal is reached, and a quiet day is not a missed
+        // payment. They never raise "Payment due" (owner report, 12 Oct 2026: a reached goal kept sending daily alerts).
+        if (isGoalGroup(group)) return none("Deposit any day toward the goal - nothing is due", "Idle");
 
         boolean bySlot = type.contains("Rotating") && group.get("currentSlot") instanceof Number
                 && ((Number) group.get("currentSlot")).intValue() > 0;
@@ -99,6 +98,16 @@ public final class PaymentDueResolver {
         }
         if ("PENDING".equals(myState)) return none("Your payment is confirming", "Confirming");
         return none("Everyone has paid this cycle", "Paid");
+    }
+
+    /** A fixed-goal group, however it was labelled when it was created. */
+    static boolean isGoalGroup(Map<String, Object> group) {
+        String type = str(group.get("groupType")).toLowerCase(Locale.US);
+        if (type.contains("fixed") || type.contains("goal")) return true;
+        for (String key : new String[]{"nodeGroupId", "nodeId", "groupId"}) {
+            if (str(group.get(key)).toUpperCase(Locale.US).startsWith("FIXED")) return true;
+        }
+        return group.get("targetGoalAmount") != null || group.get("targetGoalAmountRaw") != null;
     }
 
     private static Result none(String line, String badge) {

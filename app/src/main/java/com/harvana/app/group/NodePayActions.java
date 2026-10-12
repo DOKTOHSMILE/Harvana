@@ -173,7 +173,7 @@ public final class NodePayActions {
         }
     }
 
-    private static void amount(Ctx c, String title, String hint, RawCb cb) {
+    static void amount(Ctx c, String title, String hint, RawCb cb) {
         EditText e = new com.google.android.material.textfield.TextInputEditText(c.activity);
         e.setHint(hint);
         e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -185,7 +185,7 @@ public final class NodePayActions {
                 }).show();
     }
 
-    private interface RawCb { void got(long raw); }
+    interface RawCb { void got(long raw); }
     private interface RawText { void got(long raw, String text); }
 
     private static void reason(Ctx c, String title, String textHint, RawText cb) {
@@ -220,7 +220,7 @@ public final class NodePayActions {
                 () -> NodeGroupClient.backpayAccum(c.activity, c.me, c.nodeId, lineId, dates, result(c, "Paid back. It shows once the network confirms it.")));
     }
 
-    private static void pay(Ctx c, String title, String amount, java.util.List<String[]> rows, Runnable work) {
+    static void pay(Ctx c, String title, String amount, java.util.List<String[]> rows, Runnable work) {
         Button source = c.pressed;
         c.pressed = null;
         PaymentConfirmSheet.reviewThenAuthorize(c.activity, title, amount, rows, () -> {
@@ -243,7 +243,7 @@ public final class NodePayActions {
                 if (id.isEmpty()) { result(c, ok).onSuccess(json); return; }
                 NodeGroupClient.Callback voted = new NodeGroupClient.Callback() {
                     @Override public void onSuccess(JSONObject v) { result(c, ok + ". Your yes vote is in. The members vote next.").onSuccess(v); }
-                    @Override public void onError(String e) { result(c, ok + ", but your own yes vote did not go through. Vote from Actions & votes.").onSuccess(null); }
+                    @Override public void onError(String e) { result(c, ok + ", but your own yes vote did not go through. Vote from the Payments tab.").onSuccess(null); }
                 };
                 if (milestone) NodeGroupClient.voteFixedMilestone(c.activity, c.me, c.nodeId, id, true, voted);
                 else NodeGroupClient.voteFixedDisbursement(c.activity, c.me, c.nodeId, id, true, voted);
@@ -264,7 +264,7 @@ public final class NodePayActions {
         };
     }
 
-    private static NodeGroupClient.Callback result(Ctx c, String ok) {
+    static NodeGroupClient.Callback result(Ctx c, String ok) {
         return new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject json) {
                 com.harvana.app.trust.AppActivity.note(c.activity, "GROUP", ok);
@@ -278,7 +278,7 @@ public final class NodePayActions {
         };
     }
 
-    private static ArrayList<String[]> moneyRows(Ctx c, String to, String detail) {
+    static ArrayList<String[]> moneyRows(Ctx c, String to, String detail) {
         ArrayList<String[]> rows = new ArrayList<>();
         if (c.groupName != null && !c.groupName.isEmpty()) rows.add(new String[]{"Group", c.groupName});
         rows.add(new String[]{"To", to == null || to.isEmpty() ? escrow(c) : to});
@@ -288,7 +288,7 @@ public final class NodePayActions {
         return rows;
     }
 
-    private static String escrow(Ctx c) {
+    static String escrow(Ctx c) {
         String e = str(c.group, "escrowAddress");
         return e.isEmpty() ? "This group's network wallet" : e;
     }
@@ -300,7 +300,7 @@ public final class NodePayActions {
         return bond;
     }
 
-    private static void toast(Ctx c, String m) {
+    static void toast(Ctx c, String m) {
         if (c.activity != null) c.activity.runOnUiThread(() -> Toast.makeText(c.activity, m, Toast.LENGTH_LONG).show());
     }
 

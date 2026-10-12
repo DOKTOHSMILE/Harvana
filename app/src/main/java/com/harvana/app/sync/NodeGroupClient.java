@@ -289,6 +289,35 @@ public final class NodeGroupClient {
         act(c, voter, "/api/v1/fixed/vote-grant", vote(groupId, "grantId", grantId, voter, yes, 2), cb);
     }
 
+    /**
+     * Returning everyone's money from a goal group: PROPOSE (opens a vote, the proposer votes yes), VOTE, or FINISH
+     * (settles a vote that is decided, e.g. after seven days with no "no"). Refunds go back in proportion to what each
+     * member put in.
+     */
+    public static void proposeFixedDissolve(Context c, String address, String groupId, Callback cb) {
+        act(c, address, "/api/v1/fixed/propose-dissolve", dissolve(groupId, address, "PROPOSE", true), cb);
+    }
+
+    public static void voteFixedDissolve(Context c, String address, String groupId, boolean yes, Callback cb) {
+        act(c, address, "/api/v1/fixed/vote-dissolve", dissolve(groupId, address, "VOTE", yes), cb);
+    }
+
+    public static void finishFixedDissolve(Context c, String address, String groupId, Callback cb) {
+        act(c, address, "/api/v1/fixed/finish-dissolve", dissolve(groupId, address, "FINISH", false), cb);
+    }
+
+    /** {"status":"NONE"} when nobody has asked; otherwise PENDING, PASSED or REJECTED with weights, votes and decidesBy. */
+    public static void getFixedDissolve(String groupId, Callback cb) { read("/api/v1/fixed/" + groupId + "/dissolve", cb); }
+
+    private static Spec dissolve(String groupId, String address, String action, boolean yes) {
+        return new Spec() {
+            public String canonical(long n) { return GroupCanonical.fixedDissolve(action, groupId, address, yes, n); }
+            public void fill(JSONObject b, long n) throws JSONException {
+                b.put("groupId", groupId).put("address", address).put("action", action).put("voteYes", yes);
+            }
+        };
+    }
+
     // ═════════════════════════════ LOANS (inside a group) ═════════════════════════════
 
     public static void requestLoan(Context c, String borrower, String groupId, long principalRaw, long durationHours, Callback cb) {
@@ -671,6 +700,9 @@ public final class NodeGroupClient {
             case "/api/v1/fixed/vote-disbursement": return "FIXED_VOTE_DISBURSEMENT";
             case "/api/v1/fixed/vote-milestone": return "FIXED_VOTE_MILESTONE";
             case "/api/v1/fixed/vote-grant": return "FIXED_VOTE_GRANT";
+            case "/api/v1/fixed/propose-dissolve": return "FIXED_DISSOLVE";
+            case "/api/v1/fixed/vote-dissolve": return "FIXED_VOTE_DISSOLVE";
+            case "/api/v1/fixed/finish-dissolve": return "FIXED_FINISH_DISSOLVE";
             case "/api/v1/genloan/request": return "GENLOAN_REQUEST";
             default: return path.endsWith("/staker-share/claim") ? "STABLE_SHARE_CLAIM" : null;
         }

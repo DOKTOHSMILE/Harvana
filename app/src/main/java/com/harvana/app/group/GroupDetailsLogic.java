@@ -175,6 +175,20 @@ public class GroupDetailsLogic {
      * payout, vote, approve a withdrawal) instead of the old payout and loan buttons, which only changed Firestore.
      */
     public void wireFooter(TextView btnPayout, TextView btnLoanOrTransfer) {
+        // Goal groups: requests, votes, "return everyone's money" and past goals all sit on the Payments tab, so the
+        // footer has nothing left to open.
+        if (identity.onChain() && "FIXED".equals(com.harvana.app.sync.NodeGroupClient.familyOf(identity.protocolId()))) {
+            if (btnPayout != null) btnPayout.setVisibility(android.view.View.GONE);
+            if (btnLoanOrTransfer != null) btnLoanOrTransfer.setVisibility(android.view.View.GONE);
+            android.view.ViewParent bar = btnPayout != null ? btnPayout.getParent() : null;
+            if (bar instanceof android.view.ViewGroup && (btnLoanOrTransfer == null || btnLoanOrTransfer.getParent() == bar)) {
+                android.view.ViewGroup g = (android.view.ViewGroup) bar;
+                boolean any = false;
+                for (int i = 0; i < g.getChildCount(); i++) if (g.getChildAt(i).getVisibility() == android.view.View.VISIBLE) any = true;
+                if (!any) g.setVisibility(android.view.View.GONE);
+            }
+            return;
+        }
         if (identity.onChain() && btnPayout != null) {
             btnPayout.setText("Actions & votes");
             btnPayout.setOnClickListener(v -> {
@@ -183,15 +197,7 @@ public class GroupDetailsLogic {
                 i.putExtra("firestoreGroupId", groupId);
                 activity.startActivity(i);
             });
-            if (btnLoanOrTransfer == null) return;
-            // Goal groups keep one ledger per goal inside the same group: the second button opens every goal it has run.
-            if ("FIXED".equals(com.harvana.app.sync.NodeGroupClient.familyOf(identity.protocolId()))) {
-                btnLoanOrTransfer.setVisibility(android.view.View.VISIBLE);
-                btnLoanOrTransfer.setText("Goals");
-                btnLoanOrTransfer.setOnClickListener(v -> GoalHistoryActivity.open(activity, identity.protocolId(), ""));
-            } else {
-                btnLoanOrTransfer.setVisibility(android.view.View.GONE);
-            }
+            if (btnLoanOrTransfer != null) btnLoanOrTransfer.setVisibility(android.view.View.GONE);
             return;
         }
         GroupTypeUiController.configureFooterButtons(

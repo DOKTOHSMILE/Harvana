@@ -130,12 +130,15 @@ public final class NotificationRouter {
         return o == null ? "" : String.valueOf(o);
     }
 
-    /** A group on the network votes on its own screen (Actions & votes); any other group votes in the Members tab. */
+    /** A goal group votes on its Payments tab, another group on the network on Actions & votes; any other group in the Members tab. */
     private static void openVotes(final Context c, final String groupId) {
         com.harvana.app.firestore.GroupFirestoreManager.getInstance(c).getGroup(groupId, new com.harvana.app.firestore.GroupFirestoreManager.DocCallback() {
             @Override public void onSuccess(java.util.Map<String, Object> data) {
                 com.harvana.app.group.GroupIdentity identity = com.harvana.app.group.GroupIdentityResolver.resolve(groupId, data);
-                if (identity != null && identity.onChain()) {
+                if (identity != null && identity.onChain()
+                        && "FIXED".equals(com.harvana.app.sync.NodeGroupClient.familyOf(identity.protocolId()))) {
+                    start(c, group(c, groupId, 2));      // goal groups vote on their Payments tab
+                } else if (identity != null && identity.onChain()) {
                     start(c, new Intent(c, com.harvana.app.group.GroupActionsActivity.class)
                         .putExtra("nodeGroupId", identity.protocolId()).putExtra("firestoreGroupId", groupId));
                 } else {

@@ -90,16 +90,18 @@ public class PaymentDueResolverTest {
         assertEquals(PaymentDueResolver.Action.PAY, r.action);
     }
 
-    @Test public void monthlyFixedGroupUsesCalendarMonth() {
+    /** Goal groups ("Fixed Contribution") have no schedule: a quiet day is not a missed payment, so they never say
+     *  "Payment due" (owner report, 12 Oct 2026: a reached goal kept sending daily alerts). */
+    @Test public void goalGroupsNeverRaisePaymentDue() {
         List<Map<String, Object>> pays = new ArrayList<>();
-        pays.add(pay("me", "CONFIRMED", 0, at(2026, 8, 30, 10)));   // last month
-        PaymentDueResolver.Result due = PaymentDueResolver.resolve(group("Fixed Contribution", "Monthly", 0),
+        pays.add(pay("me", "CONFIRMED", 0, at(2026, 8, 30, 10)));   // last month only
+        PaymentDueResolver.Result r = PaymentDueResolver.resolve(group("Fixed Contribution", "Daily", 0),
             members("me"), pays, "me", at(2026, 9, 30, 12), UTC);
-        assertEquals(PaymentDueResolver.Action.PAY, due.action);
-        pays.add(pay("me", "CONFIRMED", 0, at(2026, 9, 2, 10)));    // this month
-        PaymentDueResolver.Result ok = PaymentDueResolver.resolve(group("Fixed Contribution", "Monthly", 0),
-            members("me"), pays, "me", at(2026, 9, 30, 12), UTC);
-        assertEquals(PaymentDueResolver.Action.NONE, ok.action);
+        assertEquals(PaymentDueResolver.Action.NONE, r.action);
+        Map<String, Object> g = group("Group", "Daily", 0);
+        g.put("nodeGroupId", "FIXED-abc");
+        assertEquals(PaymentDueResolver.Action.NONE, PaymentDueResolver.resolve(g, members("me"), new ArrayList<>(), "me",
+            at(2026, 9, 30, 12), UTC).action);
     }
 
     @Test public void accumulativeGroupsHaveNoSchedule() {

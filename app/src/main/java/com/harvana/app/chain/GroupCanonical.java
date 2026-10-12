@@ -140,6 +140,10 @@ public final class GroupCanonical {
     }
 
     /** FixedNewGoalRequest.getCanonicalMessage() */
+    public static String fixedDissolve(String action, String groupId, String address, boolean voteYes, long nonce) {
+        return "HARVANA_FIXED_DISSOLVE_V1:" + action + ":" + groupId + ":" + address + ":" + voteYes + ":" + nonce;
+    }
+
     public static String fixedNewGoal(String groupId, String adminAddress, long targetGoalAmountRaw, String goalName, long nonce) {
         return "HARVANA_FIXED_NEW_GOAL_V1:" + groupId + ":" + adminAddress + ":" + targetGoalAmountRaw + ":" + (goalName == null ? "" : goalName) + ":" + nonce;
     }

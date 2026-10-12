@@ -132,7 +132,7 @@ public final class NodeSettingsPanel {
         actions.removeAllViews();
         actions.addView(button(a, "Copy network id", false, v -> NodePayActions.copyId(a, id.protocolId())));
         if (!"—".equals(escrow)) actions.addView(button(a, "Copy group wallet", false, v -> NodePayActions.copyId(a, escrow)));
-        actions.addView(button(a, "Open actions and votes", true, v -> {
+        if (!"FIXED".equals(com.harvana.app.sync.NodeGroupClient.familyOf(id.protocolId()))) actions.addView(button(a, "Open actions and votes", true, v -> {
             Intent i = new Intent(a, GroupActionsActivity.class);
             i.putExtra("nodeGroupId", id.protocolId());
             i.putExtra("firestoreGroupId", fsId);

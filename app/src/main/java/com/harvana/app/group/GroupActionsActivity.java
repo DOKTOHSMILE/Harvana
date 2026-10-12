@@ -370,17 +370,7 @@ public class GroupActionsActivity extends AppCompatActivity {
             for (Object[] p : closed) content.addView(voteCard((String) p[0], (String) p[1], castMap(p[2]), false));
         }
 
-        // 4. Goals this group has already finished (the same group keeps one ledger per goal)
-        Object gl = group == null ? null : group.get("goals");
-        if ("FIXED".equals(family) && gl instanceof List && !((List<?>) gl).isEmpty()) {
-            int done = ((List<?>) gl).size();
-            content.addView(sectionHeader("Past goals", String.valueOf(done)));
-            LinearLayout c = CircleUi.card(this);
-            c.addView(CircleUi.text(this, done == 1 ? "1 goal finished in this group" : done + " goals finished in this group", 14, R.color.colorTextPrimary, true));
-            c.addView(CircleUi.text(this, "What each goal raised, whether it was paid out, its dates and what you put in.", 12.5f, R.color.colorTextSecondary, false));
-            c.addView(button("See all goals", false, v -> GoalHistoryActivity.open(this, nodeId, groupName)));
-            content.addView(c);
-        }
+        // Goal groups show their past goals on the Payments tab.
 
         TextView foot = CircleUi.text(this, "Deposits, contributions and savings are on the group's Payments tab.", 12, R.color.colorTextTertiary, false);
         foot.setPadding(CircleUi.dp(this, 4), CircleUi.dp(this, 18), CircleUi.dp(this, 4), 0);

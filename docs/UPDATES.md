@@ -2,6 +2,32 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026: goal groups are unlocked, and their screens merged into Payments
+
+What was wrong (a goal group with money in it where nobody could do anything):
+- Every day the app said "payment due" for a goal group. A goal group has no due dates, so that alert is gone.
+- Asking for a grant or a payout failed because neither member had been in the group 48 hours when it was checked. Once the goal is reached that wait no longer applies (node change).
+- If a member went silent there was no way out. Now any member who put money in, or the admin, can **ask to return everyone's money**:
+  - the vote is counted by the money each person put in;
+  - more than half says yes, or nobody says no within 7 days, and it passes;
+  - half or more says no, and it is turned down;
+  - when it passes, the group wallet is paid back to each member in proportion to what they put in, less the network fee, and the group is closed.
+
+Fewer screens:
+- A goal group's **Payments tab now holds everything**:
+  - deposit;
+  - ask for a grant, payout or milestone;
+  - start a new goal (admin);
+  - open votes with Yes and No;
+  - the vote to return everyone's money;
+  - the goals the group has finished.
+- The "Actions & votes" and "Goals" buttons are gone from goal groups. Vote alerts for a goal group open its Payments tab.
+- The separate Goals screen is removed. Other group types keep Actions & votes, which still holds join requests and defaults.
+
+What the owner does:
+- Deploy the node first (see `docs/DEPLOYMENT.md` in the node repository). The new app calls `/api/v1/fixed/propose-dissolve`, `/vote-dissolve`, `/finish-dissolve` and `GET /api/v1/fixed/{id}/dissolve`.
+- Then build and install the app in CodeAssist.
+
 ## 12 Oct 2026: About screen, and every claim pays its network fee
 
 What the app does:

@@ -318,10 +318,6 @@
 			android:label="Notifications"
 			android:configChanges="orientation|screenSize|keyboardHidden" />
                 <activity
-                        android:name=".group.GoalHistoryActivity"
-                        android:label="Goals"
-                        android:configChanges="orientation|screenSize|keyboardHidden" />
-                <activity
                         android:name=".group.GroupActionsActivity"
                         android:label="Actions &amp; votes"
                         android:configChanges="orientation|screenSize|keyboardHidden" />

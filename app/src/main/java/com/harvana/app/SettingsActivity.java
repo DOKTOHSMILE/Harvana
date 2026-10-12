@@ -407,7 +407,7 @@ public class SettingsActivity extends AppCompatActivity {
 		_compactList();
 		if (getSupportActionBar() != null) {
 			getSupportActionBar().setTitle("Settings");
-			getSupportActionBar().setSubtitle("Manage your account, preferences and app experience.");
+			getSupportActionBar().setSubtitle(null);
 		}
 		_applyCategoryTints();
 		_loadProfileHeader();
@@ -477,8 +477,10 @@ public class SettingsActivity extends AppCompatActivity {
 		if (row == null || row.getChildCount() == 0) return;
 		View icon = row.getChildAt(0);
 		if (icon instanceof ImageView) {
-			// A soft badge in the category colour with the icon drawn in that colour (the full-colour badge hid the icon).
-			icon.setBackgroundTintList(ColorStateList.valueOf((color & 0x00FFFFFF) | 0x2E000000));
+			// The icon alone in the category colour, centred, no badge behind it.
+			icon.setBackground(null);
+			icon.setBackgroundTintList(null);
+			((ImageView) icon).setScaleType(ImageView.ScaleType.FIT_CENTER);
 			((ImageView) icon).setImageTintList(ColorStateList.valueOf(color));
 		}
 	}
@@ -690,10 +692,11 @@ public class SettingsActivity extends AppCompatActivity {
 			row.setPadding((int) (14 * d), (int) (9 * d), (int) (14 * d), (int) (9 * d));
 			for (int c = 0; c < row.getChildCount(); c++) {
 				View child = row.getChildAt(c);
-				if (c == 0 && child.getLayoutParams() != null) {           // the icon badge
-					child.getLayoutParams().width = (int) (34 * d);
-					child.getLayoutParams().height = (int) (34 * d);
-					child.setPadding((int) (8 * d), (int) (8 * d), (int) (8 * d), (int) (8 * d));
+				if (c == 0 && child.getLayoutParams() != null) {           // the icon
+					child.getLayoutParams().width = (int) (24 * d);
+					child.getLayoutParams().height = (int) (24 * d);
+					child.setPadding(0, 0, 0, 0);
+					if (child instanceof ImageView) ((ImageView) child).setScaleType(ImageView.ScaleType.FIT_CENTER);
 				}
 				if (child instanceof LinearLayout && ((LinearLayout) child).getChildCount() > 1) {
 					((LinearLayout) child).getChildAt(1).setVisibility(View.GONE);   // the grey line under the title

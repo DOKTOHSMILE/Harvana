@@ -10,13 +10,16 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:theme="@style/AppTheme.AppBarOverlay"
+		android:background="@color/colorSurface"
 		app:elevation="0dp"
 		android:stateListAnimator="@null">
 		<com.google.android.material.appbar.MaterialToolbar
 			android:id="@+id/_toolbar"
 			android:layout_width="match_parent"
 			android:layout_height="?attr/actionBarSize"
-			android:background="?attr/appBarColor"
+			android:background="@color/colorSurface"
+			app:contentInsetStartWithNavigation="0dp"
+			app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6"
 			app:popupTheme="@style/AppTheme.PopupOverlay" />
 	</com.google.android.material.appbar.AppBarLayout>
 	<LinearLayout
@@ -36,6 +39,7 @@
 				android:id="@+id/linear2"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:paddingTop="8dp"
 				android:paddingBottom="24dp"
 				android:orientation="vertical">
 				<com.google.android.material.card.MaterialCardView

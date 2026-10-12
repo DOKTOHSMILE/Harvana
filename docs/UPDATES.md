@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): Settings icons and top bar
+
+- **Settings rows:** each icon sits alone, centred, in its category colour (no coloured box behind it, no clipped edges).
+- **Top bar:** "Settings" only, same colour as the page, title next to the back arrow; the list starts just below it.
+- App build only.
+
 ## 12 Oct 2026 (night): Home buttons and coin search
 
 - **Receive, Send, P2P, Web3** (Home): smaller buttons, icon beside the name, one compact row.

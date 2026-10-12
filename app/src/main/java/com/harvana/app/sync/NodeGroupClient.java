@@ -81,6 +81,32 @@ public final class NodeGroupClient {
         return com.harvana.app.group.GroupKinds.familyOf(groupId);
     }
 
+    // ═════════════════════════════ HARV-BACKED COINS (vault) ═════════════════════════════
+
+    /** The vault's terms and the live HARV price for one coin (HNGN): ratios, cap, priceOk / priceProblem. */
+    public static void vaultInfo(String code, Callback cb) { read("/api/v1/vault/" + code + "/info", cb); }
+    /** A wallet's HARV locked, coins owed, ratio, how much more it can mint now, and whether it can be liquidated. */
+    public static void vaultPosition(String code, String address, Callback cb) { read("/api/v1/vault/" + code + "/position/" + address, cb); }
+    /** Positions under the liquidation line. */
+    public static void vaultAtRisk(String code, Callback cb) { read("/api/v1/vault/" + code + "/at-risk", cb); }
+
+    /**
+     * LOCK (amountRaw in HARV raw units), MINT, REPAY (coin raw units), WITHDRAW (HARV raw units), or LIQUIDATE (owner
+     * = the position being closed; amount 0). Signed as "HARVANA_VAULT_V1:ACTION:CODE:address:amountRaw:owner:nonce".
+     */
+    public static void vault(Context c, String action, String code, String address, long amountRaw, String owner, Callback cb) {
+        final String target = owner == null ? "" : owner;
+        act(c, address, "/api/v1/vault/" + code + "/" + action.toLowerCase(java.util.Locale.US), new Spec() {
+            public String canonical(long n) {
+                return "HARVANA_VAULT_V1:" + action + ":" + code + ":" + address + ":" + amountRaw + ":" + target + ":" + n;
+            }
+            public void fill(JSONObject b, long n) throws JSONException {
+                b.put("address", address).put("amountRaw", amountRaw);
+                if (!target.isEmpty()) b.put("owner", target);
+            }
+        }, cb);
+    }
+
     // ═════════════════════════════ CIRCLE ═════════════════════════════
 
     public static void createCircle(Context c, String creator, long contributionRaw, int memberLimit, long cycleHours, Callback cb) {
@@ -711,7 +737,19 @@ public final class NodeGroupClient {
             case "/api/v1/fixed/vote-dissolve": return "FIXED_VOTE_DISSOLVE";
             case "/api/v1/fixed/finish-dissolve": return "FIXED_FINISH_DISSOLVE";
             case "/api/v1/genloan/request": return "GENLOAN_REQUEST";
-            default: return path.endsWith("/staker-share/claim") ? "STABLE_SHARE_CLAIM" : null;
+            default:
+                if (path.endsWith("/staker-share/claim")) return "STABLE_SHARE_CLAIM";
+                if (path.startsWith("/api/v1/vault/")) {           // lock pays its own gas; the rest pay the action fee
+                    String act = path.substring(path.lastIndexOf('/') + 1);
+                    switch (act) {
+                        case "mint": return "VAULT_MINT";
+                        case "repay": return "VAULT_REPAY";
+                        case "withdraw": return "VAULT_WITHDRAW";
+                        case "liquidate": return "VAULT_LIQUIDATE";
+                        default: return null;
+                    }
+                }
+                return null;
         }
     }
 

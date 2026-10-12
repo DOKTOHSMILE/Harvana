@@ -84,6 +84,18 @@ public class HusdActivity extends AppCompatActivity {
         head.addView(actions);
         root.addView(head);
 
+        if ("NGN".equals(Stable.currency(code))) {         // hNGN can also be minted against HARV (VaultActivity)
+            LinearLayout vc = card();
+            vc.addView(text("Mint " + sym + " with HARV", 15, true, UiColors.textPrimary()));
+            vc.addView(text("No naira to deposit? Lock HARV and mint " + sym + " against it. Repay to unlock your HARV.",
+                    13, false, UiColors.textSecondary()));
+            vc.addView(action("Open my vault", v -> startActivity(new android.content.Intent(this, VaultActivity.class)
+                    .putExtra(EXTRA_ASSET, code))));
+            LinearLayout.LayoutParams vlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            vlp.topMargin = dp(12);
+            root.addView(vc, vlp);
+        }
+
         TextView how = text("How it works", 15, true, UiColors.textPrimary());
         how.setPadding(dp(4), dp(18), 0, dp(6));
         root.addView(how);

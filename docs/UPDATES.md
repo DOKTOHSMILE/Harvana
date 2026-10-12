@@ -2,6 +2,20 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night, later): mint hNGN with HARV
+
+What the app does:
+- **hNGN page → "Mint hNGN with HARV" → Open my vault** (new screen `husd/VaultActivity`).
+  - Shows the HARV you have locked, the hNGN you owe, your cover (green at 200% or more, amber below, red under 150%), how much you can mint now, and the HARV price.
+  - **Lock HARV**: a normal HARV transfer into your vault. It counts once the next block has it.
+  - **Mint hNGN**: up to half the naira value of your locked HARV (200% cover). Minimum 1,000 hNGN.
+  - **Repay hNGN**: the coins are burned. **Take HARV back**: allowed while what stays still covers your debt 200%.
+  - **Vaults under the line**: anyone can close a vault under 150% by paying its debt in their own hNGN, and receives that much HARV plus 10% from it.
+  - Mint, repay, take back and liquidate pay the usual small HARV action fee (`ACTION_FEE:VAULT_MINT|VAULT_REPAY|VAULT_WITHDRAW|VAULT_LIQUIDATE`); locking pays normal gas.
+- Minting and liquidating need a live HARV price from completed P2P trades. Until the network has 10 of them, the screen says so; locking already works.
+
+Operator: needs the node with `/api/v1/vault/{code}` (node `docs/DEPLOYMENT.md`, "12 Oct 2026 (owner): hNGN backed by HARV").
+
 ## 12 Oct 2026 (night): the app works offline, like WhatsApp
 
 What the app does:

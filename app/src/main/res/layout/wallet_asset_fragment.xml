@@ -9,10 +9,12 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:fillViewport="true">
+	<!-- Bottom room: the main bottom bar is drawn over this page, and without it the last rows and "+ Add coins" sat behind the bar. -->
 	<LinearLayout
 		android:id="@+id/linear1"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
+		android:paddingBottom="120dp"
 		android:orientation="vertical">
 		<TextView
 			android:id="@+id/tv_no_wallet_hint"

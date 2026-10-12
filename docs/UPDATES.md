@@ -2,6 +2,14 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): asset rows 60dp, "+ Add coins" visible
+
+What the app does:
+- Each coin on the Assets list is a 60dp row with a 38dp icon.
+- The list now leaves room for the bottom bar. Before, the bar covered the last rows and the "+ Add coins" button.
+
+What the owner does: build and install the app.
+
 ## 12 Oct 2026 (evening): Learn tab no longer freezes, Home total on open, goal reminders only when needed
 
 What the app does:

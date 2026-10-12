@@ -43,6 +43,8 @@ public final class LogoutManager {
 		try {
 			com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
 		} catch (Exception ignored) {}
+		// Saved node answers (balances, groups, history) belong to this person: gone with the sign-out.
+		com.harvana.app.sync.NodeReadCache.clear();
 		
 		// 4. Firebase ID token cache — has its own clear() method, same one
 		//    this button already called before.

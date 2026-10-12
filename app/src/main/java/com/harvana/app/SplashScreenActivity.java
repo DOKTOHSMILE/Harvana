@@ -180,6 +180,23 @@ public class SplashScreenActivity extends AppCompatActivity {
         }
         final String uid = user.getUid();
         status.setText("");
+        // Like WhatsApp: a person who has used the app on this phone goes straight in, from what is saved, and the
+        // profile is refreshed in the background. Only a first start waits for the network.
+        Map<String, Object> saved = null;
+        try { saved = com.harvana.app.offline.OfflineCacheManager.load(getApplicationContext(), "profile_" + uid); } catch (Exception ignored) { }
+        if (saved != null && !saved.isEmpty()) {
+            final android.content.Context app = getApplicationContext();
+            com.harvana.app.firestore.UserProfileManager.getInstance(app).getProfile(uid, new com.harvana.app.firestore.UserProfileManager.DocCallback() {
+                @Override public void onSuccess(Map<String, Object> data) {
+                    if (data != null && !data.isEmpty()) {
+                        try { com.harvana.app.offline.OfflineCacheManager.save(app, "profile_" + uid, data); } catch (Exception ignored) { }
+                    }
+                }
+                @Override public void onError(String error) { }
+            });
+            go(new Intent(this, MainActivity.class));
+            return;
+        }
         com.harvana.app.firestore.UserProfileManager.getInstance(getApplicationContext()).getProfile(uid,
             new com.harvana.app.firestore.UserProfileManager.DocCallback() {
                 @Override public void onSuccess(Map<String, Object> data) {

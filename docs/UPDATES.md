@@ -2,6 +2,20 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): the app works offline, like WhatsApp
+
+What the app does:
+- **Opens at once, even offline.** If you have used the app on this phone before, it goes straight in from what is saved and refreshes your profile in the background. Only the very first start waits for the network.
+- **Every answer from the network is kept on the phone:** balances, history, groups, members, savings lines, prices, trust, staking, P2P.
+  - When you are offline, or the network is down or very slow, screens show the last saved answer instead of an error.
+  - A real "not found" or "refused" from the network is never replaced by an old copy.
+  - Never kept, because an old copy would be wrong: nonces, fee estimates, mining work and sign-in steps.
+- **Group and profile data are kept without a size limit** (the Firestore offline store), so older groups don't drop out.
+- **Payments still need a connection,** as in a bank app: a payment signed offline could go out twice or with the wrong order.
+- **Signing out, or Settings → Clear cached data, deletes everything saved,** so the next person on the phone sees nothing of yours.
+
+What the owner does: build and install the app.
+
 ## 12 Oct 2026 (late): save in stable coins, one trust per person, history icons, notifications for every coin, group tabs
 
 What the app does:

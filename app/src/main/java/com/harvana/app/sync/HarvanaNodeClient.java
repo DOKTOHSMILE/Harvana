@@ -445,9 +445,40 @@ public final class HarvanaNodeClient {
 			
 			@Override
 			public void onError(String error) {
-				mainHandler.post(() -> cb.onError("Node authentication failed: " + error));
+				// Offline or the node unreachable: show the last saved answer, like WhatsApp shows chats offline.
+				mainHandler.post(() -> offlineOr(path, cb, "Node authentication failed: " + error));
 			}
 		});
+	}
+	
+	/** The last saved answer for this read (marked "_offline": true, "_savedAt"), or the error when there is none. */
+	private static void offlineOr(String path, JsonCallback cb, String error) {
+		NodeReadCache.Entry e = NodeReadCache.get(path);
+		if (e != null) {
+			try {
+				JSONObject json = new JSONObject(e.body);
+				json.put("_offline", true).put("_savedAt", e.savedAt);
+				cb.onSuccess(json);
+				return;
+			} catch (JSONException ignored) { }
+		}
+		cb.onError(error);
+	}
+	
+	/**
+	 * Instant then fresh: the saved answer at once (if there is one, marked "_fromCache": true), then the node's
+	 * answer when it arrives. The callback can run twice, so use it only where a screen simply repaints.
+	 */
+	public static void nodeGetFast(String path, JsonCallback cb) {
+		NodeReadCache.Entry e = NodeReadCache.get(path);
+		if (e != null) {
+			try {
+				JSONObject json = new JSONObject(e.body);
+				json.put("_fromCache", true).put("_savedAt", e.savedAt);
+				mainHandler.post(() -> cb.onSuccess(json));
+			} catch (JSONException ignored) { }
+		}
+		get(path, cb);
 	}
 	
 	private static void post(String path, String json, JsonCallback cb) {
@@ -590,17 +621,22 @@ public final class HarvanaNodeClient {
 					// FIX 3: Catch JSON parsing errors safely
 					try {
 						JSONObject json = new JSONObject(body);
+						NodeReadCache.put(path, body);                 // kept for offline and instant opening
 						mainHandler.post(() -> cb.onSuccess(json));
 					} catch (JSONException je) {
 						mainHandler.post(() -> cb.onError("Invalid JSON format from server"));
 					}
+				} else if (code >= 500) {
+					// The node is down or overloaded: the last saved answer is better than nothing.
+					mainHandler.post(() -> offlineOr(path, cb, "HTTP " + code + ": " + body));
 				} else {
+					// A real answer (404 not found, 400 refused): never replaced by an old copy.
 					mainHandler.post(() -> cb.onError("HTTP " + code + ": " + body));
 				}
 			} catch (Exception e) {
 				Log.e(TAG, "GET " + path, e);
 				final String errorMsg = e.getMessage() != null ? e.getMessage() : "network error";
-				mainHandler.post(() -> cb.onError(errorMsg));
+				mainHandler.post(() -> offlineOr(path, cb, errorMsg));      // no connection: show what was saved
 			} finally {
 				if (c != null) c.disconnect();
 			}

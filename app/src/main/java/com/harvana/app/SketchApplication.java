@@ -37,6 +37,9 @@ public class SketchApplication extends Application {
         com.harvana.app.utils.SmartCaps.install(this);
         com.harvana.app.utils.SmartSpacing.install(this);
         
+        // Node answers kept on the phone, so screens open offline and at once (sync/NodeReadCache).
+        com.harvana.app.sync.NodeReadCache.init(this);
+
         // EXPLICIT INITIALIZATION: Forces Firebase to wake up early
         FirebaseApp.initializeApp(this);
         
@@ -45,6 +48,8 @@ public class SketchApplication extends Application {
             com.google.firebase.firestore.FirebaseFirestore.getInstance().setFirestoreSettings(
                 new com.google.firebase.firestore.FirebaseFirestoreSettings.Builder()
                     .setPersistenceEnabled(true)
+                    // Keep everything read so far, like WhatsApp keeps every chat: no size cap evicting old groups.
+                    .setCacheSizeBytes(com.google.firebase.firestore.FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
                     .build());
         } catch (Exception e) {
             Log.w("SketchApplication", "Firestore settings already applied", e);

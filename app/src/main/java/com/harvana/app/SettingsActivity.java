@@ -648,6 +648,7 @@ public class SettingsActivity extends AppCompatActivity {
 		.setMessage("This clears locally cached profile and balance data used for instant, offline-friendly loading. Nothing on your account is affected — the app will simply re-fetch everything fresh the next time you're online.")
 		.setPositiveButton("Clear Cache", (dialog, which) -> {
 			com.harvana.app.offline.OfflineCacheManager.clearAll(getApplicationContext());
+			com.harvana.app.sync.NodeReadCache.clear();
 			Toast.makeText(this, "Cache cleared", Toast.LENGTH_SHORT).show();
 		})
 		.setNegativeButton("Cancel", null)

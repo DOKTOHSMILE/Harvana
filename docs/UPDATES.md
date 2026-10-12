@@ -2,6 +2,11 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (evening): coin rows in Activity
+
+- A pending coin transfer reads "Sending hNGN…" / "Receiving hNGN…" (the coin's name), not "HNGN".
+- "Deposited hNGN" and the other stable-coin rows show the coin's own logo. The row's colour tint used to turn it into a plain disc.
+
 ## 12 Oct 2026 (night): the show/hide eye no longer disappears when tapped
 
 - **Cause:** the eye icons were "selectors" that fade between their normal and pressed looks. When a tap hid or showed the balances, the app swapped the icon while the tap was still in progress, and the fade could stall at fully transparent, so the eye vanished until something redrew it.

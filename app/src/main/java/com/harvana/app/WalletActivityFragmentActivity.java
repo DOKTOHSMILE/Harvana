@@ -460,6 +460,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 			String asset = item.get("tokenSymbol") != null 
 			? item.get("tokenSymbol").toString().toUpperCase() : com.harvana.app.CoinInfo.ticker();
 			if (asset.isEmpty() || "NULL".equals(asset)) asset = com.harvana.app.CoinInfo.ticker();
+			final String coinCode = asset;
+			if (com.harvana.app.husd.Stable.isStable(asset)) asset = com.harvana.app.husd.Stable.symbol(asset);   // "HNGN" reads hNGN
 			
 			double amount = 0.0;
 			Object valObj = item.get("value");
@@ -532,7 +534,15 @@ public class WalletActivityFragmentActivity extends Fragment {
 				if (kind != null) {
 					if (holder.tvType != null) holder.tvType.setText(isPending ? kind.title + "…" : kind.title);
 					if (holder.tvAddress != null) holder.tvAddress.setText(kind.detail + " · " + (isIncoming ? "From: " + shortenAddress(sender) : "To: " + shortenAddress(recipient)));
-					if (!isPending && holder.ivIcon != null) holder.ivIcon.setImageResource(kind.icon);
+					if (!isPending && holder.ivIcon != null) {
+						if (com.harvana.app.husd.Stable.isStable(coinCode)) {
+							// The coin's own logo, untinted: the row's colour filter turned it into a plain disc.
+							holder.ivIcon.clearColorFilter();
+							holder.ivIcon.setImageDrawable(com.harvana.app.husd.StableIcon.drawable(holder.ivIcon.getContext(), coinCode));
+						} else {
+							holder.ivIcon.setImageResource(kind.icon);
+						}
+					}
 				}
 			}
 			
@@ -552,7 +562,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 			
 			final long   finalTimestamp = timestamp;
 			final double finalAmount    = amount;
-			final String finalAsset     = asset;
+			final String finalAsset     = coinCode;              // the code ("HNGN"), which the receipt and coin pages look up
 			
 			if (holder.cardview1 != null) {
 				holder.cardview1.setOnClickListener(v -> {

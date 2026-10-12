@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): one trust score everywhere; HARV value loads
+
+- **Trust:** Home's trust card and the Trust score page now show the person's one score across every linked wallet (`PROFILES.trust_percent`, as on the profile). Before, they showed only the active wallet's own score (8% vs 21%). The wallet score is still used before the person has one.
+- **HARV value:**
+  - when the node has no `/api/v1/swap/price` yet, `HarvPrice` works the price out from `/api/v1/swap/pools` (hNGN pool: ₦277 per HARV now);
+  - the last known price is saved on the phone and shown at once;
+  - an unknown price is asked for again next time instead of being kept for a minute.
+- **Total balance:** a missing HARV price no longer stops the total from updating. The other coins still add up.
+
 ## 12 Oct 2026 (night): vault protection messages
 
 - New node refusals in plain English (`ErrorText`, `VaultActivity`):

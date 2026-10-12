@@ -1357,6 +1357,28 @@ public class HomeFragmentActivity extends Fragment {
 	
 	private void _loadComputedTrust() {
 		if (getContext() == null) return;
+		// The person's one trust score across every wallet they linked: the same figure the profile shows.
+		com.google.firebase.auth.FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
+		if (me != null) {
+			com.harvana.app.trust.ProfileTrust.forget(me.getUid());
+			com.harvana.app.trust.ProfileTrust.resolve(me.getUid(), card -> {
+				if (!isAdded()) return;
+				if (card.scored()) {
+					if (text_val_trust != null) text_val_trust.setText(card.percent + "%");
+					if (ring_trust_score != null) { ring_trust_score.setMax(100); ring_trust_score.setProgress(card.percent); }
+					if (text_sub_trust != null) text_sub_trust.setText(card.trustTier.isEmpty() ? com.harvana.app.trust.ProfileTrust.tierFor(card.percent) : card.trustTier);
+				} else {
+					_loadWalletTrust();
+				}
+			});
+			return;
+		}
+		_loadWalletTrust();
+	}
+
+	/** Before the person has a published score: the active wallet's own. */
+	private void _loadWalletTrust() {
+		if (getContext() == null) return;
 		String address = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(getContext());
 		com.harvana.app.trust.NetworkTrust.wallet(address, score -> {
 			if (!isAdded() || getActivity() == null) return;

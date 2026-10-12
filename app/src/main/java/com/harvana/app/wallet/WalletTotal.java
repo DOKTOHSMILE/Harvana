@@ -67,7 +67,7 @@ public final class WalletTotal {
                 if (err != null && !err.isEmpty()) { harvFailed[0] = true; partDone.run(); return; }
                 if (harv <= 0) { partDone.run(); return; }
                 FiatValueHelper.valueOfHarv(c, harv, symbol, (fiat, ok) -> {
-                    if (ok && !Double.isNaN(fiat)) parts[0] = fiat; else harvFailed[0] = true;
+                    if (ok && !Double.isNaN(fiat)) parts[0] = fiat;    // no HARV price yet: the other coins still add up
                     partDone.run();
                 });
             });

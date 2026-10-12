@@ -55,6 +55,11 @@ public class TrustScoreActivity extends AppCompatActivity {
     @Override protected void onResume() { super.onResume(); load(); }
     @Override public boolean onSupportNavigateUp() { finish(); return true; }
 
+    /** The person's one score across every linked wallet (the profile's figure), once read; -1 until then. */
+    private int personPercent = -1;
+    private String personTier = "";
+    private java.util.Map<String, Object> lastPerson;
+
     private boolean shownOnce;       // the placeholder is for the first load only, not every return to the screen
     private boolean fetchedOnce;
 
@@ -64,7 +69,15 @@ public class TrustScoreActivity extends AppCompatActivity {
             root.removeAllViews();
             root.addView(com.harvana.app.utils.Shimmer.cards(this, 3));
         }
-        address = WalletManager.getActiveWalletAddress(this);
+        com.google.firebase.auth.FirebaseUser me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (me != null) com.harvana.app.trust.ProfileTrust.resolve(me.getUid(), card -> {
+            if (!card.scored() || isFinishing()) return;
+            boolean changed = card.percent != personPercent;
+            personPercent = card.percent;
+            personTier = card.trustTier.isEmpty() ? com.harvana.app.trust.ProfileTrust.tierFor(card.percent) : card.trustTier;
+            if (changed && lastPerson != null) render(lastPerson);
+        });
+                address = WalletManager.getActiveWalletAddress(this);
         if (address == null || address.isEmpty()) {
             root.removeAllViews();
             root.addView(tv("No wallet yet", 22, true, UiColors.textPrimary()));
@@ -76,6 +89,14 @@ public class TrustScoreActivity extends AppCompatActivity {
     }
 
     private void render(java.util.Map<String, Object> person) {
+        if (person != null) {
+            lastPerson = person;
+            if (personPercent >= 0) {                       // the same figure as the profile and Home
+                person = new java.util.HashMap<>(person);
+                person.put("trustPercent", personPercent);
+                person.put("trustTier", personTier);
+            }
+        }
         final int gen = ++generation;
         root.removeAllViews();
         if (person == null) {

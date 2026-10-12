@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): staking screen fixes
+
+- **My Positions showed 0 HARV even with a stake.** The panel looked its views up through the window, and the second tab's page is not attached to the window when the panel starts, so nothing on "My Positions" was ever filled in (it kept the layout's placeholder "0 HARV" and "+0.015% Daily"). It now looks inside both pages (`StakingPanel.find`). The staking data itself was fine: the Staking tab already showed the stake.
+- **Stable-coin fee shares:** one slim row per coin, with the coin on the left and the amount and a small Claim pill together on the right. The pill is filled when there is something to claim and outlined when there isn't (tapping it then says "Nothing to claim yet").
+- **Claim on My Positions** is a 36 dp pill reading "Claim", no longer a large "Claim Now" block.
+- **MAX** in the stake box is now a solid accent pill. It was a 10%-opacity tint and looked transparent.
+
 ## 12 Oct 2026 (night): every error in plain English, nothing about the server shown
 
 What the app does:

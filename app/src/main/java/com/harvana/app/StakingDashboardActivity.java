@@ -74,7 +74,7 @@ public class StakingDashboardActivity extends AppCompatActivity {
 		parent.addView(host, at, old);
 	}
 
-	View takePage(int index) { return pages[index]; }
+	public View takePage(int index) { return pages[index]; }
 
 	void pageReady() {
 		if (++pagesReady == 2 && panel == null) {

@@ -10,7 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.button.MaterialButton;
 import com.harvana.app.utils.UiColors;
 import com.harvana.app.wallet.WalletManager;
 
@@ -64,22 +63,26 @@ public final class StakerShareCard {
             if (s == null) continue;
             String code = s.optString("asset");
             long raw = s.optLong("claimableRaw");
+            // One slim row: coin on the left; amount and a small Claim pill together on the right.
             LinearLayout row = new LinearLayout(a);
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
-            row.setPadding(0, dp(a, 10), 0, 0);
+            row.setMinimumHeight(dp(a, 44));
+            row.setPadding(0, dp(a, 4), 0, dp(a, 4));
             ImageView icon = new ImageView(a);
             icon.setImageDrawable(StableIcon.drawable(a, code));
-            row.addView(icon, new LinearLayout.LayoutParams(dp(a, 28), dp(a, 28)));
-            TextView amt = text(a, HusdClient.format(raw) + " " + Stable.symbol(code), 15, true, UiColors.textPrimary());
-            amt.setPadding(dp(a, 10), 0, 0, 0);
+            row.addView(icon, new LinearLayout.LayoutParams(dp(a, 24), dp(a, 24)));
+            TextView sym = text(a, Stable.symbol(code), 14, true, UiColors.textPrimary());
+            sym.setPadding(dp(a, 10), 0, 0, 0);
+            row.addView(sym, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+            TextView amt = text(a, HusdClient.format(raw), 14, raw > 0, raw > 0 ? UiColors.textPrimary() : UiColors.textTertiary());
+            amt.setGravity(Gravity.END);
+            amt.setPadding(0, 0, dp(a, 10), 0);
             com.harvana.app.utils.BalancePrivacy.guard(amt);
-            row.addView(amt, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-            MaterialButton claim = new MaterialButton(a);
-            claim.setText("Claim");
-            claim.setAllCaps(false);
-            claim.setEnabled(raw > 0);
+            row.addView(amt);
+            TextView claim = pill(a, raw > 0);
             claim.setOnClickListener(v -> {
+                if (raw <= 0) { Toast.makeText(a, "Nothing to claim yet.", Toast.LENGTH_SHORT).show(); return; }
                 claim.setEnabled(false);
                 java.util.List<String[]> confirm = new java.util.ArrayList<>();
                 confirm.add(new String[]{"From", "Harvana's " + Stable.symbol(code) + " staker pool"});
@@ -97,7 +100,7 @@ public final class StakerShareCard {
                             @Override public void onError(String e) {
                                 a.runOnUiThread(() -> {
                                     claim.setEnabled(true);
-                                    Toast.makeText(a, e != null && com.harvana.app.utils.ErrorText.is(e, "NOTHING_TO_CLAIM") ? "Nothing to claim yet." : "Couldn't claim: " + e,
+                                    Toast.makeText(a, com.harvana.app.utils.ErrorText.is(e, "NOTHING_TO_CLAIM") ? "Nothing to claim yet." : com.harvana.app.utils.ErrorText.plain(e),
                                             Toast.LENGTH_LONG).show();
                                 });
                             }
@@ -109,6 +112,31 @@ public final class StakerShareCard {
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(a, 12);
         page.addView(card, Math.min(1, page.getChildCount()), lp);
+    }
+
+    /** A small rounded "Claim" pill: filled when there is something to claim, outlined and quiet when not. */
+    private static TextView pill(Activity a, boolean active) {
+        TextView t = new TextView(a);
+        t.setText("Claim");
+        t.setTextSize(12);
+        t.setTypeface(null, Typeface.BOLD);
+        t.setGravity(Gravity.CENTER);
+        t.setPadding(dp(a, 14), dp(a, 6), dp(a, 14), dp(a, 6));
+        t.setMinWidth(dp(a, 64));
+        GradientDrawable g = new GradientDrawable();
+        g.setCornerRadius(dp(a, 14));
+        if (active) {
+            g.setColor(UiColors.accent());
+            t.setTextColor(UiColors.onAccent());
+        } else {
+            g.setColor(0x00000000);
+            g.setStroke(dp(a, 1), UiColors.textTertiary());
+            t.setTextColor(UiColors.textTertiary());
+        }
+        t.setBackground(g);
+        t.setClickable(true);
+        t.setFocusable(true);
+        return t;
     }
 
     private static TextView text(Activity a, String s, float sp, boolean bold, int color) {

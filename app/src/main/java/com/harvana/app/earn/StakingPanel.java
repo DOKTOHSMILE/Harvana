@@ -147,52 +147,70 @@ public final class StakingPanel {
         }
     };
 
+    /**
+     * A view on either staking page. The pages live in a ViewPager2, and the second one is not attached to the window
+     * when this panel starts, so the activity's own lookup missed every view on "My Positions" (it showed the layout's
+     * placeholder "0 HARV" for good). Look in the pages first.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T extends View> T find(AppCompatActivity activity, int id) {
+        if (activity instanceof com.harvana.app.StakingDashboardActivity) {
+            com.harvana.app.StakingDashboardActivity d = (com.harvana.app.StakingDashboardActivity) activity;
+            for (int i = 0; i < 2; i++) {
+                View page = d.takePage(i);
+                View v = page == null ? null : page.findViewById(id);
+                if (v != null) return (T) v;
+            }
+        }
+        return activity.findViewById(id);
+    }
+
     public StakingPanel(AppCompatActivity activity) {
         this.host = activity;
 
-        overviewStaked = activity.findViewById(R.id.tv_overview_staked);
-        dailyPct = activity.findViewById(R.id.tv_daily_pct);
-        overviewUnclaimed = activity.findViewById(R.id.tv_overview_unclaimed);
-        tvPool = activity.findViewById(R.id.tv_pool);
-        tvEstRewardInput = activity.findViewById(R.id.tv_est_reward_input);
-        chart = activity.findViewById(R.id.reward_chart);
-        amount = activity.findViewById(R.id.et_amount);
-        stake = activity.findViewById(R.id.btn_stake);
-        available = activity.findViewById(R.id.tv_available);
-        spAsset = activity.findViewById(R.id.spAsset);
+        overviewStaked = find(activity, R.id.tv_overview_staked);
+        dailyPct = find(activity, R.id.tv_daily_pct);
+        overviewUnclaimed = find(activity, R.id.tv_overview_unclaimed);
+        tvPool = find(activity, R.id.tv_pool);
+        tvEstRewardInput = find(activity, R.id.tv_est_reward_input);
+        chart = find(activity, R.id.reward_chart);
+        amount = find(activity, R.id.et_amount);
+        stake = find(activity, R.id.btn_stake);
+        available = find(activity, R.id.tv_available);
+        spAsset = find(activity, R.id.spAsset);
 
-        chip1d = activity.findViewById(R.id.chip_1d);
-        chip3d = activity.findViewById(R.id.chip_3d);
-        chip7d = activity.findViewById(R.id.chip_7d);
-        chip1m = activity.findViewById(R.id.chip_1m);
-        chip3m = activity.findViewById(R.id.chip_3m);
-        chipAll = activity.findViewById(R.id.chip_all);
+        chip1d = find(activity, R.id.chip_1d);
+        chip3d = find(activity, R.id.chip_3d);
+        chip7d = find(activity, R.id.chip_7d);
+        chip1m = find(activity, R.id.chip_1m);
+        chip3m = find(activity, R.id.chip_3m);
+        chipAll = find(activity, R.id.chip_all);
 
-        cardLockFree = activity.findViewById(R.id.card_lock_free);
-        cardLock7 = activity.findViewById(R.id.card_lock_7);
-        cardLock30 = activity.findViewById(R.id.card_lock_30);
-        cardLock90 = activity.findViewById(R.id.card_lock_90);
+        cardLockFree = find(activity, R.id.card_lock_free);
+        cardLock7 = find(activity, R.id.card_lock_7);
+        cardLock30 = find(activity, R.id.card_lock_30);
+        cardLock90 = find(activity, R.id.card_lock_90);
 
-        posTotal = activity.findViewById(R.id.tv_pos_total);
-        posDailyPct = activity.findViewById(R.id.tv_pos_daily_pct);
-        gridTotal = activity.findViewById(R.id.tv_grid_total);
-        gridUnclaimed = activity.findViewById(R.id.tv_grid_unclaimed);
-        gridApy = activity.findViewById(R.id.tv_grid_apy);
-        unbondCount = activity.findViewById(R.id.tv_unbond_count);
-        claim = activity.findViewById(R.id.btn_claim);
-        claimSub = activity.findViewById(R.id.tv_claim_sub);
-        unbondingList = activity.findViewById(R.id.unbonding_list);
-        stakesList = activity.findViewById(R.id.stakes_list);
-        liveEmpty = activity.findViewById(R.id.tv_live_empty);
-        liveSection = activity.findViewById(R.id.live_section);
-        closedSection = activity.findViewById(R.id.closed_section);
+        posTotal = find(activity, R.id.tv_pos_total);
+        posDailyPct = find(activity, R.id.tv_pos_daily_pct);
+        gridTotal = find(activity, R.id.tv_grid_total);
+        gridUnclaimed = find(activity, R.id.tv_grid_unclaimed);
+        gridApy = find(activity, R.id.tv_grid_apy);
+        unbondCount = find(activity, R.id.tv_unbond_count);
+        claim = find(activity, R.id.btn_claim);
+        claimSub = find(activity, R.id.tv_claim_sub);
+        unbondingList = find(activity, R.id.unbonding_list);
+        stakesList = find(activity, R.id.stakes_list);
+        liveEmpty = find(activity, R.id.tv_live_empty);
+        liveSection = find(activity, R.id.live_section);
+        closedSection = find(activity, R.id.closed_section);
 
         setupAssetSpinner();
         setupLockCards();
 
         if (stake != null) stake.setOnClickListener(v -> doStake());
         if (claim != null) claim.setOnClickListener(v -> doClaim());
-        com.google.android.material.tabs.TabLayout liveTabs = activity.findViewById(R.id.tab_live_closed);
+        com.google.android.material.tabs.TabLayout liveTabs = find(activity, R.id.tab_live_closed);
         com.harvana.app.utils.Toggles.pill(liveTabs);
         if (liveTabs != null) {
             liveTabs.addTab(liveTabs.newTab().setText("Live"));
@@ -203,7 +221,7 @@ public final class StakingPanel {
                 @Override public void onTabReselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
             });
         }
-        View btnMax = activity.findViewById(R.id.btn_max);
+        View btnMax = find(activity, R.id.btn_max);
         if (btnMax != null) btnMax.setOnClickListener(v -> fillMax());
 
         if (amount != null) {

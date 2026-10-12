@@ -307,15 +307,20 @@
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_max"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                android:layout_height="36dp"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
+                                android:insetTop="0dp"
+                                android:insetBottom="0dp"
+                                android:paddingHorizontal="14dp"
+                                android:paddingVertical="0dp"
                                 android:text="MAX"
-                                android:textColor="@color/colorSuccess"
-                                android:paddingHorizontal="8dp"
-                                android:paddingVertical="4dp"
+                                android:textColor="@color/colorTextOnAccent"
                                 android:textStyle="bold"
                                 android:textSize="12sp"
-	app:backgroundTint="#1A00FFA3"
-	android:textAllCaps="false"/>
+                                android:textAllCaps="false"
+                                app:cornerRadius="18dp"
+                                app:backgroundTint="@color/colorAccent"/>
                         </LinearLayout>
 
                         <TextView
@@ -552,11 +557,17 @@
                             android:id="@+id/btn_claim"
                             android:tag="payment_button"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Claim Now"
+                            android:layout_height="36dp"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:paddingHorizontal="16dp"
+                            android:text="Claim"
+                            android:textSize="13sp"
                             android:textAllCaps="false"
-                            android:textColor="#000000"
-                            app:cornerRadius="20dp"
+                            android:textColor="@color/colorTextOnAccent"
+                            app:cornerRadius="18dp"
                             app:backgroundTint="@color/colorAccent"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>

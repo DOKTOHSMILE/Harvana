@@ -106,6 +106,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 		if (already == null || already.isEmpty()) {
 			com.harvana.app.utils.Shimmer.hold(recyclerview1, com.harvana.app.utils.Shimmer.rows(recyclerview1.getContext(), 4), 4000, "WalletAssetFragmentActivity");
 		}
+		_setupSearch(_view);
 		View addCoins = _view.findViewById(R.id.btn_add_coins);
 		if (addCoins != null) addCoins.setOnClickListener(v -> com.harvana.app.wallet.ChainAssetsSection.showPicker(getContext(),
 				() -> {
@@ -182,6 +183,45 @@ public class WalletAssetFragmentActivity extends Fragment {
 	/** Balance from node (available = spendable). No Firestore wallet sync. */
 	private LinearLayout _husdBox() {
 		return getView() == null ? null : getView().findViewById(R.id.husd_asset);
+	}
+
+	private String assetQuery = "";
+
+	/**
+	 * Search over every row on this page: HARV, the stable coins, the other coins and the ones added by hand. A row
+	 * shows when its name or symbol contains the text. Rows arrive later as balances load, so the filter is applied
+	 * again on every layout pass while a search is typed.
+	 */
+	private void _setupSearch(View root) {
+		android.widget.EditText et = root.findViewById(R.id.et_asset_search);
+		if (et == null) return;
+		et.addTextChangedListener(new android.text.TextWatcher() {
+			@Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
+			@Override public void onTextChanged(CharSequence s, int a, int b, int c) { }
+			@Override public void afterTextChanged(android.text.Editable s) {
+				assetQuery = s.toString().trim().toLowerCase(java.util.Locale.US);
+				_applySearch();
+			}
+		});
+		if (linear1 != null) linear1.getViewTreeObserver().addOnGlobalLayoutListener(() -> { if (!assetQuery.isEmpty()) _applySearch(); });
+	}
+
+	private void _applySearch() {
+		if (getView() == null) return;
+		if (recyclerview1 != null) for (int i = 0; i < recyclerview1.getChildCount(); i++) _filterRow(recyclerview1.getChildAt(i));
+		for (int id : new int[]{R.id.husd_asset, R.id.chain_assets, R.id.custom_assets}) {
+			ViewGroup box = getView().findViewById(id);
+			if (box != null) for (int i = 0; i < box.getChildCount(); i++) _filterRow(box.getChildAt(i));
+		}
+	}
+
+	private void _filterRow(View row) {
+		TextView name = row.findViewById(R.id.tv_asset_name);
+		TextView symbol = row.findViewById(R.id.tv_asset_symbol);
+		if (name == null && symbol == null) return;
+		String text = ((name == null ? "" : name.getText()) + " " + (symbol == null ? "" : symbol.getText())).toLowerCase(java.util.Locale.US);
+		int want = assetQuery.isEmpty() || text.contains(assetQuery) ? View.VISIBLE : View.GONE;
+		if (row.getVisibility() != want) row.setVisibility(want);
 	}
 
 	public void _loadAvailableCoins() {

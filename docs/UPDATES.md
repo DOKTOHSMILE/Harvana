@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night, later): search the Assets list, clearer Add coins
+
+What the app does:
+- **Search on the Assets list:** type a name or symbol (e.g. "eth", "hNGN", "Pi") to filter every row: HARV, stable coins, the other coins and the ones you added.
+- **"Add coins"** is a proper outlined button with an icon, centred.
+- **The Add coins sheet:**
+  - starts with an **"Add a custom chain or token"** button, so it is always visible;
+  - scrolls when the list is long.
+
+What the owner does: build and install the app.
+
 ## 12 Oct 2026 (night): asset rows 60dp, "+ Add coins" visible
 
 What the app does:

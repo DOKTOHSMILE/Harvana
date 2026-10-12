@@ -61,17 +61,23 @@ public final class ChainAssetsSection {
         sub.setTextColor(ContextCompat.getColor(c, R.color.colorTextSecondary));
         sub.setPadding(0, dp(c, 4), 0, dp(c, 12));
         root.addView(sub);
-        for (CoinCatalog.Coin coin : CoinCatalog.others()) root.addView(toggleRow(c, coin, onChange));
-        TextView custom = new TextView(c);
-        custom.setText("+  Add a custom chain or token");
-        custom.setTextSize(14);
-        custom.setTypeface(Typeface.DEFAULT_BOLD);
-        custom.setTextColor(ContextCompat.getColor(c, R.color.colorPrimary));
-        custom.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        custom.setMinHeight(dp(c, 48));
+        // Adding your own chain or token is a clear button near the top, so it is always on screen.
+        com.google.android.material.button.MaterialButton custom = new com.google.android.material.button.MaterialButton(
+                c, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+        custom.setText("Add a custom chain or token");
+        custom.setAllCaps(false);
+        custom.setGravity(android.view.Gravity.CENTER);
+        custom.setIconResource(R.drawable.icon_add_circle_outline_round);
+        custom.setIconGravity(com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_START);
+        custom.setCornerRadius(dp(c, 14));
         custom.setOnClickListener(v -> { d.dismiss(); CustomAssets.showAdd(c, onChange); });
-        root.addView(custom);
-        d.setContentView(root);
+        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(c, 52));
+        clp.bottomMargin = dp(c, 8);
+        root.addView(custom, clp);
+        for (CoinCatalog.Coin coin : CoinCatalog.others()) root.addView(toggleRow(c, coin, onChange));
+        androidx.core.widget.NestedScrollView scroll = new androidx.core.widget.NestedScrollView(c);
+        scroll.addView(root);
+        d.setContentView(scroll);
         d.show();
     }
 

@@ -12,6 +12,7 @@ public final class CircleSnapshot {
     @SuppressWarnings("unchecked")
     public static GroupSnapshot of(Map<String, Object> circle, Map<String, Object> member) {
         GroupSnapshot s = new GroupSnapshot();
+        final String coin = assetOf(circle);   // the group's coin; empty for a group made before coins (HARV)
         s.family = "CIRCLE";
         s.id = str(circle, "circleId");
         s.state = str(circle, "state");
@@ -35,10 +36,10 @@ public final class CircleSnapshot {
             s.headline = "COMPLETED".equals(s.state) ? "Completed" : "ABORTED".equals(s.state) ? "Cancelled - bonds returned" : s.state;
         }
 
-        s.term("Contribution per round", harv(contribution));
-        s.term("Pot per round", harv(contribution * Math.max(0, limit - 1)));
+        s.term("Contribution per round", money(contribution, coin));
+        s.term("Pot per round", money(contribution * Math.max(0, limit - 1), coin));
         s.term("Round length", cycle(lng(circle, "cycleDurationHours")));
-        s.term("Bond to join", harv(lng(circle, "requiredBondRaw")));
+        s.term("Bond to join", money(lng(circle, "requiredBondRaw"), coin));
         s.term("Members", String.valueOf(limit));
 
         boolean isMember = member != null && !member.isEmpty();
@@ -47,11 +48,11 @@ public final class CircleSnapshot {
         if (isMember) {
             long payoutRound = lng(member, "payoutRound");
             if (payoutRound > 0) s.my("You are paid in round", String.valueOf(payoutRound));
-            s.my("Paid so far", harv(lng(member, "paidRaw")));
-            if (member.containsKey("remainingObligationRaw")) s.my("Still to pay", harv(lng(member, "remainingObligationRaw")));
-            s.my("Bond locked", harv(lng(member, "bondRemainingRaw")));
-            if (lng(member, "penaltyAccruedRaw") > 0) s.my("Penalties", harv(lng(member, "penaltyAccruedRaw")));
-            if (lng(member, "payoutReceivedRaw") > 0) s.my("Payout received", harv(lng(member, "payoutReceivedRaw")));
+            s.my("Paid so far", money(lng(member, "paidRaw"), coin));
+            if (member.containsKey("remainingObligationRaw")) s.my("Still to pay", money(lng(member, "remainingObligationRaw"), coin));
+            s.my("Bond locked", money(lng(member, "bondRemainingRaw"), coin));
+            if (lng(member, "penaltyAccruedRaw") > 0) s.my("Penalties", money(lng(member, "penaltyAccruedRaw"), coin));
+            if (lng(member, "payoutReceivedRaw") > 0) s.my("Payout received", money(lng(member, "payoutReceivedRaw"), coin));
             if ("LATE".equals(ms)) s.notes.add("You're late. Pay now to avoid penalties taken from your bond.");
             if (active && payoutRound > 0 && payoutRound == round) s.notes.add("It's your turn to be paid this round, so nothing is due from you.");
         }
@@ -70,7 +71,7 @@ public final class CircleSnapshot {
         } else if (isMember && active && alreadyPaidThisRound(member, contribution, limit, round)) {
             s.actions.add(GroupAction.closed("Already paid this round"));
         } else if (isMember && active && ("ACTIVE".equals(ms) || "LATE".equals(ms))) {
-            s.actions.add(new GroupAction(GroupAction.CONTRIBUTE, "Pay " + harv(contribution), true));
+            s.actions.add(new GroupAction(GroupAction.CONTRIBUTE, "Pay " + money(contribution, coin), true));
         } else if (isMember && "COMPLETED".equals(s.state)) {
             s.actions.add(new GroupAction(GroupAction.WITHDRAW_BOND, "Withdraw bond", true));
         } else if (isMember && "ABORTED".equals(s.state) && !"ABORTED".equals(ms) && lng(member, "bondRemainingRaw") > 0) {

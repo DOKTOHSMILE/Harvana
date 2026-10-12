@@ -62,6 +62,12 @@ public class GroupActionsActivity extends AppCompatActivity {
     private LinearLayout content;
 
     private Map<String, Object> group, member, line, fsData;
+
+    /** An amount of this group, in its coin (HARV for a group made before coins). */
+    private String gm(long raw) { return com.harvana.app.engine.Amounts.money(raw, com.harvana.app.engine.Amounts.assetOf(group)); }
+    private long typed(String text) {
+        return com.harvana.app.engine.Amounts.assetOf(group).isEmpty() ? CircleUi.toRaw(text) : NodePayActions.coinRaw(text);
+    }
     private final List<Object[]> proposals = new ArrayList<>();      // {kind, id, Map record}
     private final List<Object[]> packRequests = new ArrayList<>();   // {lineId, Map line}
     private final List<Map<String, Object>> defaulted = new ArrayList<>();
@@ -475,7 +481,7 @@ public class GroupActionsActivity extends AppCompatActivity {
 
         long amt = num(rec, "amountRaw");
         if (amt > 0) {
-            TextView a = CircleUi.text(this, CircleUi.harv(amt), 22, R.color.colorTextPrimary, true);
+            TextView a = CircleUi.text(this, gm(amt), 22, R.color.colorTextPrimary, true);
             a.setPadding(0, CircleUi.dp(this, 6), 0, 0);
             c.addView(a);
         }
@@ -660,13 +666,13 @@ public class GroupActionsActivity extends AppCompatActivity {
         head.addView(CircleUi.text(this, "Withdrawal request", 15, R.color.colorTextPrimary, true), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         head.addView(CircleUi.chip(this, "NEEDS APPROVAL", R.color.colorWarning));
         c.addView(head);
-        TextView a = CircleUi.text(this, CircleUi.harv(num(ln, "amountPaidRaw")), 22, R.color.colorTextPrimary, true);
+        TextView a = CircleUi.text(this, gm(num(ln, "amountPaidRaw")), 22, R.color.colorTextPrimary, true);
         a.setPadding(0, CircleUi.dp(this, 6), 0, 0);
         c.addView(a);
         String who = str(ln, "memberAddress");
         c.addView(CircleUi.text(this, (who.isEmpty() ? "A member" : shortAddr(who)) + " asked to take their savings out of the group. Approving sends the money to them.",
             12.5f, R.color.colorTextSecondary, false));
-        GroupAction approve = new GroupAction(GroupAction.ACCUM_APPROVE_PACK, CircleUi.harv(num(ln, "amountPaidRaw")), true, lineId);
+        GroupAction approve = new GroupAction(GroupAction.ACCUM_APPROVE_PACK, gm(num(ln, "amountPaidRaw")), true, lineId);
         Button b = button("Approve withdrawal", true, v -> NodePayActions.run(ctx((Button) v), approve));
         c.addView(b);
         return c;
@@ -745,10 +751,10 @@ public class GroupActionsActivity extends AppCompatActivity {
             return;
         }
         long deadline = num(offer, "deadlineTimestamp");
-        card.addView(CircleUi.text(this, "You can put this right: pay back " + CircleUi.harv(amount) + " of the bond the default used"
+        card.addView(CircleUi.text(this, "You can put this right: pay back " + gm(amount) + " of the bond the default used"
             + (deadline > 0 ? ", before " + new SimpleDateFormat("d MMM", Locale.US).format(new Date(deadline)) : "")
             + ". The penalty is not refunded. It goes back into your bond and the default stops counting against you.", 12.5f, R.color.colorTextSecondary, false));
-        card.addView(button("Put it right  ·  " + CircleUi.harv(amount), true, v -> pay("Put a default right", CircleUi.harv(amount),
+        card.addView(button("Put it right  ·  " + gm(amount), true, v -> pay("Put a default right", gm(amount),
             "Goes back into your own bond in this circle",
             () -> NodeGroupClient.cureDefault(getApplicationContext(), me, nodeId, result("Sent. The default is cleared once the network confirms it.")))));
     }
@@ -848,9 +854,9 @@ public class GroupActionsActivity extends AppCompatActivity {
         new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Start a new goal").setView(box).setNegativeButton("Cancel", null)
             .setPositiveButton("Continue", (d, w) -> {
                 final String n = name.getText().toString().trim();
-                final long raw = CircleUi.toRaw(target.getText().toString());
+                final long raw = typed(target.getText().toString());
                 if (n.isEmpty() || raw <= 0) { toast("Enter a name and a target."); return; }
-                pay("Start a new goal", CircleUi.harv(raw),
+                pay("Start a new goal", gm(raw),
                     "New goal “" + n + "” in this group. Target shown. Nothing is locked.",
                     () -> NodeGroupClient.startNextFixedGoal(getApplicationContext(), me, nodeId, raw, n, result("New goal started.")));
             }).show();

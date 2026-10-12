@@ -1396,7 +1396,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
 		"Create this rotating group", com.harvana.app.circle.CircleUi.harv(fee), rows, () -> {
 			final com.harvana.app.ui.ProgressSheet pd = com.harvana.app.ui.ProgressSheet.show(this, null, "Creating on the network…", true, false);
-			com.harvana.app.sync.NodeGroupClient.createCircle(getApplicationContext(), wallet, contributionRaw, members, cycleHours,
+			com.harvana.app.sync.NodeGroupClient.createCircle(getApplicationContext(), wallet, contributionRaw, members, cycleHours, "HNGN",
 			new com.harvana.app.sync.NodeGroupClient.Callback() {
 				@Override public void onSuccess(org.json.JSONObject json) {
 					final String id = json.optString("circleId", "");
@@ -1461,7 +1461,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 		final String rule = "Cycle-End Only".equals(withdrawalRuleString) ? "CYCLE_END_ONLY" : "ANYTIME";
 		String msg = "• Creation fee: 1 HARV\n• Interest rate: " + ratePct + "%\n• Withdrawals: " + rule;
 		_confirmAndCreateOnChain("Create this savings group?", msg, cb ->
-		com.harvana.app.sync.NodeGroupClient.createAccumGroup(getApplicationContext(), wallet, bps, rule, cb), "groupId", "ACCUM");
+		com.harvana.app.sync.NodeGroupClient.createAccumGroup(getApplicationContext(), wallet, bps, rule, "HNGN", cb), "groupId", "ACCUM");
 	}
 	
 	private void _refreshBeneficiaryHint() {
@@ -1515,7 +1515,7 @@ public class CreateNewGroupActivity extends AppCompatActivity {
 				+ "\n• " + when
 				+ "\n• Creation fee: 1 HARV";
 		_confirmAndCreateOnChain("Create this goal group?", msg, cb ->
-		com.harvana.app.sync.NodeGroupClient.createFixedGroup(getApplicationContext(), wallet, target, rule, beneficiary, 0L, name, desc, cb), "groupId", "FIXED");
+		com.harvana.app.sync.NodeGroupClient.createFixedGroup(getApplicationContext(), wallet, target, rule, beneficiary, 0L, name, desc, "HNGN", cb), "groupId", "FIXED");
 	}
 	
 	private interface NodeCreate { void run(com.harvana.app.sync.NodeGroupClient.Callback cb); }

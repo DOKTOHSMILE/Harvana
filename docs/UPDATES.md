@@ -2,6 +2,22 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): groups in stable coins; Receive lists every stable coin
+
+Needs the node update of the same day (groups in stable coins). An older app cannot create groups on the new node, and this app cannot create groups on the old node.
+
+| Where | Now |
+|---|---|
+| Create group (rotating, savings, goal) | **Coin** row on the amounts step: hNGN (default) or any coin the network has on. Amounts typed in that coin. Review shows Coin. The coin is signed into the create request and saved on the group (`asset`). |
+| Group screens | Every amount (contribution, pot, bond, target, raised, deposits, savings, payouts, votes, refunds) in the group's coin. |
+| Payments in a group | The coin from your wallet; tFare row: HARV. |
+| Savings line | Kept in the group's coin; no coin choice inside a group that has one. |
+| Close a group | Reads the group wallet in its coin. |
+| Group lists | Groups made before coins (no `asset`) are hidden, as test data. Nothing is deleted. |
+| Receive | hUSD, hEUR, hGBP, hNGN, hGHS, hKES, hZAR listed under HARV, with their icons; each shows the wallet's Harvana address. |
+
+App build only (with the node update above).
+
 ## 12 Oct 2026 (night): dark theme in black and grey
 
 | Part | Before | Now |

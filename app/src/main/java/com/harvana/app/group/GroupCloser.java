@@ -88,6 +88,15 @@ public final class GroupCloser {
                             f.nodeState = json.optString("state", "");
                             String escrow = json.optString("escrowAddress", "");
                             if (escrow.isEmpty()) { f.escrowBalanceRaw = -1; step.run(); return; }
+                            String coin = json.optString("asset", "");
+                            f.asset = coin;
+                            if (com.harvana.app.husd.Stable.isStable(coin)) {          // a group kept in a stable coin
+                                com.harvana.app.husd.HusdClient.balance(coin, escrow, new com.harvana.app.husd.HusdClient.Cb() {
+                                    @Override public void ok(JSONObject b) { f.escrowBalanceRaw = b.optLong("balanceRaw", -1); step.run(); }
+                                    @Override public void fail(String e) { f.escrowBalanceRaw = -1; step.run(); }
+                                });
+                                return;
+                            }
                             HarvanaNodeClient.getWallet(escrow, new HarvanaNodeClient.JsonCallback() {
                                 @Override public void onSuccess(JSONObject w) { f.escrowBalanceRaw = w.optLong("balance", -1); step.run(); }
                                 @Override public void onError(String e) { f.escrowBalanceRaw = -1; step.run(); }

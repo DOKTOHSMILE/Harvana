@@ -33,9 +33,14 @@ public final class GroupKinds {
         return !nodeId(g).isEmpty();
     }
 
-    /** A rotating group created before rotating groups ran on the network: test data, hidden from lists. */
+    /**
+     * Test data, hidden from lists (owner, 12 Oct 2026: old groups are cleared): a rotating group from before rotating
+     * groups ran on the network, and any group made before groups had a stable coin (no "asset").
+     */
     public static boolean isLegacyRotating(Map<String, Object> g) {
         if (g == null) return false;
+        Object coin = g.get("asset");
+        if (coin == null || String.valueOf(coin).trim().isEmpty()) return true;
         Object t = g.get("groupType");
         boolean rotating = t != null && String.valueOf(t).toLowerCase(Locale.US).contains("rotating");
         return rotating && !isOnChain(g);

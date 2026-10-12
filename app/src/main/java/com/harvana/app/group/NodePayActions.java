@@ -34,17 +34,26 @@ public final class NodePayActions {
 
     private NodePayActions() {}
 
+    /** The group's coin ("asset" on the node record); empty for a group made before coins (HARV). */
+    static String coinOf(Ctx c) { return com.harvana.app.engine.Amounts.assetOf(c.group); }
+
+    /** An amount of this group, in its coin. */
+    static String gm(Ctx c, long raw) { return com.harvana.app.engine.Amounts.money(raw, coinOf(c)); }
+
+    /** An amount typed for this group, in its coin's smallest units. */
+    static long typed(Ctx c, String text) { return coinOf(c).isEmpty() ? CircleUi.toRaw(text) : coinRaw(text); }
+
     public static void run(Ctx c, GroupAction a) {
         if (c == null || c.activity == null || a == null || !a.enabled) return;
         switch (a.id) {
             case GroupAction.JOIN: confirmJoin(c); break;
             case GroupAction.CONTRIBUTE:
-                pay(c, "Round contribution", CircleUi.harv(num(c.group, "contributionAmountRaw")),
+                pay(c, "Round contribution", gm(c, num(c.group, "contributionAmountRaw")),
                         moneyRows(c, escrow(c), "Your payment for this round"),
                         () -> NodeGroupClient.contributeCircle(c.activity, c.me, c.nodeId, result(c, "Payment sent")));
                 break;
             case GroupAction.WITHDRAW_BOND:
-                pay(c, "Withdraw bond", CircleUi.harv(bondOf(c)),
+                pay(c, "Withdraw bond", gm(c, bondOf(c)),
                         moneyRows(c, "Your wallet", "Returned only if this group allows it"),
                         () -> NodeGroupClient.withdrawCircleBond(c.activity, c.me, c.nodeId, result(c, "Bond withdrawal requested")));
                 break;
@@ -72,7 +81,7 @@ public final class NodePayActions {
                 break;
             case GroupAction.FIXED_DEPOSIT:
                 amount(c, "Deposit", "Amount to deposit", raw ->
-                        pay(c, "Deposit", CircleUi.harv(raw), moneyRows(c, escrow(c), "Added to this goal group"),
+                        pay(c, "Deposit", gm(c, raw), moneyRows(c, escrow(c), "Added to this goal group"),
                                 () -> NodeGroupClient.depositFixed(c.activity, c.me, c.nodeId, raw, result(c, "Deposit sent"))));
                 break;
             case GroupAction.FIXED_REQUEST_DISBURSEMENT:
@@ -81,12 +90,12 @@ public final class NodePayActions {
                 break;
             case GroupAction.FIXED_REQUEST_MILESTONE:
                 reason(c, "Request a milestone release", "What will the money be used for?", (raw, text) ->
-                        pay(c, "Request milestone", CircleUi.harv(raw), moneyRows(c, escrow(c), text),
+                        pay(c, "Request milestone", gm(c, raw), moneyRows(c, escrow(c), text),
                                 () -> NodeGroupClient.requestFixedMilestone(c.activity, c.me, c.nodeId, raw, text, requestThenVote(c, "milestoneId", true, "Milestone requested"))));
                 break;
             case GroupAction.FIXED_REQUEST_GRANT:
                 reason(c, "Ask for an emergency grant", "Why do you need help?", (raw, text) ->
-                        pay(c, "Request emergency grant", CircleUi.harv(raw), moneyRows(c, "Your wallet", text),
+                        pay(c, "Request emergency grant", gm(c, raw), moneyRows(c, "Your wallet", text),
                                 () -> NodeGroupClient.requestFixedGrant(c.activity, c.me, c.nodeId, raw, text, announced(c, "Grant requested. The group will vote.",
                                 GroupProposalIndex.GRANT, "", "Emergency grant request", "grantId"))));
                 break;
@@ -111,11 +120,11 @@ public final class NodePayActions {
     private static void confirmJoin(Ctx c) {
         long bond = num(c.group, "requiredBondRaw"), contribution = num(c.group, "contributionAmountRaw");
         ArrayList<String[]> rows = new ArrayList<>();
-        rows.add(new String[]{"Bond locked now", CircleUi.harv(bond)});
-        rows.add(new String[]{"Each round after that", CircleUi.harv(contribution)});
+        rows.add(new String[]{"Bond locked now", gm(c, bond)});
+        rows.add(new String[]{"Each round after that", gm(c, contribution)});
         rows.add(new String[]{"To", escrow(c)});
         rows.add(new String[]{"Bond comes back", "When the group finishes cleanly. Missed payments are taken from it."});
-        pay(c, "Join this group", CircleUi.harv(bond), rows, () ->
+        pay(c, "Join this group", gm(c, bond), rows, () ->
                 NodeGroupClient.joinCircle(c.activity, c.me, c.nodeId, str(c.group, "termsHash"), result(c, "You joined")));
     }
 
@@ -128,7 +137,7 @@ public final class NodePayActions {
         box.setOrientation(LinearLayout.VERTICAL);
         int p = CircleUi.dp(c.activity, 16);
         box.setPadding(p, p, p, 0);
-        final String[] asset = {""};                                   // "" = HARV
+        final String[] asset = {coinOf(c)};                            // the group's coin; "" = HARV (older groups)
         final java.util.List<String> codes = new java.util.ArrayList<>();
         codes.add("");
         com.google.android.material.button.MaterialButton coin = new com.google.android.material.button.MaterialButton(
@@ -142,8 +151,8 @@ public final class NodePayActions {
             com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c.activity).setTitle("Save in")
                     .setItems(names, (dd, which) -> { asset[0] = codes.get(which); coin.setText("Save in: " + names[which]); }));
         });
-        box.addView(coin);
-        com.harvana.app.husd.HusdClient.list(new com.harvana.app.husd.HusdClient.Cb() {
+        if (asset[0].isEmpty()) box.addView(coin);                     // a group with a coin saves only in it
+        if (asset[0].isEmpty()) com.harvana.app.husd.HusdClient.list(new com.harvana.app.husd.HusdClient.Cb() {
             @Override public void ok(org.json.JSONObject r) {
                 org.json.JSONArray arr = r.optJSONArray("assets");
                 if (arr != null) for (int i = 0; i < arr.length(); i++) {
@@ -166,7 +175,7 @@ public final class NodePayActions {
                 .setView(box).setNegativeButton("Cancel", null)
                 .setPositiveButton("Start", (d, w) -> {
                     String code = asset[0];
-                    long raw = code.isEmpty() ? CircleUi.toRaw(daily.getText().toString()) : coinRaw(daily.getText().toString());
+                    long raw = code.isEmpty() ? typed(c, daily.getText().toString()) : coinRaw(daily.getText().toString());
                     if (raw <= 0) { toast(c, "Enter a daily amount."); return; }
                     String days = lockDays.getText().toString().trim();
                     Long until = days.isEmpty() ? null : System.currentTimeMillis() + Long.parseLong(days) * 86_400_000L;
@@ -181,7 +190,7 @@ public final class NodePayActions {
     }
 
     /** A stable coin amount typed by the person, in the coin's smallest units (6 decimals). */
-    static long coinRaw(String text) {
+    public static long coinRaw(String text) {
         try { return new java.math.BigDecimal(text.trim().replace(",", "")).movePointRight(6).longValue(); } catch (Exception e) { return 0; }
     }
 
@@ -224,7 +233,7 @@ public final class NodePayActions {
         e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle(title).setView(e).setNegativeButton("Cancel", null)
                 .setPositiveButton("Continue", (d, w) -> {
-                    long raw = CircleUi.toRaw(e.getText().toString());
+                    long raw = typed(c, e.getText().toString());
                     if (raw <= 0) { toast(c, "Enter an amount."); return; }
                     cb.got(raw);
                 }).show();
@@ -247,7 +256,7 @@ public final class NodePayActions {
         box.addView(text);
         new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle(title).setView(box).setNegativeButton("Cancel", null)
                 .setPositiveButton("Send", (d, w) -> {
-                    long raw = CircleUi.toRaw(amount.getText().toString());
+                    long raw = typed(c, amount.getText().toString());
                     String t = text.getText().toString().trim();
                     if (raw <= 0 || t.length() < 5) { toast(c, "Enter an amount and a short explanation."); return; }
                     cb.got(raw, t);
@@ -330,7 +339,7 @@ public final class NodePayActions {
         rows.add(new String[]{"To", to == null || to.isEmpty() ? escrow(c) : to});
         if (detail != null && !detail.isEmpty()) rows.add(new String[]{"For", detail});
         rows.add(new String[]{"From", "Your wallet"});
-        rows.add(new String[]{"tFare", "Taken from your wallet when this is sent"});
+        rows.add(new String[]{"tFare", "HARV"});
         return rows;
     }
 

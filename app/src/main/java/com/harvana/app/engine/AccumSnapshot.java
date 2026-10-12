@@ -10,6 +10,7 @@ public final class AccumSnapshot {
 
     public static GroupSnapshot of(Map<String, Object> group, Map<String, Object> member, Map<String, Object> line, String me) {
         GroupSnapshot s = new GroupSnapshot();
+        final String coin = assetOf(group);   // the group's coin; empty for a group made before coins (HARV)
         s.family = "ACCUM";
         s.id = str(group, "groupId");
         s.state = str(group, "state");
@@ -20,7 +21,7 @@ public final class AccumSnapshot {
         long bps = lng(group, "interestRateBps");
         s.term("Interest per day", String.format(java.util.Locale.US, "%.2f%%", bps / 100.0));
         s.term("Withdrawal rule", "CYCLE_END_ONLY".equals(str(group, "withdrawalRule")) ? "Only at the end of a cycle" : "Any time (admin approves)");
-        s.term("Saved by all members", harv(lng(group, "totalActiveLineBalanceRaw")));
+        s.term("Saved by all members", money(lng(group, "totalActiveLineBalanceRaw"), coin));
         s.term("Admin", admin ? "You" : "Group admin");
 
         String lineStatus = line == null ? "" : str(line, "status");

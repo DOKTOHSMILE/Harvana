@@ -68,7 +68,7 @@ public final class GoalGroupPanel {
             VoteView v = VoteView.of(label, rec, c.me);
             if (!v.open) continue;
             LinearLayout card = CircleUi.card(c.activity);
-            card.addView(CircleUi.text(c.activity, label + (num(rec, "amountRaw") > 0 ? " · " + CircleUi.harv(num(rec, "amountRaw")) : ""),
+            card.addView(CircleUi.text(c.activity, label + (num(rec, "amountRaw") > 0 ? " · " + NodePayActions.gm(c, num(rec, "amountRaw")) : ""),
                     15, R.color.colorTextPrimary, true));
             String why = !str(rec, "description").isEmpty() ? str(rec, "description") : str(rec, "reasonDescription");
             if (!why.isEmpty()) card.addView(CircleUi.text(c.activity, "“" + why + "”", 13, R.color.colorTextSecondary, false));
@@ -137,9 +137,9 @@ public final class GoalGroupPanel {
                 .setView(form).setNegativeButton("Cancel", null)
                 .setPositiveButton("Continue", (d, w) -> {
                     String n = name.getText().toString().trim();
-                    long raw = CircleUi.toRaw(amount.getText().toString());
+                    long raw = NodePayActions.typed(c, amount.getText().toString());
                     if (n.isEmpty() || raw <= 0) { NodePayActions.toast(c, "Enter a name and a target."); return; }
-                    NodePayActions.pay(c, "Start a new goal", CircleUi.harv(raw),
+                    NodePayActions.pay(c, "Start a new goal", NodePayActions.gm(c, raw),
                             NodePayActions.moneyRows(c, NodePayActions.escrow(c), "New goal “" + n + "”. Nothing is locked."),
                             () -> NodeGroupClient.startNextFixedGoal(c.activity, c.me, c.nodeId, raw, n, NodePayActions.result(c, "New goal started.")));
                 }).show();
@@ -154,7 +154,7 @@ public final class GoalGroupPanel {
         if ("DISSOLVED".equals(state)) {
             LinearLayout card = CircleUi.card(c.activity);
             card.addView(CircleUi.text(c.activity, "Everyone's money was returned", 15, R.color.colorTextPrimary, true));
-            card.addView(CircleUi.text(c.activity, "This group voted to close. " + CircleUi.harv(num(c.group, "dissolvedRefundRaw"))
+            card.addView(CircleUi.text(c.activity, "This group voted to close. " + NodePayActions.gm(c, num(c.group, "dissolvedRefundRaw"))
                     + " went back to the members in proportion to what each put in.", 12.5f, R.color.colorTextSecondary, false));
             box.addView(header(c.activity, "Group closed"));
             box.addView(card);
@@ -234,7 +234,7 @@ public final class GoalGroupPanel {
             @SuppressWarnings("unchecked") Map<String, Object> g = (Map<String, Object>) past.get(i);
             String name = str(g, "name");
             String title = "Goal " + num(g, "number") + (name.isEmpty() ? "" : " · " + name);
-            card.addView(CircleUi.row(c.activity, title, CircleUi.harv(num(g, "raisedRaw")) + " of " + CircleUi.harv(num(g, "targetRaw"))
+            card.addView(CircleUi.row(c.activity, title, NodePayActions.gm(c, num(g, "raisedRaw")) + " of " + NodePayActions.gm(c, num(g, "targetRaw"))
                     + (Boolean.TRUE.equals(g.get("paidOut")) ? " · paid out" : " · kept")));
         }
         box.addView(card);

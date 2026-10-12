@@ -107,9 +107,52 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
 
     private String pendingNodeId = null;
 
+    // the group's coin (owner, 12 Oct 2026): every amount of the group is in it; HARV pays only the tFare
+    private String coin = "HNGN";
+    private final List<String> coins = new ArrayList<>(java.util.Arrays.asList("HNGN"));
+
+    private String sym() { return com.harvana.app.husd.Stable.symbol(coin); }
+    private long raw(String typed) { return com.harvana.app.group.NodePayActions.coinRaw(typed); }
+    private String money(long raw) { return com.harvana.app.engine.Amounts.money(raw, coin); }
+
+    /** The coins the network has switched on; hNGN first. */
+    private void loadCoins() {
+        com.harvana.app.husd.HusdClient.list(new com.harvana.app.husd.HusdClient.Cb() {
+            @Override public void ok(org.json.JSONObject r) {
+                org.json.JSONArray arr = r.optJSONArray("assets");
+                List<String> got = new ArrayList<>();
+                got.add("HNGN");
+                if (arr != null) for (int i = 0; i < arr.length(); i++) {
+                    org.json.JSONObject o = arr.optJSONObject(i);
+                    String a = o == null ? "" : o.optString("asset");
+                    if (o != null && o.optBoolean("active") && com.harvana.app.husd.Stable.isStable(a) && !got.contains(a)) got.add(a);
+                }
+                runOnUiThread(() -> {
+                    if (isFinishing() || got.equals(coins)) return;
+                    coins.clear(); coins.addAll(got);
+                    if (step == 1) go(step);
+                });
+            }
+            @Override public void fail(String e) { }
+        });
+    }
+
+    /** The coin row at the top of the amounts step. */
+    private void coinPicker() {
+        page.addView(label("Coin"));
+        String[] names = new String[coins.size()];
+        int sel = 0;
+        for (int i = 0; i < names.length; i++) {
+            names[i] = com.harvana.app.husd.Stable.symbol(coins.get(i));
+            if (coins.get(i).equals(coin)) sel = i;
+        }
+        page.addView(chips(names, sel, i -> { coin = coins.get(i); go(step); }));
+    }
+
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
+        loadCoins();
         String type = getIntent() == null ? null : getIntent().getStringExtra("groupType");
         if ("Accumulative Funds".equals(type)) { kind = Kind.ACCUM; typeLabel = type; }
         else if ("Fixed Contribution".equals(type)) { kind = Kind.FIXED; typeLabel = type; }
@@ -180,7 +223,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         page.addView(text(stepNames[step], 22, true, UiColors.textPrimary()));
         switch (step) {
             case 0: basics(); break;
-            case 1: if (kind == Kind.ROTATING) rotating(); else if (kind == Kind.ACCUM) savings(); else goal(); break;
+            case 1: coinPicker(); if (kind == Kind.ROTATING) rotating(); else if (kind == Kind.ACCUM) savings(); else goal(); break;
             case 2: people(); break;
             default: review(); break;
         }
@@ -204,7 +247,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         }
         if (s != 1) return null;
         if (kind == Kind.ROTATING) {
-            if (CircleUi.toRaw(contribution) <= 0) return "Enter how much each member pays every round.";
+            if (raw(contribution) <= 0) return "Enter how much each member pays every round.";
             if (members < 3 || members > 12) return "A rotating group needs 3 to 12 members.";
             return null;
         }
@@ -215,7 +258,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
             }
             return null;
         }
-        if (CircleUi.toRaw(target) <= 0) return "Enter the amount the group is aiming for.";
+        if (raw(target) <= 0) return "Enter the amount the group is aiming for.";
         if (purpose != 3 && !beneficiaryIsMe && !(beneficiary.startsWith("HV0x") && beneficiary.length() == 44)) return "Enter the full wallet address of who receives the money.";
         return null;
     }
@@ -392,7 +435,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
     // ── step 2a: rotating ──────────────────────────────────────────────────
 
     private void rotating() {
-        page.addView(label("Each member pays, every round (HARV)"));
+        page.addView(label("Each member pays, every round (" + sym() + ")"));
         EditText c = edit("0.00", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, contribution);
         final TextView summary = text("", 13, false, UiColors.textPrimary());
         c.addTextChangedListener(watch(s -> { contribution = s; refreshRotating(summary); }));
@@ -432,11 +475,11 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
     }
 
     private void refreshRotating(TextView out) {
-        long c = CircleUi.toRaw(contribution);
+        long c = raw(contribution);
         if (c <= 0) { out.setText("Enter the amount to see the pot, the bond and how long it runs."); return; }
         long pot = c * (members - 1);
-        out.setText("Pot each round:  " + CircleUi.harv(pot) + "  (the other " + (members - 1) + " members pay in)\n"
-                + "Each member locks:  " + CircleUi.harv(pot) + "  when they join, as a bond. It comes back when the group finishes cleanly.\n"
+        out.setText("Pot each round:  " + money(pot) + "  (the other " + (members - 1) + " members pay in)\n"
+                + "Each member locks:  " + money(pot) + "  when they join, as a bond. It comes back when the group finishes cleanly.\n"
                 + "Runs for:  " + members + " rounds of " + cycleDays + (cycleDays == 1 ? " day" : " days") + "  =  about " + (members * cycleDays) + " days\n"
                 + "Everyone gets one turn to take the pot.");
     }
@@ -462,7 +505,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
             EditText e = edit("e.g. 0.5", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, "0".equals(interest) ? "" : interest);
             e.addTextChangedListener(watch(s -> interest = s));
             rate.addView(e);
-            rate.addView(hint("Interest is charged for each day a loan is held, not by the month. A borrower who repays early pays only for the days held. Example: 0.5% a day on 100 HARV held 10 days costs 5 HARV. It is set once, now, and every member sees it before they save."));
+            rate.addView(hint("Interest is charged for each day a loan is held, not by the month. A borrower who repays early pays only for the days held. Example: 0.5% a day on " + money(100_000_000L) + " held 10 days costs " + money(5_000_000L) + ". It is set once, now, and every member sees it before they save."));
         };
         loans.setOnCheckedChangeListener((v, on) -> { allowLoans = on; paintRate.run(); });
         paintRate.run();
@@ -475,7 +518,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         EditText m = edit("e.g. 10", InputType.TYPE_CLASS_NUMBER, expectedMembers);
         m.addTextChangedListener(watch(s -> expectedMembers = s));
         page.addView(m);
-        page.addView(label("Suggested daily saving, HARV (optional)"));
+        page.addView(label("Suggested daily saving, " + sym() + " (optional)"));
         EditText a = edit("e.g. 1", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, suggestedAmount);
         a.addTextChangedListener(watch(s -> suggestedAmount = s));
         page.addView(a);
@@ -497,7 +540,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         page.addView(chips(PURPOSES, purpose, i -> { purpose = i; paintGoalRule(explain, bene); }, true));
         page.addView(explain);
 
-        page.addView(label("Target amount (HARV)"));
+        page.addView(label("Target amount (" + sym() + ")"));
         EditText t = edit("0.00", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, target);
         t.addTextChangedListener(watch(s -> target = s));
         page.addView(t);
@@ -509,7 +552,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         EditText m = edit("e.g. 10", InputType.TYPE_CLASS_NUMBER, expectedMembers);
         m.addTextChangedListener(watch(s -> expectedMembers = s));
         page.addView(m);
-        page.addView(label("Suggested deposit per member, HARV (optional)"));
+        page.addView(label("Suggested deposit per member, " + sym() + " (optional)"));
         EditText a = edit("e.g. 20", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, suggestedAmount);
         a.addTextChangedListener(watch(s -> suggestedAmount = s));
         page.addView(a);
@@ -611,18 +654,21 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
     private List<String[]> termRows() {
         List<String[]> rows = new ArrayList<>();
         if (kind == Kind.ROTATING) {
-            long c = CircleUi.toRaw(contribution);
-            rows.add(new String[] {"Each member pays", CircleUi.harv(c) + " every " + (cycleDays == 1 ? "day" : cycleDays + " days")});
-            rows.add(new String[] {"Pot each round", CircleUi.harv(c * (members - 1))});
+            rows.add(new String[] {"Coin", sym()});
+            long c = raw(contribution);
+            rows.add(new String[] {"Each member pays", money(c) + " every " + (cycleDays == 1 ? "day" : cycleDays + " days")});
+            rows.add(new String[] {"Pot each round", money(c * (members - 1))});
             rows.add(new String[] {"Members", String.valueOf(members)});
-            rows.add(new String[] {"Bond each member locks", CircleUi.harv(c * (members - 1))});
+            rows.add(new String[] {"Bond each member locks", money(c * (members - 1))});
             rows.add(new String[] {"Payout order", "Order of joining"});
         } else if (kind == Kind.ACCUM) {
+            rows.add(new String[] {"Coin", sym()});
             rows.add(new String[] {"Lending", allowLoans ? "Yes, " + interest.trim() + "% interest per day" : "No"});
             rows.add(new String[] {"Savings can be taken out", cycleEndOnly ? "Only when the 30-day line ends" : "Any time, with your approval"});
         } else {
             rows.add(new String[] {"For", PURPOSES[purpose]});
-            rows.add(new String[] {"Target", CircleUi.harv(CircleUi.toRaw(target))});
+            rows.add(new String[] {"Coin", sym()});
+            rows.add(new String[] {"Target", money(raw(target))});
             rows.add(new String[] {"How money leaves", RULE_NAMES[purpose]});
             if (purpose != 3) rows.add(new String[] {"Receiver", beneficiaryIsMe ? "You, the admin" : beneficiary});
         }
@@ -672,14 +718,14 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
                 @Override public void onError(String error) { runOnUiThread(() -> { pd.dismiss(); toast(CircleUi.friendly(error)); }); }
             };
             if (kind == Kind.ROTATING) {
-                NodeGroupClient.createCircle(getApplicationContext(), wallet, CircleUi.toRaw(contribution), members, cycleDays * 24L, done);
+                NodeGroupClient.createCircle(getApplicationContext(), wallet, raw(contribution), members, cycleDays * 24L, coin, done);
             } else if (kind == Kind.ACCUM) {
                 double pct = allowLoans ? parse(interest) : 0.0;
-                NodeGroupClient.createAccumGroup(getApplicationContext(), wallet, Math.round(pct * 100.0), cycleEndOnly ? "CYCLE_END_ONLY" : "ANYTIME", done);
+                NodeGroupClient.createAccumGroup(getApplicationContext(), wallet, Math.round(pct * 100.0), cycleEndOnly ? "CYCLE_END_ONLY" : "ANYTIME", coin, done);
             } else {
                 String rule = RULE_CODES[purpose];
                 String who = purpose == 3 ? "" : beneficiaryIsMe ? wallet : beneficiary;
-                NodeGroupClient.createFixedGroup(getApplicationContext(), wallet, CircleUi.toRaw(target), rule, who, 0L, name.trim(), description.trim(), done);
+                NodeGroupClient.createFixedGroup(getApplicationContext(), wallet, raw(target), rule, who, 0L, name.trim(), description.trim(), coin, done);
             }
         });
     }
@@ -713,6 +759,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         for (String r : rules) { Map<String, Object> m = new HashMap<>(); m.put("rules", r); ruleMaps.add(m); }
         g.put("groupRules", ruleMaps);
         g.put("groupWalletAddress", escrow);
+        g.put("asset", coin);
         g.put("requireApprovalToJoin", kind != Kind.ROTATING && requireApproval);
         g.put("joinApprovalMethod", kind != Kind.ROTATING && requireApproval ? (memberVote ? "MEMBER_VOTE" : "ADMIN") : "NONE");
         g.put("membersCanInvite", membersCanInvite);

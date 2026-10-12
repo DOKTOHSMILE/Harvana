@@ -161,12 +161,13 @@ public final class NodeGroupClient {
 
     // ═════════════════════════════ CIRCLE ═════════════════════════════
 
-    public static void createCircle(Context c, String creator, long contributionRaw, int memberLimit, long cycleHours, Callback cb) {
+    /** {@code asset}: the stable coin of the group (HNGN, HUSD, …); every amount is in its units. */
+    public static void createCircle(Context c, String creator, long contributionRaw, int memberLimit, long cycleHours, String asset, Callback cb) {
         act(c, creator, "/api/v1/circle/create", new Spec() {
-            public String canonical(long n) { return GroupCanonical.circleCreate(creator, contributionRaw, memberLimit, cycleHours, n); }
+            public String canonical(long n) { return GroupCanonical.circleCreate(creator, contributionRaw, memberLimit, cycleHours, n, asset); }
             public void fill(JSONObject b, long n) throws JSONException {
                 b.put("creatorAddress", creator).put("contributionAmountRaw", contributionRaw)
-                 .put("memberLimit", memberLimit).put("cycleDurationHours", cycleHours);
+                 .put("memberLimit", memberLimit).put("cycleDurationHours", cycleHours).put("asset", asset);
             }
         }, cb);
     }
@@ -191,11 +192,11 @@ public final class NodeGroupClient {
 
     // ═════════════════════════════ ACCUMULATIVE ═════════════════════════════
 
-    public static void createAccumGroup(Context c, String creator, long interestRateBps, String withdrawalRule, Callback cb) {
+    public static void createAccumGroup(Context c, String creator, long interestRateBps, String withdrawalRule, String asset, Callback cb) {
         act(c, creator, "/api/v1/accum/create-group", new Spec() {
-            public String canonical(long n) { return GroupCanonical.accumCreateGroup(creator, interestRateBps, withdrawalRule, n); }
+            public String canonical(long n) { return GroupCanonical.accumCreateGroup(creator, interestRateBps, withdrawalRule, n, asset); }
             public void fill(JSONObject b, long n) throws JSONException {
-                b.put("creatorAddress", creator).put("interestRateBps", interestRateBps).put("withdrawalRule", withdrawalRule);
+                b.put("creatorAddress", creator).put("interestRateBps", interestRateBps).put("withdrawalRule", withdrawalRule).put("asset", asset);
             }
         }, cb);
     }
@@ -295,15 +296,15 @@ public final class NodeGroupClient {
     // ═════════════════════════════ FIXED (goal / project / emergency pools) ═════════════════════════════
 
     public static void createFixedGroup(Context c, String creator, long targetGoalRaw, String disbursementRule, String beneficiary,
-                                        long interestRateBps, String name, String description, Callback cb) {
+                                        long interestRateBps, String name, String description, String asset, Callback cb) {
         act(c, creator, "/api/v1/fixed/create-group", new Spec() {
             public String canonical(long n) {
-                return GroupCanonical.fixedCreateGroup(creator, targetGoalRaw, disbursementRule, beneficiary, interestRateBps, name, description, n);
+                return GroupCanonical.fixedCreateGroup(creator, targetGoalRaw, disbursementRule, beneficiary, interestRateBps, name, description, n, asset);
             }
             public void fill(JSONObject b, long n) throws JSONException {
                 b.put("creatorAddress", creator).put("targetGoalAmountRaw", targetGoalRaw).put("disbursementRule", disbursementRule)
                  .put("beneficiaryAddress", beneficiary).put("interestRateBps", interestRateBps)
-                 .put("groupName", name).put("groupDescription", description);
+                 .put("groupName", name).put("groupDescription", description).put("asset", asset);
             }
         }, cb);
     }

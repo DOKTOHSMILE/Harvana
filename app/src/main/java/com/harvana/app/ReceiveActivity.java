@@ -193,7 +193,11 @@ public class ReceiveActivity extends AppCompatActivity {
 
 	private void _setupAssetSpinner() {
 		receiveCoins.clear();
-		receiveCoins.addAll(com.harvana.app.wallet.CoinCatalog.all());
+		// HARV, then every Harvana stable coin (same Harvana address), then the other chains.
+		for (com.harvana.app.wallet.CoinCatalog.Coin c : com.harvana.app.wallet.CoinCatalog.all()) {
+			receiveCoins.add(c);
+			if ("HARV".equals(c.key)) for (String code : com.harvana.app.husd.Stable.CODES) receiveCoins.add(com.harvana.app.wallet.CoinCatalog.stable(code));
+		}
 		java.util.List<String> labels = new java.util.ArrayList<>();
 		for (com.harvana.app.wallet.CoinCatalog.Coin c : receiveCoins) labels.add(c.name + " (" + c.ticker + ")");
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
@@ -255,7 +259,8 @@ public class ReceiveActivity extends AppCompatActivity {
 			int i = spinnerAssets.getSelectedItemPosition();
 			if (i >= 0 && i < receiveCoins.size()) key = receiveCoins.get(i).key;
 		}
-		startActivityForResult(new Intent(this, PickAssetActivity.class).putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, key), RC_PICK_ASSET);
+		startActivityForResult(new Intent(this, PickAssetActivity.class).putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, key)
+				.putExtra(PickAssetActivity.EXTRA_ALL_STABLE, true), RC_PICK_ASSET);
 	}
 
 	@Override
@@ -271,7 +276,10 @@ public class ReceiveActivity extends AppCompatActivity {
 
 	private void _coinIcon(TextView tv, int pos) {
 		int icon = pos >= 0 && pos < receiveCoins.size() ? receiveCoins.get(pos).icon : com.harvana.app.R.drawable.ic_coin_harv;
-		android.graphics.drawable.Drawable d = androidx.core.content.ContextCompat.getDrawable(this, icon);
+		String key = pos >= 0 && pos < receiveCoins.size() ? receiveCoins.get(pos).key : "";
+		android.graphics.drawable.Drawable d = com.harvana.app.husd.Stable.isStable(key)
+				? com.harvana.app.husd.StableIcon.drawable(this, key)
+				: androidx.core.content.ContextCompat.getDrawable(this, icon);
 		if (d == null) return;
 		int s = (int) (22 * getResources().getDisplayMetrics().density);
 		d = d.mutate();
@@ -284,7 +292,8 @@ public class ReceiveActivity extends AppCompatActivity {
 		if (position < 0 || position >= receiveCoins.size()) return;
 		com.harvana.app.wallet.CoinCatalog.Coin coin = receiveCoins.get(position);
 		String addr = receiveAddrs.get(coin.key);
-		if ((addr == null || addr.isEmpty()) && coin.nativeHarv) addr = activeAddress;
+		if ((addr == null || addr.isEmpty()) && coin.nativeHarv) addr = receiveAddrs.get("HARV");
+		if ((addr == null || addr.isEmpty()) && coin.nativeHarv) addr = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
 		if (getSupportActionBar() != null) {
 			getSupportActionBar().setTitle("Receive " + coin.ticker);
 			getSupportActionBar().setSubtitle(coin.liveNetwork());

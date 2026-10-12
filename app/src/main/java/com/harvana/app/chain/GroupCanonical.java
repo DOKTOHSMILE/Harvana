@@ -50,8 +50,8 @@ public final class GroupCanonical {
     }
 
     /** AccumCreateGroupRequest.getCanonicalMessage() */
-    public static String accumCreateGroup(String creatorAddress, long interestRateBps, String withdrawalRule, long nonce) {
-        return "HARVANA_ACCUM_CREATE_GROUP_V1:" + creatorAddress + ":" + interestRateBps + ":" + withdrawalRule + ":" + nonce;
+    public static String accumCreateGroup(String creatorAddress, long interestRateBps, String withdrawalRule, long nonce, String asset) {
+        return "HARVANA_ACCUM_CREATE_GROUP_V1:" + creatorAddress + ":" + interestRateBps + ":" + withdrawalRule + ":" + nonce + tail(asset);
     }
 
     /** AccumPackRequest.getCanonicalMessage() */
@@ -93,9 +93,9 @@ public final class GroupCanonical {
     }
 
     /** CircleCreateRequest.getCanonicalMessage() */
-    public static String circleCreate(String creatorAddress, long contributionAmountRaw, int memberLimit, long cycleDurationHours, long nonce) {
+    public static String circleCreate(String creatorAddress, long contributionAmountRaw, int memberLimit, long cycleDurationHours, long nonce, String asset) {
         return "HARVANA_CIRCLE_CREATE_V1:" + creatorAddress + ":" + contributionAmountRaw + ":" + memberLimit
-            + ":" + cycleDurationHours + ":" + nonce;
+            + ":" + cycleDurationHours + ":" + nonce + tail(asset);
     }
 
     /** CircleJoinRequest.getCanonicalMessage() */
@@ -109,10 +109,15 @@ public final class GroupCanonical {
     }
 
     /** FixedCreateGroupRequest.getCanonicalMessage() */
-    public static String fixedCreateGroup(String creatorAddress, long targetGoalAmountRaw, String disbursementRule, String beneficiaryAddress, long interestRateBps, String groupName, String groupDescription, long nonce) {
+    public static String fixedCreateGroup(String creatorAddress, long targetGoalAmountRaw, String disbursementRule, String beneficiaryAddress, long interestRateBps, String groupName, String groupDescription, long nonce, String asset) {
         return "HARVANA_FIXED_CREATE_GROUP_V1:" + creatorAddress + ":" + targetGoalAmountRaw + ":"
             + disbursementRule + ":" + beneficiaryAddress + ":" + interestRateBps + ":"
-            + groupName + ":" + groupDescription + ":" + nonce;
+            + groupName + ":" + groupDescription + ":" + nonce + tail(asset);
+    }
+
+    /** The group's coin, appended to a create message (node: ":" + asset when present). */
+    private static String tail(String asset) {
+        return asset == null || asset.isEmpty() ? "" : ":" + asset;
     }
 
     /** FixedDepositRequest.getCanonicalMessage() */

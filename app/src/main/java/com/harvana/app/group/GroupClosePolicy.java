@@ -33,6 +33,8 @@ public final class GroupClosePolicy {
         public String nodeState = "";
         /** Coins still held by the group's network escrow (raw units); -1 when unknown. */
         public long escrowBalanceRaw = -1;
+        /** The group's coin ("" for HARV). */
+        public String asset = "";
         /** Active members other than the admin. */
         public int otherActiveMembers;
         public int openLoans;
@@ -110,7 +112,7 @@ public final class GroupClosePolicy {
                 }
                 Decision ok = new Decision(Action.REFUND_AND_DELETE, "Close and delete this group");
                 ok.reasons.add(f.escrowBalanceRaw > 0
-                    ? "Nobody else has joined. The " + harv(f.escrowBalanceRaw) + " in the group wallet is yours and goes back to your wallet."
+                    ? "Nobody else has joined. The " + com.harvana.app.engine.Amounts.money(f.escrowBalanceRaw, f.asset) + " in the group wallet is yours and goes back to your wallet."
                     : "Nobody else has joined and the group wallet is empty.");
                 ok.reasons.add("The network closes the group (no more deposits), then it is removed from the app. A small tFare applies.");
                 return ok;

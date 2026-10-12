@@ -137,6 +137,12 @@ public final class CoinCatalog {
 
     public static List<Coin> all() { return ALL; }
 
+    /** A Harvana stable coin (HNGN, HUSD, …) as a coin to receive: it lives on the wallet's Harvana address. */
+    public static Coin stable(String code) {
+        return new Coin(code, com.harvana.app.husd.Stable.name(code), com.harvana.app.husd.Stable.symbol(code), "Harvana Protocol",
+                "Stable coin", "", "HUSD".equals(code) ? R.drawable.ic_coin_husd : R.drawable.ic_coin_harv, 6, null, null, true);
+    }
+
     /** Every coin except HARV, in the order they appear under it. */
     public static List<Coin> others() {
         List<Coin> o = new ArrayList<>();

@@ -10,6 +10,7 @@ public final class FixedSnapshot {
 
     public static GroupSnapshot of(Map<String, Object> group, Map<String, Object> member, String me) {
         GroupSnapshot s = new GroupSnapshot();
+        final String coin = assetOf(group);   // the group's coin; empty for a group made before coins (HARV)
         s.family = "FIXED";
         s.id = str(group, "groupId");
         s.state = str(group, "state");
@@ -20,14 +21,14 @@ public final class FixedSnapshot {
         long goalNo = Math.max(1L, lng(group, "goalNumber"));
         String rule = str(group, "disbursementRule");
         boolean admin = !me.isEmpty() && me.equals(str(group, "creatorAddress"));
-        s.headline = harv(raised) + " of " + harv(target);
+        s.headline = money(raised, coin) + " of " + money(target, coin);
         s.progressCurrent = (int) Math.min(1000, target > 0 ? raised * 1000 / target : 0);
         s.progressMax = 1000;
 
         if (goalNo > 1) s.term("Goal number", String.valueOf(goalNo));
-        s.term("Goal", harv(target));
-        s.term("Raised", harv(raised));
-        s.term("Paid out so far", harv(lng(group, "totalDisbursedRaw")));
+        s.term("Goal", money(target, coin));
+        s.term("Raised", money(raised, coin));
+        s.term("Paid out so far", money(lng(group, "totalDisbursedRaw"), coin));
         s.term("How money is paid out", ruleLabel(rule));
         if (!str(group, "beneficiaryAddress").isEmpty()) s.term("Paid to", shortAddr(str(group, "beneficiaryAddress")));
         s.term("Admin", admin ? "You" : "Group admin");
@@ -35,7 +36,7 @@ public final class FixedSnapshot {
         boolean isMember = member != null && !member.isEmpty();
         if (isMember) {
             s.myState = "MEMBER";
-            s.my("You have put in", harv(lng(member, "contributedRaw")));
+            s.my("You have put in", money(lng(member, "contributedRaw"), coin));
         }
         boolean goalMet = target > 0 && raised >= target;
         boolean completed = "COMPLETED".equals(s.state);
@@ -54,7 +55,7 @@ public final class FixedSnapshot {
             String who = str(group, "beneficiaryAddress");
             who = who.length() > 14 ? who.substring(0, 8) + "…" + who.substring(who.length() - 4) : who;
             if (who.isEmpty()) who = "the wallet chosen when this group was created";
-            s.actions.add(GroupAction.closed(FixedGoalText.sentence(rule, s.state, goalMet, harv(raised), who)));
+            s.actions.add(GroupAction.closed(FixedGoalText.sentence(rule, s.state, goalMet, money(raised, coin), who)));
         } else if (!open && !s.state.isEmpty()) {
             s.actions.add(GroupAction.closed("Deposits are paused while this goal is " + s.state + "."));
         }

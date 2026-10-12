@@ -30,6 +30,8 @@ public class PickAssetActivity extends AppCompatActivity {
     private final List<Object> shown = new ArrayList<>();
     /** EXTRA_STABLE: Send lists Harvana's stable coins too (only those the network has on). */
     public static final String EXTRA_STABLE = "withStable";
+    /** EXTRA_ALL_STABLE: Receive lists every Harvana stable coin (they all arrive on the Harvana address). */
+    public static final String EXTRA_ALL_STABLE = "allStable";
     private final List<String> stable = new ArrayList<>();
     private String lastQuery = "";
     private String current = "";
@@ -79,6 +81,7 @@ public class PickAssetActivity extends AppCompatActivity {
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) { show(s.toString()); }
             @Override public void afterTextChanged(Editable s) {}
         });
+        if (getIntent().getBooleanExtra(EXTRA_ALL_STABLE, false)) stable.addAll(java.util.Arrays.asList(com.harvana.app.husd.Stable.CODES));
         show("");
         if (getIntent().getBooleanExtra(EXTRA_STABLE, false)) {
             com.harvana.app.p2p.P2pAsset.loadActive(() -> runOnUiThread(() -> {

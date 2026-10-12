@@ -71,7 +71,7 @@
 							android:layout_width="28dp"
 							android:layout_height="28dp"
 							android:padding="5dp"
-							android:src="@drawable/icon_visibility_twotone"
+							android:src="@drawable/icon_visibility_twotone_line"
 							android:scaleType="centerInside"
 							app:tint="@color/colorTextTertiary" />
 					</LinearLayout>
@@ -114,9 +114,9 @@
 							android:layout_width="30dp"
 							android:layout_height="match_parent"
 							android:padding="6dp"
-							android:src="@drawable/icon_visibility_twotone"
+							android:src="@drawable/icon_visibility_twotone_line"
 							android:scaleType="centerInside"
-							app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+							app:tint="@color/colorTextTertiary" />
 					</LinearLayout>
 				</LinearLayout>
 				<LinearLayout

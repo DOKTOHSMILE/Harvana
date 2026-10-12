@@ -706,7 +706,7 @@
 								android:layout_height="38dp"
 								android:padding="9dp"
 								android:background="@drawable/bg_settings_icon_badge"
-								android:src="@drawable/ic_visibility"
+								android:src="@drawable/ic_visibility_line"
 								android:scaleType="center"
 								android:tag="badge_blue" android:duplicateParentState="true" />
 							<LinearLayout

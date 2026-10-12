@@ -101,12 +101,23 @@ public final class BalancePrivacy {
         paintEye(eye, isHidden(eye.getContext()));
         eye.setClickable(true);
         eye.setContentDescription(isHidden(eye.getContext()) ? "Show balances" : "Hide balances");
-        eye.setOnClickListener(v -> toggle(v.getContext()));
+        eye.setOnClickListener(v -> {
+            toggle(v.getContext());
+            paintEye((ImageView) v, isHidden(v.getContext()));     // this eye at once, whatever the others do
+        });
     }
 
+    /**
+     * Plain icons, never the pressed/selected selectors: those fade between states, and swapping one in during the tap
+     * left its fade stuck at fully transparent, so the eye vanished when clicked. A plain vector has no fade to stall.
+     */
     private static void paintEye(ImageView eye, boolean hidden) {
-        eye.setImageResource(hidden ? R.drawable.icon_visibility_off_twotone : R.drawable.icon_visibility_twotone);
+        eye.setImageResource(hidden ? R.drawable.icon_visibility_off_twotone_line : R.drawable.icon_visibility_twotone_line);
+        eye.setImageAlpha(255);
+        eye.setAlpha(1f);
+        eye.setVisibility(android.view.View.VISIBLE);
         eye.setContentDescription(hidden ? "Show balances" : "Hide balances");
+        eye.invalidate();
     }
 
     private static void repaintAll(boolean hidden) {

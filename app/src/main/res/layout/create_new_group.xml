@@ -668,7 +668,7 @@
 										android:id="@+id/imageview31"
 										android:layout_width="22dp"
 										android:layout_height="22dp"
-										android:src="@drawable/icon_visibility_off_twotone"
+										android:src="@drawable/icon_visibility_off_twotone_line"
 										android:scaleType="centerInside"
 										android:tint="@color/colorAccent" android:duplicateParentState="true" />
 									<TextView

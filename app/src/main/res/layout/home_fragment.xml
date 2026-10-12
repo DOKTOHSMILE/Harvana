@@ -512,9 +512,9 @@
 													android:layout_height="28dp"
 													android:padding="6dp"
 													android:layout_margin="2dp"
-													android:src="@drawable/icon_visibility_twotone"
+													android:src="@drawable/icon_visibility_twotone_line"
 													android:scaleType="centerInside"
-													app:tint="@color/colorTextSecondary" android:duplicateParentState="true" />
+													app:tint="@color/colorTextSecondary" />
 											</LinearLayout>
 											<TextView
 												android:id="@+id/tv_local_currency_eqv"

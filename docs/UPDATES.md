@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): the show/hide eye no longer disappears when tapped
+
+- **Cause:** the eye icons were "selectors" that fade between their normal and pressed looks. When a tap hid or showed the balances, the app swapped the icon while the tap was still in progress, and the fade could stall at fully transparent, so the eye vanished until something redrew it.
+- **Fix:** the eye now uses the plain icons (`icon_visibility_twotone_line` and `icon_visibility_off_twotone_line`), which have no fade. Each tap also repaints that eye straight away, fully opaque and visible.
+- The three eyes (Home, and both on Assets) no longer copy their parent's pressed state.
+- The other static eye icons (Settings, Create group) use the plain icons too.
+
 ## 12 Oct 2026 (night): Assets list and Add coins sheet tidied; no repeated notifications on wallet switch
 
 - **Assets search box:** the search icon is 24 dp (`icon_search_24`). It used the 48 dp source vector at full size.

@@ -75,6 +75,7 @@ public class WalletEarnFragmentActivity extends Fragment {
     public void onResume() {
         super.onResume();
         loadStakingSummary();
+        if (web3Home != null) web3Home.refreshRecent();
     }
 
     private void initialize(Bundle _savedInstanceState, View _view) {
@@ -109,6 +110,12 @@ public class WalletEarnFragmentActivity extends Fragment {
         }
 
         setupMiniChart();
+
+        for (int k = 0; k < linear1.getChildCount(); k++) linear1.getChildAt(k).setVisibility(View.GONE);
+        web3Home = new com.harvana.app.web3.Web3Home(getContext(),
+                () -> { if (getContext() != null) startActivity(new Intent(getContext(), StakingDashboardActivity.class)); },
+                () -> cardview7.performClick());
+        linear1.addView(web3Home.view(), 0, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         btnOpenStaking.setOnClickListener(_v -> {
             if (getContext() == null) return;
@@ -175,7 +182,7 @@ public class WalletEarnFragmentActivity extends Fragment {
                     tvSummaryStaked.setText(harvFormatter.format(staked / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN) + " HARV");
                     tvSummaryUnclaimed.setText(harvFormatter.format(pending / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN) + " HARV");
                     position = json;
-                    _fillStakeTable();
+                    if (web3Home != null) web3Home.setStaked(tvSummaryStaked.getText().toString());
                 });
             }
 
@@ -188,13 +195,14 @@ public class WalletEarnFragmentActivity extends Fragment {
         NodeGroupClient.getStakingInfo(new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject json) {
                 if (getActivity() == null) return;
-                getActivity().runOnUiThread(() -> { stakingInfo = json; _fillStakeTable(); });
+                getActivity().runOnUiThread(() -> stakingInfo = json);
             }
             @Override public void onError(String error) { }
         });
         drawMiniChart(address);
     }
 
+    private com.harvana.app.web3.Web3Home web3Home;
     private JSONObject position, stakingInfo;
     private com.harvana.app.utils.InfoTable stakeTable;
 

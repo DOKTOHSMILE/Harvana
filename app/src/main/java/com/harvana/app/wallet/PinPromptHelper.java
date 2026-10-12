@@ -46,7 +46,7 @@ public final class PinPromptHelper {
             onVerified.onVerified();
             return;
         }
-        _challenge(context, "Enter your transaction PIN", onVerified);
+        _challenge(context, "Enter your transaction PIN", onVerified, null);
     }
 
     /**
@@ -55,15 +55,21 @@ public final class PinPromptHelper {
      * and does not continue.
      */
     public static void authorize(Context context, String action, OnVerified onVerified) {
+        authorize(context, action, onVerified, null);
+    }
+
+    /** As above; {@code onCancelled} runs when the person closes the check without passing it. */
+    public static void authorize(Context context, String action, OnVerified onVerified, Runnable onCancelled) {
         if (context == null || onVerified == null) return;
         String what = (action == null || action.trim().isEmpty())
                 ? "Authorize this before it is sent."
                 : action.trim();
         if (!SecureWalletStorage.hasTransactionPin(context)) {
             _requirePin(context, what);
+            if (onCancelled != null) onCancelled.run();
             return;
         }
-        _challenge(context, what, onVerified);
+        _challenge(context, what, onVerified, onCancelled);
     }
 
     private static void _requirePin(Context context, String action) {
@@ -80,21 +86,21 @@ public final class PinPromptHelper {
                 }));
     }
 
-    private static void _challenge(Context context, String action, OnVerified onVerified) {
+    private static void _challenge(Context context, String action, OnVerified onVerified, Runnable onCancelled) {
         if (SecureWalletStorage.isBiometricEnabled(context) && context instanceof FragmentActivity) {
             FragmentActivity activity = (FragmentActivity) context;
             BiometricManager biometricManager = BiometricManager.from(activity);
             boolean biometricReady = biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)
                     == BiometricManager.BIOMETRIC_SUCCESS;
             if (biometricReady) {
-                _tryBiometric(activity, context, action, onVerified);
+                _tryBiometric(activity, context, action, onVerified, onCancelled);
                 return;
             }
         }
-        _showPinDialog(context, action, onVerified);
+        _showPinDialog(context, action, onVerified, onCancelled);
     }
 
-    private static void _tryBiometric(FragmentActivity activity, Context context, String action, OnVerified onVerified) {
+    private static void _tryBiometric(FragmentActivity activity, Context context, String action, OnVerified onVerified, Runnable onCancelled) {
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
         .setTitle("Confirm it's you")
         .setSubtitle(action)
@@ -110,7 +116,7 @@ public final class PinPromptHelper {
 
             @Override
             public void onAuthenticationError(int errorCode, CharSequence errString) {
-                _showPinDialog(context, action, onVerified);
+                _showPinDialog(context, action, onVerified, onCancelled);
             }
 
             @Override
@@ -121,7 +127,7 @@ public final class PinPromptHelper {
         biometricPrompt.authenticate(promptInfo);
     }
 
-    private static void _showPinDialog(Context context, String message, OnVerified onVerified) {
+    private static void _showPinDialog(Context context, String message, OnVerified onVerified, Runnable onCancelled) {
         View dialogView = LayoutInflater.from(context).inflate(
         context.getResources().getIdentifier("dialog_pin_entry", "layout", context.getPackageName()), null);
         TextView tvMessage = dialogView.findViewById(
@@ -138,6 +144,8 @@ public final class PinPromptHelper {
         .setNegativeButton("Cancel", null)
         .create();
 
+        final boolean[] passed = {false};
+        dialog.setOnDismissListener(d -> { if (!passed[0] && onCancelled != null) onCancelled.run(); });
         dialog.setOnShowListener(d -> {
             ThemedDialogs.paintButtons(dialog);
             Button confirmButton = dialog.getButton(com.harvana.app.ui.SheetDialog.BUTTON_POSITIVE);
@@ -151,6 +159,7 @@ public final class PinPromptHelper {
                     return;
                 }
                 if (SecureWalletStorage.verifyTransactionPin(context, entered)) {
+                    passed[0] = true;
                     dialog.dismiss();
                     onVerified.onVerified();
                 } else {

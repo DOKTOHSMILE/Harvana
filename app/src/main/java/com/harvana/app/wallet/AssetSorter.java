@@ -36,6 +36,8 @@ public final class AssetSorter {
     private final Map<String, Double> lastValue = new HashMap<>();
     /** Price per coin in the person's currency, once known. */
     private final Map<String, String> price = new HashMap<>();
+    /** 24h change in percent, when the price source gives one. */
+    private final Map<String, Double> change = new HashMap<>();
     private boolean pricesAsked;
 
     private AssetSorter(Context c, LinearLayout shown, ViewGroup[] sources) {
@@ -78,7 +80,7 @@ public final class AssetSorter {
                         .append(text(r, R.id.tv_asset_amount)).append('|').append(System.identityHashCode(logo(r))).append(';');
             }
         }
-        for (String k : price.keySet()) sig.append(k).append('=').append(price.get(k)).append(';');
+        for (String k : price.keySet()) sig.append(k).append('=').append(price.get(k)).append(change.get(k)).append(';');
         String s = sig.toString();
         if (s.equals(lastSignature)) return;
         lastSignature = s;
@@ -93,12 +95,9 @@ public final class AssetSorter {
         java.util.Collections.sort(order, (a, b) -> Double.compare(valueOf(b), valueOf(a)));   // a stable sort
 
         shown.removeAllViews();
-        LayoutInflater inf = LayoutInflater.from(c);
         for (View src : order) {
             if (src.getVisibility() != View.VISIBLE) continue;
-            View copy = inf.inflate(R.layout.coin_list_card, shown, false);
-            fill(copy, src);
-            shown.addView(copy);
+            shown.addView(row(src));
         }
     }
 
@@ -107,40 +106,103 @@ public final class AssetSorter {
         return v == null ? 0 : v;
     }
 
-    private void fill(View copy, View src) {
-        copyText(copy, src, R.id.tv_asset_name);
-        copyText(copy, src, R.id.tv_asset_balance);
-        copyText(copy, src, R.id.tv_asset_symbol);
-        copyText(copy, src, R.id.tv_asset_amount);
-        Drawable d = logo(src);
-        ImageView iv = copy.findViewById(R.id.iv_asset_logo);
-        if (iv != null && d != null) {
-            Drawable.ConstantState cs = d.getConstantState();
-            iv.setImageDrawable(cs != null ? cs.newDrawable(c.getResources()).mutate() : d);
+    /**
+     * One asset: icon · TICKER [Name] over price and 24h change on the left; amount over value on the right.
+     */
+    private View row(View src) {
+        float d = c.getResources().getDisplayMetrics().density;
+        String key = priceKey(src);
+        boolean stable = com.harvana.app.husd.Stable.isStable(key);
+        String ticker = stable ? com.harvana.app.husd.Stable.symbol(key) : text(src, R.id.tv_asset_symbol);
+        if (ticker.isEmpty()) ticker = key;
+        String name = stable ? com.harvana.app.husd.Stable.name(key) : text(src, R.id.tv_asset_name);
+        if ("HARV".equals(key)) name = "Harvana";
+
+        LinearLayout card = new LinearLayout(c);
+        card.setGravity(Gravity.CENTER_VERTICAL);
+        card.setPadding(px(d, 14), px(d, 12), px(d, 14), px(d, 12));
+        card.setMinimumHeight(px(d, 68));
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+        bg.setCornerRadius(px(d, 16));
+        bg.setColor(com.harvana.app.utils.UiColors.surface());
+        bg.setStroke(Math.max(1, px(d, 1)), c.getResources().getColor(R.color.colorCardStroke));
+        card.setBackground(bg);
+        card.setClickable(true);
+        card.setFocusable(true);
+        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        clp.setMargins(px(d, 12), px(d, 4), px(d, 12), px(d, 4));
+        card.setLayoutParams(clp);
+
+        ImageView iv = new ImageView(c);
+        Drawable dr = logo(src);
+        if (dr != null) {
+            Drawable.ConstantState cs = dr.getConstantState();
+            iv.setImageDrawable(cs != null ? cs.newDrawable(c.getResources()).mutate() : dr);
         }
-        // The price, on the name line at the right.
-        String p = price.get(priceKey(src));
-        TextView name = copy.findViewById(R.id.tv_asset_name);
-        if (p != null && name != null && name.getParent() instanceof LinearLayout) {
-            LinearLayout details = (LinearLayout) name.getParent();
-            int at = details.indexOfChild(name);
-            details.removeView(name);
-            LinearLayout line = new LinearLayout(c);
-            line.setGravity(Gravity.CENTER_VERTICAL);
-            line.addView(name, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            TextView pt = new TextView(c);
-            pt.setText(p);
-            pt.setTextSize(12f);
-            pt.setTextColor(c.getResources().getColor(R.color.colorTextSecondary));
-            pt.setGravity(Gravity.END);
-            line.addView(pt);
-            details.addView(line, at);
+        card.addView(iv, new LinearLayout.LayoutParams(px(d, 40), px(d, 40)));
+
+        LinearLayout mid = new LinearLayout(c);
+        mid.setOrientation(LinearLayout.VERTICAL);
+        mid.setPadding(px(d, 12), 0, px(d, 8), 0);
+        LinearLayout top = new LinearLayout(c);
+        top.setGravity(Gravity.CENTER_VERTICAL);
+        TextView tk = tv(ticker, 16, true, com.harvana.app.utils.UiColors.textPrimary());
+        top.addView(tk);
+        if (name != null && !name.isEmpty() && !name.equalsIgnoreCase(ticker)) {
+            TextView chip = tv(name, 11.5f, false, com.harvana.app.utils.UiColors.textSecondary());
+            chip.setMaxLines(1);
+            chip.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            chip.setPadding(px(d, 8), px(d, 2), px(d, 8), px(d, 2));
+            android.graphics.drawable.GradientDrawable cb = new android.graphics.drawable.GradientDrawable();
+            cb.setCornerRadius(px(d, 10));
+            cb.setColor(com.harvana.app.utils.UiColors.surfaceAlt());
+            chip.setBackground(cb);
+            LinearLayout.LayoutParams chl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            chl.leftMargin = px(d, 8);
+            top.addView(chip, chl);
         }
+        mid.addView(top);
+        LinearLayout bottom = new LinearLayout(c);
+        bottom.setGravity(Gravity.CENTER_VERTICAL);
+        String p = price.get(key);
+        bottom.addView(tv(p == null ? "—" : p, 13, false, com.harvana.app.utils.UiColors.textSecondary()));
+        Double ch = change.get(key);
+        if (ch != null && !ch.isNaN()) {
+            TextView ct = tv(String.format(java.util.Locale.US, "%s%.2f%%", ch >= 0 ? "+" : "", ch), 13, false,
+                    ch >= 0 ? com.harvana.app.utils.UiColors.success() : com.harvana.app.utils.UiColors.error());
+            ct.setPadding(px(d, 6), 0, 0, 0);
+            bottom.addView(ct);
+        }
+        mid.addView(bottom);
+        card.addView(mid, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        LinearLayout right = new LinearLayout(c);
+        right.setOrientation(LinearLayout.VERTICAL);
+        right.setGravity(Gravity.END);
+        TextView amt = tv(text(src, R.id.tv_asset_balance), 16, true, com.harvana.app.utils.UiColors.textPrimary());
+        amt.setGravity(Gravity.END);
+        right.addView(amt);
+        TextView val = tv(text(src, R.id.tv_asset_amount), 13, false, com.harvana.app.utils.UiColors.textSecondary());
+        val.setGravity(Gravity.END);
+        right.addView(val);
+        card.addView(right);
+
         View realCard = src.findViewById(R.id.cardview1);
-        View copyCard = copy.findViewById(R.id.cardview1);
-        View tap = copyCard != null ? copyCard : copy;
-        tap.setOnClickListener(v -> { if (realCard != null) realCard.performClick(); else src.performClick(); });
+        card.setOnClickListener(v -> { if (realCard != null) realCard.performClick(); else src.performClick(); });
+        return card;
     }
+
+    private TextView tv(String s, float sp, boolean bold, int color) {
+        TextView t = new TextView(c);
+        t.setText(s);
+        t.setTextSize(sp);
+        t.setTextColor(color);
+        t.setMaxLines(1);
+        if (bold) t.setTypeface(null, android.graphics.Typeface.BOLD);
+        return t;
+    }
+
+    private static int px(float d, int dp) { return Math.round(dp * d); }
 
     // ── prices ────────────────────────────────────────────────────────────────
 
@@ -171,7 +233,10 @@ public final class AssetSorter {
             AssetPrices.load(c, () -> {
                 for (CoinCatalog.Coin coin : CoinCatalog.others()) {
                     AssetPrices.Quote q = AssetPrices.peek(c, coin.key);
-                    if (q != null && q.usd > 0) price.put(coin.key.toUpperCase(java.util.Locale.US), FxRates.money(c, q.usd));
+                    if (q != null && q.usd > 0) {
+                        price.put(coin.key.toUpperCase(java.util.Locale.US), FxRates.money(c, q.usd));
+                        change.put(coin.key.toUpperCase(java.util.Locale.US), q.change);
+                    }
                 }
                 lastSignature = "";
                 sync();

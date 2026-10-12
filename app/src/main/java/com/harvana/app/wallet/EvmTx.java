@@ -35,6 +35,34 @@ final class EvmTx {
         }));
     }
 
+    /** As {@link #raw}, with call data and an optional recipient (empty {@code to} creates a contract). For dApps. */
+    static String rawWithData(byte[] priv, long nonce, BigInteger gasPrice, long gasLimit, byte[] to, BigInteger value, byte[] data, long chainId) {
+        byte[] t = to == null ? new byte[0] : to, d = data == null ? new byte[0] : data;
+        byte[] signHash = keccak(rlp(new byte[][]{
+                rlpInt(BigInteger.valueOf(nonce)), rlpInt(gasPrice), rlpInt(BigInteger.valueOf(gasLimit)),
+                t, rlpInt(value), d, rlpInt(BigInteger.valueOf(chainId)), new byte[0], new byte[0]
+        }));
+        BigInteger[] rs = sign(priv, signHash);
+        int rec = recoverId(signHash, rs[0], rs[1], priv);
+        long v = chainId * 2 + 35 + rec;
+        return hex(rlp(new byte[][]{
+                rlpInt(BigInteger.valueOf(nonce)), rlpInt(gasPrice), rlpInt(BigInteger.valueOf(gasLimit)),
+                t, rlpInt(value), d, rlpInt(BigInteger.valueOf(v)), rlpInt(rs[0]), rlpInt(rs[1])
+        }));
+    }
+
+    /** A 65-byte Ethereum signature (r ‖ s ‖ v, v = 27 or 28) over a 32-byte hash, hex with 0x. */
+    static String signHash65(byte[] priv, byte[] hash) {
+        BigInteger[] rs = sign(priv, hash);
+        int rec = recoverId(hash, rs[0], rs[1], priv);
+        byte[] out = new byte[65];
+        byte[] r = rs[0].toByteArray(), s = rs[1].toByteArray();
+        System.arraycopy(r, Math.max(0, r.length - 32), out, 32 - Math.min(32, r.length), Math.min(32, r.length));
+        System.arraycopy(s, Math.max(0, s.length - 32), out, 64 - Math.min(32, s.length), Math.min(32, s.length));
+        out[64] = (byte) (27 + rec);
+        return "0x" + hex(out);
+    }
+
     /** Low-s RFC6979 signature over a 32-byte hash. Shared with Bitcoin and Tron. */
     static BigInteger[] sign(byte[] priv, byte[] hash) {
         ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));

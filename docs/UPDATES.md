@@ -2,6 +2,22 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (late night): Web3 browser on the Earn tab, new asset rows
+
+- **Earn tab = Web3 home:** search or dApp URL bar; *Earn* (Staking → Staking Dashboard, Mining → Harvana Node Miner); *Explore dApps* (Featured, DEX, Lending, Yield, NFT); *Recent*.
+- **dApp browser** (`web3/DappBrowserActivity`), Ethereum, BNB Chain, Polygon, Base:
+  - Wallet: EIP-1193 `window.ethereum` and EIP-6963. Methods: connect, accounts, chain switch, `personal_sign`, `eth_signTypedData_v3/v4`, `eth_sendTransaction`, read-only RPC calls.
+  - Security:
+    - HTTPS pages only; a certificate error stops the page.
+    - The top-level page only, matched to its origin.
+    - Each site must be connected per account; `eth_sign` is refused.
+    - Every signature or transaction goes through the review sheet, then PIN or fingerprint.
+    - One request at a time; unanswered requests time out after 5 min.
+    - No file access, mixed content, third-party cookies, pop-ups, camera, microphone or location.
+- PIN or fingerprint cancelled → the request is rejected at once (`PinPromptHelper.authorize` with a cancel callback).
+- **Asset rows:** icon, ticker with name chip, price and 24h change, amount over value.
+- New library: `androidx.webkit:webkit:1.8.0` (`app/module.toml`, `app/build.gradle`).
+
 ## 12 Oct 2026 (night): explanations removed
 
 - Owner rule: no explanatory sentences in the app, only values.

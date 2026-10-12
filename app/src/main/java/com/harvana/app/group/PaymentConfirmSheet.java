@@ -58,11 +58,22 @@ public final class PaymentConfirmSheet {
 
 	public static void reviewThenAuthorize(Context context, String title, String amountText,
 	                                        List<String[]> rows, Runnable onAuthorized) {
-		present(context, title, amountText, rows, true, onAuthorized);
+		present(context, title, amountText, rows, true, onAuthorized, null);
+	}
+
+	/** As above; {@code onCancelled} runs when the sheet is closed without going on to verify. */
+	public static void reviewThenAuthorize(Context context, String title, String amountText,
+	                                        List<String[]> rows, Runnable onAuthorized, Runnable onCancelled) {
+		present(context, title, amountText, rows, true, onAuthorized, onCancelled);
 	}
 
 	private static void present(Context context, String title, String amountText,
 	                            List<String[]> rows, boolean thenPin, Runnable after) {
+		present(context, title, amountText, rows, thenPin, after, null);
+	}
+
+	private static void present(Context context, String title, String amountText,
+	                            List<String[]> rows, boolean thenPin, Runnable after, Runnable cancelled) {
 		if (context == null) return;
 		String heading = title == null || title.trim().isEmpty() ? "Review this payment" : title.trim();
 		String amount = amountText == null ? "" : amountText.trim();
@@ -222,14 +233,17 @@ public final class PaymentConfirmSheet {
 			});
 		});
 
+		final boolean[] going = {false};
+		dialog.setOnDismissListener(x -> { if (!going[0] && cancelled != null) cancelled.run(); });
 		cancel.setOnClickListener(v -> dialog.dismiss());
 		go.setOnClickListener(v -> {
+			going[0] = true;
 			dialog.dismiss();
 			if (thenPin) {
 				PinPromptHelper.authorize(context, _action(heading, hideAmount ? "" : amount), () -> {
 					com.harvana.app.tx.PaymentTracker.noteReview(hideAmount ? "" : amount, rows);   // the success sheet and receipt use what the person just approved
 					if (after != null) after.run();
-				});
+				}, cancelled);
 			} else if (after != null) {
 				after.run();
 			}

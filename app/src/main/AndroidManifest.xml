@@ -79,6 +79,12 @@
 			android:screenOrientation="portrait"
 			android:windowSoftInputMode="adjustResize" />
 		<activity
+			android:name=".web3.DappBrowserActivity"
+			android:label="Browser"
+			android:exported="false"
+			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:windowSoftInputMode="adjustResize" />
+		<activity
 			android:name=".swap.SwapOrderActivity"
 			android:label="Swap"
 			android:exported="false"

@@ -234,7 +234,7 @@ public class PublicProfileActivity extends AppCompatActivity {
      * no negative margin or drawing outside its parent (an earlier version hid half of it behind the cover).
      */
     private View topArea(boolean mine) {
-        int size = SocialUi.dp(this, 40);           // profile avatar: 40 dp on the scale, on the left over the cover
+        int size = SocialUi.dp(this, 80);           // profile avatar: 80 × 80 dp (owner, 12 Oct 2026), on the left over the cover
         FrameLayout top = new FrameLayout(this);
         top.setClipChildren(false);
         top.addView(coverBanner(mine));
@@ -249,13 +249,13 @@ public class PublicProfileActivity extends AppCompatActivity {
     private View avatarView(int size) {
         int tint = card.scored() ? ProfileTrust.tierColor(tierName()) : 0xFF8B98AD;
         FrameLayout face = new FrameLayout(this);
-        TextView initials = SocialUi.text(this, initialsOf(), 15, true, 0xFFFFFFFF);
+        TextView initials = SocialUi.text(this, initialsOf(), 26, true, 0xFFFFFFFF);
         initials.setGravity(Gravity.CENTER);
         GradientDrawable disc = new GradientDrawable();
         disc.setShape(GradientDrawable.OVAL);
         disc.setColors(new int[] {0xFF2BA597, 0xFF0B6B61});
         disc.setOrientation(GradientDrawable.Orientation.TL_BR);
-        disc.setStroke(SocialUi.dp(this, 2), tint);
+        disc.setStroke(SocialUi.dp(this, 3), tint);
         initials.setBackground(disc);
         face.addView(initials, new FrameLayout.LayoutParams(size, size));
         ImageView photo = new ImageView(this);

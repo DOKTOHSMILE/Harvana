@@ -2,6 +2,27 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): steady asset list from a saved copy; an icon for each Harvana dApp
+
+- **Asset list** (`wallet/AssetSorter`):
+  - **Saved copy, per wallet:** the last rows (ticker, name, balance, value, order), prices and 24h changes are kept. On opening, the list is drawn from it at once, in last time's order.
+  - **While sections load:** rows from the saved copy fill in for at most 4 seconds. A row that briefly shows no figure keeps its last one.
+  - **Updates:** prices and balances update in the background. Changes are gathered for 150 ms, then applied to the rows already on screen (no rebuild). Rows are re-sorted only when the order really changes.
+  - **Privacy:** hidden balances stay hidden ("••••"), and masked figures are never saved.
+- **Icons** (`ic_app_*`, a coloured badge with a white symbol):
+
+| Icon | Colour | Symbol |
+|---|---|---|
+| Swap | violet | arrows |
+| Staking | green | layers |
+| Liquidity | blue | drop |
+| Mining | orange | pickaxe |
+| Explorer | teal | magnifier |
+| Pools | indigo | bubbles |
+| List a coin | pink | plus |
+
+  Used in Earn (Staking, Liquidity, Mining), the Harvana tab of Web3, Bookmarks and History, and as the address-bar icon on each Harvana site.
+
 ## 12 Oct 2026 (night): HARV price from the swap pools; Web3 button
 
 - **HARV price** (`wallet/HarvPrice`):

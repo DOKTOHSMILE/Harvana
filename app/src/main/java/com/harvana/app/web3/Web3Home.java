@@ -68,13 +68,13 @@ public final class Web3Home {
         if (showEarn) {
             root.addView(heading("Earn"));
             LinearLayout earn = card();
-            earn.addView(line(R.drawable.ic_harv_coin, "Staking", staked, openStaking != null ? openStaking : () -> open(STAKE_URL)));
+            earn.addView(line(R.drawable.ic_app_stake, "Staking", staked, openStaking != null ? openStaking : () -> open(STAKE_URL)));
             TextView pools = new TextView(c);
             pools.setText("Harvana Swap");
-            earn.addView(line(R.drawable.ic_harv_coin, "Liquidity", pools, () -> open(SWAP_URL + "#liquidity")));
+            earn.addView(line(R.drawable.ic_app_liquidity, "Liquidity", pools, () -> open(SWAP_URL + "#liquidity")));
             TextView mine = new TextView(c);
             mine.setText("Harvana Node Miner");
-            earn.addView(line(R.drawable.ic_harv_coin, "Mining", mine, openMiner));
+            earn.addView(line(R.drawable.ic_app_mining, "Mining", mine, openMiner));
             root.addView(earn);
         }
         setStaked("0 HARV");
@@ -181,7 +181,7 @@ public final class Web3Home {
         row.setPadding(dp(12), dp(10), dp(12), dp(10));
         ImageView ic = new ImageView(c);
         String host = Uri.parse(url).getHost();
-        if ("harvannaprotocol.com".equals(host)) ic.setImageResource(R.drawable.ic_harv_coin);
+        if ("harvannaprotocol.com".equals(host)) ic.setImageResource(iconFor(url));
         else Glide.with(c).load("https://icons.duckduckgo.com/ip3/" + host + ".ico")
                 .placeholder(R.drawable.icon_search_24).error(R.drawable.icon_search_24).circleCrop().into(ic);
         row.addView(ic, new LinearLayout.LayoutParams(dp(36), dp(36)));
@@ -228,6 +228,20 @@ public final class Web3Home {
     }
 
     private void open(String text) { open(c, text); }
+
+    /** Each Harvana site and section has its own icon; any other Harvana page shows the HARV coin. */
+    public static int iconFor(String url) {
+        if (url == null) return R.drawable.ic_harv_coin;
+        if (url.startsWith(SWAP_URL)) {
+            if (url.contains("#pools")) return R.drawable.ic_app_pools;
+            if (url.contains("#list")) return R.drawable.ic_app_list;
+            if (url.contains("#liquidity")) return R.drawable.ic_app_liquidity;
+            return R.drawable.ic_app_swap;
+        }
+        if (url.startsWith(STAKE_URL)) return R.drawable.ic_app_stake;
+        if (url.startsWith(EXPLORER_URL)) return R.drawable.ic_app_explorer;
+        return R.drawable.ic_harv_coin;
+    }
 
     /** Opens a site: the Harvana explorer in the explorer, everything else in the dApp browser. */
     public static void open(Context c, String text) {

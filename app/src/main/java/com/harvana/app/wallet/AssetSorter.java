@@ -31,19 +31,35 @@ public final class AssetSorter {
     private final Context c;
     private final LinearLayout shown;
     private final ViewGroup[] sources;
+    private final String scope;                 // the wallet this list belongs to (the saved copy is per wallet)
+    private final long attachedAt = System.currentTimeMillis();
     private String lastSignature = "";
-    /** Last readable value per row, so a masked (privacy) balance keeps its place. */
+    /** Last readable value per row, so a masked (privacy) or still-loading balance keeps its place. */
     private final Map<String, Double> lastValue = new HashMap<>();
+    /** Last readable balance and value text per row, shown while a section is still loading. */
+    private final Map<String, String[]> lastText = new HashMap<>();
     /** Price per coin in the person's currency, once known. */
     private final Map<String, String> price = new HashMap<>();
     /** 24h change in percent, when the price source gives one. */
     private final Map<String, Double> change = new HashMap<>();
+    /** Rows from the saved copy, drawn until their section has loaded (only for the first moments). */
+    private final List<Entry> saved = new ArrayList<>();
+    /** What is on screen now, in order, with each row's views (updated in place, not rebuilt). */
+    private final List<String> onScreen = new ArrayList<>();
+    private final Map<String, Holder> holders = new HashMap<>();
     private boolean pricesAsked;
+    private final Runnable rebuild = this::rebuildNow;
+
+    /** Rows drawn from the saved copy are kept this long at most while their sections load. */
+    private static final long SAVED_GRACE_MS = 4000;
+    private static final String PREFS = "asset_list_cache";
 
     private AssetSorter(Context c, LinearLayout shown, ViewGroup[] sources) {
         this.c = c;
         this.shown = shown;
         this.sources = sources;
+        this.scope = c.getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE).getString("active_wallet_address", "").trim();
+        readCache();
     }
 
     /** Puts the sorted list where the first source box is, hides the boxes, and keeps the list in step with them. */
@@ -52,6 +68,7 @@ public final class AssetSorter {
         ViewGroup column = (ViewGroup) first.getParent();
         LinearLayout shown = new LinearLayout(first.getContext());
         shown.setOrientation(LinearLayout.VERTICAL);
+        shown.setLayoutTransition(null);
         column.addView(shown, column.indexOfChild(first), new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         ViewGroup[] all = new ViewGroup[others.length + 1];
         all[0] = first;
@@ -61,63 +78,142 @@ public final class AssetSorter {
         column.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override public void onGlobalLayout() { s.sync(); }
         });
-        s.sync();
+        s.rebuildNow();                                    // the saved copy, at once
         return s;
     }
 
-    /** Redraws the list when any row changed. Cheap when nothing did. */
+    /** Notes a change; the list is redrawn once the burst of changes settles (sections load one after another). */
     public void sync() {
-        List<View> rows = new ArrayList<>();
+        String s = signature();
+        if (s.equals(lastSignature)) return;
+        lastSignature = s;
+        if (!pricesAsked) { pricesAsked = true; loadPrices(); }
+        shown.removeCallbacks(rebuild);
+        shown.postDelayed(rebuild, 150);
+    }
+
+    private String signature() {
         StringBuilder sig = new StringBuilder();
         for (ViewGroup g : sources) {
             if (g == null) continue;
             for (int i = 0; i < g.getChildCount(); i++) {
                 View r = g.getChildAt(i);
                 if (r.findViewById(R.id.tv_asset_name) == null) continue;
-                rows.add(r);
                 sig.append(key(r)).append('|').append(r.getVisibility()).append('|')
-                        .append(text(r, R.id.tv_asset_name)).append('|').append(text(r, R.id.tv_asset_balance)).append('|')
+                        .append(text(r, R.id.tv_asset_balance)).append('|')
                         .append(text(r, R.id.tv_asset_amount)).append('|').append(System.identityHashCode(logo(r))).append(';');
             }
         }
         for (String k : price.keySet()) sig.append(k).append('=').append(price.get(k)).append(change.get(k)).append(';');
-        String s = sig.toString();
-        if (s.equals(lastSignature)) return;
-        lastSignature = s;
-        if (!pricesAsked) { pricesAsked = true; loadPrices(); }
+        return sig.toString();
+    }
 
+    /** One row of the list: from a section's row, or from the saved copy. */
+    private static final class Entry {
+        String key, priceKey, ticker, name, balance, value;
+        double sort;
+        int order;
+        View src;               // null for a row from the saved copy
+        Drawable icon;
+    }
+
+    private static final class Holder {
+        View card; ImageView icon; TextView ticker, chip, price, change, balance, value;
+        View src;
+    }
+
+    private void rebuildNow() {
+        List<Entry> entries = new ArrayList<>();
+        java.util.Set<String> real = new java.util.HashSet<>();
+        int n = 0;
+        for (ViewGroup g : sources) {
+            if (g == null) continue;
+            for (int i = 0; i < g.getChildCount(); i++) {
+                View r = g.getChildAt(i);
+                if (r.findViewById(R.id.tv_asset_name) == null) continue;
+                String k = key(r);
+                real.add(k);
+                if (r.getVisibility() != View.VISIBLE) continue;
+                Entry e = fromRow(r);
+                e.order = n++;
+                entries.add(e);
+            }
+        }
+        boolean early = System.currentTimeMillis() - attachedAt < SAVED_GRACE_MS;
+        if (early) {
+            boolean hidden = com.harvana.app.utils.BalancePrivacy.isHidden(c);
+            for (Entry e : saved) {
+                if (real.contains(e.key)) continue;           // its section has drawn it (or hidden it)
+                e.order = n++;
+                if (hidden) { e.balance = "\u2022\u2022\u2022\u2022"; e.value = "\u2022\u2022\u2022\u2022"; }
+                entries.add(e);
+            }
+            if (!saved.isEmpty()) {                            // drop the leftovers once the grace time is over
+                shown.removeCallbacks(rebuild);
+                shown.postDelayed(rebuild, SAVED_GRACE_MS - (System.currentTimeMillis() - attachedAt) + 50);
+            }
+        }
         // Largest value first; equal values keep the sections' own order (HARV, stable coins, other coins, added).
-        List<View> order = new ArrayList<>(rows);
-        for (View r : rows) {
-            Double v = money(text(r, R.id.tv_asset_amount));
-            if (v != null) lastValue.put(key(r), v);
-        }
-        java.util.Collections.sort(order, (a, b) -> Double.compare(valueOf(b), valueOf(a)));   // a stable sort
+        java.util.Collections.sort(entries, (a, b) -> {
+            int cmp = Double.compare(b.sort, a.sort);
+            return cmp != 0 ? cmp : Integer.compare(a.order, b.order);
+        });
 
-        shown.removeAllViews();
-        for (View src : order) {
-            if (src.getVisibility() != View.VISIBLE) continue;
-            shown.addView(row(src));
+        List<String> keys = new ArrayList<>();
+        for (Entry e : entries) keys.add(e.key);
+        if (keys.equals(onScreen)) {
+            for (Entry e : entries) bind(holders.get(e.key), e);      // same rows, same order: update in place
+        } else {
+            shown.removeAllViews();
+            Map<String, Holder> keep = new HashMap<>(holders);
+            holders.clear();
+            for (Entry e : entries) {
+                Holder h = keep.get(e.key);
+                if (h == null) h = make();
+                bind(h, e);
+                holders.put(e.key, h);
+                shown.addView(h.card);
+            }
+            onScreen.clear();
+            onScreen.addAll(keys);
         }
+        if (!real.isEmpty()) writeCache(entries);
     }
 
-    private double valueOf(View r) {
-        Double v = lastValue.get(key(r));
-        return v == null ? 0 : v;
+    private Entry fromRow(View src) {
+        Entry e = new Entry();
+        e.src = src;
+        e.key = key(src);
+        e.priceKey = priceKey(src);
+        boolean stable = com.harvana.app.husd.Stable.isStable(e.priceKey);
+        e.ticker = stable ? com.harvana.app.husd.Stable.symbol(e.priceKey) : text(src, R.id.tv_asset_symbol);
+        if (e.ticker.isEmpty()) e.ticker = e.priceKey;
+        e.name = stable ? com.harvana.app.husd.Stable.name(e.priceKey) : text(src, R.id.tv_asset_name);
+        if ("HARV".equals(e.priceKey)) e.name = "Harvana";
+        String bal = text(src, R.id.tv_asset_balance), val = text(src, R.id.tv_asset_amount);
+        String[] old = lastText.get(e.key);
+        // A masked figure (privacy, "••••") is shown as it is; only an empty or loading one uses the last figures.
+        boolean balOk = money(bal) != null || bal.contains("\u2022"), valOk = money(val) != null || val.contains("\u2022");
+        // A section still loading shows a placeholder: keep the last figures instead of flashing it.
+        e.balance = balOk || old == null ? bal : old[0];
+        e.value = valOk || old == null ? val : old[1];
+        if (money(bal) != null && money(val) != null) lastText.put(e.key, new String[]{bal, val});
+        Double v = money(val);
+        if (v != null) lastValue.put(e.key, v);
+        Double lv = lastValue.get(e.key);
+        e.sort = lv == null ? 0 : lv;
+        Drawable dr = logo(src);
+        if (dr != null) {
+            Drawable.ConstantState cs = dr.getConstantState();
+            e.icon = cs != null ? cs.newDrawable(c.getResources()).mutate() : dr;
+        }
+        return e;
     }
 
-    /**
-     * One asset: icon · TICKER [Name] over price and 24h change on the left; amount over value on the right.
-     */
-    private View row(View src) {
+    /** The views of one row: icon · TICKER [Name] over price and 24h change; amount over value on the right. */
+    private Holder make() {
         float d = c.getResources().getDisplayMetrics().density;
-        String key = priceKey(src);
-        boolean stable = com.harvana.app.husd.Stable.isStable(key);
-        String ticker = stable ? com.harvana.app.husd.Stable.symbol(key) : text(src, R.id.tv_asset_symbol);
-        if (ticker.isEmpty()) ticker = key;
-        String name = stable ? com.harvana.app.husd.Stable.name(key) : text(src, R.id.tv_asset_name);
-        if ("HARV".equals(key)) name = "Harvana";
-
+        Holder h = new Holder();
         LinearLayout card = new LinearLayout(c);
         card.setGravity(Gravity.CENTER_VERTICAL);
         card.setPadding(px(d, 14), px(d, 12), px(d, 14), px(d, 12));
@@ -133,63 +229,142 @@ public final class AssetSorter {
         clp.setMargins(px(d, 12), px(d, 4), px(d, 12), px(d, 4));
         card.setLayoutParams(clp);
 
-        ImageView iv = new ImageView(c);
-        Drawable dr = logo(src);
-        if (dr != null) {
-            Drawable.ConstantState cs = dr.getConstantState();
-            iv.setImageDrawable(cs != null ? cs.newDrawable(c.getResources()).mutate() : dr);
-        }
-        card.addView(iv, new LinearLayout.LayoutParams(px(d, 40), px(d, 40)));
+        h.icon = new ImageView(c);
+        card.addView(h.icon, new LinearLayout.LayoutParams(px(d, 40), px(d, 40)));
 
         LinearLayout mid = new LinearLayout(c);
         mid.setOrientation(LinearLayout.VERTICAL);
         mid.setPadding(px(d, 12), 0, px(d, 8), 0);
         LinearLayout top = new LinearLayout(c);
         top.setGravity(Gravity.CENTER_VERTICAL);
-        TextView tk = tv(ticker, 16, true, com.harvana.app.utils.UiColors.textPrimary());
-        top.addView(tk);
-        if (name != null && !name.isEmpty() && !name.equalsIgnoreCase(ticker)) {
-            TextView chip = tv(name, 11.5f, false, com.harvana.app.utils.UiColors.textSecondary());
-            chip.setMaxLines(1);
-            chip.setEllipsize(android.text.TextUtils.TruncateAt.END);
-            chip.setPadding(px(d, 8), px(d, 2), px(d, 8), px(d, 2));
-            android.graphics.drawable.GradientDrawable cb = new android.graphics.drawable.GradientDrawable();
-            cb.setCornerRadius(px(d, 10));
-            cb.setColor(com.harvana.app.utils.UiColors.surfaceAlt());
-            chip.setBackground(cb);
-            LinearLayout.LayoutParams chl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            chl.leftMargin = px(d, 8);
-            top.addView(chip, chl);
-        }
+        h.ticker = tv("", 16, true, com.harvana.app.utils.UiColors.textPrimary());
+        top.addView(h.ticker);
+        h.chip = tv("", 11.5f, false, com.harvana.app.utils.UiColors.textSecondary());
+        h.chip.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        h.chip.setPadding(px(d, 8), px(d, 2), px(d, 8), px(d, 2));
+        android.graphics.drawable.GradientDrawable cb = new android.graphics.drawable.GradientDrawable();
+        cb.setCornerRadius(px(d, 10));
+        cb.setColor(com.harvana.app.utils.UiColors.surfaceAlt());
+        h.chip.setBackground(cb);
+        LinearLayout.LayoutParams chl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        chl.leftMargin = px(d, 8);
+        top.addView(h.chip, chl);
         mid.addView(top);
         LinearLayout bottom = new LinearLayout(c);
         bottom.setGravity(Gravity.CENTER_VERTICAL);
-        String p = price.get(key);
-        bottom.addView(tv(p == null ? "—" : p, 13, false, com.harvana.app.utils.UiColors.textSecondary()));
-        Double ch = change.get(key);
-        if (ch != null && !ch.isNaN()) {
-            TextView ct = tv(String.format(java.util.Locale.US, "%s%.2f%%", ch >= 0 ? "+" : "", ch), 13, false,
-                    ch >= 0 ? com.harvana.app.utils.UiColors.success() : com.harvana.app.utils.UiColors.error());
-            ct.setPadding(px(d, 6), 0, 0, 0);
-            bottom.addView(ct);
-        }
+        h.price = tv("—", 13, false, com.harvana.app.utils.UiColors.textSecondary());
+        bottom.addView(h.price);
+        h.change = tv("", 13, false, com.harvana.app.utils.UiColors.success());
+        h.change.setPadding(px(d, 6), 0, 0, 0);
+        bottom.addView(h.change);
         mid.addView(bottom);
         card.addView(mid, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
         LinearLayout right = new LinearLayout(c);
         right.setOrientation(LinearLayout.VERTICAL);
         right.setGravity(Gravity.END);
-        TextView amt = tv(text(src, R.id.tv_asset_balance), 16, true, com.harvana.app.utils.UiColors.textPrimary());
-        amt.setGravity(Gravity.END);
-        right.addView(amt);
-        TextView val = tv(text(src, R.id.tv_asset_amount), 13, false, com.harvana.app.utils.UiColors.textSecondary());
-        val.setGravity(Gravity.END);
-        right.addView(val);
+        h.balance = tv("", 16, true, com.harvana.app.utils.UiColors.textPrimary());
+        h.balance.setGravity(Gravity.END);
+        right.addView(h.balance);
+        h.value = tv("", 13, false, com.harvana.app.utils.UiColors.textSecondary());
+        h.value.setGravity(Gravity.END);
+        right.addView(h.value);
         card.addView(right);
+        h.card = card;
+        card.setOnClickListener(v -> {
+            if (h.src == null) return;                         // a saved row: its section has not drawn it yet
+            View realCard = h.src.findViewById(R.id.cardview1);
+            if (realCard != null) realCard.performClick(); else h.src.performClick();
+        });
+        return h;
+    }
 
-        View realCard = src.findViewById(R.id.cardview1);
-        card.setOnClickListener(v -> { if (realCard != null) realCard.performClick(); else src.performClick(); });
-        return card;
+    private void bind(Holder h, Entry e) {
+        if (h == null) return;
+        h.src = e.src;
+        if (e.icon != null) h.icon.setImageDrawable(e.icon);
+        else if (h.icon.getDrawable() == null) h.icon.setImageDrawable(savedIcon(e.priceKey));
+        set(h.ticker, e.ticker);
+        boolean chip = e.name != null && !e.name.isEmpty() && !e.name.equalsIgnoreCase(e.ticker);
+        h.chip.setVisibility(chip ? View.VISIBLE : View.GONE);
+        if (chip) set(h.chip, e.name);
+        String p = price.get(e.priceKey);
+        set(h.price, p == null ? "—" : p);
+        Double ch = change.get(e.priceKey);
+        if (ch != null && !ch.isNaN()) {
+            set(h.change, String.format(java.util.Locale.US, "%s%.2f%%", ch >= 0 ? "+" : "", ch));
+            h.change.setTextColor(ch >= 0 ? com.harvana.app.utils.UiColors.success() : com.harvana.app.utils.UiColors.error());
+            h.change.setVisibility(View.VISIBLE);
+        } else {
+            h.change.setVisibility(View.GONE);
+        }
+        set(h.balance, e.balance);
+        set(h.value, e.value);
+    }
+
+    /** Only touches the view when the text really changed (no relayout, no flicker). */
+    private static void set(TextView t, String s) {
+        String v = s == null ? "" : s;
+        if (!v.contentEquals(t.getText())) t.setText(v);
+    }
+
+    /** The icon for a row from the saved copy, before its section draws the real one. */
+    private Drawable savedIcon(String priceKey) {
+        try {
+            if ("HARV".equals(priceKey)) return c.getResources().getDrawable(R.drawable.ic_harv_coin);
+            if (com.harvana.app.husd.Stable.isStable(priceKey)) return com.harvana.app.husd.StableIcon.drawable(c, priceKey);
+            CoinCatalog.Coin coin = CoinCatalog.get(priceKey);
+            if (coin != null && coin.icon != 0) return c.getResources().getDrawable(coin.icon);
+        } catch (Exception ignored) { }
+        return null;
+    }
+
+    // ── the saved copy ────────────────────────────────────────────────────────
+
+    private void readCache() {
+        if (scope.isEmpty()) return;
+        try {
+            org.json.JSONObject j = new org.json.JSONObject(c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(scope, "{}"));
+            org.json.JSONObject pr = j.optJSONObject("price"), chg = j.optJSONObject("change");
+            if (pr != null) for (java.util.Iterator<String> it = pr.keys(); it.hasNext(); ) { String k = it.next(); price.put(k, pr.optString(k)); }
+            if (chg != null) for (java.util.Iterator<String> it = chg.keys(); it.hasNext(); ) { String k = it.next(); change.put(k, chg.optDouble(k)); }
+            org.json.JSONArray rows = j.optJSONArray("rows");
+            for (int i = 0; rows != null && i < rows.length(); i++) {
+                org.json.JSONObject o = rows.optJSONObject(i);
+                if (o == null) continue;
+                Entry e = new Entry();
+                e.key = o.optString("key");
+                e.priceKey = o.optString("pk");
+                e.ticker = o.optString("t");
+                e.name = o.optString("n");
+                e.balance = o.optString("b");
+                e.value = o.optString("v");
+                e.sort = o.optDouble("s", 0);
+                e.icon = savedIcon(e.priceKey);
+                saved.add(e);
+                lastValue.put(e.key, e.sort);
+                lastText.put(e.key, new String[]{e.balance, e.value});
+            }
+        } catch (Exception ignored) { }
+    }
+
+    private void writeCache(List<Entry> entries) {
+        if (scope.isEmpty()) return;
+        try {
+            org.json.JSONObject j = new org.json.JSONObject();
+            org.json.JSONObject pr = new org.json.JSONObject(), chg = new org.json.JSONObject();
+            for (Map.Entry<String, String> m : price.entrySet()) pr.put(m.getKey(), m.getValue());
+            for (Map.Entry<String, Double> m : change.entrySet()) if (m.getValue() != null && !m.getValue().isNaN()) chg.put(m.getKey(), m.getValue());
+            org.json.JSONArray rows = new org.json.JSONArray();
+            for (Entry e : entries) {
+                String[] t = lastText.get(e.key);                    // real figures only, never a masked one
+                if (e.src == null || t == null) continue;
+                rows.put(new org.json.JSONObject().put("key", e.key).put("pk", e.priceKey).put("t", e.ticker).put("n", e.name)
+                        .put("b", t[0]).put("v", t[1]).put("s", e.sort));
+            }
+            j.put("price", pr).put("change", chg).put("rows", rows);
+            c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(scope, j.toString()).apply();
+        } catch (Exception ignored) { }
     }
 
     private TextView tv(String s, float sp, boolean bold, int color) {

@@ -203,7 +203,7 @@ public final class BrowserMenu {
             row.setPadding(0, dp(10), 0, dp(10));
             ImageView ic = new ImageView(c);
             ic.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            if ("harvannaprotocol.com".equals(host(url))) ic.setImageResource(R.drawable.ic_harv_coin);
+            if ("harvannaprotocol.com".equals(host(url))) ic.setImageResource(Web3Home.iconFor(url));
             else com.bumptech.glide.Glide.with(c).load("https://icons.duckduckgo.com/ip3/" + host(url) + ".ico")
                     .placeholder(R.drawable.icon_link_twotone_line).error(R.drawable.icon_link_twotone_line).into(ic);
             row.addView(ic, new LinearLayout.LayoutParams(dp(28), dp(28)));

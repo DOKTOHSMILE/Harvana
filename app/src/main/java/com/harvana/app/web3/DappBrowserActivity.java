@@ -225,7 +225,7 @@ public class DappBrowserActivity extends AppCompatActivity {
                 pageChanged(url);
                 nav.setLoading(true);
                 pill.start();
-                if (!pageOrigin.equals(iconOrigin)) resetFavicon();
+                if (!pageOrigin.equals(iconOrigin) || pageOrigin.endsWith("harvannaprotocol.com")) resetFavicon();
             }
             @Override public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
                 nav.update();
@@ -244,7 +244,7 @@ public class DappBrowserActivity extends AppCompatActivity {
         web.setWebChromeClient(new WebChromeClient() {
             @Override public void onProgressChanged(WebView view, int p) { pill.setProgress(p); }
             @Override public void onReceivedIcon(WebView view, android.graphics.Bitmap icon) {
-                if (icon == null) return;
+                if (icon == null || pageOrigin.endsWith("harvannaprotocol.com")) return;     // Harvana pages keep their own icons
                 iconOrigin = pageOrigin;
                 favicon.clearColorFilter();
                 favicon.setPadding(0, 0, 0, 0);
@@ -312,7 +312,8 @@ public class DappBrowserActivity extends AppCompatActivity {
         String host = pageOrigin.isEmpty() ? "" : Uri.parse(pageOrigin).getHost();
         if (host != null && host.endsWith("harvannaprotocol.com")) {
             favicon.clearColorFilter();
-            favicon.setImageResource(R.drawable.ic_harv_coin);
+            String u = web == null || web.getUrl() == null ? "" : web.getUrl();
+            favicon.setImageResource(Web3Home.iconFor(u.contains("#") ? u.substring(0, u.indexOf('#')) : u));   // the site's icon, not a tab's
             iconOrigin = pageOrigin;
             return;
         }

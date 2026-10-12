@@ -63,7 +63,7 @@
 							android:layout_height="match_parent"
 							android:padding="20dp"
 							android:scaleType="centerInside"
-							android:src="@drawable/icon_call_received_twotone"
+							android:src="@drawable/ic_action_receive"
 							android:contentDescription="Status" android:duplicateParentState="true" />
 					</com.google.android.material.card.MaterialCardView>
 					<TextView
@@ -236,7 +236,7 @@
 								android:layout_width="0dp"
 								android:layout_height="wrap_content"
 								android:layout_weight="1"
-								android:text="Network fee"
+								android:text="Transport fare"
 								android:textColor="@color/colorTextSecondary"
 								android:textSize="15sp" />
 							<TextView

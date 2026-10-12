@@ -112,7 +112,7 @@ public final class GroupClosePolicy {
                 ok.reasons.add(f.escrowBalanceRaw > 0
                     ? "Nobody else has joined. The " + harv(f.escrowBalanceRaw) + " in the group wallet is yours and goes back to your wallet."
                     : "Nobody else has joined and the group wallet is empty.");
-                ok.reasons.add("The network closes the group (no more deposits), then it is removed from the app. A small network fee applies.");
+                ok.reasons.add("The network closes the group (no more deposits), then it is removed from the app. A small transport fare applies.");
                 return ok;
             }
         }

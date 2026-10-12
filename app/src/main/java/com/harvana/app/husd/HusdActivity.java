@@ -47,6 +47,7 @@ public class HusdActivity extends AppCompatActivity {
     private JSONObject info = new JSONObject();
     private JSONObject bal = new JSONObject();
     private TextView tvBalance, tvSub, tvHow;
+    private com.harvana.app.utils.InfoTable feesTable;
     private LinearLayout history;
 
     @Override
@@ -106,13 +107,13 @@ public class HusdActivity extends AppCompatActivity {
             root.addView(vc, vlp);
         }
 
-        TextView how = text("How it works", 15, true, UiColors.textPrimary());
+        TextView how = text("Fees and limits", 15, true, UiColors.textPrimary());
         how.setPadding(dp(4), dp(18), 0, dp(6));
         root.addView(how);
-        LinearLayout hc = card();
-        tvHow = text("…", 13, false, UiColors.textSecondary());
-        hc.addView(tvHow);
-        root.addView(hc);
+        feesTable = new com.harvana.app.utils.InfoTable(this);
+        root.addView(feesTable.view());
+        fillFees();
+        tvHow = text("", 13, false, UiColors.textSecondary());          // kept for older calls; the table holds the figures
 
         TextView wtitle = text("Withdrawals", 15, true, UiColors.textPrimary());
         wtitle.setPadding(dp(4), dp(18), 0, dp(6));
@@ -131,7 +132,7 @@ public class HusdActivity extends AppCompatActivity {
         HusdClient.info(code, new HusdClient.Cb() {
             @Override public void ok(JSONObject r) { info = r; runOnUiThread(() -> {
                 reserve = Stable.reserve(code, r);
-                tvHow.setText(howText());
+                fillFees();
                 if (!r.optBoolean("active")) tvSub.setText(sym + " is not switched on yet on the network.");
             }); }
             @Override public void fail(String e) { }
@@ -226,7 +227,7 @@ public class HusdActivity extends AppCompatActivity {
         }));
         root.addView(sent);
         long depFee = bridgeFee(chain);
-        root.addView(text("Network fee on " + chainName(chain) + ": " + HusdClient.format(depFee) + " " + sym
+        root.addView(text("Transport fare on " + chainName(chain) + ": " + HusdClient.format(depFee) + " " + sym
                 + ", taken from the deposit (twice that network's gas, for forwarding it into the vault). Send more than that.",
                 12, false, UiColors.textSecondary()));
         root.addView(text("Minimum deposit 1 " + reserve + ". Each deposit address is yours alone and never changes.",
@@ -300,7 +301,7 @@ public class HusdActivity extends AppCompatActivity {
 
     private String feeText(boolean withdrawal) {
         int free = bal.optInt("freeTransfersLeft");
-        String base = "HARV gas if you hold HARV, otherwise " + HusdClient.format(fee("transferPaidInHusdRaw", 20_000L)) + " " + sym;
+        String base = "HARV transport fare if you hold HARV, otherwise " + HusdClient.format(fee("transferPaidInHusdRaw", 20_000L)) + " " + sym;
         return !withdrawal && free > 0 ? "Free (" + free + " free transfers left) if paid in " + sym + "; " + base : base;
     }
 
@@ -316,6 +317,25 @@ public class HusdActivity extends AppCompatActivity {
     private long fee(String key, long fallback) {
         JSONObject f = info.optJSONObject("fees");
         return f != null && f.has(key) ? f.optLong(key, fallback) : fallback;
+    }
+
+    /** The coin's fees and limits as a table: one figure per row. */
+    private void fillFees() {
+        if (feesTable == null) return;
+        String one = sym;
+        feesTable.clear()
+                .section("Sending on Harvana")
+                .row("Transport fare (you hold HARV)", "Normal HARV transport fare")
+                .row("Transport fare (no HARV)", HusdClient.format(fee("transferPaidInHusdRaw", 20_000L)) + " " + one)
+                .row("Free transfers", "First 3 paid in " + one)
+                .row("Who gets a no-HARV fare", "Half to the miner, half to HARV stakers")
+                .section("Deposits and withdrawals (" + reserve + ")")
+                .row("Deposit or withdraw on Base", HusdClient.format(bridgeFee("BASE")) + " " + one)
+                .row("Deposit or withdraw on Ethereum", HusdClient.format(bridgeFee("ETHEREUM")) + " " + one)
+                .row("Other networks", "Twice that network's own fee")
+                .row("Minimum withdrawal", HusdClient.format(fee("minWithdrawRaw", 5 * HusdClient.UNIT)) + " " + one)
+                .row("Deposit address", "Yours alone; it never changes")
+                .row("Value", "1 " + one + " = 1 " + Stable.name(code));
     }
 
     private String howText() {

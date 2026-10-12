@@ -497,7 +497,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 					holder.tvAmount.setTextColor(COLOR_FAILED);
 				}
 				if (holder.ivIcon != null) {
-					holder.ivIcon.setImageResource(R.drawable.icon_call_made_twotone);
+					holder.ivIcon.setImageResource(R.drawable.ic_action_send);
 					holder.ivIcon.setColorFilter(COLOR_FAILED);
 				}
 			} else if (isIncoming) {
@@ -510,7 +510,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 					holder.tvAmount.setTextColor(isPending ? COLOR_PENDING : COLOR_INCOMING);
 				}
 				if (holder.ivIcon != null) {
-					holder.ivIcon.setImageResource(isPending ? R.drawable.icon_access_time_outline : R.drawable.icon_call_received_twotone);
+					holder.ivIcon.setImageResource(isPending ? R.drawable.icon_access_time_outline : R.drawable.ic_action_receive);
 					holder.ivIcon.setColorFilter(isPending ? COLOR_PENDING : COLOR_INCOMING);
 				}
 			} else {
@@ -523,7 +523,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 					holder.tvAmount.setTextColor(isPending ? COLOR_PENDING : COLOR_OUTGOING);
 				}
 				if (holder.ivIcon != null) {
-					holder.ivIcon.setImageResource(isPending ? R.drawable.icon_access_time_outline : R.drawable.icon_call_made_twotone);
+					holder.ivIcon.setImageResource(isPending ? R.drawable.icon_access_time_outline : R.drawable.ic_action_send);
 					holder.ivIcon.setColorFilter(isPending ? COLOR_PENDING : COLOR_OUTGOING);
 				}
 			}

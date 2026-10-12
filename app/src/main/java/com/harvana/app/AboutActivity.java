@@ -51,7 +51,7 @@ public class AboutActivity extends AppCompatActivity {
 		section("How your money is kept safe",
 				"• Your keys stay on your phone. Your recovery phrase never leaves it, and nobody at Harvana can move your money.\n"
 				+ "• Group money and P2P trades are held in escrow on the chain and released only by the rules everyone agreed to.\n"
-				+ "• Every transaction pays a small network fee, like any other blockchain, so the network stays secure and can't be flooded.\n"
+				+ "• Every transaction pays a small transport fare, like any other blockchain, so the network stays secure and can't be flooded.\n"
 				+ "• Stable coins are backed one for one by the same currency held in a vault, and the reserves can be checked by anyone.");
 
 		section("Our mission",

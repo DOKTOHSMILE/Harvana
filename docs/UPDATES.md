@@ -2,6 +2,20 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): swap records, transport fare, tables instead of sentences, one send/receive icon
+
+- **Swaps:**
+  - The details under a swap are a table (`utils/InfoTable`), in two sections. *This swap*: You pay, You get, You get at least, Rate. *Costs*: Pool fee, Price impact, Transport fare, Movements paid.
+  - **Your swaps** lists every swap and pool deposit/withdrawal with its status. Tapping one opens **SwapOrderActivity**: amounts, rate, why it was refunded (if it was), transport fare, start and finish times, and every transaction (each opens in the explorer).
+  - A swap pays a **transport fare for each movement** (2: your coin in, the other coin out) from your own wallet, up front. The separate action fee is gone for swaps, adds and removals. The whole quote arrives.
+- **Transport fare:** every Harvana "network fee" / "gas" label in the app now reads *Transport fare*. Fees on other blockchains (Bitcoin, Ethereum, …) keep their own names.
+- **Tables, not sentences:**
+  - Staking: the reward estimate. *Estimated rewards*: Weight, APR, APY, In 30 days, In a year, APR when the pool is full. *Terms*: Principal, Paid into Claim, Claims open, Unstaking returns.
+  - Stable coin pages: *Fees and limits*, sending and deposits/withdrawals, one figure per row.
+  - Earn: the full stake. *Your stake*: staked, unclaimed, claimed so far, your share, next claim. Then each live stake, each unstaking amount, and *The pool*.
+- **One icon for send and one for receive** everywhere: Activity rows, history, receipts, notifications and the asset page use the same arrows as the Home Send and Receive buttons.
+- The in-app explorer can open a single transaction (`ExplorerActivity.openTx`).
+
 ## 12 Oct 2026 (evening): Assets sorted by value with prices; Send details as a table
 
 - **Assets:** one list, largest holding first, by its value in your currency, whatever kind of coin it is (HARV, stable coins, other coins, added tokens).

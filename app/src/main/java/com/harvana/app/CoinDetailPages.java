@@ -203,7 +203,7 @@ public final class CoinDetailPages {
                 }
                 if (date != null) date.setText(ago(row.get("timestamp")));
                 if (icon != null) {
-                    icon.setImageResource(in ? R.drawable.icon_call_received_twotone : R.drawable.icon_call_made_twotone);
+                    icon.setImageResource(in ? R.drawable.ic_action_receive : R.drawable.ic_action_send);
                     icon.setColorFilter(in ? com.harvana.app.utils.UiColors.accent() : com.harvana.app.utils.UiColors.error());
                 }
                 item.setOnClickListener(v -> {

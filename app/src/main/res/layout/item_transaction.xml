@@ -37,7 +37,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="match_parent"
 					android:padding="8dp"
-					android:src="@drawable/icon_call_received_twotone"
+					android:src="@drawable/ic_action_receive"
 					android:scaleType="centerInside"
 					app:tint="@color/colorAccent"
 					android:focusable="false" android:duplicateParentState="true" />

@@ -87,7 +87,7 @@ public final class StakerShareCard {
                 java.util.List<String[]> confirm = new java.util.ArrayList<>();
                 confirm.add(new String[]{"From", "Harvana's " + Stable.symbol(code) + " staker pool"});
                 confirm.add(new String[]{"To", "This wallet"});
-                confirm.add(new String[]{"Network fee", "Normal HARV gas, paid from this wallet first (like every claim)"});
+                confirm.add(new String[]{"Transport fare", "Normal HARV transport fare, paid from this wallet first (like every claim)"});
                 com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(a, "Claim staking share",
                         HusdClient.format(raw) + " " + Stable.symbol(code), confirm, () ->
                         com.harvana.app.sync.NodeGroupClient.claimStableShare(a, code, address, new com.harvana.app.sync.NodeGroupClient.Callback() {

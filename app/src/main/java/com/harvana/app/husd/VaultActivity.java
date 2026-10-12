@@ -162,7 +162,7 @@ public class VaultActivity extends AppCompatActivity {
         askAmount("Lock HARV", "HARV to lock", true, raw -> confirm("Lock HARV", BalanceFormatter.rawShort(raw) + " HARV",
                 new String[][]{{"Goes to", "Your vault (only you can take it back)"},
                         {"Counts", "Once the next block has it"},
-                        {"Network fee", "Normal HARV gas"}},
+                        {"Transport fare", "Normal HARV transport fare"}},
                 () -> run("LOCK", raw, null, "HARV locked. It counts once the next block has it.")));
     }
 
@@ -177,7 +177,7 @@ public class VaultActivity extends AppCompatActivity {
             confirm("Mint " + sym, HusdClient.format(raw) + " " + sym, new String[][]{
                             {"You owe", HusdClient.format(pos.optLong("debtRaw") + raw) + " " + sym},
                             {"Keep above", (info.optInt("liquidationRatioBps", 15000) / 100) + "% or the vault can be liquidated"},
-                            {"Network fee", "A small HARV action fee"}},
+                            {"Transport fare", "A small HARV action fee"}},
                     () -> run("MINT", raw, null, sym + " minted. It arrives with the next block."));
         });
     }
@@ -190,7 +190,7 @@ public class VaultActivity extends AppCompatActivity {
             confirm("Repay " + sym, HusdClient.format(raw) + " " + sym, new String[][]{
                             {"Still owed", HusdClient.format(debt - raw) + " " + sym},
                             {"The coins", "Are burned: they leave circulation"},
-                            {"Network fee", "A small HARV action fee"}},
+                            {"Transport fare", "A small HARV action fee"}},
                     () -> run("REPAY", raw, null, "Repayment sent."));
         });
     }
@@ -202,7 +202,7 @@ public class VaultActivity extends AppCompatActivity {
             if (raw > coll) { toast("Only " + BalanceFormatter.rawShort(coll) + " HARV is locked."); return; }
             confirm("Take HARV back", BalanceFormatter.rawShort(raw) + " HARV", new String[][]{
                             {"Rule", "What stays must cover your debt " + (info.optInt("mintRatioBps", 20000) / 100) + "%"},
-                            {"Network fee", "A small HARV action fee"}},
+                            {"Transport fare", "A small HARV action fee"}},
                     () -> run("WITHDRAW", raw, null, "Your HARV is on its way back."));
         });
     }
@@ -214,7 +214,7 @@ public class VaultActivity extends AppCompatActivity {
                         {"Vault", shortAddr(owner)},
                         {"You pay", HusdClient.format(debt) + " " + sym + " of your own (burned)"},
                         {"You get", "That much in HARV plus " + bonus + "%, from the vault"},
-                        {"Network fee", "A small HARV action fee"}},
+                        {"Transport fare", "A small HARV action fee"}},
                 () -> run("LIQUIDATE", 0, owner, "Liquidation sent. The HARV arrives after the next block."));
     }
 

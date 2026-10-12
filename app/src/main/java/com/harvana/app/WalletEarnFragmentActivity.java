@@ -174,6 +174,8 @@ public class WalletEarnFragmentActivity extends Fragment {
                     
                     tvSummaryStaked.setText(harvFormatter.format(staked / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN) + " HARV");
                     tvSummaryUnclaimed.setText(harvFormatter.format(pending / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN) + " HARV");
+                    position = json;
+                    _fillStakeTable();
                 });
             }
 
@@ -183,7 +185,80 @@ public class WalletEarnFragmentActivity extends Fragment {
             }
         });
 
+        NodeGroupClient.getStakingInfo(new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject json) {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(() -> { stakingInfo = json; _fillStakeTable(); });
+            }
+            @Override public void onError(String error) { }
+        });
         drawMiniChart(address);
+    }
+
+    private JSONObject position, stakingInfo;
+    private com.harvana.app.utils.InfoTable stakeTable;
+
+    /** Everything about the stake on the Earn page, as a table: amounts, each live stake, unstaking, timing, the pool. */
+    private void _fillStakeTable() {
+        if (getContext() == null || btnOpenStaking == null) return;
+        if (stakeTable == null) {
+            View card = btnOpenStaking;
+            while (card != null && !(card instanceof com.google.android.material.card.MaterialCardView)) {
+                card = card.getParent() instanceof View ? (View) card.getParent() : null;
+            }
+            if (card == null || !(card.getParent() instanceof ViewGroup)) return;
+            ViewGroup column = (ViewGroup) card.getParent();
+            stakeTable = new com.harvana.app.utils.InfoTable(getContext());
+            ViewGroup.MarginLayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.topMargin = Math.round(12 * getResources().getDisplayMetrics().density);
+            column.addView(stakeTable.view(), column.indexOfChild(card) + 1, lp);
+        }
+        JSONObject p = position == null ? new JSONObject() : position, i = stakingInfo == null ? new JSONObject() : stakingInfo;
+        long staked = p.optLong("stakedRaw"), total = i.optLong("totalStakedRaw");
+        long share = p.has("shareBps") ? p.optLong("shareBps") : (total > 0 ? staked * 10_000L / total : 0);
+        stakeTable.clear().section("Your stake")
+                .row("Staked", h(staked))
+                .row("Unclaimed rewards", h(p.optLong("pendingRewardsRaw")), com.harvana.app.utils.UiColors.success())
+                .row("Claimed so far", h(p.optLong("totalClaimedRaw")))
+                .row("Your share of all stakes", String.format(java.util.Locale.US, "%.2f%%", share / 100.0));
+        long last = p.optLong("lastClaimedTimestamp"), first = p.optLong("firstStakedTimestamp");
+        long next = com.harvana.app.earn.StakingRules.nextClaimAt(staked, last, first);
+        if (staked > 0) stakeTable.row("Next claim opens", next <= System.currentTimeMillis() ? "Now" : _when(next));
+        org.json.JSONArray stakes = p.optJSONArray("stakes");
+        if (stakes != null && stakes.length() > 0) {
+            stakeTable.section("Live stakes");
+            for (int k = 0; k < stakes.length(); k++) {
+                JSONObject st = stakes.optJSONObject(k);
+                if (st == null) continue;
+                long unlock = st.optLong("unlockTimestamp");
+                double w = st.optLong("multiplierBps", 10_000) / 10_000.0;
+                stakeTable.row(h(st.optLong("amountRaw")),
+                        (unlock > System.currentTimeMillis() ? "Locked until " + _when(unlock) : "Free") + String.format(java.util.Locale.US, " · %.2fx", w));
+            }
+        }
+        org.json.JSONArray unb = p.optJSONArray("unbonding");
+        if (unb != null && unb.length() > 0) {
+            stakeTable.section("Unstaking");
+            for (int k = 0; k < unb.length(); k++) {
+                JSONObject u = unb.optJSONObject(k);
+                if (u == null) continue;
+                long at = u.optLong("releaseTimestamp");
+                stakeTable.row(h(u.optLong("amountRaw")), at > System.currentTimeMillis() ? "Returns " + _when(at) : "Returned");
+            }
+        }
+        stakeTable.section("The pool")
+                .row("Reward pool", h(i.optLong("rewardPoolBalanceRaw")))
+                .row("Total staked", h(total))
+                .row("Stakers", String.valueOf(i.optInt("stakerCount")))
+                .row("Paid into Claim daily", "0.05% of the pool")
+                .row("Estimated base APR", i.optLong("estimatedBaseAprBps") > 0
+                        ? String.format(java.util.Locale.US, "%.2f%%", i.optLong("estimatedBaseAprBps") / 100.0) : "—");
+    }
+
+    private String h(long raw) { return harvFormatter.format(raw / (double) HarvanaNodeClient.HARV_UNITS_PER_TOKEN) + " HARV"; }
+
+    private static String _when(long ms) {
+        return android.text.format.DateFormat.format("d MMM, HH:mm", ms).toString();
     }
 
     private void setupMiniChart() {

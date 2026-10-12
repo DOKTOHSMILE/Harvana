@@ -253,7 +253,7 @@ public final class GoalGroupPanel {
                 if (!c.groupName.isEmpty()) rows.add(new String[]{"Group", c.groupName});
                 rows.add(new String[]{"Vote on", label});
                 rows.add(new String[]{"Your vote", yes ? "Yes" : "No"});
-                rows.add(new String[]{"Network fee", "Taken from your wallet when this is sent"});
+                rows.add(new String[]{"Transport fare", "Taken from your wallet when this is sent"});
                 c.pressed = (Button) v;
                 NodePayActions.pay(c, yes ? "Vote yes" : "Vote no", "", rows, () -> cb.vote(yes));
             });

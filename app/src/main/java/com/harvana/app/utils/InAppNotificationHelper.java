@@ -51,7 +51,7 @@ public class InAppNotificationHelper {
                     ImageView icon = new ImageView(activity);
                     LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(72, 72);
                     icon.setLayoutParams(iconParams);
-                    icon.setImageResource(R.drawable.icon_call_received_twotone);
+                    icon.setImageResource(R.drawable.ic_action_receive);
                     icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
                     LinearLayout textLayout = new LinearLayout(activity);

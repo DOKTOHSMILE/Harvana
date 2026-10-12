@@ -286,7 +286,7 @@ public class SendController {
 
                                         if (harvBalanceForGas < feeHarv) {
                                             listener.onValidationError(
-                                                ("Insufficient " + com.harvana.app.CoinInfo.ticker() + " for gas fee (")
+                                                ("Insufficient " + com.harvana.app.CoinInfo.ticker() + " for the transport fare (")
                                                 + BalanceFormatter.fee(feeHarv) + " needed)");
                                             return;
                                         }
@@ -316,7 +316,7 @@ public class SendController {
                     @Override
                     public void onError(String error) {
                         if (destroyed || listener == null) return;
-                        listener.onValidationError(("Could not fetch " + com.harvana.app.CoinInfo.ticker() + " balance for gas check."));
+                        listener.onValidationError(("Could not fetch " + com.harvana.app.CoinInfo.ticker() + " balance for the transport fare check."));
                     }
                 });
     }

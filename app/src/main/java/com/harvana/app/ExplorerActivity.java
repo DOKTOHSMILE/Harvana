@@ -19,7 +19,17 @@ import com.harvana.app.wallet.CoinCatalog;
  * Harvana opens here too, once {@link CoinCatalog#HARV_EXPLORER} is filled in.
  */
 public class ExplorerActivity extends AppCompatActivity {
+    /** Opens this page of the Harvana explorer instead of the wallet's address page. */
+    public static final String EXTRA_URL = "url";
     private WebView web;
+
+    /** The Harvana explorer's page for one transaction. */
+    public static void openTx(android.content.Context c, String hash) {
+        if (hash == null || hash.isEmpty()) return;
+        c.startActivity(new android.content.Intent(c, ExplorerActivity.class)
+                .putExtra(CoinCatalog.EXTRA, "HARV")
+                .putExtra(EXTRA_URL, "https://harvannaprotocol.com/explorer/#/tx/" + hash));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +38,8 @@ public class ExplorerActivity extends AppCompatActivity {
         String address = getIntent().getStringExtra("walletAddress");
         if (address == null) address = "";
         String url = CoinCatalog.explorerUrl(coin, address);
+        String direct = getIntent().getStringExtra(EXTRA_URL);           // a page of the Harvana explorer (a transaction)
+        if (direct != null && direct.startsWith("https://harvannaprotocol.com/explorer/")) url = direct;
         if (url.isEmpty()) {
             AppBar.setContent(this, waiting(coin, address), coin.name + " explorer", coin.liveNetwork());
             return;

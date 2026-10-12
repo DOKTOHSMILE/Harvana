@@ -50,7 +50,7 @@ public final class PaymentConfirmSheet {
 		if (memo != null && !memo.trim().isEmpty()) {
 			rows.add(new String[]{"For", memo.trim()});
 		}
-		rows.add(new String[]{"Network fee", feeDisplay != null && !feeDisplay.trim().isEmpty()
+		rows.add(new String[]{"Transport fare", feeDisplay != null && !feeDisplay.trim().isEmpty()
 				? feeDisplay.trim() : "Taken when this is sent"});
 		present(context, title, com.harvana.app.wallet.BalanceFormatter.smart(amountHarv), rows, false,
 				() -> { if (onConfirm != null) onConfirm.onConfirmed(); });

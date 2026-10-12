@@ -8,6 +8,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -56,6 +57,8 @@ public class SwapActivity extends AppCompatActivity {
 
     private ImageView ivFrom, ivTo;
     private TextView tvFrom, tvTo, tvFromBal, tvOut, tvDetails;
+    private com.harvana.app.utils.InfoTable details;
+    private LinearLayout swapsList;
     private EditText etAmount;
     private MaterialButton btnSwap;
     private LinearLayout poolList;
@@ -125,9 +128,14 @@ public class SwapActivity extends AppCompatActivity {
         get.addView(getRow);
         root.addView(get);
 
-        tvDetails = text("", 12, false, UiColors.textSecondary());
+        tvDetails = text("", 12, false, UiColors.warning());          // only for a problem (empty pool, …)
         tvDetails.setPadding(dp(6), dp(10), dp(6), dp(4));
         root.addView(tvDetails);
+        details = new com.harvana.app.utils.InfoTable(this);
+        LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dlp.topMargin = dp(4);
+        root.addView(details.view(), dlp);
+        details.view().setVisibility(View.GONE);
 
         btnSwap = new MaterialButton(this);
         btnSwap.setText("Swap");
@@ -137,6 +145,12 @@ public class SwapActivity extends AppCompatActivity {
         LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
         blp.topMargin = dp(8);
         root.addView(btnSwap, blp);
+
+        TextView yt = text("Your swaps", 15, true, UiColors.textPrimary());
+        yt.setPadding(dp(4), dp(22), 0, dp(6));
+        root.addView(yt);
+        swapsList = card();
+        root.addView(swapsList);
 
         TextView pt = text("Pools", 15, true, UiColors.textPrimary());
         pt.setPadding(dp(4), dp(22), 0, dp(2));
@@ -159,7 +173,7 @@ public class SwapActivity extends AppCompatActivity {
         loadPools();
     }
 
-    @Override protected void onResume() { super.onResume(); loadPools(); loadBalance(); }
+    @Override protected void onResume() { super.onResume(); loadPools(); loadBalance(); loadSwaps(); }
 
     // ── data ──────────────────────────────────────────────────────────────────
 
@@ -189,6 +203,39 @@ public class SwapActivity extends AppCompatActivity {
     }
 
     private JSONArray mine = new JSONArray();
+
+    /** The wallet's swaps and pool actions, newest first; a tap opens the full record (SwapOrderActivity). */
+    private void loadSwaps() {
+        if (address == null || address.isEmpty() || swapsList == null) return;
+        NodeGroupClient.swapOrders(address, new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject r) { runOnUiThread(() -> showSwaps(r.optJSONArray("orders"))); }
+            @Override public void onError(String e) { runOnUiThread(() -> {
+                swapsList.removeAllViews();
+                swapsList.addView(text(com.harvana.app.utils.ErrorText.plain(e), 13, false, UiColors.textTertiary()));
+            }); }
+        });
+    }
+
+    private void showSwaps(JSONArray arr) {
+        swapsList.removeAllViews();
+        if (arr == null || arr.length() == 0) { swapsList.addView(text("No swaps yet.", 13, false, UiColors.textTertiary())); return; }
+        for (int i = 0; i < Math.min(arr.length(), 10); i++) {
+            JSONObject o = arr.optJSONObject(i);
+            if (o == null) continue;
+            LinearLayout row = new LinearLayout(this);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setPadding(0, dp(8), 0, dp(8));
+            TextView left = text(SwapOrderActivity.title(o) + "\n" + android.text.format.DateUtils.getRelativeTimeSpanString(o.optLong("at")),
+                    13, false, UiColors.textPrimary());
+            row.addView(left, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            String st = o.optString("status");
+            TextView badge = text(SwapOrderActivity.statusText(st), 12, true, SwapOrderActivity.statusColor(st));
+            row.addView(badge);
+            row.setOnClickListener(v -> startActivity(new android.content.Intent(this, SwapOrderActivity.class)
+                    .putExtra(SwapOrderActivity.EXTRA_ID, o.optString("orderId"))));
+            swapsList.addView(row);
+        }
+    }
 
     private void loadBalance() {
         fromBalance = -1;
@@ -226,7 +273,15 @@ public class SwapActivity extends AppCompatActivity {
         quote = null;
         btnSwap.setEnabled(false);
         long in = raw(from, etAmount.getText().toString());
-        if (in <= 0) { tvOut.setText("0"); tvDetails.setText(rateLine()); return; }
+        if (in <= 0) {
+            tvOut.setText("0");
+            tvDetails.setText("");
+            String rate = rateLine();
+            details.clear();
+            if (!rate.isEmpty()) details.row("Rate", rate.replace("1 " + sym(from) + " ≈ ", "1 " + sym(from) + " = "));
+            details.view().setVisibility(rate.isEmpty() ? View.GONE : View.VISIBLE);
+            return;
+        }
         final String f = from, t = to;
         tvOut.setText("…");
         NodeGroupClient.swapQuote(f, t, in, new NodeGroupClient.Callback() {
@@ -236,12 +291,22 @@ public class SwapActivity extends AppCompatActivity {
                 long out = q.optLong("outRaw");
                 tvOut.setText(fmt(to, out));
                 long impact = q.optLong("priceImpactBps");
-                tvDetails.setText(rateLine()
-                        + "\nPool fee: " + pct(q.optLong("feeBps")) + (q.has("viaHarvRaw") ? " (two pools, through HARV)" : "")
-                        + "\nPrice impact: " + pct(impact) + (impact >= 500 ? "  ⚠ large for this pool" : "")
-                        + "\nYou get at least " + fmt(to, minOut(out)) + " " + sym(to) + ", or your " + sym(from) + " comes back"
-                        + "\nNetwork fee: a small HARV action fee");
-                tvDetails.setTextColor(impact >= 500 ? UiColors.warning() : UiColors.textSecondary());
+                long fare = q.optLong("transportFareRaw");
+                int moves = q.optInt("transportMovements", 2);
+                tvDetails.setText("");
+                details.clear()
+                        .section("This swap")
+                        .row("You pay", fmt(from, in) + " " + sym(from))
+                        .row("You get (estimate)", fmt(to, out) + " " + sym(to))
+                        .row("You get at least", fmt(to, minOut(out)) + " " + sym(to))
+                        .row("Rate", rateLine().replace(" ≈ ", " = "))
+                        .section("Costs")
+                        .row("Pool fee", pct(q.optLong("feeBps")) + (q.has("viaHarvRaw") ? " (2 pools)" : ""))
+                        .row("Price impact", pct(impact), impact >= 500 ? UiColors.warning() : UiColors.textPrimary())
+                        .row("Transport fare", fmt("HARV", fare) + " HARV")
+                        .row("Movements paid", moves + " (" + sym(from) + " in, " + sym(to) + " out)");
+                if (impact >= 500) details.note("Large price impact: this pool is small for that amount.");
+                details.view().setVisibility(View.VISIBLE);
                 boolean enough = fromBalance < 0 || in <= fromBalance;
                 btnSwap.setEnabled(out > 0 && enough);
                 btnSwap.setText(enough ? "Swap" : "Not enough " + sym(from));
@@ -249,8 +314,8 @@ public class SwapActivity extends AppCompatActivity {
             @Override public void onError(String e) { runOnUiThread(() -> {
                 if (!f.equals(from) || !t.equals(to)) return;
                 tvOut.setText("—");
+                details.view().setVisibility(View.GONE);
                 tvDetails.setText(problem(e));
-                tvDetails.setTextColor(UiColors.warning());
             }); }
         });
     }
@@ -288,7 +353,7 @@ public class SwapActivity extends AppCompatActivity {
         rows.add(new String[]{"At least", fmt(to, minOut(out)) + " " + sym(to) + " (else it all comes back)"});
         rows.add(new String[]{"Price impact", pct(quote.optLong("priceImpactBps"))});
         rows.add(new String[]{"Pool fee", pct(quote.optLong("feeBps"))});
-        rows.add(new String[]{"Network fee", "A small HARV action fee"});
+        rows.add(new String[]{"Transport fare", fmt("HARV", quote.optLong("transportFareRaw")) + " HARV · " + quote.optInt("transportMovements", 2) + " movements"});
         com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Swap " + sym(from) + " for " + sym(to),
                 fmt(from, in) + " " + sym(from), rows, () -> {
                     btnSwap.setEnabled(false);
@@ -299,6 +364,7 @@ public class SwapActivity extends AppCompatActivity {
                             etAmount.setText("");
                             loadBalance();
                             loadPools();
+                            loadSwaps();
                         }); }
                         @Override public void onError(String e) { runOnUiThread(() -> { toast(problem(e)); btnSwap.setEnabled(true); }); }
                     });
@@ -384,7 +450,7 @@ public class SwapActivity extends AppCompatActivity {
                     rows.add(new String[]{"And", fmt(code, c) + " " + sym(code)});
                     rows.add(new String[]{"You earn", "0.3% of every swap through this pool, in proportion to your share"});
                     rows.add(new String[]{"Take back", "Any time, at the pool's mix then (it shifts as people swap)"});
-                    rows.add(new String[]{"Network fee", "HARV gas plus a small action fee"});
+                    rows.add(new String[]{"Transport fare", "3 movements (HARV in, coin in, any change back), paid in HARV"});
                     com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Add to pool", fmt(HARV, h) + " HARV", rows,
                             () -> NodeGroupClient.swapAdd(this, address, code, h, c, done("Added. Your share shows once both amounts arrive.")));
                 }).setNegativeButton("Cancel", null).show();

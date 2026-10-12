@@ -758,7 +758,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		rows.add(new String[]{"From", from});
 		rows.add(new String[]{"To", to});
 		rows.add(new String[]{"For", "A payout from the group wallet"});
-		rows.add(new String[]{"Network fee", "Taken from the group wallet"});
+		rows.add(new String[]{"Transport fare", "Taken from the group wallet"});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(GroupDetailsActivity.this,
 		"Send from the group wallet", com.harvana.app.wallet.BalanceFormatter.smart(amountHarv), rows, () -> {
 			try {

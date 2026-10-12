@@ -118,6 +118,11 @@ public final class NodeGroupClient {
             @Override public void onError(String error) { cb.onError(error); }
         });
     }
+    /** The wallet's swaps and pool actions, newest first (status PENDING, DONE, REFUNDED or SENT). */
+    public static void swapOrders(String address, Callback cb) { read("/api/v1/swap/orders/" + address + "?limit=30", cb); }
+    /** One swap or pool action: amounts, transport fare and every transaction hash. */
+    public static void swapOrder(String id, Callback cb) { read("/api/v1/swap/order/" + id, cb); }
+
     /** The wallet's pool shares and what they hold now. */
     public static void swapPosition(String address, Callback cb) { read("/api/v1/swap/position/" + address, cb); }
 
@@ -735,7 +740,7 @@ public final class NodeGroupClient {
                     if (review != null) for (String[] r : review.rows) {
                         if (r == null || r.length < 2 || r[0] == null) continue;
                         String label = r[0].trim();
-                        if ("Network fee".equalsIgnoreCase(label)) continue;          // the fee is its own line on the receipt
+                        if ("Transport fare".equalsIgnoreCase(label)) continue;          // the fee is its own line on the receipt
                         if ("From".equalsIgnoreCase(label)) { hasFrom = true; rows.add(new String[]{"From", address}); continue; }
                         rows.add(r);
                     }
@@ -781,9 +786,6 @@ public final class NodeGroupClient {
             case "/api/v1/fixed/vote-dissolve": return "FIXED_VOTE_DISSOLVE";
             case "/api/v1/fixed/finish-dissolve": return "FIXED_FINISH_DISSOLVE";
             case "/api/v1/genloan/request": return "GENLOAN_REQUEST";
-            case "/api/v1/swap/swap": return "SWAP";
-            case "/api/v1/swap/add": return "SWAP_ADD";
-            case "/api/v1/swap/remove": return "SWAP_REMOVE";
             default:
                 if (path.endsWith("/staker-share/claim")) return "STABLE_SHARE_CLAIM";
                 if (path.startsWith("/api/v1/vault/")) {           // lock pays its own gas; the rest pay the action fee
@@ -812,7 +814,7 @@ public final class NodeGroupClient {
                 new com.harvana.app.tx.TransactionRouter.RouterCallback() {
                     @Override public void onSuccess(String txHash) { next.go(txHash); }
                     @Override public void onError(String code, String msg) {
-                        cb.onError("Network fee not paid. Every action needs a small fee in HARV from your wallet. " + (msg == null ? "" : msg));
+                        cb.onError("Transport fare not paid. Every action needs a small fee in HARV from your wallet. " + (msg == null ? "" : msg));
                     }
                 });
     }

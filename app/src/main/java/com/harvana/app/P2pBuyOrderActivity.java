@@ -654,7 +654,7 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
 		rows.add(new String[]{"You pay", fiatTotal >= 0 ? P2pMoney.fiat(fiatTotal, listingCurrency) : "The listed price"});
 		rows.add(new String[]{"Platform fee", BalanceFormatter.smart(com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, lastPlatformFeeRaw))});
-		rows.add(new String[]{"Network fee", BalanceFormatter.smart(com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, lastNetworkFeeRaw))});
+		rows.add(new String[]{"Transport fare", BalanceFormatter.smart(com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, lastNetworkFeeRaw))});
 		rows.add(new String[]{"You receive", BalanceFormatter.smart(com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, lastNetAmountRaw))});
 		rows.add(new String[]{"For", "Opening this buy against the listing"});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,

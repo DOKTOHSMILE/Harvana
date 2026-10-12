@@ -763,7 +763,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 			public void onError(String error) {
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> SketchwareUtil.showMessage(getContext(),
-				"Could not fetch network fee from node: " + error));
+				"Could not fetch transport fare from node: " + error));
 			}
 		});
 	}
@@ -772,7 +772,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		if (getContext() == null) return;
 		double netToBorrower = principal - feeHarv;
 		if (netToBorrower <= 0) {
-			SketchwareUtil.showMessage(getContext(), "Loan amount is too small to cover the network fee.");
+			SketchwareUtil.showMessage(getContext(), "Loan amount is too small to cover the transport fare.");
 			return;
 		}
 		
@@ -781,7 +781,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		rows.add(new String[]{"For", "Disburse this approved loan from the group wallet"});
 		rows.add(new String[]{"To", borrowerWallet});
 		rows.add(new String[]{"Borrower receives", _formatUIBalance(netToBorrower)});
-		rows.add(new String[]{"Network fee", feeDisplay + ", taken from the principal"});
+		rows.add(new String[]{"Transport fare", feeDisplay + ", taken from the principal"});
 		rows.add(new String[]{"Group wallet debit", _formatUIBalance(principal)});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(getActivity(),
 		"Approve and disburse", _formatUIBalance(principal), rows,
@@ -793,7 +793,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		(from, to, amountHarv, cb) -> {
 			double netAmount = amountHarv - feeHarv;
 			if (netAmount <= 0) {
-				cb.onError("Loan amount too small to cover the network fee.");
+				cb.onError("Loan amount too small to cover the transport fare.");
 				return;
 			}
 			String escrowKey = com.harvana.app.wallet.WalletManager.loadPrivateKey(getActivity(), from);
@@ -803,7 +803,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 			}
 			com.harvana.app.tx.TransactionRouter.routeTransaction(
 			getActivity(), from, to, java.math.BigDecimal.valueOf(netAmount), null,
-			"Loan disbursement (network fee deducted from principal)",
+			"Loan disbursement (transport fare deducted from principal)",
 			new com.harvana.app.tx.TransactionRouter.RouterCallback() {
 				@Override public void onSuccess(String txHash) { cb.onSuccess(txHash); }
 				@Override public void onError(String code, String msg) { cb.onError(msg); }
@@ -1009,7 +1009,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 				rows.add(new String[]{"From", fromWallet});
 				if (alreadyRepaid > 0) rows.add(new String[]{"Already paid", _formatUIBalance(alreadyRepaid)});
 				rows.add(new String[]{"Still owed before this", _formatUIBalance(remainingDue)});
-				rows.add(new String[]{"Network fee", "Taken from your wallet when this is sent"});
+				rows.add(new String[]{"Transport fare", "Taken from your wallet when this is sent"});
 				com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(getActivity(),
 				payFully ? "Repay and close this loan" : "Part-pay this loan",
 				_formatUIBalance(payAmount), rows,

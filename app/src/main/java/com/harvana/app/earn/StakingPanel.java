@@ -311,26 +311,48 @@ public final class StakingPanel {
         if (cardLock90 != null) cardLock90.setOnClickListener(lockClick);
     }
 
+    /** The estimate as a table (InfoTable) in place of the old sentence under the amount. */
+    private com.harvana.app.utils.InfoTable estTable;
+
+    private com.harvana.app.utils.InfoTable estTable() {
+        if (estTable != null || tvEstRewardInput == null) return estTable;
+        View row = (View) tvEstRewardInput.getParent();                 // the old "Estimated rewards" line
+        View line = row == null ? null : (View) row.getParent();
+        if (line == null || !(line.getParent() instanceof android.view.ViewGroup)) return null;
+        android.view.ViewGroup column = (android.view.ViewGroup) line.getParent();
+        estTable = new com.harvana.app.utils.InfoTable(host);
+        android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = Math.round(12 * host.getResources().getDisplayMetrics().density);
+        column.addView(estTable.view(), column.indexOfChild(line) + 1, lp);
+        line.setVisibility(View.GONE);
+        return estTable;
+    }
+
     private void updateEstReward() {
-        if (tvEstRewardInput == null) return;
+        com.harvana.app.utils.InfoTable t = estTable();
+        if (t == null) return;
         double weight = StakingRules.weight(selectedLockDays);
-        String holdText = selectedLockDays <= 0 ? "stays until you unstake" : selectedLockDays + "-day lock on the principal";
         double harvAmount = 0;
         try { if (amount != null) harvAmount = Double.parseDouble(amount.getText().toString().trim()); } catch (Exception ignored) { }
         double[] r = rates();
-        String text;
+        t.clear().section("Estimated rewards");
+        t.row("Weight", String.format(Locale.US, "%.2fx", weight));
         if (harvAmount > 0 && r[0] > 0) {
             double apr = StakingRules.aprFor(harvAmount, weight, r[0], r[1]);
             double fullApr = StakingRules.aprFor(harvAmount, weight, StakingRules.FULL_POOL_DAILY_HARV * 365.0, r[1]);
-            text = String.format(Locale.US, "About %.2f%% APR (%.2f%% APY if you restake daily) at %.2fx weight: %s HARV in 30 days, %s in a year. "
-                            + "When the reward pool is full this becomes about %.2f%% APR. %s.",
-                    apr * 100, StakingRules.apy(apr) * 100, weight,
-                    fmt2(StakingRules.earned(harvAmount, apr, 30)), fmt2(StakingRules.earned(harvAmount, apr, 365)),
-                    fullApr * 100, capitalise(holdText));
-        } else {
-            text = String.format(Locale.US, "%.2fx weight. Each day 0.05%% of the pool drips into Claim. %s.", weight, capitalise(holdText));
+            t.row("APR", String.format(Locale.US, "%.2f%%", apr * 100), UiColors.success())
+             .row("APY (restaking daily)", String.format(Locale.US, "%.2f%%", StakingRules.apy(apr) * 100))
+             .row("In 30 days", fmt2(StakingRules.earned(harvAmount, apr, 30)) + " HARV")
+             .row("In a year", fmt2(StakingRules.earned(harvAmount, apr, 365)) + " HARV")
+             .row("APR when the pool is full", String.format(Locale.US, "%.2f%%", fullApr * 100));
         }
-        tvEstRewardInput.setText(text + " Estimates move with the pool and the total staked. Claims open once every 24 hours.");
+        t.section("Terms")
+         .row("Principal", selectedLockDays <= 0 ? "Free · until you unstake" : selectedLockDays + "-day lock")
+         .row("Paid into Claim", "0.05% of the pool each day")
+         .row("Claims open", "Every 24 hours")
+         .row("Unstaking returns", "After 24 hours");
+        t.note("Estimates move with the pool and the total staked.");
     }
 
     /** {yearly drip in HARV, total weighted stake} from the node's /info and the observed block pace. */

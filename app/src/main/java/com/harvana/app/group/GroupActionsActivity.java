@@ -546,7 +546,7 @@ public class GroupActionsActivity extends AppCompatActivity {
         if (!groupName.isEmpty()) rows.add(new String[]{"Group", groupName});
         rows.add(new String[]{"Vote on", label});
         rows.add(new String[]{"Your vote", yes ? "Yes" : "No"});
-        rows.add(new String[]{"Network fee", "Taken from your wallet when this is sent"});
+        rows.add(new String[]{"Transport fare", "Taken from your wallet when this is sent"});
         PaymentConfirmSheet.reviewThenAuthorize(this, yes ? "Vote yes" : "Vote no", "", rows, () -> {
             NodeGroupClient.Callback cb = result(yes ? "Your yes vote is in" : "Your no vote is in");
             if (GroupProposalIndex.DISBURSEMENT.equals(kind)) NodeGroupClient.voteFixedDisbursement(getApplicationContext(), me, nodeId, id, yes, cb);
@@ -874,7 +874,7 @@ public class GroupActionsActivity extends AppCompatActivity {
         if (!groupName.isEmpty()) rows.add(new String[]{"Group", groupName});
         if (detail != null && !detail.isEmpty()) rows.add(new String[]{"For", detail});
         rows.add(new String[]{"From", "Your wallet"});
-        rows.add(new String[]{"Network fee", "Taken from your wallet when this is sent"});
+        rows.add(new String[]{"Transport fare", "Taken from your wallet when this is sent"});
         PaymentConfirmSheet.reviewThenAuthorize(this, title, amount, rows, work);
     }
 

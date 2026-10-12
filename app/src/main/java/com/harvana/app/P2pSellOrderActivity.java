@@ -578,7 +578,7 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 		rows.add(new String[]{"You should receive", fiatTotal >= 0 ? P2pMoney.fiat(fiatTotal, listingCurrency) : "The listed price"});
 		rows.add(new String[]{"Platform fee", BalanceFormatter.smart(com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, lastPlatformFeeRaw))});
 		rows.add(new String[]{"Paid into", selectedMethod == null ? "Your payment account" : String.valueOf(selectedMethod)});
-		rows.add(new String[]{"Network fee", "Set by the node when this order opens"});
+		rows.add(new String[]{"Transport fare", "Set by the node when this order opens"});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this,
 		"Open this sell", BalanceFormatter.smart(amountHarv), rows, () -> {
 			btn_create_sell_order.setEnabled(false);

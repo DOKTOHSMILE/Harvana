@@ -146,7 +146,7 @@
 								android:id="@+id/imageview1"
 								android:layout_width="24dp"
 								android:layout_height="match_parent"
-								android:src="@drawable/icon_call_received_twotone"
+								android:src="@drawable/ic_action_receive"
 								android:scaleType="centerInside"
 								app:tint="@color/colorAccent" />
 							<TextView
@@ -182,7 +182,7 @@
 								android:id="@+id/imageview2"
 								android:layout_width="24dp"
 								android:layout_height="match_parent"
-								android:src="@drawable/icon_call_made_twotone"
+								android:src="@drawable/ic_action_send"
 								android:scaleType="centerInside"
 								app:tint="@color/colorAccent" />
 							<TextView

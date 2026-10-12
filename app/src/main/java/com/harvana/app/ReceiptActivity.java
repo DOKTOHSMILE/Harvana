@@ -230,13 +230,13 @@ public class ReceiptActivity extends AppCompatActivity {
 			icon = R.drawable.icon_access_time_outline;
 			tint = androidx.core.content.ContextCompat.getColor(this, R.color.colorWarning);
 		} else if (failed) {
-			icon = R.drawable.icon_call_made_twotone;
+			icon = R.drawable.ic_action_send;
 			tint = androidx.core.content.ContextCompat.getColor(this, R.color.colorError);
 		} else if (isIncoming) {
-			icon = R.drawable.icon_call_received_twotone;
+			icon = R.drawable.ic_action_receive;
 			tint = androidx.core.content.ContextCompat.getColor(this, R.color.colorAccent);
 		} else {
-			icon = R.drawable.icon_call_made_twotone;
+			icon = R.drawable.ic_action_send;
 			tint = androidx.core.content.ContextCompat.getColor(this, R.color.colorError);
 		}
 		if (confirmed && _kind != null) icon = _kind.icon;
@@ -706,7 +706,7 @@ public class ReceiptActivity extends AppCompatActivity {
 			FileWriter writer = new FileWriter(csvFile);
 			
 			// 1. Write standard CSV Headers
-			writer.append("Date,TxHash,Status,Amount,Token,From,To,Network Fee,Burn Amount,Memo,Block Number,Confirmations,Nonce\n");
+			writer.append("Date,TxHash,Status,Amount,Token,From,To,Transport Fare,Burn Amount,Memo,Block Number,Confirmations,Nonce\n");
 			
 			// 2. Safely format data to prevent CSV column breakage
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());

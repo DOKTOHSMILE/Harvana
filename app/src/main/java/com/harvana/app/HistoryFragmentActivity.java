@@ -647,7 +647,7 @@ public class HistoryFragmentActivity extends Fragment {
 			com.harvana.app.tx.TxKind kind = com.harvana.app.tx.TxKind.of(memo, !isOut);
 			if (h.icon != null) {
 				h.icon.setImageResource(!confirmed ? R.drawable.icon_access_time_outline
-					: kind != null ? kind.icon : isOut ? R.drawable.icon_call_made_twotone : R.drawable.icon_call_received_twotone);
+					: kind != null ? kind.icon : isOut ? R.drawable.ic_action_send : R.drawable.ic_action_receive);
 				h.icon.setColorFilter(!confirmed ? pending : isOut ? outgoing : incoming);
 			}
 			if (h.type != null) {

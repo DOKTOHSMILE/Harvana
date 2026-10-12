@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 12 Oct 2026 (night): browser network selector
+
+- **Network chip** (dApp browser, top bar): larger, with the chain's icon, the chain's name and a down arrow.
+- **Network sheet** (curved bottom sheet with a handle) lists:
+  - Harvana (Harvana Protocol and your HV0x address);
+  - Ethereum, BNB Chain, Polygon and Base (chain ID and your 0x address).
+  - Each row has its icon; the selected row is highlighted with a tick.
+- **Harvana selected:** the Harvana wallet (`window.harvana`) is in use.
+- **EVM chain selected:** that chain is in use, as before. A site switching chain (`wallet_switchEthereumChain`) moves the chip too.
+- The choice is kept between visits (`Web3Sites.showHarvana`).
+
 ## 12 Oct 2026 (night): one trust score everywhere; HARV value loads
 
 - **Trust:** Home's trust card and the Trust score page now show the person's one score across every linked wallet (`PROFILES.trust_percent`, as on the profile). Before, they showed only the active wallet's own score (8% vs 21%). The wallet score is still used before the person has one.

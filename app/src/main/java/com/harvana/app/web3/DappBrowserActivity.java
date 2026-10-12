@@ -106,6 +106,7 @@ public class DappBrowserActivity extends AppCompatActivity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         chainKey = Web3Sites.chain(this);
+        harvanaShown = Web3Sites.showHarvana(this);
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -164,12 +165,16 @@ public class DappBrowserActivity extends AppCompatActivity {
         addrLp.rightMargin = dp(8);
         bar.addView(addr, addrLp);
         chainChip = new TextView(this);
-        chainChip.setTextSize(12);
+        chainChip.setTextSize(13.5f);
         chainChip.setTypeface(null, Typeface.BOLD);
         chainChip.setTextColor(UiColors.textPrimary());
-        chainChip.setPadding(dp(10), dp(6), dp(10), dp(6));
+        chainChip.setGravity(Gravity.CENTER_VERTICAL);
+        chainChip.setCompoundDrawablePadding(dp(6));
+        chainChip.setMinHeight(dp(40));
+        chainChip.setPadding(dp(8), dp(6), dp(8), dp(6));
         android.graphics.drawable.GradientDrawable cb = new android.graphics.drawable.GradientDrawable();
-        cb.setCornerRadius(dp(14));
+        cb.setCornerRadius(dp(20));
+        cb.setStroke(Math.max(1, dp(1)), UiColors.textTertiary() & 0x33FFFFFF);
         cb.setColor(UiColors.surfaceAlt());
         chainChip.setBackground(cb);
         chainChip.setOnClickListener(v -> pickChain());
@@ -423,16 +428,112 @@ public class DappBrowserActivity extends AppCompatActivity {
 
     private String chainHex() { return "0x" + Long.toHexString(net().chainId); }
 
-    private void paintChain() { chainChip.setText(net().name); }
+    /** True when the chip shows Harvana (the Harvana wallet, window.harvana) rather than an EVM chain. */
+    private boolean harvanaShown;
 
+    private static int chainIcon(String key) {
+        switch (key) {
+            case "HARV": return R.drawable.ic_harv_coin;
+            case "BNB": return R.drawable.ic_coin_bnb;
+            case "POL": return R.drawable.ic_coin_pol;
+            case "BASE": return R.drawable.ic_coin_base;
+            default: return R.drawable.ic_coin_eth;
+        }
+    }
+
+    private static String shortName(String name) {
+        return name.replace(" Sepolia", "").replace(" testnet", "").replace(" Amoy", "");
+    }
+
+    private void paintChain() {
+        String key = harvanaShown ? "HARV" : chainKey;
+        chainChip.setText(harvanaShown ? "Harvana" : shortName(net().name));
+        android.graphics.drawable.Drawable icon = androidx.core.content.ContextCompat.getDrawable(this, chainIcon(key));
+        android.graphics.drawable.Drawable arrow = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.icon_keyboard_arrow_down_round_line);
+        if (icon != null) icon.setBounds(0, 0, dp(22), dp(22));
+        if (arrow != null) { arrow = arrow.mutate(); arrow.setTint(UiColors.textSecondary()); arrow.setBounds(0, 0, dp(18), dp(18)); }
+        chainChip.setCompoundDrawables(icon, null, arrow, null);
+    }
+
+    /** The network sheet: Harvana and every EVM chain the wallet signs for, each with its icon, chain and address. */
     private void pickChain() {
-        String[] names = new String[Web3Signer.CHAINS.length];
-        for (int i = 0; i < names.length; i++) names[i] = Web3Signer.net(Web3Signer.CHAINS[i]).name;
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Network")
-                .setItems(names, (d, w) -> switchChain(Web3Signer.CHAINS[w])).show();
+        com.harvana.app.ui.AppSheet sheet = new com.harvana.app.ui.AppSheet(this);
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(16), dp(10), dp(16), dp(24));
+        View handle = new View(this);
+        android.graphics.drawable.GradientDrawable hb = new android.graphics.drawable.GradientDrawable();
+        hb.setCornerRadius(dp(2));
+        hb.setColor(UiColors.textTertiary());
+        handle.setBackground(hb);
+        LinearLayout.LayoutParams hlp = new LinearLayout.LayoutParams(dp(36), dp(4));
+        hlp.gravity = Gravity.CENTER_HORIZONTAL;
+        hlp.bottomMargin = dp(14);
+        box.addView(handle, hlp);
+        TextView title = new TextView(this);
+        title.setText("Network");
+        title.setTextSize(18);
+        title.setTypeface(null, Typeface.BOLD);
+        title.setTextColor(UiColors.textPrimary());
+        title.setPadding(dp(4), 0, 0, dp(10));
+        box.addView(title);
+
+        box.addView(chainRow(sheet, "HARV", "Harvana", "Harvana Protocol" + (hvAccount == null || hvAccount.isEmpty() ? "" : " · " + shortAddr(hvAccount)), harvanaShown));
+        for (String key : Web3Signer.CHAINS) {
+            Net.Evm n = Web3Signer.net(key);
+            box.addView(chainRow(sheet, key, n.name, "Chain ID " + n.chainId + (account == null ? "" : " · " + shortAddr(account)), !harvanaShown && key.equals(chainKey)));
+        }
+        sheet.setContentView(box);
+        sheet.show();
+    }
+
+    private View chainRow(com.harvana.app.ui.AppSheet sheet, String key, String name, String sub, boolean selected) {
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(dp(12), dp(12), dp(12), dp(12));
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+        bg.setCornerRadius(dp(16));
+        bg.setColor(selected ? UiColors.surfaceAlt() : 0x00000000);
+        if (selected) bg.setStroke(Math.max(1, dp(1)), UiColors.accent());
+        row.setBackground(bg);
+        ImageView icon = new ImageView(this);
+        icon.setImageResource(chainIcon(key));
+        row.addView(icon, new LinearLayout.LayoutParams(dp(36), dp(36)));
+        LinearLayout col = new LinearLayout(this);
+        col.setOrientation(LinearLayout.VERTICAL);
+        col.setPadding(dp(12), 0, dp(8), 0);
+        TextView n = new TextView(this);
+        n.setText(name);
+        n.setTextSize(15.5f);
+        n.setTypeface(null, Typeface.BOLD);
+        n.setTextColor(UiColors.textPrimary());
+        col.addView(n);
+        TextView s2 = new TextView(this);
+        s2.setText(sub);
+        s2.setTextSize(12);
+        s2.setTextColor(UiColors.textSecondary());
+        s2.setSingleLine(true);
+        col.addView(s2);
+        row.addView(col, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        if (selected) {
+            ImageView tick = new ImageView(this);
+            tick.setImageResource(R.drawable.icon_check_circle_round_line);
+            tick.setColorFilter(UiColors.accent());
+            row.addView(tick, new LinearLayout.LayoutParams(dp(24), dp(24)));
+        }
+        row.setOnClickListener(v -> {
+            sheet.dismiss();
+            if ("HARV".equals(key)) { harvanaShown = true; Web3Sites.setShowHarvana(this, true); paintChain(); }
+            else switchChain(key);
+        });
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = dp(6);
+        row.setLayoutParams(lp);
+        return row;
     }
 
     private void switchChain(String key) {
+        if (harvanaShown) { harvanaShown = false; Web3Sites.setShowHarvana(this, false); paintChain(); }   // an EVM chain was chosen
         if (key.equals(chainKey)) return;
         chainKey = key;
         Web3Sites.setChain(this, key);

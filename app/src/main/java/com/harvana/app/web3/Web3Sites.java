@@ -42,6 +42,10 @@ public final class Web3Sites {
     public static String chain(Context c) { return sp(c).getString("chain", "ETH"); }
     public static void setChain(Context c, String key) { sp(c).edit().putString("chain", key).apply(); }
 
+    /** Whether the browser's network chip shows Harvana (the Harvana wallet) instead of an EVM chain. */
+    public static boolean showHarvana(Context c) { return sp(c).getBoolean("show_harvana", true); }
+    public static void setShowHarvana(Context c, boolean on) { sp(c).edit().putBoolean("show_harvana", on).apply(); }
+
     public static void remember(Context c, String url, String title) {
         try {
             JSONArray old = recent(c), out = new JSONArray();

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Explorer browser: loading bar, the page, the find bar, then the browser buttons. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground"
+	android:orientation="vertical">
+
+	<ProgressBar
+		android:id="@+id/explorer_progress"
+		style="?android:attr/progressBarStyleHorizontal"
+		android:layout_width="match_parent"
+		android:layout_height="3dp"
+		android:max="100" />
+
+	<WebView
+		android:id="@+id/explorer_web"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1" />
+
+	<FrameLayout
+		android:id="@+id/explorer_find_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content" />
+
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="0.5dp"
+		android:background="@color/colorSurfaceAlt" />
+
+	<FrameLayout
+		android:id="@+id/explorer_nav_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content" />
+</LinearLayout>

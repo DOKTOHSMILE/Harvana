@@ -1,17 +1,14 @@
 package com.harvana.app;
 
 import android.os.Bundle;
-import android.view.Gravity;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.harvana.app.utils.AppBar;
-import com.harvana.app.utils.UiColors;
 import com.harvana.app.wallet.CoinCatalog;
 
 /**
@@ -42,10 +39,19 @@ public class ExplorerActivity extends AppCompatActivity {
         String direct = getIntent().getStringExtra(EXTRA_URL);           // a page of the Harvana explorer (a transaction)
         if (direct != null && direct.startsWith("https://harvannaprotocol.com/explorer/")) url = direct;
         if (url.isEmpty()) {
-            AppBar.setContent(this, waiting(coin, address), coin.name + " explorer", coin.liveNetwork());
+            AppBar.setContent(this, R.layout.activity_explorer_waiting, coin.name + " explorer", coin.liveNetwork());
+            ((ImageView) findViewById(R.id.iv_explorer_coin)).setImageResource(coin.icon);
+            ((TextView) findViewById(R.id.tv_explorer_coin)).setText(coin.name);
+            if (!address.isEmpty()) {
+                TextView addr = findViewById(R.id.tv_explorer_address);
+                addr.setText(address);
+                addr.setVisibility(android.view.View.VISIBLE);
+            }
             return;
         }
-        web = new WebView(this);
+        androidx.appcompat.widget.Toolbar bar = AppBar.setContent(this, R.layout.activity_explorer, coin.name + " explorer", host(url));
+        bar.setNavigationOnClickListener(v -> finish());
+        web = findViewById(R.id.explorer_web);
         android.webkit.WebSettings ws = web.getSettings();
         ws.setJavaScriptEnabled(true);
         ws.setDomStorageEnabled(true);
@@ -57,8 +63,7 @@ public class ExplorerActivity extends AppCompatActivity {
         com.harvana.app.web3.BrowserPrefs.apply(this, web);           // zoom, desktop site, images, cookies, Safe Browsing
 
         final String home = url;
-        android.widget.ProgressBar progress = new android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        progress.setMax(100);
+        android.widget.ProgressBar progress = findViewById(R.id.explorer_progress);
         com.harvana.app.web3.FindBar findBar = new com.harvana.app.web3.FindBar(this, web);
         find = findBar;
         com.harvana.app.web3.BrowserMenu menu = new com.harvana.app.web3.BrowserMenu(this, new com.harvana.app.web3.BrowserMenu.Host() {
@@ -80,19 +85,8 @@ public class ExplorerActivity extends AppCompatActivity {
         menu.attachDownloads();
         com.harvana.app.web3.BrowserBar nav = new com.harvana.app.web3.BrowserBar(this, web, home, null, menu::show);
 
-        LinearLayout column = new LinearLayout(this);
-        column.setOrientation(LinearLayout.VERTICAL);
-        column.setBackgroundColor(UiColors.background());
-        column.addView(progress, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(3)));
-        column.addView(web, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
-        column.addView(findBar.view(), new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        android.view.View rule = new android.view.View(this);
-        rule.setBackgroundColor(UiColors.surfaceAlt());
-        column.addView(rule, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, Math.max(1, dp(1) / 2)));
-        column.addView(nav.view(), new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-
-        androidx.appcompat.widget.Toolbar bar = AppBar.setContent(this, column, coin.name + " explorer", host(url));
-        bar.setNavigationOnClickListener(v -> finish());
+        ((android.widget.FrameLayout) findViewById(R.id.explorer_find_bar)).addView(findBar.view());
+        ((android.widget.FrameLayout) findViewById(R.id.explorer_nav_bar)).addView(nav.view());
 
         web.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, android.webkit.WebResourceRequest req) {
@@ -151,44 +145,7 @@ public class ExplorerActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private LinearLayout waiting(CoinCatalog.Coin coin, String address) {
-        LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.setGravity(Gravity.CENTER_HORIZONTAL);
-        int p = dp(24);
-        box.setPadding(p, p, p, p);
-        box.setBackgroundColor(UiColors.background());
-        ImageView logo = new ImageView(this);
-        int s = dp(72);
-        logo.setLayoutParams(new LinearLayout.LayoutParams(s, s));
-        logo.setImageResource(coin.icon);
-        box.addView(logo);
-        TextView title = text(coin.name, 20, true, UiColors.textPrimary());
-        title.setPadding(0, dp(16), 0, 0);
-        box.addView(title);
-        box.addView(text("The Harvana explorer website isn't linked yet. This page is ready for it. When the site is up, add its address in the coin list and it will open here.", 14, false, UiColors.textSecondary()));
-        if (!address.isEmpty()) {
-            TextView addr = text(address, 13, false, UiColors.textPrimary());
-            addr.setPadding(0, dp(16), 0, 0);
-            box.addView(addr);
-        }
-        return box;
-    }
-
-    private TextView text(String value, float size, boolean bold, int color) {
-        TextView t = new TextView(this);
-        t.setText(value);
-        t.setTextSize(size);
-        t.setTextColor(color);
-        t.setGravity(Gravity.CENTER);
-        if (bold) t.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        t.setPadding(0, dp(8), 0, 0);
-        return t;
-    }
-
     private static String host(String url) {
         try { return android.net.Uri.parse(url).getHost(); } catch (Exception e) { return ""; }
     }
-
-    private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
 }

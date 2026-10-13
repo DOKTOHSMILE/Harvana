@@ -3,13 +3,10 @@ package com.harvana.app.web3;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -26,19 +23,9 @@ public final class FindBar {
 
     public FindBar(Context c, WebView first) {
         this.web = first;
-        bar = new LinearLayout(c);
-        bar.setGravity(Gravity.CENTER_VERTICAL);
-        bar.setBackgroundColor(UiColors.surface());
-        int p = dp(c, 6);
-        bar.setPadding(dp(c, 12), p, p, p);
-        bar.setVisibility(View.GONE);
-
-        query = new EditText(c);
-        query.setSingleLine(true);
-        query.setHint("Find in page");
-        query.setTextSize(14);
-        query.setBackground(null);
-        query.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        bar = (LinearLayout) android.view.LayoutInflater.from(c).inflate(R.layout.view_find_bar, null, false);
+        query = bar.findViewById(R.id.find_bar_query);
+        count = bar.findViewById(R.id.find_bar_count);
         query.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int n) { }
             @Override public void onTextChanged(CharSequence s, int a, int b, int n) { }
@@ -48,17 +35,9 @@ public final class FindBar {
             }
         });
         query.setOnEditorActionListener((v, id, ev) -> { web.findNext(true); return true; });
-        bar.addView(query, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-
-        count = new TextView(c);
-        count.setTextSize(13);
-        count.setTextColor(UiColors.textSecondary());
-        count.setPadding(dp(c, 8), 0, dp(c, 8), 0);
-        bar.addView(count);
-
-        bar.addView(button(c, R.drawable.ic_br_up, "Previous", () -> web.findNext(false)), new LinearLayout.LayoutParams(dp(c, 40), dp(c, 40)));
-        bar.addView(button(c, R.drawable.ic_br_down, "Next", () -> web.findNext(true)), new LinearLayout.LayoutParams(dp(c, 40), dp(c, 40)));
-        bar.addView(button(c, R.drawable.ic_dismiss_circle_line, "Close", this::hide), new LinearLayout.LayoutParams(dp(c, 40), dp(c, 40)));
+        bar.findViewById(R.id.find_bar_previous).setOnClickListener(v -> web.findNext(false));
+        bar.findViewById(R.id.find_bar_next).setOnClickListener(v -> web.findNext(true));
+        bar.findViewById(R.id.find_bar_close).setOnClickListener(v -> hide());
 
         listen();
     }
@@ -97,18 +76,4 @@ public final class FindBar {
         InputMethodManager imm = (InputMethodManager) query.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) imm.hideSoftInputFromWindow(query.getWindowToken(), 0);
     }
-
-    private static ImageView button(Context c, int icon, String label, Runnable r) {
-        ImageView iv = new ImageView(c);
-        iv.setImageResource(icon);
-        iv.setContentDescription(label);
-        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        int pad = Math.round(8 * c.getResources().getDisplayMetrics().density);
-        iv.setPadding(pad, pad, pad, pad);
-        iv.setColorFilter(UiColors.textPrimary());
-        iv.setOnClickListener(v -> r.run());
-        return iv;
-    }
-
-    private static int dp(Context c, int v) { return Math.round(v * c.getResources().getDisplayMetrics().density); }
 }

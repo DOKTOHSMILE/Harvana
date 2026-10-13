@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Find in page (web3/FindBar): the search field, the match count, previous, next and close. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:minHeight="50dp"
+	android:background="@color/colorSurface"
+	android:gravity="center_vertical"
+	android:orientation="horizontal"
+	android:paddingStart="12dp"
+	android:paddingTop="6dp"
+	android:paddingEnd="6dp"
+	android:paddingBottom="6dp"
+	android:visibility="gone">
+
+	<EditText
+		android:id="@+id/find_bar_query"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:background="@null"
+		android:hint="Find in page"
+		android:imeOptions="actionSearch"
+		android:inputType="text"
+		android:singleLine="true"
+		android:textSize="14sp" />
+
+	<TextView
+		android:id="@+id/find_bar_count"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingStart="8dp"
+		android:paddingEnd="8dp"
+		android:textColor="@color/colorTextSecondary"
+		android:textSize="13sp" />
+
+	<ImageView
+		android:id="@+id/find_bar_previous"
+		android:layout_width="40dp"
+		android:layout_height="40dp"
+		android:background="?android:attr/selectableItemBackgroundBorderless"
+		android:contentDescription="Previous"
+		android:padding="8dp"
+		android:scaleType="fitCenter"
+		android:src="@drawable/ic_br_up"
+		app:tint="@color/colorTextPrimary" />
+
+	<ImageView
+		android:id="@+id/find_bar_next"
+		android:layout_width="40dp"
+		android:layout_height="40dp"
+		android:background="?android:attr/selectableItemBackgroundBorderless"
+		android:contentDescription="Next"
+		android:padding="8dp"
+		android:scaleType="fitCenter"
+		android:src="@drawable/ic_br_down"
+		app:tint="@color/colorTextPrimary" />
+
+	<ImageView
+		android:id="@+id/find_bar_close"
+		android:layout_width="40dp"
+		android:layout_height="40dp"
+		android:background="?android:attr/selectableItemBackgroundBorderless"
+		android:contentDescription="Close"
+		android:padding="8dp"
+		android:scaleType="fitCenter"
+		android:src="@drawable/ic_dismiss_circle_line"
+		app:tint="@color/colorTextPrimary" />
+</LinearLayout>

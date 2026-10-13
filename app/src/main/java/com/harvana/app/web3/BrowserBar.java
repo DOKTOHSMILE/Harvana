@@ -4,15 +4,12 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.view.Gravity;
-import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.harvana.app.R;
-import com.harvana.app.utils.UiColors;
 
 /** Browser buttons under a WebView: back, forward, reload (stop while loading), home, and the menu (or share, long press copies). */
 public final class BrowserBar {
@@ -27,16 +24,13 @@ public final class BrowserBar {
     /** With {@code onMenu}, the last button opens the browser menu instead of sharing. */
     public BrowserBar(Context c, WebView first, String homeUrl, Runnable onHome, Runnable onMenu) {
         this.web = first;
-        bar = new LinearLayout(c);
-        bar.setGravity(Gravity.CENTER_VERTICAL);
-        bar.setBackgroundColor(UiColors.surface());
-        int p = dp(c, 4);
-        bar.setPadding(p, p, p, p);
-        back = button(c, R.drawable.ic_arrow_back_line, "Back");
-        forward = button(c, R.drawable.icon_arrow_forward_round_line, "Forward");
-        reload = button(c, R.drawable.ic_refresh_line, "Reload");
-        ImageView home = button(c, R.drawable.icon_house_outline_line, "Home");
-        ImageView share = button(c, onMenu != null ? R.drawable.ic_more_vert_line : R.drawable.icon_share_round_line, onMenu != null ? "Menu" : "Share");
+        bar = (LinearLayout) android.view.LayoutInflater.from(c).inflate(R.layout.view_browser_bar, null, false);
+        back = bar.findViewById(R.id.browser_bar_back);
+        forward = bar.findViewById(R.id.browser_bar_forward);
+        reload = bar.findViewById(R.id.browser_bar_reload);
+        ImageView home = bar.findViewById(R.id.browser_bar_home);
+        ImageView share = bar.findViewById(R.id.browser_bar_more);
+        if (onMenu != null) { share.setImageResource(R.drawable.ic_more_vert_line); share.setContentDescription("Menu"); }
         back.setOnClickListener(v -> { if (web.canGoBack()) web.goBack(); });
         forward.setOnClickListener(v -> { if (web.canGoForward()) web.goForward(); });
         reload.setOnClickListener(v -> { if (loading) web.stopLoading(); else web.reload(); });
@@ -59,9 +53,6 @@ public final class BrowserBar {
             Toast.makeText(c, "Link copied", Toast.LENGTH_SHORT).show();
             return true;
         });
-        for (ImageView b : new ImageView[]{back, forward, reload, home, share}) {
-            bar.addView(b, new LinearLayout.LayoutParams(0, dp(c, 44), 1f));
-        }
         update();
     }
 
@@ -82,20 +73,4 @@ public final class BrowserBar {
         back.setAlpha(web.canGoBack() ? 1f : 0.3f);
         forward.setAlpha(web.canGoForward() ? 1f : 0.3f);
     }
-
-    private static ImageView button(Context c, int icon, String label) {
-        ImageView iv = new ImageView(c);
-        iv.setImageResource(icon);
-        iv.setContentDescription(label);
-        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);                  // every icon drawn at 24dp, whatever its own size
-        int pad = dp(c, 10);
-        iv.setPadding(pad, pad, pad, pad);
-        iv.setColorFilter(UiColors.textPrimary());
-        android.util.TypedValue tv = new android.util.TypedValue();
-        if (c.getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, tv, true)) iv.setBackgroundResource(tv.resourceId);
-        iv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        return iv;
-    }
-
-    private static int dp(Context c, int v) { return Math.round(v * c.getResources().getDisplayMetrics().density); }
 }

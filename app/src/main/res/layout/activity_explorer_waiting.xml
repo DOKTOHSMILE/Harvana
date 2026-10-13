@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Explorer for a coin whose explorer site is not linked yet: the coin and the wallet address. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground"
+	android:gravity="center_horizontal"
+	android:orientation="vertical"
+	android:padding="24dp">
+
+	<ImageView
+		android:id="@+id/iv_explorer_coin"
+		android:layout_width="72dp"
+		android:layout_height="72dp"
+		android:importantForAccessibility="no" />
+
+	<TextView
+		android:id="@+id/tv_explorer_coin"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="20sp"
+		android:textStyle="bold" />
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:paddingTop="8dp"
+		android:text="Explorer: not linked yet"
+		android:textColor="@color/colorTextSecondary"
+		android:textSize="14sp" />
+
+	<TextView
+		android:id="@+id/tv_explorer_address"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:paddingTop="16dp"
+		android:textColor="@color/colorTextPrimary"
+		android:textIsSelectable="true"
+		android:textSize="13sp"
+		android:visibility="gone" />
+</LinearLayout>

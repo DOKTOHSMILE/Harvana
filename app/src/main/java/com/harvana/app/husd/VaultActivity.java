@@ -1,13 +1,8 @@
 package com.harvana.app.husd;
 
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.InputType;
-import android.view.Gravity;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +30,7 @@ public class VaultActivity extends AppCompatActivity {
 
     private String address, code = "HNGN", sym = "hNGN";
     private JSONObject info = new JSONObject(), pos = new JSONObject();
-    private TextView tvColl, tvDebt, tvRatio, tvCanMint, tvPrice, tvHow;
+    private TextView tvColl, tvDebt, tvRatio, tvCanMint, tvPrice;
     private LinearLayout risky;
 
     @Override
@@ -46,40 +41,21 @@ public class VaultActivity extends AppCompatActivity {
         if (asked != null && !asked.isEmpty()) code = asked;
         sym = Stable.symbol(code);
 
-        ScrollView sv = new ScrollView(this);
-        sv.setBackgroundColor(UiColors.background());
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(16), dp(16), dp(16), dp(24));
-        sv.addView(root);
-
-        LinearLayout head = card();
-        head.addView(text("Your vault", 15, true, UiColors.textPrimary()));
-        tvColl = row(head, "HARV locked");
-        tvDebt = row(head, sym + " owed");
-        tvRatio = row(head, "Cover");
-        tvCanMint = row(head, "You can mint now");
-        tvPrice = text("…", 12, false, UiColors.textSecondary());
-        tvPrice.setPadding(0, dp(8), 0, 0);
-        head.addView(tvPrice);
-        LinearLayout a1 = new LinearLayout(this);
-        a1.setPadding(0, dp(12), 0, 0);
-        a1.addView(button("Lock HARV", this::lock), weight());
-        a1.addView(button("Mint " + sym, this::mint), weight());
-        head.addView(a1);
-        LinearLayout a2 = new LinearLayout(this);
-        a2.addView(button("Repay " + sym, this::repay), weight());
-        a2.addView(button("Take HARV back", this::withdraw), weight());
-        head.addView(a2);
-        root.addView(head);
-
-        tvHow = text("", 13, false, UiColors.textSecondary());
-
-        root.addView(title("Vaults under the line"));
-        risky = card();
-        root.addView(risky);
-
-        AppBar.setContent(this, sv, "Mint " + sym + " with HARV", null);
+        AppBar.setContent(this, com.harvana.app.R.layout.activity_vault, "Mint " + sym + " with HARV", null);
+        tvColl = findViewById(com.harvana.app.R.id.tv_vault_locked);
+        tvDebt = findViewById(com.harvana.app.R.id.tv_vault_owed);
+        ((TextView) findViewById(com.harvana.app.R.id.tv_vault_owed_label)).setText(sym + " owed");
+        tvRatio = findViewById(com.harvana.app.R.id.tv_vault_cover);
+        tvCanMint = findViewById(com.harvana.app.R.id.tv_vault_can_mint);
+        tvPrice = findViewById(com.harvana.app.R.id.tv_vault_price);
+        com.google.android.material.button.MaterialButton mintBtn = findViewById(com.harvana.app.R.id.btn_vault_mint), repayBtn = findViewById(com.harvana.app.R.id.btn_vault_repay);
+        mintBtn.setText("Mint " + sym);
+        repayBtn.setText("Repay " + sym);
+        findViewById(com.harvana.app.R.id.btn_vault_lock).setOnClickListener(v -> lock());
+        mintBtn.setOnClickListener(v -> mint());
+        repayBtn.setOnClickListener(v -> repay());
+        findViewById(com.harvana.app.R.id.btn_vault_withdraw).setOnClickListener(v -> withdraw());
+        risky = findViewById(com.harvana.app.R.id.vault_risky);
         load();
     }
 
@@ -102,9 +78,9 @@ public class VaultActivity extends AppCompatActivity {
     }
 
     private void showPrice() {
-        if (!info.optBoolean("available")) { tvPrice.setText("HARV price: —"); return; }
+        if (!info.optBoolean("available")) { tvPrice.setText("—"); return; }
         if (info.optBoolean("priceOk")) {
-            tvPrice.setText("HARV price: ₦" + naira(info.optLong("koboPerHarv")));
+            tvPrice.setText("₦" + naira(info.optLong("koboPerHarv")));
         } else {
             tvPrice.setText(priceProblem(info.optString("priceProblem")));
         }
@@ -131,7 +107,10 @@ public class VaultActivity extends AppCompatActivity {
     private void showAtRisk(JSONArray arr) {
         risky.removeAllViews();
         if (arr == null || arr.length() == 0) {
-            risky.addView(text("None. Every vault is above the line.", 13, false, UiColors.textTertiary()));
+            TextView none = (TextView) getLayoutInflater().inflate(com.harvana.app.R.layout.item_list_empty, risky, false);
+            none.setText("None");
+            none.setPadding(0, dp(12), 0, dp(12));
+            risky.addView(none);
             return;
         }
         for (int i = 0; i < arr.length(); i++) {
@@ -139,13 +118,14 @@ public class VaultActivity extends AppCompatActivity {
             if (p == null) continue;
             String owner = p.optString("owner");
             long debt = p.optLong("debtRaw");
-            LinearLayout r = new LinearLayout(this);
-            r.setGravity(Gravity.CENTER_VERTICAL);
-            r.setPadding(0, dp(6), 0, dp(6));
-            TextView t = text(shortAddr(owner) + "\nOwes " + HusdClient.format(debt) + " " + sym + " · cover " + (p.optInt("ratioBps") / 100) + "%",
-                    13, false, UiColors.textPrimary());
-            r.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            if (!owner.equals(address)) r.addView(button("Liquidate", () -> liquidate(owner, debt)));
+            android.view.View r = getLayoutInflater().inflate(com.harvana.app.R.layout.item_vault_at_risk, risky, false);
+            ((TextView) r.findViewById(com.harvana.app.R.id.tv_vault_risk_owner)).setText(shortAddr(owner));
+            ((TextView) r.findViewById(com.harvana.app.R.id.tv_vault_risk_owes)).setText("Owes " + HusdClient.format(debt) + " " + sym + " · cover " + (p.optInt("ratioBps") / 100) + "%");
+            if (!owner.equals(address)) {
+                android.view.View liq = r.findViewById(com.harvana.app.R.id.btn_vault_liquidate);
+                liq.setVisibility(android.view.View.VISIBLE);
+                liq.setOnClickListener(v -> liquidate(owner, debt));
+            }
             risky.addView(r);
         }
     }
@@ -220,14 +200,9 @@ public class VaultActivity extends AppCompatActivity {
     private interface Amount { void got(long raw); }
 
     private void askAmount(String title, String hint, boolean harv, Amount next) {
-        LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(dp(20), dp(8), dp(20), 0);
-        EditText e = new EditText(this);
+        android.view.View box = getLayoutInflater().inflate(com.harvana.app.R.layout.dialog_amount_entry, null, false);
+        EditText e = box.findViewById(com.harvana.app.R.id.et_amount_entry);
         e.setHint(hint);
-        e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        e.setSingleLine(true);
-        box.addView(e);
         new com.harvana.app.ui.SheetDialog.Builder(this).setTitle(title).setView(box)
                 .setPositiveButton("Review", (d, w) -> {
                     String s = e.getText().toString().trim();
@@ -253,33 +228,22 @@ public class VaultActivity extends AppCompatActivity {
     /** Minting and liquidating need a live HARV price; locking only needs the coin to be on. */
     private boolean ready(boolean needPrice) {
         if (!info.optBoolean("available")) { toast(sym + " minting is off."); return false; }
-        if (needPrice && !info.optBoolean("priceOk")) { toast(priceProblem(info.optString("priceProblem"))); return false; }
+        if (needPrice && !info.optBoolean("priceOk")) { toast("HARV price: " + priceProblem(info.optString("priceProblem"))); return false; }
         return true;
     }
 
     private String priceProblem(String p) {
-        if (p.contains("NOT_LIVE")) return "HARV price: not live yet";
-        if (p.contains("STALE")) return "HARV price: out of date";
-        return "HARV price: unavailable";
+        if (p.contains("NOT_LIVE")) return "Not live yet";
+        if (p.contains("STALE")) return "Out of date";
+        return "Unavailable";
     }
 
-    private String howText() {
-        int mint = info.optInt("mintRatioBps", 20000) / 100, liq = info.optInt("liquidationRatioBps", 15000) / 100,
-                bonus = info.optInt("liquidationBonusBps", 1000) / 100;
-        return "• Lock HARV in your vault. Only you can take it back.\n"
-                + "• Mint " + sym + " up to the HARV's naira value divided by " + mint + "% (₦20,000 of HARV mints up to ₦10,000).\n"
-                + "• The HARV price comes from completed P2P trades on Harvana. If it is missing or old, minting pauses.\n"
-                + "• If HARV falls and your vault covers less than " + liq + "% of what you owe, anyone can repay your debt with their own "
-                + sym + " and take that much HARV plus " + bonus + "% from your vault. The rest stays yours.\n"
-                + "• Repay " + sym + " (it is burned) and take your HARV back whenever you like.\n"
-                + "• Every " + sym + " minted this way is owed by a vault holding more HARV than it is worth, so the coin stays backed.";
-    }
 
     private String plain(String e) {
         if (e == null) return "Couldn't send.";
         if (com.harvana.app.utils.ErrorText.is(e, "NOT_ENOUGH_COLLATERAL")) return "Not enough HARV locked for that amount.";
         if (com.harvana.app.utils.ErrorText.is(e, "WOULD_BE_UNDER_COLLATERALISED")) return "That would leave too little HARV for what you owe. Repay first.";
-        if (com.harvana.app.utils.ErrorText.is(e, "PRICE_NOT_LIVE_YET") || com.harvana.app.utils.ErrorText.is(e, "PRICE_")) return priceProblem(e);
+        if (com.harvana.app.utils.ErrorText.is(e, "PRICE_NOT_LIVE_YET") || com.harvana.app.utils.ErrorText.is(e, "PRICE_")) return "HARV price: " + priceProblem(e);
         if (com.harvana.app.utils.ErrorText.is(e, "PRICES_DISAGREE") || com.harvana.app.utils.ErrorText.is(e, "LIQUIDATION_PENDING")
                 || com.harvana.app.utils.ErrorText.is(e, "VAULT_HOURLY_LIMIT_REACHED")) return com.harvana.app.utils.ErrorText.plain(e);
         if (com.harvana.app.utils.ErrorText.is(e, "VAULT_CAP_REACHED")) return "The network's limit for minted " + sym + " is reached for now.";
@@ -296,58 +260,11 @@ public class VaultActivity extends AppCompatActivity {
 
     private static String shortAddr(String a) { return a.length() > 14 ? a.substring(0, 8) + "…" + a.substring(a.length() - 4) : a; }
 
-    private TextView row(LinearLayout parent, String label) {
-        LinearLayout r = new LinearLayout(this);
-        r.setPadding(0, dp(6), 0, 0);
-        TextView l = text(label, 13, false, UiColors.textSecondary());
-        r.addView(l, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView v = text("…", 14, true, UiColors.textPrimary());
-        v.setGravity(Gravity.END);
-        r.addView(v, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.3f));
-        parent.addView(r);
-        return v;
-    }
 
-    private TextView title(String s) {
-        TextView t = text(s, 15, true, UiColors.textPrimary());
-        t.setPadding(dp(4), dp(18), 0, dp(6));
-        return t;
-    }
 
-    private LinearLayout card() {
-        LinearLayout c = new LinearLayout(this);
-        c.setOrientation(LinearLayout.VERTICAL);
-        c.setPadding(dp(16), dp(16), dp(16), dp(16));
-        android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
-        g.setCornerRadius(dp(18));
-        g.setColor(UiColors.surface());
-        c.setBackground(g);
-        return c;
-    }
 
-    private MaterialButton button(String label, Runnable click) {
-        MaterialButton b = new MaterialButton(this);
-        b.setText(label);
-        b.setAllCaps(false);
-        b.setOnClickListener(v -> click.run());
-        return b;
-    }
 
-    private LinearLayout.LayoutParams weight() {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        lp.setMargins(dp(4), 0, dp(4), 0);
-        return lp;
-    }
 
-    private TextView text(String s, float sp, boolean bold, int color) {
-        TextView t = new TextView(this);
-        t.setText(s);
-        t.setTextSize(sp);
-        t.setTextColor(color);
-        if (bold) t.setTypeface(null, Typeface.BOLD);
-        t.setPadding(0, dp(2), 0, dp(2));
-        return t;
-    }
 
     private void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_LONG).show(); }
     private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }

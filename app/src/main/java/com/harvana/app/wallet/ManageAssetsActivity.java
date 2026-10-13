@@ -2,26 +2,21 @@ package com.harvana.app.wallet;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.harvana.app.R;
-import com.harvana.app.utils.UiColors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,71 +60,14 @@ public class ManageAssetsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        LinearLayout body = new LinearLayout(this);
-        body.setOrientation(LinearLayout.VERTICAL);
-        body.setBackgroundColor(UiColors.background());
-
-        // Search, and Add a chain beside it: the same bar as on Assets.
-        LinearLayout bar = new LinearLayout(this);
-        bar.setGravity(Gravity.CENTER_VERTICAL);
-        com.google.android.material.card.MaterialCardView box = new com.google.android.material.card.MaterialCardView(this);
-        box.setCardBackgroundColor(UiColors.surface());
-        box.setRadius(dp(12));
-        box.setCardElevation(0);
-        box.setStrokeWidth(dp(1));
-        box.setStrokeColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorCardStroke));
-        LinearLayout inner = new LinearLayout(this);
-        inner.setGravity(Gravity.CENTER_VERTICAL);
-        inner.setPadding(dp(12), 0, dp(8), 0);
-        ImageView glass = new ImageView(this);
-        glass.setImageResource(R.drawable.icon_search_24);
-        glass.setImageTintList(android.content.res.ColorStateList.valueOf(UiColors.textSecondary()));
-        inner.addView(glass, new LinearLayout.LayoutParams(dp(18), dp(18)));
-        EditText filter = new EditText(this);
-        filter.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-        filter.setHint("Search or paste a contract");
-        filter.setSingleLine(true);
-        filter.setTextSize(14);
-        filter.setTextColor(UiColors.textPrimary());
-        filter.setHintTextColor(UiColors.textTertiary());
-        filter.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
-        LinearLayout.LayoutParams ep = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
-        ep.setMarginStart(dp(8));
-        inner.addView(filter, ep);
-        box.addView(inner, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        bar.addView(box, new LinearLayout.LayoutParams(0, dp(44), 1f));
-
-        com.google.android.material.card.MaterialCardView add = new com.google.android.material.card.MaterialCardView(this);
-        add.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorActionSurface));
-        add.setRadius(dp(12));
-        add.setCardElevation(0);
-        add.setStrokeWidth(dp(1));
-        add.setStrokeColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorActionStroke));
-        add.setClickable(true);
-        add.setFocusable(true);
-        add.setContentDescription("Add a chain");
-        ImageView plus = new ImageView(this);
-        plus.setImageResource(R.drawable.icon_add_circle_outline_round);
-        plus.setImageTintList(android.content.res.ColorStateList.valueOf(UiColors.accent()));
-        add.addView(plus, new android.widget.FrameLayout.LayoutParams(dp(22), dp(22), Gravity.CENTER));
-        add.setOnClickListener(v -> CustomAssets.editChain(this, null, this::reload));
-        LinearLayout.LayoutParams ap = new LinearLayout.LayoutParams(dp(44), dp(44));
-        ap.setMarginStart(dp(8));
-        bar.addView(add, ap);
-
-        LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        blp.setMargins(dp(12), dp(10), dp(12), dp(4));
-        body.addView(bar, blp);
-
-        RecyclerView list = new RecyclerView(this);
-        list.setLayoutManager(new LinearLayoutManager(this));
+        com.harvana.app.utils.AppBar.setContent(this, R.layout.activity_manage_assets, "Add coins", null);
+        EditText filter = findViewById(R.id.et_manage_assets_search);
+        findViewById(R.id.btn_manage_assets_add_chain).setOnClickListener(v -> CustomAssets.editChain(this, null, this::reload));
+        RecyclerView list = findViewById(R.id.rv_manage_assets);
         list.setHasFixedSize(true);
         list.setItemViewCacheSize(20);
         adapter = new Adapter();
         list.setAdapter(adapter);
-        body.addView(list, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-
-        com.harvana.app.utils.AppBar.setContent(this, body, "Add coins", null);
 
         filter.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int c, int d) { }
@@ -249,16 +187,9 @@ public class ManageAssetsActivity extends AppCompatActivity {
         @NonNull @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int type) {
             if (type == HEADER) {
-                TextView t = new TextView(parent.getContext());
-                t.setTextSize(13);
-                t.setTypeface(Typeface.DEFAULT_BOLD);
-                t.setAllCaps(true);
-                t.setTextColor(UiColors.textSecondary());
-                t.setPadding(dp(16), dp(18), dp(16), dp(6));
-                t.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                return new RecyclerView.ViewHolder(t) { };
+                return new RecyclerView.ViewHolder(getLayoutInflater().inflate(R.layout.item_manage_assets_header, parent, false)) { };
             }
-            return new RowHolder(parent.getContext());
+            return new RowHolder(getLayoutInflater().inflate(R.layout.item_manage_assets_row, parent, false));
         }
 
         @Override
@@ -300,41 +231,13 @@ public class ManageAssetsActivity extends AppCompatActivity {
         final SwitchMaterial toggle;
         final View divider;
 
-        RowHolder(Context c) {
-            super(new LinearLayout(c));
-            LinearLayout outer = (LinearLayout) itemView;
-            outer.setOrientation(LinearLayout.VERTICAL);
-            outer.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            android.util.TypedValue tv = new android.util.TypedValue();
-            c.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv, true);
-            outer.setBackgroundResource(tv.resourceId);
-            LinearLayout line = new LinearLayout(c);
-            line.setGravity(Gravity.CENTER_VERTICAL);
-            line.setPadding(dp(16), dp(10), dp(16), dp(10));
-            line.setMinimumHeight(dp(60));
-            icon = new ImageView(c);
-            line.addView(icon, new LinearLayout.LayoutParams(dp(36), dp(36)));
-            LinearLayout words = new LinearLayout(c);
-            words.setOrientation(LinearLayout.VERTICAL);
-            words.setPadding(dp(12), 0, dp(8), 0);
-            title = new TextView(c);
-            title.setTextSize(15);
-            title.setTextColor(UiColors.textPrimary());
-            title.setMaxLines(1);
-            sub = new TextView(c);
-            sub.setTextSize(12);
-            sub.setTextColor(UiColors.textSecondary());
-            sub.setMaxLines(1);
-            words.addView(title);
-            words.addView(sub);
-            line.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            toggle = new SwitchMaterial(c);
-            line.addView(toggle);
-            outer.addView(line);
-            divider = com.harvana.app.ui.SheetDialog.divider(c);
-            LinearLayout.LayoutParams dlp = com.harvana.app.ui.SheetDialog.dividerParams(c);
-            dlp.setMarginStart(dp(64));
-            outer.addView(divider, dlp);
+        RowHolder(View v) {
+            super(v);
+            icon = v.findViewById(R.id.iv_manage_asset_icon);
+            title = v.findViewById(R.id.tv_manage_asset_title);
+            sub = v.findViewById(R.id.tv_manage_asset_sub);
+            toggle = v.findViewById(R.id.sw_manage_asset);
+            divider = v.findViewById(R.id.manage_asset_divider);
         }
     }
 
@@ -350,5 +253,4 @@ public class ManageAssetsActivity extends AppCompatActivity {
         return i;
     }
 
-    private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
 }

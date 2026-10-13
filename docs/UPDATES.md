@@ -11,6 +11,7 @@
 - About (`activity_about.xml`), Verify email (`activity_verify_email.xml`), Group wallet backup (`activity_group_wallet_backup.xml`), Crash screen (`activity_debug.xml`), Picture viewer (`activity_image_viewer.xml`), Crop picture (`activity_crop_image.xml`). New layouts use the app's button styles (`HarvanaButton`, `.Tonal`, `.Outlined`).
 - Choose asset (`activity_pick_asset.xml`, `item_pick_asset.xml`), Explorer (`activity_explorer.xml`, `activity_explorer_waiting.xml`), browser find bar (`view_find_bar.xml`) and buttons (`view_browser_bar.xml`), Web3 page (`activity_discover.xml`, `view_web3_home.xml`, `item_web3_site.xml`, `item_web3_chip.xml`).
 - Swap (`activity_swap.xml`, `item_swap_order.xml`, `item_swap_pool.xml`) and the swap record (`activity_swap_order.xml`).
+- Mint with HARV (`activity_vault.xml` as table rows with icons, `item_vault_at_risk.xml`, `dialog_amount_entry.xml`), Add coins (`activity_manage_assets.xml`, `item_manage_assets_header.xml`, `item_manage_assets_row.xml`).
 
 ## 13 Oct 2026 — Group coin everywhere; 50dp table rows
 

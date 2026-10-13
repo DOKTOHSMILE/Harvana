@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Add coins: search (or paste a contract) and Add a chain on top, then every coin with its switch. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground"
+	android:orientation="vertical">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginStart="12dp"
+		android:layout_marginTop="10dp"
+		android:layout_marginEnd="12dp"
+		android:layout_marginBottom="4dp"
+		android:gravity="center_vertical"
+		android:orientation="horizontal">
+
+		<com.google.android.material.card.MaterialCardView
+			android:layout_width="0dp"
+			android:layout_height="50dp"
+			android:layout_weight="1"
+			app:cardBackgroundColor="@color/colorSurface"
+			app:cardCornerRadius="12dp"
+			app:cardElevation="0dp"
+			app:strokeColor="@color/colorCardStroke"
+			app:strokeWidth="1dp">
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:gravity="center_vertical"
+				android:orientation="horizontal"
+				android:paddingStart="12dp"
+				android:paddingEnd="8dp">
+
+				<ImageView
+					android:layout_width="18dp"
+					android:layout_height="18dp"
+					android:importantForAccessibility="no"
+					android:src="@drawable/icon_search_24"
+					app:tint="@color/colorTextSecondary" />
+
+				<EditText
+					android:id="@+id/et_manage_assets_search"
+					android:layout_width="0dp"
+					android:layout_height="match_parent"
+					android:layout_marginStart="8dp"
+					android:layout_weight="1"
+					android:background="@android:color/transparent"
+					android:hint="Search or paste a contract"
+					android:imeOptions="actionSearch"
+					android:inputType="text"
+					android:singleLine="true"
+					android:textColor="@color/colorTextPrimary"
+					android:textColorHint="@color/colorTextTertiary"
+					android:textSize="14sp" />
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+
+		<com.google.android.material.card.MaterialCardView
+			android:id="@+id/btn_manage_assets_add_chain"
+			android:layout_width="50dp"
+			android:layout_height="50dp"
+			android:layout_marginStart="8dp"
+			android:clickable="true"
+			android:contentDescription="Add a chain"
+			android:focusable="true"
+			app:cardBackgroundColor="@color/colorActionSurface"
+			app:cardCornerRadius="12dp"
+			app:cardElevation="0dp"
+			app:strokeColor="@color/colorActionStroke"
+			app:strokeWidth="1dp">
+
+			<ImageView
+				android:layout_width="22dp"
+				android:layout_height="22dp"
+				android:layout_gravity="center"
+				android:importantForAccessibility="no"
+				android:src="@drawable/icon_add_circle_outline_round"
+				app:tint="@color/colorAccent" />
+		</com.google.android.material.card.MaterialCardView>
+	</LinearLayout>
+
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/rv_manage_assets"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+</LinearLayout>

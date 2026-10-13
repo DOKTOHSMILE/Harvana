@@ -230,13 +230,27 @@ public final class CoinDetailPages {
             tok.setOrientation(LinearLayout.VERTICAL);
             addStat(tok, "Type", "Harvana stable coin");
             addStat(tok, "Token ID", st);
-            addStat(tok, "Contract", "None (native token)");
+            addStat(tok, "On Harvana", "Native token");
             addStat(tok, "Decimals", "6");
             addStat(tok, "Backed by", com.harvana.app.husd.Stable.reserve(st, null));
             LinearLayout bridgeRow = addStat(tok, "Bridge address", "…");
             LinearLayout burnRow = addStat(tok, "Burn address", "…");
             LinearLayout treasuryRow = addStat(tok, "Treasury", "…");
             body.addView(card(tok));
+            // The coin's ERC-20 contract on each EVM chain where it exists (bridge/contracts/HarvanaToken.sol).
+            body.addView(label("CONTRACT ADDRESSES"));
+            LinearLayout contracts = new LinearLayout(requireContext());
+            contracts.setOrientation(LinearLayout.VERTICAL);
+            addStat(contracts, "Other chains", "…");
+            body.addView(card(contracts));
+            com.google.android.material.button.MaterialButton toChain = new com.google.android.material.button.MaterialButton(
+                    requireContext(), null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+            toChain.setText("Send to another chain");
+            toChain.setAllCaps(false);
+            toChain.setVisibility(View.GONE);
+            LinearLayout.LayoutParams tcLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            tcLp.topMargin = dp(10);
+            body.addView(toChain, tcLp);
             com.harvana.app.wallet.FxRates.load(requireContext(), () -> {
                 if (!isAdded()) return;
                 double per = com.harvana.app.wallet.FxRates.perUsd(requireContext(), com.harvana.app.husd.Stable.currency(st));
@@ -255,6 +269,19 @@ public final class CoinDetailPages {
                     pending.setText(compact(j.optLong("pendingWithdrawalsRaw") / 1e6) + " " + sym);
                     burned.setText(compact(j.optLong("burnedRaw") / 1e6) + " " + sym);
                     copyable(bridgeRow, j.optString("bridgeAddress"));
+                    org.json.JSONObject tokens = j.optJSONObject("tokens");
+                    contracts.removeAllViews();
+                    java.util.List<String> chains = new java.util.ArrayList<>();
+                    if (tokens != null) for (java.util.Iterator<String> it = tokens.keys(); it.hasNext(); ) {
+                        String chain = it.next();
+                        chains.add(chain);
+                        copyable(addStat(contracts, chainName(chain), "…"), tokens.optString(chain));
+                    }
+                    if (chains.isEmpty()) addStat(contracts, "Other chains", "Not deployed yet");
+                    else {
+                        toChain.setVisibility(View.VISIBLE);
+                        toChain.setOnClickListener(v -> sendToChain(st, chains, j));
+                    }
                     copyable(burnRow, j.optString("burnAddress"));
                     copyable(treasuryRow, j.optString("treasuryAddress"));
                     price.post(() -> paintCap(cap, supply));
@@ -266,6 +293,94 @@ public final class CoinDetailPages {
                 }
             });
             cap.setTag(price);
+        }
+
+        /** "BASE" → "Base", "BSC" → "BNB Chain", … */
+        private static String chainName(String chain) {
+            switch (chain) {
+                case "BASE": return "Base";
+                case "BSC": return "BNB Chain";
+                case "ETHEREUM": return "Ethereum";
+                case "POLYGON": return "Polygon";
+                case "ARBITRUM": return "Arbitrum";
+                case "CELO": return "Celo";
+                default: return chain;
+            }
+        }
+
+        /**
+         * Sends the coin to its ERC-20 on another chain: a signed transfer into the coin's export wallet with memo
+         * "<CODE>_EXPORT:<chain>:<0x address>". The bridge signers then mint the same amount there for that address
+         * (this wallet's own EVM address by default). Review, then PIN or fingerprint.
+         */
+        private void sendToChain(String code, java.util.List<String> chains, org.json.JSONObject info) {
+            if (getContext() == null) return;
+            String sym = com.harvana.app.husd.Stable.symbol(code);
+            LinearLayout box = new LinearLayout(requireContext());
+            box.setOrientation(LinearLayout.VERTICAL);
+            box.setPadding(dp(20), dp(8), dp(20), 0);
+            final String[] chain = {chains.get(0)};
+            com.google.android.material.chip.ChipGroup g = new com.google.android.material.chip.ChipGroup(requireContext());
+            g.setSingleSelection(true);
+            for (String c : chains) {
+                com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(requireContext());
+                chip.setText(chainName(c));
+                chip.setCheckable(true);
+                chip.setChecked(c.equals(chain[0]));
+                chip.setOnClickListener(v -> chain[0] = c);
+                g.addView(chip);
+            }
+            box.addView(g);
+            android.widget.EditText amount = new com.google.android.material.textfield.TextInputEditText(requireContext());
+            amount.setHint("Amount (" + sym + ")");
+            amount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            box.addView(amount);
+            android.widget.EditText to = new com.google.android.material.textfield.TextInputEditText(requireContext());
+            to.setHint("0x… address on that chain");
+            to.setSingleLine(true);
+            box.addView(to);
+            new Thread(() -> {                                             // this wallet's own EVM address, as the default
+                try {
+                    String mine = com.harvana.app.wallet.Web3Signer.address(requireContext().getApplicationContext());
+                    to.post(() -> { if (to.getText().length() == 0 && mine != null) to.setText(mine); });
+                } catch (Exception ignored) { }
+            }).start();
+            long minRaw = info.optLong("minExportRaw", 0);
+            org.json.JSONObject fees = info.optJSONObject("fees");
+            org.json.JSONObject bridgeFees = fees == null ? null : fees.optJSONObject("bridgeFeeRaw");
+            new com.harvana.app.ui.SheetDialog.Builder(requireContext()).setTitle("Send to another chain").setView(box)
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("Continue", (d, w) -> {
+                        long raw = com.harvana.app.group.NodePayActions.coinRaw(amount.getText().toString());
+                        String evm = to.getText().toString().trim();
+                        if (raw <= 0 || raw < minRaw) {
+                            android.widget.Toast.makeText(requireContext(), "Minimum " + compact(minRaw / 1e6) + " " + sym, android.widget.Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (!evm.matches("^0x[0-9a-fA-F]{40}$")) {
+                            android.widget.Toast.makeText(requireContext(), "Enter a 0x address", android.widget.Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        long fee = bridgeFees == null ? 0 : bridgeFees.optLong(chain[0], 0);
+                        java.util.List<String[]> rows = new java.util.ArrayList<>();
+                        rows.add(new String[]{"Network", chainName(chain[0])});
+                        rows.add(new String[]{"To", evm});
+                        rows.add(new String[]{"Contract", info.optJSONObject("tokens") == null ? "—" : info.optJSONObject("tokens").optString(chain[0])});
+                        rows.add(new String[]{"Bridge fee", compact(fee / 1e6) + " " + sym});
+                        rows.add(new String[]{"tFare", "HARV"});
+                        String from = address();
+                        String memo = code + "_EXPORT:" + chain[0] + ":" + evm;
+                        com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(requireContext(), "Send to " + chainName(chain[0]),
+                                compact(raw / 1e6) + " " + sym, rows, () -> com.harvana.app.husd.HusdClient.send(requireContext(), code, from,
+                                        info.optString("exportAddress"), raw, memo, new com.harvana.app.husd.HusdClient.Cb() {
+                                    @Override public void ok(org.json.JSONObject r) {
+                                        if (isAdded()) android.widget.Toast.makeText(requireContext(), "Sent. It arrives on " + chainName(chain[0]) + " once the bridge mints it.", android.widget.Toast.LENGTH_LONG).show();
+                                    }
+                                    @Override public void fail(String e) {
+                                        if (isAdded()) android.widget.Toast.makeText(requireContext(), com.harvana.app.utils.ErrorText.plain(e), android.widget.Toast.LENGTH_LONG).show();
+                                    }
+                                }));
+                    }).show();
         }
 
         /** Market cap of a stable coin: its dollar price (kept on the price row) × its supply. */

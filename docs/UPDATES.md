@@ -2,6 +2,19 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: stable coins' contract addresses and "Send to another chain"
+
+Stable coin page (hNGN, hUSD, …), Overview:
+
+| Part | Now |
+|---|---|
+| Token → On Harvana | Native token (token ID, as before) |
+| Contract addresses | The coin's ERC-20 contract on each chain where it is deployed (Base, BNB Chain, …), tap to copy. "Not deployed yet" until the bridge contracts go live |
+| Send to another chain | Shown when a contract exists. Choose the chain, amount and 0x address (this wallet's own EVM address by default); review shows network, address, contract, bridge fee and tFare; PIN or fingerprint |
+| Activity | "Sent to Base" / "Received from Base" for these moves |
+
+Needs the node update of 13 Oct (export rules) and deployed contracts (docs/BRIDGE_TOKENS.md on the node). App build only.
+
 ## 13 Oct 2026: switching wallet or pulling to refresh shows the right wallet
 
 | Case | Before | Now |

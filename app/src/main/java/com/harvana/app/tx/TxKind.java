@@ -60,6 +60,16 @@ public final class TxKind {
                     ? new TxKind("Deposited " + sym, reserve + " from " + chain, icon)
                     : new TxKind("Withdrew to " + reserve, sym + " to " + chain, icon);
         }
+        // The coin sent to its ERC-20 on another chain, or back from it (docs/BRIDGE_TOKENS.md on the node).
+        if (com.harvana.app.husd.Stable.isStable(stable) && (m.startsWith(stable + "_EXPORT:") || m.startsWith(stable + "_IMPORT:"))) {
+            String[] parts = m.split(":");
+            String chain = com.harvana.app.husd.HusdActivity.chainName(parts.length > 1 ? parts[1] : "");
+            String sym = com.harvana.app.husd.Stable.symbol(stable);
+            int icon = "HUSD".equals(stable) ? R.drawable.ic_coin_husd : R.drawable.ic_coin_stable;
+            return m.startsWith(stable + "_EXPORT:")
+                    ? new TxKind("Sent to " + chain, sym + " on " + chain, icon)
+                    : new TxKind("Received from " + chain, sym + " from " + chain, icon);
+        }
         if (m.startsWith("STAKE_LOCK:")) {
             String days = m.substring("STAKE_LOCK:".length());
             return new TxKind("Staked HARV", "0".equals(days) ? "Flexible stake" : days + "-day lock", R.drawable.ic_tx_stake);

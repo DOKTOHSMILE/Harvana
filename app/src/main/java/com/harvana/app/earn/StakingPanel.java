@@ -1212,7 +1212,7 @@ public final class StakingPanel {
 
     private void styleChart() {
         if (chart == null) return;
-        chart.setNoDataText("Rewards show here as days pass.");
+        chart.setNoDataText("—");
         chart.setNoDataTextColor(UiColors.textSecondary());
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(false);

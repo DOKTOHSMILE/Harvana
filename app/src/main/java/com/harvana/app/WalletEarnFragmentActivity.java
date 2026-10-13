@@ -280,7 +280,7 @@ public class WalletEarnFragmentActivity extends Fragment {
         miniChart.setDrawBorders(false);
         miniChart.setViewPortOffsets(0, 0, 0, 0); // Fills exactly to the edge
         miniChart.setBackgroundColor(Color.TRANSPARENT);
-        miniChart.setNoDataText("Rewards show here as days pass.");
+        miniChart.setNoDataText("—");
         miniChart.setNoDataTextColor(com.harvana.app.utils.UiColors.textSecondary());
     }
 

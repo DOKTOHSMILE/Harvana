@@ -187,9 +187,10 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- INFO CARD -->
+            <!-- INFO CARD: hidden (owner, 13 Oct 2026: no explanations in the app) -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardview5"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"

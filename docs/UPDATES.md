@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: switching wallet or pulling to refresh shows the right wallet
+
+| Case | Before | Now |
+|---|---|---|
+| Switch wallet, come back to Assets | Total and some rows kept the old wallet until the app restarted | The Assets screen re-reads the active wallet, clears the old wallet's figures, then loads the new one |
+| Pull to refresh (Assets or Activity) | Refreshed the wallet it opened with | Picks up the active wallet first |
+| A slow answer for the old wallet arriving after the switch | Could overwrite the new total | Dropped (HARV, stable coins and other chains each check which wallet they were for) |
+
+App build only.
+
 ## 13 Oct 2026: Home without Swap; cleaner Home layout; total saved in your currency
 
 | Part | Before | Now |

@@ -80,6 +80,9 @@ public class WalletActivityFragmentActivity extends Fragment {
 			refresh.setColorSchemeResources(R.color.colorAccent);
 			refresh.setProgressBackgroundColorSchemeResource(R.color.colorSurface);
 			refresh.setOnRefreshListener(() -> {
+				String fresh = getContext() == null ? "" : getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE)
+						.getString("active_wallet_address", "").trim();
+				if (!fresh.isEmpty()) wallet_address = fresh;           // pull to refresh also picks up a wallet switch
 				_loadTransactionHistory();
 				refresh.postDelayed(() -> { if (isAdded()) refresh.setRefreshing(false); }, 1800);
 			});

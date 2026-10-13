@@ -97,7 +97,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 		com.harvana.app.wallet.ChainAssetsSection.onTotal(chainAssets, sum -> {
 			if (!isAdded()) return;
 			androidx.fragment.app.Fragment parent = getParentFragment();
-			if (parent instanceof AssetFragmentActivity) ((AssetFragmentActivity) parent).setChainFiat(sum);
+			if (parent instanceof AssetFragmentActivity) ((AssetFragmentActivity) parent).setChainFiat(wallet_address, sum);
 		});
 		walletsp = getContext().getSharedPreferences("walletsp", Activity.MODE_PRIVATE);
 		String cachedFor = getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE).getString("active_wallet_address", "");
@@ -120,6 +120,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 			refresh.setColorSchemeResources(R.color.colorAccent);
 			refresh.setProgressBackgroundColorSchemeResource(R.color.colorSurface);
 			refresh.setOnRefreshListener(() -> {
+				_syncWallet();                                  // pull to refresh also picks up a wallet switch
 				androidx.fragment.app.Fragment parent = getParentFragment();
 				if (parent instanceof AssetFragmentActivity) ((AssetFragmentActivity) parent)._loadAvailableCoins();
 				_loadAvailableCoins();
@@ -154,22 +155,26 @@ public class WalletAssetFragmentActivity extends Fragment {
 		_loadAvailableCoins();
 	}
 
+	/** The active wallet now; after a switch, _loadAvailableCoins redraws every row (HARV, stable coins, other chains, added coins). */
+	private void _syncWallet() {
+		if (getContext() == null) return;
+		SharedPreferences prefs = getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
+		String freshAddress = prefs.getString("active_wallet_address", "").trim();
+		if (freshAddress.isEmpty()) {
+			freshAddress = WalletManager.getActiveWalletAddress(getContext());
+			if (freshAddress == null) freshAddress = "";
+		}
+		if (!freshAddress.isEmpty() && !freshAddress.equals(wallet_address)) {
+			wallet_address = freshAddress;
+			userWalletAddress = freshAddress;
+			activeAddress = freshAddress;
+			if (tvNoWalletHint != null) tvNoWalletHint.setVisibility(View.GONE);
+		}                                                    // _loadAvailableCoins redraws every row for it
+	}
+
 	public void onResume() {
 		super.onResume();
-		if (getContext() != null) {
-			SharedPreferences prefs = getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE);
-			String freshAddress = prefs.getString("active_wallet_address", "").trim();
-			if (freshAddress.isEmpty()) {
-				freshAddress = WalletManager.getActiveWalletAddress(getContext());
-				if (freshAddress == null) freshAddress = "";
-			}
-			if (!freshAddress.isEmpty() && !freshAddress.equals(wallet_address)) {
-				wallet_address = freshAddress;
-				userWalletAddress = freshAddress;
-				activeAddress = freshAddress;
-				if (tvNoWalletHint != null) tvNoWalletHint.setVisibility(View.GONE);
-			}
-		}
+		_syncWallet();
 		
 		if (wallet_address != null && !wallet_address.trim().isEmpty()) {
 			_loadAvailableCoins();
@@ -190,9 +195,10 @@ public class WalletAssetFragmentActivity extends Fragment {
 	/** Every stable coin left on in Add coins; their value goes into the total. */
 	private void _renderStables() {
 		if (getContext() == null) return;
+		final String forWallet = wallet_address;
 		com.harvana.app.husd.HusdRow.render(getContext(), _husdBox(), wallet_address, fiat -> {
 			androidx.fragment.app.Fragment parent = getParentFragment();
-			if (isAdded() && parent instanceof AssetFragmentActivity) ((AssetFragmentActivity) parent).setHusdFiat(fiat);
+			if (isAdded() && parent instanceof AssetFragmentActivity) ((AssetFragmentActivity) parent).setHusdFiat(forWallet, fiat);
 		});
 	}
 

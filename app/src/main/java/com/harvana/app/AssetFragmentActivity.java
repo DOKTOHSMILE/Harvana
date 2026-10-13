@@ -84,6 +84,35 @@ public class AssetFragmentActivity extends Fragment {
 		husdFiat = fiat;
 		if (getActivity() != null) getActivity().runOnUiThread(this::_paintTotal);
 	}
+
+	/** As above, ignored when it was worked out for a wallet that is no longer the active one. */
+	public void setHusdFiat(String forWallet, double fiat) {
+		_syncWallet();
+		if (forWallet != null && !forWallet.equals(wallet_address)) return;
+		setHusdFiat(fiat);
+	}
+
+	/**
+	 * Picks up a wallet switch (or a wallet added while this screen was away): the new active wallet replaces the old
+	 * one, and the old wallet's figures are cleared before anything loads, so its total never lingers. True if changed.
+	 */
+	private boolean _syncWallet() {
+		if (getContext() == null) return false;
+		String fresh = getContext().getSharedPreferences("harv_wallet_prefs", Context.MODE_PRIVATE).getString("active_wallet_address", "").trim();
+		if (fresh.isEmpty()) {
+			String w = WalletManager.getActiveWalletAddress(getContext());
+			fresh = w == null ? "" : w.trim();
+		}
+		if (fresh.isEmpty() || fresh.equals(wallet_address)) return false;
+		wallet_address = fresh;
+		activeAddress = fresh;
+		harvFiat = 0;
+		chainFiat = 0;
+		husdFiat = 0;
+		_updateActiveWalletLabel();
+		if (getActivity() != null) getActivity().runOnUiThread(this::_paintTotal);
+		return true;
+	}
 	private String shownSymbol;
 	private ImageView imageview4;
 	private MaterialCardView cardview1;
@@ -526,12 +555,13 @@ public class AssetFragmentActivity extends Fragment {
 	
 	
 	public void _loadAvailableCoins() {
-		
+		_syncWallet();
 		if (wallet_address == null || wallet_address.trim().isEmpty()) {
 			return;
 		}
 		
 		final Context context = requireContext();
+		final String forWallet = wallet_address;           // a late answer for another wallet is dropped below
 		
 		// Show cached coins instantly while the node fetch is in-flight
 		java.util.List<java.util.HashMap<String, Object>> cachedCoins =
@@ -574,7 +604,9 @@ public class AssetFragmentActivity extends Fragment {
 				com.harvana.app.wallet.WalletCache.saveList(
 				context, "coins_" + wallet_address, loadedCoins);
 				
-				if (getActivity() != null) getActivity().runOnUiThread(() -> updateCoinListOnUiThread(loadedCoins));
+				if (getActivity() != null) getActivity().runOnUiThread(() -> {
+					if (forWallet.equals(wallet_address)) updateCoinListOnUiThread(loadedCoins);
+				});
 			});
 		});
 		
@@ -585,6 +617,12 @@ public class AssetFragmentActivity extends Fragment {
 	public void setChainFiat(double sum) {
 		chainFiat = sum;
 		if (getActivity() != null) getActivity().runOnUiThread(this::_paintTotal);
+	}
+
+	public void setChainFiat(String forWallet, double sum) {
+		_syncWallet();
+		if (forWallet != null && !forWallet.equals(wallet_address)) return;
+		setChainFiat(sum);
 	}
 
 	private void _paintTotal() {

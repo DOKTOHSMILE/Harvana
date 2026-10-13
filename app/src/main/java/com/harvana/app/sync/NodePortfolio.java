@@ -140,6 +140,9 @@ public final class NodePortfolio {
         for (String id : ids) {
             GroupFirestoreManager.getInstance(c).getGroup(id, new GroupFirestoreManager.DocCallback() {
                 @Override public void onSuccess(Map<String, Object> fs) {
+                    // A deleted group leaves the profile; a closed one stops counting (it is on its way out).
+                    if (com.harvana.app.group.GroupCloser.isDeleted(fs)) { gone.add(id); one.run(); return; }
+                    if (com.harvana.app.group.GroupCloser.isClosed(fs)) { one.run(); return; }
                     final String nodeId = GroupKinds.nodeId(fs);
                     if (nodeId.isEmpty()) { synchronized (p.legacyGroupIds) { p.legacyGroupIds.add(id); } one.run(); return; }
                     fetchPosition(nodeId, wallet, fs, id, p, one);

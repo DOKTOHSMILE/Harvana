@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Closed groups
+
+- A closed group leaves My groups (it is under Filter → Closed groups) and Discover. It stops counting in Home's Active groups and Total saved.
+- It is deleted for good 30 days after closing (`GroupClosePolicy.PURGE_AFTER_MS`), by its admin's app the next time it lists the group. Group settings → More shows the date ("Deleted on"). A network group's own record stays on the network; the app's copy goes.
+- A closed group can be deleted at once with "Delete now", when nothing is owed or open (the same checks as closing).
+- The admin can leave a closed group (before, leaving asked for an admin handover even after closing). Leaving removes it from the profile, so it stops counting.
+- A deleted group leaves a small marker under its id: status "Deleted", no content. Only the creator may change a group record, so no new group can take a deleted group's id. Every list treats the marker as gone, and the profile drops it.
+- Create group checks that its new id is unused before anything is created, and takes a fresh one if not.
+- Tests: `GroupClosePolicyTest` (12, run with JUnit here): a closed group with nothing open can be deleted; with a loan open or coins in its wallet it cannot.
+
 ## 13 Oct 2026 — Group chats: icons and more apps
 
 - Chat apps a group can link to (`group/ChatPlatforms`): WhatsApp, Telegram, Facebook, Messenger, WeChat, Google Chat, Signal, Discord, Viber, LINE, KakaoTalk, Zalo, Instagram, Slack, Microsoft Teams, and Other.

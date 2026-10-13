@@ -50,17 +50,27 @@ public final class GroupClosePolicy {
     }
 
     public static Decision decide(Facts f) {
+        Decision d = decideOpen(f);
+        if (!f.alreadyClosed || !f.admin) return d;
+        // Already closed: when nothing is owed or open, the admin may delete it now rather than wait for the automatic
+        // deletion (PURGE_AFTER_MS after closing). The network keeps its own record of a network group; the app's copy goes.
+        if (d.action == Action.ARCHIVE) {
+            Decision del = new Decision(Action.DELETE, "Delete this group");
+            del.reasons.add("Closed · nothing owed · nothing open.");
+            return del;
+        }
+        return d;
+    }
+
+    /** How long a closed group stays (hidden from everyone but its members) before it is deleted for good: 30 days. */
+    public static final long PURGE_AFTER_MS = 30L * 24 * 60 * 60 * 1000;
+
+    private static Decision decideOpen(Facts f) {
         if (!f.admin) {
             Decision d = new Decision(Action.NONE, "Only the admin can close this group");
             d.reasons.add("Closing a group is an admin decision. You can leave the group from the menu instead.");
             return d;
         }
-        if (f.alreadyClosed) {
-            Decision d = new Decision(Action.NONE, "This group is already closed");
-            d.nextSteps.add("You can reopen it from here if you change your mind.");
-            return d;
-        }
-
         Decision d = new Decision(Action.NONE, "This group can't be closed yet");
         // Blockers that apply to every group.
         if (f.openLoans > 0) {

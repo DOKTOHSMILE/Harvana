@@ -1342,7 +1342,8 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 *  until they transfer admin to someone else first. A regular
 *  member leaving is a plain, reversible-by-rejoining action. */
 	private void _confirmLeaveGroup() {
-		if (isAdmin) {
+		// A closed group has nothing left to run: its admin may leave it too (it stays closed and is deleted on time).
+		if (isAdmin && !GroupCloser.isClosed(groupData)) {
 			ThemedDialogs.show(ThemedDialogs.alert(this)
 			.setTitle("Transfer admin first")
 			.setMessage("You're this group's admin. Transfer admin role to another member before you can leave — otherwise nobody would be left with control of the group wallet.")
@@ -1689,18 +1690,41 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 		btn.setText(closed ? "Reopen group" : "Check if I can close this group");
 		btn.setOnClickListener(v -> { if (closed) _confirmReopen(); else _checkClose(btn); });
 		closeSection.addView(btn, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (48 * d)));
+		if (closed) {
+			// When it goes for good, and the way to delete it now (allowed with nothing owed or open).
+			Object due = groupData.get("purgeAfter");
+			long dueAt = due instanceof Number ? ((Number) due).longValue()
+				: groupData.get("closedAt") instanceof Number ? ((Number) groupData.get("closedAt")).longValue() + GroupClosePolicy.PURGE_AFTER_MS : 0L;
+			if (dueAt > 0) {
+				com.harvana.app.utils.InfoTable when = new com.harvana.app.utils.InfoTable(this);
+				when.view().setBackground(null);
+				when.view().setPadding(0, (int) (4 * d), 0, 0);
+				when.row("Deleted on", new java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.US).format(new java.util.Date(dueAt)));
+				closeSection.addView(when.view(), 1);
+			}
+			MaterialButton del = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+			del.setAllCaps(false);
+			del.setText("Delete now");
+			del.setTextColor(UiColors.error());
+			del.setStrokeColor(android.content.res.ColorStateList.valueOf(UiColors.error()));
+			del.setOnClickListener(v -> _checkClose(del));
+			LinearLayout.LayoutParams dl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (48 * d));
+			dl.topMargin = (int) (8 * d);
+			closeSection.addView(del, dl);
+		}
 		host.addView(closeSection);
 	}
 
 	private void _checkClose(MaterialButton btn) {
+		final CharSequence label = btn.getText();
 		btn.setEnabled(false);
 		btn.setText("Checking the network\u2026");
 		GroupCloser.evaluate(this, groupId, new GroupCloser.EvalCb() {
 			@Override public void onDecision(GroupClosePolicy.Decision dec, GroupClosePolicy.Facts f) {
-				runOnUiThread(() -> { btn.setEnabled(true); btn.setText("Check if I can close this group"); _showCloseDecision(dec); });
+				runOnUiThread(() -> { btn.setEnabled(true); btn.setText(label); _showCloseDecision(dec); });
 			}
 			@Override public void onError(String e) {
-				runOnUiThread(() -> { btn.setEnabled(true); btn.setText("Check if I can close this group"); Toast.makeText(GroupSettingsActivity.this, e, Toast.LENGTH_LONG).show(); });
+				runOnUiThread(() -> { btn.setEnabled(true); btn.setText(label); Toast.makeText(GroupSettingsActivity.this, e, Toast.LENGTH_LONG).show(); });
 			}
 		});
 	}

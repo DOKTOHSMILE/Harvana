@@ -19,8 +19,17 @@ public class GroupClosePolicyTest {
         assertEquals(GroupClosePolicy.Action.NONE, act(f));
     }
 
-    @Test public void alreadyClosedOffersNothing() {
-        GroupClosePolicy.Facts f = base(); f.alreadyClosed = true;
+    @Test public void aClosedGroupWithNothingOpenCanBeDeletedNow() {
+        GroupClosePolicy.Facts f = base(); f.alreadyClosed = true; f.otherActiveMembers = 3;
+        assertEquals(GroupClosePolicy.Action.DELETE, act(f));
+        f = base(); f.alreadyClosed = true; f.onChain = true; f.family = "ACCUM"; f.nodeState = "ACTIVE"; f.escrowBalanceRaw = 0;
+        assertEquals(GroupClosePolicy.Action.DELETE, act(f));
+    }
+
+    @Test public void aClosedGroupWithSomethingOpenStillCannotBeDeleted() {
+        GroupClosePolicy.Facts f = base(); f.alreadyClosed = true; f.openLoans = 1;
+        assertEquals(GroupClosePolicy.Action.NONE, act(f));
+        f = base(); f.alreadyClosed = true; f.onChain = true; f.family = "ACCUM"; f.nodeState = "ACTIVE"; f.escrowBalanceRaw = 5;
         assertEquals(GroupClosePolicy.Action.NONE, act(f));
     }
 

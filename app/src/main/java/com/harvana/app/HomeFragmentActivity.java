@@ -1405,6 +1405,12 @@ public class HomeFragmentActivity extends Fragment {
 			nodeLoanOut = p.outstandingHarv();
 			nodeLoanCount = p.loansOpen();
 			nodeGroupCount = p.entries.size();
+			// Active groups: what the network and the app still count (closed and deleted groups left out).
+			final int active = p.groupCount();
+			if (getActivity() != null) getActivity().runOnUiThread(() -> {
+				if (text_val_groups != null) text_val_groups.setText(String.valueOf(active));
+				if (text_sub_groups != null) text_sub_groups.setText(active == 0 ? "Join your first circle" : (active == 1 ? "1 active circle" : active + " active circles"));
+			});
 			_applyTotalSaved(fsSaved);
 			// The coins' dollar rates and HARV's price, then the total again in the display currency.
 			if (getContext() != null) com.harvana.app.wallet.FxRates.load(getContext(),

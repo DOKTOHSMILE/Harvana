@@ -357,7 +357,8 @@ public class DiscoverFragmentActivity extends Fragment {
 								Object gid = g.get("groupId");
 								String resolvedId = docId != null ? docId.toString() : (gid != null ? gid.toString() : "");
 								row.put("groupId", resolvedId);
-								if (!myGroupIds.contains(resolvedId) && !com.harvana.app.group.GroupKinds.isLegacyRotating(g)) {
+								if (!myGroupIds.contains(resolvedId) && !com.harvana.app.group.GroupKinds.isLegacyRotating(g)
+										&& !com.harvana.app.group.GroupCloser.isClosed(g) && !com.harvana.app.group.GroupCloser.isDeleted(g)) {
 									publicGroups.add(row);
 								}
 							}

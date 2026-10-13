@@ -139,6 +139,8 @@ public final class GroupCloser {
         Map<String, Object> patch = new HashMap<>();
         patch.put("status", CLOSED);
         patch.put("closedAt", System.currentTimeMillis());
+        // Hidden from Discover and from members' lists now; deleted for good after this (GroupClosePolicy.PURGE_AFTER_MS).
+        patch.put("purgeAfter", System.currentTimeMillis() + GroupClosePolicy.PURGE_AFTER_MS);
         patch.put("closedBy", me);
         patch.put("closedReason", reason == null ? "" : reason);
         patch.put("closedPrevVisibility", currentVisibility == null ? "Private" : currentVisibility);
@@ -155,6 +157,7 @@ public final class GroupCloser {
         patch.put("status", "Active");
         patch.put("visibility", previousVisibility == null || previousVisibility.isEmpty() ? "Private" : previousVisibility);
         patch.put("closedAt", null);
+        patch.put("purgeAfter", null);
         fm.updateGroupFields(groupId, patch, new GroupFirestoreManager.SimpleCallback() {
             @Override public void onSuccess() {
                 fm.postSystemNotice(groupId, "Group reopened", "The admin reopened this group.");
@@ -182,6 +185,7 @@ public final class GroupCloser {
         String me = FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
         GroupFirestoreManager.getInstance(c).deleteGroupTree(groupId, new GroupFirestoreManager.SimpleCallback() {
             @Override public void onSuccess() {
+                leaveMarker(c, groupId, me);
                 GroupSaver.unqueue(c, groupId); // a queued retry must not bring it back
                 forgetLocally(c, groupId);
                 if (!me.isEmpty()) {
@@ -209,6 +213,51 @@ public final class GroupCloser {
                 com.harvana.app.utils.MediaCleaner.delete(a, com.harvana.app.utils.MediaCleaner.GROUP_PHOTO, groupId, () -> delete(c, groupId, cb));
             }
             @Override public void onError(String e) { cb.onError(com.harvana.app.circle.CircleUi.friendly(e)); }
+        });
+    }
+
+    /**
+     * What stays of a deleted group: an empty record marked "Deleted" under the same id, with nothing in it. Only the
+     * creator may change a group record, so nobody can make a new group under a deleted group's id; every list treats
+     * the marker as gone.
+     */
+    static void leaveMarker(Context c, String groupId, String me) {
+        if (me == null || me.isEmpty()) return;
+        Map<String, Object> m = new HashMap<>();
+        m.put("groupName", "");
+        m.put("groupType", "");
+        m.put("creatorId", me);
+        m.put("status", DELETED);
+        m.put("deletedAt", System.currentTimeMillis());
+        GroupFirestoreManager.getInstance(c).createGroup(groupId, m, new NoopCb());
+    }
+
+    public static final String DELETED = "Deleted";
+
+    /** True for a deleted group's marker: it is not a group any more. */
+    public static boolean isDeleted(java.util.Map<String, Object> group) {
+        return group != null && DELETED.equalsIgnoreCase(s(group.get("status")));
+    }
+
+    /** True for a group its admin closed (it is hidden from lists and Discover until it is deleted). */
+    public static boolean isClosed(java.util.Map<String, Object> group) {
+        return group != null && CLOSED.equalsIgnoreCase(s(group.get("status")));
+    }
+
+    /**
+     * A closed group whose time is up is deleted for good, by its admin's app (only the admin may delete it). Closing
+     * was allowed only with nothing owed or open, and a network group's own record stays on the network.
+     */
+    public static void purgeIfDue(Context ctx, String groupId, java.util.Map<String, Object> group) {
+        if (!isClosed(group)) return;
+        String me = FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+        if (me.isEmpty() || !me.equals(s(group.get("creatorId")))) return;
+        long due = group.get("purgeAfter") instanceof Number ? ((Number) group.get("purgeAfter")).longValue()
+                : group.get("closedAt") instanceof Number ? ((Number) group.get("closedAt")).longValue() + GroupClosePolicy.PURGE_AFTER_MS : 0L;
+        if (due <= 0 || System.currentTimeMillis() < due) return;
+        delete(ctx, groupId, new DoneCb() {
+            @Override public void onDone() { }
+            @Override public void onError(String e) { }
         });
     }
 

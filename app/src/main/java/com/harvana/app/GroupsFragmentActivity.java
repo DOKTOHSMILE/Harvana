@@ -179,8 +179,8 @@ public class GroupsFragmentActivity extends Fragment {
 	
 	private void _openTypeFilter() {
 		if (getContext() == null) return;
-		final String[] labels = {"All my groups", "Rotating", "Accumulative", "Fixed contribution", "Groups I run"};
-		final String[] keys = {"", "rotat", "accum", "fixed", "admin"};
+		final String[] labels = {"All my groups", "Rotating", "Accumulative", "Fixed contribution", "Groups I run", "Closed groups"};
+		final String[] keys = {"", "rotat", "accum", "fixed", "admin", "closed"};
 		new com.harvana.app.ui.SheetDialog.Builder(getContext()).setTitle("Show")
 			.setItems(labels, (dlg, which) -> {
 				typeFilter = keys[which];
@@ -193,7 +193,10 @@ public class GroupsFragmentActivity extends Fragment {
 	private void _showGroups() {
 		shownGroups.clear();
 		for (HashMap<String, Object> g : myGroups) {
-			if (!typeFilter.isEmpty()) {
+			// A closed group leaves the list; it is under "Closed groups" until it is deleted for good.
+			boolean closed = com.harvana.app.group.GroupCloser.isClosed(g);
+			if ("closed".equals(typeFilter) != closed) continue;
+			if (!typeFilter.isEmpty() && !"closed".equals(typeFilter)) {
 				if ("admin".equals(typeFilter)) {
 					String mine = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
 						: com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -552,7 +555,9 @@ public class GroupsFragmentActivity extends Fragment {
 					if (data != null) row.putAll(data);
 					row.put("groupId", groupId);
 					// Old Firestore-only rotating groups were test data: hidden, not deleted.
-					if (!com.harvana.app.group.GroupKinds.isLegacyRotating(data)) resultsByIndex[index] = row;
+					if (!com.harvana.app.group.GroupKinds.isLegacyRotating(data) && !com.harvana.app.group.GroupCloser.isDeleted(data)) resultsByIndex[index] = row;
+					// A closed group past its time is deleted for good by its admin's app.
+					if (getContext() != null) com.harvana.app.group.GroupCloser.purgeIfDue(getContext(), groupId, data);
 					_checkComplete();
 				}
 				

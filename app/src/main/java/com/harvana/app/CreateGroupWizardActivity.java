@@ -73,6 +73,8 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
     private android.net.Uri photoUri;          // the cropped picture, waiting on the phone until Create group
     private String groupDocId;                  // the group's Firestore id, fixed early so the picture can be stored under it
 
+    private boolean idChecked;
+
     private String groupDocId() { if (groupDocId == null) groupDocId = java.util.UUID.randomUUID().toString(); return groupDocId; }
     private static final int RC_PHOTO = 721;
     private final List<String> rules = new ArrayList<>();
@@ -737,6 +739,17 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
     // ── create ─────────────────────────────────────────────────────────────
 
     private void create() {
+        // A group id is never used twice: if a record (or a deleted group's marker) already has this id, take a fresh one.
+        if (!idChecked) {
+            com.harvana.app.firestore.GroupFirestoreManager.getInstance(this).getGroup(groupDocId(), new com.harvana.app.firestore.GroupFirestoreManager.DocCallback() {
+                @Override public void onSuccess(java.util.Map<String, Object> existing) {
+                    if (existing != null && !existing.isEmpty()) groupDocId = null;
+                    runOnUiThread(() -> { idChecked = true; create(); });
+                }
+                @Override public void onError(String e) { runOnUiThread(() -> { idChecked = true; create(); }); }   // not found: the id is free
+            });
+            return;
+        }
         final String wallet = WalletManager.getActiveWalletAddress(this);
         if (wallet == null || wallet.isEmpty() || WalletManager.loadPrivateKey(this, wallet) == null) {
             new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("You need a wallet first")

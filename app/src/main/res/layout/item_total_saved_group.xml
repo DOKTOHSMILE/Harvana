@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Total saved, one group: name and kind on the left; saved in its coin, in the chosen currency and any loan owed on the right. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginTop="8dp"
+	android:minHeight="50dp"
+	android:background="@drawable/bg_card_surface"
+	android:foreground="?android:attr/selectableItemBackground"
+	android:gravity="center_vertical"
+	android:orientation="horizontal"
+	android:paddingStart="14dp"
+	android:paddingTop="12dp"
+	android:paddingEnd="14dp"
+	android:paddingBottom="12dp">
+
+	<ImageView
+		android:id="@+id/iv_saved_group_coin"
+		android:layout_width="28dp"
+		android:layout_height="28dp"
+		android:layout_marginEnd="12dp"
+		android:scaleType="fitCenter"
+		android:importantForAccessibility="no"
+		android:visibility="gone" />
+
+	<LinearLayout
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:orientation="vertical">
+
+		<TextView
+			android:id="@+id/tv_saved_group_name"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="15sp"
+			android:textStyle="bold" />
+
+		<TextView
+			android:id="@+id/tv_saved_group_kind"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="12sp" />
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:gravity="end"
+		android:orientation="vertical">
+
+		<TextView
+			android:id="@+id/tv_saved_group_amount"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="15sp"
+			android:textStyle="bold" />
+
+		<TextView
+			android:id="@+id/tv_saved_group_fiat"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="12sp"
+			android:visibility="gone" />
+
+		<TextView
+			android:id="@+id/tv_saved_group_owes"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorWarning"
+			android:textSize="12sp"
+			android:visibility="gone" />
+	</LinearLayout>
+</LinearLayout>

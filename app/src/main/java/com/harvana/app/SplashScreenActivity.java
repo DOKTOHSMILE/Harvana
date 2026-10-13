@@ -5,18 +5,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,66 +53,14 @@ public class SplashScreenActivity extends AppCompatActivity {
     }
 
     private void buildUi() {
-        FrameLayout root = new FrameLayout(this);
-        root.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        setContentView(R.layout.activity_splash);
         getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
-        float d = getResources().getDisplayMetrics().density;
-
-        LinearLayout column = new LinearLayout(this);
-        column.setOrientation(LinearLayout.VERTICAL);
-        column.setGravity(Gravity.CENTER);
-        root.addView(column, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-        ImageView logo = new ImageView(this);
-        logo.setId(View.generateViewId());
-        logo.setImageResource(R.mipmap.ic_launcher_foreground);
-        logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        logo.setContentDescription("Harvana");
-        logo.setTag("logo");
-        LinearLayout.LayoutParams logoLp = new LinearLayout.LayoutParams((int) (80 * d), (int) (80 * d));
-        logoLp.gravity = Gravity.CENTER_HORIZONTAL;
-        column.addView(logo, logoLp);
-
-        TextView name = new TextView(this);
-        name.setText("Harvana");
-        name.setTextSize(28);
-        name.setTypeface(null, Typeface.BOLD);
-        name.setTextColor(ContextCompat.getColor(this, R.color.colorTextPrimary));
-        name.setTag("name");
-        name.setGravity(Gravity.CENTER);
-        name.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        LinearLayout.LayoutParams nameLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        nameLp.topMargin = (int) (18 * d);
-        column.addView(name, nameLp);
-
-        TextView tagline = new TextView(this);
-        tagline.setText("Save together. Build trust.");
-        tagline.setTextSize(14);
-        tagline.setTextColor(ContextCompat.getColor(this, R.color.colorTextSecondary));
-        tagline.setTag("tagline");
-        tagline.setGravity(Gravity.CENTER);
-        tagline.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        LinearLayout.LayoutParams tagLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        tagLp.topMargin = (int) (6 * d);
-        column.addView(tagline, tagLp);
-
-        status = new TextView(this);
-        status.setTextSize(13);
-        status.setTextColor(ContextCompat.getColor(this, R.color.colorTextSecondary));
-        status.setGravity(Gravity.CENTER);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM);
-        lp.bottomMargin = (int) (48 * d);
-        root.addView(status, lp);
-
-        setContentView(root);
+        status = findViewById(R.id.splash_status);
     }
 
     /** Logo pops in with a slight overshoot and then breathes once; the name and tagline rise into place. */
     private void animate() {
-        View root = findViewById(android.R.id.content);
-        View logo = root.findViewWithTag("logo"), name = root.findViewWithTag("name"), tagline = root.findViewWithTag("tagline");
+        View logo = findViewById(R.id.splash_logo), name = findViewById(R.id.splash_name), tagline = findViewById(R.id.splash_tagline);
         float d = getResources().getDisplayMetrics().density;
         logo.setAlpha(0f); logo.setScaleX(0.5f); logo.setScaleY(0.5f);
         logo.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(650).setInterpolator(new OvershootInterpolator(1.6f))

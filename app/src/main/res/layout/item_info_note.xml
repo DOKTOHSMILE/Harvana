@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A short line under the rows of a table (utils/InfoTable). -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/info_note"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:paddingTop="8dp"
+	android:paddingBottom="4dp"
+	android:textColor="@color/colorTextTertiary"
+	android:textSize="11.5sp" />

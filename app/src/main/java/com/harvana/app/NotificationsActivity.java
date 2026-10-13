@@ -9,9 +9,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,8 +18,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.harvana.app.notify.NotificationCenter;
 import com.harvana.app.notify.NotificationRouter;
 import com.harvana.app.notify.NotificationSync;
-import com.harvana.app.utils.StatusBarUtil;
-import com.harvana.app.utils.UiColors;
 
 import java.util.List;
 
@@ -38,10 +34,9 @@ public class NotificationsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(UiColors.background());
-        tabs = new com.google.android.material.tabs.TabLayout(this);
+        com.harvana.app.utils.AppBar.setContent(this, R.layout.activity_notifications, "Notifications", "Group, payment and account updates");
+        list = findViewById(R.id.notifications_list);
+        tabs = findViewById(R.id.notifications_tabs);
         tabs.setTabMode(com.google.android.material.tabs.TabLayout.MODE_SCROLLABLE);
         com.harvana.app.utils.Toggles.pill(tabs);
         for (String t : TABS) tabs.addTab(tabs.newTab().setText(t));
@@ -50,18 +45,6 @@ public class NotificationsActivity extends AppCompatActivity {
             @Override public void onTabUnselected(com.google.android.material.tabs.TabLayout.Tab t) {}
             @Override public void onTabReselected(com.google.android.material.tabs.TabLayout.Tab t) {}
         });
-        android.widget.LinearLayout.LayoutParams tabsLp = new android.widget.LinearLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toggle_height));
-        tabsLp.setMargins(dp(16), dp(8), dp(16), dp(4));
-        root.addView(tabs, tabsLp);
-        ScrollView sv = new ScrollView(this);
-        list = new LinearLayout(this);
-        list.setOrientation(LinearLayout.VERTICAL);
-        int p = dp(12);
-        list.setPadding(p, p, p, p);
-        sv.addView(list);
-        root.addView(sv, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-        com.harvana.app.utils.AppBar.setContent(this, root, "Notifications", "Group, payment and account updates");
     }
 
     @Override protected void onStart() {
@@ -108,10 +91,9 @@ public class NotificationsActivity extends AppCompatActivity {
             if (t != null) t.setText(unread[i] > 0 ? TABS[i] + " (" + unread[i] + ")" : TABS[i]);
         }
         if (items.isEmpty()) {
-            TextView e = tv(tab == 0 ? "You're all caught up.\nPayment reminders, group notices, invitations and transfers will show here."
-                    : "Nothing in " + TABS[tab] + " yet.", 14, false, UiColors.textSecondary());
-            e.setGravity(android.view.Gravity.CENTER);
-            e.setPadding(dp(16), dp(48), dp(16), dp(16));
+            TextView e = (TextView) getLayoutInflater().inflate(R.layout.item_list_empty, list, false);
+            e.setText(tab == 0 ? "You're all caught up.\nPayment reminders, group notices, invitations and transfers will show here."
+                    : "Nothing in " + TABS[tab] + " yet.");
             list.addView(e);
             return;
         }
@@ -120,8 +102,8 @@ public class NotificationsActivity extends AppCompatActivity {
             String d = dayLabel(it.createdAt);
             if (!d.equals(day)) {
                 day = d;
-                TextView h = tv(d, 12, true, UiColors.textTertiary());
-                h.setPadding(dp(4), dp(10), 0, dp(6));
+                TextView h = (TextView) getLayoutInflater().inflate(R.layout.item_list_day_header, list, false);
+                h.setText(d);
                 list.addView(h);
             }
             list.addView(row(it));
@@ -154,55 +136,20 @@ public class NotificationsActivity extends AppCompatActivity {
         return new java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.getDefault()).format(new java.util.Date(t));
     }
 
+    /** One notification: res/layout/item_notification.xml. */
     private View row(NotificationCenter.Item it) {
-        com.google.android.material.card.MaterialCardView card = new com.google.android.material.card.MaterialCardView(this);
-        card.setCardBackgroundColor(UiColors.surface());
-        card.setRadius(dp(14));
-        card.setCardElevation(0);
+        com.google.android.material.card.MaterialCardView card = (com.google.android.material.card.MaterialCardView)
+                getLayoutInflater().inflate(R.layout.item_notification, list, false);
         card.setStrokeWidth(it.read ? 0 : dp(1));
-        card.setStrokeColor(UiColors.accent() & 0x00FFFFFF | 0x66000000);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.bottomMargin = dp(8);
-        card.setLayoutParams(lp);
-
-        LinearLayout r = new LinearLayout(this);
-        r.setOrientation(LinearLayout.HORIZONTAL);
-        int p = dp(14);
-        r.setPadding(p, p, p, p);
-        android.widget.ImageView ic = new android.widget.ImageView(this);
-        ic.setImageResource(icon(it.type));
-        ic.setColorFilter(UiColors.accent());
-        int ip = dp(9);
-        ic.setPadding(ip, ip, ip, ip);
-        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
-        bg.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-        bg.setColor(UiColors.accent() & 0x00FFFFFF | 0x22000000);
-        ic.setBackground(bg);
-        r.addView(ic, new LinearLayout.LayoutParams(dp(40), dp(40)));
-
-        LinearLayout col = new LinearLayout(this);
-        col.setOrientation(LinearLayout.VERTICAL);
-        col.setPadding(dp(12), 0, 0, 0);
-        LinearLayout top = new LinearLayout(this);
-        top.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        TextView head = tv(it.title, 15, !it.read, UiColors.textPrimary());
-        top.addView(head, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        top.addView(tv(ago(it.createdAt), 11, false, UiColors.textTertiary()));
-        if (!it.read) {
-            View dot = new View(this);
-            android.graphics.drawable.GradientDrawable dd = new android.graphics.drawable.GradientDrawable();
-            dd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-            dd.setColor(UiColors.accent());
-            dot.setBackground(dd);
-            LinearLayout.LayoutParams dl = new LinearLayout.LayoutParams(dp(8), dp(8));
-            dl.leftMargin = dp(6);
-            top.addView(dot, dl);
-        }
-        col.addView(top);
-        if (!it.body.isEmpty()) col.addView(tv(it.body, 13, false, UiColors.textSecondary()));
-        col.addView(tv(NotificationCenter.label(it.type), 11, false, UiColors.textTertiary()));
-        r.addView(col, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        card.addView(r);
+        ((android.widget.ImageView) card.findViewById(R.id.iv_notification_icon)).setImageResource(icon(it.type));
+        TextView head = card.findViewById(R.id.tv_notification_title);
+        head.setText(it.title);
+        head.setTypeface(null, it.read ? Typeface.NORMAL : Typeface.BOLD);
+        ((TextView) card.findViewById(R.id.tv_notification_time)).setText(ago(it.createdAt));
+        card.findViewById(R.id.notification_unread_dot).setVisibility(it.read ? View.GONE : View.VISIBLE);
+        TextView body = card.findViewById(R.id.tv_notification_body);
+        if (!it.body.isEmpty()) { body.setText(it.body); body.setVisibility(View.VISIBLE); }
+        ((TextView) card.findViewById(R.id.tv_notification_kind)).setText(NotificationCenter.label(it.type));
         card.setOnClickListener(v -> open(it));
         return card;
     }
@@ -219,11 +166,4 @@ public class NotificationsActivity extends AppCompatActivity {
         return (m / 1440) + " d ago";
     }
     private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
-    private TextView tv(String t, int sp, boolean bold, int color) {
-        TextView v = new TextView(this);
-        v.setText(t); v.setTextSize(sp); v.setTextColor(color);
-        if (bold) v.setTypeface(null, Typeface.BOLD);
-        v.setPadding(0, dp(2), 0, dp(2));
-        return v;
-    }
 }

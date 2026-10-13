@@ -1,22 +1,17 @@
 package com.harvana.app;
 
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.button.MaterialButton;
 import com.harvana.app.firestore.GroupFirestoreManager;
 import com.harvana.app.group.GroupContract;
 import com.harvana.app.group.InviteManager;
-import com.harvana.app.utils.StatusBarUtil;
 import com.harvana.app.utils.UiColors;
 
 import java.util.List;
@@ -26,22 +21,13 @@ import java.util.Map;
 /** The invitee's inbox: who invited them, and a clear summary of each group before they decide. */
 public class InvitesActivity extends AppCompatActivity {
     private LinearLayout list;
-    private TextView empty;
 
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        ScrollView sv = new ScrollView(this);
-        sv.setBackgroundColor(UiColors.background());
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        int p = dp(16);
-        root.setPadding(p, p, p, p);
-        sv.addView(root);
-        com.harvana.app.utils.AppBar.setContent(this, sv, "Invitations", "Groups that invited you to join");
-        list = root;
-        empty = tv("Loading invitations…", 14, false, UiColors.textSecondary());
-        root.addView(com.harvana.app.utils.Shimmer.rows(this, 4));
+        com.harvana.app.utils.AppBar.setContent(this, R.layout.activity_list_screen, "Invitations", "Groups that invited you to join");
+        list = findViewById(R.id.list_screen_items);
+        list.addView(com.harvana.app.utils.Shimmer.rows(this, 4));
     }
 
     @Override protected void onResume() { super.onResume(); load(); }
@@ -53,95 +39,81 @@ public class InvitesActivity extends AppCompatActivity {
                 runOnUiThread(() -> show(invites));
             }
             @Override public void onError(String e) {
-                runOnUiThread(() -> { list.removeAllViews(); empty = tv("Couldn't load invitations: " + e, 14, false, UiColors.error()); list.addView(empty); });
+                runOnUiThread(() -> { list.removeAllViews(); emptyLine("Couldn't load invitations: " + e).setTextColor(UiColors.error()); });
             }
         });
     }
 
     private void show(List<Map<String, Object>> invites) {
         list.removeAllViews();
-        if (invites.isEmpty()) {
-            list.addView(tv("No pending invitations.", 14, false, UiColors.textSecondary()));
-            return;
-        }
+        if (invites.isEmpty()) { emptyLine("No pending invitations."); return; }
         for (Map<String, Object> inv : invites) list.addView(card(inv));
     }
 
+    private TextView emptyLine(String text) {
+        TextView e = (TextView) getLayoutInflater().inflate(R.layout.item_list_empty, list, false);
+        e.setText(text);
+        list.addView(e);
+        return e;
+    }
+
+    /** One invitation: res/layout/item_invite.xml. The group's figures fill in as a table once the group is read. */
     private View card(Map<String, Object> inv) {
         final String id = s(inv, "_docId");
         final String gid = s(inv, "groupId");
-        LinearLayout c = new LinearLayout(this);
-        c.setOrientation(LinearLayout.VERTICAL);
-        c.setBackgroundColor(UiColors.surface());
-        int p = dp(14);
-        c.setPadding(p, p, p, p);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.bottomMargin = dp(12);
-        c.setLayoutParams(lp);
-
-        LinearLayout head = new LinearLayout(this);
-        head.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        final android.widget.ImageView face = new android.widget.ImageView(this);
+        View c = getLayoutInflater().inflate(R.layout.item_invite, list, false);
+        final android.widget.ImageView face = c.findViewById(R.id.iv_invite_group);
         com.harvana.app.utils.GroupRing.show(face, "", "", R.drawable.ic_coin_harv);
-        head.addView(face, new LinearLayout.LayoutParams(dp(44), dp(44)));
-        TextView groupTitle = tv(s(inv, "groupName"), 17, true, UiColors.textPrimary());
-        groupTitle.setPadding(dp(12), 0, 0, 0);
-        head.addView(groupTitle, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        c.addView(head);
-        c.addView(tv(s(inv, "inviterName") + " invited you", 13, false, UiColors.textSecondary()));
+        ((TextView) c.findViewById(R.id.tv_invite_group_name)).setText(s(inv, "groupName"));
+        ((TextView) c.findViewById(R.id.tv_invite_from)).setText(s(inv, "inviterName"));
         String msg = s(inv, "message");
-        if (!msg.isEmpty()) c.addView(tv("“" + msg + "”", 13, false, UiColors.textPrimary()));
-        final TextView summary = tv("Loading group details…", 13, false, UiColors.textSecondary());
-        c.addView(summary);
-        com.harvana.app.utils.Shimmer.watch(summary);
+        TextView note = c.findViewById(R.id.tv_invite_message);
+        if (!msg.isEmpty()) { note.setText("“" + msg + "”"); note.setVisibility(View.VISIBLE); }
+        final LinearLayout details = c.findViewById(R.id.invite_details);
+        details.addView(com.harvana.app.utils.Shimmer.rows(this, 3));
 
         GroupFirestoreManager.getInstance(this).getGroup(gid, new GroupFirestoreManager.DocCallback() {
             @Override public void onSuccess(Map<String, Object> g) {
                 runOnUiThread(() -> {
-                    summary.setText(summaryOf(g));
+                    details.removeAllViews();
+                    details.addView(detailsOf(g).view());
                     com.harvana.app.utils.GroupRing.show(face, s(g, "groupType"), s(g, "groupPhoto"), R.drawable.ic_coin_harv);
                 });
             }
             @Override public void onError(String e) {
-                runOnUiThread(() -> summary.setText("Group details unavailable right now."));
+                runOnUiThread(() -> { details.removeAllViews(); details.addView(new com.harvana.app.utils.InfoTable(InvitesActivity.this).row("Group", "—").view()); });
             }
         });
 
-        MaterialButton review = new MaterialButton(this);
-        review.setText("Read the details and join");
-        review.setAllCaps(false);
-        review.setOnClickListener(v -> {
+        c.findViewById(R.id.btn_invite_join).setOnClickListener(v -> {
             Intent i = new Intent(this, GroupJoinRequestActivity.class);
             i.putExtra("groupId", gid);
             i.putExtra("inviteId", id);
             startActivity(i);
         });
-        c.addView(review);
-
-        MaterialButton decline = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
-        decline.setText("Decline");
-        decline.setAllCaps(false);
-        decline.setOnClickListener(v -> InviteManager.respond(this, id, false, err -> runOnUiThread(() -> {
+        c.findViewById(R.id.btn_invite_decline).setOnClickListener(v -> InviteManager.respond(this, id, false, err -> runOnUiThread(() -> {
             if (err != null) Toast.makeText(this, "Couldn't decline: " + err, Toast.LENGTH_LONG).show();
             else load();
         })));
-        c.addView(decline);
         return c;
     }
 
-    private String summaryOf(Map<String, Object> g) {
-        String ticker = CoinInfo.ticker();
-        StringBuilder sb = new StringBuilder();
-        sb.append(s(g, "groupType")).append('\n');
+    /** The group's figures, one per row, with the group coin's logo on the contribution. */
+    private com.harvana.app.utils.InfoTable detailsOf(Map<String, Object> g) {
+        String coin = s(g, "asset");
+        com.harvana.app.utils.InfoTable t = new com.harvana.app.utils.InfoTable(this);
+        t.row(R.drawable.ic_groups_line, "Type", s(g, "groupType"));
         Object amt = g.get("contributionAmount");
-        if (amt instanceof Number) sb.append("Contribution: ").append(amt).append(' ').append(ticker)
-            .append(s(g, "frequency").isEmpty() ? "" : " · " + s(g, "frequency")).append('\n');
-        sb.append("Members: ").append(num(g, "membersCount")).append(" of ").append(num(g, "totalSlots")).append('\n');
-        sb.append("Loans: ").append(GroupContract.allowsLoans(g) ? "yes" : "no").append('\n');
-        sb.append("Joining: ").append(s(g, "joinApprovalMethod").isEmpty()
-            ? (Boolean.FALSE.equals(g.get("requireApprovalToJoin")) ? "open" : "admin approves") : s(g, "joinApprovalMethod").toLowerCase(Locale.US)).append('\n');
-        sb.append("You will read the full rules and sign before you join. You need a wallet to join.");
-        return sb.toString();
+        if (amt instanceof Number) {
+            t.row(com.harvana.app.group.CoinLogo.of(this, coin), "Contribution",
+                com.harvana.app.wallet.BalanceFormatter.smart(((Number) amt).doubleValue()) + " " + com.harvana.app.group.CoinLogo.symbol(coin)
+                + (s(g, "frequency").isEmpty() ? "" : " · " + s(g, "frequency")));
+        }
+        t.row(R.drawable.ic_person_line, "Members", num(g, "membersCount") + " / " + num(g, "totalSlots"));
+        t.row(R.drawable.ic_tx_loan_line, "Loans", GroupContract.allowsLoans(g) ? "Yes" : "No");
+        t.row(R.drawable.ic_check_circle_line, "Joining", s(g, "joinApprovalMethod").isEmpty()
+            ? (Boolean.FALSE.equals(g.get("requireApprovalToJoin")) ? "Open" : "Admin approves") : s(g, "joinApprovalMethod").toLowerCase(Locale.US));
+        return t;
     }
 
     private static long num(Map<String, Object> m, String k) {
@@ -149,13 +121,5 @@ public class InvitesActivity extends AppCompatActivity {
     }
     private static String s(Map<String, Object> m, String k) {
         Object o = m.get(k); return o == null ? "" : String.valueOf(o).trim();
-    }
-    private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
-    private TextView tv(String t, int sp, boolean bold, int color) {
-        TextView v = new TextView(this);
-        v.setText(t); v.setTextSize(sp); v.setTextColor(color);
-        if (bold) v.setTypeface(null, Typeface.BOLD);
-        v.setPadding(0, dp(4), 0, dp(4));
-        return v;
     }
 }

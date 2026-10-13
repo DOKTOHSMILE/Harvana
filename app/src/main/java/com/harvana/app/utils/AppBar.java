@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -23,26 +22,20 @@ import com.harvana.app.R;
 public final class AppBar {
     private AppBar() {}
 
-    /** Sets the screen's content: toolbar (title, optional subtitle) above {@code body}. */
+    /** Sets the screen's content: toolbar (title, optional subtitle) above the screen's own layout {@code bodyLayout}. */
+    public static Toolbar setContent(AppCompatActivity a, int bodyLayout, String title, String subtitle) {
+        View body = android.view.LayoutInflater.from(a).inflate(bodyLayout, null, false);
+        return setContent(a, body, title, subtitle);
+    }
+
+    /** Sets the screen's content: toolbar (title, optional subtitle) above {@code body}. The shell is res/layout/screen_app_bar.xml. */
     public static Toolbar setContent(AppCompatActivity a, View body, String title, String subtitle) {
-        Toolbar tb = new Toolbar(a);
-        TypedValue bar = new TypedValue();
+        a.setContentView(R.layout.screen_app_bar);
+        Toolbar tb = a.findViewById(R.id.app_bar_toolbar);
         TypedValue on = new TypedValue();
-        TypedValue h = new TypedValue();
-        a.getTheme().resolveAttribute(R.attr.appBarColor, bar, true);
         a.getTheme().resolveAttribute(R.attr.onAppBarColor, on, true);
-        a.getTheme().resolveAttribute(androidx.appcompat.R.attr.actionBarSize, h, true);
-        int height = TypedValue.complexToDimensionPixelSize(h.data, a.getResources().getDisplayMetrics());
-
-        tb.setBackgroundColor(bar.data);
-        tb.setTitleTextColor(on.data);
-        tb.setSubtitleTextColor(on.data);
-
-        LinearLayout root = new LinearLayout(a);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.addView(tb, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
-        root.addView(body, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-        a.setContentView(root);
+        ((ViewGroup) a.findViewById(R.id.app_bar_body)).addView(body,
+            new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         a.setSupportActionBar(tb);
         if (a.getSupportActionBar() != null) {

@@ -1,11 +1,7 @@
 package com.harvana.app.utils;
 
 import android.content.Context;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -29,13 +25,7 @@ public final class InfoTable {
     public InfoTable(Context c) {
         this.c = c;
         this.d = c.getResources().getDisplayMetrics().density;
-        box = new LinearLayout(c);
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(px(14), px(6), px(14), px(6));
-        GradientDrawable bg = new GradientDrawable();
-        bg.setCornerRadius(px(14));
-        bg.setColor(UiColors.surface());
-        box.setBackground(bg);
+        box = (LinearLayout) android.view.LayoutInflater.from(c).inflate(com.harvana.app.R.layout.view_info_table, null, false);
     }
 
     public LinearLayout view() { return box; }
@@ -45,13 +35,9 @@ public final class InfoTable {
 
     /** A small title above the rows that follow. */
     public InfoTable section(String title) {
-        TextView t = new TextView(c);
-        t.setText(title.toUpperCase(java.util.Locale.US));
-        t.setTextSize(11f);
-        t.setLetterSpacing(0.06f);
-        t.setTypeface(null, Typeface.BOLD);
-        t.setTextColor(UiColors.textTertiary());
-        t.setPadding(0, px(box.getChildCount() == 0 ? 6 : 14), 0, px(4));
+        TextView t = (TextView) android.view.LayoutInflater.from(c).inflate(com.harvana.app.R.layout.item_info_section, box, false);
+        t.setText(title);
+        if (box.getChildCount() == 0) t.setPadding(0, px(6), 0, px(4));
         box.addView(t);
         return this;
     }
@@ -92,20 +78,15 @@ public final class InfoTable {
 
     private void addDivided(View r) {
         if (box.getChildCount() > 0 && !(box.getChildAt(box.getChildCount() - 1) instanceof TextView)) {
-            View line = new View(c);
-            line.setBackgroundColor(UiColors.textTertiary() & 0x22FFFFFF);
-            box.addView(line, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Math.max(1, px(1) / 2)));
+            android.view.LayoutInflater.from(c).inflate(com.harvana.app.R.layout.item_info_divider, box, true);
         }
         box.addView(r);
     }
 
     /** A short note under the rows (only for what is not a figure). */
     public InfoTable note(String text) {
-        TextView t = new TextView(c);
+        TextView t = (TextView) android.view.LayoutInflater.from(c).inflate(com.harvana.app.R.layout.item_info_note, box, false);
         t.setText(text);
-        t.setTextSize(11.5f);
-        t.setTextColor(UiColors.textTertiary());
-        t.setPadding(0, px(8), 0, px(4));
         box.addView(t);
         return this;
     }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A table card (utils/InfoTable): section titles, 50dp rows (item_info_row) and hairline dividers are added inside. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:background="@drawable/bg_card_surface"
+	android:orientation="vertical"
+	android:paddingStart="14dp"
+	android:paddingTop="6dp"
+	android:paddingEnd="14dp"
+	android:paddingBottom="6dp" />

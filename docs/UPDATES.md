@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Screens built in code now have XML layouts
+
+- The toolbar shell (`screen_app_bar.xml`) and the table card (`view_info_table.xml`, `item_info_section.xml`, `item_info_note.xml`, `item_info_divider.xml`) are XML.
+- Total saved (`activity_total_saved.xml`, `item_total_saved_group.xml` with the coin logo), Splash (`activity_splash.xml`), Notifications (`activity_notifications.xml`, `item_notification.xml`), Invitations (`activity_list_screen.xml`, `item_invite.xml`, the group's figures as table rows with the coin logo).
+- Shared list pieces: `item_list_day_header.xml`, `item_list_empty.xml`.
+
 ## 13 Oct 2026 — Group coin everywhere; 50dp table rows
 
 - Group pages show the group coin logo: a coin banner card on the group overview (logo, symbol, name, rate), the logo beside the wallet balance, the contribution rule, the "Per slot" amount on every group card, and the group details header.

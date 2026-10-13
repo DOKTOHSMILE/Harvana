@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Total saved
+
+- Home, Total saved card: one figure in the currency chosen in Settings, with every group's savings converted from the coin it is kept in. It used to read "40.00 HARV · ₦5,000.00": a savings line in hNGN was read with HARV's 8 decimals. The portfolio now takes a line's own coin when the group record names none.
+- Tap the card: a new Total saved screen (`TotalSavedActivity`), read from the network.
+  - The total in your currency, with how many groups and coins.
+  - By coin: each coin's amount and the same in your currency.
+  - By group: each group's saving in its coin and in your currency, plus what is owed. Tap a group to open it.
+  - Loans: open loans, borrowed, still owed, and saved after loans.
+  - By kind of group: rotating, savings, goal.
+
 ## 13 Oct 2026 — Group screens in the group's coin
 
 - Group header, Collected: shown in the group's coin, e.g. 5,000 hNGN. A savings group whose total is not on the network yet shows what its group wallet holds.

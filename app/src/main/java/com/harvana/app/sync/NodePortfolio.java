@@ -165,7 +165,12 @@ public final class NodePortfolio {
                         final Map<String, Object> member = JsonMaps.toMap(memberJson);
                         if ("ACCUM".equals(family) && member.get("currentLineId") != null) {
                             NodeGroupClient.getAccumLine(nodeId, String.valueOf(member.get("currentLineId")), new NodeGroupClient.Callback() {
-                                @Override public void onSuccess(JSONObject l) { add(p, fsId, nodeId, name, family, group, NodePositions.accum(member, JsonMaps.toMap(l), System.currentTimeMillis()), done); }
+                                @Override public void onSuccess(JSONObject l) {
+                                    // A line kept in a stable coin: its amounts are in that coin even when the group record names none.
+                                    String lineCoin = l.optString("asset", "");
+                                    if (com.harvana.app.husd.Stable.isStable(lineCoin) && !com.harvana.app.husd.Stable.isStable(String.valueOf(group.get("asset")))) group.put("asset", lineCoin);
+                                    add(p, fsId, nodeId, name, family, group, NodePositions.accum(member, JsonMaps.toMap(l), System.currentTimeMillis()), done);
+                                }
                                 @Override public void onError(String e) { add(p, fsId, nodeId, name, family, group, NodePositions.accum(member, null, 0), done); }
                             });
                         } else if ("ACCUM".equals(family)) {

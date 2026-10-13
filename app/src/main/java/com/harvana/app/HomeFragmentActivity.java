@@ -1422,11 +1422,19 @@ public class HomeFragmentActivity extends Fragment {
 		getActivity().runOnUiThread(() -> {
 			// Groups save in stable coins (hNGN, hUSD, …): the total is shown in those coins, from the node's records,
 			// whatever the app's display currency (owner, 13 Oct 2026).
+			// One figure, in the currency chosen in Settings: each group's savings converted from the coin it is kept in
+			// (owner, 13 Oct 2026). The breakdown by coin and by group is on the Total saved screen (tap the card).
 			if (nodePortfolio == null || getContext() == null) { text_val_saved.setText("—"); }
 			else {
-				String saved = nodePortfolio.savedInGroupCoins();
-				text_val_saved.setText(saved.isEmpty() ? "0" : saved);
+				double usd = nodePortfolio.savedUsd(getContext());
+				if (Double.isNaN(usd)) {
+					String saved = nodePortfolio.savedInGroupCoins();
+					text_val_saved.setText(saved.isEmpty() ? "0" : saved);
+				} else {
+					text_val_saved.setText(com.harvana.app.wallet.FxRates.money(getContext(), usd));
+				}
 			}
+			_openTotalSavedOnTap();
 			if (text_sub_saved != null) {
 				int n = group_map_list.size();
 				text_sub_saved.setText(n <= 0 ? "No group savings yet"
@@ -1435,6 +1443,15 @@ public class HomeFragmentActivity extends Fragment {
 		});
 	}
 	
+	/** The Total saved card opens the Total saved screen. */
+	private void _openTotalSavedOnTap() {
+		View v = text_val_saved;
+		while (v != null && !(v instanceof com.google.android.material.card.MaterialCardView) && v.getParent() instanceof View) v = (View) v.getParent();
+		View card = v instanceof com.google.android.material.card.MaterialCardView ? v : text_val_saved;
+		if (card == null || card.hasOnClickListeners()) return;
+		card.setOnClickListener(x -> startActivity(new android.content.Intent(getContext(), TotalSavedActivity.class)));
+	}
+
 	private static String _fmtAmount(double v) {
 		try {
 			java.text.DecimalFormat df = new java.text.DecimalFormat("#,##0.00######", new java.text.DecimalFormatSymbols(java.util.Locale.US));

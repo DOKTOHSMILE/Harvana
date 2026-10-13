@@ -68,23 +68,58 @@ public class ManageAssetsActivity extends AppCompatActivity {
         LinearLayout body = new LinearLayout(this);
         body.setOrientation(LinearLayout.VERTICAL);
         body.setBackgroundColor(UiColors.background());
-        int pad = dp(16);
 
-        EditText filter = new com.google.android.material.textfield.TextInputEditText(this);
-        filter.setHint("Search");
+        // Search, and Add a chain beside it: the same bar as on Assets.
+        LinearLayout bar = new LinearLayout(this);
+        bar.setGravity(Gravity.CENTER_VERTICAL);
+        com.google.android.material.card.MaterialCardView box = new com.google.android.material.card.MaterialCardView(this);
+        box.setCardBackgroundColor(UiColors.surface());
+        box.setRadius(dp(12));
+        box.setCardElevation(0);
+        box.setStrokeWidth(dp(1));
+        box.setStrokeColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorCardStroke));
+        LinearLayout inner = new LinearLayout(this);
+        inner.setGravity(Gravity.CENTER_VERTICAL);
+        inner.setPadding(dp(12), 0, dp(8), 0);
+        ImageView glass = new ImageView(this);
+        glass.setImageResource(R.drawable.icon_search_24);
+        glass.setImageTintList(android.content.res.ColorStateList.valueOf(UiColors.textSecondary()));
+        inner.addView(glass, new LinearLayout.LayoutParams(dp(18), dp(18)));
+        EditText filter = new EditText(this);
+        filter.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        filter.setHint("Search or paste a contract");
         filter.setSingleLine(true);
-        filter.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.icon_search_24, 0, 0, 0);
-        filter.setCompoundDrawablePadding(dp(8));
-        LinearLayout.LayoutParams flp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        flp.setMargins(pad, dp(8), pad, 0);
-        body.addView(filter, flp);
+        filter.setTextSize(14);
+        filter.setTextColor(UiColors.textPrimary());
+        filter.setHintTextColor(UiColors.textTertiary());
+        filter.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
+        LinearLayout.LayoutParams ep = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
+        ep.setMarginStart(dp(8));
+        inner.addView(filter, ep);
+        box.addView(inner, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        bar.addView(box, new LinearLayout.LayoutParams(0, dp(44), 1f));
 
-        LinearLayout actions = new LinearLayout(this);
-        actions.setOrientation(LinearLayout.VERTICAL);
-        actions.setPadding(pad, 0, pad, 0);
-        actions.addView(action("Add a chain", v -> CustomAssets.editChain(this, null, this::reload)));
-        actions.addView(action("Token index key (GoldRush)", v -> indexKey()));
-        body.addView(actions);
+        com.google.android.material.card.MaterialCardView add = new com.google.android.material.card.MaterialCardView(this);
+        add.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorActionSurface));
+        add.setRadius(dp(12));
+        add.setCardElevation(0);
+        add.setStrokeWidth(dp(1));
+        add.setStrokeColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorActionStroke));
+        add.setClickable(true);
+        add.setFocusable(true);
+        add.setContentDescription("Add a chain");
+        ImageView plus = new ImageView(this);
+        plus.setImageResource(R.drawable.icon_add_circle_outline_round);
+        plus.setImageTintList(android.content.res.ColorStateList.valueOf(UiColors.accent()));
+        add.addView(plus, new android.widget.FrameLayout.LayoutParams(dp(22), dp(22), Gravity.CENTER));
+        add.setOnClickListener(v -> CustomAssets.editChain(this, null, this::reload));
+        LinearLayout.LayoutParams ap = new LinearLayout.LayoutParams(dp(44), dp(44));
+        ap.setMarginStart(dp(8));
+        bar.addView(add, ap);
+
+        LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        blp.setMargins(dp(12), dp(10), dp(12), dp(4));
+        body.addView(bar, blp);
 
         RecyclerView list = new RecyclerView(this);
         list.setLayoutManager(new LinearLayoutManager(this));
@@ -303,19 +338,6 @@ public class ManageAssetsActivity extends AppCompatActivity {
         }
     }
 
-    /** The GoldRush key that lets token discovery read chains with no free index (BNB Chain, Polygon, Base). */
-    private void indexKey() {
-        EditText key = new com.google.android.material.textfield.TextInputEditText(this);
-        key.setHint("API key");
-        key.setSingleLine(true);
-        key.setText(TokenDiscovery.indexKey(this));
-        com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(this)
-                .setTitle("Token index key")
-                .setView(key)
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Save", (d, w) -> TokenDiscovery.setIndexKey(this, key.getText() == null ? "" : key.getText().toString())));
-    }
-
     private Item header(String title) { Item i = new Item(); i.type = HEADER; i.title = title; return i; }
 
     private Item row(String kind, String key, String title, String sub) {
@@ -326,21 +348,6 @@ public class ManageAssetsActivity extends AppCompatActivity {
         i.title = title;
         i.sub = sub;
         return i;
-    }
-
-    private TextView action(String text, View.OnClickListener l) {
-        TextView t = new TextView(this);
-        t.setText(text);
-        t.setTextSize(14);
-        t.setTypeface(Typeface.DEFAULT_BOLD);
-        t.setTextColor(UiColors.accent());
-        t.setGravity(Gravity.CENTER_VERTICAL);
-        t.setMinHeight(dp(48));
-        android.util.TypedValue tv = new android.util.TypedValue();
-        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv, true);
-        t.setBackgroundResource(tv.resourceId);
-        t.setOnClickListener(l);
-        return t;
     }
 
     private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }

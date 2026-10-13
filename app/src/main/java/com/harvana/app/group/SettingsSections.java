@@ -134,6 +134,7 @@ public final class SettingsSections {
             detach(v);
             to.addView(v);
         }
+        com.harvana.app.utils.IconFit.apply(to);
     }
 
     private static void detach(View v) {
@@ -189,8 +190,8 @@ public final class SettingsSections {
         LinearLayout c = card();
         c.addView(text("Invite people", 16, true, UiColors.textPrimary()));
         boolean membersMay = Boolean.TRUE.equals(g.get("membersCanInvite"));
-        c.addView(text(isAdmin || membersMay ? "Send an invitation by email, or share the group ID so someone can find it."
-                : "Only the admin can invite people to this group. You can still share its ID.", 12.5f, false, UiColors.textSecondary()));
+        c.addView(row("Who can invite", membersMay ? "Admin and members" : "Admin"));
+        c.addView(row("Group ID", groupId));
         if (isAdmin || membersMay) c.addView(button("Invite someone", false, v -> host.invite()));
         c.addView(button("Share group ID", false, v -> {
             android.content.Intent s = new android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain");
@@ -203,9 +204,8 @@ public final class SettingsSections {
     private View membersCard(boolean isAdmin, int count) {
         LinearLayout c = card();
         c.addView(text("Members", 16, true, UiColors.textPrimary()));
-        c.addView(text(count > 0 ? count + (count == 1 ? " member" : " members") : "Members load from the group's Members tab.", 13, false, UiColors.textSecondary()));
-        c.addView(text(isAdmin ? "You are the admin. You can hand the admin role to another member."
-                : "The admin manages who joins and who is removed.", 12.5f, false, UiColors.textSecondary()));
+        c.addView(row("Members", count > 0 ? String.valueOf(count) : "—"));
+        c.addView(row("You", isAdmin ? "Admin" : "Member"));
         if (isAdmin) c.addView(button("Transfer admin role", false, v -> host.transferAdmin()));
         return c;
     }
@@ -214,10 +214,9 @@ public final class SettingsSections {
     private View treasurerCard(boolean isAdmin) {
         LinearLayout c = card();
         c.addView(text("Treasurer (optional)", 16, true, UiColors.textPrimary()));
-        c.addView(text(treasurerWallet.isEmpty()
-                ? "This group has no treasurer. That is fine: the admin handles money requests. A treasurer can be added if the admin decides to, or if a member proposes one and the group, including the admin, votes yes."
-                : "This group has a treasurer. The admin can remove the role at any time, or any member can propose removing it for the group to vote on.",
-                12.5f, false, UiColors.textSecondary()));
+        c.addView(row("Treasurer", treasurerWallet.isEmpty() ? "None" : shortWallet(treasurerWallet)));
+        c.addView(row("Added by", "Admin, or a vote with the admin's yes"));
+        c.addView(row("Removed by", "Admin, or a vote"));
         org.json.JSONObject p = treasurerProposal;
         if (p != null && "PENDING".equals(p.optString("status"))) {
             String target = p.optString("treasurerAddress", "");
@@ -225,16 +224,15 @@ public final class SettingsSections {
             org.json.JSONObject weights = p.optJSONObject("voterWeights");
             int yes = 0, no = 0;
             if (votes != null) for (java.util.Iterator<String> it = votes.keys(); it.hasNext(); ) { if (votes.optBoolean(it.next())) yes++; else no++; }
-            TextView t = text((target.isEmpty() ? "Open vote: remove the treasurer" : "Open vote: make " + shortWallet(target) + " treasurer")
-                    + "\nYes " + yes + " \u00b7 No " + no + (p.optString("cosignBy").isEmpty() ? "" : "\nAdding a treasurer also needs the admin's yes."),
-                    13.5f, true, UiColors.textPrimary());
-            c.addView(t);
+            c.addView(row("Open vote", target.isEmpty() ? "Remove the treasurer" : "Make " + shortWallet(target) + " treasurer"));
+            c.addView(row("Yes · No", yes + " · " + no));
+            if (!p.optString("cosignBy").isEmpty()) c.addView(row("Also needs", "Admin's yes"));
             boolean mayVote = weights != null && !myWallet.isEmpty() && weights.has(myWallet);
             if (mayVote) {
                 c.addView(button("Vote yes", false, v -> host.voteTreasurer(true)));
                 c.addView(button("Vote no", true, v -> host.voteTreasurer(false)));
             } else {
-                c.addView(text("Only the admin and the group's most active members vote.", 12, false, UiColors.textTertiary()));
+                c.addView(row("You", "Not a voter"));
             }
         } else if (!treasurerWallet.isEmpty()) {
             c.addView(button("Propose removing the treasurer", true, v -> host.proposeTreasurer("", "")));
@@ -251,7 +249,6 @@ public final class SettingsSections {
     private View memberListCard(Map<String, Object> g, boolean isAdmin, java.util.List<Map<String, Object>> members) {
         LinearLayout c = card();
         c.addView(text("Roles and permissions", 16, true, UiColors.textPrimary()));
-        c.addView(text("Tap a member to see what they can do. These come from the group's rules; they are not switches.", 12.5f, false, UiColors.textSecondary()));
         String adminUid = str(g, "creatorId", "");
         String myUid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
                 : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -412,7 +409,7 @@ public final class SettingsSections {
     private View leaveCard() {
         LinearLayout c = card();
         c.addView(text("Leave", 16, true, 0xFFE5484D));
-        c.addView(text("You lose access to this group's payments, loans and notices. The admin must hand over the admin role before leaving.", 12.5f, false, UiColors.textSecondary()));
+        c.addView(row("Admin", "Hands over the role first"));
         c.addView(button("Leave this group", true, v -> host.leave()));
         return c;
     }

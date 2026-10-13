@@ -889,23 +889,22 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 			etGracePeriod.setText(str(groupData, "gracePeriodDays", "0"));
 			etCommission.setText(str(groupData, "commissionPercent", "0"));
 			tvTypeSettingsSubtitle.setText("Slots " + numStr(groupData, "totalSlots") + " · Round " + numStr(groupData, "currentRound"));
-			tvRuleInfoBanner.setText("Only the member whose slot is due can pay this round.");
+			tvRuleInfoBanner.setVisibility(View.GONE);
 		} 
 		else if (isFixed()) {
 			ivHeroTypeIcon.setImageResource(R.drawable.ic_type_goal);
 			etFixedGoal.setText(numStr(groupData, "targetGoalAmount"));
 			_select(spinDisbursementRule, str(groupData, "disbursementRule", "All at Once at Goal"));
-			tv_fixed_progress.setText("Live savings progress is shown on the group's Overview tab.");
-			tvRuleInfoBanner.setText(GroupIdentityResolver.resolve(groupId, groupData).onChain()
-					? "This goal runs on the network. The target and the payout rule cannot be changed here. Open votes are on the Payments tab."
-					: "The goal amount and disbursement rule apply to future contributions once saved.");
+			// Values only (owner, 13 Oct 2026): no sentences under the fields.
+			tv_fixed_progress.setVisibility(View.GONE);
+			tvRuleInfoBanner.setVisibility(View.GONE);
 		} 
 		else if (isAccum()) {
 			ivHeroTypeIcon.setImageResource(R.drawable.ic_type_savings);
 			etLoanInterestRate.setText(numStr(groupData, "loanInterestRate"));
 			_select(spinWithdrawalRule, str(groupData, "withdrawalRule", "Anytime"));
-			tv_loan_active_count.setText("Active loan count is shown on the group's Loans tab.");
-			tvRuleInfoBanner.setText("Interest rate changes only apply to new loans, not ones already disbursed.");
+			tv_loan_active_count.setVisibility(View.GONE);
+			tvRuleInfoBanner.setVisibility(View.GONE);
 		}
 		
 		tvWalletAddress.setText(expectedWallet.isEmpty() ? "No group wallet" : expectedWallet);
@@ -1669,9 +1668,8 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 		closeSection.addView(title);
 
 		TextView info = new TextView(this);
-		info.setText(closed
-			? "Closed groups are hidden from Discover and nobody can join. Members keep their history. You can reopen the group."
-			: "We check the network first. A group that holds money can't be erased: it is closed once everyone has been paid out. A group nobody joined can be deleted.");
+		info.setText("");
+		info.setVisibility(View.GONE);
 		info.setTextSize(12);
 		info.setTextColor(UiColors.textSecondary());
 		info.setPadding(0, (int) (4 * d), 0, (int) (8 * d));

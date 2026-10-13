@@ -59,6 +59,7 @@ public abstract class CreateGroupStepFragment extends Fragment {
         if (page == null || !(getActivity() instanceof Host)) return;
         page.removeAllViews();
         build((Host) getActivity(), page);
+        com.harvana.app.utils.IconFit.apply(page);
     }
 
     public void toTop() { if (scroll != null) scroll.post(() -> scroll.scrollTo(0, 0)); }

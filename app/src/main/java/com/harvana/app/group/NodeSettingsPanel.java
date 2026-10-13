@@ -18,6 +18,7 @@ import com.harvana.app.firestore.GroupFirestoreManager;
 import com.harvana.app.sync.NodeGroupClient;
 import com.harvana.app.utils.JsonMaps;
 import com.harvana.app.utils.UiColors;
+import com.harvana.app.utils.InfoTable;
 import com.harvana.app.wallet.PinPromptHelper;
 import com.harvana.app.wallet.WalletManager;
 
@@ -47,33 +48,28 @@ public final class NodeSettingsPanel {
         host.addView(card);
         card.addView(text(a, "Network control", 16, true, UiColors.textPrimary()));
         if (!id.onChain()) {
-            card.addView(text(a, "This group is not on the network. Its money and members are kept in the app only, so there are no network settings to show.",
-                    12, false, UiColors.textSecondary()));
+            card.addView(table(a).row("Network", "Not on the network").view());
             return;
         }
-        card.addView(text(a, "The network holds this group's money and says who is in it. The profile (name, photo, description, chat, notices) is kept in the app. "
-                + "Both are read together, and where they differ the network wins.", 12, false, UiColors.textSecondary()));
-        final TextView facts = text(a, "Reading the network…", 13, false, UiColors.textPrimary());
-        facts.setPadding(0, dp(a, 8), 0, dp(a, 4));
-        facts.setVisibility(View.GONE);
+        final InfoTable facts = table(a);
+        facts.view().setVisibility(View.GONE);
         final View factsLoading = com.harvana.app.utils.Shimmer.lines(a, 4);
         String cachedFacts = FACTS_CACHE.get(id.protocolId());
         if (cachedFacts != null) {               // seen before: show it straight away, refresh underneath
-            facts.setText(cachedFacts);
-            facts.setTypeface(Typeface.MONOSPACE);
-            facts.setVisibility(View.VISIBLE);
+            fill(facts, cachedFacts);
+            facts.view().setVisibility(View.VISIBLE);
             factsLoading.setVisibility(View.GONE);
         }
         card.addView(factsLoading);
-        card.addView(facts);
+        card.addView(facts.view());
         final LinearLayout actions = new LinearLayout(a);
         actions.setOrientation(LinearLayout.VERTICAL);
         card.addView(actions);
 
         final LinearLayout rules = card(a);
         host.addView(rules);
-        rules.addView(text(a, "Who decides, and what starts a vote", 16, true, UiColors.textPrimary()));
-        rules.addView(text(a, rulesText(id.family), 12.5f, false, UiColors.textSecondary()));
+        rules.addView(text(a, "Votes", 16, true, UiColors.textPrimary()));
+        rules.addView(rulesTable(a, id.family).view());
 
         final LinearLayout recovery = card(a);
         host.addView(recovery);
@@ -82,10 +78,10 @@ public final class NodeSettingsPanel {
         NodeGroupClient.Callback onGroup = new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject json) {
                 Map<String, Object> g = JsonMaps.toMap(json);
-                a.runOnUiThread(() -> { factsLoading.setVisibility(View.GONE); facts.setVisibility(View.VISIBLE); showFacts(a, id, firestoreGroupId, groupData, g, me, facts, actions); });
-                loadMembers(a, id, count -> a.runOnUiThread(() -> compare(a, id, firestoreGroupId, groupData, g, count, me, actions)));
+                a.runOnUiThread(() -> { factsLoading.setVisibility(View.GONE); facts.view().setVisibility(View.VISIBLE); showFacts(a, id, firestoreGroupId, groupData, g, me, facts, actions); });
+                loadMembers(a, id, count -> a.runOnUiThread(() -> compare(a, id, firestoreGroupId, groupData, g, count, me, facts, actions)));
             }
-            @Override public void onError(String e) { a.runOnUiThread(() -> { factsLoading.setVisibility(View.GONE); facts.setVisibility(View.VISIBLE); facts.setText("Could not read the network right now. Pull to refresh later."); }); }
+            @Override public void onError(String e) { a.runOnUiThread(() -> { factsLoading.setVisibility(View.GONE); facts.view().setVisibility(View.VISIBLE); facts.clear().row("Network", "Not reachable", UiColors.warning()); }); }
         };
         if ("CIRCLE".equals(id.family)) NodeGroupClient.getCircle(id.protocolId(), onGroup);
         else if ("ACCUM".equals(id.family)) NodeGroupClient.getAccumGroup(id.protocolId(), onGroup);
@@ -118,19 +114,18 @@ public final class NodeSettingsPanel {
     private static final java.util.Map<String, String> FACTS_CACHE = new java.util.HashMap<>();
 
     private static void showFacts(Activity a, GroupIdentity id, String fsId, Map<String, Object> profile, Map<String, Object> g, String me,
-                                  TextView facts, LinearLayout actions) {
+                                  InfoTable facts, LinearLayout actions) {
         String state = str(g.get("state"), str(g.get("status"), "—"));
         String admin = str(g.get("creatorAddress"), "—");
         String escrow = str(g.get("escrowAddress"), "—");
         StringBuilder b = new StringBuilder();
-        b.append("Network id  ").append(id.protocolId());
-        b.append("\nKind  ").append(familyName(id.family));
-        b.append("\nState  ").append(state);
-        if (g.get("disbursementRule") != null) b.append("\nHow money leaves  ").append(String.valueOf(g.get("disbursementRule")).replace('_', ' ').toLowerCase());
-        b.append("\nGroup wallet  ").append(short_(escrow));
-        b.append("\nAdmin  ").append(short_(admin)).append(admin.equalsIgnoreCase(me) ? " (you)" : "");
-        facts.setText(b.toString());
-        facts.setTypeface(Typeface.MONOSPACE);
+        line(b, "Network id", id.protocolId());
+        line(b, "Kind", familyName(id.family));
+        line(b, "State", state);
+        if (g.get("disbursementRule") != null) line(b, "Money leaves", String.valueOf(g.get("disbursementRule")).replace('_', ' ').toLowerCase());
+        line(b, "Group wallet", short_(escrow));
+        line(b, "Admin", short_(admin) + (admin.equalsIgnoreCase(me) ? " (you)" : ""));
+        fill(facts, b.toString());
         FACTS_CACHE.put(id.protocolId(), b.toString());
         actions.removeAllViews();
         actions.addView(button(a, "Copy network id", false, v -> NodePayActions.copyId(a, id.protocolId())));
@@ -145,19 +140,14 @@ public final class NodeSettingsPanel {
 
     /** Compares the profile with the network and, for the admin, brings the profile up to date. */
     private static void compare(Activity a, GroupIdentity id, String fsId, Map<String, Object> profile, Map<String, Object> g, int networkMembers,
-                                String me, LinearLayout actions) {
+                                String me, InfoTable facts, LinearLayout actions) {
         if (networkMembers < 0) return;
         Object fs = profile.get("membersCount");
         int profileMembers = fs instanceof Number ? ((Number) fs).intValue() : -1;
         boolean admin = str(g.get("creatorAddress"), "").equalsIgnoreCase(me);
-        TextView line = text(a, "", 12.5f, false, UiColors.textSecondary());
-        line.setPadding(0, dp(a, 8), 0, 0);
         boolean differs = profileMembers != networkMembers;
-        line.setText(differs
-                ? "Out of step: the profile says " + (profileMembers < 0 ? "no member count" : profileMembers + " members")
-                    + ", the network says " + networkMembers + "."
-                : "In step: the profile and the network agree on " + networkMembers + " members.");
-        actions.addView(line);
+        facts.row("Members", networkMembers + (differs ? "  ·  app " + (profileMembers < 0 ? "—" : String.valueOf(profileMembers)) : "  ·  in step"),
+                differs ? UiColors.warning() : UiColors.success());
         if (differs && admin) {
             actions.addView(button(a, "Update the profile from the network", false, v -> {
                 Map<String, Object> patch = new HashMap<>();
@@ -166,51 +156,75 @@ public final class NodeSettingsPanel {
                 if (g.get("raisedAmountRaw") instanceof Number) patch.put("raisedAmountRaw", ((Number) g.get("raisedAmountRaw")).longValue());
                 if (g.get("escrowAddress") != null) patch.put("groupWalletAddress", String.valueOf(g.get("escrowAddress")));
                 GroupFirestoreManager.getInstance(a).updateGroupFields(fsId, patch, new GroupFirestoreManager.SimpleCallback() {
-                    @Override public void onSuccess() { a.runOnUiThread(() -> { Toast.makeText(a, "Profile updated from the network.", Toast.LENGTH_SHORT).show(); line.setText("In step."); }); }
+                    @Override public void onSuccess() { a.runOnUiThread(() -> Toast.makeText(a, "Profile updated from the network.", Toast.LENGTH_SHORT).show()); }
                     @Override public void onError(String e) { a.runOnUiThread(() -> Toast.makeText(a, "Could not update the profile: " + e, Toast.LENGTH_LONG).show()); }
                 });
             }));
         }
     }
 
-    // ── rules text ─────────────────────────────────────────────────────────
+    // ── rows ───────────────────────────────────────────────────────────────
 
-    static String rulesText(String family) {
-        String common = "When a vote is needed, the admin counts for 40% (shared with the treasurer if there is one, the admin always holding more) and the other members share 60% (the five who have put in the most, or everyone if fewer). "
-                + "A vote passes at 51% yes, with at least two yes votes and one of them from someone other than the person who asked. "
-                + "Only members who have paid in at least once and joined 48 hours ago can vote, and the voters are fixed when the vote starts. "
-                + "You can change your vote until it is decided.";
-        String starts;
-        if ("FIXED".equals(family)) {
-            starts = "What starts a vote:\n"
-                    + "• Admin asks for a payout (rule: admin asks, the group votes).\n"
-                    + "• Admin asks for a milestone release (rule: milestones).\n"
-                    + "• A member asks for an emergency grant (rule: emergency grants).\n"
-                    + "• Someone takes over from an admin who is gone (admin recovery).\n"
-                    + "With the all-at-once rule nobody votes: the whole pot goes to the wallet chosen when the group was created, when the goal is reached.\n"
-                    + "The admin's request counts as the admin's yes vote.";
-        } else if ("ACCUM".equals(family)) {
-            starts = "What starts a decision:\n"
-                    + "• A member asks to take their savings out early. The admin alone approves or not, and the network pays it out when they approve.\n"
-                    + "• Someone takes over from an admin who is gone (admin recovery, a vote).\n"
-                    + "Nothing else needs a vote.";
-        } else {
-            starts = "What starts a decision:\n"
-                    + "• Nothing about money is voted. Each round's payout goes to the next member on the schedule, and bonds cover missed payments.\n"
-                    + "• Someone takes over from an admin who is gone (admin recovery, a vote).";
+    /** A table inside a card (the card already has the padding and the fill). */
+    private static InfoTable table(Activity a) {
+        InfoTable t = new InfoTable(a);
+        t.view().setPadding(0, dp(a, 4), 0, 0);
+        t.view().setBackground(null);
+        return t;
+    }
+
+    private static void line(StringBuilder b, String label, String value) {
+        if (b.length() > 0) b.append('\n');
+        b.append(label).append('\t').append(value);
+    }
+
+    /** Rows from "label\tvalue" lines (the form kept in the cache). */
+    private static void fill(InfoTable t, String lines) {
+        t.clear();
+        for (String l : lines.split("\n")) {
+            int tab = l.indexOf('\t');
+            if (tab > 0) t.row(l.substring(0, tab), l.substring(tab + 1));
         }
-        return starts + "\n\n" + common;
+    }
+
+    /** Who votes and what starts a vote, as rows. */
+    static InfoTable rulesTable(Activity a, String family) {
+        InfoTable t = table(a);
+        t.section("Starts a vote");
+        if ("FIXED".equals(family)) {
+            t.row("Payout", "Admin asks · group votes");
+            t.row("Milestone release", "Admin asks · group votes");
+            t.row("Emergency grant", "Member asks · group votes");
+            t.row("All at once", "No vote · paid at goal");
+            t.row("Admin's request", "Counts as admin's yes");
+        } else if ("ACCUM".equals(family)) {
+            t.row("Early withdrawal", "Admin approves · no vote");
+        } else {
+            t.row("Payouts", "No vote · by schedule");
+            t.row("Missed payment", "Covered by bonds");
+        }
+        t.row("Admin recovery", "Vote · 14 days");
+        t.section("Weights");
+        t.row("Admin", "40% (shared with treasurer)");
+        t.row("Members", "60% · top 5 by deposits");
+        t.section("Passing");
+        t.row("Yes needed", "51%");
+        t.row("Yes votes", "2 or more, one not the asker");
+        t.row("Voters", "Paid in once · joined 48 h+");
+        t.row("Voter list", "Fixed when the vote starts");
+        t.row("Changing a vote", "Until decided");
+        return t;
     }
 
     // ── admin recovery ─────────────────────────────────────────────────────
 
     private static void showRecovery(Activity a, GroupIdentity id, LinearLayout box, Map<String, Object> rec, String me) {
-        TextView info = text(a, "", 12.5f, false, UiColors.textSecondary());
-        box.addView(info);
+        InfoTable info = table(a);
+        box.addView(info.view());
         boolean pending = rec != null && "PENDING".equals(String.valueOf(rec.get("status")));
         if (!pending) {
-            info.setText("Use this only if the admin is gone or has lost their phone. A member asks to take over, and the voters decide. "
-                    + "The vote lasts 14 days.");
+            info.row("Open request", "None");
+            info.row("Vote length", "14 days");
             box.addView(button(a, "Ask to take over as admin", false, v -> PinPromptHelper.authorize(a, "Ask to become this group's admin", () ->
                     NodeGroupClient.requestAdminRecovery(a, me, id.protocolId(), me, done(a, "Your request is open. The voters decide.")))));
             return;
@@ -227,8 +241,9 @@ public final class NodeSettingsPanel {
                 if (String.valueOf(e.getKey()).equalsIgnoreCase(me)) eligible = true;
             }
         }
-        info.setText(short_(next) + " asked to become admin. Yes " + (total == 0 ? 0 : yes * 100 / total) + "% of the vote, 51% needed. "
-                + (eligible ? "You can vote." : "You are not one of the voters."));
+        info.row("Asked to be admin", short_(next));
+        info.row("Yes", (total == 0 ? 0 : yes * 100 / total) + "% of 51%");
+        info.row("You", eligible ? "Can vote" : "Not a voter");
         if (eligible) {
             box.addView(button(a, "Vote yes", true, v -> PinPromptHelper.authorize(a, "Vote to change this group's admin", () ->
                     NodeGroupClient.voteAdminRecovery(a, me, id.protocolId(), true, done(a, "Voted yes")))));

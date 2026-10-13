@@ -2,6 +2,14 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Group settings: rows, whole icons
+
+- Network control is a table: Network id, Kind, State, Money leaves, Group wallet, Admin, and Members (green "in step", or amber with the app's count when the two differ). The explanation paragraph is gone.
+- "Who decides" is now "Votes", in rows grouped as Starts a vote, Weights and Passing.
+- Admin recovery, Invite, Members, Treasurer and Leave cards are rows. Their paragraphs are gone, and so are the sentences under the goal, savings and rotating fields and on Close or delete.
+- Icons on every Group settings tab and Create group page sit whole and centred in a round bubble, no longer cropped (`utils/IconFit`).
+- The duplicate Loans card (it showed on every section) sits only under Money & rules (fixed in b94b20d).
+
 ## 13 Oct 2026 — Create group: one fragment per page
 
 - The create-group wizard (rotating, savings, goal) shows each page as its own fragment, in `group/create/`:

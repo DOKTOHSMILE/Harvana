@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Payout to a wallet you choose
+
+- Claim savings and Withdraw bond first ask "Pay to": any wallet on your account (named as on this phone, the one in use marked). Then the usual review, and PIN or fingerprint.
+- The choice is recorded with the group on the network (`NodeGroupClient.setPayoutWallet`, signed `HARVANA_PAYOUT_WALLET_V1:{groupId}:{address}:{payoutWallet}:{nonce}`). The group then pays you there: the claim, a rotating round's payout, and a bond back.
+- The network accepts only your own linked wallets. With one wallet nothing is asked.
+- Needs the node update of the same day (`/api/v1/group-roles/payout-wallet`). On an older node the payout goes to the wallet in use.
+
 ## 13 Oct 2026 — Closed groups
 
 - A closed group leaves My groups (it is under Filter → Closed groups) and Discover. It stops counting in Home's Active groups and Total saved.

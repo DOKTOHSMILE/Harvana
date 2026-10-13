@@ -22,6 +22,11 @@ public final class GroupCanonical {
     }
 
     /** The creator changing a group's coin; {@code amountRaw} is the new contribution or goal in that coin, 0 keeps it. */
+    /** A member choosing which of their wallets the group pays them into (node GroupPayoutWalletRequest). */
+    public static String payoutWallet(String groupId, String address, String payoutWallet, long nonce) {
+        return "HARVANA_PAYOUT_WALLET_V1:" + groupId + ":" + address + ":" + payoutWallet + ":" + nonce;
+    }
+
     public static String groupCoin(String groupId, String address, String asset, long amountRaw, long nonce) {
         return "HARVANA_GROUP_COIN_V1:" + groupId + ":" + address + ":" + asset + ":" + amountRaw + ":" + nonce;
     }

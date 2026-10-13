@@ -53,9 +53,9 @@ public final class NodePayActions {
                         () -> NodeGroupClient.contributeCircle(c.activity, c.me, c.nodeId, result(c, "Payment sent")));
                 break;
             case GroupAction.WITHDRAW_BOND:
-                pay(c, "Withdraw bond", gm(c, bondOf(c)),
-                        moneyRows(c, "Your wallet", "Returned only if this group allows it"),
-                        () -> NodeGroupClient.withdrawCircleBond(c.activity, c.me, c.nodeId, result(c, "Bond withdrawal requested")));
+                choosePayoutWallet(c, to -> pay(c, "Withdraw bond", gm(c, bondOf(c)),
+                        moneyRows(c, shortWallet(to), "Returned only if this group allows it"),
+                        () -> thenPayTo(c, to, () -> NodeGroupClient.withdrawCircleBond(c.activity, c.me, c.nodeId, result(c, "Bond withdrawal requested")))));
                 break;
             case GroupAction.START_LINE: startLine(c); break;
             case GroupAction.ACCUM_CONTRIBUTE:
@@ -71,9 +71,9 @@ public final class NodePayActions {
                                 GroupProposalIndex.PACK, a.ref, "Withdrawal request", "")));
                 break;
             case GroupAction.ACCUM_CLAIM:
-                pay(c, "Claim savings", lineMoney(c, c.line == null ? 0 : num(c.line, "amountPaidRaw")),
-                        moneyRows(c, "Your wallet", "Pays your savings line out to you"),
-                        () -> NodeGroupClient.claimAccumLine(c.activity, c.me, c.nodeId, a.ref, result(c, "Savings claimed")));
+                choosePayoutWallet(c, to -> pay(c, "Claim savings", lineMoney(c, c.line == null ? 0 : num(c.line, "amountPaidRaw")),
+                        moneyRows(c, shortWallet(to), "Pays your savings line out to you"),
+                        () -> thenPayTo(c, to, () -> NodeGroupClient.claimAccumLine(c.activity, c.me, c.nodeId, a.ref, result(c, "Savings claimed")))));
                 break;
             case GroupAction.ACCUM_APPROVE_PACK:
                 pay(c, "Approve withdrawal", a.label, moneyRows(c, "Member wallet", "Sends this member's savings out of the group"),
@@ -273,6 +273,73 @@ public final class NodePayActions {
         pay(c, dates.size() == 1 ? "Pay " + dates.get(0) : "Pay " + dates.size() + " days", lineMoney(c, total),
                 moneyRows(c, escrow(c), android.text.TextUtils.join(", ", dates) + " · " + lineMoney(c, dailyRaw) + " a day"),
                 () -> NodeGroupClient.backpayAccum(c.activity, c.me, c.nodeId, lineId, dates, result(c, "Paid back. It shows once the network confirms it.")));
+    }
+
+    interface WalletChoice { void chosen(String wallet); }
+
+    /**
+     * Where the group sends the member's money: they pick one of their own wallets (the ones on their account). With one
+     * wallet there is nothing to pick. The network accepts only the member's own wallets.
+     */
+    static void choosePayoutWallet(Ctx c, WalletChoice then) {
+        com.harvana.app.sync.NodeIdentityClient.myWallets(new com.harvana.app.sync.NodeIdentityClient.Callback() {
+            @Override public void onSuccess(JSONObject j) {
+                org.json.JSONArray ws = j == null ? null : j.optJSONArray("wallets");
+                java.util.List<String> mine = new java.util.ArrayList<>();
+                for (int i = 0; ws != null && i < ws.length(); i++) {
+                    JSONObject w = ws.optJSONObject(i);
+                    String a = w == null ? "" : w.optString("address", "");
+                    if (!a.isEmpty() && !mine.contains(a)) mine.add(a);
+                }
+                c.activity.runOnUiThread(() -> pickFrom(c, mine, then));
+            }
+            @Override public void onError(String e) { c.activity.runOnUiThread(() -> then.chosen(c.me)); }   // older network: the wallet in use
+        });
+    }
+
+    private static void pickFrom(Ctx c, java.util.List<String> mine, WalletChoice then) {
+        if (c.activity.isFinishing()) return;
+        if (mine.size() <= 1) { then.chosen(c.me); return; }
+        String[] labels = new String[mine.size()];
+        int sel = 0;
+        for (int i = 0; i < labels.length; i++) {
+            String a = mine.get(i);
+            String name = "";
+            for (com.harvana.app.wallet.WalletListManager.WalletEntry e : com.harvana.app.wallet.WalletListManager.getWalletList(c.activity)) {
+                if (e != null && a.equalsIgnoreCase(e.address) && e.label != null) name = e.label;
+            }
+            labels[i] = (name.isEmpty() ? "" : name + " · ") + shortWallet(a) + (a.equalsIgnoreCase(c.me) ? " · in use" : "");
+            if (a.equalsIgnoreCase(c.me)) sel = i;
+        }
+        final int[] picked = {sel};
+        new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle("Pay to")
+                .setSingleChoiceItems(labels, sel, (d, which) -> picked[0] = which)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Continue", (d, w) -> then.chosen(mine.get(picked[0])))
+                .show();
+    }
+
+    /** Records the chosen wallet with the group (when it is not already where the group pays), then does the work. */
+    static void thenPayTo(Ctx c, String to, Runnable work) {
+        NodeGroupClient.getPayoutWallet(c.nodeId, c.me, new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject now) {
+                if (to.equalsIgnoreCase(now == null ? "" : now.optString("payoutWallet", ""))) { work.run(); return; }
+                set();
+            }
+            @Override public void onError(String e) {
+                if (to.equalsIgnoreCase(c.me)) work.run(); else set();
+            }
+            private void set() {
+                NodeGroupClient.setPayoutWallet(c.activity, c.me, c.nodeId, to, new NodeGroupClient.Callback() {
+                    @Override public void onSuccess(JSONObject json) { work.run(); }
+                    @Override public void onError(String e) { result(c, "").onError(e); }
+                });
+            }
+        });
+    }
+
+    static String shortWallet(String a) {
+        return a == null || a.length() <= 14 ? String.valueOf(a) : a.substring(0, 8) + "\u2026" + a.substring(a.length() - 4);
     }
 
     static void pay(Ctx c, String title, String amount, java.util.List<String[]> rows, Runnable work) {

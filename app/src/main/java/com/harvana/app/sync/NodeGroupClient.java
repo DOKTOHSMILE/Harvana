@@ -275,6 +275,21 @@ public final class NodeGroupClient {
         }, cb);
     }
 
+    /** The member chooses which of their own wallets this group pays them into (payouts, a claim, a bond back). */
+    public static void setPayoutWallet(Context c, String member, String groupId, String payoutWallet, Callback cb) {
+        act(c, member, "/api/v1/group-roles/payout-wallet", new Spec() {
+            public String canonical(long n) { return com.harvana.app.chain.GroupCanonical.payoutWallet(groupId, member, payoutWallet, n); }
+            public void fill(JSONObject b, long n) throws JSONException {
+                b.put("groupId", groupId).put("address", member).put("payoutWallet", payoutWallet);
+            }
+        }, cb);
+    }
+
+    /** Where this group pays the member now: {memberWallet, payoutWallet}. */
+    public static void getPayoutWallet(String groupId, String address, Callback cb) {
+        read("/api/v1/group-roles/payout-wallet/" + groupId + "/" + address, cb);
+    }
+
     /** The admin names a member as treasurer, or clears the role with an empty address. */
     public static void setTreasurer(Context c, String admin, String groupId, String treasurer, Callback cb) {
         act(c, admin, "/api/v1/group-roles/treasurer", new Spec() {

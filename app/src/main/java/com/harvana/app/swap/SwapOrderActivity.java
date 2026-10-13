@@ -1,11 +1,7 @@
 package com.harvana.app.swap;
 
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,7 +25,6 @@ public class SwapOrderActivity extends AppCompatActivity {
 
     public static final String EXTRA_ID = "orderId";
     private String id;
-    private LinearLayout root;
     private final android.os.Handler ui = new android.os.Handler(android.os.Looper.getMainLooper());
     private final Runnable poll = this::load;
 
@@ -37,13 +32,7 @@ public class SwapOrderActivity extends AppCompatActivity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         id = getIntent() == null ? null : getIntent().getStringExtra(EXTRA_ID);
-        ScrollView sv = new ScrollView(this);
-        sv.setBackgroundColor(UiColors.background());
-        root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(16), dp(16), dp(16), dp(24));
-        sv.addView(root);
-        AppBar.setContent(this, sv, "Swap", "Transaction record");
+        AppBar.setContent(this, com.harvana.app.R.layout.activity_swap_order, "Swap", "Transaction record");
         load();
     }
 
@@ -54,23 +43,27 @@ public class SwapOrderActivity extends AppCompatActivity {
         NodeGroupClient.swapOrder(id, new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject o) { runOnUiThread(() -> show(o)); }
             @Override public void onError(String e) { runOnUiThread(() -> {
-                root.removeAllViews();
-                root.addView(text(com.harvana.app.utils.ErrorText.plain(e), 14, false, UiColors.textSecondary()));
+                TextView err = findViewById(com.harvana.app.R.id.tv_swap_order_error);
+                err.setText(com.harvana.app.utils.ErrorText.plain(e));
+                err.setVisibility(android.view.View.VISIBLE);
             }); }
         });
     }
 
     private void show(JSONObject o) {
         if (isFinishing()) return;
-        root.removeAllViews();
         String kind = o.optString("kind"), status = o.optString("status");
+        findViewById(com.harvana.app.R.id.tv_swap_order_error).setVisibility(android.view.View.GONE);
+        findViewById(com.harvana.app.R.id.swap_order_content).setVisibility(android.view.View.VISIBLE);
+        LinearLayout figures = findViewById(com.harvana.app.R.id.swap_order_figures), txBox = findViewById(com.harvana.app.R.id.swap_order_txs);
+        figures.removeAllViews();
+        txBox.removeAllViews();
 
         // Headline: the action and its status.
-        TextView title = text(title(o), 20, true, UiColors.textPrimary());
-        root.addView(title);
-        TextView st = text(statusText(status), 13, true, statusColor(status));
-        st.setPadding(0, dp(4), 0, dp(12));
-        root.addView(st);
+        ((TextView) findViewById(com.harvana.app.R.id.tv_swap_order_title)).setText(title(o));
+        TextView st = findViewById(com.harvana.app.R.id.tv_swap_order_status);
+        st.setText(statusText(status));
+        st.setTextColor(statusColor(status));
 
         InfoTable t = new InfoTable(this);
         if ("SWAP".equals(kind)) {
@@ -116,12 +109,9 @@ public class SwapOrderActivity extends AppCompatActivity {
          .row("Started", android.text.format.DateFormat.format("d MMM yyyy, HH:mm", o.optLong("at")))
          .row("Finished", o.has("doneAt") ? android.text.format.DateFormat.format("d MMM yyyy, HH:mm", o.optLong("doneAt")) : "Waiting for blocks")
          .row("Order", shortHash(o.optString("orderId")));
-        root.addView(t.view());
+        figures.addView(t.view());
 
         // Every transaction, each opening in the explorer.
-        TextView tx = text("Transactions", 15, true, UiColors.textPrimary());
-        tx.setPadding(dp(4), dp(18), 0, dp(6));
-        root.addView(tx);
         InfoTable txs = new InfoTable(this);
         addTx(txs, "tFare", o.optString("fareTx"));
         addTx(txs, "In", o.optString("inTx"));
@@ -129,7 +119,7 @@ public class SwapOrderActivity extends AppCompatActivity {
         addTx(txs, "Out", o.optString("outTx"));
         addTx(txs, "Coin out", o.optString("coinOutTx"));
         addTx(txs, "Sent back", o.optString("refundTx"));
-        root.addView(txs.view());
+        txBox.addView(txs.view());
 
         ui.removeCallbacks(poll);
         if ("PENDING".equals(status)) ui.postDelayed(poll, 10_000);
@@ -191,15 +181,4 @@ public class SwapOrderActivity extends AppCompatActivity {
     }
 
     private static String shortHash(String h) { return h == null || h.length() < 16 ? String.valueOf(h) : h.substring(0, 10) + "…" + h.substring(h.length() - 6); }
-
-    private TextView text(String s, float sp, boolean bold, int color) {
-        TextView t = new TextView(this);
-        t.setText(s);
-        t.setTextSize(sp);
-        t.setTextColor(color);
-        if (bold) t.setTypeface(null, Typeface.BOLD);
-        return t;
-    }
-
-    private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
 }

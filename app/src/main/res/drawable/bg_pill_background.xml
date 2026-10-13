@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A pill on the page background colour (coin pickers on a card). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+	<solid android:color="@color/colorBackground" />
+	<corners android:radius="20dp" />
+</shape>

@@ -10,6 +10,7 @@
 - Open loans (`item_open_loan.xml`: figures as table rows in the group's coin, coin logo), Devices (`activity_devices.xml`, `item_device.xml`), Profile settings (`activity_profile_settings.xml`, rows with icons), Profile privacy (`activity_profile_privacy.xml`), My QR code (`activity_profile_qr.xml`).
 - About (`activity_about.xml`), Verify email (`activity_verify_email.xml`), Group wallet backup (`activity_group_wallet_backup.xml`), Crash screen (`activity_debug.xml`), Picture viewer (`activity_image_viewer.xml`), Crop picture (`activity_crop_image.xml`). New layouts use the app's button styles (`HarvanaButton`, `.Tonal`, `.Outlined`).
 - Choose asset (`activity_pick_asset.xml`, `item_pick_asset.xml`), Explorer (`activity_explorer.xml`, `activity_explorer_waiting.xml`), browser find bar (`view_find_bar.xml`) and buttons (`view_browser_bar.xml`), Web3 page (`activity_discover.xml`, `view_web3_home.xml`, `item_web3_site.xml`, `item_web3_chip.xml`).
+- Swap (`activity_swap.xml`, `item_swap_order.xml`, `item_swap_pool.xml`) and the swap record (`activity_swap_order.xml`).
 
 ## 13 Oct 2026 — Group coin everywhere; 50dp table rows
 

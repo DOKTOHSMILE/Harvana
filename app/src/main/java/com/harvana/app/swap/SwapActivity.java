@@ -1,19 +1,15 @@
 package com.harvana.app.swap;
 
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -77,86 +73,26 @@ public class SwapActivity extends AppCompatActivity {
         }
         assets.add(HARV);
 
-        ScrollView sv = new ScrollView(this);
-        sv.setBackgroundColor(UiColors.background());
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(16), dp(16), dp(16), dp(24));
-        sv.addView(root);
-
-        // You pay
-        LinearLayout pay = card();
-        pay.addView(text("You pay", 13, false, UiColors.textSecondary()));
-        LinearLayout payRow = new LinearLayout(this);
-        payRow.setGravity(Gravity.CENTER_VERTICAL);
-        etAmount = new EditText(this);
-        etAmount.setHint("0");
-        etAmount.setTextSize(26);
-        etAmount.setTypeface(null, Typeface.BOLD);
-        etAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        etAmount.setSingleLine(true);
-        etAmount.setBackground(null);
-        payRow.addView(etAmount, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        LinearLayout chipFrom = chip(true);
-        payRow.addView(chipFrom);
-        pay.addView(payRow);
-        LinearLayout balRow = new LinearLayout(this);
-        tvFromBal = text("Balance: …", 12, false, UiColors.textTertiary());
-        balRow.addView(tvFromBal, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView max = text("Max", 13, true, UiColors.accent());
-        max.setOnClickListener(v -> { if (fromBalance > 0) etAmount.setText(plain(from, fromBalance)); });
-        balRow.addView(max);
-        pay.addView(balRow);
-        root.addView(pay);
-
-        // flip
-        TextView flip = text("⇅", 22, true, UiColors.accent());
-        flip.setGravity(Gravity.CENTER);
-        flip.setPadding(0, dp(4), 0, dp(4));
-        flip.setContentDescription("Swap the two sides");
-        flip.setOnClickListener(v -> { String f = from; from = to; to = f; sidesChanged(); });
-        root.addView(flip);
-
-        // You get
-        LinearLayout get = card();
-        get.addView(text("You get (estimate)", 13, false, UiColors.textSecondary()));
-        LinearLayout getRow = new LinearLayout(this);
-        getRow.setGravity(Gravity.CENTER_VERTICAL);
-        tvOut = text("0", 26, true, UiColors.textPrimary());
-        getRow.addView(tvOut, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        getRow.addView(chip(false));
-        get.addView(getRow);
-        root.addView(get);
-
-        tvDetails = text("", 12, false, UiColors.warning());          // only for a problem (empty pool, …)
-        tvDetails.setPadding(dp(6), dp(10), dp(6), dp(4));
-        root.addView(tvDetails);
+        AppBar.setContent(this, R.layout.activity_swap, "Swap", "HARV and the Harvana coins");
+        etAmount = findViewById(R.id.et_swap_amount);
+        ivFrom = findViewById(R.id.iv_swap_from);
+        tvFrom = findViewById(R.id.tv_swap_from);
+        ivTo = findViewById(R.id.iv_swap_to);
+        tvTo = findViewById(R.id.tv_swap_to);
+        findViewById(R.id.swap_chip_from).setOnClickListener(v -> pick(true));
+        findViewById(R.id.swap_chip_to).setOnClickListener(v -> pick(false));
+        tvFromBal = findViewById(R.id.tv_swap_balance);
+        findViewById(R.id.tv_swap_max).setOnClickListener(v -> { if (fromBalance > 0) etAmount.setText(plain(from, fromBalance)); });
+        findViewById(R.id.iv_swap_flip).setOnClickListener(v -> { String f = from; from = to; to = f; sidesChanged(); });
+        tvOut = findViewById(R.id.tv_swap_out);
+        tvDetails = findViewById(R.id.tv_swap_problem);          // only for a problem (empty pool, …)
         details = new com.harvana.app.utils.InfoTable(this);
-        LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        dlp.topMargin = dp(4);
-        root.addView(details.view(), dlp);
+        ((LinearLayout) findViewById(R.id.swap_details)).addView(details.view());
         details.view().setVisibility(View.GONE);
-
-        btnSwap = new MaterialButton(this);
-        btnSwap.setText("Swap");
-        btnSwap.setAllCaps(false);
-        btnSwap.setEnabled(false);
+        btnSwap = findViewById(R.id.btn_swap);
         btnSwap.setOnClickListener(v -> review());
-        LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
-        blp.topMargin = dp(8);
-        root.addView(btnSwap, blp);
-
-        TextView yt = text("Your swaps", 15, true, UiColors.textPrimary());
-        yt.setPadding(dp(4), dp(22), 0, dp(6));
-        root.addView(yt);
-        swapsList = card();
-        root.addView(swapsList);
-
-        TextView pt = text("Pools", 15, true, UiColors.textPrimary());
-        pt.setPadding(dp(4), dp(22), 0, dp(6));
-        root.addView(pt);
-        poolList = card();
-        root.addView(poolList);
+        swapsList = findViewById(R.id.swap_orders);
+        poolList = findViewById(R.id.swap_pools);
 
         etAmount.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b2, int c) { }
@@ -164,7 +100,6 @@ public class SwapActivity extends AppCompatActivity {
             @Override public void afterTextChanged(Editable s) { ui.removeCallbacks(requote); ui.postDelayed(requote, 350); }
         });
 
-        AppBar.setContent(this, sv, "Swap", "HARV and the Harvana coins");
         sidesChanged();
         loadPools();
     }
@@ -188,7 +123,7 @@ public class SwapActivity extends AppCompatActivity {
             }); }
             @Override public void onError(String e) { runOnUiThread(() -> {
                 poolList.removeAllViews();
-                poolList.addView(text(com.harvana.app.utils.ErrorText.plain(e), 13, false, UiColors.textTertiary()));
+                poolList.addView(line(com.harvana.app.utils.ErrorText.plain(e)));
             }); }
         });
         if (address == null || address.isEmpty()) return;
@@ -207,26 +142,24 @@ public class SwapActivity extends AppCompatActivity {
             @Override public void onSuccess(JSONObject r) { runOnUiThread(() -> showSwaps(r.optJSONArray("orders"))); }
             @Override public void onError(String e) { runOnUiThread(() -> {
                 swapsList.removeAllViews();
-                swapsList.addView(text(com.harvana.app.utils.ErrorText.plain(e), 13, false, UiColors.textTertiary()));
+                swapsList.addView(line(com.harvana.app.utils.ErrorText.plain(e)));
             }); }
         });
     }
 
     private void showSwaps(JSONArray arr) {
         swapsList.removeAllViews();
-        if (arr == null || arr.length() == 0) { swapsList.addView(text("No swaps yet.", 13, false, UiColors.textTertiary())); return; }
+        if (arr == null || arr.length() == 0) { swapsList.addView(line("No swaps yet.")); return; }
         for (int i = 0; i < Math.min(arr.length(), 10); i++) {
             JSONObject o = arr.optJSONObject(i);
             if (o == null) continue;
-            LinearLayout row = new LinearLayout(this);
-            row.setGravity(Gravity.CENTER_VERTICAL);
-            row.setPadding(0, dp(8), 0, dp(8));
-            TextView left = text(SwapOrderActivity.title(o) + "\n" + android.text.format.DateUtils.getRelativeTimeSpanString(o.optLong("at")),
-                    13, false, UiColors.textPrimary());
-            row.addView(left, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            View row = getLayoutInflater().inflate(R.layout.item_swap_order, swapsList, false);
+            ((TextView) row.findViewById(R.id.tv_swap_order_name)).setText(SwapOrderActivity.title(o));
+            ((TextView) row.findViewById(R.id.tv_swap_order_when)).setText(android.text.format.DateUtils.getRelativeTimeSpanString(o.optLong("at")));
             String st = o.optString("status");
-            TextView badge = text(SwapOrderActivity.statusText(st), 12, true, SwapOrderActivity.statusColor(st));
-            row.addView(badge);
+            TextView badge = row.findViewById(R.id.tv_swap_order_badge);
+            badge.setText(SwapOrderActivity.statusText(st));
+            badge.setTextColor(SwapOrderActivity.statusColor(st));
             row.setOnClickListener(v -> startActivity(new android.content.Intent(this, SwapOrderActivity.class)
                     .putExtra(SwapOrderActivity.EXTRA_ID, o.optString("orderId"))));
             swapsList.addView(row);
@@ -373,35 +306,34 @@ public class SwapActivity extends AppCompatActivity {
     private void showPools() {
         poolList.removeAllViews();
         if (pools.length() == 0) {
-            poolList.addView(text("No coin is switched on yet.", 13, false, UiColors.textTertiary()));
+            poolList.addView(line("No coin is switched on yet."));
             return;
         }
         for (int i = 0; i < pools.length(); i++) {
             JSONObject p = pools.optJSONObject(i);
             if (p == null) continue;
             String code = p.optString("asset");
-            LinearLayout row = new LinearLayout(this);
-            row.setGravity(Gravity.CENTER_VERTICAL);
-            row.setPadding(0, dp(8), 0, dp(8));
-            ImageView ic = new ImageView(this);
-            ic.setImageDrawable(icon(code));
-            row.addView(ic, new LinearLayout.LayoutParams(dp(32), dp(32)));
+            View row = getLayoutInflater().inflate(R.layout.item_swap_pool, poolList, false);
+            ((ImageView) row.findViewById(R.id.iv_swap_pool_coin)).setImageDrawable(icon(code));
             boolean open = p.optBoolean("open");
-            String body = "HARV / " + sym(code) + "\n" + (open
+            ((TextView) row.findViewById(R.id.tv_swap_pool_name)).setText("HARV / " + sym(code));
+            ((TextView) row.findViewById(R.id.tv_swap_pool_amounts)).setText(open
                     ? fmt(HARV, p.optLong("harvRaw")) + " HARV + " + fmt(code, p.optLong("coinRaw")) + " " + sym(code)
                     : "Empty");
             JSONObject my = myPosition(code);
-            if (my != null) body += "\nYours: " + pct(my.optLong("shareBps")) + " = " + fmt(HARV, my.optLong("harvRaw")) + " HARV + "
-                    + fmt(code, my.optLong("coinRaw")) + " " + sym(code);
-            TextView t = text(body, 13, false, UiColors.textPrimary());
-            t.setPadding(dp(10), 0, dp(6), 0);
-            row.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            LinearLayout btns = new LinearLayout(this);
-            btns.setOrientation(LinearLayout.VERTICAL);
-            btns.addView(small(open ? "Add" : "List", () -> com.harvana.app.web3.Web3Home.open(this,
-                    com.harvana.app.web3.Web3Home.SWAP_URL + (open ? "#liquidity" : "#list"))));
-            if (my != null) btns.addView(small("Remove", () -> com.harvana.app.web3.Web3Home.open(this, com.harvana.app.web3.Web3Home.SWAP_URL + "#liquidity")));
-            row.addView(btns);
+            MaterialButton add = row.findViewById(R.id.btn_swap_pool_add);
+            add.setText(open ? "Add" : "List");
+            add.setOnClickListener(v -> com.harvana.app.web3.Web3Home.open(this,
+                    com.harvana.app.web3.Web3Home.SWAP_URL + (open ? "#liquidity" : "#list")));
+            if (my != null) {
+                TextView mineTv = row.findViewById(R.id.tv_swap_pool_mine);
+                mineTv.setText("Yours: " + pct(my.optLong("shareBps")) + " = " + fmt(HARV, my.optLong("harvRaw")) + " HARV + "
+                        + fmt(code, my.optLong("coinRaw")) + " " + sym(code));
+                mineTv.setVisibility(View.VISIBLE);
+                View remove = row.findViewById(R.id.btn_swap_pool_remove);
+                remove.setVisibility(View.VISIBLE);
+                remove.setOnClickListener(v -> com.harvana.app.web3.Web3Home.open(this, com.harvana.app.web3.Web3Home.SWAP_URL + "#liquidity"));
+            }
             poolList.addView(row);
         }
     }
@@ -430,24 +362,6 @@ public class SwapActivity extends AppCompatActivity {
                 }).show();
     }
 
-    private LinearLayout chip(boolean isFrom) {
-        LinearLayout c = new LinearLayout(this);
-        c.setGravity(Gravity.CENTER_VERTICAL);
-        c.setPadding(dp(10), dp(6), dp(12), dp(6));
-        android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
-        g.setCornerRadius(dp(20));
-        g.setColor(UiColors.background());
-        c.setBackground(g);
-        ImageView iv = new ImageView(this);
-        c.addView(iv, new LinearLayout.LayoutParams(dp(24), dp(24)));
-        TextView tv = text("", 15, true, UiColors.textPrimary());
-        tv.setPadding(dp(6), 0, dp(2), 0);
-        c.addView(tv);
-        c.addView(text("▾", 13, false, UiColors.textSecondary()));
-        c.setOnClickListener(v -> pick(isFrom));
-        if (isFrom) { ivFrom = iv; tvFrom = tv; } else { ivTo = iv; tvTo = tv; }
-        return c;
-    }
 
     private android.graphics.drawable.Drawable icon(String code) {
         return HARV.equals(code) ? androidx.core.content.ContextCompat.getDrawable(this, R.drawable.ic_harv_coin) : StableIcon.drawable(this, code);
@@ -493,43 +407,17 @@ public class SwapActivity extends AppCompatActivity {
 
     // ── views ─────────────────────────────────────────────────────────────────
 
-    private LinearLayout card() {
-        LinearLayout c = new LinearLayout(this);
-        c.setOrientation(LinearLayout.VERTICAL);
-        c.setPadding(dp(16), dp(14), dp(16), dp(14));
-        android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
-        g.setCornerRadius(dp(18));
-        g.setColor(UiColors.surface());
-        c.setBackground(g);
-        return c;
-    }
 
-    private EditText field(LinearLayout box, String hint) {
-        EditText e = new EditText(this);
-        e.setHint(hint);
-        e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        e.setSingleLine(true);
-        box.addView(e);
-        return e;
-    }
 
-    private MaterialButton small(String label, Runnable click) {
-        MaterialButton b = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
-        b.setText(label);
-        b.setAllCaps(false);
-        b.setMinWidth(0);
-        b.setMinimumWidth(0);
-        b.setOnClickListener(v -> click.run());
-        return b;
-    }
 
-    private TextView text(String s, float sp, boolean bold, int color) {
-        TextView t = new TextView(this);
+
+    /** A short line in a card (empty list, error): res/layout/item_list_empty.xml. */
+    private TextView line(String s) {
+        TextView t = (TextView) getLayoutInflater().inflate(R.layout.item_list_empty, null, false);
         t.setText(s);
-        t.setTextSize(sp);
-        t.setTextColor(color);
-        if (bold) t.setTypeface(null, Typeface.BOLD);
-        t.setPadding(0, dp(2), 0, dp(2));
+        t.setGravity(android.view.Gravity.START);
+        t.setPadding(0, dp(10), 0, dp(10));
+        t.setTextSize(13);
         return t;
     }
 

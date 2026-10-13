@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Swap record: the action and its status, the figures table, then every transaction (each opens in the explorer). -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:paddingStart="16dp"
+		android:paddingTop="16dp"
+		android:paddingEnd="16dp"
+		android:paddingBottom="24dp">
+
+		<TextView
+			android:id="@+id/tv_swap_order_error"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="14sp"
+			android:visibility="gone" />
+
+		<LinearLayout
+			android:id="@+id/swap_order_content"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:visibility="gone">
+
+			<TextView
+				android:id="@+id/tv_swap_order_title"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="20sp"
+				android:textStyle="bold" />
+
+			<TextView
+				android:id="@+id/tv_swap_order_status"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:paddingTop="4dp"
+				android:paddingBottom="12dp"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+
+			<LinearLayout
+				android:id="@+id/swap_order_figures"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical" />
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:paddingStart="4dp"
+				android:paddingTop="18dp"
+				android:paddingBottom="6dp"
+				android:text="Transactions"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="15sp"
+				android:textStyle="bold" />
+
+			<LinearLayout
+				android:id="@+id/swap_order_txs"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical" />
+		</LinearLayout>
+	</LinearLayout>
+</ScrollView>

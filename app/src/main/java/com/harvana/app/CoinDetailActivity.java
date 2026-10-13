@@ -210,13 +210,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		}
 		
 		btn_receive.setOnClickListener(_v -> {
-			if (stable != null && stable.depositsOpen()) {
-				new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Receive " + stable.sym)
-						.setItems(new String[]{"Harvana address", "Deposit " + stable.reserve()}, (d, w) -> {
-							if (w == 0) _receiveBottomSheet(); else stable.deposit();
-						}).show();
-				return;
-			}
+			if (stable != null) { _receiveBottomSheet(); return; }          // a stable coin is received at the Harvana address
 			if (openCoin != null && !openCoin.nativeHarv) {
 				startActivity(new Intent(CoinDetailActivity.this, ReceiveActivity.class)
 						.putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, openCoin.key)

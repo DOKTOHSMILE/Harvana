@@ -426,6 +426,9 @@ public final class CoinDetailPages {
                 links.add(new String[]{"Official website", "https://harvannaprotocol.com/"});
                 links.add(new String[]{"Harvana Swap", com.harvana.app.web3.Web3Home.SWAP_URL});
             }
+            // Bridge deposits from another chain: shown only once a chain takes them (Receive is the Harvana address only).
+            com.harvana.app.husd.StableActions sa = getActivity() instanceof CoinDetailActivity ? ((CoinDetailActivity) getActivity()).stable() : null;
+            if (st != null && sa != null && sa.depositsOpen()) links.add(new String[]{"Deposit " + sa.reserve(), "deposit:"});
             if (links.isEmpty()) return;
             body.addView(label("MORE INFO"));
             com.google.android.material.chip.ChipGroup g = new com.google.android.material.chip.ChipGroup(requireContext());
@@ -438,6 +441,7 @@ public final class CoinDetailPages {
                 c.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
                 c.setOnClickListener(v -> {
                     if (l[1].isEmpty()) { if (getActivity() instanceof CoinDetailActivity) ((CoinDetailActivity) getActivity()).openExplorer(); }
+                    else if ("deposit:".equals(l[1])) { if (sa != null) sa.deposit(); }
                     else com.harvana.app.web3.Web3Home.open(requireContext(), l[1]);
                 });
                 g.addView(c);

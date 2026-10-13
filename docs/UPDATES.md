@@ -60,6 +60,12 @@ The Bitcoin address shown in the app changes. Testnet coins sent to the old tb1â
 - Receive on a stable coin opens the Harvana address directly while no chain takes deposits; the Deposit choice appears once one does.
 - Bridge, burn and treasury address rows: value and copy icon on the same line as the label.
 
+**Send asset picker:** pasting or scanning an address keeps the chosen coin when the address fits it (a Harvana address fits HARV and every stable coin; a 0x address fits every EVM coin). The stable coins arriving in the list no longer move the selection, and the coin the screen was opened for is applied once only.
+
+**Receive on a stable coin:** one action, the Harvana address. Deposit from another chain is a link under More info, shown only once a chain takes deposits.
+
+**Free transfers:** the "Free transfers left" row shows only while the node still gives them (node: none from `harvana.stable.free-transfers-end-height`).
+
 App build only.
 
 ## 13 Oct 2026: stable coins' contract addresses and "Send to another chain"

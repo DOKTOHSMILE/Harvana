@@ -828,6 +828,7 @@ public class SendAssetActivity extends AppCompatActivity {
 				if (on.isEmpty()) return;
 				runOnUiThread(() -> {
 					if (isFinishing() || walletAssets == null || assetDisplayNames == null) return;
+					final String keep = _selectedKey();          // rows are inserted above it: keep the same coin selected
 					int at = 1;                                   // right after HARV
 					for (String code : on) {
 						boolean have = false;
@@ -862,6 +863,7 @@ public class SendAssetActivity extends AppCompatActivity {
 						});
 					}
 					if (assetAdapter != null) assetAdapter.notifyDataSetChanged();
+					if (keep != null && !keep.equals(_selectedKey())) _selectKey(keep);
 					_selectRequestedAsset();
 				});
 			}
@@ -997,10 +999,31 @@ public class SendAssetActivity extends AppCompatActivity {
 	private void _applyScanned(String raw) {
 		com.harvana.app.scan.WalletQr.Hit hit = com.harvana.app.scan.WalletQr.parse(raw);
 		if (etRecipient != null) etRecipient.setText(hit == null ? (raw == null ? "" : raw.trim()) : hit.address);
-		if (hit != null) {
+		// Keep the chosen coin when the address already fits it: a Harvana address fits HARV and every stable coin,
+		// a 0x address fits every EVM coin. Only an address of another kind changes the coin.
+		if (hit != null && !_sameFamily(_selectedKey(), hit.key)) {
 			pendingCoin = hit.key;
 			_selectKey(hit.key);
 		}
+	}
+
+	private String _selectedKey() {
+		if (spAsset == null || walletAssets == null) return null;
+		int i = spAsset.getSelectedItemPosition();
+		return i >= 0 && i < walletAssets.size() ? String.valueOf(walletAssets.get(i).get("assetKey")) : null;
+	}
+
+	private static String _family(String key) {
+		if (key == null) return "";
+		if ("HARV".equals(key) || com.harvana.app.husd.Stable.isStable(key)) return "HV";
+		switch (key) {
+			case "ETH": case "BNB": case "POL": case "BASE": return "EVM";
+			default: return key;
+		}
+	}
+
+	private static boolean _sameFamily(String a, String b) {
+		return a != null && b != null && _family(a).equals(_family(b));
 	}
 
 	private void _selectKey(String key) {
@@ -1014,10 +1037,18 @@ public class SendAssetActivity extends AppCompatActivity {
 		}
 	}
 
+	/** The coin the screen was opened for, applied once; after that the person's own pick is never changed. */
+	private boolean requestApplied;
+
 	private void _selectRequestedAsset() {
 		if (spAsset == null || walletAssets == null) return;
-		String want = pendingCoin != null ? pendingCoin : getIntent().getStringExtra(com.harvana.app.wallet.CoinCatalog.EXTRA);
-		_selectKey(want);
+		if (pendingCoin != null) { _selectKey(pendingCoin); return; }
+		if (requestApplied) return;
+		String want = getIntent().getStringExtra(com.harvana.app.wallet.CoinCatalog.EXTRA);
+		if (want == null) { requestApplied = true; return; }
+		for (HashMap<String, Object> row : walletAssets) {
+			if (want.equals(String.valueOf(row.get("assetKey")))) { _selectKey(want); requestApplied = true; return; }
+		}
 	}
 
 	private void _showTransferConfirmSheet(TransactionRouter.PreparedTransfer prepared, String symbol) {

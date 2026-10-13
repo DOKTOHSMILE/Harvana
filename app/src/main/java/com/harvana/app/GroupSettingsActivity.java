@@ -67,7 +67,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class GroupSettingsActivity extends AppCompatActivity {
+public class GroupSettingsActivity extends AppCompatActivity implements com.harvana.app.group.GroupSettingsSectionFragment.Host {
 
 	private androidx.coordinatorlayout.widget.CoordinatorLayout _coordinator;
 	private com.google.android.material.appbar.AppBarLayout _app_bar;
@@ -460,6 +460,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		spinWithdrawalRule.setAdapter(new ArrayAdapter<>(this, com.harvana.app.R.layout.spinner_dropdown_item, withdrawalOptions));
 		
 		_setupGroupNotificationToggles();
+		_buildSectionTabs();
 		
 		_loadGroupDoc();
 		
@@ -595,12 +596,67 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		else com.harvana.app.sync.NodeGroupClient.getFixedGroup(gi.protocolId(), got);
 	}
 	
+	/** Each section's page while its fragment's view exists (General, Access, Members, Money & rules, Network, More). */
+	private final LinearLayout[] sectionPages = new LinearLayout[com.harvana.app.group.SettingsSections.NAMES.length];
+	
+	/**
+	 * Tabs over swipeable pages, one fragment per section, in place of the old single scrolling page. The cards are still
+	 * built on that page (linear39, now off screen) and then moved onto their section's page.
+	 */
+	private void _buildSectionTabs() {
+		if (vscroll2 == null || !(vscroll2.getParent() instanceof ViewGroup)) return;
+		ViewGroup parent = (ViewGroup) vscroll2.getParent();
+		int at = parent.indexOfChild(vscroll2);
+		ViewGroup.LayoutParams lp = vscroll2.getLayoutParams();
+		parent.removeView(vscroll2);
+		
+		LinearLayout holder = new LinearLayout(this);
+		holder.setOrientation(LinearLayout.VERTICAL);
+		com.google.android.material.tabs.TabLayout tabs = new com.google.android.material.tabs.TabLayout(this);
+		tabs.setTabMode(com.google.android.material.tabs.TabLayout.MODE_SCROLLABLE);
+		tabs.setTabGravity(com.google.android.material.tabs.TabLayout.GRAVITY_START);
+		tabs.setBackgroundColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorSurface));
+		tabs.setSelectedTabIndicatorColor(UiColors.accent());
+		tabs.setTabTextColors(UiColors.textSecondary(), UiColors.accent());
+		tabs.setTabRippleColor(android.content.res.ColorStateList.valueOf((UiColors.accent() & 0x00FFFFFF) | 0x1F000000));
+		holder.addView(tabs, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		
+		androidx.viewpager2.widget.ViewPager2 pager = new androidx.viewpager2.widget.ViewPager2(this);
+		pager.setId(R.id.vscroll2);                                   // a fixed id, so the pages come back after the screen is recreated
+		pager.setOffscreenPageLimit(com.harvana.app.group.SettingsSections.NAMES.length);
+		pager.setAdapter(new androidx.viewpager2.adapter.FragmentStateAdapter(this) {
+			@Override public int getItemCount() { return com.harvana.app.group.SettingsSections.NAMES.length; }
+			@androidx.annotation.NonNull @Override public androidx.fragment.app.Fragment createFragment(int position) {
+				return com.harvana.app.group.GroupSettingsSectionFragment.newInstance(position);
+			}
+		});
+		holder.addView(pager, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+		new com.google.android.material.tabs.TabLayoutMediator(tabs, pager,
+			(tab, position) -> tab.setText(com.harvana.app.group.SettingsSections.NAMES[position])).attach();
+		parent.addView(holder, at, lp);
+	}
+	
+	@Override
+	public void attachSection(int section, LinearLayout page) {
+		if (section < 0 || section >= sectionPages.length) return;
+		sectionPages[section] = page;
+		if (sections != null) sections.attach(section);
+	}
+	
+	@Override
+	public void detachSection(int section) {
+		if (section < 0 || section >= sectionPages.length) return;
+		LinearLayout page = sectionPages[section];
+		sectionPages[section] = null;
+		if (page != null) page.removeAllViews();               // the cards wait off screen until the page is made again
+	}
+	
 	/** Puts the page's cards into the standard sections (General, Access, Members, Money & rules, Network, More). */
 	private void _organize() {
-		LinearLayout page = findViewById(R.id.linear39);
+		LinearLayout page = linear39;
 		if (page == null) return;
 		if (sections == null) {
-			sections = new com.harvana.app.group.SettingsSections(this, page, findViewById(R.id.vscroll2),
+			sections = new com.harvana.app.group.SettingsSections(this, page, sectionPages,
 				new com.harvana.app.group.SettingsSections.Host() {
 					@Override public void invite() { com.harvana.app.group.InviteMemberSheet.show(GroupSettingsActivity.this, groupId, groupData); }
 					@Override public void transferAdmin() { _showTransferAdminDialog(); }
@@ -670,14 +726,15 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		sections.treasurerProposal = treasurerProposal;
 		sections.myWallet = String.valueOf(WalletManager.getActiveWalletAddress(this));
 		sections.apply(groupId, groupData, isAdmin, memberRows == null ? 0 : memberRows.size(), _isOnChain(), memberRows,
-			cardHero, cardview13, cardview11, cardview15, cardview19, cardview20, cardview10, linear72, networkPanelHost, closeSection);
+			cardHero, cardview13, cardview11, cardview15, cardview19, cardview20, cardview10, linear72, networkPanelHost, closeSection,
+			panel_fixed, panel_accumulative);
 	}
 	
 	/** The network half of the settings: what the network says about this group, who decides, admin recovery. */
 	private LinearLayout networkPanelHost;
 	
 	private void _showNetworkPanel() {
-		ViewGroup page = findViewById(R.id.linear39);
+		ViewGroup page = linear39;
 		if (page == null || groupId.isEmpty()) return;
 		if (networkPanelHost == null) {
 			networkPanelHost = new LinearLayout(this);
@@ -1593,7 +1650,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 
 	/** Admin-only "danger zone": checks what the network and the group's records allow, then closes or deletes. */
 	private void _buildCloseSection() {
-		ViewGroup host = findViewById(R.id.linear39);
+		ViewGroup host = linear39;
 		if (host == null) return;
 		if (closeSection != null && closeSection.getParent() != null) ((ViewGroup) closeSection.getParent()).removeView(closeSection);
 		if (!isAdmin) return;

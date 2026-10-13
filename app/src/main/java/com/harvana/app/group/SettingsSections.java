@@ -26,9 +26,10 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Lays the group settings page out in the standard sections: General, Access, Members, Money and rules, Network, More. The existing
- * cards keep all their logic; this only decides which section each one lives in, shows one section at a time under a chip bar, and adds
- * the cards a group settings page is expected to have (invite, members summary, group info with ID, the contract, leave).
+ * Lays the group settings page out in the standard sections: General, Access, Members, Money and rules, Network, More. Each section
+ * is its own page (a {@link GroupSettingsSectionFragment} under the screen's tabs). The existing cards keep all their logic; this only
+ * decides which section each one lives in, moves it onto that section's page, and adds the cards a group settings page is expected to
+ * have (invite, members summary, group info with ID, the contract, leave).
  */
 public final class SettingsSections {
 
@@ -57,22 +58,24 @@ public final class SettingsSections {
 
     public static final String[] NAMES = {"General", "Access", "Members", "Money & rules", "Network", "More"};
     private static final int GENERAL = 0, ACCESS = 1, MEMBERS = 2, MONEY = 3, NETWORK = 4, MORE = 5;
-    private static final String TAG_TABS = "settings_tabs", TAG_EXTRA = "settings_extra";
 
     private final Activity a;
+    /** Where the screen builds its cards before they are placed (the old single page). */
     private final LinearLayout page;
-    private final View scroller;
+    /** Each section's page, set while its fragment's view exists. */
+    private final LinearLayout[] pages;
     private final Host host;
     private final float d;
-    private int selected;
     private final List<View> views = new ArrayList<>();
     private final List<Integer> where = new ArrayList<>();
-    private final TextView[] chips = new TextView[NAMES.length];
+    private final List<View> extras = new ArrayList<>();
+    /** The blocked-members header, its list and note: taken from the page once, kept for every later layout. */
+    private List<View> blockedBlock;
 
-    public SettingsSections(Activity a, LinearLayout page, View scroller, Host host) {
+    public SettingsSections(Activity a, LinearLayout page, LinearLayout[] pages, Host host) {
         this.a = a;
         this.page = page;
-        this.scroller = scroller;
+        this.pages = pages;
         this.host = host;
         this.d = a.getResources().getDisplayMetrics().density;
     }
@@ -80,80 +83,61 @@ public final class SettingsSections {
     /** Call after every (re)build of the page. The views are the page's own cards; null ones are skipped. */
     public void apply(String groupId, Map<String, Object> g, boolean isAdmin, int memberCount, boolean onChain, java.util.List<Map<String, Object>> members,
                       View hero, View about, View access, View money, View rules, View wallet, View notifications,
-                      View blockedHeader, View networkPanel, View closeSection) {
-        for (int i = page.getChildCount() - 1; i >= 0; i--) if (TAG_EXTRA.equals(page.getChildAt(i).getTag())) page.removeViewAt(i);
-        if (page.findViewWithTag(TAG_TABS) == null) page.addView(buildTabs(), 0);
+                      View blockedHeader, View networkPanel, View closeSection, View... moneyPanels) {
+        for (View x : extras) detach(x);
+        extras.clear();
 
         views.clear();
         where.clear();
         add(hero, GENERAL); add(about, GENERAL);
         add(access, ACCESS);
-        add(money, MONEY); add(rules, MONEY); add(wallet, MONEY);
+        add(money, MONEY);
+        for (View p : moneyPanels) add(p, MONEY);
+        add(rules, MONEY); add(wallet, MONEY);
         add(networkPanel, NETWORK);
         add(notifications, MORE);
         // The blocked-members header and everything after it (the list and its note) belong to Members.
-        int from = blockedHeader == null ? -1 : page.indexOfChild(blockedHeader);
-        if (from >= 0) for (int i = from; i < page.getChildCount(); i++) {
-            View c = page.getChildAt(i);
-            if (c == networkPanel || c == closeSection || TAG_EXTRA.equals(c.getTag()) || TAG_TABS.equals(c.getTag())) continue;
-            add(c, MEMBERS);
+        if (blockedBlock == null && blockedHeader != null && blockedHeader.getParent() == page) {
+            blockedBlock = new ArrayList<>();
+            for (int i = page.indexOfChild(blockedHeader); i < page.getChildCount(); i++) {
+                View c = page.getChildAt(i);
+                if (c != networkPanel && c != closeSection) blockedBlock.add(c);
+            }
         }
 
         add(extra(inviteCard(groupId, g, isAdmin)), ACCESS);
         add(extra(membersCard(isAdmin, memberCount)), MEMBERS);
         if (canHaveTreasurer) add(extra(treasurerCard(isAdmin)), MEMBERS);
         add(extra(memberListCard(g, isAdmin, members)), MEMBERS);
+        if (blockedBlock != null) for (View v : blockedBlock) add(v, MEMBERS);
         add(extra(infoCard(groupId, g, onChain)), MORE);
-        if (closeSection != null) { page.removeView(closeSection); page.addView(closeSection); add(closeSection, MORE); }
+        add(closeSection, MORE);
         add(extra(leaveCard()), MORE);
-        show(selected);
+        for (int i = 0; i < NAMES.length; i++) place(i);
     }
+
+    /** A section's page has appeared (its fragment's view was made): its cards move onto it. */
+    public void attach(int section) { place(section); }
 
     private void add(View v, int section) { if (v == null) return; views.add(v); where.add(section); }
 
-    private View extra(View v) { v.setTag(TAG_EXTRA); page.addView(v); return v; }
+    private View extra(View v) { extras.add(v); return v; }
 
-    private void show(int section) {
-        selected = section;
-        for (int i = 0; i < views.size(); i++) views.get(i).setVisibility(where.get(i) == section ? View.VISIBLE : View.GONE);
-        for (int i = 0; i < chips.length; i++) if (chips[i] != null) paintChip(chips[i], i == section);
-        if (scroller != null) scroller.scrollTo(0, 0);
-    }
-
-    // ── chip bar ──
-
-    private View buildTabs() {
-        HorizontalScrollView hs = new HorizontalScrollView(a);
-        hs.setTag(TAG_TABS);
-        hs.setHorizontalScrollBarEnabled(false);
-        LinearLayout row = new LinearLayout(a);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        for (int i = 0; i < NAMES.length; i++) {
-            final int at = i;
-            TextView c = new TextView(a);
-            c.setText(NAMES[i]);
-            c.setTextSize(13);
-            c.setTypeface(null, Typeface.BOLD);
-            c.setGravity(Gravity.CENTER);
-            c.setPadding((int) (16 * d), 0, (int) (16 * d), 0);
-            c.setOnClickListener(v -> show(at));
-            chips[i] = c;
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (int) (36 * d));
-            lp.setMarginEnd((int) (8 * d));
-            row.addView(c, lp);
-            paintChip(c, i == selected);
+    /** Puts a section's cards on its page, in order. A page not made yet gets them when it is. */
+    private void place(int section) {
+        LinearLayout to = section < pages.length ? pages[section] : null;
+        if (to == null) return;
+        to.removeAllViews();
+        for (int i = 0; i < views.size(); i++) {
+            if (where.get(i) != section) continue;
+            View v = views.get(i);
+            detach(v);
+            to.addView(v);
         }
-        hs.addView(row);
-        hs.setPadding(0, 0, 0, (int) (4 * d));
-        return hs;
     }
 
-    private void paintChip(TextView c, boolean on) {
-        GradientDrawable g = new GradientDrawable();
-        g.setCornerRadius(18 * d);
-        g.setColor(on ? UiColors.accent() : (UiColors.accent() & 0x00FFFFFF) | 0x22000000);
-        c.setBackground(g);
-        c.setTextColor(on ? UiColors.onAccent() : UiColors.textPrimary());
+    private static void detach(View v) {
+        if (v != null && v.getParent() instanceof ViewGroup) ((ViewGroup) v.getParent()).removeView(v);
     }
 
     // ── cards ──

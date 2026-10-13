@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Group settings in tabs
+
+- Group settings is now a tab bar over swipeable pages. Each of General, Access, Members, Money & rules, Network and More is its own fragment (`group/GroupSettingsSectionFragment`) with its own scroll.
+- The cards keep their logic: they are still built on the old page and `SettingsSections` moves each onto its section's page. The pages come back after the screen is recreated (theme change, rotation).
+- The goal and savings panels now sit under Money & rules. They used to show on every section.
+- "No blocked members" shows only when no one is blocked (switching sections used to force it on).
+
 ## 13 Oct 2026 — Add coins: one search bar
 
 - Add coins has the same bar as Assets: a search box ("Search or paste a contract") and a + button beside it that opens Add a chain.

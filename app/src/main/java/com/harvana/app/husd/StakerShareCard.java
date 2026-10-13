@@ -65,7 +65,7 @@ public final class StakerShareCard {
             LinearLayout row = new LinearLayout(a);
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
-            row.setMinimumHeight(dp(a, 44));
+            row.setMinimumHeight(dp(a, 50));
             row.setPadding(0, dp(a, 4), 0, dp(a, 4));
             ImageView icon = new ImageView(a);
             icon.setImageDrawable(StableIcon.drawable(a, code));

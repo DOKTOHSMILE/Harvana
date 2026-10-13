@@ -33,7 +33,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:gravity="center_vertical"
-					android:orientation="horizontal">
+					android:orientation="horizontal" android:minHeight="50dp">
 					<TextView
 						android:id="@+id/tv_wallet_label"
 						android:layout_width="match_parent"

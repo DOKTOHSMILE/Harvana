@@ -119,7 +119,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp" android:gravity="center_vertical">
 						<TextView
 							android:id="@+id/textview1"
 							android:layout_width="0dp"
@@ -142,7 +142,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp" android:gravity="center_vertical">
 						<TextView
 							android:id="@+id/textview2"
 							android:layout_width="0dp"
@@ -165,7 +165,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp" android:gravity="center_vertical">
 						<TextView
 							android:id="@+id/textview3"
 							android:layout_width="0dp"
@@ -289,7 +289,7 @@
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/tv_check_verified"
 							android:layout_width="22dp"
@@ -314,7 +314,7 @@
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/tv_check_clean"
 							android:layout_width="22dp"
@@ -339,7 +339,7 @@
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/tv_check_deposit"
 							android:layout_width="22dp"
@@ -364,7 +364,7 @@
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/tv_check_volume"
 							android:layout_width="22dp"
@@ -389,7 +389,7 @@
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/tv_check_success_rate"
 							android:layout_width="22dp"
@@ -478,7 +478,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="10dp"
-						android:orientation="horizontal">
+						android:orientation="horizontal" android:minHeight="50dp" android:gravity="center_vertical">
 						<TextView
 							android:id="@+id/textview13"
 							android:layout_width="0dp"

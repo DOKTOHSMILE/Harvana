@@ -253,7 +253,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="12dp"
 				android:gravity="center_vertical"
-				android:orientation="horizontal">
+				android:orientation="horizontal" android:minHeight="50dp">
 				<TextView
 					android:id="@+id/tv_slots_label"
 					android:layout_width="0dp"

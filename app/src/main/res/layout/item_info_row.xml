@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One row of a table (utils/InfoTable): label on the left, value on the right. Every table row in the app is 50dp. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:minHeight="50dp"
+	android:gravity="center_vertical"
+	android:orientation="horizontal"
+	android:paddingTop="6dp"
+	android:paddingBottom="6dp">
+	<ImageView
+		android:id="@+id/info_icon"
+		android:layout_width="20dp"
+		android:layout_height="20dp"
+		android:layout_marginEnd="12dp"
+		android:scaleType="fitCenter"
+		android:visibility="gone"
+		android:importantForAccessibility="no" />
+	<TextView
+		android:id="@+id/info_label"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:textSize="13sp"
+		android:textColor="@color/colorTextSecondary" />
+	<TextView
+		android:id="@+id/info_value"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1.4"
+		android:gravity="end"
+		android:textSize="14sp"
+		android:textStyle="bold"
+		android:textIsSelectable="true"
+		android:textColor="@color/colorTextPrimary" />
+</LinearLayout>

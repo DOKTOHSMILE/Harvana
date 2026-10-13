@@ -417,9 +417,21 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				Object summary = doc.get("summary");
 				if (doc.get("trustPercent") instanceof Number && summary != null) {
 					// The node's group trust percentage, with what it is made of.
-					tv_group_trust.setText(summary + "\nMember standing " + _pct(doc, "trustStandingPct") + " · Clean record " + _pct(doc, "trustCleanPct")
-							+ " · Experience " + _pct(doc, "trustExperiencePct") + " · Depth " + _pct(doc, "trustDepthPct")
-							+ " · Vouching " + _pct(doc, "trustVouchingPct"));
+					// The node's group trust percentage, then each part on its own row with an icon.
+					tv_group_trust.setText(String.valueOf(summary));
+					LinearLayout rows = getView() == null ? null : getView().findViewById(R.id.layout_group_trust_rows);
+					if (rows != null) {
+						rows.removeAllViews();
+						com.harvana.app.utils.InfoTable t = new com.harvana.app.utils.InfoTable(getContext());
+						t.view().setBackground(null);
+						t.view().setPadding(0, 0, 0, 0);
+						t.row(R.drawable.ic_person, "Member standing", _pct(doc, "trustStandingPct"));
+						t.row(R.drawable.ic_check_circle, "Clean record", _pct(doc, "trustCleanPct"));
+						t.row(R.drawable.ic_star, "Experience", _pct(doc, "trustExperiencePct"));
+						t.row(R.drawable.ic_pie_chart, "Depth", _pct(doc, "trustDepthPct"));
+						t.row(R.drawable.ic_verified, "Vouching", _pct(doc, "trustVouchingPct"));
+						rows.addView(t.view());
+					}
 					return;
 				}
 				if (summary != null && !String.valueOf(summary).isEmpty()) {
@@ -596,8 +608,8 @@ public class GroupOverviewFragmentActivity extends Fragment {
 			return;
 		}
 		double bps = json.optLong("interestRateBps") / 100.0;
-		if (tv_loan_rate != null) tv_loan_rate.setText(String.format(java.util.Locale.US, "Interest: %.2f%% a day", bps));
-		if (tv_loan_withdrawal != null) tv_loan_withdrawal.setText("Withdrawal rule: " + json.optString("withdrawalRule", "—"));
+		if (tv_loan_rate != null) tv_loan_rate.setText(String.format(java.util.Locale.US, "%.2f%%", bps));
+		if (tv_loan_withdrawal != null) tv_loan_withdrawal.setText(json.optString("withdrawalRule", "—"));
 	}
 	
 	private void _loadGroupData() {
@@ -655,6 +667,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		String groupWallet = _safeString(data, "groupWalletAddress",
 		_safeString(data, "group_wallet", "—"));
 		groupCoin = _safeString(data, "asset", "");
+		_showGroupCoin(groupCoin);
 		double goal = _safeDouble(data, "targetGoalAmount");
 		
 		// About
@@ -828,13 +841,13 @@ public class GroupOverviewFragmentActivity extends Fragment {
 			double rate = com.harvana.app.group.LoanInterest.dailyPercent(_safeDouble(data, "loanInterestRate"),
 				_safeString(data, "loanInterestPeriod", ""), com.harvana.app.group.GroupKinds.isOnChain(data));
 			if (tv_loan_rate != null) {
-				tv_loan_rate.setText(String.format(Locale.US, "Interest: %.2f%% a day", rate));
+				tv_loan_rate.setText(String.format(Locale.US, "%.2f%%", rate));
 			}
 			if (tv_loan_withdrawal != null) {
-				tv_loan_withdrawal.setText("Withdrawal rule: " + _safeString(data, "withdrawalRule", "—"));
+				tv_loan_withdrawal.setText(_safeString(data, "withdrawalRule", "—"));
 			}
 			if (tv_loan_active_count != null) {
-				tv_loan_active_count.setText("Active loans: 0");
+				tv_loan_active_count.setText("0");
 			}
 		}
 		
@@ -878,7 +891,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				}
 				final int n = active;
 				if (getActivity() != null) getActivity().runOnUiThread(() -> {
-					if (tv_loan_active_count != null) tv_loan_active_count.setText("Active loans: " + n);
+					if (tv_loan_active_count != null) tv_loan_active_count.setText(String.valueOf(n));
 				});
 			}
 			@Override public void onError(String error) {}
@@ -900,6 +913,29 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	
 	/** The group's stable coin ("HNGN", …); empty for a group made before coins. */
 	private String groupCoin = "";
+
+	/** The group's coin, where nobody can miss it: the banner at the top, and its logo by every amount in it. */
+	private void _showGroupCoin(String coin) {
+		View root = getView();
+		if (root == null) return;
+		View card = root.findViewById(R.id.card_group_coin);
+		if (card != null) {
+			card.setVisibility(View.VISIBLE);
+			com.harvana.app.group.CoinLogo.show(root.findViewById(R.id.iv_group_coin_logo), coin);
+			TextView sym = root.findViewById(R.id.tv_group_coin_symbol);
+			TextView name = root.findViewById(R.id.tv_group_coin_name);
+			TextView rate = root.findViewById(R.id.tv_group_coin_rate);
+			if (sym != null) sym.setText(com.harvana.app.group.CoinLogo.symbol(coin));
+			if (name != null) name.setText(com.harvana.app.group.CoinLogo.name(coin));
+			if (rate != null) {
+				String line = com.harvana.app.husd.Stable.isStable(coin)
+					? com.harvana.app.wallet.FxRates.rateLine(getContext(), com.harvana.app.husd.Stable.currency(coin)) : "";
+				rate.setText(line);
+			}
+		}
+		com.harvana.app.group.CoinLogo.show(root.findViewById(R.id.iv_group_wallet_coin), coin);
+		com.harvana.app.group.CoinLogo.show(root.findViewById(R.id.iv_rule_contribution_coin), coin);
+	}
 
 	private String _coinSymbol() {
 		return com.harvana.app.husd.Stable.isStable(groupCoin) ? com.harvana.app.husd.Stable.symbol(groupCoin) : com.harvana.app.CoinInfo.ticker();

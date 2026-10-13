@@ -58,32 +58,45 @@ public final class InfoTable {
 
     public InfoTable row(String label, CharSequence value) { return row(label, value, UiColors.textPrimary()); }
 
-    /** One fact. Rows are divided by a hairline. */
+    /** One fact. Rows are divided by a hairline; each row is res/layout/item_info_row.xml (50dp). */
     public InfoTable row(String label, CharSequence value, int valueColor) {
-        LinearLayout r = new LinearLayout(c);
-        r.setGravity(Gravity.CENTER_VERTICAL);
-        r.setMinimumHeight(px(36));
-        r.setPadding(0, px(6), 0, px(6));
-        TextView l = new TextView(c);
-        l.setText(label);
-        l.setTextSize(13f);
-        l.setTextColor(UiColors.textSecondary());
-        r.addView(l, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView v = new TextView(c);
-        v.setText(value == null || value.length() == 0 ? "—" : value);
-        v.setTextSize(13.5f);
-        v.setTypeface(null, Typeface.BOLD);
+        return row(0, label, value, valueColor);
+    }
+
+    /** A row with an icon before its label (a coin's logo, a calendar, a wallet…); 0 for none. */
+    public InfoTable row(int iconRes, String label, CharSequence value) { return row(iconRes, label, value, UiColors.textPrimary()); }
+
+    public InfoTable row(int iconRes, String label, CharSequence value, int valueColor) {
+        View r = android.view.LayoutInflater.from(c).inflate(com.harvana.app.R.layout.item_info_row, box, false);
+        ((TextView) r.findViewById(com.harvana.app.R.id.info_label)).setText(label);
+        TextView v = r.findViewById(com.harvana.app.R.id.info_value);
+        v.setText(value == null || value.length() == 0 ? "\u2014" : value);
         v.setTextColor(valueColor);
-        v.setGravity(Gravity.END);
-        v.setTextIsSelectable(true);
-        r.addView(v, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.4f));
+        if (iconRes != 0) {
+            android.widget.ImageView i = r.findViewById(com.harvana.app.R.id.info_icon);
+            i.setImageResource(iconRes);
+            i.setVisibility(View.VISIBLE);
+        }
+        addDivided(r);
+        return this;
+    }
+
+    /** A row whose icon is a drawable (a stable coin's logo is drawn, not a resource). */
+    public InfoTable row(android.graphics.drawable.Drawable icon, String label, CharSequence value) {
+        row(0, label, value, UiColors.textPrimary());
+        View r = box.getChildAt(box.getChildCount() - 1);
+        android.widget.ImageView i = r.findViewById(com.harvana.app.R.id.info_icon);
+        if (icon != null && i != null) { i.setImageDrawable(icon); i.setVisibility(View.VISIBLE); }
+        return this;
+    }
+
+    private void addDivided(View r) {
         if (box.getChildCount() > 0 && !(box.getChildAt(box.getChildCount() - 1) instanceof TextView)) {
             View line = new View(c);
             line.setBackgroundColor(UiColors.textTertiary() & 0x22FFFFFF);
             box.addView(line, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Math.max(1, px(1) / 2)));
         }
         box.addView(r);
-        return this;
     }
 
     /** A short note under the rows (only for what is not a figure). */

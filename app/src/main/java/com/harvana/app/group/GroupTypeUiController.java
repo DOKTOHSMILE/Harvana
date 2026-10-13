@@ -52,8 +52,8 @@ public final class GroupTypeUiController {
 
         if (type.contains("Accumulative")) {
             double rate = num(group, "loanInterestRate", 0);
-            setText(root, "tv_loan_rate", String.format(Locale.US, "Interest: %.2f%%", rate));
-            setText(root, "tv_loan_withdrawal", "Withdrawal rule: " + str(group, "withdrawalRule", "—"));
+            setText(root, "tv_loan_rate", String.format(Locale.US, "%.2f%%", rate));
+            setText(root, "tv_loan_withdrawal", str(group, "withdrawalRule", "—"));
         }
     }
 

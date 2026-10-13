@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Group coin everywhere; 50dp table rows
+
+- Group pages show the group coin logo: a coin banner card on the group overview (logo, symbol, name, rate), the logo beside the wallet balance, the contribution rule, the "Per slot" amount on every group card, and the group details header.
+- Loan facility, pool summary and trust are separate rows with icons (values only).
+- Every table row in the app is at least 50dp high: `InfoTable` rows now inflate `res/layout/item_info_row.xml` (icon, label, value), and the label/value rows in the XML layouts got `minHeight="50dp"`.
+
 ## 13 Oct 2026 — Payout to a wallet you choose
 
 - Claim savings and Withdraw bond first ask "Pay to": any wallet on your account (named as on this phone, the one in use marked). Then the usual review, and PIN or fingerprint.

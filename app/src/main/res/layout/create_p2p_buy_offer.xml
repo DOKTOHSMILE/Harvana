@@ -337,7 +337,7 @@
 							android:background="?attr/selectableItemBackground"
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
-							android:focusable="true">
+							android:focusable="true" android:minHeight="50dp">
 							<TextView
 								android:id="@+id/tv_buy_trade_limit_label"
 								android:layout_width="0dp"
@@ -366,7 +366,7 @@
 							android:background="?attr/selectableItemBackground"
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
-							android:focusable="true">
+							android:focusable="true" android:minHeight="50dp">
 							<TextView
 								android:id="@+id/tv_buy_offer_duration_label"
 								android:layout_width="0dp"
@@ -395,7 +395,7 @@
 							android:background="?attr/selectableItemBackground"
 							android:gravity="center_vertical"
 							android:orientation="horizontal"
-							android:focusable="true">
+							android:focusable="true" android:minHeight="50dp">
 							<TextView
 								android:id="@+id/tv_buy_payment_window_label"
 								android:layout_width="0dp"
@@ -509,7 +509,7 @@
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:orientation="horizontal"
-							android:paddingVertical="8dp">
+							android:paddingVertical="8dp" android:minHeight="50dp" android:gravity="center_vertical">
 							<TextView
 								android:id="@+id/textview11"
 								android:layout_width="0dp"
@@ -529,7 +529,7 @@
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:orientation="horizontal"
-							android:paddingVertical="8dp">
+							android:paddingVertical="8dp" android:minHeight="50dp" android:gravity="center_vertical">
 							<TextView
 								android:id="@+id/textview12"
 								android:layout_width="0dp"
@@ -555,7 +555,7 @@
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:orientation="horizontal"
-							android:paddingVertical="8dp">
+							android:paddingVertical="8dp" android:minHeight="50dp" android:gravity="center_vertical">
 							<TextView
 								android:id="@+id/textview13"
 								android:layout_width="0dp"
@@ -577,7 +577,7 @@
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:orientation="horizontal"
-							android:paddingVertical="8dp">
+							android:paddingVertical="8dp" android:minHeight="50dp" android:gravity="center_vertical">
 							<TextView
 								android:id="@+id/textview14"
 								android:layout_width="0dp"

@@ -823,8 +823,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
 	}
 	
 	/** An amount in the group's own coin: a stable coin has 6 decimals and its symbol, HARV 8. */
-	private static String _groupMoney(org.json.JSONObject group, long raw) {
+	private String _groupMoney(org.json.JSONObject group, long raw) {
 		String coin = group == null ? "" : group.optString("asset", "");
+		// The Collected card shows the coin's own logo, so the coin is plain to see.
+		runOnUiThread(() -> com.harvana.app.group.CoinLogo.show(findViewById(R.id.imageview11), coin));
 		if (com.harvana.app.husd.Stable.isStable(coin)) return com.harvana.app.husd.HusdClient.format(raw) + " " + com.harvana.app.husd.Stable.symbol(coin);
 		return com.harvana.app.wallet.BalanceFormatter.smart(raw / 100_000_000.0);
 	}

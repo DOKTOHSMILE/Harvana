@@ -161,7 +161,7 @@
 							android:id="@+id/linear84"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
-							android:gravity="center_vertical">
+							android:gravity="center_vertical" android:minHeight="50dp">
 							<TextView
 								android:id="@+id/textview42"
 								android:layout_width="0dp"
@@ -182,7 +182,7 @@
 							android:layout_height="wrap_content"
 							android:layout_marginTop="9dp"
 							android:gravity="center_vertical"
-							android:visibility="gone">
+							android:visibility="gone" android:minHeight="50dp">
 							<TextView
 								android:id="@+id/textview43"
 								android:layout_width="0dp"
@@ -203,7 +203,7 @@
 							android:layout_height="wrap_content"
 							android:layout_marginTop="9dp"
 							android:gravity="center_vertical"
-							android:visibility="gone">
+							android:visibility="gone" android:minHeight="50dp">
 							<TextView
 								android:id="@+id/textview44"
 								android:layout_width="0dp"
@@ -382,7 +382,7 @@
 						android:id="@+id/linear91"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:gravity="center_vertical">
+						android:gravity="center_vertical" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/escrow_title"
 							android:layout_width="0dp"
@@ -497,7 +497,7 @@
 						android:layout_marginTop="15dp"
 						android:padding="12dp"
 						android:background="@color/colorP2pSurfaceAlt"
-						android:gravity="center_vertical">
+						android:gravity="center_vertical" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview45"
 							android:layout_width="0dp"
@@ -891,7 +891,7 @@
 					<LinearLayout
 						android:id="@+id/linear101"
 						android:layout_width="match_parent"
-						android:layout_height="wrap_content">
+						android:layout_height="wrap_content" android:minHeight="50dp" android:gravity="center_vertical">
 						<TextView
 							android:id="@+id/blockchain_title"
 							android:layout_width="0dp"

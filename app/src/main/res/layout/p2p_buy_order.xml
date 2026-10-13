@@ -229,7 +229,7 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="16dp"
 						android:gravity="center_vertical"
-						android:orientation="horizontal">
+						android:orientation="horizontal" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview29"
 							android:layout_width="0dp"
@@ -251,7 +251,7 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="11dp"
 						android:gravity="center_vertical"
-						android:orientation="horizontal">
+						android:orientation="horizontal" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview30"
 							android:layout_width="0dp"
@@ -272,7 +272,7 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="11dp"
 						android:gravity="center_vertical"
-						android:orientation="horizontal">
+						android:orientation="horizontal" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview31"
 							android:layout_width="0dp"
@@ -293,7 +293,7 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="11dp"
 						android:gravity="center_vertical"
-						android:orientation="horizontal">
+						android:orientation="horizontal" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview32"
 							android:layout_width="0dp"
@@ -452,7 +452,7 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="16dp"
 						android:gravity="center_vertical"
-						android:orientation="horizontal">
+						android:orientation="horizontal" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview33"
 							android:layout_width="0dp"
@@ -474,7 +474,7 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="11dp"
 						android:gravity="center_vertical"
-						android:orientation="horizontal">
+						android:orientation="horizontal" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview34"
 							android:layout_width="0dp"
@@ -501,7 +501,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
-						android:orientation="horizontal">
+						android:orientation="horizontal" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview35"
 							android:layout_width="0dp"
@@ -524,7 +524,7 @@
 						android:layout_marginTop="11dp"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:visibility="gone">
+						android:visibility="gone" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview36"
 							android:layout_width="0dp"
@@ -546,7 +546,7 @@
 						android:layout_marginTop="11dp"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:visibility="gone">
+						android:visibility="gone" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview37"
 							android:layout_width="0dp"
@@ -567,7 +567,7 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="14dp"
 						android:gravity="center_vertical"
-						android:orientation="horizontal">
+						android:orientation="horizontal" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview38"
 							android:layout_width="0dp"

@@ -160,7 +160,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp" android:gravity="center_vertical">
 						<TextView
 							android:id="@+id/tv_confirm_amount_label"
 							android:layout_width="0dp"
@@ -181,7 +181,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp" android:gravity="center_vertical">
 						<TextView
 							android:id="@+id/textview8"
 							android:layout_width="0dp"
@@ -208,7 +208,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp" android:gravity="center_vertical">
 						<TextView
 							android:id="@+id/tv_confirm_pay_direction_label"
 							android:layout_width="0dp"
@@ -229,7 +229,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp" android:gravity="center_vertical">
 						<TextView
 							android:id="@+id/textview9"
 							android:layout_width="0dp"
@@ -249,7 +249,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp" android:gravity="center_vertical">
 						<TextView
 							android:id="@+id/textview10"
 							android:layout_width="0dp"

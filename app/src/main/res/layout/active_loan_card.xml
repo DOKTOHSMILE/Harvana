@@ -27,7 +27,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:gravity="center_vertical"
-				android:orientation="horizontal">
+				android:orientation="horizontal" android:minHeight="50dp">
 				<TextView
 					android:id="@+id/textview2"
 					android:layout_width="0dp"
@@ -94,7 +94,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="8dp"
 				android:gravity="center_vertical"
-				android:orientation="horizontal">
+				android:orientation="horizontal" android:minHeight="50dp">
 				<TextView
 					android:id="@+id/textview4"
 					android:layout_width="0dp"

@@ -131,7 +131,7 @@
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview16"
 							android:layout_width="0dp"
@@ -155,7 +155,7 @@
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview17"
 							android:layout_width="0dp"
@@ -178,7 +178,7 @@
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview18"
 							android:layout_width="0dp"
@@ -202,7 +202,7 @@
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview19"
 							android:layout_width="0dp"
@@ -225,7 +225,7 @@
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview20"
 							android:layout_width="0dp"
@@ -248,7 +248,7 @@
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview21"
 							android:layout_width="0dp"
@@ -277,7 +277,7 @@
 						android:layout_height="wrap_content"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
-						android:paddingVertical="6dp">
+						android:paddingVertical="6dp" android:minHeight="50dp">
 						<TextView
 							android:id="@+id/textview22"
 							android:layout_width="0dp"

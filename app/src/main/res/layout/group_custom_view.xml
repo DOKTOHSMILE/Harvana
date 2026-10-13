@@ -138,7 +138,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:gravity="center_vertical"
-					android:orientation="horizontal">
+					android:orientation="horizontal" android:minHeight="50dp">
 					<TextView
 						android:id="@+id/current_cycle_textview4"
 						android:layout_width="0dp"
@@ -193,16 +193,30 @@
 							android:textSize="10sp"
 							android:textColor="@color/colorTextTertiary"
 							android:focusable="false" />
-						<TextView
-							android:id="@+id/amount_per_slot_textview6"
+						<LinearLayout
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="2dp"
-							android:text="0 HARV"
-							android:textSize="13sp"
-							android:textStyle="bold"
-							android:textColor="@color/colorTextPrimary"
-							android:focusable="false" />
+							android:gravity="center_vertical"
+							android:orientation="horizontal">
+							<ImageView
+								android:id="@+id/iv_group_card_coin"
+								android:layout_width="16dp"
+								android:layout_height="16dp"
+								android:layout_marginEnd="5dp"
+								android:scaleType="fitCenter"
+								android:visibility="gone"
+								android:importantForAccessibility="no" />
+							<TextView
+								android:id="@+id/amount_per_slot_textview6"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="0 HARV"
+								android:textSize="13sp"
+								android:textStyle="bold"
+								android:textColor="@color/colorTextPrimary"
+								android:focusable="false" />
+						</LinearLayout>
 					</LinearLayout>
 					<LinearLayout
 						android:id="@+id/linear81"

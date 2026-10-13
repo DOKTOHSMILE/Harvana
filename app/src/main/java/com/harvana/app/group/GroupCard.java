@@ -68,6 +68,8 @@ public final class GroupCard {
         if (bar != null) bar.setProgress(progress);
 
         TextView amount = view.findViewById(R.id.amount_per_slot_textview6);
+        Object coinOfCard = group.get("asset");
+        CoinLogo.show(view.findViewById(R.id.iv_group_card_coin), coinOfCard == null ? "" : String.valueOf(coinOfCard));
         if (amount != null) {
             Object c0 = group.get("asset");
             String coin0 = c0 == null ? "" : String.valueOf(c0);

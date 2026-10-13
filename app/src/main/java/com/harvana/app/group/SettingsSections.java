@@ -408,14 +408,12 @@ public final class SettingsSections {
         return c;
     }
 
+    /** A table row (res/layout/item_info_row.xml, 50dp like every table in the app). */
     private View row(String k, String v) {
-        LinearLayout r = new LinearLayout(a);
-        r.setPadding(0, (int) (6 * d), 0, (int) (2 * d));
-        TextView l = text(k, 13, false, UiColors.textSecondary());
-        r.addView(l, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 0.9f));
-        TextView val = text(v, 13, true, UiColors.textPrimary());
-        val.setGravity(Gravity.END);
-        r.addView(val, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.6f));
+        View r = android.view.LayoutInflater.from(a).inflate(com.harvana.app.R.layout.item_info_row, null, false);
+        ((TextView) r.findViewById(com.harvana.app.R.id.info_label)).setText(k);
+        ((TextView) r.findViewById(com.harvana.app.R.id.info_value)).setText(v == null || v.isEmpty() ? "\u2014" : v);
+        r.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         return r;
     }
 

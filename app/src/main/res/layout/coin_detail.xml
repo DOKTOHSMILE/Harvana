@@ -180,7 +180,7 @@
 								android:layout_height="wrap_content"
 								android:gravity="center_vertical"
 								android:orientation="horizontal"
-								android:paddingVertical="6dp">
+								android:paddingVertical="6dp" android:minHeight="50dp">
 								<TextView
 									android:id="@+id/tv_stat_label_1"
 									android:layout_width="0dp"
@@ -206,7 +206,7 @@
 								android:layout_height="wrap_content"
 								android:gravity="center_vertical"
 								android:orientation="horizontal"
-								android:paddingVertical="6dp">
+								android:paddingVertical="6dp" android:minHeight="50dp">
 								<TextView
 									android:id="@+id/tv_stat_label_2"
 									android:layout_width="0dp"
@@ -232,7 +232,7 @@
 								android:layout_height="wrap_content"
 								android:gravity="center_vertical"
 								android:orientation="horizontal"
-								android:paddingVertical="6dp">
+								android:paddingVertical="6dp" android:minHeight="50dp">
 								<TextView
 									android:id="@+id/tv_stat_label_3"
 									android:layout_width="0dp"
@@ -258,7 +258,7 @@
 								android:layout_height="wrap_content"
 								android:gravity="center_vertical"
 								android:orientation="horizontal"
-								android:paddingVertical="6dp">
+								android:paddingVertical="6dp" android:minHeight="50dp">
 								<TextView
 									android:id="@+id/tv_stat_label_4"
 									android:layout_width="0dp"
@@ -284,7 +284,7 @@
 								android:layout_height="wrap_content"
 								android:gravity="center_vertical"
 								android:orientation="horizontal"
-								android:paddingVertical="6dp">
+								android:paddingVertical="6dp" android:minHeight="50dp">
 								<TextView
 									android:id="@+id/tv_stat_label_5"
 									android:layout_width="0dp"
@@ -310,7 +310,7 @@
 								android:layout_height="wrap_content"
 								android:gravity="center_vertical"
 								android:orientation="horizontal"
-								android:paddingVertical="6dp">
+								android:paddingVertical="6dp" android:minHeight="50dp">
 								<TextView
 									android:id="@+id/tv_stat_label_6"
 									android:layout_width="0dp"
@@ -336,7 +336,7 @@
 								android:layout_height="wrap_content"
 								android:gravity="center_vertical"
 								android:orientation="horizontal"
-								android:paddingVertical="6dp">
+								android:paddingVertical="6dp" android:minHeight="50dp">
 								<TextView
 									android:id="@+id/tv_stat_label_7"
 									android:layout_width="0dp"
@@ -362,7 +362,7 @@
 								android:layout_height="wrap_content"
 								android:gravity="center_vertical"
 								android:orientation="horizontal"
-								android:paddingVertical="6dp">
+								android:paddingVertical="6dp" android:minHeight="50dp">
 								<TextView
 									android:id="@+id/tv_stat_label_8"
 									android:layout_width="0dp"

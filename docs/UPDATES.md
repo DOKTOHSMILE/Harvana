@@ -19,6 +19,16 @@ The Bitcoin address shown in the app changes. Testnet coins sent to the old tb1â
 
 **Dialogs:** every remaining centre dialog is a styled bottom sheet: dApp browser connect and menu, Discover, stable coin actions, vaults, coin page, Swap, and the trust tier list.
 
+**Coin page price chart:** on Overview, for HARV and every coin with a market price (BTC, ETH, SOL, LTC, DOGE, BNB, POL, TRX, PI).
+
+| Part | Value |
+|---|---|
+| Ranges | 1D, 7D, 30D |
+| Shown | Price in the display currency, change over the range, the line (green up, red down) |
+| Touch | Drag along the line: price and time of that point |
+| HARV source | Node `/api/v1/swap/price/history`, hUSD pool; hNGN pool at the naira rate when hUSD has no history |
+| Other coins | CoinGecko market chart; kept 5 minutes |
+
 App build only.
 
 ## 13 Oct 2026: stable coins' contract addresses and "Send to another chain"

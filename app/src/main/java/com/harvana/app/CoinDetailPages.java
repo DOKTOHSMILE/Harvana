@@ -140,6 +140,10 @@ public final class CoinDetailPages {
             CoinCatalog.Coin coin = coin();
             String st = stable();
             String name = st != null ? com.harvana.app.husd.Stable.symbol(st) : coin == null ? "Harvana coin" : coin.name;
+            String priceKey = st != null ? null : coin == null || coin.nativeHarv ? "HARV" : coin.key;
+            if (priceKey != null && com.harvana.app.wallet.PriceChart.supports(priceKey)) {
+                body.addView(card(com.harvana.app.wallet.PriceChart.create(requireContext(), priceKey)));
+            }
             body.addView(label("WALLET ADDRESS"));
             TextView addr = new TextView(requireContext());
             addr.setText(address().isEmpty() ? "Address not ready yet" : address());

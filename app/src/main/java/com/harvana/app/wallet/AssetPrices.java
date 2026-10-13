@@ -42,6 +42,12 @@ public final class AssetPrices {
             {"BNB", "binancecoin"}, {"POL", "polygon-ecosystem-token"},
             {"TRX", "tron"}, {"PI", "pi-network"}
     };
+    /** The CoinGecko id for a coin key ("BTC" → "bitcoin"), or null. */
+    public static String geckoId(String key) {
+        for (String[] r : IDS) if (r[0].equals(key)) return r[1];
+        return null;
+    }
+
     private static final String ENDPOINT =
             "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&include_24hr_change=true&ids="
                     + "bitcoin,ethereum,solana,litecoin,dogecoin,binancecoin,polygon-ecosystem-token,tron,pi-network";

@@ -210,7 +210,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		}
 		
 		btn_receive.setOnClickListener(_v -> {
-			if (stable != null) {
+			if (stable != null && stable.depositsOpen()) {
 				new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Receive " + stable.sym)
 						.setItems(new String[]{"Harvana address", "Deposit " + stable.reserve()}, (d, w) -> {
 							if (w == 0) _receiveBottomSheet(); else stable.deposit();

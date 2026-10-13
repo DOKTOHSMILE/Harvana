@@ -82,6 +82,9 @@ public final class StableActions {
         a.startActivity(new Intent(a, VaultActivity.class).putExtra(HusdActivity.EXTRA_ASSET, code));
     }
 
+    /** True when at least one chain takes deposits of the reserve token. */
+    public boolean depositsOpen() { return info != null && !chains().isEmpty(); }
+
     public void deposit() {
         if (!active()) return;
         List<String> chains = chains();

@@ -898,15 +898,40 @@ public class SendAssetActivity extends AppCompatActivity {
 			SketchwareUtil.showMessage(getApplicationContext(), "That note is reserved by the network. Use a different note.");
 			return;
 		}
-		int free = asset.get("freeTransfersLeft") instanceof Integer ? (Integer) asset.get("freeTransfersLeft") : 0;
+		sendButton.setEnabled(false);
+		com.harvana.app.husd.HusdClient.fare(code, mine, recipient, units, memo.isEmpty() ? null : memo, new com.harvana.app.husd.HusdClient.Cb() {
+			@Override public void ok(org.json.JSONObject q) {
+				runOnUiThread(() -> {
+					if (isFinishing()) return;
+					sendButton.setEnabled(true);
+					if (units > q.optLong("maxSendRaw")) {
+						SketchwareUtil.showMessage(getApplicationContext(), "Max " + com.harvana.app.husd.HusdClient.format(q.optLong("maxSendRaw")) + " " + sym
+								+ " · tFare " + com.harvana.app.husd.HusdClient.fareText(q, sym));
+						return;
+					}
+					_reviewStable(sendButton, code, sym, mine, recipient, units, memo, q);
+				});
+			}
+			@Override public void fail(String e) {
+				runOnUiThread(() -> {
+					if (isFinishing()) return;
+					sendButton.setEnabled(true);
+					SketchwareUtil.showMessage(getApplicationContext(), "Couldn't get the tFare: " + e);
+				});
+			}
+		});
+	}
+
+	private void _reviewStable(View sendButton, String code, String sym, String mine, String recipient, long units, String memo, org.json.JSONObject q) {
 		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
 		rows.add(new String[]{"To", recipient});
 		rows.add(new String[]{"From", mine});
 		rows.add(new String[]{"Network", "Harvana · " + sym});
 		if (!memo.isEmpty()) rows.add(new String[]{"Note", memo});
-		rows.add(new String[]{"tFare", free > 0
-				? "Free (" + free + " free left), or HARV tFare if you hold HARV"
-				: "HARV tFare if you hold HARV, otherwise a small fee in " + sym});
+		rows.add(new String[]{"tFare", com.harvana.app.husd.HusdClient.fareText(q, sym)});
+		long coinFee = q.optLong("coinFeeRaw");
+		rows.add(new String[]{"Total", com.harvana.app.husd.HusdClient.format(units + coinFee) + " " + sym
+				+ ("HARV".equals(q.optString("payIn")) ? " + " + com.harvana.app.husd.HusdClient.fareText(q, sym) : "")});
 		String shown = com.harvana.app.husd.HusdClient.format(units) + " " + sym;
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send " + sym, shown, rows, () -> {
 			if (isProcessingSend) return;

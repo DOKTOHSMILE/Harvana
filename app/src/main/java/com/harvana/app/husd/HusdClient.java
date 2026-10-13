@@ -134,6 +134,29 @@ public final class HusdClient {
         }
     }
 
+    /**
+     * What this transfer pays if sent now, as the node decides it: {payIn: "HARV" | "FREE" | code, harvGasRaw,
+     * coinFeeRaw (twice the tFare with no HARV, plus a bridge fee on a withdrawal), freeTransfersLeft, availableRaw,
+     * maxSendRaw}.
+     */
+    public static void fare(String code, String from, String to, long amountUnits, String memo, Cb cb) {
+        String q = Stable.base(code) + "/fare?from=" + android.net.Uri.encode(from) + "&to=" + android.net.Uri.encode(to)
+                + "&amount=" + amountUnits + (memo == null || memo.isEmpty() ? "" : "&memo=" + android.net.Uri.encode(memo));
+        HarvanaNodeClient.nodeGet(q, wrap(cb));
+    }
+
+    /** The tFare row's value for a fare answer: "0.0035 HARV", "Free · 2 left", or "10 hNGN". */
+    public static String fareText(JSONObject q, String sym) {
+        String pay = q.optString("payIn");
+        if ("HARV".equals(pay)) return trimHarv(q.optLong("harvGasRaw")) + " HARV";
+        if ("FREE".equals(pay)) return "Free · " + Math.max(0, q.optInt("freeTransfersLeft") - 1) + " left";
+        return format(q.optLong("coinTFareRaw", q.optLong("coinFeeRaw"))) + " " + sym;
+    }
+
+    private static String trimHarv(long raw) {
+        return java.math.BigDecimal.valueOf(raw, 8).stripTrailingZeros().toPlainString();
+    }
+
     /** A HARV staker's share of every active stable coin's fees: {shares:[{asset, symbol, claimableRaw}], nextRequestNonce}. */
     public static void shares(String address, Cb cb) { HarvanaNodeClient.nodeGet("/api/v1/stable-shares/" + address, wrap(cb)); }
 

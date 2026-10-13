@@ -400,12 +400,16 @@ public final class CoinDetailPages {
             TextView v = valueOf(row);
             if (address == null || address.isEmpty()) { v.setText("—"); return; }
             v.setText(shortAddr(address));
-            v.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_copy_line, 0);
-            v.setCompoundDrawablePadding(dp(6));
-            if (v.getCompoundDrawablesRelative()[2] != null) {
-                v.getCompoundDrawablesRelative()[2].setBounds(0, 0, dp(16), dp(16));
-                v.getCompoundDrawablesRelative()[2].setTint(com.harvana.app.utils.UiColors.textSecondary());
+            // The icon is sized before it is attached, so the row keeps the text's height and the value lines up with its label.
+            android.graphics.drawable.Drawable icon = androidx.core.content.ContextCompat.getDrawable(requireContext(), R.drawable.ic_copy_line);
+            if (icon != null) {
+                icon = icon.mutate();
+                icon.setBounds(0, 0, dp(16), dp(16));
+                icon.setTint(com.harvana.app.utils.UiColors.textSecondary());
             }
+            v.setCompoundDrawablesRelative(null, null, icon, null);
+            v.setCompoundDrawablePadding(dp(6));
+            v.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
             row.setOnClickListener(x -> {
                 android.content.ClipboardManager cm = (android.content.ClipboardManager) requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE);
                 if (cm != null) cm.setPrimaryClip(android.content.ClipData.newPlainText("Address", address));

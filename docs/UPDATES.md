@@ -43,6 +43,23 @@ The Bitcoin address shown in the app changes. Testnet coins sent to the old tb1�
 
 **Fix: currency change.** Coin prices on the Assets list and the coin page were kept as text in dollars; they now follow the chosen currency at once, like the balances.
 
+**Stable coin Send: the 2x tFare is quoted exactly** (owner: a sender with no HARV pays twice the tFare in the coin)
+
+| Case | tFare row |
+|---|---|
+| Wallet holds enough HARV | tFare in HARV |
+| No HARV, free transfers left | Free · n left |
+| No HARV, no free transfer | 2 × tFare in the coin (e.g. 10 hNGN, 0.007 hUSD) |
+
+- The figure comes from the node (`/api/v1/stable/<CODE>/fare`), the same decision the node makes when the transfer arrives.
+- Amount + coin tFare is checked against the balance before the review sheet; above it: "Max … · tFare …".
+- Review sheet rows: To, From, Network, Note, tFare, Total.
+- Needs the node with the fare endpoint (node `docs/DEPLOYMENT.md`, 13 Oct 2026).
+
+**Coin page fixes**
+- Receive on a stable coin opens the Harvana address directly while no chain takes deposits; the Deposit choice appears once one does.
+- Bridge, burn and treasury address rows: value and copy icon on the same line as the label.
+
 App build only.
 
 ## 13 Oct 2026: stable coins' contract addresses and "Send to another chain"

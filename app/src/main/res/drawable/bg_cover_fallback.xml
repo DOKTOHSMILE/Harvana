@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The cover area before a cover is chosen: soft accent fading into the surface. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+	<gradient android:angle="315" android:startColor="@color/colorAccentSoft" android:endColor="@color/colorSurface" />
+	<corners android:radius="14dp" />
+</shape>

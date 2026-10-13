@@ -1,21 +1,16 @@
 package com.harvana.app;
 
 import android.content.Intent;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,7 +40,6 @@ import java.util.Map;
 public class EditProfileActivity extends AppCompatActivity {
     private static final int RC_PHOTO = 612;
 
-    private LinearLayout page;
     private String uid = "";
     private Map<String, Object> data = new HashMap<>();
     private boolean nameLocked;
@@ -72,16 +66,8 @@ public class EditProfileActivity extends AppCompatActivity {
         com.google.firebase.auth.FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
         if (me == null) { finish(); return; }
         uid = me.getUid();
-        ScrollView sv = new ScrollView(this);
-        sv.setBackgroundColor(UiColors.background());
-        sv.setFillViewport(true);
-        page = new LinearLayout(this);
-        page.setOrientation(LinearLayout.VERTICAL);
-        int p = SocialUi.dp(this, 16);
-        page.setPadding(p, p, p, SocialUi.dp(this, 28));
-        sv.addView(page);
-        AppBar.setContent(this, sv, "Edit profile", "Your photo and details");
-        page.addView(Shimmer.cards(this, 3));
+        AppBar.setContent(this, R.layout.activity_edit_profile, "Edit profile", "Your photo and details");
+        ((LinearLayout) findViewById(R.id.edit_profile_loading)).addView(Shimmer.cards(this, 3));
 
         Map<String, Object> cached = OfflineCacheManager.load(getApplicationContext(), "profile_" + uid);
         if (cached != null && !cached.isEmpty()) { data = cached; build(); }
@@ -97,8 +83,10 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override public void onError(String error) {
                 runOnUiThread(() -> {
                     if (isFinishing() || first != null) return;
-                    page.removeAllViews();
-                    page.addView(SocialUi.text(EditProfileActivity.this, "Couldn't load your details: " + error, 14, false, UiColors.error()));
+                    findViewById(R.id.edit_profile_loading).setVisibility(View.GONE);
+                    TextView err = findViewById(R.id.tv_edit_profile_error);
+                    err.setText("Couldn't load your details: " + error);
+                    err.setVisibility(View.VISIBLE);
                 });
             }
         });
@@ -111,94 +99,65 @@ public class EditProfileActivity extends AppCompatActivity {
 
     // ── Page ─────────────────────────────────────────────────────────────
 
+    /** Fills res/layout/activity_edit_profile.xml from the profile. */
     private void build() {
-        page.removeAllViews();
+        findViewById(R.id.edit_profile_loading).setVisibility(View.GONE);
+        findViewById(R.id.edit_profile_content).setVisibility(View.VISIBLE);
         nameLocked = !s("v_type").isEmpty();
         newIcon = null;
         newCover = null;
-        page.addView(coverBlock());
-        page.addView(photoBlock());
+        coverBlock();
+        photoBlock();
 
-        LinearLayout about = SocialUi.card(this);
-        about.addView(SocialUi.text(this, "About you", 16, true, UiColors.textPrimary()));
-        first = field(about, "First name", s("first_name"), InputType.TYPE_TEXT_FLAG_CAP_WORDS, nameLocked);
-        last = field(about, "Last name", s("last_name"), InputType.TYPE_TEXT_FLAG_CAP_WORDS, nameLocked);
-        if (nameLocked) about.addView(note("Your name was confirmed by an identity check, so it can't be changed here."));
-        job = field(about, "Occupation", s("occupation"), InputType.TYPE_TEXT_FLAG_CAP_SENTENCES, false);
-        address = field(about, "Home address", s("address"), InputType.TYPE_TEXT_FLAG_CAP_WORDS, false);
-        city = field(about, "City", s("city"), InputType.TYPE_TEXT_FLAG_CAP_WORDS, false);
-        about.addView(note("Your address stays private. Your city is shown on your profile only if you turn that on in Profile privacy."));
-        page.addView(about);
+        first = field(R.id.et_profile_first, s("first_name"), nameLocked);
+        last = field(R.id.et_profile_last, s("last_name"), nameLocked);
+        findViewById(R.id.tv_profile_name_locked).setVisibility(nameLocked ? View.VISIBLE : View.GONE);
+        job = field(R.id.et_profile_job, s("occupation"), false);
+        address = field(R.id.et_profile_address, s("address"), false);
+        city = field(R.id.et_profile_city, s("city"), false);
 
-        LinearLayout fixed = SocialUi.card(this);
-        fixed.addView(SocialUi.text(this, "Fixed details", 16, true, UiColors.textPrimary()));
-        fixed.addView(readOnly("Country", s("country")));
-        fixed.addView(readOnly("State", s("state")));
-        fixed.addView(readOnly("Email", s("email")));
-        fixed.addView(readOnly("Date of birth", s("dob")));
-        fixed.addView(readOnly("Harvana ID", s("pid")));
-        fixed.addView(note("These feed your trust score and your account's safety, so they are set when you sign up and can't be edited."));
-        page.addView(fixed);
+        readOnly(R.id.tv_profile_country, s("country"));
+        readOnly(R.id.tv_profile_state, s("state"));
+        readOnly(R.id.tv_profile_email, s("email"));
+        readOnly(R.id.tv_profile_dob, s("dob"));
+        readOnly(R.id.tv_profile_pid, s("pid"));
 
-        LinearLayout more = SocialUi.card(this);
-        more.addView(SocialUi.text(this, "Also on your profile", 16, true, UiColors.textPrimary()));
-        more.addView(link("Username, phone and chat links", "My contact card", ContactCardActivity.class));
-        more.addView(link("Bio, show or hide age and city", "Profile privacy", ProfilePrivacyActivity.class));
-        page.addView(more);
+        findViewById(R.id.row_profile_contact_card).setOnClickListener(v -> startActivity(new Intent(this, ContactCardActivity.class)));
+        findViewById(R.id.row_profile_privacy).setOnClickListener(v -> startActivity(new Intent(this, ProfilePrivacyActivity.class)));
 
-        save = SocialUi.button(this, "Save changes", false);
+        save = findViewById(R.id.btn_profile_save);
+        save.setText("Save changes");
         save.setEnabled(false);
         save.setOnClickListener(v -> save());
-        page.addView(save, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 52)));
 
         TextWatcher w = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence a, int b, int c, int d) { }
             @Override public void onTextChanged(CharSequence a, int b, int c, int d) { }
             @Override public void afterTextChanged(Editable e) { save.setEnabled(dirty()); }
         };
-        for (EditText e : new EditText[] {first, last, job, address, city}) e.addTextChangedListener(w);
+        for (EditText e : new EditText[] {first, last, job, address, city}) { e.removeTextChangedListener(w); e.addTextChangedListener(w); }
     }
 
-    private View coverBlock() {
-        LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(0, 0, 0, SocialUi.dp(this, 14));
-        FrameLayout frame = new FrameLayout(this);
-        GradientDrawable fallback = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                new int[] {(UiColors.accent() & 0x00FFFFFF) | 0x66000000, UiColors.surface()});
-        frame.setBackground(fallback);
-        coverView = new ImageView(this);
-        coverView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        frame.addView(coverView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        coverBusy = new ProgressBar(this);
-        coverBusy.setVisibility(View.GONE);
-        frame.addView(coverBusy, new FrameLayout.LayoutParams(SocialUi.dp(this, 36), SocialUi.dp(this, 36), Gravity.CENTER));
-        showCover(s("cover"));
+    private void coverBlock() {
+        View frame = findViewById(R.id.profile_cover_frame);
         int previewWidth = getResources().getDisplayMetrics().widthPixels - 2 * SocialUi.dp(this, 16);
-        box.addView(frame, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Math.round(previewWidth / COVER_ASPECT)));   // same shape as on the profile
-
-        LinearLayout buttons = new LinearLayout(this);
-        buttons.setPadding(0, SocialUi.dp(this, 10), 0, 0);
-        MaterialButton change = SocialUi.compactButton(this, "Change cover", true);
-        change.setOnClickListener(v -> startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_GET_CONTENT).setType("image/*"), "Choose a cover"), RC_COVER));
-        buttons.addView(change);
-        if (!s("cover").isEmpty()) {
-            MaterialButton remove = SocialUi.compactButton(this, "Remove", true);
-            LinearLayout.LayoutParams rp = (LinearLayout.LayoutParams) remove.getLayoutParams();
-            rp.setMarginStart(SocialUi.dp(this, 8));
-            remove.setOnClickListener(v -> {
-                newCover = ""; pendingCover = null;
-                showCover("");
-                coverStatus.setText("Cover will be removed when you press Save changes.");
-                if (save != null) save.setEnabled(true);
-            });
-            buttons.addView(remove, rp);
-        }
-        box.addView(buttons);
-        coverStatus = SocialUi.text(this, "", 12, false, UiColors.textSecondary());
-        coverStatus.setPadding(0, SocialUi.dp(this, 6), 0, 0);
-        box.addView(coverStatus);
-        return box;
+        ViewGroup.LayoutParams lp = frame.getLayoutParams();
+        lp.height = Math.round(previewWidth / COVER_ASPECT);                       // same shape as on the profile
+        frame.setLayoutParams(lp);
+        coverView = findViewById(R.id.iv_profile_cover);
+        coverBusy = findViewById(R.id.profile_cover_busy);
+        coverStatus = findViewById(R.id.tv_profile_cover_status);
+        showCover(s("cover"));
+        findViewById(R.id.btn_profile_cover_change).setOnClickListener(v ->
+                startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_GET_CONTENT).setType("image/*"), "Choose a cover"), RC_COVER));
+        View remove = findViewById(R.id.btn_profile_cover_remove);
+        remove.setVisibility(s("cover").isEmpty() ? View.GONE : View.VISIBLE);
+        remove.setOnClickListener(v -> {
+            newCover = ""; pendingCover = null;
+            showCover("");
+            coverStatus.setText("Cover will be removed when you press Save changes.");
+            if (save != null) save.setEnabled(true);
+        });
     }
 
     private void showCover(String url) {
@@ -206,41 +165,17 @@ public class EditProfileActivity extends AppCompatActivity {
         else coverView.setImageDrawable(null);
     }
 
-    private View photoBlock() {
-        LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.setGravity(Gravity.CENTER_HORIZONTAL);
-        box.setPadding(0, SocialUi.dp(this, 4), 0, SocialUi.dp(this, 16));
-        int size = SocialUi.dp(this, 104);
-        FrameLayout face = new FrameLayout(this);
-        initials = SocialUi.text(this, initialsOf(), 34, true, UiColors.onAccent());
-        initials.setGravity(Gravity.CENTER);
-        GradientDrawable disc = new GradientDrawable();
-        disc.setShape(GradientDrawable.OVAL);
-        disc.setColor(UiColors.accent());
-        initials.setBackground(disc);
-        face.addView(initials, new FrameLayout.LayoutParams(size, size));
-        photo = new ImageView(this);
-        photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        face.addView(photo, new FrameLayout.LayoutParams(size, size));
-        photoBusy = new ProgressBar(this);
-        photoBusy.setVisibility(View.GONE);
-        face.addView(photoBusy, new FrameLayout.LayoutParams(SocialUi.dp(this, 36), SocialUi.dp(this, 36), Gravity.CENTER));
+    private void photoBlock() {
+        initials = findViewById(R.id.tv_profile_initials);
+        initials.setText(initialsOf());
+        photo = findViewById(R.id.iv_profile_photo);
+        photoBusy = findViewById(R.id.profile_photo_busy);
+        photoStatus = findViewById(R.id.tv_profile_photo_status);
         showPhoto(s("icon"));
-        box.addView(face, new LinearLayout.LayoutParams(size, size));
-
-        MaterialButton change = SocialUi.compactButton(this, "Change photo", true);
-        change.setOnClickListener(v -> {
+        findViewById(R.id.btn_profile_photo_change).setOnClickListener(v -> {
             Intent pick = new Intent(Intent.ACTION_GET_CONTENT).setType("image/*");
             startActivityForResult(Intent.createChooser(pick, "Choose a photo"), RC_PHOTO);
         });
-        LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, SocialUi.dp(this, 36));
-        cp.topMargin = SocialUi.dp(this, 12);
-        box.addView(change, cp);
-        photoStatus = SocialUi.text(this, "", 12, false, UiColors.textSecondary());
-        photoStatus.setPadding(0, SocialUi.dp(this, 6), 0, 0);
-        box.addView(photoStatus);
-        return box;
     }
 
     private void showPhoto(String url) {
@@ -331,50 +266,18 @@ public class EditProfileActivity extends AppCompatActivity {
 
     // ── Fields ───────────────────────────────────────────────────────────
 
-    private EditText field(LinearLayout into, String label, String value, int caps, boolean locked) {
-        TextView l = SocialUi.text(this, label, 13, false, UiColors.textSecondary());
-        l.setPadding(0, SocialUi.dp(this, 14), 0, 0);
-        into.addView(l);
-        EditText e = SocialUi.edit(this, label);
-        e.setInputType(InputType.TYPE_CLASS_TEXT | caps);
+    private EditText field(int id, String value, boolean locked) {
+        EditText e = findViewById(id);
         e.setText(value);
         e.setEnabled(!locked);
         e.setAlpha(locked ? 0.6f : 1f);
-        into.addView(e, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         return e;
     }
 
-    private View readOnly(String label, String value) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.VERTICAL);
-        row.setPadding(0, SocialUi.dp(this, 12), 0, 0);
-        row.addView(SocialUi.text(this, label, 13, false, UiColors.textSecondary()));
-        TextView v = SocialUi.text(this, value.isEmpty() ? "Not provided" : value, 15, false, value.isEmpty() ? UiColors.textTertiary() : UiColors.textPrimary());
-        v.setPadding(0, SocialUi.dp(this, 2), 0, 0);
-        row.addView(v);
-        return row;
-    }
-
-    private TextView note(String text) {
-        TextView t = SocialUi.text(this, text, 12, false, UiColors.textTertiary());
-        t.setPadding(0, SocialUi.dp(this, 10), 0, 0);
-        return t;
-    }
-
-    private View link(String caption, String title, Class<?> target) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, SocialUi.dp(this, 12), 0, 0);
-        LinearLayout words = new LinearLayout(this);
-        words.setOrientation(LinearLayout.VERTICAL);
-        words.addView(SocialUi.text(this, title, 15, true, UiColors.textPrimary()));
-        words.addView(SocialUi.text(this, caption, 12, false, UiColors.textSecondary()));
-        row.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        row.addView(SocialUi.chevron(this));
-        row.setClickable(true);
-        row.setOnClickListener(v -> startActivity(new Intent(this, target)));
-        return row;
+    private void readOnly(int id, String value) {
+        TextView v = findViewById(id);
+        v.setText(value.isEmpty() ? "—" : value);
+        v.setTextColor(value.isEmpty() ? UiColors.textTertiary() : UiColors.textPrimary());
     }
 
     // ── Saving ───────────────────────────────────────────────────────────

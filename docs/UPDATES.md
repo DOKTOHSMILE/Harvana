@@ -23,6 +23,7 @@
 - Mint with HARV (`activity_vault.xml` as table rows with icons, `item_vault_at_risk.xml`, `dialog_amount_entry.xml`), Add coins (`activity_manage_assets.xml`, `item_manage_assets_header.xml`, `item_manage_assets_row.xml`).
 - Trade chat (`activity_p2p_chat.xml`, `item_chat_bubble_mine.xml`, `item_chat_bubble_theirs.xml`, `item_chat_day.xml`, `item_chat_quick_reply.xml`), Add friends to a group (`activity_friend_picker.xml`), one shared person row (`item_person_row.xml`), `item_list_button.xml`.
 - Find friends from contacts (`activity_find_contacts.xml`, `item_find_header.xml`, `item_find_note.xml`, `item_find_person.xml`), Friends (`activity_friends.xml`, `item_friend.xml`, `view_referral_code.xml`; referral count as a table row).
+- Edit profile (`activity_edit_profile.xml`; fixed details as table rows with icons), Email sign in / create account (`fragment_email_auth.xml`).
 
 ## 13 Oct 2026 — Group coin everywhere; 50dp table rows
 

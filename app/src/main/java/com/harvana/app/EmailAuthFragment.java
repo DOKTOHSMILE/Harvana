@@ -1,22 +1,17 @@
 package com.harvana.app;
 
-import com.harvana.app.utils.UiColors;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.textfield.TextInputEditText;
@@ -62,64 +57,29 @@ public class EmailAuthFragment extends Fragment {
 		createMode = getArguments() != null && getArguments().getBoolean(ARG_CREATE);
 		auth = FirebaseAuth.getInstance();
 		
-		int pad = dp(20);
-		ScrollView scroll = new ScrollView(requireContext());
-		scroll.setFillViewport(true);
-		LinearLayout root = new LinearLayout(requireContext());
-		root.setOrientation(LinearLayout.VERTICAL);
-		root.setPadding(pad, pad, pad, pad);
-		scroll.addView(root, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-		
-		TextView title = new TextView(requireContext());
-		title.setText(createMode ? "Create your account" : "Welcome back");
-		title.setTextSize(24f);
-		title.setTextColor(UiColors.textPrimary());
-		title.setPadding(0, dp(8), 0, dp(4));
-		root.addView(title);
-		
-		TextView sub = new TextView(requireContext());
-		sub.setText(createMode ? "Sign up with your email and a password." : "Sign in with your email and password.");
-		sub.setPadding(0, 0, 0, dp(20));
-		root.addView(sub);
-		
-		tilEmail = makeField("Email", false);
-		etEmail = (TextInputEditText) tilEmail.getEditText();
-		etEmail.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-		root.addView(tilEmail);
-		
-		tilPassword = makeField("Password", true);
-		etPassword = (TextInputEditText) tilPassword.getEditText();
-		root.addView(tilPassword);
-		
+		View root = inflater.inflate(R.layout.fragment_email_auth, container, false);
+		((TextView) root.findViewById(R.id.tv_email_auth_title)).setText(createMode ? "Create your account" : "Sign in");
+		tilEmail = root.findViewById(R.id.til_email_auth_email);
+		etEmail = root.findViewById(R.id.et_email_auth_email);
+		tilPassword = root.findViewById(R.id.til_email_auth_password);
+		etPassword = root.findViewById(R.id.et_email_auth_password);
 		if (createMode) {
-			tilConfirm = makeField("Confirm password", true);
-			etConfirm = (TextInputEditText) tilConfirm.getEditText();
-			root.addView(tilConfirm);
+			tilConfirm = root.findViewById(R.id.til_email_auth_confirm);
+			etConfirm = root.findViewById(R.id.et_email_auth_confirm);
+		} else {
+			root.findViewById(R.id.til_email_auth_confirm).setVisibility(View.GONE);
 		}
-		
-		btnSubmit = com.harvana.app.ui.Btn.filled(requireContext(), createMode ? "Create account" : "Sign in", null);
-		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
-		lp.topMargin = dp(16);
-		root.addView(btnSubmit, lp);
+		btnSubmit = root.findViewById(R.id.btn_email_auth_submit);
+		btnSubmit.setText(createMode ? "Create account" : "Sign in");
 		btnSubmit.setOnClickListener(v -> submit());
-		
-		if (!createMode) {
-			TextView forgot = link("Forgot password?");
-			forgot.setPadding(dp(12), dp(14), dp(12), dp(14));
-			forgot.setClickable(true);
-			forgot.setFocusable(true);
-			android.util.TypedValue tv = new android.util.TypedValue();
-			if (requireContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv, true)) forgot.setBackgroundResource(tv.resourceId);
-			forgot.setOnClickListener(v -> resetPassword());
-			root.addView(forgot);
-		}
-		
-		TextView switchMode = link(createMode ? "Already have an account? Sign in" : "New here? Create an account");
+		View forgot = root.findViewById(R.id.tv_email_auth_forgot);
+		forgot.setVisibility(createMode ? View.GONE : View.VISIBLE);
+		forgot.setOnClickListener(v -> resetPassword());
+		TextView switchMode = root.findViewById(R.id.tv_email_auth_switch);
+		switchMode.setText(createMode ? "Already have an account? Sign in" : "New here? Create an account");
 		switchMode.setOnClickListener(v -> requireActivity().getSupportFragmentManager().beginTransaction()
 			.replace(R.id.linear2, newInstance(!createMode)).commit());
-		root.addView(switchMode);
-		
-		return scroll;
+		return root;
 	}
 	
 	private void submit() {
@@ -262,31 +222,7 @@ public class EmailAuthFragment extends Fragment {
 		toast(msg);
 	}
 	
-	private TextInputLayout makeField(String hint, boolean password) {
-		TextInputLayout til = new TextInputLayout(requireContext(), null,
-			com.google.android.material.R.attr.textInputOutlinedStyle);
-		til.setHint(hint);
-		if (password) til.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
-		TextInputEditText et = new TextInputEditText(til.getContext());
-		et.setSingleLine(true);
-		if (password) {
-			et.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-		}
-		til.addView(et, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		lp.topMargin = dp(8);
-		til.setLayoutParams(lp);
-		return til;
-	}
 	
-	private TextView link(String label) {
-		TextView t = new TextView(requireContext());
-		t.setText(label);
-		t.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
-		t.setPadding(0, dp(16), 0, dp(8));
-		t.setGravity(android.view.Gravity.CENTER);
-		return t;
-	}
 	
 	private void clearErrors() {
 		tilEmail.setError(null);
@@ -307,7 +243,4 @@ public class EmailAuthFragment extends Fragment {
 		if (getContext() != null) Toast.makeText(getContext(), m, Toast.LENGTH_LONG).show();
 	}
 	
-	private int dp(int v) {
-		return Math.round(v * getResources().getDisplayMetrics().density);
-	}
 }

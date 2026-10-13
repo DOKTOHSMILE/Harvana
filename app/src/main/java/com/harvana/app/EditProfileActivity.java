@@ -421,6 +421,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 Map<String, Object> merged = new HashMap<>(data);
                 merged.putAll(changes);
                 OfflineCacheManager.save(getApplicationContext(), "profile_" + uid, merged);
+                com.harvana.app.trust.ProfileTrust.forget(uid);          // every post and row reads the new photo and name now
                 PublicProfileStore.publishMine(getApplicationContext());
                 // A cover that was removed is deleted from the picture host too, so nothing is left stored.
                 if ("".equals(changes.get("cover"))) com.harvana.app.utils.MediaCleaner.delete(getApplicationContext(), com.harvana.app.utils.MediaCleaner.PROFILE_COVER, null);

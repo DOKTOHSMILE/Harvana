@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: posts and rows show the author's current photo
+
+A post, comment or member row reads the author live (ProfileTrust). The photo used to come from the public profile card first; when that card was not re-published after a photo change, the old photo showed everywhere. Now the photo on the person's own record (written first by Edit profile) wins, the card's copy is only a fallback, and saving the profile clears the saved copy so the new photo shows at once.
+
+App build only.
+
 ## 13 Oct 2026: group coin can change before anything is in the group; savings shown in the group's coin
 
 **Group settings → Group coin** (the creator; on-network groups). Pick another stable coin; a rotating group's contribution or a goal group's goal is typed again in the new coin.

@@ -64,7 +64,9 @@ public final class ProfileTrust {
                         String n = fullName(text(p.get("first_name")), text(p.get("last_name")));
                         if (!n.isEmpty()) card.name = n;
                         if (!text(p.get("username")).isEmpty()) card.username = text(p.get("username"));
-                        if (!text(p.get("icon")).isEmpty()) card.icon = text(p.get("icon"));
+                        // The photo the person set last is on their own record (Edit profile writes it there first);
+                        // the public card's copy is only a fallback, so an old copy never wins over a new photo.
+                        if (card.icon.isEmpty() && !text(p.get("icon")).isEmpty()) card.icon = text(p.get("icon"));
                         card.wallet = text(p.get("wallet"));
                         card.trustTier = text(p.get("trust_tier"));
                         if (p.get("trust_percent") instanceof Number) card.percent = Math.max(0, Math.min(100, ((Number) p.get("trust_percent")).intValue()));

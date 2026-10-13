@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Round green disc behind a person's initial, with a white ring. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+	<gradient android:angle="315" android:startColor="#FF2BA597" android:endColor="#FF0B6B61" />
+	<stroke android:width="2dp" android:color="#FFFFFFFF" />
+</shape>

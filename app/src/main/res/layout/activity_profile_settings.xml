@@ -1,0 +1,655 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Profile settings: your profile, privacy, safety and alerts, then all app settings. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground"
+	android:fillViewport="true">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:paddingStart="16dp"
+		android:paddingTop="16dp"
+		android:paddingEnd="16dp"
+		android:paddingBottom="28dp">
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="6dp"
+			android:letterSpacing="0.06"
+			android:paddingStart="4dp"
+			android:paddingBottom="8dp"
+			android:text="Your profile"
+			android:textAllCaps="true"
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="13sp"
+			android:textStyle="bold" />
+
+		<com.google.android.material.card.MaterialCardView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:cardBackgroundColor="@color/colorSurface"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeColor="@color/colorCardStroke"
+			app:strokeWidth="1dp">
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:paddingStart="14dp"
+				android:paddingEnd="14dp">
+
+				<LinearLayout
+					android:id="@+id/row_edit_profile"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:minHeight="50dp"
+					android:background="?android:attr/selectableItemBackground"
+					android:clickable="true"
+					android:focusable="true"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingTop="12dp"
+					android:paddingBottom="12dp">
+
+					<ImageView
+						android:layout_width="36dp"
+						android:layout_height="36dp"
+						android:background="@drawable/bg_icon_circle_accent_soft"
+						android:importantForAccessibility="no"
+						android:padding="8dp"
+						android:src="@drawable/icon_edit_attributes_twotone_line"
+						app:tint="@color/colorAccent" />
+
+					<LinearLayout
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:orientation="vertical"
+						android:paddingStart="12dp"
+						android:paddingEnd="8dp">
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Edit profile"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="15sp"
+							android:textStyle="bold" />
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:paddingTop="2dp"
+							android:text="Photo, name, occupation, address, city"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12.5sp" />
+					</LinearLayout>
+
+					<ImageView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_arrow_right"
+						app:tint="@color/colorAccent" />
+				</LinearLayout>
+
+				<View
+					android:layout_width="match_parent"
+					android:layout_height="0.5dp"
+					android:layout_marginStart="48dp"
+					android:alpha="0.2"
+					android:background="@color/colorTextTertiary" />
+
+				<LinearLayout
+					android:id="@+id/row_contact_card"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:minHeight="50dp"
+					android:background="?android:attr/selectableItemBackground"
+					android:clickable="true"
+					android:focusable="true"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingTop="12dp"
+					android:paddingBottom="12dp">
+
+					<ImageView
+						android:layout_width="36dp"
+						android:layout_height="36dp"
+						android:background="@drawable/bg_icon_circle_accent_soft"
+						android:importantForAccessibility="no"
+						android:padding="8dp"
+						android:src="@drawable/icon_person_outline_outline_line"
+						app:tint="@color/colorAccent" />
+
+					<LinearLayout
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:orientation="vertical"
+						android:paddingStart="12dp"
+						android:paddingEnd="8dp">
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Username and contact card"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="15sp"
+							android:textStyle="bold" />
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:paddingTop="2dp"
+							android:text="Username, phone, chat links, let contacts find me"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12.5sp" />
+					</LinearLayout>
+
+					<ImageView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_arrow_right"
+						app:tint="@color/colorAccent" />
+				</LinearLayout>
+
+				<View
+					android:layout_width="match_parent"
+					android:layout_height="0.5dp"
+					android:layout_marginStart="48dp"
+					android:alpha="0.2"
+					android:background="@color/colorTextTertiary" />
+
+				<LinearLayout
+					android:id="@+id/row_my_qr"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:minHeight="50dp"
+					android:background="?android:attr/selectableItemBackground"
+					android:clickable="true"
+					android:focusable="true"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingTop="12dp"
+					android:paddingBottom="12dp">
+
+					<ImageView
+						android:layout_width="36dp"
+						android:layout_height="36dp"
+						android:background="@drawable/bg_icon_circle_accent_soft"
+						android:importantForAccessibility="no"
+						android:padding="8dp"
+						android:src="@drawable/icon_qr_code_2_twotone_line"
+						app:tint="@color/colorAccent" />
+
+					<LinearLayout
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:orientation="vertical"
+						android:paddingStart="12dp"
+						android:paddingEnd="8dp">
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="My QR code"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="15sp"
+							android:textStyle="bold" />
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:paddingTop="2dp"
+							android:text="Show or save your code"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12.5sp" />
+					</LinearLayout>
+
+					<ImageView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_arrow_right"
+						app:tint="@color/colorAccent" />
+				</LinearLayout>
+
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="18dp"
+			android:letterSpacing="0.06"
+			android:paddingStart="4dp"
+			android:paddingBottom="8dp"
+			android:text="Privacy"
+			android:textAllCaps="true"
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="13sp"
+			android:textStyle="bold" />
+
+		<com.google.android.material.card.MaterialCardView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:cardBackgroundColor="@color/colorSurface"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeColor="@color/colorCardStroke"
+			app:strokeWidth="1dp">
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:paddingStart="14dp"
+				android:paddingEnd="14dp">
+
+				<LinearLayout
+					android:id="@+id/row_profile_privacy"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:minHeight="50dp"
+					android:background="?android:attr/selectableItemBackground"
+					android:clickable="true"
+					android:focusable="true"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingTop="12dp"
+					android:paddingBottom="12dp">
+
+					<ImageView
+						android:layout_width="36dp"
+						android:layout_height="36dp"
+						android:background="@drawable/bg_icon_circle_accent_soft"
+						android:importantForAccessibility="no"
+						android:padding="8dp"
+						android:src="@drawable/ic_visibility_line"
+						app:tint="@color/colorAccent" />
+
+					<LinearLayout
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:orientation="vertical"
+						android:paddingStart="12dp"
+						android:paddingEnd="8dp">
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Profile privacy"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="15sp"
+							android:textStyle="bold" />
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:paddingTop="2dp"
+							android:text="Bio, age and city"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12.5sp" />
+					</LinearLayout>
+
+					<ImageView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_arrow_right"
+						app:tint="@color/colorAccent" />
+				</LinearLayout>
+
+				<View
+					android:layout_width="match_parent"
+					android:layout_height="0.5dp"
+					android:layout_marginStart="48dp"
+					android:alpha="0.2"
+					android:background="@color/colorTextTertiary" />
+
+				<LinearLayout
+					android:id="@+id/row_privacy_visibility"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:minHeight="50dp"
+					android:background="?android:attr/selectableItemBackground"
+					android:clickable="true"
+					android:focusable="true"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingTop="12dp"
+					android:paddingBottom="12dp">
+
+					<ImageView
+						android:layout_width="36dp"
+						android:layout_height="36dp"
+						android:background="@drawable/bg_icon_circle_accent_soft"
+						android:importantForAccessibility="no"
+						android:padding="8dp"
+						android:src="@drawable/ic_shield_line"
+						app:tint="@color/colorAccent" />
+
+					<LinearLayout
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:orientation="vertical"
+						android:paddingStart="12dp"
+						android:paddingEnd="8dp">
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Privacy and visibility"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="15sp"
+							android:textStyle="bold" />
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:paddingTop="2dp"
+							android:text="What other members can see"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12.5sp" />
+					</LinearLayout>
+
+					<ImageView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_arrow_right"
+						app:tint="@color/colorAccent" />
+				</LinearLayout>
+
+				<View
+					android:layout_width="match_parent"
+					android:layout_height="0.5dp"
+					android:layout_marginStart="48dp"
+					android:alpha="0.2"
+					android:background="@color/colorTextTertiary" />
+
+				<LinearLayout
+					android:id="@+id/row_blocked"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:minHeight="50dp"
+					android:background="?android:attr/selectableItemBackground"
+					android:clickable="true"
+					android:focusable="true"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingTop="12dp"
+					android:paddingBottom="12dp">
+
+					<ImageView
+						android:layout_width="36dp"
+						android:layout_height="36dp"
+						android:background="@drawable/bg_icon_circle_accent_soft"
+						android:importantForAccessibility="no"
+						android:padding="8dp"
+						android:src="@drawable/ic_block_line"
+						app:tint="@color/colorAccent" />
+
+					<LinearLayout
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:orientation="vertical"
+						android:paddingStart="12dp"
+						android:paddingEnd="8dp">
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Blocked users"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="15sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+
+					<ImageView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_arrow_right"
+						app:tint="@color/colorAccent" />
+				</LinearLayout>
+
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="18dp"
+			android:letterSpacing="0.06"
+			android:paddingStart="4dp"
+			android:paddingBottom="8dp"
+			android:text="Safety and alerts"
+			android:textAllCaps="true"
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="13sp"
+			android:textStyle="bold" />
+
+		<com.google.android.material.card.MaterialCardView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:cardBackgroundColor="@color/colorSurface"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeColor="@color/colorCardStroke"
+			app:strokeWidth="1dp">
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:paddingStart="14dp"
+				android:paddingEnd="14dp">
+
+				<LinearLayout
+					android:id="@+id/row_pin_security"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:minHeight="50dp"
+					android:background="?android:attr/selectableItemBackground"
+					android:clickable="true"
+					android:focusable="true"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingTop="12dp"
+					android:paddingBottom="12dp">
+
+					<ImageView
+						android:layout_width="36dp"
+						android:layout_height="36dp"
+						android:background="@drawable/bg_icon_circle_accent_soft"
+						android:importantForAccessibility="no"
+						android:padding="8dp"
+						android:src="@drawable/icon_lock_round_line"
+						app:tint="@color/colorAccent" />
+
+					<LinearLayout
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:orientation="vertical"
+						android:paddingStart="12dp"
+						android:paddingEnd="8dp">
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="PIN and security"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="15sp"
+							android:textStyle="bold" />
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:paddingTop="2dp"
+							android:text="PIN, biometrics, lock"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12.5sp" />
+					</LinearLayout>
+
+					<ImageView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_arrow_right"
+						app:tint="@color/colorAccent" />
+				</LinearLayout>
+
+				<View
+					android:layout_width="match_parent"
+					android:layout_height="0.5dp"
+					android:layout_marginStart="48dp"
+					android:alpha="0.2"
+					android:background="@color/colorTextTertiary" />
+
+				<LinearLayout
+					android:id="@+id/row_notifications"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:minHeight="50dp"
+					android:background="?android:attr/selectableItemBackground"
+					android:clickable="true"
+					android:focusable="true"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingTop="12dp"
+					android:paddingBottom="12dp">
+
+					<ImageView
+						android:layout_width="36dp"
+						android:layout_height="36dp"
+						android:background="@drawable/bg_icon_circle_accent_soft"
+						android:importantForAccessibility="no"
+						android:padding="8dp"
+						android:src="@drawable/ic_notifications_line"
+						app:tint="@color/colorAccent" />
+
+					<LinearLayout
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:orientation="vertical"
+						android:paddingStart="12dp"
+						android:paddingEnd="8dp">
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Notifications"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="15sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+
+					<ImageView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_arrow_right"
+						app:tint="@color/colorAccent" />
+				</LinearLayout>
+
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="18dp"
+			android:letterSpacing="0.06"
+			android:paddingStart="4dp"
+			android:paddingBottom="8dp"
+			android:text="More"
+			android:textAllCaps="true"
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="13sp"
+			android:textStyle="bold" />
+
+		<com.google.android.material.card.MaterialCardView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:cardBackgroundColor="@color/colorSurface"
+			app:cardCornerRadius="16dp"
+			app:cardElevation="0dp"
+			app:strokeColor="@color/colorCardStroke"
+			app:strokeWidth="1dp">
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:paddingStart="14dp"
+				android:paddingEnd="14dp">
+
+				<LinearLayout
+					android:id="@+id/row_all_settings"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:minHeight="50dp"
+					android:background="?android:attr/selectableItemBackground"
+					android:clickable="true"
+					android:focusable="true"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingTop="12dp"
+					android:paddingBottom="12dp">
+
+					<ImageView
+						android:layout_width="36dp"
+						android:layout_height="36dp"
+						android:background="@drawable/bg_icon_circle_accent_soft"
+						android:importantForAccessibility="no"
+						android:padding="8dp"
+						android:src="@drawable/ic_settings_line"
+						app:tint="@color/colorAccent" />
+
+					<LinearLayout
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:orientation="vertical"
+						android:paddingStart="12dp"
+						android:paddingEnd="8dp">
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="All app settings"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="15sp"
+							android:textStyle="bold" />
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:paddingTop="2dp"
+							android:text="Currency, theme, wallets, backup"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12.5sp" />
+					</LinearLayout>
+
+					<ImageView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_arrow_right"
+						app:tint="@color/colorAccent" />
+				</LinearLayout>
+
+			</LinearLayout>
+		</com.google.android.material.card.MaterialCardView>
+
+	</LinearLayout>
+</ScrollView>

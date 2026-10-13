@@ -1,12 +1,9 @@
 package com.harvana.app;
 
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,7 +12,6 @@ import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.harvana.app.firestore.GroupFirestoreManager;
 import com.harvana.app.firestore.UserProfileManager;
-import com.harvana.app.utils.StatusBarUtil;
 import com.harvana.app.utils.UiColors;
 
 import java.util.ArrayList;
@@ -27,25 +23,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 /** Every active loan the user has, across all their groups, with a Pay button that opens that group's Loans tab. */
 public class OpenLoansActivity extends AppCompatActivity {
     private LinearLayout list;
-    private TextView summary;
 
     private static final class Row {
-        String groupId, groupName, nodeId = "", groupPhoto = "", groupType = "";
+        String groupId, groupName, nodeId = "", groupPhoto = "", groupType = "", asset = "";
         double principal, repaid;
     }
 
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        ScrollView sv = new ScrollView(this);
-        sv.setBackgroundColor(UiColors.background());
-        list = new LinearLayout(this);
-        list.setOrientation(LinearLayout.VERTICAL);
-        int p = dp(16);
-        list.setPadding(p, p, p, p);
-        sv.addView(list);
-        com.harvana.app.utils.AppBar.setContent(this, sv, "Open loans", "Loans you have taken across your groups");
-        summary = tv("Loading your loans…", 14, false, UiColors.textSecondary());
+        com.harvana.app.utils.AppBar.setContent(this, R.layout.activity_list_screen, "Open loans", "Loans you have taken across your groups");
+        list = findViewById(R.id.list_screen_items);
         list.addView(com.harvana.app.utils.Shimmer.rows(this, 3));
     }
 
@@ -80,6 +68,7 @@ public class OpenLoansActivity extends AppCompatActivity {
                     r.groupId = e.firestoreGroupId; r.groupName = e.name + " (on the network)";
                     r.principal = e.position.borrowedHarv; r.repaid = e.position.repaidHarv;
                     r.nodeId = e.nodeId;
+                    r.asset = e.asset == null ? "" : e.asset;
                     rows.add(r);
                 }
             }
@@ -131,67 +120,57 @@ public class OpenLoansActivity extends AppCompatActivity {
 
     private void show(List<Row> rows) {
         list.removeAllViews();
-        double outstanding = 0;
-        for (Row r : rows) outstanding += Math.max(0, r.principal - r.repaid);
         if (rows.isEmpty()) {
-            list.addView(tv("You have no open loans.", 15, true, UiColors.textPrimary()));
-            list.addView(tv("When you borrow from a group, the loan shows here with a Pay button.", 13, false, UiColors.textSecondary()));
+            TextView e = (TextView) getLayoutInflater().inflate(R.layout.item_list_empty, list, false);
+            e.setText("No open loans.");
+            list.addView(e);
             return;
         }
-        list.addView(tv(rows.size() + (rows.size() == 1 ? " open loan" : " open loans") + " · "
-            + fmt(outstanding) + " " + CoinInfo.ticker() + " still to repay", 14, true, UiColors.textPrimary()));
+        // Summary: how many, and what is still owed in each coin.
+        java.util.Map<String, Double> owed = new java.util.LinkedHashMap<>();
+        for (Row r : rows) owed.merge(r.asset, Math.max(0, r.principal - r.repaid), Double::sum);
+        com.harvana.app.utils.InfoTable sum = new com.harvana.app.utils.InfoTable(this);
+        sum.row(R.drawable.ic_tx_loan_line, "Open loans", String.valueOf(rows.size()));
+        for (java.util.Map.Entry<String, Double> o : owed.entrySet()) {
+            sum.row(com.harvana.app.group.CoinLogo.of(this, o.getKey()), "Still to pay", fmt(o.getValue()) + " " + com.harvana.app.group.CoinLogo.symbol(o.getKey()));
+        }
+        list.addView(sum.view());
         for (Row r : rows) list.addView(card(r));
     }
 
+    /** One loan: res/layout/item_open_loan.xml. */
     private View card(Row r) {
-        LinearLayout c = new LinearLayout(this);
-        c.setOrientation(LinearLayout.VERTICAL);
-        c.setBackgroundColor(UiColors.surface());
-        int p = dp(14);
-        c.setPadding(p, p, p, p);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(10);
-        c.setLayoutParams(lp);
+        View c = getLayoutInflater().inflate(R.layout.item_open_loan, list, false);
         double left = Math.max(0, r.principal - r.repaid);
-        LinearLayout head = new LinearLayout(this);
-        head.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        android.widget.ImageView face = new android.widget.ImageView(this);
-        com.harvana.app.utils.GroupRing.show(face, r.groupType, r.groupPhoto, R.drawable.ic_coin_harv);
-        head.addView(face, new LinearLayout.LayoutParams(dp(40), dp(40)));
-        TextView groupTitle = tv(r.groupName, 16, true, UiColors.textPrimary());
-        groupTitle.setPadding(dp(12), 0, 0, 0);
-        head.addView(groupTitle, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        c.addView(head);
-        c.addView(tv("Borrowed " + fmt(r.principal) + " " + CoinInfo.ticker() + " · Repaid " + fmt(r.repaid), 13, false, UiColors.textSecondary()));
-        c.addView(tv("Still to pay: " + fmt(left) + " " + CoinInfo.ticker(), 14, true, UiColors.accent()));
-        MaterialButton pay = new MaterialButton(this);
-        pay.setText("Pay");
-        pay.setAllCaps(false);
+        String coin = com.harvana.app.group.CoinLogo.symbol(r.asset);
+        com.harvana.app.utils.GroupRing.show(c.findViewById(R.id.iv_loan_group), r.groupType, r.groupPhoto, R.drawable.ic_coin_harv);
+        com.harvana.app.group.CoinLogo.show(c.findViewById(R.id.iv_loan_coin), r.asset);
+        ((TextView) c.findViewById(R.id.tv_loan_group_name)).setText(r.groupName);
+        com.harvana.app.utils.InfoTable t = new com.harvana.app.utils.InfoTable(this);
+        t.row(R.drawable.ic_tx_loan_line, "Borrowed", fmt(r.principal) + " " + coin);
+        t.row(R.drawable.ic_check_circle_line, "Repaid", fmt(r.repaid) + " " + coin);
+        t.row(R.drawable.ic_wallet_line, "Still to pay", fmt(left) + " " + coin, UiColors.accent());
+        ((LinearLayout) c.findViewById(R.id.loan_figures)).addView(t.view());
+        MaterialButton pay = c.findViewById(R.id.btn_loan_pay);
+        if (!r.nodeId.isEmpty()) pay.setText("Open group to repay");
         pay.setOnClickListener(v -> {
             Intent i = new Intent(this, GroupDetailsActivity.class);
             i.putExtra("groupId", r.groupId);
             i.putExtra("tab", 3);                       // the group's Loans tab
             startActivity(i);
         });
-        if (!r.nodeId.isEmpty()) pay.setText("Open group to repay");
-        c.addView(pay);
         return c;
     }
 
     private void showError(String e) {
         list.removeAllViews();
-        list.addView(tv("Couldn't load your loans: " + e, 14, false, UiColors.error()));
+        TextView t = (TextView) getLayoutInflater().inflate(R.layout.item_list_empty, list, false);
+        t.setText("Couldn't load your loans: " + e);
+        t.setTextColor(UiColors.error());
+        list.addView(t);
     }
 
     private static String fmt(double v) { return v == Math.rint(v) ? String.valueOf((long) v) : String.format(Locale.US, "%.2f", v); }
     private static double n(Object o) { return o instanceof Number ? ((Number) o).doubleValue() : 0; }
     private static String s(Object o) { return o == null ? "" : String.valueOf(o).trim(); }
-    private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
-    private TextView tv(String t, int sp, boolean bold, int color) {
-        TextView v = new TextView(this);
-        v.setText(t); v.setTextSize(sp); v.setTextColor(color);
-        if (bold) v.setTypeface(null, Typeface.BOLD);
-        v.setPadding(0, dp(3), 0, dp(3));
-        return v;
-    }
 }

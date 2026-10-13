@@ -298,13 +298,10 @@ public final class CoinDetailPages {
         private void moreInfo(LinearLayout body, CoinCatalog.Coin coin, String st) {
             java.util.List<String[]> links = new java.util.ArrayList<>();
             boolean harvana = st != null || coin == null || coin.nativeHarv;
+            links.add(new String[]{"Explorer", ""});                         // this coin's explorer, for this wallet
             if (harvana) {
                 links.add(new String[]{"Official website", "https://harvannaprotocol.com/"});
-                links.add(new String[]{"Explorer", com.harvana.app.web3.Web3Home.EXPLORER_URL});
                 links.add(new String[]{"Harvana Swap", com.harvana.app.web3.Web3Home.SWAP_URL});
-            } else {
-                String ex = CoinCatalog.explorerUrl(coin, address());
-                if (!ex.isEmpty()) links.add(new String[]{"Explorer", ex});
             }
             if (links.isEmpty()) return;
             body.addView(label("MORE INFO"));
@@ -316,7 +313,10 @@ public final class CoinDetailPages {
                 c.setChipIconTint(android.content.res.ColorStateList.valueOf(com.harvana.app.utils.UiColors.accent()));
                 c.setChipBackgroundColor(android.content.res.ColorStateList.valueOf(com.harvana.app.utils.UiColors.surfaceAlt()));
                 c.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
-                c.setOnClickListener(v -> com.harvana.app.web3.Web3Home.open(requireContext(), l[1]));
+                c.setOnClickListener(v -> {
+                    if (l[1].isEmpty()) { if (getActivity() instanceof CoinDetailActivity) ((CoinDetailActivity) getActivity()).openExplorer(); }
+                    else com.harvana.app.web3.Web3Home.open(requireContext(), l[1]);
+                });
                 g.addView(c);
             }
             body.addView(g);

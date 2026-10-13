@@ -238,10 +238,14 @@ public class CoinDetailActivity extends AppCompatActivity {
 			intent.putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, openCoin == null ? "HARV" : openCoin.key);
 			startActivityForResult(intent, SEND_ASSET_REQUEST_CODE);
 		});
-		View btnExplorer = findViewById(R.id.btn_explorer);
-		if (btnExplorer != null) btnExplorer.setOnClickListener(_v -> startActivity(new Intent(CoinDetailActivity.this, ExplorerActivity.class)
+		// The Explorer button moved into Overview's "More info" links (owner, 13 Oct 2026); the old full-width one stays hidden.
+	}
+
+	/** This coin's explorer page for the shown address (Overview → More info → Explorer). */
+	public void openExplorer() {
+		startActivity(new Intent(CoinDetailActivity.this, ExplorerActivity.class)
 				.putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, openCoin == null ? "HARV" : openCoin.key)
-				.putExtra("walletAddress", walletAddress == null ? "" : walletAddress)));
+				.putExtra("walletAddress", walletAddress == null ? "" : walletAddress));
 	}
 	
 	private void initializeLogic() {

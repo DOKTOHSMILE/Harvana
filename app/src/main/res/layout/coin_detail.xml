@@ -398,6 +398,7 @@
 			</androidx.core.widget.NestedScrollView>
 			<com.google.android.material.button.MaterialButton
 				android:id="@+id/btn_explorer"
+				android:visibility="gone"
 				android:layout_width="match_parent"
 				android:layout_height="48dp"
 				android:layout_marginStart="16dp"

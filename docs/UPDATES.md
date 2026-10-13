@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: coin page without the large Explorer button
+
+- The full-width Explorer button above Receive/Send is gone.
+- Overview → More info → **Explorer** opens the same page it did: this coin's explorer for this wallet (HARV and stable coins on the Harvana explorer, other coins on their own chain's explorer). Every coin has the link.
+
+App build only.
+
 ## 13 Oct 2026: "MetaMask" in a dApp's wallet list connects to the Harvana wallet
 
 | Part | Now |

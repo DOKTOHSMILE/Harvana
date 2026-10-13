@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Switch network: where the request comes from, the current network to the new one, then Cancel and Switch network. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:paddingStart="20dp"
+	android:paddingTop="16dp"
+	android:paddingEnd="20dp"
+	android:paddingBottom="20dp">
+
+	<TextView
+		android:id="@+id/tv_network_sheet_origin"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal"
+		android:layout_marginBottom="12dp"
+		android:background="@drawable/bg_pill_outline"
+		android:drawableStart="@drawable/ic_language_line"
+		android:drawablePadding="6dp"
+		android:paddingStart="12dp"
+		android:paddingTop="6dp"
+		android:paddingEnd="14dp"
+		android:paddingBottom="6dp"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:visibility="gone" />
+
+	<TextView
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:text="Allow this site to switch the network?"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="20sp"
+		android:textStyle="bold" />
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="20dp"
+		android:gravity="center_vertical"
+		android:orientation="horizontal">
+
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:gravity="center_horizontal"
+			android:orientation="vertical">
+
+			<ImageView
+				android:id="@+id/iv_switch_from"
+				android:layout_width="56dp"
+				android:layout_height="56dp"
+				android:background="@drawable/bg_pill_outline"
+				android:importantForAccessibility="no"
+				android:padding="10dp"
+				android:src="@drawable/ic_coin_generic" />
+
+			<TextView
+				android:id="@+id/tv_switch_from"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="8dp"
+				android:gravity="center"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="14sp" />
+		</LinearLayout>
+
+		<ImageView
+			android:layout_width="32dp"
+			android:layout_height="32dp"
+			android:background="@drawable/bg_circle_accent"
+			android:importantForAccessibility="no"
+			android:padding="6dp"
+			android:src="@drawable/icon_arrow_forward_round_line"
+			app:tint="@color/colorTextOnAccent" />
+
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:gravity="center_horizontal"
+			android:orientation="vertical">
+
+			<ImageView
+				android:id="@+id/iv_switch_to"
+				android:layout_width="56dp"
+				android:layout_height="56dp"
+				android:background="@drawable/bg_pill_outline"
+				android:importantForAccessibility="no"
+				android:padding="10dp"
+				android:src="@drawable/ic_coin_generic" />
+
+			<TextView
+				android:id="@+id/tv_switch_to"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="8dp"
+				android:gravity="center"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="14sp" />
+		</LinearLayout>
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="16dp"
+		android:orientation="horizontal">
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_network_sheet_cancel"
+			style="@style/HarvanaButton.Outlined"
+			android:layout_width="0dp"
+			android:layout_height="52dp"
+			android:layout_marginEnd="6dp"
+			android:layout_weight="1"
+			android:text="Cancel" />
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_network_sheet_switch"
+			style="@style/HarvanaButton"
+			android:layout_width="0dp"
+			android:layout_height="52dp"
+			android:layout_marginStart="6dp"
+			android:layout_weight="1"
+			android:text="Switch network" />
+	</LinearLayout>
+</LinearLayout>

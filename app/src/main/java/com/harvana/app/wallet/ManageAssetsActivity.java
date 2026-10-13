@@ -62,7 +62,7 @@ public class ManageAssetsActivity extends AppCompatActivity {
         super.onCreate(b);
         com.harvana.app.utils.AppBar.setContent(this, R.layout.activity_manage_assets, "Add coins", null);
         EditText filter = findViewById(R.id.et_manage_assets_search);
-        findViewById(R.id.btn_manage_assets_add_chain).setOnClickListener(v -> CustomAssets.editChain(this, null, this::reload));
+        findViewById(R.id.btn_manage_assets_add_chain).setOnClickListener(v -> NetworksActivity.open(this, this::reload));
         RecyclerView list = findViewById(R.id.rv_manage_assets);
         list.setHasFixedSize(true);
         list.setItemViewCacheSize(20);

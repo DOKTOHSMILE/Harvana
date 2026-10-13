@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Add a network like MetaMask
+
+- New Networks screen (`wallet/NetworksActivity`, `activity_networks.xml`) with two tabs, each its own fragment:
+  - Popular (`PopularNetworksFragment`, `fragment_networks_popular.xml`, `item_network.xml`): Ethereum, Arbitrum One, Avalanche, BNB Smart Chain, Base, Linea, OP Mainnet, Polygon, zkSync Era, Celo, Gnosis, Scroll, Mantle, Blast, Core, Cronos, Fantom, Moonbeam, Kava; chain ID and currency on each row; Add fetches it from the chain list and finds an RPC that answers; Added on the ones the wallet has.
+  - Custom networks (`CustomNetworkFragment`, `fragment_network_custom.xml`): Network name, RPC URL, Chain ID (decimal or 0x hex), Symbol, Block explorer URL. The RPC is asked for its chain ID while typing: an empty Chain ID is filled in, a different one shows "answered with a different chain ID" and Add stays off. A symbol that differs from the chain list gets a warning. "Other protocol (NEAR)" opens the old full form.
+- Approval sheet before anything is added (`sheet_approve_network.xml`): network name, Network URL, Chain ID, Currency symbol, View all details (full RPC, block explorer, decimals), a warning when the chain list does not know the chain ID, Cancel / Approve.
+- dApp browser: `wallet_addEthereumChain` checks the site's RPC answers with the chain ID it claims, then shows the approval sheet with the site on top and switches to it; `wallet_switchEthereumChain` shows "Allow this site to switch the network?" (from → to, `sheet_switch_network.xml`). The network picker lists added networks and has Add network. Transactions on an added network use its RPC, chain ID and coin symbol.
+- "Add a chain" in Add coins opens the Networks screen.
+
 ## 13 Oct 2026 — Screens built in code now have XML layouts
 
 - The toolbar shell (`screen_app_bar.xml`) and the table card (`view_info_table.xml`, `item_info_section.xml`, `item_info_note.xml`, `item_info_divider.xml`) are XML.

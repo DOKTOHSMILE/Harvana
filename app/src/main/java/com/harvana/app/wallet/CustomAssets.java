@@ -230,6 +230,45 @@ public final class CustomAssets {
 
     // ── fetching chain and token data ──────────────────────────────────────
 
+    /**
+     * What the chain registry (ethereum-lists, the list MetaMask and Chainlist read) says about a chain ID: name, coin symbol,
+     * decimals, explorer and icon. No RPC is tried. Runs off the main thread; null with an error when the ID is not listed.
+     */
+    public static void registry(long chainId, Got cb) {
+        new Thread(() -> {
+            try {
+                JSONObject j = getJson(REGISTRY + "chains/eip155-" + chainId + ".json");
+                Asset a = new Asset();
+                a.kind = "CHAIN";
+                a.chainId = chainId;
+                a.chainName = j.optString("name", "Chain " + chainId);
+                a.name = a.chainName;
+                JSONObject cur = j.optJSONObject("nativeCurrency");
+                a.symbol = cur == null ? "" : cur.optString("symbol", "");
+                a.decimals = cur == null ? 18 : cur.optInt("decimals", 18);
+                JSONArray ex = j.optJSONArray("explorers");
+                if (ex != null && ex.length() > 0 && ex.optJSONObject(0) != null) a.explorer = trimSlash(ex.optJSONObject(0).optString("url", ""));
+                a.icon = chainIcon(j.optString("icon", ""));
+                MAIN.post(() -> cb.got(a, null));
+            } catch (Exception e) {
+                MAIN.post(() -> cb.got(null, "Chain ID " + chainId + " is not in the chain list."));
+            }
+        }).start();
+    }
+
+    /** The chain ID an RPC answers with (eth_chainId). Blocking: run off the main thread. */
+    public static long rpcChainId(String rpcUrl) throws Exception { return chainIdOf(rpcUrl); }
+
+    /** Saves an added network (or replaces the one with the same chain ID). */
+    public static void addNetwork(Context c, Asset a) { add(c, a); }
+
+    /** The added EVM networks. */
+    public static List<Asset> networks(Context c) {
+        List<Asset> out = new ArrayList<>();
+        for (Asset a : all(c)) if (!a.token() && "EVM".equals(a.family)) out.add(a);
+        return out;
+    }
+
     /** A chain from the registry by chain ID, with an RPC that answered with that chain ID. Runs off the main thread. */
     public static void fetchChain(long chainId, Got cb) {
         new Thread(() -> {
@@ -619,7 +658,7 @@ public final class CustomAssets {
         LinearLayout root = column(c);
         root.addView(title(c, "Add"));
         root.addView(button(c, "Search a token by contract address", v -> { d.dismiss(); search(c, "", onAdded); }));
-        root.addView(button(c, "A chain", v -> { d.dismiss(); editChain(c, null, onAdded); }));
+        root.addView(button(c, "A chain", v -> { d.dismiss(); NetworksActivity.open(c, onAdded); }));
         root.addView(button(c, "A token on a chain", v -> { d.dismiss(); addToken(c, null, onAdded); }));
         root.addView(button(c, "Tokens on a chain", v -> {
             d.dismiss();

@@ -591,7 +591,13 @@ public class DappBrowserActivity extends AppCompatActivity {
 
     private Net.Evm net() { return Web3Signer.net(chainKey); }
 
-    private static String coin(String key) { return "BNB".equals(key) ? "BNB" : "POL".equals(key) ? "POL" : "ETH"; }
+    private static String coin(String key) {
+        if (key != null && key.startsWith("C:")) {
+            com.harvana.app.wallet.CustomAssets.Asset a = com.harvana.app.wallet.CustomAssets.find(key);
+            if (a != null && !a.symbol.isEmpty()) return a.symbol;
+        }
+        return "BNB".equals(key) ? "BNB" : "POL".equals(key) ? "POL" : "ETH";
+    }
 
     private String chainHex() { return "0x" + Long.toHexString(net().chainId); }
 
@@ -604,7 +610,8 @@ public class DappBrowserActivity extends AppCompatActivity {
             case "BNB": return R.drawable.ic_coin_bnb;
             case "POL": return R.drawable.ic_coin_pol;
             case "BASE": return R.drawable.ic_coin_base;
-            default: return R.drawable.ic_coin_eth;
+            case "ETH": return R.drawable.ic_coin_eth;
+            default: return key != null && key.startsWith("C:") ? R.drawable.ic_coin_generic : R.drawable.ic_coin_eth;
         }
     }
 
@@ -650,6 +657,16 @@ public class DappBrowserActivity extends AppCompatActivity {
             Net.Evm n = Web3Signer.net(key);
             box.addView(chainRow(sheet, key, n.name, "Chain ID " + n.chainId + (account == null ? "" : " · " + shortAddr(account)), !harvanaShown && key.equals(chainKey)));
         }
+        for (com.harvana.app.wallet.CustomAssets.Asset a : com.harvana.app.wallet.CustomAssets.networks(this)) {
+            String key = "C:" + a.chainId;
+            box.addView(chainRow(sheet, key, a.chainName, "Chain ID " + a.chainId + (account == null ? "" : " · " + shortAddr(account)), !harvanaShown && key.equals(chainKey)));
+        }
+        com.google.android.material.button.MaterialButton addNet = (com.google.android.material.button.MaterialButton)
+                getLayoutInflater().inflate(R.layout.item_list_button, box, false);
+        addNet.setText("Add network");
+        addNet.setIconResource(R.drawable.icon_add_circle_outline_round);
+        addNet.setOnClickListener(v -> { sheet.dismiss(); com.harvana.app.wallet.NetworksActivity.open(this, null); });
+        box.addView(addNet);
         sheet.setContentView(box);
         sheet.show();
     }
@@ -664,7 +681,7 @@ public class DappBrowserActivity extends AppCompatActivity {
         if (selected) bg.setStroke(Math.max(1, dp(1)), UiColors.accent());
         row.setBackground(bg);
         ImageView icon = new ImageView(this);
-        icon.setImageResource(chainIcon(key));
+        com.harvana.app.wallet.NetworkSheets.icon(icon, key, null);
         row.addView(icon, new LinearLayout.LayoutParams(dp(36), dp(36)));
         LinearLayout col = new LinearLayout(this);
         col.setOrientation(LinearLayout.VERTICAL);
@@ -807,14 +824,45 @@ public class DappBrowserActivity extends AppCompatActivity {
                 ok(id, JSONObject.NULL);
                 emit("accountsChanged", new JSONArray());
                 return;
-            case "wallet_switchEthereumChain":
+            case "wallet_switchEthereumChain": {
+                long want = chainIdParam(params.optJSONObject(0));
+                String key = keyFor(want);
+                if (key == null) { error(id, 4902, "Unrecognized chain ID. Try adding the chain using wallet_addEthereumChain first."); return; }
+                askSwitch(origin, id, key);
+                return;
+            }
             case "wallet_addEthereumChain": {
                 JSONObject p = params.optJSONObject(0);
-                String want = p == null ? "" : p.optString("chainId", "");
-                for (String k : Web3Signer.CHAINS) {
-                    if (("0x" + Long.toHexString(Web3Signer.net(k).chainId)).equalsIgnoreCase(want)) { switchChain(k); ok(id, JSONObject.NULL); return; }
-                }
-                error(id, 4902, "Unrecognized chain."); return;
+                long want = chainIdParam(p);
+                if (want <= 0) { error(id, -32602, "Invalid chainId."); return; }
+                String have = keyFor(want);
+                if (have != null) { askSwitch(origin, id, have); return; }      // already in the wallet: MetaMask asks to switch
+                com.harvana.app.wallet.CustomAssets.Asset n = networkFrom(p, want);
+                if (n == null) { error(id, -32602, "Expected an https RPC URL in rpcUrls."); return; }
+                if (!claim(id)) return;
+                io.execute(() -> {
+                    long answer;
+                    try { answer = com.harvana.app.wallet.CustomAssets.rpcChainId(n.rpc); } catch (Exception e) { answer = -1; }
+                    final long got = answer;
+                    ui.post(() -> {
+                        if (got != want) {
+                            release();
+                            error(id, -32602, got < 0 ? "Could not fetch chain ID. Is your RPC URL correct?" : "Chain ID returned by RPC URL does not match (" + got + ").");
+                            return;
+                        }
+                        com.harvana.app.wallet.CustomAssets.registry(want, (listed, err) -> {
+                            if (listed != null && n.icon.isEmpty()) n.icon = listed.icon;
+                            com.harvana.app.wallet.NetworkSheets.approve(this, n, origin, listed != null, () -> {
+                                release();
+                                if (!origin.equals(pageOrigin)) { error(id, 4001, "User rejected the request."); return; }
+                                com.harvana.app.wallet.CustomAssets.addNetwork(this, n);
+                                switchChain("C:" + want);
+                                ok(id, JSONObject.NULL);
+                            }, () -> { release(); error(id, 4001, "User rejected the request."); });
+                        });
+                    });
+                });
+                return;
             }
             case "eth_sign":
             case "eth_signTransaction":
@@ -848,6 +896,61 @@ public class DappBrowserActivity extends AppCompatActivity {
                 }
                 error(id, 4200, "Method not supported.");
         }
+    }
+
+    /** "0x…" (or a number) from a wallet_*EthereumChain request; -1 when missing. */
+    private static long chainIdParam(JSONObject p) {
+        if (p == null) return -1;
+        String c = p.optString("chainId", "").trim().toLowerCase(java.util.Locale.US);
+        try { return c.startsWith("0x") ? Long.parseLong(c.substring(2), 16) : Long.parseLong(c); } catch (Exception e) { return -1; }
+    }
+
+    /** The wallet's key for a chain ID: one of its own chains, or a network the person added ("C:<id>"); null when neither. */
+    private static String keyFor(long chainId) {
+        if (chainId <= 0) return null;
+        for (String k : Web3Signer.CHAINS) if (Web3Signer.net(k).chainId == chainId) return k;
+        return com.harvana.app.wallet.CustomAssets.find("C:" + chainId) != null ? "C:" + chainId : null;
+    }
+
+    /** A network from a site's wallet_addEthereumChain request (EIP-3085); null without an https RPC. */
+    private static com.harvana.app.wallet.CustomAssets.Asset networkFrom(JSONObject p, long chainId) {
+        com.harvana.app.wallet.CustomAssets.Asset a = new com.harvana.app.wallet.CustomAssets.Asset();
+        a.kind = "CHAIN";
+        a.family = "EVM";
+        a.chainId = chainId;
+        JSONArray rpcs = p.optJSONArray("rpcUrls");
+        if (rpcs != null) for (int i = 0; i < rpcs.length() && a.rpc.isEmpty(); i++) {
+            String r = rpcs.optString(i, "").trim();
+            if (r.startsWith("https://")) a.rpc = r;
+        }
+        if (a.rpc.isEmpty()) return null;
+        a.chainName = p.optString("chainName", "").trim();
+        if (a.chainName.isEmpty()) a.chainName = "Chain " + chainId;
+        a.name = a.chainName;
+        JSONObject cur = p.optJSONObject("nativeCurrency");
+        a.symbol = cur == null ? "ETH" : cur.optString("symbol", "ETH").trim();
+        a.decimals = cur == null ? 18 : cur.optInt("decimals", 18);
+        JSONArray ex = p.optJSONArray("blockExplorerUrls");
+        String e = ex == null ? "" : ex.optString(0, "").trim();
+        while (e.endsWith("/")) e = e.substring(0, e.length() - 1);
+        a.explorer = e.startsWith("https://") ? e : "";
+        JSONArray icons = p.optJSONArray("iconUrls");
+        String ic = icons == null ? "" : icons.optString(0, "");
+        a.icon = ic.startsWith("https://") ? ic : "";
+        return a;
+    }
+
+    /** "Allow this site to switch the network?": from the browser's network to {@code key}. */
+    private void askSwitch(String origin, int id, String key) {
+        if (!harvanaShown && key.equals(chainKey)) { ok(id, JSONObject.NULL); return; }
+        if (!claim(id)) return;
+        com.harvana.app.wallet.NetworkSheets.switchNetwork(this, origin, harvanaShown ? "HARV" : chainKey, harvanaShown ? "Harvana" : net().name,
+                key, Web3Signer.net(key).name, () -> {
+                    release();
+                    if (!origin.equals(pageOrigin)) { error(id, 4001, "User rejected the request."); return; }
+                    switchChain(key);
+                    ok(id, JSONObject.NULL);
+                }, () -> { release(); error(id, 4001, "User rejected the request."); });
     }
 
     /** Only one request may wait for the person; it is refused if left for 5 minutes. */

@@ -119,6 +119,13 @@ public final class Net {
     }
 
     public static Evm evm(String key) {
+        // A network the person added ("C:<chain id>"): its own RPC, chain ID and explorer.
+        if (key != null && key.startsWith("C:")) {
+            CustomAssets.Asset a = CustomAssets.find(key);
+            if (a != null && !a.rpc.isEmpty()) {
+                return new Evm(a.rpc.split(",")[0].trim(), a.chainId, a.scout, a.chainName, a.txPage(""), a.addressPage(""));
+            }
+        }
         if (!TEST) {
             switch (key == null ? "" : key) {
                 case "BNB": return new Evm("https://bsc-rpc.publicnode.com", 56, "", "BNB Chain", "https://bscscan.com/tx/", "https://bscscan.com/address/");

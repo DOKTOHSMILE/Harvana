@@ -286,12 +286,18 @@ public class WalletActivityFragmentActivity extends Fragment {
 								item.put("status", tx.optString("status", "confirmed"));
 								
 								double displayFee;
-								if (tx.has("gas") && !tx.isNull("gas")) {
+								String feeSymbol = com.harvana.app.CoinInfo.ticker();
+								if (husd && tx.optLong("gas", 0L) == 0L && tx.has("coinFeeRaw")) {
+									// A coin transfer that paid its tFare in the coin (no HARV): the node gives the fare it took.
+									displayFee = tx.optLong("coinFeeRaw", 0L) / (double) com.harvana.app.husd.HusdClient.UNIT;
+									feeSymbol = com.harvana.app.husd.Stable.symbol(stableAsset);
+								} else if (tx.has("gas") && !tx.isNull("gas")) {
 									displayFee = com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay(tx.optLong("gas", 0L));
 								} else {
 									displayFee = tx.optDouble("harvFee", tx.optDouble("fee_harv", 0.0));
 								}
 								item.put("harvFee", displayFee);
+								item.put("feeSymbol", feeSymbol);
 								item.put("burnAmount", tx.optDouble("burnAmount", 0.0));
 								item.put("blockNumber", tx.optLong("blockHeight", 0L));
 								item.put("nonce", tx.optLong("nonce", 0L));
@@ -611,6 +617,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 					}
 					
 					if (feeObj instanceof Number)   intent.putExtra("harvFee", ((Number) feeObj).doubleValue());
+					if (item.get("feeSymbol") != null) intent.putExtra("feeSymbol", String.valueOf(item.get("feeSymbol")));
 					if (burnObj instanceof Number)  intent.putExtra("burnAmount", ((Number) burnObj).doubleValue());
 					if (blockObj instanceof Number) intent.putExtra("blockNumber", ((Number) blockObj).longValue());
 					if (nonceObj instanceof Number) intent.putExtra("nonce", ((Number) nonceObj).longValue());
@@ -674,6 +681,12 @@ public class WalletActivityFragmentActivity extends Fragment {
 		iv.clearColorFilter();
 		iv.setImageTintList(null);
 		iv.setPadding(0, 0, 0, 0);
+		// A coin is round: clipped to a circle, so nothing square shows around it in the round bubble.
+		iv.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
+		iv.setOutlineProvider(new android.view.ViewOutlineProvider() {
+			@Override public void getOutline(android.view.View v, android.graphics.Outline o) { o.setOval(0, 0, v.getWidth(), v.getHeight()); }
+		});
+		iv.setClipToOutline(true);
 	}
 
 	private java.util.ArrayList<java.util.HashMap<String, Object>> filterFailedTx(

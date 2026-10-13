@@ -268,7 +268,10 @@ public class ReceiptActivity extends AppCompatActivity {
 			tv_memo.setTag(memo);
 		}
 		
-		tv_network_fee.setText(_formatUIBalance(harvFee) + " " + tokenSymbol);
+		// The fare's own coin: HARV when it was paid in HARV, the coin when a coin transfer paid it in the coin.
+		String feeSymbol = getIntent().getStringExtra("feeSymbol");
+		if (feeSymbol == null || feeSymbol.isEmpty()) feeSymbol = tokenSymbol;
+		tv_network_fee.setText(_formatUIBalance(harvFee) + " " + feeSymbol);
 		tv_burn_amount.setText(_formatUIBalance(burnAmount) + " " + tokenSymbol);
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("MMM d, yyyy | h:mma", Locale.US);

@@ -151,12 +151,8 @@ public class TrustScoreActivity extends AppCompatActivity {
             bld.append("\n").append(address);
             who.setText(bld.toString());
         }));
-        Object summary = person.get("summary");
-        if (summary != null && !String.valueOf(summary).isEmpty()) {
-            TextView sum = tv(String.valueOf(summary), 13, false, UiColors.textSecondary());
-            sum.setPadding(dp(4), dp(8), dp(4), 0);
-            root.addView(sum);
-        }
+        // No summary line here: it is the active wallet's own record ("8% Bronze · not bound"), while this page shows the
+        // person, all their wallets together. The tier card above already carries the person's figure.
 
         LinearLayout saved = cardBox();
         saved.addView(tv("Personhood detail", 16, true, UiColors.textPrimary()));

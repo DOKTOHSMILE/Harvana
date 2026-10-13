@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Background when the tab is SELECTED (Pill shape with 5dp margin) -->
+    <!-- Background when the tab is SELECTED (a pill kept 4dp in from the sides, so the end tabs are never cut by the screen edge) -->
     <item android:state_checked="true">
-        <inset android:insetLeft="0dp"
-               android:insetRight="0dp"
+        <inset android:insetLeft="4dp"
+               android:insetRight="4dp"
                android:insetTop="5dp"
                android:insetBottom="5dp">
             <shape android:shape="rectangle">

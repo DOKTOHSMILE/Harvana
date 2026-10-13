@@ -650,7 +650,6 @@ public class PublicProfileActivity extends AppCompatActivity {
             lp.topMargin = SocialUi.dp(this, 12);
             bind.setLayoutParams(lp);
             rows.addView(bind);
-            rows.addView(SocialUi.text(this, "Ties your wallet to this phone and lifts the base score. No ID is uploaded. A phone belongs to one person; all your own wallets can be bound on it.", 12, false, UiColors.textSecondary()));
         }
     }
 
@@ -679,6 +678,35 @@ public class PublicProfileActivity extends AppCompatActivity {
                 return;
             }
             String shortH = holder.length() > 14 ? holder.substring(0, 8) + "\u2026" + holder.substring(holder.length() - 6) : holder;
+            // The wallet holding the phone may already be on the account (listed as "Also yours"): then there is nothing to add,
+            // and the network binds this wallet too once it sees both are the same person.
+            com.harvana.app.sync.NodeIdentityClient.myWallets(new com.harvana.app.sync.NodeIdentityClient.Callback() {
+                @Override public void onSuccess(org.json.JSONObject j) {
+                    org.json.JSONArray ws = j.optJSONArray("wallets");
+                    boolean mine = false;
+                    for (int i = 0; ws != null && i < ws.length(); i++) {
+                        org.json.JSONObject w = ws.optJSONObject(i);
+                        if (w != null && holder.equalsIgnoreCase(w.optString("address"))) mine = true;
+                    }
+                    final boolean already = mine;
+                    runOnUiThread(() -> { if (already) heldByMine(shortH); else askToAdopt(holder, shortH); });
+                }
+                @Override public void onError(String e) { runOnUiThread(() -> askToAdopt(holder, shortH)); }
+            });
+        }));
+    }
+
+    /** The phone is held by another wallet already on the account: one person, so the phone counts as bound. */
+    private void heldByMine(String shortH) {
+        if (isFinishing()) return;
+        message("Bind this device", "Bound · " + shortH);
+        factsCache = null;
+        load();
+    }
+
+    private void askToAdopt(String holder, String shortH) {
+        if (isFinishing()) return;
+        {
             com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(this)
                     .setTitle("Add your other wallet first")
                     .setMessage("This phone is bound to " + shortH + ", a wallet kept on this phone that is not on your account yet. "
@@ -686,7 +714,7 @@ public class PublicProfileActivity extends AppCompatActivity {
                     .setNegativeButton("Not now", (d, w) -> { factsCache = null; load(); })
                     .setPositiveButton("Add and bind", (d, w) -> com.harvana.app.sync.NodeLinkManager.adoptHolderThenBind(this, holder,
                             s -> runOnUiThread(() -> afterBind(s)))));
-        }));
+        }
     }
 
     private void message(String title, String body) {
@@ -717,9 +745,6 @@ public class PublicProfileActivity extends AppCompatActivity {
                         String shortA = a.length() > 14 ? a.substring(0, 8) + "\u2026" + a.substring(a.length() - 6) : a;
                         list.addView(factRow(w.optBoolean("main") ? "Main wallet" : "Also yours", shortA));
                     }
-                    list.addView(SocialUi.text(PublicProfileActivity.this,
-                        "Every wallet you sign in with is added to you, signed by that wallet. Your profile stays on your main wallet, and what any of them does counts toward your trust and badges.",
-                        12, false, UiColors.textSecondary()));
                 });
             }
             @Override public void onError(String e) { }      // older network or offline: the list just isn't shown
@@ -1174,10 +1199,6 @@ public class PublicProfileActivity extends AppCompatActivity {
             v -> startActivity(new Intent(this, DevicesActivity.class))));
         c.addView(linkRow("Trust score in full", "Every part of your score and how to raise it",
             v -> startActivity(new Intent(this, com.harvana.app.TrustScoreActivity.class))));
-        TextView keep = SocialUi.text(this, "Anything you delete leaves every screen at once. A private copy is kept for one year in case of a dispute, then erased.",
-            11.5f, false, UiColors.textTertiary());
-        keep.setPadding(0, SocialUi.dp(this, 12), 0, 0);
-        c.addView(keep);
         return c;
     }
 

@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — One person, many wallets; stable tFare; bottom bar
+
+- Profile, My data:
+  - Bind this device no longer asks to "add" a wallet that is already listed as yours. It shows the phone as bound to your own wallet.
+  - The explanation lines under the wallets, under the bind button and at the foot of More of your data are gone.
+- Trust score: the wallet-only line ("8% Bronze · not bound …") under the tier card is gone. The page shows the person, all their wallets together, the same figure as the profile.
+- Activity → a stable-coin transfer shows its tFare in the coin it was paid in (the node now gives `coinFeeRaw` when the fare was paid in the coin rather than in HARV), on the row and on the receipt.
+- Bottom bar: fixed 68 dp height and 22 dp icons, so labels never sit on the icons. The selected pill is kept 4 dp in from the sides, so Asset at the edge is not cut. The bar adds no system-inset padding of its own.
+- Coin icons in Activity rows are clipped round.
+- Needs the node update of the same day for the person-level group records and the stable tFare (see the node's DEPLOYMENT.md).
+
 ## 13 Oct 2026 — Crash fix: Add a chain
 
 - Add a chain and Add a token crashed on open: the Protocol and Chain boxes used Material's dropdown arrow, which only works on an AutoCompleteTextView. They now use a plain arrow icon and open the same list when tapped.

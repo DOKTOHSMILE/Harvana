@@ -332,6 +332,13 @@
 						android:orientation="horizontal"
 						android:paddingStart="14dp"
 						android:paddingEnd="14dp">
+						<ImageView
+							android:id="@+id/iv_express_bank_logo"
+							android:layout_width="32dp"
+							android:layout_height="32dp"
+							android:layout_marginEnd="10dp"
+							android:importantForAccessibility="no"
+							android:visibility="gone" />
 						<TextView
 							android:id="@+id/tv_express_payment_method"
 							android:layout_width="0dp"

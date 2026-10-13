@@ -480,18 +480,9 @@ public final class P2pOfferWizard {
 			if (selectedIds.isEmpty() && sell) selectedIds.add(all.get(0).id);
 		}
 		for (PaymentMethod pm : all) {
-			LinearLayout row = ThemedDialogs.sheetRow(a);
-			CheckBox cb = new com.google.android.material.checkbox.MaterialCheckBox(a);
-			cb.setText((pm.label != null && !pm.label.isEmpty() ? pm.label : pm.primaryField)
-				+ "\n" + pm.displaySummary());
-			cb.setTextColor(ThemedDialogs.onSurface(a));
-			cb.setChecked(selectedIds.contains(pm.id));
-			CompoundButtonCompat.setButtonTintList(cb, android.content.res.ColorStateList.valueOf(ThemedDialogs.accent(a)));
-			cb.setOnCheckedChangeListener((button, checked) -> {
-				if (checked) selectedIds.add(pm.id); else selectedIds.remove(pm.id);
+			PaymentMethodRows.addSelectable(a, list, pm, selectedIds.contains(pm.id), chosen -> {
+				if (chosen) selectedIds.add(pm.id); else selectedIds.remove(pm.id);
 			});
-			row.addView(cb);
-			list.addView(row);
 		}
 	}
 
@@ -515,14 +506,7 @@ public final class P2pOfferWizard {
 				t.setTextColor(ThemedDialogs.onSurfaceVariant(a));
 				pay.addView(t);
 			} else {
-				for (PaymentMethod pm : methods) {
-					TextView t = new TextView(a);
-					com.harvana.app.utils.Icons.checked(t, pm.label != null && !pm.label.isEmpty() ? pm.label : pm.displaySummary());
-					t.setTextColor(ThemedDialogs.onSurface(a));
-					t.setTextSize(13.5f);
-					t.setPadding(0, 8, 0, 8);
-					pay.addView(t);
-				}
+				for (PaymentMethod pm : methods) PaymentMethodRows.addReadOnly(a, pay, pm);
 			}
 		}
 	}

@@ -49,6 +49,7 @@
 					android:textColor="@color/colorTextPrimary" />
 				<com.google.android.material.card.MaterialCardView
 					android:id="@+id/card_buy_info"
+					android:visibility="gone"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:layout_marginBottom="24dp"
@@ -594,6 +595,7 @@
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>
 				<com.google.android.material.card.MaterialCardView
+					android:visibility="gone"
 					android:id="@+id/card_buy_review_note"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"

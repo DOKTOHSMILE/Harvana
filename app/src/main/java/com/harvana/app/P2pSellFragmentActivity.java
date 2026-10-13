@@ -513,6 +513,13 @@ public class P2pSellFragmentActivity extends Fragment {
 					if (cb.isChecked()) selectedPaymentLabels.add(label); else selectedPaymentLabels.remove(label);
 					rebuildHolder[0].run();
 				});
+				android.widget.ImageView logo = new android.widget.ImageView(requireContext());
+				int lp = (int) (32 * getResources().getDisplayMetrics().density);
+				LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(lp, lp);
+				llp.setMarginEnd(lp / 3);
+				logo.setLayoutParams(llp);
+				com.harvana.app.banks.BankLogo.into(logo, label);
+				row.addView(logo);
 				row.addView(tv);
 				row.addView(_spacer());
 				row.addView(cb);

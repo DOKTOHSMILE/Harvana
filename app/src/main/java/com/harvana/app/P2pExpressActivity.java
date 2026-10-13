@@ -473,12 +473,15 @@ public class P2pExpressActivity extends AppCompatActivity {
 			.setPositiveButton("OK", null));
 			return;
 		}
-		String[] labels = new String[myMethods.size()];
-		for (int i = 0; i < myMethods.size(); i++) labels[i] = myMethods.get(i).label + " (" + myMethods.get(i).displaySummary() + ")";
-		ThemedDialogs.show(ThemedDialogs.alert(this).setTitle("Receive payment into").setItems(labels, (dialog, which) -> {
-			selectedMethod = myMethods.get(which);
-			tv_express_payment_method.setText(selectedMethod.primaryField);
-		}));
+		com.harvana.app.p2p.PaymentMethodRows.pickSheet(this, "Receive payment into", myMethods, selectedMethod, pm -> {
+			selectedMethod = pm;
+			tv_express_payment_method.setText(pm.primaryField);
+			android.widget.ImageView logo = findViewById(R.id.iv_express_bank_logo);
+			if (logo != null) {
+				logo.setVisibility(View.VISIBLE);
+				com.harvana.app.banks.BankLogo.into(logo, pm.primaryField);
+			}
+		});
 	}
 	
 	private void _resetMatch() {

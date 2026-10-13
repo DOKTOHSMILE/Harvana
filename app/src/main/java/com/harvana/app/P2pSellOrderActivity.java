@@ -443,14 +443,10 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 			.setPositiveButton("OK", null));
 			return;
 		}
-		String[] labels = new String[myMethods.size()];
-		for (int i = 0; i < myMethods.size(); i++) labels[i] = myMethods.get(i).label + " (" + myMethods.get(i).displaySummary() + ")";
-		ThemedDialogs.show(ThemedDialogs.alert(this)
-		.setTitle("Receive payment into")
-		.setItems(labels, (dialog, which) -> {
-			selectedMethod = myMethods.get(which);
+		com.harvana.app.p2p.PaymentMethodRows.pickSheet(this, "Receive payment into", myMethods, selectedMethod, pm -> {
+			selectedMethod = pm;
 			_refreshSelectedMethodLabel();
-		}));
+		});
 	}
 	
 	private void _refreshSelectedMethodLabel() {
@@ -461,6 +457,11 @@ public class P2pSellOrderActivity extends AppCompatActivity {
 		}
 		tv_sell_bank_name.setText(selectedMethod.primaryField);
 		tv_sell_account_preview.setText(selectedMethod.accountName + " · " + selectedMethod.accountIdentifier);
+		android.widget.ImageView logo = findViewById(R.id.iv_sell_bank_logo);
+		if (logo != null) {
+			logo.setVisibility(View.VISIBLE);
+			com.harvana.app.banks.BankLogo.into(logo, selectedMethod.primaryField);
+		}
 	}
 	
 	// ── Amount ───────────────────────────────────────────────────────────

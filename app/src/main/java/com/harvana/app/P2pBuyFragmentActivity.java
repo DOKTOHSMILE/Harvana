@@ -573,6 +573,13 @@ public class P2pBuyFragmentActivity extends Fragment {
 				row.setOnClickListener(rowClickListener);
 				
 				checkboxes.put(label, cb);
+				android.widget.ImageView logo = new android.widget.ImageView(requireContext());
+				int lp = (int) (32 * getResources().getDisplayMetrics().density);
+				LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(lp, lp);
+				llp.setMarginEnd(lp / 3);
+				logo.setLayoutParams(llp);
+				com.harvana.app.banks.BankLogo.into(logo, label);
+				row.addView(logo);
 				row.addView(tv);
 				row.addView(_spacer());
 				row.addView(cb);

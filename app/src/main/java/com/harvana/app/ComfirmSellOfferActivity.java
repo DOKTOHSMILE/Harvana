@@ -377,14 +377,7 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 	private void _renderPaymentMethods() {
 		layout_confirm_payment_methods.removeAllViews();
 		for (PaymentMethod pm : selectedMethods) {
-			TextView row = new TextView(this);
-			com.harvana.app.utils.Icons.checked(row, pm.label != null && !pm.label.isEmpty() ? pm.label : pm.primaryField);
-			int padH = (int) (16 * getResources().getDisplayMetrics().density);
-			int padV = (int) (10 * getResources().getDisplayMetrics().density);
-			row.setPadding(padH, padV, padH, padV);
-			row.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorP2pTextPrimary));
-			row.setTextSize(13.5f);
-			layout_confirm_payment_methods.addView(row);
+			com.harvana.app.p2p.PaymentMethodRows.addReadOnly(this, layout_confirm_payment_methods, pm);
 		}
 	}
 	

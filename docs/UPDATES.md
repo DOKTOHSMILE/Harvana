@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Bank logos on every P2P payment account list
+
+- New row (`item_payment_method_select.xml`, `p2p/PaymentMethodRows`): bank logo, account name, bank · account number · holder, Default badge, accent check; a chosen row gets the soft accent fill and edge.
+- Used in: Create sell / buy offer (payment methods, tap the row to choose), the offer review, Confirm sell offer, "Receive payment into" on Sell to a buy offer and Express (now a sheet of logo rows instead of a plain text list).
+- Logo beside the chosen account on Sell order and Express; bank logos beside each name in the Buy / Sell payment filters; overlapping logo badges beside the payment methods on the Buy order offer card.
+- Explanatory sentences removed from Create sell / buy offer and Confirm sell offer (the info card, the price note and the "Buyers will see…" notes), per the values-only rule.
+- Checked with a full Gradle debug build (assembleDebug passes).
+- Install: build in CodeAssist.
+
 ## 13 Oct 2026 — P2P order flow: escrow wait, buyer cancel, timeline, appeals
 
 Needs the node update of the same date (`cancel-order`, `unpaid-status`, `escrowConfirmed`, `events`). On an older node the screens behave as before.

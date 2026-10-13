@@ -550,12 +550,23 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 		if (!(methodsObj instanceof List)) { offer_payment_methods.setText("—"); return; }
 		List<?> methods = (List<?>) methodsObj;
 		StringBuilder sb = new StringBuilder();
+		LinearLayout logos = findViewById(R.id.offer_payment_logos);
+		if (logos != null) logos.removeAllViews();
+		int size = (int) (22 * getResources().getDisplayMetrics().density);
 		for (Object m : methods) {
 			if (!(m instanceof Map)) continue;
 			Object primary = ((Map<?, ?>) m).get("primaryField");
 			if (primary == null) continue;
 			if (sb.length() > 0) sb.append(", ");
 			sb.append(primary);
+			if (logos != null && logos.getChildCount() < 4) {
+				android.widget.ImageView iv = new android.widget.ImageView(this);
+				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
+				lp.setMarginStart(logos.getChildCount() == 0 ? 0 : -size / 4);   // overlapping badges
+				iv.setLayoutParams(lp);
+				com.harvana.app.banks.BankLogo.into(iv, String.valueOf(primary));
+				logos.addView(iv);
+			}
 		}
 		offer_payment_methods.setText(sb.length() > 0 ? sb.toString() : "—");
 	}

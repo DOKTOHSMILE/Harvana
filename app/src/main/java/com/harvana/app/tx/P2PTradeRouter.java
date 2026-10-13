@@ -127,6 +127,26 @@ public final class P2PTradeRouter {
 		});
 	}
 	
+	// Canonical (P2PCancelOrderRequest.getCanonicalMessage()):
+	//   "P2P_CANCEL_ORDER:" + orderId + ":" + buyerAddress + ":" + nonce
+	public static void cancelOrder(Context context, String orderId, String buyerAddress, Callback callback) {
+		HarvanaNodeClient.getWallet(buyerAddress, new HarvanaNodeClient.JsonCallback() {
+			@Override
+			public void onSuccess(JSONObject walletJson) {
+				long nonce = walletJson.optLong("nextRequestNonce", walletJson.optLong("nonce", 0) + 1);
+				String canonical = "P2P_CANCEL_ORDER:" + orderId + ":" + buyerAddress + ":" + nonce;
+				_signAndSubmit(context, buyerAddress, canonical, callback, (sigB64, pubKeyB64, cb) ->
+				HarvanaNodeClient.submitP2PCancelOrder(orderId, buyerAddress, nonce, sigB64, pubKeyB64,
+				_wrap(cb)));
+			}
+
+			@Override
+			public void onError(String error) {
+				callback.onError("Couldn't reach the network: " + error);
+			}
+		});
+	}
+
 	public static void confirmReceived(Context context, String orderId, String sellerAddress, Callback callback) {
 		HarvanaNodeClient.getWallet(sellerAddress, new HarvanaNodeClient.JsonCallback() {
 			@Override

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:paddingLeft="20dp"
+	android:paddingRight="20dp"
+	android:paddingTop="8dp">
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Category"
+		android:textSize="12sp"
+		android:textStyle="bold" />
+	<RadioGroup
+		android:id="@+id/dispute_category"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="4dp"
+		android:orientation="vertical">
+		<RadioButton
+			android:id="@+id/cat_not_released"
+			android:layout_width="match_parent"
+			android:layout_height="40dp"
+			android:checked="true"
+			android:text="Paid, not released"
+			android:textSize="13sp" />
+		<RadioButton
+			android:id="@+id/cat_not_received"
+			android:layout_width="match_parent"
+			android:layout_height="40dp"
+			android:text="Payment not received"
+			android:textSize="13sp" />
+		<RadioButton
+			android:id="@+id/cat_wrong_amount"
+			android:layout_width="match_parent"
+			android:layout_height="40dp"
+			android:text="Wrong amount"
+			android:textSize="13sp" />
+		<RadioButton
+			android:id="@+id/cat_wrong_name"
+			android:layout_width="match_parent"
+			android:layout_height="40dp"
+			android:text="Payer name mismatch"
+			android:textSize="13sp" />
+		<RadioButton
+			android:id="@+id/cat_fraud"
+			android:layout_width="match_parent"
+			android:layout_height="40dp"
+			android:text="Fraud"
+			android:textSize="13sp" />
+		<RadioButton
+			android:id="@+id/cat_other"
+			android:layout_width="match_parent"
+			android:layout_height="40dp"
+			android:text="Other"
+			android:textSize="13sp" />
+	</RadioGroup>
+	<com.google.android.material.textfield.TextInputLayout
+		android:id="@+id/dispute_reason_layout"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="8dp"
+		android:hint="Details"
+		app:counterEnabled="true"
+		app:counterMaxLength="400">
+		<com.google.android.material.textfield.TextInputEditText
+			android:id="@+id/dispute_reason"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="top"
+			android:inputType="textMultiLine|textCapSentences"
+			android:maxLength="400"
+			android:minLines="3" />
+	</com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>

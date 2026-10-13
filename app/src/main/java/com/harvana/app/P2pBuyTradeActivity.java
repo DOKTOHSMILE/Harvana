@@ -190,6 +190,9 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	private TextView security_title;
 	private TextView security_text;
 	private MaterialButton dispute_button;
+	private MaterialButton cancel_order_button;
+	private LinearLayout order_limits;
+	private LinearLayout order_events;
 	private TextView support_text;
 	private TextView support_button;
 	private LinearLayout linear103;
@@ -347,6 +350,9 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		security_title = findViewById(R.id.security_title);
 		security_text = findViewById(R.id.security_text);
 		dispute_button = findViewById(R.id.dispute_button);
+		cancel_order_button = findViewById(R.id.cancel_order_button);
+		order_limits = findViewById(R.id.order_limits);
+		order_events = findViewById(R.id.order_events);
 		support_text = findViewById(R.id.support_text);
 		support_button = findViewById(R.id.support_button);
 		linear103 = findViewById(R.id.linear103);
@@ -387,6 +393,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		proof_picker.setOnClickListener(v -> imagePicker.launch("image/*"));
 		
 		dispute_button.setOnClickListener(v -> _showDisputeDialog());
+		cancel_order_button.setOnClickListener(v -> _confirmCancelOrder());
 		if (support_button != null) {
 			support_button.setOnClickListener(v -> Toast.makeText(this,
 			"In-app support isn't live yet — dispute this trade if you need a review.", Toast.LENGTH_LONG).show());
@@ -417,6 +424,9 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	private long amountRaw = 0;
 	private String listingCurrency = "NGN";
 	private boolean countdownFired = false;
+	private boolean escrowConfirmed = true;
+	private org.json.JSONArray orderEvents = new org.json.JSONArray();
+	private final Runnable escrowPoll = () -> _loadOrder();
 	private long platformFeeRaw = 0;
 	private long releaseGasRaw = 0;
 	private long paymentClaimedTimestamp = 0;
@@ -505,6 +515,10 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 				paymentClaimedTimestamp = order.optLong("paymentClaimedTimestamp", 0);
 				markedPaidTimestamp = order.optLong("markedPaidTimestamp", 0);
 				escrowTxHashValue = order.optString("escrowTxHash", "");
+				// An older node has no flag: the lock was mined before the order existed there.
+				escrowConfirmed = order.optBoolean("escrowConfirmed", true);
+				org.json.JSONArray ev = order.optJSONArray("events");
+				orderEvents = ev != null ? ev : new org.json.JSONArray();
 				releaseTxHashValue = order.optString("releaseTxHash", "");
 				String orderReference = order.optString("orderId", orderId);
 				
@@ -691,10 +705,20 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 			timeline_card.setVisibility(View.VISIBLE);
 			security_card.setVisibility(View.VISIBLE);
 			primary_action.setVisibility(View.VISIBLE);
-			primary_action.setText("I've Made Payment");
-			primary_action.setEnabled(true);
+			primary_action.setText(escrowConfirmed ? "I've Made Payment" : "Locking escrow…");
+			primary_action.setEnabled(escrowConfirmed);
 			primary_action.setOnClickListener(v -> _confirmMarkPaid());
-			dispute_button.setVisibility(myAddress.equals(buyerAddress) ? View.VISIBLE : View.GONE);
+			if (!escrowConfirmed) {
+				_setStatusBadge("Locking escrow");
+				current_action_title.setText("Escrow lock pending");
+				current_action_description.setText("Do not pay yet.");
+				tickHandler.postDelayed(escrowPoll, 10_000L);
+			}
+			dispute_button.setVisibility(View.GONE);
+			if (myAddress.equals(buyerAddress)) {
+				cancel_order_button.setVisibility(View.VISIBLE);
+				_loadUnpaidLimit();
+			}
 			_startCountdown(paymentClaimedTimestamp, 45);
 			break;
 			
@@ -764,11 +788,14 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		completed_card.setVisibility(View.GONE);
 		primary_action.setVisibility(View.GONE);
 		dispute_button.setVisibility(View.GONE);
+		cancel_order_button.setVisibility(View.GONE);
+		order_limits.setVisibility(View.GONE);
+		tickHandler.removeCallbacks(escrowPoll);
 		if (tickRunnable != null) tickHandler.removeCallbacks(tickRunnable);
 	}
 	
 	private void _renderTimeline() {
-		boolean escrowDone = !escrowTxHashValue.isEmpty();
+		boolean escrowDone = !escrowTxHashValue.isEmpty() && escrowConfirmed;
 		boolean paymentMarked = "PAYMENT_SUBMITTED".equals(status) || "COMPLETED".equals(status) || "DISPUTED".equals(status);
 		boolean completed = "COMPLETED".equals(status);
 		boolean disputed = "DISPUTED".equals(status);
@@ -792,6 +819,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		_setStepDone(step_complete_dot, completed);
 		
 		escrow_state.setText(escrowDone ? "Locked" : "Pending");
+		com.harvana.app.p2p.P2pOrderViews.events(this, order_events, orderEvents, buyerAddress, sellerAddress);
 		if (escrowDone) {
 			escrow_transaction_row.setVisibility(View.VISIBLE);
 			escrow_tx_hash.setText(escrowTxHashValue);
@@ -870,6 +898,38 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		.setNegativeButton("Cancel", null));
 	}
 	
+	private void _confirmCancelOrder() {
+		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+		rows.add(new String[]{"Order", orderId});
+		rows.add(new String[]{"Amount", com.harvana.app.wallet.BalanceFormatter.smart(com.harvana.app.p2p.P2pAsset.fromRaw(p2pAsset, amountRaw > 0 ? amountRaw : netAmountToBuyerRaw)) + " " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset)});
+		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Cancel order", "Unpaid order", rows, () -> {
+			cancel_order_button.setEnabled(false);
+			P2PTradeRouter.cancelOrder(getApplicationContext(), orderId, myAddress, new P2PTradeRouter.Callback() {
+				@Override
+				public void onSuccess(JSONObject result) {
+					runOnUiThread(() -> { cancel_order_button.setEnabled(true); _loadOrder(); });
+					com.harvana.app.p2p.P2pChatStore.notice(orderId, chatOtherUid, "I cancelled this order before paying.");
+				}
+				@Override
+				public void onError(String error) {
+					runOnUiThread(() -> {
+						cancel_order_button.setEnabled(true);
+						Toast.makeText(P2pBuyTradeActivity.this, error, Toast.LENGTH_LONG).show();
+					});
+				}
+			});
+		});
+	}
+
+	private void _loadUnpaidLimit() {
+		HarvanaNodeClient.getP2PUnpaidStatus(myAddress, new HarvanaNodeClient.JsonCallback() {
+			@Override public void onSuccess(JSONObject r) {
+				runOnUiThread(() -> com.harvana.app.p2p.P2pOrderViews.unpaidLimit(P2pBuyTradeActivity.this, order_limits, r));
+			}
+			@Override public void onError(String error) { }
+		});
+	}
+
 	/**
 	 * The buyer's payment proof: the picture is shrunk and uploaded, then posted in the trade chat, where the seller sees it on
 	 * their trade screen. It stays with the chat through the dispute window. The picture is never the payment itself: the
@@ -895,35 +955,19 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	}
 
 	private void _showDisputeDialog() {
-		EditText input = new com.google.android.material.textfield.TextInputEditText(this);
-		input.setHint("What went wrong?");
-		input.setTextColor(ThemedDialogs.onSurface(this));
-		input.setHintTextColor(ThemedDialogs.onSurfaceVariant(this));
-		int pad = (int) (16 * getResources().getDisplayMetrics().density);
-		input.setPadding(pad, pad, pad, pad);
-		ThemedDialogs.show(ThemedDialogs.alert(this)
-		.setTitle("Raise a dispute")
-		.setMessage("A guardian will review this trade. Only do this if there's a genuine problem with payment.")
-		.setView(input)
-		.setPositiveButton("Submit", (dialog, which) -> {
-			String reason = input.getText().toString().trim();
-			if (reason.isEmpty()) reason = "No reason provided";
-			String finalReason = reason;
-			PinPromptHelper.authorize(this, "Raise a dispute on this trade", () -> {
-				P2PTradeRouter.raiseDispute(getApplicationContext(), orderId, myAddress, finalReason, new P2PTradeRouter.Callback() {
+		com.harvana.app.p2p.P2pOrderViews.appealForm(this, "Paid, not released", reason ->
+			PinPromptHelper.authorize(this, "Appeal this trade", () ->
+				P2PTradeRouter.raiseDispute(getApplicationContext(), orderId, myAddress, reason, new P2PTradeRouter.Callback() {
 					@Override
 					public void onSuccess(JSONObject result) {
 						runOnUiThread(() -> _loadOrder());
-						com.harvana.app.p2p.P2pChatStore.notice(orderId, chatOtherUid, "I opened a dispute on this trade: " + finalReason);
+						com.harvana.app.p2p.P2pChatStore.notice(orderId, chatOtherUid, "I opened an appeal on this trade: " + reason);
 					}
 					@Override
 					public void onError(String error) {
-						runOnUiThread(() -> Toast.makeText(P2pBuyTradeActivity.this, "Couldn't raise dispute: " + error, Toast.LENGTH_LONG).show());
+						runOnUiThread(() -> Toast.makeText(P2pBuyTradeActivity.this, error, Toast.LENGTH_LONG).show());
 					}
-				});
-			});
-		})
-		.setNegativeButton("Cancel", null));
+				})));
 	}
 	
 	private static String _shortAddr(String address) {
@@ -934,6 +978,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		tickHandler.removeCallbacks(escrowPoll);
 		if (tickRunnable != null) tickHandler.removeCallbacks(tickRunnable);
 	}
 	

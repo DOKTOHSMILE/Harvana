@@ -325,6 +325,28 @@ public final class HarvanaNodeClient {
 		}
 	}
 	
+	/** The buyer cancels an unpaid order; the locked share goes back to the seller's side. */
+	public static void submitP2PCancelOrder(String orderId, String buyerAddress, long nonce,
+	String signatureB64, String publicKeyB64, JsonCallback cb) {
+		try {
+			JSONObject body = new JSONObject();
+			body.put("orderId",      orderId);
+			body.put("buyerAddress", buyerAddress);
+			body.put("nonce",        nonce);
+			body.put("signature",    signatureB64);
+			body.put("publicKey",    publicKeyB64);
+			post("/api/v1/p2p/cancel-order", body.toString(), cb);
+		} catch (Exception e) {
+			String errorMsg = "The app couldn't prepare this request. Try again.";
+			mainHandler.post(() -> cb.onError(errorMsg));
+		}
+	}
+
+	/** Unpaid orders cancelled in the last 24 hours across one person's wallets, and the limit. */
+	public static void getP2PUnpaidStatus(String address, JsonCallback cb) {
+		get("/api/v1/p2p/unpaid-status?address=" + address, cb);
+	}
+
 	public static void submitP2PConfirmReceived(String orderId, String sellerAddress, long nonce,
 	String signatureB64, String publicKeyB64, JsonCallback cb) {
 		try {

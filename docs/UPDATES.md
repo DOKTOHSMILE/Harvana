@@ -2,6 +2,21 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — P2P order flow: escrow wait, buyer cancel, timeline, appeals
+
+Needs the node update of the same date (`cancel-order`, `unpaid-status`, `escrowConfirmed`, `events`). On an older node the screens behave as before.
+
+- Buy trade (`P2pBuyTradeActivity`, `p2p_buy_trade.xml`):
+  - "I've Made Payment" stays off ("Locking escrow…") until the node reports the seller's lock mined (`escrowConfirmed`); the order reloads every 10 s while it waits.
+  - Cancel order button for the buyer while the order is unpaid (signed `P2P_CANCEL_ORDER:orderId:buyer:nonce`, `P2PTradeRouter.cancelOrder`).
+  - Unpaid cancels in the last 24 h shown against the limit (`order_limits` table), with the time new orders open again when held back.
+  - Appeal only after the payment is marked paid.
+- Sell trade (`P2pSellTradeActivity`, `p2p_sell_trade.xml`): appeal link shown only while payment is marked paid; "Locking escrow" badge until the lock is mined.
+- Both trades: Timeline table from the node's own order events (created, escrow locked, marked paid, released, cancelled, appeal opened / resolved), with who and when.
+- Appeal form (`p2p_dispute_form.xml`, `p2p/P2pOrderViews`): category (Paid, not released / Payment not received / Wrong amount / Payer name mismatch / Fraud / Other) and details up to 400 characters; sent as "Category: details" (500 at most).
+- New error texts: ESCROW_NOT_CONFIRMED, TOO_MANY_UNPAID_ORDERS, DISPUTE_AFTER_PAYMENT_MARKED, ORDER_NOT_CANCELLABLE, NOT_ORDER_BUYER, REASON_REQUIRED, REASON_TOO_LONG, CANNOT_FULFILL_OWN_LISTING.
+- Install: build in CodeAssist after the node is deployed.
+
 ## 13 Oct 2026 — Add a network like MetaMask
 
 - New Networks screen (`wallet/NetworksActivity`, `activity_networks.xml`) with two tabs, each its own fragment:

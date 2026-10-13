@@ -154,6 +154,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	private TextView textview77;
 	private TextView textview78;
 	private TextView tv_sell_dispute;
+	private LinearLayout sell_order_events;
 	private TextView tv_sell_support;
 	private LinearLayout linear155;
 	private ImageView iv_sell_completed;
@@ -275,6 +276,7 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		textview77 = findViewById(R.id.textview77);
 		textview78 = findViewById(R.id.textview78);
 		tv_sell_dispute = findViewById(R.id.tv_sell_dispute);
+		sell_order_events = findViewById(R.id.sell_order_events);
 		tv_sell_support = findViewById(R.id.tv_sell_support);
 		linear155 = findViewById(R.id.linear155);
 		iv_sell_completed = findViewById(R.id.iv_sell_completed);
@@ -353,6 +355,8 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	private long amountRaw = 0;
 	private String listingCurrency = "NGN";
 	private boolean countdownFired = false;
+	private boolean escrowConfirmed = true;
+	private org.json.JSONArray orderEvents = new org.json.JSONArray();
 	private long platformFeeRaw = 0;
 	private long markedPaidTimestamp = 0;
 	private String escrowTxHashValue = "";
@@ -439,6 +443,9 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 				platformFeeRaw = order.optLong("platformFeeRaw", 0);
 				markedPaidTimestamp = order.optLong("markedPaidTimestamp", 0);
 				escrowTxHashValue = order.optString("escrowTxHash", "");
+				escrowConfirmed = order.optBoolean("escrowConfirmed", true);
+				org.json.JSONArray ev = order.optJSONArray("events");
+				orderEvents = ev != null ? ev : new org.json.JSONArray();
 				releaseTxHashValue = order.optString("releaseTxHash", "");
 				String orderReference = order.optString("orderId", orderId);
 				
@@ -639,6 +646,8 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 		card_sell_warning.setVisibility(View.GONE);
 		card_sell_completed.setVisibility(View.GONE);
 		if (tickRunnable != null) tickHandler.removeCallbacks(tickRunnable);
+		// An appeal opens only once the buyer has marked the payment sent.
+		tv_sell_dispute.setVisibility("PAYMENT_SUBMITTED".equals(status) ? View.VISIBLE : View.GONE);
 		
 		switch (status) {
 			case "AWAITING_PAYMENT":
@@ -648,6 +657,11 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 			tv_sell_action_description.setText(("Your " + com.harvana.app.p2p.P2pAsset.ticker(p2pAsset) + " is already locked in escrow. Nothing to do until they mark payment sent."));
 			tv_sell_payment_status.setText("Not yet paid");
 			layout_sell_payment_received.setVisibility(View.GONE);
+			if (!escrowConfirmed) {
+				_setStatusBadge("Locking escrow");
+				tv_sell_action_title.setText("Escrow lock pending");
+				tv_sell_action_description.setText("");
+			}
 			break;
 			
 			case "PAYMENT_SUBMITTED":
@@ -698,9 +712,10 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	}
 	
 	private void _renderTimeline() {
-		boolean escrowDone = !escrowTxHashValue.isEmpty();
+		boolean escrowDone = !escrowTxHashValue.isEmpty() && escrowConfirmed;
 		boolean paymentMarked = "PAYMENT_SUBMITTED".equals(status) || "COMPLETED".equals(status) || "DISPUTED".equals(status);
 		boolean completed = "COMPLETED".equals(status);
+		com.harvana.app.p2p.P2pOrderViews.events(this, sell_order_events, orderEvents, buyerAddress, sellerAddress);
 		
 		String t = com.harvana.app.p2p.P2pAsset.ticker(p2pAsset);
 		com.harvana.app.utils.Icons.step(tv_sell_step_1, "Order created", true);
@@ -778,35 +793,19 @@ public class P2pSellTradeActivity extends AppCompatActivity {
 	}
 	
 	private void _showDisputeDialog() {
-		EditText input = new com.google.android.material.textfield.TextInputEditText(this);
-		input.setHint("What went wrong?");
-		input.setTextColor(ThemedDialogs.onSurface(this));
-		input.setHintTextColor(ThemedDialogs.onSurfaceVariant(this));
-		int pad = (int) (16 * getResources().getDisplayMetrics().density);
-		input.setPadding(pad, pad, pad, pad);
-		ThemedDialogs.show(ThemedDialogs.alert(this)
-		.setTitle("Raise a dispute")
-		.setMessage("A guardian will review this trade.")
-		.setView(input)
-		.setPositiveButton("Submit", (dialog, which) -> {
-			String reason = input.getText().toString().trim();
-			if (reason.isEmpty()) reason = "No reason provided";
-			String finalReason = reason;
-			PinPromptHelper.authorize(this, "Raise a dispute on this trade", () -> {
-				P2PTradeRouter.raiseDispute(getApplicationContext(), orderId, myAddress, finalReason, new P2PTradeRouter.Callback() {
+		com.harvana.app.p2p.P2pOrderViews.appealForm(this, "Payment not received", reason ->
+			PinPromptHelper.authorize(this, "Appeal this trade", () ->
+				P2PTradeRouter.raiseDispute(getApplicationContext(), orderId, myAddress, reason, new P2PTradeRouter.Callback() {
 					@Override
 					public void onSuccess(JSONObject result) {
 						runOnUiThread(() -> _loadOrder());
-						com.harvana.app.p2p.P2pChatStore.notice(orderId, chatOtherUid, "I opened a dispute on this trade: " + finalReason);
+						com.harvana.app.p2p.P2pChatStore.notice(orderId, chatOtherUid, "I opened an appeal on this trade: " + reason);
 					}
 					@Override
 					public void onError(String error) {
-						runOnUiThread(() -> Toast.makeText(P2pSellTradeActivity.this, "Couldn't raise dispute: " + error, Toast.LENGTH_LONG).show());
+						runOnUiThread(() -> Toast.makeText(P2pSellTradeActivity.this, error, Toast.LENGTH_LONG).show());
 					}
-				});
-			});
-		})
-		.setNegativeButton("Cancel", null));
+				})));
 	}
 	
 	private static String _shortAddr(String address) {

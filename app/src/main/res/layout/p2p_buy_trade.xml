@@ -616,6 +616,26 @@
 				android:textAllCaps="false"
 				android:backgroundTint="@color/colorP2pAccent"
 				app:cornerRadius="12dp" />
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/cancel_order_button"
+				style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+				android:layout_width="match_parent"
+				android:layout_height="48dp"
+				android:layout_marginTop="8dp"
+				android:text="Cancel order"
+				android:textSize="13sp"
+				android:textAllCaps="false"
+				android:visibility="gone"
+				app:cornerRadius="12dp"
+				app:strokeColor="@color/colorP2pBorder"
+				app:strokeWidth="1dp" />
+			<LinearLayout
+				android:id="@+id/order_limits"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="8dp"
+				android:orientation="vertical"
+				android:visibility="gone" />
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/timeline_card"
 				android:layout_width="match_parent"
@@ -869,6 +889,13 @@
 								android:textSize="10sp" />
 						</LinearLayout>
 					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/order_events"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="12dp"
+						android:orientation="vertical"
+						android:visibility="gone" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 			<com.google.android.material.card.MaterialCardView

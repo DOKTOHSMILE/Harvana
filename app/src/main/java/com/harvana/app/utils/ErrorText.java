@@ -185,6 +185,14 @@ public final class ErrorText {
         WORDS.put("SAME_ASSET", "Pick two different coins.");
         WORDS.put("PICK_A_COIN", "Pick a coin to pair with HARV.");
         WORDS.put("MORE_THAN_YOUR_SHARES", "That is more than your share of the pool.");
+        WORDS.put("ESCROW_NOT_CONFIRMED", "The seller's coins are not locked in escrow yet. Wait for the lock, then pay.");
+        WORDS.put("TOO_MANY_UNPAID_ORDERS", "Too many unpaid orders cancelled in the last 24 hours. New orders open again later.");
+        WORDS.put("DISPUTE_AFTER_PAYMENT_MARKED", "An appeal opens after the payment is marked paid.");
+        WORDS.put("ORDER_NOT_CANCELLABLE", "This order can no longer be cancelled.");
+        WORDS.put("NOT_ORDER_BUYER", "Only the buyer can do this.");
+        WORDS.put("REASON_REQUIRED", "Add the appeal details.");
+        WORDS.put("REASON_TOO_LONG", "The appeal details are too long.");
+        WORDS.put("CANNOT_FULFILL_OWN_LISTING", "You can't trade with your own offer.");
         WORDS.put("PRICE_NOT_LIVE_YET", "HARV has no market price yet: the network needs 10 completed P2P trades first.");
         WORDS.put("NOT_ENOUGH_COLLATERAL", "Not enough HARV locked for that amount.");
         WORDS.put("WOULD_BE_UNDER_COLLATERALISED", "That would leave too little HARV for what you owe. Repay first.");

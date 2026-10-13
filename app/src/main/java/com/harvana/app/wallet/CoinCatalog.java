@@ -100,7 +100,7 @@ public final class CoinCatalog {
     static {
         List<Coin> a = new ArrayList<>();
         a.add(new Coin("HARV", "Harvana", "HARV", "Harvana Protocol", "Native coin",
-                "HARV is the coin of Harvana Protocol. Group savings, loans, staking and transfers in this app are settled in HARV. One HARV is 100,000,000 of the smallest unit.",
+                "HARV is the coin of Harvana Protocol. It pays the tFare for every action on the network, rewards miners and stakers, and pairs with every Harvana stable coin in Harvana Swap. Groups save and lend in stable coins; HARV pays their tFare. One HARV is 100,000,000 of the smallest unit.",
                 R.drawable.ic_coin_harv, 8, null, null, true));
         a.add(new Coin("PI", "Pi Network", "PI", Net.label("Pi Network"), "Stellar-style account",
                 "Pi is a mobile-mined cryptocurrency. An account address starts with G and has 56 characters. A new account stays inactive until the Pi network itself creates it with a minimum balance. One Pi is 10,000,000 stroops.",

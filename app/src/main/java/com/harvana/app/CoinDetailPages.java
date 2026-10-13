@@ -148,6 +148,7 @@ public final class CoinDetailPages {
             addr.setTextColor(com.harvana.app.utils.UiColors.textSecondary());
             addr.setTypeface(android.graphics.Typeface.MONOSPACE);
             body.addView(card(addr));
+            if (st != null || coin == null || coin.nativeHarv) basicInfo(body, st);
             body.addView(label("ABOUT " + name.toUpperCase(Locale.US)));
             TextView about = new TextView(requireContext());
             about.setText(st != null
@@ -161,6 +162,180 @@ public final class CoinDetailPages {
             about.setTextColor(com.harvana.app.utils.UiColors.textSecondary());
             about.setLineSpacing(dp(3), 1f);
             body.addView(card(about));
+            moreInfo(body, coin, st);
+        }
+
+        /** HARV's most there will ever be: 1.25 HARV a block, halving every 23,260,000 blocks (node: ConsensusMath). */
+        private static final double HARV_MAX_SUPPLY = 58_149_996.9762;
+
+        /**
+         * Basic information (owner, 13 Oct 2026): price, market cap and supply from the node, then the token's own
+         * identity on Harvana (a native token, no contract: the token ID is what a transfer names).
+         */
+        private void basicInfo(LinearLayout body, String st) {
+            body.addView(label("BASIC INFORMATION"));
+            LinearLayout box = new LinearLayout(requireContext());
+            box.setOrientation(LinearLayout.VERTICAL);
+            TextView price = valueOf(addStat(box, "Price", "…"));
+            TextView cap = valueOf(addStat(box, "Market cap", "…"));
+            if (st == null) {
+                TextView circ = valueOf(addStat(box, "Circulating supply", "…"));
+                addStat(box, "Maximum supply", compact(HARV_MAX_SUPPLY) + " HARV");
+                TextView holders = valueOf(addStat(box, "Holders", "…"));
+                TextView txs = valueOf(addStat(box, "Transactions", "…"));
+                body.addView(card(box));
+                final double[] supply = {Double.NaN}, usd = {Double.NaN};
+                Runnable paint = () -> {
+                    price.setText(Double.isNaN(usd[0]) ? "—" : com.harvana.app.wallet.FxRates.money(requireContext(), usd[0]));
+                    cap.setText(Double.isNaN(usd[0]) || Double.isNaN(supply[0]) ? "—" : com.harvana.app.wallet.FxRates.money(requireContext(), usd[0] * supply[0]));
+                };
+                com.harvana.app.sync.HarvanaNodeClient.nodeGet("/api/v1/supply", new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
+                    @Override public void onSuccess(org.json.JSONObject j) {
+                        if (!isAdded()) return;
+                        supply[0] = j.optLong("circulatingSupplyRaw") / 1e8;
+                        circ.setText(compact(supply[0]) + " HARV");
+                        holders.setText(String.format(Locale.US, "%,d", j.optLong("holderCount")));
+                        txs.setText(String.format(Locale.US, "%,d", j.optLong("totalTransactions")));
+                        paint.run();
+                    }
+                    @Override public void onError(String e) { if (isAdded()) { circ.setText("—"); holders.setText("—"); txs.setText("—"); } }
+                });
+                com.harvana.app.wallet.HarvPrice.get(q -> {
+                    if (!isAdded()) return;
+                    com.harvana.app.wallet.FxRates.load(requireContext(), () -> {
+                        if (!isAdded()) return;
+                        usd[0] = com.harvana.app.wallet.HarvPrice.usd(requireContext(), q);
+                        paint.run();
+                    });
+                });
+                body.addView(label("TOKEN"));
+                LinearLayout tok = new LinearLayout(requireContext());
+                tok.setOrientation(LinearLayout.VERTICAL);
+                addStat(tok, "Type", "Native coin");
+                addStat(tok, "Token ID", "HARV");
+                addStat(tok, "Contract", "None (native)");
+                addStat(tok, "Decimals", "8");
+                addStat(tok, "Network", com.harvana.app.wallet.CoinCatalog.harv().liveNetwork());
+                body.addView(card(tok));
+                return;
+            }
+            String sym = com.harvana.app.husd.Stable.symbol(st);
+            TextView supply = valueOf(addStat(box, "Total supply", "…"));
+            TextView backing = valueOf(addStat(box, "Backing required", "…"));
+            TextView pending = valueOf(addStat(box, "Pending withdrawals", "…"));
+            TextView burned = valueOf(addStat(box, "Burned", "…"));
+            body.addView(card(box));
+            body.addView(label("TOKEN"));
+            LinearLayout tok = new LinearLayout(requireContext());
+            tok.setOrientation(LinearLayout.VERTICAL);
+            addStat(tok, "Type", "Harvana stable coin");
+            addStat(tok, "Token ID", st);
+            addStat(tok, "Contract", "None (native token)");
+            addStat(tok, "Decimals", "6");
+            addStat(tok, "Backed by", com.harvana.app.husd.Stable.reserve(st, null));
+            LinearLayout bridgeRow = addStat(tok, "Bridge address", "…");
+            LinearLayout burnRow = addStat(tok, "Burn address", "…");
+            LinearLayout treasuryRow = addStat(tok, "Treasury", "…");
+            body.addView(card(tok));
+            com.harvana.app.wallet.FxRates.load(requireContext(), () -> {
+                if (!isAdded()) return;
+                double per = com.harvana.app.wallet.FxRates.perUsd(requireContext(), com.harvana.app.husd.Stable.currency(st));
+                double usd = Double.isNaN(per) || per <= 0 ? Double.NaN : 1d / per;
+                price.setText(Double.isNaN(usd) ? "—" : com.harvana.app.wallet.FxRates.money(requireContext(), usd));
+                price.setTag(usd);
+                paintCap(cap, supply);
+            });
+            com.harvana.app.husd.HusdClient.info(st, new com.harvana.app.husd.HusdClient.Cb() {
+                @Override public void ok(org.json.JSONObject j) {
+                    if (!isAdded()) return;
+                    double units = j.optLong("supplyRaw") / 1e6;
+                    supply.setText(compact(units) + " " + sym);
+                    supply.setTag(units);
+                    backing.setText(compact(j.optLong("backingRequiredRaw") / 1e6) + " " + sym);
+                    pending.setText(compact(j.optLong("pendingWithdrawalsRaw") / 1e6) + " " + sym);
+                    burned.setText(compact(j.optLong("burnedRaw") / 1e6) + " " + sym);
+                    copyable(bridgeRow, j.optString("bridgeAddress"));
+                    copyable(burnRow, j.optString("burnAddress"));
+                    copyable(treasuryRow, j.optString("treasuryAddress"));
+                    price.post(() -> paintCap(cap, supply));
+                }
+                @Override public void fail(String e) {
+                    if (!isAdded()) return;
+                    supply.setText("—"); backing.setText("—"); pending.setText("—"); burned.setText("—");
+                    valueOf(bridgeRow).setText("—"); valueOf(burnRow).setText("—"); valueOf(treasuryRow).setText("—");
+                }
+            });
+            cap.setTag(price);
+        }
+
+        /** Market cap of a stable coin: its dollar price (kept on the price row) × its supply. */
+        private void paintCap(TextView cap, TextView supply) {
+            if (!isAdded() || !(cap.getTag() instanceof TextView)) return;
+            Object p = ((TextView) cap.getTag()).getTag(), s0 = supply.getTag();
+            if (!(p instanceof Double) || !(s0 instanceof Double) || ((Double) p).isNaN()) { cap.setText("—"); return; }
+            cap.setText(com.harvana.app.wallet.FxRates.money(requireContext(), (Double) p * (Double) s0));
+        }
+
+        /** An address row: shortened, tap to copy. */
+        private void copyable(LinearLayout row, String address) {
+            TextView v = valueOf(row);
+            if (address == null || address.isEmpty()) { v.setText("—"); return; }
+            v.setText(shortAddr(address));
+            v.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_copy_line, 0);
+            v.setCompoundDrawablePadding(dp(6));
+            if (v.getCompoundDrawablesRelative()[2] != null) {
+                v.getCompoundDrawablesRelative()[2].setBounds(0, 0, dp(16), dp(16));
+                v.getCompoundDrawablesRelative()[2].setTint(com.harvana.app.utils.UiColors.textSecondary());
+            }
+            row.setOnClickListener(x -> {
+                android.content.ClipboardManager cm = (android.content.ClipboardManager) requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+                if (cm != null) cm.setPrimaryClip(android.content.ClipData.newPlainText("Address", address));
+                android.widget.Toast.makeText(requireContext(), "Copied", android.widget.Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        /** More info: the coin's links, opened in the app's browser (the explorer in the explorer). */
+        private void moreInfo(LinearLayout body, CoinCatalog.Coin coin, String st) {
+            java.util.List<String[]> links = new java.util.ArrayList<>();
+            boolean harvana = st != null || coin == null || coin.nativeHarv;
+            if (harvana) {
+                links.add(new String[]{"Official website", "https://harvannaprotocol.com/"});
+                links.add(new String[]{"Explorer", com.harvana.app.web3.Web3Home.EXPLORER_URL});
+                links.add(new String[]{"Harvana Swap", com.harvana.app.web3.Web3Home.SWAP_URL});
+            } else {
+                String ex = CoinCatalog.explorerUrl(coin, address());
+                if (!ex.isEmpty()) links.add(new String[]{"Explorer", ex});
+            }
+            if (links.isEmpty()) return;
+            body.addView(label("MORE INFO"));
+            com.google.android.material.chip.ChipGroup g = new com.google.android.material.chip.ChipGroup(requireContext());
+            for (String[] l : links) {
+                com.google.android.material.chip.Chip c = new com.google.android.material.chip.Chip(requireContext());
+                c.setText(l[0]);
+                c.setChipIconResource(R.drawable.icon_link_twotone_line);
+                c.setChipIconTint(android.content.res.ColorStateList.valueOf(com.harvana.app.utils.UiColors.accent()));
+                c.setChipBackgroundColor(android.content.res.ColorStateList.valueOf(com.harvana.app.utils.UiColors.surfaceAlt()));
+                c.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+                c.setOnClickListener(v -> com.harvana.app.web3.Web3Home.open(requireContext(), l[1]));
+                g.addView(c);
+            }
+            body.addView(g);
+        }
+
+        private LinearLayout addStat(LinearLayout box, String name, String value) {
+            LinearLayout row = stat(name, value);
+            box.addView(row);
+            return row;
+        }
+
+        /** 1,234,567.8 → "1.23M"; small figures in full. */
+        private static String compact(double v) {
+            if (Double.isNaN(v)) return "—";
+            double a = Math.abs(v);
+            if (a >= 1e9) return String.format(Locale.US, "%.2fB", v / 1e9);
+            if (a >= 1e6) return String.format(Locale.US, "%.2fM", v / 1e6);
+            if (a >= 1e3) return String.format(Locale.US, "%,.2f", v);
+            return String.format(Locale.US, "%.4f", v).replaceAll("0+$", "").replaceAll("\\.$", "");
         }
 
         private void fillHistory(LinearLayout body) {

@@ -2,6 +2,19 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: coin Overview with supply, token and links
+
+HARV and every Harvana stable coin, Overview tab, under the wallet address:
+
+| Section | HARV | Stable coin (hNGN, hUSD, …) |
+|---|---|---|
+| Basic information | Price, Market cap, Circulating supply, Maximum supply (58.15M), Holders, Transactions | Price, Market cap, Total supply, Backing required, Pending withdrawals, Burned |
+| Token | Native coin · Token ID HARV · Contract: none (native) · 8 decimals · Network | Harvana stable coin · Token ID (HNGN…) · Contract: none (native token) · 6 decimals · Backed by · Bridge, Burn and Treasury addresses (tap to copy) |
+| About | Updated text (HARV pays tFare; groups use stable coins) | As before |
+| More info | Official website · Explorer · Harvana Swap (open in the app's browser) | Same |
+
+Other chains' coins (BTC, ETH, …) get an Explorer link under About. Supply and price come from the node (`/api/v1/supply`, `/api/v1/stable/<CODE>/info`) and the HARV price. App build only.
+
 ## 13 Oct 2026: toggles 35dp; tFare without movement counts
 
 - Every toggle (Assets/Activity/Earn, group tabs, coin pages, staking, notifications): 35dp tall (`toggle_height`).

@@ -3,15 +3,11 @@ package com.harvana.app.social;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.harvana.app.trust.ProfileTrust;
 import com.harvana.app.utils.AppBar;
-import com.harvana.app.utils.UiColors;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -61,49 +56,18 @@ public class FriendPickerActivity extends AppCompatActivity {
         for (Person p : preselected) { everyone.put(p.uid, p); chosen.put(p.uid, p); }
         selecting = !chosen.isEmpty();
 
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(UiColors.background());
-
-        search = SocialUi.edit(this, "Search friends or type @username");
-        search.setPadding(SocialUi.dp(this, 16), SocialUi.dp(this, 12), SocialUi.dp(this, 16), SocialUi.dp(this, 12));
-        search.setCompoundDrawablePadding(SocialUi.dp(this, 8));
+        AppBar.setContent(this, com.harvana.app.R.layout.activity_friend_picker, "Add friends", "People you follow");
+        search = findViewById(com.harvana.app.R.id.et_friend_picker_search);
         search.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int c, int d) { }
             @Override public void onTextChanged(CharSequence s, int a, int c, int d) { }
             @Override public void afterTextChanged(Editable s) { render(); }
         });
-        LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        sp.setMargins(SocialUi.dp(this, 12), SocialUi.dp(this, 8), SocialUi.dp(this, 12), 0);
-        root.addView(search, sp);
-
-        hint = SocialUi.text(this, "", 12, false, UiColors.textSecondary());
-        hint.setPadding(SocialUi.dp(this, 16), SocialUi.dp(this, 8), SocialUi.dp(this, 16), SocialUi.dp(this, 4));
-        root.addView(hint);
-
-        ScrollView scroll = new ScrollView(this);
-        list = new LinearLayout(this);
-        list.setOrientation(LinearLayout.VERTICAL);
-        list.setPadding(SocialUi.dp(this, 12), 0, SocialUi.dp(this, 12), SocialUi.dp(this, 12));
-        scroll.addView(list);
-        root.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-
-        LinearLayout bar = new LinearLayout(this);
-        bar.setOrientation(LinearLayout.HORIZONTAL);
-        bar.setGravity(Gravity.CENTER_VERTICAL);
-        bar.setPadding(SocialUi.dp(this, 12), SocialUi.dp(this, 8), SocialUi.dp(this, 12), SocialUi.dp(this, 8));
-        bar.setBackgroundColor(UiColors.surface());
-        allButton = SocialUi.button(this, "Select all", true);
-        allButton.setOnClickListener(v -> selectAll());
-        bar.addView(allButton);
-        addButton = SocialUi.button(this, "Add", false);
+        hint = findViewById(com.harvana.app.R.id.tv_friend_picker_hint);
+        list = findViewById(com.harvana.app.R.id.friend_picker_list);
+        allButton = findViewById(com.harvana.app.R.id.btn_friend_picker_all);
+        addButton = findViewById(com.harvana.app.R.id.btn_friend_picker_add);
         addButton.setOnClickListener(v -> finishWithChosen());
-        LinearLayout.LayoutParams ap = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        ap.leftMargin = SocialUi.dp(this, 8);
-        bar.addView(addButton, ap);
-        root.addView(bar);
-
-        AppBar.setContent(this, root, "Add friends", "People you follow");
         render();
         SocialStore.following((people, err) -> {
             for (Person p : people) if (!everyone.containsKey(p.uid)) everyone.put(p.uid, p);
@@ -142,13 +106,15 @@ public class FriendPickerActivity extends AppCompatActivity {
         List<Person> shown = visible();
         String q = search.getText().toString().trim();
         if (shown.isEmpty()) {
-            list.addView(SocialUi.text(this, everyone.isEmpty() ? "You do not follow anyone yet. Add friends from the Friends screen, or find someone by username here."
-                    : "No friend matches that.", 13, false, UiColors.textSecondary()));
+            TextView none = (TextView) getLayoutInflater().inflate(com.harvana.app.R.layout.item_list_empty, list, false);
+            none.setText(everyone.isEmpty() ? "No friends yet" : "No match");
+            list.addView(none);
         }
         for (Person p : shown) list.addView(row(p));
         String handle = q.startsWith("@") ? q.substring(1) : q;
         if (handle.length() >= 3 && handle.matches("^[A-Za-z0-9_.]+$") && !hasUsername(handle)) {
-            MaterialButton find = SocialUi.button(this, "Find @" + handle.toLowerCase(Locale.US) + " on Harvana", true);
+            MaterialButton find = (MaterialButton) getLayoutInflater().inflate(com.harvana.app.R.layout.item_list_button, list, false);
+            find.setText("Find @" + handle.toLowerCase(Locale.US));
             find.setOnClickListener(v -> SocialStore.findByUsername(handle, (person, err) -> runOnUiThread(() -> {
                 if (person == null) { Toast.makeText(this, err == null ? "Not found." : err, Toast.LENGTH_LONG).show(); return; }
                 everyone.put(person.uid, person);
@@ -159,8 +125,7 @@ public class FriendPickerActivity extends AppCompatActivity {
             list.addView(find);
         }
         int n = chosen.size();
-        hint.setText(selecting ? n + (n == 1 ? " friend selected. Tap to tick or untick." : " friends selected. Tap to tick or untick.")
-                : "Tap a friend to add them. Press and hold to pick several.");
+        hint.setText(n + " selected");
         addButton.setText(n == 0 ? "Add" : "Add " + n);
         addButton.setEnabled(n > 0);
         allButton.setText(selecting && n == visible().size() && n > 0 ? "Clear" : "Select all");
@@ -175,63 +140,34 @@ public class FriendPickerActivity extends AppCompatActivity {
         return false;
     }
 
+    /** One friend: res/layout/item_person_row.xml. */
     private View row(Person p) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, SocialUi.dp(this, 8), 0, SocialUi.dp(this, 8));
-
-        int size = SocialUi.dp(this, 24);
-        FrameLayout face = new FrameLayout(this);
-        TextView initials = SocialUi.text(this, p.initials(), 10, true, 0xFFFFFFFF);
-        initials.setGravity(Gravity.CENTER);
-        android.graphics.drawable.GradientDrawable disc = new android.graphics.drawable.GradientDrawable();
-        disc.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-        disc.setColors(new int[] {0xFF2BA597, 0xFF0B6B61});
-        disc.setOrientation(android.graphics.drawable.GradientDrawable.Orientation.TL_BR);
-        initials.setBackground(disc);
-        face.addView(initials, new FrameLayout.LayoutParams(size, size));
-        ImageView photo = new ImageView(this);
-        photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        face.addView(photo, new FrameLayout.LayoutParams(size, size));
-        LinearLayout.LayoutParams faceLp = new LinearLayout.LayoutParams(size, size);
-        faceLp.rightMargin = SocialUi.dp(this, 12);
-        row.addView(face, faceLp);
-
-        LinearLayout names = new LinearLayout(this);
-        names.setOrientation(LinearLayout.VERTICAL);
-        names.addView(SocialUi.text(this, p.name, 15, true, UiColors.textPrimary()));
+        View row = getLayoutInflater().inflate(com.harvana.app.R.layout.item_person_row, list, false);
+        TextView initials = row.findViewById(com.harvana.app.R.id.tv_person_initials);
+        initials.setText(p.initials());
+        ImageView photo = row.findViewById(com.harvana.app.R.id.iv_person_photo);
+        ((TextView) row.findViewById(com.harvana.app.R.id.tv_person_name)).setText(p.name);
         String sub = (p.handle().isEmpty() ? "" : p.handle()) + (mutual.contains(p.uid) ? (p.handle().isEmpty() ? "" : "  ·  ") + "Friends" : "");
-        if (!sub.isEmpty()) names.addView(SocialUi.text(this, sub, 12, false, UiColors.textSecondary()));
-        TextView trust = SocialUi.text(this, "", 11, true, UiColors.textSecondary());
-        trust.setPadding(SocialUi.dp(this, 8), SocialUi.dp(this, 2), SocialUi.dp(this, 8), SocialUi.dp(this, 2));
-        LinearLayout.LayoutParams tl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        tl.topMargin = SocialUi.dp(this, 3);
-        names.addView(trust, tl);
+        TextView handle = row.findViewById(com.harvana.app.R.id.tv_person_handle);
+        if (!sub.isEmpty()) { handle.setText(sub); handle.setVisibility(View.VISIBLE); }
+        TextView trust = row.findViewById(com.harvana.app.R.id.tv_person_trust);
+        LinearLayout chips = row.findViewById(com.harvana.app.R.id.person_badges);
         ProfileTrust.resolve(p.uid, card -> {
             ProfileTrust.bind(trust, card);
-            if (!card.wallet.isEmpty()) com.harvana.app.trust.NodeBadges.load(card.wallet, list -> {
-                if (list.isEmpty()) return;
-                LinearLayout chips = new LinearLayout(this);
-                chips.setOrientation(LinearLayout.VERTICAL);
-                chips.setPadding(0, SocialUi.dp(this, 4), 0, 0);
-                com.harvana.app.trust.BadgeChips.fill(chips, list, true);
-                names.addView(chips);
+            if (!card.wallet.isEmpty()) com.harvana.app.trust.NodeBadges.load(card.wallet, badges -> {
+                if (badges.isEmpty()) return;
+                com.harvana.app.trust.BadgeChips.fill(chips, badges, true);
+                chips.setVisibility(View.VISIBLE);
             });
             if (!card.icon.isEmpty() && card.icon.startsWith("http")) {
                 try { com.bumptech.glide.Glide.with(this).load(card.icon).circleCrop().into(photo); initials.setVisibility(View.INVISIBLE); }
                 catch (Exception ignored) { }
             }
         });
-        row.addView(names, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-
-        if (selecting) {
-            CheckBox box = new com.google.android.material.checkbox.MaterialCheckBox(this);
-            box.setChecked(chosen.containsKey(p.uid));
-            box.setClickable(false);
-            row.addView(box);
-        }
-        row.setBackground(chosen.containsKey(p.uid) ? tint() : null);
+        CheckBox box = row.findViewById(com.harvana.app.R.id.cb_person);
+        box.setVisibility(selecting ? View.VISIBLE : View.GONE);
+        box.setChecked(chosen.containsKey(p.uid));
+        if (chosen.containsKey(p.uid)) row.setBackgroundResource(com.harvana.app.R.drawable.bg_row_selected);
         row.setOnClickListener(v -> {
             if (selecting) {
                 if (chosen.containsKey(p.uid)) chosen.remove(p.uid); else chosen.put(p.uid, p);
@@ -249,13 +185,6 @@ public class FriendPickerActivity extends AppCompatActivity {
             return true;
         });
         return row;
-    }
-
-    private android.graphics.drawable.Drawable tint() {
-        android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
-        g.setCornerRadius(SocialUi.dp(this, 12));
-        g.setColor((UiColors.accent() & 0x00FFFFFF) | 0x1F000000);
-        return g;
     }
 
     private void finishWithChosen() {

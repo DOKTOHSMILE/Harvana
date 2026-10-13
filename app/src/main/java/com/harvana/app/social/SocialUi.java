@@ -3,7 +3,6 @@ package com.harvana.app.social;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -83,45 +82,30 @@ public final class SocialUi {
 
     /** name + @handle on the left, one action button on the right. */
     public static LinearLayout personRow(Context c, Person p, String action, boolean outlined, View.OnClickListener onAction, View.OnClickListener onRow) {
-        LinearLayout row = new LinearLayout(c);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, dp(c, 8), 0, dp(c, 8));
-        TextView face = text(c, p.initials(), 10, true, 0xFFFFFFFF);
-        face.setGravity(Gravity.CENTER);
-        int size = dp(c, 24);
-        GradientDrawable disc = new GradientDrawable();
-        disc.setShape(GradientDrawable.OVAL);
-        disc.setColors(new int[] {0xFF2BA597, 0xFF0B6B61});
-        disc.setOrientation(GradientDrawable.Orientation.TL_BR);
-        face.setBackground(disc);
-        LinearLayout.LayoutParams faceLp = new LinearLayout.LayoutParams(size, size);
-        faceLp.rightMargin = dp(c, 12);
-        row.addView(face, faceLp);
+        LinearLayout row = (LinearLayout) android.view.LayoutInflater.from(c).inflate(com.harvana.app.R.layout.item_person_row, null, false);
+        TextView initials = row.findViewById(com.harvana.app.R.id.tv_person_initials);
+        initials.setText(p.initials());
         if (p.photo.startsWith("http")) {
-            ImageView photo = new ImageView(c);
-            photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
             try {
-                com.bumptech.glide.Glide.with(c).load(p.photo).circleCrop().into(photo);
-                row.removeView(face);
-                row.addView(photo, 0, faceLp);
+                com.bumptech.glide.Glide.with(c).load(p.photo).circleCrop().into((ImageView) row.findViewById(com.harvana.app.R.id.iv_person_photo));
+                initials.setVisibility(View.INVISIBLE);
             } catch (Exception ignored) { }
         }
-        LinearLayout names = new LinearLayout(c);
-        names.setOrientation(LinearLayout.VERTICAL);
-        names.addView(text(c, p.name, 15, true, UiColors.textPrimary()));
-        if (!p.handle().isEmpty()) names.addView(text(c, p.handle(), 12, false, UiColors.textSecondary()));
-        TextView trust = text(c, "", 11, true, UiColors.textSecondary());
-        trust.setPadding(dp(c, 8), dp(c, 2), dp(c, 8), dp(c, 2));
-        LinearLayout.LayoutParams trustLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        trustLp.topMargin = dp(c, 4);
-        names.addView(trust, trustLp);
-        com.harvana.app.trust.ProfileTrust.attach(trust, p.uid);
-        row.addView(names, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        ((TextView) row.findViewById(com.harvana.app.R.id.tv_person_name)).setText(p.name);
+        TextView handle = row.findViewById(com.harvana.app.R.id.tv_person_handle);
+        if (!p.handle().isEmpty()) { handle.setText(p.handle()); handle.setVisibility(View.VISIBLE); }
+        com.harvana.app.trust.ProfileTrust.attach(row.findViewById(com.harvana.app.R.id.tv_person_trust), p.uid);
         if (action != null) {
-            MaterialButton b = button(c, action, outlined);
+            MaterialButton b = row.findViewById(com.harvana.app.R.id.btn_person_action);
+            b.setText(action);
+            if (outlined) {
+                b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT));
+                b.setStrokeColorResource(com.harvana.app.R.color.colorAccent);
+                b.setStrokeWidth(dp(c, 1));
+                b.setTextColor(androidx.core.content.ContextCompat.getColor(c, com.harvana.app.R.color.colorAccentStrong));
+            }
+            b.setVisibility(View.VISIBLE);
             b.setOnClickListener(onAction);
-            row.addView(b);
         }
         if (onRow != null) { row.setClickable(true); row.setOnClickListener(onRow); }
         return row;

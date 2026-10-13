@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A quick reply chip under the chat. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_marginEnd="6dp"
+	android:background="@drawable/bg_chip_outline"
+	android:paddingStart="12dp"
+	android:paddingTop="7dp"
+	android:paddingEnd="12dp"
+	android:paddingBottom="7dp"
+	android:textColor="@color/colorTextPrimary"
+	android:textSize="12sp" />

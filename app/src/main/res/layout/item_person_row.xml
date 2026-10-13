@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One person: photo (or initials), name, @username, trust, badges; a checkbox when picking several, or an action button. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:minHeight="50dp"
+	android:gravity="center_vertical"
+	android:orientation="horizontal"
+	android:paddingTop="8dp"
+	android:paddingBottom="8dp">
+
+	<FrameLayout
+		android:layout_width="36dp"
+		android:layout_height="36dp"
+		android:layout_marginEnd="12dp">
+
+		<TextView
+			android:id="@+id/tv_person_initials"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:background="@drawable/bg_avatar_disc"
+			android:gravity="center"
+			android:textColor="#FFFFFFFF"
+			android:textSize="12sp"
+			android:textStyle="bold" />
+
+		<ImageView
+			android:id="@+id/iv_person_photo"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:importantForAccessibility="no"
+			android:scaleType="centerCrop" />
+	</FrameLayout>
+
+	<LinearLayout
+		android:id="@+id/person_names"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:orientation="vertical">
+
+		<TextView
+			android:id="@+id/tv_person_name"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="15sp"
+			android:textStyle="bold" />
+
+		<TextView
+			android:id="@+id/tv_person_handle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="12sp"
+			android:visibility="gone" />
+
+		<TextView
+			android:id="@+id/tv_person_trust"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="3dp"
+			android:paddingStart="8dp"
+			android:paddingTop="2dp"
+			android:paddingEnd="8dp"
+			android:paddingBottom="2dp"
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="11sp"
+			android:textStyle="bold" />
+
+		<LinearLayout
+			android:id="@+id/person_badges"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:paddingTop="4dp"
+			android:visibility="gone" />
+	</LinearLayout>
+
+	<com.google.android.material.checkbox.MaterialCheckBox
+		android:id="@+id/cb_person"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:clickable="false"
+		android:focusable="false"
+		android:visibility="gone" />
+
+	<com.google.android.material.button.MaterialButton
+		android:id="@+id/btn_person_action"
+		style="@style/HarvanaButton"
+		android:layout_width="wrap_content"
+		android:layout_height="40dp"
+		android:minWidth="0dp"
+		android:textSize="13sp"
+		android:visibility="gone" />
+</LinearLayout>

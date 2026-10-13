@@ -86,13 +86,17 @@ public final class CustomAssets {
         public boolean token() { return "TOKEN".equals(kind); }
 
         public String key() {
-            if (token()) return near() ? "T:" + chainKey + ":" + contract : "T:" + chainId + ":" + contract.toLowerCase(Locale.US);
+            if (token()) return "EVM".equals(family) ? "T:" + chainId + ":" + contract.toLowerCase(Locale.US) : "T:" + chainKey + ":" + contract;
             return near() ? "N:" + networkId : "C:" + chainId;
         }
+
+        /** A token on a built-in chain that has its own address (Tron, Solana): that chain's coin key. */
+        String builtInChain() { return Trc20.FAMILY.equals(family) ? "TRX" : SplToken.FAMILY.equals(family) ? "SOL" : null; }
 
         /** The coin that pays this one's network fee. */
         public String feeSymbol() {
             if (!token()) return symbol;
+            if (builtInChain() != null) return builtInChain();
             Asset c = find(chainKey.isEmpty() ? "C:" + chainId : chainKey);
             if (c != null) return c.symbol;
             for (String k : new String[]{"ETH", "BNB", "POL", "BASE"}) if (Net.evm(k).chainId == chainId) return "BNB".equals(k) ? "BNB" : "POL".equals(k) ? "POL" : "ETH";
@@ -177,6 +181,7 @@ public final class CustomAssets {
     public static String savedAddress(Context c, String harvAddress, Asset a) {
         if (c == null || a == null || harvAddress == null || harvAddress.isEmpty()) return "";
         if (a.near()) return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("near:" + harvAddress + ":" + pathOf(a), "");
+        if (a.builtInChain() != null) return CoinCatalog.savedAddress(c, harvAddress, a.builtInChain());
         return CoinCatalog.savedAddress(c, harvAddress, "ETH");
     }
 
@@ -199,8 +204,8 @@ public final class CustomAssets {
                 c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString("near:" + harvAddress + ":" + pathOf(a), id).apply();
                 return id;
             }
-            String eth = CoinCatalog.addresses(c, harvAddress).get("ETH");
-            return eth == null ? "" : eth;
+            String own = CoinCatalog.addresses(c, harvAddress).get(a.builtInChain() != null ? a.builtInChain() : "ETH");
+            return own == null ? "" : own;
         } catch (Exception e) {
             return "";
         }
@@ -255,6 +260,41 @@ public final class CustomAssets {
             }
         }).start();
     }
+
+    /** A token on an EVM chain, read from its contract; null when the address is not a token there. Blocking. */
+    static Asset readEvmToken(Asset chain, String contract) {
+        try {
+            String addr = contract.trim();
+            String symbol = abiString(call(chain.rpc, addr, "0x95d89b41"));
+            if (symbol.isEmpty()) return null;
+            Asset a = new Asset();
+            a.kind = "TOKEN";
+            a.family = "EVM";
+            a.chainId = chain.chainId;
+            a.chainKey = "C:" + chain.chainId;
+            a.chainName = chain.chainName;
+            a.rpc = chain.rpc;
+            a.explorer = chain.explorer;
+            a.addressUrl = chain.addressUrl;
+            a.txUrl = chain.txUrl;
+            a.scout = chain.scout;
+            a.contract = addr;
+            a.symbol = symbol;
+            String name = abiString(call(chain.rpc, addr, "0x06fdde03"));
+            a.name = name.isEmpty() ? symbol : name;
+            String dec = call(chain.rpc, addr, "0x313ce567");
+            a.decimals = dec.length() > 2 ? new BigInteger(dec.substring(2), 16).intValue() : 18;
+            String[] g = geckoToken(chain.chainId, addr);
+            a.geckoId = g[0];
+            a.icon = g[1];
+            return a;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** The EVM chains and NEAR chains a token can be searched on (built-in EVM ones included). */
+    static List<Asset> searchableChains(Context c) { return chainsForTokens(c); }
 
     /** A token on an EVM chain, read from its contract. Runs off the main thread. */
     public static void fetchToken(long chainId, String chainName, String rpc, String explorer, String contract, Got cb) {
@@ -339,6 +379,8 @@ public final class CustomAssets {
     static String balance(Asset a, String owner) {
         try {
             if (a.near()) return a.token() ? NearProtocol.tokenBalance(a, owner) : NearProtocol.balance(a, owner);
+            if (Trc20.FAMILY.equals(a.family)) return Trc20.balance(a, owner);
+            if (SplToken.FAMILY.equals(a.family)) return SplToken.balance(a, owner);
             BigInteger raw;
             if ("TOKEN".equals(a.kind)) {
                 String data = "0x70a08231" + String.format("%64s", owner.substring(2).toLowerCase(Locale.US)).replace(' ', '0');
@@ -421,9 +463,13 @@ public final class CustomAssets {
     /** A token's CoinGecko {id, icon}, found through its chain's platform. Blocking; {"", ""} when unknown. */
     private static String[] geckoToken(long chainId, String contract) {
         JSONObject p = platform(chainId);
-        if (p == null) return new String[]{"", ""};
+        return p == null ? new String[]{"", ""} : geckoToken(p.optString("id"), contract.toLowerCase(Locale.US));
+    }
+
+    /** A token's CoinGecko {id, icon} on a CoinGecko platform ("tron", "solana", …). Blocking; {"", ""} when unknown. */
+    static String[] geckoToken(String platformId, String contract) {
         try {
-            JSONObject j = getJson("https://api.coingecko.com/api/v3/coins/" + p.optString("id") + "/contract/" + contract.toLowerCase(Locale.US));
+            JSONObject j = getJson("https://api.coingecko.com/api/v3/coins/" + platformId + "/contract/" + contract);
             JSONObject img = j.optJSONObject("image");
             return new String[]{j.optString("id", ""), img == null ? "" : img.optString("small", "")};
         } catch (Exception e) {
@@ -568,6 +614,7 @@ public final class CustomAssets {
         BottomSheetDialog d = new com.harvana.app.ui.AppSheet(c);
         LinearLayout root = column(c);
         root.addView(title(c, "Add"));
+        root.addView(button(c, "Search a token by contract address", v -> { d.dismiss(); search(c, "", onAdded); }));
         root.addView(button(c, "A chain", v -> { d.dismiss(); editChain(c, null, onAdded); }));
         root.addView(button(c, "A token on a chain", v -> { d.dismiss(); addToken(c, null, onAdded); }));
         root.addView(button(c, "Tokens on a chain", v -> {
@@ -580,6 +627,74 @@ public final class CustomAssets {
         }));
         d.setContentView(root);
         d.show();
+    }
+
+    // ── a token by its contract address, on every chain at once ────────────
+
+    /** Paste an address; every chain where it is a token is listed; tap one to add it. */
+    public static void search(Context c, String prefill, Runnable onAdded) {
+        BottomSheetDialog d = new com.harvana.app.ui.AppSheet(c);
+        LinearLayout root = column(c);
+        root.addView(title(c, "Search a token"));
+        EditText q = field(c, "Contract address", InputType.TYPE_CLASS_TEXT);
+        if (prefill != null) q.setText(prefill.trim());
+        root.addView(q);
+        TextView status = sub(c, "");
+        LinearLayout results = new LinearLayout(c);
+        results.setOrientation(LinearLayout.VERTICAL);
+        Runnable run = () -> {
+            String text = text(q);
+            results.removeAllViews();
+            if (!TokenScan.looksLikeContract(text)) { status.setText("Contract address"); return; }
+            status.setText("Searching every chain…");
+            TokenScan.search(c, text, found -> {
+                results.removeAllViews();
+                status.setText(found.isEmpty() ? "No chain has a token at this address." : found.size() + (found.size() == 1 ? " network" : " networks"));
+                for (Asset a : found) {
+                    boolean have = find(a.key()) != null;
+                    LinearLayout row = new LinearLayout(c);
+                    row.setOrientation(LinearLayout.HORIZONTAL);
+                    row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+                    row.setMinimumHeight(dp(c, 60));
+                    android.util.TypedValue tv = new android.util.TypedValue();
+                    c.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv, true);
+                    row.setBackgroundResource(tv.resourceId);
+                    ImageView logo = new ImageView(c);
+                    icon(c, logo, a);
+                    row.addView(logo, new LinearLayout.LayoutParams(dp(c, 32), dp(c, 32)));
+                    LinearLayout words = new LinearLayout(c);
+                    words.setOrientation(LinearLayout.VERTICAL);
+                    words.setPadding(dp(c, 12), 0, 0, 0);
+                    TextView top = sub(c, a.symbol + "  ·  " + a.name);
+                    top.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
+                    top.setTypeface(Typeface.DEFAULT_BOLD);
+                    top.setPadding(0, 0, 0, 0);
+                    words.addView(top);
+                    TextView net = sub(c, a.chainName);
+                    net.setPadding(0, 0, 0, 0);
+                    words.addView(net);
+                    row.addView(words, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+                    TextView act = button(c, have ? "Added" : "Add", null);
+                    act.setMinHeight(0);
+                    row.addView(act);
+                    row.setOnClickListener(v -> {
+                        if (find(a.key()) != null) return;
+                        add(c, a);
+                        act.setText("Added");
+                        if (onAdded != null) onAdded.run();
+                    });
+                    com.harvana.app.ui.SheetDialog.list(results, row);
+                }
+            });
+        };
+        root.addView(button(c, "Search", v -> run.run()));
+        root.addView(status);
+        root.addView(results);
+        android.widget.ScrollView sv = new android.widget.ScrollView(c);
+        sv.addView(root);
+        d.setContentView(sv);
+        d.show();
+        if (prefill != null && !prefill.trim().isEmpty()) run.run();
     }
 
     // ── a chain, typed in (Fill reads what it can) ─────────────────────────

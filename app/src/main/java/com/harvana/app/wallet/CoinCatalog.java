@@ -186,7 +186,8 @@ public final class CoinCatalog {
     public static Coin added(String key) {
         CustomAssets.Asset a = CustomAssets.find(key);
         if (a == null) return null;
-        String standard = a.token() ? (a.near() ? "NEP-141 token" : "ERC-20 token") : a.family + " account";
+        String standard = !a.token() ? a.family + " account"
+                : a.near() ? "NEP-141 token" : Trc20.FAMILY.equals(a.family) ? "TRC-20 token" : SplToken.FAMILY.equals(a.family) ? "SPL token" : "ERC-20 token";
         return new Coin(a.key(), a.token() ? a.name : a.chainName, a.symbol, a.chainName, standard, "",
                 R.drawable.ic_coin_generic, a.decimals, null, a.near() ? null : "added", false, a);
     }

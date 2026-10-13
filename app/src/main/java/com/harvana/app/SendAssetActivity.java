@@ -989,7 +989,12 @@ public class SendAssetActivity extends AppCompatActivity {
 			case "SOL": return "Solana address";
 			default: {
 				com.harvana.app.wallet.CustomAssets.Asset added = com.harvana.app.wallet.CustomAssets.find(key);
-				if (added != null) return added.near() ? "Account name or 64 characters" : "0x...";   // an added chain or token
+				if (added != null) {                                          // an added chain or token: its chain's address shape
+					if (added.near()) return "Account name or 64 characters";
+					if (com.harvana.app.wallet.Trc20.FAMILY.equals(added.family)) return "T...";
+					if (com.harvana.app.wallet.SplToken.FAMILY.equals(added.family)) return "Solana address";
+					return "0x...";
+				}
 			}
 				return "HV0x...";              // HARV and the stable coins (hUSD, hNGN, …)
 		}
@@ -1028,7 +1033,12 @@ public class SendAssetActivity extends AppCompatActivity {
 		if (key == null) return "";
 		if ("HARV".equals(key) || com.harvana.app.husd.Stable.isStable(key)) return "HV";
 		com.harvana.app.wallet.CustomAssets.Asset added = com.harvana.app.wallet.CustomAssets.find(key);
-		if (added != null) return added.near() ? "NEAR" : "EVM";       // a 0x address fits every EVM chain, built-in or added
+		if (added != null) {                                              // a token's address is its chain's
+			if (added.near()) return "NEAR";
+			if (com.harvana.app.wallet.Trc20.FAMILY.equals(added.family)) return "TRX";
+			if (com.harvana.app.wallet.SplToken.FAMILY.equals(added.family)) return "SOL";
+			return "EVM";                                                  // a 0x address fits every EVM chain, built-in or added
+		}
 		switch (key) {
 			case "ETH": case "BNB": case "POL": case "BASE": return "EVM";
 			default: return key;

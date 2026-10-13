@@ -45,6 +45,12 @@ public final class ChainSend {
                 CustomAssets.Asset a = CustomAssets.find(key);
                 if (a == null) throw new IllegalArgumentException("Sending " + key + " from Harvana is not switched on.");
                 if (a.near()) return a.token() ? NearProtocol.sendToken(a, mnemonic, from, to, amount) : NearProtocol.send(a, mnemonic, from, to, amount);
+                if (Trc20.FAMILY.equals(a.family)) return Trc20.send(a, mnemonic, from, to, amount);
+                if (SplToken.FAMILY.equals(a.family)) {
+                    byte[] seed = ChainKeys.privateKey(mnemonic, ChainKeys.Chain.SOL);
+                    try { return SplToken.send(a, seed, from, to, amount); }
+                    finally { java.util.Arrays.fill(seed, (byte) 0); }
+                }
                 if ("TOKEN".equals(a.kind)) return erc20(mnemonic, from, to, amount, a);
                 return evm(mnemonic, from, to, amount, a.rpc, a.chainId, a.decimals);
             }
@@ -247,6 +253,11 @@ public final class ChainSend {
         JSONObject tx = post(Net.tronApi() + "/wallet/createtransaction",
                 "{\"owner_address\":\"" + from + "\",\"to_address\":\"" + to + "\",\"amount\":" + sun + ",\"visible\":true}");
         if (!tx.has("txID")) throw new IllegalArgumentException(tx.optString("Error", "Tron could not build the payment."));
+        return tronBroadcast(priv, tx);
+    }
+
+    /** Signs a Tron transaction the API built (its txID) and broadcasts it; returns the txID. Also used for TRC-20. */
+    static String tronBroadcast(byte[] priv, JSONObject tx) throws Exception {
         byte[] hash = EvmTx.unhex(tx.getString("txID"));
         java.math.BigInteger[] rs = EvmTx.sign(priv, hash);
         int rec = EvmTx.recoverId(hash, rs[0], rs[1], priv);
@@ -259,6 +270,8 @@ public final class ChainSend {
         if (!out.optBoolean("result", false)) throw new IllegalArgumentException(tronMessage(out));
         return tx.getString("txID");
     }
+
+    static JSONObject tronPost(String path, String json) throws Exception { return post(Net.tronApi() + path, json); }
 
     private static String sol(String mnemonic, String from, String to, String amount) throws Exception {
         byte[] seed = ChainKeys.privateKey(mnemonic, ChainKeys.Chain.SOL);

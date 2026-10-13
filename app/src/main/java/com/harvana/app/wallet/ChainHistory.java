@@ -86,6 +86,8 @@ public final class ChainHistory {
                     if (a == null) break;
                     if (a.near() && !a.token()) out.addAll(NearProtocol.history(a, addr));
                     else if (a.near()) break;                                    // NEP-141 transfers: on the explorer
+                    else if (Trc20.FAMILY.equals(a.family)) trc20(out, a, addr);
+                    else if (SplToken.FAMILY.equals(a.family)) break;            // SPL transfers: on the explorer
                     else if ("CHAIN".equals(a.kind) && !a.scout.isEmpty()) blockscout(out, a.scout, a.symbol, a.chainName, addr, a.decimals, a.txPage(""));
                     else if ("TOKEN".equals(a.kind) && !a.scout.isEmpty()) scoutTokens(out, a, addr);
                     break;
@@ -410,6 +412,20 @@ public final class ChainHistory {
         if (o == null) return "";
         JSONArray a = o.optJSONArray("addresses");
         return a == null || a.length() == 0 ? "" : a.optString(0);
+    }
+
+    /** A TRC-20 token's transfers for this address, from the Tron API. */
+    private static void trc20(List<HashMap<String, Object>> out, CustomAssets.Asset a, String address) {
+        try {
+            JSONObject j = get(Net.tronApi() + "/v1/accounts/" + address + "/transactions/trc20?limit=20&contract_address=" + a.contract);
+            JSONArray data = j.optJSONArray("data");
+            for (int i = 0; data != null && i < data.length(); i++) {
+                JSONObject t = data.getJSONObject(i);
+                String from = t.optString("from"), to = t.optString("to"), hash = t.optString("transaction_id");
+                out.add(row(a.symbol, a.chainName, address.equals(to), from, to, shift(t.optString("value", "0"), a.decimals),
+                        t.optLong("block_timestamp"), hash, a.txPage(hash)));
+            }
+        } catch (Exception ignored) { }
     }
 
     /** An added token's transfers for this address, from the chain's Blockscout. */

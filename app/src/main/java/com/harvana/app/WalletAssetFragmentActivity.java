@@ -240,11 +240,35 @@ public class WalletAssetFragmentActivity extends Fragment {
 	private void _setupSearch(View root) {
 		android.widget.EditText et = root.findViewById(R.id.et_asset_search);
 		if (et == null) return;
+		// A contract address typed or pasted here: one row under the box finds that token on every chain (TokenScan).
+		final TextView scan = new TextView(root.getContext());
+		View searchCard = root.findViewById(R.id.til_asset_search);
+		if (searchCard != null && searchCard.getParent() instanceof View && ((View) searchCard.getParent()).getParent() instanceof ViewGroup) {
+			View searchRow = (View) searchCard.getParent();
+			ViewGroup outer = (ViewGroup) searchRow.getParent();
+			float d = getResources().getDisplayMetrics().density;
+			scan.setText("Find this token on every chain");
+			scan.setTextSize(14);
+			scan.setTypeface(null, android.graphics.Typeface.BOLD);
+			scan.setTextColor(com.harvana.app.utils.UiColors.accent());
+			scan.setGravity(android.view.Gravity.CENTER_VERTICAL);
+			scan.setMinHeight((int) (44 * d));
+			scan.setPadding((int) (16 * d), 0, (int) (16 * d), 0);
+			scan.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.icon_search_24, 0, 0, 0);
+			scan.setCompoundDrawablePadding((int) (8 * d));
+			if (scan.getCompoundDrawablesRelative()[0] != null) scan.getCompoundDrawablesRelative()[0].mutate().setTint(com.harvana.app.utils.UiColors.accent());
+			scan.setVisibility(View.GONE);
+			scan.setOnClickListener(v -> com.harvana.app.wallet.CustomAssets.search(requireContext(), et.getText().toString(), () -> {
+				if (getView() != null) com.harvana.app.wallet.CustomAssets.render(getContext(), getView().findViewById(R.id.custom_assets), wallet_address);
+			}));
+			outer.addView(scan, outer.indexOfChild(searchRow) + 1);
+		}
 		et.addTextChangedListener(new android.text.TextWatcher() {
 			@Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
 			@Override public void onTextChanged(CharSequence s, int a, int b, int c) { }
 			@Override public void afterTextChanged(android.text.Editable s) {
 				assetQuery = s.toString().trim().toLowerCase(java.util.Locale.US);
+				scan.setVisibility(com.harvana.app.wallet.TokenScan.looksLikeContract(s.toString()) ? View.VISIBLE : View.GONE);
 				_applySearch();
 			}
 		});

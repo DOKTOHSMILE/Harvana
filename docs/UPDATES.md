@@ -2,6 +2,23 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: find a token on every chain by its contract address
+
+Paste a contract address (Assets search box, or Add → Search a token by contract address). The address is tried on every chain at once; each network where it is a token is listed with its icon, symbol, name and network; tap Add.
+
+| Network | Token standard | Read | Send | History |
+|---|---|---|---|---|
+| Ethereum, BNB Chain, Polygon, Base, every added EVM chain | ERC-20 | contract name, symbol, decimals | yes, fee in the chain's coin | Blockscout, where the chain has one |
+| Tron | TRC-20 | contract name, symbol, decimals | yes, energy paid in TRX (up to 100 TRX) | Tron API |
+| Solana | SPL and Token-2022 | mint decimals; name, symbol and icon from Jupiter's token list | yes; creates the receiver's token account when missing (paid in SOL) | explorer |
+| Every added NEAR chain | NEP-141 | ft_metadata | yes; registers the receiver's storage when missing | explorer |
+
+- Price id and icon from CoinGecko by contract, where CoinGecko lists the token.
+- Checked: Solana associated-account addresses and both transfer shapes against @solana/web3.js and @solana/spl-token (instructions, accounts, signature); Tron and Solana read calls live.
+- A token found on several networks is added per network (each is its own row).
+
+App build only.
+
 ## 13 Oct 2026: chains and tokens added by hand; list rows in sheets; Home spacing
 
 **Add a chain (any chain of a protocol the app speaks).** A chain is data only. Every field can be typed; "Fill" reads what it can.

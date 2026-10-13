@@ -62,6 +62,9 @@ public final class Ed25519 {
         } catch (Exception e) { return false; }
     }
 
+    /** True when the 32 bytes are a point on the curve (Solana program-derived addresses must not be). */
+    public static boolean onCurve(byte[] encoded) { return decodePoint(encoded) != null; }
+
     private static Point decodePoint(byte[] encoded) {
         if (encoded == null || encoded.length != 32) return null;
         byte[] copy = encoded.clone();

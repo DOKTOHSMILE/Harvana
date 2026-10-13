@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A line on a card in Actions & votes (your vote, who can vote, what a cure costs). -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:paddingTop="8dp"
+	android:textColor="@color/colorTextSecondary"
+	android:textSize="12.5sp" />

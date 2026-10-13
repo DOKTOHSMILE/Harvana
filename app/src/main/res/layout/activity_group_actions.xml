@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Actions & votes: pull to refresh; the cards (summary, needs your attention, what you can do, recent decisions) go in group_actions_content. -->
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/group_actions_refresh"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<ScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@color/colorBackground">
+
+		<LinearLayout
+			android:id="@+id/group_actions_content"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:paddingStart="16dp"
+			android:paddingTop="8dp"
+			android:paddingEnd="16dp"
+			android:paddingBottom="28dp" />
+	</ScrollView>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

@@ -1,24 +1,16 @@
 package com.harvana.app.group;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.os.Bundle;
-import android.text.InputType;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.harvana.app.R;
 import com.harvana.app.circle.CircleUi;
 import com.harvana.app.engine.AccumSnapshot;
@@ -83,17 +75,10 @@ public class GroupActionsActivity extends AppCompatActivity {
         family = NodeGroupClient.familyOf(nodeId);
         me = WalletManager.getActiveWalletAddress(this);
 
-        refresh = new SwipeRefreshLayout(this);
-        ScrollView scroll = new ScrollView(this);
-        scroll.setBackgroundColor(CircleUi.color(this, R.color.colorBackground));
-        content = new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);
-        int pad = CircleUi.dp(this, 16);
-        content.setPadding(pad, CircleUi.dp(this, 8), pad, CircleUi.dp(this, 28));
-        scroll.addView(content, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        refresh.addView(scroll);
+        com.harvana.app.utils.AppBar.setContent(this, R.layout.activity_group_actions, "Actions & votes", "");
+        refresh = findViewById(R.id.group_actions_refresh);
+        content = findViewById(R.id.group_actions_content);
         refresh.setOnRefreshListener(this::load);
-        com.harvana.app.utils.AppBar.setContent(this, refresh, "Actions & votes", "");
         if (!fsGroupId.isEmpty()) {
             GroupFirestoreManager.getInstance(this).getGroup(fsGroupId, new GroupFirestoreManager.DocCallback() {
                 @Override public void onSuccess(Map<String, Object> data) {
@@ -313,10 +298,7 @@ public class GroupActionsActivity extends AppCompatActivity {
         GroupSnapshot s = snapshot();
 
         if (notOnNetwork) {
-            LinearLayout warn = CircleUi.card(this);
-            warn.addView(CircleUi.text(this, "Not on the network", 15, R.color.colorWarning, true));
-            warn.addView(CircleUi.text(this, "The network no longer has this group, so votes and requests for it will be refused.", 12.5f, R.color.colorTextSecondary, false));
-            content.addView(warn);
+            content.addView(new ActionCard(this, content).title("Not on the network").chip("OFF NETWORK", R.color.colorWarning).view);
         }
 
         // Which things are waiting on this person
@@ -347,8 +329,7 @@ public class GroupActionsActivity extends AppCompatActivity {
         boolean any = !openVotes.isEmpty() || joinCount > 0 || !approvals.isEmpty() || !defaulted.isEmpty();
         content.addView(sectionHeader("Needs your attention", attention == 0 ? "" : String.valueOf(attention)));
         if (!any) {
-            content.addView(emptyCard("Nothing is waiting on you",
-                "Votes, join requests and approvals appear here as soon as someone asks. You will also get a notification."));
+            content.addView(emptyCard("Nothing is waiting on you", ""));
         }
         for (Object[] p : openVotes) content.addView(voteCard((String) p[0], (String) p[1], castMap(p[2]), true));
         if (joinCount > 0) for (Map<String, Object> r : joinRequests) content.addView(joinRequestCard(r));
@@ -378,11 +359,6 @@ public class GroupActionsActivity extends AppCompatActivity {
 
         // Goal groups show their past goals on the Payments tab.
 
-        TextView foot = CircleUi.text(this, "Deposits, contributions and savings are on the group's Payments tab.", 12, R.color.colorTextTertiary, false);
-        foot.setPadding(CircleUi.dp(this, 4), CircleUi.dp(this, 18), CircleUi.dp(this, 4), 0);
-        content.addView(foot);
-        Button copy = button("Copy group ID", false, v -> copy(nodeId));
-        content.addView(copy);
     }
 
     @SuppressWarnings("unchecked")
@@ -400,42 +376,21 @@ public class GroupActionsActivity extends AppCompatActivity {
 
     // ── summary ────────────────────────────────────────────────────────────
 
+    /** res/layout/item_action_summary.xml: the group, my role, its state and the three counts. */
     private View summaryCard(GroupSnapshot s, int attention, int openVotes, int joinCount, int approvals, int defaults) {
-        LinearLayout card = CircleUi.card(this);
-        LinearLayout top = new LinearLayout(this);
-        top.setGravity(Gravity.CENTER_VERTICAL);
-        LinearLayout titles = new LinearLayout(this);
-        titles.setOrientation(LinearLayout.VERTICAL);
-        titles.addView(CircleUi.text(this, groupName.isEmpty() ? titleFor(family) : groupName, 17, R.color.colorTextPrimary, true));
-        titles.addView(CircleUi.text(this, titleFor(family) + " · " + role(), 12.5f, R.color.colorTextSecondary, false));
-        top.addView(titles, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        top.addView(CircleUi.chip(this, s.state.isEmpty() ? "ACTIVE" : s.state, CircleUi.stateColor(s.state)));
-        card.addView(top);
-
-        LinearLayout stats = new LinearLayout(this);
-        stats.setPadding(0, CircleUi.dp(this, 14), 0, 0);
-        stats.addView(stat(String.valueOf(openVotes), "Open votes"), statParams());
-        stats.addView(stat(String.valueOf(joinCount), "Join requests"), statParams());
-        stats.addView(stat(String.valueOf(approvals + defaults), "To approve"), statParams());
-        card.addView(stats);
-
-        String hint = attention == 0 ? "You are up to date."
-            : attention == 1 ? "1 thing needs you." : attention + " things need you.";
-        TextView h = CircleUi.text(this, hint, 12.5f, attention == 0 ? R.color.colorSuccess : R.color.colorWarning, true);
-        h.setPadding(0, CircleUi.dp(this, 12), 0, 0);
-        card.addView(h);
+        View card = getLayoutInflater().inflate(R.layout.item_action_summary, content, false);
+        ((TextView) card.findViewById(R.id.tv_actions_group_name)).setText(groupName.isEmpty() ? titleFor(family) : groupName);
+        ((TextView) card.findViewById(R.id.tv_actions_group_role)).setText(titleFor(family) + " · " + role());
+        TextView state = card.findViewById(R.id.tv_actions_group_state);
+        state.setText(s.state.isEmpty() ? "ACTIVE" : s.state);
+        state.setTextColor(CircleUi.color(this, CircleUi.stateColor(s.state)));
+        ((TextView) card.findViewById(R.id.tv_actions_open_votes)).setText(String.valueOf(openVotes));
+        ((TextView) card.findViewById(R.id.tv_actions_join_requests)).setText(String.valueOf(joinCount));
+        ((TextView) card.findViewById(R.id.tv_actions_to_approve)).setText(String.valueOf(approvals + defaults));
+        TextView h = card.findViewById(R.id.tv_actions_attention);
+        h.setText(attention == 0 ? "Up to date" : attention == 1 ? "1 thing needs you" : attention + " things need you");
+        h.setTextColor(CircleUi.color(this, attention == 0 ? R.color.colorSuccess : R.color.colorWarning));
         return card;
-    }
-
-    private LinearLayout.LayoutParams statParams() { return new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f); }
-
-    private View stat(String value, String label) {
-        LinearLayout c = new LinearLayout(this);
-        c.setOrientation(LinearLayout.VERTICAL);
-        c.setGravity(Gravity.CENTER_HORIZONTAL);
-        c.addView(CircleUi.text(this, value, 22, R.color.colorTextPrimary, true));
-        c.addView(CircleUi.text(this, label, 11.5f, R.color.colorTextSecondary, false));
-        return c;
     }
 
     private String role() {
@@ -444,25 +399,18 @@ public class GroupActionsActivity extends AppCompatActivity {
         return "You are not a member";
     }
 
+    /** res/layout/item_action_section.xml. */
     private View sectionHeader(String title, String count) {
-        LinearLayout h = new LinearLayout(this);
-        h.setGravity(Gravity.CENTER_VERTICAL);
-        h.setPadding(CircleUi.dp(this, 4), CircleUi.dp(this, 22), CircleUi.dp(this, 4), CircleUi.dp(this, 0));
-        h.addView(CircleUi.text(this, title.toUpperCase(Locale.US), 11.5f, R.color.colorTextTertiary, true),
-            new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        if (!count.isEmpty()) h.addView(CircleUi.chip(this, count, R.color.colorAccent));
+        View h = getLayoutInflater().inflate(R.layout.item_action_section, content, false);
+        ((TextView) h.findViewById(R.id.tv_action_section_title)).setText(title);
+        TextView c = h.findViewById(R.id.tv_action_section_count);
+        c.setText(count);
+        c.setVisibility(count.isEmpty() ? View.GONE : View.VISIBLE);
         return h;
     }
 
     private View emptyCard(String title, String body) {
-        LinearLayout c = CircleUi.card(this);
-        c.setGravity(Gravity.CENTER_HORIZONTAL);
-        c.addView(CircleUi.text(this, title, 14.5f, R.color.colorTextPrimary, true));
-        TextView t = CircleUi.text(this, body, 12.5f, R.color.colorTextSecondary, false);
-        t.setGravity(Gravity.CENTER_HORIZONTAL);
-        t.setPadding(0, CircleUi.dp(this, 4), 0, 0);
-        c.addView(t);
-        return c;
+        return new ActionCard(this, content).title(title).note(body).view;
     }
 
     // ── votes ──────────────────────────────────────────────────────────────
@@ -471,64 +419,29 @@ public class GroupActionsActivity extends AppCompatActivity {
         String label = GroupProposalIndex.DISBURSEMENT.equals(kind) ? "Payout request"
             : GroupProposalIndex.MILESTONE.equals(kind) ? "Milestone release" : "Emergency grant";
         VoteView v = VoteView.of(label, rec, me == null ? "" : me);
-        LinearLayout c = CircleUi.card(this);
-
-        LinearLayout head = new LinearLayout(this);
-        head.setGravity(Gravity.CENTER_VERTICAL);
-        head.addView(CircleUi.text(this, label, 15, R.color.colorTextPrimary, true), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        head.addView(CircleUi.chip(this, statusLabel(v), statusColor(v)));
-        c.addView(head);
-
+        ActionCard c = new ActionCard(this, content).title(label).chip(statusLabel(v), statusColor(v));
         long amt = num(rec, "amountRaw");
-        if (amt > 0) {
-            TextView a = CircleUi.text(this, gm(amt), 22, R.color.colorTextPrimary, true);
-            a.setPadding(0, CircleUi.dp(this, 6), 0, 0);
-            c.addView(a);
-        }
-        String why = !str(rec, "description").isEmpty() ? str(rec, "description") : str(rec, "reasonDescription");
-        if (!why.isEmpty()) {
-            TextView w = CircleUi.text(this, "“" + why + "”", 13.5f, R.color.colorTextSecondary, false);
-            w.setPadding(0, CircleUi.dp(this, 6), 0, 0);
-            c.addView(w);
-        }
+        if (amt > 0) c.amount(gm(amt));
+        c.quote(!str(rec, "description").isEmpty() ? str(rec, "description") : str(rec, "reasonDescription"));
         String by = !str(rec, "requestedBy").isEmpty() ? str(rec, "requestedBy") : str(rec, "requesterAddress");
         long when = num(rec, "requestedTimestamp");
         if (!by.isEmpty() || when > 0) {
             String who = by.isEmpty() ? "" : (by.equalsIgnoreCase(me) ? "You" : shortAddr(by));
-            TextView m = CircleUi.text(this, (who.isEmpty() ? "" : "Asked by " + who) + (who.isEmpty() || when <= 0 ? "" : " · ") + (when > 0 ? date(when) : ""),
-                11.5f, R.color.colorTextTertiary, false);
-            m.setPadding(0, CircleUi.dp(this, 6), 0, 0);
-            c.addView(m);
+            c.meta((who.isEmpty() ? "" : "Asked by " + who) + (who.isEmpty() || when <= 0 ? "" : " · ") + (when > 0 ? date(when) : ""));
         }
-
         if (v.votersTotal > 0) {
-            LinearProgressIndicator bar = new LinearProgressIndicator(this);
-            bar.setMax(100);
-            bar.setProgress(Math.min(100, v.yesPercent));
-            bar.setIndicatorColor(CircleUi.color(this, v.open ? R.color.colorAccent : R.color.colorSuccess));
-            bar.setTrackColor(CircleUi.color(this, R.color.colorCardStroke));
-            LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            bp.topMargin = CircleUi.dp(this, 12);
-            c.addView(bar, bp);
-            c.addView(CircleUi.text(this, v.yesPercent + "% yes of the vote · needs " + v.thresholdPercent + "% · "
-                + v.votersYes + " of " + v.votersTotal + " voters said yes", 12, R.color.colorTextSecondary, false));
+            c.bar(v.yesPercent, v.open, v.yesPercent + "% yes · needs " + v.thresholdPercent + "% · " + v.votersYes + " of " + v.votersTotal + " voters");
         }
-
         if (v.open) {
             if (!v.eligible) {
-                c.addView(CircleUi.text(this, "You can't vote on this one. Only the admin and the most active members can.", 12, R.color.colorTextTertiary, false));
+                c.note("Not a voter on this", R.color.colorTextTertiary, false);
             } else {
-                String mine = v.alreadyVoted ? "You voted " + (v.myVoteYes ? "yes" : "no") + ". You can change it until it closes." : "Your vote is needed.";
-                TextView t = CircleUi.text(this, mine, 12.5f, v.alreadyVoted ? R.color.colorTextSecondary : R.color.colorWarning, true);
-                t.setPadding(0, CircleUi.dp(this, 10), 0, 0);
-                c.addView(t);
-                LinearLayout row = new LinearLayout(this);
-                row.addView(voteButton("Vote yes", true, v2 -> vote(kind, id, true, label)), buttonCell(true));
-                row.addView(voteButton("Vote no", false, v2 -> vote(kind, id, false, label)), buttonCell(false));
-                c.addView(row);
+                c.note(v.alreadyVoted ? "You voted " + (v.myVoteYes ? "yes" : "no") : "Your vote is needed",
+                        v.alreadyVoted ? R.color.colorTextSecondary : R.color.colorWarning, true);
+                c.twoButtons("Vote yes", v2 -> vote(kind, id, true, label), "Vote no", v2 -> vote(kind, id, false, label));
             }
         }
-        return c;
+        return c.view;
     }
 
     private String statusLabel(VoteView v) {
@@ -570,65 +483,36 @@ public class GroupActionsActivity extends AppCompatActivity {
         final String myUid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
             : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        LinearLayout c = CircleUi.card(this);
-        LinearLayout head = new LinearLayout(this);
-        head.setGravity(Gravity.CENTER_VERTICAL);
-        final TextView badge = CircleUi.text(this, "?", 14, R.color.colorTextOnAccent, true);
-        badge.setGravity(Gravity.CENTER);
-        badge.setBackgroundResource(R.drawable.bg_avatar);
-        LinearLayout.LayoutParams bl = new LinearLayout.LayoutParams(CircleUi.dp(this, 40), CircleUi.dp(this, 40));
-        bl.setMarginEnd(CircleUi.dp(this, 12));
-        head.addView(badge, bl);
+        ActionCard c = new ActionCard(this, content).subtitle("Wants to join " + (groupName.isEmpty() ? "this group" : groupName))
+                .chip(vote ? "MEMBERS VOTE" : "ADMIN DECIDES", R.color.colorWarning);
+        final TextView badge = c.avatar();
         MemberPhoto.apply(badge, reqUid);
-        LinearLayout titles = new LinearLayout(this);
-        titles.setOrientation(LinearLayout.VERTICAL);
-        final TextView name = CircleUi.text(this, "Someone", 15, R.color.colorTextPrimary, true);
-        titles.addView(name);
-        titles.addView(CircleUi.text(this, "Wants to join " + (groupName.isEmpty() ? "this group" : groupName), 12, R.color.colorTextSecondary, false));
-        head.addView(titles, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        head.addView(CircleUi.chip(this, vote ? "MEMBERS VOTE" : "ADMIN DECIDES", R.color.colorWarning));
-        c.addView(head);
+        final TextView name = c.titleView();
+        name.setText("Someone");
         MemberNameResolver.resolve(this, reqUid, "Someone", full -> {
             name.setText(full);
             if (!full.isEmpty()) badge.setText(full.substring(0, 1).toUpperCase(Locale.US));
         });
-
-        String msg = str(req, "message");
-        if (!msg.isEmpty()) {
-            TextView m = CircleUi.text(this, "“" + msg + "”", 13, R.color.colorTextSecondary, false);
-            m.setPadding(0, CircleUi.dp(this, 8), 0, 0);
-            c.addView(m);
-        }
+        c.quote(str(req, "message"));
         long when = num(req, "createdAt");
-        if (when > 0) {
-            TextView t = CircleUi.text(this, "Asked " + date(when), 11.5f, R.color.colorTextTertiary, false);
-            t.setPadding(0, CircleUi.dp(this, 6), 0, 0);
-            c.addView(t);
-        }
+        if (when > 0) c.meta("Asked " + date(when));
 
         if (vote) {
             Object votes = req.get("votes");
             boolean voted = votes instanceof Map && ((Map<?, ?>) votes).containsKey(myUid);
             if (reqUid.equals(myUid)) {
-                c.addView(CircleUi.text(this, "This is your own request. Other members vote on it.", 12, R.color.colorTextTertiary, false));
+                c.note("Your own request", R.color.colorTextTertiary, false);
             } else if (voted) {
-                c.addView(CircleUi.text(this, "You have voted on this request.", 12.5f, R.color.colorTextSecondary, true));
+                c.note("You have voted", R.color.colorTextSecondary, true);
             } else {
                 int total = (int) num(fsData, "membersCount");
-                c.addView(CircleUi.text(this, "Passes when at least 60% of the " + Math.max(1, total) + (total == 1 ? " member votes" : " members vote") + " yes"
-                    + (total <= 1 ? ", so your Yes is enough." : "."), 12, R.color.colorTextSecondary, false));
-                LinearLayout row = new LinearLayout(this);
-                row.addView(voteButton("Vote yes", true, v -> castJoinVote(reqUid, myUid, true)), buttonCell(true));
-                row.addView(voteButton("Vote no", false, v -> castJoinVote(reqUid, myUid, false)), buttonCell(false));
-                c.addView(row);
+                c.note("Passes at 60% yes of " + Math.max(1, total) + (total == 1 ? " member" : " members"));
+                c.twoButtons("Vote yes", v -> castJoinVote(reqUid, myUid, true), "Vote no", v -> castJoinVote(reqUid, myUid, false));
             }
         } else {
-            LinearLayout row = new LinearLayout(this);
-            row.addView(voteButton("Accept", true, v -> acceptJoin(docId, reqUid)), buttonCell(true));
-            row.addView(voteButton("Reject", false, v -> rejectJoin(docId)), buttonCell(false));
-            c.addView(row);
+            c.twoButtons("Accept", v -> acceptJoin(docId, reqUid), "Reject", v -> rejectJoin(docId));
         }
-        return c;
+        return c.view;
     }
 
     private void castJoinVote(String reqUid, String myUid, boolean yes) {
@@ -660,22 +544,12 @@ public class GroupActionsActivity extends AppCompatActivity {
     // ── withdrawals and defaults ───────────────────────────────────────────
 
     private View withdrawalCard(final String lineId, final Map<String, Object> ln) {
-        LinearLayout c = CircleUi.card(this);
-        LinearLayout head = new LinearLayout(this);
-        head.setGravity(Gravity.CENTER_VERTICAL);
-        head.addView(CircleUi.text(this, "Withdrawal request", 15, R.color.colorTextPrimary, true), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        head.addView(CircleUi.chip(this, "NEEDS APPROVAL", R.color.colorWarning));
-        c.addView(head);
-        TextView a = CircleUi.text(this, gm(num(ln, "amountPaidRaw")), 22, R.color.colorTextPrimary, true);
-        a.setPadding(0, CircleUi.dp(this, 6), 0, 0);
-        c.addView(a);
         String who = str(ln, "memberAddress");
-        c.addView(CircleUi.text(this, (who.isEmpty() ? "A member" : shortAddr(who)) + " asked to take their savings out of the group. Approving sends the money to them.",
-            12.5f, R.color.colorTextSecondary, false));
+        ActionCard c = new ActionCard(this, content).title("Withdrawal request").chip("NEEDS APPROVAL", R.color.colorWarning)
+                .amount(gm(num(ln, "amountPaidRaw"))).meta(who.isEmpty() ? "A member" : shortAddr(who));
         GroupAction approve = new GroupAction(GroupAction.ACCUM_APPROVE_PACK, gm(num(ln, "amountPaidRaw")), true, lineId);
-        Button b = button("Approve withdrawal", true, v -> NodePayActions.run(ctx((Button) v), approve));
-        c.addView(b);
-        return c;
+        c.button("Approve withdrawal", true, v -> NodePayActions.run(ctx((Button) v), approve));
+        return c.view;
     }
 
     @SuppressWarnings("unchecked")
@@ -684,23 +558,15 @@ public class GroupActionsActivity extends AppCompatActivity {
         boolean admin = iAmAdmin();
         for (final Map<String, Object> m : defaulted) {
             final String addr = String.valueOf(m.get("address"));
-            LinearLayout c = CircleUi.card(this);
             boolean mineCase = addr.equalsIgnoreCase(me == null ? "" : me);
-            LinearLayout head = new LinearLayout(this);
-            head.setGravity(Gravity.CENTER_VERTICAL);
-            head.addView(CircleUi.text(this, (mineCase ? "You" : shortAddr(addr)) + " defaulted", 15, R.color.colorTextPrimary, true),
-                new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            head.addView(CircleUi.chip(this, "DEFAULT", R.color.colorError));
-            c.addView(head);
+            ActionCard c = new ActionCard(this, content).title((mineCase ? "You" : shortAddr(addr)) + " defaulted").chip("DEFAULT", R.color.colorError);
             if (mineCase) renderCure(c, (Map<String, Object>) m.get("cureOffer"));
             Map<String, Object> proposal = (Map<String, Object>) m.get("proposal");
             boolean open = proposal != null && "PENDING".equals(str(proposal, "status"));
             if (!open) {
-                c.addView(CircleUi.text(this, "The group can vote to forgive a default. Forgiving it takes it off this member's record. It does not move any money.",
-                    12.5f, R.color.colorTextSecondary, false));
                 if (admin && !mineCase) {
-                    c.addView(button("Ask the group to forgive", false, v -> PinPromptHelper.authorize(this, "Ask the group to forgive this default", () ->
-                        NodeGroupClient.proposeForgiveness(getApplicationContext(), me, nodeId, addr, result("Asked. The voters decide.")))));
+                    c.button("Ask the group to forgive", false, v -> PinPromptHelper.authorize(this, "Ask the group to forgive this default", () ->
+                        NodeGroupClient.proposeForgiveness(getApplicationContext(), me, nodeId, addr, result("Asked. The voters decide."))));
                 }
             } else {
                 long yes = 0, total = 0;
@@ -713,62 +579,46 @@ public class GroupActionsActivity extends AppCompatActivity {
                     if (String.valueOf(e.getKey()).equalsIgnoreCase(me)) eligible = true;
                 }
                 int pct = total == 0 ? 0 : (int) (yes * 100 / total);
-                LinearProgressIndicator bar = new LinearProgressIndicator(this);
-                bar.setMax(100);
-                bar.setProgress(pct);
-                bar.setIndicatorColor(CircleUi.color(this, R.color.colorAccent));
-                bar.setTrackColor(CircleUi.color(this, R.color.colorCardStroke));
-                LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                bp.topMargin = CircleUi.dp(this, 10);
-                c.addView(bar, bp);
-                c.addView(CircleUi.text(this, "The admin asked the group to forgive this default. " + pct + "% yes, 51% needed. "
-                    + (mineCase ? "You cannot vote on your own case." : eligible ? "Your vote is needed." : "You are not one of the voters."),
-                    12.5f, R.color.colorTextSecondary, false));
+                c.bar(pct, true, "Forgive: " + pct + "% yes · needs 51%");
+                c.note(mineCase ? "Your own case" : eligible ? "Your vote is needed" : "Not a voter on this",
+                        eligible && !mineCase ? R.color.colorWarning : R.color.colorTextTertiary, eligible && !mineCase);
                 if (eligible && !mineCase) {
-                    LinearLayout row = new LinearLayout(this);
-                    row.addView(voteButton("Vote yes", true, v -> PinPromptHelper.authorize(this, "Vote to forgive this default", () ->
-                        NodeGroupClient.voteForgiveness(getApplicationContext(), me, nodeId, addr, true, result("Your yes vote is in")))), buttonCell(true));
-                    row.addView(voteButton("Vote no", false, v -> PinPromptHelper.authorize(this, "Vote against forgiving this default", () ->
-                        NodeGroupClient.voteForgiveness(getApplicationContext(), me, nodeId, addr, false, result("Your no vote is in")))), buttonCell(false));
-                    c.addView(row);
+                    c.twoButtons("Vote yes", v -> PinPromptHelper.authorize(this, "Vote to forgive this default", () ->
+                            NodeGroupClient.voteForgiveness(getApplicationContext(), me, nodeId, addr, true, result("Your yes vote is in"))),
+                        "Vote no", v -> PinPromptHelper.authorize(this, "Vote against forgiving this default", () ->
+                            NodeGroupClient.voteForgiveness(getApplicationContext(), me, nodeId, addr, false, result("Your no vote is in"))));
                 }
             }
-            content.addView(c);
+            content.addView(c.view);
         }
     }
 
-    private void renderCure(LinearLayout card, Map<String, Object> offer) {
+    private void renderCure(ActionCard card, Map<String, Object> offer) {
         if (offer == null) return;
         boolean eligible = Boolean.TRUE.equals(offer.get("eligible"));
         final long amount = num(offer, "amountRaw");
         if (!eligible) {
             String why = str(offer, "reason");
-            String text = "SHORTFALL_NOT_COVERED_BY_BOND".equals(why) ? "Your bond did not cover everything you missed, so only the group can forgive this default."
-                : "CURE_WINDOW_CLOSED".equals(why) ? "The 14 days to put this right have passed. The group can still vote to forgive it."
-                : "CURE_LIMIT_REACHED".equals(why) ? "You have already put " + num(offer, "curesAllowed") + " defaults right. The group can still vote to forgive this one."
+            String text = "SHORTFALL_NOT_COVERED_BY_BOND".equals(why) ? "Bond did not cover the shortfall"
+                : "CURE_WINDOW_CLOSED".equals(why) ? "14-day window to put it right: closed"
+                : "CURE_LIMIT_REACHED".equals(why) ? "Defaults already put right: " + num(offer, "curesAllowed")
                 : "";
-            if (!text.isEmpty()) card.addView(CircleUi.text(this, text, 12.5f, R.color.colorTextSecondary, false));
+            card.note(text);
             return;
         }
         long deadline = num(offer, "deadlineTimestamp");
-        card.addView(CircleUi.text(this, "You can put this right: pay back " + gm(amount) + " of the bond the default used"
-            + (deadline > 0 ? ", before " + new SimpleDateFormat("d MMM", Locale.US).format(new Date(deadline)) : "")
-            + ". The penalty is not refunded. It goes back into your bond and the default stops counting against you.", 12.5f, R.color.colorTextSecondary, false));
-        card.addView(button("Put it right  ·  " + gm(amount), true, v -> pay("Put a default right", gm(amount),
+        card.note("Put it right: " + gm(amount) + (deadline > 0 ? " · before " + new SimpleDateFormat("d MMM", Locale.US).format(new Date(deadline)) : ""));
+        card.button("Put it right  ·  " + gm(amount), true, v -> pay("Put a default right", gm(amount),
             "Goes back into your own bond in this circle",
-            () -> NodeGroupClient.cureDefault(getApplicationContext(), me, nodeId, result("Sent. The default is cleared once the network confirms it.")))));
+            () -> NodeGroupClient.cureDefault(getApplicationContext(), me, nodeId, result("Sent. The default is cleared once the network confirms it."))));
     }
 
     // ── actions ────────────────────────────────────────────────────────────
 
     private View actionCard(final GroupAction a) {
-        LinearLayout c = CircleUi.card(this);
-        c.addView(CircleUi.text(this, actionTitle(a), 15, R.color.colorTextPrimary, true));
-        TextView d = CircleUi.text(this, actionExplain(a), 12.5f, R.color.colorTextSecondary, false);
-        d.setPadding(0, CircleUi.dp(this, 4), 0, 0);
-        c.addView(d);
-        c.addView(button(actionButtonLabel(a), a.primary, v -> NodePayActions.run(ctx((Button) v), a)));
-        return c;
+        ActionCard c = new ActionCard(this, content).title(actionTitle(a));
+        c.button(actionButtonLabel(a), a.primary, v -> NodePayActions.run(ctx((Button) v), a));
+        return c.view;
     }
 
     private String actionTitle(GroupAction a) {
@@ -780,18 +630,6 @@ public class GroupActionsActivity extends AppCompatActivity {
             case GroupAction.ACCUM_CLAIM: return "Claim your savings";
             case GroupAction.WITHDRAW_BOND: return "Withdraw your bond";
             default: return a.label;
-        }
-    }
-
-    private String actionExplain(GroupAction a) {
-        switch (a.id) {
-            case GroupAction.FIXED_REQUEST_DISBURSEMENT: return "Asks the group to release the money held for this goal. Members vote before anyone is paid.";
-            case GroupAction.FIXED_REQUEST_MILESTONE: return "Asks for part of the money for a step you have reached. Say what it is for. Members vote.";
-            case GroupAction.FIXED_REQUEST_GRANT: return "Ask the group for help from the money held here. Be clear and honest: members vote and the reason stays on record.";
-            case GroupAction.ACCUM_PACK: return "Asks the admin to approve taking your savings out. Nothing moves until they approve.";
-            case GroupAction.ACCUM_CLAIM: return "Pays your savings line out to your wallet.";
-            case GroupAction.WITHDRAW_BOND: return "Returns the bond you locked, when the group allows it.";
-            default: return "";
         }
     }
 
@@ -825,32 +663,19 @@ public class GroupActionsActivity extends AppCompatActivity {
     // ── start a new goal (goal groups that have reached their goal) ────────
 
     private View newGoalCard() {
-        LinearLayout c = CircleUi.card(this);
-        c.addView(CircleUi.text(this, "Start a new goal", 15, R.color.colorTextPrimary, true));
-        TextView d = CircleUi.text(this, "Starts a new goal inside this same group: same members, rule and wallet, with a name and target you choose and its own ledger. "
-            + "Nobody has to join again. Only the admin can do this.", 12.5f, R.color.colorTextSecondary, false);
-        d.setPadding(0, CircleUi.dp(this, 4), 0, 0);
-        c.addView(d);
-        c.addView(button("Start a new goal", false, v -> startNewGoal()));
-        return c;
+        ActionCard c = new ActionCard(this, content).title("Start a new goal");
+        c.button("Start a new goal", false, v -> startNewGoal());
+        return c.view;
     }
 
     private void startNewGoal() {
         if (group == null) return;
-                LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-        int pad = CircleUi.dp(this, 20);
-        box.setPadding(pad, CircleUi.dp(this, 8), pad, 0);
-        final EditText name = new com.google.android.material.textfield.TextInputEditText(this);
-        name.setHint("Name of the new goal");
+        View box = getLayoutInflater().inflate(R.layout.dialog_new_goal, null, false);
+        final EditText name = box.findViewById(R.id.et_new_goal_name);
         name.setText("Goal " + (num(group, "goalNumber") > 0 ? num(group, "goalNumber") + 1 : 2));
-        final EditText target = new com.google.android.material.textfield.TextInputEditText(this);
-        target.setHint("Target amount");
-        target.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        final EditText target = box.findViewById(R.id.et_new_goal_target);
         long old = num(group, "targetGoalAmountRaw");
         if (old > 0) target.setText(String.valueOf(old / 100_000_000.0).replaceAll("\\.0$", ""));
-        box.addView(name);
-        box.addView(target);
         new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Start a new goal").setView(box).setNegativeButton("Cancel", null)
             .setPositiveButton("Continue", (d, w) -> {
                 final String n = name.getText().toString().trim();
@@ -884,26 +709,8 @@ public class GroupActionsActivity extends AppCompatActivity {
         PaymentConfirmSheet.reviewThenAuthorize(this, title, amount, rows, work);
     }
 
-    private Button voteButton(String label, boolean yes, View.OnClickListener l) {
-        Button b = com.harvana.app.ui.Btn.of(this, label, yes, l);
-        b.setMinHeight(0);
-        return b;
-    }
 
-    private LinearLayout.LayoutParams buttonCell(boolean first) {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, CircleUi.dp(this, 50), 1f);
-        lp.topMargin = CircleUi.dp(this, 12);
-        if (first) lp.setMarginEnd(CircleUi.dp(this, 6)); else lp.setMarginStart(CircleUi.dp(this, 6));
-        return lp;
-    }
 
-    private Button button(String label, boolean primary, View.OnClickListener l) {
-        Button bt = com.harvana.app.ui.Btn.of(this, label, primary, l);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, CircleUi.dp(this, 50));
-        lp.topMargin = CircleUi.dp(this, 12);
-        bt.setLayoutParams(lp);
-        return bt;
-    }
 
     private void message(String m) {
         content.removeAllViews();
@@ -912,11 +719,6 @@ public class GroupActionsActivity extends AppCompatActivity {
 
     private void toast(final String m) { runOnUiThread(() -> Toast.makeText(this, m, Toast.LENGTH_LONG).show()); }
 
-    private void copy(String text) {
-        ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("Group", text));
-        toast("Copied");
-    }
 
     private static String date(long ms) { return new SimpleDateFormat("d MMM yyyy, h:mm a", Locale.US).format(new Date(ms)); }
     private static String titleFor(String f) {

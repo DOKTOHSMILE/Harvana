@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One card in Actions & votes (group/ActionCard fills it): a head (avatar, title, subtitle, status chip), an amount, a quote,
+  a meta line, a vote bar with its line, a note, then Yes / No buttons or one button. Parts not used stay hidden.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginTop="12dp"
+	android:background="@drawable/bg_quick_action"
+	android:orientation="vertical"
+	android:paddingStart="16dp"
+	android:paddingTop="14dp"
+	android:paddingEnd="16dp"
+	android:paddingBottom="14dp">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center_vertical"
+		android:orientation="horizontal">
+
+		<TextView
+			android:id="@+id/tv_action_avatar"
+			android:layout_width="40dp"
+			android:layout_height="40dp"
+			android:layout_marginEnd="12dp"
+			android:background="@drawable/bg_avatar"
+			android:gravity="center"
+			android:text="\?"
+			android:textColor="@color/colorTextOnAccent"
+			android:textSize="14sp"
+			android:textStyle="bold"
+			android:visibility="gone" />
+
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:orientation="vertical">
+
+			<TextView
+				android:id="@+id/tv_action_title"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="15sp"
+				android:textStyle="bold" />
+
+			<TextView
+				android:id="@+id/tv_action_subtitle"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="12sp"
+				android:visibility="gone" />
+		</LinearLayout>
+
+		<TextView
+			android:id="@+id/tv_action_chip"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:background="@drawable/bg_chip_muted"
+			android:paddingStart="10dp"
+			android:paddingTop="3dp"
+			android:paddingEnd="10dp"
+			android:paddingBottom="3dp"
+			android:textSize="11.5sp"
+			android:textStyle="bold"
+			android:visibility="gone" />
+	</LinearLayout>
+
+	<TextView
+		android:id="@+id/tv_action_amount"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="6dp"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="22sp"
+		android:textStyle="bold"
+		android:visibility="gone" />
+
+	<TextView
+		android:id="@+id/tv_action_quote"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingTop="6dp"
+		android:textColor="@color/colorTextSecondary"
+		android:textSize="13.5sp"
+		android:textStyle="italic"
+		android:visibility="gone" />
+
+	<TextView
+		android:id="@+id/tv_action_meta"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingTop="6dp"
+		android:textColor="@color/colorTextTertiary"
+		android:textSize="11.5sp"
+		android:visibility="gone" />
+
+	<com.google.android.material.progressindicator.LinearProgressIndicator
+		android:id="@+id/action_vote_bar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="12dp"
+		android:max="100"
+		android:visibility="gone" />
+
+	<TextView
+		android:id="@+id/tv_action_vote_line"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingTop="4dp"
+		android:textColor="@color/colorTextSecondary"
+		android:textSize="12sp"
+		android:visibility="gone" />
+
+	<LinearLayout
+		android:id="@+id/action_notes"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical" />
+
+	<LinearLayout
+		android:id="@+id/action_two_buttons"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="12dp"
+		android:orientation="horizontal"
+		android:visibility="gone">
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_action_yes"
+			style="@style/HarvanaButton"
+			android:layout_width="0dp"
+			android:layout_height="50dp"
+			android:layout_marginEnd="6dp"
+			android:layout_weight="1"
+			android:text="Vote yes" />
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_action_no"
+			style="@style/HarvanaButton.Outlined"
+			android:layout_width="0dp"
+			android:layout_height="50dp"
+			android:layout_marginStart="6dp"
+			android:layout_weight="1"
+			android:text="Vote no" />
+	</LinearLayout>
+
+	<com.google.android.material.button.MaterialButton
+		android:id="@+id/btn_action_main"
+		style="@style/HarvanaButton"
+		android:layout_width="match_parent"
+		android:layout_height="50dp"
+		android:layout_marginTop="12dp"
+		android:visibility="gone" />
+
+	<com.google.android.material.button.MaterialButton
+		android:id="@+id/btn_action_secondary"
+		style="@style/HarvanaButton.Outlined"
+		android:layout_width="match_parent"
+		android:layout_height="50dp"
+		android:layout_marginTop="12dp"
+		android:visibility="gone" />
+</LinearLayout>

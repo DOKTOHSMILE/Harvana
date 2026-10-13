@@ -29,6 +29,18 @@ The Bitcoin address shown in the app changes. Testnet coins sent to the old tb1â
 | HARV source | Node `/api/v1/swap/price/history`, hUSD pool; hNGN pool at the naira rate when hUSD has no history |
 | Other coins | CoinGecko market chart; kept 5 minutes |
 
+**dApp browser: Solana**
+
+| Part | Value |
+|---|---|
+| Account | The wallet's Solana address (m/44'/501'/0'/0') |
+| Network | Solana Devnet on test, Solana on main |
+| Page APIs | `window.solana`, `window.phantom.solana`, Wallet Standard wallet "Harvana" |
+| Methods | connect, disconnect, signMessage, signTransaction, signAllTransactions, signAndSendTransaction |
+| Transactions | Legacy and v0 |
+| Review sheet | Site, account, network, fee payer, SOL out, programs, instructions, signers, lookup tables, network fee |
+| Refused | A message that is a transaction; a transaction this account does not sign; unreadable bytes |
+
 App build only.
 
 ## 13 Oct 2026: stable coins' contract addresses and "Send to another chain"

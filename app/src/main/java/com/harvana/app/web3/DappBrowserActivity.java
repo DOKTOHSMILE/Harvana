@@ -39,6 +39,7 @@ import androidx.webkit.WebViewFeature;
 import com.harvana.app.R;
 import com.harvana.app.utils.UiColors;
 import com.harvana.app.wallet.Net;
+import com.harvana.app.wallet.SolSigner;
 import com.harvana.app.wallet.Web3Signer;
 
 import org.json.JSONArray;
@@ -85,6 +86,7 @@ public class DappBrowserActivity extends AppCompatActivity {
     private String chainKey;
     private String account;                     // the active wallet's EVM address, once derived
     private String hvAccount;                   // the active wallet's Harvana address
+    private String solAccount;                  // the active wallet's Solana address, once derived
     private BrowserBar nav;
     private LoadingPill pill;
     private ImageView favicon;
@@ -177,6 +179,8 @@ public class DappBrowserActivity extends AppCompatActivity {
         io.execute(() -> {
             try { String a = Web3Signer.address(this); ui.post(() -> account = a); }
             catch (Exception e) { ui.post(() -> account = null); }
+            try { String s = SolSigner.address(this); ui.post(() -> solAccount = s); }
+            catch (Exception e) { ui.post(() -> solAccount = null); }
         });
 
         // The tabs left open last time come back (each loads when it is shown).
@@ -283,7 +287,7 @@ public class DappBrowserActivity extends AppCompatActivity {
         });
         if (bridge) {
             WebViewCompat.addWebMessageListener(w, "harvanaBridge", Collections.singleton("*"), this::onBridgeMessage);
-            tab.injected = WebViewCompat.addDocumentStartJavaScript(w, Provider.script(chainHex(), String.valueOf(net().chainId)), Collections.singleton("*"));
+            tab.injected = WebViewCompat.addDocumentStartJavaScript(w, Provider.script(chainHex(), String.valueOf(net().chainId), com.harvana.app.wallet.SolSigner.chain()), Collections.singleton("*"));
         }
         return w;
     }
@@ -523,6 +527,7 @@ public class DappBrowserActivity extends AppCompatActivity {
                 List<String> out = new ArrayList<>();
                 if (account != null && Web3Sites.connected(DappBrowserActivity.this, account, pageOrigin)) out.add(net().name + " · " + shortAddr(account));
                 if (hvConnected(pageOrigin)) out.add("Harvana · " + shortAddr(hvAccount));
+                if (solConnected(pageOrigin)) out.add(SolSigner.networkName() + " · " + shortAddr(solAccount));
                 return out;
             }
             @Override public void disconnectPage() { disconnectSite(pageOrigin); }
@@ -530,14 +535,17 @@ public class DappBrowserActivity extends AppCompatActivity {
                 java.util.TreeSet<String> all = new java.util.TreeSet<>();
                 if (account != null) all.addAll(Web3Sites.connectedSites(DappBrowserActivity.this, account));
                 if (hvAccount != null && !hvAccount.isEmpty()) all.addAll(Web3Sites.connectedSites(DappBrowserActivity.this, hvAccount));
+                if (solAccount != null) all.addAll(Web3Sites.connectedSites(DappBrowserActivity.this, solAccount));
                 return new ArrayList<>(all);
             }
             @Override public void disconnectSite(String origin) {
                 if (account != null) Web3Sites.disconnect(DappBrowserActivity.this, account, origin);
                 if (hvAccount != null && !hvAccount.isEmpty()) Web3Sites.disconnect(DappBrowserActivity.this, hvAccount, origin);
+                if (solAccount != null) Web3Sites.disconnect(DappBrowserActivity.this, solAccount, origin);
                 if (origin.equals(pageOrigin)) {
                     emit("accountsChanged", new JSONArray());
                     emitHv("accountsChanged", new JSONArray());
+                    emitSol("disconnect", JSONObject.NULL);
                 }
             }
         };
@@ -706,7 +714,7 @@ public class DappBrowserActivity extends AppCompatActivity {
         for (Tab t : tabs) {
             if (t.web == null) continue;
             if (t.injected != null) { t.injected.remove(); t.injected = null; }
-            t.injected = WebViewCompat.addDocumentStartJavaScript(t.web, Provider.script(chainHex(), String.valueOf(net().chainId)), Collections.singleton("*"));
+            t.injected = WebViewCompat.addDocumentStartJavaScript(t.web, Provider.script(chainHex(), String.valueOf(net().chainId), com.harvana.app.wallet.SolSigner.chain()), Collections.singleton("*"));
         }
     }
 
@@ -753,6 +761,30 @@ public class DappBrowserActivity extends AppCompatActivity {
                 if (!hvConnected(origin)) { error(id, 4100, "Not connected."); return; }
                 if (!claim(id)) return;
                 harvanaAction(origin, id, params.optJSONObject(0));
+                return;
+            case "sol_connect": {
+                if (solAccount == null) { error(id, 4100, "No wallet on this phone."); return; }
+                if (solConnected(origin)) { ok(id, solAccountJson()); return; }
+                JSONObject o = params.optJSONObject(0);
+                if (o != null && o.optBoolean("onlyIfTrusted")) { error(id, 4001, "User rejected the request."); return; }
+                if (!claim(id)) return;
+                connect(origin, id, solAccount, SolSigner.networkName(), () -> {
+                    Web3Sites.connect(this, solAccount, origin);
+                    try { ok(id, solAccountJson()); } catch (Exception e) { error(id, -32603, "Internal error"); }
+                });
+                return;
+            }
+            case "sol_disconnect":
+                if (solAccount != null) Web3Sites.disconnect(this, solAccount, origin);
+                ok(id, JSONObject.NULL);
+                return;
+            case "sol_signMessage":
+            case "sol_signTransaction":
+            case "sol_signAllTransactions":
+            case "sol_signAndSendTransaction":
+                if (!solConnected(origin)) { error(id, 4100, "Not connected."); return; }
+                if (!claim(id)) return;
+                solana(origin, id, method, params);
                 return;
             case "eth_chainId": ok(id, chainHex()); return;
             case "net_version": ok(id, String.valueOf(net().chainId)); return;
@@ -850,6 +882,87 @@ public class DappBrowserActivity extends AppCompatActivity {
                 }).create();
         d.setOnDismissListener(x -> { if (!done[0]) { release(); error(id, 4001, "User rejected the request."); } });
         d.show();
+    }
+
+    // ── Solana ─────────────────────────────────────────────────────────────────────
+
+    private boolean solConnected(String origin) {
+        return solAccount != null && Web3Sites.connected(this, solAccount, origin);
+    }
+
+    private JSONObject solAccountJson() throws Exception {
+        return new JSONObject().put("address", solAccount)
+                .put("publicKey", android.util.Base64.encodeToString(SolSigner.publicKey(solAccount), android.util.Base64.NO_WRAP));
+    }
+
+    /** Review, then sign (and send) with the Solana key. Each transaction is read so the sheet shows what it does. */
+    private void solana(String origin, int id, String method, JSONArray params) {
+        final String acc = solAccount;
+        List<String[]> rows = new ArrayList<>();
+        rows.add(new String[]{"Site", origin});
+        rows.add(new String[]{"Account", shortAddr(acc)});
+        rows.add(new String[]{"Network", SolSigner.networkName()});
+        try {
+            switch (method) {
+                case "sol_signMessage": {
+                    byte[] msg = android.util.Base64.decode(params.optString(0, ""), android.util.Base64.NO_WRAP);
+                    String shown = printable(msg) ? new String(msg, StandardCharsets.UTF_8) : "0x" + hex(msg);
+                    rows.add(new String[]{"Message", shown.length() > 1200 ? shown.substring(0, 1200) + "…" : shown});
+                    review("Sign message", "", rows, id, () -> new JSONObject().put("signature", SolSigner.signMessage(this, acc, msg)));
+                    return;
+                }
+                case "sol_signTransaction": {
+                    byte[] tx = android.util.Base64.decode(params.optString(0, ""), android.util.Base64.NO_WRAP);
+                    rows.addAll(SolSigner.describe(tx, acc));
+                    review("Sign transaction", solOut(tx, acc), rows, id,
+                            () -> new JSONObject().put("transaction", SolSigner.signTransaction(this, acc, tx)));
+                    return;
+                }
+                case "sol_signAllTransactions": {
+                    JSONArray list = params.optJSONArray(0);
+                    if (list == null || list.length() == 0 || list.length() > 20) { bad(id); return; }
+                    List<byte[]> txs = new ArrayList<>();
+                    long out = 0;
+                    for (int i = 0; i < list.length(); i++) {
+                        byte[] tx = android.util.Base64.decode(list.optString(i, ""), android.util.Base64.NO_WRAP);
+                        SolSigner.describe(tx, acc);                                     // refuses a transaction it can't read
+                        out += SolSigner.lamportsOut(tx, acc);
+                        txs.add(tx);
+                    }
+                    rows.add(new String[]{"Transactions", String.valueOf(txs.size())});
+                    if (out > 0) rows.add(new String[]{"SOL out", SolSigner.sol(out) + " SOL"});
+                    review("Sign transactions", out > 0 ? SolSigner.sol(out) + " SOL" : "", rows, id, () -> {
+                        JSONArray signed = new JSONArray();
+                        for (byte[] tx : txs) signed.put(SolSigner.signTransaction(this, acc, tx));
+                        return new JSONObject().put("transactions", signed);
+                    });
+                    return;
+                }
+                default: {
+                    byte[] tx = android.util.Base64.decode(params.optString(0, ""), android.util.Base64.NO_WRAP);
+                    JSONObject opts = params.optJSONObject(1);
+                    boolean skip = opts != null && opts.optBoolean("skipPreflight");
+                    rows.addAll(SolSigner.describe(tx, acc));
+                    review("Send transaction", solOut(tx, acc), rows, id, () -> {
+                        String sig = SolSigner.signAndSend(this, acc, tx, skip);
+                        return new JSONObject().put("signature", sig)
+                                .put("raw", android.util.Base64.encodeToString(SolSigner.base58(sig), android.util.Base64.NO_WRAP));
+                    });
+                }
+            }
+        } catch (Exception e) {
+            release();
+            error(id, -32602, e.getMessage() == null ? "Invalid params." : e.getMessage());
+        }
+    }
+
+    private static String solOut(byte[] tx, String acc) {
+        long out = SolSigner.lamportsOut(tx, acc);
+        return out > 0 ? SolSigner.sol(out) + " SOL" : "";
+    }
+
+    private void emitSol(String event, Object data) {
+        try { post(new JSONObject().put("event", event).put("data", data).put("ns", "solana")); } catch (Exception ignored) { }
     }
 
     // ── Harvana chain actions (the Harvana Swap and Staking sites, or any connected site) ─────────────────────
@@ -1071,7 +1184,7 @@ public class DappBrowserActivity extends AppCompatActivity {
         });
     }
 
-    private interface Work { String run() throws Exception; }
+    private interface Work { Object run() throws Exception; }
 
     /** The review sheet, then PIN or fingerprint, then the work on a background thread; the answer goes to the page. */
     private void review(String title, String amount, List<String[]> rows, int id, Work work) {
@@ -1081,7 +1194,7 @@ public class DappBrowserActivity extends AppCompatActivity {
                     if (!originAtAsk.equals(pageOrigin)) { release(); error(id, 4001, "User rejected the request."); return; }
                     io.execute(() -> {
                         try {
-                            String r = work.run();
+                            Object r = work.run();
                             ui.post(() -> { release(); ok(id, r); });
                         } catch (Web3Signer.RpcError e) {
                             ui.post(() -> { release(); error(id, e.code, e.getMessage()); });

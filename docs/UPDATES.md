@@ -2,6 +2,22 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: group coin can change before anything is in the group; savings shown in the group's coin
+
+**Group settings → Group coin** (the creator; on-network groups). Pick another stable coin; a rotating group's contribution or a goal group's goal is typed again in the new coin.
+
+| Group | Allowed while |
+|---|---|
+| Savings | no member but the creator, and no savings line |
+| Goal | no member but the creator, nothing raised or paid out |
+| Rotating | still forming and nobody has joined (the creator joins first, locking a bond in the coin) |
+
+Refusals: "Members have joined", "The group holds savings", "The group has started", "Only the creator". Needs the node with `/api/v1/group-roles/coin` (node `docs/DEPLOYMENT.md`, 13 Oct 2026).
+
+**Home → Total saved** shows the savings in the coins the groups are kept in (₦11,080.40, or ₦11,080.40 · $20.00 across coins), not converted to the app's display currency.
+
+App build only (plus the node change above).
+
 ## 13 Oct 2026: BTC testnet balance; received tokens join Assets; Add coins is its own screen
 
 **Bitcoin testnet:** the address service the app used (`mempool.emzy.de/testnet4`) is gone (404), so no testnet balance could load. Now mempool.space, on whichever Bitcoin test network the address has coins on (testnet4, else testnet3; checked every 10 minutes). Coins still unconfirmed count in the balance; sending uses confirmed coins only.

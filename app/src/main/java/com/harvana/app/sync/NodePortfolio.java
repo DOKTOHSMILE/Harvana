@@ -59,6 +59,35 @@ public final class NodePortfolio {
             }
             return s;
         }
+        /**
+         * Everything saved, in the coins the groups are kept in (owner, 13 Oct 2026: a group's savings show in the
+         * currency it was set in, whatever the app's display currency): "₦11,080.40", or "₦11,080.40 · $20.00".
+         */
+        public String savedInGroupCoins() {
+            java.util.Map<String, Double> by = new java.util.LinkedHashMap<>();
+            synchronized (entries) {
+                for (Entry e : entries) {
+                    if (e.position.savedHarv <= 0) continue;
+                    String k = e.asset == null ? "" : e.asset;
+                    Double prev = by.get(k);
+                    by.put(k, (prev == null ? 0 : prev) + e.position.savedHarv);
+                }
+            }
+            if (by.isEmpty()) return "";
+            StringBuilder out = new StringBuilder();
+            for (java.util.Map.Entry<String, Double> m : by.entrySet()) {
+                if (out.length() > 0) out.append(" · ");
+                String coin = m.getKey();
+                if (com.harvana.app.husd.Stable.isStable(coin)) {
+                    out.append(com.harvana.app.wallet.FxRates.format(
+                            com.harvana.app.wallet.FxRates.symbolFor(com.harvana.app.husd.Stable.currency(coin)), m.getValue()));
+                } else {
+                    out.append(String.format(java.util.Locale.US, "%,.2f HARV", m.getValue()));
+                }
+            }
+            return out.toString();
+        }
+
         public int loansOpen() { int n = 0; synchronized (entries) { for (Entry e : entries) if (e.position.outstandingHarv() > 0) n++; } return n; }
     }
 

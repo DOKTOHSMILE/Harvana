@@ -549,6 +549,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		_showNetworkPanel();
 		_organize();
 		_loadTreasurer();
+		_buildCoinRow();
 	}
 	
 	private com.harvana.app.group.SettingsSections sections;
@@ -565,6 +566,16 @@ public class GroupSettingsActivity extends AppCompatActivity {
 		return com.harvana.app.circle.CircleUi.friendly(e);
 	}
 	
+	private View coinRow;
+
+	/** The group's coin row; the creator changes it while nothing is in the group (GroupCoinSetting). */
+	private void _buildCoinRow() {
+		if (btnRestoreWallet == null || !(btnRestoreWallet.getParent() instanceof ViewGroup)) return;
+		ViewGroup host = (ViewGroup) btnRestoreWallet.getParent();
+		if (coinRow != null && coinRow.getParent() != null) ((ViewGroup) coinRow.getParent()).removeView(coinRow);
+		coinRow = com.harvana.app.group.GroupCoinSetting.attach(this, host, host.indexOfChild(btnRestoreWallet), groupId, groupData, isAdmin);
+	}
+
 	/** Reads the treasurer's wallet from the network record of a goal or savings group, then redraws the Members section. */
 	private void _loadTreasurer() {
 		GroupIdentity gi = GroupIdentityResolver.resolve(groupId, groupData);

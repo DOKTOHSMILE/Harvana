@@ -21,6 +21,11 @@ public final class GroupCanonical {
         return "HARVANA_GROUP_TREASURER_VOTE_V1:" + groupId + ":" + voter + ":" + yes + ":" + nonce;
     }
 
+    /** The creator changing a group's coin; {@code amountRaw} is the new contribution or goal in that coin, 0 keeps it. */
+    public static String groupCoin(String groupId, String address, String asset, long amountRaw, long nonce) {
+        return "HARVANA_GROUP_COIN_V1:" + groupId + ":" + address + ":" + asset + ":" + amountRaw + ":" + nonce;
+    }
+
     public static String groupTreasurer(String groupId, String adminAddress, String treasurerAddress, long nonce) {
         return "HARVANA_GROUP_TREASURER_V1:" + groupId + ":" + adminAddress + ":" + treasurerAddress + ":" + nonce;
     }

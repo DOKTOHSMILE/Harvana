@@ -265,6 +265,16 @@ public final class NodeGroupClient {
 
     public static void getTreasurerProposal(String groupId, Callback cb) { read("/api/v1/group-roles/treasurer-proposal/" + groupId, cb); }
 
+    /** The creator changes the stable coin a group is kept in (only while nothing is in the group). */
+    public static void changeGroupCoin(Context c, String creator, String groupId, String asset, long amountRaw, Callback cb) {
+        act(c, creator, "/api/v1/group-roles/coin", new Spec() {
+            public String canonical(long n) { return GroupCanonical.groupCoin(groupId, creator, asset, amountRaw, n); }
+            public void fill(JSONObject b, long n) throws JSONException {
+                b.put("groupId", groupId).put("address", creator).put("asset", asset).put("amountRaw", amountRaw);
+            }
+        }, cb);
+    }
+
     /** The admin names a member as treasurer, or clears the role with an empty address. */
     public static void setTreasurer(Context c, String admin, String groupId, String treasurer, Callback cb) {
         act(c, admin, "/api/v1/group-roles/treasurer", new Spec() {
@@ -711,6 +721,7 @@ public final class NodeGroupClient {
         switch (path) {
             case "/api/v1/circle/contribute": return "Contribution sent";
             case "/api/v1/circle/join": return "Joined the group";
+            case "/api/v1/group-roles/coin": return "Changed the group coin";
             case "/api/v1/circle/cure-default": return "Default cured";
             case "/api/v1/accum/contribute":
             case "/api/v1/accum/contribute-multiple":

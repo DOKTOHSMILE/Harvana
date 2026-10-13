@@ -1420,12 +1420,12 @@ public class HomeFragmentActivity extends Fragment {
 		fsSaved = harv;
 		if (!isAdded() || getActivity() == null || text_val_saved == null) return;
 		getActivity().runOnUiThread(() -> {
-			// Groups save in stable coins (hNGN, hUSD, …), so the total is shown in the display currency, from the
-			// node's records: one figure across groups in different coins (owner, 13 Oct 2026).
+			// Groups save in stable coins (hNGN, hUSD, …): the total is shown in those coins, from the node's records,
+			// whatever the app's display currency (owner, 13 Oct 2026).
 			if (nodePortfolio == null || getContext() == null) { text_val_saved.setText("—"); }
 			else {
-				double usd = nodePortfolio.savedUsd(getContext());
-				text_val_saved.setText(Double.isNaN(usd) ? "—" : com.harvana.app.wallet.FxRates.money(getContext(), usd));
+				String saved = nodePortfolio.savedInGroupCoins();
+				text_val_saved.setText(saved.isEmpty() ? "0" : saved);
 			}
 			if (text_sub_saved != null) {
 				int n = group_map_list.size();

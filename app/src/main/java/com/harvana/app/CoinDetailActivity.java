@@ -211,7 +211,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		
 		btn_receive.setOnClickListener(_v -> {
 			if (stable != null) {
-				new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Receive " + stable.sym)
+				new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Receive " + stable.sym)
 						.setItems(new String[]{"Harvana address", "Deposit " + stable.reserve()}, (d, w) -> {
 							if (w == 0) _receiveBottomSheet(); else stable.deposit();
 						}).show();
@@ -228,7 +228,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		
 		btn_send.setOnClickListener(_v -> {
 			if (stable != null) {
-				new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Send " + stable.sym)
+				new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Send " + stable.sym)
 						.setItems(new String[]{"Send on Harvana", "Withdraw to " + stable.reserve()}, (d, w) -> {
 							if (w == 0) stable.send(); else stable.withdraw();
 						}).show();

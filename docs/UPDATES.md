@@ -17,6 +17,8 @@ The Bitcoin address shown in the app changes. Testnet coins sent to the old tb1â
 
 **Create group:** no coin is picked in advance. "Choose a coin" opens a bottom sheet of the coins the network has on; Next is refused until one is chosen.
 
+**Dialogs:** every remaining centre dialog is a styled bottom sheet: dApp browser connect and menu, Discover, stable coin actions, vaults, coin page, Swap, and the trust tier list.
+
 App build only.
 
 ## 13 Oct 2026: stable coins' contract addresses and "Send to another chain"

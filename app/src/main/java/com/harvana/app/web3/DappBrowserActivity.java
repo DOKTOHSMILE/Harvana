@@ -839,7 +839,7 @@ public class DappBrowserActivity extends AppCompatActivity {
         com.harvana.app.utils.InfoTable t = new com.harvana.app.utils.InfoTable(this);
         t.row("Site", origin).row("Account", shortAddr(addr)).row("Network", network);
         final boolean[] done = {false};
-        androidx.appcompat.app.AlertDialog d = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+        com.harvana.app.ui.SheetDialog d = new com.harvana.app.ui.SheetDialog.Builder(this)
                 .setTitle("Connect to " + host).setView(padded(t.view()))
                 .setNegativeButton("Cancel", (x, w) -> { done[0] = true; release(); error(id, 4001, "User rejected the request."); })
                 .setPositiveButton("Connect", (x, w) -> {

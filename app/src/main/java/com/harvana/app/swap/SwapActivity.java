@@ -421,7 +421,7 @@ public class SwapActivity extends AppCompatActivity {
         List<String> list = new ArrayList<>(assets);
         String[] labels = new String[list.size()];
         for (int i = 0; i < labels.length; i++) labels[i] = sym(list.get(i)) + (HARV.equals(list.get(i)) ? "" : "  ·  " + Stable.name(list.get(i)));
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle(isFrom ? "You pay" : "You get")
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle(isFrom ? "You pay" : "You get")
                 .setItems(labels, (d, which) -> {
                     String c = list.get(which);
                     if (isFrom) { if (c.equals(to)) to = from; from = c; }

@@ -24,7 +24,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.widget.SwitchCompat;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.harvana.app.R;
 import com.harvana.app.ui.AppSheet;
 import com.harvana.app.utils.InfoTable;
@@ -164,7 +163,7 @@ public final class BrowserMenu {
         JSONArray a = BrowserPrefs.history(c);
         List<JSONObject> items = new ArrayList<>();
         for (int i = 0; i < a.length(); i++) if (a.optJSONObject(i) != null) items.add(a.optJSONObject(i));
-        listSheet("History", "Clear", () -> new MaterialAlertDialogBuilder(c).setTitle("Clear history")
+        listSheet("History", "Clear", () -> new com.harvana.app.ui.SheetDialog.Builder(c).setTitle("Clear history")
                         .setNegativeButton("Cancel", null)
                         .setPositiveButton("Clear", (d, w) -> { BrowserPrefs.clearHistory(c, host.web()); toast("History cleared"); }).show(),
                 items, o -> BrowserPrefs.removeHistory(c, o.optString("url"), o.optLong("at")));
@@ -372,7 +371,7 @@ public final class BrowserMenu {
         boolean[] pick = new boolean[labels.size()];
         pick[0] = true;
         pick[1] = true;
-        new MaterialAlertDialogBuilder(c).setTitle("Clear data")
+        new com.harvana.app.ui.SheetDialog.Builder(c).setTitle("Clear data")
                 .setMultiChoiceItems(labels.toArray(new String[0]), pick, (d, which, on) -> pick[which] = on)
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Clear", (d, w) -> {
@@ -396,7 +395,7 @@ public final class BrowserMenu {
 
         box.addView(section("General"));
         TextView engine = valueRow(box, "Search engine", BrowserPrefs.ENGINES[BrowserPrefs.engine(c)]);
-        ((View) engine.getParent()).setOnClickListener(v -> new MaterialAlertDialogBuilder(c).setTitle("Search engine")
+        ((View) engine.getParent()).setOnClickListener(v -> new com.harvana.app.ui.SheetDialog.Builder(c).setTitle("Search engine")
                 .setSingleChoiceItems(BrowserPrefs.ENGINES, BrowserPrefs.engine(c), (d, w) -> {
                     BrowserPrefs.setEngine(c, w);
                     engine.setText(BrowserPrefs.ENGINES[w]);
@@ -449,7 +448,7 @@ public final class BrowserMenu {
         String current = host.web().getUrl();
         String[] items = current != null && current.startsWith("https://")
                 ? new String[]{"Web3", "This page", "Enter address"} : new String[]{"Web3", "Enter address"};
-        new MaterialAlertDialogBuilder(c).setTitle("Home page").setItems(items, (d, w) -> {
+        new com.harvana.app.ui.SheetDialog.Builder(c).setTitle("Home page").setItems(items, (d, w) -> {
             String pick = items[w];
             if ("Web3".equals(pick)) { BrowserPrefs.setHome(c, ""); value.setText(homeLabel()); }
             else if ("This page".equals(pick)) { BrowserPrefs.setHome(c, current); value.setText(homeLabel()); }
@@ -461,7 +460,7 @@ public final class BrowserMenu {
                 LinearLayout pad = new LinearLayout(c);
                 pad.setPadding(dp(20), dp(8), dp(20), 0);
                 pad.addView(in, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                new MaterialAlertDialogBuilder(c).setTitle("Home page").setView(pad)
+                new com.harvana.app.ui.SheetDialog.Builder(c).setTitle("Home page").setView(pad)
                         .setNegativeButton("Cancel", null)
                         .setPositiveButton("Save", (x, y) -> {
                             String t = in.getText().toString().trim();
@@ -533,7 +532,7 @@ public final class BrowserMenu {
                     || type == WebView.HitTestResult.IMAGE_TYPE)) return false;
             boolean image = type == WebView.HitTestResult.IMAGE_TYPE;
             String[] items = {image ? "Open image" : "Open link", image ? "Copy image address" : "Copy link", "Share", "Open outside"};
-            new MaterialAlertDialogBuilder(c).setTitle(extra.length() > 80 ? extra.substring(0, 80) + "…" : extra)
+            new com.harvana.app.ui.SheetDialog.Builder(c).setTitle(extra.length() > 80 ? extra.substring(0, 80) + "…" : extra)
                     .setItems(items, (d, w) -> {
                         if (w == 0) host.openUrl(extra);
                         else if (w == 1) copy(extra);
@@ -556,7 +555,7 @@ public final class BrowserMenu {
             LinearLayout pad = new LinearLayout(c);
             pad.setPadding(dp(20), dp(8), dp(20), 0);
             pad.addView(t.view(), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            new MaterialAlertDialogBuilder(c).setTitle("Download").setView(pad)
+            new com.harvana.app.ui.SheetDialog.Builder(c).setTitle("Download").setView(pad)
                     .setNegativeButton("Cancel", null)
                     .setPositiveButton("Download", (d, w) -> outside(url)).show();
         });

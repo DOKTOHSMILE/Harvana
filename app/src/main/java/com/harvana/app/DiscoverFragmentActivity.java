@@ -635,7 +635,7 @@ public class DiscoverFragmentActivity extends Fragment {
 				btn_join.setSingleLine(true);
 				btn_join.setMaxLines(1);
 				final long fMembers = membersCount, fSlots = totalSlots;
-				if (imageview4 != null) imageview4.setOnClickListener(v -> new com.google.android.material.dialog.MaterialAlertDialogBuilder(v.getContext())
+				if (imageview4 != null) imageview4.setOnClickListener(v -> new com.harvana.app.ui.SheetDialog.Builder(v.getContext())
 						.setTitle(_safeString(group, "groupName", "Group"))
 						.setMessage("Type: " + (tv_groupType != null ? tv_groupType.getText() : "")
 								+ "\nPays: " + (tv_frequency != null ? tv_frequency.getText() : "")

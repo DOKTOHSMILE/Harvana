@@ -90,7 +90,7 @@ public final class StableActions {
         String[] labels = new String[names.length];
         for (int i = 0; i < names.length; i++) labels[i] = HusdActivity.chainName(names[i]);
         JSONObject factories = info.optJSONObject("depositFactories");
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(a).setTitle("Deposit " + reserve + " from")
+        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Deposit " + reserve + " from")
                 .setItems(labels, (d, which) -> showDepositAddress(names[which], factories == null ? null : factories.optJSONObject(names[which]))).show();
     }
 
@@ -147,7 +147,7 @@ public final class StableActions {
         String[] names = list.toArray(new String[0]);
         String[] labels = new String[names.length];
         for (int i = 0; i < names.length; i++) labels[i] = HusdActivity.chainName(names[i]);
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(a).setTitle("Withdraw " + reserve + " to")
+        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Withdraw " + reserve + " to")
                 .setItems(labels, (d, which) -> withdrawTo(names[which])).show();
     }
 
@@ -158,7 +158,7 @@ public final class StableActions {
         EditText to = field(box, HusdActivity.chainName(chain) + " address (0x…)", InputType.TYPE_CLASS_TEXT);
         long min = fee("minWithdrawRaw", 5 * HusdClient.UNIT);
         EditText amount = field(box, "Amount in " + sym + " (min " + HusdClient.format(min) + ")", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(a).setTitle("Withdraw to " + reserve).setView(box)
+        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Withdraw to " + reserve).setView(box)
                 .setPositiveButton("Review", (d, w) -> {
                     String dest = to.getText().toString().trim();
                     Long units = HusdClient.parse(amount.getText().toString());

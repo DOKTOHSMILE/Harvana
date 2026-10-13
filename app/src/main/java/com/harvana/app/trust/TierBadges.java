@@ -1,18 +1,15 @@
 package com.harvana.app.trust;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
@@ -61,15 +58,9 @@ public final class TierBadges {
 
     /** Every tier, reached ones in colour, the others dimmed. {@code percent} is -1 when there is no score yet. */
     public static void show(Activity a, String tier, int percent) {
-        final Dialog dlg = new Dialog(a);
-        dlg.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
         LinearLayout box = new LinearLayout(a);
         box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(dp(a, 20), dp(a, 20), dp(a, 20), dp(a, 14));
-        GradientDrawable bg = new GradientDrawable();
-        bg.setCornerRadius(dp(a, 24));
-        bg.setColor(UiColors.surface());
-        box.setBackground(bg);
+        box.setPadding(dp(a, 20), dp(a, 4), dp(a, 20), 0);
 
         int at = index(tier);
         ImageView hero = new ImageView(a);
@@ -115,24 +106,8 @@ public final class TierBadges {
             rlp.topMargin = dp(a, 8);
             list.addView(row, rlp);
         }
-        ScrollView sv = new ScrollView(a);
-        sv.addView(list);
-        box.addView(sv, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-
-        TextView close = text(a, "Close", 15, true, UiColors.accent());
-        close.setGravity(Gravity.CENTER);
-        close.setPadding(0, dp(a, 14), 0, dp(a, 4));
-        close.setOnClickListener(v -> dlg.dismiss());
-        box.addView(close);
-
-        dlg.setContentView(box);
-        if (dlg.getWindow() != null) {
-            dlg.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-            int w = Math.min(a.getResources().getDisplayMetrics().widthPixels - dp(a, 32), dp(a, 420));
-            int h = Math.min(a.getResources().getDisplayMetrics().heightPixels - dp(a, 80), dp(a, 640));
-            dlg.getWindow().setLayout(w, h);
-        }
-        dlg.show();
+        box.addView(list);
+        new com.harvana.app.ui.SheetDialog.Builder(a).setView(box).setPositiveButton("Close", null).show();
     }
 
     /** Not reached yet: grey and faded. */

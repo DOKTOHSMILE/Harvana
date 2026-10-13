@@ -228,7 +228,7 @@ public class VaultActivity extends AppCompatActivity {
         e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         e.setSingleLine(true);
         box.addView(e);
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle(title).setView(box)
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle(title).setView(box)
                 .setPositiveButton("Review", (d, w) -> {
                     String s = e.getText().toString().trim();
                     long raw;

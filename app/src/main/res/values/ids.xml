@@ -8,4 +8,5 @@
     <item name="smart_spacing_done" type="id" />
     <item name="member_photo_uid" type="id" />
     <item name="sheet_divider_tag" type="id"/>
+    <item name="create_group_step" type="id"/>
 </resources>

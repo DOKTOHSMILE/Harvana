@@ -51,7 +51,7 @@ import java.util.Map;
  * Creating costs the admin only the 1 HARV network fee. Nothing is locked, and the group wallet is made by the network, not
  * by this phone. The kind comes from the entry screen (CreateRotatingGroupActivity and the others set it).
  */
-public class CreateGroupWizardActivity extends AppCompatActivity {
+public class CreateGroupWizardActivity extends AppCompatActivity implements com.harvana.app.group.create.CreateGroupStepFragment.Host {
 
     private enum Kind { ROTATING, ACCUM, FIXED }
 
@@ -63,9 +63,9 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
     private int step;
     private String[] stepNames;
 
+    /** The page being drawn: the current step fragment's column, set while a step-builder runs. */
     private LinearLayout page, dots;
     private MaterialButton back, next;
-    private ScrollView scroll;
 
     // basics
     private String name = "", description = "", visibility = "Public", country = "", state = "", city = "";
@@ -187,12 +187,10 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         dots.setPadding(0, dp(12), 0, dp(4));
         root.addView(dots);
 
-        scroll = new ScrollView(this);
-        page = new LinearLayout(this);
-        page.setOrientation(LinearLayout.VERTICAL);
-        page.setPadding(dp(16), dp(8), dp(16), dp(24));
-        scroll.addView(page);
-        root.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        // Each step is its own fragment, shown here one at a time.
+        android.widget.FrameLayout steps = new android.widget.FrameLayout(this);
+        steps.setId(R.id.create_group_step);
+        root.addView(steps, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
         LinearLayout bar = new LinearLayout(this);
         bar.setOrientation(LinearLayout.HORIZONTAL);
@@ -211,6 +209,42 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         AppBar.setContent(this, root, kind == Kind.ROTATING ? "New rotating group" : kind == Kind.ACCUM ? "New savings group" : "New goal group", null);
         go(0);
     }
+
+    @Override
+    public void onBackPressed() { go(step - 1); }
+
+    // ── the step fragments ─────────────────────────────────────────────────
+
+    private Class<? extends com.harvana.app.group.create.CreateGroupStepFragment> stepClass(int s) {
+        switch (s) {
+            case 0: return com.harvana.app.group.create.BasicsStepFragment.class;
+            case 1: return kind == Kind.ROTATING ? com.harvana.app.group.create.RoundsStepFragment.class
+                    : kind == Kind.ACCUM ? com.harvana.app.group.create.SavingsRulesStepFragment.class
+                    : com.harvana.app.group.create.GoalStepFragment.class;
+            case 2: return com.harvana.app.group.create.PeopleStepFragment.class;
+            default: return com.harvana.app.group.create.ReviewStepFragment.class;
+        }
+    }
+
+    private com.harvana.app.group.create.CreateGroupStepFragment current() {
+        androidx.fragment.app.Fragment f = getSupportFragmentManager().findFragmentById(R.id.create_group_step);
+        return f instanceof com.harvana.app.group.create.CreateGroupStepFragment ? (com.harvana.app.group.create.CreateGroupStepFragment) f : null;
+    }
+
+    /** Draws one step into its fragment's page, under the step's title. */
+    private void draw(int s, LinearLayout into, Runnable fields) {
+        page = into;
+        page.addView(text(stepNames[s], 22, true, UiColors.textPrimary()));
+        fields.run();
+    }
+
+    @Override public void buildBasics(LinearLayout p) { draw(0, p, this::basics); }
+    @Override public void buildRounds(LinearLayout p) { draw(1, p, () -> { coinPicker(); rotating(); }); }
+    @Override public void buildSavingsRules(LinearLayout p) { draw(1, p, () -> { coinPicker(); savings(); }); }
+    @Override public void buildGoal(LinearLayout p) { draw(1, p, () -> { coinPicker(); goal(); }); }
+    @Override public void buildPeople(LinearLayout p) { draw(2, p, this::people); }
+    @Override public void buildReview(LinearLayout p) { draw(3, p, this::review); }
+    @Override public void pageShown(com.harvana.app.group.create.CreateGroupStepFragment f) { f.toTop(); }
 
     // ── navigation ─────────────────────────────────────────────────────────
 
@@ -234,17 +268,25 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
                 dots.addView(line, lp);
             }
         }
-        page.removeAllViews();
-        page.addView(text(stepNames[step], 22, true, UiColors.textPrimary()));
-        switch (step) {
-            case 0: basics(); break;
-            case 1: coinPicker(); if (kind == Kind.ROTATING) rotating(); else if (kind == Kind.ACCUM) savings(); else goal(); break;
-            case 2: people(); break;
-            default: review(); break;
-        }
         back.setText(step == 0 ? "Cancel" : "Back");
         next.setText(step == stepNames.length - 1 ? "Create group" : "Next");
-        scroll.post(() -> scroll.scrollTo(0, 0));
+        com.harvana.app.group.create.CreateGroupStepFragment shown = current();
+        if (shown != null && shown.getClass() == stepClass(step)) { shown.redraw(); return; }   // same page: drawn again in place
+        boolean forward = shown == null || stepOf(shown) < step;
+        try {
+            getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(forward ? R.anim.slide_in_right : android.R.anim.slide_in_left,
+                        forward ? R.anim.slide_out_left : android.R.anim.slide_out_right)
+                .replace(R.id.create_group_step, stepClass(step).newInstance())
+                .commitNow();
+        } catch (Exception e) {
+            Toast.makeText(this, String.valueOf(e.getMessage()), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private int stepOf(com.harvana.app.group.create.CreateGroupStepFragment f) {
+        for (int i = 0; i < stepNames.length; i++) if (stepClass(i) == f.getClass()) return i;
+        return 0;
     }
 
     private void onNext() {

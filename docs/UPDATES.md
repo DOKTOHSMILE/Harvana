@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Create group: one fragment per page
+
+- The create-group wizard (rotating, savings, goal) shows each page as its own fragment, in `group/create/`:
+  - `BasicsStepFragment`
+  - the type's own page: `RoundsStepFragment`, `SavingsRulesStepFragment` or `GoalStepFragment`
+  - `PeopleStepFragment`
+  - `ReviewStepFragment`
+- Next and Back swap fragments with a slide. The phone's back button goes to the previous page, and on the first page it closes the wizard.
+- What has been typed is kept across pages.
+
 ## 13 Oct 2026 — Group settings in tabs
 
 - Group settings is now a tab bar over swipeable pages. Each of General, Access, Members, Money & rules, Network and More is its own fragment (`group/GroupSettingsSectionFragment`) with its own scroll.

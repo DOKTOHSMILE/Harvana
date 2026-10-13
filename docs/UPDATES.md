@@ -41,6 +41,8 @@ The Bitcoin address shown in the app changes. Testnet coins sent to the old tb1â
 | Review sheet | Site, account, network, fee payer, SOL out, programs, instructions, signers, lookup tables, network fee |
 | Refused | A message that is a transaction; a transaction this account does not sign; unreadable bytes |
 
+**Fix: currency change.** Coin prices on the Assets list and the coin page were kept as text in dollars; they now follow the chosen currency at once, like the balances.
+
 App build only.
 
 ## 13 Oct 2026: stable coins' contract addresses and "Send to another chain"

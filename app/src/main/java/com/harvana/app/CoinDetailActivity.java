@@ -373,12 +373,12 @@ public class CoinDetailActivity extends AppCompatActivity {
 		com.harvana.app.wallet.AssetPrices.Quote quote = com.harvana.app.wallet.AssetPrices.peek(this, coin.key);
 		if (quote == null) return;
 		_setStatRow(R.id.row_circulating_supply, "Price",
-				com.harvana.app.wallet.AssetPrices.usd(quote.usd) + com.harvana.app.wallet.AssetPrices.change(quote));
+				com.harvana.app.wallet.FxRates.money(this, quote.usd) + com.harvana.app.wallet.AssetPrices.change(quote));
 		if (textview14 != null && tv_coin_balance != null) {
 			Double amt = com.harvana.app.wallet.AssetPrices.amount(tv_coin_balance.getText());
-			if (amt != null) textview14.setText("Worth " + com.harvana.app.wallet.AssetPrices.usd(amt * quote.usd) + " · " + com.harvana.app.wallet.AssetPrices.usd(quote.usd) + " each");
+			if (amt != null) textview14.setText("Worth " + com.harvana.app.wallet.FxRates.money(this, amt * quote.usd) + " · " + com.harvana.app.wallet.FxRates.money(this, quote.usd) + " each");
 		}
-		if (chainPriceLine != null) chainPriceLine.setText(com.harvana.app.wallet.AssetPrices.usd(quote.usd) + com.harvana.app.wallet.AssetPrices.change(quote));
+		if (chainPriceLine != null) chainPriceLine.setText(com.harvana.app.wallet.FxRates.money(this, quote.usd) + com.harvana.app.wallet.AssetPrices.change(quote));
 	}
 
 	/** A status such as "Not active yet" stays under the number. The number itself is always an amount. */

@@ -39,7 +39,8 @@ public final class AssetSorter {
     /** Last readable balance and value text per row, shown while a section is still loading. */
     private final Map<String, String[]> lastText = new HashMap<>();
     /** Price per coin in the person's currency, once known. */
-    private final Map<String, String> price = new HashMap<>();
+    /** Price in US dollars; shown in the person's currency when the row is drawn, so a currency change shows at once. */
+    private final Map<String, Double> price = new HashMap<>();
     /** 24h change in percent, when the price source gives one. */
     private final Map<String, Double> change = new HashMap<>();
     /** Rows from the saved copy, drawn until their section has loaded (only for the first moments). */
@@ -104,6 +105,7 @@ public final class AssetSorter {
                         .append(text(r, R.id.tv_asset_amount)).append('|').append(System.identityHashCode(logo(r))).append(';');
             }
         }
+        sig.append(FxRates.symbol(c)).append(';');
         for (String k : price.keySet()) sig.append(k).append('=').append(price.get(k)).append(change.get(k)).append(';');
         return sig.toString();
     }
@@ -288,8 +290,8 @@ public final class AssetSorter {
         boolean chip = e.name != null && !e.name.isEmpty() && !e.name.equalsIgnoreCase(e.ticker);
         h.chip.setVisibility(chip ? View.VISIBLE : View.GONE);
         if (chip) set(h.chip, e.name);
-        String p = price.get(e.priceKey);
-        set(h.price, p == null ? "—" : p);
+        Double p = price.get(e.priceKey);
+        set(h.price, p == null || p.isNaN() ? "—" : FxRates.money(c, p));
         Double ch = change.get(e.priceKey);
         if (ch != null && !ch.isNaN()) {
             set(h.change, String.format(java.util.Locale.US, "%s%.2f%%", ch >= 0 ? "+" : "", ch));
@@ -325,8 +327,13 @@ public final class AssetSorter {
         if (scope.isEmpty()) return;
         try {
             org.json.JSONObject j = new org.json.JSONObject(c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(scope, "{}"));
-            org.json.JSONObject pr = j.optJSONObject("price"), chg = j.optJSONObject("change");
-            if (pr != null) for (java.util.Iterator<String> it = pr.keys(); it.hasNext(); ) { String k = it.next(); price.put(k, pr.optString(k)); }
+            if (!FxRates.symbol(c).equals(j.optString("sym"))) return;   // saved in another currency: wait for fresh figures
+            org.json.JSONObject pr = j.optJSONObject("usd"), chg = j.optJSONObject("change");
+            if (pr != null) for (java.util.Iterator<String> it = pr.keys(); it.hasNext(); ) {
+                String k = it.next();
+                double v = pr.optDouble(k);
+                if (!Double.isNaN(v)) price.put(k, v);
+            }
             if (chg != null) for (java.util.Iterator<String> it = chg.keys(); it.hasNext(); ) { String k = it.next(); change.put(k, chg.optDouble(k)); }
             org.json.JSONArray rows = j.optJSONArray("rows");
             for (int i = 0; rows != null && i < rows.length(); i++) {
@@ -353,7 +360,7 @@ public final class AssetSorter {
         try {
             org.json.JSONObject j = new org.json.JSONObject();
             org.json.JSONObject pr = new org.json.JSONObject(), chg = new org.json.JSONObject();
-            for (Map.Entry<String, String> m : price.entrySet()) pr.put(m.getKey(), m.getValue());
+            for (Map.Entry<String, Double> m : price.entrySet()) if (m.getValue() != null && !m.getValue().isNaN()) pr.put(m.getKey(), m.getValue());
             for (Map.Entry<String, Double> m : change.entrySet()) if (m.getValue() != null && !m.getValue().isNaN()) chg.put(m.getKey(), m.getValue());
             org.json.JSONArray rows = new org.json.JSONArray();
             for (Entry e : entries) {
@@ -362,7 +369,7 @@ public final class AssetSorter {
                 rows.put(new org.json.JSONObject().put("key", e.key).put("pk", e.priceKey).put("t", e.ticker).put("n", e.name)
                         .put("b", t[0]).put("v", t[1]).put("s", e.sort));
             }
-            j.put("price", pr).put("change", chg).put("rows", rows);
+            j.put("sym", FxRates.symbol(c)).put("usd", pr).put("change", chg).put("rows", rows);
             c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(scope, j.toString()).apply();
         } catch (Exception ignored) { }
     }
@@ -393,13 +400,13 @@ public final class AssetSorter {
             // Stable coins: one coin is one unit of its currency.
             for (String code : com.harvana.app.husd.Stable.CODES) {
                 double per = FxRates.perUsd(c, com.harvana.app.husd.Stable.currency(code));
-                if (!Double.isNaN(per) && per > 0) price.put(code, FxRates.money(c, 1d / per));
+                if (!Double.isNaN(per) && per > 0) price.put(code, 1d / per);
             }
             // HARV: the swap pools' price and its 24-hour change, in the person's currency.
             HarvPrice.get(q -> {
                 double usd = HarvPrice.usd(c, q);
                 if (Double.isNaN(usd)) return;
-                price.put("HARV", FxRates.money(c, usd));
+                price.put("HARV", usd);
                 if (!Double.isNaN(q.changePct)) change.put("HARV", q.changePct);
                 lastSignature = "";
                 sync();
@@ -409,7 +416,7 @@ public final class AssetSorter {
                 for (CoinCatalog.Coin coin : CoinCatalog.others()) {
                     AssetPrices.Quote q = AssetPrices.peek(c, coin.key);
                     if (q != null && q.usd > 0) {
-                        price.put(coin.key.toUpperCase(java.util.Locale.US), FxRates.money(c, q.usd));
+                        price.put(coin.key.toUpperCase(java.util.Locale.US), q.usd);
                         change.put(coin.key.toUpperCase(java.util.Locale.US), q.change);
                     }
                 }

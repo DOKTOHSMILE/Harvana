@@ -108,12 +108,16 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
     private String pendingNodeId = null;
 
     // the group's coin (owner, 12 Oct 2026): every amount of the group is in it; HARV pays only the tFare
-    private String coin = "HNGN";
+    // The member chooses it; nothing is picked for them (owner, 13 Oct 2026).
+    private String coin = "";
     private final List<String> coins = new ArrayList<>(java.util.Arrays.asList("HNGN"));
 
-    private String sym() { return com.harvana.app.husd.Stable.symbol(coin); }
+    private String sym() { return coin.isEmpty() ? "coin" : com.harvana.app.husd.Stable.symbol(coin); }
     private long raw(String typed) { return com.harvana.app.group.NodePayActions.coinRaw(typed); }
-    private String money(long raw) { return com.harvana.app.engine.Amounts.money(raw, coin); }
+    private String money(long raw) {
+        return coin.isEmpty() ? java.math.BigDecimal.valueOf(raw, 6).stripTrailingZeros().toPlainString()
+                : com.harvana.app.engine.Amounts.money(raw, coin);
+    }
 
     /** The coins the network has switched on; hNGN first. */
     private void loadCoins() {
@@ -121,14 +125,13 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
             @Override public void ok(org.json.JSONObject r) {
                 org.json.JSONArray arr = r.optJSONArray("assets");
                 List<String> got = new ArrayList<>();
-                got.add("HNGN");
                 if (arr != null) for (int i = 0; i < arr.length(); i++) {
                     org.json.JSONObject o = arr.optJSONObject(i);
                     String a = o == null ? "" : o.optString("asset");
                     if (o != null && o.optBoolean("active") && com.harvana.app.husd.Stable.isStable(a) && !got.contains(a)) got.add(a);
                 }
                 runOnUiThread(() -> {
-                    if (isFinishing() || got.equals(coins)) return;
+                    if (isFinishing() || got.isEmpty() || got.equals(coins)) return;
                     coins.clear(); coins.addAll(got);
                     if (step == 1) go(step);
                 });
@@ -137,16 +140,28 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
         });
     }
 
-    /** The coin row at the top of the amounts step. */
+    /** The coin the group saves in, chosen by the creator from a bottom sheet (nothing is chosen for them). */
     private void coinPicker() {
-        page.addView(label("Coin"));
-        String[] names = new String[coins.size()];
-        int sel = 0;
-        for (int i = 0; i < names.length; i++) {
-            names[i] = com.harvana.app.husd.Stable.symbol(coins.get(i));
-            if (coins.get(i).equals(coin)) sel = i;
+        page.addView(label("Stable coin for savings"));
+        MaterialButton pick = button(coin.isEmpty() ? "Choose a coin" : com.harvana.app.husd.Stable.symbol(coin) + "  ·  " + com.harvana.app.husd.Stable.name(coin), coin.isEmpty());
+        if (!coin.isEmpty()) {
+            android.graphics.drawable.Drawable icon = com.harvana.app.husd.StableIcon.drawable(this, coin);
+            pick.setIcon(icon);
+            pick.setIconTint(null);
+            pick.setIconSize(dp(22));
         }
-        page.addView(chips(names, sel, i -> { coin = coins.get(i); go(step); }));
+        pick.setOnClickListener(v -> {
+            String[] names = new String[coins.size()];
+            int sel = -1;
+            for (int i = 0; i < names.length; i++) {
+                names[i] = com.harvana.app.husd.Stable.symbol(coins.get(i)) + "  ·  " + com.harvana.app.husd.Stable.name(coins.get(i));
+                if (coins.get(i).equals(coin)) sel = i;
+            }
+            new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Stable coin for savings")
+                    .setSingleChoiceItems(names, sel, (d, which) -> { coin = coins.get(which); d.dismiss(); go(step); })
+                    .setNegativeButton("Cancel", null).show();
+        });
+        page.addView(pick);
     }
 
     @Override
@@ -246,6 +261,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity {
             return null;
         }
         if (s != 1) return null;
+        if (coin.isEmpty()) return "Choose the stable coin this group saves in.";
         if (kind == Kind.ROTATING) {
             if (raw(contribution) <= 0) return "Enter how much each member pays every round.";
             if (members < 3 || members > 12) return "A rotating group needs 3 to 12 members.";

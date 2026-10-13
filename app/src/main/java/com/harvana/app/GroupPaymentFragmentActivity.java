@@ -515,9 +515,10 @@ public class GroupPaymentFragmentActivity extends Fragment {
                         _bindTypeBoard();
                         if (tv_payments_empty != null) {
                                 boolean goal = linkedNodeId != null && linkedNodeId.startsWith("FIXED-");
-                                if (paymentRows.isEmpty() && goal) {
-                                        tv_payments_empty.setText("Deposits are on the network, in the boxes above. A day with no box is not a missed payment.");
-                                        tv_payments_empty.setVisibility(View.VISIBLE);
+                                boolean onNetwork = linkedNodeId != null && !com.harvana.app.sync.NodeGroupClient.familyOf(linkedNodeId).isEmpty();
+                                if (paymentRows.isEmpty() && (goal || onNetwork)) {
+                                        // A network group's payments are its boxes above (and the History tab), not this old list.
+                                        tv_payments_empty.setVisibility(View.GONE);
                                 } else {
                                         tv_payments_empty.setText("No payment records for this round yet.");
                                         tv_payments_empty.setVisibility(paymentRows.isEmpty() ? View.VISIBLE : View.GONE);

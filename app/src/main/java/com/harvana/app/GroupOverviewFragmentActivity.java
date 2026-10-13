@@ -447,6 +447,27 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		return label + " · " + members + " members · " + Math.round(clean * 100) + "% clean · " + Math.round(history * 100) + "% with history";
 	}
 
+	/** "Your days paid · 5": the days paid on this member's open savings line, by any of their wallets. */
+	private void _paintMyLineDays(String nodeId) {
+		if (textview64 != null) textview64.setText("Your days paid");
+		String me = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(getContext());
+		if (me == null || me.isEmpty()) { if (tv_pool_paid != null) tv_pool_paid.setText("—"); return; }
+		com.harvana.app.sync.NodeGroupClient.getAccumMember(nodeId, me, new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject member) {
+				String lid = member.optString("currentLineId", "");
+				if (lid.isEmpty() || "null".equals(lid)) { show("0"); return; }
+				com.harvana.app.sync.NodeGroupClient.getAccumLine(nodeId, lid, new com.harvana.app.sync.NodeGroupClient.Callback() {
+					@Override public void onSuccess(org.json.JSONObject line) { show(String.valueOf(line.optInt("daysPaid", 0))); }
+					@Override public void onError(String e) { show("—"); }
+				});
+			}
+			@Override public void onError(String e) { show("0"); }
+			private void show(String v) {
+				if (getActivity() != null) getActivity().runOnUiThread(() -> { if (tv_pool_paid != null) tv_pool_paid.setText(v); });
+			}
+		});
+	}
+
 	/** Overview numbers for an on-chain group come from the node, not the Firebase copy. */
 	private void _paintLiveEngine(Map<String, Object> data) {
 		String nodeId = com.harvana.app.group.GroupKinds.nodeId(data);
@@ -1109,7 +1130,11 @@ public class GroupOverviewFragmentActivity extends Fragment {
 				}
 				recycler_payment_slots.setAdapter(new SlotGridAdapter(slots, slotPaid));
 			}
-			if (tv_pool_paid != null && (loadedGroup == null || !com.harvana.app.group.GroupTypeBoard.isGoalPool(loadedGroup))) {
+			String liveNode = loadedGroup == null ? "" : com.harvana.app.group.GroupKinds.nodeId(loadedGroup);
+			if ("ACCUM".equals(com.harvana.app.sync.NodeGroupClient.familyOf(liveNode))) {
+				// A savings group has no rounds: its summary row is the days this member has paid on their own line (from the network).
+				_paintMyLineDays(liveNode);
+			} else if (tv_pool_paid != null && (loadedGroup == null || !com.harvana.app.group.GroupTypeBoard.isGoalPool(loadedGroup))) {
 				tv_pool_paid.setText(paidCount + " / " + slots);
 			}
 			if (tv_fixed_progress != null && liveRaised < 0) {

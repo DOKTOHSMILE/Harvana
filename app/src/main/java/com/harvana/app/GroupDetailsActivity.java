@@ -822,6 +822,13 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		}
 	}
 	
+	/** An amount in the group's own coin: a stable coin has 6 decimals and its symbol, HARV 8. */
+	private static String _groupMoney(org.json.JSONObject group, long raw) {
+		String coin = group == null ? "" : group.optString("asset", "");
+		if (com.harvana.app.husd.Stable.isStable(coin)) return com.harvana.app.husd.HusdClient.format(raw) + " " + com.harvana.app.husd.Stable.symbol(coin);
+		return com.harvana.app.wallet.BalanceFormatter.smart(raw / 100_000_000.0);
+	}
+	
 	private void _loadTotalGroupContributions() {
 		if (groupId == null || groupId.isEmpty()) return;
 		
@@ -830,8 +837,8 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		if ("FIXED".equals(com.harvana.app.sync.NodeGroupClient.familyOf(groupId))) {
 			com.harvana.app.sync.NodeGroupClient.getFixedGroup(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
 				@Override public void onSuccess(org.json.JSONObject json) {
-					final double raised = (json.has("goalRaisedRaw") ? json.optLong("goalRaisedRaw", 0L) : json.optLong("raisedAmountRaw", 0L)) / 100_000_000.0;
-					runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(com.harvana.app.wallet.BalanceFormatter.smart(raised)); });
+					final String text = _groupMoney(json, json.has("goalRaisedRaw") ? json.optLong("goalRaisedRaw", 0L) : json.optLong("raisedAmountRaw", 0L));
+					runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(text); });
 				}
 				@Override public void onError(String error) { /* keep what is shown */ }
 			});
@@ -853,8 +860,17 @@ public class GroupDetailsActivity extends AppCompatActivity {
 							if (m != null) paid += m.optLong("paidRaw", 0L);
 						}
 					}
-					final double collected = paid / 100_000_000.0;
-					runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(com.harvana.app.wallet.BalanceFormatter.smart(collected)); });
+					final long paidRaw = paid;
+					// The members list does not carry the coin: read it from the circle itself.
+					com.harvana.app.sync.NodeGroupClient.getCircle(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
+						@Override public void onSuccess(org.json.JSONObject circle) {
+							final String text = _groupMoney(circle, paidRaw);
+							runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(text); });
+						}
+						@Override public void onError(String error) {
+							runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(com.harvana.app.wallet.BalanceFormatter.smart(paidRaw / 100_000_000.0)); });
+						}
+					});
 				}
 				@Override public void onError(String error) { /* keep what is shown */ }
 			});
@@ -863,8 +879,24 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		if ("ACCUM".equals(family)) {
 			com.harvana.app.sync.NodeGroupClient.getAccumGroup(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
 				@Override public void onSuccess(org.json.JSONObject json) {
-					final double saved = json.optLong("totalActiveLineBalanceRaw", 0L) / 100_000_000.0;
-					runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(com.harvana.app.wallet.BalanceFormatter.smart(saved)); });
+					final long savedRaw = json.optLong("totalActiveLineBalanceRaw", 0L);
+					final String coin = json.optString("asset", "");
+					final String escrow = json.optString("escrowAddress", "");
+					if (savedRaw == 0L && com.harvana.app.husd.Stable.isStable(coin) && escrow.startsWith("HV0x")) {
+						// What the group wallet holds in its coin (the same figure as the Group wallet card).
+						com.harvana.app.husd.HusdClient.balance(coin, escrow, new com.harvana.app.husd.HusdClient.Cb() {
+							@Override public void ok(org.json.JSONObject b) {
+								final String text = com.harvana.app.husd.HusdClient.format(b.optLong("balanceRaw", 0L)) + " " + com.harvana.app.husd.Stable.symbol(coin);
+								runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(text); });
+							}
+							@Override public void fail(String e) {
+								runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(_groupMoney(json, 0L)); });
+							}
+						});
+						return;
+					}
+					final String text = _groupMoney(json, savedRaw);
+					runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(text); });
 				}
 				@Override public void onError(String error) { /* keep what is shown */ }
 			});

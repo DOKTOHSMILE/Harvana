@@ -249,6 +249,8 @@ public class HistoryFragmentActivity extends Fragment {
 						row.put("timestamp", tx.optLong("timestamp", 0L));
 						row.put("confirmations", tx.optLong("confirmations", 0L));
 						row.put("fee", tx.optLong("gas", tx.optLong("fee", 0L)));
+						row.put("asset", tx.optString("asset", tx.optString("mintId", "")));   // a stable coin moves in its own units
+						if (tx.has("coinFeeRaw")) row.put("coinFeeRaw", tx.optLong("coinFeeRaw", 0L));
 						rows.add(row);
 					}
 				}
@@ -479,7 +481,7 @@ public class HistoryFragmentActivity extends Fragment {
 				boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
 				String type = isOut ? "Sent" : "Received";
 				String counterparty = isOut ? to : from;
-				double amt = HarvanaNodeClient.toHarvDisplay((long) num(tx, "amount"));
+				double amt = _amountOf(tx);
 				String memo = str(tx, "memo", "").replace(",", " ");
 				long conf = (long) num(tx, "confirmations");
 				String status = conf > 0 ? "Confirmed" : "Pending";
@@ -539,12 +541,12 @@ public class HistoryFragmentActivity extends Fragment {
 				boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
 				String type = isOut ? "Sent" : "Received";
 				String counterparty = isOut ? to : from;
-				double amt = HarvanaNodeClient.toHarvDisplay((long) num(tx, "amount"));
+				double amt = _amountOf(tx);
 				String memo = str(tx, "memo", "");
 				String status = ((long) num(tx, "confirmations") > 0) ? "Confirmed" : "Pending";
 				
 				// APPLIED FIX
-				docContent.append("• ").append(date).append(" | ").append(type).append(" | ").append(_formatUIBalance(amt)).append((" " + com.harvana.app.CoinInfo.ticker() + " | ")).append(status).append("\n");
+				docContent.append("• ").append(date).append(" | ").append(type).append(" | ").append(_formatUIBalance(amt)).append((" " + _symbolOf(tx) + " | ")).append(status).append("\n");
 				docContent.append("    Wallet: ").append(counterparty).append("\n");
 				docContent.append("    TxHash: ").append(hash).append("\n");
 				if (!memo.isEmpty()) {
@@ -575,7 +577,7 @@ public class HistoryFragmentActivity extends Fragment {
 				String from = str(tx, "from", "");
 				String to = str(tx, "to", "");
 				boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
-				double amt = HarvanaNodeClient.toHarvDisplay((long) num(tx, "amount"));
+				double amt = _amountOf(tx);
 				String memo = str(tx, "memo", "");
 				com.harvana.app.tx.TxKind kind = com.harvana.app.tx.TxKind.of(memo, !isOut);
 				com.harvana.app.receipt.ReceiptRenderer.Row r = new com.harvana.app.receipt.ReceiptRenderer.Row();
@@ -628,14 +630,14 @@ public class HistoryFragmentActivity extends Fragment {
 			String to = str(tx, "to", "");
 			boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
 			String counterparty = isOut ? to : from;
-			double amountHarv = HarvanaNodeClient.toHarvDisplay((long) num(tx, "amount"));
+			double amountHarv = _amountOf(tx);
 			long ts = (long) num(tx, "timestamp");
 			long confirmations = (long) num(tx, "confirmations");
 			String memo = str(tx, "memo", "");
 			String txHash = str(tx, "txHash", "");
 			boolean confirmed = confirmations >= 1;
 			String status = confirmed ? "Confirmed" : "Pending";
-			String ticker = com.harvana.app.CoinInfo.ticker();
+			String ticker = _symbolOf(tx);
 			int incoming = androidx.core.content.ContextCompat.getColor(h.itemView.getContext(), R.color.colorAccent);
 			int outgoing = androidx.core.content.ContextCompat.getColor(h.itemView.getContext(), R.color.colorError);
 			int pending = androidx.core.content.ContextCompat.getColor(h.itemView.getContext(), R.color.colorWarning);
@@ -656,7 +658,7 @@ public class HistoryFragmentActivity extends Fragment {
 			}
 			if (h.amount != null) {
 				h.amount.setVisibility(View.VISIBLE);
-				h.amount.setText((isOut ? "- " : "+ ") + _formatUIBalance(amountHarv));
+				h.amount.setText((isOut ? "- " : "+ ") + _formatUIBalance(amountHarv) + " " + ticker);
 				h.amount.setTextColor(!confirmed ? pending : isOut ? outgoing : incoming);
 			}
 			if (h.date != null) h.date.setText(ts > 0 ? new SimpleDateFormat("dd MMM · HH:mm", Locale.getDefault()).format(new java.util.Date(ts)) : "Pending");
@@ -678,14 +680,21 @@ public class HistoryFragmentActivity extends Fragment {
 				intent.putExtra("status", status);
 				intent.putExtra("senderAddress", from);
 				intent.putExtra("recipientAddress", to);
-				intent.putExtra("tokenSymbol", com.harvana.app.CoinInfo.ticker());
+				intent.putExtra("tokenSymbol", ticker);
 				intent.putExtra("value", amountHarv);
 				intent.putExtra("timestamp", ts);
 				intent.putExtra("memo", memo);
 				intent.putExtra("confirmations", confirmations);
 				
 				// Pass optional node telemetry if available in the HashMap
-				intent.putExtra("harvFee", com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay((long) num(tx, "fee"))); 
+				// The tFare in the coin it was paid in: HARV gas, or the coin's own fare when no HARV was paid.
+				if ((long) num(tx, "fee") == 0L && tx.containsKey("coinFeeRaw") && com.harvana.app.husd.Stable.isStable(str(tx, "asset", ""))) {
+					intent.putExtra("harvFee", (long) num(tx, "coinFeeRaw") / (double) com.harvana.app.husd.HusdClient.UNIT);
+					intent.putExtra("feeSymbol", ticker);
+				} else {
+					intent.putExtra("harvFee", com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay((long) num(tx, "fee")));
+					intent.putExtra("feeSymbol", com.harvana.app.CoinInfo.ticker());
+				}
 				intent.putExtra("blockNumber", (long) num(tx, "blockHeight"));
 				intent.putExtra("nonce", (long) num(tx, "nonce"));
 				
@@ -716,6 +725,21 @@ public class HistoryFragmentActivity extends Fragment {
 		return s.isEmpty() || "null".equalsIgnoreCase(s) ? d : s;
 	}
 	
+	/** A row's amount in its own coin: a stable coin has 6 decimals, HARV 8. */
+	private static double _amountOf(java.util.Map<String, Object> tx) {
+		Object raw = tx.get("amount");
+		long v = raw instanceof Number ? ((Number) raw).longValue() : 0L;
+		Object a = tx.get("asset");
+		return a != null && com.harvana.app.husd.Stable.isStable(String.valueOf(a))
+			? v / (double) com.harvana.app.husd.HusdClient.UNIT : HarvanaNodeClient.toHarvDisplay(v);
+	}
+
+	private static String _symbolOf(java.util.Map<String, Object> tx) {
+		Object a = tx.get("asset");
+		return a != null && com.harvana.app.husd.Stable.isStable(String.valueOf(a))
+			? com.harvana.app.husd.Stable.symbol(String.valueOf(a)) : com.harvana.app.CoinInfo.ticker();
+	}
+
 	private static double num(Map<String, Object> m, String k) {
 		Object v = m.get(k);
 		if (v instanceof Number) return ((Number) v).doubleValue();

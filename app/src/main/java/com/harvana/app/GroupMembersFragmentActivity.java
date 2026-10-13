@@ -419,7 +419,9 @@ public class GroupMembersFragmentActivity extends Fragment {
 			com.harvana.app.trust.WalletProfiles.resolve(wallet, card -> {
 				if (card != null) {
 					target.put("personPid", card.pid);
-					if (!card.name.isEmpty() && str(target, "memberUid", "").isEmpty()) {
+					// The account behind the wallet: the row and the member sheet then show the whole profile.
+					if (!card.uid.isEmpty() && str(target, "memberUid", "").isEmpty()) target.put("memberUid", card.uid);
+					if (!card.name.isEmpty()) {
 						target.put("displayName", card.name);
 						target.put("resolvedName", card.name);
 						target.put("resolvedUsername", card.username);
@@ -677,7 +679,8 @@ public class GroupMembersFragmentActivity extends Fragment {
 		TextView kickBtn = sheet.findViewById(getResources().getIdentifier("btn_detail_kick", "id", requireContext().getPackageName()));
 		
 		String memberUid = str(member, "memberUid", str(member, "requesterUid", str(member, "_docId", "")));
-		com.harvana.app.group.MemberPhoto.apply(initials, memberUid);
+		if (!memberUid.isEmpty()) com.harvana.app.group.MemberPhoto.apply(initials, memberUid);
+		else com.harvana.app.group.MemberPhoto.applyWallet(initials, str(member, "walletAddress", str(member, "wallet_address", "")));
 		
 		// Admin-only, never for a pending join request (nothing to report
 		// yet), never for yourself.
@@ -752,6 +755,19 @@ public class GroupMembersFragmentActivity extends Fragment {
 		}
 		if (name != null) com.harvana.app.utils.Shimmer.loading(name);
 		if (close != null) close.setOnClickListener(v -> dialog.dismiss());
+		final String sheetWallet = str(member, "walletAddress", str(member, "wallet_address", ""));
+		if (memberUid.isEmpty() && name != null) {
+			// No account found for this wallet: the name the network row carries, else the wallet itself.
+			String known = str(member, "resolvedName", str(member, "displayName", ""));
+			name.setText(!known.isEmpty() ? known : sheetWallet.length() > 14 ? sheetWallet.substring(0, 10) + "\u2026" + sheetWallet.substring(sheetWallet.length() - 4) : "Member");
+		}
+		// Trust follows the wallet that is in this group (the profile may name another of the person's wallets).
+		if (trust != null && sheetWallet.startsWith("HV0x")) {
+			com.harvana.app.trust.NetworkTrust.wallet(sheetWallet, score -> {
+				if (getActivity() == null) return;
+				getActivity().runOnUiThread(() -> trust.setText(score.label()));
+			});
+		}
 		
 		// Offline-first: this member's profile may have been viewed before
 		// (in this group or another) — render whatever's cached immediately
@@ -856,7 +872,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 			}
 		}
 		
-		if (trust != null) trust.setText("—");
+		if (trust != null && trust.getText().length() == 0) trust.setText("—");
 		Object walletObj = data.get("walletAddress");
 		if (walletObj == null) walletObj = data.get("wallet_address");
 		String wallet = walletObj == null ? "" : String.valueOf(walletObj).trim();
@@ -1143,7 +1159,11 @@ public class GroupMembersFragmentActivity extends Fragment {
 			if (h.wallet != null) h.wallet.setText("—");
 			if (h.status != null) h.status.setText(str(member, "status", "Active"));
 			if (h.balance != null) h.balance.setText("");
-			if (h.initials != null) { h.initials.setText("?"); com.harvana.app.group.MemberPhoto.apply(h.initials, memberUid); }
+			if (h.initials != null) {
+				h.initials.setText("?");
+				if (!memberUid.isEmpty()) com.harvana.app.group.MemberPhoto.apply(h.initials, memberUid);
+				else com.harvana.app.group.MemberPhoto.applyWallet(h.initials, str(member, "walletAddress", str(member, "wallet_address", "")));
+			}
 			h.itemView.setTag(memberUid);
 			h.itemView.setOnClickListener(v -> _showMemberSheet(member, false));
 			

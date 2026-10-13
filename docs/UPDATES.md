@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Group members: the real person behind each wallet
+
+- On network groups a member arrives as a wallet only. The app now finds the person: wallet, then public profile, then account (USERS holds the pid; `WalletProfiles` adds the account id to the card).
+- With the account known, the member row shows their profile photo instead of initials, and the member sheet shows their name, photo, occupation, location and contact like any member's.
+- A wallet with no account shows the name the network row carries (or the shortened wallet) instead of a loading bar that never ended.
+- Trust in the member sheet is read from the wallet that is in the group.
+
 ## 13 Oct 2026 — Group settings: no repeats
 
 - The group ID is shared from one place: Share group ID on the Invite card. "Copy group ID" (More) and "Copy network id" (Network) are gone. The IDs stay in their rows and can be selected and copied there. Copy group wallet stays.

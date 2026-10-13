@@ -86,8 +86,14 @@ public final class WalletProfiles {
     }
 
     private static void done(String key, ProfileTrust.Card card, Callback cb) {
-        if (card != null) FOUND.put(key, card); else MISSED.put(key, System.currentTimeMillis());
-        MAIN.post(() -> cb.onCard(card));
+        if (card == null) { MISSED.put(key, System.currentTimeMillis()); MAIN.post(() -> cb.onCard(null)); return; }
+        if (!card.uid.isEmpty() || card.pid.isEmpty()) { FOUND.put(key, card); MAIN.post(() -> cb.onCard(card)); return; }
+        // The account behind the public card (USERS keeps the pid), so screens can open the whole profile, not only the card.
+        FirebaseFirestore.getInstance().collection("USERS").whereEqualTo("pid", card.pid).limit(1).get().addOnCompleteListener(t -> {
+            if (t.isSuccessful() && t.getResult() != null) for (QueryDocumentSnapshot d : t.getResult()) { card.uid = d.getId(); break; }
+            FOUND.put(key, card);
+            MAIN.post(() -> cb.onCard(card));
+        });
     }
 
     private static String text(Object o) { return o == null ? "" : String.valueOf(o).trim(); }

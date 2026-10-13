@@ -20,6 +20,32 @@ import com.harvana.app.trust.ProfileTrust;
 public final class MemberPhoto {
     private MemberPhoto() {}
 
+    /** For a member the network knows only by wallet: the photo of the person who owns it. */
+    public static void applyWallet(final TextView badge, final String wallet) {
+        if (badge == null) return;
+        badge.setBackgroundResource(R.drawable.bg_avatar);
+        badge.setTextColor(Color.WHITE);
+        badge.setTag(R.id.member_photo_uid, "w:" + wallet);
+        if (wallet == null || wallet.isEmpty()) return;
+        com.harvana.app.trust.WalletProfiles.resolve(wallet, card -> {
+            if (!("w:" + wallet).equals(badge.getTag(R.id.member_photo_uid))) return;
+            if (card == null) return;
+            if (!card.name.isEmpty()) badge.setText(card.name.substring(0, 1).toUpperCase(java.util.Locale.US));
+            if (!card.uid.isEmpty()) { apply(badge, card.uid); return; }      // the account's own photo, newest first
+            if (card.icon.isEmpty()) return;
+            try {
+                Glide.with(badge.getContext().getApplicationContext()).load(card.icon).circleCrop().into(new CustomTarget<Drawable>() {
+                    @Override public void onResourceReady(@NonNull Drawable d, @Nullable Transition<? super Drawable> t) {
+                        if (!("w:" + wallet).equals(badge.getTag(R.id.member_photo_uid))) return;
+                        badge.setBackground(d);
+                        badge.setTextColor(Color.TRANSPARENT);
+                    }
+                    @Override public void onLoadCleared(@Nullable Drawable placeholder) { }
+                });
+            } catch (Exception ignored) { }
+        });
+    }
+
     public static void apply(final TextView badge, final String uid) {
         if (badge == null) return;
         badge.setBackgroundResource(R.drawable.bg_avatar);

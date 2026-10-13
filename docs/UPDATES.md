@@ -2,6 +2,23 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Add coins search, sheet text, Settings audit
+
+- Add coins: one Search. A contract address typed or pasted there is looked up on every chain; the tokens found head the list with their toggles, followed by "Add on a chain" (the token form, address filled in). The rows "Search a token by contract address" and "Add a token on a chain" are gone.
+- Bottom sheets: the chain sheet's Add a token / Edit chain / Remove chain were drawn in the page background colour. Fixed, and every sheet now swaps any text that would blend into the sheet for the main text colour (dark on light, light on dark).
+- Settings:
+  - Wallet & assets opens the Assets tab (it reopened Home).
+  - Log out clears the whole account from the phone, the same as the side menu (it left the wallet keys and caches behind).
+  - The name and photo refresh when you come back from Edit profile.
+  - Currency shows its code (NGN); a change also refreshes the rates.
+  - Clear cache, Language, Log out: no explanation text.
+- Notification and Privacy settings: explanation lines removed.
+- Privacy switches now work for other people: each is saved on the profile.
+  - Show trust score off: your profile shows Trust score · Hidden.
+  - Show my groups off: Groups · Hidden, with no counts.
+  - Activity status off: no last-seen.
+  - Allow group invites off: only members of a group you are in can invite you.
+
 ## 13 Oct 2026 — Earn: explanation removed
 
 - The "How earning works" card on Assets → Earn is gone (no explanations in the app).

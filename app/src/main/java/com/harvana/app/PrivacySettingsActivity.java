@@ -81,7 +81,7 @@ public class PrivacySettingsActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
-		com.harvana.app.utils.AppBar.header(this, "Privacy & visibility", "What other members can see about you", R.id.textview92, R.id.textview93);
+		com.harvana.app.utils.AppBar.header(this, "Privacy & visibility", null, R.id.textview92, R.id.textview93, R.id.textview95, R.id.textview97, R.id.textview99, R.id.textview101, R.id.textview102);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {
@@ -147,6 +147,7 @@ public class PrivacySettingsActivity extends AppCompatActivity {
 		_bindToggle(switchShowGroups, "show_groups");
 		_bindToggle(switchShowActivity, "show_activity_status");
 		_bindToggle(switchAllowInvites, "allow_invites_from_anyone");
+		publish(this);
 		
 	}
 	
@@ -155,8 +156,28 @@ public class PrivacySettingsActivity extends AppCompatActivity {
 	public static final String PREFS_NAME = "privacy_prefs";
 	private SharedPreferences prefs;
 	private void _bindToggle(SwitchMaterial sw, String prefKey) {
-		sw.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) ->
-		prefs.edit().putBoolean(prefKey, isChecked).apply());
+		sw.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> {
+			prefs.edit().putBoolean(prefKey, isChecked).apply();
+			publish(this);
+		});
+	}
+	
+	/** The switches on the account's profile (USERS), where other members' phones read them. */
+	public static void publish(android.content.Context c) {
+		com.google.firebase.auth.FirebaseUser u = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+		if (u == null) return;
+		SharedPreferences p = c.getSharedPreferences(PREFS_NAME, Activity.MODE_PRIVATE);
+		java.util.Map<String, Object> f = new java.util.HashMap<>();
+		f.put("showTrustScore", p.getBoolean("show_trust_score", true));
+		f.put("showGroups", p.getBoolean("show_groups", true));
+		f.put("showActivityStatus", p.getBoolean("show_activity_status", true));
+		f.put("allowGroupInvites", p.getBoolean("allow_invites_from_anyone", true));
+		if (!p.getBoolean("show_activity_status", true)) f.put("lastActiveAt", 0L);
+		com.harvana.app.firestore.UserProfileManager.getInstance(c).updateProfileFields(u.getUid(), f,
+			new com.harvana.app.firestore.UserProfileManager.SimpleCallback() {
+				@Override public void onSuccess() { }
+				@Override public void onError(String error) { }
+			});
 	}
 	
 	{

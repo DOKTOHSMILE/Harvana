@@ -289,7 +289,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         ((LinearLayout.LayoutParams) chip.getLayoutParams()).setMarginStart(SocialUi.dp(this, 8));
         // The tier's medal beside the score; tap for every tier (reached in colour, the rest dimmed).
         com.harvana.app.trust.TierBadges.decorate(this, chip, tierName(), card.trustPercent, card.scored());
-        nameRow.addView(chip);
+        if (!card.trustHidden) nameRow.addView(chip);
         h.addView(nameRow);
 
         String status = mine ? "" : PublicProfileStore.presence(card.lastActiveAt, System.currentTimeMillis());
@@ -1059,12 +1059,25 @@ public class PublicProfileActivity extends AppCompatActivity {
         }
     }
 
+    /** One row, "Trust score · Hidden": the member turned it off in Privacy. */
+    private View hiddenRow(String label) {
+        com.harvana.app.utils.InfoTable t = new com.harvana.app.utils.InfoTable(this);
+        t.row(label, "Hidden");
+        return t.view();
+    }
+
     private void renderTab() {
         if (tabContent == null) return;
         tabContent.removeAllViews();
-        if (tab == 0) {
+        if (tab == 0 && card.trustHidden) {
+            tabContent.addView(hiddenRow("Trust score"));
+            tabContent.addView(milestonesCard());
+        } else if (tab == 0) {
             tabContent.addView(trustCard());
             tabContent.addView(milestonesCard());
+        }
+        else if (tab == 2 && card.groupsHidden) {
+            tabContent.addView(hiddenRow("Groups"));
         }
         else if (tab == 1) {
             tabContent.addView(activityCard());
@@ -1076,10 +1089,6 @@ public class PublicProfileActivity extends AppCompatActivity {
             tabContent.addView(networkFactsCard());          // device, vouches, established, and your wallets
             tabContent.addView(myDataLinks());
         }
-        TextView foot = SocialUi.text(this, "Trust, country and state are always public. Amounts and group names are never shown. "
-                + "Age and city are shown only if the member turns them on.", 11.5f, false, UiColors.textTertiary());
-        foot.setPadding(SocialUi.dp(this, 4), SocialUi.dp(this, 10), SocialUi.dp(this, 4), 0);
-        tabContent.addView(foot);
     }
 
     // ── Trust ────────────────────────────────────────────────────────────

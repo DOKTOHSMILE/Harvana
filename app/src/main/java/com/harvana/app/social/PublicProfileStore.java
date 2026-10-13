@@ -97,6 +97,8 @@ public final class PublicProfileStore {
         public String country = "", state = "", city = "", bio = "";
         public int trustPercent = -1, age = -1;
         public boolean showAge, showCity;
+        /** The member turned these off in Privacy: others see neither the score nor their groups. */
+        public boolean trustHidden, groupsHidden;
         public long memberSince;
         /** When the member last had the app open (self-reported presence); 0 when unknown. */
         public long lastActiveAt;
@@ -180,6 +182,21 @@ public final class PublicProfileStore {
                             c.sharedGroups.add(groupFromDoc(gid, gd));
                         } catch (Exception ignored) { }
                     }
+                }
+                if (!uid.equals(mine)) {
+                    if (Boolean.FALSE.equals(user.get("showTrustScore"))) {
+                        c.trustHidden = true;
+                        c.trustPercent = -1;
+                        c.trustTier = "";
+                        c.trustParts = new HashMap<>();
+                    }
+                    if (Boolean.FALSE.equals(user.get("showGroups"))) {
+                        c.groupsHidden = true;
+                        c.groups = -1;
+                        c.cycles = -1;
+                        c.sharedGroups.clear();
+                    }
+                    if (Boolean.FALSE.equals(user.get("showActivityStatus"))) c.lastActiveAt = 0;
                 }
                 cb.done(c, null);
             } catch (Exception e) { cb.done(null, e.getMessage() == null ? e.toString() : e.getMessage()); }

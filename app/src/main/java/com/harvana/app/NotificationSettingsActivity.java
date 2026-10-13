@@ -93,7 +93,7 @@ public class NotificationSettingsActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
-		com.harvana.app.utils.AppBar.header(this, "Notification settings", "Choose what Harvana notifies you about", R.id.textview74, R.id.textview75);
+		com.harvana.app.utils.AppBar.header(this, "Notification settings", null, R.id.textview74, R.id.textview75, R.id.textview77, R.id.textview79, R.id.textview81, R.id.textview83, R.id.textview87);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {

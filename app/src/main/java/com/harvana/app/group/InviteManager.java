@@ -95,6 +95,34 @@ public final class InviteManager {
         if (me == null) { done.onDone("Sign in first."); return; }
         if (to == null || to.uid.isEmpty()) { done.onDone("Unknown member."); return; }
         if (to.uid.equals(me.getUid())) { done.onDone("You can't invite yourself."); return; }
+        com.google.firebase.firestore.FirebaseFirestore db = com.google.firebase.firestore.FirebaseFirestore.getInstance();
+        db.collection("USERS").document(to.uid).get().addOnCompleteListener(theirs -> {
+            Map<String, Object> them = theirs.isSuccessful() && theirs.getResult() != null && theirs.getResult().getData() != null
+                    ? theirs.getResult().getData() : new HashMap<>();
+            if (!Boolean.FALSE.equals(them.get("allowGroupInvites"))) { write(ctx, groupId, group, me, to, message, done); return; }
+            db.collection("USERS").document(me.getUid()).get().addOnCompleteListener(mine -> {
+                Map<String, Object> us = mine.isSuccessful() && mine.getResult() != null && mine.getResult().getData() != null
+                        ? mine.getResult().getData() : new HashMap<>();
+                List<String> a = groupIds(them.get("groups")), b = groupIds(us.get("groups"));
+                a.retainAll(b);
+                if (a.isEmpty()) done.onDone(to.name + " takes invites only from members of their groups.");
+                else write(ctx, groupId, group, me, to, message, done);
+            });
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<String> groupIds(Object raw) {
+        List<String> out = new ArrayList<>();
+        if (raw instanceof List) for (Object g : (List<Object>) raw) {
+            Object id = g instanceof Map ? ((Map<?, ?>) g).get("id") : g;
+            if (id != null && !String.valueOf(id).isEmpty() && !out.contains(String.valueOf(id))) out.add(String.valueOf(id));
+        }
+        return out;
+    }
+
+    private static void write(Context ctx, String groupId, Map<String, Object> group, FirebaseUser me, com.harvana.app.social.Person to,
+                              String message, Done done) {
         long now = System.currentTimeMillis();
         Map<String, Object> f = new HashMap<>();
         f.put("groupId", groupId);

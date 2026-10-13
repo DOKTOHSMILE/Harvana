@@ -819,7 +819,10 @@ public final class CustomAssets {
     // ── a token under a chain ──────────────────────────────────────────────
 
     /** The token form; {@code chainKey} preselects the chain (null = the first). */
-    public static void addToken(Context c, String chainKey, Runnable onDone) {
+    public static void addToken(Context c, String chainKey, Runnable onDone) { addToken(c, chainKey, null, onDone); }
+
+    /** The token form, with the contract address already typed in when {@code contractText} is given. */
+    public static void addToken(Context c, String chainKey, String contractText, Runnable onDone) {
         BottomSheetDialog d = new com.harvana.app.ui.AppSheet(c);
         LinearLayout root = column(c);
         root.addView(title(c, "Add a token"));
@@ -833,6 +836,7 @@ public final class CustomAssets {
         TextView chainPick = button(c, "On: " + names[picked[0]], null);
         root.addView(chainPick);
         EditText contract = field(c, "", InputType.TYPE_CLASS_TEXT);
+        if (contractText != null) contract.setText(contractText.trim());
         TextView fill = button(c, "Fill", null);
         TextView status = sub(c, "");
         EditText name = field(c, "Name", InputType.TYPE_CLASS_TEXT);
@@ -1024,7 +1028,7 @@ public final class CustomAssets {
         t.setText(s);
         t.setTextSize(14);
         t.setTypeface(Typeface.DEFAULT_BOLD);
-        t.setTextColor(ContextCompat.getColor(c, R.color.colorPrimary));
+        t.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
         t.setGravity(android.view.Gravity.CENTER_VERTICAL);
         t.setMinHeight(dp(c, 44));
         android.util.TypedValue tv = new android.util.TypedValue();

@@ -403,6 +403,16 @@ public class SettingsActivity extends AppCompatActivity {
 		authsp = getSharedPreferences("authsp", Activity.MODE_PRIVATE);
 	}
 	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		// Back from Edit profile or another screen: the header and the values show what is saved now.
+		if (tvSettingsName != null) {
+			_loadProfileHeader();
+			_bindCurrentValues();
+		}
+	}
+	
 	private void initializeLogic() {
 		_compactList();
 		if (getSupportActionBar() != null) {
@@ -554,7 +564,7 @@ public class SettingsActivity extends AppCompatActivity {
 		
 		SharedPreferences currencySp = getSharedPreferences("currencysp", Activity.MODE_PRIVATE);
 		String currency = currencySp.getString("currency", "₦");
-		tvCurrencyValue.setText("Currently " + _currencyLabel(currency));
+		tvCurrencyValue.setText(_currencyCode(currency));
 	}
 	
 	private static final String[][] SUPPORTED_CURRENCIES = {
@@ -566,6 +576,12 @@ public class SettingsActivity extends AppCompatActivity {
 		{"KSh", "KES — Kenyan Shilling"},
 		{"R", "ZAR — South African Rand"},
 	};
+	
+	private String _currencyCode(String symbol) {
+		String label = _currencyLabel(symbol);
+		int dash = label.indexOf(" — ");
+		return dash > 0 ? label.substring(0, dash) : label;
+	}
 	
 	private String _currencyLabel(String symbol) {
 		for (String[] entry : SUPPORTED_CURRENCIES) {
@@ -590,7 +606,7 @@ public class SettingsActivity extends AppCompatActivity {
 		
 		rowWalletAssets.setOnClickListener(v -> {
 			Intent intent = new Intent(this, MainActivity.class);
-			intent.putExtra("open_tab", "asset");
+			intent.putExtra("open_fragment", "asset");
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 			startActivity(intent);
 		});
@@ -636,8 +652,9 @@ public class SettingsActivity extends AppCompatActivity {
 		.setTitle("Currency")
 		.setSingleChoiceItems(labels, selectedIndex, (dialog, which) -> {
 			String chosenSymbol = SUPPORTED_CURRENCIES[which][0];
-			currencySp.edit().putString("currency", chosenSymbol).apply();
-			tvCurrencyValue.setText("Currently " + SUPPORTED_CURRENCIES[which][1]);
+			com.harvana.app.wallet.FxRates.save(this, chosenSymbol);
+			com.harvana.app.wallet.FxRates.load(this, null);
+			tvCurrencyValue.setText(_currencyCode(chosenSymbol));
 			dialog.dismiss();
 		})
 		.setNegativeButton("Cancel", null)
@@ -646,9 +663,8 @@ public class SettingsActivity extends AppCompatActivity {
 	
 	private void _showDataStorageDialog() {
 		new com.harvana.app.ui.SheetDialog.Builder(this)
-		.setTitle("Clear cached data")
-		.setMessage("This clears locally cached profile and balance data used for instant, offline-friendly loading. Nothing on your account is affected — the app will simply re-fetch everything fresh the next time you're online.")
-		.setPositiveButton("Clear Cache", (dialog, which) -> {
+		.setTitle("Clear cache")
+		.setPositiveButton("Clear", (dialog, which) -> {
 			com.harvana.app.offline.OfflineCacheManager.clearAll(getApplicationContext());
 			com.harvana.app.sync.NodeReadCache.clear();
 			Toast.makeText(this, "Cache cleared", Toast.LENGTH_SHORT).show();
@@ -660,8 +676,7 @@ public class SettingsActivity extends AppCompatActivity {
 	private void _showLanguagePicker() {
 		new com.harvana.app.ui.SheetDialog.Builder(this)
 		.setTitle("Language")
-		.setMessage("English is currently the only supported language. More languages are planned for a future update.")
-		.setPositiveButton("OK", null)
+		.setSingleChoiceItems(new String[]{"English"}, 0, (dialog, which) -> dialog.dismiss())
 		.show();
 	}
 	
@@ -727,17 +742,15 @@ public class SettingsActivity extends AppCompatActivity {
 	
 	private void _confirmLogOut() {
 		new com.harvana.app.ui.SheetDialog.Builder(this)
-		.setTitle("Log Out")
-		.setMessage("Are you sure you want to sign out of your account?")
-		.setPositiveButton("Log Out", (dialog, which) -> _performLogOut())
+		.setTitle("Log out")
+		.setPositiveButton("Log out", (dialog, which) -> _performLogOut())
 		.setNegativeButton("Cancel", null)
 		.show();
 	}
 	
 	private void _performLogOut() {
-		authsp.edit().clear().apply();
-		try { com.google.firebase.auth.FirebaseAuth.getInstance().signOut(); } catch (Exception ignored) {}
-		com.harvana.app.sync.AuthTokenProvider.clear();
+		// The same sign-out as the side menu: every store this app writes, the wallet keys included.
+		com.harvana.app.auth.LogoutManager.logout(getApplicationContext());
 		Intent intent = new Intent(this, SplashScreenActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		startActivity(intent);

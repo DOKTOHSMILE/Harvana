@@ -49,7 +49,7 @@ public class ManageAssetsActivity extends AppCompatActivity {
         int type;
         String title, sub = "", key, iconUrl = "";
         int icon;
-        String kind;                       // COIN, STABLE, ADDED
+        String kind;                       // COIN, STABLE, ADDED, FOUND (a search result), MANUAL (type a token in)
         CustomAssets.Asset asset;
     }
 
@@ -57,6 +57,10 @@ public class ManageAssetsActivity extends AppCompatActivity {
     private final List<Item> shown = new ArrayList<>();
     private Adapter adapter;
     private String query = "";
+    /** A contract address in Search: every chain is scanned for it and the tokens found head the list. */
+    private final List<Item> found = new ArrayList<>();
+    private String scanned = "";
+    private final android.os.Handler debounce = new android.os.Handler(android.os.Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle b) {
@@ -78,9 +82,7 @@ public class ManageAssetsActivity extends AppCompatActivity {
         LinearLayout actions = new LinearLayout(this);
         actions.setOrientation(LinearLayout.VERTICAL);
         actions.setPadding(pad, 0, pad, 0);
-        actions.addView(action("Search a token by contract address", v -> CustomAssets.search(this, filter.getText().toString(), this::reload)));
         actions.addView(action("Add a chain", v -> CustomAssets.editChain(this, null, this::reload)));
-        actions.addView(action("Add a token on a chain", v -> CustomAssets.addToken(this, null, this::reload)));
         actions.addView(action("Token index key (GoldRush)", v -> indexKey()));
         body.addView(actions);
 
@@ -97,7 +99,14 @@ public class ManageAssetsActivity extends AppCompatActivity {
         filter.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int c, int d) { }
             @Override public void onTextChanged(CharSequence s, int a, int c, int d) { }
-            @Override public void afterTextChanged(Editable s) { query = s.toString().trim().toLowerCase(Locale.US); applyFilter(); }
+            @Override public void afterTextChanged(Editable s) {
+                String raw = s.toString().trim();
+                query = raw.toLowerCase(Locale.US);
+                debounce.removeCallbacksAndMessages(null);
+                if (!TokenScan.looksLikeContract(raw)) { found.clear(); scanned = ""; }
+                else if (!raw.equals(scanned)) debounce.postDelayed(() -> scan(raw), 500);
+                applyFilter();
+            }
         });
         reload();
     }
@@ -107,6 +116,7 @@ public class ManageAssetsActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        debounce.removeCallbacksAndMessages(null);
         Runnable r = onClosed;
         onClosed = null;
         if (changed && r != null) r.run();
@@ -138,8 +148,33 @@ public class ManageAssetsActivity extends AppCompatActivity {
         applyFilter();
     }
 
+    /** Scans every chain for the address in Search; the tokens found show first, each with its toggle. */
+    private void scan(String address) {
+        scanned = address;
+        found.clear();
+        found.add(header("Searching"));
+        applyFilter();
+        TokenScan.search(this, address, tokens -> {
+            if (isFinishing() || !address.equals(scanned)) return;
+            found.clear();
+            found.add(header(tokens.isEmpty() ? "Found · 0" : "Found · " + tokens.size()));
+            for (CustomAssets.Asset a : tokens) {
+                Item i = row("FOUND", a.key(), a.symbol + " · " + a.name, a.chainName);
+                i.icon = R.drawable.ic_coin_generic;
+                i.iconUrl = a.icon == null ? "" : a.icon;
+                i.asset = a;
+                found.add(i);
+            }
+            Item manual = row("MANUAL", "", "Add on a chain", address);
+            manual.icon = R.drawable.ic_coin_generic;
+            found.add(manual);
+            applyFilter();
+        });
+    }
+
     private void applyFilter() {
         shown.clear();
+        if (!found.isEmpty()) shown.addAll(found);
         Item pendingHeader = null;
         for (Item i : all) {
             if (i.type == HEADER) { pendingHeader = i; continue; }
@@ -151,12 +186,21 @@ public class ManageAssetsActivity extends AppCompatActivity {
     }
 
     private boolean isOn(Item i) {
+        if ("FOUND".equals(i.kind)) { CustomAssets.Asset a = CustomAssets.find(i.key); return a != null && !a.hidden; }
         if ("ADDED".equals(i.kind)) return !i.asset.hidden;
         return ChainAssetsSection.shown(this, i.key);
     }
 
     private void setOn(Item i, boolean on) {
         changed = true;
+        if ("FOUND".equals(i.kind)) {
+            CustomAssets.Asset have = CustomAssets.find(i.key);
+            CustomAssets.Asset a = have != null ? have : i.asset.copy();
+            a.hidden = !on;
+            CustomAssets.add(this, a);
+            reload();
+            return;
+        }
         if ("ADDED".equals(i.kind)) { i.asset.hidden = !on; CustomAssets.add(this, i.asset); }
         else ChainAssetsSection.setShown(this, i.key, on);
     }
@@ -193,6 +237,15 @@ public class ManageAssetsActivity extends AppCompatActivity {
             else if (!i.iconUrl.isEmpty()) CustomAssets.icon(ManageAssetsActivity.this, r.icon, i.iconUrl, i.title);
             else r.icon.setImageResource(i.icon);
             r.toggle.setOnCheckedChangeListener(null);
+            if ("MANUAL".equals(i.kind)) {
+                r.toggle.setVisibility(View.GONE);
+                r.itemView.setOnClickListener(v -> CustomAssets.addToken(ManageAssetsActivity.this, null, i.sub, ManageAssetsActivity.this::reload));
+                r.itemView.setOnLongClickListener(null);
+                int next = p + 1;
+                r.divider.setVisibility(next < shown.size() && shown.get(next).type == ROW ? View.VISIBLE : View.GONE);
+                return;
+            }
+            r.toggle.setVisibility(View.VISIBLE);
             r.toggle.setChecked(isOn(i));
             r.toggle.setOnCheckedChangeListener((b, on) -> setOn(i, on));
             r.itemView.setOnClickListener(v -> r.toggle.toggle());

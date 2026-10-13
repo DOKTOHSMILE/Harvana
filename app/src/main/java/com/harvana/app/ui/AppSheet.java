@@ -67,7 +67,7 @@ public class AppSheet extends BottomSheetDialog {
         b.setSkipCollapsed(true);
         b.setState(BottomSheetBehavior.STATE_EXPANDED);
         View content = findViewById(android.R.id.content);
-        if (content != null) dividers(content);
+        if (content != null) { dividers(content); readable(content, surfaceColor()); }
         focusFirstField();
     }
 
@@ -86,6 +86,26 @@ public class AppSheet extends BottomSheetDialog {
             View a = g.getChildAt(i - 1), b = g.getChildAt(i);
             if (row(a) && row(b)) g.addView(SheetDialog.divider(g.getContext()), i, SheetDialog.dividerParams(g.getContext()));
         }
+    }
+
+    private int surfaceColor() {
+        return com.google.android.material.color.MaterialColors.getColor(getContext(),
+                com.google.android.material.R.attr.colorSurface, UiColors.surface());
+    }
+
+    /** Text on the sheet always reads: dark on a light sheet, light on a dark one. Text that would blend in takes the main text colour. */
+    static void readable(View v, int surface) {
+        if (v instanceof ViewGroup) {
+            ViewGroup g = (ViewGroup) v;
+            for (int i = 0; i < g.getChildCount(); i++) readable(g.getChildAt(i), surface);
+            return;
+        }
+        if (!(v instanceof android.widget.TextView) || v instanceof EditText || v instanceof android.widget.Button) return;
+        if (v.getBackground() instanceof android.graphics.drawable.ColorDrawable
+                || v.getBackground() instanceof GradientDrawable) return;   // a chip or badge paints its own fill
+        android.widget.TextView t = (android.widget.TextView) v;
+        int fg = androidx.core.graphics.ColorUtils.compositeColors(t.getCurrentTextColor(), surface | 0xFF000000);
+        if (androidx.core.graphics.ColorUtils.calculateContrast(fg, surface | 0xFF000000) < 3.0) t.setTextColor(UiColors.textPrimary());
     }
 
     private static boolean row(View v) {

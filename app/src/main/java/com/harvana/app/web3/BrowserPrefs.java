@@ -79,6 +79,8 @@ public final class BrowserPrefs {
         setDesktopMode(web, desktop(c));
     }
 
+    static final String METAMASK_UA = "MetaMaskMobile/7.57.0";
+
     /** Desktop site: a desktop Chrome user agent (same version) and a wide viewport. */
     public static void setDesktopMode(WebView web, boolean on) {
         WebSettings s = web.getSettings();
@@ -88,7 +90,10 @@ public final class BrowserPrefs {
             String ver = m.find() ? m.group(1) : "124.0.0.0";
             s.setUserAgentString("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/" + ver + " Safari/537.36");
         } else {
-            s.setUserAgentString(null);
+            // MetaMask compatibility (owner, 13 Oct 2026): dApps using the MetaMask SDK or Reown/WalletConnect look for
+            // "MetaMaskMobile" in the user agent to know they are inside a wallet's own browser. With it, "MetaMask" in
+            // their wallet list connects straight to this app's wallet (window.ethereum) instead of opening the MetaMask app.
+            s.setUserAgentString(mobile + " " + METAMASK_UA);
         }
         s.setUseWideViewPort(on);
         s.setLoadWithOverviewMode(on);

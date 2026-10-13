@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: "MetaMask" in a dApp's wallet list connects to the Harvana wallet
+
+| Part | Now |
+|---|---|
+| Browser user agent (mobile mode) | Ends with `MetaMaskMobile/7.57.0`, the mark dApps (MetaMask SDK, Reown/WalletConnect AppKit, wagmi) use to know they run inside a wallet's own browser |
+| `window.ethereum` | `isMetaMask: true` (as before), plus `_metamask.isUnlocked()` and `metamask_getProviderState` |
+| Result | On OpenSea and similar sites, tap MetaMask (or Browser Wallet / Injected): the Harvana connect sheet opens; no MetaMask app needed |
+| Wallet list entry (EIP-6963) | Stays "Harvana" with the Harvana icon |
+
+Signing is unchanged: every signature and transaction still shows the review sheet and needs PIN or fingerprint. Desktop-site mode uses a desktop user agent without the mark. App build only.
+
 ## 13 Oct 2026: group cards and overview in the group's coin
 
 - Group card and Discover card: the per-slot amount shows the group's coin (e.g. "500 hNGN/slot").

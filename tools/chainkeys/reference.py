@@ -15,7 +15,7 @@ def slip10(seed,path):
 for m in sys.argv[1:]:
     seed=bip39.mnemonic_to_seed(m); root=bip32.HDKey.from_seed(seed)
     pk=lambda p: root.derive(p)
-    print('BTC', script.p2wpkh(pk("m/84'/0'/0'/0/0").get_public_key()).address(NETWORKS['main']))
+    print('BTC', script.p2pkh(pk("m/44'/0'/0'/0/0").get_public_key()).address(NETWORKS['main']))   # legacy P2PKH since 13 Oct 2026
     print('LTC', eb.encode('ltc',0,h160(pk("m/84'/2'/0'/0/0").get_public_key().sec())))
     print('DOGE', base58.b58encode_check(b'\x1e'+h160(pk("m/44'/3'/0'/0/0").get_public_key().sec())).decode())
     print('ETH', Account.from_mnemonic(m, account_path="m/44'/60'/0'/0/0").address)

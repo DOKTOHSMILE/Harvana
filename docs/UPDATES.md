@@ -2,6 +2,23 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: Bitcoin uses legacy addresses; groups ask for the coin
+
+**Bitcoin (owner: SegWit did not work on testnet)**
+
+| Part | Before | Now |
+|---|---|---|
+| Address type | Native SegWit (tb1… / bc1…), path m/84' | Legacy P2PKH: m… or n… on testnet, 1… on mainnet; path m/44'/1' (testnet), m/44'/0' (mainnet) |
+| Check | — | "abandon … about" gives 1LqBGSKuX5yYUonjxT5qGfpUsXKYYWeabA and mkpZhYtJu2r87Js3pDiWJDmPte2NRZ8bJV, the published BIP-44 vectors |
+| Sending | SegWit inputs | Legacy inputs; can still pay legacy, P2SH (3…/2…) and SegWit addresses |
+| QR scan | — | Testnet m…/n…/2… told apart from testnet Dogecoin by the address version byte |
+
+The Bitcoin address shown in the app changes. Testnet coins sent to the old tb1… address stay with that address.
+
+**Create group:** no coin is picked in advance. "Choose a coin" opens a bottom sheet of the coins the network has on; Next is refused until one is chosen.
+
+App build only.
+
 ## 13 Oct 2026: stable coins' contract addresses and "Send to another chain"
 
 Stable coin page (hNGN, hUSD, …), Overview:

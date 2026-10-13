@@ -20,7 +20,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Wallets on other chains from the same recovery phrase, at the paths the common wallets use, so the same words also open
  * them in MetaMask, Trust Wallet, Phantom, TronLink, Electrum and so on:
  *
- *   Bitcoin   m/84'/0'/0'/0/0    native SegWit, bc1...
+ *   Bitcoin   m/44'/0'/0'/0/0    legacy P2PKH, 1... (testnet m/44'/1', m... or n...)
  *   Litecoin  m/84'/2'/0'/0/0    native SegWit, ltc1...
  *   Dogecoin  m/44'/3'/0'/0/0    D...
  *   Ethereum  m/44'/60'/0'/0/0   0x... (the same address on BNB Chain, Polygon, Base, Arbitrum and other EVM chains)
@@ -47,7 +47,8 @@ public final class ChainKeys {
     public static String address(String mnemonic, Chain chain) throws Exception {
         byte[] seed = PiKeys.bip39Seed(mnemonic);
         switch (chain) {
-            case BTC: return segwit(Net.TEST ? "tb" : "bc", pub(derive(seed, btcPath())));
+            // Legacy P2PKH (owner, 13 Oct 2026: SegWit did not work on testnet): "m…"/"n…" on testnet, "1…" on mainnet.
+            case BTC: return base58Check((byte) (Net.TEST ? 0x6f : 0x00), hash160(pub(derive(seed, btcPath()))));
             case LTC: return segwit(Net.TEST ? "tltc" : "ltc", pub(derive(seed, ltcPath())));
             case DOGE: return base58Check((byte) (Net.TEST ? 0x71 : 0x1e), hash160(pub(derive(seed, dogePath()))));
             case ETH: return ethAddress(derive(seed, new int[]{44 | H, 60 | H, H, 0, 0}));
@@ -71,7 +72,8 @@ public final class ChainKeys {
         }
     }
 
-    private static int[] btcPath() { return new int[]{84 | H, (Net.TEST ? 1 : 0) | H, H, 0, 0}; }
+    /** BIP-44, the standard path for legacy Bitcoin addresses (the same as most wallets that offer them). */
+    private static int[] btcPath() { return new int[]{44 | H, (Net.TEST ? 1 : 0) | H, H, 0, 0}; }
     private static int[] ltcPath() { return new int[]{84 | H, (Net.TEST ? 1 : 2) | H, H, 0, 0}; }
     private static int[] dogePath() { return new int[]{44 | H, (Net.TEST ? 1 : 3) | H, H, 0, 0}; }
 

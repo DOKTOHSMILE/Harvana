@@ -103,17 +103,43 @@ public final class WalletQr {
         if (t.startsWith("T") && t.matches("^T[1-9A-HJ-NP-Za-km-z]{33}$")) return new Hit("TRX", t);
         if (t.startsWith("G") && t.matches("^G[A-Z2-7]{55}$")) return new Hit("PI", t);
         if (t.matches("^D[1-9A-HJ-NP-Za-km-z]{25,34}$")) return new Hit("DOGE", t);
-        if (com.harvana.app.wallet.Net.TEST && t.matches("^[n2][1-9A-HJ-NP-Za-km-z]{25,34}$")) return new Hit("DOGE", t);
+        if (com.harvana.app.wallet.Net.TEST && t.matches("^[mn2][1-9A-HJ-NP-Za-km-z]{25,34}$")) {
+            // Testnet Bitcoin (m…, n…, 2…) and testnet Dogecoin (n…) share letters: the version byte tells them apart.
+            int v = base58Version(t);
+            if (v == 0x6f || v == 0xc4) return new Hit("BTC", t);
+            if (v == 0x71) return new Hit("DOGE", t);
+            return null;
+        }
         if (t.matches("^[LM][1-9A-HJ-NP-Za-km-z]{25,34}$")) return new Hit("LTC", t);
         if (t.matches("^[13][1-9A-HJ-NP-Za-km-z]{24,34}$")) return new Hit("BTC", t);
         if (t.matches("^[1-9A-HJ-NP-Za-km-z]{32,44}$")) return new Hit("SOL", t);
         return null;
     }
 
+    /** The version byte of a base58 address (its first byte once decoded), or -1. */
+    static int base58Version(String a) {
+        try {
+            java.math.BigInteger v = java.math.BigInteger.ZERO, b = java.math.BigInteger.valueOf(58);
+            String alpha = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+            for (char ch : a.toCharArray()) {
+                int i = alpha.indexOf(ch);
+                if (i < 0) return -1;
+                v = v.multiply(b).add(java.math.BigInteger.valueOf(i));
+            }
+            byte[] raw = v.toByteArray();
+            int lead = 0;
+            while (lead < a.length() && a.charAt(lead) == '1') lead++;
+            if (lead > 0) return 0;                                  // a leading '1' is a zero version byte
+            int skip = raw.length > 25 ? raw.length - 25 : 0;       // BigInteger's sign byte
+            return raw.length - skip == 25 ? raw[skip] & 0xFF : -1;
+        } catch (Exception e) { return -1; }
+    }
+
     private static boolean looksLike(String key, String a) {
         switch (key) {
             case "HARV": return a.regionMatches(true, 0, "HV0x", 0, 4) && a.length() == 44;
-            case "BTC": return a.regionMatches(true, 0, "bc1", 0, 3) || a.regionMatches(true, 0, "tb1", 0, 3) || a.matches("^[13][1-9A-HJ-NP-Za-km-z]{24,34}$");
+            case "BTC": return a.regionMatches(true, 0, "bc1", 0, 3) || a.regionMatches(true, 0, "tb1", 0, 3) || a.matches("^[13][1-9A-HJ-NP-Za-km-z]{24,34}$")
+                    || (com.harvana.app.wallet.Net.TEST && (base58Version(a) == 0x6f || base58Version(a) == 0xc4));
             case "LTC": return a.regionMatches(true, 0, "ltc1", 0, 4) || a.regionMatches(true, 0, "tltc1", 0, 5) || a.matches("^[LM][1-9A-HJ-NP-Za-km-z]{25,34}$");
             case "DOGE": return a.matches("^D[1-9A-HJ-NP-Za-km-z]{25,34}$") || (com.harvana.app.wallet.Net.TEST && a.matches("^[n2][1-9A-HJ-NP-Za-km-z]{25,34}$"));
             case "ETH":

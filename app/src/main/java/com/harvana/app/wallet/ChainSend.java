@@ -36,9 +36,9 @@ public final class ChainSend {
             case "BNB": { Net.Evm n = Net.evm("BNB"); return evm(mnemonic, from, to, amount, n.rpc, n.chainId, 18); }
             case "POL": { Net.Evm n = Net.evm("POL"); return evm(mnemonic, from, to, amount, n.rpc, n.chainId, 18); }
             case "BASE": { Net.Evm n = Net.evm("BASE"); return evm(mnemonic, from, to, amount, n.rpc, n.chainId, 18); }
-            case "BTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.BTC, Net.btcApi(), true);
-            case "LTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.LTC, Net.ltcApi(), true);
-            case "DOGE": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.DOGE, Net.TEST ? "" : "https://api.blockcypher.com/v1/doge/main", false);
+            case "BTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.BTC, Net.btcApi(), true, false);   // legacy P2PKH coins
+            case "LTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.LTC, Net.ltcApi(), true, true);
+            case "DOGE": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.DOGE, Net.TEST ? "" : "https://api.blockcypher.com/v1/doge/main", false, false);
             case "TRX": return tron(mnemonic, from, to, amount);
             case "SOL": return sol(mnemonic, from, to, amount);
             default: throw new IllegalArgumentException("Sending " + key + " from Harvana is not switched on.");
@@ -76,7 +76,11 @@ public final class ChainSend {
         return r.getString("result");
     }
 
-    private static String utxo(String mnemonic, String from, String to, String amount, ChainKeys.Chain chain, String api, boolean segwit) throws Exception {
+    /**
+     * {@code esplora}: the coins are read from and sent through an Esplora API (mempool.space style), else Dogecoin's.
+     * {@code witness}: this wallet's coins are SegWit (P2WPKH, Litecoin); else legacy P2PKH (Bitcoin, Dogecoin).
+     */
+    private static String utxo(String mnemonic, String from, String to, String amount, ChainKeys.Chain chain, String api, boolean esplora, boolean witness) throws Exception {
         byte[] priv = ChainKeys.privateKey(mnemonic, chain);
         String mine = ChainKeys.address(mnemonic, chain);
         if (!mine.equals(from)) throw new IllegalArgumentException("This phone's key does not match the address on screen. Open the coin again.");
@@ -88,25 +92,25 @@ public final class ChainSend {
         long sum = 0;
         long fee = 0;
         long change = 0;
-        JSONArray utxos = segwit ? getArray(api + "/api/address/" + from + "/utxo") : dogeUtxos(from);
-        int rate = segwit ? feeRate(api) : 100;
+        JSONArray utxos = esplora ? getArray(api + "/api/address/" + from + "/utxo") : dogeUtxos(from);
+        int rate = esplora ? feeRate(api) : 100;
         int dust = "DOGE".equals(chain.ticker) ? 100000 : 546;
         for (int i = 0; i < utxos.length() && ins.size() < 50; i++) {
             JSONObject u = utxos.getJSONObject(i);
-            if (segwit && u.has("status") && !u.getJSONObject("status").optBoolean("confirmed", true)) continue;
+            if (esplora && u.has("status") && !u.getJSONObject("status").optBoolean("confirmed", true)) continue;
             long value = u.optLong("value");
             if (value <= 0) continue;
-            String idKey = segwit ? "txid" : "tx_hash";
-            String voutKey = segwit ? "vout" : "tx_output_n";
+            String idKey = esplora ? "txid" : "tx_hash";
+            String voutKey = esplora ? "vout" : "tx_output_n";
             if (!u.has(idKey) || !u.has(voutKey)) continue;
             byte[] txid = BtcTx.reverse(EvmTx.unhex(u.getString(idKey)));
             ins.add(new BtcTx.In(txid, u.getInt(voutKey), value));
             sum += value;
-            fee = (long) rate * vsize(ins.size(), 2, segwit);
+            fee = (long) rate * vsize(ins.size(), 2, witness);
             if (sum >= sats + fee) {
                 change = sum - sats - fee;
                 if (change < dust) {
-                    fee = (long) rate * vsize(ins.size(), 1, segwit);
+                    fee = (long) rate * vsize(ins.size(), 1, witness);
                     change = sum - sats - fee;
                     if (change < 0) continue;
                     if (change < dust) { fee += change; change = 0; }
@@ -118,8 +122,8 @@ public final class ChainSend {
         List<BtcTx.Out> outs = new ArrayList<>();
         outs.add(new BtcTx.Out(sats, payScript));
         if (change > 0) outs.add(new BtcTx.Out(change, changeScript));
-        String raw = segwit ? BtcTx.p2wpkh(priv, ins, outs) : BtcTx.p2pkh(priv, ins, outs);
-        int size = segwit ? BtcTx.vbytes(raw) : raw.length() / 2;
+        String raw = witness ? BtcTx.p2wpkh(priv, ins, outs) : BtcTx.p2pkh(priv, ins, outs);
+        int size = witness ? BtcTx.vbytes(raw) : raw.length() / 2;
         long need = (long) rate * Math.max(size, 1);
         if (need > fee) {
             long gap = need - fee;
@@ -132,9 +136,9 @@ public final class ChainSend {
             outs.clear();
             outs.add(new BtcTx.Out(sats, payScript));
             if (change > 0) outs.add(new BtcTx.Out(change, changeScript));
-            raw = segwit ? BtcTx.p2wpkh(priv, ins, outs) : BtcTx.p2pkh(priv, ins, outs);
+            raw = witness ? BtcTx.p2wpkh(priv, ins, outs) : BtcTx.p2pkh(priv, ins, outs);
         }
-        if (segwit) return postText(api + "/api/tx", raw);
+        if (esplora) return postText(api + "/api/tx", raw);
         if (Net.TEST) {
             JSONObject pushed = post(Net.dogeRpc(), "{\"jsonrpc\":\"1.0\",\"id\":1,\"method\":\"sendrawtransaction\",\"params\":[\"" + raw + "\"]}");
             if (pushed.has("error")) {
@@ -274,9 +278,24 @@ public final class ChainSend {
         String a = address.trim();
         if (a.regionMatches(true, 0, "bc1", 0, 3) || a.regionMatches(true, 0, "tb1", 0, 3)
                 || a.regionMatches(true, 0, "ltc1", 0, 4) || a.regionMatches(true, 0, "tltc1", 0, 5)) return BtcTx.p2wpkhScript(bech32Program(a.toLowerCase()));
+        if (chain == ChainKeys.Chain.BTC) {
+            // Legacy (1… / m… n…) and P2SH (3… / 2…) Bitcoin addresses.
+            boolean p2sh = Net.TEST ? a.charAt(0) == '2' : a.charAt(0) == '3';
+            if (p2sh) return p2shScript(base58check(a, Net.TEST ? 0xc4 : 0x05));
+            return BtcTx.p2pkhScript(base58check(a, Net.TEST ? 0x6f : 0x00));
+        }
         int version = chain == ChainKeys.Chain.DOGE ? (Net.TEST ? 0x71 : 0x1e) : chain == ChainKeys.Chain.LTC ? 0x30 : 0x00;
         if (a.charAt(0) == '3' || a.charAt(0) == 'M') throw new IllegalArgumentException("That address type is not supported. Use a normal " + chain.ticker + " address.");
         return BtcTx.p2pkhScript(base58check(a, version));
+    }
+
+    /** OP_HASH160 <20 bytes> OP_EQUAL. */
+    private static byte[] p2shScript(byte[] hash20) {
+        byte[] s = new byte[23];
+        s[0] = (byte) 0xa9; s[1] = 0x14;
+        System.arraycopy(hash20, 0, s, 2, 20);
+        s[22] = (byte) 0x87;
+        return s;
     }
 
     private static byte[] bech32Program(String addr) {

@@ -944,7 +944,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		if (key == null) return "HV0x...";
 		switch (key) {
 			case "PI": return "G...";
-			case "BTC": return test ? "tb1..." : "bc1...";
+			case "BTC": return test ? "m... or n..." : "1...";
 			case "LTC": return test ? "tltc1..." : "ltc1...";
 			case "DOGE": return test ? "n..." : "D...";
 			case "ETH":

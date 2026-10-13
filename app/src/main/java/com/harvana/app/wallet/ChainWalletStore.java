@@ -16,6 +16,11 @@ public final class ChainWalletStore {
 
     private static final String PREFS = "chain_wallets";
 
+    /** Bitcoin's saved address moved to legacy P2PKH (13 Oct 2026): a new key, so the old SegWit one is derived again. */
+    private static String key(String harvAddress, ChainKeys.Chain chain) {
+        return harvAddress + "_" + chain.name() + (chain == ChainKeys.Chain.BTC ? "_p2pkh" : "") + (Net.TEST ? "_tn" : "");
+    }
+
     private static SharedPreferences prefs(Context c) { return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE); }
 
     /** Every chain's address for this wallet, deriving and saving any that are missing. Run off the main thread. */
@@ -26,7 +31,7 @@ public final class ChainWalletStore {
         SharedPreferences.Editor ed = prefs(c).edit();
         boolean changed = false;
         for (ChainKeys.Chain chain : ChainKeys.Chain.values()) {
-            String key = harvAddress + "_" + chain.name() + (Net.TEST ? "_tn" : "");
+            String key = key(harvAddress, chain);
             String a = prefs(c).getString(key, "");
             if (a.isEmpty()) {
                 if (mnemonic == null) mnemonic = SecureWalletStorage.loadMnemonic(c, harvAddress);
@@ -43,7 +48,7 @@ public final class ChainWalletStore {
     /** The address already saved for this wallet and chain, or "" . Does not derive. */
     public static String saved(Context c, String harvAddress, ChainKeys.Chain chain) {
         if (c == null || harvAddress == null || chain == null) return "";
-        String a = prefs(c).getString(harvAddress + "_" + chain.name() + (Net.TEST ? "_tn" : ""), "");
+        String a = prefs(c).getString(key(harvAddress, chain), "");
         return a == null ? "" : a;
     }
 }

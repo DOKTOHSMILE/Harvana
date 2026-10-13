@@ -31,13 +31,20 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * External chats for a group. The conversation stays in WhatsApp, Telegram,
- * or a Facebook group. Harvana only keeps the links the admin chose.
+ * External chats for a group, in any of the chat apps in ChatPlatforms (WhatsApp, Telegram, WeChat, LINE, KakaoTalk…).
+ * The conversation stays in that app; Harvana only keeps the links the admin chose.
  */
 public final class GroupChatSheet {
 
     private static final int MAX_LINKS = 8;
-    private static final String[] KINDS = {"WHATSAPP", "TELEGRAM", "FACEBOOK", "OTHER"};
+    /** Every chat app the group can link to (ChatPlatforms), "Other" last. */
+    private static final String[] KINDS = kinds();
+
+    private static String[] kinds() {
+        String[] out = new String[ChatPlatforms.ALL.length];
+        for (int i = 0; i < out.length; i++) out[i] = ChatPlatforms.ALL[i].kind;
+        return out;
+    }
 
     private GroupChatSheet() {}
 
@@ -80,16 +87,12 @@ public final class GroupChatSheet {
 
         TextView title = text(activity, "Group chats", 18, true, UiColors.textPrimary());
         root.addView(title);
-        TextView sub = text(activity, "These open outside Harvana. The conversation is not inside the app.", 13, false, UiColors.textSecondary());
-        sub.setPadding(0, (int) (6 * d), 0, (int) (14 * d));
-        root.addView(sub);
+        title.setPadding(0, 0, 0, (int) (12 * d));
 
         LinearLayout list = new LinearLayout(activity);
         list.setOrientation(LinearLayout.VERTICAL);
         if (links.isEmpty()) {
-            TextView empty = text(activity, admin
-                    ? "No chats yet. Add WhatsApp, Telegram, or a Facebook group so members can talk outside the app."
-                    : "The admin has not added a chat yet.", 14, false, UiColors.textSecondary());
+            TextView empty = text(activity, "No chats yet", 14, false, UiColors.textSecondary());
             empty.setPadding(0, 0, 0, (int) (12 * d));
             list.addView(empty);
         }
@@ -131,12 +134,8 @@ public final class GroupChatSheet {
         row.setGravity(Gravity.CENTER_VERTICAL);
         row.setPadding(0, (int) (10 * d), 0, (int) (10 * d));
 
-        TextView mark = text(activity, link.mark(), 14, true, UiColors.onAccent());
-        mark.setGravity(Gravity.CENTER);
-        GradientDrawable bubble = new GradientDrawable();
-        bubble.setShape(GradientDrawable.OVAL);
-        bubble.setColor(UiColors.accent());
-        mark.setBackground(bubble);
+        android.widget.ImageView mark = new android.widget.ImageView(activity);
+        mark.setImageDrawable(ChatPlatforms.badge(activity.getResources(), ChatPlatforms.of(link.kind), 36));
         int size = (int) (36 * d);
         LinearLayout.LayoutParams markLp = new LinearLayout.LayoutParams(size, size);
         markLp.setMarginEnd((int) (12 * d));
@@ -205,9 +204,9 @@ public final class GroupChatSheet {
         curve(root, sheet, (int) (22 * d));
 
         root.addView(text(activity, "Add a chat", 18, true, UiColors.textPrimary()));
-        TextView hint = text(activity, "Paste the group invite. Members will be warned before they leave Harvana.", 13, false, UiColors.textSecondary());
-        hint.setPadding(0, (int) (6 * d), 0, (int) (14 * d));
-        root.addView(hint);
+        View space = new View(activity);
+        space.setLayoutParams(new LinearLayout.LayoutParams(1, (int) (12 * d)));
+        root.addView(space);
 
         final String[] kind = {KINDS[0]};
         EditText label = field(activity, "Name members will see");
@@ -220,7 +219,10 @@ public final class GroupChatSheet {
         for (int i = 0; i < KINDS.length; i++) {
             final int index = i;
             TextView chip = text(activity, shortKind(KINDS[i]), 12, true, UiColors.textPrimary());
-            chip.setPadding((int) (10 * d), (int) (8 * d), (int) (10 * d), (int) (8 * d));
+            chip.setPadding((int) (8 * d), (int) (6 * d), (int) (12 * d), (int) (6 * d));
+            chip.setGravity(Gravity.CENTER_VERTICAL);
+            chip.setCompoundDrawablesRelative(ChatPlatforms.badge(activity.getResources(), ChatPlatforms.of(KINDS[i]), 20), null, null, null);
+            chip.setCompoundDrawablePadding((int) (6 * d));
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             if (i > 0) lp.setMarginStart((int) (8 * d));
             chip.setLayoutParams(lp);
@@ -233,6 +235,17 @@ public final class GroupChatSheet {
             kinds.addView(chip);
         }
         paintChips(chips, kind[0], d);
+        url.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence c, int a, int b, int e) { }
+            @Override public void onTextChanged(CharSequence c, int a, int b, int e) { }
+            @Override public void afterTextChanged(android.text.Editable e) {
+                // A pasted invite picks its own app.
+                try {
+                    ChatPlatforms.Platform p = ChatPlatforms.forHost(Uri.parse(e.toString().trim()).getHost());
+                    if (p != null && !p.kind.equals(kind[0])) { kind[0] = p.kind; paintChips(chips, kind[0], d); }
+                } catch (Exception ignored) { }
+            }
+        });
         HorizontalScrollView scroller = new HorizontalScrollView(activity);
         scroller.setHorizontalScrollBarEnabled(false);
         scroller.addView(kinds);
@@ -347,38 +360,14 @@ public final class GroupChatSheet {
     }
 
     private static boolean hostAllowed(String kind, String host) {
-        if ("WHATSAPP".equals(kind)) {
-            return host.equals("chat.whatsapp.com") || host.equals("wa.me") || host.equals("whatsapp.com") || host.equals("api.whatsapp.com");
-        }
-        if ("TELEGRAM".equals(kind)) {
-            return host.equals("t.me") || host.equals("telegram.me") || host.equals("telegram.org");
-        }
-        if ("FACEBOOK".equals(kind)) {
-            return host.equals("facebook.com") || host.equals("m.facebook.com") || host.equals("fb.com") || host.equals("fb.me") || host.endsWith(".facebook.com");
-        }
-        return "OTHER".equals(kind) && host.contains(".");
+        return ChatPlatforms.of(kind).accepts(host);
     }
 
-    private static String shortKind(String kind) {
-        if ("WHATSAPP".equals(kind)) return "WhatsApp";
-        if ("TELEGRAM".equals(kind)) return "Telegram";
-        if ("FACEBOOK".equals(kind)) return "Facebook";
-        return "Other";
-    }
+    private static String shortKind(String kind) { return ChatPlatforms.of(kind).name; }
 
-    private static String urlHint(String kind) {
-        if ("WHATSAPP".equals(kind)) return "https://chat.whatsapp.com/…";
-        if ("TELEGRAM".equals(kind)) return "https://t.me/…";
-        if ("FACEBOOK".equals(kind)) return "https://facebook.com/groups/…";
-        return "https://…";
-    }
+    private static String urlHint(String kind) { return ChatPlatforms.of(kind).hint; }
 
-    private static String kindName(String kind) {
-        if ("WHATSAPP".equals(kind)) return "WhatsApp";
-        if ("TELEGRAM".equals(kind)) return "Telegram";
-        if ("FACEBOOK".equals(kind)) return "Facebook group";
-        return "Other link";
-    }
+    private static String kindName(String kind) { return ChatPlatforms.of(kind).name; }
 
     private static void curve(LinearLayout root, BottomSheetDialog sheet, int radius) {
         GradientDrawable bg = new GradientDrawable();

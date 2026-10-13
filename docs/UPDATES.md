@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Group chats: icons and more apps
+
+- Chat apps a group can link to (`group/ChatPlatforms`): WhatsApp, Telegram, Facebook, Messenger, WeChat, Google Chat, Signal, Discord, Viber, LINE, KakaoTalk, Zalo, Instagram, Slack, Microsoft Teams, and Other.
+- Each has a round badge in the app's colour. It shows on the chip in Add a chat and on every saved chat in the list.
+- Only https links on that app's own hosts are saved, as before, now for every app.
+- Pasting an invite picks its app's chip by itself.
+- The explanation lines in the chat sheets are gone; an empty list reads "No chats yet". The warning before a chat opens outside Harvana stays.
+- The create-group wizard's chat step uses the same sheet.
+
 ## 13 Oct 2026 — Total saved
 
 - Home, Total saved card: one figure in the currency chosen in Settings, with every group's savings converted from the coin it is kept in. It used to read "40.00 HARV · ₦5,000.00": a savings line in hNGN was read with HARV's 8 decimals. The portfolio now takes a line's own coin when the group record names none.

@@ -68,7 +68,12 @@ public final class GroupCard {
         if (bar != null) bar.setProgress(progress);
 
         TextView amount = view.findViewById(R.id.amount_per_slot_textview6);
-        if (amount != null) amount.setText(com.harvana.app.wallet.BalanceFormatter.smart(num(group, "contributionAmount")) + "/slot");
+        if (amount != null) {
+            Object c0 = group.get("asset");
+            String coin0 = c0 == null ? "" : String.valueOf(c0);
+            amount.setText(com.harvana.app.wallet.BalanceFormatter.smart(num(group, "contributionAmount"))
+                    + (com.harvana.app.husd.Stable.isStable(coin0) ? " " + com.harvana.app.husd.Stable.symbol(coin0) : "") + "/slot");
+        }
         TextView members = view.findViewById(R.id.number_of_members_textview7);
         if (members != null) {
             long n = (long) num(group, "membersCount");

@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: group cards and overview in the group's coin
+
+- Group card and Discover card: the per-slot amount shows the group's coin (e.g. "500 hNGN/slot").
+- Group overview: the group wallet's balance is read in the group's coin and shown with its symbol.
+
+App build only.
+
 ## 13 Oct 2026: coin Overview with supply, token and links
 
 HARV and every Harvana stable coin, Overview tab, under the wallet address:

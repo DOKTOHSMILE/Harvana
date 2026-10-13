@@ -576,7 +576,9 @@ public class DiscoverFragmentActivity extends Fragment {
 				tv_members.setText(String.valueOf((long) _safeDouble(group, "membersCount")));
 			}
 			if (tv_slotAmount != null) {
-				tv_slotAmount.setText(String.format(Locale.US, ("%.4f " + com.harvana.app.CoinInfo.ticker()), _safeDouble(group, "contributionAmount")));
+				String coin0 = _safeString(group, "asset", "");
+				tv_slotAmount.setText(com.harvana.app.wallet.BalanceFormatter.smart(_safeDouble(group, "contributionAmount")) + " "
+						+ (com.harvana.app.husd.Stable.isStable(coin0) ? com.harvana.app.husd.Stable.symbol(coin0) : com.harvana.app.CoinInfo.ticker()));
 			}
 			
 			String nodeId = com.harvana.app.trust.NetworkTrust.groupKey(group);

@@ -633,6 +633,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		
 		String groupWallet = _safeString(data, "groupWalletAddress",
 		_safeString(data, "group_wallet", "—"));
+		groupCoin = _safeString(data, "asset", "");
 		double goal = _safeDouble(data, "targetGoalAmount");
 		
 		// About
@@ -876,9 +877,28 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		});
 	}
 	
+	/** The group's stable coin ("HNGN", …); empty for a group made before coins. */
+	private String groupCoin = "";
+
+	private String _coinSymbol() {
+		return com.harvana.app.husd.Stable.isStable(groupCoin) ? com.harvana.app.husd.Stable.symbol(groupCoin) : com.harvana.app.CoinInfo.ticker();
+	}
+
 	private void _loadGroupWalletBalance(String address) {
 		if (address == null || !address.startsWith("HV0x")) {
-			if (tv_group_wallet_balance != null) tv_group_wallet_balance.setText(("0 " + com.harvana.app.CoinInfo.ticker()));
+			if (tv_group_wallet_balance != null) tv_group_wallet_balance.setText(("0 " + _coinSymbol()));
+			return;
+		}
+		if (com.harvana.app.husd.Stable.isStable(groupCoin)) {                // the group's wallet in its coin
+			com.harvana.app.husd.HusdClient.balance(groupCoin, address, new com.harvana.app.husd.HusdClient.Cb() {
+				@Override public void ok(org.json.JSONObject b) {
+					double v = b.optLong("balanceRaw") / 1e6;
+					if (getActivity() != null) getActivity().runOnUiThread(() -> { if (tv_group_wallet_balance != null) tv_group_wallet_balance.setText(_formatUIBalance(v)); });
+				}
+				@Override public void fail(String e) {
+					if (getActivity() != null) getActivity().runOnUiThread(() -> { if (tv_group_wallet_balance != null) tv_group_wallet_balance.setText("—"); });
+				}
+			});
 			return;
 		}
 		final String cacheKey = "wallet_balance_" + address;
@@ -1173,10 +1193,10 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	// NEW UI FORMATTER HELPER
 	private String _formatUIBalance(double v) {
 		try {
-			java.text.DecimalFormat uiDf = new java.text.DecimalFormat("#,##0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
-			return uiDf.format(v);
+			java.text.DecimalFormat uiDf = new java.text.DecimalFormat(com.harvana.app.husd.Stable.isStable(groupCoin) ? "#,##0.##" : "#,##0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
+			return uiDf.format(v) + " " + _coinSymbol();
 		} catch (Exception e) {
-			return String.valueOf(v);
+			return String.valueOf(v) + " " + _coinSymbol();
 		}
 	}
 }

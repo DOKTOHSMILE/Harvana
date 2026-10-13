@@ -2,6 +2,24 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026 — Full sign-out; Add coins forms redesigned
+
+- Every sign-out clears the whole account from the phone: Settings, the side menu, "Use a different account", and being signed out because the account opened on another phone.
+  - Every preferences file on disk is cleared and deleted: wallet keys, settings, theme, currency, added coins, caches.
+  - The Android Keystore keys that lock the wallet and the offline cache are deleted.
+  - App databases, files and cache folders are deleted.
+  - dApp browser site data and cookies are cleared.
+  - Background jobs and notifications are cancelled, and memory caches are emptied.
+  - Firebase and WorkManager keep only their own bookkeeping files.
+- Add a chain / Add a token / Search:
+  - Fields are outlined boxes.
+  - Protocol and Chain are dropdown boxes.
+  - Sections have small capital headings (NETWORK, COIN, LINKS, MORE).
+  - Fill is a tinted button.
+  - The foot of each form is Cancel and Save.
+  - Remove chain is shown in red.
+- Bottom sheets: the text-colour check also covers rows that load after the sheet opens.
+
 ## 13 Oct 2026 — Add coins search, sheet text, Settings audit
 
 - Add coins: one Search. A contract address typed or pasted there is looked up on every chain; the tokens found head the list with their toggles, followed by "Add on a chain" (the token form, address filled in). The rows "Search a token by contract address" and "Add a token on a chain" are gone.

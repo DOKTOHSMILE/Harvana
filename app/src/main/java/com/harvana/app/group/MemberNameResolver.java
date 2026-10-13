@@ -54,6 +54,9 @@ public final class MemberNameResolver {
     private static final Map<String, Map<String, String>> groupWalletToUid = new ConcurrentHashMap<>();
 
     /** Resolve a uid to "First Last". Cached after the first successful fetch. */
+    /** Sign-out: nothing of the last account stays in memory. */
+    public static void forgetAll() { uidNameCache.clear(); }
+
     public static void resolve(Context context, String uid, String fallback, NameCallback cb) {
         if (uid == null || uid.trim().isEmpty()) {
             cb.onResolved(fallback);

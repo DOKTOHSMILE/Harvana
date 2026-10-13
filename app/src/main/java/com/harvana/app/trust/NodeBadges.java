@@ -38,6 +38,9 @@ public final class NodeBadges {
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
 
     /** Calls back on the main thread, always with a list (empty when the node cannot be reached). */
+    /** Sign-out: nothing of the last account stays in memory. */
+    public static void forgetAll() { CACHE.clear(); CACHED_AT.clear(); }
+
     public static void load(String wallet, Callback cb) {
         if (wallet == null || wallet.trim().isEmpty()) { MAIN.post(() -> cb.onBadges(new ArrayList<>())); return; }
         Long at = CACHED_AT.get(wallet);

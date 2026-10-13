@@ -61,6 +61,9 @@ public final class PriceChart {
     private List<double[]> shown = new ArrayList<>();
 
     /** {@code key} is "HARV" or a coin key with a CoinGecko id ("BTC", "ETH", …). */
+    /** Sign-out: nothing of the last account stays in memory. */
+    public static void forgetAll() { synchronized (CACHE) { CACHE.clear(); } }
+
     public static boolean supports(String key) {
         return "HARV".equals(key) || AssetPrices.geckoId(key) != null;
     }

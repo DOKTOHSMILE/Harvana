@@ -34,6 +34,9 @@ public final class ProfileTrust {
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
 
     /** Drops the saved copy of one person, so the next resolve reads Firestore again. */
+    /** Sign-out: nothing of the last account stays in memory. */
+    public static void forgetAll() { CACHE.clear(); CACHED_AT.clear(); }
+
     public static void forget(String uid) { if (uid != null) { CACHE.remove(uid); CACHED_AT.remove(uid); } }
 
     /** Calls back on the main thread, always with a card (empty fields when the person cannot be read). */

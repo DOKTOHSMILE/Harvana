@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import com.harvana.app.utils.UiColors;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
@@ -162,6 +163,9 @@ public final class CustomAssets {
     }
 
     /** The added chain or token with this key, or null. */
+    /** Sign-out: the added chains and tokens of the last account leave memory (their prefs file is cleared too). */
+    public static void forgetAll() { cache = null; }
+
     public static Asset find(String key) {
         if (key == null) return null;
         for (Asset a : cached()) if (a.key().equals(key)) return a;
@@ -687,7 +691,7 @@ public final class CustomAssets {
                 }
             });
         };
-        root.addView(button(c, "Search", v -> run.run()));
+        root.addView(filled(c, "Search", v -> run.run()));
         root.addView(status);
         root.addView(results);
         android.widget.ScrollView sv = new android.widget.ScrollView(c);
@@ -705,12 +709,13 @@ public final class CustomAssets {
         LinearLayout root = column(c);
         root.addView(title(c, editing == null ? "Add a chain" : editing.chainName));
         final String[] protocol = {editing == null ? "EVM" : editing.family};
-        TextView pick = button(c, "Protocol: " + protocol[0], null);
+        EditText pick = picker(c, "Protocol", protocol[0]);
+        root.addView(label(c, "Network"));
         root.addView(pick);
 
         EditText lookup = field(c, "", InputType.TYPE_CLASS_TEXT);
         TextView status = sub(c, "");
-        TextView fill = button(c, "Fill", null);
+        TextView fill = tonal(c, "Fill");
         EditText name = field(c, "Name", InputType.TYPE_CLASS_TEXT);
         EditText symbol = field(c, "Coin symbol", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
         EditText decimals = field(c, "Decimals", InputType.TYPE_CLASS_NUMBER);
@@ -725,15 +730,20 @@ public final class CustomAssets {
         root.addView(lookup);
         root.addView(fill);
         root.addView(status);
-        for (EditText e : new EditText[]{name, symbol, decimals, rpc, explorer, addressUrl, txUrl, history, icon, gecko, path}) root.addView(e);
+        root.addView(label(c, "Coin"));
+        for (EditText e : new EditText[]{name, symbol, decimals}) root.addView(e);
+        root.addView(label(c, "Links"));
+        for (EditText e : new EditText[]{rpc, explorer, addressUrl, txUrl, history}) root.addView(e);
+        root.addView(label(c, "More"));
+        for (EditText e : new EditText[]{icon, gecko, path}) root.addView(e);
 
         Runnable protocolChanged = () -> {
             boolean near = NearProtocol.FAMILY.equals(protocol[0]);
-            pick.setText("Protocol: " + protocol[0]);
-            lookup.setHint(near ? "RPC URL" : "Chain ID");
+            pick.setText(protocol[0]);
+            hint(lookup, near ? "RPC URL" : "Chain ID");
             lookup.setInputType(near ? InputType.TYPE_TEXT_VARIATION_URI : InputType.TYPE_CLASS_NUMBER);
-            path.setVisibility(near ? View.VISIBLE : View.GONE);
-            history.setHint(near ? "History API (NearBlocks-style)" : "History API (Blockscout)");
+            show(path, near);
+            hint(history, near ? "History API (NearBlocks-style)" : "History API (Blockscout)");
         };
         pick.setOnClickListener(v -> com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c).setTitle("Protocol")
                 .setItems(PROTOCOLS, (dd, which) -> { protocol[0] = PROTOCOLS[which]; protocolChanged.run(); })));
@@ -754,7 +764,7 @@ public final class CustomAssets {
         final Asset[] found = {editing == null ? null : editing.copy()};
         fill.setOnClickListener(v -> {
             String q = lookup.getText().toString().trim();
-            if (q.isEmpty()) { status.setText(lookup.getHint()); return; }
+            if (q.isEmpty()) { status.setText(hintOf(lookup)); return; }
             status.setText("…");
             Got got = (a, err) -> {
                 if (a == null) { status.setText(err); return; }
@@ -768,7 +778,7 @@ public final class CustomAssets {
             }
         });
 
-        root.addView(button(c, "Save", v -> {
+        root.addView(saveRow(c, d, "Save", v -> {
             Asset a = found[0] != null ? found[0].copy() : new Asset();
             a.kind = "CHAIN";
             a.family = protocol[0];
@@ -833,11 +843,12 @@ public final class CustomAssets {
             names[i] = chains.get(i).chainName;
             if (chainKey != null && chainKey.equals(chains.get(i).key())) picked[0] = i;
         }
-        TextView chainPick = button(c, "On: " + names[picked[0]], null);
+        EditText chainPick = picker(c, "Chain", names[picked[0]]);
+        root.addView(label(c, "Network"));
         root.addView(chainPick);
         EditText contract = field(c, "", InputType.TYPE_CLASS_TEXT);
         if (contractText != null) contract.setText(contractText.trim());
-        TextView fill = button(c, "Fill", null);
+        TextView fill = tonal(c, "Fill");
         TextView status = sub(c, "");
         EditText name = field(c, "Name", InputType.TYPE_CLASS_TEXT);
         EditText symbol = field(c, "Symbol", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
@@ -847,11 +858,14 @@ public final class CustomAssets {
         root.addView(contract);
         root.addView(fill);
         root.addView(status);
-        for (EditText e : new EditText[]{name, symbol, decimals, icon, gecko}) root.addView(e);
-        Runnable hint = () -> contract.setHint(chains.get(picked[0]).near() ? "Token account, such as usdt.tether-token.near" : "Contract address, 0x…");
+        root.addView(label(c, "Token"));
+        for (EditText e : new EditText[]{name, symbol, decimals}) root.addView(e);
+        root.addView(label(c, "More"));
+        for (EditText e : new EditText[]{icon, gecko}) root.addView(e);
+        Runnable hint = () -> hint(contract, chains.get(picked[0]).near() ? "Token account, such as usdt.tether-token.near" : "Contract address, 0x…");
         hint.run();
         chainPick.setOnClickListener(v -> com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c)
-                .setTitle("Chain").setItems(names, (dd, which) -> { picked[0] = which; chainPick.setText("On: " + names[which]); hint.run(); })));
+                .setTitle("Chain").setItems(names, (dd, which) -> { picked[0] = which; chainPick.setText(names[which]); hint.run(); })));
         final Asset[] found = {null};
         fill.setOnClickListener(v -> {
             Asset ch = chains.get(picked[0]);
@@ -866,7 +880,7 @@ public final class CustomAssets {
             if (ch.near()) fetchNearToken(ch, contract.getText().toString(), got);
             else fetchToken(ch.chainId, ch.chainName, ch.rpc, ch.explorer, contract.getText().toString(), got);
         });
-        root.addView(button(c, "Save", v -> {
+        root.addView(saveRow(c, d, "Save", v -> {
             Asset ch = chains.get(picked[0]);
             String id = text(contract);
             Asset a = found[0] != null && found[0].contract.equalsIgnoreCase(id) ? found[0].copy() : new Asset();
@@ -941,7 +955,7 @@ public final class CustomAssets {
         Asset added = find(key);
         if (added != null && !added.token()) {
             root.addView(button(c, "Edit chain", v -> { d.dismiss(); editChain(c, added, onChange); }));
-            root.addView(button(c, "Remove chain", v -> com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c)
+            root.addView(danger(button(c, "Remove chain", v -> com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c)
                     .setTitle("Remove " + added.chainName + " and its tokens?")
                     .setNegativeButton("Cancel", null)
                     .setPositiveButton("Remove", (dd, w) -> {
@@ -949,7 +963,7 @@ public final class CustomAssets {
                         remove(c, added.key());
                         d.dismiss();
                         if (onChange != null) onChange.run();
-                    }))));
+                    })))));
         }
         android.widget.ScrollView sv = new android.widget.ScrollView(c);
         sv.addView(root);
@@ -982,27 +996,83 @@ public final class CustomAssets {
 
     // ── small builders ─────────────────────────────────────────────────────
 
+    /**
+     * A sheet's column. A text field made by {@link #field} sits in its own outlined box; adding the field adds the box,
+     * so forms read {@code root.addView(name)}.
+     */
     private static LinearLayout column(Context c) {
-        LinearLayout root = new LinearLayout(c);
+        LinearLayout root = new LinearLayout(c) {
+            @Override public void addView(View child, int index, android.view.ViewGroup.LayoutParams params) {
+                if (child instanceof EditText && child.getParent() instanceof android.widget.FrameLayout
+                        && child.getParent().getParent() instanceof com.google.android.material.textfield.TextInputLayout) {
+                    View box = (View) child.getParent().getParent();
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    lp.topMargin = dp(c, 12);
+                    super.addView(box, index, lp);
+                    return;
+                }
+                super.addView(child, index, params);
+            }
+        };
         root.setOrientation(LinearLayout.VERTICAL);
         int p = dp(c, 20);
-        root.setPadding(p, p, p, p);
+        root.setPadding(p, dp(c, 8), p, dp(c, 24));
         return root;
+    }
+
+    /** The outlined box around a field made by {@link #field}, or null. */
+    private static com.google.android.material.textfield.TextInputLayout box(EditText e) {
+        android.view.ViewParent p = e.getParent();
+        android.view.ViewParent pp = p == null ? null : p.getParent();
+        return pp instanceof com.google.android.material.textfield.TextInputLayout ? (com.google.android.material.textfield.TextInputLayout) pp : null;
+    }
+
+    private static void hint(EditText e, CharSequence h) {
+        com.google.android.material.textfield.TextInputLayout b = box(e);
+        if (b != null) b.setHint(h); else e.setHint(h);
+    }
+
+    private static CharSequence hintOf(EditText e) {
+        com.google.android.material.textfield.TextInputLayout b = box(e);
+        return b != null ? b.getHint() : e.getHint();
+    }
+
+    private static void show(EditText e, boolean on) {
+        com.google.android.material.textfield.TextInputLayout b = box(e);
+        (b != null ? b : e).setVisibility(on ? View.VISIBLE : View.GONE);
+    }
+
+    private static com.google.android.material.textfield.TextInputLayout outlined(Context c, String hint) {
+        com.google.android.material.textfield.TextInputLayout box = new com.google.android.material.textfield.TextInputLayout(c, null,
+                com.google.android.material.R.attr.textInputOutlinedStyle);
+        box.setBoxBackgroundMode(com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE);
+        float r = dp(c, 12);
+        box.setBoxCornerRadii(r, r, r, r);
+        box.setBoxStrokeColor(UiColors.accent());
+        box.setHintTextColor(android.content.res.ColorStateList.valueOf(UiColors.accent()));
+        box.setHint(hint);
+        return box;
     }
 
     private static TextView title(Context c, String s) {
         TextView t = new TextView(c);
         t.setText(s);
-        t.setTextSize(18);
+        t.setTextSize(20);
         t.setTypeface(Typeface.DEFAULT_BOLD);
+        t.setPadding(0, 0, 0, 4 * (int) c.getResources().getDisplayMetrics().density);
         t.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
         return t;
     }
 
+    /** A section heading: small, bold, capitals, like "WHAT WAS SOLD". */
     private static TextView label(Context c, String s) {
-        TextView t = title(c, s);
-        t.setTextSize(14);
-        t.setPadding(0, dp(c, 16), 0, dp(c, 4));
+        TextView t = new TextView(c);
+        t.setText(s.toUpperCase(Locale.US));
+        t.setTextSize(12);
+        t.setTypeface(Typeface.DEFAULT_BOLD);
+        t.setLetterSpacing(0.06f);
+        t.setTextColor(UiColors.textSecondary());
+        t.setPadding(0, dp(c, 22), 0, 0);
         return t;
     }
 
@@ -1016,21 +1086,103 @@ public final class CustomAssets {
     }
 
     private static EditText field(Context c, String hint, int type) {
-        EditText e = new com.google.android.material.textfield.TextInputEditText(c);
-        e.setHint(hint);
+        com.google.android.material.textfield.TextInputLayout box = outlined(c, hint);
+        EditText e = new com.google.android.material.textfield.TextInputEditText(box.getContext());
         e.setInputType(type);
         e.setSingleLine(true);
+        e.setTextColor(UiColors.textPrimary());
+        box.addView(e);
         return e;
     }
 
+    /** A choice in an outlined box with the dropdown arrow; tapping it opens the choices (set its click listener). */
+    private static EditText picker(Context c, String hint, String value) {
+        com.google.android.material.textfield.TextInputLayout box = outlined(c, hint);
+        box.setEndIconMode(com.google.android.material.textfield.TextInputLayout.END_ICON_DROPDOWN_MENU);
+        EditText e = new com.google.android.material.textfield.TextInputEditText(box.getContext()) {
+            @Override public void setOnClickListener(View.OnClickListener l) {
+                super.setOnClickListener(l);
+                box.setEndIconOnClickListener(l);
+            }
+        };
+        e.setFocusable(false);
+        e.setCursorVisible(false);
+        e.setKeyListener(null);
+        e.setSingleLine(true);
+        e.setTextColor(UiColors.textPrimary());
+        e.setText(value);
+        box.addView(e);
+        return e;
+    }
+
+    private static com.google.android.material.button.MaterialButton materialButton(Context c, String s) {
+        com.google.android.material.button.MaterialButton b = new com.google.android.material.button.MaterialButton(c);
+        b.setText(s);
+        b.setAllCaps(false);
+        b.setTextSize(15);
+        b.setInsetTop(0);
+        b.setInsetBottom(0);
+        b.setMinHeight(dp(c, 52));
+        b.setCornerRadius(dp(c, 14));
+        return b;
+    }
+
+    /** The main action: filled in the accent colour. */
+    private static TextView filled(Context c, String s, View.OnClickListener l) {
+        com.google.android.material.button.MaterialButton b = materialButton(c, s);
+        b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(UiColors.accent()));
+        b.setTextColor(UiColors.onAccent());
+        if (l != null) b.setOnClickListener(l);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(c, 12);
+        b.setLayoutParams(lp);
+        return b;
+    }
+
+    /** A second action under a field (Fill): a soft accent tint, accent text. */
+    private static TextView tonal(Context c, String s) {
+        com.google.android.material.button.MaterialButton b = materialButton(c, s);
+        b.setBackgroundTintList(android.content.res.ColorStateList.valueOf((UiColors.accent() & 0x00FFFFFF) | 0x26000000));
+        b.setTextColor(UiColors.accent());
+        b.setElevation(0);
+        b.setStateListAnimator(null);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(c, 12);
+        b.setLayoutParams(lp);
+        return b;
+    }
+
+    /** Cancel (outlined) and the main action (filled), side by side at the foot of a form. */
+    private static LinearLayout saveRow(Context c, android.app.Dialog d, String action, View.OnClickListener l) {
+        LinearLayout row = new LinearLayout(c);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(0, dp(c, 24), 0, 0);
+        com.google.android.material.button.MaterialButton cancel = materialButton(c, "Cancel");
+        cancel.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT));
+        cancel.setStrokeColor(android.content.res.ColorStateList.valueOf(UiColors.textTertiary()));
+        cancel.setStrokeWidth(dp(c, 1));
+        cancel.setTextColor(UiColors.accent());
+        cancel.setElevation(0);
+        cancel.setStateListAnimator(null);
+        cancel.setOnClickListener(v -> d.dismiss());
+        LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        cp.setMarginEnd(dp(c, 12));
+        row.addView(cancel, cp);
+        TextView save = filled(c, action, l);
+        row.addView(save, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.6f));
+        return row;
+    }
+
+    private static TextView danger(TextView t) { t.setTextColor(UiColors.error()); return t; }
+
+    /** A row in a sheet's list (Add a token, Edit chain…). */
     private static TextView button(Context c, String s, View.OnClickListener l) {
         TextView t = new TextView(c);
         t.setText(s);
-        t.setTextSize(14);
-        t.setTypeface(Typeface.DEFAULT_BOLD);
+        t.setTextSize(15);
         t.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
         t.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        t.setMinHeight(dp(c, 44));
+        t.setMinHeight(dp(c, 52));
         android.util.TypedValue tv = new android.util.TypedValue();
         c.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv, true);
         t.setBackgroundResource(tv.resourceId);

@@ -67,7 +67,13 @@ public class AppSheet extends BottomSheetDialog {
         b.setSkipCollapsed(true);
         b.setState(BottomSheetBehavior.STATE_EXPANDED);
         View content = findViewById(android.R.id.content);
-        if (content != null) { dividers(content); readable(content, surfaceColor()); }
+        if (content != null) {
+            dividers(content);
+            final int surface = surfaceColor();
+            readable(content, surface);
+            // Rows that arrive later (search results, loaded lists) are checked too.
+            content.getViewTreeObserver().addOnGlobalLayoutListener(() -> readable(content, surface));
+        }
         focusFirstField();
     }
 

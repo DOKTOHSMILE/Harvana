@@ -37,6 +37,9 @@ import java.util.Map;
 public final class NodeSettingsPanel {
     private NodeSettingsPanel() {}
 
+    /** Sign-out: nothing of the last account stays in memory. */
+    public static void forgetAll() { synchronized (FACTS_CACHE) { FACTS_CACHE.clear(); } }
+
     public static void attach(Activity a, LinearLayout host, String firestoreGroupId, Map<String, Object> groupData) {
         final GroupIdentity id = GroupIdentityResolver.resolve(firestoreGroupId, groupData);
         final String me = WalletManager.getActiveWalletAddress(a);

@@ -50,6 +50,14 @@ public final class OfflineDatabaseHelper extends SQLiteOpenHelper {
         return instance;
     }
 
+    /** Sign-out: the cache database is closed and deleted. */
+    public static void wipe(Context context) {
+        synchronized (OfflineDatabaseHelper.class) {
+            if (instance != null) { try { instance.close(); } catch (Exception ignored) { } instance = null; }
+        }
+        context.getApplicationContext().deleteDatabase(DB_NAME);
+    }
+
     private OfflineDatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }

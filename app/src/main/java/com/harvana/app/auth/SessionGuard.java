@@ -158,9 +158,8 @@ public final class SessionGuard {
         new Handler(Looper.getMainLooper()).postDelayed(() -> ended = false, 10000);
         stop();
         prefs().edit().clear().apply();
-        try { FirebaseAuth.getInstance().signOut(); } catch (Exception ignored) {}
-        com.harvana.app.sync.AuthTokenProvider.clear();
-        app.getSharedPreferences("authsp", Context.MODE_PRIVATE).edit().clear().apply();
+        // The full sign-out: keys, every saved setting, caches.
+        com.harvana.app.auth.LogoutManager.logout(app);
         new Handler(Looper.getMainLooper()).post(() -> {
             Toast.makeText(app, "Signed out: this account was signed in on " + (device == null || device.isEmpty() ? "another phone" : device)
                     + ". An account can be signed in on one phone at a time.", Toast.LENGTH_LONG).show();

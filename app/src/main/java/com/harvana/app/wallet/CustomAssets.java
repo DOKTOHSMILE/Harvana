@@ -1098,7 +1098,10 @@ public final class CustomAssets {
     /** A choice in an outlined box with the dropdown arrow; tapping it opens the choices (set its click listener). */
     private static EditText picker(Context c, String hint, String value) {
         com.google.android.material.textfield.TextInputLayout box = outlined(c, hint);
-        box.setEndIconMode(com.google.android.material.textfield.TextInputLayout.END_ICON_DROPDOWN_MENU);
+        // A plain arrow (END_ICON_DROPDOWN_MENU would need an AutoCompleteTextView and crashes on an EditText).
+        box.setEndIconMode(com.google.android.material.textfield.TextInputLayout.END_ICON_CUSTOM);
+        box.setEndIconDrawable(R.drawable.icon_arrow_drop_down_round);
+        box.setEndIconTintList(android.content.res.ColorStateList.valueOf(UiColors.textSecondary()));
         EditText e = new com.google.android.material.textfield.TextInputEditText(box.getContext()) {
             @Override public void setOnClickListener(View.OnClickListener l) {
                 super.setOnClickListener(l);

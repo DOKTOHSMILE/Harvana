@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Create group, people: invite friends, joining (approval, admin or members vote), who can invite. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+
+	<TextView
+		android:id="@+id/tv_step_title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="22sp"
+		android:textStyle="bold" />
+
+	<LinearLayout
+		android:id="@+id/create_people_picker"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical" />
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="6dp"
+		android:text="Joining"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:textStyle="bold" />
+
+	<LinearLayout
+		android:id="@+id/create_approval_section"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+
+		<com.google.android.material.switchmaterial.SwitchMaterial
+			android:id="@+id/sw_create_approval"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:minHeight="50dp"
+			android:text="New members need approval"
+			android:textColor="@color/colorTextPrimary" />
+
+		<com.google.android.material.button.MaterialButtonToggleGroup
+			android:id="@+id/tg_create_approval_how"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:selectionRequired="true"
+			app:singleSelection="true">
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/tg_create_approval_how_0"
+				style="@style/Harvana.Segment"
+				android:layout_width="0dp"
+				android:layout_height="50dp"
+				android:layout_weight="1"
+				android:text="Admin decides"
+				android:textSize="12.5sp" />
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/tg_create_approval_how_1"
+				style="@style/Harvana.Segment"
+				android:layout_width="0dp"
+				android:layout_height="50dp"
+				android:layout_weight="1"
+				android:text="Members vote"
+				android:textSize="12.5sp" />
+
+		</com.google.android.material.button.MaterialButtonToggleGroup>
+
+	</LinearLayout>
+
+	<com.google.android.material.switchmaterial.SwitchMaterial
+		android:id="@+id/sw_create_members_invite"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:minHeight="50dp"
+		android:text="Members can invite people"
+		android:textColor="@color/colorTextPrimary" />
+
+	<com.google.android.material.switchmaterial.SwitchMaterial
+		android:id="@+id/sw_create_invite_link"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:minHeight="50dp"
+		android:text="Anyone with the link can ask to join"
+		android:textColor="@color/colorTextPrimary" />
+</LinearLayout>

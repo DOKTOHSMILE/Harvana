@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Create group, page 1: picture, name, description, who can find it, place, rules, chats. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+
+	<TextView
+		android:id="@+id/tv_step_title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="22sp"
+		android:textStyle="bold" />
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:paddingTop="14dp"
+		android:paddingBottom="4dp">
+
+		<ImageView
+			android:id="@+id/iv_create_photo"
+			android:layout_width="76dp"
+			android:layout_height="76dp"
+			android:background="@drawable/bg_icon_circle_accent_soft"
+			android:contentDescription="Group picture"
+			android:scaleType="centerCrop" />
+
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:orientation="vertical"
+			android:paddingStart="14dp">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Group picture (optional)"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="14sp"
+				android:textStyle="bold" />
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="6dp"
+				android:orientation="horizontal">
+
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_create_photo_pick"
+					style="@style/HarvanaButton.Outlined"
+					android:layout_width="wrap_content"
+					android:layout_height="40dp"
+					android:minWidth="0dp"
+					android:text="Add picture"
+					android:textSize="12.5sp"
+					app:icon="@drawable/icon_image_twotone_line" />
+
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_create_photo_remove"
+					style="@style/HarvanaButton.Outlined"
+					android:layout_width="wrap_content"
+					android:layout_height="40dp"
+					android:layout_marginStart="8dp"
+					android:minWidth="0dp"
+					android:text="Remove"
+					android:textSize="12.5sp"
+					android:visibility="gone" />
+			</LinearLayout>
+		</LinearLayout>
+	</LinearLayout>
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="6dp"
+		android:text="Group name"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:textStyle="bold" />
+
+	<EditText
+		android:id="@+id/et_create_name"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:minHeight="50dp"
+		android:background="@drawable/bg_field_surface"
+		android:hint="e.g. Market women ajo"
+		android:inputType="textCapWords"
+		android:paddingStart="14dp"
+		android:paddingTop="12dp"
+		android:paddingEnd="14dp"
+		android:paddingBottom="12dp"
+		android:textColor="@color/colorTextPrimary"
+		android:textColorHint="@color/colorTextTertiary"
+		android:maxLength="40"
+		android:singleLine="true" />
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="6dp"
+		android:text="What is it about? (optional)"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:textStyle="bold" />
+
+	<EditText
+		android:id="@+id/et_create_description"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:minHeight="50dp"
+		android:background="@drawable/bg_field_surface"
+		android:hint="A line or two members read before they join"
+		android:inputType="textMultiLine|textCapSentences"
+		android:paddingStart="14dp"
+		android:paddingTop="12dp"
+		android:paddingEnd="14dp"
+		android:paddingBottom="12dp"
+		android:textColor="@color/colorTextPrimary"
+		android:textColorHint="@color/colorTextTertiary"
+		android:gravity="top|start"
+		android:minLines="3" />
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="6dp"
+		android:text="Who can find it"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:textStyle="bold" />
+
+	<com.google.android.material.button.MaterialButtonToggleGroup
+		android:id="@+id/tg_create_visibility"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		app:selectionRequired="true"
+		app:singleSelection="true">
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/tg_create_visibility_0"
+			style="@style/Harvana.Segment"
+			android:layout_width="0dp"
+			android:layout_height="50dp"
+			android:layout_weight="1"
+			android:text="Public"
+			android:textSize="12.5sp" />
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/tg_create_visibility_1"
+			style="@style/Harvana.Segment"
+			android:layout_width="0dp"
+			android:layout_height="50dp"
+			android:layout_weight="1"
+			android:text="Private"
+			android:textSize="12.5sp" />
+
+	</com.google.android.material.button.MaterialButtonToggleGroup>
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="6dp"
+		android:text="Where is it based"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:textStyle="bold" />
+
+	<com.harvana.app.ui.MaterialSpinner
+		android:id="@+id/sp_create_country"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="6dp"
+		android:minHeight="50dp" />
+
+	<com.harvana.app.ui.MaterialSpinner
+		android:id="@+id/sp_create_state"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="6dp"
+		android:minHeight="50dp" />
+
+	<com.harvana.app.ui.MaterialSpinner
+		android:id="@+id/sp_create_city"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="6dp"
+		android:minHeight="50dp" />
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="6dp"
+		android:text="Group rules (optional)"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:textStyle="bold" />
+
+	<LinearLayout
+		android:id="@+id/create_rules"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical" />
+
+	<EditText
+		android:id="@+id/et_create_rule"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:minHeight="50dp"
+		android:background="@drawable/bg_field_surface"
+		android:hint="e.g. Pay before 6pm on the due day"
+		android:inputType="textCapSentences"
+		android:paddingStart="14dp"
+		android:paddingTop="12dp"
+		android:paddingEnd="14dp"
+		android:paddingBottom="12dp"
+		android:textColor="@color/colorTextPrimary"
+		android:textColorHint="@color/colorTextTertiary"
+		android:singleLine="true" />
+
+	<com.google.android.material.button.MaterialButton
+		android:id="@+id/btn_create_add_rule"
+		style="@style/HarvanaButton.Outlined"
+		android:layout_width="match_parent"
+		android:layout_height="50dp"
+		android:layout_marginTop="8dp"
+		android:text="Add rule"
+		app:icon="@drawable/icon_add_circle_outline_round" />
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="6dp"
+		android:text="Outside chat (optional)"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:textStyle="bold" />
+
+	<LinearLayout
+		android:id="@+id/create_chats"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical" />
+
+	<com.google.android.material.button.MaterialButton
+		android:id="@+id/btn_create_add_chat"
+		style="@style/HarvanaButton.Outlined"
+		android:layout_width="match_parent"
+		android:layout_height="50dp"
+		android:layout_marginTop="8dp"
+		android:text="Add a chat link"
+		app:icon="@drawable/ic_learn_comment_line" />
+</LinearLayout>

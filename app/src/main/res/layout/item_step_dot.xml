@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One wizard step number. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="26dp"
+	android:layout_height="26dp"
+	android:background="@drawable/bg_step_dot_off"
+	android:gravity="center"
+	android:textColor="@color/colorTextSecondary"
+	android:textSize="12sp"
+	android:textStyle="bold" />

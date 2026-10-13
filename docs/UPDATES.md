@@ -25,6 +25,7 @@
 - Find friends from contacts (`activity_find_contacts.xml`, `item_find_header.xml`, `item_find_note.xml`, `item_find_person.xml`), Friends (`activity_friends.xml`, `item_friend.xml`, `view_referral_code.xml`; referral count as a table row).
 - Edit profile (`activity_edit_profile.xml`; fixed details as table rows with icons), Email sign in / create account (`fragment_email_auth.xml`).
 - Group Actions & votes (`activity_group_actions.xml`, `item_action_summary.xml`, `item_action_section.xml`, `item_action_card.xml` filled by `group/ActionCard`, `item_action_note.xml`, `dialog_new_goal.xml`). Explanations on the cards became short values; Copy group ID removed from this screen.
+- Create group: the screen (`activity_create_group_wizard.xml`, `item_step_dot.xml`, `item_step_line.xml`) and each step its own layout: `fragment_create_basics.xml`, `fragment_create_rounds.xml`, `fragment_create_savings.xml`, `fragment_create_goal.xml`, `fragment_create_people.xml`, `fragment_create_review.xml` (inside `fragment_create_step.xml`); choices are toggle groups, the round summary and the review are tables with icons and the coin logo; rules and chats use `item_create_list_row.xml` (chat rows show the app's badge). Group settings tabs use `fragment_settings_section.xml`.
 
 ## 13 Oct 2026 — Group coin everywhere; 50dp table rows
 

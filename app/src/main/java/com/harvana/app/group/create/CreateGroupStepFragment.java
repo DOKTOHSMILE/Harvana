@@ -31,20 +31,19 @@ public abstract class CreateGroupStepFragment extends Fragment {
     private LinearLayout page;
     private ScrollView scroll;
 
-    /** Draws this page's fields. */
+    /** Fills this page's fields (its own layout, already in {@code page}). */
     protected abstract void build(Host host, LinearLayout page);
+
+    /** This page's layout: res/layout/fragment_create_*.xml. */
+    protected abstract int layout();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle state) {
-        float d = getResources().getDisplayMetrics().density;
-        scroll = new ScrollView(requireContext());
-        scroll.setFillViewport(true);
-        page = new LinearLayout(requireContext());
-        page.setOrientation(LinearLayout.VERTICAL);
-        page.setPadding((int) (16 * d), (int) (8 * d), (int) (16 * d), (int) (24 * d));
-        scroll.addView(page, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        return scroll;
+        View v = inflater.inflate(com.harvana.app.R.layout.fragment_create_step, container, false);
+        scroll = v.findViewById(com.harvana.app.R.id.create_step_scroll);
+        page = v.findViewById(com.harvana.app.R.id.create_step_page);
+        return v;
     }
 
     @Override
@@ -58,6 +57,7 @@ public abstract class CreateGroupStepFragment extends Fragment {
     public void redraw() {
         if (page == null || !(getActivity() instanceof Host)) return;
         page.removeAllViews();
+        getLayoutInflater().inflate(layout(), page, true);
         build((Host) getActivity(), page);
         com.harvana.app.utils.IconFit.apply(page);
     }

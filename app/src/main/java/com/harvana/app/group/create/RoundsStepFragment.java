@@ -4,5 +4,6 @@ import android.widget.LinearLayout;
 
 /** Rotating group, page 2: the coin, contribution, members, round length. */
 public class RoundsStepFragment extends CreateGroupStepFragment {
+    @Override protected int layout() { return com.harvana.app.R.layout.fragment_create_rounds; }
     @Override protected void build(Host host, LinearLayout page) { host.buildRounds(page); }
 }

@@ -8,7 +8,6 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
 /**
@@ -38,21 +37,13 @@ public class GroupSettingsSectionFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle state) {
-        float d = getResources().getDisplayMetrics().density;
-        NestedScrollView scroll = new NestedScrollView(requireContext());
-        scroll.setFillViewport(true);
-        scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        LinearLayout page = new LinearLayout(requireContext());
-        page.setOrientation(LinearLayout.VERTICAL);
-        page.setPadding((int) (16 * d), (int) (4 * d), (int) (16 * d), (int) (24 * d));
-        scroll.addView(page, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        return scroll;
+        return inflater.inflate(com.harvana.app.R.layout.fragment_settings_section, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle state) {
         super.onViewCreated(view, state);
-        if (getActivity() instanceof Host) ((Host) getActivity()).attachSection(section(), (LinearLayout) ((ViewGroup) view).getChildAt(0));
+        if (getActivity() instanceof Host) ((Host) getActivity()).attachSection(section(), view.findViewById(com.harvana.app.R.id.settings_section_page));
     }
 
     @Override

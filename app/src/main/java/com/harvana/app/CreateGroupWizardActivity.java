@@ -1,17 +1,12 @@
 package com.harvana.app;
 
 
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.text.InputType;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,7 +32,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -142,13 +136,15 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
         });
     }
 
-    /** The coin the group saves in, chosen by the creator from a bottom sheet (nothing is chosen for them). */
+    /** The coin the group saves in, chosen by the creator from a bottom sheet (nothing is chosen for them): btn_create_coin. */
     private void coinPicker() {
-        page.addView(label("Stable coin for savings"));
-        MaterialButton pick = button(coin.isEmpty() ? "Choose a coin" : com.harvana.app.husd.Stable.symbol(coin) + "  ·  " + com.harvana.app.husd.Stable.name(coin), coin.isEmpty());
-        if (!coin.isEmpty()) {
-            android.graphics.drawable.Drawable icon = com.harvana.app.husd.StableIcon.drawable(this, coin);
-            pick.setIcon(icon);
+        MaterialButton pick = page.findViewById(R.id.btn_create_coin);
+        if (coin.isEmpty()) {
+            pick.setText("Choose a coin");
+            pick.setIcon(null);
+        } else {
+            pick.setText(com.harvana.app.husd.Stable.symbol(coin) + "  ·  " + com.harvana.app.husd.Stable.name(coin));
+            pick.setIcon(com.harvana.app.husd.StableIcon.drawable(this, coin));
             pick.setIconTint(null);
             pick.setIconSize(dp(22));
         }
@@ -163,7 +159,6 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
                     .setSingleChoiceItems(names, sel, (d, which) -> { coin = coins.get(which); d.dismiss(); go(step); })
                     .setNegativeButton("Cancel", null).show();
         });
-        page.addView(pick);
     }
 
     @Override
@@ -179,36 +174,13 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
         country = firstOr(location.getCountryNames(), "Nigeria");
         if (location.getCountryNames().contains("Nigeria")) country = "Nigeria";
 
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(UiColors.background());
-
-        dots = new LinearLayout(this);
-        dots.setOrientation(LinearLayout.HORIZONTAL);
-        dots.setGravity(Gravity.CENTER);
-        dots.setPadding(0, dp(12), 0, dp(4));
-        root.addView(dots);
-
-        // Each step is its own fragment, shown here one at a time.
-        android.widget.FrameLayout steps = new android.widget.FrameLayout(this);
-        steps.setId(R.id.create_group_step);
-        root.addView(steps, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-
-        LinearLayout bar = new LinearLayout(this);
-        bar.setOrientation(LinearLayout.HORIZONTAL);
-        bar.setPadding(dp(12), dp(8), dp(12), dp(8));
-        bar.setBackgroundColor(UiColors.surface());
-        back = button("Back", true);
+        AppBar.setContent(this, R.layout.activity_create_group_wizard,
+                kind == Kind.ROTATING ? "New rotating group" : kind == Kind.ACCUM ? "New savings group" : "New goal group", null);
+        dots = findViewById(R.id.create_group_dots);
+        back = findViewById(R.id.btn_create_back);
         back.setOnClickListener(v -> go(step - 1));
-        bar.addView(back, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        next = button("Next", false);
+        next = findViewById(R.id.btn_create_next);
         next.setOnClickListener(v -> onNext());
-        LinearLayout.LayoutParams np = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 2f);
-        np.leftMargin = dp(8);
-        bar.addView(next, np);
-        root.addView(bar);
-
-        AppBar.setContent(this, root, kind == Kind.ROTATING ? "New rotating group" : kind == Kind.ACCUM ? "New savings group" : "New goal group", null);
         go(0);
     }
 
@@ -236,7 +208,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
     /** Draws one step into its fragment's page, under the step's title. */
     private void draw(int s, LinearLayout into, Runnable fields) {
         page = into;
-        page.addView(text(stepNames[s], 22, true, UiColors.textPrimary()));
+        ((TextView) page.findViewById(R.id.tv_step_title)).setText(stepNames[s]);
         fields.run();
     }
 
@@ -255,19 +227,15 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
         step = Math.min(to, stepNames.length - 1);
         dots.removeAllViews();
         for (int i = 0; i < stepNames.length; i++) {
-            TextView d = text(String.valueOf(i + 1), 12, true, i <= step ? UiColors.onAccent() : UiColors.textSecondary());
-            d.setGravity(Gravity.CENTER);
-            GradientDrawable g = new GradientDrawable();
-            g.setShape(GradientDrawable.OVAL);
-            g.setColor(i <= step ? UiColors.accent() : (UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000);
-            d.setBackground(g);
-            dots.addView(d, new LinearLayout.LayoutParams(dp(26), dp(26)));
+            TextView d = (TextView) getLayoutInflater().inflate(R.layout.item_step_dot, dots, false);
+            d.setText(String.valueOf(i + 1));
+            d.setBackgroundResource(i <= step ? R.drawable.bg_step_dot_on : R.drawable.bg_step_dot_off);
+            d.setTextColor(i <= step ? UiColors.onAccent() : UiColors.textSecondary());
+            dots.addView(d);
             if (i < stepNames.length - 1) {
-                View line = new View(this);
-                line.setBackgroundColor(i < step ? UiColors.accent() : (UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000);
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(28), dp(2));
-                lp.setMargins(dp(4), 0, dp(4), 0);
-                dots.addView(line, lp);
+                View line = getLayoutInflater().inflate(R.layout.item_step_line, dots, false);
+                if (i < step) line.setBackgroundColor(UiColors.accent());
+                dots.addView(line);
             }
         }
         back.setText(step == 0 ? "Cancel" : "Back");
@@ -325,18 +293,9 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
 
     // ── step 1: basics ─────────────────────────────────────────────────────
 
-    /** The optional group picture: a round preview, Add / Change, and Remove. Picked, cropped square and uploaded by GroupPhotoPickerActivity. */
-    private View photoRow() {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, dp(14), 0, dp(4));
-        android.widget.ImageView face = new android.widget.ImageView(this);
-        face.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
-        GradientDrawable disc = new GradientDrawable();
-        disc.setShape(GradientDrawable.OVAL);
-        disc.setColor((UiColors.accent() & 0x00FFFFFF) | 0x33000000);
-        face.setBackground(disc);
+    /** The optional group picture (iv_create_photo): a round preview, Add / Change, and Remove. Picked and cropped square by GroupPhotoPickerActivity. */
+    private void photoRow() {
+        android.widget.ImageView face = page.findViewById(R.id.iv_create_photo);
         com.harvana.app.utils.GroupRing.apply(face, typeLabel, 1f, 0x00000000);   // ring colour = group type
         if (photoUri != null) {
             com.bumptech.glide.Glide.with(this).load(photoUri).circleCrop().into(face);
@@ -347,26 +306,13 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
         } else {
             com.bumptech.glide.Glide.with(this).load(photoUrl).circleCrop().into(face);
         }
-        row.addView(face, new LinearLayout.LayoutParams(dp(76), dp(76)));
-        LinearLayout side = new LinearLayout(this);
-        side.setOrientation(LinearLayout.VERTICAL);
-        side.setPadding(dp(14), 0, 0, 0);
-        side.addView(text("Group picture (optional)", 14, true, UiColors.textPrimary()));
-        side.addView(hint("A square picture. The ring colour shows the kind of group: blue rotating, green accumulative, purple fixed."));
-        LinearLayout buttons = new LinearLayout(this);
-        MaterialButton pick = button(photoUri == null && photoUrl.isEmpty() ? "Add picture" : "Change", true);
+        boolean has = photoUri != null || !photoUrl.isEmpty();
+        MaterialButton pick = page.findViewById(R.id.btn_create_photo_pick);
+        pick.setText(has ? "Change" : "Add picture");
         pick.setOnClickListener(v -> startActivityForResult(com.harvana.app.utils.GroupPhotoPickerActivity.intent(this), RC_PHOTO));
-        buttons.addView(pick);
-        if (photoUri != null || !photoUrl.isEmpty()) {
-            MaterialButton remove = button("Remove", true);
-            remove.setOnClickListener(v -> { photoUrl = ""; photoUri = null; go(step); });
-            LinearLayout.LayoutParams rl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            rl.setMarginStart(dp(8));
-            buttons.addView(remove, rl);
-        }
-        side.addView(buttons);
-        row.addView(side, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        return row;
+        View remove = page.findViewById(R.id.btn_create_photo_remove);
+        remove.setVisibility(has ? View.VISIBLE : View.GONE);
+        remove.setOnClickListener(v -> { photoUrl = ""; photoUri = null; go(step); });
     }
 
     @Override
@@ -380,29 +326,13 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
     }
 
     private void basics() {
-        page.addView(text(kind == Kind.ROTATING ? "A circle where everyone pays in each round and one member takes the pot, until all have had a turn."
-                : kind == Kind.ACCUM ? "A group where each member saves in their own line and earns interest set by the group."
-                : "A group saving together toward one target, where money leaves only by the rule you pick.", 13, false, UiColors.textSecondary()));
-        page.addView(photoRow());
-        page.addView(label("Group name"));
-        EditText n = edit("e.g. Market women ajo", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS, name);
-        n.setFilters(new android.text.InputFilter[] {new android.text.InputFilter.LengthFilter(40)});
-        n.addTextChangedListener(watch(s -> name = s));
-        page.addView(n);
-
-        page.addView(label("What is it about? (optional)"));
-        EditText d = edit("A line or two members will read before they join", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES, description);
-        d.setMinLines(3);
+        photoRow();
+        EditText n = text(R.id.et_create_name, name, s -> name = s);
+        EditText d = text(R.id.et_create_description, description, s -> description = s);
         d.setFilters(new android.text.InputFilter[] {new android.text.InputFilter.LengthFilter(DESC_MAX)});
-        d.addTextChangedListener(watch(s -> description = s));
-        page.addView(d);
+        toggle(R.id.tg_create_visibility, "Public".equals(visibility) ? 0 : 1, i -> visibility = i == 0 ? "Public" : "Private");
 
-        page.addView(label("Who can find it"));
-        page.addView(chips(new String[] {"Public", "Private"}, "Public".equals(visibility) ? 0 : 1, i -> visibility = i == 0 ? "Public" : "Private"));
-        page.addView(hint("Public: anyone can find the group and ask to join. Private: only people you invite can see it."));
-
-        page.addView(label("Where is it based"));
-        Spinner sc = spinner(), ss = spinner(), sy = spinner();
+        Spinner sc = page.findViewById(R.id.sp_create_country), ss = page.findViewById(R.id.sp_create_state), sy = page.findViewById(R.id.sp_create_city);
         List<String> countries = location.getCountryNames();
         location.setSpinnerData(sc, countries);
         sc.setSelection(Math.max(0, countries.indexOf(country)));
@@ -419,17 +349,11 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
             if (!ct.isEmpty()) { int at = Math.max(0, ct.indexOf(city)); sy.setSelection(at); }
         }));
         sy.setOnItemSelectedListener(sel(v -> city = v));
-        page.addView(sc); page.addView(ss); page.addView(sy);
 
-        page.addView(label("Group rules (optional)"));
-        LinearLayout ruleList = new LinearLayout(this);
-        ruleList.setOrientation(LinearLayout.VERTICAL);
-        page.addView(ruleList);
+        LinearLayout ruleList = page.findViewById(R.id.create_rules);
         paintRules(ruleList);
-        EditText r = edit("e.g. Pay before 6pm on the due day", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES, "");
-        page.addView(r);
-        MaterialButton addRule = button("Add rule", true);
-        addRule.setOnClickListener(v -> {
+        EditText r = page.findViewById(R.id.et_create_rule);
+        page.findViewById(R.id.btn_create_add_rule).setOnClickListener(v -> {
             String t = r.getText().toString().trim();
             if (t.isEmpty()) return;
             if (rules.size() >= 12) { Toast.makeText(this, "Keep it to 12 rules.", Toast.LENGTH_SHORT).show(); return; }
@@ -437,15 +361,10 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
             r.setText("");
             paintRules(ruleList);
         });
-        page.addView(addRule);
 
-        page.addView(label("Outside chat (optional)"));
-        LinearLayout chatList = new LinearLayout(this);
-        chatList.setOrientation(LinearLayout.VERTICAL);
-        page.addView(chatList);
+        LinearLayout chatList = page.findViewById(R.id.create_chats);
         paintChats(chatList);
-        MaterialButton addChat = button("Add a WhatsApp, Telegram or other chat link", true);
-        addChat.setOnClickListener(v -> {
+        page.findViewById(R.id.btn_create_add_chat).setOnClickListener(v -> {
             if (chatLinks.size() >= 8) { Toast.makeText(this, "A group can have 8 chats.", Toast.LENGTH_SHORT).show(); return; }
             GroupChatSheet.pickOne(this, link -> runOnUiThread(() -> {
                 Map<String, Object> copy = new HashMap<>();
@@ -454,22 +373,26 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
                 paintChats(chatList);
             }));
         });
-        page.addView(addChat);
+    }
+
+    /** One added rule or chat: res/layout/item_create_list_row.xml. */
+    private View listRow(LinearLayout box, String text, android.graphics.drawable.Drawable icon, Runnable remove) {
+        View row = getLayoutInflater().inflate(R.layout.item_create_list_row, box, false);
+        ((TextView) row.findViewById(R.id.tv_create_row_text)).setText(text);
+        if (icon != null) {
+            android.widget.ImageView iv = row.findViewById(R.id.iv_create_row_icon);
+            iv.setImageDrawable(icon);
+            iv.setVisibility(View.VISIBLE);
+        }
+        row.findViewById(R.id.tv_create_row_remove).setOnClickListener(v -> remove.run());
+        return row;
     }
 
     private void paintRules(LinearLayout box) {
         box.removeAllViews();
         for (int i = 0; i < rules.size(); i++) {
             final int at = i;
-            LinearLayout row = new LinearLayout(this);
-            row.setOrientation(LinearLayout.HORIZONTAL);
-            row.setGravity(Gravity.CENTER_VERTICAL);
-            row.addView(text((i + 1) + ".  " + rules.get(i), 13, false, UiColors.textPrimary()), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            TextView x = text("Remove", 12, true, UiColors.accent());
-            x.setPadding(dp(8), dp(8), dp(8), dp(8));
-            x.setOnClickListener(v -> { rules.remove(at); paintRules(box); });
-            row.addView(x);
-            box.addView(row);
+            box.addView(listRow(box, (i + 1) + ".  " + rules.get(i), null, () -> { rules.remove(at); paintRules(box); }));
         }
     }
 
@@ -479,110 +402,79 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
             final int at = i;
             Object label = chatLinks.get(i).get("label");
             Object url = chatLinks.get(i).get("url");
-            LinearLayout row = new LinearLayout(this);
-            row.setOrientation(LinearLayout.HORIZONTAL);
-            row.setGravity(Gravity.CENTER_VERTICAL);
-            row.addView(text((label == null ? "Chat" : String.valueOf(label)) + (url == null ? "" : "  " + url), 13, false, UiColors.textPrimary()),
-                    new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            TextView x = text("Remove", 12, true, UiColors.accent());
-            x.setPadding(dp(8), dp(8), dp(8), dp(8));
-            x.setOnClickListener(v -> { chatLinks.remove(at); paintChats(box); });
-            row.addView(x);
-            box.addView(row);
+            Object kindOf = chatLinks.get(i).get("kind");
+            android.graphics.drawable.Drawable badge = com.harvana.app.group.ChatPlatforms.badge(getResources(),
+                    com.harvana.app.group.ChatPlatforms.of(kindOf == null ? "" : String.valueOf(kindOf)), 24);
+            box.addView(listRow(box, (label == null ? "Chat" : String.valueOf(label)) + (url == null ? "" : "  " + url), badge,
+                    () -> { chatLinks.remove(at); paintChats(box); }));
         }
     }
 
     // ── step 2a: rotating ──────────────────────────────────────────────────
 
     private void rotating() {
-        page.addView(label("Each member pays, every round (" + sym() + ")"));
-        EditText c = edit("0.00", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, contribution);
-        final TextView summary = text("", 13, false, UiColors.textPrimary());
-        c.addTextChangedListener(watch(s -> { contribution = s; refreshRotating(summary); }));
-        page.addView(c);
+        ((TextView) page.findViewById(R.id.tv_create_contribution_label)).setText("Each member pays, every round (" + sym() + ")");
+        final LinearLayout summary = page.findViewById(R.id.create_rounds_summary);
+        text(R.id.et_create_contribution, contribution, s -> { contribution = s; refreshRotating(summary); });
 
-        page.addView(label("How many members (3 to 12)"));
-        page.addView(stepper(members, 3, 12, v -> { members = v; refreshRotating(summary); }));
+        TextView count = page.findViewById(R.id.tv_create_members);
+        count.setText(String.valueOf(members));
+        page.findViewById(R.id.btn_create_members_minus).setOnClickListener(v -> {
+            if (members > 3) { members--; count.setText(String.valueOf(members)); refreshRotating(summary); }
+        });
+        page.findViewById(R.id.btn_create_members_plus).setOnClickListener(v -> {
+            if (members < 12) { members++; count.setText(String.valueOf(members)); refreshRotating(summary); }
+        });
 
-        page.addView(label("How often is a round"));
         int sel = cycleDays == 1 ? 0 : cycleDays == 7 ? 1 : cycleDays == 14 ? 2 : cycleDays == 30 ? 3 : 4;
-        final LinearLayout custom = new LinearLayout(this);
-        custom.setOrientation(LinearLayout.VERTICAL);
-        page.addView(chips(new String[] {"Daily", "Weekly", "2 weeks", "Monthly", "Other"}, sel, i -> {
-            int[] days = {1, 7, 14, 30, 0};
-            if (days[i] > 0) { cycleDays = days[i]; custom.removeAllViews(); }
-            else {
-                custom.removeAllViews();
-                custom.addView(hint("Days between rounds, 1 to 30"));
-                EditText ed = edit("e.g. 10", InputType.TYPE_CLASS_NUMBER, "");
-                ed.addTextChangedListener(watch(s -> {
-                    try { int d = Integer.parseInt(s.trim()); if (d >= 1 && d <= 30) cycleDays = d; } catch (Exception ignored) { }
-                    refreshRotating(summary);
-                }));
-                custom.addView(ed);
-            }
+        EditText custom = page.findViewById(R.id.et_create_cycle_days);
+        custom.setVisibility(sel == 4 ? View.VISIBLE : View.GONE);
+        if (sel == 4) custom.setText(String.valueOf(cycleDays));
+        custom.addTextChangedListener(watch(s -> {
+            try { int d = Integer.parseInt(s.trim()); if (d >= 1 && d <= 30) cycleDays = d; } catch (Exception ignored) { }
             refreshRotating(summary);
         }));
-        page.addView(custom);
-
-        LinearLayout card = card();
-        card.addView(text("What this adds up to", 14, true, UiColors.textPrimary()));
-        card.addView(summary);
-        page.addView(card);
-        page.addView(hint("Payout order is the order members join, and you join first. A member who misses a round has 24 hours' grace, then a small penalty is taken from their bond. "
-                + "The group must fill within 72 hours or it is cancelled and every bond is returned."));
+        toggle(R.id.tg_create_cycle, sel, i -> {
+            int[] days = {1, 7, 14, 30, 0};
+            if (days[i] > 0) { cycleDays = days[i]; custom.setVisibility(View.GONE); }
+            else custom.setVisibility(View.VISIBLE);
+            refreshRotating(summary);
+        });
         refreshRotating(summary);
     }
 
-    private void refreshRotating(TextView out) {
+    /** What the rounds add up to, as a table: pot, bond, rounds and how long. */
+    private void refreshRotating(LinearLayout out) {
+        out.removeAllViews();
         long c = raw(contribution);
-        if (c <= 0) { out.setText("Enter the amount to see the pot, the bond and how long it runs."); return; }
+        com.harvana.app.utils.InfoTable t = new com.harvana.app.utils.InfoTable(this);
         long pot = c * (members - 1);
-        out.setText("Pot each round:  " + money(pot) + "  (the other " + (members - 1) + " members pay in)\n"
-                + "Each member locks:  " + money(pot) + "  when they join, as a bond. It comes back when the group finishes cleanly.\n"
-                + "Runs for:  " + members + " rounds of " + cycleDays + (cycleDays == 1 ? " day" : " days") + "  =  about " + (members * cycleDays) + " days\n"
-                + "Everyone gets one turn to take the pot.");
+        t.row(com.harvana.app.group.CoinLogo.of(this, coin), "Pot each round", c <= 0 ? "—" : money(pot));
+        t.row(R.drawable.icon_lock_round_line, "Bond each member locks", c <= 0 ? "—" : money(pot));
+        t.row(R.drawable.ic_groups_line, "Rounds", String.valueOf(members));
+        t.row(R.drawable.ic_calendar, "Each round", cycleDays + (cycleDays == 1 ? " day" : " days"));
+        t.row(R.drawable.ic_calendar, "Runs for", "about " + (members * cycleDays) + " days");
+        out.addView(t.view());
     }
 
     // ── step 2b: savings ───────────────────────────────────────────────────
 
     private void savings() {
-        page.addView(text("Each member starts their own savings line inside the group: a daily amount, flexible or locked, a lump sum or changing deposits. A line lasts 30 days.", 13, false, UiColors.textSecondary()));
-
-        page.addView(label("Lending"));
-        SwitchMaterial loans = new SwitchMaterial(this);
-        loans.setText("Members can borrow from the group's savings");
-        loans.setTextColor(UiColors.textPrimary());
-        loans.setChecked(allowLoans);
-        page.addView(loans);
-        final LinearLayout rate = new LinearLayout(this);
-        rate.setOrientation(LinearLayout.VERTICAL);
-        page.addView(rate);
+        SwitchMaterial loans = page.findViewById(R.id.sw_create_loans);
+        View rateLabel = page.findViewById(R.id.tv_create_interest_label);
+        EditText rate = text(R.id.et_create_interest, "0".equals(interest) ? "" : interest, s -> interest = s);
         Runnable paintRate = () -> {
-            rate.removeAllViews();
-            if (!allowLoans) { rate.addView(hint("No lending. Savings stay in the group until members take them out.")); interest = "0"; return; }
-            rate.addView(label("Interest per day on a loan (0 to 5%)"));
-            EditText e = edit("e.g. 0.5", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, "0".equals(interest) ? "" : interest);
-            e.addTextChangedListener(watch(s -> interest = s));
-            rate.addView(e);
-            rate.addView(hint("Interest is charged for each day a loan is held, not by the month. A borrower who repays early pays only for the days held. Example: 0.5% a day on " + money(100_000_000L) + " held 10 days costs " + money(5_000_000L) + ". It is set once, now, and every member sees it before they save."));
+            rateLabel.setVisibility(allowLoans ? View.VISIBLE : View.GONE);
+            rate.setVisibility(allowLoans ? View.VISIBLE : View.GONE);
+            if (!allowLoans) interest = "0";
         };
+        loans.setChecked(allowLoans);
         loans.setOnCheckedChangeListener((v, on) -> { allowLoans = on; paintRate.run(); });
         paintRate.run();
-
-        page.addView(label("When can savings be taken out"));
-        page.addView(chips(new String[] {"Any time", "Only when the line ends"}, cycleEndOnly ? 1 : 0, i -> cycleEndOnly = i == 1));
-        page.addView(hint("Any time: a member asks and you, as admin, approve the withdrawal. Only when the line ends: nothing can be taken out before its 30 days are up."));
-
-        page.addView(label("Expected number of members (optional)"));
-        EditText m = edit("e.g. 10", InputType.TYPE_CLASS_NUMBER, expectedMembers);
-        m.addTextChangedListener(watch(s -> expectedMembers = s));
-        page.addView(m);
-        page.addView(label("Suggested daily saving, " + sym() + " (optional)"));
-        EditText a = edit("e.g. 1", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, suggestedAmount);
-        a.addTextChangedListener(watch(s -> suggestedAmount = s));
-        page.addView(a);
-        page.addView(hint("These two only help members decide. Each member chooses their own amount when they start a line."));
+        toggle(R.id.tg_create_withdraw, cycleEndOnly ? 1 : 0, i -> cycleEndOnly = i == 1);
+        text(R.id.et_create_expected, expectedMembers, s -> expectedMembers = s);
+        ((TextView) page.findViewById(R.id.tv_create_suggested_label)).setText("Suggested daily saving, " + sym() + " (optional)");
+        text(R.id.et_create_suggested, suggestedAmount, s -> suggestedAmount = s);
     }
 
     // ── step 2c: goal ──────────────────────────────────────────────────────
@@ -592,123 +484,85 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
     private static final String[] RULE_NAMES = {"All at once at goal", "Admin-Triggered", "Released in Milestones", "Emergency Grants"};
 
     private void goal() {
-        page.addView(label("What is the group saving for"));
-        final LinearLayout explain = new LinearLayout(this);
-        explain.setOrientation(LinearLayout.VERTICAL);
-        final LinearLayout bene = new LinearLayout(this);
-        bene.setOrientation(LinearLayout.VERTICAL);
-        page.addView(chips(PURPOSES, purpose, i -> { purpose = i; paintGoalRule(explain, bene); }, true));
-        page.addView(explain);
-
-        page.addView(label("Target amount (" + sym() + ")"));
-        EditText t = edit("0.00", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, target);
-        t.addTextChangedListener(watch(s -> target = s));
-        page.addView(t);
-
-        page.addView(bene);
-        paintGoalRule(explain, bene);
-
-        page.addView(label("Expected number of members (optional)"));
-        EditText m = edit("e.g. 10", InputType.TYPE_CLASS_NUMBER, expectedMembers);
-        m.addTextChangedListener(watch(s -> expectedMembers = s));
-        page.addView(m);
-        page.addView(label("Suggested deposit per member, " + sym() + " (optional)"));
-        EditText a = edit("e.g. 20", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, suggestedAmount);
-        a.addTextChangedListener(watch(s -> suggestedAmount = s));
-        page.addView(a);
-        page.addView(hint("Deposits close when the target is reached. Members can deposit any amount until then."));
+        LinearLayout rule = page.findViewById(R.id.create_goal_rule);
+        toggle(R.id.tg_create_purpose, purpose, i -> { purpose = i; paintGoalRule(rule); });
+        ((TextView) page.findViewById(R.id.tv_create_target_label)).setText("Target amount (" + sym() + ")");
+        text(R.id.et_create_target, target, s -> target = s);
+        text(R.id.et_create_beneficiary, beneficiary, s -> beneficiary = s.trim());
+        toggle(R.id.tg_create_beneficiary, beneficiaryIsMe ? 0 : 1, i -> { beneficiaryIsMe = i == 0; paintGoalRule(rule); });
+        paintGoalRule(rule);
+        text(R.id.et_create_expected, expectedMembers, s -> expectedMembers = s);
+        ((TextView) page.findViewById(R.id.tv_create_suggested_label)).setText("Suggested deposit per member, " + sym() + " (optional)");
+        text(R.id.et_create_suggested, suggestedAmount, s -> suggestedAmount = s);
     }
 
-    private void paintGoalRule(LinearLayout explain, LinearLayout bene) {
-        explain.removeAllViews();
-        String why = purpose == 0 ? "When the target is reached the whole pot is sent, automatically and with no vote, to the wallet you name below. Members see that wallet before they deposit."
-                : purpose == 1 ? "Nothing is sent when the target is reached. You ask for a payout and the members vote. It is paid only if the vote passes."
-                : purpose == 2 ? "Money is released in parts. You ask for each part and say what it is for, and the members vote on every one."
-                : "Nobody is named in advance. A member asks for a grant, says why, and the group votes. If it passes, that member is paid.";
-        LinearLayout c = card();
-        c.addView(text(RULE_NAMES[purpose], 14, true, UiColors.textPrimary()));
-        c.addView(text(why, 12.5f, false, UiColors.textSecondary()));
-        explain.addView(c);
-
-        bene.removeAllViews();
-        if (purpose == 3) return;
-        bene.addView(label(purpose == 0 ? "Who receives the pot" : purpose == 1 ? "Who is paid if the vote passes" : "Who receives each approved part"));
-        bene.addView(chips(new String[] {"Me, the admin", "Another wallet"}, beneficiaryIsMe ? 0 : 1, i -> { beneficiaryIsMe = i == 0; paintGoalRule(explain, bene); }));
-        if (beneficiaryIsMe) {
-            LinearLayout warn = card();
-            warn.addView(text("Members will see that the money goes to you.", 13, true, UiColors.textPrimary()));
-            warn.addView(text("Say so in the description so people know who they are paying and why. Choose another wallet, such as a supplier or a venue, if the money is not for you.", 12.5f, false, UiColors.textSecondary()));
-            bene.addView(warn);
-        } else {
-            EditText w = edit("HV0x… full wallet address", InputType.TYPE_CLASS_TEXT, beneficiary);
-            w.addTextChangedListener(watch(s -> beneficiary = s.trim()));
-            bene.addView(w);
-        }
+    /** How money leaves for the chosen purpose (a table row), and who receives it (hidden for an emergency fund). */
+    private void paintGoalRule(LinearLayout rule) {
+        rule.removeAllViews();
+        com.harvana.app.utils.InfoTable t = new com.harvana.app.utils.InfoTable(this);
+        t.row(R.drawable.ic_check_circle_line, "How money leaves", RULE_NAMES[purpose]);
+        t.row(R.drawable.ic_groups_line, "Vote before paying", purpose == 0 ? "No" : "Yes");
+        ((LinearLayout.LayoutParams) rule.getLayoutParams()).topMargin = dp(10);
+        rule.addView(t.view());
+        page.findViewById(R.id.create_beneficiary).setVisibility(purpose == 3 ? View.GONE : View.VISIBLE);
+        ((TextView) page.findViewById(R.id.tv_create_beneficiary_label)).setText(purpose == 0 ? "Who receives the pot"
+                : purpose == 1 ? "Who is paid if the vote passes" : "Who receives each approved part");
+        page.findViewById(R.id.et_create_beneficiary).setVisibility(beneficiaryIsMe ? View.GONE : View.VISIBLE);
     }
 
     // ── step 3: people ─────────────────────────────────────────────────────
 
     private void people() {
-        page.addView(text("Invite people now or later. They get the group's rules and decide for themselves.", 13, false, UiColors.textSecondary()));
-        page.addView(PeoplePicker.section(this, invite));
-
-        page.addView(label("Joining"));
-        if (kind == Kind.ROTATING) {
-            page.addView(hint("Anyone can join until the group is full. Joining locks their bond, so there is no approval step."));
-        } else {
-            SwitchMaterial ap = new SwitchMaterial(this);
-            ap.setText("New members need approval");
-            ap.setTextColor(UiColors.textPrimary());
-            ap.setChecked(requireApproval);
-            page.addView(ap);
-            final LinearLayout how = new LinearLayout(this);
-            how.setOrientation(LinearLayout.VERTICAL);
-            page.addView(how);
-            Runnable paint = () -> {
-                how.removeAllViews();
-                if (!requireApproval) return;
-                how.addView(chips(new String[] {"Admin decides", "Members vote"}, memberVote ? 1 : 0, i -> memberVote = i == 1));
-                how.addView(hint(memberVote ? "Members vote on each request. 60% must agree." : "You approve or decline each request."));
-            };
-            ap.setOnCheckedChangeListener((v, on) -> { requireApproval = on; paint.run(); });
-            paint.run();
-        }
-        SwitchMaterial mi = new SwitchMaterial(this);
-        mi.setText("Members can invite people");
-        mi.setTextColor(UiColors.textPrimary());
+        ((LinearLayout) page.findViewById(R.id.create_people_picker)).addView(PeoplePicker.section(this, invite));
+        View approval = page.findViewById(R.id.create_approval_section);
+        approval.setVisibility(kind == Kind.ROTATING ? View.GONE : View.VISIBLE);
+        SwitchMaterial ap = page.findViewById(R.id.sw_create_approval);
+        View how = page.findViewById(R.id.tg_create_approval_how);
+        ap.setChecked(requireApproval);
+        how.setVisibility(requireApproval ? View.VISIBLE : View.GONE);
+        ap.setOnCheckedChangeListener((v, on) -> { requireApproval = on; how.setVisibility(on ? View.VISIBLE : View.GONE); });
+        toggle(R.id.tg_create_approval_how, memberVote ? 1 : 0, i -> memberVote = i == 1);
+        SwitchMaterial mi = page.findViewById(R.id.sw_create_members_invite);
         mi.setChecked(membersCanInvite);
         mi.setOnCheckedChangeListener((v, on) -> membersCanInvite = on);
-        page.addView(mi);
-        SwitchMaterial il = new SwitchMaterial(this);
-        il.setText("Anyone with the link can ask to join");
-        il.setTextColor(UiColors.textPrimary());
+        SwitchMaterial il = page.findViewById(R.id.sw_create_invite_link);
         il.setChecked(inviteViaLink);
         il.setOnCheckedChangeListener((v, on) -> inviteViaLink = on);
-        page.addView(il);
     }
 
     // ── step 4: review ─────────────────────────────────────────────────────
 
+    /** The group, its terms and what it costs, as tables (create_review). */
     private void review() {
-        LinearLayout c = card();
-        c.addView(text(name.trim().isEmpty() ? "Your group" : name.trim(), 17, true, UiColors.textPrimary()));
-        c.addView(text(visibility + "  ·  " + city + ", " + state, 12.5f, false, UiColors.textSecondary()));
-        page.addView(c);
-        LinearLayout t = card();
-        t.addView(text("The terms", 14, true, UiColors.textPrimary()));
-        for (String[] row : termRows()) t.addView(pair(row[0], row[1]));
-        page.addView(t);
-        LinearLayout cost = card();
-        cost.addView(text("What it costs you", 14, true, UiColors.textPrimary()));
-        cost.addView(pair("tFare", CircleUi.harv(FEE_RAW)));
-        cost.addView(pair("Locked now", "Nothing"));
-        cost.addView(pair("Group wallet", "Made and held by the network. This phone never creates or holds one."));
-        if (kind == Kind.ROTATING) cost.addView(pair("Then you join", "You join first and lock the same bond as everyone else."));
-        page.addView(cost);
-        if (invite.count() > 0) page.addView(hint("Invitations will go to " + invite.count() + (invite.count() == 1 ? " person." : " people.")));
-        String why = null;
-        if (kind == Kind.FIXED && purpose != 3 && beneficiaryIsMe) why = "The money will go to your wallet. Members are shown that before they deposit.";
-        if (why != null) page.addView(hint(why));
+        LinearLayout box = page.findViewById(R.id.create_review);
+        com.harvana.app.utils.InfoTable g = new com.harvana.app.utils.InfoTable(this);
+        g.section("The group");
+        g.row(R.drawable.ic_groups_line, "Name", name.trim().isEmpty() ? "—" : name.trim());
+        g.row(R.drawable.ic_visibility_line, "Who can find it", visibility);
+        g.row(R.drawable.icon_flag_round_line, "Place", city + ", " + state);
+        if (invite.count() > 0) g.row(R.drawable.ic_person_line, "Invitations", String.valueOf(invite.count()));
+        box.addView(g.view());
+
+        com.harvana.app.utils.InfoTable t = new com.harvana.app.utils.InfoTable(this);
+        t.section("The terms");
+        for (String[] row : termRows()) {
+            if ("Coin".equals(row[0])) t.row(com.harvana.app.group.CoinLogo.of(this, coin), row[0], row[1]);
+            else t.row(row[0], row[1]);
+        }
+        View tv = t.view();
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(12);
+        box.addView(tv, lp);
+
+        com.harvana.app.utils.InfoTable cost = new com.harvana.app.utils.InfoTable(this);
+        cost.section("What it costs you");
+        cost.row(R.drawable.ic_harv_coin, "tFare", CircleUi.harv(FEE_RAW));
+        cost.row(R.drawable.icon_lock_round_line, "Locked now", "Nothing");
+        cost.row(R.drawable.ic_wallet_line, "Group wallet", "Held by the network");
+        if (kind == Kind.ROTATING) cost.row(R.drawable.ic_person_line, "Your place", "You join first, same bond");
+        LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp2.topMargin = dp(12);
+        box.addView(cost.view(), lp2);
     }
 
     private List<String[]> termRows() {
@@ -885,7 +739,6 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
     private interface Text { void on(String s); }
     private interface Pick { void on(int i); }
     private interface Chosen { void on(String s); }
-    private interface Count { void on(int v); }
 
     private static double parse(String s) {
         try { return Double.parseDouble(s.trim()); } catch (Exception e) { return 0.0; }
@@ -908,123 +761,23 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
         };
     }
 
-    private Spinner spinner() {
-        Spinner s = new com.harvana.app.ui.MaterialSpinner(this);
-        s.setMinimumHeight(dp(48));
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(6);
-        s.setLayoutParams(lp);
-        return s;
-    }
-
-    private View chips(String[] options, int selected, Pick pick) { return chips(options, selected, pick, false); }
-
-    /** A row of choices, one picked. {@code column} stacks them for long labels. */
-    private View chips(String[] options, int selected, Pick pick, boolean column) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(column ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
-        final MaterialButton[] all = new MaterialButton[options.length];
-        for (int i = 0; i < options.length; i++) {
-            final int at = i;
-            MaterialButton b = button(options[i], i != selected);
-            b.setTextSize(12.5f);
-            b.setOnClickListener(v -> {
-                for (int k = 0; k < all.length; k++) styleChip(all[k], k == at);
-                pick.on(at);
-            });
-            all[i] = b;
-            LinearLayout.LayoutParams lp = column ? new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-                    : new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-            lp.setMargins(dp(2), dp(4), dp(2), dp(4));
-            row.addView(b, lp);
-        }
-        return row;
-    }
-
-    private void styleChip(MaterialButton b, boolean on) {
-        b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(on ? UiColors.accent() : 0x00000000));
-        b.setTextColor(on ? UiColors.onAccent() : UiColors.accent());
-    }
-
-    private View stepper(int value, int min, int max, Count c) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        final TextView n = text(String.valueOf(value), 22, true, UiColors.textPrimary());
-        n.setGravity(Gravity.CENTER);
-        final int[] cur = {value};
-        MaterialButton minus = button("−", true), plus = button("+", true);
-        minus.setOnClickListener(v -> { if (cur[0] > min) { cur[0]--; n.setText(String.valueOf(cur[0])); c.on(cur[0]); } });
-        plus.setOnClickListener(v -> { if (cur[0] < max) { cur[0]++; n.setText(String.valueOf(cur[0])); c.on(cur[0]); } });
-        row.addView(minus);
-        row.addView(n, new LinearLayout.LayoutParams(dp(72), ViewGroup.LayoutParams.WRAP_CONTENT));
-        row.addView(plus);
-        return row;
-    }
-
-    private EditText edit(String hint, int inputType, String value) {
-        EditText e = new com.google.android.material.textfield.TextInputEditText(this);
-        e.setHint(hint);
-        e.setInputType(inputType);
+    /** Fills a field from the wizard's state and keeps the state in step with what is typed. */
+    private EditText text(int id, String value, Text t) {
+        EditText e = page.findViewById(id);
         e.setText(value);
-        e.setTextColor(UiColors.textPrimary());
-        e.setHintTextColor(UiColors.textTertiary());
+        e.addTextChangedListener(watch(t));
         return e;
     }
 
-    private TextView label(String s) {
-        TextView t = text(s, 13, true, UiColors.textPrimary());
-        t.setPadding(0, dp(16), 0, dp(2));
-        return t;
-    }
-
-    private TextView hint(String s) {
-        TextView t = text(s, 12, false, UiColors.textSecondary());
-        t.setPadding(0, dp(4), 0, dp(4));
-        return t;
-    }
-
-    private View pair(String k, String v) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setPadding(0, dp(5), 0, dp(5));
-        row.addView(text(k, 13, false, UiColors.textSecondary()), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView value = text(v, 13, true, UiColors.textPrimary());
-        value.setGravity(Gravity.END);
-        row.addView(value, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.3f));
-        return row;
-    }
-
-    private LinearLayout card() {
-        LinearLayout l = new LinearLayout(this);
-        l.setOrientation(LinearLayout.VERTICAL);
-        int p = dp(14);
-        l.setPadding(p, p, p, p);
-        GradientDrawable g = new GradientDrawable();
-        g.setColor(UiColors.surface());
-        g.setCornerRadius(dp(14));
-        g.setStroke(dp(1), (UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000);
-        l.setBackground(g);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(12);
-        l.setLayoutParams(lp);
-        return l;
-    }
-
-    private MaterialButton button(String label, boolean outlined) {
-        MaterialButton b = outlined ? new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle) : new MaterialButton(this);
-        b.setText(label);
-        b.setAllCaps(false);
-        return b;
-    }
-
-    private TextView text(String s, float sp, boolean bold, int color) {
-        TextView t = new TextView(this);
-        t.setText(s);
-        t.setTextSize(sp);
-        t.setTextColor(color);
-        if (bold) t.setTypeface(null, Typeface.BOLD);
-        return t;
+    /** A row of choices (MaterialButtonToggleGroup in the layout), {@code selected} checked; {@code pick} gets the index tapped. */
+    private void toggle(int id, int selected, Pick pick) {
+        com.google.android.material.button.MaterialButtonToggleGroup g = page.findViewById(id);
+        if (selected >= 0 && selected < g.getChildCount()) g.check(g.getChildAt(selected).getId());
+        g.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) return;
+            int at = group.indexOfChild(group.findViewById(checkedId));
+            if (at >= 0) pick.on(at);
+        });
     }
 
     private void toast(String m) { Toast.makeText(this, m, Toast.LENGTH_LONG).show(); }

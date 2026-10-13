@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Create group, rotating: coin, contribution, members, how often, and what it adds up to (table). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+
+	<TextView
+		android:id="@+id/tv_step_title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="22sp"
+		android:textStyle="bold" />
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="6dp"
+		android:text="Stable coin for savings"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:textStyle="bold" />
+
+	<com.google.android.material.button.MaterialButton
+		android:id="@+id/btn_create_coin"
+		style="@style/HarvanaButton.Outlined"
+		android:layout_width="match_parent"
+		android:layout_height="52dp"
+		android:gravity="start|center_vertical"
+		android:text="Choose a coin"
+		app:iconTint="@null" />
+
+	<TextView
+		android:id="@+id/tv_create_contribution_label"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="6dp"
+		android:text="Each member pays, every round"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:textStyle="bold" />
+
+	<EditText
+		android:id="@+id/et_create_contribution"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:minHeight="50dp"
+		android:background="@drawable/bg_field_surface"
+		android:hint="0.00"
+		android:inputType="numberDecimal"
+		android:paddingStart="14dp"
+		android:paddingTop="12dp"
+		android:paddingEnd="14dp"
+		android:paddingBottom="12dp"
+		android:textColor="@color/colorTextPrimary"
+		android:textColorHint="@color/colorTextTertiary"
+		android:singleLine="true" />
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="6dp"
+		android:text="How many members (3 to 12)"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:textStyle="bold" />
+
+	<LinearLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:gravity="center_vertical"
+		android:orientation="horizontal">
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_create_members_minus"
+			style="@style/HarvanaButton.Outlined"
+			android:layout_width="56dp"
+			android:layout_height="50dp"
+			android:minWidth="0dp"
+			android:text="−" />
+
+		<TextView
+			android:id="@+id/tv_create_members"
+			android:layout_width="72dp"
+			android:layout_height="wrap_content"
+			android:gravity="center"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="22sp"
+			android:textStyle="bold" />
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_create_members_plus"
+			style="@style/HarvanaButton.Outlined"
+			android:layout_width="56dp"
+			android:layout_height="50dp"
+			android:minWidth="0dp"
+			android:text="+" />
+	</LinearLayout>
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="6dp"
+		android:text="How often is a round"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:textStyle="bold" />
+
+	<com.google.android.material.button.MaterialButtonToggleGroup
+		android:id="@+id/tg_create_cycle"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		app:selectionRequired="true"
+		app:singleSelection="true">
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/tg_create_cycle_0"
+			style="@style/Harvana.Segment"
+			android:layout_width="0dp"
+			android:layout_height="50dp"
+			android:layout_weight="1"
+			android:text="Daily"
+			android:textSize="12.5sp" />
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/tg_create_cycle_1"
+			style="@style/Harvana.Segment"
+			android:layout_width="0dp"
+			android:layout_height="50dp"
+			android:layout_weight="1"
+			android:text="Weekly"
+			android:textSize="12.5sp" />
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/tg_create_cycle_2"
+			style="@style/Harvana.Segment"
+			android:layout_width="0dp"
+			android:layout_height="50dp"
+			android:layout_weight="1"
+			android:text="2 weeks"
+			android:textSize="12.5sp" />
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/tg_create_cycle_3"
+			style="@style/Harvana.Segment"
+			android:layout_width="0dp"
+			android:layout_height="50dp"
+			android:layout_weight="1"
+			android:text="Monthly"
+			android:textSize="12.5sp" />
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/tg_create_cycle_4"
+			style="@style/Harvana.Segment"
+			android:layout_width="0dp"
+			android:layout_height="50dp"
+			android:layout_weight="1"
+			android:text="Other"
+			android:textSize="12.5sp" />
+
+	</com.google.android.material.button.MaterialButtonToggleGroup>
+
+	<EditText
+		android:id="@+id/et_create_cycle_days"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:minHeight="50dp"
+		android:background="@drawable/bg_field_surface"
+		android:hint="Days between rounds, 1 to 30"
+		android:inputType="number"
+		android:paddingStart="14dp"
+		android:paddingTop="12dp"
+		android:paddingEnd="14dp"
+		android:paddingBottom="12dp"
+		android:textColor="@color/colorTextPrimary"
+		android:textColorHint="@color/colorTextTertiary"
+		android:layout_marginTop="8dp"
+		android:singleLine="true"
+		android:visibility="gone" />
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingTop="16dp"
+		android:paddingBottom="6dp"
+		android:text="What this adds up to"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="13sp"
+		android:textStyle="bold" />
+
+	<LinearLayout
+		android:id="@+id/create_rounds_summary"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical" />
+</LinearLayout>

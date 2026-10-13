@@ -853,11 +853,16 @@ public class DappBrowserActivity extends AppCompatActivity {
                         com.harvana.app.wallet.CustomAssets.registry(want, (listed, err) -> {
                             if (listed != null && n.icon.isEmpty()) n.icon = listed.icon;
                             com.harvana.app.wallet.NetworkSheets.approve(this, n, origin, listed != null, () -> {
-                                release();
-                                if (!origin.equals(pageOrigin)) { error(id, 4001, "User rejected the request."); return; }
+                                if (!origin.equals(pageOrigin)) { release(); error(id, 4001, "User rejected the request."); return; }
                                 com.harvana.app.wallet.CustomAssets.addNetwork(this, n);
-                                switchChain("C:" + want);
-                                ok(id, JSONObject.NULL);
+                                // Then, as MetaMask does, ask to switch to it. The request is answered either way: the network is added.
+                                String key = "C:" + want;
+                                com.harvana.app.wallet.NetworkSheets.switchNetwork(this, origin, harvanaShown ? "HARV" : chainKey,
+                                        harvanaShown ? "Harvana" : net().name, key, n.chainName, () -> {
+                                            release();
+                                            if (origin.equals(pageOrigin)) switchChain(key);
+                                            ok(id, JSONObject.NULL);
+                                        }, () -> { release(); ok(id, JSONObject.NULL); });
                             }, () -> { release(); error(id, 4001, "User rejected the request."); });
                         });
                     });

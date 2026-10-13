@@ -10,6 +10,7 @@
 - Approval sheet before anything is added (`sheet_approve_network.xml`): network name, Network URL, Chain ID, Currency symbol, View all details (full RPC, block explorer, decimals), a warning when the chain list does not know the chain ID, Cancel / Approve.
 - dApp browser: `wallet_addEthereumChain` checks the site's RPC answers with the chain ID it claims, then shows the approval sheet with the site on top and switches to it; `wallet_switchEthereumChain` shows "Allow this site to switch the network?" (from → to, `sheet_switch_network.xml`). The network picker lists added networks and has Add network. Transactions on an added network use its RPC, chain ID and coin symbol.
 - "Add a chain" in Add coins opens the Networks screen.
+- A site's add-network request now goes like MetaMask: Approve adds the network, then "Allow this site to switch the network?" asks before switching (Cancel keeps the network added and stays where you are).
 
 ## 13 Oct 2026 — Screens built in code now have XML layouts
 

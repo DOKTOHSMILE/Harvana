@@ -66,7 +66,7 @@ public final class TokenScan {
         }, "token-scan").start();
     }
 
-    private static CustomAssets.Asset tron(String contract) {
+    static CustomAssets.Asset tron(String contract) {
         String[] m = Trc20.read(contract);
         if (m == null) return null;
         CustomAssets.Asset a = base(Trc20.FAMILY, "TRX", contract);
@@ -80,7 +80,7 @@ public final class TokenScan {
         return a;
     }
 
-    private static CustomAssets.Asset solana(String mint) {
+    static CustomAssets.Asset solana(String mint) {
         try {
             String[] m = SplToken.mint(Net.solRpc(), mint);
             if (m == null) return null;
@@ -112,7 +112,7 @@ public final class TokenScan {
         }
     }
 
-    private static CustomAssets.Asset near(CustomAssets.Asset chain, String id) {
+    static CustomAssets.Asset near(CustomAssets.Asset chain, String id) {
         try {
             String[] m = NearProtocol.tokenMetadata(chain.rpc, id);
             CustomAssets.Asset a = base(NearProtocol.FAMILY, chain.key(), id);

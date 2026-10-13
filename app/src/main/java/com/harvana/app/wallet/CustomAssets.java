@@ -928,7 +928,7 @@ public final class CustomAssets {
             row.setOnLongClickListener(v -> {
                 com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c).setTitle("Remove " + t.symbol + "?")
                         .setNegativeButton("Cancel", null)
-                        .setPositiveButton("Remove", (dd, w) -> { remove(c, t.key()); d.dismiss(); if (onChange != null) onChange.run(); manage(c, chain, onChange); }));
+                        .setPositiveButton("Remove", (dd, w) -> { remove(c, t.key()); TokenDiscovery.forget(c, t.key()); d.dismiss(); if (onChange != null) onChange.run(); manage(c, chain, onChange); }));
                 return true;
             });
             root.addView(row);
@@ -941,7 +941,7 @@ public final class CustomAssets {
                     .setTitle("Remove " + added.chainName + " and its tokens?")
                     .setNegativeButton("Cancel", null)
                     .setPositiveButton("Remove", (dd, w) -> {
-                        for (Asset t : tokens) remove(c, t.key());
+                        for (Asset t : tokens) { remove(c, t.key()); TokenDiscovery.forget(c, t.key()); }
                         remove(c, added.key());
                         d.dismiss();
                         if (onChange != null) onChange.run();

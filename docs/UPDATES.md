@@ -2,6 +2,26 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: BTC testnet balance; received tokens join Assets; Add coins is its own screen
+
+**Bitcoin testnet:** the address service the app used (`mempool.emzy.de/testnet4`) is gone (404), so no testnet balance could load. Now mempool.space, on whichever Bitcoin test network the address has coins on (testnet4, else testnet3; checked every 10 minutes). Coins still unconfirmed count in the balance; sending uses confirmed coins only.
+
+**Received tokens join Assets by themselves** (every 10 minutes at most, when Assets loads). A removed token never comes back; a hidden one stays hidden.
+
+| Chain | Read from | Key |
+|---|---|---|
+| Ethereum, Ethereum Sepolia, Base Sepolia, added EVM chains with Blockscout | Blockscout token list (spam-flagged tokens skipped) | none |
+| BNB Chain, Polygon, Base, other EVM chains without Blockscout | GoldRush (Covalent) balances | the person's free GoldRush key, in Add coins → Token index key |
+| Tron | the account's TRC-20 list | none |
+| Solana | token accounts (Token and Token-2022) | none |
+| NEAR chains with a history API | the account's inventory | none |
+
+BNB Chain's Blockscout address in the app did not exist; removed (BNB history needs a key-based index too).
+
+**Add coins** is now a screen (ManageAssetsActivity): search, a recycled list (coins, Harvana stable coins, added chains and tokens) with switches, dividers; long-press an added row for its chain's tokens, edit and remove. Actions on top: search a token by contract, add a chain, add a token, token index key.
+
+App build only.
+
 ## 13 Oct 2026: find a token on every chain by its contract address
 
 Paste a contract address (Assets search box, or Add → Search a token by contract address). The address is tried on every chain at once; each network where it is a token is listed with its icon, symbol, name and network; tap Add.

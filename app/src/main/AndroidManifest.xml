@@ -101,6 +101,12 @@
 			android:screenOrientation="portrait"
 			android:windowSoftInputMode="adjustResize" />
 		<activity
+			android:name=".wallet.ManageAssetsActivity"
+			android:label="Add coins"
+			android:exported="false"
+			android:screenOrientation="portrait"
+			android:windowSoftInputMode="adjustResize" />
+		<activity
 			android:name=".husd.VaultActivity"
 			android:label="Mint with HARV"
 			android:exported="false"

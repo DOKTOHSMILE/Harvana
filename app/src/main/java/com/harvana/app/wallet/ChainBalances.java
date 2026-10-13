@@ -32,7 +32,7 @@ public final class ChainBalances {
     public static String describe(ChainKeys.Chain chain, String address) {
         try {
             switch (chain) {
-                case BTC: return mempool(Net.btcApi() + "/api/address/", address, "BTC");
+                case BTC: return mempool(Net.btcApi(address) + "/api/address/", address, "BTC");
                 case LTC: return mempool(Net.ltcApi() + "/api/address/", address, "LTC");
                 case DOGE: return doge(address);
                 case ETH: {
@@ -72,7 +72,7 @@ public final class ChainBalances {
         if (key == null || address == null || address.isEmpty()) return "Balance unavailable";
         try {
             switch (key) {
-                case "BTC": return mempool(Net.btcApi() + "/api/address/", address, "BTC");
+                case "BTC": return mempool(Net.btcApi(address) + "/api/address/", address, "BTC");
                 case "LTC": return mempool(Net.ltcApi() + "/api/address/", address, "LTC");
                 case "DOGE": return doge(address);
                 case "ETH": return amount(evmBalance(Net.evm("ETH").rpc, address), 18) + " ETH";
@@ -134,8 +134,10 @@ public final class ChainBalances {
     }
 
     private static String mempool(String base, String address, String unit) throws Exception {
-        JSONObject s = get(base + address).getJSONObject("chain_stats");
-        long sats = s.optLong("funded_txo_sum") - s.optLong("spent_txo_sum");
+        JSONObject j = get(base + address);
+        JSONObject s = j.getJSONObject("chain_stats"), m = j.optJSONObject("mempool_stats");
+        long sats = s.optLong("funded_txo_sum") - s.optLong("spent_txo_sum")
+                + (m == null ? 0 : m.optLong("funded_txo_sum") - m.optLong("spent_txo_sum"));   // coins on the way count too
         return amount(BigInteger.valueOf(sats), 8) + " " + unit;
     }
 

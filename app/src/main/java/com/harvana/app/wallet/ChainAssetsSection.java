@@ -2,18 +2,14 @@ package com.harvana.app.wallet;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.harvana.app.CoinDetailActivity;
 import com.harvana.app.R;
 
@@ -39,128 +35,13 @@ public final class ChainAssetsSection {
         return true;
     }
 
-    private static void setShown(Context c, String key, boolean on) {
+    static void setShown(Context c, String key, boolean on) {
         c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(key, on).apply();
     }
 
-    /** Opens the picker; {@code onChange} runs after any toggle so the list can redraw. */
+    /** Opens "Add coins" (its own screen, ManageAssetsActivity); {@code onChange} runs when it closes after a change. */
     public static void showPicker(Context c, Runnable onChange) {
-        // The app's sheet: rounded top, a small handle, opened to the full screen.
-        BottomSheetDialog d = com.harvana.app.p2p.ThemedDialogs.sheet(c);
-        LinearLayout root = new LinearLayout(c);
-        root.setOrientation(LinearLayout.VERTICAL);
-        int p = dp(c, 20);
-        root.setPadding(p, dp(c, 10), p, p);
-        View handle = new View(c);
-        android.graphics.drawable.GradientDrawable hb = new android.graphics.drawable.GradientDrawable();
-        hb.setCornerRadius(dp(c, 2));
-        hb.setColor(ContextCompat.getColor(c, R.color.colorTextTertiary));
-        handle.setBackground(hb);
-        LinearLayout.LayoutParams hlp = new LinearLayout.LayoutParams(dp(c, 36), dp(c, 4));
-        hlp.gravity = android.view.Gravity.CENTER_HORIZONTAL;
-        hlp.bottomMargin = dp(c, 14);
-        root.addView(handle, hlp);
-        TextView title = new TextView(c);
-        title.setText("Add coins");
-        title.setTextSize(18);
-        title.setTypeface(Typeface.DEFAULT_BOLD);
-        title.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
-        root.addView(title);
-        TextView sub = new TextView(c);
-        sub.setText("Each coin is its own wallet, from the same recovery phrase. Turn one off to hide it.");
-        sub.setTextSize(13);
-        sub.setTextColor(ContextCompat.getColor(c, R.color.colorTextSecondary));
-        sub.setPadding(0, dp(c, 4), 0, dp(c, 8));
-        root.addView(sub);
-        for (CoinCatalog.Coin coin : CoinCatalog.others()) root.addView(toggleRow(c, coin, onChange));
-
-        TextView stables = new TextView(c);
-        stables.setText("Harvana stable coins");
-        stables.setTextSize(15);
-        stables.setTypeface(Typeface.DEFAULT_BOLD);
-        stables.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
-        stables.setPadding(0, dp(c, 16), 0, dp(c, 4));
-        root.addView(stables);
-        for (String code : com.harvana.app.husd.Stable.CODES) root.addView(stableRow(c, code, onChange));
-
-        // At the end of the list: for anything not listed.
-        TextView missing = new TextView(c);
-        missing.setText("Can't find your coin? Add it yourself: any EVM chain by its chain ID, or a token by its contract address.");
-        missing.setTextSize(13);
-        missing.setGravity(android.view.Gravity.CENTER);
-        missing.setTextColor(ContextCompat.getColor(c, R.color.colorTextSecondary));
-        missing.setPadding(0, dp(c, 18), 0, dp(c, 8));
-        root.addView(missing);
-        com.google.android.material.button.MaterialButton custom = new com.google.android.material.button.MaterialButton(
-                c, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
-        custom.setText("Add a custom chain or token");
-        custom.setAllCaps(false);
-        custom.setGravity(android.view.Gravity.CENTER);
-        custom.setIconResource(R.drawable.icon_add_circle_outline_round);
-        custom.setIconSize(dp(c, 24));
-        custom.setIconGravity(com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_START);
-        custom.setCornerRadius(dp(c, 14));
-        custom.setOnClickListener(v -> { d.dismiss(); CustomAssets.showAdd(c, onChange); });
-        root.addView(custom, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(c, 48)));
-
-        androidx.core.widget.NestedScrollView scroll = new androidx.core.widget.NestedScrollView(c);
-        scroll.addView(root);
-        d.setContentView(scroll);
-        d.setOnShowListener(x -> {
-            View sheet = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            if (sheet != null) {
-                ViewGroup.LayoutParams lp = sheet.getLayoutParams();
-                lp.height = ViewGroup.LayoutParams.MATCH_PARENT;      // full screen
-                sheet.setLayoutParams(lp);
-            }
-        });
-        d.show();
-    }
-
-    private static View stableRow(Context c, String code, Runnable onChange) {
-        LinearLayout row = new LinearLayout(c);
-        row.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        row.setPadding(0, dp(c, 8), 0, dp(c, 8));
-        ImageView icon = new ImageView(c);
-        int s = dp(c, 36);
-        icon.setLayoutParams(new LinearLayout.LayoutParams(s, s));
-        icon.setImageDrawable(com.harvana.app.husd.StableIcon.drawable(c, code));
-        row.addView(icon);
-        TextView t = new TextView(c);
-        t.setText(com.harvana.app.husd.Stable.symbol(code) + " · " + com.harvana.app.husd.Stable.name(code));
-        t.setTextSize(15);
-        t.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
-        t.setPadding(dp(c, 12), 0, 0, 0);
-        row.addView(t, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-        SwitchMaterial sw = new SwitchMaterial(c);
-        sw.setChecked(shown(c, code));
-        sw.setOnCheckedChangeListener((b, on) -> { setShown(c, code, on); if (onChange != null) onChange.run(); });
-        row.addView(sw);
-        row.setOnClickListener(v -> sw.toggle());
-        return row;
-    }
-
-    private static View toggleRow(Context c, CoinCatalog.Coin coin, Runnable onChange) {
-        LinearLayout row = new LinearLayout(c);
-        row.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        row.setPadding(0, dp(c, 8), 0, dp(c, 8));
-        ImageView icon = new ImageView(c);
-        int s = dp(c, 36);
-        icon.setLayoutParams(new LinearLayout.LayoutParams(s, s));
-        icon.setImageResource(coin.icon);
-        row.addView(icon);
-        TextView t = new TextView(c);
-        t.setText(coin.name);
-        t.setTextSize(15);
-        t.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
-        t.setPadding(dp(c, 12), 0, 0, 0);
-        row.addView(t, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-        SwitchMaterial sw = new SwitchMaterial(c);
-        sw.setChecked(shown(c, coin.key));
-        sw.setOnCheckedChangeListener((b, on) -> { setShown(c, coin.key, on); if (onChange != null) onChange.run(); });
-        row.addView(sw);
-        row.setOnClickListener(v -> sw.toggle());
-        return row;
+        ManageAssetsActivity.open(c, onChange);
     }
 
     /** Draws one card per shown coin. A refresh updates the numbers in place and does not clear the list first. */

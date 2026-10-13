@@ -36,7 +36,7 @@ public final class ChainSend {
             case "BNB": { Net.Evm n = Net.evm("BNB"); return evm(mnemonic, from, to, amount, n.rpc, n.chainId, 18); }
             case "POL": { Net.Evm n = Net.evm("POL"); return evm(mnemonic, from, to, amount, n.rpc, n.chainId, 18); }
             case "BASE": { Net.Evm n = Net.evm("BASE"); return evm(mnemonic, from, to, amount, n.rpc, n.chainId, 18); }
-            case "BTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.BTC, Net.btcApi(), true, false);   // legacy P2PKH coins
+            case "BTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.BTC, Net.btcApi(from), true, false);   // legacy P2PKH coins
             case "LTC": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.LTC, Net.ltcApi(), true, true);
             case "DOGE": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.DOGE, Net.TEST ? "" : "https://api.blockcypher.com/v1/doge/main", false, false);
             case "TRX": return tron(mnemonic, from, to, amount);

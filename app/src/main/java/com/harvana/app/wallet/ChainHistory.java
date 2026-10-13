@@ -72,7 +72,7 @@ public final class ChainHistory {
                                 parse(p.amount), parseIso(p.when), p.hash, Net.piTxPage(p.hash)));
                     }
                     break;
-                case "BTC": mempool(out, Net.btcApi(), "BTC", Net.label("Bitcoin"), addr); break;
+                case "BTC": mempool(out, Net.btcApi(addr), "BTC", Net.label("Bitcoin"), addr); break;
                 case "LTC": mempool(out, Net.ltcApi(), "LTC", Net.label("Litecoin"), addr); break;
                 case "DOGE": doge(out, addr); break;
                 case "ETH": evmList(out, "ETH", addr); break;

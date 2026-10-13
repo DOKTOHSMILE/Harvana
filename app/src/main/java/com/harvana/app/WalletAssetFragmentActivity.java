@@ -301,6 +301,10 @@ public class WalletAssetFragmentActivity extends Fragment {
 		final Context context = getContext();
 		com.harvana.app.wallet.ChainAssetsSection.render(context, chainAssets, wallet_address);
 		if (getView() != null) com.harvana.app.wallet.CustomAssets.render(context, getView().findViewById(R.id.custom_assets), wallet_address);
+		// Tokens this wallet holds but has not listed join the list by themselves (TokenDiscovery).
+		com.harvana.app.wallet.TokenDiscovery.run(context, wallet_address, () -> {
+			if (getView() != null && getContext() != null) com.harvana.app.wallet.CustomAssets.render(getContext(), getView().findViewById(R.id.custom_assets), wallet_address);
+		});
 		_renderStables();
 		
 		java.util.List<HashMap<String, Object>> cachedCoins =

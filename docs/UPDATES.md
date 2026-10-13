@@ -2,6 +2,18 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: Home without Swap; cleaner Home layout; total saved in your currency
+
+| Part | Before | Now |
+|---|---|---|
+| Money buttons | Send, Receive, P2P, Swap (round icons, tiny labels) | Send, Receive, P2P: icon beside the name, 40dp, teal, same as the Assets screen. Swap stays in Web3 / Harvana Swap |
+| Layout | Every section inside one large outlined card (double borders) | Sections sit directly on the page |
+| Balance card | Cream outline | Card outline like the other cards |
+| Greeting | Name, date and a sentence | Name and date |
+| Total saved | Group payments added up as HARV | Every group from the node, each in its own coin, totalled in your display currency |
+
+App build only.
+
 ## 13 Oct 2026: coin page without the large Explorer button
 
 - The full-width Explorer button above Receive/Send is gone.

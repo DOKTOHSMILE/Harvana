@@ -62,13 +62,13 @@
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				android:layout_marginLeft="10dp"
-				android:layout_marginTop="15dp"
+				android:layout_marginTop="6dp"
 				android:layout_marginRight="10dp"
 				android:layout_marginBottom="10dp"
-				app:cardBackgroundColor="@color/colorSurface"
+				app:cardBackgroundColor="@android:color/transparent"
 				app:cardCornerRadius="20dp"
 				app:cardElevation="0dp"
-				app:strokeWidth="1dp"
+				app:strokeWidth="0dp"
 				app:strokeColor="@color/whiteFaint10">
 				<LinearLayout
 					android:id="@+id/linear217"
@@ -434,11 +434,11 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="18dp"
-						app:cardBackgroundColor="@color/darkFaint10"
+						app:cardBackgroundColor="@color/colorSurface"
 						app:cardCornerRadius="16dp"
 						app:cardElevation="0dp"
 						app:strokeWidth="1dp"
-						app:strokeColor="@color/colorAccent">
+						app:strokeColor="@color/colorCardStroke">
 						<LinearLayout
 							android:id="@+id/linear30"
 							android:layout_width="match_parent"

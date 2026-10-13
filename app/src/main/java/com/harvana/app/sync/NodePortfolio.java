@@ -25,7 +25,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class NodePortfolio {
     public static final class Entry {
         public String firestoreGroupId, nodeId, name, family;
+        /** The group's coin ("HNGN", …); empty for a HARV group made before coins. Position amounts are in it. */
+        public String asset = "";
         public Position position;
+
+        /** Dollars per unit of this entry's coin; NaN when unknown. */
+        public double usdPerUnit(Context c) {
+            if (com.harvana.app.husd.Stable.isStable(asset)) {
+                double per = com.harvana.app.wallet.FxRates.perUsd(c, com.harvana.app.husd.Stable.currency(asset));
+                return Double.isNaN(per) || per <= 0 ? Double.NaN : 1d / per;
+            }
+            return com.harvana.app.wallet.HarvPrice.usd(c, com.harvana.app.wallet.HarvPrice.peek());
+        }
     }
 
     public static final class Portfolio {
@@ -35,6 +46,19 @@ public final class NodePortfolio {
         public double savedHarv() { double s = 0; synchronized (entries) { for (Entry e : entries) s += e.position.savedHarv; } return s; }
         public double outstandingHarv() { double s = 0; synchronized (entries) { for (Entry e : entries) s += e.position.outstandingHarv(); } return s; }
         public double borrowedHarv() { double s = 0; synchronized (entries) { for (Entry e : entries) s += e.position.borrowedHarv; } return s; }
+        /** Everything saved across groups, in dollars (each group in its own coin); NaN when a price is missing. */
+        public double savedUsd(Context c) {
+            double s = 0;
+            synchronized (entries) {
+                for (Entry e : entries) {
+                    if (e.position.savedHarv <= 0) continue;
+                    double u = e.usdPerUnit(c);
+                    if (Double.isNaN(u)) return Double.NaN;
+                    s += e.position.savedHarv * u;
+                }
+            }
+            return s;
+        }
         public int loansOpen() { int n = 0; synchronized (entries) { for (Entry e : entries) if (e.position.outstandingHarv() > 0) n++; } return n; }
     }
 
@@ -112,15 +136,15 @@ public final class NodePortfolio {
                         final Map<String, Object> member = JsonMaps.toMap(memberJson);
                         if ("ACCUM".equals(family) && member.get("currentLineId") != null) {
                             NodeGroupClient.getAccumLine(nodeId, String.valueOf(member.get("currentLineId")), new NodeGroupClient.Callback() {
-                                @Override public void onSuccess(JSONObject l) { add(p, fsId, nodeId, name, family, NodePositions.accum(member, JsonMaps.toMap(l), System.currentTimeMillis()), done); }
-                                @Override public void onError(String e) { add(p, fsId, nodeId, name, family, NodePositions.accum(member, null, 0), done); }
+                                @Override public void onSuccess(JSONObject l) { add(p, fsId, nodeId, name, family, group, NodePositions.accum(member, JsonMaps.toMap(l), System.currentTimeMillis()), done); }
+                                @Override public void onError(String e) { add(p, fsId, nodeId, name, family, group, NodePositions.accum(member, null, 0), done); }
                             });
                         } else if ("ACCUM".equals(family)) {
-                            add(p, fsId, nodeId, name, family, NodePositions.accum(member, null, 0), done);
+                            add(p, fsId, nodeId, name, family, group, NodePositions.accum(member, null, 0), done);
                         } else if ("CIRCLE".equals(family)) {
-                            add(p, fsId, nodeId, name, family, NodePositions.circle(group, member), done);
+                            add(p, fsId, nodeId, name, family, group, NodePositions.circle(group, member), done);
                         } else {
-                            add(p, fsId, nodeId, name, family, NodePositions.fixed(group, member), done);
+                            add(p, fsId, nodeId, name, family, group, NodePositions.fixed(group, member), done);
                         }
                     }
                     @Override public void onError(String e) { done.run(); } // not a member on the node (yet)
@@ -136,10 +160,16 @@ public final class NodePortfolio {
         else NodeGroupClient.getFixedGroup(nodeId, onGroup);
     }
 
-    private static void add(Portfolio p, String fsId, String nodeId, String name, String family, Position pos, Runnable done) {
+    private static void add(Portfolio p, String fsId, String nodeId, String name, String family, Map<String, Object> group, Position pos, Runnable done) {
         if (pos.stillIn || pos.savedHarv > 0) {
             Entry e = new Entry();
             e.firestoreGroupId = fsId; e.nodeId = nodeId; e.name = name; e.family = family; e.position = pos;
+            Object a = group == null ? null : group.get("asset");
+            e.asset = a == null ? "" : String.valueOf(a);
+            if (com.harvana.app.husd.Stable.isStable(e.asset)) {
+                // NodePositions reads raw amounts as HARV (8 decimals); a stable coin has 6, so its units are 100× that.
+                pos.savedHarv *= 100; pos.borrowedHarv *= 100; pos.repaidHarv *= 100;
+            }
             p.entries.add(e);
         }
         done.run();

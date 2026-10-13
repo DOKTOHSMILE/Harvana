@@ -457,7 +457,7 @@ public class HomeFragmentActivity extends Fragment {
 		if (textview2 != null)
 		textview2.setText(new SimpleDateFormat("EEEE dd MMMM", Locale.getDefault()).format(c.getTime()));
 		if (textview4 != null)
-		textview4.setText("Here's what's happening in your circles today.");
+		textview4.setVisibility(View.GONE);                 // values only on Home: the greeting and the date
 		_loadProfile();
 		_loadWalletBalance();
 		_loadLearnHubPreview();
@@ -1401,19 +1401,32 @@ public class HomeFragmentActivity extends Fragment {
 		String wallet = WalletManager.getActiveWalletAddress(getContext());
 		com.harvana.app.sync.NodePortfolio.load(getContext(), uid, wallet, p -> {
 			nodeSaved = p.savedHarv();
+			nodePortfolio = p;
 			nodeLoanOut = p.outstandingHarv();
 			nodeLoanCount = p.loansOpen();
 			nodeGroupCount = p.entries.size();
 			_applyTotalSaved(fsSaved);
+			// The coins' dollar rates and HARV's price, then the total again in the display currency.
+			if (getContext() != null) com.harvana.app.wallet.FxRates.load(getContext(),
+					() -> com.harvana.app.wallet.HarvPrice.get(q -> _applyTotalSaved(fsSaved)));
 			_renderLoans();
 		});
 	}
 	
+	/** The node's view of the member's groups (each in its own coin), once loaded. */
+	private com.harvana.app.sync.NodePortfolio.Portfolio nodePortfolio;
+
 	private void _applyTotalSaved(double harv) {
 		fsSaved = harv;
 		if (!isAdded() || getActivity() == null || text_val_saved == null) return;
 		getActivity().runOnUiThread(() -> {
-			text_val_saved.setText(_fmtHarv(fsSaved + nodeSaved));
+			// Groups save in stable coins (hNGN, hUSD, …), so the total is shown in the display currency, from the
+			// node's records: one figure across groups in different coins (owner, 13 Oct 2026).
+			if (nodePortfolio == null || getContext() == null) { text_val_saved.setText("—"); }
+			else {
+				double usd = nodePortfolio.savedUsd(getContext());
+				text_val_saved.setText(Double.isNaN(usd) ? "—" : com.harvana.app.wallet.FxRates.money(getContext(), usd));
+			}
 			if (text_sub_saved != null) {
 				int n = group_map_list.size();
 				text_sub_saved.setText(n <= 0 ? "No group savings yet"
@@ -1495,7 +1508,6 @@ public class HomeFragmentActivity extends Fragment {
 			row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
 			row.addView(_quickAction(R.drawable.ic_action_receive, "Receive", ReceiveActivity.class), _quickActionParams(d, true));
 			row.addView(_quickAction(R.drawable.ic_action_buy, "P2P", P2pMarketplaceActivity.class), _quickActionParams(d, true));
-			row.addView(_quickAction(R.drawable.icon_currency_exchange_twotone, "Swap", com.harvana.app.swap.SwapActivity.class), _quickActionParams(d, true));
 			
 			card.removeView(top);
 			android.widget.LinearLayout box = new android.widget.LinearLayout(getContext());
@@ -1537,36 +1549,33 @@ public class HomeFragmentActivity extends Fragment {
 		return lp;
 	}
 	
+	/** One of Home's money buttons: icon beside the name, 40dp, like the Assets screen's buttons. */
 	private View _quickAction(int iconRes, String label, final Class<?> target) {
 		final float d = getResources().getDisplayMetrics().density;
 		android.widget.LinearLayout cell = new android.widget.LinearLayout(getContext());
-		cell.setOrientation(android.widget.LinearLayout.VERTICAL);
-		cell.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
-		cell.setPadding(0, (int) (4 * d), 0, (int) (4 * d));
-		cell.setBackgroundResource(R.drawable.bg_quick_action_hero);
+		cell.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+		cell.setGravity(android.view.Gravity.CENTER);
+		cell.setPadding((int) (4 * d), (int) (9 * d), (int) (4 * d), (int) (9 * d));
+		cell.setBackgroundResource(R.drawable.bg_quick_action_card);
 		cell.setClickable(true);
 		cell.setFocusable(true);
-		cell.setMinimumHeight((int) (36 * d));
-		
+		cell.setMinimumHeight((int) (40 * d));
+
 		android.widget.ImageView icon = new android.widget.ImageView(getContext());
 		icon.setImageResource(iconRes);
-		icon.setColorFilter(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextOnAccent));
-		icon.setBackgroundResource(R.drawable.bg_quick_action_icon);
-		int pad = (int) (4 * d);
-		icon.setPadding(pad, pad, pad, pad);
-		android.widget.LinearLayout.LayoutParams ilp = new android.widget.LinearLayout.LayoutParams((int) (20 * d), (int) (20 * d));
-		ilp.gravity = android.view.Gravity.CENTER_HORIZONTAL;
-		cell.addView(icon, ilp);
-		
+		icon.setColorFilter(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorAccent));
+		cell.addView(icon, new android.widget.LinearLayout.LayoutParams((int) (17 * d), (int) (17 * d)));
+
 		TextView tv = new TextView(getContext());
 		tv.setText(label);
-		tv.setTextSize(10f);
-		tv.setTypeface(null, android.graphics.Typeface.BOLD);
+		tv.setTextSize(12f);
+		tv.setMaxLines(1);
+		tv.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
 		tv.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextPrimary));
-		tv.setGravity(android.view.Gravity.CENTER);
-		tv.setPadding(0, (int) (4 * d), 0, 0);
-		cell.addView(tv, new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-		
+		android.widget.LinearLayout.LayoutParams tlp = new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		tlp.leftMargin = (int) (6 * d);
+		cell.addView(tv, tlp);
+
 		cell.setContentDescription(label);
 		cell.setOnClickListener(v -> startActivity(new Intent(getContext(), target)));
 		return cell;

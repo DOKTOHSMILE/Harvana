@@ -105,6 +105,7 @@
 			android:textStyle="bold" />
 
 		<com.google.android.material.button.MaterialButton
+			style="@style/HarvanaButton"
 			android:id="@+id/btn_qr_share"
 			android:layout_width="match_parent"
 			android:layout_height="52dp"
@@ -114,7 +115,7 @@
 
 		<com.google.android.material.button.MaterialButton
 			android:id="@+id/btn_qr_scan"
-			style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+			style="@style/HarvanaButton.Outlined"
 			android:layout_width="match_parent"
 			android:layout_height="52dp"
 			android:layout_marginTop="10dp"

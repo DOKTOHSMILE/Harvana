@@ -11,14 +11,10 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -43,24 +39,10 @@ public class ImageViewerActivity extends AppCompatActivity {
         super.onCreate(b);
         String url = getIntent().getStringExtra(X_URL);
         if (url == null) { finish(); return; }
-        float d = getResources().getDisplayMetrics().density;
-        FrameLayout root = new FrameLayout(this);
-        root.setBackgroundColor(Color.BLACK);
-        final ZoomView zoom = new ZoomView(this);
-        root.addView(zoom, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        final ProgressBar busy = new ProgressBar(this);
-        root.addView(busy, new FrameLayout.LayoutParams((int) (40 * d), (int) (40 * d), Gravity.CENTER));
-        android.widget.ImageView close = new android.widget.ImageView(this);
-        close.setImageResource(com.harvana.app.R.drawable.ic_close);
-        close.setColorFilter(Color.WHITE);
-        close.setPadding((int) (11 * d), (int) (11 * d), (int) (11 * d), (int) (11 * d));
-        close.setBackgroundColor(0x66000000);
-        close.setContentDescription("Close");
-        close.setOnClickListener(v -> finish());
-        FrameLayout.LayoutParams cp = new FrameLayout.LayoutParams((int) (44 * d), (int) (44 * d), Gravity.TOP | Gravity.START);
-        cp.setMargins((int) (12 * d), (int) (36 * d), 0, 0);
-        root.addView(close, cp);
-        setContentView(root);
+        setContentView(com.harvana.app.R.layout.activity_image_viewer);
+        final ZoomView zoom = findViewById(com.harvana.app.R.id.image_viewer_zoom);
+        final ProgressBar busy = findViewById(com.harvana.app.R.id.image_viewer_busy);
+        findViewById(com.harvana.app.R.id.image_viewer_close).setOnClickListener(v -> finish());
         getWindow().setStatusBarColor(Color.BLACK);
         getWindow().setNavigationBarColor(Color.BLACK);
 
@@ -75,7 +57,7 @@ public class ImageViewerActivity extends AppCompatActivity {
     }
 
     /** The zoomable picture. It starts fitted inside the screen and never leaves an empty gap on a side it fills. */
-    private static final class ZoomView extends View {
+    public static final class ZoomView extends View {
         private Bitmap bmp;
         private final Matrix matrix = new Matrix();
         private final Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
@@ -84,8 +66,10 @@ public class ImageViewerActivity extends AppCompatActivity {
         private final ScaleGestureDetector scaler;
         private final GestureDetector taps;
 
-        ZoomView(Context c) {
-            super(c);
+        public ZoomView(Context c) { this(c, null); }
+
+        public ZoomView(Context c, android.util.AttributeSet attrs) {
+            super(c, attrs);
             scaler = new ScaleGestureDetector(c, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
                 @Override public boolean onScale(ScaleGestureDetector s) {
                     if (bmp == null) return true;

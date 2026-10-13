@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Crash screen card: dark navy with a thin border. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+	<solid android:color="#FF131F33" />
+	<corners android:radius="12dp" />
+	<stroke android:width="1px" android:color="#FF1E2D4A" />
+</shape>

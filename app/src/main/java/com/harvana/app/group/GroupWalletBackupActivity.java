@@ -2,21 +2,15 @@ package com.harvana.app.group;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.print.PrintHelper;
 
-import com.harvana.app.utils.StatusBarUtil;
-import com.harvana.app.utils.UiColors;
 import com.harvana.app.wallet.CardTemplate;
 import com.harvana.app.wallet.HarvanaCardRenderer;
 
@@ -31,7 +25,6 @@ public class GroupWalletBackupActivity extends AppCompatActivity {
     public static final String EXTRA_GROUP_ID = "groupId";
     public static final String EXTRA_GROUP_NAME = "groupName";
 
-    private LinearLayout content;
     private ProgressBar progress;
     private Bitmap front, back;
 
@@ -40,23 +33,8 @@ public class GroupWalletBackupActivity extends AppCompatActivity {
         super.onCreate(b);
 		getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE, android.view.WindowManager.LayoutParams.FLAG_SECURE); // no screenshots or recents thumbnails of secrets
 
-        ScrollView sv = new ScrollView(this);
-        sv.setBackgroundColor(UiColors.background());
-        content = new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);
-        int p = dp(16);
-        content.setPadding(p, p, p, p);
-        sv.addView(content);
-        com.harvana.app.utils.AppBar.setContent(this, sv, "Group wallet backup", "Encrypted social backup card");
-
-        addText("Social backup card", 20, true, UiColors.textPrimary());
-        addText("This card is encrypted with a passphrase only the group admin holds. "
-            + "Keep a copy safe: if the admin loses access, the admin's passphrase plus any "
-            + "member's copy of this card can restore the group wallet. On its own, this card "
-            + "cannot move funds.", 14, false, UiColors.textSecondary());
-
-        progress = new ProgressBar(this);
-        content.addView(progress);
+        com.harvana.app.utils.AppBar.setContent(this, com.harvana.app.R.layout.activity_group_wallet_backup, "Group wallet backup", "Encrypted social backup card");
+        progress = findViewById(com.harvana.app.R.id.backup_progress);
         load();
     }
 
@@ -99,16 +77,17 @@ public class GroupWalletBackupActivity extends AppCompatActivity {
     private void show(Bitmap f, Bitmap k) {
         front = f; back = k;
         progress.setVisibility(View.GONE);
-        addImage(f);
-        addImage(k);
-        addButton("Save as PDF", v -> HarvanaCardRenderer.saveAsPdf(this, front, back,
+        ((ImageView) findViewById(com.harvana.app.R.id.iv_backup_front)).setImageBitmap(f);
+        ((ImageView) findViewById(com.harvana.app.R.id.iv_backup_back)).setImageBitmap(k);
+        findViewById(com.harvana.app.R.id.backup_card).setVisibility(View.VISIBLE);
+        findViewById(com.harvana.app.R.id.btn_backup_pdf).setOnClickListener(v -> HarvanaCardRenderer.saveAsPdf(this, front, back,
             "harvana-group-card-" + System.currentTimeMillis(), exportCb("Saved to Downloads/Harvana")));
-        addButton("Save images", v -> {
+        findViewById(com.harvana.app.R.id.btn_backup_images).setOnClickListener(v -> {
             long s = System.currentTimeMillis();
             HarvanaCardRenderer.saveAsPng(this, front, "group-card-front-" + s, exportCb("Front saved"));
             HarvanaCardRenderer.saveAsPng(this, back, "group-card-back-" + s, exportCb("Back saved"));
         });
-        addButton("Print", v -> {
+        findViewById(com.harvana.app.R.id.btn_backup_print).setOnClickListener(v -> {
             PrintHelper ph = new PrintHelper(this);
             ph.setScaleMode(PrintHelper.SCALE_MODE_FIT);
             ph.printBitmap("Group wallet card - front", front);
@@ -129,33 +108,10 @@ public class GroupWalletBackupActivity extends AppCompatActivity {
 
     private void fail(String msg) {
         progress.setVisibility(View.GONE);
-        addText(msg, 14, false, UiColors.error());
+        TextView t = findViewById(com.harvana.app.R.id.tv_backup_error);
+        t.setText(msg);
+        t.setVisibility(View.VISIBLE);
     }
 
     private static String str(Object o) { return o == null ? "" : String.valueOf(o); }
-    private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
-
-    private void addText(String s, int sp, boolean bold, int color) {
-        TextView tv = new TextView(this);
-        tv.setText(s); tv.setTextSize(sp); tv.setTextColor(color);
-        if (bold) tv.setTypeface(null, android.graphics.Typeface.BOLD);
-        tv.setPadding(0, 0, 0, dp(10));
-        content.addView(tv);
-    }
-
-    private void addImage(Bitmap bmp) {
-        ImageView iv = new ImageView(this);
-        iv.setImageBitmap(bmp);
-        iv.setAdjustViewBounds(true);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        lp.bottomMargin = dp(12);
-        content.addView(iv, lp);
-    }
-
-    private void addButton(String label, View.OnClickListener l) {
-        Button btn = com.harvana.app.ui.Btn.tonal(this, label, l);
-        btn.setGravity(Gravity.CENTER);
-        content.addView(btn);
-    }
 }

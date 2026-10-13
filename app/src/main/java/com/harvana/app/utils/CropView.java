@@ -42,8 +42,10 @@ public class CropView extends View {
     private final GestureDetector mover;
     private final float[] v = new float[9];
 
-    public CropView(Context c) {
-        super(c);
+    public CropView(Context c) { this(c, null); }
+
+    public CropView(Context c, android.util.AttributeSet attrs) {
+        super(c, attrs);
         float d = c.getResources().getDisplayMetrics().density;
         slop = 28 * d;
         minBox = 56 * d;

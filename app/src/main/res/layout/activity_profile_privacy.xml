@@ -136,6 +136,7 @@
 				</com.google.android.material.textfield.TextInputLayout>
 
 				<com.google.android.material.button.MaterialButton
+					style="@style/HarvanaButton"
 					android:id="@+id/btn_privacy_save"
 					android:layout_width="match_parent"
 					android:layout_height="52dp"
@@ -381,7 +382,7 @@
 
 		<com.google.android.material.button.MaterialButton
 			android:id="@+id/btn_privacy_preview"
-			style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+			style="@style/HarvanaButton.Outlined"
 			android:layout_width="match_parent"
 			android:layout_height="52dp"
 			android:layout_marginTop="16dp"

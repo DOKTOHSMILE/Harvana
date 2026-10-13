@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Crash screen: what went wrong in plain words, the raw crash message, then Copy log and Restart. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground"
+	android:fillViewport="true">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:padding="24dp">
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="⚠️ Application Crash"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="20sp"
+			android:textStyle="bold" />
+
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="4dp"
+			android:layout_marginBottom="16dp"
+			android:text="An unexpected error caused the app to stop running."
+			android:textColor="#FF8C9BAE"
+			android:textSize="13sp" />
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="16dp"
+			android:background="@drawable/bg_debug_card"
+			android:orientation="vertical"
+			android:padding="16dp">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Crash meaning:"
+				android:textColor="#FF7DD3FC"
+				android:textSize="12sp"
+				android:textStyle="bold" />
+
+			<TextView
+				android:id="@+id/tv_debug_meaning"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingTop="6dp"
+				android:textColor="@color/colorTextPrimary"
+				android:textIsSelectable="true"
+				android:textSize="15sp" />
+
+			<TextView
+				android:id="@+id/tv_debug_where"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingTop="10dp"
+				android:textColor="#FF8C9BAE"
+				android:textSize="12.5sp" />
+
+			<TextView
+				android:id="@+id/tv_debug_advice"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingTop="10dp"
+				android:textColor="#FFB6E3C2"
+				android:textSize="13sp" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_marginBottom="16dp"
+			android:layout_weight="1"
+			android:background="@drawable/bg_debug_card"
+			android:orientation="vertical"
+			android:padding="16dp">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:paddingBottom="8dp"
+				android:text="Crash message:"
+				android:textColor="#FFFF9B9B"
+				android:textSize="12sp"
+				android:textStyle="bold" />
+
+			<TextView
+				android:id="@+id/tv_debug_error"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:fontFamily="monospace"
+				android:textColor="#FFFF6B6B"
+				android:textIsSelectable="true"
+				android:textSize="12sp" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal">
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_debug_copy"
+				style="@style/HarvanaButton"
+				android:layout_width="0dp"
+				android:layout_height="52dp"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1"
+				android:text="Copy Log"
+				android:textColor="#FFFFFFFF"
+				app:backgroundTint="#FF1E2D4A" />
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_debug_restart"
+				style="@style/HarvanaButton"
+				android:layout_width="0dp"
+				android:layout_height="52dp"
+				android:layout_marginStart="8dp"
+				android:layout_weight="1"
+				android:text="Restart App"
+				android:textColor="#FFFFFFFF"
+				app:backgroundTint="#FF0066FF" />
+		</LinearLayout>
+	</LinearLayout>
+</ScrollView>

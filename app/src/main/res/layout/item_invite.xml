@@ -72,6 +72,7 @@
 			android:orientation="vertical" />
 
 		<com.google.android.material.button.MaterialButton
+			style="@style/HarvanaButton"
 			android:id="@+id/btn_invite_join"
 			android:layout_width="match_parent"
 			android:layout_height="52dp"
@@ -81,7 +82,7 @@
 
 		<com.google.android.material.button.MaterialButton
 			android:id="@+id/btn_invite_decline"
-			style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+			style="@style/HarvanaButton.Outlined"
 			android:layout_width="match_parent"
 			android:layout_height="52dp"
 			android:text="Decline"

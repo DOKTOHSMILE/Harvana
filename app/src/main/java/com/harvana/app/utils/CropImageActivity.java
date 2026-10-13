@@ -9,11 +9,7 @@ import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,43 +51,15 @@ public class CropImageActivity extends AppCompatActivity {
         boolean circle = getIntent().getBooleanExtra(X_CIRCLE, false);
         if (photo == null) { finish(); return; }
 
-        float d = getResources().getDisplayMetrics().density;
-        FrameLayout root = new FrameLayout(this);
-        root.setBackgroundColor(Color.BLACK);
-        crop = new CropView(this);
-        root.addView(crop, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-        LinearLayout top = new LinearLayout(this);
-        top.setGravity(Gravity.CENTER_VERTICAL);
-        top.setPadding((int) (16 * d), (int) (14 * d), (int) (16 * d), (int) (10 * d));
-        TextView cancel = text("Cancel", 15, true);
-        cancel.setOnClickListener(v -> { setResult(RESULT_CANCELED); finish(); });
-        top.addView(cancel);
-        TextView heading = text(title == null ? "Crop" : title, 16, true);
-        heading.setGravity(Gravity.CENTER);
-        top.addView(heading, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        top.addView(text("          ", 15, false));      // keeps the heading centred against Cancel
-        root.addView(top, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP));
-
-        LinearLayout bottom = new LinearLayout(this);
-        bottom.setOrientation(LinearLayout.VERTICAL);
-        bottom.setGravity(Gravity.CENTER_HORIZONTAL);
-        bottom.setPadding((int) (24 * d), (int) (10 * d), (int) (24 * d), (int) (24 * d));
-        TextView hint = text(aspect <= 0f ? "Drag the corners or edges to choose the area. Drag inside to move it." : "Drag to move. Pinch to zoom.", 13, false);
-        hint.setTextColor(0xFFB6BDC8);
-        hint.setPadding(0, 0, 0, (int) (12 * d));
-        bottom.addView(hint);
-        use = new MaterialButton(this);
-        use.setText("Use photo");
-        use.setAllCaps(false);
-        use.setEnabled(false);
+        setContentView(com.harvana.app.R.layout.activity_crop_image);
+        crop = findViewById(com.harvana.app.R.id.crop_view);
+        busy = findViewById(com.harvana.app.R.id.crop_busy);
+        use = findViewById(com.harvana.app.R.id.crop_use);
+        findViewById(com.harvana.app.R.id.crop_cancel).setOnClickListener(v -> { setResult(RESULT_CANCELED); finish(); });
+        if (title != null) ((TextView) findViewById(com.harvana.app.R.id.crop_title)).setText(title);
+        ((TextView) findViewById(com.harvana.app.R.id.crop_hint)).setText(aspect <= 0f
+                ? "Drag the corners or edges to choose the area. Drag inside to move it." : "Drag to move. Pinch to zoom.");
         use.setOnClickListener(v -> finishCrop());
-        bottom.addView(use, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (50 * d)));
-        root.addView(bottom, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
-
-        busy = new ProgressBar(this);
-        root.addView(busy, new FrameLayout.LayoutParams((int) (40 * d), (int) (40 * d), Gravity.CENTER));
-        setContentView(root);
         getWindow().setStatusBarColor(Color.BLACK);
         getWindow().setNavigationBarColor(Color.BLACK);
 
@@ -105,15 +73,6 @@ public class CropImageActivity extends AppCompatActivity {
                 use.setEnabled(true);
             });
         }).start();
-    }
-
-    private TextView text(String s, float sp, boolean bold) {
-        TextView t = new TextView(this);
-        t.setText(s);
-        t.setTextColor(Color.WHITE);
-        t.setTextSize(sp);
-        if (bold) t.setTypeface(null, android.graphics.Typeface.BOLD);
-        return t;
     }
 
     /** Decodes the picture at a size the phone can hold, turned upright using its EXIF tag. */

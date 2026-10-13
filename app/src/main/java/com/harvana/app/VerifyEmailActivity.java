@@ -1,24 +1,17 @@
 package com.harvana.app;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.view.Gravity;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.harvana.app.auth.EmailVerification;
-import com.harvana.app.utils.UiColors;
 
 /**
  * A signed-in account whose email is not confirmed lands here and goes no further. They can resend the confirmation email
@@ -36,45 +29,19 @@ public class VerifyEmailActivity extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) { goTo(WelcomeActivity.class); return; }
 
-        int pad = dp(24);
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setGravity(Gravity.CENTER_HORIZONTAL);
-        root.setPadding(pad, dp(72), pad, pad);
-        root.setBackgroundColor(ContextCompat.getColor(this, R.color.colorBackground));
-
-        TextView title = text("Confirm your email", 24f, UiColors.textPrimary());
-        title.setTypeface(title.getTypeface(), android.graphics.Typeface.BOLD);
-        root.addView(title);
-
+        setContentView(R.layout.activity_verify_email);
         String email = user.getEmail() == null ? "your email" : user.getEmail();
-        TextView body = text("We sent a confirmation link to " + email + ". Open it, then come back and tap the button below. "
-                + "You cannot use Harvana until the email is confirmed. Check your spam folder if you do not see it.", 14f,
-                ContextCompat.getColor(this, R.color.colorTextTertiary));
-        body.setPadding(0, dp(12), 0, dp(24));
-        root.addView(body);
-
-        state = text("", 13f, ContextCompat.getColor(this, R.color.colorTextTertiary));
-        state.setPadding(0, 0, 0, dp(12));
-        root.addView(state);
-
-        confirmed = button("I have confirmed my email", true);
+        ((TextView) findViewById(R.id.tv_verify_body)).setText(email);
+        state = findViewById(R.id.tv_verify_state);
+        confirmed = findViewById(R.id.btn_verify_confirmed);
         confirmed.setOnClickListener(v -> checkNow());
-        root.addView(confirmed, buttonParams());
-
-        resend = button("Resend confirmation email", false);
+        resend = findViewById(R.id.btn_verify_resend);
         resend.setOnClickListener(v -> resendEmail());
-        root.addView(resend, buttonParams());
-
-        TextView other = text("Use a different account", 14f, ContextCompat.getColor(this, R.color.colorAccent));
-        other.setPadding(0, dp(20), 0, dp(8));
-        other.setOnClickListener(v -> {
+        findViewById(R.id.tv_verify_other_account).setOnClickListener(v -> {
             com.harvana.app.auth.LogoutManager.logout(this);
             FirebaseAuth.getInstance().signOut();
             goTo(WelcomeActivity.class);
         });
-        root.addView(other);
-        setContentView(root);
     }
 
     @Override
@@ -143,24 +110,4 @@ public class VerifyEmailActivity extends AppCompatActivity {
         startActivity(i);
         finish();
     }
-
-    private TextView text(String s, float size, int color) {
-        TextView t = new TextView(this);
-        t.setText(s);
-        t.setTextSize(size);
-        t.setTextColor(color);
-        return t;
-    }
-
-    private Button button(String label, boolean primary) {
-        return primary ? com.harvana.app.ui.Btn.filled(this, label, null) : com.harvana.app.ui.Btn.tonal(this, label, null);
-    }
-
-    private LinearLayout.LayoutParams buttonParams() {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
-        lp.topMargin = dp(10);
-        return lp;
-    }
-
-    private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
 }

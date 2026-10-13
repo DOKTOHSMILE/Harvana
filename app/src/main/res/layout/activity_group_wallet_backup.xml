@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Group wallet backup: the encrypted card (front and back), then Save as PDF, Save images and Print. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:padding="16dp">
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:paddingBottom="10dp"
+			android:text="Social backup card"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="20sp"
+			android:textStyle="bold" />
+
+		<ProgressBar
+			android:id="@+id/backup_progress"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal" />
+
+		<TextView
+			android:id="@+id/tv_backup_error"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorError"
+			android:textSize="14sp"
+			android:visibility="gone" />
+
+		<LinearLayout
+			android:id="@+id/backup_card"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:visibility="gone">
+
+			<ImageView
+				android:id="@+id/iv_backup_front"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="12dp"
+				android:adjustViewBounds="true"
+				android:contentDescription="Card front" />
+
+			<ImageView
+				android:id="@+id/iv_backup_back"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="12dp"
+				android:adjustViewBounds="true"
+				android:contentDescription="Card back" />
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_backup_pdf"
+				style="@style/HarvanaButton.Tonal"
+				android:layout_width="match_parent"
+				android:layout_height="52dp"
+				android:text="Save as PDF"
+				app:icon="@drawable/icon_save_pdf_line" />
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_backup_images"
+				style="@style/HarvanaButton.Tonal"
+				android:layout_width="match_parent"
+				android:layout_height="52dp"
+				android:layout_marginTop="8dp"
+				android:text="Save images"
+				app:icon="@drawable/icon_save_image_line" />
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_backup_print"
+				style="@style/HarvanaButton.Tonal"
+				android:layout_width="match_parent"
+				android:layout_height="52dp"
+				android:layout_marginTop="8dp"
+				android:text="Print" />
+		</LinearLayout>
+	</LinearLayout>
+</ScrollView>

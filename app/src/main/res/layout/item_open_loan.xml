@@ -56,6 +56,7 @@
 			android:orientation="vertical" />
 
 		<com.google.android.material.button.MaterialButton
+			style="@style/HarvanaButton"
 			android:id="@+id/btn_loan_pay"
 			android:layout_width="match_parent"
 			android:layout_height="52dp"

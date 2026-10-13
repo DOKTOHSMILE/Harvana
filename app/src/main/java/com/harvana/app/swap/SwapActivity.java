@@ -348,7 +348,7 @@ public class SwapActivity extends AppCompatActivity {
         rows.add(new String[]{"At least", fmt(to, minOut(out)) + " " + sym(to)});
         rows.add(new String[]{"Price impact", pct(quote.optLong("priceImpactBps"))});
         rows.add(new String[]{"Pool fee", pct(quote.optLong("feeBps"))});
-        rows.add(new String[]{"tFare", fmt("HARV", quote.optLong("transportFareRaw")) + " HARV · " + quote.optInt("transportMovements", 2) + " movements"});
+        rows.add(new String[]{"tFare", fmt("HARV", quote.optLong("transportFareRaw")) + " HARV"});
         com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Swap " + sym(from) + " for " + sym(to),
                 fmt(from, in) + " " + sym(from), rows, () -> {
                     btnSwap.setEnabled(false);

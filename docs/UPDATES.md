@@ -2,6 +2,14 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: toggles 35dp; tFare without movement counts
+
+- Every toggle (Assets/Activity/Earn, group tabs, coin pages, staking, notifications): 35dp tall (`toggle_height`).
+- Review sheets (Swap screen, Harvana sites in the browser): the tFare row shows only the amount, no "· 2 movements".
+- The Swap and Staking websites no longer show the fee (node update of 13 Oct); the review sheet does.
+
+App build only (with the node update for the websites).
+
 ## 12 Oct 2026 (night): activity icons
 
 | Row | Icon |

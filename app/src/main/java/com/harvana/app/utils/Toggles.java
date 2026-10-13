@@ -7,8 +7,8 @@ import com.google.android.material.tabs.TabLayout;
 import com.harvana.app.R;
 
 /**
- * One look for every toggle in the app: a rounded track with the selected option as an inset pill, 38dp tall
- * (owner: 35 to 40dp; R.dimen.toggle_height). The pill is inset inside the drawable, never by padding on the
+ * One look for every toggle in the app: a rounded track with the selected option as an inset pill, 35dp tall
+ * (owner, 13 Oct 2026: 35dp everywhere; R.dimen.toggle_height). The pill is inset inside the drawable, never by padding on the
  * TabLayout, because TabLayout ignores its end padding when it draws the indicator and the pill ran past the track.
  */
 public final class Toggles {

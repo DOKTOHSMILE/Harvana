@@ -955,7 +955,7 @@ public class DappBrowserActivity extends AppCompatActivity {
                 long one = j.optLong("perMovementRaw", 0);
                 runOnUiThread(() -> {
                     if (busyId != id) return;
-                    rows.add(new String[]{"tFare", (upTo ? "Up to " : "") + fmt(one * movements, "HARV") + " · " + movements + " movements"});
+                    rows.add(new String[]{"tFare", (upTo ? "Up to " : "") + fmt(one * movements, "HARV")});
                     then.run();
                 });
             }

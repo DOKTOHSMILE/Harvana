@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A line in Find friends (nothing found, access off) with Allow when contacts access is off. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:minHeight="50dp"
+	android:gravity="center_vertical"
+	android:orientation="horizontal"
+	android:paddingStart="4dp"
+	android:paddingTop="8dp"
+	android:paddingEnd="4dp"
+	android:paddingBottom="8dp">
+
+	<TextView
+		android:id="@+id/tv_find_note"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:textColor="@color/colorTextSecondary"
+		android:textSize="13sp" />
+
+	<com.google.android.material.button.MaterialButton
+		android:id="@+id/btn_find_allow"
+		style="@style/HarvanaButton"
+		android:layout_width="wrap_content"
+		android:layout_height="36dp"
+		android:minWidth="0dp"
+		android:text="Allow"
+		android:textSize="12sp"
+		android:visibility="gone" />
+</LinearLayout>

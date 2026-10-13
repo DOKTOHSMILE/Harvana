@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One person in Friends: photo, "Follows you", name, @username, trust, badges; Follow / Following and the menu; a divider. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+
+	<LinearLayout
+		android:id="@+id/friend_line"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:minHeight="60dp"
+		android:background="?android:attr/selectableItemBackground"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:paddingTop="10dp"
+		android:paddingBottom="10dp">
+
+		<FrameLayout
+			android:layout_width="40dp"
+			android:layout_height="40dp"
+			android:layout_marginEnd="12dp">
+
+			<TextView
+				android:id="@+id/tv_friend_initials"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:background="@drawable/bg_avatar_disc"
+				android:gravity="center"
+				android:textColor="#FFFFFFFF"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+
+			<ImageView
+				android:id="@+id/iv_friend_photo"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:importantForAccessibility="no"
+				android:scaleType="centerCrop" />
+		</FrameLayout>
+
+		<LinearLayout
+			android:id="@+id/friend_names"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:orientation="vertical">
+
+			<TextView
+				android:id="@+id/tv_friend_follows_you"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Follows you"
+				android:textColor="@color/colorTextTertiary"
+				android:textSize="12sp"
+				android:textStyle="bold"
+				android:visibility="gone" />
+
+			<TextView
+				android:id="@+id/tv_friend_name"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:ellipsize="end"
+				android:maxLines="1"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="16sp"
+				android:textStyle="bold" />
+
+			<TextView
+				android:id="@+id/tv_friend_handle"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13sp"
+				android:visibility="gone" />
+
+			<TextView
+				android:id="@+id/tv_friend_status"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textColor="@color/colorTextTertiary"
+				android:textSize="12.5sp"
+				android:visibility="gone" />
+
+			<TextView
+				android:id="@+id/tv_friend_trust"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="4dp"
+				android:paddingStart="8dp"
+				android:paddingTop="2dp"
+				android:paddingEnd="8dp"
+				android:paddingBottom="2dp"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="11sp"
+				android:textStyle="bold" />
+
+			<LinearLayout
+				android:id="@+id/friend_badges"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:paddingTop="4dp"
+				android:visibility="gone" />
+		</LinearLayout>
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_friend_follow"
+			style="@style/HarvanaButton"
+			android:layout_width="wrap_content"
+			android:layout_height="36dp"
+			android:layout_marginStart="8dp"
+			android:minWidth="0dp"
+			android:textSize="13sp"
+			android:visibility="gone" />
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_friend_following"
+			style="@style/HarvanaButton.Outlined"
+			android:layout_width="wrap_content"
+			android:layout_height="36dp"
+			android:layout_marginStart="8dp"
+			android:minWidth="0dp"
+			android:text="Following"
+			android:textSize="13sp"
+			android:visibility="gone" />
+
+		<ImageView
+			android:id="@+id/iv_friend_more"
+			android:layout_width="36dp"
+			android:layout_height="36dp"
+			android:background="?android:attr/selectableItemBackgroundBorderless"
+			android:contentDescription="More"
+			android:padding="8dp"
+			android:src="@drawable/ic_more_vert_line"
+			android:visibility="gone"
+			app:tint="@color/colorTextSecondary" />
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/friend_referral_buttons"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:paddingStart="52dp"
+		android:paddingBottom="10dp"
+		android:visibility="gone">
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_friend_confirm"
+			style="@style/HarvanaButton"
+			android:layout_width="wrap_content"
+			android:layout_height="36dp"
+			android:minWidth="0dp"
+			android:text="Confirm"
+			android:textSize="13sp" />
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_friend_decline"
+			style="@style/HarvanaButton.Outlined"
+			android:layout_width="wrap_content"
+			android:layout_height="36dp"
+			android:layout_marginStart="8dp"
+			android:minWidth="0dp"
+			android:text="Decline"
+			android:textSize="13sp" />
+	</LinearLayout>
+
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="0.5dp"
+		android:alpha="0.14"
+		android:background="@color/colorTextTertiary" />
+</LinearLayout>

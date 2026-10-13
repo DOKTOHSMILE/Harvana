@@ -1,23 +1,18 @@
 package com.harvana.app.social;
 
-import android.app.AlertDialog;
 import android.content.Intent;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+
+import com.harvana.app.R;
+import com.google.android.material.button.MaterialButton;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,108 +53,26 @@ public class FriendsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        ScrollView sv = new ScrollView(this);
-        sv.setBackgroundColor(UiColors.background());
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        int p = SocialUi.dp(this, 14);
-        root.setPadding(p, SocialUi.dp(this, 10), p, p);
-        sv.addView(root);
-        AppBar.setContent(this, sv, "Friends", "People you and they both follow");
-
-        // Pill tabs
-        HorizontalScrollView chipScroll = new HorizontalScrollView(this);
-        chipScroll.setHorizontalScrollBarEnabled(false);
-        LinearLayout chipRow = new LinearLayout(this);
-        chipRow.setOrientation(LinearLayout.HORIZONTAL);
-        String[] names = {"Friends", "Following", "Followers", "Referrals", "Blocked"};
+        AppBar.setContent(this, com.harvana.app.R.layout.activity_friends, "Friends", "People you and they both follow");
+        int[] chipIds = {com.harvana.app.R.id.chip_friends_0, com.harvana.app.R.id.chip_friends_1, com.harvana.app.R.id.chip_friends_2, com.harvana.app.R.id.chip_friends_3, com.harvana.app.R.id.chip_friends_4};
         for (int i = 0; i < 5; i++) {
             final int which = i;
-            TextView c = SocialUi.text(this, names[i], 14, true, UiColors.textPrimary());
-            c.setGravity(Gravity.CENTER);
-            c.setPadding(SocialUi.dp(this, 16), 0, SocialUi.dp(this, 16), 0);
-            c.setOnClickListener(v -> { tab = which; filter = ""; searchBox.setText(""); render(); });
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, SocialUi.dp(this, 38));
-            lp.setMarginEnd(SocialUi.dp(this, 8));
-            chipRow.addView(c, lp);
-            chips[i] = c;
+            chips[i] = findViewById(chipIds[i]);
+            chips[i].setOnClickListener(v -> { tab = which; filter = ""; searchBox.setText(""); render(); });
         }
-        chipScroll.addView(chipRow);
-        root.addView(chipScroll);
-
-        // Ways to bring people in
-        LinearLayout add = new LinearLayout(this);
-        add.setOrientation(LinearLayout.HORIZONTAL);
-        add.addView(quick("@  Username", v -> askUsername()));
-        add.addView(quick("Contacts", v -> startActivity(new Intent(this, FindContactsActivity.class))));
-        add.addView(quick("Invite", v -> shareCode()));
-        LinearLayout.LayoutParams addLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        addLp.topMargin = SocialUi.dp(this, 12);
-        root.addView(add, addLp);
-
-        // Search
-        searchBox = new com.google.android.material.textfield.TextInputEditText(this);
-        searchBox.setSingleLine(true);
-        searchBox.setTextSize(15);
-        searchBox.setTextColor(UiColors.textPrimary());
-        searchBox.setHintTextColor(UiColors.textTertiary());
-        searchBox.setHint("Search friends");
-        searchBox.setCompoundDrawablePadding(SocialUi.dp(this, 8));
-        searchBox.setPadding(SocialUi.dp(this, 16), 0, SocialUi.dp(this, 16), 0);
-        GradientDrawable box = new GradientDrawable();
-        box.setCornerRadius(SocialUi.dp(this, 26));
-        box.setColor(UiColors.surface());
-        searchBox.setBackground(box);
+        findViewById(com.harvana.app.R.id.btn_friends_username).setOnClickListener(v -> askUsername());
+        findViewById(com.harvana.app.R.id.btn_friends_contacts).setOnClickListener(v -> startActivity(new Intent(this, FindContactsActivity.class)));
+        findViewById(com.harvana.app.R.id.btn_friends_invite).setOnClickListener(v -> shareCode());
+        searchBox = findViewById(com.harvana.app.R.id.et_friends_search);
         searchBox.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int c, int d) { }
             @Override public void onTextChanged(CharSequence s, int a, int c, int d) { }
             @Override public void afterTextChanged(Editable e) { filter = e.toString().trim(); render(); }
         });
-        LinearLayout.LayoutParams sLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SocialUi.dp(this, 46));
-        sLp.topMargin = SocialUi.dp(this, 12);
-        root.addView(searchBox, sLp);
-
-        countLine = SocialUi.text(this, "", 20, true, UiColors.textPrimary());
-        countLine.setPadding(SocialUi.dp(this, 2), SocialUi.dp(this, 18), 0, SocialUi.dp(this, 6));
-        root.addView(countLine);
-
-        referralHead = new LinearLayout(this);
-        referralHead.setOrientation(LinearLayout.VERTICAL);
-        root.addView(referralHead);
-
-        listBox = new LinearLayout(this);
-        listBox.setOrientation(LinearLayout.VERTICAL);
-        root.addView(listBox);
+        countLine = findViewById(com.harvana.app.R.id.tv_friends_count);
+        referralHead = findViewById(com.harvana.app.R.id.friends_referral_head);
+        listBox = findViewById(com.harvana.app.R.id.friends_list);
         render();
-    }
-
-    private TextView quick(String label, View.OnClickListener click) {
-        TextView t = SocialUi.text(this, label, 13.5f, true, UiColors.accent());
-        t.setGravity(Gravity.CENTER);
-        GradientDrawable g = new GradientDrawable();
-        g.setCornerRadius(SocialUi.dp(this, 22));
-        g.setStroke(SocialUi.dp(this, 1), (UiColors.accent() & 0x00FFFFFF) | 0x88000000);
-        t.setBackground(g);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, SocialUi.dp(this, 40), 1f);
-        lp.setMarginEnd(SocialUi.dp(this, 8));
-        t.setLayoutParams(lp);
-        t.setOnClickListener(click);
-        return t;
-    }
-
-    /** A pill button for a row. Filled for the main action, outlined for a state like "Following". */
-    private TextView pill(String label, boolean filled, View.OnClickListener click) {
-        TextView t = SocialUi.text(this, label, 13.5f, true, filled ? UiColors.onAccent() : UiColors.textPrimary());
-        t.setGravity(Gravity.CENTER);
-        t.setPadding(SocialUi.dp(this, 16), 0, SocialUi.dp(this, 16), 0);
-        GradientDrawable g = new GradientDrawable();
-        g.setCornerRadius(SocialUi.dp(this, 20));
-        if (filled) g.setColor(UiColors.accent());
-        else g.setStroke(SocialUi.dp(this, 1), (UiColors.textTertiary() & 0x00FFFFFF) | 0xAA000000);
-        t.setBackground(g);
-        t.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, SocialUi.dp(this, 36)));
-        t.setOnClickListener(click);
-        return t;
     }
 
     @Override protected void onResume() { super.onResume(); reload(); }
@@ -249,31 +162,20 @@ public class FriendsActivity extends AppCompatActivity {
         for (Person p : blockedList) if (matches(p)) list.add(p);
         countLine.setText(filter.isEmpty() ? blockedList.size() + (blockedList.size() == 1 ? " blocked member" : " blocked members") : list.size() + " of " + blockedList.size());
         if (list.isEmpty()) {
-            TextView t = SocialUi.text(this, blockedList.isEmpty()
-                ? "You have not blocked anyone. Blocking removes someone from your followers, stops them following you and hides their Learn posts."
-                : "No blocked member matches that.", 14, false, UiColors.textSecondary());
-            t.setPadding(SocialUi.dp(this, 2), SocialUi.dp(this, 8), 0, 0);
-            listBox.addView(t);
+            emptyLine(blockedList.isEmpty() ? "None" : "No match");
             return;
         }
         for (Person p : list) {
-            LinearLayout line = new LinearLayout(this);
-            line.setOrientation(LinearLayout.HORIZONTAL);
-            line.setGravity(Gravity.CENTER_VERTICAL);
-            line.setPadding(0, SocialUi.dp(this, 12), 0, SocialUi.dp(this, 12));
-            LinearLayout names = new LinearLayout(this);
-            names.setOrientation(LinearLayout.VERTICAL);
-            names.addView(SocialUi.text(this, p.name, 16, true, UiColors.textPrimary()));
-            if (!p.handle().isEmpty()) names.addView(SocialUi.text(this, p.handle(), 13, false, UiColors.textSecondary()));
-            line.addView(names, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            line.addView(pill("Unblock", false, v -> SocialStore.unblock(p.uid, (ok, e) -> runOnUiThread(() -> {
+            View row = personRow(p, "");
+            MaterialButton unblock = row.findViewById(R.id.btn_friend_following);
+            unblock.setText("Unblock");
+            unblock.setVisibility(View.VISIBLE);
+            unblock.setOnClickListener(v -> SocialStore.unblock(p.uid, (ok, e) -> runOnUiThread(() -> {
                 Toast.makeText(this, ok ? p.name + " is unblocked." : e, ok ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG).show();
                 reload();
-            }))));
-            listBox.addView(line);
-            View rule = new View(this);
-            rule.setBackgroundColor((UiColors.textTertiary() & 0x00FFFFFF) | 0x22000000);
-            listBox.addView(rule, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+            })));
+            row.findViewById(R.id.friend_line).setOnClickListener(null);
+            listBox.addView(row);
         }
     }
 
@@ -287,12 +189,17 @@ public class FriendsActivity extends AppCompatActivity {
     private void styleChips() {
         for (int i = 0; i < chips.length; i++) {
             boolean on = i == tab;
-            GradientDrawable g = new GradientDrawable();
-            g.setCornerRadius(SocialUi.dp(this, 20));
-            g.setColor(on ? ((UiColors.accent() & 0x00FFFFFF) | 0x33000000) : UiColors.surface());
-            chips[i].setBackground(g);
+            chips[i].setBackgroundResource(on ? R.drawable.bg_chip_on : R.drawable.bg_chip_off);
             chips[i].setTextColor(on ? UiColors.accent() : UiColors.textPrimary());
         }
+    }
+
+    /** A short line in the list (nothing yet, no match): res/layout/item_list_empty.xml. */
+    private void emptyLine(String text) {
+        TextView t = (TextView) getLayoutInflater().inflate(R.layout.item_list_empty, listBox, false);
+        t.setText(text);
+        t.setPadding(SocialUi.dp(this, 2), SocialUi.dp(this, 16), 0, SocialUi.dp(this, 8));
+        listBox.addView(t);
     }
 
     private boolean matches(Person p) {
@@ -339,19 +246,14 @@ public class FriendsActivity extends AppCompatActivity {
         countLine.setText(filter.isEmpty() ? total + " " + noun : list.size() + " of " + total);
 
         if (list.isEmpty() && filter.isEmpty()) {
-            String empty = tab == 1 ? "You don't follow anyone yet. Use Username or Contacts above to find people."
-                    : tab == 2 ? "Nobody follows you yet. Share your code with Invite."
-                    : "No friends yet. A friend is someone you follow who follows you back.";
-            TextView t = SocialUi.text(this, empty, 14, false, UiColors.textSecondary());
-            t.setPadding(SocialUi.dp(this, 2), SocialUi.dp(this, 8), 0, 0);
-            listBox.addView(t);
+            emptyLine("None yet");
             return;
         }
         Set<String> mine = followingIds(), theirs = followerIds();
         for (Person p : list) listBox.addView(friendRow(p, mine.contains(p.uid), theirs.contains(p.uid)));
         if (filter.length() >= 2) {                               // the person may not be in your lists at all
-            TextView find = SocialUi.text(this, "Search Harvana for \u201C" + filter + "\u201D", 14.5f, true, UiColors.accent());
-            find.setPadding(SocialUi.dp(this, 2), SocialUi.dp(this, 16), 0, SocialUi.dp(this, 16));
+            MaterialButton find = (MaterialButton) getLayoutInflater().inflate(R.layout.item_list_button, listBox, false);
+            find.setText("Search Harvana for \u201C" + filter + "\u201D");
             find.setOnClickListener(v -> lookup(filter));
             listBox.addView(find);
         }
@@ -362,76 +264,23 @@ public class FriendsActivity extends AppCompatActivity {
      * and badges, and on the right one pill button and a menu. The photo and score arrive after the row is drawn.
      */
     private View friendRow(Person p, boolean iFollow, boolean followsMe) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.VERTICAL);
-
-        LinearLayout line = new LinearLayout(this);
-        line.setOrientation(LinearLayout.HORIZONTAL);
-        line.setGravity(Gravity.CENTER_VERTICAL);
-        line.setPadding(0, SocialUi.dp(this, 10), 0, SocialUi.dp(this, 10));
-
-        int size = SocialUi.dp(this, 24);
-        FrameLayout face = new FrameLayout(this);
-        TextView initials = SocialUi.text(this, p.initials(), 10, true, 0xFFFFFFFF);
-        initials.setGravity(Gravity.CENTER);
-        GradientDrawable disc = new GradientDrawable();
-        disc.setShape(GradientDrawable.OVAL);
-        disc.setColors(new int[] {0xFF2BA597, 0xFF0B6B61});
-        disc.setOrientation(android.graphics.drawable.GradientDrawable.Orientation.TL_BR);
-        initials.setBackground(disc);
-        face.addView(initials, new FrameLayout.LayoutParams(size, size));
-        ImageView photo = new ImageView(this);
-        photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        face.addView(photo, new FrameLayout.LayoutParams(size, size));
-        LinearLayout.LayoutParams faceLp = new LinearLayout.LayoutParams(size, size);
-        faceLp.setMarginEnd(SocialUi.dp(this, 12));
-        line.addView(face, faceLp);
-        if (p.photo.startsWith("http")) {
-            try { com.bumptech.glide.Glide.with(this).load(p.photo).circleCrop().into(photo); initials.setVisibility(View.INVISIBLE); } catch (Exception ignored) { }
-        }
-
-        LinearLayout names = new LinearLayout(this);
-        names.setOrientation(LinearLayout.VERTICAL);
-        if (followsMe && tab == 1) names.addView(SocialUi.text(this, "Follows you", 12, true, UiColors.textTertiary()));
-        TextView name = SocialUi.text(this, p.name, 16, true, UiColors.textPrimary());
-        name.setMaxLines(1);
-        name.setEllipsize(android.text.TextUtils.TruncateAt.END);
-        names.addView(name);
-        TextView handle = SocialUi.text(this, p.handle(), 13, false, UiColors.textSecondary());
-        if (!p.handle().isEmpty()) names.addView(handle);
-        TextView trust = SocialUi.text(this, "", 11, true, UiColors.textSecondary());
-        trust.setPadding(SocialUi.dp(this, 8), SocialUi.dp(this, 2), SocialUi.dp(this, 8), SocialUi.dp(this, 2));
-        LinearLayout.LayoutParams trustLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        trustLp.topMargin = SocialUi.dp(this, 4);
-        names.addView(trust, trustLp);
-        com.harvana.app.trust.ProfileTrust.resolve(p.uid, card -> {
-            com.harvana.app.trust.ProfileTrust.bind(trust, card);
-            if (!card.wallet.isEmpty()) com.harvana.app.trust.NodeBadges.load(card.wallet, list -> {
-                if (list.isEmpty()) return;
-                LinearLayout chipsBox = new LinearLayout(this);
-                chipsBox.setOrientation(LinearLayout.VERTICAL);
-                chipsBox.setPadding(0, SocialUi.dp(this, 4), 0, 0);
-                com.harvana.app.trust.BadgeChips.fill(chipsBox, list, true);
-                names.addView(chipsBox);
-            });
-            if (!card.icon.isEmpty() && card.icon.startsWith("http")) {
-                try { com.bumptech.glide.Glide.with(this).load(card.icon).circleCrop().into(photo); initials.setVisibility(View.INVISIBLE); }
-                catch (Exception ignored) { }
-            }
-            if (p.handle().isEmpty() && !card.username.isEmpty()) { handle.setText("@" + card.username); if (handle.getParent() == null) names.addView(handle, 1); }
-        });
-        line.addView(names, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        View row = personRow(p, "");
+        if (followsMe && tab == 1) row.findViewById(R.id.tv_friend_follows_you).setVisibility(View.VISIBLE);
 
         // Following is a state (tap to unfollow); Follow back is the call to action.
-        TextView main = iFollow
-            ? pill("Following", false, v -> unfollowAsk(p))
-            : pill(followsMe ? "Follow back" : "Follow", true, v -> follow(p));
-        ((LinearLayout.LayoutParams) main.getLayoutParams()).setMarginStart(SocialUi.dp(this, 8));
-        line.addView(main);
+        if (iFollow) {
+            View following = row.findViewById(R.id.btn_friend_following);
+            following.setVisibility(View.VISIBLE);
+            following.setOnClickListener(v -> unfollowAsk(p));
+        } else {
+            MaterialButton follow = row.findViewById(R.id.btn_friend_follow);
+            follow.setText(followsMe ? "Follow back" : "Follow");
+            follow.setVisibility(View.VISIBLE);
+            follow.setOnClickListener(v -> follow(p));
+        }
 
-        TextView more = SocialUi.text(this, "\u22EF", 22, true, UiColors.textSecondary());
-        more.setGravity(Gravity.CENTER);
-        line.addView(more, new LinearLayout.LayoutParams(SocialUi.dp(this, 36), SocialUi.dp(this, 36)));
+        View more = row.findViewById(R.id.iv_friend_more);
+        more.setVisibility(View.VISIBLE);
         final boolean friend = iFollow && followsMe;
         more.setOnClickListener(v -> {
             PopupMenu m = new PopupMenu(this, v);
@@ -451,13 +300,42 @@ public class FriendsActivity extends AppCompatActivity {
             });
             m.show();
         });
-        line.setClickable(true);
-        line.setOnClickListener(v -> openProfile(p));
-        row.addView(line);
+        return row;
+    }
 
-        View rule = new View(this);
-        rule.setBackgroundColor((UiColors.textTertiary() & 0x00FFFFFF) | 0x22000000);
-        row.addView(rule, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+    /**
+     * One person (res/layout/item_friend.xml): photo or initials, name, @username, an optional status line, trust and badges.
+     * The photo, score and badges arrive after the row is drawn. Buttons are hidden; the caller shows the ones it needs.
+     */
+    private View personRow(Person p, String status) {
+        View row = getLayoutInflater().inflate(R.layout.item_friend, listBox, false);
+        TextView initials = row.findViewById(R.id.tv_friend_initials);
+        initials.setText(p.initials());
+        ImageView photo = row.findViewById(R.id.iv_friend_photo);
+        if (p.photo.startsWith("http")) {
+            try { com.bumptech.glide.Glide.with(this).load(p.photo).circleCrop().into(photo); initials.setVisibility(View.INVISIBLE); } catch (Exception ignored) { }
+        }
+        ((TextView) row.findViewById(R.id.tv_friend_name)).setText(p.name);
+        TextView handle = row.findViewById(R.id.tv_friend_handle);
+        if (!p.handle().isEmpty()) { handle.setText(p.handle()); handle.setVisibility(View.VISIBLE); }
+        TextView st = row.findViewById(R.id.tv_friend_status);
+        if (!status.isEmpty()) { st.setText(status); st.setVisibility(View.VISIBLE); }
+        TextView trust = row.findViewById(R.id.tv_friend_trust);
+        LinearLayout badges = row.findViewById(R.id.friend_badges);
+        com.harvana.app.trust.ProfileTrust.resolve(p.uid, card -> {
+            com.harvana.app.trust.ProfileTrust.bind(trust, card);
+            if (!card.wallet.isEmpty()) com.harvana.app.trust.NodeBadges.load(card.wallet, list -> {
+                if (list.isEmpty()) return;
+                com.harvana.app.trust.BadgeChips.fill(badges, list, true);
+                badges.setVisibility(View.VISIBLE);
+            });
+            if (!card.icon.isEmpty() && card.icon.startsWith("http")) {
+                try { com.bumptech.glide.Glide.with(this).load(card.icon).circleCrop().into(photo); initials.setVisibility(View.INVISIBLE); }
+                catch (Exception ignored) { }
+            }
+            if (p.handle().isEmpty() && !card.username.isEmpty()) { handle.setText("@" + card.username); handle.setVisibility(View.VISIBLE); }
+        });
+        row.findViewById(R.id.friend_line).setOnClickListener(v -> openProfile(p));
         return row;
     }
 
@@ -470,46 +348,26 @@ public class FriendsActivity extends AppCompatActivity {
 
     /** Your code, then the people who named you: Confirm / Decline when it is your turn, otherwise what they are waiting on. */
     private void renderReferrals() {
-        LinearLayout code = SocialUi.card(this);
-        LinearLayout top = new LinearLayout(this);
-        top.setOrientation(LinearLayout.HORIZONTAL);
-        top.setGravity(Gravity.CENTER_VERTICAL);
-        LinearLayout text = new LinearLayout(this);
-        text.setOrientation(LinearLayout.VERTICAL);
-        text.addView(SocialUi.text(this, "Your referral code", 12, true, UiColors.textSecondary()));
-        codeLine = SocialUi.text(this, myUsername.isEmpty() ? "No username yet" : "@" + myUsername, 22, true, UiColors.textPrimary());
-        text.addView(codeLine);
-        top.addView(text, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        top.addView(pill("Share", true, v -> shareCode()));
-        code.addView(top);
-        codeStats = SocialUi.text(this, myUsername.isEmpty()
-            ? "Choose a username on your contact card. It becomes your referral code."
-            : namedMe.size() + (namedMe.size() == 1 ? " person has" : " people have") + " named you as their referrer. "
-              + "Only confirm people you know and trust: if someone you referred defaults in a group, your trust score drops too, 10 points for each, up to 30.",
-            12, false, UiColors.textSecondary());
-        codeStats.setPadding(0, SocialUi.dp(this, 10), 0, 0);
-        code.addView(codeStats);
+        View code = getLayoutInflater().inflate(R.layout.view_referral_code, referralHead, false);
+        codeLine = code.findViewById(R.id.tv_referral_code);
+        codeLine.setText(myUsername.isEmpty() ? "—" : "@" + myUsername);
+        codeStats = code.findViewById(R.id.tv_referral_named);
+        codeStats.setText(String.valueOf(namedMe.size()));
+        code.findViewById(R.id.btn_referral_share).setOnClickListener(v -> shareCode());
         referralHead.addView(code);
 
         java.util.Map<String, ReferralStore.Ask> byUid = new java.util.HashMap<>();
         for (ReferralStore.Ask a : asks) byUid.put(a.fromUid, a);
-        if (namedMe.isEmpty() && asks.isEmpty()) {
-            TextView none = SocialUi.text(this, "Nobody has named you as their referrer yet. Share your code with Invite.", 14, false, UiColors.textSecondary());
-            none.setPadding(SocialUi.dp(this, 2), SocialUi.dp(this, 4), 0, 0);
-            listBox.addView(none);
-            return;
-        }
+        if (namedMe.isEmpty() && asks.isEmpty()) { emptyLine("None yet"); return; }
         for (Person p : namedMe) {
             if (!matches(p)) continue;
             final ReferralStore.Ask a = byUid.get(p.uid);
             boolean myTurn = a != null && !a.consented() && !a.referredAddress.isEmpty();
-            String state = a == null ? "Has not set up a wallet yet" : a.consented() ? "Confirmed" : a.referredAddress.isEmpty() ? "Waiting for their wallet" : "Waiting for you";
-            LinearLayout row = (LinearLayout) friendRowPlain(p, state);
+            String state = a == null ? "No wallet yet" : a.consented() ? "Confirmed" : a.referredAddress.isEmpty() ? "Waiting for their wallet" : "Waiting for you";
+            View row = personRow(p, state);
             if (myTurn) {
-                LinearLayout buttons = new LinearLayout(this);
-                buttons.setOrientation(LinearLayout.HORIZONTAL);
-                buttons.setPadding(SocialUi.dp(this, 64), 0, 0, SocialUi.dp(this, 10));
-                TextView confirm = pill("Confirm", true, v -> new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Confirm " + p.name + "?")
+                row.findViewById(R.id.friend_referral_buttons).setVisibility(View.VISIBLE);
+                row.findViewById(R.id.btn_friend_confirm).setOnClickListener(v -> new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Confirm " + p.name + "?")
                     .setMessage("You are saying you know " + p.name + " and are referring them. You will confirm with your PIN. "
                         + "If they default in a group, your trust score drops.")
                     .setPositiveButton("Confirm", (d, w) -> ReferralStore.approve(this, a, (ok, err) -> runOnUiThread(() -> {
@@ -517,55 +375,10 @@ public class FriendsActivity extends AppCompatActivity {
                         reload();
                     })))
                     .setNegativeButton("Cancel", null).show());
-                TextView decline = pill("Decline", false, v -> ReferralStore.decline(a, (ok, err) -> runOnUiThread(this::reload)));
-                ((LinearLayout.LayoutParams) decline.getLayoutParams()).setMarginStart(SocialUi.dp(this, 8));
-                buttons.addView(confirm);
-                buttons.addView(decline);
-                row.addView(buttons, row.getChildCount() - 1);      // above the divider
+                row.findViewById(R.id.btn_friend_decline).setOnClickListener(v -> ReferralStore.decline(a, (ok, err) -> runOnUiThread(this::reload)));
             }
             listBox.addView(row);
         }
-    }
-
-    /** A person with a line of status under the name and no buttons: the base of a referral row. */
-    private View friendRowPlain(Person p, String status) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout line = new LinearLayout(this);
-        line.setGravity(Gravity.CENTER_VERTICAL);
-        line.setPadding(0, SocialUi.dp(this, 10), 0, SocialUi.dp(this, 10));
-        int size = SocialUi.dp(this, 24);
-        FrameLayout face = new FrameLayout(this);
-        TextView initials = SocialUi.text(this, p.initials(), 10, true, 0xFFFFFFFF);
-        initials.setGravity(Gravity.CENTER);
-        GradientDrawable disc = new GradientDrawable();
-        disc.setShape(GradientDrawable.OVAL);
-        disc.setColors(new int[] {0xFF2BA597, 0xFF0B6B61});
-        disc.setOrientation(android.graphics.drawable.GradientDrawable.Orientation.TL_BR);
-        initials.setBackground(disc);
-        face.addView(initials, new FrameLayout.LayoutParams(size, size));
-        ImageView photo = new ImageView(this);
-        photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        face.addView(photo, new FrameLayout.LayoutParams(size, size));
-        LinearLayout.LayoutParams faceLp = new LinearLayout.LayoutParams(size, size);
-        faceLp.setMarginEnd(SocialUi.dp(this, 12));
-        line.addView(face, faceLp);
-        if (p.photo.startsWith("http")) {
-            try { com.bumptech.glide.Glide.with(this).load(p.photo).circleCrop().into(photo); initials.setVisibility(View.INVISIBLE); } catch (Exception ignored) { }
-        }
-        LinearLayout names = new LinearLayout(this);
-        names.setOrientation(LinearLayout.VERTICAL);
-        names.addView(SocialUi.text(this, p.name, 16, true, UiColors.textPrimary()));
-        if (!p.handle().isEmpty()) names.addView(SocialUi.text(this, p.handle(), 13, false, UiColors.textSecondary()));
-        names.addView(SocialUi.text(this, status, 12.5f, false, UiColors.textTertiary()));
-        line.addView(names, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        line.setClickable(true);
-        line.setOnClickListener(v -> openProfile(p));
-        row.addView(line);
-        View rule = new View(this);
-        rule.setBackgroundColor((UiColors.textTertiary() & 0x00FFFFFF) | 0x22000000);
-        row.addView(rule, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
-        return row;
     }
 
     /** People both sides follow. */

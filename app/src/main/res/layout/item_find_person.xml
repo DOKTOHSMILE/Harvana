@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One contact: initials, name and @username or number, then Follow / Following / Invite. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:minHeight="60dp"
+	android:background="?android:attr/selectableItemBackground"
+	android:gravity="center_vertical"
+	android:orientation="horizontal"
+	android:paddingTop="8dp"
+	android:paddingBottom="8dp">
+
+	<TextView
+		android:id="@+id/tv_find_initials"
+		android:layout_width="44dp"
+		android:layout_height="44dp"
+		android:background="@drawable/bg_circle_accent"
+		android:gravity="center"
+		android:textColor="@color/colorTextOnAccent"
+		android:textSize="16sp"
+		android:textStyle="bold" />
+
+	<LinearLayout
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_marginStart="12dp"
+		android:layout_weight="1"
+		android:orientation="vertical">
+
+		<TextView
+			android:id="@+id/tv_find_name"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="16sp" />
+
+		<TextView
+			android:id="@+id/tv_find_sub"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="13sp"
+			android:visibility="gone" />
+	</LinearLayout>
+
+	<com.google.android.material.button.MaterialButton
+		android:id="@+id/btn_find_action"
+		style="@style/HarvanaButton"
+		android:layout_width="wrap_content"
+		android:layout_height="36dp"
+		android:minWidth="0dp"
+		android:textSize="12sp"
+		android:visibility="gone" />
+
+	<com.google.android.material.button.MaterialButton
+		android:id="@+id/btn_find_action_outlined"
+		style="@style/HarvanaButton.Outlined"
+		android:layout_width="wrap_content"
+		android:layout_height="36dp"
+		android:minWidth="0dp"
+		android:textSize="12sp"
+		android:visibility="gone" />
+</LinearLayout>

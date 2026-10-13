@@ -1,21 +1,17 @@
 package com.harvana.app.social;
 
 import android.content.Intent;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
@@ -64,35 +60,16 @@ public class FindContactsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(UiColors.background());
-        int pad = SocialUi.dp(this, 16);
-
-        search = SocialUi.edit(this, "Search your contacts");
-        search.setPadding(pad, SocialUi.dp(this, 12), pad, SocialUi.dp(this, 12));
-        GradientDrawable box = new GradientDrawable();
-        box.setColor(UiColors.surface());
-        box.setCornerRadius(SocialUi.dp(this, 24));
-        box.setStroke(SocialUi.dp(this, 1), (UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000);
-        search.setBackground(box);
-        LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        sp.setMargins(pad, SocialUi.dp(this, 10), pad, SocialUi.dp(this, 6));
-        root.addView(search, sp);
+        AppBar.setContent(this, com.harvana.app.R.layout.activity_find_contacts, "Find friends", "From your contacts");
+        search = findViewById(com.harvana.app.R.id.et_find_contacts_search);
         search.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int c, int d) { }
             @Override public void onTextChanged(CharSequence s, int a, int c, int d) { }
             @Override public void afterTextChanged(Editable e) { rebuild(); }
         });
-
-        list = new RecyclerView(this);
-        list.setLayoutManager(new LinearLayoutManager(this));
-        list.setClipToPadding(false);
-        list.setPadding(pad, SocialUi.dp(this, 4), pad, SocialUi.dp(this, 24));
+        list = findViewById(com.harvana.app.R.id.rv_find_contacts);
         adapter = new Adapter();
         list.setAdapter(adapter);
-        root.addView(list, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-        AppBar.setContent(this, root, "Find friends", "From your contacts");
 
         SocialStore.myUsername((name, err) -> myUsername = name == null ? "" : name);
         rebuild();
@@ -116,7 +93,7 @@ public class FindContactsActivity extends AppCompatActivity {
             allowed = granted;
             if (!granted) {
                 checking = false;
-                denied = "Contacts access is off. Allow it to see which of your contacts are on Harvana. If nothing happens, turn it on in Settings > Apps > Harvana > Permissions.";
+                denied = "Contacts access: off";
                 rebuild();
                 return;
             }
@@ -176,7 +153,7 @@ public class FindContactsActivity extends AppCompatActivity {
         shown.add(h1);
         if (checking && members.isEmpty()) shown.add(new Row(LOADING));
         else if (mm.isEmpty()) shown.add(note(members.isEmpty()
-            ? "None of your contacts have turned on discovery yet. Invite them below, or find someone by username on the Friends screen."
+            ? "None yet"
             : "No matches for “" + search.getText().toString().trim() + "”."));
         else for (DiscoveryStore.Match m : mm) { Row r = new Row(MEMBER); r.match = m; shown.add(r); }
 
@@ -234,42 +211,29 @@ public class FindContactsActivity extends AppCompatActivity {
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int type) {
             View v;
-            if (type == LOADING) v = Shimmer.rows(FindContactsActivity.this, 3);
-            else {
-                LinearLayout row = new LinearLayout(FindContactsActivity.this);
-                row.setOrientation(LinearLayout.HORIZONTAL);
-                row.setGravity(Gravity.CENTER_VERTICAL);
-                v = row;
+            if (type == LOADING) {
+                v = Shimmer.rows(FindContactsActivity.this, 3);
+                v.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            } else {
+                int layout = type == HEADER ? com.harvana.app.R.layout.item_find_header : type == NOTE ? com.harvana.app.R.layout.item_find_note : com.harvana.app.R.layout.item_find_person;
+                v = getLayoutInflater().inflate(layout, parent, false);
             }
-            v.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             return new RecyclerView.ViewHolder(v) { };
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder h, int i) {
             Row r = shown.get(i);
+            View row = h.itemView;
             if (r.type == LOADING) return;
-            LinearLayout row = (LinearLayout) h.itemView;
-            row.removeAllViews();
-            row.setOnClickListener(null);
-            row.setClickable(false);
-            row.setPadding(0, 0, 0, 0);
-            int gap = SocialUi.dp(FindContactsActivity.this, 8);
             if (r.type == HEADER) {
-                TextView t = SocialUi.text(FindContactsActivity.this, r.text, 13, true, UiColors.accent());
-                t.setAllCaps(true);
-                t.setLetterSpacing(0.05f);
-                row.setPadding(SocialUi.dp(FindContactsActivity.this, 4), SocialUi.dp(FindContactsActivity.this, 18), 0, gap);
-                row.addView(t);
+                ((TextView) row).setText(r.text);
             } else if (r.type == NOTE) {
-                TextView t = SocialUi.text(FindContactsActivity.this, r.text, 13, false, UiColors.textSecondary());
-                row.setPadding(SocialUi.dp(FindContactsActivity.this, 4), gap, SocialUi.dp(FindContactsActivity.this, 4), gap);
-                row.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-                if (!allowed && !denied.isEmpty()) {
-                    MaterialButton allow = SocialUi.compactButton(FindContactsActivity.this, "Allow", false);
-                    allow.setOnClickListener(v -> start());
-                    row.addView(allow);
-                }
+                ((TextView) row.findViewById(com.harvana.app.R.id.tv_find_note)).setText(r.text);
+                View allow = row.findViewById(com.harvana.app.R.id.btn_find_allow);
+                boolean ask = !allowed && !denied.isEmpty();
+                allow.setVisibility(ask ? View.VISIBLE : View.GONE);
+                allow.setOnClickListener(ask ? v -> start() : null);
             } else if (r.type == MEMBER) {
                 bindMember(row, r.match);
             } else {
@@ -278,53 +242,56 @@ public class FindContactsActivity extends AppCompatActivity {
         }
     }
 
-    private void bindMember(LinearLayout row, DiscoveryStore.Match m) {
-        row.setPadding(0, SocialUi.dp(this, 8), 0, SocialUi.dp(this, 8));
-        row.addView(avatar(m.person.initials(), UiColors.accent(), UiColors.onAccent()));
-        LinearLayout words = new LinearLayout(this);
-        words.setOrientation(LinearLayout.VERTICAL);
-        words.addView(SocialUi.text(this, label(m), 16, true, UiColors.textPrimary()));
+    /** A contact on Harvana: res/layout/item_find_person.xml with Follow (or Following). */
+    private void bindMember(View row, DiscoveryStore.Match m) {
+        TextView face = row.findViewById(com.harvana.app.R.id.tv_find_initials);
+        face.setText(m.person.initials());
+        face.setBackgroundResource(com.harvana.app.R.drawable.bg_circle_accent);
+        face.setTextColor(UiColors.onAccent());
+        TextView name = row.findViewById(com.harvana.app.R.id.tv_find_name);
+        name.setText(label(m));
+        name.setTypeface(null, android.graphics.Typeface.BOLD);
         String sub = (m.person.handle().isEmpty() ? "" : m.person.handle()) + (m.contactName != null && !m.contactName.isEmpty() && !m.contactName.equals(m.person.name) ? "  ·  " + m.person.name : "");
-        if (!sub.isEmpty()) words.addView(SocialUi.text(this, sub, 13, false, UiColors.textSecondary()));
-        LinearLayout.LayoutParams wp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        wp.setMarginStart(SocialUi.dp(this, 12));
-        row.addView(words, wp);
+        sub(row, sub);
         boolean already = followingIds.contains(m.person.uid);
-        final MaterialButton b = SocialUi.compactButton(this, already ? "Following" : "Follow", already);
-        if (already) b.setEnabled(false);
-        else b.setOnClickListener(v -> follow(m, b));
-        row.addView(b);
-        row.setClickable(true);
+        MaterialButton b = button(row, already);
+        b.setText(already ? "Following" : "Follow");
+        b.setEnabled(!already);
+        b.setOnClickListener(already ? null : v -> follow(m, b));
         row.setOnClickListener(v -> openProfile(m.person.uid));
     }
 
-    private void bindContact(LinearLayout row, PhoneContacts.Entry e) {
-        row.setPadding(0, SocialUi.dp(this, 8), 0, SocialUi.dp(this, 8));
+    /** A phone contact not on Harvana: res/layout/item_find_person.xml with Invite. */
+    private void bindContact(View row, PhoneContacts.Entry e) {
         String name = e.name.isEmpty() ? firstOf(e) : e.name;
-        row.addView(avatar(initials(name), (UiColors.textTertiary() & 0x00FFFFFF) | 0x44000000, UiColors.textPrimary()));
-        LinearLayout words = new LinearLayout(this);
-        words.setOrientation(LinearLayout.VERTICAL);
-        words.addView(SocialUi.text(this, name, 16, false, UiColors.textPrimary()));
-        String sub = e.name.isEmpty() ? "" : firstOf(e);
-        if (!sub.isEmpty()) words.addView(SocialUi.text(this, sub, 13, false, UiColors.textSecondary()));
-        LinearLayout.LayoutParams wp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        wp.setMarginStart(SocialUi.dp(this, 12));
-        row.addView(words, wp);
-        MaterialButton b = SocialUi.compactButton(this, "Invite", true);
+        TextView face = row.findViewById(com.harvana.app.R.id.tv_find_initials);
+        face.setText(initials(name));
+        face.setBackgroundResource(com.harvana.app.R.drawable.bg_oval_surface_alt);
+        face.setTextColor(UiColors.textPrimary());
+        TextView n = row.findViewById(com.harvana.app.R.id.tv_find_name);
+        n.setText(name);
+        n.setTypeface(null, android.graphics.Typeface.NORMAL);
+        sub(row, e.name.isEmpty() ? "" : firstOf(e));
+        MaterialButton b = button(row, true);
+        b.setText("Invite");
+        b.setEnabled(true);
         b.setOnClickListener(v -> invite(e));
-        row.addView(b);
+        row.setOnClickListener(null);
+        row.setClickable(false);
     }
 
-    private View avatar(String letters, int fill, int ink) {
-        int size = SocialUi.dp(this, 44);
-        TextView t = SocialUi.text(this, letters, 16, true, ink);
-        t.setGravity(Gravity.CENTER);
-        GradientDrawable g = new GradientDrawable();
-        g.setShape(GradientDrawable.OVAL);
-        g.setColor(fill);
-        t.setBackground(g);
-        t.setLayoutParams(new LinearLayout.LayoutParams(size, size));
-        return t;
+    private static void sub(View row, String text) {
+        TextView t = row.findViewById(com.harvana.app.R.id.tv_find_sub);
+        t.setText(text);
+        t.setVisibility(text.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    /** The row's filled or outlined button (the other one is hidden). */
+    private static MaterialButton button(View row, boolean outlined) {
+        MaterialButton filled = row.findViewById(com.harvana.app.R.id.btn_find_action), line = row.findViewById(com.harvana.app.R.id.btn_find_action_outlined);
+        filled.setVisibility(outlined ? View.GONE : View.VISIBLE);
+        line.setVisibility(outlined ? View.VISIBLE : View.GONE);
+        return outlined ? line : filled;
     }
 
     private static String initials(String name) {

@@ -190,8 +190,6 @@ public final class SettingsSections {
         LinearLayout c = card();
         c.addView(text("Invite people", 16, true, UiColors.textPrimary()));
         boolean membersMay = Boolean.TRUE.equals(g.get("membersCanInvite"));
-        c.addView(row("Who can invite", membersMay ? "Admin and members" : "Admin"));
-        c.addView(row("Group ID", groupId));
         if (isAdmin || membersMay) c.addView(button("Invite someone", false, v -> host.invite()));
         c.addView(button("Share group ID", false, v -> {
             android.content.Intent s = new android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain");
@@ -390,18 +388,14 @@ public final class SettingsSections {
     private View infoCard(String groupId, Map<String, Object> g, boolean onChain) {
         LinearLayout c = card();
         c.addView(text("About this group", 16, true, UiColors.textPrimary()));
-        c.addView(row("Type", str(g, "groupType", "Savings group")));
-        c.addView(row("Status", str(g, "status", "Active")));
-        c.addView(row("Kept", onChain ? "On the Harvana network" : "In the app only"));
+        // A group on the network shows its kind and state under Network; here only what is not there.
+        if (!onChain) {
+            c.addView(row("Status", str(g, "status", "Active")));
+        }
         long ts = 0;
         try { ts = Long.parseLong(str(g, "timestamp", "0")); } catch (Exception ignored) { }
         if (ts > 0) c.addView(row("Created", new SimpleDateFormat("d MMM yyyy", Locale.US).format(new Date(ts))));
         c.addView(row("Group ID", groupId));
-        c.addView(button("Copy group ID", false, v -> {
-            ClipboardManager cm = (ClipboardManager) a.getSystemService(Context.CLIPBOARD_SERVICE);
-            if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("group id", groupId));
-            Toast.makeText(a, "Copied.", Toast.LENGTH_SHORT).show();
-        }));
         c.addView(button("Read the contract", false, v -> showContract(groupId, g)));
         return c;
     }

@@ -460,6 +460,7 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 		spinWithdrawalRule.setAdapter(new ArrayAdapter<>(this, com.harvana.app.R.layout.spinner_dropdown_item, withdrawalOptions));
 		
 		_setupGroupNotificationToggles();
+		_hideSwitchSentences();
 		_buildSectionTabs();
 		
 		_loadGroupDoc();
@@ -603,6 +604,14 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 	 * Tabs over swipeable pages, one fragment per section, in place of the old single scrolling page. The cards are still
 	 * built on that page (linear39, now off screen) and then moved onto their section's page.
 	 */
+	/** The grey sentences under the Privacy switches: values only. */
+	private void _hideSwitchSentences() {
+		for (int id : new int[]{R.id.textview58, R.id.textview60, R.id.textview62}) {
+			View v = findViewById(id);
+			if (v != null) v.setVisibility(View.GONE);
+		}
+	}
+	
 	private void _buildSectionTabs() {
 		if (vscroll2 == null || !(vscroll2.getParent() instanceof ViewGroup)) return;
 		ViewGroup parent = (ViewGroup) vscroll2.getParent();

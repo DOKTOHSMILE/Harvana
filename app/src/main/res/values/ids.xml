@@ -7,4 +7,5 @@
     <item name="smart_spacing_attached" type="id" />
     <item name="smart_spacing_done" type="id" />
     <item name="member_photo_uid" type="id" />
+    <item name="sheet_divider_tag" type="id"/>
 </resources>

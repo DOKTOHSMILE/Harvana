@@ -114,6 +114,16 @@ public final class WalletTotal {
                         double fiat = FxRates.fiat(c, held * q.usd);
                         if (!Double.isNaN(fiat)) sum += fiat;
                     }
+                    for (CoinCatalog.Coin coin : CoinCatalog.addedCoins()) {           // chains and tokens the person added
+                        AssetPrices.Quote q = AssetPrices.peek(c, coin.key);
+                        if (q == null) continue;
+                        String a = CustomAssets.address(c, address, coin.added);
+                        if (a == null || a.isEmpty()) continue;
+                        Double held = AssetPrices.amount(ChainBalances.assetBalance(coin.key, a));
+                        if (held == null || held <= 0) continue;
+                        double fiat = FxRates.fiat(c, held * q.usd);
+                        if (!Double.isNaN(fiat)) sum += fiat;
+                    }
                 } catch (Exception ignored) { }
                 parts[2] = sum;
                 main.post(partDone);

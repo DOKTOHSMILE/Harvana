@@ -198,6 +198,7 @@ public class ReceiveActivity extends AppCompatActivity {
 			receiveCoins.add(c);
 			if ("HARV".equals(c.key)) for (String code : com.harvana.app.husd.Stable.CODES) receiveCoins.add(com.harvana.app.wallet.CoinCatalog.stable(code));
 		}
+		receiveCoins.addAll(com.harvana.app.wallet.CoinCatalog.addedCoins());     // chains and tokens the person added
 		java.util.List<String> labels = new java.util.ArrayList<>();
 		for (com.harvana.app.wallet.CoinCatalog.Coin c : receiveCoins) labels.add(c.name + " (" + c.ticker + ")");
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
@@ -240,7 +241,11 @@ public class ReceiveActivity extends AppCompatActivity {
 		}
 		final String harv = activeAddress;
 		new Thread(() -> {
-			java.util.Map<String, String> found = com.harvana.app.wallet.CoinCatalog.addresses(getApplicationContext(), harv);
+			java.util.Map<String, String> found = new java.util.HashMap<>(com.harvana.app.wallet.CoinCatalog.addresses(getApplicationContext(), harv));
+			for (com.harvana.app.wallet.CoinCatalog.Coin c : com.harvana.app.wallet.CoinCatalog.addedCoins()) {
+				String a = com.harvana.app.wallet.CustomAssets.address(getApplicationContext(), harv, c.added);
+				if (a != null && !a.isEmpty()) found.put(c.key, a);
+			}
 			runOnUiThread(() -> {
 				if (isFinishing()) return;
 				receiveAddrs.clear();

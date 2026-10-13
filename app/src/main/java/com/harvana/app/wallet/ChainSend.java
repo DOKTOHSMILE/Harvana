@@ -41,7 +41,13 @@ public final class ChainSend {
             case "DOGE": return utxo(mnemonic, from, to, amount, ChainKeys.Chain.DOGE, Net.TEST ? "" : "https://api.blockcypher.com/v1/doge/main", false, false);
             case "TRX": return tron(mnemonic, from, to, amount);
             case "SOL": return sol(mnemonic, from, to, amount);
-            default: throw new IllegalArgumentException("Sending " + key + " from Harvana is not switched on.");
+            default: {
+                CustomAssets.Asset a = CustomAssets.find(key);
+                if (a == null) throw new IllegalArgumentException("Sending " + key + " from Harvana is not switched on.");
+                if (a.near()) return a.token() ? NearProtocol.sendToken(a, mnemonic, from, to, amount) : NearProtocol.send(a, mnemonic, from, to, amount);
+                if ("TOKEN".equals(a.kind)) return erc20(mnemonic, from, to, amount, a);
+                return evm(mnemonic, from, to, amount, a.rpc, a.chainId, a.decimals);
+            }
         }
     }
 
@@ -60,6 +66,48 @@ public final class ChainSend {
         long nonce = qty(rpc(rpc, "eth_getTransactionCount", from, "pending")).longValue();
         String raw = EvmTx.raw(priv, nonce, gasPrice, gas, EvmTx.unhex(to), value, chainId);
         return rpc(rpc, "eth_sendRawTransaction", "0x" + raw);
+    }
+
+    /** An added ERC-20 token: transfer(to, amount) on its contract; the fee is paid in the chain's own coin. */
+    private static String erc20(String mnemonic, String from, String to, String amount, CustomAssets.Asset a) throws Exception {
+        byte[] priv = ChainKeys.privateKey(mnemonic, ChainKeys.Chain.ETH);
+        try {
+            String mine = ChainKeys.address(mnemonic, ChainKeys.Chain.ETH);
+            if (!mine.equalsIgnoreCase(from)) throw new IllegalArgumentException("This phone's key does not match the address on screen. Open the coin again.");
+            if (!to.matches("(?i)0x[0-9a-f]{40}")) throw new IllegalArgumentException("Enter an address that starts with 0x.");
+            BigInteger value = units(amount, a.decimals);
+            String rpc = a.rpc;
+            String held = rpcRaw(rpc, "eth_call", "[{\"to\":\"" + a.contract + "\",\"data\":\"0x70a08231" + pad(from) + "\"},\"latest\"]");
+            if (qty(held).compareTo(value) < 0) throw new IllegalArgumentException("Not enough " + a.symbol + ".");
+            String data = "0xa9059cbb" + pad(to) + String.format("%64s", value.toString(16)).replace(' ', '0');
+            BigInteger gasPrice = qty(rpc(rpc, "eth_gasPrice")).multiply(BigInteger.valueOf(110)).divide(BigInteger.valueOf(100));
+            if (gasPrice.signum() == 0) gasPrice = BigInteger.valueOf(1_000_000_000L);
+            long gas = qty(rpcRaw(rpc, "eth_estimateGas", "[{\"from\":\"" + from + "\",\"to\":\"" + a.contract + "\",\"data\":\"" + data + "\"}]"))
+                    .multiply(BigInteger.valueOf(12)).divide(BigInteger.TEN).longValue();
+            BigInteger fee = gasPrice.multiply(BigInteger.valueOf(gas));
+            if (qty(rpc(rpc, "eth_getBalance", from, "latest")).compareTo(fee) < 0)
+                throw new IllegalArgumentException("Not enough " + a.feeSymbol() + " to pay the network fee.");
+            long nonce = qty(rpc(rpc, "eth_getTransactionCount", from, "pending")).longValue();
+            String raw = EvmTx.rawWithData(priv, nonce, gasPrice, gas, EvmTx.unhex(a.contract), BigInteger.ZERO, EvmTx.unhex(data), a.chainId);
+            return rpc(rpc, "eth_sendRawTransaction", "0x" + raw);
+        } finally {
+            java.util.Arrays.fill(priv, (byte) 0);
+        }
+    }
+
+    /** JSON-RPC with the params already written as a JSON array (for object params such as eth_call's). */
+    private static String rpcRaw(String url, String method, String paramsJson) throws Exception {
+        JSONObject r = post(url, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"" + method + "\",\"params\":" + paramsJson + "}");
+        if (r.has("error")) {
+            JSONObject e = r.optJSONObject("error");
+            throw new IllegalArgumentException(e == null ? "The network rejected the payment." : e.optString("message", "The network rejected the payment."));
+        }
+        return r.getString("result");
+    }
+
+    private static String pad(String address) {
+        String a = address.startsWith("0x") || address.startsWith("0X") ? address.substring(2) : address;
+        return String.format("%64s", a.toLowerCase(java.util.Locale.US)).replace(' ', '0');
     }
 
     private static String rpc(String url, String method, String... params) throws Exception {

@@ -166,6 +166,13 @@ public final class CoinDetailPages {
             about.setTextColor(com.harvana.app.utils.UiColors.textSecondary());
             about.setLineSpacing(dp(3), 1f);
             body.addView(card(about));
+            // Every coin's description is read live from CoinGecko when it has an id; the text above stays until then.
+            if (st == null && coin != null && !coin.nativeHarv) {
+                if (coin.about.isEmpty()) about.setText(coin.name + " · " + coin.liveNetwork());
+                com.harvana.app.wallet.CoinFacts.about(requireContext(), coin.geckoId(), text -> {
+                    if (isAdded() && text != null && !text.isEmpty()) about.setText(text);
+                });
+            }
             moreInfo(body, coin, st);
         }
 

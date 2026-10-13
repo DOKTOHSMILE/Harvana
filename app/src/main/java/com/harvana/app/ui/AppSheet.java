@@ -66,7 +66,34 @@ public class AppSheet extends BottomSheetDialog {
         BottomSheetBehavior<FrameLayout> b = getBehavior();
         b.setSkipCollapsed(true);
         b.setState(BottomSheetBehavior.STATE_EXPANDED);
+        View content = findViewById(android.R.id.content);
+        if (content != null) dividers(content);
         focusFirstField();
+    }
+
+    private static final String DIVIDER = "sheet-divider";
+
+    /**
+     * Every list in a sheet reads like a list: a thin line between rows that sit next to each other in a column and can be
+     * tapped. Buttons, text fields, chips and switches on their own are not rows, and are left as they are.
+     */
+    static void dividers(View v) {
+        if (!(v instanceof ViewGroup)) return;
+        ViewGroup g = (ViewGroup) v;
+        for (int i = 0; i < g.getChildCount(); i++) dividers(g.getChildAt(i));
+        if (!(g instanceof android.widget.LinearLayout) || ((android.widget.LinearLayout) g).getOrientation() != android.widget.LinearLayout.VERTICAL) return;
+        for (int i = g.getChildCount() - 1; i > 0; i--) {
+            View a = g.getChildAt(i - 1), b = g.getChildAt(i);
+            if (row(a) && row(b)) g.addView(SheetDialog.divider(g.getContext()), i, SheetDialog.dividerParams(g.getContext()));
+        }
+    }
+
+    private static boolean row(View v) {
+        if (v == null || v.getVisibility() != View.VISIBLE || DIVIDER.equals(v.getTag(com.harvana.app.R.id.sheet_divider_tag))) return false;
+        if (v instanceof android.widget.Button || v instanceof EditText || v instanceof android.widget.CompoundButton
+                || v instanceof com.google.android.material.chip.ChipGroup) return false;
+        if (v.getHeight() > 0 && v.getHeight() > (int) (120 * v.getResources().getDisplayMetrics().density)) return false;   // a card, not a row
+        return v.isClickable() || v.hasOnClickListeners();
     }
 
     /** Rounded top corners on the sheet itself, and everything inside is clipped to the curve, whatever background it paints. */

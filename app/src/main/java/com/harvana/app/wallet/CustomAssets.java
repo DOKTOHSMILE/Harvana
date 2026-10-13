@@ -1,11 +1,8 @@
 package com.harvana.app.wallet;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
@@ -15,7 +12,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
@@ -38,14 +34,17 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * Chains and tokens the person adds themselves, from "Add coins":
- *  - a custom EVM chain by its chain ID: the name, coin, decimals, a working RPC, the explorer and the icon are fetched
- *    from the public chain registry (ethereum-lists/chains, the source of chainlist.org), and the RPC is checked to
- *    really answer with that chain ID;
- *  - a token by its contract address on any EVM chain (built-in or added): name, symbol and decimals are read from the
- *    contract itself, the icon from CoinGecko.
- * The address is the person's own EVM address (the Ethereum one from their recovery phrase). Rows show the balance and
- * open a sheet to receive (copy the address) and to see the address on the explorer.
+ * Chains and tokens the person adds themselves, from "Add coins". Nothing about them is written into the app: every
+ * fact is fetched when it is added and read live afterwards.
+ *  - an EVM chain by its chain ID: name, coin, decimals, a working RPC, explorer and icon from the public chain
+ *    registry (ethereum-lists/chains); the RPC is checked to answer with that chain ID; the price id from CoinGecko;
+ *  - a token by its contract on any EVM chain: name, symbol and decimals read from the contract, icon and price id
+ *    from CoinGecko;
+ *  - any chain of a protocol the app speaks, typed in by hand: name, coin, decimals, RPC, explorer pages, history API,
+ *    icon, price id and key path are all fields; "Fill" reads what it can from the RPC or a public registry.
+ *  - any token under any of those chains, with its own row that can be shown, hidden or removed.
+ * A protocol (EVM, NEAR) is the code that knows how a network signs and reads; a chain is only data. Each chain and
+ * token opens the same coin page as the built-in coins (balance, price, chart, history, send, receive).
  */
 public final class CustomAssets {
     private CustomAssets() {}
@@ -57,34 +56,90 @@ public final class CustomAssets {
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static final String REGISTRY = "https://raw.githubusercontent.com/ethereum-lists/chains/master/_data/";
 
-    /** One added chain or token. */
+    /** The protocols the app speaks. A chain of any of them can be added as data; a new protocol needs its engine. */
+    public static final String[] PROTOCOLS = {"EVM", NearProtocol.FAMILY};
+
+    /** One added chain or token. Every field is data: fetched when added, and editable. */
     public static final class Asset {
         public String kind = "CHAIN";          // CHAIN or TOKEN
+        /** The protocol: EVM or NEAR. */
+        public String family = "EVM";
+        /** EVM chain id; NEAR network id (what the RPC reports). */
         public long chainId;
+        public String networkId = "";
+        /** A token's chain: its key ("C:1", "N:mainnet", or a built-in coin key such as "ETH"). */
+        public String chainKey = "";
         public String chainName = "", name = "", symbol = "", rpc = "", explorer = "", icon = "", contract = "";
+        /** Explorer page templates ({address}, {tx}); empty = explorer + /address/… and /tx/…. */
+        public String addressUrl = "", txUrl = "";
+        /** History API: Blockscout host (EVM) or NearBlocks-style API base (NEAR); "" = no history. */
+        public String scout = "", historyApi = "";
+        /** CoinGecko id for the price, chart and description ("" = none). */
+        public String geckoId = "";
+        /** Key path for protocols that use one per chain (NEAR: "m/44'/397'/0'"). */
+        public String derivation = "";
         public int decimals = 18;
+        /** A token hidden from the Assets list (kept, so it can be shown again). */
+        public boolean hidden;
 
-        public String key() { return "TOKEN".equals(kind) ? "T:" + chainId + ":" + contract.toLowerCase(Locale.US) : "C:" + chainId; }
+        public boolean near() { return NearProtocol.FAMILY.equals(family); }
+        public boolean token() { return "TOKEN".equals(kind); }
+
+        public String key() {
+            if (token()) return near() ? "T:" + chainKey + ":" + contract : "T:" + chainId + ":" + contract.toLowerCase(Locale.US);
+            return near() ? "N:" + networkId : "C:" + chainId;
+        }
+
+        /** The coin that pays this one's network fee. */
+        public String feeSymbol() {
+            if (!token()) return symbol;
+            Asset c = find(chainKey.isEmpty() ? "C:" + chainId : chainKey);
+            if (c != null) return c.symbol;
+            for (String k : new String[]{"ETH", "BNB", "POL", "BASE"}) if (Net.evm(k).chainId == chainId) return "BNB".equals(k) ? "BNB" : "POL".equals(k) ? "POL" : "ETH";
+            return "";
+        }
+
+        public String addressPage(String address) {
+            if (!addressUrl.isEmpty()) return addressUrl.replace("{address}", address);
+            return explorer.isEmpty() ? "" : explorer + "/address/" + address;
+        }
+
+        public String txPage(String hash) {
+            if (!txUrl.isEmpty()) return txUrl.replace("{tx}", hash);
+            return explorer.isEmpty() ? "" : explorer + "/tx/" + hash;
+        }
 
         JSONObject json() throws Exception {
-            return new JSONObject().put("kind", kind).put("chainId", chainId).put("chainName", chainName).put("name", name)
-                    .put("symbol", symbol).put("rpc", rpc).put("explorer", explorer).put("icon", icon)
-                    .put("contract", contract).put("decimals", decimals);
+            return new JSONObject().put("kind", kind).put("family", family).put("chainId", chainId).put("networkId", networkId)
+                    .put("chainKey", chainKey).put("chainName", chainName).put("name", name).put("symbol", symbol).put("rpc", rpc)
+                    .put("explorer", explorer).put("addressUrl", addressUrl).put("txUrl", txUrl).put("icon", icon)
+                    .put("contract", contract).put("decimals", decimals).put("geckoId", geckoId).put("scout", scout)
+                    .put("historyApi", historyApi).put("derivation", derivation).put("hidden", hidden);
         }
 
         static Asset of(JSONObject o) {
             Asset a = new Asset();
-            a.kind = o.optString("kind", "CHAIN"); a.chainId = o.optLong("chainId"); a.chainName = o.optString("chainName");
-            a.name = o.optString("name"); a.symbol = o.optString("symbol"); a.rpc = o.optString("rpc");
-            a.explorer = o.optString("explorer"); a.icon = o.optString("icon"); a.contract = o.optString("contract");
-            a.decimals = o.optInt("decimals", 18);
+            a.kind = o.optString("kind", "CHAIN"); a.family = o.optString("family", "EVM"); a.chainId = o.optLong("chainId");
+            a.networkId = o.optString("networkId"); a.chainKey = o.optString("chainKey");
+            a.chainName = o.optString("chainName"); a.name = o.optString("name"); a.symbol = o.optString("symbol"); a.rpc = o.optString("rpc");
+            a.explorer = o.optString("explorer"); a.addressUrl = o.optString("addressUrl"); a.txUrl = o.optString("txUrl");
+            a.icon = o.optString("icon"); a.contract = o.optString("contract");
+            a.decimals = o.optInt("decimals", 18); a.geckoId = o.optString("geckoId"); a.scout = o.optString("scout");
+            a.historyApi = o.optString("historyApi"); a.derivation = o.optString("derivation"); a.hidden = o.optBoolean("hidden");
+            if (a.token() && a.chainKey.isEmpty() && !a.near()) a.chainKey = "C:" + a.chainId;
             return a;
         }
+
+        Asset copy() { return of(jsonOrEmpty()); }
+
+        private JSONObject jsonOrEmpty() { try { return json(); } catch (Exception e) { return new JSONObject(); } }
     }
 
     public interface Got { void got(Asset assetOrNull, String error); }
 
     // ── storage ────────────────────────────────────────────────────────────
+
+    private static volatile List<Asset> cache;
 
     public static List<Asset> all(Context c) {
         List<Asset> out = new ArrayList<>();
@@ -92,13 +147,63 @@ public final class CustomAssets {
             JSONArray arr = new JSONArray(c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("list", "[]"));
             for (int i = 0; i < arr.length(); i++) out.add(Asset.of(arr.getJSONObject(i)));
         } catch (Exception ignored) { }
+        cache = java.util.Collections.unmodifiableList(new ArrayList<>(out));
         return out;
+    }
+
+    /** The added list as last read (SketchApplication reads it at start). Safe on any thread. */
+    public static List<Asset> cached() {
+        List<Asset> c = cache;
+        return c == null ? java.util.Collections.emptyList() : c;
+    }
+
+    /** The added chain or token with this key, or null. */
+    public static Asset find(String key) {
+        if (key == null) return null;
+        for (Asset a : cached()) if (a.key().equals(key)) return a;
+        return null;
     }
 
     private static void save(Context c, List<Asset> list) {
         JSONArray arr = new JSONArray();
         try { for (Asset a : list) arr.put(a.json()); } catch (Exception ignored) { }
         c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString("list", arr.toString()).apply();
+        cache = java.util.Collections.unmodifiableList(new ArrayList<>(list));
+    }
+
+    // ── addresses ──────────────────────────────────────────────────────────
+
+    /** This wallet's address on an added chain, if already known. Never derives, so safe on the main thread. */
+    public static String savedAddress(Context c, String harvAddress, Asset a) {
+        if (c == null || a == null || harvAddress == null || harvAddress.isEmpty()) return "";
+        if (a.near()) return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("near:" + harvAddress + ":" + pathOf(a), "");
+        return CoinCatalog.savedAddress(c, harvAddress, "ETH");
+    }
+
+    /** The key path a chain's account uses (a token uses its chain's). */
+    static String pathOf(Asset a) {
+        Asset chain = a.token() ? find(a.chainKey) : a;
+        String p = chain == null ? a.derivation : chain.derivation;
+        return p == null || p.isEmpty() ? "m/44'/397'/0'" : p;
+    }
+
+    /** As {@link #savedAddress}, deriving it from the recovery phrase when needed. Run off the main thread. */
+    public static String address(Context c, String harvAddress, Asset a) {
+        String have = savedAddress(c, harvAddress, a);
+        if (have != null && !have.isEmpty()) return have;
+        try {
+            if (a.near()) {
+                String m = SecureWalletStorage.getActiveMnemonic(c.getApplicationContext());
+                if (m == null || m.trim().isEmpty()) return "";
+                String id = NearProtocol.address(m, pathOf(a));
+                c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString("near:" + harvAddress + ":" + pathOf(a), id).apply();
+                return id;
+            }
+            String eth = CoinCatalog.addresses(c, harvAddress).get("ETH");
+            return eth == null ? "" : eth;
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     static void add(Context c, Asset a) {
@@ -139,6 +244,9 @@ public final class CustomAssets {
                 }
                 if (a.rpc.isEmpty()) throw new Exception("No public RPC for this chain answered. Try again later.");
                 a.icon = chainIcon(j.optString("icon", ""));
+                JSONObject p = platform(chainId);
+                if (p != null) a.geckoId = p.optString("native_coin_id", "");
+                if (isBlockscout(a.explorer)) a.scout = a.explorer;
                 MAIN.post(() -> cb.got(a, null));
             } catch (java.io.FileNotFoundException | NotFound e) {
                 MAIN.post(() -> cb.got(null, "No chain with ID " + chainId + " is listed."));
@@ -157,6 +265,7 @@ public final class CustomAssets {
                 Asset a = new Asset();
                 a.kind = "TOKEN";
                 a.chainId = chainId;
+                a.chainKey = "C:" + chainId;
                 a.chainName = chainName;
                 a.rpc = rpc;
                 a.explorer = explorer;
@@ -167,7 +276,56 @@ public final class CustomAssets {
                 a.decimals = dec.length() > 2 ? new BigInteger(dec.substring(2), 16).intValue() : 18;
                 if (a.symbol.isEmpty()) throw new Exception("This address is not a token on " + chainName + ".");
                 if (a.name.isEmpty()) a.name = a.symbol;
-                a.icon = tokenIcon(chainId, addr);
+                String[] g = geckoToken(chainId, addr);
+                a.geckoId = g[0];
+                a.icon = g[1];
+                if (isBlockscout(explorer)) a.scout = explorer;
+                MAIN.post(() -> cb.got(a, null));
+            } catch (Exception e) {
+                MAIN.post(() -> cb.got(null, e.getMessage() == null ? "Could not read this token." : e.getMessage()));
+            }
+        }).start();
+    }
+
+    /** A NEAR-protocol chain from its RPC: the network id the RPC reports. Every other field is the person's. */
+    public static void fetchNearChain(String rpc, Got cb) {
+        new Thread(() -> {
+            try {
+                Asset a = new Asset();
+                a.kind = "CHAIN";
+                a.family = NearProtocol.FAMILY;
+                a.rpc = rpc.trim();
+                a.networkId = NearProtocol.networkId(a.rpc.split(",")[0].trim());
+                a.decimals = 24;                                     // NEAR's protocol unit (yocto)
+                a.derivation = "m/44'/397'/0'";
+                MAIN.post(() -> cb.got(a, null));
+            } catch (Exception e) {
+                MAIN.post(() -> cb.got(null, e.getMessage() == null ? "That RPC did not answer." : e.getMessage()));
+            }
+        }).start();
+    }
+
+    /** A NEP-141 token on a NEAR-protocol chain, read from its ft_metadata. */
+    public static void fetchNearToken(Asset chain, String contract, Got cb) {
+        new Thread(() -> {
+            try {
+                String id = contract.trim().toLowerCase(Locale.US);
+                if (!NearProtocol.validAccount(id)) throw new Exception("Enter the token's account, such as usdt.tether-token.near.");
+                String[] m = NearProtocol.tokenMetadata(chain.rpc, id);
+                Asset a = new Asset();
+                a.kind = "TOKEN";
+                a.family = NearProtocol.FAMILY;
+                a.chainKey = chain.key();
+                a.chainName = chain.chainName;
+                a.rpc = chain.rpc;
+                a.explorer = chain.explorer;
+                a.addressUrl = chain.addressUrl;
+                a.txUrl = chain.txUrl;
+                a.contract = id;
+                a.name = m[0].isEmpty() ? m[1] : m[0];
+                a.symbol = m[1];
+                a.decimals = Integer.parseInt(m[2]);
+                a.icon = m[3];
                 MAIN.post(() -> cb.got(a, null));
             } catch (Exception e) {
                 MAIN.post(() -> cb.got(null, e.getMessage() == null ? "Could not read this token." : e.getMessage()));
@@ -180,6 +338,7 @@ public final class CustomAssets {
 
     static String balance(Asset a, String owner) {
         try {
+            if (a.near()) return a.token() ? NearProtocol.tokenBalance(a, owner) : NearProtocol.balance(a, owner);
             BigInteger raw;
             if ("TOKEN".equals(a.kind)) {
                 String data = "0x70a08231" + String.format("%64s", owner.substring(2).toLowerCase(Locale.US)).replace(' ', '0');
@@ -240,28 +399,42 @@ public final class CustomAssets {
     }
 
     /** CoinGecko's small token image, when it knows the token. */
-    private static String tokenIcon(long chainId, String contract) {
-        String platform;
-        switch ((int) chainId) {
-            case 1: platform = "ethereum"; break;
-            case 56: platform = "binance-smart-chain"; break;
-            case 137: platform = "polygon-pos"; break;
-            case 8453: platform = "base"; break;
-            case 42161: platform = "arbitrum-one"; break;
-            case 10: platform = "optimistic-ethereum"; break;
-            case 43114: platform = "avalanche"; break;
-            case 250: platform = "fantom"; break;
-            case 324: platform = "zksync"; break;
-            case 59144: platform = "linea"; break;
-            default: return "";
-        }
+    private static volatile JSONArray platforms;
+
+    /** CoinGecko's platform for an EVM chain id ({id, chain_identifier, native_coin_id, …}), or null. Blocking. */
+    static JSONObject platform(long chainId) {
         try {
-            JSONObject j = getJson("https://api.coingecko.com/api/v3/coins/" + platform + "/contract/" + contract.toLowerCase(Locale.US));
+            JSONArray list = platforms;
+            if (list == null) {
+                Request req = new Request.Builder().url("https://api.coingecko.com/api/v3/asset_platforms").get().build();
+                try (Response r = HTTP.newCall(req).execute()) { list = new JSONArray(r.body() == null ? "[]" : r.body().string()); }
+                platforms = list;
+            }
+            for (int i = 0; i < list.length(); i++) {
+                JSONObject p = list.optJSONObject(i);
+                if (p != null && !p.isNull("chain_identifier") && p.optLong("chain_identifier", -1) == chainId) return p;
+            }
+        } catch (Exception ignored) { }
+        return null;
+    }
+
+    /** A token's CoinGecko {id, icon}, found through its chain's platform. Blocking; {"", ""} when unknown. */
+    private static String[] geckoToken(long chainId, String contract) {
+        JSONObject p = platform(chainId);
+        if (p == null) return new String[]{"", ""};
+        try {
+            JSONObject j = getJson("https://api.coingecko.com/api/v3/coins/" + p.optString("id") + "/contract/" + contract.toLowerCase(Locale.US));
             JSONObject img = j.optJSONObject("image");
-            return img == null ? "" : img.optString("small", "");
+            return new String[]{j.optString("id", ""), img == null ? "" : img.optString("small", "")};
         } catch (Exception e) {
-            return "";
+            return new String[]{"", ""};
         }
+    }
+
+    /** True when the explorer is a Blockscout (its API gives the address history). */
+    private static boolean isBlockscout(String explorer) {
+        if (explorer == null || explorer.isEmpty()) return false;
+        try { return getJson(explorer + "/api/v2/stats").has("total_blocks"); } catch (Exception e) { return false; }
     }
 
     /** Decodes an ABI string return, or a bytes32 one (older tokens such as MKR). */
@@ -292,16 +465,15 @@ public final class CustomAssets {
 
     // ── the Assets tab ─────────────────────────────────────────────────────
 
-    /** One row per added chain or token, in the same plain style as the other coins. */
+    /** One row per added chain or token, in the same style as the other coins; a row opens the coin page. */
     public static void render(Context c, LinearLayout box, String harvAddress) {
         if (box == null || c == null || harvAddress == null || harvAddress.isEmpty()) return;
         box.removeAllViews();
         List<Asset> list = all(c);
         if (list.isEmpty()) return;
-        String owner = CoinCatalog.savedAddress(c, harvAddress, "ETH");
-        if (owner == null || !owner.startsWith("0x")) return;
         LayoutInflater inf = LayoutInflater.from(c);
         for (Asset a : list) {
+            if (a.hidden) continue;
             View item = inf.inflate(R.layout.coin_list_card, box, false);
             item.setTag(a.key());
             ImageView logo = item.findViewById(R.id.iv_asset_logo);
@@ -309,19 +481,52 @@ public final class CustomAssets {
             TextView bal = item.findViewById(R.id.tv_asset_balance);
             TextView symbol = item.findViewById(R.id.tv_asset_symbol);
             TextView side = item.findViewById(R.id.tv_asset_amount);
-            if (name != null) name.setText("TOKEN".equals(a.kind) ? a.name + " · " + a.chainName : a.name);
+            if (name != null) name.setText(a.chainName);
             if (symbol != null) symbol.setText(a.symbol);
             if (side != null) side.setText("");
             if (bal != null) { bal.setText("…"); com.harvana.app.utils.BalancePrivacy.guard(bal); }
             if (logo != null) icon(c, logo, a);
             View row = item.findViewById(R.id.cardview1);
-            (row != null ? row : item).setOnClickListener(v -> detail(c, a, owner, box, harvAddress));
+            View tap = row != null ? row : item;
+            tap.setOnClickListener(v -> open(c, a, harvAddress));
+            tap.setOnLongClickListener(v -> { manage(c, a.token() ? (find(a.chainKey) != null ? find(a.chainKey) : a) : a, () -> render(c, box, harvAddress)); return true; });
             box.addView(item);
             new Thread(() -> {
-                String b = balance(a, owner);
+                String owner = address(c, harvAddress, a);
+                String b = owner.isEmpty() ? "" : balance(a, owner);
                 if (bal != null) bal.post(() -> bal.setText(b.isEmpty() ? "—" : b));
+                // Its worth in the person's currency, once a price is known.
+                if (b.isEmpty() || side == null) return;
+                AssetPrices.load(c, () -> FxRates.load(c, () -> {
+                    AssetPrices.Quote q = AssetPrices.peek(c, a.key());
+                    Double held = AssetPrices.amount(b);
+                    if (q == null || held == null) return;
+                    side.setText(FxRates.money(c, held * q.usd));
+                    com.harvana.app.utils.BalancePrivacy.guard(side);
+                }));
             }).start();
         }
+    }
+
+    /** The coin page, the same one every coin uses. */
+    public static void open(Context c, Asset a, String harvAddress) {
+        new Thread(() -> {
+            String owner = address(c, harvAddress, a);
+            MAIN.post(() -> c.startActivity(new Intent(c, com.harvana.app.CoinDetailActivity.class)
+                    .putExtra(CoinCatalog.EXTRA, a.key())
+                    .putExtra("walletAddress", owner)));
+        }).start();
+    }
+
+    /** Removes an added chain or token from the list (the coin page's menu). */
+    public static void removeKey(Context c, String key) { remove(c, key); }
+
+    /** Loads an added asset's icon (URL) into a view, with a letter badge until it arrives. */
+    public static void icon(Context c, ImageView logo, String url, String symbol) {
+        Asset a = new Asset();
+        a.icon = url == null ? "" : url;
+        a.symbol = symbol == null ? "" : symbol;
+        icon(c, logo, a);
     }
 
     private static void icon(Context c, ImageView logo, Asset a) {
@@ -356,112 +561,304 @@ public final class CustomAssets {
         };
     }
 
-    private static void detail(Context c, Asset a, String owner, LinearLayout box, String harvAddress) {
-        BottomSheetDialog d = new BottomSheetDialog(c);
+    // ── the "Add a custom chain or token" sheet ────────────────────────────
+
+    /** Opens the add sheet; {@code onAdded} runs after something was added so the list can redraw. */
+    public static void showAdd(Context c, Runnable onAdded) {
+        BottomSheetDialog d = new com.harvana.app.ui.AppSheet(c);
         LinearLayout root = column(c);
-        root.addView(title(c, a.name + " (" + a.symbol + ")"));
-        root.addView(sub(c, "TOKEN".equals(a.kind)
-                ? "A token you added on " + a.chainName + ". Contract " + a.contract + ". Decimals " + a.decimals + "."
-                : "A chain you added. Chain ID " + a.chainId + ". The coin is " + a.symbol + ", with " + a.decimals + " decimals."));
-        root.addView(sub(c, "Your address (the same as your Ethereum address):\n" + owner));
-        root.addView(sub(c, "Only send " + a.symbol + " on " + a.chainName + " to this address. Sending from this app is not available for added "
-                + ("TOKEN".equals(a.kind) ? "tokens" : "chains") + " yet; receive here and send from another wallet with the same recovery phrase."));
-        root.addView(button(c, "Copy address", v -> {
-            ClipboardManager cm = (ClipboardManager) c.getSystemService(Context.CLIPBOARD_SERVICE);
-            if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("Address", owner));
-            Toast.makeText(c, "Copied", Toast.LENGTH_SHORT).show();
-        }));
-        if (!a.explorer.isEmpty()) root.addView(button(c, "See on the explorer", v -> {
-            try { c.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(a.explorer + "/address/" + owner))); } catch (Exception ignored) { }
-        }));
-        root.addView(button(c, "Remove from my list", v -> {
-            remove(c, a.key());
+        root.addView(title(c, "Add"));
+        root.addView(button(c, "A chain", v -> { d.dismiss(); editChain(c, null, onAdded); }));
+        root.addView(button(c, "A token on a chain", v -> { d.dismiss(); addToken(c, null, onAdded); }));
+        root.addView(button(c, "Tokens on a chain", v -> {
             d.dismiss();
-            render(c, box, harvAddress);
+            List<Asset> chains = chainsForTokens(c);
+            String[] names = new String[chains.size()];
+            for (int i = 0; i < names.length; i++) names[i] = chains.get(i).chainName;
+            com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c).setTitle("Chain")
+                    .setItems(names, (dd, which) -> manage(c, chains.get(which), onAdded)));
         }));
         d.setContentView(root);
         d.show();
     }
 
-    // ── the "Add a custom chain or token" sheet ────────────────────────────
+    // ── a chain, typed in (Fill reads what it can) ─────────────────────────
 
-    /** Opens the add sheet; {@code onAdded} runs after something was added so the list can redraw. */
-    public static void showAdd(Context c, Runnable onAdded) {
-        BottomSheetDialog d = new BottomSheetDialog(c);
+    /** The chain form. {@code editing} is an added chain to change, or null for a new one. */
+    public static void editChain(Context c, Asset editing, Runnable onDone) {
+        BottomSheetDialog d = new com.harvana.app.ui.AppSheet(c);
         LinearLayout root = column(c);
-        root.addView(title(c, "Add a chain or token"));
-        root.addView(sub(c, "EVM networks only (Ethereum, BNB Chain, Polygon, Base, Arbitrum and the rest). Your address there is your Ethereum address."));
+        root.addView(title(c, editing == null ? "Add a chain" : editing.chainName));
+        final String[] protocol = {editing == null ? "EVM" : editing.family};
+        TextView pick = button(c, "Protocol: " + protocol[0], null);
+        root.addView(pick);
 
-        // 1. Custom chain by chain ID
-        root.addView(label(c, "A chain, by its chain ID"));
-        EditText chainId = field(c, "Chain ID, for example 42161 for Arbitrum", InputType.TYPE_CLASS_NUMBER);
-        root.addView(chainId);
-        TextView chainStatus = sub(c, "");
-        root.addView(button(c, "Find chain", v -> {
-            long id;
-            try { id = Long.parseLong(chainId.getText().toString().trim()); } catch (Exception e) { chainStatus.setText("Enter the chain ID as a number."); return; }
-            chainStatus.setText("Looking it up…");
-            fetchChain(id, (a, err) -> {
-                if (a == null) { chainStatus.setText(err); return; }
-                chainStatus.setText(a.chainName + " · " + a.symbol + " · RPC checked");
-                confirm(c, a, () -> { add(c, a); d.dismiss(); if (onAdded != null) onAdded.run(); });
-            });
+        EditText lookup = field(c, "", InputType.TYPE_CLASS_TEXT);
+        TextView status = sub(c, "");
+        TextView fill = button(c, "Fill", null);
+        EditText name = field(c, "Name", InputType.TYPE_CLASS_TEXT);
+        EditText symbol = field(c, "Coin symbol", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        EditText decimals = field(c, "Decimals", InputType.TYPE_CLASS_NUMBER);
+        EditText rpc = field(c, "RPC URL (several: comma between)", InputType.TYPE_TEXT_VARIATION_URI);
+        EditText explorer = field(c, "Explorer URL", InputType.TYPE_TEXT_VARIATION_URI);
+        EditText addressUrl = field(c, "Address page, with {address}", InputType.TYPE_TEXT_VARIATION_URI);
+        EditText txUrl = field(c, "Transaction page, with {tx}", InputType.TYPE_TEXT_VARIATION_URI);
+        EditText history = field(c, "History API", InputType.TYPE_TEXT_VARIATION_URI);
+        EditText icon = field(c, "Icon URL", InputType.TYPE_TEXT_VARIATION_URI);
+        EditText gecko = field(c, "CoinGecko id", InputType.TYPE_CLASS_TEXT);
+        EditText path = field(c, "Key path", InputType.TYPE_CLASS_TEXT);
+        root.addView(lookup);
+        root.addView(fill);
+        root.addView(status);
+        for (EditText e : new EditText[]{name, symbol, decimals, rpc, explorer, addressUrl, txUrl, history, icon, gecko, path}) root.addView(e);
+
+        Runnable protocolChanged = () -> {
+            boolean near = NearProtocol.FAMILY.equals(protocol[0]);
+            pick.setText("Protocol: " + protocol[0]);
+            lookup.setHint(near ? "RPC URL" : "Chain ID");
+            lookup.setInputType(near ? InputType.TYPE_TEXT_VARIATION_URI : InputType.TYPE_CLASS_NUMBER);
+            path.setVisibility(near ? View.VISIBLE : View.GONE);
+            history.setHint(near ? "History API (NearBlocks-style)" : "History API (Blockscout)");
+        };
+        pick.setOnClickListener(v -> com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c).setTitle("Protocol")
+                .setItems(PROTOCOLS, (dd, which) -> { protocol[0] = PROTOCOLS[which]; protocolChanged.run(); })));
+        protocolChanged.run();
+
+        // Fills the fields from a fetched chain; what the person already typed is kept.
+        Fill put = a -> {
+            setIfEmpty(name, a.chainName); setIfEmpty(symbol, a.symbol); setIfEmpty(decimals, String.valueOf(a.decimals));
+            setIfEmpty(rpc, a.rpc); setIfEmpty(explorer, a.explorer); setIfEmpty(addressUrl, a.addressUrl); setIfEmpty(txUrl, a.txUrl);
+            setIfEmpty(history, a.scout.isEmpty() ? a.historyApi : a.scout); setIfEmpty(icon, a.icon); setIfEmpty(gecko, a.geckoId);
+            setIfEmpty(path, a.derivation);
+            if (lookup.getText().toString().trim().isEmpty()) lookup.setText(NearProtocol.FAMILY.equals(a.family) ? a.rpc : String.valueOf(a.chainId));
+        };
+        if (editing != null) {
+            put.on(editing);
+            lookup.setText(editing.near() ? editing.rpc : String.valueOf(editing.chainId));
+        }
+        final Asset[] found = {editing == null ? null : editing.copy()};
+        fill.setOnClickListener(v -> {
+            String q = lookup.getText().toString().trim();
+            if (q.isEmpty()) { status.setText(lookup.getHint()); return; }
+            status.setText("…");
+            Got got = (a, err) -> {
+                if (a == null) { status.setText(err); return; }
+                found[0] = a;
+                status.setText(a.near() ? a.networkId : String.valueOf(a.chainId));
+                put.on(a);
+            };
+            if (NearProtocol.FAMILY.equals(protocol[0])) fetchNearChain(q, got);
+            else {
+                try { fetchChain(Long.parseLong(q), got); } catch (NumberFormatException e) { status.setText("Chain ID"); }
+            }
+        });
+
+        root.addView(button(c, "Save", v -> {
+            Asset a = found[0] != null ? found[0].copy() : new Asset();
+            a.kind = "CHAIN";
+            a.family = protocol[0];
+            a.chainName = text(name);
+            a.name = a.chainName;
+            a.symbol = text(symbol).toUpperCase(Locale.US);
+            a.rpc = text(rpc);
+            a.explorer = trimSlash(text(explorer));
+            a.addressUrl = text(addressUrl);
+            a.txUrl = text(txUrl);
+            a.icon = text(icon);
+            a.geckoId = text(gecko).toLowerCase(Locale.US);
+            a.derivation = text(path);
+            String hist = trimSlash(text(history));
+            if (a.near()) { a.historyApi = hist; a.scout = ""; } else { a.scout = hist; a.historyApi = ""; }
+            try { a.decimals = Integer.parseInt(text(decimals)); } catch (Exception e) { status.setText("Decimals"); return; }
+            if (a.chainName.isEmpty() || a.symbol.isEmpty() || a.rpc.isEmpty()) { status.setText("Name, coin symbol and RPC URL are needed."); return; }
+            status.setText("Checking the RPC…");
+            final String q = lookup.getText().toString().trim();
+            new Thread(() -> {
+                String err = null;
+                try {
+                    if (a.near()) a.networkId = NearProtocol.networkId(a.rpc.split(",")[0].trim());
+                    else {
+                        long want = Long.parseLong(q);
+                        long got = chainIdOf(a.rpc.split(",")[0].trim());
+                        if (got != want) throw new Exception("That RPC answers as chain " + got + ", not " + want + ".");
+                        a.chainId = want;
+                    }
+                } catch (NumberFormatException e) { err = "Chain ID"; }
+                catch (Exception e) { err = e.getMessage() == null ? "The RPC did not answer." : e.getMessage(); }
+                final String error = err;
+                MAIN.post(() -> {
+                    if (error != null) { status.setText(error); return; }
+                    if (editing != null && !editing.key().equals(a.key())) remove(c, editing.key());
+                    add(c, a);
+                    d.dismiss();
+                    if (onDone != null) onDone.run();
+                });
+            }).start();
         }));
-        root.addView(chainStatus);
-
-        // 2. Token by contract address
-        root.addView(label(c, "A token, by its contract address"));
-        List<Asset> chains = chainsForTokens(c);
-        String[] names = new String[chains.size()];
-        for (int i = 0; i < names.length; i++) names[i] = chains.get(i).chainName;
-        final int[] picked = {0};
-        TextView chainPick = button(c, "On: " + names[0], null);
-        chainPick.setOnClickListener(v -> com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c)
-                .setTitle("Token is on").setItems(names, (dd, which) -> { picked[0] = which; chainPick.setText("On: " + names[which]); })));
-        root.addView(chainPick);
-        EditText contract = field(c, "Contract address, 0x…", InputType.TYPE_CLASS_TEXT);
-        root.addView(contract);
-        TextView tokenStatus = sub(c, "");
-        root.addView(button(c, "Find token", v -> {
-            Asset ch = chains.get(picked[0]);
-            tokenStatus.setText("Reading the contract…");
-            fetchToken(ch.chainId, ch.chainName, ch.rpc, ch.explorer, contract.getText().toString(), (a, err) -> {
-                if (a == null) { tokenStatus.setText(err); return; }
-                tokenStatus.setText(a.name + " · " + a.symbol + " · " + a.decimals + " decimals");
-                confirm(c, a, () -> { add(c, a); d.dismiss(); if (onAdded != null) onAdded.run(); });
-            });
-        }));
-        root.addView(tokenStatus);
-
         android.widget.ScrollView sv = new android.widget.ScrollView(c);
         sv.addView(root);
         d.setContentView(sv);
         d.show();
     }
 
-    /** Built-in EVM chains plus any chain the person added, as a place a token can live. */
+    // ── a token under a chain ──────────────────────────────────────────────
+
+    /** The token form; {@code chainKey} preselects the chain (null = the first). */
+    public static void addToken(Context c, String chainKey, Runnable onDone) {
+        BottomSheetDialog d = new com.harvana.app.ui.AppSheet(c);
+        LinearLayout root = column(c);
+        root.addView(title(c, "Add a token"));
+        List<Asset> chains = chainsForTokens(c);
+        String[] names = new String[chains.size()];
+        final int[] picked = {0};
+        for (int i = 0; i < names.length; i++) {
+            names[i] = chains.get(i).chainName;
+            if (chainKey != null && chainKey.equals(chains.get(i).key())) picked[0] = i;
+        }
+        TextView chainPick = button(c, "On: " + names[picked[0]], null);
+        root.addView(chainPick);
+        EditText contract = field(c, "", InputType.TYPE_CLASS_TEXT);
+        TextView fill = button(c, "Fill", null);
+        TextView status = sub(c, "");
+        EditText name = field(c, "Name", InputType.TYPE_CLASS_TEXT);
+        EditText symbol = field(c, "Symbol", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        EditText decimals = field(c, "Decimals", InputType.TYPE_CLASS_NUMBER);
+        EditText icon = field(c, "Icon URL", InputType.TYPE_TEXT_VARIATION_URI);
+        EditText gecko = field(c, "CoinGecko id", InputType.TYPE_CLASS_TEXT);
+        root.addView(contract);
+        root.addView(fill);
+        root.addView(status);
+        for (EditText e : new EditText[]{name, symbol, decimals, icon, gecko}) root.addView(e);
+        Runnable hint = () -> contract.setHint(chains.get(picked[0]).near() ? "Token account, such as usdt.tether-token.near" : "Contract address, 0x…");
+        hint.run();
+        chainPick.setOnClickListener(v -> com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c)
+                .setTitle("Chain").setItems(names, (dd, which) -> { picked[0] = which; chainPick.setText("On: " + names[which]); hint.run(); })));
+        final Asset[] found = {null};
+        fill.setOnClickListener(v -> {
+            Asset ch = chains.get(picked[0]);
+            status.setText("…");
+            Got got = (a, err) -> {
+                if (a == null) { status.setText(err); return; }
+                found[0] = a;
+                status.setText(a.name);
+                setIfEmpty(name, a.name); setIfEmpty(symbol, a.symbol); setIfEmpty(decimals, String.valueOf(a.decimals));
+                setIfEmpty(icon, a.icon); setIfEmpty(gecko, a.geckoId);
+            };
+            if (ch.near()) fetchNearToken(ch, contract.getText().toString(), got);
+            else fetchToken(ch.chainId, ch.chainName, ch.rpc, ch.explorer, contract.getText().toString(), got);
+        });
+        root.addView(button(c, "Save", v -> {
+            Asset ch = chains.get(picked[0]);
+            String id = text(contract);
+            Asset a = found[0] != null && found[0].contract.equalsIgnoreCase(id) ? found[0].copy() : new Asset();
+            a.kind = "TOKEN";
+            a.family = ch.family;
+            a.chainId = ch.chainId;
+            a.chainKey = ch.key();
+            a.chainName = ch.chainName;
+            a.rpc = ch.rpc;
+            a.explorer = ch.explorer;
+            a.addressUrl = ch.addressUrl;
+            a.txUrl = ch.txUrl;
+            if (a.scout.isEmpty()) a.scout = ch.scout;
+            a.contract = ch.near() ? id.toLowerCase(Locale.US) : id;
+            a.name = text(name);
+            a.symbol = text(symbol);
+            a.icon = text(icon);
+            a.geckoId = text(gecko).toLowerCase(Locale.US);
+            try { a.decimals = Integer.parseInt(text(decimals)); } catch (Exception e) { status.setText("Decimals"); return; }
+            if (a.contract.isEmpty() || a.symbol.isEmpty()) { status.setText("Contract and symbol are needed."); return; }
+            if (!ch.near() && !a.contract.matches("^0x[0-9a-fA-F]{40}$")) { status.setText("A contract is 0x and 40 characters."); return; }
+            if (ch.near() && !NearProtocol.validAccount(a.contract)) { status.setText("Token account, such as usdt.tether-token.near"); return; }
+            if (a.name.isEmpty()) a.name = a.symbol;
+            add(c, a);
+            d.dismiss();
+            if (onDone != null) onDone.run();
+        }));
+        android.widget.ScrollView sv = new android.widget.ScrollView(c);
+        sv.addView(root);
+        d.setContentView(sv);
+        d.show();
+    }
+
+    // ── one chain's tokens: show, hide, remove; edit or remove the chain ───
+
+    /** Every token on this chain with a switch to show or hide it; add a token; edit or remove an added chain. */
+    public static void manage(Context c, Asset chain, Runnable onChange) {
+        BottomSheetDialog d = new com.harvana.app.ui.AppSheet(c);
+        LinearLayout root = column(c);
+        root.addView(title(c, chain.chainName));
+        String key = chain.token() ? chain.chainKey : chain.key();
+        List<Asset> tokens = new ArrayList<>();
+        for (Asset t : all(c)) if (t.token() && key.equals(t.chainKey)) tokens.add(t);
+        if (!tokens.isEmpty()) root.addView(label(c, "Tokens"));
+        for (Asset t : tokens) {
+            LinearLayout row = new LinearLayout(c);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            row.setMinimumHeight(dp(c, 52));
+            row.setClickable(true);
+            ImageView logo = new ImageView(c);
+            icon(c, logo, t);
+            row.addView(logo, new LinearLayout.LayoutParams(dp(c, 28), dp(c, 28)));
+            TextView words = sub(c, t.symbol + "  ·  " + t.name);
+            words.setTextColor(ContextCompat.getColor(c, R.color.colorTextPrimary));
+            words.setPadding(dp(c, 12), 0, 0, 0);
+            row.addView(words, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+            com.google.android.material.switchmaterial.SwitchMaterial shown = new com.google.android.material.switchmaterial.SwitchMaterial(c);
+            shown.setChecked(!t.hidden);
+            shown.setOnCheckedChangeListener((b, on) -> { t.hidden = !on; add(c, t); if (onChange != null) onChange.run(); });
+            row.addView(shown);
+            row.setOnClickListener(v -> shown.toggle());
+            row.setOnLongClickListener(v -> {
+                com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c).setTitle("Remove " + t.symbol + "?")
+                        .setNegativeButton("Cancel", null)
+                        .setPositiveButton("Remove", (dd, w) -> { remove(c, t.key()); d.dismiss(); if (onChange != null) onChange.run(); manage(c, chain, onChange); }));
+                return true;
+            });
+            root.addView(row);
+        }
+        root.addView(button(c, "Add a token", v -> { d.dismiss(); addToken(c, key, onChange); }));
+        Asset added = find(key);
+        if (added != null && !added.token()) {
+            root.addView(button(c, "Edit chain", v -> { d.dismiss(); editChain(c, added, onChange); }));
+            root.addView(button(c, "Remove chain", v -> com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c)
+                    .setTitle("Remove " + added.chainName + " and its tokens?")
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("Remove", (dd, w) -> {
+                        for (Asset t : tokens) remove(c, t.key());
+                        remove(c, added.key());
+                        d.dismiss();
+                        if (onChange != null) onChange.run();
+                    }))));
+        }
+        android.widget.ScrollView sv = new android.widget.ScrollView(c);
+        sv.addView(root);
+        d.setContentView(sv);
+        d.show();
+    }
+
+    private interface Fill { void on(Asset a); }
+
+    private static String text(EditText e) { return e.getText() == null ? "" : e.getText().toString().trim(); }
+
+    private static void setIfEmpty(EditText e, String v) {
+        if (v != null && !v.isEmpty() && text(e).isEmpty()) e.setText(v);
+    }
+
+    /** The built-in EVM chains and every chain the person added (any protocol), as places a token can live. */
     private static List<Asset> chainsForTokens(Context c) {
         List<Asset> out = new ArrayList<>();
         for (String k : new String[]{"ETH", "BNB", "POL", "BASE"}) {
             Net.Evm e = Net.evm(k);
             Asset a = new Asset();
-            a.chainId = e.chainId; a.chainName = e.name; a.rpc = e.rpc;
+            a.chainId = e.chainId; a.chainName = e.name; a.rpc = e.rpc; a.symbol = "BNB".equals(k) ? "BNB" : "POL".equals(k) ? "POL" : "ETH";
             a.explorer = e.addressPage.endsWith("/address/") ? e.addressPage.substring(0, e.addressPage.length() - "/address/".length()) : "";
+            a.scout = e.scout == null ? "" : e.scout;
             out.add(a);
         }
-        for (Asset a : all(c)) if ("CHAIN".equals(a.kind)) out.add(a);
+        for (Asset a : all(c)) if (!a.token()) out.add(a);
         return out;
-    }
-
-    private static void confirm(Context c, Asset a, Runnable yes) {
-        String what = "TOKEN".equals(a.kind)
-                ? a.name + " (" + a.symbol + ") on " + a.chainName + "\nContract " + a.contract
-                : a.chainName + "\nChain ID " + a.chainId + " · coin " + a.symbol + "\nRPC " + a.rpc;
-        com.harvana.app.p2p.ThemedDialogs.show(com.harvana.app.p2p.ThemedDialogs.alert(c)
-                .setTitle("Add this?")
-                .setMessage(what + "\n\nAnyone can make a token with any name. Add only a contract you got from a source you trust.")
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Add", (dd, w) -> yes.run()));
     }
 
     // ── small builders ─────────────────────────────────────────────────────

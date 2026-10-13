@@ -642,7 +642,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		rows.add(new String[]{"To", recipient});
 		rows.add(new String[]{"From", mine});
 		rows.add(new String[]{"Network", coin.liveNetwork()});
-		rows.add(new String[]{"Network fee", "Paid to " + coin.liveNetwork() + ", not to Harvana"});
+		rows.add(new String[]{"Network fee in", coin.feeTicker()});
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send " + coin.ticker, amountText + " " + coin.ticker, rows, () -> {
 			if (isProcessingSend) return;
 			isProcessingSend = true;
@@ -768,7 +768,9 @@ public class SendAssetActivity extends AppCompatActivity {
 		for (HashMap<String, Object> row : walletAssets) {
 			if (!"HARV".equals(String.valueOf(row.get("assetKey")))) return;
 		}
-		for (com.harvana.app.wallet.CoinCatalog.Coin c : com.harvana.app.wallet.CoinCatalog.others()) {
+		java.util.List<com.harvana.app.wallet.CoinCatalog.Coin> chainCoins = new java.util.ArrayList<>(com.harvana.app.wallet.CoinCatalog.others());
+		chainCoins.addAll(com.harvana.app.wallet.CoinCatalog.addedCoins());          // chains and tokens the person added
+		for (com.harvana.app.wallet.CoinCatalog.Coin c : chainCoins) {
 			HashMap<String, Object> row = new HashMap<>();
 			row.put("contractAddress", "external");
 			row.put("symbol", c.ticker);
@@ -783,9 +785,14 @@ public class SendAssetActivity extends AppCompatActivity {
 		_includeStableAssets(harvAddress);
 		final String mine = harvAddress;
 		new Thread(() -> {
-			java.util.Map<String, String> addrs = com.harvana.app.wallet.CoinCatalog.addresses(getApplicationContext(), mine);
+			java.util.Map<String, String> addrs = new java.util.HashMap<>(com.harvana.app.wallet.CoinCatalog.addresses(getApplicationContext(), mine));
+			for (com.harvana.app.wallet.CoinCatalog.Coin c : chainCoins) {
+				if (c.added == null) continue;
+				String a = com.harvana.app.wallet.CustomAssets.address(getApplicationContext(), mine, c.added);
+				if (a != null && !a.isEmpty()) addrs.put(c.key, a);
+			}
 			java.util.Map<String, String> bals = new java.util.HashMap<>();
-			for (com.harvana.app.wallet.CoinCatalog.Coin c : com.harvana.app.wallet.CoinCatalog.others()) {
+			for (com.harvana.app.wallet.CoinCatalog.Coin c : chainCoins) {
 				String a = addrs.get(c.key);
 				if (a == null || a.isEmpty()) continue;
 				bals.put(c.key, com.harvana.app.wallet.ChainBalances.assetBalance(c.key, a));
@@ -980,7 +987,11 @@ public class SendAssetActivity extends AppCompatActivity {
 			case "BASE": return "0x...";
 			case "TRX": return "T...";
 			case "SOL": return "Solana address";
-			default: return "HV0x...";              // HARV and the stable coins (hUSD, hNGN, …)
+			default: {
+				com.harvana.app.wallet.CustomAssets.Asset added = com.harvana.app.wallet.CustomAssets.find(key);
+				if (added != null) return added.near() ? "Account name or 64 characters" : "0x...";   // an added chain or token
+			}
+				return "HV0x...";              // HARV and the stable coins (hUSD, hNGN, …)
 		}
 	}
 
@@ -1016,6 +1027,8 @@ public class SendAssetActivity extends AppCompatActivity {
 	private static String _family(String key) {
 		if (key == null) return "";
 		if ("HARV".equals(key) || com.harvana.app.husd.Stable.isStable(key)) return "HV";
+		com.harvana.app.wallet.CustomAssets.Asset added = com.harvana.app.wallet.CustomAssets.find(key);
+		if (added != null) return added.near() ? "NEAR" : "EVM";       // a 0x address fits every EVM chain, built-in or added
 		switch (key) {
 			case "ETH": case "BNB": case "POL": case "BASE": return "EVM";
 			default: return key;

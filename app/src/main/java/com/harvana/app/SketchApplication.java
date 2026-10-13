@@ -26,6 +26,7 @@ public class SketchApplication extends Application {
         super.onCreate();
         appContext = getApplicationContext();
         com.harvana.app.wallet.Net.load(this);
+        com.harvana.app.wallet.CustomAssets.all(this);           // added chains and tokens, so every screen can open them
         
         // Saved theme (System / Light / Dark) must be applied before any screen is created.
         com.harvana.app.utils.ThemeManager.applySavedTheme(this);

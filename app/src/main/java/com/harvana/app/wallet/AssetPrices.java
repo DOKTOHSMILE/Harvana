@@ -45,7 +45,20 @@ public final class AssetPrices {
     /** The CoinGecko id for a coin key ("BTC" → "bitcoin"), or null. */
     public static String geckoId(String key) {
         for (String[] r : IDS) if (r[0].equals(key)) return r[1];
-        return null;
+        CustomAssets.Asset a = CustomAssets.find(key);
+        return a == null || a.geckoId == null || a.geckoId.isEmpty() ? null : a.geckoId;
+    }
+
+    /** Every {key, CoinGecko id}: the built-in coins, then the chains and tokens the person added. */
+    private static List<String[]> allIds() {
+        List<String[]> out = new ArrayList<>(java.util.Arrays.asList(IDS));
+        for (CustomAssets.Asset a : CustomAssets.cached()) if (a.geckoId != null && !a.geckoId.isEmpty()) out.add(new String[]{a.key(), a.geckoId});
+        return out;
+    }
+
+    private static boolean builtIn(String key) {
+        for (String[] r : IDS) if (r[0].equals(key)) return true;
+        return false;
     }
 
     private static final String ENDPOINT =
@@ -142,7 +155,12 @@ public final class AssetPrices {
     private static boolean fetch(Context app) {
         if (app == null) return false;
         sharedAt = 0;
-        if (readShared()) return true;
+        if (readShared()) {
+            boolean missing = false;
+            synchronized (mem) { for (String[] r : allIds()) if (!mem.containsKey(r[0])) missing = true; }
+            if (missing) fetchRemote();                                   // an added coin the shared copy doesn't carry
+            return true;
+        }
         if (!fetchRemote()) return false;
         writeShared();
         return true;
@@ -187,6 +205,7 @@ public final class AssetPrices {
             Map<String, Object> quotes = new HashMap<>();
             synchronized (mem) {
                 for (Map.Entry<String, Quote> e : mem.entrySet()) {
+                    if (!builtIn(e.getKey())) continue;                   // what a person added stays on their phone
                     Map<String, Object> q = new HashMap<>();
                     double ch = e.getValue().change;
                     q.put("usd", e.getValue().usd);
@@ -214,7 +233,9 @@ public final class AssetPrices {
     private static boolean fetchRemote() {
         HttpURLConnection c = null;
         try {
-            c = (HttpURLConnection) new URL(ENDPOINT).openConnection();
+            StringBuilder extra = new StringBuilder();
+            for (String[] r : allIds()) if (!builtIn(r[0])) extra.append(',').append(java.net.URLEncoder.encode(r[1], "UTF-8"));
+            c = (HttpURLConnection) new URL(ENDPOINT + extra).openConnection();
             c.setConnectTimeout(8000);
             c.setReadTimeout(8000);
             c.setRequestProperty("Accept", "application/json");
@@ -223,7 +244,7 @@ public final class AssetPrices {
             if (code != 200) return false;
             JSONObject o = new JSONObject(read(c.getInputStream()));
             synchronized (mem) {
-                for (String[] pair : IDS) {
+                for (String[] pair : allIds()) {
                     JSONObject row = o.optJSONObject(pair[1]);
                     if (row == null || !row.has("usd")) continue;
                     double usd = row.optDouble("usd", Double.NaN);

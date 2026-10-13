@@ -42,6 +42,26 @@ public class SheetDialog extends AppSheet {
         }
     }
 
+    /** The thin line between list rows in every sheet. */
+    public static View divider(Context c) {
+        View line = new View(c);
+        line.setBackgroundColor((UiColors.textTertiary() & 0x00FFFFFF) | 0x33000000);
+        line.setTag(com.harvana.app.R.id.sheet_divider_tag, "sheet-divider");
+        return line;
+    }
+
+    public static LinearLayout.LayoutParams dividerParams(Context c) {
+        return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Math.max(1, Math.round(c.getResources().getDisplayMetrics().density * 0.8f)));
+    }
+
+    /** Adds rows to a sheet's column as a list: a divider between each, like every sheet list. */
+    public static void list(LinearLayout column, View... rows) {
+        for (View r : rows) {
+            if (column.getChildCount() > 0) column.addView(divider(column.getContext()), dividerParams(column.getContext()));
+            column.addView(r);
+        }
+    }
+
     public static class Builder {
         private final Context context;
         private CharSequence title, message;
@@ -144,9 +164,12 @@ public class SheetDialog extends AppSheet {
                     row.setText(items[i]);
                     row.setTextSize(16);
                     row.setTextColor(UiColors.textPrimary());
-                    row.setMinHeight((int) (50 * dp));
+                    row.setMinHeight((int) (54 * dp));
                     row.setGravity(Gravity.CENTER_VERTICAL);
-                    row.setPadding(0, 0, 0, 0);
+                    row.setPadding(0, (int) (6 * dp), 0, (int) (6 * dp));
+                    android.util.TypedValue ripple = new android.util.TypedValue();
+                    context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, ripple, true);
+                    row.setBackgroundResource(ripple.resourceId);
                     if (singleChoice || multiChecked != null) {
                         row.setCheckMarkDrawable(com.harvana.app.R.drawable.sheet_checkmark);
                         if (row.getCheckMarkDrawable() != null) row.getCheckMarkDrawable().mutate().setTint(UiColors.accent());
@@ -166,6 +189,7 @@ public class SheetDialog extends AppSheet {
                         if (itemListener != null) itemListener.onClick(d, at);
                         if (!singleChoice) d.dismiss();                         // a plain list closes when a row is chosen
                     });
+                    if (i > 0) root.addView(divider(context), dividerParams(context));   // a list, one line between rows
                     root.addView(row, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 }
             }

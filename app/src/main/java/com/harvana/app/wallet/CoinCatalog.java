@@ -26,6 +26,7 @@ public final class CoinCatalog {
     public static String explorerUrl(Coin coin, String address) {
         if (coin == null) return "";
         String a = address == null ? "" : address.trim();
+        if (coin.added != null) return a.isEmpty() ? "" : coin.added.addressPage(a);
         String pattern;
         switch (coin.key) {
             case "HARV": pattern = HARV_EXPLORER; break;
@@ -52,16 +53,39 @@ public final class CoinCatalog {
         /** When set, this coin uses the Ethereum address but a different chain. */
         public final String evm;
         public final boolean nativeHarv;
+        /** A chain or token the person added (CustomAssets), or null for a built-in coin. */
+        public final CustomAssets.Asset added;
 
         Coin(String key, String name, String ticker, String network, String standard, String about,
              int icon, int decimals, ChainKeys.Chain chain, String evm, boolean nativeHarv) {
+            this(key, name, ticker, network, standard, about, icon, decimals, chain, evm, nativeHarv, null);
+        }
+
+        Coin(String key, String name, String ticker, String network, String standard, String about,
+             int icon, int decimals, ChainKeys.Chain chain, String evm, boolean nativeHarv, CustomAssets.Asset added) {
             this.key = key; this.name = name; this.ticker = ticker; this.network = network;
             this.standard = standard; this.about = about; this.icon = icon; this.decimals = decimals;
-            this.chain = chain; this.evm = evm; this.nativeHarv = nativeHarv;
+            this.chain = chain; this.evm = evm; this.nativeHarv = nativeHarv; this.added = added;
+        }
+
+        /** The icon's web address for an added coin ("" for a built-in one: use {@link #icon}). */
+        public String iconUrl() { return added == null ? "" : added.icon; }
+
+        /** CoinGecko id for price, chart and description, or null. */
+        public String geckoId() {
+            if (added != null) return added.geckoId == null || added.geckoId.isEmpty() ? null : added.geckoId;
+            return AssetPrices.geckoId(key);
+        }
+
+        /** The coin its network fee is paid in. */
+        public String feeTicker() {
+            if (added != null) return added.feeSymbol();
+            return "BASE".equals(key) ? "ETH" : ticker;
         }
 
         /** The name of the smallest unit this coin is counted in. */
         public String smallestUnit() {
+            if (added != null) return "10^" + decimals + " per " + ticker;
             switch (key) {
                 case "BTC": return "satoshi · 100,000,000 per BTC";
                 case "LTC": return "litoshi · 100,000,000 per LTC";
@@ -79,6 +103,7 @@ public final class CoinCatalog {
 
         /** The network name for the choice saved now, not the one from when the app started. */
         public String liveNetwork() {
+            if (added != null) return added.chainName;
             if (nativeHarv) return Net.TEST ? "Harvana Protocol testnet" : "Harvana Protocol";
             switch (key) {
                 case "PI": return Net.label("Pi Network");
@@ -153,7 +178,28 @@ public final class CoinCatalog {
     public static Coin get(String key) {
         if (key == null || key.isEmpty()) return ALL.get(0);
         for (Coin c : ALL) if (c.key.equals(key)) return c;
-        return ALL.get(0);
+        Coin added = added(key);
+        return added != null ? added : ALL.get(0);
+    }
+
+    /** An added chain or token as a coin (every fact from what was fetched when it was added), or null. */
+    public static Coin added(String key) {
+        CustomAssets.Asset a = CustomAssets.find(key);
+        if (a == null) return null;
+        String standard = a.token() ? (a.near() ? "NEP-141 token" : "ERC-20 token") : a.family + " account";
+        return new Coin(a.key(), a.token() ? a.name : a.chainName, a.symbol, a.chainName, standard, "",
+                R.drawable.ic_coin_generic, a.decimals, null, a.near() ? null : "added", false, a);
+    }
+
+    /** Every added chain and token that is shown, as coins. */
+    public static List<Coin> addedCoins() {
+        List<Coin> out = new ArrayList<>();
+        for (CustomAssets.Asset a : CustomAssets.cached()) {
+            if (a.hidden) continue;                                           // hidden on Assets: hidden everywhere
+            Coin c = added(a.key());
+            if (c != null) out.add(c);
+        }
+        return out;
     }
 
     public static Coin harv() { return ALL.get(0); }
@@ -166,6 +212,8 @@ public final class CoinCatalog {
         if (c == null || harvAddress == null || harvAddress.isEmpty() || key == null) return "";
         if ("HARV".equals(key)) return harvAddress;
         if ("PI".equals(key)) return PiWalletStore.get(c, harvAddress);
+        CustomAssets.Asset added = CustomAssets.find(key);
+        if (added != null) return CustomAssets.savedAddress(c, harvAddress, added);
         Coin coin = null;
         for (Coin x : ALL) if (x.key.equals(key)) coin = x;
         if (coin == null) return "";

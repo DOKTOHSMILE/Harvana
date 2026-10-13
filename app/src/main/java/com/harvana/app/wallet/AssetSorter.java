@@ -413,7 +413,9 @@ public final class AssetSorter {
             });
             // Other coins: market prices.
             AssetPrices.load(c, () -> {
-                for (CoinCatalog.Coin coin : CoinCatalog.others()) {
+                java.util.List<CoinCatalog.Coin> priced = new java.util.ArrayList<>(CoinCatalog.others());
+                priced.addAll(CoinCatalog.addedCoins());
+                for (CoinCatalog.Coin coin : priced) {
                     AssetPrices.Quote q = AssetPrices.peek(c, coin.key);
                     if (q != null && q.usd > 0) {
                         price.put(coin.key.toUpperCase(java.util.Locale.US), q.usd);

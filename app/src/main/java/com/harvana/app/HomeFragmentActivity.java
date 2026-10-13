@@ -1541,6 +1541,43 @@ public class HomeFragmentActivity extends Fragment {
 			parent.addView(v, Math.min(at, parent.getChildCount()));
 			at = parent.indexOfChild(v) + 1;
 		}
+		_alignSections(root, order);
+	}
+
+	/**
+	 * One spacing for every Home section: the same gap above each, and the four small cards' outer edges in line
+	 * with the full-width cards (no extra inset), with an even gap between them.
+	 */
+	private void _alignSections(View root, int[] order) {
+		float d = getResources().getDisplayMetrics().density;
+		int gap = Math.round(16 * d), inner = Math.round(6 * d);
+		View first = root.findViewById(order[0]);
+		if (first != null && first.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+			ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) first.getLayoutParams();
+			lp.bottomMargin = 0;                                              // the gap comes from the next section only
+			first.setLayoutParams(lp);
+		}
+		for (int i = 1; i < order.length; i++) {
+			View v = root.findViewById(order[i]);
+			if (v == null || !(v.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)) continue;
+			ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+			lp.topMargin = gap;
+			lp.leftMargin = 0;
+			lp.rightMargin = 0;
+			v.setLayoutParams(lp);
+		}
+		int[][] rows = {{R.id.card_total_saved, R.id.card_active_groups}, {R.id.card_trust_score, R.id.card_open_loans}};
+		for (int r = 0; r < rows.length; r++) {
+			for (int k = 0; k < 2; k++) {
+				View card = root.findViewById(rows[r][k]);
+				if (card == null || !(card.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)) continue;
+				ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) card.getLayoutParams();
+				lp.setMargins(k == 0 ? 0 : inner, r == 0 ? 0 : inner * 2, k == 0 ? inner : 0, 0);
+				lp.setMarginStart(k == 0 ? 0 : inner);
+				lp.setMarginEnd(k == 0 ? inner : 0);
+				card.setLayoutParams(lp);
+			}
+		}
 	}
 
 	private android.widget.LinearLayout.LayoutParams _quickActionParams(float d, boolean leftGap) {

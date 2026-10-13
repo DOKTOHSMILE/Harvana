@@ -319,8 +319,18 @@ public class CoinDetailActivity extends AppCompatActivity {
 	/** The same detail page HARV uses, filled with this coin's own name, logo, address and facts. */
 	private void _showChainCoin(com.harvana.app.wallet.CoinCatalog.Coin coin) {
 		setTitle(coin.name);
-		if (img_coin_logo != null) img_coin_logo.setImageResource(coin.icon);
-		if (tv_coin_description != null) tv_coin_description.setText(coin.about);
+		if (img_coin_logo != null) {
+			img_coin_logo.setImageResource(coin.icon);
+			if (!coin.iconUrl().isEmpty()) com.harvana.app.wallet.CustomAssets.icon(this, img_coin_logo, coin.iconUrl(), coin.ticker);
+		}
+		if (tv_coin_description != null) {
+			tv_coin_description.setText(coin.about.isEmpty() ? "…" : coin.about);
+			com.harvana.app.wallet.CoinFacts.about(this, coin.geckoId(), about -> {
+				if (isFinishing() || tv_coin_description == null) return;
+				if (about != null && !about.isEmpty()) tv_coin_description.setText(about);
+				else if (coin.about.isEmpty()) tv_coin_description.setText(coin.name + " · " + coin.liveNetwork());
+			});
+		}
 		if (textview2 != null) textview2.setText("ABOUT " + coin.name.toUpperCase(java.util.Locale.US));
 		if (tv_coin_info_note != null) tv_coin_info_note.setText(coin.liveNetwork());
 		String address = walletAddress == null ? "" : walletAddress.trim();
@@ -332,7 +342,7 @@ public class CoinDetailActivity extends AppCompatActivity {
 		_setStatRow(R.id.row_circulating_supply, "Price", "…");
 		_setStatRow(R.id.row_total_holders, "Decimals", String.valueOf(coin.decimals));
 		_setStatRow(R.id.row_block_height, "Smallest unit", coin.smallestUnit());
-		_setStatRow(R.id.row_block_reward, "Fee paid in", "BASE".equals(coin.key) ? "ETH" : coin.ticker);
+		_setStatRow(R.id.row_block_reward, "Fee paid in", coin.feeTicker());
 		_setStatRow(R.id.row_halving, "Address", address.isEmpty() ? "Not ready yet" : address);
 		if (address.isEmpty() || tv_coin_balance == null) {
 			_watchMarketPrice(coin);

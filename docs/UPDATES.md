@@ -2,6 +2,35 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 13 Oct 2026: chains and tokens added by hand; list rows in sheets; Home spacing
+
+**Add a chain (any chain of a protocol the app speaks).** A chain is data only. Every field can be typed; "Fill" reads what it can.
+
+| Field | EVM | NEAR protocol |
+|---|---|---|
+| Fill from | Chain ID (public chain registry; the RPC is checked to answer with that ID) | RPC URL (the network id it reports) |
+| Name, coin symbol, decimals | typed or filled | typed or filled |
+| RPC URL | one, or several with commas | one, or several with commas |
+| Explorer, address page `{address}`, transaction page `{tx}` | typed or filled | typed |
+| History API | Blockscout host | NearBlocks-style API |
+| Icon URL, CoinGecko id | typed or filled | typed |
+| Key path | the Ethereum one | typed (default m/44'/397'/0') |
+
+- Protocols: EVM, NEAR. A protocol is the code for how a network signs and reads; any number of chains of that protocol are added from the app. A new protocol (Cosmos, Sui, …) needs its engine once.
+- NEAR engine checked byte for byte against near-api-js: account, coin transfer, token transfer with storage registration, transaction id.
+
+**Tokens under a chain.** Add a token on any chain (built-in EVM, or any added chain): contract (EVM) or token account (NEAR, NEP-141). Fill reads name, symbol and decimals from the contract; icon and CoinGecko id are fields.
+- Long-press a chain or token row on Assets: the chain's tokens with a show/hide switch, long-press a token to remove it, Add a token, Edit chain, Remove chain (with its tokens).
+- Hidden tokens are hidden on Assets, Send and Receive.
+
+**Every added chain and token uses the coin page:** balance, price, chart, about (CoinGecko), history, Send, Receive, explorer. The old text sheet is gone. Prices of added coins stay on the phone (not in the shared price list).
+
+**Sheets:** every list in a bottom sheet has a thin divider between rows; list rows are 54dp with a touch ripple.
+
+**Home:** Upcoming Payments, the four small cards and the cards below share one 16dp gap; the small cards' outer edges line up with the full-width cards, 6dp between them.
+
+App build only.
+
 ## 13 Oct 2026: Bitcoin uses legacy addresses; groups ask for the coin
 
 **Bitcoin (owner: SegWit did not work on testnet)**

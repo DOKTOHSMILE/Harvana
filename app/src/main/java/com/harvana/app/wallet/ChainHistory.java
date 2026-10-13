@@ -81,7 +81,15 @@ public final class ChainHistory {
                 case "BASE": evmList(out, "BASE", addr); break;
                 case "TRX": tron(out, addr); break;
                 case "SOL": solana(out, addr); break;
-                default: break;
+                default: {
+                    CustomAssets.Asset a = CustomAssets.find(key);
+                    if (a == null) break;
+                    if (a.near() && !a.token()) out.addAll(NearProtocol.history(a, addr));
+                    else if (a.near()) break;                                    // NEP-141 transfers: on the explorer
+                    else if ("CHAIN".equals(a.kind) && !a.scout.isEmpty()) blockscout(out, a.scout, a.symbol, a.chainName, addr, a.decimals, a.txPage(""));
+                    else if ("TOKEN".equals(a.kind) && !a.scout.isEmpty()) scoutTokens(out, a, addr);
+                    break;
+                }
             }
             remembered(c, key, out);
         } catch (Exception ignored) { }
@@ -402,6 +410,22 @@ public final class ChainHistory {
         if (o == null) return "";
         JSONArray a = o.optJSONArray("addresses");
         return a == null || a.length() == 0 ? "" : a.optString(0);
+    }
+
+    /** An added token's transfers for this address, from the chain's Blockscout. */
+    private static void scoutTokens(List<HashMap<String, Object>> out, CustomAssets.Asset a, String address) {
+        try {
+            JSONObject j = get(a.scout + "/api/v2/addresses/" + address + "/token-transfers?token=" + a.contract);
+            JSONArray items = j.optJSONArray("items");
+            for (int i = 0; items != null && i < Math.min(20, items.length()); i++) {
+                JSONObject t = items.getJSONObject(i);
+                String from = who(t.optJSONObject("from")), to = who(t.optJSONObject("to"));
+                JSONObject total = t.optJSONObject("total");
+                String hash = t.optString("transaction_hash", t.optString("tx_hash"));
+                out.add(row(a.symbol, a.chainName, address.equalsIgnoreCase(to), from, to,
+                        shift(total == null ? "0" : total.optString("value", "0"), a.decimals), iso(t.optString("timestamp")), hash, a.txPage(hash)));
+            }
+        } catch (Exception ignored) { }
     }
 
     private static void blockscout(List<HashMap<String, Object>> out, String host, String ticker, String network, String address, int decimals, String txBase) {

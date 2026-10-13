@@ -91,7 +91,12 @@ public final class ChainBalances {
                     return amount(BigInteger.valueOf(r.getJSONObject("result").optLong("value")), 9) + " SOL";
                 }
                 case "PI": return pi(address);
-                default: return "";
+                default: {
+                    CustomAssets.Asset a = CustomAssets.find(key);
+                    if (a == null) return "";
+                    String b = CustomAssets.balance(a, address);
+                    return b.isEmpty() ? "Balance unavailable" : b + " " + a.symbol;
+                }
             }
         } catch (Exception e) {
             return "Balance unavailable";

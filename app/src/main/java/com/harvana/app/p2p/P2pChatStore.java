@@ -174,6 +174,53 @@ public final class P2pChatStore {
         });
     }
 
+    public interface ReachListener { void onReach(String myPhone, String theirPhone); }
+
+    /**
+     * A phone number this person leaves on the trade, so the other side can call or WhatsApp them if they are offline.
+     * Stored as + and digits only. Not their private profile number unless they choose to put that here.
+     */
+    public static void saveReach(String orderId, String other, String phone, Done cb) {
+        final String me = me();
+        final String stored = phone == null ? "" : phone;
+        if (me.isEmpty() || !stored.matches("\\+[0-9]{8,15}")) {
+            BG.execute(() -> cb.done(false, "Enter a phone number with the country code."));
+            return;
+        }
+        ensure(orderId, other, (ok, err) -> {
+            if (!ok) { cb.done(false, err == null ? "Could not open the trade." : err); return; }
+            BG.execute(() -> {
+                try {
+                    Map<String, Object> f = new HashMap<>();
+                    f.put("phone", stored);
+                    f.put("updatedAt", FieldValue.serverTimestamp());
+                    Tasks.await(db().collection("P2P_CHATS").document(chatId(orderId, me, other))
+                            .collection("reach").document(me).set(f), 20, TimeUnit.SECONDS);
+                    cb.done(true, null);
+                } catch (Exception e) { cb.done(false, "Could not save the number. Check your connection."); }
+            });
+        });
+    }
+
+    /** Live phone numbers the two people have chosen to share on this trade. */
+    public static ListenerRegistration listenReach(String orderId, String other, ReachListener l) {
+        final String id = chatId(orderId, me(), other);
+        final String me = me();
+        return db().collection("P2P_CHATS").document(id).collection("reach")
+                .addSnapshotListener((snap, err) -> {
+                    String mine = "", theirs = "";
+                    if (snap != null) {
+                        for (DocumentSnapshot d : snap.getDocuments()) {
+                            String phone = d.getString("phone");
+                            if (phone == null || phone.isEmpty()) continue;
+                            if (d.getId().equals(me)) mine = phone;
+                            else theirs = phone;
+                        }
+                    }
+                    l.onReach(mine, theirs);
+                });
+    }
+
     public static void send(String orderId, String other, String text, Done cb) {
         final String me = me();
         final String t = text == null ? "" : text.trim();

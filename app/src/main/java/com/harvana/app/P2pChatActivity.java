@@ -77,9 +77,11 @@ public class P2pChatActivity extends AppCompatActivity {
 
     private LinearLayout list;
     private ScrollView scroll;
-    private EditText input;
-    private String orderId = "", other = "";
-    private ListenerRegistration reg;
+    private EditText input, reachInput;
+    private TextView theirPhone;
+    private LinearLayout theirActions;
+    private String orderId = "", other = "", savedMine = "";
+    private ListenerRegistration reg, reachReg;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -93,6 +95,10 @@ public class P2pChatActivity extends AppCompatActivity {
         list = findViewById(R.id.chat_messages);
         input = findViewById(R.id.et_chat_message);
         input.setFilters(new android.text.InputFilter[] {new android.text.InputFilter.LengthFilter(P2pChatStore.MAX_TEXT)});
+        reachInput = findViewById(R.id.et_trade_phone);
+        theirPhone = findViewById(R.id.tv_trade_their_phone);
+        theirActions = findViewById(R.id.trade_reach_actions);
+        findViewById(R.id.btn_trade_phone_save).setOnClickListener(v -> saveReach(v));
         android.view.View send = findViewById(R.id.btn_chat_send);
         send.setOnClickListener(v -> send(send));
 
@@ -114,10 +120,75 @@ public class P2pChatActivity extends AppCompatActivity {
         P2pChatStore.ensure(orderId, other, (ok, err) -> runOnUiThread(() -> {
             if (!ok) { Toast.makeText(this, err, Toast.LENGTH_LONG).show(); return; }
             reg = P2pChatStore.listen(orderId, other, messages -> runOnUiThread(() -> show(messages)));
+            reachReg = P2pChatStore.listenReach(orderId, other, (mine, theirs) -> runOnUiThread(() -> showReach(mine, theirs)));
+        }));
+        prefillOwnNumber();
+    }
+
+    @Override protected void onDestroy() {
+        if (reg != null) reg.remove();
+        if (reachReg != null) reachReg.remove();
+        super.onDestroy();
+    }
+
+    private void prefillOwnNumber() {
+        String me = P2pChatStore.me();
+        if (me.isEmpty()) return;
+        com.harvana.app.firestore.UserProfileManager.getInstance(this).getProfile(me, new com.harvana.app.firestore.UserProfileManager.DocCallback() {
+            @Override public void onSuccess(java.util.Map<String, Object> data) {
+                Object raw = data == null ? null : data.get("phone");
+                String n = raw == null ? null : normalizePhone(String.valueOf(raw));
+                if (n == null) return;
+                runOnUiThread(() -> { if (reachInput.getText().length() == 0) reachInput.setText(n); });
+            }
+            @Override public void onError(String error) { }
+        });
+    }
+
+    private void showReach(String mine, String theirs) {
+        savedMine = mine == null ? "" : mine;
+        if (reachInput.getText().length() == 0 && !savedMine.isEmpty()) reachInput.setText(savedMine);
+        if (theirs == null || theirs.isEmpty()) {
+            theirPhone.setVisibility(android.view.View.GONE);
+            theirActions.setVisibility(android.view.View.GONE);
+            return;
+        }
+        theirPhone.setText("They left " + theirs);
+        theirPhone.setVisibility(android.view.View.VISIBLE);
+        theirActions.setVisibility(android.view.View.VISIBLE);
+        String digits = theirs.replaceAll("[^0-9]", "");
+        findViewById(R.id.btn_trade_call).setOnClickListener(v ->
+            startActivity(new android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:" + theirs))));
+        findViewById(R.id.btn_trade_whatsapp).setOnClickListener(v ->
+            startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://wa.me/" + digits))));
+    }
+
+    private void saveReach(android.view.View button) {
+        String stored = normalizePhone(reachInput.getText().toString());
+        if (stored == null) {
+            Toast.makeText(this, "Enter a phone number with the country code.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (stored.equals(savedMine)) {
+            Toast.makeText(this, "That number is already on this trade.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        button.setEnabled(false);
+        P2pChatStore.saveReach(orderId, other, stored, (ok, err) -> runOnUiThread(() -> {
+            button.setEnabled(true);
+            if (!ok) { Toast.makeText(this, err, Toast.LENGTH_LONG).show(); return; }
+            savedMine = stored;
+            Toast.makeText(this, "Number saved for this trade.", Toast.LENGTH_SHORT).show();
+            P2pChatStore.notice(orderId, other, "I left a phone number on this trade, in case one of us is offline.");
         }));
     }
 
-    @Override protected void onDestroy() { if (reg != null) reg.remove(); super.onDestroy(); }
+    private static String normalizePhone(String raw) {
+        if (com.harvana.app.social.ContactLinks.problem("Phone", raw) != null) return null;
+        String digits = raw.replaceAll("[^0-9]", "");
+        if (digits.length() < 8 || digits.length() > 15) return null;
+        return "+" + digits;
+    }
 
     private void send(android.view.View button) {
         String t = input.getText().toString();

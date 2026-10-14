@@ -403,6 +403,19 @@ service cloud.firestore {
           && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members
           && get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.expiresAt < request.time.toMillis();
       }
+
+      // A phone number one trader chooses to leave on this trade. Only the two members can read it. Only you can write your own.
+      match /reach/{uid} {
+        allow read: if signedIn() && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members;
+        allow create, update: if signedIn()
+          && request.auth.uid == uid
+          && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members
+          && request.resource.data.keys().hasOnly(['phone', 'updatedAt'])
+          && request.resource.data.phone is string
+          && request.resource.data.phone.matches('^\\+[0-9]{8,15}$')
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if false;
+      }
     }
 
     match /FRIENDS/{owner}/list/{friend} {

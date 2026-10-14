@@ -23,7 +23,7 @@ import java.util.List;
 
 /** Everything worth telling the user about, newest first, split into tabs. Tap an item to go to where it happened. */
 public class NotificationsActivity extends AppCompatActivity {
-    private static final String[] TABS = {"All", "Transactions", "Groups", "Others"};
+    private static final String[] TABS = {"All", "Transactions", "Groups", "Trades", "Others"};
     private LinearLayout list;
     private com.google.android.material.tabs.TabLayout tabs;
     private int tab = 0;
@@ -82,7 +82,7 @@ public class NotificationsActivity extends AppCompatActivity {
         int[] unread = new int[TABS.length];
         java.util.ArrayList<NotificationCenter.Item> items = new java.util.ArrayList<>();
         for (NotificationCenter.Item it : all) {
-            int g = group(it.type);
+            int g = group(it);
             if (!it.read) { unread[0]++; unread[g]++; }
             if (tab == 0 || tab == g) items.add(it);
         }
@@ -92,7 +92,7 @@ public class NotificationsActivity extends AppCompatActivity {
         }
         if (items.isEmpty()) {
             TextView e = (TextView) getLayoutInflater().inflate(R.layout.item_list_empty, list, false);
-            e.setText(tab == 0 ? "You're all caught up.\nPayment reminders, group notices, invitations and transfers will show here."
+            e.setText(tab == 0 ? "You're all caught up.\nPayment reminders, group notices, trade messages and transfers will show here."
                     : "Nothing in " + TABS[tab] + " yet.");
             list.addView(e);
             return;
@@ -110,18 +110,20 @@ public class NotificationsActivity extends AppCompatActivity {
         }
     }
 
-    /** Tab index for a notification type: 1 transactions, 2 groups, 3 everything else. */
-    private static int group(String type) {
-        if (NotificationCenter.TX.equals(type) || NotificationCenter.PAYMENT.equals(type) || NotificationCenter.LOAN.equals(type)) return 1;
-        if (NotificationCenter.GROUP.equals(type) || NotificationCenter.INVITE.equals(type) || NotificationCenter.MEMBERSHIP.equals(type)) return 2;
-        return 3;
+    /** Tab index: 1 transactions, 2 groups, 3 trades, 4 everything else. */
+    private static int group(NotificationCenter.Item it) {
+        if (it.id != null && it.id.startsWith("p2pchat_")) return 3;
+        if (NotificationCenter.TX.equals(it.type) || NotificationCenter.PAYMENT.equals(it.type) || NotificationCenter.LOAN.equals(it.type)) return 1;
+        if (NotificationCenter.GROUP.equals(it.type) || NotificationCenter.INVITE.equals(it.type) || NotificationCenter.MEMBERSHIP.equals(it.type)) return 2;
+        return 4;
     }
 
-    private static int icon(String type) {
-        switch (group(type)) {
-            case 1: return NotificationCenter.LOAN.equals(type) ? R.drawable.ic_tx_loan_line : R.drawable.ic_wallet_line;
+    private static int icon(NotificationCenter.Item it) {
+        if (it.id != null && it.id.startsWith("p2pchat_")) return R.drawable.ic_person_line;
+        switch (group(it)) {
+            case 1: return NotificationCenter.LOAN.equals(it.type) ? R.drawable.ic_tx_loan_line : R.drawable.ic_wallet_line;
             case 2: return R.drawable.ic_groups_line;
-            default: return NotificationCenter.SOCIAL.equals(type) ? R.drawable.ic_person_line : R.drawable.ic_notifications_line;
+            default: return NotificationCenter.SOCIAL.equals(it.type) ? R.drawable.ic_person_line : R.drawable.ic_notifications_line;
         }
     }
 
@@ -141,7 +143,7 @@ public class NotificationsActivity extends AppCompatActivity {
         com.google.android.material.card.MaterialCardView card = (com.google.android.material.card.MaterialCardView)
                 getLayoutInflater().inflate(R.layout.item_notification, list, false);
         card.setStrokeWidth(it.read ? 0 : dp(1));
-        ((android.widget.ImageView) card.findViewById(R.id.iv_notification_icon)).setImageResource(icon(it.type));
+        ((android.widget.ImageView) card.findViewById(R.id.iv_notification_icon)).setImageResource(icon(it));
         TextView head = card.findViewById(R.id.tv_notification_title);
         head.setText(it.title);
         head.setTypeface(null, it.read ? Typeface.NORMAL : Typeface.BOLD);

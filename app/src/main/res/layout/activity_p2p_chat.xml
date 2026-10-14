@@ -26,6 +26,88 @@
 		android:textColor="@color/colorTextSecondary"
 		android:textSize="12sp" />
 
+	<LinearLayout
+		android:id="@+id/trade_reach"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginStart="12dp"
+		android:layout_marginTop="4dp"
+		android:layout_marginEnd="12dp"
+		android:layout_marginBottom="4dp"
+		android:background="@color/colorSurface"
+		android:orientation="vertical"
+		android:padding="12dp">
+
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Number for this trade"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="13sp"
+			android:textStyle="bold" />
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+
+			<EditText
+				android:id="@+id/et_trade_phone"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:hint="+234"
+				android:inputType="phone"
+				android:maxLines="1"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="14sp" />
+
+			<TextView
+				android:id="@+id/btn_trade_phone_save"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:padding="8dp"
+				android:text="Save"
+				android:textColor="@color/colorAccent"
+				android:textStyle="bold" />
+		</LinearLayout>
+
+		<TextView
+			android:id="@+id/tv_trade_their_phone"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="13sp"
+			android:visibility="gone" />
+
+		<LinearLayout
+			android:id="@+id/trade_reach_actions"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal"
+			android:visibility="gone">
+
+			<TextView
+				android:id="@+id/btn_trade_call"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:padding="8dp"
+				android:text="Call"
+				android:textColor="@color/colorAccent"
+				android:textStyle="bold" />
+
+			<TextView
+				android:id="@+id/btn_trade_whatsapp"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:padding="8dp"
+				android:text="WhatsApp"
+				android:textColor="@color/colorAccent"
+				android:textStyle="bold" />
+		</LinearLayout>
+	</LinearLayout>
+
 	<ScrollView
 		android:id="@+id/chat_scroll"
 		android:layout_width="match_parent"

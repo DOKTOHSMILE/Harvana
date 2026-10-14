@@ -114,6 +114,7 @@ public final class P2pOfferWizard {
 		String priceNoteDefault = tvPriceNote != null ? tvPriceNote.getText().toString() : "";
 		final boolean[] floatingMode = {false};
 		final double[] indexPrice = {-1};
+		final boolean[] poolBound = {false};
 		// Node-side, the settlement engine currently hardcodes a uniform
 		// 15-minute AWAITING_PAYMENT window for every trade regardless of
 		// listing (see the master P2P spec) — so this default matches
@@ -142,21 +143,35 @@ public final class P2pOfferWizard {
 		if (tvError1 != null) tvError1.setVisibility(View.GONE);
 		if (tvError2 != null) tvError2.setVisibility(View.GONE);
 
-		// The "index price" is honestly sourced from FiatValueHelper's own
-		// definition of HARV's market rate — the cheapest currently-open
-		// SELL listing in this currency (see that class's own comment: HARV
-		// has no real external exchange listing anywhere, so a fabricated
-		// Binance/CMC-style feed would be dishonest). Both the fat-finger
-		// guardrail (Fixed mode) and the margin calculation (Floating
-		// mode) key off this same real number.
+		// HARV in Naira follows the hNGN swap pool, ±10%. A stable coin is a fixed price. No pool: the cheapest open sell is only a guide.
 		if (P2pAsset.isStable(asset)) {
 			View floatBtn = a.findViewById(id(a, "btn_" + p + "_price_floating"));
 			if (floatBtn != null) floatBtn.setEnabled(false);
-		} else FiatValueHelper.getCheapestRate(currency, rate -> {
-			indexPrice[0] = (rate != null && rate > 0) ? rate : -1;
-			_refreshPricingDisplay(floatingMode[0], etPrice, etMargin, tvPriceNote,
-				tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency, asset);
-		});
+		} else if ("NGN".equalsIgnoreCase(currency)) {
+			P2pPriceReference.fetchQuote(q -> {
+				if (a.isFinishing()) return;
+				if (q.pool && q.midKobo > 0) {
+					poolBound[0] = true;
+					indexPrice[0] = q.midKobo / 100.0;
+				}
+				if (indexPrice[0] > 0) {
+					_refreshPricingDisplay(floatingMode[0], etPrice, etMargin, tvPriceNote,
+						tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency, asset, poolBound[0]);
+				} else {
+					FiatValueHelper.getCheapestRate(currency, rate -> {
+						indexPrice[0] = (rate != null && rate > 0) ? rate : -1;
+						_refreshPricingDisplay(floatingMode[0], etPrice, etMargin, tvPriceNote,
+							tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency, asset, false);
+					});
+				}
+			});
+		} else {
+			FiatValueHelper.getCheapestRate(currency, rate -> {
+				indexPrice[0] = (rate != null && rate > 0) ? rate : -1;
+				_refreshPricingDisplay(floatingMode[0], etPrice, etMargin, tvPriceNote,
+					tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency, asset, false);
+			});
+		}
 
 		if (togglePricingMode != null) {
 			togglePricingMode.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
@@ -166,7 +181,7 @@ public final class P2pOfferWizard {
 				if (groupPriceFixed != null) groupPriceFixed.setVisibility(nowFloating ? View.GONE : View.VISIBLE);
 				if (groupPriceFloating != null) groupPriceFloating.setVisibility(nowFloating ? View.VISIBLE : View.GONE);
 				_refreshPricingDisplay(floatingMode[0], etPrice, etMargin, tvPriceNote,
-					tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency, asset);
+					tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency, asset, poolBound[0]);
 			});
 		}
 
@@ -214,7 +229,7 @@ public final class P2pOfferWizard {
 						BalanceFormatter.smartDecimal(minOrder[0]), BalanceFormatter.smartDecimal(maxOrder[0])));
 				}
 				_refreshPricingDisplay(floatingMode[0], etPrice, etMargin, tvPriceNote,
-					tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency, asset);
+					tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency, asset, poolBound[0]);
 			}
 		};
 		if (etAmount != null) etAmount.addTextChangedListener(totals);
@@ -285,7 +300,7 @@ public final class P2pOfferWizard {
 			List<PaymentMethod> selected = selectedMethods(a, selectedIds);
 			double price = effectivePrice(floatingMode[0], etPrice, etMargin, indexPrice[0]);
 			String err = validate(asset, sell, parse(etAmount), price, minOrder[0], maxOrder[0], selected, available[0],
-				floatingMode[0], parseMargin(etMargin), indexPrice[0]);
+				floatingMode[0], parseMargin(etMargin), indexPrice[0], poolBound[0]);
 			if (btnDeposit1 != null) btnDeposit1.setVisibility(INSUFFICIENT_BALANCE_ERROR.equals(err) ? View.VISIBLE : View.GONE);
 			if (err != null) { showError(tvError1, err); return; }
 			showError(tvError1, null);
@@ -304,7 +319,7 @@ public final class P2pOfferWizard {
 			List<PaymentMethod> selected = selectedMethods(a, selectedIds);
 			double price = effectivePrice(floatingMode[0], etPrice, etMargin, indexPrice[0]);
 			String err = validate(asset, sell, parse(etAmount), price, minOrder[0], maxOrder[0], selected, available[0],
-				floatingMode[0], parseMargin(etMargin), indexPrice[0]);
+				floatingMode[0], parseMargin(etMargin), indexPrice[0], poolBound[0]);
 			if (btnDeposit2 != null) btnDeposit2.setVisibility(INSUFFICIENT_BALANCE_ERROR.equals(err) ? View.VISIBLE : View.GONE);
 			if (err != null) { showError(tvError2, err); return; }
 			showError(tvError2, null);
@@ -386,22 +401,29 @@ public final class P2pOfferWizard {
 		return indexPrice * (1 + (parseMargin(etMargin) / 100.0));
 	}
 
-	// Fixed mode: the fat-finger guardrail — warns (doesn't block) when the
-	// entered price is >10% away from the real index price. Floating mode:
-	// live preview of the calculated price from the current margin.
+	// Fixed mode against an open swap pool refuses a price outside the 10% band. With no pool it only warns.
 	private static void _refreshPricingDisplay(boolean floating, EditText etPrice, EditText etMargin,
 	                                            TextView tvNote, TextView tvCalculatedPrice,
-	                                            String noteDefault, double indexPrice, String currency, String asset) {
+	                                            String noteDefault, double indexPrice, String currency, String asset, boolean poolBound) {
 		if (!floating) {
 			if (tvNote == null) return;
 			double price = parse(etPrice);
+			if (poolBound && indexPrice > 0) {
+				long mid = P2pPriceReference.nairaToKobo(indexPrice);
+				String band = "Swap " + P2pMoney.perUnit(indexPrice, currency, asset)
+					+ " · " + P2pMoney.perUnit(P2pPriceReference.floorKobo(mid) / 100.0, currency, asset)
+					+ " to " + P2pMoney.perUnit(P2pPriceReference.ceilKobo(mid) / 100.0, currency, asset);
+				tvNote.setText(band);
+				boolean outside = price > 0 && !P2pPriceReference.allowed(P2pPriceReference.nairaToKobo(price), mid);
+				tvNote.setTextColor(tvNote.getResources().getColor(outside ? R.color.colorWarning : R.color.colorTextPrimary));
+				tvNote.setAlpha(0.8f);
+				return;
+			}
 			if (indexPrice > 0 && price > 0) {
 				double diffPct = Math.abs(price - indexPrice) / indexPrice * 100.0;
 				if (diffPct > 10) {
-					tvNote.setText(String.format(Locale.US,
-						"Market rate %s",
-						P2pMoney.perUnit(indexPrice, currency, asset)));
-					tvNote.setTextColor(tvNote.getResources().getColor(R.color.colorWarning)); // colorWarning
+					tvNote.setText(String.format(Locale.US, "Market rate %s", P2pMoney.perUnit(indexPrice, currency, asset)));
+					tvNote.setTextColor(tvNote.getResources().getColor(R.color.colorWarning));
 					return;
 				}
 			}
@@ -411,17 +433,19 @@ public final class P2pOfferWizard {
 		} else {
 			if (tvCalculatedPrice == null) return;
 			if (indexPrice <= 0) {
-				tvCalculatedPrice.setText("No market rate yet");
+				tvCalculatedPrice.setText(poolBound ? "No swap price yet" : "No market rate yet");
 				return;
 			}
 			double margin = parseMargin(etMargin);
+			double cap = poolBound ? 10 : 20;
 			double calculated = indexPrice * (1 + (margin / 100.0));
-			if (margin < -20 || margin > 20) {
-				tvCalculatedPrice.setText("Margin must be between -20% and +20%.");
-				tvCalculatedPrice.setTextColor(tvCalculatedPrice.getResources().getColor(R.color.colorError)); // colorError
+			if (margin < -cap || margin > cap) {
+				tvCalculatedPrice.setText("Margin must be between -" + (int) cap + "% and +" + (int) cap + "%.");
+				tvCalculatedPrice.setTextColor(tvCalculatedPrice.getResources().getColor(R.color.colorError));
 			} else {
-				tvCalculatedPrice.setText(String.format(Locale.US, "%s · market %s",
-					P2pMoney.perUnit(calculated, currency, asset), P2pMoney.perUnit(indexPrice, currency, asset)));
+				tvCalculatedPrice.setText(String.format(Locale.US, "%s · %s %s",
+					P2pMoney.perUnit(calculated, currency, asset), poolBound ? "swap" : "market",
+					P2pMoney.perUnit(indexPrice, currency, asset)));
 				tvCalculatedPrice.setTextColor(tvCalculatedPrice.getContext().getResources().getColor(R.color.colorAccent));
 			}
 		}
@@ -429,18 +453,27 @@ public final class P2pOfferWizard {
 
 	private static String validate(String asset, boolean sell, double amount, double price, double minOrder, double maxOrder,
 	                               List<PaymentMethod> methods, double available,
-	                               boolean floating, double marginPercent, double indexPrice) {
+	                               boolean floating, double marginPercent, double indexPrice, boolean poolBound) {
 		String tk = P2pAsset.ticker(asset);
 		double lo = P2pAsset.minListing(asset), hi = P2pAsset.maxListing(asset);
 		if (amount < lo || amount > hi) return "A listing must be between " + BalanceFormatter.smartDecimal(lo) + " and "
 				+ BalanceFormatter.smartDecimal(hi) + " " + tk + ".";
-		// Floating prices follow HARV's market; a stable coin is priced fixed.
 		if (floating && P2pAsset.isStable(asset)) return "Use a fixed price for " + tk + ".";
+		double cap = poolBound ? 10 : 20;
 		if (floating) {
-			if (indexPrice <= 0) return "No market rate available yet — floating pricing needs at least one open listing to price against. Use Fixed Price instead.";
-			if (marginPercent < -20 || marginPercent > 20) return "Floating margin must be between -20% and +20%.";
+			if (indexPrice <= 0) return poolBound ? "No swap price yet. Use a fixed price."
+				: "No market rate available yet — floating pricing needs at least one open listing to price against. Use Fixed Price instead.";
+			if (marginPercent < -cap || marginPercent > cap) return "Floating margin must be between -" + (int) cap + "% and +" + (int) cap + "%.";
 		}
 		if (price <= 0) return "Enter a unit price greater than zero.";
+		if (poolBound && !floating && indexPrice > 0) {
+			long mid = P2pPriceReference.nairaToKobo(indexPrice);
+			if (!P2pPriceReference.allowed(P2pPriceReference.nairaToKobo(price), mid)) {
+				return "Price must stay within 10% of the swap pool ("
+					+ P2pMoney.perUnit(P2pPriceReference.floorKobo(mid) / 100.0, "NGN", asset) + " to "
+					+ P2pMoney.perUnit(P2pPriceReference.ceilKobo(mid) / 100.0, "NGN", asset) + ").";
+			}
+		}
 		if (minOrder < P2pAsset.minOrder(asset)) return ("Minimum trade must be at least " + BalanceFormatter.smartDecimal(P2pAsset.minOrder(asset)) + " " + tk + ".");
 		if (maxOrder > amount) return "Maximum trade can't be more than the total you're listing.";
 		if (minOrder > maxOrder) return "Minimum trade can't be more than the maximum trade.";

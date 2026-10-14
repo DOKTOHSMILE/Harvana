@@ -236,14 +236,21 @@ public final class P2pListingPublisher {
 			});
 		});
 		};
+		final boolean harv = !P2pAsset.isStable(asset);
 		if ("MARGIN".equals(pricingType)) {
-			// Resolve the floating margin to a fixed signed price against the market reference.
-			P2pPriceReference.fetch((medianKobo, samples) -> {
-				if (medianKobo <= 0) {
+			// HARV follows the hNGN swap pool, ±10%. A stable coin keeps the wider margin against whatever reference exists.
+			P2pPriceReference.fetchQuote(q -> {
+				if (q.midKobo <= 0) {
 					activity.runOnUiThread(() -> cb.onError("Margin pricing needs a market reference and none is available yet. Use a fixed price."));
 					return;
 				}
-				priceKobo[0] = Math.max(1L, Math.round(medianKobo * (1.0 + marginPercent / 100.0)));
+				if (harv && q.pool && (marginPercent < -10.0 || marginPercent > 10.0)) {
+					activity.runOnUiThread(() -> cb.onError("The swap pool only allows a margin of 10% either side."));
+					return;
+				}
+				long price = Math.max(1L, Math.round(q.midKobo * (1.0 + marginPercent / 100.0)));
+				if (harv && q.pool) price = Math.max(q.floorKobo, Math.min(q.ceilKobo, price));
+				priceKobo[0] = price;
 				activity.runOnUiThread(startPublish);
 			});
 		} else {
@@ -252,7 +259,16 @@ public final class P2pListingPublisher {
 				cb.onError("Enter a unit price greater than zero.");
 				return;
 			}
-			startPublish.run();
+			if (!harv) { startPublish.run(); return; }
+			P2pPriceReference.fetchQuote(q -> {
+				if (q.pool && !P2pPriceReference.allowed(priceKobo[0], q.midKobo)) {
+					String lo = P2pMoney.perUnit(q.floorKobo / 100.0, "NGN", asset);
+					String hi = P2pMoney.perUnit(q.ceilKobo / 100.0, "NGN", asset);
+					activity.runOnUiThread(() -> cb.onError("That price is outside the swap band (" + lo + " to " + hi + "). Stay within 10% of the pool."));
+					return;
+				}
+				activity.runOnUiThread(startPublish);
+			});
 		}
 	}
 	
@@ -262,6 +278,8 @@ public final class P2pListingPublisher {
 		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_MAX_ORDER_AMOUNT")) return "The maximum trade amount must be between the minimum and the total you're listing.";
 		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_PAYMENT_WINDOW")) return "Payment window must be 15, 30, 45 or 60 minutes.";
 		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_UNIT_PRICE")) return "That price isn't valid. Enter a price per HARV in Naira.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "PRICE_OUTSIDE_SWAP_BAND")) return "That price is more than 10% away from the swap pool. Move it inside the band and try again.";
+		if (com.harvana.app.utils.ErrorText.is(rawError, "SWAP_PRICE_UNAVAILABLE")) return "The swap price could not be read. Try again in a moment.";
 		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_MIN_ORDER_AMOUNT")) return "The minimum trade amount must be at least 1 HARV and no more than the total you're listing.";
 		if (com.harvana.app.utils.ErrorText.is(rawError, "INVALID_DURATION")) return "Offer duration must be between 1 hour and 30 days.";
 		if (com.harvana.app.utils.ErrorText.is(rawError, "SENDER_ADDRESS_FROZEN")) return "This wallet is currently frozen and can't post listings.";

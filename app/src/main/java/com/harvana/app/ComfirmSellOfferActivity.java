@@ -106,16 +106,29 @@ public class ComfirmSellOfferActivity extends AppCompatActivity {
 		}
 	}
 
-	/** The median of open HARV offers in naira, next to this price (HARV and NGN only: that is where the reference exists). */
+	/** HARV in Naira shows the swap-pool band. Outside it, the offer will not be published. */
 	private void marketReference(LinearLayout rows) {
 		if (P2pAsset.isStable(asset) || !"NGN".equalsIgnoreCase(currency) || unitPrice <= 0) return;
-		TextView v = P2pKv.add(rows, "Market reference", "…");
-		long mine = P2pPriceReference.nairaToKobo(unitPrice);
-		P2pPriceReference.fetch((medianKobo, samples) -> {
+		TextView v = P2pKv.add(rows, "Swap pool", "…");
+		long mine = "MARGIN".equals(pricingType) ? 0L : P2pPriceReference.nairaToKobo(unitPrice);
+		P2pPriceReference.fetchQuote(q -> {
 			if (isFinishing() || isDestroyed()) return;
-			if (medianKobo <= 0) { v.setText("—"); return; }
-			double dev = P2pPriceReference.deviation(mine, medianKobo);
-			v.setText(P2pMoney.perUnit(medianKobo / 100.0, "NGN", asset)
+			if (q.pool && q.midKobo > 0) {
+				long priced = "MARGIN".equals(pricingType)
+					? Math.max(1L, Math.round(q.midKobo * (1.0 + marginPercent / 100.0)))
+					: mine;
+				boolean outside = !P2pPriceReference.allowed(priced, q.midKobo)
+					|| ("MARGIN".equals(pricingType) && (marginPercent < -10.0 || marginPercent > 10.0));
+				v.setText(P2pMoney.perUnit(q.midKobo / 100.0, "NGN", asset)
+					+ " · " + P2pMoney.perUnit(q.floorKobo / 100.0, "NGN", asset)
+					+ " to " + P2pMoney.perUnit(q.ceilKobo / 100.0, "NGN", asset)
+					+ (outside ? " · outside the band" : ""));
+				if (outside) v.setTextColor(ContextCompat.getColor(this, R.color.colorWarning));
+				return;
+			}
+			if (q.midKobo <= 0 || "MARGIN".equals(pricingType)) { v.setText("—"); return; }
+			double dev = P2pPriceReference.deviation(mine, q.midKobo);
+			v.setText(P2pMoney.perUnit(q.midKobo / 100.0, "NGN", asset)
 				+ String.format(java.util.Locale.US, " · %+d%%", Math.round(dev * 100)));
 			if (Math.abs(dev) > P2pPriceReference.DEVIATION_FLAG) v.setTextColor(ContextCompat.getColor(this, R.color.colorWarning));
 		});

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One order in My orders: Buy / Sell coin and status, amount, price, total, order number, counterparty and time. -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginStart="16dp"
+	android:layout_marginTop="6dp"
+	android:layout_marginEnd="16dp"
+	android:layout_marginBottom="6dp"
+	app:cardBackgroundColor="@color/colorSurface"
+	app:cardCornerRadius="16dp"
+	app:cardElevation="0dp"
+	app:strokeColor="@color/colorCardStroke"
+	app:strokeWidth="1dp">
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:padding="14dp">
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+			<ImageView
+				android:id="@+id/iv_order_coin"
+				android:layout_width="22dp"
+				android:layout_height="22dp"
+				android:importantForAccessibility="no" />
+			<TextView
+				android:id="@+id/tv_order_side"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textSize="15sp"
+				android:textStyle="bold" />
+			<TextView
+				android:id="@+id/tv_order_coin"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="4dp"
+				android:layout_weight="1"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="15sp"
+				android:textStyle="bold" />
+			<TextView
+				android:id="@+id/tv_order_status"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+			<ImageView
+				android:layout_width="18dp"
+				android:layout_height="18dp"
+				android:importantForAccessibility="no"
+				android:src="@drawable/icon_keyboard_arrow_right_round"
+				app:tint="@color/colorTextTertiary" />
+		</LinearLayout>
+		<LinearLayout
+			android:id="@+id/ll_order_rows"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="8dp"
+			android:orientation="vertical" />
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+			<LinearLayout
+				android:id="@+id/chip_order_counterparty"
+				android:layout_width="wrap_content"
+				android:layout_height="30dp"
+				android:background="@drawable/bg_p2p_method_chip"
+				android:gravity="center_vertical"
+				android:orientation="horizontal"
+				android:paddingStart="4dp"
+				android:paddingEnd="10dp">
+				<TextView
+					android:id="@+id/tv_order_avatar"
+					android:layout_width="22dp"
+					android:layout_height="22dp"
+					android:background="@drawable/bg_p2p_avatar"
+					android:gravity="center"
+					android:textColor="@color/colorAccent"
+					android:textSize="11sp"
+					android:textStyle="bold" />
+				<TextView
+					android:id="@+id/tv_order_counterparty"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="6dp"
+					android:ellipsize="end"
+					android:maxWidth="150dp"
+					android:maxLines="1"
+					android:textColor="@color/colorTextPrimary"
+					android:textSize="12sp" />
+			</LinearLayout>
+			<Space
+				android:layout_width="0dp"
+				android:layout_height="1dp"
+				android:layout_weight="1" />
+			<TextView
+				android:id="@+id/tv_order_time"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textColor="@color/colorTextTertiary"
+				android:textSize="12sp" />
+		</LinearLayout>
+	</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

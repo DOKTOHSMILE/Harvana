@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Take an offer (P2pBuyOrderActivity, P2pSellOrderActivity): trader, price, I pay / I receive, payment, fees, terms. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground"
+	android:orientation="vertical">
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="56dp"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:paddingStart="8dp"
+		android:paddingEnd="16dp">
+		<ImageView
+			android:id="@+id/iv_take_back"
+			android:layout_width="44dp"
+			android:layout_height="44dp"
+			android:background="?attr/selectableItemBackgroundBorderless"
+			android:contentDescription="Back"
+			android:padding="10dp"
+			android:src="@drawable/ic_nav_back"
+			app:tint="@color/colorTextPrimary" />
+		<ImageView
+			android:id="@+id/iv_take_coin"
+			android:layout_width="24dp"
+			android:layout_height="24dp"
+			android:layout_marginStart="4dp"
+			android:importantForAccessibility="no" />
+		<TextView
+			android:id="@+id/tv_take_title"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="8dp"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textStyle="bold" />
+	</LinearLayout>
+
+	<ScrollView
+		android:id="@+id/sv_take"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:fillViewport="true">
+		<LinearLayout
+			android:id="@+id/ll_take_body"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:paddingStart="16dp"
+			android:paddingEnd="16dp"
+			android:paddingBottom="16dp">
+
+			<!-- Trader -->
+			<com.google.android.material.card.MaterialCardView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:padding="14dp">
+					<FrameLayout
+						android:layout_width="44dp"
+						android:layout_height="44dp">
+						<TextView
+							android:id="@+id/tv_take_initial"
+							android:layout_width="match_parent"
+							android:layout_height="match_parent"
+							android:background="@drawable/bg_p2p_avatar"
+							android:gravity="center"
+							android:textColor="@color/colorAccent"
+							android:textSize="17sp"
+							android:textStyle="bold" />
+						<ImageView
+							android:id="@+id/iv_take_avatar"
+							android:layout_width="match_parent"
+							android:layout_height="match_parent"
+							android:importantForAccessibility="no"
+							android:visibility="gone" />
+						<View
+							android:id="@+id/v_take_online"
+							android:layout_width="12dp"
+							android:layout_height="12dp"
+							android:layout_gravity="bottom|end"
+							android:background="@drawable/bg_p2p_online_dot"
+							android:visibility="gone" />
+					</FrameLayout>
+					<LinearLayout
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_marginStart="12dp"
+						android:layout_weight="1"
+						android:orientation="vertical">
+						<LinearLayout
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:gravity="center_vertical"
+							android:orientation="horizontal">
+							<TextView
+								android:id="@+id/tv_take_name"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:ellipsize="end"
+								android:maxWidth="190dp"
+								android:maxLines="1"
+								android:text="Trader"
+								android:textColor="@color/colorTextPrimary"
+								android:textSize="15sp"
+								android:textStyle="bold" />
+							<ImageView
+								android:id="@+id/iv_take_verified"
+								android:layout_width="16dp"
+								android:layout_height="16dp"
+								android:layout_marginStart="4dp"
+								android:importantForAccessibility="no"
+								android:src="@drawable/ic_verified_small"
+								android:visibility="gone"
+								app:tint="@color/colorInfo" />
+						</LinearLayout>
+						<TextView
+							android:id="@+id/tv_take_stats"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="2dp"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12sp" />
+					</LinearLayout>
+					<LinearLayout
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:gravity="end"
+						android:orientation="vertical">
+						<TextView
+							android:id="@+id/tv_take_window"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Payment window"
+							android:textColor="@color/colorTextTertiary"
+							android:textSize="11sp" />
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+
+			<!-- Price -->
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="14dp"
+				android:baselineAligned="true"
+				android:orientation="horizontal">
+				<TextView
+					android:id="@+id/tv_take_price"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:textColor="@color/colorTextPrimary"
+					android:textSize="26sp"
+					android:textStyle="bold" />
+				<TextView
+					android:id="@+id/tv_take_price_unit"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="6dp"
+					android:textColor="@color/colorTextSecondary"
+					android:textSize="13sp" />
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/ll_take_offer_rows"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="6dp"
+				android:orientation="vertical" />
+
+			<!-- I pay / I receive -->
+			<com.google.android.material.card.MaterialCardView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="14dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:padding="14dp">
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<TextView
+							android:id="@+id/tv_take_coin_label"
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="13sp" />
+						<TextView
+							android:id="@+id/tv_take_balance"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textColor="@color/colorTextTertiary"
+							android:textSize="12sp" />
+					</LinearLayout>
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="56dp"
+						android:layout_marginTop="6dp"
+						android:background="@drawable/bg_p2p_segment"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingStart="14dp"
+						android:paddingEnd="8dp">
+						<EditText
+							android:id="@+id/et_take_coin"
+							android:layout_width="0dp"
+							android:layout_height="match_parent"
+							android:layout_weight="1"
+							android:background="@null"
+							android:hint="0.00"
+							android:importantForAutofill="no"
+							android:inputType="numberDecimal"
+							android:maxLines="1"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="20sp"
+							android:textStyle="bold" />
+						<TextView
+							android:id="@+id/tv_take_coin_ticker"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+						<TextView
+							android:id="@+id/btn_take_max"
+							android:layout_width="wrap_content"
+							android:layout_height="36dp"
+							android:layout_marginStart="8dp"
+							android:background="@drawable/bg_pill_accent"
+							android:gravity="center"
+							android:paddingStart="12dp"
+							android:paddingEnd="12dp"
+							android:text="Max"
+							android:textColor="@color/colorAccent"
+							android:textSize="13sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<FrameLayout
+						android:layout_width="match_parent"
+						android:layout_height="34dp">
+						<ImageView
+							android:layout_width="30dp"
+							android:layout_height="30dp"
+							android:layout_gravity="center"
+							android:importantForAccessibility="no"
+							android:src="@drawable/ic_app_swap"
+							app:tint="@color/colorTextTertiary" />
+					</FrameLayout>
+					<TextView
+						android:id="@+id/tv_take_fiat_label"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textColor="@color/colorTextSecondary"
+						android:textSize="13sp" />
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="56dp"
+						android:layout_marginTop="6dp"
+						android:background="@drawable/bg_p2p_segment"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingStart="14dp"
+						android:paddingEnd="14dp">
+						<EditText
+							android:id="@+id/et_take_fiat"
+							android:layout_width="0dp"
+							android:layout_height="match_parent"
+							android:layout_weight="1"
+							android:background="@null"
+							android:hint="0.00"
+							android:importantForAutofill="no"
+							android:inputType="numberDecimal"
+							android:maxLines="1"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="20sp"
+							android:textStyle="bold" />
+						<TextView
+							android:id="@+id/tv_take_fiat_ccy"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/ll_take_presets"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="10dp"
+						android:orientation="horizontal" />
+					<TextView
+						android:id="@+id/tv_take_error"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="8dp"
+						android:textColor="@color/colorError"
+						android:textSize="12.5sp"
+						android:visibility="gone" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+
+			<!-- Payment: the poster's methods (buying) or your account to receive into (selling) -->
+			<TextView
+				android:id="@+id/tv_take_payment_title"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="18dp"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+			<LinearLayout
+				android:id="@+id/ll_take_payment"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="8dp"
+				android:orientation="vertical" />
+
+			<!-- Fees -->
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_take_summary"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="14dp"
+				android:visibility="gone"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:id="@+id/ll_take_summary"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:padding="14dp" />
+			</com.google.android.material.card.MaterialCardView>
+
+			<!-- Terms -->
+			<LinearLayout
+				android:id="@+id/ll_take_terms"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="14dp"
+				android:background="@drawable/bg_p2p_method_chip"
+				android:orientation="vertical"
+				android:padding="14dp"
+				android:visibility="gone">
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Trader's terms"
+					android:textColor="@color/colorTextSecondary"
+					android:textSize="13sp"
+					android:textStyle="bold" />
+				<TextView
+					android:id="@+id/tv_take_terms"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="6dp"
+					android:textColor="@color/colorTextPrimary"
+					android:textIsSelectable="true"
+					android:textSize="13sp" />
+			</LinearLayout>
+		</LinearLayout>
+	</ScrollView>
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@color/colorSurface"
+		android:orientation="vertical"
+		android:paddingStart="16dp"
+		android:paddingTop="10dp"
+		android:paddingEnd="16dp"
+		android:paddingBottom="14dp">
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_take_confirm"
+			android:layout_width="match_parent"
+			android:layout_height="54dp"
+			android:enabled="false"
+			android:insetTop="0dp"
+			android:insetBottom="0dp"
+			android:textAllCaps="false"
+			android:textSize="16sp"
+			android:textStyle="bold"
+			app:cornerRadius="14dp" />
+	</LinearLayout>
+</LinearLayout>

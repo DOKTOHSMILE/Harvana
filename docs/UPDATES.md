@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 14 Oct 2026 — P2P rebuilt (market, take offer, orders, create offer)
+
+- Market (`P2pMarketplaceActivity`, `p2p_marketplace.xml`, `item_p2p_offer.xml`): one screen for both sides (the Buy / Sell fragments are gone). Buy / Sell switch in green / red, coin chips (HARV and every stable coin the network has on), currency pill, Amount / Payment / Filters pills, offer cards (trader, verified, trades · completion · trust, price per coin, payment window, available, fiat limit, bank-logo method chips, Buy / Sell button), New offer button, open-orders count on the orders icon. Your own offers never show. Filters sheet (`sheet_p2p_filters.xml`): amount, payment methods with logos, verified / insured / premium / online, sort (price, trades, completion, trust), live "Show N offers".
+- Take an offer (`P2pBuyOrderActivity`, `P2pSellOrderActivity`, `p2p_take_offer.xml`): one screen for both sides. Trader card with payment window, price, available and limits, I receive / I pay boxes that follow each other (coin or fiat), 25-100 % presets and Max, the poster's methods (buying) or your receive-into account (selling), the node's fee preview (maker fee, tFare, buyer receives), trader's terms, Buy / Sell button.
+- Orders (`P2pMyTradesActivity`, `p2p_my_trades.xml`, `item_p2p_order.xml`): Active / Completed, status chips (Unpaid, Paid, Appeal / Completed, Cancelled, Appeal resolved), "waiting for you" count, cards with Buy / Sell coin, status, amount, price, total, order number (copy), counterparty, time.
+- Create offer (`create_p2p_sell_offer.xml`, `create_p2p_buy_offer.xml`, both from one template): coin picker at the top (the screen reopens for the chosen coin); every coin label follows the coin (no more fixed "HARV", no "HARV HARV"); stable coins are priced fixed and are not compared with HARV's market rate; settings in 50dp rows; two steps (details, review).
+
 ## 13 Oct 2026 — Bank logos on every P2P payment account list
 
 - New row (`item_payment_method_select.xml`, `p2p/PaymentMethodRows`): bank logo, account name, bank · account number · holder, Default badge, accent check; a chosen row gets the soft accent fill and edge.

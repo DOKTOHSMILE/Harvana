@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A quick amount (25% / 50% / 75% / 100%) under the amount box. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="0dp"
+	android:layout_height="34dp"
+	android:layout_marginEnd="6dp"
+	android:layout_weight="1"
+	android:background="@drawable/bg_p2p_filter_pill"
+	android:gravity="center"
+	android:textColor="@color/colorTextPrimary"
+	android:textSize="12.5sp" />

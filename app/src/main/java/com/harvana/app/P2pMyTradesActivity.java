@@ -1,582 +1,339 @@
 package com.harvana.app;
 
-import android.animation.*;
-import android.app.*;
-import android.content.*;
-import android.content.res.*;
-import android.graphics.*;
-import android.graphics.drawable.*;
-import android.media.*;
-import android.net.*;
-import android.os.*;
-import android.text.*;
-import android.text.style.*;
-import android.util.*;
-import android.view.*;
-import android.view.View.*;
-import android.view.animation.*;
-import android.widget.*;
-import android.widget.HorizontalScrollView;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import androidx.annotation.*;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.biometric.*;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.*;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerView.Adapter;
-import androidx.recyclerview.widget.RecyclerView.ViewHolder;
-import com.budiyev.android.codescanner.*;
-import com.bumptech.glide.*;
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.card.*;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.storage.*;
-import java.io.*;
-import java.text.*;
-import java.util.*;
-import java.util.regex.*;
-import org.json.*;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.harvana.app.firestore.P2PPaymentDetailsManager;
 import com.harvana.app.firestore.UserProfileManager;
-import com.harvana.app.sync.HarvanaNodeClient;
+import com.harvana.app.p2p.P2pAsset;
+import com.harvana.app.p2p.P2pIds;
+import com.harvana.app.p2p.P2pKv;
+import com.harvana.app.p2p.P2pMoney;
+import com.harvana.app.p2p.P2pOffers;
+import com.harvana.app.p2p.P2pStatus;
 import com.harvana.app.tx.P2PTradeRouter;
 import com.harvana.app.wallet.BalanceFormatter;
 import com.harvana.app.wallet.WalletManager;
-import com.harvana.app.p2p.P2pIds;
-import com.harvana.app.p2p.P2pMoney;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+/** My orders: every P2P order this wallet is in, as buyer or seller. Active first (yours to act on at the top). */
 public class P2pMyTradesActivity extends AppCompatActivity {
-	
-	private Toolbar _toolbar;
-	private AppBarLayout _app_bar;
-	private CoordinatorLayout _coordinator;
-	
-	private LinearLayout my_trades_root;
-	private MaterialCardView card_trade_summary;
-	private HorizontalScrollView my_trades_filter_scroll;
-	private LinearLayout linear268;
-	private RecyclerView recycler_my_trades;
-	private LinearLayout layout_my_trades_empty;
-	private MaterialCardView card_my_trades_info;
-	private LinearLayout linear260;
-	private LinearLayout linear261;
-	private LinearLayout linear263;
-	private LinearLayout linear262;
-	private TextView tv_trade_summary_count;
-	private TextView textview151;
-	private TextView tv_trade_summary_period;
-	private LinearLayout linear264;
-	private LinearLayout linear265;
-	private LinearLayout linear266;
-	private LinearLayout linear267;
-	private TextView tv_summary_ongoing;
-	private TextView textview152;
-	private TextView tv_summary_completed;
-	private TextView textview153;
-	private TextView tv_summary_cancelled;
-	private TextView textview154;
-	private TextView tv_summary_disputed;
-	private TextView textview155;
-	private LinearLayout my_trades_filter_container;
-	private TextView filter_trade_all;
-	private TextView filter_trade_ongoing;
-	private TextView filter_trade_completed;
-	private TextView filter_trade_cancelled;
-	private TextView filter_trade_disputed;
-	private TextView tv_trades_section_title;
-	private TextView tv_trades_result_count;
-	private TextView textview156;
-	private TextView tv_empty_trades_description;
-	private LinearLayout linear269;
-	private TextView textview157;
-	private TextView tv_my_trades_info;
-	
-	@Override
-	protected void onCreate(Bundle _savedInstanceState) {
-		super.onCreate(_savedInstanceState);
-		setContentView(R.layout.p2p_my_trades);
-		initialize(_savedInstanceState);
-		FirebaseApp.initializeApp(this);
-		initializeLogic();
-	}
-	
-	private void initialize(Bundle _savedInstanceState) {
-		_app_bar = findViewById(R.id._app_bar);
-		_coordinator = findViewById(R.id._coordinator);
-		_toolbar = findViewById(R.id._toolbar);
-		setSupportActionBar(_toolbar);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		getSupportActionBar().setHomeButtonEnabled(true);
-		_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View _v) {
-				onBackPressed();
-			}
-		});
-		my_trades_root = findViewById(R.id.my_trades_root);
-		card_trade_summary = findViewById(R.id.card_trade_summary);
-		my_trades_filter_scroll = findViewById(R.id.my_trades_filter_scroll);
-		linear268 = findViewById(R.id.linear268);
-		recycler_my_trades = findViewById(R.id.recycler_my_trades);
-		com.harvana.app.utils.Shimmer.hold(recycler_my_trades, com.harvana.app.utils.Shimmer.rows(recycler_my_trades.getContext(), 5), 4000, "P2pMyTradesActivity");
-		layout_my_trades_empty = findViewById(R.id.layout_my_trades_empty);
-		card_my_trades_info = findViewById(R.id.card_my_trades_info);
-		linear260 = findViewById(R.id.linear260);
-		linear261 = findViewById(R.id.linear261);
-		linear263 = findViewById(R.id.linear263);
-		linear262 = findViewById(R.id.linear262);
-		tv_trade_summary_count = findViewById(R.id.tv_trade_summary_count);
-		textview151 = findViewById(R.id.textview151);
-		tv_trade_summary_period = findViewById(R.id.tv_trade_summary_period);
-		linear264 = findViewById(R.id.linear264);
-		linear265 = findViewById(R.id.linear265);
-		linear266 = findViewById(R.id.linear266);
-		linear267 = findViewById(R.id.linear267);
-		tv_summary_ongoing = findViewById(R.id.tv_summary_ongoing);
-		textview152 = findViewById(R.id.textview152);
-		tv_summary_completed = findViewById(R.id.tv_summary_completed);
-		textview153 = findViewById(R.id.textview153);
-		tv_summary_cancelled = findViewById(R.id.tv_summary_cancelled);
-		textview154 = findViewById(R.id.textview154);
-		tv_summary_disputed = findViewById(R.id.tv_summary_disputed);
-		textview155 = findViewById(R.id.textview155);
-		my_trades_filter_container = findViewById(R.id.my_trades_filter_container);
-		filter_trade_all = findViewById(R.id.filter_trade_all);
-		filter_trade_ongoing = findViewById(R.id.filter_trade_ongoing);
-		filter_trade_completed = findViewById(R.id.filter_trade_completed);
-		filter_trade_cancelled = findViewById(R.id.filter_trade_cancelled);
-		filter_trade_disputed = findViewById(R.id.filter_trade_disputed);
-		tv_trades_section_title = findViewById(R.id.tv_trades_section_title);
-		tv_trades_result_count = findViewById(R.id.tv_trades_result_count);
-		textview156 = findViewById(R.id.textview156);
-		tv_empty_trades_description = findViewById(R.id.tv_empty_trades_description);
-		linear269 = findViewById(R.id.linear269);
-		textview157 = findViewById(R.id.textview157);
-		tv_my_trades_info = findViewById(R.id.tv_my_trades_info);
-	}
-	
-	private void initializeLogic() {
-		androidx.appcompat.app.ActionBar ab = getSupportActionBar();
-		int backgroundColor = androidx.core.content.ContextCompat.getColor(this, R.color.colorBackground);
-		
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			final Window window = this.getWindow();
-			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			com.harvana.app.utils.StatusBarUtil.matchToolbar(this);
-		}
-		
-		if (getSupportActionBar() != null) {
-			getSupportActionBar().setTitle("My Trades");
-			getSupportActionBar().setSubtitle("Transactions you've personally taken part in");
-		}
-		myAddress = WalletManager.getActiveWalletAddress(this);
-		
-		adapter = new Recycler_my_tradesAdapter(visible);
-		recycler_my_trades.setLayoutManager(new LinearLayoutManager(this));
-		recycler_my_trades.setAdapter(adapter);
-		
-		tv_trade_summary_period.setText("All time");
-		tv_my_trades_info.setText("This is your personal trade history — both when you bought and when you sold. Managing your own listings happens in Merchant Manager instead.");
-		
-		
-		_setFilter("ALL", filter_trade_all);
-		filter_trade_all.setOnClickListener(v -> _setFilter("ALL", filter_trade_all));
-		filter_trade_ongoing.setOnClickListener(v -> _setFilter("ONGOING", filter_trade_ongoing));
-		filter_trade_completed.setOnClickListener(v -> _setFilter("COMPLETED", filter_trade_completed));
-		filter_trade_cancelled.setOnClickListener(v -> _setFilter("CANCELLED", filter_trade_cancelled));
-		filter_trade_disputed.setOnClickListener(v -> _setFilter("DISPUTED", filter_trade_disputed));
-		
-		_loadMine();
-		
-	}
-	
-	
-	@Override
-	public void onResume() {
-		super.onResume();
-		if (!allOrders.isEmpty()) _loadMine();
-	}
-	public void _MORE() {
-	}
+
+	private static final String[][] ACTIVE_CHIPS = {
+		{"ALL", "All"}, {"AWAITING_PAYMENT", "Unpaid"}, {"PAYMENT_SUBMITTED", "Paid"}, {"DISPUTED", "Appeal"}};
+	private static final String[][] DONE_CHIPS = {
+		{"ALL", "All"}, {"COMPLETED", "Completed"}, {"CANCELLED", "Cancelled"}, {"RESOLVED", "Appeal resolved"}};
+
 	private String myAddress = "";
-	private final List<JSONObject> allOrders = new ArrayList<>();
-	private final List<JSONObject> visible = new ArrayList<>();
-	private String activeFilter = "ALL";
-	private Recycler_my_tradesAdapter adapter;
-	
-	private void _loadMine() {
-		if (myAddress == null || myAddress.isEmpty()) {
-			tv_trades_result_count.setText("No wallet found on this device.");
-			return;
+	private boolean activeTab = true;
+	private String chip = "ALL";
+	private final List<JSONObject> all = new ArrayList<>();
+	private final List<JSONObject> shown = new ArrayList<>();
+	/** listingId → {price, currency} from the offer card, cached for the rows. */
+	private final Map<String, String[]> offerCache = new HashMap<>();
+	private final Map<String, String> nameCache = new HashMap<>();
+
+	private TextView tabActive, tabDone, tvEmpty, tvActionCount;
+	private ChipGroup chips;
+	private View banner, empty;
+	private SwipeRefreshLayout refresh;
+	private RecyclerView list;
+	private final Adapter adapter = new Adapter();
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.p2p_my_trades);
+		com.harvana.app.utils.StatusBarUtil.matchToolbar(this);
+		myAddress = WalletManager.getActiveWalletAddress(this);
+		if (myAddress == null) myAddress = "";
+		tabActive = findViewById(R.id.tab_orders_active);
+		tabDone = findViewById(R.id.tab_orders_done);
+		chips = findViewById(R.id.chips_orders_status);
+		banner = findViewById(R.id.banner_orders_action);
+		tvActionCount = findViewById(R.id.tv_orders_action_count);
+		refresh = findViewById(R.id.refresh_orders);
+		list = findViewById(R.id.rv_orders);
+		empty = findViewById(R.id.layout_orders_empty);
+		tvEmpty = findViewById(R.id.tv_orders_empty);
+		list.setLayoutManager(new LinearLayoutManager(this));
+		list.setAdapter(adapter);
+		refresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent));
+		refresh.setOnRefreshListener(this::load);
+		findViewById(R.id.iv_orders_back).setOnClickListener(v -> finish());
+		findViewById(R.id.iv_orders_refresh).setOnClickListener(v -> load());
+		findViewById(R.id.btn_orders_market).setOnClickListener(v -> {
+			startActivity(new Intent(this, P2pMarketplaceActivity.class));
+			finish();
+		});
+		tabActive.setOnClickListener(v -> setTab(true));
+		tabDone.setOnClickListener(v -> setTab(false));
+		setTab(true);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		load();
+	}
+
+	private void setTab(boolean active) {
+		activeTab = active;
+		int on = ContextCompat.getColor(this, R.color.colorTextPrimary), off = ContextCompat.getColor(this, R.color.colorTextTertiary);
+		tabActive.setTextColor(active ? on : off);
+		tabDone.setTextColor(active ? off : on);
+		chip = "ALL";
+		chips.setOnCheckedChangeListener(null);
+		chips.removeAllViews();
+		for (String[] c : active ? ACTIVE_CHIPS : DONE_CHIPS) {
+			Chip ch = new Chip(this);
+			ch.setId(View.generateViewId());
+			ch.setText(c[1]);
+			ch.setTag(c[0]);
+			ch.setCheckable(true);
+			ch.setCheckedIconVisible(false);
+			chips.addView(ch);
+			if ("ALL".equals(c[0])) ch.setChecked(true);
 		}
+		chips.setOnCheckedChangeListener((g, id) -> {
+			Chip ch = g.findViewById(id);
+			if (ch != null) { chip = String.valueOf(ch.getTag()); apply(); }
+		});
+		apply();
+	}
+
+	private void load() {
+		if (myAddress.isEmpty()) { refresh.setRefreshing(false); showEmpty("No wallet on this device"); return; }
+		refresh.setRefreshing(true);
 		P2PTradeRouter.listMine(getApplicationContext(), myAddress, new P2PTradeRouter.Callback() {
-			@Override
-			public void onSuccess(JSONObject result) {
+			@Override public void onSuccess(JSONObject result) {
 				List<JSONObject> orders = new ArrayList<>();
 				JSONArray arr = result.optJSONArray("listings");
-				if (arr != null) {
-					for (int i = 0; i < arr.length(); i++) {
-						JSONObject entry = arr.optJSONObject(i);
-						if (entry != null && "ORDER".equals(entry.optString("recordType", ""))) orders.add(entry);
-					}
+				for (int i = 0; arr != null && i < arr.length(); i++) {
+					JSONObject e = arr.optJSONObject(i);
+					if (e != null && "ORDER".equals(e.optString("recordType", ""))) orders.add(e);
 				}
-				// Trades waiting on me first (pay, or confirm and release), then the rest, newest first.
-				java.util.Collections.sort(orders, (a, b) -> {
-					int na = _needsMe(a) ? 0 : 1, nb = _needsMe(b) ? 0 : 1;
+				Collections.sort(orders, (a, b) -> {
+					int na = needsMe(a) ? 0 : 1, nb = needsMe(b) ? 0 : 1;
 					if (na != nb) return Integer.compare(na, nb);
 					return Long.compare(b.optLong("createdTimestamp", 0), a.optLong("createdTimestamp", 0));
 				});
 				runOnUiThread(() -> {
-					allOrders.clear();
-					allOrders.addAll(orders);
-					_applyFilter();
+					refresh.setRefreshing(false);
+					all.clear();
+					all.addAll(orders);
+					apply();
 				});
 			}
-			@Override
-			public void onError(String error) {
+			@Override public void onError(String error) {
 				runOnUiThread(() -> {
-					tv_trades_result_count.setText("Couldn't load: " + error);
-					layout_my_trades_empty.setVisibility(View.VISIBLE);
-					recycler_my_trades.setVisibility(View.GONE);
+					refresh.setRefreshing(false);
+					all.clear();
+					apply();
+					showEmpty(com.harvana.app.utils.ErrorText.plain(error));
 				});
 			}
 		});
 	}
-	
-	private void _setFilter(String filter, TextView selectedTab) {
-		activeFilter = filter;
-		filter_trade_all.setAlpha(0.6f);
-		filter_trade_ongoing.setAlpha(0.6f);
-		filter_trade_completed.setAlpha(0.6f);
-		filter_trade_cancelled.setAlpha(0.6f);
-		filter_trade_disputed.setAlpha(0.6f);
-		selectedTab.setAlpha(1f);
-		_applyFilter();
-	}
-	
-	/** True when the next step of this trade is mine: the buyer pays, the seller confirms and releases. */
-	private boolean _needsMe(JSONObject order) {
-		String st = order.optString("status", "");
-		boolean buyer = myAddress != null && myAddress.equals(order.optString("buyerAddress", ""));
+
+	/** The next step is mine: the buyer pays, the seller confirms and releases. */
+	private boolean needsMe(JSONObject o) {
+		String st = o.optString("status", "");
+		boolean buyer = myAddress.equals(o.optString("buyerAddress", ""));
 		return (buyer && "AWAITING_PAYMENT".equals(st)) || (!buyer && "PAYMENT_SUBMITTED".equals(st));
 	}
 
-	private void _applyFilter() {
-		visible.clear();
-		int ongoing = 0, completed = 0, cancelled = 0, disputed = 0;
-		for (JSONObject order : allOrders) {
-			String status = order.optString("status", "");
-			boolean isOngoing = "AWAITING_PAYMENT".equals(status) || "PAYMENT_SUBMITTED".equals(status);
-			boolean isCompleted = "COMPLETED".equals(status);
-			boolean isCancelled = "CANCELLED".equals(status);
-			boolean isDisputed = "DISPUTED".equals(status);
-			
-			if (isOngoing) ongoing++;
-			if (isCompleted) completed++;
-			if (isCancelled) cancelled++;
-			if (isDisputed) disputed++;
-			
-			boolean include;
-			switch (activeFilter) {
-				case "ONGOING": include = isOngoing; break;
-				case "COMPLETED": include = isCompleted; break;
-				case "CANCELLED": include = isCancelled; break;
-				case "DISPUTED": include = isDisputed; break;
-				default: include = true;
+	private void apply() {
+		shown.clear();
+		int mine = 0;
+		for (JSONObject o : all) {
+			String st = o.optString("status", "");
+			if (P2pStatus.active(st) != activeTab) continue;
+			if (needsMe(o)) mine++;
+			boolean keep;
+			switch (chip) {
+				case "ALL": keep = true; break;
+				case "RESOLVED": keep = st.startsWith("DISPUTE_RESOLVED"); break;
+				case "DISPUTED": keep = "DISPUTED".equals(st) || "STUCK_NEEDS_MANUAL_REVIEW".equals(st); break;
+				case "PAYMENT_SUBMITTED": keep = "PAYMENT_SUBMITTED".equals(st) || "RELEASE_PROCESSING".equals(st); break;
+				default: keep = chip.equals(st);
 			}
-			if (include) visible.add(order);
+			if (keep) shown.add(o);
 		}
-		
-		tv_summary_ongoing.setText(String.valueOf(ongoing));
-		tv_summary_completed.setText(String.valueOf(completed));
-		tv_summary_cancelled.setText(String.valueOf(cancelled));
-		tv_summary_disputed.setText(String.valueOf(disputed));
-		tv_trade_summary_count.setText(String.valueOf(allOrders.size()));
-		tv_trades_result_count.setText(visible.size() + " trade" + (visible.size() == 1 ? "" : "s"));
-		
 		adapter.notifyDataSetChanged();
-		boolean empty = visible.isEmpty();
-		recycler_my_trades.setVisibility(empty ? View.GONE : View.VISIBLE);
-		layout_my_trades_empty.setVisibility(empty ? View.VISIBLE : View.GONE);
-		if (empty) {
-			tv_empty_trades_description.setText(allOrders.isEmpty()
-			? ("Once you buy or sell " + com.harvana.app.CoinInfo.ticker() + " through P2P, your trades will show up here.")
-			: "No trades match this filter right now.");
-		}
+		banner.setVisibility(activeTab && mine > 0 ? View.VISIBLE : View.GONE);
+		tvActionCount.setText(mine == 1 ? "1 order waiting for you" : mine + " orders waiting for you");
+		if (shown.isEmpty()) showEmpty(activeTab ? "No active orders" : "No completed orders");
+		else { empty.setVisibility(View.GONE); list.setVisibility(View.VISIBLE); }
 	}
-	
-	public class Recycler_my_tradesAdapter extends RecyclerView.Adapter<Recycler_my_tradesAdapter.ViewHolder> {
-		
-		List<JSONObject> _data;
-		
-		public Recycler_my_tradesAdapter(List<JSONObject> _arr) {
-			_data = _arr;
-		}
-		
-		@Override
-		public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-			LayoutInflater _inflater = getLayoutInflater();
-			View _v = _inflater.inflate(R.layout.p2p_my_trade_item, parent, false);
-			return new ViewHolder(_v);
-		}
-		
-		@Override
-		public void onBindViewHolder(ViewHolder _holder, final int _position) {
-			View _view = _holder.itemView;
-			JSONObject order = _data.get(_position);
-			
-			final TextView tv_my_trade_order_id = _view.findViewById(R.id.tv_my_trade_order_id);
-			final LinearLayout layout_my_trade_state = _view.findViewById(R.id.layout_my_trade_state);
-			final TextView tv_my_trade_open = _view.findViewById(R.id.tv_my_trade_open);
-			final TextView tv_my_trade_type = _view.findViewById(R.id.tv_my_trade_type);
-			final TextView tv_my_trade_status = _view.findViewById(R.id.tv_my_trade_status);
-			final TextView tv_my_trade_menu = _view.findViewById(R.id.tv_my_trade_menu);
-			final TextView tv_my_trade_avatar = _view.findViewById(R.id.tv_my_trade_avatar);
-			final TextView tv_my_trade_counterparty = _view.findViewById(R.id.tv_my_trade_counterparty);
-			final TextView tv_my_trade_counterparty_meta = _view.findViewById(R.id.tv_my_trade_counterparty_meta);
-			final TextView tv_my_trade_harv = _view.findViewById(R.id.tv_my_trade_harv);
-			final TextView tv_my_trade_fiat = _view.findViewById(R.id.tv_my_trade_fiat);
-			final TextView tv_my_trade_state_title = _view.findViewById(R.id.tv_my_trade_state_title);
-			final TextView tv_my_trade_state_description = _view.findViewById(R.id.tv_my_trade_state_description);
-			final TextView tv_my_trade_date = _view.findViewById(R.id.tv_my_trade_date);
-			final TextView tv_my_trade_tx_state = _view.findViewById(R.id.tv_my_trade_tx_state);
-			
-			String orderId = P2pIds.orderId(order);
-			String listingId = order.optString("listingId", "");
-			String buyerAddress = order.optString("buyerAddress", "");
-			String sellerAddress = order.optString("sellerAddress", "");
-			String status = order.optString("status", "");
-			long claimedRaw = order.optLong("amount", order.optLong("netAmountToBuyer", order.optLong("buyerEntitlementRaw", 0)));
-			final String asset = com.harvana.app.p2p.P2pAsset.of(order);           // HARV or a stable asset (its own decimals and ticker)
-			double harvAmount = com.harvana.app.p2p.P2pAsset.fromRaw(claimedRaw, asset);
-			long createdAt = order.optLong("createdTimestamp", 0);
-			String releaseTxHash = order.optString("releaseTxHash", "");
-			boolean iWasBuyer = myAddress.equals(buyerAddress);
-			
-			tv_my_trade_type.setText(iWasBuyer ? "Bought" : "Sold");
-			tv_my_trade_status.setText(_statusLabel(status));
-			tv_my_trade_order_id.setText(_shortId(orderId));
-			tv_my_trade_harv.setText(BalanceFormatter.smart(harvAmount) + " " + com.harvana.app.p2p.P2pAsset.ticker(asset));
-			com.harvana.app.utils.Shimmer.loading(tv_my_trade_fiat);
-			tv_my_trade_date.setText(_formatDate(createdAt));
-			tv_my_trade_tx_state.setText(releaseTxHash.isEmpty() ? "No release yet" : _shortId(releaseTxHash));
-			tv_my_trade_menu.setVisibility(View.GONE);
-			
-			switch (status) {
-				case "AWAITING_PAYMENT":
-				layout_my_trade_state.setVisibility(View.VISIBLE);
-				tv_my_trade_state_title.setText(iWasBuyer ? "Awaiting your payment" : "Awaiting buyer's payment");
-				tv_my_trade_state_description.setText(iWasBuyer ? "The seller's HARV is held in escrow for you. Pay, then tap \"I have paid\"." : "Your HARV is held in escrow until the buyer pays.");
-				break;
-				case "PAYMENT_SUBMITTED":
-				layout_my_trade_state.setVisibility(View.VISIBLE);
-				tv_my_trade_state_title.setText(iWasBuyer ? "Waiting for seller to confirm" : "Confirm you've received payment");
-				tv_my_trade_state_description.setText(iWasBuyer ? "You marked the payment sent." : "The buyer says they paid. Check your account, then release.");
-				break;
-				case "DISPUTED":
-				layout_my_trade_state.setVisibility(View.VISIBLE);
-				tv_my_trade_state_title.setText("Under dispute review");
-				tv_my_trade_state_description.setText("A guardian will resolve this.");
-				break;
-				default:
-				layout_my_trade_state.setVisibility(View.GONE);
-			}
-			
-			boolean needsMe = _needsMe(order);
-			tv_my_trade_open.setText(needsMe ? (iWasBuyer ? "Pay now" : "Confirm & release") : "View");
-			tv_my_trade_open.setTextColor(needsMe ? androidx.core.content.ContextCompat.getColor(P2pMyTradesActivity.this, R.color.colorAccent)
-					: androidx.core.content.ContextCompat.getColor(P2pMyTradesActivity.this, R.color.colorTextSecondary));
-			tv_my_trade_open.setTypeface(null, needsMe ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
-			if (needsMe && tv_my_trade_state_title != null) {
-				tv_my_trade_state_title.setTextColor(androidx.core.content.ContextCompat.getColor(P2pMyTradesActivity.this, R.color.colorWarning));
-			} else if (tv_my_trade_state_title != null) {
-				tv_my_trade_state_title.setTextColor(androidx.core.content.ContextCompat.getColor(P2pMyTradesActivity.this, R.color.colorTextPrimary));
-			}
-			View.OnClickListener open = v -> {
-				Intent intent = new Intent(P2pMyTradesActivity.this, iWasBuyer ? P2pBuyTradeActivity.class : P2pSellTradeActivity.class);
-				intent.putExtra("orderId", orderId);
-				startActivity(intent);
-			};
-			tv_my_trade_open.setOnClickListener(open);
-			_view.setOnClickListener(open);   // the whole card opens the trade, not just the small link
-			
-			_view.setTag(orderId);
-			
-			// Mutual visibility: resolve whichever party ISN'T me, using
-			// the same real lookups Buy Trade / Sell Trade already use.
-			tv_my_trade_avatar.setText("?");
-			com.harvana.app.utils.Shimmer.loading(tv_my_trade_counterparty);
-			tv_my_trade_counterparty_meta.setText("");
-			
-			if (iWasBuyer) {
-				if (!listingId.isEmpty()) {
-					P2PPaymentDetailsManager.getInstance(getApplicationContext()).get(listingId, new P2PPaymentDetailsManager.DocCallback() {
-						@Override
-						public void onSuccess(Map<String, Object> data) {
-							Object priceObj = data.get("unitPrice");
-							double price = priceObj instanceof Number ? ((Number) priceObj).doubleValue() : -1;
-							Object currencyObj = data.get("currency");
-							String ccy = currencyObj != null && !String.valueOf(currencyObj).trim().isEmpty()
-							? String.valueOf(currencyObj).trim() : com.harvana.app.p2p.P2pCurrencyFilterState.getCurrency();
-							runOnUiThread(() -> {
-								if (!orderId.equals(_view.getTag())) return;
-								tv_my_trade_fiat.setText(price >= 0 ? P2pMoney.fiat(harvAmount * price, ccy) : "Unavailable");
-							});
-							Object uidObj = data.get("sellerUid");
-							String sellerUid = uidObj != null ? String.valueOf(uidObj) : "";
-							if (sellerUid.isEmpty()) { runOnUiThread(() -> { if (orderId.equals(_view.getTag())) tv_my_trade_counterparty.setText("Trader"); }); return; }
-							_resolveCounterparty(sellerUid, tv_my_trade_avatar, tv_my_trade_counterparty, tv_my_trade_counterparty_meta, sellerAddress, orderId, _view);
-						}
-						@Override
-						public void onError(String error) {
-							runOnUiThread(() -> {
-								if (!orderId.equals(_view.getTag())) return;
-								tv_my_trade_counterparty.setText("Trader");
-								tv_my_trade_fiat.setText("Unavailable");
-							});
-						}
-					});
-				}
-			} else {
-				P2PPaymentDetailsManager.getInstance(getApplicationContext()).getBuyerUidForOrder(listingId, orderId, new P2PPaymentDetailsManager.UidCallback() {
-					@Override
-					public void onFound(String buyerUid) {
-						_resolveCounterparty(buyerUid, tv_my_trade_avatar, tv_my_trade_counterparty, tv_my_trade_counterparty_meta, buyerAddress, orderId, _view);
-					}
-					@Override
-					public void onNotFound() {
-						runOnUiThread(() -> { if (orderId.equals(_view.getTag())) tv_my_trade_counterparty.setText("Trader"); });
-					}
-					@Override
-					public void onError(String error) {
-						runOnUiThread(() -> { if (orderId.equals(_view.getTag())) tv_my_trade_counterparty.setText("Trader"); });
-					}
-				});
-				if (!listingId.isEmpty()) {
-					P2PPaymentDetailsManager.getInstance(getApplicationContext()).get(listingId, new P2PPaymentDetailsManager.DocCallback() {
-						@Override
-						public void onSuccess(Map<String, Object> data) {
-							Object priceObj = data.get("unitPrice");
-							double price = priceObj instanceof Number ? ((Number) priceObj).doubleValue() : -1;
-							Object currencyObj = data.get("currency");
-							String ccy = currencyObj != null && !String.valueOf(currencyObj).trim().isEmpty()
-							? String.valueOf(currencyObj).trim() : com.harvana.app.p2p.P2pCurrencyFilterState.getCurrency();
-							runOnUiThread(() -> {
-								if (!orderId.equals(_view.getTag())) return;
-								tv_my_trade_fiat.setText(price >= 0 ? P2pMoney.fiat(harvAmount * price, ccy) : "Unavailable");
-							});
-						}
-						@Override
-						public void onError(String error) {
-							runOnUiThread(() -> {
-								if (!orderId.equals(_view.getTag())) return;
-								tv_my_trade_fiat.setText("Unavailable");
-							});
-						}
-					});
-				}
-			}
-		}
-		
-		@Override
-		public int getItemCount() {
-			return _data.size();
-		}
-		
-		public class ViewHolder extends RecyclerView.ViewHolder {
-			public ViewHolder(View v) {
+
+	private void showEmpty(String text) {
+		list.setVisibility(View.GONE);
+		empty.setVisibility(View.VISIBLE);
+		tvEmpty.setText(text);
+	}
+
+	private static String shortAddr(String a) {
+		return a == null || a.length() < 14 ? (a == null ? "" : a) : a.substring(0, 8) + "\u2026" + a.substring(a.length() - 4);
+	}
+
+	private static String time(long ms) {
+		return ms <= 0 ? "" : new SimpleDateFormat("d MMM, HH:mm", Locale.getDefault()).format(new Date(ms));
+	}
+
+	private final class Adapter extends RecyclerView.Adapter<Adapter.Holder> {
+
+		final class Holder extends RecyclerView.ViewHolder {
+			final ImageView coin;
+			final TextView side, coinName, status, avatar, counterparty, timeView;
+			final LinearLayout rows;
+
+			Holder(View v) {
 				super(v);
+				coin = v.findViewById(R.id.iv_order_coin);
+				side = v.findViewById(R.id.tv_order_side);
+				coinName = v.findViewById(R.id.tv_order_coin);
+				status = v.findViewById(R.id.tv_order_status);
+				rows = v.findViewById(R.id.ll_order_rows);
+				avatar = v.findViewById(R.id.tv_order_avatar);
+				counterparty = v.findViewById(R.id.tv_order_counterparty);
+				timeView = v.findViewById(R.id.tv_order_time);
 			}
 		}
+
+		@NonNull @Override
+		public Holder onCreateViewHolder(@NonNull ViewGroup parent, int type) {
+			return new Holder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_p2p_order, parent, false));
+		}
+
+		@Override
+		public void onBindViewHolder(@NonNull Holder h, int position) {
+			JSONObject o = shown.get(position);
+			String orderId = P2pIds.orderId(o);
+			String listingId = o.optString("listingId", "");
+			String status = o.optString("status", "");
+			String asset = P2pAsset.of(o);
+			String tk = P2pAsset.ticker(asset);
+			boolean buyer = myAddress.equals(o.optString("buyerAddress", ""));
+			double qty = P2pAsset.fromRaw(o.optLong("amount", o.optLong("buyerEntitlementRaw", 0)), asset);
+			h.itemView.setTag(orderId);
+
+			P2pOffers.coinIcon(h.coin, asset);
+			h.side.setText(buyer ? "Buy" : "Sell");
+			h.side.setTextColor(ContextCompat.getColor(P2pMyTradesActivity.this, buyer ? R.color.p2pBuy : R.color.p2pSell));
+			h.coinName.setText(tk);
+			h.status.setText(needsMe(o) ? (buyer ? "Pay now" : "Release now") : P2pStatus.label(status));
+			h.status.setTextColor(ContextCompat.getColor(P2pMyTradesActivity.this, needsMe(o) ? R.color.colorAmber : P2pStatus.color(status)));
+			h.timeView.setText(time(o.optLong("createdTimestamp", 0)));
+
+			h.rows.removeAllViews();
+			P2pKv.add(h.rows, "Amount", BalanceFormatter.smart(qty) + " " + tk);
+			long kobo = o.optLong("unitPricePerHarvRaw", 0);
+			TextView price = P2pKv.add(h.rows, "Price", kobo > 0 ? P2pMoney.fiat(kobo / 100.0, null) : "");
+			TextView total = P2pKv.add(h.rows, "Total", kobo > 0 ? P2pMoney.fiat(qty * kobo / 100.0, null) : "");
+			P2pKv.add(h.rows, "Order No.", orderId, true);
+			bindPrice(listingId, orderId, qty, h.itemView, price, total);
+
+			String other = buyer ? o.optString("sellerAddress", "") : o.optString("buyerAddress", "");
+			h.counterparty.setText(shortAddr(other));
+			h.avatar.setText("?");
+			bindCounterparty(buyer, listingId, orderId, h);
+
+			h.itemView.setOnClickListener(v -> {
+				Intent i = new Intent(P2pMyTradesActivity.this, buyer ? P2pBuyTradeActivity.class : P2pSellTradeActivity.class);
+				i.putExtra("orderId", orderId);
+				startActivity(i);
+			});
+		}
+
+		@Override
+		public int getItemCount() { return shown.size(); }
 	}
-	
-	private void _resolveCounterparty(String uid, TextView avatar, TextView name, TextView meta, String fallbackAddress, String rowId, View row) {
-		UserProfileManager.getInstance(getApplicationContext()).getProfile(uid, new UserProfileManager.DocCallback() {
-			@Override
-			public void onSuccess(Map<String, Object> profile) {
-				Object first = profile.get("first_name");
-				Object last = profile.get("last_name");
-				String firstStr = first != null ? String.valueOf(first).trim() : "";
-				String lastStr = last != null ? String.valueOf(last).trim() : "";
-				String resolvedName = !firstStr.isEmpty()
-				? (lastStr.isEmpty() ? firstStr : firstStr + " " + lastStr.substring(0, 1).toUpperCase(Locale.US) + ".")
-				: "Trader";
-				runOnUiThread(() -> {
-					if (rowId != null && row != null && !rowId.equals(row.getTag())) return;
-					name.setText(resolvedName);
-					avatar.setText(resolvedName.length() > 0 ? resolvedName.substring(0, 1).toUpperCase(Locale.US) : "?");
-					String line = _shortAddr(fallbackAddress);
-					meta.setText(line);
-					final String addr = fallbackAddress;
-					com.harvana.app.trust.NetworkTrust.wallet(addr, score -> runOnUiThread(() -> {
-						if (rowId != null && row != null && !rowId.equals(row.getTag())) return;
-						meta.setText(score.published ? (line + " · " + score.label()) : line);
-					}));
-				});
+
+	/** Price and total in the offer's own currency (the offer card has it; the order has only the number). */
+	private void bindPrice(String listingId, String orderId, double qty, View row, TextView price, TextView total) {
+		if (listingId.isEmpty()) return;
+		String[] cached = offerCache.get(listingId);
+		if (cached != null) { setPrice(cached, qty, price, total); return; }
+		P2PPaymentDetailsManager.getInstance(getApplicationContext()).get(listingId, new P2PPaymentDetailsManager.DocCallback() {
+			@Override public void onSuccess(Map<String, Object> data) {
+				Object p = data.get("unitPrice"), c = data.get("currency");
+				if (!(p instanceof Number)) return;
+				String[] v = {String.valueOf(((Number) p).doubleValue()), c == null ? null : String.valueOf(c)};
+				offerCache.put(listingId, v);
+				runOnUiThread(() -> { if (orderId.equals(row.getTag())) setPrice(v, qty, price, total); });
 			}
-			@Override
-			public void onError(String error) {
-				runOnUiThread(() -> {
-					if (rowId != null && row != null && !rowId.equals(row.getTag())) return;
-					name.setText("Trader");
-				});
-			}
+			@Override public void onError(String error) { }
 		});
 	}
-	
-	private static String _statusLabel(String status) {
-		switch (status) {
-			case "AWAITING_PAYMENT": return "Awaiting Payment";
-			case "PAYMENT_SUBMITTED": return "Payment Submitted";
-			case "COMPLETED": return "Completed";
-			case "DISPUTED": return "Disputed";
-			case "CANCELLED": return "Cancelled";
-			default: return status;
+
+	private static void setPrice(String[] v, double qty, TextView price, TextView total) {
+		double p = Double.parseDouble(v[0]);
+		price.setText(P2pMoney.fiat(p, v[1]));
+		total.setText(P2pMoney.fiat(p * qty, v[1]));
+	}
+
+	private void bindCounterparty(boolean iAmBuyer, String listingId, String orderId, Adapter.Holder h) {
+		String key = (iAmBuyer ? "L:" : "O:") + (iAmBuyer ? listingId : orderId);
+		String cached = nameCache.get(key);
+		if (cached != null) { setName(h, cached); return; }
+		if (iAmBuyer) {
+			if (listingId.isEmpty()) return;
+			P2PPaymentDetailsManager.getInstance(getApplicationContext()).get(listingId, new P2PPaymentDetailsManager.DocCallback() {
+				@Override public void onSuccess(Map<String, Object> data) {
+					Object uid = data.get("sellerUid");
+					if (uid != null) profileName(String.valueOf(uid), key, orderId, h);
+				}
+				@Override public void onError(String error) { }
+			});
+		} else {
+			P2PPaymentDetailsManager.getInstance(getApplicationContext()).getBuyerUidForOrder(listingId, orderId, new P2PPaymentDetailsManager.UidCallback() {
+				@Override public void onFound(String uid) { profileName(uid, key, orderId, h); }
+				@Override public void onNotFound() { }
+				@Override public void onError(String error) { }
+			});
 		}
 	}
-	
-	private static String _shortId(String id) {
-		if (id == null || id.length() < 10) return id != null ? id : "";
-		return id.substring(0, 8) + "…";
+
+	private void profileName(String uid, String key, String orderId, Adapter.Holder h) {
+		UserProfileManager.getInstance(getApplicationContext()).getProfile(uid, new UserProfileManager.DocCallback() {
+			@Override public void onSuccess(Map<String, Object> p) {
+				String name = P2pOffers.displayName(p.get("first_name"), p.get("last_name"));
+				nameCache.put(key, name);
+				runOnUiThread(() -> { if (orderId.equals(h.itemView.getTag())) setName(h, name); });
+			}
+			@Override public void onError(String error) { }
+		});
 	}
-	
-	private static String _shortAddr(String address) {
-		if (address == null || address.length() < 12) return address != null ? address : "";
-		return address.substring(0, 8) + "…" + address.substring(address.length() - 4);
+
+	private static void setName(Adapter.Holder h, String name) {
+		h.counterparty.setText(name);
+		h.avatar.setText(name.isEmpty() ? "?" : name.substring(0, 1).toUpperCase(Locale.US));
 	}
-	
-	private static String _formatDate(long epochMs) {
-		if (epochMs <= 0) return "—";
-		return new SimpleDateFormat("MMM d, h:mm a", Locale.US).format(new Date(epochMs));
-	}
-	
-	// GROUND-UP FIX (Sept 17 2026): Sketchware's actual generated layout
-	// has no tv_my_trades_refresh TextView at all — refresh lives as a
-	// real ActionBar menu item instead, same pattern already used in
-	// Merchant Manager.
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuItem refreshItem = menu.add("Refresh");
-		refreshItem.setIcon(R.drawable.ic_refresh);
-		refreshItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-		return super.onCreateOptionsMenu(menu);
-	}
-	
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if ("Refresh".contentEquals(item.getTitle())) { _loadMine(); return true; }
-		return super.onOptionsItemSelected(item);
-	}
-	
-	{
-	}
-	
 }

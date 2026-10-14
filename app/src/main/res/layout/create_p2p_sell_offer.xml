@@ -1,904 +1,897 @@
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Create sell offer (CreateSellP2p...Activity + p2p/P2pOfferWizard). Generated from one template with the buy screen; ids are the wizard's. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:id="@+id/_coordinator"
+	android:id="@+id/create_sell_offer_root"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent">
-	<com.google.android.material.appbar.AppBarLayout
-		android:id="@+id/_app_bar"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground"
+	android:orientation="vertical">
+	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:theme="@style/AppTheme.AppBarOverlay"
-		app:elevation="0dp"
-		android:stateListAnimator="@null">
-		<com.google.android.material.appbar.MaterialToolbar
-			android:id="@+id/_toolbar"
-			android:layout_width="match_parent"
-			android:layout_height="?attr/actionBarSize"
-			android:background="?attr/appBarColor"
-			app:popupTheme="@style/AppTheme.PopupOverlay" />
-	</com.google.android.material.appbar.AppBarLayout>
-	<androidx.core.widget.NestedScrollView
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:fillViewport="true"
-		android:overScrollMode="never"
-		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		android:layout_height="56dp"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:paddingStart="8dp"
+		android:paddingEnd="16dp">
+		<ImageView
+			android:id="@+id/iv_sell_offer_back"
+			android:layout_width="44dp"
+			android:layout_height="44dp"
+			android:background="?attr/selectableItemBackgroundBorderless"
+			android:contentDescription="Back"
+			android:padding="10dp"
+			android:src="@drawable/ic_nav_back"
+			app:tint="@color/colorTextPrimary" />
 		<LinearLayout
-			android:id="@+id/create_sell_offer_root"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="4dp"
+			android:layout_weight="1"
+			android:orientation="vertical">
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Create sell offer"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="19sp"
+				android:textStyle="bold" />
+			<TextView
+				android:id="@+id/tv_sell_step_label"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textColor="@color/colorTextTertiary"
+				android:textSize="12sp" />
+		</LinearLayout>
+	</LinearLayout>
+	<ScrollView
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:fillViewport="true">
+		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:padding="24dp"
+			android:orientation="vertical"
+			android:paddingStart="16dp"
+			android:paddingEnd="16dp"
+			android:paddingBottom="24dp">
+
+		<!-- ═══ Step 1: coin, amount, price, payment, settings, terms ═══ -->
+		<LinearLayout
+			android:id="@+id/panel_sell_step_1"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
 			android:orientation="vertical">
+
+			<!-- Coin -->
 			<LinearLayout
-				android:id="@+id/panel_sell_step_1"
+				android:id="@+id/row_sell_coin"
+				android:layout_width="match_parent"
+				android:layout_height="60dp"
+				android:layout_marginTop="4dp"
+				android:background="@drawable/bg_p2p_filter_pill"
+				android:foreground="?attr/selectableItemBackground"
+				android:gravity="center_vertical"
+				android:orientation="horizontal"
+				android:paddingStart="14dp"
+				android:paddingEnd="10dp">
+				<ImageView
+					android:id="@+id/iv_sell_coin"
+					android:layout_width="34dp"
+					android:layout_height="34dp"
+					android:importantForAccessibility="no" />
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="12dp"
+					android:layout_weight="1"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/tv_sell_coin"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="16sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/tv_sell_coin_name"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textColor="@color/colorTextTertiary"
+						android:textSize="12sp" />
+				</LinearLayout>
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Change"
+					android:textColor="@color/colorAccent"
+					android:textSize="13sp"
+					android:textStyle="bold" />
+				<ImageView
+					android:layout_width="22dp"
+					android:layout_height="22dp"
+					android:importantForAccessibility="no"
+					android:src="@drawable/icon_arrow_drop_down_round"
+					app:tint="@color/colorAccent" />
+			</LinearLayout>
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="18dp"
+				android:layout_marginBottom="8dp"
+				android:text="Amount"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_sell_amount"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:orientation="vertical"
-				android:visibility="visible">
-				<TextView
-					android:id="@+id/tv_sell_step_label"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginBottom="24dp"
-					android:text="Step 1 of 3 · Amount &amp; Price"
-					android:textSize="14sp"
-					android:textStyle="bold" />
-				<com.google.android.material.card.MaterialCardView
-					android:id="@+id/card_sell_info"
-					android:visibility="gone"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginBottom="24dp"
-					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="12dp"
-					app:cardElevation="0dp"
-					app:strokeColor="@color/colorP2pBorder"
-					app:strokeWidth="1dp">
-					<LinearLayout
-						android:id="@+id/layout_sell_info"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:padding="16dp"
-						android:orientation="horizontal">
-						<com.google.android.material.imageview.ShapeableImageView
-							android:id="@+id/imageview_sell_info"
-							android:layout_width="20dp"
-							android:layout_height="20dp"
-							android:layout_marginTop="2dp"
-							android:src="@drawable/ic_info"
-							android:scaleType="centerInside"
-							android:layout_marginEnd="12dp"
-							app:tint="@color/colorP2pAccent" android:duplicateParentState="true" />
-						<TextView
-							android:id="@+id/tv_sell_info"
-							android:layout_width="0dp"
-							android:layout_height="wrap_content"
-							android:text="Set your price and get paid. Buyers will see your offer and can buy HARV directly from you."
-							android:textSize="14sp"
-							android:layout_weight="1"
-							android:lineSpacingExtra="4dp" />
-					</LinearLayout>
-				</com.google.android.material.card.MaterialCardView>
-				<TextView
-					android:id="@+id/tv_sell_amount_section"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginBottom="12dp"
-					android:text="① AMOUNT TO SELL"
-					android:textSize="12sp"
-					android:textStyle="bold"
-					android:letterSpacing="0.05" />
-				<com.google.android.material.card.MaterialCardView
-					android:id="@+id/card_sell_amount"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="12dp"
-					app:cardElevation="0dp"
-					app:strokeColor="@color/colorP2pBorder"
-					app:strokeWidth="1dp">
-					<LinearLayout
-						android:id="@+id/layout_sell_amount"
-						android:layout_width="match_parent"
-						android:layout_height="56dp"
-						android:gravity="center_vertical"
-						android:orientation="horizontal">
-						<com.google.android.material.textfield.TextInputEditText
-							android:id="@+id/et_sell_amount"
-							android:layout_width="0dp"
-							android:layout_height="match_parent"
-							android:background="@android:color/transparent"
-							android:textSize="18sp"
-							android:textStyle="bold"
-							android:hint="0.00"
-							android:inputType="numberDecimal"
-							android:layout_weight="1"
-							android:paddingStart="16dp"
-							android:paddingEnd="8dp" />
-						<TextView
-							android:id="@+id/tv_sell_amount_currency"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="HARV"
-							android:textSize="16sp"
-							android:textStyle="bold"
-							android:paddingEnd="16dp" />
-					</LinearLayout>
-				</com.google.android.material.card.MaterialCardView>
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
 				<LinearLayout
-					android:id="@+id/layout_sell_available"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="12dp"
-					android:gravity="center_vertical"
-					android:orientation="horizontal">
-					<TextView
-						android:id="@+id/tv_sell_available_label"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="Available balance: "
-						android:textSize="12sp" />
-					<TextView
-						android:id="@+id/tv_sell_available_balance"
-						android:layout_width="0dp"
-						android:layout_height="wrap_content"
-						android:text="…"
-						android:textSize="12sp"
-						android:textStyle="bold"
-						android:layout_weight="1" />
-					<com.google.android.material.button.MaterialButton
-						android:id="@+id/btn_sell_max"
-						android:layout_width="wrap_content"
-						android:layout_height="36dp"
-						android:text="MAX"
-						android:textSize="12sp"
-						android:textStyle="bold"
-						style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-						android:paddingHorizontal="16dp"
-						app:backgroundTint="@color/colorP2pSurfaceAlt"
-						app:cornerRadius="8dp"
-						app:strokeColor="@color/colorP2pBorder"
-						app:strokeWidth="1dp"
-						android:insetTop="0dp"
-						android:insetBottom="0dp" />
-				</LinearLayout>
-				<TextView
-					android:id="@+id/tv_sell_price_section"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="32dp"
-					android:layout_marginBottom="12dp"
-					android:text="② PRICE PER 1 HARV"
-					android:textSize="12sp"
-					android:textStyle="bold"
-					android:letterSpacing="0.05" />
-				<com.google.android.material.button.MaterialButtonToggleGroup
-					android:id="@+id/toggle_sell_pricing_mode"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginBottom="12dp"
-					app:singleSelection="true"
-					app:selectionRequired="true">
-					<com.google.android.material.button.MaterialButton
-						android:id="@+id/btn_sell_price_fixed"
-						android:layout_width="0dp"
-						android:layout_height="wrap_content"
-						android:text="Fixed Price"
-						android:textSize="12sp"
-						android:layout_weight="1"
-						style="@style/Harvana.Segment"
-						android:textAllCaps="false" />
-					<com.google.android.material.button.MaterialButton
-						android:id="@+id/btn_sell_price_floating"
-						android:layout_width="0dp"
-						android:layout_height="wrap_content"
-						android:text="Floating Price"
-						android:textSize="12sp"
-						android:layout_weight="1"
-						style="@style/Harvana.Segment"
-						android:textAllCaps="false" />
-				</com.google.android.material.button.MaterialButtonToggleGroup>
-				<LinearLayout
-					android:id="@+id/group_sell_price_fixed"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:orientation="vertical">
-					<com.google.android.material.card.MaterialCardView
-						android:id="@+id/card_sell_price"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						app:cardBackgroundColor="@color/colorSurface"
-						app:cardCornerRadius="12dp"
-						app:cardElevation="0dp"
-						app:strokeColor="@color/colorP2pBorder"
-						app:strokeWidth="1dp">
-						<LinearLayout
-							android:id="@+id/layout_sell_price"
-							android:layout_width="match_parent"
-							android:layout_height="56dp"
-							android:gravity="center_vertical"
-							android:orientation="horizontal">
-							<com.google.android.material.textfield.TextInputEditText
-								android:id="@+id/et_sell_price"
-								android:layout_width="0dp"
-								android:layout_height="match_parent"
-								android:background="@android:color/transparent"
-								android:textSize="18sp"
-								android:textStyle="bold"
-								android:hint="0.00"
-								android:inputType="numberDecimal"
-								android:layout_weight="1"
-								android:paddingStart="16dp"
-								android:paddingEnd="8dp" />
-							<TextView
-								android:id="@+id/tv_sell_price_currency"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="NGN"
-								android:textSize="16sp"
-								android:textStyle="bold"
-								android:paddingEnd="16dp" />
-						</LinearLayout>
-					</com.google.android.material.card.MaterialCardView>
-					<TextView
-						android:id="@+id/tv_sell_price_note"
-					android:visibility="gone"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="8dp"
-						android:text="Set the NGN amount you want to receive for each 1 HARV."
-						android:textSize="12sp"
-						android:alpha="0.8" />
-				</LinearLayout>
-				<LinearLayout
-					android:id="@+id/group_sell_price_floating"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:orientation="vertical"
-					android:visibility="gone">
-					<com.google.android.material.card.MaterialCardView
-						android:id="@+id/card_sell_margin"
+					android:padding="14dp">
+					<LinearLayout
 						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						app:cardBackgroundColor="@color/colorSurface"
-						app:cardCornerRadius="12dp"
-						app:cardElevation="0dp"
-						app:strokeColor="@color/colorP2pBorder"
-						app:strokeWidth="1dp">
-						<LinearLayout
-							android:id="@+id/linear7"
-							android:layout_width="match_parent"
-							android:layout_height="56dp"
-							android:gravity="center_vertical"
-							android:orientation="horizontal">
-							<com.google.android.material.textfield.TextInputEditText
-								android:id="@+id/et_sell_margin"
-								android:layout_width="0dp"
-								android:layout_height="match_parent"
-								android:background="@android:color/transparent"
-								android:textSize="18sp"
-								android:textStyle="bold"
-								android:hint="0.0"
-								android:inputType="numberSigned|numberDecimal"
-								android:layout_weight="1"
-								android:paddingStart="16dp"
-								android:paddingEnd="8dp" />
-							<TextView
-								android:id="@+id/tv_sell_margin_percent_label"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="% margin"
-								android:textSize="16sp"
-								android:textStyle="bold"
-								android:paddingEnd="16dp" />
-						</LinearLayout>
-					</com.google.android.material.card.MaterialCardView>
-					<TextView
-						android:id="@+id/tv_sell_calculated_price"
+						android:layout_height="56dp"
+						android:background="@drawable/bg_p2p_segment"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingStart="14dp"
+						android:paddingEnd="8dp">
+						<EditText
+							android:id="@+id/et_sell_amount"
+							android:layout_width="0dp"
+							android:layout_height="match_parent"
+							android:layout_weight="1"
+							android:background="@null"
+							android:hint="0.00"
+							android:importantForAutofill="no"
+							android:inputType="numberDecimal"
+							android:maxLines="1"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="20sp"
+							android:textStyle="bold" />
+						<TextView
+							android:id="@+id/tv_sell_amount_unit"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginEnd="6dp"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+						<com.google.android.material.button.MaterialButton
+							android:id="@+id/btn_sell_max"
+							style="@style/Widget.MaterialComponents.Button.TextButton"
+							android:layout_width="wrap_content"
+							android:layout_height="40dp"
+							android:insetTop="0dp"
+							android:insetBottom="0dp"
+							android:minWidth="0dp"
+							android:text="Max"
+							android:textAllCaps="false"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/layout_sell_available"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="8dp"
-						android:text="Enter a margin above or below the current best price."
-						android:textSize="13sp"
-						android:textStyle="bold" />
-				</LinearLayout>
-				<TextView
-					android:id="@+id/tv_sell_payment_section"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="32dp"
-					android:layout_marginBottom="12dp"
-					android:text="③ PAYMENT METHODS"
-					android:textSize="12sp"
-					android:textStyle="bold"
-					android:letterSpacing="0.05" />
-				<com.google.android.material.card.MaterialCardView
-					android:id="@+id/card_sell_payment_methods"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="12dp"
-					app:cardElevation="0dp"
-					app:strokeColor="@color/colorP2pBorder"
-					app:strokeWidth="1dp">
-					<LinearLayout
-						android:id="@+id/layout_sell_payment_methods"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:padding="16dp"
-						android:orientation="vertical" />
-				</com.google.android.material.card.MaterialCardView>
-				<TextView
-					android:id="@+id/tv_sell_settings_section"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="32dp"
-					android:layout_marginBottom="12dp"
-					android:text="④ ADDITIONAL SETTINGS"
-					android:textSize="12sp"
-					android:textStyle="bold"
-					android:letterSpacing="0.05" />
-				<com.google.android.material.card.MaterialCardView
-					android:id="@+id/card_sell_settings"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="12dp"
-					app:cardElevation="0dp"
-					app:strokeColor="@color/colorP2pBorder"
-					app:strokeWidth="1dp">
-					<LinearLayout
-						android:id="@+id/layout_sell_settings"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:orientation="vertical">
-						<LinearLayout
-							android:id="@+id/row_sell_trade_limit"
-							android:layout_width="match_parent"
+						android:orientation="horizontal">
+						<TextView
+							android:layout_width="0dp"
 							android:layout_height="wrap_content"
-							android:padding="16dp"
-							android:background="?attr/selectableItemBackground"
-							android:gravity="center_vertical"
-							android:orientation="horizontal"
-							android:focusable="true" android:minHeight="50dp">
-							<TextView
-								android:id="@+id/tv_sell_trade_limit_label"
-								android:layout_width="0dp"
-								android:layout_height="wrap_content"
-								android:text="Trade limit (per trade)"
-								android:textSize="14sp"
-								android:layout_weight="1" />
-							<TextView
-								android:id="@+id/tv_sell_trade_limit_value"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="Min 5 · Max 25"
-								android:textSize="14sp"
-								android:textStyle="bold" />
-						</LinearLayout>
-						<com.google.android.material.divider.MaterialDivider
-							android:id="@+id/view3"
-							android:layout_width="match_parent"
-							android:layout_height="1dp"
-	app:dividerColor="@color/colorP2pBorder"/>
-						<LinearLayout
-							android:id="@+id/row_sell_offer_duration"
-							android:layout_width="match_parent"
+							android:layout_weight="1"
+							android:text="Available"
+							android:textColor="@color/colorTextTertiary"
+							android:textSize="12.5sp" />
+						<TextView
+							android:id="@+id/tv_sell_available_balance"
+							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:padding="16dp"
-							android:background="?attr/selectableItemBackground"
-							android:gravity="center_vertical"
-							android:orientation="horizontal"
-							android:focusable="true" android:minHeight="50dp">
-							<TextView
-								android:id="@+id/tv_sell_offer_duration_label"
-								android:layout_width="0dp"
-								android:layout_height="wrap_content"
-								android:text="Offer duration"
-								android:textSize="14sp"
-								android:layout_weight="1" />
-							<TextView
-								android:id="@+id/tv_sell_offer_duration_value"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="1 Day"
-								android:textSize="14sp"
-								android:textStyle="bold" />
-						</LinearLayout>
-						<com.google.android.material.divider.MaterialDivider
-							android:id="@+id/view_sell_payment_window_divider"
-							android:layout_width="match_parent"
-							android:layout_height="1dp"
-	app:dividerColor="@color/colorP2pBorder"/>
-						<LinearLayout
-							android:id="@+id/row_sell_payment_window"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:padding="16dp"
-							android:background="?attr/selectableItemBackground"
-							android:gravity="center_vertical"
-							android:orientation="horizontal"
-							android:focusable="true" android:minHeight="50dp">
-							<TextView
-								android:id="@+id/tv_sell_payment_window_label"
-								android:layout_width="0dp"
-								android:layout_height="wrap_content"
-								android:text="Payment window"
-								android:textSize="14sp"
-								android:layout_weight="1" />
-							<TextView
-								android:id="@+id/tv_sell_payment_window_value"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="15 Minutes"
-								android:textSize="14sp"
-								android:textStyle="bold" />
-						</LinearLayout>
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="12.5sp"
+							android:textStyle="bold" />
 					</LinearLayout>
-				</com.google.android.material.card.MaterialCardView>
-				<TextView
-					android:id="@+id/tv_sell_terms_section"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="32dp"
-					android:layout_marginBottom="12dp"
-					android:text="⑤ TERMS OF TRADE (OPTIONAL)"
-					android:textSize="12sp"
-					android:textStyle="bold"
-					android:letterSpacing="0.05" />
-				<com.google.android.material.card.MaterialCardView
-					android:id="@+id/card_sell_terms"
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:id="@+id/tv_sell_price_title"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="18dp"
+				android:layout_marginBottom="8dp"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_sell_price"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="12dp"
-					app:cardElevation="0dp"
-					app:strokeColor="@color/colorP2pBorder"
-					app:strokeWidth="1dp">
-					<com.google.android.material.textfield.TextInputEditText
+					android:orientation="vertical"
+					android:padding="14dp">
+					<com.google.android.material.button.MaterialButtonToggleGroup
+						android:id="@+id/toggle_sell_pricing_mode"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						app:checkedButton="@+id/btn_sell_price_fixed"
+						app:selectionRequired="true"
+						app:singleSelection="true">
+						<com.google.android.material.button.MaterialButton
+							android:id="@+id/btn_sell_price_fixed"
+							style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+							android:layout_width="0dp"
+							android:layout_height="44dp"
+							android:layout_weight="1"
+							android:text="Fixed"
+							android:textAllCaps="false" />
+						<com.google.android.material.button.MaterialButton
+							android:id="@+id/btn_sell_price_floating"
+							style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+							android:layout_width="0dp"
+							android:layout_height="44dp"
+							android:layout_weight="1"
+							android:text="Floating"
+							android:textAllCaps="false" />
+					</com.google.android.material.button.MaterialButtonToggleGroup>
+					<LinearLayout
+						android:id="@+id/group_sell_price_fixed"
+						android:layout_width="match_parent"
+						android:layout_height="56dp"
+						android:layout_marginTop="12dp"
+						android:background="@drawable/bg_p2p_segment"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingStart="14dp"
+						android:paddingEnd="14dp">
+						<EditText
+							android:id="@+id/et_sell_price"
+							android:layout_width="0dp"
+							android:layout_height="match_parent"
+							android:layout_weight="1"
+							android:background="@null"
+							android:hint="0.00"
+							android:importantForAutofill="no"
+							android:inputType="numberDecimal"
+							android:maxLines="1"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="20sp"
+							android:textStyle="bold" />
+						<TextView
+							android:id="@+id/tv_sell_price_currency"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/group_sell_price_floating"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="12dp"
+						android:orientation="vertical"
+						android:visibility="gone">
+						<LinearLayout
+							android:layout_width="match_parent"
+							android:layout_height="56dp"
+							android:background="@drawable/bg_p2p_segment"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:paddingStart="14dp"
+							android:paddingEnd="14dp">
+							<EditText
+								android:id="@+id/et_sell_margin"
+								android:layout_width="0dp"
+								android:layout_height="match_parent"
+								android:layout_weight="1"
+								android:background="@null"
+								android:hint="0"
+								android:importantForAutofill="no"
+								android:inputType="numberDecimal|numberSigned"
+								android:maxLines="1"
+								android:textColor="@color/colorTextPrimary"
+								android:textSize="20sp"
+								android:textStyle="bold" />
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="% margin"
+								android:textColor="@color/colorTextPrimary"
+								android:textSize="14sp"
+								android:textStyle="bold" />
+						</LinearLayout>
+						<TextView
+							android:id="@+id/tv_sell_calculated_price"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="8dp"
+							android:textColor="@color/colorAccent"
+							android:textSize="13sp" />
+					</LinearLayout>
+					<TextView
+						android:id="@+id/tv_sell_price_note"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="8dp"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="12.5sp" />
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:layout_marginTop="10dp"
+						android:background="@color/colorCardStroke" />
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="50dp"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<TextView
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="You receive"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="14sp" />
+						<TextView
+							android:id="@+id/tv_sell_you_receive"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="\u2014"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="17sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="18dp"
+				android:layout_marginBottom="8dp"
+				android:text="Payment methods"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+			<LinearLayout
+				android:id="@+id/layout_sell_payment_methods"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical" />
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_sell_edit_payment_methods"
+				style="@style/Widget.MaterialComponents.Button.TextButton"
+				android:layout_width="wrap_content"
+				android:layout_height="40dp"
+				android:text="Manage payment methods"
+				android:textAllCaps="false" />
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="18dp"
+				android:layout_marginBottom="8dp"
+				android:text="Settings"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_sell_settings"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:padding="0dp">
+					<LinearLayout
+						android:id="@+id/row_sell_trade_limit"
+						android:layout_width="match_parent"
+						android:layout_height="50dp"
+						android:background="?attr/selectableItemBackground"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingStart="14dp"
+						android:paddingEnd="8dp">
+						<TextView
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="Trade limit"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="14sp" />
+						<TextView
+							android:id="@+id/tv_sell_trade_limit_value"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text=""
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+						<ImageView
+							android:layout_width="20dp"
+							android:layout_height="20dp"
+							android:layout_marginStart="4dp"
+							android:importantForAccessibility="no"
+							android:src="@drawable/icon_keyboard_arrow_right_round"
+							app:tint="@color/colorTextTertiary" />
+					</LinearLayout>
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:background="@color/colorCardStroke" />
+					<LinearLayout
+						android:id="@+id/row_sell_offer_duration"
+						android:layout_width="match_parent"
+						android:layout_height="50dp"
+						android:background="?attr/selectableItemBackground"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingStart="14dp"
+						android:paddingEnd="8dp">
+						<TextView
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="Offer duration"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="14sp" />
+						<TextView
+							android:id="@+id/tv_sell_offer_duration_value"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="7 days"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+						<ImageView
+							android:layout_width="20dp"
+							android:layout_height="20dp"
+							android:layout_marginStart="4dp"
+							android:importantForAccessibility="no"
+							android:src="@drawable/icon_keyboard_arrow_right_round"
+							app:tint="@color/colorTextTertiary" />
+					</LinearLayout>
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:background="@color/colorCardStroke" />
+					<LinearLayout
+						android:id="@+id/row_sell_payment_window"
+						android:layout_width="match_parent"
+						android:layout_height="50dp"
+						android:background="?attr/selectableItemBackground"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingStart="14dp"
+						android:paddingEnd="8dp">
+						<TextView
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="Payment window"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="14sp" />
+						<TextView
+							android:id="@+id/tv_sell_payment_window_value"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="15 min"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+						<ImageView
+							android:layout_width="20dp"
+							android:layout_height="20dp"
+							android:layout_marginStart="4dp"
+							android:importantForAccessibility="no"
+							android:src="@drawable/icon_keyboard_arrow_right_round"
+							app:tint="@color/colorTextTertiary" />
+					</LinearLayout>
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:background="@color/colorCardStroke" />
+					<LinearLayout
+						android:id="@+id/row_sell_min_account_age"
+						android:layout_width="match_parent"
+						android:layout_height="50dp"
+						android:background="?attr/selectableItemBackground"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingStart="14dp"
+						android:paddingEnd="8dp">
+						<TextView
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="Minimum account age"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="14sp" />
+						<TextView
+							android:id="@+id/tv_sell_min_account_age_value"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Any"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+						<ImageView
+							android:layout_width="20dp"
+							android:layout_height="20dp"
+							android:layout_marginStart="4dp"
+							android:importantForAccessibility="no"
+							android:src="@drawable/icon_keyboard_arrow_right_round"
+							app:tint="@color/colorTextTertiary" />
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="18dp"
+				android:layout_marginBottom="8dp"
+				android:text="Terms"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/card_sell_terms"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:padding="14dp">
+					<EditText
 						android:id="@+id/et_sell_terms"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:padding="16dp"
-						android:background="@android:color/transparent"
-						android:textSize="14sp"
-						android:hint="E.g., No third-party payments. I will ask for ID verification. Do not put crypto terms in bank narration."
-						android:gravity="top|start"
+						android:background="@null"
+						android:gravity="top"
+						android:hint="Optional"
+						android:importantForAutofill="no"
 						android:inputType="textMultiLine|textCapSentences"
+						android:maxLength="500"
 						android:minLines="3"
-						android:maxLength="500" />
-				</com.google.android.material.card.MaterialCardView>
-				<TextView
-					android:id="@+id/tv_sell_terms_counter"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="4dp"
-					android:text="0/500"
-					android:textSize="11sp"
-					android:gravity="end"
-					android:alpha="0.6" />
-				<TextView
-					android:id="@+id/tv_sell_counterparty_section"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="32dp"
-					android:layout_marginBottom="12dp"
-					android:text="⑥ COUNTERPARTY REQUIREMENTS (OPTIONAL)"
-					android:textSize="12sp"
-					android:textStyle="bold"
-					android:letterSpacing="0.05" />
-				<com.google.android.material.card.MaterialCardView
-					android:id="@+id/card_sell_counterparty"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="12dp"
-					app:cardElevation="0dp"
-					app:strokeColor="@color/colorP2pBorder"
-					app:strokeWidth="1dp">
-					<LinearLayout
-						android:id="@+id/linear8"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="14sp" />
+					<TextView
+						android:id="@+id/tv_sell_terms_counter"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:orientation="vertical">
-						<LinearLayout
-							android:id="@+id/row_sell_require_kyc"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:padding="16dp"
-							android:gravity="center_vertical"
-							android:orientation="horizontal"
-							android:alpha="0.5">
-							<LinearLayout
-								android:id="@+id/linear9"
-								android:layout_width="0dp"
-								android:layout_height="wrap_content"
-								android:orientation="vertical"
-								android:layout_weight="1">
-								<TextView
-									android:id="@+id/textview2"
-									android:layout_width="match_parent"
-									android:layout_height="wrap_content"
-									android:text="Require KYC verification"
-									android:textSize="14sp" />
-								<TextView
-									android:id="@+id/textview3"
-									android:layout_width="match_parent"
-									android:layout_height="wrap_content"
-									android:layout_marginTop="2dp"
-									android:text="Coming soon — identity verification isn't built yet"
-									android:textSize="11sp" />
-							</LinearLayout>
-							<com.google.android.material.switchmaterial.SwitchMaterial
-								android:id="@+id/switch_sell_require_kyc"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:textSize="12sp"
-								android:enabled="false"
-								android:clickable="false" />
-						</LinearLayout>
-						<com.google.android.material.divider.MaterialDivider
-							android:id="@+id/view10"
-							android:layout_width="match_parent"
-							android:layout_height="1dp"
-	app:dividerColor="@color/colorP2pBorder"/>
-						<LinearLayout
-							android:id="@+id/row_sell_min_account_age"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:padding="16dp"
-							android:background="?attr/selectableItemBackground"
-							android:gravity="center_vertical"
-							android:orientation="horizontal"
-							android:focusable="true" android:minHeight="50dp">
-							<TextView
-								android:id="@+id/textview4"
-								android:layout_width="0dp"
-								android:layout_height="wrap_content"
-								android:text="Minimum account age"
-								android:textSize="14sp"
-								android:layout_weight="1" />
-							<TextView
-								android:id="@+id/tv_sell_min_account_age_value"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="No limit"
-								android:textSize="14sp"
-								android:textStyle="bold" />
-						</LinearLayout>
-						<com.google.android.material.divider.MaterialDivider
-							android:id="@+id/view11"
-							android:layout_width="match_parent"
-							android:layout_height="1dp"
-	app:dividerColor="@color/colorP2pBorder"/>
-						<LinearLayout
-							android:id="@+id/row_sell_min_completion_rate"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:padding="16dp"
-							android:gravity="center_vertical"
-							android:orientation="horizontal"
-							android:alpha="0.5">
-							<LinearLayout
-								android:id="@+id/linear12"
-								android:layout_width="0dp"
-								android:layout_height="wrap_content"
-								android:orientation="vertical"
-								android:layout_weight="1">
-								<TextView
-									android:id="@+id/textview5"
-									android:layout_width="match_parent"
-									android:layout_height="wrap_content"
-									android:text="Minimum completion rate"
-									android:textSize="14sp" />
-								<TextView
-									android:id="@+id/textview6"
-									android:layout_width="match_parent"
-									android:layout_height="wrap_content"
-									android:layout_marginTop="2dp"
-									android:text="Not yet available — trade success rate isn't tracked yet"
-									android:textSize="11sp" />
-							</LinearLayout>
-							<TextView
-								android:id="@+id/tv_sell_min_completion_rate_value"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="No limit"
-								android:textSize="14sp"
-								android:textStyle="bold" />
-						</LinearLayout>
-					</LinearLayout>
-				</com.google.android.material.card.MaterialCardView>
-				<TextView
-					android:id="@+id/tv_sell_step1_error"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="16dp"
-					android:textSize="14sp"
-					android:visibility="gone" />
-				<com.google.android.material.button.MaterialButton
-					android:id="@+id/btn_sell_deposit_harv_1"
-					android:layout_width="match_parent"
-					android:layout_height="44dp"
-					android:layout_marginTop="8dp"
-					android:text="Deposit HARV"
-					android:textSize="13sp"
-					android:textStyle="bold"
-					android:visibility="gone"
-					style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-					app:cornerRadius="12dp" />
-				<com.google.android.material.button.MaterialButton
-					android:id="@+id/btn_preview_sell_offer"
-					android:layout_width="match_parent"
-					android:layout_height="56dp"
-					android:layout_marginTop="32dp"
-					android:text="Preview Offer"
-					android:textSize="16sp"
-					android:textStyle="bold"
-					app:backgroundTint="@color/colorP2pAccent"
-					app:cornerRadius="12dp"
-					app:elevation="0dp" />
-			</LinearLayout>
-			<LinearLayout
-				android:id="@+id/panel_sell_step_2"
+						android:gravity="end"
+						android:textColor="@color/colorTextTertiary"
+						android:textSize="12sp" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:id="@+id/tv_sell_step1_error"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:orientation="vertical"
-				android:visibility="gone">
-				<TextView
-					android:id="@+id/tv_sell_summary_title"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginBottom="16dp"
-					android:text="STEP 2 OF 3 · REVIEW"
-					android:textSize="12sp"
-					android:textStyle="bold"
-					android:letterSpacing="0.05" />
-				<com.google.android.material.card.MaterialCardView
-					android:id="@+id/card_sell_review"
+				android:layout_marginTop="14dp"
+				android:background="@drawable/bg_chip_overdue"
+				android:padding="12dp"
+				android:textColor="@color/colorError"
+				android:textSize="13sp"
+				android:visibility="gone" />
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_sell_deposit_harv_1"
+				style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+				android:layout_width="match_parent"
+				android:layout_height="50dp"
+				android:layout_marginTop="8dp"
+				android:text="Deposit"
+				android:textAllCaps="false"
+				android:visibility="gone"
+				app:cornerRadius="12dp" />
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_preview_sell_offer"
+				android:layout_width="match_parent"
+				android:layout_height="54dp"
+				android:layout_marginTop="16dp"
+				android:text="Preview"
+				android:textAllCaps="false"
+				android:textSize="16sp"
+				android:textStyle="bold"
+				app:backgroundTint="@color/p2pSell"
+				app:cornerRadius="14dp"
+				android:textColor="@color/p2pOnSell" />
+		</LinearLayout>
+
+		<!-- ═══ Step 2: review ═══ -->
+		<LinearLayout
+			android:id="@+id/panel_sell_step_2"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:visibility="gone">
+			<com.google.android.material.card.MaterialCardView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					app:cardBackgroundColor="@color/colorSurface"
-					app:cardCornerRadius="12dp"
-					app:cardElevation="0dp"
-					app:strokeColor="@color/colorP2pBorder"
-					app:strokeWidth="1dp">
+					android:orientation="vertical"
+					android:padding="14dp">
 					<LinearLayout
-						android:id="@+id/layout_sell_review"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:padding="20dp"
-						android:orientation="vertical">
-						<LinearLayout
-							android:id="@+id/linear4"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:orientation="horizontal"
-							android:paddingVertical="8dp" android:minHeight="50dp" android:gravity="center_vertical">
-							<TextView
-								android:id="@+id/textview7"
-								android:layout_width="0dp"
-								android:layout_height="wrap_content"
-								android:text="Amount to sell"
-								android:textSize="14sp"
-								android:layout_weight="1" />
-							<TextView
-								android:id="@+id/tv_sell_review_amount"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:textSize="14sp"
-								android:textStyle="bold" />
-						</LinearLayout>
-						<LinearLayout
-							android:id="@+id/linear5"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:orientation="horizontal"
-							android:paddingVertical="8dp" android:minHeight="50dp" android:gravity="center_vertical">
-							<TextView
-								android:id="@+id/textview8"
-								android:layout_width="0dp"
-								android:layout_height="wrap_content"
-								android:text="Price per HARV"
-								android:textSize="14sp"
-								android:layout_weight="1" />
-							<TextView
-								android:id="@+id/tv_sell_review_unit_price"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:textSize="14sp"
-								android:textStyle="bold" />
-						</LinearLayout>
-						<com.google.android.material.divider.MaterialDivider
-							android:id="@+id/view6"
-							android:layout_width="match_parent"
-							android:layout_height="1dp"
-							android:layout_marginVertical="12dp"
-	app:dividerColor="@color/colorP2pBorder"/>
-						<LinearLayout
-							android:id="@+id/linear13"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:orientation="horizontal"
-							android:paddingVertical="8dp" android:minHeight="50dp" android:gravity="center_vertical">
-							<TextView
-								android:id="@+id/textview9"
-								android:layout_width="0dp"
-								android:layout_height="wrap_content"
-								android:text="Buyers pay you (est.)"
-								android:textSize="16sp"
-								android:textStyle="bold"
-								android:layout_weight="1" />
-							<TextView
-								android:id="@+id/tv_sell_review_total_price"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:textSize="16sp"
-								android:textStyle="bold" />
-						</LinearLayout>
-						<LinearLayout
-							android:id="@+id/linear14"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:orientation="horizontal"
-							android:paddingVertical="8dp" android:minHeight="50dp" android:gravity="center_vertical">
-							<TextView
-								android:id="@+id/textview10"
-								android:layout_width="0dp"
-								android:layout_height="wrap_content"
-								android:text="Maker fee"
-								android:textSize="14sp"
-								android:layout_weight="1" />
-							<TextView
-								android:id="@+id/tv_sell_review_fee"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:textSize="14sp" />
-						</LinearLayout>
-					</LinearLayout>
-				</com.google.android.material.card.MaterialCardView>
-				<com.google.android.material.card.MaterialCardView
-					android:visibility="gone"
-					android:id="@+id/card_sell_review_note"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="24dp"
-					app:cardBackgroundColor="@color/colorAmberSoft"
-					app:cardCornerRadius="12dp"
-					app:cardElevation="0dp"
-					app:strokeColor="@color/colorAmber"
-					app:strokeWidth="1dp">
-					<LinearLayout
-						android:id="@+id/linear15"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:padding="20dp"
-						android:orientation="vertical">
+						android:layout_marginBottom="6dp"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<ImageView
+							android:id="@+id/iv_sell_review_coin"
+							android:layout_width="26dp"
+							android:layout_height="26dp"
+							android:importantForAccessibility="no" />
 						<TextView
-							android:id="@+id/textview11"
-							android:layout_width="match_parent"
+							android:id="@+id/tv_sell_review_title"
+							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:gravity="center_vertical"
-							android:text="Please note"
+							android:layout_marginStart="10dp"
+							android:textColor="@color/p2pSell"
+							android:textSize="17sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:background="@color/colorCardStroke" />
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:minHeight="50dp"
+						android:orientation="horizontal">
+						<TextView
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="Amount"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="14sp" />
+						<TextView
+							android:id="@+id/tv_sell_review_amount"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:gravity="end"
+							android:maxWidth="220dp"
+							android:textColor="@color/colorTextPrimary"
 							android:textSize="14sp"
-							android:textStyle="bold"
-							android:drawableStart="@drawable/ic_info"
-							android:drawablePadding="8dp"
-							app:drawableTint="@color/colorAmber" />
-						<TextView
-							android:id="@+id/textview12"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:layout_marginTop="12dp"
-							android:text="• Buyers will see your offer and can place orders.\n• HARV is only committed to escrow when a specific trade is created.\n• You can edit or cancel your offer anytime."
-							android:textSize="13sp"
-							android:lineSpacingExtra="4dp" />
+							android:textStyle="bold" />
 					</LinearLayout>
-				</com.google.android.material.card.MaterialCardView>
-				<TextView
-					android:id="@+id/tv_sell_step2_error"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="16dp"
-					android:textSize="14sp"
-					android:visibility="gone" />
-				<com.google.android.material.button.MaterialButton
-					android:id="@+id/btn_sell_deposit_harv_2"
-					android:tag="payment_button"
-					android:layout_width="match_parent"
-					android:layout_height="44dp"
-					android:layout_marginTop="8dp"
-					android:text="Deposit HARV"
-					android:textSize="13sp"
-					android:textStyle="bold"
-					android:visibility="gone"
-					style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-					app:cornerRadius="12dp" />
-				<com.google.android.material.button.MaterialButton
-					android:id="@+id/btn_publish_sell_offer"
-					android:tag="payment_button"
-					android:layout_width="match_parent"
-					android:layout_height="56dp"
-					android:layout_marginTop="32dp"
-					android:text="Publish Offer"
-					android:textSize="16sp"
-					android:textStyle="bold"
-					app:backgroundTint="@color/colorP2pAccent"
-					app:cornerRadius="12dp"
-					app:elevation="0dp" />
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:background="@color/colorCardStroke" />
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:minHeight="50dp"
+						android:orientation="horizontal">
+						<TextView
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="Price"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="14sp" />
+						<TextView
+							android:id="@+id/tv_sell_review_unit_price"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:gravity="end"
+							android:maxWidth="220dp"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:background="@color/colorCardStroke" />
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:minHeight="50dp"
+						android:orientation="horizontal">
+						<TextView
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="Total"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="14sp" />
+						<TextView
+							android:id="@+id/tv_sell_review_total_price"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:gravity="end"
+							android:maxWidth="220dp"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:background="@color/colorCardStroke" />
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:minHeight="50dp"
+						android:orientation="horizontal">
+						<TextView
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="Maker fee"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="14sp" />
+						<TextView
+							android:id="@+id/tv_sell_review_fee"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:gravity="end"
+							android:maxWidth="220dp"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:background="@color/colorCardStroke" />
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:minHeight="50dp"
+						android:orientation="horizontal">
+						<TextView
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="Trade limit"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="14sp" />
+						<TextView
+							android:id="@+id/tv_sell_review_trade_limit"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:gravity="end"
+							android:maxWidth="220dp"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:background="@color/colorCardStroke" />
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:minHeight="50dp"
+						android:orientation="horizontal">
+						<TextView
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:text="Offer duration"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="14sp" />
+						<TextView
+							android:id="@+id/tv_sell_review_duration"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:gravity="end"
+							android:maxWidth="220dp"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="14sp"
+							android:textStyle="bold" />
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="18dp"
+				android:layout_marginBottom="8dp"
+				android:text="Payment methods"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+			<LinearLayout
+				android:id="@+id/layout_sell_review_payment_methods"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical" />
+			<TextView
+				android:id="@+id/tv_sell_step2_error"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="14dp"
+				android:background="@drawable/bg_chip_overdue"
+				android:padding="12dp"
+				android:textColor="@color/colorError"
+				android:textSize="13sp"
+				android:visibility="gone" />
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_sell_deposit_harv_2"
+				style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+				android:layout_width="match_parent"
+				android:layout_height="50dp"
+				android:layout_marginTop="8dp"
+				android:text="Deposit"
+				android:textAllCaps="false"
+				android:visibility="gone"
+				app:cornerRadius="12dp" />
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				android:orientation="horizontal">
 				<com.google.android.material.button.MaterialButton
 					android:id="@+id/btn_sell_back_to_step1"
-					android:layout_width="match_parent"
-					android:layout_height="56dp"
-					android:layout_marginTop="12dp"
-					android:text="Back to Edit"
-					android:textSize="16sp"
-					android:textStyle="bold"
 					style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-					app:backgroundTint="@color/colorP2pSurfaceAlt"
-					app:cornerRadius="12dp"
-					app:strokeColor="@color/colorP2pBorder"
-					app:strokeWidth="1dp" />
-			</LinearLayout>
-			<LinearLayout
-				android:id="@+id/panel_sell_step_3"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:paddingTop="32dp"
-				android:gravity="center_horizontal"
-				android:orientation="vertical"
-				android:visibility="gone">
-				<com.google.android.material.imageview.ShapeableImageView
-					android:id="@+id/imageview1"
-					android:layout_width="80dp"
-					android:layout_height="80dp"
-					android:src="@drawable/ic_check_circle"
-					android:scaleType="centerInside"
-					app:tint="@color/colorSuccess" />
-				<TextView
-					android:id="@+id/textview13"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="24dp"
-					android:text="Offer Published!"
-					android:textSize="22sp"
-					android:textStyle="bold" />
-				<TextView
-					android:id="@+id/textview14"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="8dp"
-					android:gravity="center_horizontal|center_vertical"
-					android:text="Your sell offer is now live on the P2P market."
-					android:textSize="16sp"
-					android:alpha="0.8" />
+					android:layout_width="0dp"
+					android:layout_height="54dp"
+					android:layout_marginEnd="6dp"
+					android:layout_weight="1"
+					android:text="Edit"
+					android:textAllCaps="false"
+					app:cornerRadius="14dp" />
 				<com.google.android.material.button.MaterialButton
-					android:id="@+id/btn_sell_view_my_offers"
-					android:layout_width="match_parent"
-					android:layout_height="56dp"
-					android:layout_marginTop="40dp"
-					android:text="View My Offers"
+					android:id="@+id/btn_publish_sell_offer"
+					android:layout_width="0dp"
+					android:layout_height="54dp"
+					android:layout_marginStart="6dp"
+					android:layout_weight="1.6"
+					android:text="Publish"
+					android:textAllCaps="false"
 					android:textSize="16sp"
 					android:textStyle="bold"
-					app:backgroundTint="@color/colorP2pAccent"
-					app:cornerRadius="12dp"
-					app:elevation="0dp" />
-				<com.google.android.material.button.MaterialButton
-					android:id="@+id/btn_sell_create_another"
-					android:layout_width="match_parent"
-					android:layout_height="56dp"
-					android:layout_marginTop="12dp"
-					android:text="Create Another"
-					android:textSize="16sp"
-					android:textStyle="bold"
-					style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-					app:backgroundTint="@color/colorP2pSurfaceAlt"
-					app:cornerRadius="12dp"
-					app:strokeColor="@color/colorP2pBorder"
-					app:strokeWidth="1dp" />
+					app:backgroundTint="@color/p2pSell"
+					app:cornerRadius="14dp"
+					android:textColor="@color/p2pOnSell" />
 			</LinearLayout>
 		</LinearLayout>
-	</androidx.core.widget.NestedScrollView>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+		</LinearLayout>
+	</ScrollView>
+</LinearLayout>

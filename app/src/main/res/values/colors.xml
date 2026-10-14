@@ -100,4 +100,9 @@
     <!--Buttons drawn as cards (Home actions, Add); teal in the dark theme-->
     <color name="colorActionSurface">@color/colorSurface</color>
     <color name="colorActionStroke">@color/colorCardStroke</color>
+    <!-- P2P: buying is green, selling is red, everywhere (marketplace, orders, trades). -->
+    <color name="p2pBuy">@color/colorSuccess</color>
+    <color name="p2pOnBuy">#FFFFFF</color>
+    <color name="p2pSell">@color/colorError</color>
+    <color name="p2pOnSell">#FFFFFF</color>
 </resources>

@@ -48,6 +48,30 @@ public final class BankLogo {
         }
     }
 
+    /** The same logo as a Chip's icon (filter chips): initials at once, the picture when it arrives. */
+    public static void intoChip(com.google.android.material.chip.Chip chip, String bankName) {
+        if (chip == null) return;
+        BankDirectory.Bank b = BankDirectory.matchAnywhere(chip.getContext(), bankName);
+        if (b == null) {
+            b = new BankDirectory.Bank();
+            b.name = bankName == null || bankName.trim().isEmpty() ? "?" : bankName.trim();
+        }
+        Drawable fallback = initials(chip.getContext(), b, 64);
+        chip.setChipIcon(fallback);
+        Object src = !b.logoAsset.isEmpty() ? Uri.parse("file:///android_asset/" + b.logoAsset)
+                : (b.logoUrl.startsWith("https://") ? b.logoUrl : null);
+        if (src == null) return;
+        try {
+            Glide.with(chip.getContext()).load(src).apply(new RequestOptions().circleCrop())
+                    .into(new com.bumptech.glide.request.target.CustomTarget<Drawable>(64, 64) {
+                        @Override public void onResourceReady(Drawable d, com.bumptech.glide.request.transition.Transition<? super Drawable> t) { chip.setChipIcon(d); }
+                        @Override public void onLoadCleared(Drawable placeholder) { }
+                    });
+        } catch (IllegalArgumentException destroyed) {
+            // the screen was closing
+        }
+    }
+
     /** A round badge in the bank's colour with its initials, used offline and for banks without a logo. */
     public static Drawable initials(Context c, BankDirectory.Bank b, int sizePx) {
         Bitmap bmp = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);

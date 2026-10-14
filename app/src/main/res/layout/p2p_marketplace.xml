@@ -1,202 +1,309 @@
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!-- P2P market (P2pMarketplaceActivity): header, Buy / Sell, coin chips, filter pills, offers, New offer. -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:background="@color/colorP2pBg"
-	android:id="@+id/_main">
+	android:background="@color/colorBackground">
+
 	<LinearLayout
-		android:id="@+id/linear52"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:orientation="vertical">
+
+		<!-- Header -->
 		<LinearLayout
-			android:tag="bar_top"
-			android:id="@+id/linear57"
 			android:layout_width="match_parent"
-			android:background="@color/colorBackground"
+			android:layout_height="56dp"
 			android:gravity="center_vertical"
 			android:orientation="horizontal"
-			android:layout_height="?attr/actionBarSize">
-			<com.google.android.material.imageview.ShapeableImageView
-				android:id="@+id/imageview1"
-				android:layout_width="48dp"
-				android:layout_height="48dp"
-				android:padding="12dp"
+			android:paddingStart="8dp"
+			android:paddingEnd="8dp">
+			<ImageView
+				android:id="@+id/iv_p2p_back"
+				android:layout_width="44dp"
+				android:layout_height="44dp"
 				android:background="?attr/selectableItemBackgroundBorderless"
-				android:src="@drawable/ic_arrow_back"
 				android:contentDescription="Back"
-				android:scaleType="centerInside"
-				app:tint="@color/colorTextPrimary"
-				android:layout_marginStart="4dp" />
-			<com.google.android.material.card.MaterialCardView
-				android:id="@+id/cardview3"
-				android:layout_width="wrap_content"
+				android:padding="10dp"
+				android:src="@drawable/ic_nav_back"
+				app:tint="@color/colorTextPrimary" />
+			<TextView
+				android:layout_width="0dp"
 				android:layout_height="wrap_content"
-				app:cardBackgroundColor="@color/colorP2pAccent"
-				android:layout_marginStart="8dp"
-				android:layout_marginEnd="8dp"
-				app:cardCornerRadius="30dp"
-				app:cardElevation="0dp">
-				<com.google.android.material.card.MaterialCardView
-					android:id="@+id/cardview2"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_margin="1dp"
-					app:cardBackgroundColor="@color/colorSurfaceAlt"
-					app:cardCornerRadius="20dp"
-					app:cardElevation="0dp">
-					<LinearLayout
-						android:id="@+id/linear56"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:padding="1dp"
-						android:orientation="horizontal">
-						<com.google.android.material.button.MaterialButton
-							android:id="@+id/express_button"
-							android:layout_width="wrap_content"
-							android:layout_height="32dp"
-							android:gravity="center_horizontal|center_vertical"
-							android:text="EXPRESS"
-							android:textSize="10sp"
-							android:textStyle="bold"
-							style="@style/Widget.MaterialComponents.Button.TextButton"
-							android:insetTop="0dp"
-							android:insetBottom="0dp"
-							app:cornerRadius="30dp" />
-						<com.google.android.material.card.MaterialCardView
-							android:id="@+id/cardview_btn_buy"
-							android:layout_width="wrap_content"
-							android:layout_height="32dp"
-							app:cardBackgroundColor="@color/colorP2pAccent"
-							app:cardCornerRadius="30dp"
-							app:cardElevation="0dp">
-							<com.google.android.material.textview.MaterialTextView
-								android:id="@+id/textview1"
-								android:layout_width="60dp"
-								android:layout_height="match_parent"
-								android:gravity="center_horizontal|center_vertical"
-								android:text="BUY"
-								android:textSize="12sp"
-								android:textColor="@color/colorTextPrimary" />
-						</com.google.android.material.card.MaterialCardView>
-						<com.google.android.material.card.MaterialCardView
-							android:id="@+id/cardview_btn_sell"
-							android:layout_width="wrap_content"
-							android:layout_height="32dp"
-							app:cardBackgroundColor="@android:color/transparent"
-							app:cardCornerRadius="30dp"
-							app:cardElevation="0dp">
-							<com.google.android.material.textview.MaterialTextView
-								android:id="@+id/textview2"
-								android:layout_width="60dp"
-								android:layout_height="match_parent"
-								android:gravity="center_horizontal|center_vertical"
-								android:text="SELL"
-								android:textSize="10sp"
-								android:textStyle="bold"
-								android:textColor="@color/colorTextPrimary" />
-						</com.google.android.material.card.MaterialCardView>
-					</LinearLayout>
-				</com.google.android.material.card.MaterialCardView>
-			</com.google.android.material.card.MaterialCardView>
-			<com.google.android.material.card.MaterialCardView
-				android:id="@+id/cardview_choose_currency"
+				android:layout_marginStart="4dp"
+				android:layout_weight="1"
+				android:text="P2P"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="22sp"
+				android:textStyle="bold" />
+			<LinearLayout
+				android:id="@+id/btn_p2p_currency"
 				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="5dp"
-				android:layout_marginRight="5dp"
-				app:cardBackgroundColor="@color/whiteFaint10"
-				app:cardElevation="0dp"
-				app:cardCornerRadius="30dp"
-	app:strokeWidth="0dp">
-				<LinearLayout
-					android:id="@+id/linear58"
-					android:layout_width="match_parent"
+				android:layout_height="34dp"
+				android:background="@drawable/bg_p2p_filter_pill"
+				android:foreground="?attr/selectableItemBackground"
+				android:gravity="center_vertical"
+				android:orientation="horizontal"
+				android:paddingStart="12dp"
+				android:paddingEnd="6dp">
+				<TextView
+					android:id="@+id/tv_p2p_currency"
+					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:paddingLeft="10dp"
-					android:paddingTop="5dp"
-					android:paddingRight="10dp"
-					android:paddingBottom="5dp"
-					android:gravity="center_vertical"
-					android:orientation="horizontal">
-					<TextView
-						android:id="@+id/textview3"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:paddingLeft="5dp"
-						android:paddingTop="3dp"
-						android:paddingRight="3dp"
-						android:paddingBottom="3dp"
-						android:text="NGN"
-						android:textSize="10sp" />
-					<com.google.android.material.imageview.ShapeableImageView
-						android:id="@+id/imageview4"
-						android:layout_width="20dp"
-						android:layout_height="match_parent"
-						android:src="@drawable/icon_arrow_drop_down_round"
-						android:scaleType="centerInside" android:duplicateParentState="true" />
-				</LinearLayout>
-			</com.google.android.material.card.MaterialCardView>
-			<Space
-				android:id="@+id/space1"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				android:layout_weight="1" />
+					android:text="NGN"
+					android:textColor="@color/colorTextPrimary"
+					android:textSize="13sp"
+					android:textStyle="bold" />
+				<ImageView
+					android:layout_width="20dp"
+					android:layout_height="20dp"
+					android:importantForAccessibility="no"
+					android:src="@drawable/icon_arrow_drop_down_round"
+					app:tint="@color/colorTextSecondary" />
+			</LinearLayout>
+			<ImageView
+				android:id="@+id/iv_p2p_express"
+				android:layout_width="44dp"
+				android:layout_height="44dp"
+				android:layout_marginStart="4dp"
+				android:background="?attr/selectableItemBackgroundBorderless"
+				android:contentDescription="Express"
+				android:padding="10dp"
+				android:src="@drawable/icon_currency_exchange_twotone"
+				app:tint="@color/colorTextPrimary" />
 			<FrameLayout
-				android:layout_width="48dp"
-				android:layout_height="48dp">
-				<com.google.android.material.imageview.ShapeableImageView
-					android:id="@+id/imageview2"
-					android:layout_width="48dp"
-					android:layout_height="48dp"
-					android:padding="12dp"
-					android:background="?attr/selectableItemBackgroundBorderless"
-					android:src="@drawable/icon_history_twotone"
-					android:scaleType="centerInside" />
+				android:id="@+id/btn_p2p_orders"
+				android:layout_width="44dp"
+				android:layout_height="44dp"
+				android:background="?attr/selectableItemBackgroundBorderless"
+				android:contentDescription="My orders">
+				<ImageView
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					android:importantForAccessibility="no"
+					android:padding="10dp"
+					android:src="@drawable/ic_receipt"
+					app:tint="@color/colorTextPrimary" />
 				<TextView
 					android:id="@+id/tv_open_trades_dot"
 					android:layout_width="wrap_content"
-					android:layout_height="16dp"
-					android:minWidth="16dp"
+					android:layout_height="18dp"
 					android:layout_gravity="top|end"
-					android:layout_marginTop="6dp"
-					android:layout_marginEnd="6dp"
+					android:layout_marginTop="4dp"
+					android:background="@drawable/bg_p2p_badge_dot"
+					android:gravity="center"
+					android:minWidth="18dp"
 					android:paddingStart="4dp"
 					android:paddingEnd="4dp"
-					android:gravity="center"
-					android:background="@drawable/bg_unread_dot"
-					android:textColor="@android:color/white"
+					android:textColor="#FFFFFF"
 					android:textSize="10sp"
 					android:textStyle="bold"
 					android:visibility="gone" />
 			</FrameLayout>
-			<com.google.android.material.imageview.ShapeableImageView
-				android:id="@+id/imageview3"
-				android:layout_width="48dp"
-				android:layout_height="48dp"
-				android:padding="12dp"
+			<ImageView
+				android:id="@+id/iv_p2p_my_ads"
+				android:layout_width="44dp"
+				android:layout_height="44dp"
 				android:background="?attr/selectableItemBackgroundBorderless"
-				android:src="@drawable/icon_business_center_twotone"
-				android:scaleType="centerInside"
-				android:layout_marginEnd="4dp" />
+				android:contentDescription="My offers"
+				android:padding="10dp"
+				android:src="@drawable/icon_ads_click_outline"
+				app:tint="@color/colorTextPrimary" />
 		</LinearLayout>
-		<com.google.android.material.card.MaterialCardView
-			android:id="@+id/cardview1"
+
+		<!-- Buy / Sell -->
+		<LinearLayout
 			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:layout_margin="10dp"
-			app:cardBackgroundColor="@color/colorSurface"
-			app:cardCornerRadius="16dp"
-			app:cardElevation="0dp"
-			app:strokeColor="@color/colorP2pBorder"
-			app:strokeWidth="1dp">
-			<FrameLayout
-				android:id="@+id/linear_fragment"
-				android:layout_width="match_parent"
+			android:layout_height="48dp"
+			android:layout_marginStart="16dp"
+			android:layout_marginTop="4dp"
+			android:layout_marginEnd="16dp"
+			android:background="@drawable/bg_p2p_segment"
+			android:orientation="horizontal"
+			android:padding="4dp">
+			<TextView
+				android:id="@+id/tab_p2p_buy"
+				android:layout_width="0dp"
 				android:layout_height="match_parent"
-				android:orientation="vertical" />
-		</com.google.android.material.card.MaterialCardView>
+				android:layout_weight="1"
+				android:gravity="center"
+				android:text="Buy"
+				android:textSize="15sp"
+				android:textStyle="bold" />
+			<TextView
+				android:id="@+id/tab_p2p_sell"
+				android:layout_width="0dp"
+				android:layout_height="match_parent"
+				android:layout_weight="1"
+				android:gravity="center"
+				android:text="Sell"
+				android:textSize="15sp"
+				android:textStyle="bold" />
+		</LinearLayout>
+
+		<!-- Coins -->
+		<HorizontalScrollView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:clipToPadding="false"
+			android:paddingStart="16dp"
+			android:paddingEnd="16dp"
+			android:scrollbars="none">
+			<com.google.android.material.chip.ChipGroup
+				android:id="@+id/chips_p2p_coins"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				app:chipSpacingHorizontal="8dp"
+				app:selectionRequired="true"
+				app:singleLine="true"
+				app:singleSelection="true" />
+		</HorizontalScrollView>
+
+		<!-- Filters -->
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="6dp"
+			android:gravity="center_vertical"
+			android:orientation="horizontal"
+			android:paddingStart="16dp"
+			android:paddingEnd="16dp"
+			android:paddingBottom="8dp">
+			<LinearLayout
+				android:id="@+id/btn_p2p_filter_amount"
+				android:layout_width="wrap_content"
+				android:layout_height="34dp"
+				android:background="@drawable/bg_p2p_filter_pill"
+				android:foreground="?attr/selectableItemBackground"
+				android:gravity="center_vertical"
+				android:paddingStart="12dp"
+				android:paddingEnd="6dp">
+				<TextView
+					android:id="@+id/tv_p2p_filter_amount"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:maxWidth="120dp"
+					android:maxLines="1"
+					android:text="Amount"
+					android:textColor="@color/colorTextPrimary"
+					android:textSize="13sp" />
+				<ImageView
+					android:layout_width="20dp"
+					android:layout_height="20dp"
+					android:importantForAccessibility="no"
+					android:src="@drawable/icon_arrow_drop_down_round"
+					app:tint="@color/colorTextSecondary" />
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/btn_p2p_filter_payment"
+				android:layout_width="wrap_content"
+				android:layout_height="34dp"
+				android:layout_marginStart="8dp"
+				android:background="@drawable/bg_p2p_filter_pill"
+				android:foreground="?attr/selectableItemBackground"
+				android:gravity="center_vertical"
+				android:paddingStart="12dp"
+				android:paddingEnd="6dp">
+				<TextView
+					android:id="@+id/tv_p2p_filter_payment"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:maxWidth="140dp"
+					android:maxLines="1"
+					android:text="Payment"
+					android:textColor="@color/colorTextPrimary"
+					android:textSize="13sp" />
+				<ImageView
+					android:layout_width="20dp"
+					android:layout_height="20dp"
+					android:importantForAccessibility="no"
+					android:src="@drawable/icon_arrow_drop_down_round"
+					app:tint="@color/colorTextSecondary" />
+			</LinearLayout>
+			<Space
+				android:layout_width="0dp"
+				android:layout_height="1dp"
+				android:layout_weight="1" />
+			<FrameLayout
+				android:id="@+id/btn_p2p_filters"
+				android:layout_width="40dp"
+				android:layout_height="34dp"
+				android:background="@drawable/bg_p2p_filter_pill"
+				android:contentDescription="Filters"
+				android:foreground="?attr/selectableItemBackground">
+				<ImageView
+					android:layout_width="20dp"
+					android:layout_height="20dp"
+					android:layout_gravity="center"
+					android:importantForAccessibility="no"
+					android:src="@drawable/icon_filter_alt_twotone"
+					app:tint="@color/colorTextPrimary" />
+			</FrameLayout>
+		</LinearLayout>
+
+		<!-- Offers -->
+		<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+			android:id="@+id/refresh_p2p_offers"
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="1">
+			<FrameLayout
+				android:layout_width="match_parent"
+				android:layout_height="match_parent">
+				<androidx.recyclerview.widget.RecyclerView
+					android:id="@+id/rv_p2p_offers"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					android:clipToPadding="false"
+					android:paddingBottom="96dp" />
+				<LinearLayout
+					android:id="@+id/layout_p2p_empty"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					android:gravity="center"
+					android:orientation="vertical"
+					android:padding="32dp"
+					android:visibility="gone">
+					<ImageView
+						android:layout_width="56dp"
+						android:layout_height="56dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_search_off"
+						app:tint="@color/colorTextTertiary" />
+					<TextView
+						android:id="@+id/tv_p2p_empty_title"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="12dp"
+						android:gravity="center"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="16sp"
+						android:textStyle="bold" />
+					<com.google.android.material.button.MaterialButton
+						android:id="@+id/btn_p2p_empty_action"
+						style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="16dp"
+						android:textAllCaps="false"
+						app:cornerRadius="12dp" />
+				</LinearLayout>
+			</FrameLayout>
+		</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 	</LinearLayout>
+
+	<com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+		android:id="@+id/fab_p2p_new_offer"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="bottom|end"
+		android:layout_margin="20dp"
+		android:text="New offer"
+		android:textAllCaps="false"
+		android:textColor="@color/colorTextOnAccent"
+		app:backgroundTint="@color/colorAccent"
+		app:icon="@drawable/icon_add_circle_round"
+		app:iconTint="@color/colorTextOnAccent" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

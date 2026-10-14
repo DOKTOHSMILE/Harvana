@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A titled list sheet (currency, new offer): rows are item_p2p_sheet_row. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:background="@color/colorSurface"
+	android:orientation="vertical"
+	android:paddingBottom="16dp">
+	<TextView
+		android:id="@+id/tv_sheet_title"
+		android:layout_width="match_parent"
+		android:layout_height="56dp"
+		android:gravity="center_vertical"
+		android:paddingStart="20dp"
+		android:paddingEnd="20dp"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="18sp"
+		android:textStyle="bold" />
+	<androidx.core.widget.NestedScrollView
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+		<LinearLayout
+			android:id="@+id/ll_sheet_rows"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:paddingStart="12dp"
+			android:paddingEnd="12dp" />
+	</androidx.core.widget.NestedScrollView>
+</LinearLayout>

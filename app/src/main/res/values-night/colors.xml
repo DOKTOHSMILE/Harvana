@@ -96,4 +96,9 @@
     <!--Buttons drawn as cards (Home actions, Add): teal stays on buttons (owner, 12 Oct 2026)-->
     <color name="colorActionSurface">#06312E</color>
     <color name="colorActionStroke">#14544E</color>
+    <!-- P2P: buying is green, selling is red, everywhere (marketplace, orders, trades). -->
+    <color name="p2pBuy">@color/colorSuccess</color>
+    <color name="p2pOnBuy">#04261A</color>
+    <color name="p2pSell">@color/colorError</color>
+    <color name="p2pOnSell">#2B0706</color>
 </resources>

@@ -136,7 +136,9 @@ public final class P2pOfferWizard {
 
 		if (tvPriceCurrency != null) tvPriceCurrency.setText(currency);
 		if (tvDuration != null) tvDuration.setText("7 days");
-		if (tvLimit != null) tvLimit.setText(("Min 1 · Max — " + tk));
+		if (tvLimit != null) tvLimit.setText("Min " + BalanceFormatter.smartDecimal(minOrder[0]) + " " + tk);
+		if (tvPaymentWindow != null) tvPaymentWindow.setText(paymentWindowMinutes[0] + " min");
+		bindCoin(a, p, asset, sell);
 		if (tvError1 != null) tvError1.setVisibility(View.GONE);
 		if (tvError2 != null) tvError2.setVisibility(View.GONE);
 
@@ -147,10 +149,13 @@ public final class P2pOfferWizard {
 		// Binance/CMC-style feed would be dishonest). Both the fat-finger
 		// guardrail (Fixed mode) and the margin calculation (Floating
 		// mode) key off this same real number.
-		FiatValueHelper.getCheapestRate(currency, rate -> {
+		if (P2pAsset.isStable(asset)) {
+			View floatBtn = a.findViewById(id(a, "btn_" + p + "_price_floating"));
+			if (floatBtn != null) floatBtn.setEnabled(false);
+		} else FiatValueHelper.getCheapestRate(currency, rate -> {
 			indexPrice[0] = (rate != null && rate > 0) ? rate : -1;
 			_refreshPricingDisplay(floatingMode[0], etPrice, etMargin, tvPriceNote,
-				tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency);
+				tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency, asset);
 		});
 
 		if (togglePricingMode != null) {
@@ -161,7 +166,7 @@ public final class P2pOfferWizard {
 				if (groupPriceFixed != null) groupPriceFixed.setVisibility(nowFloating ? View.GONE : View.VISIBLE);
 				if (groupPriceFloating != null) groupPriceFloating.setVisibility(nowFloating ? View.VISIBLE : View.GONE);
 				_refreshPricingDisplay(floatingMode[0], etPrice, etMargin, tvPriceNote,
-					tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency);
+					tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency, asset);
 			});
 		}
 
@@ -209,7 +214,7 @@ public final class P2pOfferWizard {
 						BalanceFormatter.smartDecimal(minOrder[0]), BalanceFormatter.smartDecimal(maxOrder[0])));
 				}
 				_refreshPricingDisplay(floatingMode[0], etPrice, etMargin, tvPriceNote,
-					tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency);
+					tvCalculatedPrice, priceNoteDefault, indexPrice[0], currency, asset);
 			}
 		};
 		if (etAmount != null) etAmount.addTextChangedListener(totals);
@@ -331,6 +336,24 @@ public final class P2pOfferWizard {
 		});
 	}
 
+	/** The coin row: logo, ticker and name; tapping it picks another coin and reopens the screen for it. */
+	private static void bindCoin(AppCompatActivity a, String p, String asset, boolean sell) {
+		String tk = P2pAsset.ticker(asset);
+		P2pOffers.coinIcon(a.findViewById(id(a, "iv_" + p + "_coin")), asset);
+		setText(a, "tv_" + p + "_coin", tk);
+		setText(a, "tv_" + p + "_coin_name", P2pAsset.isStable(asset) ? P2pAsset.name(asset) : "Harvana Protocol");
+		setText(a, "tv_" + p + "_amount_unit", tk);
+		setText(a, "tv_" + p + "_price_title", "Price per 1 " + tk);
+		for (String b : new String[]{"btn_" + p + "_deposit_harv_1", "btn_" + p + "_deposit_harv_2"}) {
+			View v = a.findViewById(id(a, b));
+			if (v instanceof TextView) ((TextView) v).setText("Deposit " + tk);
+		}
+		View row = a.findViewById(id(a, "row_" + p + "_coin"));
+		if (row != null) row.setOnClickListener(v -> P2pCoinSheet.show(a, () -> {
+			if (!P2pAsset.get().equals(asset)) a.recreate();
+		}));
+	}
+
 	private static int id(AppCompatActivity a, String name) {
 		return a.getResources().getIdentifier(name, "id", a.getPackageName());
 	}
@@ -368,7 +391,7 @@ public final class P2pOfferWizard {
 	// live preview of the calculated price from the current margin.
 	private static void _refreshPricingDisplay(boolean floating, EditText etPrice, EditText etMargin,
 	                                            TextView tvNote, TextView tvCalculatedPrice,
-	                                            String noteDefault, double indexPrice, String currency) {
+	                                            String noteDefault, double indexPrice, String currency, String asset) {
 		if (!floating) {
 			if (tvNote == null) return;
 			double price = parse(etPrice);
@@ -376,8 +399,8 @@ public final class P2pOfferWizard {
 				double diffPct = Math.abs(price - indexPrice) / indexPrice * 100.0;
 				if (diffPct > 10) {
 					tvNote.setText(String.format(Locale.US,
-						"Your price is significantly different from the market rate of %s.",
-						P2pMoney.perHarv(indexPrice, currency)));
+						"Market rate %s",
+						P2pMoney.perUnit(indexPrice, currency, asset)));
 					tvNote.setTextColor(tvNote.getResources().getColor(R.color.colorWarning)); // colorWarning
 					return;
 				}
@@ -388,7 +411,7 @@ public final class P2pOfferWizard {
 		} else {
 			if (tvCalculatedPrice == null) return;
 			if (indexPrice <= 0) {
-				tvCalculatedPrice.setText("No market rate available yet — at least one open SELL listing is needed to price against.");
+				tvCalculatedPrice.setText("No market rate yet");
 				return;
 			}
 			double margin = parseMargin(etMargin);
@@ -397,8 +420,8 @@ public final class P2pOfferWizard {
 				tvCalculatedPrice.setText("Margin must be between -20% and +20%.");
 				tvCalculatedPrice.setTextColor(tvCalculatedPrice.getResources().getColor(R.color.colorError)); // colorError
 			} else {
-				tvCalculatedPrice.setText(String.format(Locale.US, "Current price: %s (market %s)",
-					P2pMoney.perHarv(calculated, currency), P2pMoney.perHarv(indexPrice, currency)));
+				tvCalculatedPrice.setText(String.format(Locale.US, "%s · market %s",
+					P2pMoney.perUnit(calculated, currency, asset), P2pMoney.perUnit(indexPrice, currency, asset)));
 				tvCalculatedPrice.setTextColor(tvCalculatedPrice.getContext().getResources().getColor(R.color.colorAccent));
 			}
 		}
@@ -439,9 +462,7 @@ public final class P2pOfferWizard {
 		if (p2 != null) p2.setVisibility(step == 2 ? View.VISIBLE : View.GONE);
 		if (p3 != null) p3.setVisibility(step == 3 ? View.VISIBLE : View.GONE);
 		if (label != null) {
-			if (step == 1) label.setText("Step 1 of 3 · Amount & Price");
-			else if (step == 2) label.setText(sell ? "Step 2 of 3 · Review sell offer" : "Step 2 of 3 · Review buy offer");
-			else label.setText("Step 3 of 3 · Published");
+			label.setText(step == 1 ? "1 / 2 · Details" : "2 / 2 · Review");
 		}
 	}
 
@@ -490,12 +511,15 @@ public final class P2pOfferWizard {
 	                               double minOrder, double maxOrder, long hours, String durationLabel, String currency,
 	                               List<PaymentMethod> methods) {
 		String p = sell ? "sell" : "buy";
-		setText(a, "tv_" + p + "_review_amount", BalanceFormatter.smart(amount));
+		String asset = P2pAsset.get(), tk = P2pAsset.ticker(asset);
+		P2pOffers.coinIcon(a.findViewById(id(a, "iv_" + p + "_review_coin")), asset);
+		setText(a, "tv_" + p + "_review_title", (sell ? "Sell " : "Buy ") + tk);
+		setText(a, "tv_" + p + "_review_amount", BalanceFormatter.smartDecimal(amount) + " " + tk);
 		setText(a, "tv_" + p + "_review_unit_price", P2pMoney.perUnit(price, currency, P2pAsset.get()));
 		setText(a, "tv_" + p + "_review_total_price", P2pMoney.fiat(amount * price, currency));
-		setText(a, "tv_" + p + "_review_fee", "Set by the network at match time");
+		setText(a, "tv_" + p + "_review_fee", "0.5% per trade");
 		setText(a, "tv_" + p + "_review_trade_limit",
-			String.format(Locale.US, "Min %s · Max %s", BalanceFormatter.smart(minOrder), BalanceFormatter.smart(maxOrder)));
+			String.format(Locale.US, "%s – %s %s", BalanceFormatter.smartDecimal(minOrder), BalanceFormatter.smartDecimal(maxOrder), tk));
 		setText(a, "tv_" + p + "_review_duration", durationLabel);
 		LinearLayout pay = a.findViewById(id(a, "layout_" + p + "_review_payment_methods"));
 		if (pay != null) {

@@ -182,37 +182,7 @@ public class P2pMarketplaceActivity extends AppCompatActivity {
 		}
 	}
 
-	private void buildCoinChips() {
-		coinChips.setOnCheckedChangeListener(null);
-		coinChips.removeAllViews();
-		String current = P2pAsset.get();
-		for (String code : P2pAsset.available()) {
-			Chip c = new Chip(this);
-			c.setId(View.generateViewId());
-			c.setText(P2pAsset.ticker(code));
-			c.setTag(code);
-			c.setCheckable(true);
-			c.setCheckedIconVisible(false);
-			c.setChipIconVisible(true);
-			c.setChipIconSize(dp(18));
-			c.setChipIcon(code.equals(P2pAsset.HARV) ? ContextCompat.getDrawable(this, R.drawable.ic_coin_harv)
-				: com.harvana.app.husd.StableIcon.drawable(this, code));
-			c.setChipBackgroundColor(new ColorStateList(
-				new int[][]{{android.R.attr.state_checked}, {}},
-				new int[]{ContextCompat.getColor(this, R.color.colorAccentSoft), ContextCompat.getColor(this, R.color.colorSurface)}));
-			c.setChipStrokeWidth(dp(1));
-			c.setChipStrokeColor(new ColorStateList(
-				new int[][]{{android.R.attr.state_checked}, {}},
-				new int[]{ContextCompat.getColor(this, R.color.colorAccent), ContextCompat.getColor(this, R.color.colorCardStroke)}));
-			c.setTextColor(ContextCompat.getColor(this, R.color.colorTextPrimary));
-			coinChips.addView(c);
-			if (code.equals(current)) c.setChecked(true);
-		}
-		coinChips.setOnCheckedChangeListener((group, id) -> {
-			Chip c = group.findViewById(id);
-			if (c != null) P2pAsset.set(String.valueOf(c.getTag()));   // the asset listener reloads
-		});
-	}
+	private void buildCoinChips() { com.harvana.app.p2p.P2pCoinChips.build(coinChips); }
 
 	// ── Loading and filtering ────────────────────────────────────────────
 

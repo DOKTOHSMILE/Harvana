@@ -1,741 +1,226 @@
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Express (P2pExpressActivity): side, coin, amount, the best offer for it, then the take-offer screen prefilled. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:id="@+id/_coordinator"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent">
-	<com.google.android.material.appbar.AppBarLayout
-		android:id="@+id/_app_bar"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground"
+	android:orientation="vertical">
+	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:theme="@style/AppTheme.AppBarOverlay"
-		app:elevation="0dp"
-		android:stateListAnimator="@null">
-		<com.google.android.material.appbar.MaterialToolbar
-			android:id="@+id/_toolbar"
-			android:layout_width="match_parent"
-			android:layout_height="?attr/actionBarSize"
-			android:background="?attr/appBarColor"
-			app:popupTheme="@style/AppTheme.PopupOverlay" />
-	</com.google.android.material.appbar.AppBarLayout>
-	<androidx.core.widget.NestedScrollView
+		android:layout_height="56dp"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:paddingStart="8dp"
+		android:paddingEnd="16dp">
+		<ImageView
+			android:id="@+id/iv_express_back"
+			android:layout_width="44dp"
+			android:layout_height="44dp"
+			android:background="?attr/selectableItemBackgroundBorderless"
+			android:contentDescription="Back"
+			android:padding="10dp"
+			android:src="@drawable/ic_nav_back"
+			app:tint="@color/colorTextPrimary" />
+		<TextView
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="4dp"
+			android:layout_weight="1"
+			android:text="Express"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="20sp"
+			android:textStyle="bold" />
+	</LinearLayout>
+	<ScrollView
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:background="@color/colorP2pBg"
-		android:fillViewport="true"
-		android:clipToPadding="false"
-		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+		android:layout_height="0dp"
+		android:layout_weight="1">
 		<LinearLayout
-			android:id="@+id/express_root"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:paddingTop="16dp"
-			android:paddingBottom="35dp"
 			android:orientation="vertical"
-			android:paddingStart="18dp"
-			android:paddingEnd="18dp">
-			<com.google.android.material.card.MaterialCardView
-				android:id="@+id/card_express_membership"
+			android:paddingStart="16dp"
+			android:paddingEnd="16dp"
+			android:paddingBottom="16dp">
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="48dp"
+				android:background="@drawable/bg_p2p_segment"
+				android:orientation="horizontal"
+				android:padding="4dp">
+				<TextView
+					android:id="@+id/tab_express_buy"
+					android:layout_width="0dp"
+					android:layout_height="match_parent"
+					android:layout_weight="1"
+					android:gravity="center"
+					android:text="Buy"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+				<TextView
+					android:id="@+id/tab_express_sell"
+					android:layout_width="0dp"
+					android:layout_height="match_parent"
+					android:layout_weight="1"
+					android:gravity="center"
+					android:text="Sell"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+			</LinearLayout>
+			<HorizontalScrollView
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="16dp"
+				android:layout_marginTop="10dp"
+				android:scrollbars="none">
+				<com.google.android.material.chip.ChipGroup
+					android:id="@+id/chips_express_coins"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					app:chipSpacingHorizontal="8dp"
+					app:selectionRequired="true"
+					app:singleLine="true"
+					app:singleSelection="true" />
+			</HorizontalScrollView>
+			<com.google.android.material.card.MaterialCardView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="12dp"
 				app:cardBackgroundColor="@color/colorSurface"
 				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
-				app:strokeColor="@color/colorAmber"
+				app:strokeColor="@color/colorCardStroke"
 				app:strokeWidth="1dp">
 				<LinearLayout
-					android:id="@+id/linear380"
-					android:layout_width="match_parent"
-					android:layout_height="130dp"
-					android:padding="17dp"
-					android:background="@drawable/golden_bkg"
-					android:gravity="center_horizontal|center_vertical"
-					android:orientation="vertical">
-					<LinearLayout
-						android:id="@+id/linear381"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:gravity="center_vertical"
-						android:orientation="horizontal">
-						<LinearLayout
-							android:id="@+id/linear382"
-							android:layout_width="0dp"
-							android:layout_height="wrap_content"
-							android:orientation="vertical"
-							android:layout_weight="1">
-							<TextView
-								android:id="@+id/tv_express_tier"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="PREMIUM TRADER"
-								android:textSize="10sp"
-								android:textStyle="bold" />
-							<TextView
-								android:id="@+id/tv_express_tier_description"
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content"
-								android:layout_marginTop="4dp"
-								android:text="Express access is available to eligible high-tier P2P traders."
-								android:textSize="10sp" />
-						</LinearLayout>
-						<TextView
-							android:id="@+id/tv_express_tier_level"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="—"
-							android:textSize="11sp"
-							android:textStyle="bold" />
-					</LinearLayout>
-					<LinearLayout
-						android:id="@+id/linear383"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="15dp"
-						android:orientation="horizontal">
-						<LinearLayout
-							android:id="@+id/linear384"
-							android:layout_width="0dp"
-							android:layout_height="wrap_content"
-							android:orientation="vertical"
-							android:layout_weight="1">
-							<TextView
-								android:id="@+id/tv_express_trust"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="—"
-								android:textSize="16sp"
-								android:textStyle="bold" />
-							<TextView
-								android:id="@+id/textview228"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_marginTop="2dp"
-								android:text="Trust score"
-								android:textSize="10sp" />
-						</LinearLayout>
-						<LinearLayout
-							android:id="@+id/linear385"
-							android:layout_width="0dp"
-							android:layout_height="wrap_content"
-							android:orientation="vertical"
-							android:layout_weight="1">
-							<TextView
-								android:id="@+id/tv_express_completed"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="1,248"
-								android:textSize="16sp"
-								android:textStyle="bold" />
-							<TextView
-								android:id="@+id/textview229"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_marginTop="2dp"
-								android:text="Trades completed"
-								android:textSize="10sp" />
-						</LinearLayout>
-						<LinearLayout
-							android:id="@+id/linear386"
-							android:layout_width="0dp"
-							android:layout_height="wrap_content"
-							android:orientation="vertical"
-							android:layout_weight="1">
-							<TextView
-								android:id="@+id/tv_express_limit"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="₦5M"
-								android:textSize="16sp"
-								android:textStyle="bold" />
-							<TextView
-								android:id="@+id/textview230"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_marginTop="2dp"
-								android:text="Express limit"
-								android:textSize="10sp" />
-						</LinearLayout>
-					</LinearLayout>
-				</LinearLayout>
-			</com.google.android.material.card.MaterialCardView>
-			<LinearLayout
-				android:id="@+id/express_trade_selector"
-				android:layout_width="match_parent"
-				android:layout_height="48dp"
-				android:layout_marginTop="18dp"
-				android:padding="4dp"
-				android:background="@color/colorP2pSurfaceAlt"
-				android:orientation="horizontal">
-				<TextView
-					android:id="@+id/express_buy_tab"
-					android:layout_width="0dp"
-					android:layout_height="match_parent"
-					android:background="@color/colorP2pSurface"
-					android:gravity="center_horizontal|center_vertical"
-					android:text="Buy HARV"
-					android:textSize="12sp"
-					android:textStyle="bold"
-					android:layout_weight="1" />
-				<TextView
-					android:id="@+id/express_sell_tab"
-					android:layout_width="0dp"
-					android:layout_height="match_parent"
-					android:gravity="center_horizontal|center_vertical"
-					android:text="Sell HARV"
-					android:textSize="12sp"
-					android:layout_weight="1" />
-			</LinearLayout>
-			<com.google.android.material.card.MaterialCardView
-				android:id="@+id/card_express_match"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="14dp"
-				app:cardBackgroundColor="@color/colorSurface"
-				app:cardCornerRadius="20dp"
-				app:cardElevation="0dp"
-				app:strokeColor="@color/colorP2pBorder"
-				app:strokeWidth="1dp">
-				<LinearLayout
-					android:id="@+id/linear387"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:padding="18dp"
-					android:orientation="vertical">
-					<TextView
-						android:id="@+id/tv_express_action_title"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="Buy HARV instantly"
-						android:textSize="18sp"
-						android:textStyle="bold" />
-					<TextView
-						android:id="@+id/tv_express_action_description"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="4dp"
-						android:text="Enter your target amount and Express will search eligible premium traders for a suitable match."
-						android:textSize="11sp"
-						android:lineSpacingExtra="2dp" />
-					<TextView
-						android:id="@+id/textview231"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="19dp"
-						android:text="HARV amount"
-						android:textSize="10sp" />
+					android:orientation="vertical"
+					android:padding="14dp">
 					<LinearLayout
-						android:id="@+id/layout_express_amount"
 						android:layout_width="match_parent"
-						android:layout_height="58dp"
-						android:layout_marginTop="6dp"
-						android:background="@color/colorP2pSurfaceAlt"
-						android:gravity="center_vertical"
-						android:orientation="horizontal"
-						android:paddingStart="15dp"
-						android:paddingEnd="15dp">
+						android:layout_height="wrap_content"
+						android:orientation="horizontal">
 						<TextView
-							android:id="@+id/textview232"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="HARV"
-							android:textSize="12sp"
-							android:textStyle="bold" />
-						<com.google.android.material.textfield.TextInputEditText
-							android:id="@+id/et_express_amount"
+							android:id="@+id/tv_express_amount_label"
 							android:layout_width="0dp"
-							android:layout_height="match_parent"
-							android:background="@android:color/transparent"
-							android:textSize="19sp"
-							android:textStyle="bold"
-							android:hint="0.00"
-							android:inputType="numberDecimal"
+							android:layout_height="wrap_content"
 							android:layout_weight="1"
-							android:gravity="center_vertical|end"
-							android:layout_marginStart="10dp" />
-					</LinearLayout>
-					<HorizontalScrollView
-						android:id="@+id/hscroll5"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="9dp"
-						android:scrollbars="none">
-						<LinearLayout
-							android:id="@+id/linear388"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="13sp" />
+						<TextView
+							android:id="@+id/tv_express_balance"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:orientation="horizontal">
-							<TextView
-								android:id="@+id/express_quick_1"
-								android:layout_width="wrap_content"
-								android:layout_height="32dp"
-								android:background="@color/colorP2pSurfaceAlt"
-								android:gravity="center_horizontal|center_vertical"
-								android:text="10 HARV"
-								android:textSize="10sp"
-								android:layout_weight="1"
-								android:paddingStart="13dp"
-								android:paddingEnd="13dp" />
-							<TextView
-								android:id="@+id/express_quick_2"
-								android:layout_width="wrap_content"
-								android:layout_height="32dp"
-								android:background="@color/colorP2pSurfaceAlt"
-								android:gravity="center_horizontal|center_vertical"
-								android:text="25 HARV"
-								android:textSize="10sp"
-								android:layout_weight="1"
-								android:layout_marginStart="6dp"
-								android:paddingStart="13dp"
-								android:paddingEnd="13dp" />
-							<TextView
-								android:id="@+id/express_quick_3"
-								android:layout_width="wrap_content"
-								android:layout_height="32dp"
-								android:background="@color/colorP2pSurfaceAlt"
-								android:gravity="center_horizontal|center_vertical"
-								android:text="50 HARV"
-								android:textSize="10sp"
-								android:layout_weight="1"
-								android:layout_marginStart="6dp"
-								android:paddingStart="13dp"
-								android:paddingEnd="13dp" />
-							<TextView
-								android:id="@+id/express_quick_4"
-								android:layout_width="wrap_content"
-								android:layout_height="32dp"
-								android:background="@color/colorP2pSurfaceAlt"
-								android:gravity="center_horizontal|center_vertical"
-								android:text="100 HARV"
-								android:textSize="10sp"
-								android:layout_weight="1"
-								android:layout_marginStart="6dp"
-								android:paddingStart="13dp"
-								android:paddingEnd="13dp" />
-						</LinearLayout>
-					</HorizontalScrollView>
-					<TextView
-						android:id="@+id/textview233"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="17dp"
-						android:text="Payment method"
-						android:textSize="10sp" />
+							android:textColor="@color/colorTextTertiary"
+							android:textSize="12sp" />
+					</LinearLayout>
 					<LinearLayout
-						android:id="@+id/layout_express_payment_method"
 						android:layout_width="match_parent"
-						android:layout_height="52dp"
+						android:layout_height="60dp"
 						android:layout_marginTop="6dp"
-						android:background="@color/colorP2pSurfaceAlt"
+						android:background="@drawable/bg_p2p_segment"
 						android:gravity="center_vertical"
 						android:orientation="horizontal"
 						android:paddingStart="14dp"
 						android:paddingEnd="14dp">
-						<ImageView
-							android:id="@+id/iv_express_bank_logo"
-							android:layout_width="32dp"
-							android:layout_height="32dp"
-							android:layout_marginEnd="10dp"
-							android:importantForAccessibility="no"
-							android:visibility="gone" />
-						<TextView
-							android:id="@+id/tv_express_payment_method"
+						<EditText
+							android:id="@+id/et_express_amount"
 							android:layout_width="0dp"
-							android:layout_height="wrap_content"
-							android:text="Bank Transfer"
-							android:textSize="12sp"
-							android:textStyle="bold"
-							android:layout_weight="1" />
-						<TextView
-							android:id="@+id/tv_express_payment_arrow"
-							android:layout_width="35dp"
-							android:layout_height="35dp"
-							android:gravity="center_horizontal|center_vertical"
-							android:text="&gt;"
-							android:textSize="22sp" />
-					</LinearLayout>
-					<com.google.android.material.card.MaterialCardView
-						android:id="@+id/card_express_quote"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="15dp"
-						app:cardBackgroundColor="@color/colorSurfaceAlt"
-						app:cardCornerRadius="16dp"
-						app:cardElevation="0dp"
-						app:strokeColor="@color/colorP2pBorder"
-						app:strokeWidth="1dp">
-						<LinearLayout
-							android:id="@+id/linear389"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:padding="14dp"
-							android:orientation="vertical">
-							<LinearLayout
-								android:id="@+id/linear390"
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content"
-								android:orientation="horizontal" android:minHeight="50dp" android:gravity="center_vertical">
-								<TextView
-									android:id="@+id/textview234"
-									android:layout_width="0dp"
-									android:layout_height="wrap_content"
-									android:text="Indicative rate"
-									android:textSize="10sp"
-									android:layout_weight="1" />
-								<TextView
-									android:id="@+id/tv_express_rate"
-									android:layout_width="wrap_content"
-									android:layout_height="wrap_content"
-									android:text="₦1,250 / HARV"
-									android:textSize="11sp"
-									android:textStyle="bold" />
-							</LinearLayout>
-							<LinearLayout
-								android:id="@+id/linear391"
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content"
-								android:layout_marginTop="9dp"
-								android:orientation="horizontal" android:minHeight="50dp" android:gravity="center_vertical">
-								<TextView
-									android:id="@+id/textview235"
-									android:layout_width="0dp"
-									android:layout_height="wrap_content"
-									android:text="Estimated fiat"
-									android:textSize="10sp"
-									android:layout_weight="1" />
-								<TextView
-									android:id="@+id/tv_express_fiat"
-									android:layout_width="wrap_content"
-									android:layout_height="wrap_content"
-									android:text="₦0"
-									android:textSize="11sp"
-									android:textStyle="bold" />
-							</LinearLayout>
-							<LinearLayout
-								android:id="@+id/linear392"
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content"
-								android:layout_marginTop="9dp"
-								android:orientation="horizontal" android:minHeight="50dp" android:gravity="center_vertical">
-								<TextView
-									android:id="@+id/textview236"
-									android:layout_width="0dp"
-									android:layout_height="wrap_content"
-									android:text="Maker / Express fee"
-									android:textSize="10sp"
-									android:layout_weight="1" />
-								<TextView
-									android:id="@+id/tv_express_fee"
-									android:layout_width="wrap_content"
-									android:layout_height="wrap_content"
-									android:text="Calculated at match"
-									android:textSize="10sp" />
-							</LinearLayout>
-						</LinearLayout>
-					</com.google.android.material.card.MaterialCardView>
-					<LinearLayout
-						android:id="@+id/layout_express_match_status"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="14dp"
-						android:padding="12dp"
-						android:background="@color/colorP2pSurfaceAlt"
-						android:gravity="center_vertical"
-						android:orientation="horizontal">
-						<TextView
-							android:id="@+id/tv_express_match_indicator"
-							android:layout_width="10dp"
-							android:layout_height="10dp"
-							android:background="@color/colorP2pAccent"
-							android:textSize="12sp" />
-						<LinearLayout
-							android:id="@+id/linear393"
-							android:layout_width="0dp"
-							android:layout_height="wrap_content"
-							android:orientation="vertical"
+							android:layout_height="match_parent"
 							android:layout_weight="1"
-							android:layout_marginStart="9dp">
-							<TextView
-								android:id="@+id/tv_express_match_title"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="Ready for Express matching"
-								android:textSize="11sp"
-								android:textStyle="bold" />
-							<TextView
-								android:id="@+id/tv_express_match_description"
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content"
-								android:layout_marginTop="2dp"
-								android:text="Your request will be matched against eligible available liquidity."
-								android:textSize="10sp" />
-						</LinearLayout>
+							android:background="@null"
+							android:hint="0.00"
+							android:importantForAutofill="no"
+							android:inputType="numberDecimal"
+							android:maxLines="1"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="24sp"
+							android:textStyle="bold" />
+						<TextView
+							android:id="@+id/tv_express_unit"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="15sp"
+							android:textStyle="bold" />
 					</LinearLayout>
-					<com.google.android.material.button.MaterialButton
-						android:id="@+id/btn_express_find_match"
+					<LinearLayout
+						android:id="@+id/ll_express_presets"
 						android:layout_width="match_parent"
-						android:layout_height="52dp"
-						android:layout_marginTop="16dp"
-						android:gravity="center_horizontal|center_vertical"
-						android:text="Find Express Match"
-						android:textSize="12sp"
-						android:textStyle="bold"
-	app:backgroundTint="@color/colorP2pAccent"
-	android:textAllCaps="false"/>
+						android:layout_height="wrap_content"
+						android:layout_marginTop="10dp"
+						android:orientation="horizontal" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
+
 			<TextView
-				android:id="@+id/textview237"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="21dp"
-				android:text="Express advantages"
-				android:textSize="15sp"
-				android:textStyle="bold" />
-			<LinearLayout
-				android:id="@+id/linear394"
+				android:id="@+id/tv_express_state"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="10dp"
-				android:orientation="horizontal">
-				<com.google.android.material.card.MaterialCardView
-					android:id="@+id/card_express_fast"
-					android:layout_width="0dp"
-					android:layout_height="wrap_content"
-					app:cardBackgroundColor="@color/colorSurface"
-					android:layout_weight="1"
-					android:layout_marginEnd="5dp"
-					app:cardCornerRadius="16dp"
-					app:cardElevation="0dp"
-					app:strokeColor="@color/colorP2pBorder"
-					app:strokeWidth="1dp">
-					<LinearLayout
-						android:id="@+id/linear395"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:padding="13dp"
-						android:orientation="vertical">
-						<TextView
-							android:id="@+id/textview238"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="FAST"
-							android:textSize="10sp"
-							android:textStyle="bold" />
-						<TextView
-							android:id="@+id/textview239"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:layout_marginTop="6dp"
-							android:text="Skip manual listing search and request a direct match."
-							android:textSize="10sp"
-							android:lineSpacingExtra="2dp" />
-					</LinearLayout>
-				</com.google.android.material.card.MaterialCardView>
-				<com.google.android.material.card.MaterialCardView
-					android:id="@+id/card_express_premium"
-					android:layout_width="0dp"
-					android:layout_height="wrap_content"
-					app:cardBackgroundColor="@color/colorSurface"
-					android:layout_weight="1"
-					android:layout_marginStart="5dp"
-					app:cardCornerRadius="16dp"
-					app:cardElevation="0dp"
-					app:strokeColor="@color/colorP2pBorder"
-					app:strokeWidth="1dp">
-					<LinearLayout
-						android:id="@+id/linear396"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:padding="13dp"
-						android:orientation="vertical">
-						<TextView
-							android:id="@+id/textview240"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="PREMIUM"
-							android:textSize="10sp"
-							android:textStyle="bold" />
-						<TextView
-							android:id="@+id/textview241"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:layout_marginTop="6dp"
-							android:text="Access eligible high-tier counterparties and liquidity."
-							android:textSize="10sp"
-							android:lineSpacingExtra="2dp" />
-					</LinearLayout>
-				</com.google.android.material.card.MaterialCardView>
-			</LinearLayout>
+				android:layout_marginTop="16dp"
+				android:gravity="center"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13sp" />
 			<com.google.android.material.card.MaterialCardView
-				android:id="@+id/card_express_liquidity"
+				android:id="@+id/card_express_match"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="12dp"
+				android:layout_marginTop="8dp"
+				android:visibility="gone"
 				app:cardBackgroundColor="@color/colorSurface"
 				app:cardCornerRadius="16dp"
 				app:cardElevation="0dp"
-				app:strokeColor="@color/colorP2pBorder"
+				app:strokeColor="@color/colorAccent"
 				app:strokeWidth="1dp">
 				<LinearLayout
-					android:id="@+id/linear397"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:padding="15dp"
-					android:orientation="vertical">
-					<LinearLayout
-						android:id="@+id/linear398"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:orientation="horizontal" android:minHeight="50dp" android:gravity="center_vertical">
-						<TextView
-							android:id="@+id/textview242"
-							android:layout_width="0dp"
-							android:layout_height="wrap_content"
-							android:text="Express liquidity"
-							android:textSize="13sp"
-							android:textStyle="bold"
-							android:layout_weight="1" />
-						<TextView
-							android:id="@+id/tv_express_liquidity_status"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="LIVE"
-							android:textSize="10sp"
-							android:textStyle="bold" />
-					</LinearLayout>
-					<LinearLayout
-						android:id="@+id/linear399"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="13dp"
-						android:orientation="horizontal">
-						<LinearLayout
-							android:id="@+id/linear400"
-							android:layout_width="0dp"
-							android:layout_height="wrap_content"
-							android:orientation="vertical"
-							android:layout_weight="1">
-							<TextView
-								android:id="@+id/tv_express_available_harv"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="18,420 HARV"
-								android:textSize="14sp"
-								android:textStyle="bold" />
-							<TextView
-								android:id="@+id/textview243"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_marginTop="2dp"
-								android:text="Available liquidity"
-								android:textSize="10sp" />
-						</LinearLayout>
-						<LinearLayout
-							android:id="@+id/linear401"
-							android:layout_width="0dp"
-							android:layout_height="wrap_content"
-							android:orientation="vertical"
-							android:layout_weight="1">
-							<TextView
-								android:id="@+id/tv_express_counterparties"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="24"
-								android:textSize="14sp"
-								android:textStyle="bold" />
-							<TextView
-								android:id="@+id/textview244"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_marginTop="2dp"
-								android:text="Eligible traders"
-								android:textSize="10sp" />
-						</LinearLayout>
-						<LinearLayout
-							android:id="@+id/linear402"
-							android:layout_width="0dp"
-							android:layout_height="wrap_content"
-							android:orientation="vertical"
-							android:layout_weight="1">
-							<TextView
-								android:id="@+id/tv_express_average_time"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="Less than 1 min"
-								android:textSize="14sp"
-								android:textStyle="bold" />
-							<TextView
-								android:id="@+id/textview245"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_marginTop="2dp"
-								android:text="Avg. match time"
-								android:textSize="10sp" />
-						</LinearLayout>
-					</LinearLayout>
-				</LinearLayout>
-			</com.google.android.material.card.MaterialCardView>
-			<com.google.android.material.card.MaterialCardView
-				android:id="@+id/card_express_security"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="12dp"
-				app:cardBackgroundColor="@color/colorSurface"
-				app:cardCornerRadius="16dp"
-				app:cardElevation="0dp"
-				app:strokeColor="@color/colorP2pBorder"
-				app:strokeWidth="1dp">
-				<LinearLayout
-					android:id="@+id/linear403"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:padding="15dp"
-					android:orientation="horizontal">
+					android:orientation="vertical"
+					android:padding="14dp">
 					<TextView
-						android:id="@+id/textview246"
-						android:layout_width="34dp"
-						android:layout_height="34dp"
-						android:background="@color/colorP2pSurfaceAlt"
-						android:gravity="center_horizontal|center_vertical"
-						android:text="OK"
-						android:textSize="10sp"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Best offer"
+						android:textColor="@color/colorAccent"
+						android:textSize="12sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/tv_express_receive"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="6dp"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="24sp"
 						android:textStyle="bold" />
 					<LinearLayout
-						android:id="@+id/linear404"
-						android:layout_width="0dp"
+						android:id="@+id/ll_express_match_rows"
+						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:orientation="vertical"
-						android:layout_weight="1"
-						android:layout_marginStart="10dp">
-						<TextView
-							android:id="@+id/textview247"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="Protected P2P execution"
-							android:textSize="12sp"
-							android:textStyle="bold" />
-						<TextView
-							android:id="@+id/tv_express_security"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:layout_marginTop="4dp"
-							android:text="Matching does not complete a trade by itself. The selected transaction must still pass the normal order, escrow, payment and blockchain verification flow."
-							android:textSize="10sp"
-							android:lineSpacingExtra="2dp" />
-					</LinearLayout>
+						android:layout_marginTop="8dp"
+						android:orientation="vertical" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
-			<TextView
-				android:id="@+id/tv_express_footer"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="15dp"
-				android:gravity="center_horizontal|center_vertical"
-				android:text="Express matches are subject to eligibility, available liquidity, limits and current market conditions."
-				android:textSize="10sp"
-				android:lineSpacingExtra="2dp" />
 		</LinearLayout>
-	</androidx.core.widget.NestedScrollView>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+	</ScrollView>
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@color/colorSurface"
+		android:orientation="vertical"
+		android:paddingStart="16dp"
+		android:paddingTop="10dp"
+		android:paddingEnd="16dp"
+		android:paddingBottom="14dp">
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_express_go"
+			android:layout_width="match_parent"
+			android:layout_height="54dp"
+			android:enabled="false"
+			android:insetTop="0dp"
+			android:insetBottom="0dp"
+			android:textAllCaps="false"
+			android:textSize="16sp"
+			android:textStyle="bold"
+			app:cornerRadius="14dp" />
+	</LinearLayout>
+</LinearLayout>

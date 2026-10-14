@@ -146,6 +146,8 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 				bindOffer();
 				if (selling()) loadBalance();
 				else bindPresets();
+				double want = getIntent().getDoubleExtra("coinAmount", 0);
+				if (want > 0) setCoin(Math.min(want, o.remaining));
 			}
 			@Override public void failed(String error) { fatal(com.harvana.app.utils.ErrorText.plain(error)); }
 		});

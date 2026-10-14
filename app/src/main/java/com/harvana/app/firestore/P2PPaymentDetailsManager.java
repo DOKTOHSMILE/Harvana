@@ -231,40 +231,6 @@ public class P2PPaymentDetailsManager {
 		read(doc(ORDER_COLLECTION, orderId), callback);
 	}
 	
-	public static void bindAccount(Map data, android.widget.TextView bank, android.widget.TextView number, android.widget.TextView name) {
-		if (bank == null || number == null || name == null) return;
-		String primary = null, identifier = null, accountName = null;
-		Object methodsObj = data != null ? data.get("paymentMethods") : null;
-		if (methodsObj instanceof java.util.List && !((java.util.List<?>) methodsObj).isEmpty()) {
-			Object first = ((java.util.List<?>) methodsObj).get(0);
-			if (first instanceof Map) {
-				Map<?, ?> m = (Map<?, ?>) first;
-				if (m.get("primaryField") != null) primary = String.valueOf(m.get("primaryField"));
-				if (m.get("accountIdentifier") != null) identifier = String.valueOf(m.get("accountIdentifier"));
-				if (m.get("accountName") != null) accountName = String.valueOf(m.get("accountName"));
-			}
-		}
-		if ((primary == null || primary.isEmpty()) && data != null && data.get("primaryField") != null) {
-			primary = String.valueOf(data.get("primaryField"));
-		}
-		if ((identifier == null || identifier.isEmpty()) && data != null && data.get("accountIdentifier") != null) {
-			identifier = String.valueOf(data.get("accountIdentifier"));
-		}
-		if ((accountName == null || accountName.isEmpty()) && data != null && data.get("accountName") != null) {
-			accountName = String.valueOf(data.get("accountName"));
-		}
-		bank.setText(primary != null && !primary.isEmpty() ? primary : "—");
-		// The bank's logo beside its name, where the screen has a spot for it.
-		if (primary != null && !primary.isEmpty() && bank.getParent() instanceof android.view.View) {
-			android.view.View logo = ((android.view.View) bank.getParent()).findViewById(com.harvana.app.R.id.iv_bank_logo);
-			if (logo instanceof android.widget.ImageView) {
-				logo.setVisibility(android.view.View.VISIBLE);
-				com.harvana.app.banks.BankLogo.into((android.widget.ImageView) logo, primary);
-			}
-		}
-		number.setText(identifier != null && !identifier.isEmpty() ? identifier : "—");
-		name.setText(accountName != null && !accountName.isEmpty() ? accountName : "—");
-	}
 	
 	// ── SDK plumbing ──
 

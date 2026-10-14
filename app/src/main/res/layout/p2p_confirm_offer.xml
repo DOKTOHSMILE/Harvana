@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Publish an offer (ComfirmSellOfferActivity): coin and side, the offer as a table, payment methods, Publish. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground"
+	android:orientation="vertical">
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="56dp"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:paddingStart="8dp"
+		android:paddingEnd="16dp">
+		<ImageView
+			android:id="@+id/iv_confirm_back"
+			android:layout_width="44dp"
+			android:layout_height="44dp"
+			android:background="?attr/selectableItemBackgroundBorderless"
+			android:contentDescription="Back"
+			android:padding="10dp"
+			android:src="@drawable/ic_nav_back"
+			app:tint="@color/colorTextPrimary" />
+		<TextView
+			android:id="@+id/tv_confirm_title"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="4dp"
+			android:layout_weight="1"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="19sp"
+			android:textStyle="bold" />
+	</LinearLayout>
+	<ScrollView
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1">
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:paddingStart="16dp"
+			android:paddingEnd="16dp"
+			android:paddingBottom="16dp">
+			<com.google.android.material.card.MaterialCardView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:padding="16dp">
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+						<ImageView
+							android:id="@+id/iv_confirm_coin"
+							android:layout_width="36dp"
+							android:layout_height="36dp"
+							android:importantForAccessibility="no" />
+						<LinearLayout
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_marginStart="12dp"
+							android:layout_weight="1"
+							android:orientation="vertical">
+							<TextView
+								android:id="@+id/tv_confirm_side"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:textSize="13sp"
+								android:textStyle="bold" />
+							<TextView
+								android:id="@+id/tv_confirm_amount"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:textColor="@color/colorTextPrimary"
+								android:textSize="24sp"
+								android:textStyle="bold" />
+						</LinearLayout>
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/ll_confirm_rows"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="10dp"
+						android:orientation="vertical" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="18dp"
+				android:layout_marginBottom="8dp"
+				android:text="Payment methods"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+			<LinearLayout
+				android:id="@+id/layout_confirm_payment_methods"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical" />
+			<LinearLayout
+				android:id="@+id/ll_confirm_terms"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:background="@drawable/bg_p2p_method_chip"
+				android:orientation="vertical"
+				android:padding="14dp"
+				android:visibility="gone">
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Terms"
+					android:textColor="@color/colorTextSecondary"
+					android:textSize="13sp"
+					android:textStyle="bold" />
+				<TextView
+					android:id="@+id/tv_confirm_terms"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="6dp"
+					android:textColor="@color/colorTextPrimary"
+					android:textSize="13sp" />
+			</LinearLayout>
+			<TextView
+				android:id="@+id/tv_confirm_error"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="14dp"
+				android:background="@drawable/bg_chip_overdue"
+				android:padding="12dp"
+				android:textColor="@color/colorError"
+				android:textSize="13sp"
+				android:visibility="gone" />
+		</LinearLayout>
+	</ScrollView>
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@color/colorSurface"
+		android:orientation="horizontal"
+		android:paddingStart="16dp"
+		android:paddingTop="10dp"
+		android:paddingEnd="16dp"
+		android:paddingBottom="14dp">
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_confirm_edit"
+			style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+			android:layout_width="0dp"
+			android:layout_height="54dp"
+			android:layout_marginEnd="6dp"
+			android:layout_weight="1"
+			android:text="Edit"
+			android:textAllCaps="false"
+			app:cornerRadius="14dp" />
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_publish_offer"
+			android:layout_width="0dp"
+			android:layout_height="54dp"
+			android:layout_marginStart="6dp"
+			android:layout_weight="1.6"
+			android:insetTop="0dp"
+			android:insetBottom="0dp"
+			android:text="Publish"
+			android:textAllCaps="false"
+			android:textSize="16sp"
+			android:textStyle="bold"
+			app:cornerRadius="14dp" />
+	</LinearLayout>
+</LinearLayout>

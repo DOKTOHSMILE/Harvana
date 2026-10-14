@@ -71,6 +71,8 @@ public class SketchApplication extends Application {
             Log.w("SketchApplication", "Could not schedule background notifications", e);
         }
         
+        com.harvana.app.telemetry.CrashReporter.sendPending(this);
+
         // GLOBAL CRASH INTERCEPTOR (File Writer + Debug Screen)
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
@@ -84,6 +86,9 @@ public class SketchApplication extends Application {
                     return;
                 }
                 
+                // Queued for the node's error tracker; sent on the next start (telemetry/CrashReporter).
+                com.harvana.app.telemetry.CrashReporter.saveCrash(getApplicationContext(), throwable, stackTrace);
+
                 // Save crash log to SharedPreferences synchronously
                 getApplicationContext().getSharedPreferences("crash_prefs", Context.MODE_PRIVATE)
                         .edit()

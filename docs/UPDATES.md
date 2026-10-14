@@ -2,6 +2,11 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 14 Oct 2026 — Crash reports to the node
+
+- A crash is saved on the phone and sent on the next start to the node's error tracker (`POST /api/v1/app/error`), which the moderator app shows under Errors. Sent: app version, the screen and method, the error and its stack. No wallet, address or account data.
+- Needs the node update of 14 Oct 2026; on an older node the report waits on the phone (at most 10 kept).
+
 ## 14 Oct 2026 — P2P rebuilt (market, take offer, orders, create offer)
 
 - Market (`P2pMarketplaceActivity`, `p2p_marketplace.xml`, `item_p2p_offer.xml`): one screen for both sides (the Buy / Sell fragments are gone). Buy / Sell switch in green / red, coin chips (HARV and every stable coin the network has on), currency pill, Amount / Payment / Filters pills, offer cards (trader, verified, trades · completion · trust, price per coin, payment window, available, fiat limit, bank-logo method chips, Buy / Sell button), New offer button, open-orders count on the orders icon. Your own offers never show. Filters sheet (`sheet_p2p_filters.xml`): amount, payment methods with logos, verified / insured / premium / online, sort (price, trades, completion, trust), live "Show N offers".

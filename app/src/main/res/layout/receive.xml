@@ -100,6 +100,73 @@
 						app:tint="@color/colorTextSecondary" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:id="@+id/tvAmountLabel"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="8dp"
+				android:text="AMOUNT"
+				android:textStyle="bold"
+				android:textSize="11sp"
+				android:letterSpacing="0.06" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/cardAmount"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="16dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<EditText
+					android:id="@+id/etReceiveAmount"
+					android:layout_width="match_parent"
+					android:layout_height="52dp"
+					android:background="@android:color/transparent"
+					android:hint="Amount to request (optional)"
+					android:inputType="numberDecimal"
+					android:maxLines="1"
+					android:paddingStart="14dp"
+					android:paddingEnd="14dp"
+					android:textColor="@color/colorTextPrimary"
+					android:textColorHint="@color/colorTextSecondary"
+					android:textSize="14sp" />
+			</com.google.android.material.card.MaterialCardView>
+			<TextView
+				android:id="@+id/tvMemoLabel"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="8dp"
+				android:text="MEMO"
+				android:textStyle="bold"
+				android:textSize="11sp"
+				android:letterSpacing="0.06" />
+			<com.google.android.material.card.MaterialCardView
+				android:id="@+id/cardMemo"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="20dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="16dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+				<EditText
+					android:id="@+id/etReceiveMemo"
+					android:layout_width="match_parent"
+					android:layout_height="52dp"
+					android:background="@android:color/transparent"
+					android:hint="Note for the sender (optional)"
+					android:inputType="text"
+					android:maxLength="200"
+					android:maxLines="1"
+					android:paddingStart="14dp"
+					android:paddingEnd="14dp"
+					android:textColor="@color/colorTextPrimary"
+					android:textColorHint="@color/colorTextSecondary"
+					android:textSize="14sp" />
+			</com.google.android.material.card.MaterialCardView>
 			<LinearLayout
 				android:id="@+id/ll_qr_card"
 				android:layout_width="wrap_content"

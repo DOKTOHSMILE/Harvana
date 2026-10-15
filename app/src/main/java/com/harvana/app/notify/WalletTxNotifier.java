@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.harvana.app.CoinInfo;
+import com.harvana.app.husd.HusdClient;
+import com.harvana.app.husd.Stable;
 import com.harvana.app.sync.HarvanaNodeClient;
 import com.harvana.app.wallet.WalletManager;
 
@@ -23,6 +25,10 @@ public final class WalletTxNotifier {
 
     /** How many announced transactions are remembered, so none is announced twice. */
     static final int TOLD_CAP = 400;
+    /** Status bar only for a confirmation this recent. Older ones stay on the activity list. */
+    static final long TRAY_WINDOW_MS = 6L * 60 * 60 * 1000;
+    /** Inbox only this far back, so a broken baseline cannot dump a wallet's history into notifications. */
+    static final long INBOX_WINDOW_MS = 24L * 60 * 60 * 1000;
 
     public interface Done { void onDone(List<TxEvents.Event> newEvents); }
 
@@ -50,9 +56,14 @@ public final class WalletTxNotifier {
                 List<TxEvents.Event> events = TxEvents.classify(txs, me, baseline, CoinInfo.ticker());
                 List<TxEvents.Event> fresh = new ArrayList<>();
                 java.util.Set<String> told = new java.util.LinkedHashSet<>(java.util.Arrays.asList(sp.getString("told", "").split(",")));
+                long now = System.currentTimeMillis();
                 for (TxEvents.Event e : events) {
                     if (told.contains(e.key)) continue;                     // announced before, even if since cleared
-                    if (NotificationCenter.post(c, NotificationCenter.TX, e.key, e.title, e.body, "", -1)) fresh.add(e);
+                    long at = e.at;
+                    long age = at > 0 ? now - at : Long.MAX_VALUE;
+                    if (age > INBOX_WINDOW_MS) { told.add(e.key); continue; } // too old for the inbox; the activity list still has it
+                    boolean tray = age <= TRAY_WINDOW_MS;
+                    if (NotificationCenter.post(c, NotificationCenter.TX, e.key, e.title, e.body, "", -1, at, tray)) fresh.add(e);
                     told.add(e.key);
                 }
                 java.util.List<String> keep = new java.util.ArrayList<>(told);
@@ -79,8 +90,14 @@ public final class WalletTxNotifier {
             t.to = o.optString("recipientAddress", o.optString("to", ""));
             t.memo = o.optString("memo", "");
             t.status = o.optString("status", "confirmed");
-            t.amount = o.has("amount") && !o.isNull("amount") ? HarvanaNodeClient.toHarvDisplay(o.optLong("amount", 0L))
-                : o.optDouble("value", o.optDouble("value_harv", 0.0));
+            String asset = o.optString("asset", o.optString("mintId", ""));
+            if (Stable.isStable(asset) && o.has("amount") && !o.isNull("amount")) {
+                t.amount = o.optLong("amount", 0L) / (double) HusdClient.UNIT;
+                t.symbol = Stable.symbol(asset);
+            } else {
+                t.amount = o.has("amount") && !o.isNull("amount") ? HarvanaNodeClient.toHarvDisplay(o.optLong("amount", 0L))
+                    : o.optDouble("value", o.optDouble("value_harv", 0.0));
+            }
             long ts = o.optLong("timestamp", 0L);
             if (ts > 0 && ts < 1_000_000_000_000L) ts *= 1000L;
             t.timestamp = ts;

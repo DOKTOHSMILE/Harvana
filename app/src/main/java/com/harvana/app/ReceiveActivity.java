@@ -69,6 +69,8 @@ public class ReceiveActivity extends AppCompatActivity {
 	private TextView tvDepositAddress;
 	private ImageView ivCopyAddress;
 	private ImageView ivQrCode;
+	private EditText etReceiveAmount;
+	private EditText etReceiveMemo;
 	
 	@Override
 	protected void onCreate(Bundle _savedInstanceState) {
@@ -104,6 +106,8 @@ public class ReceiveActivity extends AppCompatActivity {
 		tvDepositAddress = findViewById(R.id.tvDepositAddress);
 		ivCopyAddress = findViewById(R.id.ivCopyAddress);
 		ivQrCode = findViewById(R.id.ivQrCode);
+		etReceiveAmount = findViewById(R.id.etReceiveAmount);
+		etReceiveMemo = findViewById(R.id.etReceiveMemo);
 	}
 	
 	private void initializeLogic() {
@@ -137,6 +141,13 @@ public class ReceiveActivity extends AppCompatActivity {
 		};
 		if (ivCopyAddress != null) ivCopyAddress.setOnClickListener(copyListener);
 		if (tvDepositAddress != null) tvDepositAddress.setOnClickListener(copyListener);
+		android.text.TextWatcher qrWatch = new android.text.TextWatcher() {
+			@Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+			@Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+			@Override public void afterTextChanged(Editable s) { _scheduleQr(); }
+		};
+		if (etReceiveAmount != null) etReceiveAmount.addTextChangedListener(qrWatch);
+		if (etReceiveMemo != null) etReceiveMemo.addTextChangedListener(qrWatch);
 		
 		if (btnShare != null) {
 			btnShare.setOnClickListener(v -> {
@@ -147,7 +158,7 @@ public class ReceiveActivity extends AppCompatActivity {
 				try {
 					Bitmap bitmap = ivQrCode == null ? null : _getBitmapFromView(ivQrCode);
 					Uri imageUri = bitmap == null ? null : _saveImageToCache(bitmap);
-					if (imageUri != null) _shareImage(imageUri, activeAddress);
+					if (imageUri != null) _shareImage(imageUri, qrPayload != null && qrPayload.startsWith("harvana://") ? qrPayload : activeAddress);
 					else SketchwareUtil.showMessage(this, "Couldn't prepare the QR image to share. Try again.");
 				} catch (Exception e) {
 					SketchwareUtil.showMessage(this, "Couldn't prepare the QR image to share. Try again.");
@@ -163,6 +174,10 @@ public class ReceiveActivity extends AppCompatActivity {
 	private boolean validAddress;
 	private int qrIcon = R.drawable.ic_coin_harv;
 	private String qrPayload = "";
+	private String receiveKey = "HARV";
+	private String receiveTicker = "HARV";
+	private final android.os.Handler qrHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+	private final Runnable qrRebuild = this::_rebuildQr;
 	private boolean addressesReady = false;
 	private void _loadQrCode() {
 		if (ivQrCode == null) return;
@@ -182,7 +197,8 @@ public class ReceiveActivity extends AppCompatActivity {
 			final Bitmap finalQr = qr;
 			runOnUiThread(() -> {
 				if (isFinishing() || isDestroyed() || ivQrCode == null) return;
-				if (!forAddr.equals(activeAddress) || icon != qrIcon) return;
+				String now = qrPayload == null || qrPayload.isEmpty() ? activeAddress : qrPayload;
+				if (!forAddr.equals(activeAddress) || icon != qrIcon || !encoded.equals(now)) return;
 				if (finalQr != null) ivQrCode.setImageBitmap(finalQr);
 			});
 		}).start();
@@ -304,10 +320,12 @@ public class ReceiveActivity extends AppCompatActivity {
 			getSupportActionBar().setSubtitle(coin.liveNetwork());
 		}
 		if (textview1 != null) textview1.setText(coin.name);
-		if (tvQrHint != null) tvQrHint.setText("Scan to send " + coin.ticker + " to this address");
+		receiveKey = coin.key;
+		receiveTicker = coin.ticker;
 		if (addr == null || addr.isEmpty()) {
 			validAddress = false;
 			qrPayload = "";
+			activeAddress = "";
 			if (tvDepositAddress != null) tvDepositAddress.setText(!addressesReady
 					? "Preparing this address…"
 					: ("PI".equals(coin.key)
@@ -319,16 +337,39 @@ public class ReceiveActivity extends AppCompatActivity {
 		}
 		boolean same = addr.equals(activeAddress) && coin.icon == qrIcon && validAddress
 				&& ivQrCode != null && ivQrCode.getDrawable() != null;
-		if (same) {
-			if (tvDepositAddress != null) tvDepositAddress.setText(addr);
-			return;
-		}
 		qrIcon = coin.icon;
 		activeAddress = addr;
-		qrPayload = com.harvana.app.scan.WalletQr.payload(coin.key, addr);
 		validAddress = addr.length() >= 20;
 		if (tvDepositAddress != null) tvDepositAddress.setText(addr);
 		if (btnShare != null) { btnShare.setEnabled(true); btnShare.setAlpha(1f); }
+		if (!same) {
+			qrPayload = "";
+			if (ivQrCode != null) ivQrCode.setImageDrawable(null);
+		}
+		_rebuildQr();
+	}
+
+	private void _scheduleQr() {
+		qrHandler.removeCallbacks(qrRebuild);
+		qrHandler.postDelayed(qrRebuild, 200);
+	}
+
+	/** Rebuilds the code from the address plus whatever amount and memo are typed. Does not depend on the coin being new. */
+	private void _rebuildQr() {
+		if (!validAddress || activeAddress == null || activeAddress.isEmpty()) return;
+		String amount = etReceiveAmount == null || etReceiveAmount.getText() == null ? "" : etReceiveAmount.getText().toString();
+		String memo = etReceiveMemo == null || etReceiveMemo.getText() == null ? "" : etReceiveMemo.getText().toString();
+		String next = com.harvana.app.scan.WalletQr.payload(receiveKey, activeAddress, amount, memo);
+		boolean request = !com.harvana.app.scan.WalletQr.cleanAmount(amount).isEmpty()
+				|| !com.harvana.app.scan.WalletQr.cleanMemo(memo).isEmpty();
+		if (tvQrHint != null) {
+			String amt = com.harvana.app.scan.WalletQr.cleanAmount(amount);
+			tvQrHint.setText(request
+					? "Scan to send " + (amt.isEmpty() ? receiveTicker : amt + " " + receiveTicker)
+					: "Scan to send " + receiveTicker + " to this address");
+		}
+		if (next.equals(qrPayload) && ivQrCode != null && ivQrCode.getDrawable() != null) return;
+		qrPayload = next;
 		if (ivQrCode != null) ivQrCode.setImageDrawable(null);
 		_loadQrCode();
 	}

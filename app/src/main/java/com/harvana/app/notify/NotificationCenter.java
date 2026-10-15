@@ -35,6 +35,8 @@ public final class NotificationCenter {
         public String id, type, title, body, groupId;
         public int tab = -1;
         public long createdAt;
+        /** When the thing happened, not when this phone stored the notice. Missing on older rows, so those use createdAt. */
+        public long eventAt;
         public boolean read;
     }
 
@@ -60,6 +62,7 @@ public final class NotificationCenter {
                 it.id = o.optString("id"); it.type = o.optString("type"); it.title = o.optString("title");
                 it.body = o.optString("body"); it.groupId = o.optString("groupId");
                 it.tab = o.optInt("tab", -1); it.createdAt = o.optLong("createdAt"); it.read = o.optBoolean("read");
+                it.eventAt = o.optLong("eventAt", it.createdAt);
                 out.add(it);
             }
         } catch (Exception ignored) { }
@@ -88,6 +91,15 @@ public final class NotificationCenter {
     /** dedupeKey: same key never notifies twice (e.g. a tx hash, or noticeId). */
     public static synchronized boolean post(Context ctx, String type, String dedupeKey, String title, String body,
                                             String groupId, int tab) {
+        return post(ctx, type, dedupeKey, title, body, groupId, tab, System.currentTimeMillis(), true);
+    }
+
+    /**
+     * @param eventAt when the action happened. The inbox sorts by this, not by when the notice was stored.
+     * @param tray false keeps it in the inbox only, so an old transfer cannot pop the status bar.
+     */
+    public static synchronized boolean post(Context ctx, String type, String dedupeKey, String title, String body,
+                                            String groupId, int tab, long eventAt, boolean tray) {
         Context c = ctx.getApplicationContext();
         List<Item> items = list(c);
         for (Item i : items) if (i.id.equals(dedupeKey)) return false;
@@ -99,10 +111,11 @@ public final class NotificationCenter {
         Item it = new Item();
         it.id = dedupeKey; it.type = type; it.title = title; it.body = body;
         it.groupId = groupId == null ? "" : groupId; it.tab = tab; it.createdAt = System.currentTimeMillis();
+        it.eventAt = eventAt > 0 ? eventAt : it.createdAt;
         items.add(0, it);
         while (items.size() > CAP) items.remove(items.size() - 1);
         save(c, items);
-        show(c, it);
+        if (tray) show(c, it);
         LocalBroadcastManager.getInstance(c).sendBroadcast(new Intent(ACTION_CHANGED));
         return true;
     }
@@ -131,7 +144,8 @@ public final class NotificationCenter {
             JSONArray a = new JSONArray();
             for (Item i : items) {
                 a.put(new JSONObject().put("id", i.id).put("type", i.type).put("title", i.title).put("body", i.body)
-                    .put("groupId", i.groupId).put("tab", i.tab).put("createdAt", i.createdAt).put("read", i.read));
+                    .put("groupId", i.groupId).put("tab", i.tab).put("createdAt", i.createdAt)
+                    .put("eventAt", i.eventAt).put("read", i.read));
             }
             sp(c).edit().putString("items", a.toString()).apply();
         } catch (Exception ignored) { }
@@ -155,9 +169,11 @@ public final class NotificationCenter {
         if (nm == null) return;
         SharedPreferences p = c.getSharedPreferences("notification_prefs", Context.MODE_PRIVATE);
         boolean sound = p.getBoolean("sound", true), vibrate = p.getBoolean("vibrate", true);
-        String channel = "harv_" + it.type.toLowerCase() + (sound ? "_s" : "") + (vibrate ? "_v" : "");
+        int importance = importance(it.type);
+        // A new channel id: Android will not lower a channel that was already created at high importance.
+        String channel = "harv2_" + it.type.toLowerCase() + "_" + importance + (sound ? "_s" : "") + (vibrate ? "_v" : "");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel ch = new NotificationChannel(channel, label(it.type), NotificationManager.IMPORTANCE_HIGH);
+            NotificationChannel ch = new NotificationChannel(channel, label(it.type), importance);
             if (!sound) ch.setSound(null, null);
             ch.enableVibration(vibrate);
             nm.createNotificationChannel(ch);
@@ -172,8 +188,29 @@ public final class NotificationCenter {
             .setSmallIcon(com.harvana.app.R.drawable.ic_stat_notify)
             .setColor(UiColors.accent())
             .setContentIntent(pi).setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_HIGH);
+            .setPriority(priority(importance));
         try { nm.notify(it.id.hashCode(), b.build()); } catch (SecurityException ignored) { }
+    }
+
+    /** Transactions and money due outrank group notices, which outrank social and system. */
+    public static int rank(String type) {
+        if (TX.equals(type) || PAYMENT.equals(type) || LOAN.equals(type)) return 3;
+        if (GROUP.equals(type) || INVITE.equals(type) || MEMBERSHIP.equals(type)) return 2;
+        if (SOCIAL.equals(type)) return 1;
+        return 0;
+    }
+
+    private static int importance(String type) {
+        int r = rank(type);
+        if (r >= 3) return NotificationManager.IMPORTANCE_HIGH;
+        if (r == 2) return NotificationManager.IMPORTANCE_DEFAULT;
+        return NotificationManager.IMPORTANCE_LOW;
+    }
+
+    private static int priority(int importance) {
+        if (importance >= NotificationManager.IMPORTANCE_HIGH) return NotificationCompat.PRIORITY_HIGH;
+        if (importance >= NotificationManager.IMPORTANCE_DEFAULT) return NotificationCompat.PRIORITY_DEFAULT;
+        return NotificationCompat.PRIORITY_LOW;
     }
 
     public static String label(String type) {

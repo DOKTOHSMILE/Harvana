@@ -67,6 +67,7 @@ public class SketchApplication extends Application {
         CoinInfo.refresh(this);
         try {
             com.harvana.app.notify.NotificationWorker.schedule(this);
+            com.harvana.app.notify.WalletWatchService.start(this);
         } catch (Exception e) {
             Log.w("SketchApplication", "Could not schedule background notifications", e);
         }

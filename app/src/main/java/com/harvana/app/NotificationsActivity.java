@@ -86,6 +86,13 @@ public class NotificationsActivity extends AppCompatActivity {
             if (!it.read) { unread[0]++; unread[g]++; }
             if (tab == 0 || tab == g) items.add(it);
         }
+        java.util.Collections.sort(items, (a, b) -> {
+            long ea = a.eventAt > 0 ? a.eventAt : a.createdAt;
+            long eb = b.eventAt > 0 ? b.eventAt : b.createdAt;
+            int byTime = Long.compare(eb, ea);
+            if (byTime != 0) return byTime;
+            return Integer.compare(NotificationCenter.rank(b.type), NotificationCenter.rank(a.type));
+        });
         for (int i = 0; i < TABS.length; i++) {
             com.google.android.material.tabs.TabLayout.Tab t = tabs.getTabAt(i);
             if (t != null) t.setText(unread[i] > 0 ? TABS[i] + " (" + unread[i] + ")" : TABS[i]);
@@ -99,7 +106,7 @@ public class NotificationsActivity extends AppCompatActivity {
         }
         String day = null;
         for (NotificationCenter.Item it : items) {
-            String d = dayLabel(it.createdAt);
+            String d = dayLabel(whenOf(it));
             if (!d.equals(day)) {
                 day = d;
                 TextView h = (TextView) getLayoutInflater().inflate(R.layout.item_list_day_header, list, false);
@@ -127,6 +134,10 @@ public class NotificationsActivity extends AppCompatActivity {
         }
     }
 
+    private static long whenOf(NotificationCenter.Item it) {
+        return it.eventAt > 0 ? it.eventAt : it.createdAt;
+    }
+
     private static String dayLabel(long t) {
         java.util.Calendar now = java.util.Calendar.getInstance(), c = java.util.Calendar.getInstance();
         c.setTimeInMillis(t);
@@ -147,7 +158,7 @@ public class NotificationsActivity extends AppCompatActivity {
         TextView head = card.findViewById(R.id.tv_notification_title);
         head.setText(it.title);
         head.setTypeface(null, it.read ? Typeface.NORMAL : Typeface.BOLD);
-        ((TextView) card.findViewById(R.id.tv_notification_time)).setText(ago(it.createdAt));
+        ((TextView) card.findViewById(R.id.tv_notification_time)).setText(ago(whenOf(it)));
         card.findViewById(R.id.notification_unread_dot).setVisibility(it.read ? View.GONE : View.VISIBLE);
         TextView body = card.findViewById(R.id.tv_notification_body);
         if (!it.body.isEmpty()) { body.setText(it.body); body.setVisibility(View.VISIBLE); }

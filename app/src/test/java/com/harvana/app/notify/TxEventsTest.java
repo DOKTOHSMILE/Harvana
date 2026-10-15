@@ -49,6 +49,16 @@ public class TxEventsTest {
         assertTrue(TxEvents.classify(l, ME, 100, "HARV").isEmpty());
     }
 
+    @Test public void stableSymbolAndConfirmationTime() {
+        TxEvents.Tx t = tx("h9", OTHER, ME, 12.5, "", "confirmed", 1_700_000_000_000L);
+        t.symbol = "hNGN";
+        List<TxEvents.Event> e = TxEvents.classify(java.util.Collections.singletonList(t), ME, 0, "HARV");
+        assertEquals(1, e.size());
+        assertEquals("hNGN received", e.get(0).title);
+        assertTrue(e.get(0).body.startsWith("12.5 hNGN"));
+        assertEquals(1_700_000_000_000L, e.get(0).at);
+    }
+
     @Test public void amountFormatting() {
         assertEquals("12.5", TxEvents.amt(12.5));
         assertEquals("3", TxEvents.amt(3));

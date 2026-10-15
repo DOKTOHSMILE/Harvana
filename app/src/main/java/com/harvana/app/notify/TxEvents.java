@@ -15,11 +15,15 @@ public final class TxEvents {
         public String hash = "", from = "", to = "", memo = "", status = "confirmed";
         public double amount;
         public long timestamp;
+        /** Display symbol when this row is not the default coin. Empty means use the ticker passed to classify. */
+        public String symbol = "";
     }
 
     public static final class Event {
         public final String kind; // RECEIVED, SENT, SIGNED
         public final String key, title, body;
+        /** When the transfer was confirmed. 0 until classify sets it. */
+        public long at;
         Event(String kind, String key, String title, String body) { this.kind = kind; this.key = key; this.title = title; this.body = body; }
     }
 
@@ -66,20 +70,27 @@ public final class TxEvents {
             boolean incoming = me.equalsIgnoreCase(t.to) && !me.equalsIgnoreCase(t.from);
             boolean outgoing = me.equalsIgnoreCase(t.from) && !me.equalsIgnoreCase(t.to);
             String scope = scope(t.memo), purpose = purpose(t.memo);
-            String amount = amt(t.amount) + " " + ticker;
+            String unit = t.symbol != null && !t.symbol.isEmpty() ? t.symbol : ticker;
+            String amount = amt(t.amount) + " " + unit;
             if (incoming) {
-                String title = purpose.isEmpty() ? ticker + " received" : purpose + " received";
+                String title = purpose.isEmpty() ? unit + " received" : purpose + " received";
                 String body = amount + (scope.isEmpty() ? " from " + shortAddr(t.from) : " from your " + scope);
-                out.add(new Event("RECEIVED", "tx_" + t.hash + "_in", title, body));
+                out.add(event("RECEIVED", "tx_" + t.hash + "_in", title, body, t.timestamp));
             } else if (outgoing) {
                 if (scope.isEmpty()) {
-                    out.add(new Event("SENT", "tx_" + t.hash + "_out", ticker + " sent", amount + " to " + shortAddr(t.to) + " was confirmed."));
+                    out.add(event("SENT", "tx_" + t.hash + "_out", unit + " sent", amount + " to " + shortAddr(t.to) + " was confirmed.", t.timestamp));
                 } else {
-                    out.add(new Event("SIGNED", "tx_" + t.hash + "_out", "Payment signed and confirmed",
-                        amount + " for your " + scope + (purpose.isEmpty() ? "" : " (" + purpose.toLowerCase(Locale.US) + ")") + " went through."));
+                    out.add(event("SIGNED", "tx_" + t.hash + "_out", "Payment signed and confirmed",
+                        amount + " for your " + scope + (purpose.isEmpty() ? "" : " (" + purpose.toLowerCase(Locale.US) + ")") + " went through.", t.timestamp));
                 }
             }
         }
         return out;
+    }
+
+    private static Event event(String kind, String key, String title, String body, long at) {
+        Event e = new Event(kind, key, title, body);
+        e.at = at;
+        return e;
     }
 }

@@ -96,6 +96,8 @@ public final class QrRouter {
                 if (wallet != null) {
                     a.startActivity(new Intent(a, com.harvana.app.SendAssetActivity.class)
                             .putExtra("toAddress", wallet.address)
+                            .putExtra("amount", wallet.amount)
+                            .putExtra("memo", wallet.memo)
                             .putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, wallet.key));
                     return;
                 }

@@ -10,13 +10,52 @@ public final class WalletQr {
     public static final class Hit {
         public final String key;
         public final String address;
-        public Hit(String key, String address) { this.key = key; this.address = address; }
+        /** Display units the receiver asked for, or empty when the code is only an address. */
+        public final String amount;
+        /** A note the receiver asked to attach, or empty. */
+        public final String memo;
+        public Hit(String key, String address) { this(key, address, "", ""); }
+        public Hit(String key, String address, String amount, String memo) {
+            this.key = key;
+            this.address = address;
+            this.amount = amount == null ? "" : amount;
+            this.memo = memo == null ? "" : memo;
+        }
     }
 
     /** The text to put in that coin's QR. A Harvana address stays plain so older codes still scan. */
     public static String payload(String key, String address) {
+        return payload(key, address, "", "");
+    }
+
+    /**
+     * Same as {@link #payload(String, String)} when amount and memo are empty.
+     * Otherwise a payment request: harvana://pay for a Harvana coin, or the coin's own scheme plus amount and memo.
+     */
+    public static String payload(String key, String address, String amount, String memo) {
         if (address == null) return "";
         String a = address.trim();
+        String amt = cleanAmount(amount);
+        String note = cleanMemo(memo);
+        if (amt.isEmpty() && note.isEmpty()) return plain(key, a);
+        boolean harv = key == null || key.isEmpty() || "HARV".equals(key) || com.harvana.app.husd.Stable.isStable(key);
+        if (harv) {
+            String asset = key == null || key.isEmpty() ? "HARV" : key;
+            StringBuilder sb = new StringBuilder("harvana://pay?address=").append(url(a)).append("&asset=").append(url(asset));
+            if (!amt.isEmpty()) sb.append("&amount=").append(url(amt));
+            if (!note.isEmpty()) sb.append("&memo=").append(url(note));
+            return sb.toString();
+        }
+        String base = plain(key, a);
+        StringBuilder sb = new StringBuilder(base);
+        sb.append(base.indexOf('?') >= 0 ? '&' : '?');
+        boolean any = false;
+        if (!amt.isEmpty()) { sb.append("amount=").append(url(amt)); any = true; }
+        if (!note.isEmpty()) { if (any) sb.append('&'); sb.append("message=").append(url(note)); }
+        return sb.toString();
+    }
+
+    private static String plain(String key, String a) {
         if (key == null) return a;
         switch (key) {
             case "BTC": return "bitcoin:" + a;
@@ -38,22 +77,91 @@ public final class WalletQr {
         if (raw == null) return null;
         String t = raw.trim();
         if (t.isEmpty()) return null;
+        if (t.regionMatches(true, 0, "harvana://pay", 0, "harvana://pay".length())) return pay(t);
         int schemeAt = t.indexOf(':');
         if (schemeAt > 0 && schemeAt < 16 && !t.startsWith("http")) {
             String scheme = t.substring(0, schemeAt).toLowerCase(java.util.Locale.US);
             String rest = t.substring(schemeAt + 1).trim();
             if (rest.startsWith("//")) return null;
+            String amount = "", memo = "";
+            int q = rest.indexOf('?');
+            if (q > 0) {
+                String query = rest.substring(q + 1);
+                rest = rest.substring(0, q);
+                amount = qparam(query, "amount");
+                memo = qparam(query, "memo");
+                if (memo.isEmpty()) memo = qparam(query, "message");
+            }
             String chain = "";
             int at = rest.indexOf('@');
             if (at > 0) { chain = rest.substring(at + 1); rest = rest.substring(0, at); }
-            int q = rest.indexOf('?');
-            if (q > 0) rest = rest.substring(0, q);
             rest = rest.trim();
             String key = keyForScheme(scheme, chain);
             if (key == null) return null;
-            return looksLike(key, rest) ? new Hit(key, rest) : null;
+            return looksLike(key, rest) ? new Hit(key, rest, cleanAmount(amount), cleanMemo(memo)) : null;
         }
         return bare(t);
+    }
+
+    private static Hit pay(String t) {
+        int q = t.indexOf('?');
+        if (q < 0) return null;
+        String query = t.substring(q + 1);
+        String address = qparam(query, "address");
+        if (!looksLike("HARV", address)) return null;
+        String asset = qparam(query, "asset");
+        if (asset.isEmpty()) asset = "HARV";
+        String key = "HARV".equalsIgnoreCase(asset) || com.harvana.app.husd.Stable.isStable(asset) ? asset.toUpperCase(java.util.Locale.US) : "HARV";
+        if ("HARV".equals(key)) key = "HARV";
+        String norm = "HV0x" + address.substring(4).toLowerCase(java.util.Locale.US);
+        return new Hit(key, norm, cleanAmount(qparam(query, "amount")), cleanMemo(qparam(query, "memo")));
+    }
+
+    private static String qparam(String query, String name) {
+        if (query == null || query.isEmpty()) return "";
+        for (String part : query.split("&")) {
+            int eq = part.indexOf('=');
+            String k = eq < 0 ? part : part.substring(0, eq);
+            if (!name.equalsIgnoreCase(urlDec(k))) continue;
+            return eq < 0 ? "" : urlDec(part.substring(eq + 1)).trim();
+        }
+        return "";
+    }
+
+    private static String url(String s) {
+        try { return java.net.URLEncoder.encode(s, "UTF-8").replace("+", "%20"); }
+        catch (Exception e) { return s; }
+    }
+
+    private static String urlDec(String s) {
+        try { return java.net.URLDecoder.decode(s, "UTF-8"); }
+        catch (Exception e) { return s; }
+    }
+
+    /** Digits and one dot. Anything else is dropped so a bad field cannot change the payment. */
+    static String cleanAmount(String amount) {
+        if (amount == null) return "";
+        String s = amount.trim().replace(",", "");
+        if (s.isEmpty()) return "";
+        boolean dot = false;
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c >= '0' && c <= '9') b.append(c);
+            else if (c == '.' && !dot) { dot = true; b.append(c); }
+            else return "";
+        }
+        if (b.length() == 0 || ".".equals(b.toString())) return "";
+        return b.toString();
+    }
+
+    static String cleanMemo(String memo) {
+        if (memo == null) return "";
+        String s = memo.trim().replace('\n', ' ').replace('\r', ' ');
+        if (s.length() > com.harvana.app.tx.TransactionRequest.MAX_MEMO_LENGTH) {
+            s = s.substring(0, com.harvana.app.tx.TransactionRequest.MAX_MEMO_LENGTH);
+        }
+        return s;
     }
 
     private static String keyForScheme(String scheme, String chain) {

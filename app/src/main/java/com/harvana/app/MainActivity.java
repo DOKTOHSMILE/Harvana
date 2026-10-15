@@ -372,6 +372,7 @@ public class MainActivity extends AppCompatActivity {
 		com.harvana.app.utils.PresenceHeartbeat.start(getApplicationContext());
 		com.harvana.app.group.GroupSaver.retryAll(getApplicationContext(), null);
 		com.harvana.app.notify.NotificationWorker.schedule(getApplicationContext());
+		com.harvana.app.notify.WalletWatchService.start(getApplicationContext());
 		androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
 		.registerReceiver(notifChanged, new android.content.IntentFilter(com.harvana.app.notify.NotificationCenter.ACTION_CHANGED));
 		_updateNotifBadge();

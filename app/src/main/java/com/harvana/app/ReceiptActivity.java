@@ -276,21 +276,26 @@ public class ReceiptActivity extends AppCompatActivity {
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("MMM d, yyyy | h:mma", Locale.US);
 		sdf.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));
-		String when = sdf.format(new Date(timestamp));
-		tv_timestamp.setText(when);
-		TextView tl1 = findViewById(R.id.tv_tl1);
-		TextView tl2 = findViewById(R.id.tv_tl2);
-		TextView tl3 = findViewById(R.id.tv_tl3);
-		TextView tl3Title = findViewById(R.id.tv_tl3_title);
-		TextView tl3Body = findViewById(R.id.tv_tl3_body);
-		TextView tl3Mark = findViewById(R.id.tv_tl3_mark);
-		if (tl1 != null) tl1.setText(when);
-		if (tl2 != null) tl2.setText(when);
-		if (tl3 != null) tl3.setText(when);
-		if (!confirmed) {
-			if (tl3Title != null) tl3Title.setText(pending ? "Waiting to complete" : "Payment failed");
-			if (tl3Body != null) tl3Body.setText(pending ? "This transfer is not confirmed yet" : "This transfer did not complete");
-			if (tl3Mark != null) tl3Mark.setTextColor(pending ? UiColors.warning() : UiColors.error());
+		long initiatedAt = _millis(getIntent().getLongExtra("initiatedAt", 0L));
+		long confirmedAt = _millis(getIntent().getLongExtra("confirmedAt", 0L));
+		if (confirmedAt <= 0 && !pending && timestamp > 0) confirmedAt = timestamp;
+		_paintTimeline(sdf, initiatedAt, confirmedAt, pending);
+		final String hashForTimes = txHash;
+		final boolean pendingNow = pending;
+		if (otherChain == null && hashForTimes != null && hashForTimes.matches("(?i)[0-9a-f]{64}")) {
+			com.harvana.app.sync.HarvanaNodeClient.nodeGet("/api/v1/tx/" + hashForTimes, new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
+				@Override public void onSuccess(org.json.JSONObject tx) {
+					long ini = _millis(tx.optLong("initiatedAt", 0L));
+					long conf = _millis(tx.optLong("confirmedAt", tx.optLong("timestamp", 0L)));
+					runOnUiThread(() -> {
+						if (isFinishing()) return;
+						SimpleDateFormat fmt = new SimpleDateFormat("MMM d, yyyy | h:mma", Locale.US);
+						fmt.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));
+						_paintTimeline(fmt, ini, conf > 0 ? conf : (pendingNow ? 0L : timestamp), pendingNow);
+					});
+				}
+				@Override public void onError(String error) { }
+			});
 		}
 		
 		tv_tx_hash.setText(_shortAddr(txHash));
@@ -867,6 +872,35 @@ public class ReceiptActivity extends AppCompatActivity {
 		return y + 32; // Bottom margin for the next row
 	}
 	
+
+	private void _paintTimeline(java.text.SimpleDateFormat sdf, long initiatedAt, long confirmedAt, boolean pending) {
+		String initiated = initiatedAt > 0 ? sdf.format(new java.util.Date(initiatedAt)) : "Not recorded";
+		String confirmedText = confirmedAt > 0 ? sdf.format(new java.util.Date(confirmedAt)) : (pending ? "Not yet" : "Not recorded");
+		if (tv_timestamp != null) tv_timestamp.setText(confirmedAt > 0 ? confirmedText : (initiatedAt > 0 ? initiated : confirmedText));
+		TextView tl1 = findViewById(R.id.tv_tl1);
+		TextView tl2 = findViewById(R.id.tv_tl2);
+		TextView tl3 = findViewById(R.id.tv_tl3);
+		TextView tl3Title = findViewById(R.id.tv_tl3_title);
+		TextView tl3Body = findViewById(R.id.tv_tl3_body);
+		TextView tl3Mark = findViewById(R.id.tv_tl3_mark);
+		if (tl1 != null) tl1.setText(initiated);
+		if (tl2 != null) tl2.setText(pending ? "Waiting for the network" : confirmedText);
+		if (tl3 != null) tl3.setText(pending ? "Not yet" : confirmedText);
+		if (pending || confirmedAt <= 0) {
+			if (tl3Title != null) tl3Title.setText(pending ? "Waiting to complete" : "Payment failed");
+			if (tl3Body != null) tl3Body.setText(pending ? "This transfer is not confirmed yet" : "This transfer did not complete");
+			if (tl3Mark != null) tl3Mark.setTextColor(pending ? UiColors.warning() : UiColors.error());
+		} else {
+			if (tl3Title != null) tl3Title.setText("Payment complete");
+			if (tl3Body != null) tl3Body.setText("First confirmation on the network");
+			if (tl3Mark != null) tl3Mark.setTextColor(UiColors.success());
+		}
+	}
+
+	private static long _millis(long ts) {
+		if (ts > 0 && ts < 1_000_000_000_000L) return ts * 1000L;
+		return ts < 0 ? 0L : ts;
+	}
 
 	private String _shortAddr(String a) {
 		if (a == null || a.trim().isEmpty()) return "—";

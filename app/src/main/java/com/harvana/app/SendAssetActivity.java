@@ -162,6 +162,10 @@ public class SendAssetActivity extends AppCompatActivity {
 		btnScan = findViewById(R.id.btnScan);
 		etAmount = findViewById(R.id.etAmount);
 		etMemo = findViewById(R.id.etMemo);
+		String prefillAmount = getIntent().getStringExtra("amount");
+		String prefillMemo = getIntent().getStringExtra("memo");
+		if (prefillAmount != null && !prefillAmount.trim().isEmpty() && etAmount != null) etAmount.setText(prefillAmount.trim());
+		if (prefillMemo != null && !prefillMemo.trim().isEmpty() && etMemo != null) etMemo.setText(prefillMemo.trim());
 		tvAvailable = findViewById(R.id.tvAvailable);
 		linear19 = findViewById(R.id.linear19);
 		linear20 = findViewById(R.id.linear20);
@@ -1015,9 +1019,12 @@ public class SendAssetActivity extends AppCompatActivity {
 	private void _applyScanned(String raw) {
 		com.harvana.app.scan.WalletQr.Hit hit = com.harvana.app.scan.WalletQr.parse(raw);
 		if (etRecipient != null) etRecipient.setText(hit == null ? (raw == null ? "" : raw.trim()) : hit.address);
+		if (hit != null && hit.amount != null && !hit.amount.isEmpty() && etAmount != null) etAmount.setText(hit.amount);
+		if (hit != null && hit.memo != null && !hit.memo.isEmpty() && etMemo != null) etMemo.setText(hit.memo);
 		// Keep the chosen coin when the address already fits it: a Harvana address fits HARV and every stable coin,
-		// a 0x address fits every EVM coin. Only an address of another kind changes the coin.
-		if (hit != null && !_sameFamily(_selectedKey(), hit.key)) {
+		// a 0x address fits every EVM coin. A payment request names the coin, so that one is selected.
+		boolean named = hit != null && ((hit.amount != null && !hit.amount.isEmpty()) || (hit.memo != null && !hit.memo.isEmpty()));
+		if (hit != null && (named || !_sameFamily(_selectedKey(), hit.key))) {
 			pendingCoin = hit.key;
 			_selectKey(hit.key);
 		}

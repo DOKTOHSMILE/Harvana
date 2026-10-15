@@ -30,6 +30,7 @@ public final class LogoutManager {
 		// 1. Stop everything that could write the old account back while it is being cleared.
 		quietly(() -> com.harvana.app.utils.IncomingTxWatcher.stop());
 		quietly(() -> com.harvana.app.utils.PresenceHeartbeat.stop());
+		quietly(() -> com.harvana.app.notify.WalletWatchService.stop(app));
 		quietly(() -> androidx.work.WorkManager.getInstance(app).cancelAllWork());
 		quietly(() -> androidx.core.app.NotificationManagerCompat.from(app).cancelAll());
 

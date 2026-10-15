@@ -209,7 +209,12 @@ public class WalletActivityFragmentActivity extends Fragment {
 									: com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay(tx.optLong("amount", 0L)));
 							entry.put("tokenSymbol", husdTx ? com.harvana.app.husd.Stable.symbol(stableCode) : com.harvana.app.CoinInfo.ticker());
 							entry.put("status", "pending");
-							entry.put("timestamp", System.currentTimeMillis());
+							long initiated = tx.optLong("receivedAt", tx.optLong("timestamp", 0L));
+							if (initiated <= 0) initiated = System.currentTimeMillis();
+							else if (initiated < 1_000_000_000_000L) initiated *= 1000L;
+							entry.put("timestamp", initiated);
+							entry.put("initiatedAt", initiated);
+							entry.put("confirmedAt", 0L);
 							knownPending.add(entry);
 							addedAny = true;
 						}
@@ -303,9 +308,14 @@ public class WalletActivityFragmentActivity extends Fragment {
 								item.put("nonce", tx.optLong("nonce", 0L));
 								item.put("confirmations", tx.optLong("confirmations", 0L));
 								
-								long ts = tx.optLong("timestamp", System.currentTimeMillis());
-								if (ts > 0 && ts < 1_000_000_000_000L) ts *= 1000L;
+								long confirmed = tx.optLong("confirmedAt", tx.optLong("timestamp", 0L));
+								long initiated = tx.optLong("initiatedAt", 0L);
+								if (confirmed > 0 && confirmed < 1_000_000_000_000L) confirmed *= 1000L;
+								if (initiated > 0 && initiated < 1_000_000_000_000L) initiated *= 1000L;
+								long ts = confirmed > 0 ? confirmed : (initiated > 0 ? initiated : System.currentTimeMillis());
 								item.put("timestamp", ts);
+								item.put("initiatedAt", initiated);
+								item.put("confirmedAt", confirmed);
 								
 								allNodeTx.add(item);
 							}
@@ -493,7 +503,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 				} catch (Exception ignored) {}
 			}
 			
-			String formattedAmount = _formatUIBalance(amount);
+			String formattedAmount = _formatUIBalance(amount) + " " + asset;
 			
 			long timestamp = System.currentTimeMillis();
 			Object tsObj = item.get("timestamp");
@@ -555,10 +565,13 @@ public class WalletActivityFragmentActivity extends Fragment {
 				com.harvana.app.tx.TxKind kind = com.harvana.app.tx.TxKind.of(
 				item.get("memo") != null ? String.valueOf(item.get("memo")) : "", isIncoming);
 				if (kind != null) {
+					String memo0 = item.get("memo") != null ? String.valueOf(item.get("memo")) : "";
 					if (holder.tvType != null) holder.tvType.setText(isPending ? kind.title + "…" : kind.title);
-					if (holder.tvAddress != null) holder.tvAddress.setText(kind.detail + " · " + (isIncoming ? "From: " + shortenAddress(sender) : "To: " + shortenAddress(recipient)));
+					if (holder.tvAddress != null) {
+						String coinBit = memo0.startsWith("SWAP_") ? " · " + asset : "";
+						holder.tvAddress.setText(kind.detail + coinBit + " · " + (isIncoming ? "From: " + shortenAddress(sender) : "To: " + shortenAddress(recipient)));
+					}
 					if (!isPending && holder.ivIcon != null) {
-						String memo0 = item.get("memo") != null ? String.valueOf(item.get("memo")) : "";
 						if (memo0.startsWith("SWAP_") && !memo0.startsWith("SWAP_FARE:")) {
 							_fullColourIcon(holder.ivIcon);                         // Harvana Swap's own icon
 							holder.ivIcon.setImageResource(R.drawable.ic_app_swap);
@@ -579,12 +592,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 			}
 			
 			if (holder.tvDate != null) {
-				CharSequence rel = android.text.format.DateUtils.getRelativeTimeSpanString(
-				timestamp, 
-				System.currentTimeMillis(), 
-				android.text.format.DateUtils.MINUTE_IN_MILLIS
-				);
-				holder.tvDate.setText(rel);
+				holder.tvDate.setText(_activityWhen(isPending, _longOf(item, "initiatedAt"), timestamp));
 			}
 			
 			final long   finalTimestamp = timestamp;
@@ -602,6 +610,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 					intent.putExtra("tokenSymbol",      finalAsset);
 					intent.putExtra("value",            finalAmount);
 					intent.putExtra("timestamp",        finalTimestamp);
+					intent.putExtra("initiatedAt",      _longOf(item, "initiatedAt"));
+					intent.putExtra("confirmedAt",      _longOf(item, "confirmedAt"));
 					
 					String passedMemo = item.get("memo") != null ? String.valueOf(item.get("memo")) : "";
 					intent.putExtra("memo", passedMemo);
@@ -673,7 +683,9 @@ public class WalletActivityFragmentActivity extends Fragment {
 	private static void _lineIcon(android.widget.ImageView iv) {
 		int p = Math.round(8 * iv.getResources().getDisplayMetrics().density);
 		iv.setPadding(p, p, p, p);
+		iv.setScaleType(android.widget.ImageView.ScaleType.CENTER_INSIDE);
 		iv.setImageTintList(android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(iv.getContext(), R.color.colorAccent)));
+		com.harvana.app.tx.TxIcon.circle(iv);
 	}
 
 	/** A coin or app logo in its own colours, filling its circle. */
@@ -681,12 +693,38 @@ public class WalletActivityFragmentActivity extends Fragment {
 		iv.clearColorFilter();
 		iv.setImageTintList(null);
 		iv.setPadding(0, 0, 0, 0);
-		// A coin is round: clipped to a circle, so nothing square shows around it in the round bubble.
-		iv.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
-		iv.setOutlineProvider(new android.view.ViewOutlineProvider() {
-			@Override public void getOutline(android.view.View v, android.graphics.Outline o) { o.setOval(0, 0, v.getWidth(), v.getHeight()); }
-		});
-		iv.setClipToOutline(true);
+		iv.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
+		com.harvana.app.tx.TxIcon.circle(iv);
+	}
+
+	private static long _longOf(java.util.Map<String, Object> item, String key) {
+		if (item == null) return 0L;
+		Object v = item.get(key);
+		long ts = 0L;
+		if (v instanceof Number) ts = ((Number) v).longValue();
+		else if (v != null) {
+			try { ts = Long.parseLong(v.toString().trim()); } catch (Exception ignored) { return 0L; }
+		}
+		if (ts > 0 && ts < 1_000_000_000_000L) ts *= 1000L;
+		return ts;
+	}
+
+	/** Pending shows when it was sent. Confirmed shows that time, then the confirmation, when the node recorded both. */
+	static CharSequence _activityWhen(boolean pending, long initiated, long confirmed) {
+		long now = System.currentTimeMillis();
+		if (pending) {
+			long t = initiated > 0 ? initiated : confirmed;
+			if (t <= 0) return "Waiting";
+			return "Sent " + android.text.format.DateUtils.getRelativeTimeSpanString(t, now, android.text.format.DateUtils.MINUTE_IN_MILLIS);
+		}
+		if (initiated > 0 && confirmed > 0 && Math.abs(confirmed - initiated) > 1_500L) {
+			CharSequence sent = android.text.format.DateUtils.getRelativeTimeSpanString(initiated, now, android.text.format.DateUtils.MINUTE_IN_MILLIS);
+			CharSequence done = android.text.format.DateUtils.getRelativeTimeSpanString(confirmed, now, android.text.format.DateUtils.MINUTE_IN_MILLIS);
+			return "Sent " + sent + " · Confirmed " + done;
+		}
+		long t = confirmed > 0 ? confirmed : initiated;
+		if (t <= 0) return "";
+		return android.text.format.DateUtils.getRelativeTimeSpanString(t, now, android.text.format.DateUtils.MINUTE_IN_MILLIS);
 	}
 
 	private java.util.ArrayList<java.util.HashMap<String, Object>> filterFailedTx(

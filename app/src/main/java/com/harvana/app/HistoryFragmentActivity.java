@@ -648,6 +648,10 @@ public class HistoryFragmentActivity extends Fragment {
 			// The group wallet is "me" here: money into it is received, money out of it is sent.
 			com.harvana.app.tx.TxKind kind = com.harvana.app.tx.TxKind.of(memo, !isOut);
 			if (h.icon != null) {
+				int pad = Math.round(8 * h.icon.getResources().getDisplayMetrics().density);
+				h.icon.setPadding(pad, pad, pad, pad);
+				h.icon.setScaleType(android.widget.ImageView.ScaleType.CENTER_INSIDE);
+				com.harvana.app.tx.TxIcon.circle(h.icon);
 				h.icon.setImageResource(!confirmed ? R.drawable.icon_access_time_outline
 					: kind != null ? kind.icon : isOut ? R.drawable.ic_action_send : R.drawable.ic_action_receive);
 				h.icon.setColorFilter(!confirmed ? pending : isOut ? outgoing : incoming);
@@ -661,7 +665,14 @@ public class HistoryFragmentActivity extends Fragment {
 				h.amount.setText((isOut ? "- " : "+ ") + _formatUIBalance(amountHarv) + " " + ticker);
 				h.amount.setTextColor(!confirmed ? pending : isOut ? outgoing : incoming);
 			}
-			if (h.date != null) h.date.setText(ts > 0 ? new SimpleDateFormat("dd MMM · HH:mm", Locale.getDefault()).format(new java.util.Date(ts)) : "Pending");
+			if (h.date != null) {
+				long initiated = _millis(num(tx, "initiatedAt"));
+				long confirmedAt = _millis(num(tx, "confirmedAt"));
+				if (initiated <= 0) confirmedAt = 0;
+				h.date.setText(initiated > 0
+						? WalletActivityFragmentActivity._activityWhen(!confirmed, initiated, confirmedAt > 0 ? confirmedAt : ts)
+						: (ts > 0 ? new SimpleDateFormat("dd MMM · HH:mm", Locale.getDefault()).format(new java.util.Date(ts)) : "Pending"));
+			}
 			if (h.address != null) {
 				h.address.setTag(counterparty);
 				h.address.setText((isOut ? "To: " : "From: ") + shortAddr);
@@ -683,6 +694,8 @@ public class HistoryFragmentActivity extends Fragment {
 				intent.putExtra("tokenSymbol", ticker);
 				intent.putExtra("value", amountHarv);
 				intent.putExtra("timestamp", ts);
+				intent.putExtra("initiatedAt", (long) num(tx, "initiatedAt"));
+				intent.putExtra("confirmedAt", (long) num(tx, "confirmedAt"));
 				intent.putExtra("memo", memo);
 				intent.putExtra("confirmations", confirmations);
 				
@@ -744,6 +757,12 @@ public class HistoryFragmentActivity extends Fragment {
 		Object v = m.get(k);
 		if (v instanceof Number) return ((Number) v).doubleValue();
 		try { return Double.parseDouble(String.valueOf(v)); } catch (Exception e) { return 0; }
+	}
+
+	private static long _millis(double v) {
+		long ts = (long) v;
+		if (ts > 0 && ts < 1_000_000_000_000L) ts *= 1000L;
+		return ts;
 	}
 	
 	// NEW UI FORMATTER HELPER

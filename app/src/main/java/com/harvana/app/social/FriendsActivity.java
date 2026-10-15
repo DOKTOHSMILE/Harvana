@@ -60,6 +60,7 @@ public class FriendsActivity extends AppCompatActivity {
             chips[i] = findViewById(chipIds[i]);
             chips[i].setOnClickListener(v -> { tab = which; filter = ""; searchBox.setText(""); render(); });
         }
+        sizePillIcons();
         findViewById(com.harvana.app.R.id.btn_friends_username).setOnClickListener(v -> askUsername());
         findViewById(com.harvana.app.R.id.btn_friends_contacts).setOnClickListener(v -> startActivity(new Intent(this, FindContactsActivity.class)));
         findViewById(com.harvana.app.R.id.btn_friends_invite).setOnClickListener(v -> shareCode());
@@ -85,6 +86,19 @@ public class FriendsActivity extends AppCompatActivity {
         ReferralStore.sync(this, (line, err) -> { });
         ReferralStore.asksForMe((list, err) -> { asks = list; runOnUiThread(this::render); });
         ReferralStore.namedMe((list, err) -> { namedMe = list; runOnUiThread(this::render); });
+    }
+
+    /** Leading icons of the three way buttons, all the same 24dp so one does not look bigger than the others. */
+    private void sizePillIcons() {
+        int[] ids = {com.harvana.app.R.id.btn_friends_username, com.harvana.app.R.id.btn_friends_contacts, com.harvana.app.R.id.btn_friends_invite};
+        int size = (int) (24 * getResources().getDisplayMetrics().density);
+        for (int id : ids) {
+            android.widget.TextView b = findViewById(id);
+            if (b == null) continue;
+            android.graphics.drawable.Drawable[] ds = b.getCompoundDrawables();
+            android.graphics.drawable.Drawable d = ds.length > 0 ? ds[0] : null;
+            if (d != null) { d.setBounds(0, 0, size, size); b.setCompoundDrawables(d, null, null, null); }
+        }
     }
 
     private void shareCode() {

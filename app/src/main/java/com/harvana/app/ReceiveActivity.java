@@ -155,13 +155,15 @@ public class ReceiveActivity extends AppCompatActivity {
 					SketchwareUtil.showMessage(this, "This address is not ready yet.");
 					return;
 				}
+				if (qrBuilt == null) { SketchwareUtil.showMessage(this, "The code is not ready yet."); return; }
 				try {
-					Bitmap bitmap = ivQrCode == null ? null : _getBitmapFromView(ivQrCode);
-					Uri imageUri = bitmap == null ? null : _saveImageToCache(bitmap);
-					if (imageUri != null) _shareImage(imageUri, qrPayload != null && qrPayload.startsWith("harvana://") ? qrPayload : activeAddress);
-					else SketchwareUtil.showMessage(this, "Couldn't prepare the QR image to share. Try again.");
+					Bitmap card = _renderRequestCard();
+					if (card == null) { SketchwareUtil.showMessage(this, "Couldn't build the request card. Try again."); return; }
+					Uri imageUri = _saveImageToCache(card);
+					if (imageUri != null) _shareImage(imageUri, _shareText());
+					else SketchwareUtil.showMessage(this, "Couldn't save the request card. Try again.");
 				} catch (Exception e) {
-					SketchwareUtil.showMessage(this, "Couldn't prepare the QR image to share. Try again.");
+					SketchwareUtil.showMessage(this, "Couldn't build the request card. Try again.");
 				}
 			});
 		}
@@ -176,6 +178,10 @@ public class ReceiveActivity extends AppCompatActivity {
 	private String qrPayload = "";
 	private String receiveKey = "HARV";
 	private String receiveTicker = "HARV";
+	/** The finished code, kept so the slip can be drawn from it once it is built. */
+	private Bitmap qrBuilt;
+	/** True while the screen is showing the slip rather than the bare code. */
+	private boolean showCard;
 	private final android.os.Handler qrHandler = new android.os.Handler(android.os.Looper.getMainLooper());
 	private final Runnable qrRebuild = this::_rebuildQr;
 	private boolean addressesReady = false;
@@ -199,7 +205,12 @@ public class ReceiveActivity extends AppCompatActivity {
 				if (isFinishing() || isDestroyed() || ivQrCode == null) return;
 				String now = qrPayload == null || qrPayload.isEmpty() ? activeAddress : qrPayload;
 				if (!forAddr.equals(activeAddress) || icon != qrIcon || !encoded.equals(now)) return;
-				if (finalQr != null) ivQrCode.setImageBitmap(finalQr);
+				if (finalQr != null) {
+					qrBuilt = finalQr;
+					showCard = false;
+					ivQrCode.setImageDrawable(null);
+					ivQrCode.setImageBitmap(qrBuilt);
+				}
 			});
 		}).start();
 	}
@@ -374,13 +385,197 @@ public class ReceiveActivity extends AppCompatActivity {
 		_loadQrCode();
 	}
 
+	/** Puts the slip on screen, so what is shown is what Share sends. */
+	private void _toggleCard() {
+		if (qrBuilt == null || ivQrCode == null) { SketchwareUtil.showMessage(this, "The code is not ready yet."); return; }
+		showCard = !showCard;
+		ivQrCode.setImageDrawable(null);
+		ivQrCode.setImageBitmap(showCard ? _renderRequestCard() : qrBuilt);
+		if (tvQrHint != null) tvQrHint.setText(showCard ? "Request card ready to share" : _hintText());
+	}
+
+	/**
+	 * The request slip: the same code, drawn on a card in the app's own colours, with the amount, note and address
+	 * printed under it. A friend who scans it pays; a friend who reads it sees what the payment is for.
+	 */
+	private Bitmap _renderRequestCard() {
+		float density = getResources().getDisplayMetrics().density;
+		int w = Math.round(600 * density), h = Math.round(860 * density);
+		int pad = Math.round(24 * density);
+		float corner = Math.round(24 * density);
+		Bitmap out = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+		Canvas c = new Canvas(out);
+		int accent = androidx.core.content.ContextCompat.getColor(this, R.color.colorAccent);
+		int accentDark = androidx.core.content.ContextCompat.getColor(this, R.color.colorAccentDark);
+		int strong = androidx.core.content.ContextCompat.getColor(this, R.color.colorAccentStrong);
+		int ink = androidx.core.content.ContextCompat.getColor(this, R.color.colorTextPrimary);
+		int secondary = androidx.core.content.ContextCompat.getColor(this, R.color.colorTextSecondary);
+		int amber = androidx.core.content.ContextCompat.getColor(this, R.color.colorWarning);
+		int onAccent = androidx.core.content.ContextCompat.getColor(this, R.color.colorTextOnAccent);
+		int onAccentMuted = androidx.core.content.ContextCompat.getColor(this, R.color.colorTextOnAccentMuted);
+		Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+		RectF box = new RectF(0, 0, w, h);
+		fill.setShader(new LinearGradient(0, 0, w, h, accent, accentDark, Shader.TileMode.CLAMP));
+		c.drawRoundRect(box, corner, corner, fill);
+
+		// a faint coin behind the panel, so the card reads as a Harvana card and not a plain box
+		fill.setShader(null);
+		fill.setColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorOverlayLight));
+		c.drawRoundRect(new RectF(w - 200 * density, -80 * density, w + 90 * density, 130 * density), 100 * density, 100 * density, fill);
+
+		int left = pad, right = w - pad, top = pad, bottom = h - Math.round(210 * density);
+		float panelW = right - left;
+		fill.setColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorQrBackground));
+		c.drawRoundRect(new RectF(left, top, right, bottom), 18 * density, 18 * density, fill);
+
+		Paint text = new Paint(Paint.ANTI_ALIAS_FLAG);
+		text.setTextAlign(Paint.Align.LEFT);
+
+		// ── Header row ──────────────────────────────────────────────
+		float y = top + 44 * density;
+		text.setColor(strong);
+		text.setTextSize(14f * density);
+		text.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
+		c.drawText("PAYMENT REQUEST", left + 24 * density, y, text);
+
+		text.setColor(accent);
+		text.setTextSize(26f * density);
+		c.drawText("HARVANA", left + 24 * density, y + 40 * density, text);
+
+		// ticker chip (right-aligned)
+		String label = receiveTicker == null || receiveTicker.trim().isEmpty() ? receiveKey : receiveTicker;
+		Paint chipText = new Paint(text);
+		chipText.setTextSize(13f * density);
+		float chipW = chipText.measureText(label) + 28 * density;
+		fill.setColor(strong);
+		c.drawRoundRect(new RectF(right - chipW - 24 * density, top + 24 * density, right - 24 * density, top + 56 * density), 16 * density, 16 * density, fill);
+		chipText.setColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorTextOnAccent));
+		c.drawText(label.toUpperCase(java.util.Locale.US), right - chipW - 10 * density, top + 46 * density, chipText);
+
+		// ── QR section ──────────────────────────────────────────────
+		float mid = (left + right) / 2f;
+		text.setTextAlign(Paint.Align.CENTER);
+		text.setColor(ink);
+		text.setTextSize(15f * density);
+		text.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+		c.drawText("SCAN TO PAY", mid, top + 130 * density, text);
+
+		Bitmap square = _square(qrBuilt);
+		int qrSize = Math.round(panelW * 0.62f);
+		c.drawBitmap(Bitmap.createScaledBitmap(square, qrSize, qrSize, true), mid - qrSize / 2f, top + 156 * density, null);
+
+		// ── Divider ─────────────────────────────────────────────────
+		float split = bottom - 48 * density;
+		fill.setColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorCardStroke));
+		float dash = 10 * density;
+		for (float x = left + 16 * density; x < right - 8 * density; x += dash * 2) {
+			c.drawLine(x, split, Math.min(x + dash, right - 8 * density), split, fill);
+		}
+
+		// ── Amount + memo ───────────────────────────────────────────
+		String amount = etReceiveAmount == null || etReceiveAmount.getText() == null ? "" : etReceiveAmount.getText().toString().trim();
+		String memo = etReceiveMemo == null || etReceiveMemo.getText() == null ? "" : etReceiveMemo.getText().toString().trim();
+
+		float lineH = 30 * density;
+		float tx = left + 24 * density;
+		float maxTextW = panelW - 48 * density;
+
+		text.setTextAlign(Paint.Align.LEFT);
+		text.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
+		text.setTextSize(20f * density);
+		text.setColor(strong);
+		String amtLine = amount.isEmpty() ? "Open amount" : amount + "  " + receiveTicker;
+		drawWrapped(c, amtLine, tx, split + lineH, maxTextW, lineH, text);
+
+		text.setTextSize(14f * density);
+		text.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
+		text.setColor(secondary);
+		String memoLine = memo.isEmpty() ? qrPayload : memo;
+		drawWrapped(c, memoLine, tx, split + lineH * 2.2f, maxTextW, lineH * 0.85f, text);
+
+		// ── Instruction strip ───────────────────────────────────────
+		float instrTop = bottom + 20 * density;
+		fill.setColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorOverlayLight));
+		c.drawRoundRect(new RectF(left, instrTop, right, instrTop + 80 * density), 14 * density, 14 * density, fill);
+
+		text.setTextAlign(Paint.Align.LEFT);
+		text.setColor(onAccent);
+		text.setTextSize(12.5f * density);
+		text.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
+		c.drawText("HOW TO PAY", left + 20 * density, instrTop + 26 * density, text);
+
+		text.setColor(onAccentMuted);
+		text.setTextSize(12f * density);
+		text.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
+		c.drawText("Open the Harvana app and scan this code to complete the payment.", left + 20 * density, instrTop + 52 * density, text);
+
+		// ── Footer strip ────────────────────────────────────────────
+		float footTop = h - 72 * density;
+		fill.setColor(amber);
+		c.drawRoundRect(new RectF(left, footTop, right, footTop + 48 * density), 24 * density, 24 * density, fill);
+		text.setTextAlign(Paint.Align.CENTER);
+		text.setColor(strong);
+		text.setTextSize(12.5f * density);
+		text.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
+		c.drawText("HARVANA PAY", mid, footTop + 31 * density, text);
+		return out;
+	}
+
+	/** A square copy of the code so the panel never stretches it. */
+	private Bitmap _square(Bitmap b) {
+		int side = Math.min(b.getWidth(), b.getHeight());
+		return Bitmap.createBitmap(b, (b.getWidth() - side) / 2, (b.getHeight() - side) / 2, side, side);
+	}
+
+	/** Draws s, wrapping onto as many lines as needed starting at (x, y). */
+	private void drawWrapped(Canvas c, String s, float x, float y, float maxW, float lineH, Paint p) {
+		if (s == null || s.isEmpty()) return;
+		if (p.measureText(s) <= maxW) { c.drawText(s, x, y, p); return; }
+		String[] words = s.split(" ");
+		StringBuilder line = new StringBuilder();
+		float cy = y;
+		for (String word : words) {
+			String test = line.length() == 0 ? word : line + " " + word;
+			if (p.measureText(test) <= maxW) { line.append(line.length() == 0 ? "" : " ").append(word); continue; }
+			if (line.length() > 0) { c.drawText(line.toString(), x, cy, p); cy += lineH; line = new StringBuilder(); }
+			line.append(word);
+		}
+		if (line.length() > 0) c.drawText(line.toString(), x, cy, p);
+	}
+
+	private String _hintText() {
+		String amt = com.harvana.app.scan.WalletQr.cleanAmount(etReceiveAmount == null || etReceiveAmount.getText() == null ? "" : etReceiveAmount.getText().toString());
+		return amt.isEmpty()
+				? "Scan to send " + receiveTicker + " to this address"
+				: "Scan to send " + amt + " " + receiveTicker;
+	}
+
 	private void _shareImage(final Uri imageUri, final String text) {
 		Intent intent = new Intent(Intent.ACTION_SEND);
 		intent.setType("image/png");
 		intent.putExtra(Intent.EXTRA_STREAM, imageUri);
 		intent.putExtra(Intent.EXTRA_TEXT, text);
 		intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-		startActivity(Intent.createChooser(intent, "Share Wallet Address"));
+		startActivity(Intent.createChooser(intent, "Share request"));
+	}
+
+	/** What accompanies the card: a short line that tells the sender exactly what to do. */
+	private String _shareText() {
+		String amount = etReceiveAmount == null || etReceiveAmount.getText() == null ? "" : etReceiveAmount.getText().toString().trim();
+		String memo = etReceiveMemo == null || etReceiveMemo.getText() == null ? "" : etReceiveMemo.getText().toString().trim();
+		StringBuilder sb = new StringBuilder("You've got a payment request on Harvana");
+		if (!amount.isEmpty()) {
+			sb.append(": ").append(amount).append(' ').append(receiveTicker);
+			if (!memo.isEmpty()) { sb.append(" - ").append(memo); }
+			sb.append('.');
+		} else if (!memo.isEmpty()) {
+			sb.append(": ").append(memo).append('.');
+		} else {
+			sb.append('.');
+		}
+		sb.append("\n\nOpen Harvana and scan the code to complete the payment.");
+		return sb.toString();
 	}
 	
 	private Bitmap _getBitmapFromView(View view) {

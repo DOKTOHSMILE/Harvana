@@ -13,8 +13,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -59,6 +57,9 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 
 	private static final long RELEASE_WINDOW_MIN = 45;     // node P2P_RELEASE_WINDOW_MINUTES
 	private static final long REFRESH_MS = 15_000;
+	/** Picture picker. Must stay inside 16 bits: this app's fragment library rejects anything higher, and the
+	 *  Activity Result launcher draws codes above that and crashes with "Can only use lower 16 bits for requestCode". */
+	private static final int RC_PROOF = 4107;
 
 	private String orderId = "", myAddress = "";
 	private JSONObject order;
@@ -74,7 +75,6 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	private final Handler handler = new Handler(Looper.getMainLooper());
 	private final Runnable tick = this::tickTimer;
 	private final Runnable autoRefresh = this::load;
-	private ActivityResultLauncher<String> picker;
 
 	private SwipeRefreshLayout refresh;
 	private TextView tvTitle, tvTimerLabel, tvTimer, tvBanner;
@@ -107,7 +107,6 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 		findViewById(R.id.iv_trade_refresh).setOnClickListener(v -> load());
 		findViewById(R.id.tv_trade_cancel).setOnClickListener(v -> cancelOrder());
 		findViewById(R.id.btn_trade_chat).setOnClickListener(v -> openChat());
-		picker = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> { if (uri != null) uploadProof(uri); });
 		if (orderId == null || orderId.isEmpty()) { fatal("No order"); return; }
 		tvTitle.setText(orderId);
 		load();
@@ -493,7 +492,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 			v.setOnClickListener(x -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(proofUrl))));
 		} else if (mine && ("AWAITING_PAYMENT".equals(status) || "PAYMENT_SUBMITTED".equals(status) || "DISPUTED".equals(status))) {
 			empty.setText("Add payment proof");
-			v.setOnClickListener(x -> picker.launch("image/*"));
+			v.setOnClickListener(x -> pickProof());
 		} else {
 			empty.setText(mine ? "No proof" : "No proof from the buyer yet");
 			v.setForeground(null);
@@ -603,6 +602,22 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 				});
 			}
 		};
+	}
+
+	private void pickProof() {
+		Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
+		pick.addCategory(Intent.CATEGORY_OPENABLE);
+		pick.setType("image/*");
+		try { startActivityForResult(pick, RC_PROOF); }
+		catch (android.content.ActivityNotFoundException e) {
+			Toast.makeText(this, "No app can pick a picture.", Toast.LENGTH_LONG).show();
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == RC_PROOF && resultCode == RESULT_OK && data != null && data.getData() != null) uploadProof(data.getData());
 	}
 
 	private void uploadProof(Uri uri) {

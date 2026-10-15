@@ -368,15 +368,26 @@ service cloud.firestore {
       allow delete: if signedIn() && (request.auth.uid == referrer || request.auth.uid == referred);
     }
 
+    // The chat id is "{orderId}_{uidA}_{uidB}" with the two ids sorted. Compared as text, not as a
+    // regular expression, so a uid that contains "." or "+" cannot break the check.
+    function p2pChatFor(id, a, b) {
+      return a is string && b is string && a.size() > 0 && b.size() > 0
+        && id.size() > a.size() + b.size() + 2
+        && id[id.size() - (a.size() + b.size() + 2):id.size()] == '_' + a + '_' + b;
+    }
+
     match /P2P_CHATS/{chatId} {
-      allow get: if signedIn() && request.auth.uid in resource.data.members;
+      // A missing chat has no resource. Reading resource.data there is a refusal, and the app
+      // used to stop before it could create the chat. A signed-in user may see that it is absent.
+      // An existing chat is still visible only to its two members.
+      allow get: if signedIn() && (resource == null || request.auth.uid in resource.data.members);
       allow list: if signedIn() && request.auth.uid in resource.data.members;
       allow create: if signedIn()
         && request.resource.data.keys().hasOnly(['members', 'createdAt', 'lastAt', 'lastFrom', 'expiresAt'])
         && request.resource.data.members.size() == 2
         && request.resource.data.members[0] < request.resource.data.members[1]
         && request.auth.uid in request.resource.data.members
-        && chatId.matches('^.+_' + request.resource.data.members[0] + '_' + request.resource.data.members[1] + '$')
+        && p2pChatFor(chatId, request.resource.data.members[0], request.resource.data.members[1])
         && request.resource.data.expiresAt is number;
       allow update: if signedIn() && request.auth.uid in resource.data.members
         && request.resource.data.members == resource.data.members

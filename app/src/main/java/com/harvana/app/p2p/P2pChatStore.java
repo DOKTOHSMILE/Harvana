@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -76,24 +77,52 @@ public final class P2pChatStore {
         final String id = chatId(orderId, me, other);
         BG.execute(() -> {
             try {
-                DocumentSnapshot d = Tasks.await(db().collection("P2P_CHATS").document(id).get(), 20, TimeUnit.SECONDS);
-                if (d.exists()) {
-                    Long exp = d.getLong("expiresAt");
-                    if (exp != null && exp < System.currentTimeMillis()) { purge(id); }
-                    else { cb.done(true, null); return; }
+                // A chat that is not there yet cannot be read: the rules look at its members, and a missing
+                // document has none, so that read is refused. That refusal is not a failure. Create it.
+                DocumentSnapshot existing = read(id);
+                if (existing != null && existing.exists()) {
+                    Long exp = existing.getLong("expiresAt");
+                    if (exp == null || exp >= System.currentTimeMillis()) { cb.done(true, null); return; }
+                    purge(id);
                 }
-                String[] pair = sortedPair(me, other);
-                long now = System.currentTimeMillis();
-                Map<String, Object> f = new HashMap<>();
-                f.put("members", Arrays.asList(pair[0], pair[1]));
-                f.put("createdAt", now);
-                f.put("lastAt", now);
-                f.put("lastFrom", "");
-                f.put("expiresAt", now + KEEP_MS);
-                Tasks.await(db().collection("P2P_CHATS").document(id).set(f), 20, TimeUnit.SECONDS);
+                create(id, me, other);
                 cb.done(true, null);
-            } catch (Exception e) { cb.done(false, "Could not open the chat."); }
+            } catch (Exception e) {
+                DocumentSnapshot again = read(id);
+                if (again != null && again.exists()) { cb.done(true, null); return; }
+                cb.done(false, fail(e, "Could not open the chat."));
+            }
         });
+    }
+
+    /** Null when the read is refused (including a chat that does not exist yet). */
+    private static DocumentSnapshot read(String id) {
+        try { return Tasks.await(db().collection("P2P_CHATS").document(id).get(), 20, TimeUnit.SECONDS); }
+        catch (Exception e) { return null; }
+    }
+
+    private static void create(String id, String me, String other) throws Exception {
+        String[] pair = sortedPair(me, other);
+        long now = System.currentTimeMillis();
+        Map<String, Object> f = new HashMap<>();
+        f.put("members", Arrays.asList(pair[0], pair[1]));
+        f.put("createdAt", now);
+        f.put("lastAt", now);
+        f.put("lastFrom", "");
+        f.put("expiresAt", now + KEEP_MS);
+        Tasks.await(db().collection("P2P_CHATS").document(id).set(f), 20, TimeUnit.SECONDS);
+    }
+
+    /** A sentence for the screen. Never the exception text (it names hosts and classes). */
+    private static String fail(Exception e, String fallback) {
+        StringBuilder blob = new StringBuilder();
+        for (Throwable t = e; t != null; t = t.getCause()) blob.append(' ').append(t.getClass().getName()).append(' ').append(t.getMessage());
+        String u = blob.toString().toUpperCase(Locale.ROOT);
+        if (u.contains("PERMISSION_DENIED")) return "The database refused this. Publish the latest Firestore rules, then try again.";
+        if (u.contains("UNAUTHENTICATED")) return "Sign in again and try once more.";
+        if (u.contains("UNAVAILABLE") || u.contains("NETWORK") || u.contains("OFFLINE") || u.contains("UNABLE TO RESOLVE"))
+            return "No connection. Check your internet and try again.";
+        return fallback;
     }
 
     /** Live messages, oldest first. Remove the returned registration when the screen closes. */
@@ -149,7 +178,7 @@ public final class P2pChatStore {
                 b.update(db().collection("P2P_CHATS").document(id), head);
                 Tasks.await(b.commit(), 20, TimeUnit.SECONDS);
                 cb.done(true, null);
-            } catch (Exception e) { cb.done(false, "Could not send the proof. Check your connection."); }
+            } catch (Exception e) { cb.done(false, fail(e, "Could not send the proof. Check your connection.")); }
         });
     }
 
@@ -197,7 +226,7 @@ public final class P2pChatStore {
                     Tasks.await(db().collection("P2P_CHATS").document(chatId(orderId, me, other))
                             .collection("reach").document(me).set(f), 20, TimeUnit.SECONDS);
                     cb.done(true, null);
-                } catch (Exception e) { cb.done(false, "Could not save the number. Check your connection."); }
+                } catch (Exception e) { cb.done(false, fail(e, "Could not save the number. Check your connection.")); }
             });
         });
     }
@@ -248,7 +277,7 @@ public final class P2pChatStore {
                 b.update(db().collection("P2P_CHATS").document(id), head);
                 Tasks.await(b.commit(), 20, TimeUnit.SECONDS);
                 cb.done(true, null);
-            } catch (Exception e) { cb.done(false, "Could not send. Check your connection."); }
+            } catch (Exception e) { cb.done(false, fail(e, "Could not send. Check your connection.")); }
         });
     }
 

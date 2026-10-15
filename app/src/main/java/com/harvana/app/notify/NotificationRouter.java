@@ -95,10 +95,14 @@ public final class NotificationRouter {
             String other = me.equals(a) ? b : me.equals(b) ? a : "";
             StringBuilder order = new StringBuilder();
             for (int i = 0; i < p.length - 3; i++) order.append(i == 0 ? "" : "_").append(p[i]);
-            if (other.isEmpty() || order.length() == 0) return null;
-            return new Intent(c, com.harvana.app.P2pChatActivity.class)
-                .putExtra(com.harvana.app.P2pChatActivity.EXTRA_ORDER, order.toString())
-                .putExtra(com.harvana.app.P2pChatActivity.EXTRA_OTHER, other);
+            if (order.length() == 0) return null;
+            android.content.Intent i = new Intent(c, com.harvana.app.P2pChatActivity.class)
+                .putExtra(com.harvana.app.P2pChatActivity.EXTRA_ORDER, order.toString());
+            if (!other.isEmpty()) return i.putExtra(com.harvana.app.P2pChatActivity.EXTRA_OTHER, other);
+            // A moderator is the third member. The chat id is still the two traders' id.
+            return i.putExtra(com.harvana.app.P2pChatActivity.EXTRA_CHAT, order + "_" + a + "_" + b)
+                .putExtra(com.harvana.app.P2pChatActivity.EXTRA_AS_MOD, true)
+                .putExtra(com.harvana.app.P2pChatActivity.EXTRA_NAME, "Appeal");
         } catch (Exception e) { return null; }
     }
 

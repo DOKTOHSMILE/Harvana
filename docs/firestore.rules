@@ -368,6 +368,14 @@ service cloud.firestore {
       allow delete: if signedIn() && (request.auth.uid == referrer || request.auth.uid == referred);
     }
 
+    // A Harvana moderator account. Create the document in the Firebase console only
+    // (this file denies client writes): MODERATORS/{firebaseUid} with active: true and a name.
+    // An appeal adds that uid as the third member of the trade chat. Until a document exists, appeals still open and the two traders keep talking.
+    match /MODERATORS/{uid} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
     // The chat id is "{orderId}_{uidA}_{uidB}" with the two ids sorted. Compared as text, not as a
     // regular expression, so a uid that contains "." or "+" cannot break the check.
     function p2pChatFor(id, a, b) {
@@ -376,23 +384,52 @@ service cloud.firestore {
         && id[id.size() - (a.size() + b.size() + 2):id.size()] == '_' + a + '_' + b;
     }
 
+    function p2pChatKeys() {
+      return request.resource.data.keys().hasOnly(
+        ['members', 'createdAt', 'lastAt', 'lastFrom', 'expiresAt', 'orderId', 'appeal', 'moderator']);
+    }
+
     match /P2P_CHATS/{chatId} {
       // A missing chat has no resource. Reading resource.data there is a refusal, and the app
       // used to stop before it could create the chat. A signed-in user may see that it is absent.
-      // An existing chat is still visible only to its two members.
+      // An existing chat is visible to its members: the two traders, and a moderator once an appeal adds one.
       allow get: if signedIn() && (resource == null || request.auth.uid in resource.data.members);
       allow list: if signedIn() && request.auth.uid in resource.data.members;
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['members', 'createdAt', 'lastAt', 'lastFrom', 'expiresAt'])
+        && p2pChatKeys()
         && request.resource.data.members.size() == 2
         && request.resource.data.members[0] < request.resource.data.members[1]
         && request.auth.uid in request.resource.data.members
         && p2pChatFor(chatId, request.resource.data.members[0], request.resource.data.members[1])
-        && request.resource.data.expiresAt is number;
+        && request.resource.data.expiresAt is number
+        && (!('orderId' in request.resource.data) || (request.resource.data.orderId is string && request.resource.data.orderId.size() < 80))
+        && (!('appeal' in request.resource.data) || request.resource.data.appeal == false)
+        && (!('moderator' in request.resource.data) || request.resource.data.moderator == '');
+      // A member may touch the clocks, mark the appeal, or add exactly one active moderator as the third member.
       allow update: if signedIn() && request.auth.uid in resource.data.members
-        && request.resource.data.members == resource.data.members
-        && request.resource.data.keys().hasOnly(['members', 'createdAt', 'lastAt', 'lastFrom', 'expiresAt'])
-        && request.resource.data.lastFrom == request.auth.uid;
+        && p2pChatKeys()
+        && request.resource.data.expiresAt is number
+        && (
+          (request.resource.data.members == resource.data.members
+            && request.resource.data.lastFrom == request.auth.uid
+            && request.resource.data.get('appeal', false) == resource.data.get('appeal', false)
+            && request.resource.data.get('moderator', '') == resource.data.get('moderator', '')
+            && request.resource.data.get('orderId', '') == resource.data.get('orderId', ''))
+          || (request.resource.data.members == resource.data.members
+            && resource.data.get('appeal', false) != true
+            && request.resource.data.appeal == true
+            && request.resource.data.get('moderator', '') == resource.data.get('moderator', '')
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['appeal', 'orderId', 'lastAt', 'expiresAt']))
+          || (resource.data.members.size() == 2
+            && request.resource.data.members.size() == 3
+            && request.resource.data.members[0] == resource.data.members[0]
+            && request.resource.data.members[1] == resource.data.members[1]
+            && request.resource.data.appeal == true
+            && request.resource.data.moderator == request.resource.data.members[2]
+            && request.auth.uid != request.resource.data.members[2]
+            && exists(/databases/$(database)/documents/MODERATORS/$(request.resource.data.members[2]))
+            && get(/databases/$(database)/documents/MODERATORS/$(request.resource.data.members[2])).data.active == true)
+        );
       allow delete: if signedIn() && request.auth.uid in resource.data.members
         && resource.data.expiresAt < request.time.toMillis();
 
@@ -400,7 +437,7 @@ service cloud.firestore {
         allow read: if signedIn() && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members;
         allow create: if signedIn()
           && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members
-          && request.resource.data.keys().hasOnly(['from', 'text', 'at', 'image'])
+          && request.resource.data.keys().hasOnly(['from', 'text', 'at', 'image', 'file', 'fileName'])
           && request.resource.data.from == request.auth.uid
           && request.resource.data.text is string
           && request.resource.data.text.size() > 0
@@ -408,7 +445,13 @@ service cloud.firestore {
           && request.resource.data.at == request.time
           && (!('image' in request.resource.data)
               || (request.resource.data.image is string && request.resource.data.image.matches('^https://.+')
-                  && request.resource.data.image.size() <= 600));
+                  && request.resource.data.image.size() <= 1000))
+          && (!('file' in request.resource.data)
+              || (request.resource.data.file is string && request.resource.data.file.matches('^https://.+')
+                  && request.resource.data.file.size() <= 1000))
+          && (!('fileName' in request.resource.data)
+              || (request.resource.data.fileName is string && request.resource.data.fileName.size() > 0
+                  && request.resource.data.fileName.size() <= 80));
         allow update: if false;
         allow delete: if signedIn()
           && request.auth.uid in get(/databases/$(database)/documents/P2P_CHATS/$(chatId)).data.members

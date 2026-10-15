@@ -31,9 +31,8 @@ import java.util.concurrent.TimeUnit;
  * The small chat on a P2P trade, so the two people can sort out payment details without leaving Harvana (where a scammer
  * would take them to an app nobody can look into).
  *
- *   P2P_CHATS/{orderId}_{uidA}_{uidB}            members [A, B] (sorted), createdAt, lastAt, lastFrom, expiresAt
- *   P2P_CHATS/{...}/messages/{id}                from, text (1 to 500), at (server time), image (optional https address:
- *                                                the buyer's payment proof, which the seller sees on the trade)
+ *   P2P_CHATS/{orderId}_{uidA}_{uidB}            members [A, B] then a moderator uid once the trade is appealed
+ *   P2P_CHATS/{...}/messages/{id}                from, text, at, image (optional picture), file + fileName (optional PDF)
  *
  * The id carries both people, so nobody can take over the chat of a trade they are not in by creating its document first.
  * Messages are kept for 30 days after the last one (so a dispute can be shown what was said), and the first participant to open
@@ -46,7 +45,7 @@ public final class P2pChatStore {
     public static final int MAX_TEXT = 500;
 
     public static final class Message {
-        public String id = "", from = "", text = "", image = "";
+        public String id = "", from = "", text = "", image = "", file = "", fileName = "";
         public long at;
     }
 
@@ -127,7 +126,10 @@ public final class P2pChatStore {
 
     /** Live messages, oldest first. Remove the returned registration when the screen closes. */
     public static ListenerRegistration listen(String orderId, String other, Listener l) {
-        final String id = chatId(orderId, me(), other);
+        return listenId(chatId(orderId, me(), other), l);
+    }
+
+    public static ListenerRegistration listenId(String id, Listener l) {
         return db().collection("P2P_CHATS").document(id).collection("messages").orderBy("at", Query.Direction.ASCENDING).limit(300)
                 .addSnapshotListener((snap, err) -> {
                     if (snap == null) return;
@@ -138,12 +140,148 @@ public final class P2pChatStore {
                         m.from = d.getString("from") == null ? "" : d.getString("from");
                         m.text = d.getString("text") == null ? "" : d.getString("text");
                         m.image = d.getString("image") == null ? "" : d.getString("image");
+                        m.file = d.getString("file") == null ? "" : d.getString("file");
+                        m.fileName = d.getString("fileName") == null ? "" : d.getString("fileName");
                         Timestamp ts = d.getTimestamp("at");
                         m.at = ts == null ? System.currentTimeMillis() : ts.toDate().getTime();
                         out.add(m);
                     }
                     l.onMessages(out);
                 });
+    }
+
+    public interface MetaListener { void onMeta(String moderatorUid, boolean appeal); }
+
+    /** The chat head: whether an appeal is open and which moderator was added. */
+    public static ListenerRegistration listenMeta(String id, MetaListener l) {
+        return db().collection("P2P_CHATS").document(id).addSnapshotListener((snap, err) -> {
+            String mod = "";
+            boolean appeal = false;
+            if (snap != null && snap.exists()) {
+                String m = snap.getString("moderator");
+                mod = m == null ? "" : m;
+                Boolean a = snap.getBoolean("appeal");
+                appeal = a != null && a;
+            }
+            l.onMeta(mod, appeal);
+        });
+    }
+
+    /**
+     * Marks the trade appealed and, when a moderator account is on duty, adds that person as the third member.
+     * The chat id does not change, so the two traders and the moderator share one thread.
+     */
+    public static void openAppeal(String orderId, String other, Done cb) {
+        ensure(orderId, other, (ok, err) -> {
+            if (!ok) { if (cb != null) cb.done(false, err); return; }
+            admit(chatId(orderId, me(), other), orderId, true, cb);
+        });
+    }
+
+    /** If this chat was already marked appealed and still has only the two traders, add a moderator now. */
+    public static void admitIfAppealed(String orderId, String other) {
+        admit(chatId(orderId, me(), other), orderId, false, (ok, err) -> { });
+    }
+
+    private static void admit(String id, String orderId, boolean forceAppeal, Done cb) {
+        BG.execute(() -> {
+            try {
+                DocumentSnapshot doc = read(id);
+                if (doc == null || !doc.exists()) { if (cb != null) cb.done(false, "Could not open the chat."); return; }
+                boolean appealed = Boolean.TRUE.equals(doc.getBoolean("appeal")) || forceAppeal;
+                if (!appealed) { if (cb != null) cb.done(true, null); return; }
+                String existingMod = doc.getString("moderator");
+                if (existingMod != null && !existingMod.isEmpty()) { if (cb != null) cb.done(true, null); return; }
+                List<String> members = new ArrayList<>();
+                Object raw = doc.get("members");
+                if (raw instanceof List) for (Object o : (List<?>) raw) if (o != null) members.add(String.valueOf(o));
+                if (members.size() >= 3) { if (cb != null) cb.done(true, null); return; }
+                String picked = "";
+                for (DocumentSnapshot m : Tasks.await(db().collection("MODERATORS").whereEqualTo("active", true).limit(8).get(), 20, TimeUnit.SECONDS)) {
+                    if (members.contains(m.getId())) continue;
+                    picked = m.getId();
+                    break;
+                }
+                Map<String, Object> head = new HashMap<>();
+                head.put("appeal", true);
+                if (orderId != null && !orderId.isEmpty()) head.put("orderId", orderId);
+                head.put("lastAt", System.currentTimeMillis());
+                boolean joined = false;
+                if (!picked.isEmpty() && members.size() == 2) {
+                    members.add(picked);
+                    head.put("members", members);
+                    head.put("moderator", picked);
+                    joined = true;
+                }
+                Tasks.await(db().collection("P2P_CHATS").document(id).update(head), 20, TimeUnit.SECONDS);
+                if (joined) sendNow(id, me(), "A Harvana moderator joined this appeal. The three of us can talk here.", null);
+                if (cb != null) cb.done(true, null);
+            } catch (Exception e) {
+                if (cb != null) cb.done(false, fail(e, "Could not add a moderator."));
+            }
+        });
+    }
+
+    /** Opens the appeal thread for the signed-in moderator. The chat id stays the traders' id. */
+    public static void openAppealChat(android.app.Activity a, String orderId) {
+        final String me = me();
+        if (me.isEmpty() || orderId == null || orderId.isEmpty()) return;
+        db().collection("P2P_CHATS").whereArrayContains("members", me).limit(40).get()
+                .addOnSuccessListener(snap -> {
+                    String found = "";
+                    for (DocumentSnapshot d : snap.getDocuments()) {
+                        String oid = d.getString("orderId");
+                        if (orderId.equals(oid) || d.getId().startsWith(orderId + "_")) { found = d.getId(); break; }
+                    }
+                    if (found.isEmpty()) {
+                        android.widget.Toast.makeText(a, "No appeal chat for this order yet.", android.widget.Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    a.startActivity(new android.content.Intent(a, com.harvana.app.P2pChatActivity.class)
+                            .putExtra(com.harvana.app.P2pChatActivity.EXTRA_ORDER, orderId)
+                            .putExtra(com.harvana.app.P2pChatActivity.EXTRA_CHAT, found)
+                            .putExtra(com.harvana.app.P2pChatActivity.EXTRA_AS_MOD, true)
+                            .putExtra(com.harvana.app.P2pChatActivity.EXTRA_NAME, "Appeal"));
+                })
+                .addOnFailureListener(e -> android.widget.Toast.makeText(a, "Could not open the appeal chat.", android.widget.Toast.LENGTH_LONG).show());
+    }
+
+    /** A picture or PDF already uploaded. Everyone in the thread sees it. */
+    public static void sendFile(String chatId, String text, String imageUrl, String fileUrl, String fileName, Done cb) {
+        final String me = me();
+        final String body = text == null || text.trim().isEmpty() ? "Attachment" : text.trim();
+        BG.execute(() -> {
+            try {
+                Map<String, Object> m = new HashMap<>();
+                m.put("from", me);
+                m.put("text", body.length() > MAX_TEXT ? body.substring(0, MAX_TEXT) : body);
+                m.put("at", FieldValue.serverTimestamp());
+                if (imageUrl != null && imageUrl.startsWith("https://")) m.put("image", imageUrl);
+                if (fileUrl != null && fileUrl.startsWith("https://")) {
+                    m.put("file", fileUrl);
+                    String name = fileName == null || fileName.trim().isEmpty() ? "Document.pdf" : fileName.trim();
+                    if (name.length() > 80) name = name.substring(0, 80);
+                    m.put("fileName", name);
+                }
+                long now = System.currentTimeMillis();
+                Map<String, Object> head = new HashMap<>();
+                head.put("lastAt", now);
+                head.put("lastFrom", me);
+                head.put("expiresAt", now + KEEP_MS);
+                WriteBatch b = db().batch();
+                b.set(db().collection("P2P_CHATS").document(chatId).collection("messages").document(), m);
+                b.update(db().collection("P2P_CHATS").document(chatId), head);
+                Tasks.await(b.commit(), 20, TimeUnit.SECONDS);
+                if (cb != null) cb.done(true, null);
+            } catch (Exception e) { if (cb != null) cb.done(false, fail(e, "Could not send the file.")); }
+        });
+    }
+
+    /** Writes into a known chat. Does not create a second chat, so a moderator stays in the traders' thread. */
+    public static void sendTo(String chatId, String text, Done cb) {
+        final String t = text == null ? "" : text.trim();
+        if (t.isEmpty()) { BG.execute(() -> { if (cb != null) cb.done(false, "Write something first."); }); return; }
+        sendNow(chatId, me(), t.length() > MAX_TEXT ? t.substring(0, MAX_TEXT) : t, cb);
     }
 
     /**
@@ -276,8 +414,8 @@ public final class P2pChatStore {
                 b.set(db().collection("P2P_CHATS").document(id).collection("messages").document(), m);
                 b.update(db().collection("P2P_CHATS").document(id), head);
                 Tasks.await(b.commit(), 20, TimeUnit.SECONDS);
-                cb.done(true, null);
-            } catch (Exception e) { cb.done(false, fail(e, "Could not send. Check your connection.")); }
+                if (cb != null) cb.done(true, null);
+            } catch (Exception e) { if (cb != null) cb.done(false, fail(e, "Could not send. Check your connection.")); }
         });
     }
 

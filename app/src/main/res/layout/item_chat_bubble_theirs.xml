@@ -15,6 +15,15 @@
 	android:paddingBottom="8dp">
 
 	<TextView
+		android:id="@+id/tv_chat_who"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textColor="@color/colorAccent"
+		android:textSize="11sp"
+		android:textStyle="bold"
+		android:visibility="gone" />
+
+	<TextView
 		android:id="@+id/tv_chat_text"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -29,6 +38,16 @@
 		android:adjustViewBounds="true"
 		android:contentDescription="Payment proof"
 		android:scaleType="centerCrop"
+		android:visibility="gone" />
+
+	<TextView
+		android:id="@+id/tv_chat_file"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="6dp"
+		android:textColor="@color/colorAccent"
+		android:textSize="13sp"
+		android:textStyle="bold"
 		android:visibility="gone" />
 
 	<TextView

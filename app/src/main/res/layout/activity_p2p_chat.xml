@@ -22,7 +22,7 @@
 		android:paddingTop="10dp"
 		android:paddingEnd="12dp"
 		android:paddingBottom="10dp"
-		android:text="Pay only into the account on the trade screen. Chats are kept 30 days."
+		android:text="Pay only into the account on the trade screen. An appeal adds a moderator. Chats are kept 30 days."
 		android:textColor="@color/colorTextSecondary"
 		android:textSize="12sp" />
 
@@ -149,6 +149,19 @@
 		android:paddingTop="8dp"
 		android:paddingEnd="10dp"
 		android:paddingBottom="10dp">
+
+		<TextView
+			android:id="@+id/btn_chat_attach"
+			android:layout_width="44dp"
+			android:layout_height="44dp"
+			android:layout_marginEnd="8dp"
+			android:background="@drawable/bg_chat_input"
+			android:contentDescription="Attach a picture or PDF"
+			android:gravity="center"
+			android:text="+"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="22sp"
+			android:textStyle="bold" />
 
 		<EditText
 			android:id="@+id/et_chat_message"

@@ -585,8 +585,10 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	private void appeal() {
 		P2pOrderViews.appealForm(this, buyer ? "Paid, not released" : "Payment not received", reason ->
 			PinPromptHelper.authorize(this, "Appeal this order", () ->
-				P2PTradeRouter.raiseDispute(getApplicationContext(), orderId, myAddress, reason, cb("Appeal opened", () ->
-					P2pChatStore.notice(orderId, otherUid, "I opened an appeal: " + reason)))));
+				P2PTradeRouter.raiseDispute(getApplicationContext(), orderId, myAddress, reason, cb("Appeal opened", () -> {
+					P2pChatStore.openAppeal(orderId, otherUid, (ok, err) -> { });
+					P2pChatStore.notice(orderId, otherUid, "I opened an appeal: " + reason);
+				}))));
 	}
 
 	private P2PTradeRouter.Callback cb(String done, Runnable after) {

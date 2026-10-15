@@ -263,6 +263,8 @@ public class GuardianConsoleActivity extends AppCompatActivity {
 		tvSigCounts, btnReleaseBuyer, btnReturnSeller));
 		btnReturnSeller.setOnClickListener(v -> _confirmAndSign(orderId, "RETURN_TO_SELLER",
 		tvSigCounts, btnReleaseBuyer, btnReturnSeller));
+		android.view.View openChat = card.findViewById(R.id.btn_card_open_chat);
+		if (openChat != null) openChat.setOnClickListener(v -> com.harvana.app.p2p.P2pChatStore.openAppealChat(this, orderId));
 		
 		layoutDisputeCards.addView(card);
 	}

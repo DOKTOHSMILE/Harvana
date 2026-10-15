@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.harvana.app.R;
 
@@ -77,6 +78,42 @@ public final class ImageHost {
                 }
             } catch (Exception e) {
                 final String m = e.getMessage() == null ? "Couldn't upload the picture." : e.getMessage();
+                MAIN.post(() -> cb.onError(m));
+            }
+        });
+    }
+
+    /**
+     * A PDF for a trade chat. Stored in Firebase Storage under {@code folder}. Pictures still go through {@link #upload}.
+     * The bucket must allow a signed-in user to write {@code p2p_chat/}.
+     */
+    public static void uploadPdf(Context context, final Uri uri, final String folder, final Callback cb) {
+        final Context app = context.getApplicationContext();
+        BG.execute(() -> {
+            try {
+                byte[] data;
+                try (InputStream in = app.getContentResolver().openInputStream(uri)) {
+                    if (in == null) throw new Exception("Couldn't read that file.");
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    byte[] buf = new byte[8192];
+                    int n, total = 0;
+                    while ((n = in.read(buf)) >= 0) {
+                        total += n;
+                        if (total > 8 * 1024 * 1024) throw new Exception("That PDF is larger than 8 MB.");
+                        out.write(buf, 0, n);
+                    }
+                    data = out.toByteArray();
+                }
+                if (data.length < 5 || data[0] != '%') throw new Exception("That file is not a PDF.");
+                StorageReference ref = FirebaseStorage.getInstance().getReference().child(folder + "/" + System.currentTimeMillis() + ".pdf");
+                StorageMetadata meta = new StorageMetadata.Builder().setContentType("application/pdf").build();
+                ref.putBytes(data, meta)
+                        .addOnSuccessListener(t -> ref.getDownloadUrl()
+                                .addOnSuccessListener(u -> cb.onSuccess(u.toString()))
+                                .addOnFailureListener(e -> cb.onError(com.harvana.app.utils.ErrorText.of(e))))
+                        .addOnFailureListener(e -> cb.onError(com.harvana.app.utils.ErrorText.of(e)));
+            } catch (Exception e) {
+                final String m = e.getMessage() == null ? "Couldn't upload the PDF." : e.getMessage();
                 MAIN.post(() -> cb.onError(m));
             }
         });

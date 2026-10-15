@@ -139,7 +139,7 @@ public final class WalletQr {
     }
 
     /** Digits and one dot. Anything else is dropped so a bad field cannot change the payment. */
-    static String cleanAmount(String amount) {
+    public static String cleanAmount(String amount) {
         if (amount == null) return "";
         String s = amount.trim().replace(",", "");
         if (s.isEmpty()) return "";
@@ -155,7 +155,7 @@ public final class WalletQr {
         return b.toString();
     }
 
-    static String cleanMemo(String memo) {
+    public static String cleanMemo(String memo) {
         if (memo == null) return "";
         String s = memo.trim().replace('\n', ' ').replace('\r', ' ');
         if (s.length() > com.harvana.app.tx.TransactionRequest.MAX_MEMO_LENGTH) {

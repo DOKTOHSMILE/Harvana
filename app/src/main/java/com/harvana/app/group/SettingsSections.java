@@ -220,10 +220,17 @@ public final class SettingsSections {
             String target = p.optString("treasurerAddress", "");
             org.json.JSONObject votes = p.optJSONObject("votes");
             org.json.JSONObject weights = p.optJSONObject("voterWeights");
-            int yes = 0, no = 0;
-            if (votes != null) for (java.util.Iterator<String> it = votes.keys(); it.hasNext(); ) { if (votes.optBoolean(it.next())) yes++; else no++; }
+            int yes = 0, no = 0, yesWeight = 0, weight = 0;
+            if (votes != null) for (java.util.Iterator<String> it = votes.keys(); it.hasNext(); ) {
+                String who = it.next();
+                int w = weights == null ? 1 : weights.optInt(who, 1);
+                weight += w;
+                if (votes.optBoolean(who)) { yes++; yesWeight += w; } else no++;
+            }
+            int pct = weight == 0 ? 0 : yesWeight * 100 / weight;
             c.addView(row("Open vote", target.isEmpty() ? "Remove the treasurer" : "Make " + shortWallet(target) + " treasurer"));
             c.addView(row("Yes · No", yes + " · " + no));
+            c.addView(row("Vote weight", pct + "% yes · needs 51%"));
             if (!p.optString("cosignBy").isEmpty()) c.addView(row("Also needs", "Admin's yes"));
             boolean mayVote = weights != null && !myWallet.isEmpty() && weights.has(myWallet);
             if (mayVote) {

@@ -243,6 +243,14 @@ public final class P2PTradeRouter {
 		_signAndSubmit(context, address, canonical, callback, (sigB64, pubKeyB64, cb) ->
 		HarvanaNodeClient.submitP2PListMine(address, timestamp, sigB64, pubKeyB64, _wrap(cb)));
 	}
+
+	/** The order as a party sees it, including the lock hash. Public GET strips payment fields. */
+	public static void fetchOrder(Context context, String orderId, String address, Callback callback) {
+		long timestamp = System.currentTimeMillis();
+		String canonical = "P2P_GET_ORDER:" + orderId + ":" + address + ":" + timestamp;
+		_signAndSubmit(context, address, canonical, callback, (sigB64, pubKeyB64, cb) ->
+			HarvanaNodeClient.submitP2PGetOrder(orderId, address, timestamp, sigB64, pubKeyB64, _wrap(cb)));
+	}
 	
 	// ── Insured Trader deposit ────────────────────────────────────────────
 	// Canonical (P2PInsuranceDepositRequest.getCanonicalMessage()):

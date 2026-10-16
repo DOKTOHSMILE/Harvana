@@ -468,6 +468,16 @@ public class GroupMembersFragmentActivity extends Fragment {
 		if (recycler_members != null && recycler_members.getAdapter() != null) recycler_members.getAdapter().notifyDataSetChanged();
 	}
 
+	/** Approved in the app is not the same as a bond locked on the chain. */
+	private String bondLine(Map<String, Object> member, String base) {
+		if (!"CIRCLE".equals(com.harvana.app.sync.NodeGroupClient.familyOf(groupId)) || !chainRosterLoaded) return base;
+		boolean locked = false;
+		for (String w : _walletsOf(member)) {
+			if (chainRoster.contains(w.toLowerCase(Locale.US))) locked = true;
+		}
+		return base + (locked ? " · bond locked" : " · bond not locked");
+	}
+
 	/** Every wallet shown on one member row: their own, then any other wallet of theirs in this group. */
 	@SuppressWarnings("unchecked")
 	private static java.util.List<String> _walletsOf(Map<String, Object> member) {
@@ -480,6 +490,9 @@ public class GroupMembersFragmentActivity extends Fragment {
 
 	/** What each member has paid in, by wallet, as the network records it (rotating circles). */
 	private final java.util.Map<String, Long> nodePaid = new java.util.HashMap<>();
+	/** Wallets whose bond is locked on the chain. Empty until the circle member list returns. */
+	private final java.util.Set<String> chainRoster = new java.util.HashSet<>();
+	private boolean chainRosterLoaded;
 	
 	private void _loadNodePaid() {
 		if (!"CIRCLE".equals(com.harvana.app.sync.NodeGroupClient.familyOf(groupId))) return;
@@ -487,12 +500,16 @@ public class GroupMembersFragmentActivity extends Fragment {
 			@Override public void onSuccess(org.json.JSONObject json) {
 				org.json.JSONArray arr = json.optJSONArray("members");
 				if (arr == null) return;
+				chainRoster.clear();
 				for (int i = 0; i < arr.length(); i++) {
 					org.json.JSONObject m = arr.optJSONObject(i);
 					if (m == null) continue;
 					String addr = m.optString("address", m.optString("memberAddress", ""));
-					if (!addr.isEmpty()) nodePaid.put(addr.toLowerCase(Locale.US), m.optLong("paidRaw", 0L));
+					if (addr.isEmpty()) continue;
+					nodePaid.put(addr.toLowerCase(Locale.US), m.optLong("paidRaw", 0L));
+					chainRoster.add(addr.toLowerCase(Locale.US));
 				}
+				chainRosterLoaded = true;
 				if (getActivity() != null) getActivity().runOnUiThread(() -> {
 					if (recycler_members != null && recycler_members.getAdapter() != null) recycler_members.getAdapter().notifyDataSetChanged();
 				});
@@ -748,7 +765,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 			String s = str(member, "slot", "");
 			slot.setText(s.isEmpty() ? "Slot —" : ("Slot " + s));
 		}
-		if (status != null) status.setText(isPending ? "PENDING join request" : str(member, "status", "ACTIVE"));
+		if (status != null) status.setText(isPending ? "PENDING join request" : bondLine(member, str(member, "status", "ACTIVE")));
 		if (role != null) {
 			boolean admin = !creatorId.isEmpty() && creatorId.equals(memberUid);
 			role.setText(isPending ? "Join request" : (admin ? "Admin" : "Member"));
@@ -766,6 +783,25 @@ public class GroupMembersFragmentActivity extends Fragment {
 			com.harvana.app.trust.NetworkTrust.wallet(sheetWallet, score -> {
 				if (getActivity() == null) return;
 				getActivity().runOnUiThread(() -> trust.setText(score.label()));
+			});
+			com.harvana.app.sync.HarvanaNodeClient.nodeGet("/api/v1/wallet/labels/" + sheetWallet, new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
+				@Override public void onSuccess(org.json.JSONObject json) {
+					org.json.JSONArray labels = json.optJSONArray("labels");
+					if (labels == null || labels.length() == 0 || getActivity() == null) return;
+					StringBuilder line = new StringBuilder();
+					for (int i = 0; i < labels.length(); i++) {
+						org.json.JSONObject one = labels.optJSONObject(i);
+						String name = one == null ? "" : one.optString("label", "");
+						if (name.isEmpty()) continue;
+						if (line.length() > 0) line.append(", ");
+						line.append(name.replace('_', ' ').toLowerCase(Locale.US));
+					}
+					if (line.length() == 0) return;
+					getActivity().runOnUiThread(() -> {
+						if (trust != null) trust.setText(trust.getText() + " · " + line);
+					});
+				}
+				@Override public void onError(String error) { }
 			});
 		}
 		
@@ -1157,7 +1193,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 			}
 			if (h.name != null) com.harvana.app.utils.Shimmer.loading(h.name);
 			if (h.wallet != null) h.wallet.setText("—");
-			if (h.status != null) h.status.setText(str(member, "status", "Active"));
+			if (h.status != null) h.status.setText(bondLine(member, str(member, "status", "Active")));
 			if (h.balance != null) h.balance.setText("");
 			if (h.initials != null) {
 				h.initials.setText("?");
@@ -1225,7 +1261,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 							if (h.name != null) h.name.setText(full);
 							if (h.initials != null && full.length() > 0)
 							h.initials.setText(full.substring(0, 1).toUpperCase(Locale.US));
-							_applyPresence(h, data);
+							_applyPresence(h, data, member);
 						});
 					}
 					@Override
@@ -1251,7 +1287,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 		public int getItemCount() { return data.size(); }
 		
 		/** Circular ring around the avatar: green = online now, amber = away, thin grey = offline. */
-		private void _applyPresence(VH h, Map<String, Object> profile) {
+		private void _applyPresence(VH h, Map<String, Object> profile, Map<String, Object> member) {
 			long now = System.currentTimeMillis();
 			com.harvana.app.group.PresenceState st = com.harvana.app.group.PresenceState.of(profile, now);
 			View ring = h.itemView.findViewById(R.id.view116);
@@ -1264,7 +1300,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 			}
 			if (dot != null) dot.setVisibility(st == com.harvana.app.group.PresenceState.ONLINE ? View.VISIBLE : View.GONE);
 			String label = com.harvana.app.group.PresenceState.label(profile, now);
-			if (h.status != null && !label.isEmpty()) h.status.setText(label);
+			if (h.status != null && !label.isEmpty()) h.status.setText(bondLine(member, label));
 		}
 		
 		private void _fetchBalance(String address, TextView target) {

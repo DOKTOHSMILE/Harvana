@@ -188,10 +188,28 @@ public class WelcomeActivity extends AppCompatActivity {
             startActivity(i);
         });
 
+        MaterialButton btnPhone = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+        LinearLayout.LayoutParams phoneParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        phoneParams.setMargins(0, dp(12), 0, 0);
+        btnPhone.setLayoutParams(phoneParams);
+        btnPhone.setText("Sign in with phone");
+        btnPhone.setAllCaps(false);
+        btnPhone.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+        btnPhone.setStrokeColorResource(R.color.colorCardStroke);
+        btnPhone.setCornerRadius(dp(12));
+        btnPhone.setMinimumHeight(dp(56));
+        btnPhone.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent phone = new Intent(this, LoginActivity.class);
+            phone.putExtra("page", "phone");
+            startActivity(phone);
+        });
+
         sheetLayout.addView(title);
         sheetLayout.addView(subtitle);
         sheetLayout.addView(btnGoogle);
         sheetLayout.addView(btnEmail);
+        sheetLayout.addView(btnPhone);
 
         bottomSheetDialog.setContentView(sheetLayout);
         bottomSheetDialog.show();

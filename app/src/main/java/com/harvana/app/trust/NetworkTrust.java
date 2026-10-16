@@ -26,6 +26,8 @@ public final class NetworkTrust {
         public int badges;
         public boolean established;
         public String summary = "";
+        public int cleanPct = -1;
+        public int experiencePct = -1;
 
         /** "92% · Gold" once the node has published a percentage, the older "12 / 26" before that, "—" if nothing. */
         public String label() {
@@ -144,9 +146,17 @@ public final class NetworkTrust {
         if (j == null) return s;
         s.published = true;
         if (j.has("trustPercent")) s.percent = j.optInt("trustPercent", -1);
-        s.tier = j.optString("trustTier", "");
+        s.tier = j.optString("trustTier", j.optString("tier", ""));
+        s.cleanPct = j.has("trustCleanPct") ? j.optInt("trustCleanPct", -1) : -1;
+        s.experiencePct = j.has("trustExperiencePct") ? j.optInt("trustExperiencePct", -1) : -1;
         String summary = j.optString("summary", "");
-        s.summary = summary.isEmpty() ? j.optString("tier", "") : summary;
+        if (summary.isEmpty() && !s.tier.isEmpty()) {
+            summary = s.tier;
+            if (s.percent >= 0) summary = s.percent + "% · " + summary;
+            if (s.cleanPct >= 0) summary += " · " + s.cleanPct + "% clean record";
+            if (s.experiencePct >= 0) summary += " · " + s.experiencePct + "% have finished a circle";
+        }
+        s.summary = summary;
         return s;
     }
 

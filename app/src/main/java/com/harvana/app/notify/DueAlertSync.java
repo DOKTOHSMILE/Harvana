@@ -55,6 +55,7 @@ public final class DueAlertSync {
                         mgr.getPayments(gid, new GroupFirestoreManager.ListCallback() {
                             @Override public void onSuccess(List<Map<String, Object>> payments) {
                                 postIfDue(c, uid, gid, data, members, payments);
+                                alertLoans(c, uid, gid, data);
                                 done.run();
                             }
                             @Override public void onError(String error) { done.run(); }
@@ -96,6 +97,34 @@ public final class DueAlertSync {
             return;
         }
         post(c, gid, data);
+    }
+
+    private static void alertLoans(Context c, String uid, String gid, Map<String, Object> group) {
+        GroupFirestoreManager.getInstance(c).getLoans(gid, new GroupFirestoreManager.ListCallback() {
+            @Override public void onSuccess(List<Map<String, Object>> loans) {
+                String name = text(group, "groupName", "Group");
+                long now = System.currentTimeMillis();
+                String day = DueCopy.dayKey(now);
+                for (Map<String, Object> loan : loans) {
+                    if (!uid.equals(text(loan, "borrowerUid", ""))) continue;
+                    String st = text(loan, "status", "").toUpperCase();
+                    if (!st.equals("ACTIVE") && !st.equals("DISBURSED")) continue;
+                    long created = loan.get("createdAt") instanceof Number ? ((Number) loan.get("createdAt")).longValue() : 0;
+                    int days = loan.get("termDays") instanceof Number ? ((Number) loan.get("termDays")).intValue() : 0;
+                    if (created <= 0 || days <= 0) continue;
+                    long due = created + days * 86_400_000L;
+                    if (now + 3L * 86_400_000L < due) continue;
+                    String id = text(loan, "_docId", gid);
+                    boolean late = now >= due;
+                    NotificationCenter.post(c, NotificationCenter.LOAN, "loan_due_" + id + "_" + day,
+                        (late ? "Loan overdue · " : "Loan due soon · ") + name,
+                        late ? "This loan is past the term you agreed. Open Loans to repay."
+                            : "This loan is due within 3 days. Open Loans to repay.",
+                        gid, 3);
+                }
+            }
+            @Override public void onError(String error) { }
+        });
     }
 
     private static void post(Context c, String gid, Map<String, Object> data) {

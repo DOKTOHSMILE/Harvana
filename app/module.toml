@@ -47,5 +47,5 @@ versionCode = 3
 versionName = "1.2.0"
 isApplication = true
 manifestPlaceholders = []
-buildTypes = [{ name = "release", debuggable = false, minifyEnabled = false, shrinkResources = false, proguardFiles = ["proguard-android-optimize.txt", "proguard-rules.pro"] }]
+buildTypes = [{ name = "release", debuggable = false, minifyEnabled = true, shrinkResources = false, proguardFiles = ["proguard-android-optimize.txt", "proguard-rules.pro"] }]
 kspProcessors = ["glide"]

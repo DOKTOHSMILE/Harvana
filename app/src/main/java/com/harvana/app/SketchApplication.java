@@ -90,7 +90,7 @@ public class SketchApplication extends Application {
             com.google.firebase.firestore.FirebaseFirestore.getInstance().setFirestoreSettings(
                 new com.google.firebase.firestore.FirebaseFirestoreSettings.Builder()
                     .setPersistenceEnabled(true)
-                    .setCacheSizeBytes(com.google.firebase.firestore.FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
+                    .setCacheSizeBytes(100L * 1024 * 1024)
                     .build());
         } catch (Throwable e) {
             Log.w(TAG, "Firestore settings already applied or init issue: " + e.getMessage());

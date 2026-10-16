@@ -190,7 +190,7 @@ public class SheetDialog extends AppSheet {
                         if (!singleChoice) d.dismiss();                         // a plain list closes when a row is chosen
                     });
                     if (i > 0) root.addView(divider(context), dividerParams(context));   // a list, one line between rows
-                    root.addView(row, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    root.addView(row, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (54 * dp)));
                 }
             }
             if (positive != null || negative != null || neutral != null) {

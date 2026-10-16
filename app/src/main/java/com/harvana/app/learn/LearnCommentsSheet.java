@@ -3,7 +3,6 @@ package com.harvana.app.learn;
 import android.app.Activity;
 import android.graphics.Typeface;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -96,7 +95,7 @@ public final class LearnCommentsSheet {
         input.setTextColor(ContextCompat.getColor(host, R.color.colorTextPrimary));
         input.setMaxLines(4);
         input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(LearnSocial.MAX_COMMENT_CHARS)});
-        MaterialButton send = new MaterialButton(host, null, com.google.android.material.R.attr.borderlessButtonStyle);
+        MaterialButton send = new MaterialButton(host, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
         send.setText("Post");
         send.setAllCaps(false);
         inputRow.addView(input, new LinearLayout.LayoutParams(0, -2, 1f));

@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 16 Oct 2026 — Startup crash interception & Download folder crash report exporter
+- Global crash interceptor (`CrashReportManager`) installed immediately in `SketchApplication.attachBaseContext()` and `onCreate()` so any startup or runtime failure is caught before the app can die silently.
+- Automatic Download folder export: writes full hardware, OS, memory, explainer analysis, and complete stack trace directly to `/storage/emulated/0/Download/Harvana_Crash_<timestamp>.txt` and `Harvana_Latest_Crash.txt` using MediaStore (Android 10+) and public storage APIs.
+- Upgraded `DebugActivity` screen with prominent download path indicator card, one-tap "Save to Downloads" button with immediate toast and path confirmation, one-tap "Share Report" button (email/chat/drive), "Copy Log", and safe "Restart App".
+- Exported action `com.harvana.app.ACTION_DEBUG_CRASH` in AndroidManifest for direct invocation and inspection via ADB or intent.
+- Startup safeguards in `SketchApplication.onCreate()` and `SplashScreenActivity`: non-critical service initializations wrapped safely to prevent blocking app boot on secondary component exceptions.
+
 ## 16 Oct 2026 — Home UI Refactor & Cross-Chain Decimals & Offline Fixes
 - Home UI refactored: added Swap quick action alongside Send, Receive, and P2P; responsive dynamic spacing and margins across narrow, medium, and wide phone screens (<360dp, 360-400dp, >400dp) so no action cards wrap or clip.
 - Offline cache background fix: removed strict device-unlocked requirement on the cache master key, allowing background synchronization workers to read state without UserNotAuthenticatedException when the phone is locked.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Crash screen: what went wrong in plain words, the raw crash message, then Copy log and Restart. -->
+<!-- Crash screen: diagnostic summary, download folder save location, quick export actions, and raw stack trace. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
@@ -11,32 +11,70 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
-		android:padding="24dp">
+		android:padding="20dp">
 
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="⚠️ Application Crash"
 			android:textColor="@color/colorTextPrimary"
-			android:textSize="20sp"
+			android:textSize="22sp"
 			android:textStyle="bold" />
 
 		<TextView
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="4dp"
-			android:layout_marginBottom="16dp"
-			android:text="An unexpected error caused the app to stop running."
+			android:layout_marginBottom="14dp"
+			android:text="An unexpected error caused Harvana to stop running. A diagnostic crash report has been saved to your device."
 			android:textColor="#FF8C9BAE"
 			android:textSize="13sp" />
 
+		<!-- Download folder notification card -->
+		<LinearLayout
+			android:id="@+id/card_debug_download"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="14dp"
+			android:background="@drawable/bg_debug_card"
+			android:orientation="vertical"
+			android:padding="14dp">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="📁 Crash Report Saved to Downloads:"
+				android:textColor="#FF68D391"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+
+			<TextView
+				android:id="@+id/tv_debug_download_path"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="6dp"
+				android:fontFamily="monospace"
+				android:textColor="#FFCBD5E0"
+				android:textIsSelectable="true"
+				android:textSize="12sp" />
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="6dp"
+				android:text="You can find this file in your phone's 'Downloads' app or file manager to inspect or share."
+				android:textColor="#FF718096"
+				android:textSize="11.5sp" />
+		</LinearLayout>
+
+		<!-- Crash meaning / human-friendly explanation -->
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_marginBottom="16dp"
+			android:layout_marginBottom="14dp"
 			android:background="@drawable/bg_debug_card"
 			android:orientation="vertical"
-			android:padding="16dp">
+			android:padding="14dp">
 
 			<TextView
 				android:layout_width="wrap_content"
@@ -53,13 +91,13 @@
 				android:paddingTop="6dp"
 				android:textColor="@color/colorTextPrimary"
 				android:textIsSelectable="true"
-				android:textSize="15sp" />
+				android:textSize="14.5sp" />
 
 			<TextView
 				android:id="@+id/tv_debug_where"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:paddingTop="10dp"
+				android:paddingTop="8dp"
 				android:textColor="#FF8C9BAE"
 				android:textSize="12.5sp" />
 
@@ -67,25 +105,84 @@
 				android:id="@+id/tv_debug_advice"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:paddingTop="10dp"
+				android:paddingTop="8dp"
 				android:textColor="#FFB6E3C2"
 				android:textSize="13sp" />
 		</LinearLayout>
 
+		<!-- Primary Action Buttons: Save to Downloads + Share -->
 		<LinearLayout
 			android:layout_width="match_parent"
-			android:layout_height="0dp"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="8dp"
+			android:orientation="horizontal">
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_debug_save_download"
+				style="@style/HarvanaButton"
+				android:layout_width="0dp"
+				android:layout_height="48dp"
+				android:layout_marginEnd="6dp"
+				android:layout_weight="1"
+				android:text="Save to Downloads"
+				android:textColor="#FFFFFFFF"
+				app:backgroundTint="#FF2B6CB0" />
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_debug_share"
+				style="@style/HarvanaButton"
+				android:layout_width="0dp"
+				android:layout_height="48dp"
+				android:layout_marginStart="6dp"
+				android:layout_weight="1"
+				android:text="Share Report"
+				android:textColor="#FFFFFFFF"
+				app:backgroundTint="#FF4A5568" />
+		</LinearLayout>
+
+		<!-- Secondary Action Buttons: Copy Log + Restart App -->
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
 			android:layout_marginBottom="16dp"
-			android:layout_weight="1"
+			android:orientation="horizontal">
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_debug_copy"
+				style="@style/HarvanaButton"
+				android:layout_width="0dp"
+				android:layout_height="48dp"
+				android:layout_marginEnd="6dp"
+				android:layout_weight="1"
+				android:text="Copy Log"
+				android:textColor="#FFFFFFFF"
+				app:backgroundTint="#FF1E2D4A" />
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_debug_restart"
+				style="@style/HarvanaButton"
+				android:layout_width="0dp"
+				android:layout_height="48dp"
+				android:layout_marginStart="6dp"
+				android:layout_weight="1"
+				android:text="Restart App"
+				android:textColor="#FFFFFFFF"
+				app:backgroundTint="#FF0066FF" />
+		</LinearLayout>
+
+		<!-- Raw Stack Trace & Diagnostic Dump -->
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
 			android:background="@drawable/bg_debug_card"
 			android:orientation="vertical"
-			android:padding="16dp">
+			android:padding="14dp">
 
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:paddingBottom="8dp"
-				android:text="Crash message:"
+				android:text="Complete Crash Diagnostics:"
 				android:textColor="#FFFF9B9B"
 				android:textSize="12sp"
 				android:textStyle="bold" />
@@ -97,35 +194,8 @@
 				android:fontFamily="monospace"
 				android:textColor="#FFFF6B6B"
 				android:textIsSelectable="true"
-				android:textSize="12sp" />
+				android:textSize="11.5sp" />
 		</LinearLayout>
 
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:orientation="horizontal">
-
-			<com.google.android.material.button.MaterialButton
-				android:id="@+id/btn_debug_copy"
-				style="@style/HarvanaButton"
-				android:layout_width="0dp"
-				android:layout_height="52dp"
-				android:layout_marginEnd="8dp"
-				android:layout_weight="1"
-				android:text="Copy Log"
-				android:textColor="#FFFFFFFF"
-				app:backgroundTint="#FF1E2D4A" />
-
-			<com.google.android.material.button.MaterialButton
-				android:id="@+id/btn_debug_restart"
-				style="@style/HarvanaButton"
-				android:layout_width="0dp"
-				android:layout_height="52dp"
-				android:layout_marginStart="8dp"
-				android:layout_weight="1"
-				android:text="Restart App"
-				android:textColor="#FFFFFFFF"
-				app:backgroundTint="#FF0066FF" />
-		</LinearLayout>
 	</LinearLayout>
 </ScrollView>

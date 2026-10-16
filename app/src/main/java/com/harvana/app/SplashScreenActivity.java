@@ -45,7 +45,7 @@ public class SplashScreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        FirebaseApp.initializeApp(this);
+        try { FirebaseApp.initializeApp(this); } catch (Throwable ignored) {}
         startedAt = System.currentTimeMillis();
         buildUi();
         animate();

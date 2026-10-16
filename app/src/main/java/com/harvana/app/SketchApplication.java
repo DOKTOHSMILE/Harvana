@@ -2,128 +2,135 @@ package com.harvana.app;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
 import com.google.firebase.FirebaseApp;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import com.harvana.app.telemetry.CrashReportManager;
 
 public class SketchApplication extends Application {
-    
+
+    private static final String TAG = "SketchApplication";
     private static Context appContext;
-    
+
     public static Context getContext() {
         return appContext;
     }
-    
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        // Step 0: Install global uncaught exception interceptor before any class loading or onCreate
+        try {
+            CrashReportManager.install(base);
+        } catch (Throwable t) {
+            Log.e(TAG, "Early crash interceptor installation failed", t);
+        }
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         appContext = getApplicationContext();
-        com.harvana.app.wallet.Net.load(this);
-        com.harvana.app.wallet.CustomAssets.all(this);           // added chains and tokens, so every screen can open them
-        
-        // Saved theme (System / Light / Dark) must be applied before any screen is created.
-        com.harvana.app.utils.ThemeManager.applySavedTheme(this);
-        com.harvana.app.utils.ThemeManager.keepAppContextInSync(this);
-        // App bar, status bar and bottom bar take the colour of the page they are on, on every screen.
-        com.harvana.app.utils.BarMatcher.install(this);
-        com.harvana.app.utils.ActivityTracker.install(this);
-        com.harvana.app.tx.PaymentTracker.install(this);
-        com.harvana.app.utils.SmartCaps.install(this);
-        com.harvana.app.utils.SmartSpacing.install(this);
-        
-        // Node answers kept on the phone, so screens open offline and at once (sync/NodeReadCache).
-        com.harvana.app.sync.NodeReadCache.init(this);
 
-        // EXPLICIT INITIALIZATION: Forces Firebase to wake up early
-        FirebaseApp.initializeApp(this);
-        
-        // Firestore offline persistence, enabled explicitly (must run before any other Firestore use)
+        // Ensure crash handler is bound to application context as well
+        try {
+            CrashReportManager.install(this);
+        } catch (Throwable t) {
+            Log.e(TAG, "CrashReportManager install in onCreate failed", t);
+        }
+
+        // 1. Core wallet and token configuration
+        try {
+            com.harvana.app.wallet.Net.load(this);
+        } catch (Throwable t) {
+            Log.e(TAG, "Failed to load Net", t);
+        }
+
+        try {
+            com.harvana.app.wallet.CustomAssets.all(this);
+        } catch (Throwable t) {
+            Log.e(TAG, "Failed to load CustomAssets", t);
+        }
+
+        // 2. Theming and UI appearance
+        try {
+            com.harvana.app.utils.ThemeManager.applySavedTheme(this);
+            com.harvana.app.utils.ThemeManager.keepAppContextInSync(this);
+        } catch (Throwable t) {
+            Log.e(TAG, "ThemeManager setup failed", t);
+        }
+
+        // 3. UI and Activity tracking helpers
+        try {
+            com.harvana.app.utils.BarMatcher.install(this);
+            com.harvana.app.utils.ActivityTracker.install(this);
+            com.harvana.app.tx.PaymentTracker.install(this);
+            com.harvana.app.utils.SmartCaps.install(this);
+            com.harvana.app.utils.SmartSpacing.install(this);
+        } catch (Throwable t) {
+            Log.e(TAG, "UI trackers setup failed", t);
+        }
+
+        // 4. Node read cache for offline responsiveness
+        try {
+            com.harvana.app.sync.NodeReadCache.init(this);
+        } catch (Throwable t) {
+            Log.e(TAG, "NodeReadCache init failed", t);
+        }
+
+        // 5. Firebase initialization with safety
+        try {
+            FirebaseApp.initializeApp(this);
+        } catch (Throwable t) {
+            Log.w(TAG, "FirebaseApp.initializeApp returned: " + t.getMessage());
+        }
+
+        // 6. Firestore offline persistence
         try {
             com.google.firebase.firestore.FirebaseFirestore.getInstance().setFirestoreSettings(
                 new com.google.firebase.firestore.FirebaseFirestoreSettings.Builder()
                     .setPersistenceEnabled(true)
-                    // Keep everything read so far, like WhatsApp keeps every chat: no size cap evicting old groups.
                     .setCacheSizeBytes(com.google.firebase.firestore.FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
                     .build());
-        } catch (Exception e) {
-            Log.w("SketchApplication", "Firestore settings already applied", e);
+        } catch (Throwable e) {
+            Log.w(TAG, "Firestore settings already applied or init issue: " + e.getMessage());
         }
-        
-        // One phone per account: a newer sign-in elsewhere signs this phone out.
-        com.harvana.app.auth.SessionGuard.install(this);
-        
-        // One-time AJ0x -> HV0x wallet address migration (idempotent)
-        com.harvana.app.wallet.AddressMigration.run(this);
-        
-        // Coin ticker/name come from the node (cached; defaults HARV / Harvana)
-        CoinInfo.init(this);
-        CoinInfo.refresh(this);
+
+        // 7. Session guard
+        try {
+            com.harvana.app.auth.SessionGuard.install(this);
+        } catch (Throwable t) {
+            Log.e(TAG, "SessionGuard install failed", t);
+        }
+
+        // 8. One-time AJ0x -> HV0x wallet address migration (idempotent)
+        try {
+            com.harvana.app.wallet.AddressMigration.run(this);
+        } catch (Throwable t) {
+            Log.e(TAG, "AddressMigration run failed", t);
+        }
+
+        // 9. Coin ticker / info from node
+        try {
+            CoinInfo.init(this);
+            CoinInfo.refresh(this);
+        } catch (Throwable t) {
+            Log.e(TAG, "CoinInfo init/refresh failed", t);
+        }
+
+        // 10. Background notifications and watcher
         try {
             com.harvana.app.notify.NotificationWorker.schedule(this);
             com.harvana.app.notify.WalletWatchService.start(this);
-        } catch (Exception e) {
-            Log.w("SketchApplication", "Could not schedule background notifications", e);
+        } catch (Throwable e) {
+            Log.w(TAG, "Could not schedule background notifications: " + e.getMessage());
         }
-        
-        com.harvana.app.telemetry.CrashReporter.sendPending(this);
 
-        // GLOBAL CRASH INTERCEPTOR (File Writer + Debug Screen)
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread thread, Throwable throwable) {
-                String stackTrace = Log.getStackTraceString(throwable);
-                
-                // Infinite loop prevention: If DebugActivity itself crashes, exit cleanly
-                if (stackTrace.contains("DebugActivity")) {
-                    android.os.Process.killProcess(android.os.Process.myPid());
-                    System.exit(1);
-                    return;
-                }
-                
-                // Queued for the node's error tracker; sent on the next start (telemetry/CrashReporter).
-                com.harvana.app.telemetry.CrashReporter.saveCrash(getApplicationContext(), throwable, stackTrace);
-
-                // Save crash log to SharedPreferences synchronously
-                getApplicationContext().getSharedPreferences("crash_prefs", Context.MODE_PRIVATE)
-                        .edit()
-                        .putString("crash_error", stackTrace)
-                        .commit(); 
-                
-                // Save a timestamped backup copy to private internal storage
-                try {
-                    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-                    String fileName = "Harvana_Crash_" + timeStamp + ".txt";
-                    
-                    File privateDir = new File(getApplicationContext().getFilesDir(), "CrashLogs");
-                    if (!privateDir.exists()) privateDir.mkdirs();
-                    File privateCrashFile = new File(privateDir, fileName);
-                    FileWriter privWriter = new FileWriter(privateCrashFile);
-                    com.harvana.app.utils.CrashExplainer.Result why = com.harvana.app.utils.CrashExplainer.explain(stackTrace);
-                    privWriter.append("FATAL CRASH DETECTED:\n\nCrash meaning:\n").append(why.meaning)
-                            .append(why.where.isEmpty() ? "" : "\nWhere: " + why.where)
-                            .append("\n\nCrash message:\n").append(stackTrace);
-                    privWriter.flush();
-                    privWriter.close();
-                } catch (Exception e) {
-                    // Ignore file writing errors during a critical crash
-                }
-                
-                // Launch the modern DebugActivity
-                Intent intent = new Intent(getApplicationContext(), DebugActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                
-                try { Thread.sleep(300); } catch (Exception ignored) {}
-                android.os.Process.killProcess(android.os.Process.myPid());
-                System.exit(1);
-            }
-        });
+        // 11. Send any pending telemetry crashes from previous runs
+        try {
+            com.harvana.app.telemetry.CrashReporter.sendPending(this);
+        } catch (Throwable t) {
+            Log.w(TAG, "CrashReporter.sendPending failed: " + t.getMessage());
+        }
     }
 }

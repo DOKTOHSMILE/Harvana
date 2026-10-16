@@ -96,9 +96,9 @@ public final class OfflineCacheManager {
                 .setKeySize(256)
                 .setRandomizedEncryptionRequired(true);
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-            builder.setUnlockedDeviceRequired(true);
-        }
+        // Note: setUnlockedDeviceRequired is intentionally omitted for the offline cache
+        // so that background workers (NotificationWorker, sync) can read/decrypt cached state
+        // when the screen is locked, avoiding UserNotAuthenticatedException.
 
         keyGenerator.init(builder.build());
         return keyGenerator.generateKey();

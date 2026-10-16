@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 16 Oct 2026 — Home UI Refactor & Cross-Chain Decimals & Offline Fixes
+- Home UI refactored: added Swap quick action alongside Send, Receive, and P2P; responsive dynamic spacing and margins across narrow, medium, and wide phone screens (<360dp, 360-400dp, >400dp) so no action cards wrap or clip.
+- Offline cache background fix: removed strict device-unlocked requirement on the cache master key, allowing background synchronization workers to read state without UserNotAuthenticatedException when the phone is locked.
+- Decimal and amount validation: NEAR, SPL (Solana), and TRC20 (Tron) transfer routines normalized with comma/dot decimal parsing and safe decimal scaling checks (ArithmeticException on excess decimals).
+- Security cleanup: removed obsolete server host and sensitive notes from developer guidance.
+
 ## 14 Oct 2026 — Crash reports to the node
 
 - A crash is saved on the phone and sent on the next start to the node's error tracker (`POST /api/v1/app/error`), which the moderator app shows under Errors. Sent: app version, the screen and method, the error and its stack. No wallet, address or account data.

@@ -99,8 +99,13 @@ public final class SplToken {
         if (!ChainKeys.base58(payer).equals(from)) throw new IllegalArgumentException("This phone's key does not match the address on screen. Open the coin again.");
         byte[] receiver = ChainSend.b58(to);
         if (receiver.length != 32) throw new IllegalArgumentException("Enter a Solana address.");
-        BigInteger value = new BigDecimal(amount.trim()).movePointRight(token.decimals).toBigIntegerExact();
-        if (value.signum() <= 0) throw new IllegalArgumentException("Enter an amount above zero.");
+        BigDecimal d;
+        try { d = new BigDecimal(amount != null ? amount.trim().replace(",", ".") : ""); }
+        catch (Exception e) { throw new IllegalArgumentException("Enter a valid amount."); }
+        if (d.signum() <= 0) throw new IllegalArgumentException("Enter an amount above zero.");
+        BigInteger value;
+        try { value = d.movePointRight(token.decimals).toBigIntegerExact(); }
+        catch (ArithmeticException e) { throw new IllegalArgumentException("Too many decimal places for " + token.symbol + " (maximum " + token.decimals + ")."); }
         String[] m = mint(token.rpc, token.contract);
         if (m == null) throw new IllegalArgumentException("That token is not a mint on this network.");
         byte[] mint = ChainSend.b58(token.contract), program = ChainSend.b58(m[1]);

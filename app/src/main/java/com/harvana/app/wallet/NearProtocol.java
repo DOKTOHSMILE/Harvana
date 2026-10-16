@@ -124,8 +124,13 @@ public final class NearProtocol {
 
     /** Sends the chain's coin; returns the transaction id. */
     public static String send(CustomAssets.Asset chain, String mnemonic, String from, String to, String amount) throws Exception {
-        BigInteger deposit = new BigDecimal(amount.trim()).movePointRight(chain.decimals).toBigIntegerExact();
-        if (deposit.signum() <= 0) throw new IllegalArgumentException("Enter an amount above zero.");
+        BigDecimal d;
+        try { d = new BigDecimal(amount != null ? amount.trim().replace(",", ".") : ""); }
+        catch (Exception e) { throw new IllegalArgumentException("Enter a valid amount."); }
+        if (d.signum() <= 0) throw new IllegalArgumentException("Enter an amount above zero.");
+        BigInteger deposit;
+        try { deposit = d.movePointRight(chain.decimals).toBigIntegerExact(); }
+        catch (ArithmeticException e) { throw new IllegalArgumentException("Too many decimal places for " + chain.symbol + "."); }
         if (!validAccount(to)) throw new IllegalArgumentException("Enter an account: 64 characters, or a name such as alice.near.");
         BigInteger[] acc = account(chain.rpc, from);
         BigInteger spendable = acc[0].subtract(acc[1].multiply(STORAGE_PRICE));
@@ -137,8 +142,13 @@ public final class NearProtocol {
 
     /** Sends a NEP-141 token: registers the receiver's storage first when it has none, then ft_transfer. */
     public static String sendToken(CustomAssets.Asset token, String mnemonic, String from, String to, String amount) throws Exception {
-        BigInteger value = new BigDecimal(amount.trim()).movePointRight(token.decimals).toBigIntegerExact();
-        if (value.signum() <= 0) throw new IllegalArgumentException("Enter an amount above zero.");
+        BigDecimal d2;
+        try { d2 = new BigDecimal(amount != null ? amount.trim().replace(",", ".") : ""); }
+        catch (Exception e) { throw new IllegalArgumentException("Enter a valid amount."); }
+        if (d2.signum() <= 0) throw new IllegalArgumentException("Enter an amount above zero.");
+        BigInteger value;
+        try { value = d2.movePointRight(token.decimals).toBigIntegerExact(); }
+        catch (ArithmeticException e) { throw new IllegalArgumentException("Too many decimal places for " + token.symbol + "."); }
         if (!validAccount(to)) throw new IllegalArgumentException("Enter an account: 64 characters, or a name such as alice.near.");
         BigInteger held = new BigInteger(String.valueOf(view(token.rpc, token.contract, "ft_balance_of", new JSONObject().put("account_id", from))));
         if (held.compareTo(value) < 0) throw new IllegalArgumentException("Not enough " + token.symbol + ".");

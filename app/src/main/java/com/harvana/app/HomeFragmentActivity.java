@@ -1527,9 +1527,11 @@ public class HomeFragmentActivity extends Fragment {
 			
 			android.widget.LinearLayout row = new android.widget.LinearLayout(getContext());
 			row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-			row.setPadding((int) (10 * d), 0, (int) (10 * d), (int) (10 * d));
+			int hPad = getResources().getConfiguration().screenWidthDp < 360 ? (int) (6 * d) : (int) (10 * d);
+			row.setPadding(hPad, 0, hPad, (int) (10 * d));
 			row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
 			row.addView(_quickAction(R.drawable.ic_action_receive, "Receive", ReceiveActivity.class), _quickActionParams(d, true));
+			row.addView(_quickAction(R.drawable.ic_app_swap, "Swap", com.harvana.app.swap.SwapActivity.class), _quickActionParams(d, true));
 			row.addView(_quickAction(R.drawable.ic_action_buy, "P2P", P2pMarketplaceActivity.class), _quickActionParams(d, true));
 			
 			card.removeView(top);
@@ -1605,7 +1607,9 @@ public class HomeFragmentActivity extends Fragment {
 
 	private android.widget.LinearLayout.LayoutParams _quickActionParams(float d, boolean leftGap) {
 		android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-		if (leftGap) lp.leftMargin = (int) (10 * d);
+		int screenWidthDp = getResources().getConfiguration().screenWidthDp;
+		int margin = screenWidthDp < 360 ? (int) (4 * d) : (screenWidthDp < 400 ? (int) (6 * d) : (int) (8 * d));
+		if (leftGap) lp.leftMargin = margin;
 		return lp;
 	}
 	
@@ -1626,14 +1630,16 @@ public class HomeFragmentActivity extends Fragment {
 		icon.setColorFilter(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorAccent));
 		cell.addView(icon, new android.widget.LinearLayout.LayoutParams((int) (17 * d), (int) (17 * d)));
 
+		int screenWidthDp = getResources().getConfiguration().screenWidthDp;
 		TextView tv = new TextView(getContext());
 		tv.setText(label);
-		tv.setTextSize(12f);
+		tv.setTextSize(screenWidthDp < 360 ? 11f : 12f);
 		tv.setMaxLines(1);
+		tv.setEllipsize(android.text.TextUtils.TruncateAt.END);
 		tv.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
 		tv.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextPrimary));
 		android.widget.LinearLayout.LayoutParams tlp = new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		tlp.leftMargin = (int) (6 * d);
+		tlp.leftMargin = screenWidthDp < 360 ? (int) (3 * d) : (int) (6 * d);
 		cell.addView(tv, tlp);
 
 		cell.setContentDescription(label);

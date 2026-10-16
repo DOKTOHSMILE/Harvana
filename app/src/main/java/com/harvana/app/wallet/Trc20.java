@@ -61,8 +61,13 @@ public final class Trc20 {
         byte[] priv = ChainKeys.privateKey(mnemonic, ChainKeys.Chain.TRX);
         try {
             if (!ChainKeys.address(mnemonic, ChainKeys.Chain.TRX).equals(from)) throw new IllegalArgumentException("This phone's key does not match the address on screen. Open the coin again.");
-            BigInteger value = new BigDecimal(amount.trim()).movePointRight(token.decimals).toBigIntegerExact();
-            if (value.signum() <= 0) throw new IllegalArgumentException("Enter an amount above zero.");
+            BigDecimal d;
+            try { d = new BigDecimal(amount != null ? amount.trim().replace(",", ".") : ""); }
+            catch (Exception e) { throw new IllegalArgumentException("Enter a valid amount."); }
+            if (d.signum() <= 0) throw new IllegalArgumentException("Enter an amount above zero.");
+            BigInteger value;
+            try { value = d.movePointRight(token.decimals).toBigIntegerExact(); }
+            catch (ArithmeticException e) { throw new IllegalArgumentException("Too many decimal places for " + token.symbol + " (maximum " + token.decimals + ")."); }
             if (new BigDecimal(balance(token, from)).movePointRight(token.decimals).toBigInteger().compareTo(value) < 0)
                 throw new IllegalArgumentException("Not enough " + token.symbol + ".");
             JSONObject built = ChainSend.tronPost("/wallet/triggersmartcontract", new JSONObject().put("owner_address", from)

@@ -1,0 +1,23 @@
+HARVANA PROTOCOL & MULTI-CHAIN ECOSYSTEM
+GLOBAL PRIVACY POLICY & DATA SUBJECT RIGHTS
+Last Updated: October 2026 | Effective Worldwide
+
+1. CORE PRIVACY PRINCIPLE: ZERO PERSONAL DATA MINING
+Harvana is built on the cryptographic principle of data minimization and sovereign privacy. We do not sell, rent, monetize, or harvest personal data. There are no third-party tracking scripts, advertising SDKs, or data broker integrations within the Harvana application.
+
+2. ON-CHAIN IMMUTABILITY & PUBLIC LEDGER TRANSPARENCY
+Cryptographic transactions conducted on Harvana, Ethereum, Bitcoin, BNB Chain, Polygon, Arbitrum, Solana, and other supported distributed networks are recorded on public, decentralized ledgers. By initiating on-chain transfers, smart contract interactions, or savings circle deposits, you acknowledge that blockchain transactions are permanent, transparent, and mathematically immutable.
+
+3. LOCAL ENCRYPTION OF KEYS & RECOVERY PHRASES
+All cryptographic private keys, seed phrases, and security PINs are encrypted locally on your device hardware using Android KeyStore, hardware-backed Keystore, or AES-GCM-256 encryption. Private keys NEVER leave your physical device and are NEVER transmitted to any central server.
+
+4. FIRESTORE & DISTRIBUTED CACHING
+To provide high-performance price quotes, coin metadata, and P2P order matching without rate-limiting:
+- Public market prices, token logos, and contract ABIs are cached globally in Firestore.
+- P2P trade chats and encrypted payment slips are visible only to the buyer, seller, and certified dispute arbitrators.
+- Optional profile information (username, bio, avatar) can be updated or cleared by you at any time.
+
+5. GDPR, CCPA, & GLOBAL PRIVACY COMPLIANCE
+Under the EU General Data Protection Regulation (GDPR), California Consumer Privacy Act (CCPA), and Nigeria Data Protection Act (NDPA):
+- You have the right to access, rectify, or purge off-chain profile data stored in Firestore.
+- In-app sign-out ("Clear All Data & Cache") instantly wipes all local keys, databases, shared preferences, and cached profile artifacts from your device.

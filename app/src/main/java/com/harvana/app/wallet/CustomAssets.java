@@ -248,7 +248,8 @@ public final class CustomAssets {
                 a.decimals = cur == null ? 18 : cur.optInt("decimals", 18);
                 JSONArray ex = j.optJSONArray("explorers");
                 if (ex != null && ex.length() > 0 && ex.optJSONObject(0) != null) a.explorer = trimSlash(ex.optJSONObject(0).optString("url", ""));
-                a.icon = chainIcon(j.optString("icon", ""));
+                String ci = chainIcon(j.optString("icon", ""));
+                a.icon = (ci != null && !ci.isEmpty()) ? ci : MultiCoinEngine.resolveChainIcon(chainId, "");
                 MAIN.post(() -> cb.got(a, null));
             } catch (Exception e) {
                 MAIN.post(() -> cb.got(null, "Chain ID " + chainId + " is not in the chain list."));
@@ -330,6 +331,22 @@ public final class CustomAssets {
             String[] g = geckoToken(chain.chainId, addr);
             a.geckoId = g[0];
             a.icon = g[1];
+            if (a.icon == null || a.icon.isEmpty()) {
+                try {
+                    JSONObject dex = getJson("https://api.dexscreener.com/latest/dex/tokens/" + addr);
+                    JSONArray pairs = dex.optJSONArray("pairs");
+                    if (pairs != null && pairs.length() > 0) {
+                        JSONObject info = pairs.getJSONObject(0).optJSONObject("info");
+                        if (info != null && !info.optString("imageUrl", "").isEmpty()) {
+                            a.icon = info.optString("imageUrl", "");
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+            if (a.icon == null || a.icon.isEmpty()) {
+                String tw = chain.chainId == 1 ? "ethereum" : chain.chainId == 56 ? "smartchain" : chain.chainId == 137 ? "polygon" : chain.chainId == 8453 ? "base" : chain.chainId == 42161 ? "arbitrum" : chain.chainId == 10 ? "optimism" : "";
+                if (!tw.isEmpty()) a.icon = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/" + tw + "/assets/" + addr + "/logo.png";
+            }
             return a;
         } catch (Exception e) {
             return null;
@@ -362,6 +379,22 @@ public final class CustomAssets {
                 String[] g = geckoToken(chainId, addr);
                 a.geckoId = g[0];
                 a.icon = g[1];
+                if (a.icon == null || a.icon.isEmpty()) {
+                    try {
+                        JSONObject dex = getJson("https://api.dexscreener.com/latest/dex/tokens/" + addr);
+                        JSONArray pairs = dex.optJSONArray("pairs");
+                        if (pairs != null && pairs.length() > 0) {
+                            JSONObject info = pairs.getJSONObject(0).optJSONObject("info");
+                            if (info != null && !info.optString("imageUrl", "").isEmpty()) {
+                                a.icon = info.optString("imageUrl", "");
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                }
+                if (a.icon == null || a.icon.isEmpty()) {
+                    String tw = chainId == 1 ? "ethereum" : chainId == 56 ? "smartchain" : chainId == 137 ? "polygon" : chainId == 8453 ? "base" : chainId == 42161 ? "arbitrum" : chainId == 10 ? "optimism" : "";
+                    if (!tw.isEmpty()) a.icon = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/" + tw + "/assets/" + addr + "/logo.png";
+                }
                 if (isBlockscout(explorer)) a.scout = explorer;
                 MAIN.post(() -> cb.got(a, null));
             } catch (Exception e) {

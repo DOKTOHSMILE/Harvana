@@ -1,0 +1,43 @@
+HARVANA PROTOCOL & MULTI-CHAIN ECOSYSTEM
+GLOBAL TERMS OF SERVICE AND JURISDICTIONAL USER AGREEMENT
+Last Updated: October 2026 | Effective Worldwide
+
+1. INTRODUCTION & NATURE OF PROTOCOL
+Harvana is a decentralized, non-custodial software suite comprising an open-source Android application, cryptographic wallet, peer-to-peer (P2P) communications bridge, and smart contract protocol interfaces. Harvana is NOT a bank, broker-dealer, financial institution, custodian, or money services business (MSB). At all times, you retain sole and exclusive ownership and mathematical control over your cryptographic private keys, seed phrases, digital assets, and transactions.
+
+2. GLOBAL JURISDICTIONAL COMPLIANCE & LEGAL SAFE HARBORS
+
+2.1 United States Safe Harbor
+Under the FinCEN 2019 Virtual Currency Guidance and SEC non-custodial precedents, Harvana provides unhosted, self-custodial software. Harvana developers and node operators do not accept, store, transmit, or hold custody of funds. The software acts purely as an automated communicative tool between users and decentralized networks.
+
+2.2 European Union (EU) & MiCA Compliance
+In accordance with the EU Markets in Crypto-Assets Regulation (MiCA) Recitals 22 and fully decentralized non-custodial exemptions, Harvana operates without central financial intermediaries. Peer-to-peer transactions and self-hosted wallets are governed directly by consensus rules. Data handling respects the EU General Data Protection Regulation (GDPR) with transparent notice that public blockchain records are immutable by design.
+
+2.3 United Kingdom (FCA)
+This software is provided on an unhosted basis. Users acknowledge that decentralized protocol transactions do not fall under the UK Financial Services Compensation Scheme (FSCS) or the jurisdiction of the Financial Ombudsman Service.
+
+2.4 Nigeria & African Jurisdictions (CBN VASP & ROSCA Frameworks)
+Harvana savings circles are digital modernizations of traditional Rotating Savings and Credit Associations (ROSCAs, known locally as Esusu, Ajo, or Chit funds). These circles are autonomous mutual aid arrangements governed by peer-agreed rules and smart contract locks, operating outside fractional reserve banking.
+
+2.5 United Arab Emirates (VARA) & Singapore (MAS)
+Users in the UAE and Singapore acknowledge that self-custodial software and direct peer-to-peer transfers are non-custodial and not regulated as custodial exchange services.
+
+3. SELF-CUSTODY & PRIVATE KEY RESPONSIBILITY
+You are solely responsible for safeguarding your 12-word mnemonic phrase, private keys, and authorization PIN. If you lose access to your recovery phrase, neither Harvana developers, moderators, nor node operators can restore or recover your funds. The protocol operates via deterministic cryptography: lost keys mean permanent loss of access.
+
+4. SAVINGS GROUPS, COLLATERAL BONDS & GRACE PERIODS
+When participating in Harvana Savings Circles (Rotating, Accumulative, or Fixed Goals):
+- Contributions and bonds are locked in network escrow contracts governed by the smart contract rules.
+- In rotating circles, collateral bonds guarantee performance.
+- Defaults on round payments trigger the protocol grace period (up to 48 hours).
+- If a default occurs, circle admins and members may vote on forgiveness or rehabilitation in accordance with on-chain consensus.
+- Emergency grants and dissolution of stalled groups can be proposed and passed by member majority vote to guarantee funds are never permanently locked.
+
+5. PEER-TO-PEER (P2P) ESCROW & CERTIFIED MEDIATION
+In P2P fiat-to-crypto trades, Harvana acts solely as a technical escrow coordination layer. Certified moderators act as independent dispute arbiters who examine payment proofs. No warranty is made regarding counterparty fiat payment methods or banking reversals.
+
+6. PROHIBITION OF AUTOMATED FARMING & SYBIL ABUSE
+Users agree not to deploy automated phone racks, sybil bots, or artificial farming rings. Harvana utilizes device authenticity verification, multi-feature entropy, and trust scoring to protect savings pools and genuine human members from sybil attacks.
+
+7. LIMITATION OF LIABILITY
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE HARVANA PROTOCOL AND SOFTWARE ARE PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTIES OF ANY KIND. UNDER NO CIRCUMSTANCES SHALL DEVELOPERS, MINERS, OR ARBITRATORS BE LIABLE FOR DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL LOSSES ARISING FROM PROTOCOL USAGE, NETWORK CONGESTION, GAS FEES, OR KEY LOSS.

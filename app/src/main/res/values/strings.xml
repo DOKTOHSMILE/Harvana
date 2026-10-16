@@ -1,3 +1,24 @@
 <resources>
 	<string name="app_name" translatable="false">Harvana</string>
+	<string name="nav_home">Home</string>
+	<string name="nav_wallet">Wallet</string>
+	<string name="nav_groups">Savings Circles</string>
+	<string name="nav_p2p">P2P Escrow</string>
+	<string name="nav_web3">Web3 Browser</string>
+	<string name="nav_settings">Settings</string>
+
+	<string name="action_send">Send</string>
+	<string name="action_receive">Receive</string>
+	<string name="action_swap">Swap</string>
+	<string name="action_add_asset">Add Asset</string>
+	<string name="action_pay_contribution">Pay Contribution</string>
+	<string name="action_withdraw_bond">Withdraw Bond</string>
+	<string name="action_claim_payout">Claim Payout</string>
+	<string name="action_request_grace">Request Grace</string>
+	<string name="action_forgive_default">Forgive Default</string>
+
+	<string name="label_trust_score">Trust Score</string>
+	<string name="label_verified_human">Verified Human</string>
+	<string name="label_terms_of_service">Terms of Service</string>
+	<string name="label_privacy_policy">Privacy Policy</string>
 </resources>

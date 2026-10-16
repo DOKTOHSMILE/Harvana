@@ -241,7 +241,10 @@ public final class AssetPrices {
             c.setRequestProperty("Accept", "application/json");
             c.setRequestProperty("User-Agent", "Harvana");
             int code = c.getResponseCode();
-            if (code != 200) return false;
+            if (code != 200) {
+                // Rate-limited or error on CoinGecko: Fall back to Binance & DexScreener
+                return fetchFallbackMultiSource();
+            }
             JSONObject o = new JSONObject(read(c.getInputStream()));
             synchronized (mem) {
                 for (String[] pair : allIds()) {
@@ -299,5 +302,46 @@ public final class AssetPrices {
                 .putLong("fetchedAt", fetchedAt)
                 .putLong("nextAllowed", nextAllowed)
                 .apply();
+    }
+
+    private static boolean fetchFallbackMultiSource() {
+        boolean gotAny = false;
+        try {
+            HttpURLConnection bin = (HttpURLConnection) new URL("https://api.binance.com/api/v3/ticker/24hr").openConnection();
+            bin.setConnectTimeout(8000);
+            bin.setReadTimeout(8000);
+            bin.setRequestProperty("Accept", "application/json");
+            if (bin.getResponseCode() == 200) {
+                JSONArray arr = new JSONArray(read(bin.getInputStream()));
+                Map<String, double[]> bMap = new HashMap<>();
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject row = arr.getJSONObject(i);
+                    String s = row.optString("symbol", "");
+                    double price = row.optDouble("lastPrice", 0.0);
+                    double change = row.optDouble("priceChangePercent", 0.0);
+                    if (price > 0) bMap.put(s, new double[]{price, change});
+                }
+                synchronized (mem) {
+                    if (bMap.containsKey("BTCUSDT")) { mem.put("BTC", new Quote(bMap.get("BTCUSDT")[0], bMap.get("BTCUSDT")[1])); gotAny = true; }
+                    if (bMap.containsKey("ETHUSDT")) { 
+                        mem.put("ETH", new Quote(bMap.get("ETHUSDT")[0], bMap.get("ETHUSDT")[1]));
+                        mem.put("BASE", new Quote(bMap.get("ETHUSDT")[0], bMap.get("ETHUSDT")[1]));
+                        mem.put("ARB", new Quote(bMap.get("ETHUSDT")[0], bMap.get("ETHUSDT")[1]));
+                        mem.put("OP", new Quote(bMap.get("ETHUSDT")[0], bMap.get("ETHUSDT")[1]));
+                        gotAny = true; 
+                    }
+                    if (bMap.containsKey("SOLUSDT")) { mem.put("SOL", new Quote(bMap.get("SOLUSDT")[0], bMap.get("SOLUSDT")[1])); gotAny = true; }
+                    if (bMap.containsKey("BNBUSDT")) { mem.put("BNB", new Quote(bMap.get("BNBUSDT")[0], bMap.get("BNBUSDT")[1])); gotAny = true; }
+                    if (bMap.containsKey("DOGEUSDT")) { mem.put("DOGE", new Quote(bMap.get("DOGEUSDT")[0], bMap.get("DOGEUSDT")[1])); gotAny = true; }
+                    if (bMap.containsKey("LTCUSDT")) { mem.put("LTC", new Quote(bMap.get("LTCUSDT")[0], bMap.get("LTCUSDT")[1])); gotAny = true; }
+                    if (bMap.containsKey("MATICUSDT")) { mem.put("POL", new Quote(bMap.get("MATICUSDT")[0], bMap.get("MATICUSDT")[1])); gotAny = true; }
+                    if (bMap.containsKey("TRXUSDT")) { mem.put("TRX", new Quote(bMap.get("TRXUSDT")[0], bMap.get("TRXUSDT")[1])); gotAny = true; }
+                    if (bMap.containsKey("AVAXUSDT")) { mem.put("AVAX", new Quote(bMap.get("AVAXUSDT")[0], bMap.get("AVAXUSDT")[1])); gotAny = true; }
+                    if (bMap.containsKey("FTMUSDT")) { mem.put("FTM", new Quote(bMap.get("FTMUSDT")[0], bMap.get("FTMUSDT")[1])); gotAny = true; }
+                }
+            }
+            bin.disconnect();
+        } catch (Exception ignored) {}
+        return gotAny;
     }
 }

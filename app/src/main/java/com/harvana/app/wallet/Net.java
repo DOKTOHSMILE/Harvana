@@ -131,6 +131,14 @@ public final class Net {
                 case "BNB": return new Evm("https://bsc-rpc.publicnode.com", 56, "", "BNB Chain", "https://bscscan.com/tx/", "https://bscscan.com/address/");
                 case "POL": return new Evm("https://polygon-bor-rpc.publicnode.com", 137, "https://polygon.blockscout.com", "Polygon", "https://polygonscan.com/tx/", "https://polygonscan.com/address/");
                 case "BASE": return new Evm("https://base-rpc.publicnode.com", 8453, "https://base.blockscout.com", "Base", "https://basescan.org/tx/", "https://basescan.org/address/");
+                case "ARB": return new Evm("https://arb1.arbitrum.io/rpc", 42161, "https://arbitrum.blockscout.com", "Arbitrum One", "https://arbiscan.io/tx/", "https://arbiscan.io/address/");
+                case "OP": return new Evm("https://mainnet.optimism.io", 10, "https://optimism.blockscout.com", "OP Mainnet", "https://optimistic.etherscan.io/tx/", "https://optimistic.etherscan.io/address/");
+                case "AVAX": return new Evm("https://api.avax.network/ext/bc/C/rpc", 43114, "", "Avalanche C-Chain", "https://snowtrace.io/tx/", "https://snowtrace.io/address/");
+                case "ZK": return new Evm("https://mainnet.era.zksync.io", 324, "https://zksync.blockscout.com", "zkSync Era", "https://explorer.zksync.io/tx/", "https://explorer.zksync.io/address/");
+                case "FTM": return new Evm("https://rpc.ftm.tools", 250, "", "Fantom Opera", "https://ftmscan.com/tx/", "https://ftmscan.com/address/");
+                case "CRO": return new Evm("https://evm.cronos.org", 25, "", "Cronos", "https://cronoscan.com/tx/", "https://cronoscan.com/address/");
+                case "GNOSIS": return new Evm("https://rpc.gnosischain.com", 100, "https://gnosis.blockscout.com", "Gnosis", "https://gnosisscan.io/tx/", "https://gnosisscan.io/address/");
+                case "LINEA": return new Evm("https://rpc.linea.build", 59144, "", "Linea", "https://lineascan.build/tx/", "https://lineascan.build/address/");
                 default: return new Evm("https://ethereum-rpc.publicnode.com", 1, "https://eth.blockscout.com", "Ethereum", "https://etherscan.io/tx/", "https://etherscan.io/address/");
             }
         }

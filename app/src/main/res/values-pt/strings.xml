@@ -1,0 +1,22 @@
+<resources>
+	<string name="app_name" translatable="false">Harvana</string>
+	<string name="nav_home">Início</string>
+	<string name="nav_wallet">Carteira</string>
+	<string name="nav_groups">Círculos de Poupança</string>
+	<string name="nav_p2p">Escrow P2P</string>
+	<string name="nav_web3">Navegador Web3</string>
+	<string name="nav_settings">Configurações</string>
+	<string name="action_send">Enviar</string>
+	<string name="action_receive">Receber</string>
+	<string name="action_swap">Trocar</string>
+	<string name="action_add_asset">Adicionar Ativo</string>
+	<string name="action_pay_contribution">Pagar Contribuição</string>
+	<string name="action_withdraw_bond">Retirar Caução</string>
+	<string name="action_claim_payout">Resgatar Pagamento</string>
+	<string name="action_request_grace">Solicitar Prazo de Graça</string>
+	<string name="action_forgive_default">Perdoar Inadimplência</string>
+	<string name="label_trust_score">Pontuação de Confiança</string>
+	<string name="label_verified_human">Humano Verificado</string>
+	<string name="label_terms_of_service">Termos de Serviço</string>
+	<string name="label_privacy_policy">Política de Privacidade</string>
+</resources>

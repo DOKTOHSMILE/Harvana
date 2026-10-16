@@ -28,7 +28,7 @@ public final class Web3Signer {
     private static final MediaType JSON = MediaType.parse("application/json");
 
     /** The chains the browser offers, by the app's coin key. */
-    public static final String[] CHAINS = {"ETH", "BNB", "POL", "BASE"};
+    public static final String[] CHAINS = {"ETH", "BNB", "POL", "BASE", "ARB", "OP", "AVAX", "FTM", "ZK", "LINEA", "CRO", "GNOSIS"};
 
     public static Net.Evm net(String key) { return Net.evm(key); }
 

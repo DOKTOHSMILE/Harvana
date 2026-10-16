@@ -143,7 +143,7 @@ public class DocumentViewerActivity extends AppCompatActivity {
 			tvNoViewerHint.setVisibility(View.GONE);
 			
 		} catch (ActivityNotFoundException e) {
-			tvNoViewerHint.setVisibility(View.VISIBLE);
+			_openInAppReader();
 		} catch (Exception e) {
 			Toast.makeText(this, "Couldn't open the document: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_LONG).show();
 		}
@@ -152,4 +152,55 @@ public class DocumentViewerActivity extends AppCompatActivity {
 	{
 	}
 	
+
+	private void _openInAppReader() {
+		String docType = getIntent().getStringExtra("doc_type");
+		String txtFile = "privacy".equals(docType) ? "legal_privacy_policy.txt" : "legal_terms_of_service.txt";
+		String title = "privacy".equals(docType) ? "Privacy Policy" : "Terms of Service";
+		try (InputStream in = getAssets().open(txtFile);
+			 ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+			byte[] buf = new byte[2048];
+			int n;
+			while ((n = in.read(buf)) > 0) baos.write(buf, 0, n);
+			String text = baos.toString("UTF-8");
+
+			com.google.android.material.bottomsheet.BottomSheetDialog sheet =
+					new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+			LinearLayout root = new LinearLayout(this);
+			root.setOrientation(LinearLayout.VERTICAL);
+			int pad = (int) (20 * getResources().getDisplayMetrics().density);
+			root.setPadding(pad, pad, pad, pad);
+
+			TextView tvTitle = new TextView(this);
+			tvTitle.setText(title);
+			tvTitle.setTextSize(18f);
+			tvTitle.setTypeface(null, Typeface.BOLD);
+			tvTitle.setPadding(0, 0, 0, (int) (12 * getResources().getDisplayMetrics().density));
+			root.addView(tvTitle);
+
+			androidx.core.widget.NestedScrollView scroller = new androidx.core.widget.NestedScrollView(this);
+			TextView tvBody = new TextView(this);
+			tvBody.setText(text);
+			tvBody.setTextSize(13f);
+			tvBody.setLineSpacing(6f, 1.2f);
+			scroller.addView(tvBody);
+
+			LinearLayout.LayoutParams lpScroll = new LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.0f);
+			lpScroll.bottomMargin = (int) (16 * getResources().getDisplayMetrics().density);
+			root.addView(scroller, lpScroll);
+
+			com.google.android.material.button.MaterialButton close =
+					new com.google.android.material.button.MaterialButton(this);
+			close.setText("Done Reading");
+			close.setOnClickListener(x -> sheet.dismiss());
+			root.addView(close, new LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+			sheet.setContentView(root);
+			sheet.show();
+		} catch (Exception ex) {
+			tvNoViewerHint.setVisibility(View.VISIBLE);
+		}
+	}
 }

@@ -825,17 +825,29 @@ public class GroupPaymentFragmentActivity extends Fragment {
                                 : com.harvana.app.engine.FixedSnapshot.of(group, member, me);
                 NodePayActions.Ctx ctx = _payCtx();
                 for (com.harvana.app.engine.GroupAction a : snap.actions) {
-                        // Goal groups keep every request and vote here (no separate Actions & votes page). Other groups keep
-                        // requests, withdrawals and votes on their Actions & votes page; this tab is only for paying.
-                        if (!"FIXED".equals(family) && isDecisionAction(a.id)) continue;
+                        // Crucial: never hide WITHDRAW_BOND, CLAIM_ROUND, or ACCUM_CLAIM - members must always be able to claim payouts and withdraw bonds!
+                        if (!"FIXED".equals(family) && isDecisionAction(a.id) 
+                                && !com.harvana.app.engine.GroupAction.WITHDRAW_BOND.equals(a.id)
+                                && !com.harvana.app.engine.GroupAction.ACCUM_CLAIM.equals(a.id)
+                                && !com.harvana.app.engine.GroupAction.ACCUM_PACK.equals(a.id)) {
+                            continue;
+                        }
                         final com.harvana.app.engine.GroupAction action = a;
-                        Button b = NodePayActions.button(getActivity(), a.label, a.primary && a.enabled, v -> {
+                        Button b = NodePayActions.button(getActivity(), a.label, (a.primary || com.harvana.app.engine.GroupAction.WITHDRAW_BOND.equals(a.id) || com.harvana.app.engine.GroupAction.ACCUM_CLAIM.equals(a.id)) && a.enabled, v -> {
                                 ctx.pressed = (Button) v;
                                 NodePayActions.run(ctx, action);
                         });
                         b.setEnabled(a.enabled);
                         if (!a.enabled) b.setAlpha(0.55f);
                         nodeActionHost.addView(b);
+                }
+                if (linkedNodeId != null && !linkedNodeId.isEmpty()) {
+                        nodeActionHost.addView(NodePayActions.button(getActivity(), "Actions, Votes & Governance", false, v -> {
+                                android.content.Intent it = new android.content.Intent(getActivity(), com.harvana.app.group.GroupActionsActivity.class);
+                                it.putExtra("nodeGroupId", linkedNodeId);
+                                it.putExtra("firestoreGroupId", groupId);
+                                startActivity(it);
+                        }));
                 }
                 if ("FIXED".equals(family)) com.harvana.app.group.GoalGroupPanel.render(ctx, nodeActionHost);
                 nodeActionHost.addView(NodePayActions.button(getActivity(), "Copy group ID", false,

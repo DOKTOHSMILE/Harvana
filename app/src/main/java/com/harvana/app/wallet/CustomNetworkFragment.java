@@ -148,7 +148,8 @@ public class CustomNetworkFragment extends Fragment {
         if (ex.isEmpty() && listed != null && listed.chainId == id) ex = listed.explorer;
         while (ex.endsWith("/")) ex = ex.substring(0, ex.length() - 1);
         a.explorer = ex;
-        a.icon = listed != null && listed.chainId == id ? listed.icon : "";
+        String rawIc = listed != null && listed.chainId == id ? listed.icon : "";
+        a.icon = (rawIc != null && !rawIc.isEmpty()) ? rawIc : MultiCoinEngine.resolveChainIcon(id, "");
         boolean known = listed != null && listed.chainId == id;
         NetworkSheets.approve(requireActivity(), a, null, known, () -> {
             CustomAssets.addNetwork(requireContext(), a);

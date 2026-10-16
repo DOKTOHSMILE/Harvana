@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 16 Oct 2026 — Phone sign-in, circle roster, alerts, signed order
+
+- Sign-in sheet has **Sign in with phone**. Firebase sends the SMS. No Cloud Function. Enable the Phone provider in the Firebase console or the text will not send.
+- A forming circle shows how many seats have a locked bond. The member list says `bond locked` or `bond not locked`. Approving someone in the app does not start the circle.
+- Discover's group info shows the node's trust line (clean record and finished circles) and that a vote needs 51% of the vote weight. A member sheet shows that wallet's labels. A treasurer vote shows the weight, not only the count of people.
+- The phone pulls admin join requests and loan applications, and reminds a borrower when a loan is due within 3 days or late. This uses the existing 15-minute pull. It is not push.
+- An order screen signs `P2P_GET_ORDER` and uses that copy for the lock hash and any payment fields. The public order view stays redacted.
+- Circle payout math was already `contribution × (members − 1)` on the node (12 Oct). The overview now says the same thing. No node change in this commit.
+
 ## 16 Oct 2026 — Direct Firestore crash streaming & rules update
 - Wired CrashReportManager to stream crash logs directly to Firestore CRASH_LOGS collection and mirror via node error tracker for live monitoring.
 - Updated docs/firestore.rules with CRASH_LOGS, OFFICIAL_KEYS, and SYSTEM_MITIGATIONS permissions.

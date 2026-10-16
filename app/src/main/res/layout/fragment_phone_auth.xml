@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:fillViewport="true">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:padding="20dp">
+
+		<TextView
+			android:id="@+id/tv_phone_auth_title"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:paddingTop="8dp"
+			android:paddingBottom="8dp"
+			android:text="Sign in with your phone"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="24sp" />
+
+		<TextView
+			android:id="@+id/tv_phone_auth_hint"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingBottom="16dp"
+			android:text="We text a code. No extra server is involved. Use the full number, including the country code."
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="14sp" />
+
+		<com.google.android.material.textfield.TextInputLayout
+			android:id="@+id/til_phone_auth_number"
+			style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:hint="Phone number">
+
+			<com.google.android.material.textfield.TextInputEditText
+				android:id="@+id/et_phone_auth_number"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:inputType="phone"
+				android:singleLine="true" />
+		</com.google.android.material.textfield.TextInputLayout>
+
+		<com.google.android.material.textfield.TextInputLayout
+			android:id="@+id/til_phone_auth_code"
+			style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="12dp"
+			android:hint="SMS code"
+			android:visibility="gone">
+
+			<com.google.android.material.textfield.TextInputEditText
+				android:id="@+id/et_phone_auth_code"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:inputType="number"
+				android:singleLine="true" />
+		</com.google.android.material.textfield.TextInputLayout>
+
+		<Button
+			android:id="@+id/btn_phone_auth_submit"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="20dp"
+			android:text="Send code" />
+
+		<TextView
+			android:id="@+id/tv_phone_auth_email"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:padding="8dp"
+			android:text="Use email instead"
+			android:textColor="@color/colorAccent" />
+	</LinearLayout>
+</ScrollView>

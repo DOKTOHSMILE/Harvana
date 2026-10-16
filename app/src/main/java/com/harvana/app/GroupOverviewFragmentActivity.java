@@ -541,7 +541,21 @@ public class GroupOverviewFragmentActivity extends Fragment {
 			if (textview63 != null) textview63.setText("Payout this round");
 			if (tv_pool_total != null) tv_pool_total.setText(_formatUIBalance(payout));
 			if (tv_rotating_current != null) tv_rotating_current.setText(json.optString("state", "") + " · round " + round + " / " + limit);
-			if (tv_rotating_method != null) tv_rotating_method.setText("Order is set when the circle fills. Bonds are collateral, not the payout.");
+			org.json.JSONArray roster = json.optJSONArray("payoutOrder");
+			int locked = roster == null ? 0 : roster.length();
+			if ("FORMING".equals(json.optString("state"))) {
+				int saved = 0;
+				if (loadedGroup != null && loadedGroup.get("membersCount") instanceof Number) {
+					saved = ((Number) loadedGroup.get("membersCount")).intValue();
+				}
+				if (tv_rotating_method != null) {
+					tv_rotating_method.setText(locked + " of " + limit + " seats have a locked bond on the chain"
+						+ (saved > locked ? " (" + saved + " approved in the app)" : "")
+						+ ". The circle does not start, and nobody is paid, until every seat's bond is locked. Approving a request is not a locked bond.");
+				}
+			} else if (tv_rotating_method != null) {
+				tv_rotating_method.setText("This round pays " + _formatUIBalance(payout) + " from the other members. The recipient does not pay in. Bonds stay locked.");
+			}
 			return;
 		}
 		if ("FIXED".equals(family)) {

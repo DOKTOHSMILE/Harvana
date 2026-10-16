@@ -152,6 +152,7 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 					if (unitPrice <= 0 && kobo > 0) unitPrice = kobo / 100.0;
 					render();
 					if (first) { loadOfferAndPayment(); loadCounterparty(); }
+					fetchPartyOrder();
 					if (P2pStatus.active(status)) handler.postDelayed(autoRefresh, REFRESH_MS);
 				});
 			}
@@ -163,6 +164,48 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 				});
 			}
 		});
+	}
+
+	/** Party-signed order. Fills the lock hash and any payment fields the public view strips. */
+	private void fetchPartyOrder() {
+		if (myAddress == null || myAddress.isEmpty() || orderId == null) return;
+		P2PTradeRouter.fetchOrder(this, orderId, myAddress, new P2PTradeRouter.Callback() {
+			@Override public void onSuccess(JSONObject full) {
+				runOnUiThread(() -> {
+					if (full == null || order == null) return;
+					try {
+						java.util.Iterator<String> keys = full.keys();
+						while (keys.hasNext()) {
+							String k = keys.next();
+							order.put(k, full.opt(k));
+						}
+					} catch (org.json.JSONException ignored) { return; }
+					String hash = full.optString("escrowTxHash", "");
+					if (!hash.isEmpty()) order.put("escrowTxHash", hash);
+					applyNodePayment(full);
+					status = order.optString("status", status);
+					render();
+				});
+			}
+			@Override public void onError(String error) { }
+		});
+	}
+
+	private void applyNodePayment(JSONObject full) {
+		String bank = first(full, "bankName", "bank");
+		String number = first(full, "accountNumber", "accountNo", "bankAccountNumber");
+		String name = first(full, "accountName");
+		if (!bank.isEmpty()) payBank = bank;
+		if (!number.isEmpty()) payNumber = number;
+		if (!name.isEmpty()) payName = name;
+	}
+
+	private static String first(JSONObject o, String... keys) {
+		for (String k : keys) {
+			String v = o.optString(k, "");
+			if (!v.isEmpty() && !"null".equals(v)) return v;
+		}
+		return "";
 	}
 
 	/** Price and currency from the offer card; where the buyer pays (the order's own copy, else the offer's first method). */

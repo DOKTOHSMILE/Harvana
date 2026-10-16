@@ -636,15 +636,32 @@ public class DiscoverFragmentActivity extends Fragment {
 				btn_join.setSingleLine(true);
 				btn_join.setMaxLines(1);
 				final long fMembers = membersCount, fSlots = totalSlots;
-				if (imageview4 != null) imageview4.setOnClickListener(v -> new com.harvana.app.ui.SheetDialog.Builder(v.getContext())
-						.setTitle(_safeString(group, "groupName", "Group"))
-						.setMessage("Type: " + (tv_groupType != null ? tv_groupType.getText() : "")
-								+ "\nPays: " + (tv_frequency != null ? tv_frequency.getText() : "")
-								+ "\nPer slot: " + (tv_slotAmount != null ? tv_slotAmount.getText() : "")
-								+ "\nSlots filled: " + fMembers + " / " + fSlots
-								+ "\n\nAsk to join and the group's admin reviews your request. You pay nothing until you are accepted.")
-						.setPositiveButton("Close", null)
-						.show());
+				if (imageview4 != null) imageview4.setOnClickListener(v -> {
+					String nodeKey = com.harvana.app.trust.NetworkTrust.groupKey(group);
+					String base = "Type: " + (tv_groupType != null ? tv_groupType.getText() : "")
+						+ "\nPays: " + (tv_frequency != null ? tv_frequency.getText() : "")
+						+ "\nPer slot: " + (tv_slotAmount != null ? tv_slotAmount.getText() : "")
+						+ "\nSlots filled: " + fMembers + " / " + fSlots
+						+ "\n\nA vote in this group passes at 51% of the vote weight, with enough people voting."
+						+ "\nAsk to join and the group's admin reviews your request. You pay nothing until you are accepted and, for a circle, your bond is locked.";
+					if (nodeKey.isEmpty()) {
+						new com.harvana.app.ui.SheetDialog.Builder(v.getContext())
+							.setTitle(_safeString(group, "groupName", "Group"))
+							.setMessage(base)
+							.setPositiveButton("Close", null)
+							.show();
+						return;
+					}
+					com.harvana.app.trust.NetworkTrust.group(nodeKey, score -> {
+						if (getActivity() == null) return;
+						String trust = score.summary == null || score.summary.isEmpty() ? "Not published yet" : score.summary;
+						getActivity().runOnUiThread(() -> new com.harvana.app.ui.SheetDialog.Builder(v.getContext())
+							.setTitle(_safeString(group, "groupName", "Group"))
+							.setMessage("Trust: " + trust + "\n\n" + base)
+							.setPositiveButton("Close", null)
+							.show());
+					});
+				});
 				btn_join.setOnClickListener(isPending ? null : v -> {
 					if (gid.isEmpty()) return;
 					Intent i = new Intent();

@@ -24,7 +24,7 @@ public final class NotificationSync {
         final Context c = ctx.getApplicationContext();
         if (FirebaseAuth.getInstance().getCurrentUser() == null) { if (done != null) done.run(); return; }
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        final AtomicInteger pending = new AtomicInteger(9);
+        final AtomicInteger pending = new AtomicInteger(10);
         final Runnable finish = () -> { if (pending.decrementAndGet() == 0 && done != null) done.run(); };
 
         // 1. Invitations
@@ -86,6 +86,9 @@ public final class NotificationSync {
 
         // 6. Contribution dues, including after the member has left the app
         DueAlertSync.run(c, uid, finish);
+
+        // 10. Admin: join requests and loan applications. Pulled on the phone; no Cloud Function.
+        AdminAlertSync.run(c, uid, finish);
 
       // 4. Review verdicts on my Learn Hub submissions
         GroupFirestoreManager.getInstance(c).getMyLearnSubmissions(uid, new GroupFirestoreManager.ListCallback() {

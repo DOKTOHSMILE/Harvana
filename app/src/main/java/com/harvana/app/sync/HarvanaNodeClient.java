@@ -419,6 +419,22 @@ public final class HarvanaNodeClient {
 			mainHandler.post(() -> cb.onError(errorMsg));
 		}
 	}
+
+	/** Signed party view of one order. Canonical: P2P_GET_ORDER:orderId:address:timestamp. */
+	public static void submitP2PGetOrder(String orderId, String address, long timestamp, String signatureB64,
+	String publicKeyB64, JsonCallback cb) {
+		try {
+			JSONObject body = new JSONObject();
+			body.put("orderId", orderId);
+			body.put("address", address);
+			body.put("timestamp", timestamp);
+			body.put("signature", signatureB64);
+			body.put("publicKey", publicKeyB64);
+			post("/api/v1/p2p/order/fetch", body.toString(), cb);
+		} catch (Exception e) {
+			mainHandler.post(() -> cb.onError("The app couldn't prepare this request. Try again."));
+		}
+	}
 	
 	// ── Conversion helpers ────────────────────────────────────────────────────
 	

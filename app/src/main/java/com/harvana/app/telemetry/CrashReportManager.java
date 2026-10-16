@@ -14,22 +14,31 @@ import android.os.Process;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.harvana.app.DebugActivity;
+import com.harvana.app.sync.HarvanaNodeClient;
 import com.harvana.app.utils.CrashExplainer;
+
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
  * Intercepts uncaught application crashes, builds detailed system and stack diagnostics,
- * writes the report to the user's public Download folder, and launches DebugActivity.
+ * writes the report to the user's public Download folder, sends the crash log to Firestore
+ * for real-time monitoring by the moderator console, and launches DebugActivity.
  */
 public final class CrashReportManager {
 
@@ -74,12 +83,15 @@ public final class CrashReportManager {
                     // 2. Save report to the user-visible Download folder
                     String savedPath = saveReportToDownloads(app, fullReport);
 
-                    // 3. Queue crash for node telemetry (for moderator/admin tracking)
+                    // 3. Send crash log immediately to Firestore CRASH_LOGS collection & node
+                    sendCrashToFirestore(app, throwable, stackTrace);
+
+                    // 4. Queue crash for node telemetry (for moderator/admin tracking)
                     try {
                         CrashReporter.saveCrash(app, throwable, stackTrace);
                     } catch (Throwable ignored) {}
 
-                    // 4. Save to SharedPreferences synchronously
+                    // 5. Save to SharedPreferences synchronously
                     try {
                         SharedPreferences prefs = app.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
                         prefs.edit()
@@ -92,7 +104,7 @@ public final class CrashReportManager {
                         Log.e(TAG, "Failed to write crash to shared preferences", t);
                     }
 
-                    // 5. Launch modern DebugActivity in a fresh task
+                    // 6. Launch modern DebugActivity in a fresh task
                     Intent intent = new Intent(app, DebugActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     intent.putExtra("crash_stack", stackTrace);
@@ -121,6 +133,85 @@ public final class CrashReportManager {
         });
 
         Log.i(TAG, "CrashReportManager uncaught exception handler installed successfully");
+    }
+
+    /**
+     * Sends the crash report to Firestore collection CRASH_LOGS asynchronously.
+     */
+    public static void sendCrashToFirestore(final Context context, final Throwable throwable, final String stackTrace) {
+        new Thread(() -> {
+            try {
+                String versionName = "1.2.0";
+                long versionCode = 3;
+                try {
+                    PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+                    versionName = pInfo.versionName;
+                    versionCode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ? pInfo.getLongVersionCode() : pInfo.versionCode;
+                } catch (Throwable ignored) {}
+
+                CrashExplainer.Result why = CrashExplainer.explain(stackTrace != null ? stackTrace : "");
+                String screen = why.where != null && !why.where.isEmpty() ? why.where : "Unknown";
+                String msg = throwable != null ? String.valueOf(throwable.getMessage()) : "Fatal crash";
+                long now = System.currentTimeMillis();
+
+                // 1. Firebase Firestore SDK
+                try {
+                    Map<String, Object> doc = new HashMap<>();
+                    doc.put("app", "wallet");
+                    doc.put("appName", "Harvana Wallet");
+                    doc.put("version", versionName);
+                    doc.put("versionCode", versionCode);
+                    doc.put("kind", "CRASH");
+                    doc.put("severity", "CRITICAL");
+                    doc.put("screen", screen);
+                    doc.put("where", screen);
+                    doc.put("meaning", why.meaning != null ? why.meaning : "");
+                    doc.put("advice", why.advice != null ? why.advice : "");
+                    doc.put("message", msg);
+                    doc.put("stack", stackTrace != null && stackTrace.length() > 2000 ? stackTrace.substring(0, 2000) : stackTrace);
+                    doc.put("device", Build.MANUFACTURER + " " + Build.MODEL);
+                    doc.put("androidVersion", Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
+                    doc.put("timestamp", now);
+                    doc.put("status", "OPEN");
+                    doc.put("fixed", false);
+
+                    FirebaseFirestore.getInstance()
+                            .collection("CRASH_LOGS")
+                            .add(doc);
+                } catch (Throwable t) {
+                    Log.w(TAG, "Firebase SDK write to CRASH_LOGS skipped: " + t.getMessage());
+                }
+
+                // 2. HTTP POST to node error endpoint (which mirrors to Firestore with service credentials)
+                try {
+                    JSONObject r = new JSONObject();
+                    r.put("app", "wallet");
+                    r.put("version", versionName);
+                    r.put("kind", "CRASH");
+                    r.put("screen", screen);
+                    r.put("message", msg);
+                    r.put("stack", stackTrace != null && stackTrace.length() > 1500 ? stackTrace.substring(0, 1500) : stackTrace);
+
+                    HttpURLConnection conn = (HttpURLConnection) new URL(HarvanaNodeClient.BASE + "/api/v1/app/error").openConnection();
+                    conn.setConnectTimeout(8_000);
+                    conn.setReadTimeout(8_000);
+                    conn.setRequestMethod("POST");
+                    conn.setDoOutput(true);
+                    conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                    try (OutputStream os = conn.getOutputStream()) {
+                        os.write(r.toString().getBytes(StandardCharsets.UTF_8));
+                    }
+                    int code = conn.getResponseCode();
+                    Log.i(TAG, "Sent crash to node error tracker, HTTP " + code);
+                    conn.disconnect();
+                } catch (Throwable t) {
+                    Log.w(TAG, "Failed sending crash to node /api/v1/app/error: " + t.getMessage());
+                }
+
+            } catch (Throwable t) {
+                Log.w(TAG, "sendCrashToFirestore error: " + t.getMessage());
+            }
+        }, "firestore-crash-sender").start();
     }
 
     /**

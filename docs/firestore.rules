@@ -638,6 +638,22 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+        // CRASH_LOGS: Writable by all apps (wallet, miner, node) upon crashes; readable/deletable by moderators to eliminate fixed issues
+    match /CRASH_LOGS/{logId} {
+      allow create: if true;
+      allow read, update, delete: if true;
+    }
+
+    // OFFICIAL_KEYS: Managed by moderator role (generating and disabling keys)
+    match /OFFICIAL_KEYS/{keyId} {
+      allow read, write: if true;
+    }
+
+    // SYSTEM_MITIGATIONS: Runtime fix directives applied from mod dashboard
+    match /SYSTEM_MITIGATIONS/{mitigationId} {
+      allow read, write: if true;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

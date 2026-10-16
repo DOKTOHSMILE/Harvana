@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 16 Oct 2026 — Direct Firestore crash streaming & rules update
+- Wired CrashReportManager to stream crash logs directly to Firestore CRASH_LOGS collection and mirror via node error tracker for live monitoring.
+- Updated docs/firestore.rules with CRASH_LOGS, OFFICIAL_KEYS, and SYSTEM_MITIGATIONS permissions.
+
 ## 16 Oct 2026 — Startup crash interception & Download folder crash report exporter
 - Global crash interceptor (`CrashReportManager`) installed immediately in `SketchApplication.attachBaseContext()` and `onCreate()` so any startup or runtime failure is caught before the app can die silently.
 - Automatic Download folder export: writes full hardware, OS, memory, explainer analysis, and complete stack trace directly to `/storage/emulated/0/Download/Harvana_Crash_<timestamp>.txt` and `Harvana_Latest_Crash.txt` using MediaStore (Android 10+) and public storage APIs.

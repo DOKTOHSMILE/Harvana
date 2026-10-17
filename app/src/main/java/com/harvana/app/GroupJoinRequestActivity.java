@@ -536,6 +536,41 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 		}
 		
 		_bindRules(data.get("groupRules"));
+		_bindChainFacts(data);
+	}
+
+	/** What the node knows before anyone asks to join: group trust, and how many circle bonds are actually locked. */
+	private void _bindChainFacts(Map<String, Object> data) {
+		String nodeId = com.harvana.app.trust.NetworkTrust.groupKey(data);
+		if (nodeId.isEmpty()) nodeId = com.harvana.app.trust.NetworkTrust.groupKey(java.util.Collections.singletonMap("groupId", groupId));
+		if (nodeId.isEmpty()) return;
+		final String id = nodeId;
+		com.harvana.app.trust.NetworkTrust.group(id, score -> runOnUiThread(() -> {
+			if (tv_group_health == null || score == null || !score.published) return;
+			String line = score.summary == null || score.summary.isEmpty() ? score.label() : score.summary;
+			tv_group_health.setText(line);
+		}));
+		if (!"CIRCLE".equals(com.harvana.app.sync.NodeGroupClient.familyOf(id))) return;
+		com.harvana.app.sync.NodeGroupClient.getCircle(id, new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				if (!"FORMING".equals(json.optString("state"))) return;
+				org.json.JSONArray roster = json.optJSONArray("payoutOrder");
+				int locked = roster == null ? 0 : roster.length();
+				int limit = json.optInt("memberLimit", 0);
+				runOnUiThread(() -> {
+					if (tv_join_cycle_value != null) {
+						tv_join_cycle_value.setText(locked + " of " + limit + " bonds locked");
+					}
+					if (tv_group_description != null) {
+						String now = tv_group_description.getText() == null ? "" : tv_group_description.getText().toString();
+						if (!now.contains("bond is locked")) {
+							tv_group_description.setText(now + "\n\nThe circle starts only when every seat has a locked bond. Asking to join does not lock one.");
+						}
+					}
+				});
+			}
+			@Override public void onError(String error) { }
+		});
 	}
 	
 	@SuppressWarnings("unchecked")

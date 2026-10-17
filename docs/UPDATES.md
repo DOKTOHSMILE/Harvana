@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 17 Oct 2026 — Join screen shows chain trust and locked bonds
+
+- The join request screen shows the node's trust line, and for a forming circle how many bonds are locked. Asking to join still does not lock a bond or start the circle.
+
 ## 17 Oct 2026 — Minify no longer removes WorkManager
 
 - Release shrinking kept `WorkManagerInitializer`. Without that class the app crashed on startup after minify (`ClassNotFoundException` inside `InitializationProvider`). Clean and rebuild the release build after pulling.

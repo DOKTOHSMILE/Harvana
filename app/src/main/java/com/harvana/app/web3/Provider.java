@@ -7,6 +7,7 @@ final class Provider {
     static String script(String chainHex, String netVersion, String solChain) {
         return "(function(){\n"
             + "if (window.top !== window) return;\n"
+            + "if (!window.isSecureContext) return;\n"
             + "if (window.ethereum && window.ethereum.isHarvana) return;\n"
             + "var bridge = window.harvanaBridge; if (!bridge) return;\n"
             + "try { delete window.harvanaBridge; } catch(e) {}\n"

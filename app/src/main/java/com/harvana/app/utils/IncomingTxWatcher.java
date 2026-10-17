@@ -90,7 +90,9 @@ public final class IncomingTxWatcher {
 					String amountStr = String.format(java.util.Locale.US, "%.4f", amount);
 					
 					TransactionNotification.showReceived(appCtx, amountStr, symbol, from, txHash);
-					Log.i(TAG, "Incoming: " + amountStr + " " + symbol + " from " + from);
+					// Never log the amount, symbol or sender address: the notification is already
+					// shown to the user. The log line only records the event for diagnostics.
+					Log.i(TAG, "Incoming tx notification shown");
 				}
 				if (newest > lastSeen) {
 					prefs.edit().putLong(KEY_LAST_TS, newest).apply();

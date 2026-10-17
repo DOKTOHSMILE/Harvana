@@ -116,10 +116,17 @@ public class HARVQRCodeGenerator {
 			}
 			return out;
 		} catch (WriterException e) {
-			Log.e(TAG, "QR encode failed: " + e.getMessage());
+			// ZXing's exception message does not include the input data, but the stack trace can
+			// (it points to the call site, which has the wallet address). Log a sanitized error
+			// and the exception class only.
+			Log.e(TAG, "QR encode failed: " + e.getClass().getSimpleName());
 			return null;
 		} catch (Exception e) {
-			Log.e(TAG, "Unexpected error generating QR: " + e.getMessage(), e);
+			// Generic catch: never log the exception message because it can echo the encoded
+			// wallet address or other PII from the input. Class name + presence of the throwable
+			// is enough for the operator to find the crash in the CRASH_LOGS Firestore collection
+			// (the full stack is uploaded there by CrashReportManager).
+			Log.e(TAG, "Unexpected error generating QR: " + e.getClass().getSimpleName());
 			return null;
 		}
 	}

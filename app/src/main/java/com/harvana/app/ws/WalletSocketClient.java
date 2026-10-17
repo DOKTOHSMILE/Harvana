@@ -104,7 +104,9 @@ public class WalletSocketClient {
         }
 
         String url = WS_BASE + "/ws/wallet?address=" + walletAddress;
-        Log.i(TAG, "Connecting to: " + WS_BASE + "/ws/wallet?address=" + walletAddress);
+        // Never log the wallet address. Logcat is readable by any app with READ_LOGS on a rooted
+        // device and by ADB; addresses are PII. The URL and the listener (above) are kept.
+        Log.i(TAG, "Connecting to wallet WS");
 
         Request request = new Request.Builder()
                 .url(url)
@@ -118,7 +120,7 @@ public class WalletSocketClient {
             public void onOpen(WebSocket ws, Response response) {
                 connected = true;
                 reconnectDelay = RECONNECT_BASE_MS;
-                Log.i(TAG, "Wallet WS connected | address=" + walletAddress);
+                Log.i(TAG, "Wallet WS connected");
                 mainHandler.post(() -> {
                     if (listener != null) listener.onConnected();
                 });
@@ -197,7 +199,10 @@ public class WalletSocketClient {
                     long rawBalance  = payload.optLong("balance", 0L);
                     long nonce       = payload.optLong("nonce", 0L);
                     long blockHeight = payload.optLong("blockHeight", -1L);
-                    Log.i(TAG, "BALANCE_UPDATE: raw=" + rawBalance + " nonce=" + nonce);
+                    // Never log the raw balance or nonce: balance is financial PII and the nonce
+                    // is a wallet-internal value that, combined with the address, would let an
+                    // observer correlate. The listener gets the values; the log just records the event.
+                    Log.i(TAG, "BALANCE_UPDATE received");
                     mainHandler.post(() -> {
                         if (listener != null) listener.onBalanceUpdate(rawBalance, nonce, blockHeight);
                     });

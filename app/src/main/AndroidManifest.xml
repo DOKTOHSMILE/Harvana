@@ -461,14 +461,9 @@
 		<activity
 			android:name=".DebugActivity"
 			android:label="Crash Report"
-			android:exported="true"
+			android:exported="false"
 			android:screenOrientation="portrait"
-			android:theme="@style/AppTheme.DebugActivity">
-			<intent-filter>
-				<action android:name="com.harvana.app.ACTION_DEBUG_CRASH" />
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
-		</activity>
+			android:theme="@style/AppTheme.DebugActivity" />
 		
 		<meta-data
 			android:name="com.google.android.gms.version"

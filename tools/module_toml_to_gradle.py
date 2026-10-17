@@ -176,6 +176,28 @@ android {{
         targetCompatibility JavaVersion.VERSION_17
     }}
 
+    // Multiple libraries (kotlinx-coroutines, okhttp, firebase) ship the same META-INF
+    // resources. Without these excludes the merge step logs duplicate-resource warnings and, in
+    // some R8 versions, turns them into a hard error.
+    packagingOptions {{
+        resources {{
+            excludes += [
+                'META-INF/versions/9/module-info.class',
+                'META-INF/com.android.tools/proguard/coroutines.pro',
+                'META-INF/proguard/coroutines.pro',
+                'META-INF/DEPENDENCIES',
+                'META-INF/LICENSE',
+                'META-INF/LICENSE.txt',
+                'META-INF/license.txt',
+                'META-INF/NOTICE',
+                'META-INF/NOTICE.txt',
+                'META-INF/notice.txt',
+                'META-INF/ASL2.0',
+                'META-INF/*.kotlin_module'
+            ]
+        }}
+    }}
+
     lint {{
         abortOnError true
     }}

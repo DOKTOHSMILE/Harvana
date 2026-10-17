@@ -52,6 +52,40 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/PIDS/$(pid)).data.uid == request.auth.uid;
     }
 
+    // A Harvana moderator. MODERATORS/{uid} documents are created in the Firebase console
+    // only (the rule for that collection denies client writes). Same pattern as the
+    // P2P_CHATS update rule that adds a moderator to a disputed trade.
+    function isModerator(uid) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/MODERATORS/$(uid))
+        && get(/databases/$(database)/documents/MODERATORS/$(uid)).data.active == true;
+    }
+
+    // Fields that must never appear in the public USERS/{uid} document. They are owner-only and
+    // live in USERS/{uid}/private/kyc (see PrivateProfile.FIELDS in the Android client). The list
+    // is kept in sync with the client; if a field is added on the client, add it here in the
+    // same commit and call it out in docs/UPDATES.md.
+    function privateProfileFields() {
+      return [
+        'dob', 'v_type', 'bvn', 'nin',
+        'phone', 'email', 'address', 'occupation',
+        'gps_lat', 'gps_long', 'kin', 'city'
+      ];
+    }
+    // True when the new document state contains none of the private profile fields. Used on
+    // create (the document did not exist, so affectedKeys() is not available).
+    function publicProfileOnly() {
+      return !request.resource.data.keys().hasAny(privateProfileFields());
+    }
+    // True when an update to the document touches none of the private profile fields. This is
+    // the graceful-degradation path: a legacy user whose main USERS/{uid} doc still has private
+    // fields from before the split can still update their public fields, and the next
+    // saveProfile / updateProfileFields call will migrate the private fields to private/kyc
+    // (UserProfileManager routes them in a single batch).
+    function publicProfileUpdateOnly() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(privateProfileFields());
+    }
+
     function paymentConfirmOnly() {
       return request.resource.data.diff(resource.data).affectedKeys()
         .hasOnly(['status', 'txRef', 'confirmedAt']);
@@ -59,8 +93,11 @@ service cloud.firestore {
 
     match /USERS/{uid} {
       allow read: if signedIn();
-      allow create: if isSelf(uid) && referrerSetOk();
-      allow update: if isSelf(uid) && referrerUnchangedOrNew();
+      // create / update must keep private profile fields (DOB, ID, phone, address, GPS, next of
+      // kin) out of the public document. They live in USERS/{uid}/private/kyc instead; the
+      // Android client routes them there in one batch (PrivateProfile.split + UserProfileManager).
+      allow create: if isSelf(uid) && referrerSetOk() && publicProfileOnly();
+      allow update: if isSelf(uid) && referrerUnchangedOrNew() && publicProfileUpdateOnly();
       allow delete: if false;
     }
 
@@ -638,20 +675,48 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-        // CRASH_LOGS: Writable by all apps (wallet, miner, node) upon crashes; readable/deletable by moderators to eliminate fixed issues
+    // CRASH_LOGS: written by every Harvana app (wallet, miner, node) when an uncaught
+    // exception is caught. The original `if true` rule let any client read or rewrite
+    // every other user's crash data, and let a buggy or hostile client fill the
+    // collection. A crash report must now carry the canonical fields the wallet's
+    // CrashReportManager writes (kind, severity, status, fixed, timestamp, app) and
+    // the two largest fields are capped. Reads, updates and deletes are moderator-only.
     match /CRASH_LOGS/{logId} {
-      allow create: if true;
-      allow read, update, delete: if true;
+      allow create: if
+        request.resource.data.kind is string
+        && request.resource.data.kind.size() > 0
+        && request.resource.data.kind.size() <= 32
+        && request.resource.data.severity is string
+        && request.resource.data.severity in ['CRITICAL', 'ERROR', 'WARNING', 'INFO']
+        && request.resource.data.status == 'OPEN'
+        && request.resource.data.fixed == false
+        && request.resource.data.timestamp is number
+        && request.resource.data.timestamp > 0
+        && request.resource.data.app is string
+        && request.resource.data.app.size() > 0
+        && request.resource.data.app.size() <= 32
+        && (!('message' in request.resource.data)
+            || (request.resource.data.message is string
+                && request.resource.data.message.size() <= 2000))
+        && (!('stack' in request.resource.data)
+            || (request.resource.data.stack is string
+                && request.resource.data.stack.size() <= 8000));
+      allow read, update, delete: if isModerator(request.auth.uid);
     }
 
-    // OFFICIAL_KEYS: Managed by moderator role (generating and disabling keys)
+    // OFFICIAL_KEYS: public key directory used by the app to verify Harvana-issued
+    // artifacts. Readable by any signed-in client; only moderators can add, rotate or
+    // retire a key.
     match /OFFICIAL_KEYS/{keyId} {
-      allow read, write: if true;
+      allow read: if signedIn();
+      allow write: if isModerator(request.auth.uid);
     }
 
-    // SYSTEM_MITIGATIONS: Runtime fix directives applied from mod dashboard
+    // SYSTEM_MITIGATIONS: runtime directives the moderator dashboard pushes to clients
+    // (feature toggles, kill-switches, rate caps). Clients read; moderators write.
     match /SYSTEM_MITIGATIONS/{mitigationId} {
-      allow read, write: if true;
+      allow read: if signedIn();
+      allow write: if isModerator(request.auth.uid);
     }
 
     match /{document=**} {

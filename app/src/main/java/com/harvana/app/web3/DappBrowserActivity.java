@@ -286,6 +286,14 @@ public class DappBrowserActivity extends AppCompatActivity {
             @Override public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback cb) { cb.invoke(origin, false, false); }
         });
         if (bridge) {
+            // Bridge security model:
+            //   addWebMessageListener + addDocumentStartJavaScript both pass Collections.singleton("*")
+            //   because AndroidX has no removeWebMessageListener and the WebView is reused across
+            //   navigations within a tab. The wildcard only means "any origin may ATTEMPT to post";
+            //   the real boundary is acceptBridgeMessage() in onBridgeMessage, which rejects unless
+            //   the message comes from the active tab's main frame and matches the current page's
+            //   https origin. Any new code path that calls the bridge MUST go through acceptBridgeMessage
+            //   first — there is no other route to the wallet from page JS.
             WebViewCompat.addWebMessageListener(w, "harvanaBridge", Collections.singleton("*"), this::onBridgeMessage);
             tab.injected = WebViewCompat.addDocumentStartJavaScript(w, Provider.script(chainHex(), String.valueOf(net().chainId), com.harvana.app.wallet.SolSigner.chain()), Collections.singleton("*"));
         }
@@ -738,10 +746,8 @@ public class DappBrowserActivity extends AppCompatActivity {
     // ── the bridge ────────────────────────────────────────────────────────────
 
     private void onBridgeMessage(WebView view, WebMessageCompat message, Uri sourceOrigin, boolean isMainFrame, JavaScriptReplyProxy reply) {
-        if (view != web) return;                                          // only the tab on screen talks to the wallet
-        if (!isMainFrame || sourceOrigin == null) return;                 // frames inside a page get no wallet
+        if (!acceptBridgeMessage(view, sourceOrigin, isMainFrame)) return;
         String origin = origin(sourceOrigin.toString());
-        if (!origin.startsWith("https://") || !origin.equals(pageOrigin)) return;
         proxy = reply;
         JSONObject req;
         try { req = new JSONObject(message.getData()); } catch (Exception e) { return; }
@@ -751,6 +757,30 @@ public class DappBrowserActivity extends AppCompatActivity {
         if (params == null) params = new JSONArray();
         try { handle(origin, id, method, params); }
         catch (Exception e) { error(id, -32603, "Internal error"); }
+    }
+
+    /**
+     * The single origin/frame check every bridge call must pass. Returns true only if:
+     *   - the message came from the WebView currently on screen (the active tab),
+     *   - the message came from the page's main frame (not an iframe, not a service worker),
+     *   - the source origin is non-null and uses https,
+     *   - the source origin equals the page origin the browser is currently showing.
+     * Any new code path that reaches the wallet (signing, connect, send, switch chain) MUST
+     * call this first. There is no second route.
+     */
+    private boolean acceptBridgeMessage(WebView view, Uri sourceOrigin, boolean isMainFrame) {
+        if (view != web) { warnBridgeReject("not active tab"); return false; }
+        if (!isMainFrame) { warnBridgeReject("not main frame"); return false; }
+        if (sourceOrigin == null) { warnBridgeReject("null source origin"); return false; }
+        String origin = origin(sourceOrigin.toString());
+        if (!origin.startsWith("https://")) { warnBridgeReject("non-https origin " + origin); return false; }
+        if (!origin.equals(pageOrigin)) { warnBridgeReject("origin " + origin + " != pageOrigin " + pageOrigin); return false; }
+        return true;
+    }
+
+    /** Diagnostic for a bridge message that was rejected. Only fires for an attempted violation. */
+    private void warnBridgeReject(String why) {
+        android.util.Log.w("DappBridge", "bridge message rejected: " + why);
     }
 
     private void handle(String origin, int id, String method, JSONArray params) throws Exception {

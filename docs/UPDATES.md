@@ -2,6 +2,77 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 18 Oct 2026 — Cross-repo audit: Harvana wallet, node, miner, moderator
+
+- A full cross-repo audit was run across all four Harvana repositories (this wallet, the node, the miner, the moderator). The wallet has every fix from this session applied; the miner and moderator have exact drop-in patches written in `docs/CROSS_REPO_AUDIT.md`; the node has its open items listed for the node team. The audit's overall production-readiness rating is 65% — the remaining 35% is operational (republish rules, rebuild, device-test, rotate the leaked PAT), not code.
+- **Action:** open `docs/CROSS_REPO_AUDIT.md` for the severity-ranked table, the exact patches for the miner and moderator, the open items against the node, and the six-item checklist that moves the rating to 100%.
+
+## 18 Oct 2026 — DebugActivity no longer reachable by other apps
+
+- The `DebugActivity` (the post-crash screen that dumps the report, copies it to the clipboard and shares it) was declared `android:exported="true"` with a custom `<action android:name="com.harvana.app.ACTION_DEBUG_CRASH" />` intent-filter. That meant any app installed on the user's phone could fire `Intent("com.harvana.app.ACTION_DEBUG_CRASH")` and open the crash-dump screen, which would then try to write a report to the public Downloads folder. Real crash UI is reachable by a malicious app: an attacker can drop a fake crash report and trick the user into sharing it.
+- The only legitimate caller is `CrashReportManager.uncaughtException()` which does `new Intent(app, DebugActivity.class)` — an explicit Intent that works without the activity being exported. The intent-filter and the `exported="true"` flag were unnecessary and removed.
+- **Action:** clean and rebuild the release build.
+
+## 18 Oct 2026 — Log hygiene: strip sensitive values, add LogSanitizer, remove debug logs in release
+
+- Five `Log.*` calls in the app were writing PII or financial data to logcat, where any app with `READ_LOGS` on a rooted device (or ADB) could read it:
+  - `WalletSocketClient.connect()` — `"Connecting to: " + WS_BASE + "/ws/wallet?address=" + walletAddress` and `"Wallet WS connected | address=" + walletAddress`. The wallet address is the user's on-network identity. Both reduced to a single "Connecting to wallet WS" / "Wallet WS connected" line.
+  - `WalletSocketClient.handleMessage()` — `"BALANCE_UPDATE: raw=" + rawBalance + " nonce=" + nonce`. The raw balance is financial PII; the nonce combined with the address would let an observer correlate. Reduced to "BALANCE_UPDATE received".
+  - `IncomingTxWatcher` — `"Incoming: " + amountStr + " " + symbol + " from " + from`. The notification is already shown to the user. Reduced to "Incoming tx notification shown".
+  - `HARVQRCodeGenerator` — `Log.e(TAG, "...: " + e.getMessage(), e)`. ZXing's exception message does not include the input, but the stack trace points at the call site which holds the encoded wallet address. Reduced to logging the exception class name only; the full stack is already uploaded to the `CRASH_LOGS` Firestore collection by `CrashReportManager` for the operator.
+- A small `com.harvana.app.utils.LogSanitizer` helper was added. It shortens wallet-shaped strings (`HV0x…` / `0x…` / `AJ0x…`) to a 6+4 form that is safe to log, and exposes `LogSanitizer.i/w(tag, msg)` for future code that might accidentally embed an address. Pure Java so it is unit-testable on the JVM.
+- A proguard rule was added to `app/proguard-rules.pro` that strips all `Log.d(...)` and `Log.v(...)` calls in release builds. `Log.i`, `Log.w`, `Log.e` are kept because they carry real production diagnostics. This is belt-and-braces: even if a future change adds a `Log.d` that leaks data, R8 will remove it from the release APK.
+- No behaviour change for users. The wallet socket lifecycle, balance updates and incoming-tx notifications still work exactly the same; only the logcat text changed.
+
+## 18 Oct 2026 — Dependency update: BouncyCastle 1.77 → 1.80 (CVE-2024-30171, CVE-2024-30172)
+
+- `org.bouncycastle:bcprov-jdk18on:1.77` is in the affected range for the timing-side-channel issue (CVE-2024-30171) and the carry-down check in `SSLeay` RSA blinding (CVE-2024-30172). Bumped to `1.80` in `app/build.gradle`. No API change; drop-in. Used for the Ed25519 / key-handling code paths; the wallet never receives a TLS connection through BouncyCastle, so the practical exposure is the JCA / KeyFactory / Signature paths.
+- **Action:** clean and rebuild the release build.
+- **Recommended next pass (not applied here, build-host decision):** the other libraries in `app/build.gradle` are not in any known-CVE list as of this pass, but several have newer stable releases with bug fixes. None of these are security-critical; bump when the build host is ready and the release is tested:
+  - `com.squareup.okhttp3:okhttp:4.12.0` → 4.12.0 stays (latest 4.x; 5.x is a major-version API break and out of scope).
+  - `com.google.android.material:material:1.11.0` → 1.12.0 / 1.13.0.
+  - `androidx.work:work-runtime:2.9.0` → 2.10.0.
+  - `androidx.lifecycle:lifecycle-runtime:2.6.2` → 2.7.0 / 2.8.x.
+  - `com.google.code.gson:gson:2.10.1` → 2.11.0.
+  - Firebase: `firebase-auth:22.3.1`, `firebase-firestore:24.10.0`, `firebase-storage:20.3.0`, `firebase-database:20.3.0` — consider switching to the Firebase BoM (`com.google.firebase:firebase-bom:33.x.x`) so all Firebase libraries move together and version drift can't reintroduce the same class of issues that bit 16 Oct's `addWebMessageListener` rules.
+- **Action for the build host:** run `./gradlew dependencyUpdates` (from the `gradle-versions-plugin`) and review the output. Anything in the major-version column needs a code-side migration; anything in the patch / minor column is usually safe to bump.
+
+## 18 Oct 2026 — USERS/{uid} public/private field split enforced in rules
+
+- The Android client already routes sensitive profile fields (DOB, ID number, phone, email, address, occupation, GPS, next of kin, city) to `USERS/{uid}/private/kyc` via `PrivateProfile.split` + `UserProfileManager` in a single batch. The Firestore rules were the gap: `match /USERS/{uid}` allowed `signedIn()` reads and `isSelf` writes with no field check, so a buggy or hostile client could still write private fields into the public document and bypass the split.
+- Two helpers added next to the other helpers in `docs/firestore.rules`:
+  - `privateProfileFields()` — the single source of truth for the field list. Mirrors `PrivateProfile.FIELDS` in the client. If a field is added on the client, add it here in the same commit.
+  - `publicProfileOnly()` — for `create`: the new document must not contain any private field name. (affectedKeys() is not available on create, so this checks the full document.)
+  - `publicProfileUpdateOnly()` — for `update`: the update must not TOUCH a private field. This is the graceful-degradation path: legacy users whose main `USERS/{uid}` doc still has private fields from before the split can still update their public fields, and the next profile save migrates the private fields to `private/kyc` (UserProfileManager routes them in one batch).
+- The `match /USERS/{uid}` create and update rules now require `publicProfileOnly()` and `publicProfileUpdateOnly()` respectively. Reads and deletes are unchanged.
+- **Action:** republish `docs/firestore.rules` in Firebase console → Firestore Database → Rules → Publish. New sign-ups and updates that try to write private fields to the public document will be denied; the client already routes those writes to `private/kyc` and the batch will succeed.
+- **Migration note:** existing users whose main `USERS/{uid}` doc has leftover private fields are not affected by the update rule (it only checks fields being changed). To finish the cleanup, the owner can run a one-time console script that reads each `USERS/{uid}` doc, copies private fields to `USERS/{uid}/private/kyc` if missing, and removes them from the main doc. The app's `PrivateProfile.leftoversIn(pub)` helper already lists the offending fields for that script.
+
+## 18 Oct 2026 — Dapp browser bridge: extracted origin check, added JS-side secure-context guard
+
+- The dapp browser's `addWebMessageListener` and `addDocumentStartJavaScript` both use `Collections.singleton("*")` because AndroidX has no `removeWebMessageListener` and a tab reuses one WebView across navigations. The wildcard is necessary; the security boundary is the handler. Two changes make the boundary harder to break in future edits:
+  - The three inline `if (... ) return;` lines in `onBridgeMessage` are now a single `acceptBridgeMessage(view, sourceOrigin, isMainFrame)` method. Any new code path that wants to reach the wallet must call it; there is no second route. The same checks still apply (active tab, main frame, non-null https origin, origin equals `pageOrigin`).
+  - A `warnBridgeReject(why)` log is written when a message is rejected, so an attempted cross-origin call is visible in logcat instead of silently dropped.
+- The Provider script (what the page sees as `window.ethereum` / `window.harvana` / `window.solana`) now also returns early if `!window.isSecureContext`. The script used to run on every page including `about:blank` and any non-HTTPS page that slipped past the navigation guard, which installed a wallet object that could not actually call back to the handler. With this guard the wallet is only installed on https pages, which is where it can ever do anything useful.
+- No behaviour change for legitimate dapps. The handler still rejects anything that is not the current page's main frame on https.
+
+## 18 Oct 2026 — Release-build crash: BottomSheetBehavior stripped by R8
+
+- Symptom: any screen that opens a `BottomSheetDialog` (asset picker, coin detail, sell/buy confirm, etc.) crashes in release builds with `InflateException: Could not inflate Behavior subclass com.google.android.material.bottomsheet.BottomSheetBehavior` followed by `ClassNotFoundException`.
+- Cause: the `design_bottom_sheet_dialog` layout in `com.google.android.material:material:1.11.0` references the behavior class by string in its XML. `CoordinatorLayout` instantiates it via `Class.forName(...)` at inflate time. R8's whole-program analysis pruned the class because the only Java reference is `new BottomSheetDialog(...)` plus a static `BottomSheetBehavior.from(...)` call, neither of which looks like a real use of the class to R8.
+- Fix: a full "XML-related keep rules" section added to `app/proguard-rules.pro` covering every class Android inflates by name from XML (CoordinatorLayout Behaviors, custom Views/ViewGroups, custom Drawables, custom Animations/Animators, custom Transitions, `android:onClick` methods, custom styleable attributes). The Material bottomsheet package and `CoordinatorLayout$Behavior` subclasses are kept explicitly.
+- **Action:** clean and rebuild the release build (`./gradlew clean assembleRelease`). The next release build will not strip the class.
+
+## 18 Oct 2026 — Firestore rules tightened for CRASH_LOGS, OFFICIAL_KEYS, SYSTEM_MITIGATIONS
+
+- The three rules added on 16 Oct 2026 used `allow ...: if true`, which let any client (signed in or not) read every other user's crash log, read the OFFICIAL_KEYS directory, and rewrite any runtime mitigation. They are now bounded:
+  - **CRASH_LOGS**: any client may create a report, but only with a fixed shape (`kind`, `severity` in `['CRITICAL','ERROR','WARNING','INFO']`, `status == 'OPEN'`, `fixed == false`, `timestamp` is a positive number, `app` ≤ 32 chars, `message` ≤ 2000, `stack` ≤ 8000). Reads, updates and deletes require `isModerator(request.auth.uid)`.
+  - **OFFICIAL_KEYS**: signed-in clients can read the directory; only moderators can write.
+  - **SYSTEM_MITIGATIONS**: signed-in clients can read mitigations; only moderators can write.
+- A new `isModerator(uid)` helper was added next to the other helpers in `docs/firestore.rules`. It uses the same `MODERATORS/{uid}.active == true` check the `P2P_CHATS` update rule already uses when a moderator is added to a disputed trade.
+- The catch-all deny at the bottom of the rules file is unchanged.
+- **Action:** republish `docs/firestore.rules` in Firebase console → Firestore Database → Rules → Publish. The wallet app's `CrashReportManager` keeps writing on every crash; without a republish, those writes will be denied and the moderator dashboard will lose its live feed.
+
 ## 17 Oct 2026 — Minify keeps WorkManager because the app calls it
 
 - The keep rules in the last phone commit were right, and they stay. They were not enough: R8 still deleted `WorkManagerInitializer` when only the manifest named it, so the app died at startup. The app now calls that class itself, and the manifest no longer asks Android to start it. Minify stays on. Clean and rebuild the release build.

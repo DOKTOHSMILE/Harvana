@@ -179,9 +179,9 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 							String k = keys.next();
 							order.put(k, full.opt(k));
 						}
+						String hash = full.optString("escrowTxHash", "");
+						if (!hash.isEmpty()) order.put("escrowTxHash", hash);
 					} catch (org.json.JSONException ignored) { return; }
-					String hash = full.optString("escrowTxHash", "");
-					if (!hash.isEmpty()) order.put("escrowTxHash", hash);
 					applyNodePayment(full);
 					status = order.optString("status", status);
 					render();

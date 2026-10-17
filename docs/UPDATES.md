@@ -2,6 +2,11 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 17 Oct 2026 — Minify no longer removes WorkManager
+
+- Release shrinking kept `WorkManagerInitializer`. Without that class the app crashed on startup after minify (`ClassNotFoundException` inside `InitializationProvider`). Clean and rebuild the release build after pulling.
+- The order screen's lock-hash write is inside the same try as the rest of the signed order, so CodeAssist no longer stops on `JSONException`.
+
 ## 16 Oct 2026 — Phone sign-in, circle roster, alerts, signed order
 
 - Sign-in sheet has **Sign in with phone**. Firebase sends the SMS. No Cloud Function. Enable the Phone provider in the Firebase console or the text will not send.

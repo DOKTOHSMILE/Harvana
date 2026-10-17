@@ -26,3 +26,15 @@
 
 # BouncyCastle: only the pieces referenced directly are needed; it ships no reflection-based lookups here
 -dontwarn org.bouncycastle.**
+
+# Play services references this annotation; it is not in the app. A missing class here is a warning, not a crash.
+-dontwarn com.google.android.apps.common.proguard.SideEffectFree
+
+# WorkManager is started from the manifest (InitializationProvider), not from a direct call.
+# CodeAssist's R8 does not always apply the library's own keep rules, so without these the
+# class is removed and the app dies at startup: ClassNotFoundException: WorkManagerInitializer.
+-keep class androidx.work.WorkManagerInitializer { <init>(); }
+-keep class androidx.work.impl.WorkManagerInitializer { <init>(); }
+-keep class * implements androidx.startup.Initializer { <init>(); }
+-keep class * extends androidx.work.ListenableWorker { public <init>(android.content.Context, androidx.work.WorkerParameters); }
+-keep class androidx.work.** { *; }

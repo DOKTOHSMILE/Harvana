@@ -431,6 +431,11 @@
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
+			android:name=".SupportChatActivity"
+			android:label="Support"
+			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:windowSoftInputMode="adjustResize" />
+		<activity
 			android:name=".NotificationSettingsActivity"
 			android:label="Notification settings"
 			android:configChanges="orientation|screenSize|keyboardHidden" />

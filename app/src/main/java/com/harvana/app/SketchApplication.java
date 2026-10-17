@@ -118,7 +118,15 @@ public class SketchApplication extends Application {
             Log.e(TAG, "CoinInfo init/refresh failed", t);
         }
 
-        // 10. Background notifications and watcher
+        // 10. WorkManager is started here, not by the manifest. The manifest entry was crashing
+        //     release builds after minify removed WorkManagerInitializer.
+        try {
+            androidx.work.WorkManager.initialize(this, new androidx.work.Configuration.Builder().build());
+        } catch (IllegalStateException already) {
+            Log.d(TAG, "WorkManager was already started");
+        } catch (Throwable t) {
+            Log.e(TAG, "WorkManager start failed", t);
+        }
         try {
             com.harvana.app.notify.NotificationWorker.schedule(this);
             com.harvana.app.notify.WalletWatchService.start(this);

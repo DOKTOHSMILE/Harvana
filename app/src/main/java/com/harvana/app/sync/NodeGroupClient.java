@@ -76,6 +76,11 @@ public final class NodeGroupClient {
         read("/api/v1/wallet/group-trust/" + groupId, cb);
     }
 
+    /** Labels the node computes for one wallet (finished circles, on-time payments, vouches). Decoration only. */
+    public static void getLabels(String address, Callback cb) {
+        read("/api/v1/wallet/labels/" + address, cb);
+    }
+
     /** Family of a group id, from the node's fixed id prefixes. */
     public static String familyOf(String groupId) {
         return com.harvana.app.group.GroupKinds.familyOf(groupId);

@@ -537,6 +537,7 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 		
 		_bindRules(data.get("groupRules"));
 		_bindChainFacts(data);
+		_bindRosterLabels(com.harvana.app.group.GroupKinds.nodeId(data));
 	}
 
 	/** What the node knows before anyone asks to join: group trust, and how many circle bonds are actually locked. */
@@ -571,6 +572,89 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 			}
 			@Override public void onError(String error) { }
 		});
+	}
+
+	/** Who is already on the network roster, with the labels the node computes for each wallet. */
+	private void _bindRosterLabels(String nodeId) {
+		if (nodeId == null || nodeId.isEmpty() || layout_group_rules == null) return;
+		String family = com.harvana.app.sync.NodeGroupClient.familyOf(nodeId);
+		com.harvana.app.sync.NodeGroupClient.Callback cb = new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				org.json.JSONArray members = json.optJSONArray("members");
+				if (members == null || members.length() == 0) return;
+				java.util.ArrayList<String> addresses = new java.util.ArrayList<>();
+				int n = Math.min(members.length(), 8);
+				for (int i = 0; i < n; i++) {
+					org.json.JSONObject row = members.optJSONObject(i);
+					if (row == null) continue;
+					String address = row.optString("address", "");
+					if (!address.isEmpty()) addresses.add(address);
+				}
+				if (!addresses.isEmpty()) runOnUiThread(() -> _paintRoster(addresses));
+			}
+			@Override public void onError(String error) { }
+		};
+		if ("CIRCLE".equals(family)) com.harvana.app.sync.NodeGroupClient.getCircleMembers(nodeId, cb);
+		else if ("ACCUM".equals(family)) com.harvana.app.sync.NodeGroupClient.getAccumMembers(nodeId, cb);
+		else if ("FIXED".equals(family)) com.harvana.app.sync.NodeGroupClient.getFixedMembers(nodeId, cb);
+	}
+
+	private void _paintRoster(java.util.List<String> addresses) {
+		if (layout_group_rules == null) return;
+		float d = getResources().getDisplayMetrics().density;
+		TextView head = new TextView(this);
+		head.setText("People already in");
+		head.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+		head.setPadding(0, (int) (16 * d), 0, (int) (8 * d));
+		layout_group_rules.addView(head);
+		for (String address : addresses) {
+			TextView line = new TextView(this);
+			line.setTag(address);
+			line.setText(_shortAddress(address) + "  ·  checking the network");
+			line.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+			line.setPadding(0, 0, 0, (int) (8 * d));
+			layout_group_rules.addView(line);
+			com.harvana.app.sync.NodeGroupClient.getLabels(address, new com.harvana.app.sync.NodeGroupClient.Callback() {
+				@Override public void onSuccess(org.json.JSONObject json) {
+					String text = _shortAddress(address) + "  ·  " + _labelLine(json);
+					runOnUiThread(() -> line.setText(text));
+				}
+				@Override public void onError(String error) {
+					runOnUiThread(() -> line.setText(_shortAddress(address) + "  ·  no network label yet"));
+				}
+			});
+		}
+	}
+
+	private static String _shortAddress(String address) {
+		if (address == null || address.length() <= 12) return address == null ? "" : address;
+		return address.substring(0, 6) + "…" + address.substring(address.length() - 4);
+	}
+
+	private static String _labelLine(org.json.JSONObject json) {
+		org.json.JSONArray labels = json == null ? null : json.optJSONArray("labels");
+		if (labels == null || labels.length() == 0) return "no network label yet";
+		StringBuilder out = new StringBuilder();
+		for (int i = 0; i < labels.length(); i++) {
+			org.json.JSONObject label = labels.optJSONObject(i);
+			String plain = label == null ? null : _plainLabel(label.optString("label", ""));
+			if (plain == null) continue;
+			if (out.length() > 0) out.append(", ");
+			out.append(plain);
+		}
+		return out.length() == 0 ? "no network label yet" : out.toString();
+	}
+
+	private static String _plainLabel(String code) {
+		if ("CIRCLE_VETERAN".equals(code)) return "finished a circle";
+		if ("FOUNDING_MEMBER".equals(code)) return "started a circle that finished";
+		if ("ZERO_DEFAULT".equals(code)) return "no missed payment";
+		if ("EARLY_PAYER".equals(code)) return "pays on time";
+		if ("VOUCHED".equals(code)) return "someone vouches for them";
+		if ("FORGIVEN".equals(code)) return "a group forgave a miss";
+		if ("CURED_DEFAULT".equals(code)) return "paid a miss back";
+		if ("REHABILITATED".equals(code)) return "back in good standing";
+		return null;
 	}
 	
 	@SuppressWarnings("unchecked")

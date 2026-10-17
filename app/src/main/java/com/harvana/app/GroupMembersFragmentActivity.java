@@ -1403,6 +1403,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 						h.reject.setEnabled(true);
 						h.reject.setOnClickListener(v -> _castVote(h, req, docId, reqUid, currentUid, false));
 					}
+					if (h.meta != null) h.meta.setText("Wants to join. A yes passes at 51% of the vote weight, with enough people voting.");
 				}
 			} else {
 				if (h.accept != null) {

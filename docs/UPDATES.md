@@ -2,6 +2,11 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 17 Oct 2026 — Startup no longer asks for the missing WorkManager class
+
+- Minify was deleting `WorkManagerInitializer` while Android still tried to start it, so the app died before any screen. That startup entry is removed. The app starts WorkManager itself. Clean and rebuild the release build after pulling. The old crash log from 16 Oct is this same crash.
+- Before you join, the request screen lists people already on the network roster and the labels the node computes for them (finished a circle, pays on time, someone vouches, and so on). A member vote now says a yes passes at 51% of the vote weight.
+
 ## 17 Oct 2026 — Join screen shows chain trust and locked bonds
 
 - The join request screen shows the node's trust line, and for a forming circle how many bonds are locked. Asking to join still does not lock a bond or start the circle.

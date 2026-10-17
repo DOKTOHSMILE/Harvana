@@ -46,6 +46,18 @@
 				android:name="android.support.FILE_PROVIDER_PATHS"
 				android:resource="@xml/file_paths" />
 		</provider>
+		<!-- Do not start WorkManager from this provider. Minify was removing WorkManagerInitializer
+		     while this entry stayed, and the app died before the first screen. The app starts WorkManager itself. -->
+		<provider
+			android:name="androidx.startup.InitializationProvider"
+			android:authorities="${applicationId}.androidx-startup"
+			android:exported="false"
+			tools:node="merge">
+			<meta-data
+				android:name="androidx.work.WorkManagerInitializer"
+				android:value="androidx.startup"
+				tools:node="remove" />
+		</provider>
 		<receiver
 			android:name=".notify.NotificationBootReceiver"
 			android:exported="false">

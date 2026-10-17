@@ -298,6 +298,49 @@
 					</LinearLayout>
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
+			<!-- Action buttons. Visibility is wired in LoanDetailSheet based on
+			     the current user's role (borrower / guardian / neither) and the
+			     loan's on-chain vs. legacy status. -->
+			<LinearLayout
+				android:id="@+id/row_loan_detail_actions"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal"
+				android:layout_marginBottom="12dp"
+				android:visibility="gone">
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_loan_detail_repay"
+					android:layout_width="0dp"
+					android:layout_height="48dp"
+					android:text="Repay"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextOnAccent"
+					android:layout_weight="1"
+					android:textSize="14sp"
+					android:layout_marginEnd="6dp"
+					app:backgroundTint="@color/colorAccent"
+					app:cornerRadius="12dp"
+					app:elevation="0dp"
+					android:textAllCaps="false"
+					android:focusable="false" />
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_loan_detail_guardian_sign"
+					android:layout_width="0dp"
+					android:layout_height="48dp"
+					android:text="Sign as guardian"
+					android:textStyle="bold"
+					android:textColor="@color/colorTextSecondary"
+					android:layout_weight="1"
+					android:textSize="14sp"
+					android:layout_marginStart="6dp"
+					app:backgroundTint="@color/colorSurfaceAlt"
+					app:cornerRadius="12dp"
+					app:elevation="0dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/colorCardStroke"
+					android:textAllCaps="false"
+					android:focusable="false" />
+			</LinearLayout>
 			<TextView
 				android:id="@+id/textview23"
 				android:layout_width="wrap_content"

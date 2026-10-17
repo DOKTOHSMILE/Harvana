@@ -136,6 +136,51 @@
 -dontwarn javax.annotation.**
 -dontwarn javax.inject.**
 
+# ============================================================================
+# Firebase + google-services.json runtime resolution
+# -----------------------------------------------------------------------------
+# The error "An internal error has occurred. [API key not found. Please pass a valid API key.]"
+# means R8 pruned one of the classes Firebase uses at runtime to read the API key
+# out of google-services.json. The Firebase SDK uses reflection on three things
+# during init:
+#   (a) the FirebaseInitProvider ContentProvider declared in the merged manifest,
+#   (b) the generated google-services resources (string resources injected by
+#       the google-services Gradle plugin), and
+#   (c) Firebase / Play services classes that look up the key on the classpath.
+# Without explicit keeps R8 prunes (a) and (c) and the SDK then reports
+# "API key not found" on the first call. The rules below keep all three.
+# ============================================================================
+
+# (a) FirebaseInitProvider is in the merged manifest. R8 prunes it because
+#     the app's Java never references it directly; the keep here is the only
+#     thing that keeps the class on the device.
+-keep class com.google.firebase.provider.FirebaseInitProvider { *; }
+
+# (b) The google-services Gradle plugin generates string resources whose values
+#     are read at runtime by FirebaseOptions.fromResource(). Keep every R$* member
+#     so the generated google_app_id, default_web_client_id, etc. survive R8.
+-keepclassmembers class **.R$* {
+    public static <fields>;
+}
+# Same for the styleable and attr classes Firebase may read indirectly.
+-keepclassmembers class **.R$styleable { *; }
+-keepclassmembers class **.R$attr { *; }
+
+# (c) Keep every Firebase and Play services class. They use reflection to wire
+#     providers, auth, firestore, storage, database, appcheck, crashlytics and
+#     the messaging FCM endpoint. A blanket -keep is the simplest correct rule.
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
+
+# FirebaseAuth, FirebaseFirestore, FirebaseDatabase, FirebaseStorage, Crashlytics
+# each ship their own consumer rules but the umbrella -keep above makes any
+# gap in those consumer rules harmless.
+
+# Firebase App Check: the new key attestation provider reads via reflection.
+-keep class com.google.firebase.appcheck.** { *; }
+
 # Firebase + Kotlin coroutines generic signatures. R8 8.x in full mode has been known to flag
 # "applied generic arguments have different count than the expected formals" on Firebase
 # coroutine internals when the kotlin-stdlib on the classpath is older than the one Firebase was

@@ -33,6 +33,16 @@ public final class GroupTypeUiController {
         String gWallet = str(group, "groupWalletAddress", str(group, "group_wallet", "—"));
         setText(root, "tv_group_wallet_address", gWallet);
 
+        // Network status — shows the user whether the group's money, members and
+        // votes live on the node or stay in Firestore. Reads from GroupKinds.isOnChain
+        // which checks for a valid protocol id (CIRC-, ACCUM-, FIXED-) in
+        // nodeGroupId / circleId / nodeId / groupId. If the layout has a
+        // tv_group_network TextView, this fills it; otherwise it is a no-op.
+        boolean onChain = GroupKinds.isOnChain(group);
+        setText(root, "tv_group_network",
+                onChain ? "On-chain (signed on the node)"
+                        : "Firestore (legacy) — only this app's copy");
+
         if (type.contains("Rotating")) {
             int slot = (int) num(group, "currentSlot", num(group, "currentRound", 1));
             int total = (int) num(group, "totalSlots", 0);

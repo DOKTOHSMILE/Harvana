@@ -67,6 +67,166 @@
   `./gradlew test`, so the new test class will be picked up
   automatically.
 
+## 18 Oct 2026 — Fix: release build "API key not found" after R8 minify
+
+- **Symptom (real device, release build):** the sign-in screen
+  shows "An internal error has occurred. [API key not found. Please
+  pass a valid API key.]" The dev build was fine.
+- **Cause:** R8 pruned three things the Firebase SDK reads via
+  reflection at init time:
+  1. the `FirebaseInitProvider` ContentProvider declared in the merged
+     manifest (R8 prunes it because the app's Java never references it),
+  2. the generated `google-services.json` resources (string array
+     entries like `google_app_id`, `default_web_client_id`, the API key),
+  3. Firebase and Play services classes that look the key up on the
+     classpath.
+  The existing `-dontwarn` rules only suppressed warnings; they did not
+  *keep* the classes.
+- **Fix in `app/proguard-rules.pro`:** added a new "Firebase +
+  google-services.json runtime resolution" section with three explicit
+  keeps:
+  1. `-keep class com.google.firebase.provider.FirebaseInitProvider { *; }`
+     — preserves the ContentProvider the merged manifest references.
+  2. `-keepclassmembers class **.R$* { public static <fields>; }` —
+     preserves the generated google-services string resources
+     (google_app_id, default_web_client_id, the API key).
+  3. `-keep class com.google.firebase.** { *; }` + `-keep class
+     com.google.android.gms.** { *; }` — blanket keeps on every
+     Firebase and Play services class so any consumer-rule gap
+     cannot strip the API-key lookup.
+- **Action:** clean + rebuild the release build, reinstall on the
+  device. The sign-in screen will then resolve the API key and the
+  Firebase auth / firestore / storage clients will initialise.
+
+## 18 Oct 2026 — `ACCUM_WALLET_RECOVERY` action, Network status row on the overview
+
+- **`ACCUM_WALLET_RECOVERY` action** added end-to-end. The constant
+  `GroupAction.ACCUM_WALLET_RECOVERY` is defined; `AccumSnapshot.of`
+  surfaces the "Change my payout wallet" action whenever a member has a
+  line in ACTIVE or CLAIMABLE state; `NodePayActions.run()` routes the
+  case to a new `promptWalletRecovery` method that opens a sheet, asks
+  for the new HV0x / 0x address, validates it, and calls
+  `chain.NodeGroupClient.accumWalletRecovery` which signs
+  `HARVANA_ACCUM_WALLET_RECOVERY_V1:groupId:oldMember:newMember:acting:nonce`
+  and submits to `/api/v1/accum/wallet-recovery`.
+- **`WalletRecoverySheet`** (`com.harvana.app.group.WalletRecoverySheet`)
+  holds the address validator (`isPlausibleAddress`) and a tiny
+  reference holder so the sheet body and the submit handler can be
+  wired from `NodePayActions` without an extra dependency.
+- **`GroupSettingsActivity._showNetworkPanel()`** is already wired —
+  it calls `com.harvana.app.group.NodeSettingsPanel.attach(...)` to put
+  the node-status card on the Network section of the settings page.
+  This was the missing "Network settings" entry; no change needed.
+- **Network status row on the group overview.** `GroupTypeUiController
+  .applyOverviewPanels` now sets `tv_group_network` with
+  `On-chain (signed on the node)` or `Firestore (legacy)`. Read via
+  `GroupKinds.isOnChain(group)`. If the layout has a `tv_group_network`
+  TextView it shows up; if not, the `setText` helper silently no-ops.
+  This is the single missing UI row I had not surfaced in the previous
+  status — the overview already showed the group wallet balance from
+  the node, but did not say *where* the group's money lives.
+- **No behaviour change for legacy users.** Legacy groups still show
+  the same screens; they just get a clear "Firestore (legacy)" line.
+
+## 18 Oct 2026 — Loan detail sheet: `Repay` and `Sign as guardian` UI buttons
+
+- **New `com.harvana.app.group.LoanDetailSheet`** inflates the existing
+  `bottom_sheet_loan_detail.xml` and wires the two action buttons that
+  were missing from the legacy `LoansFragmentLogic` flow.
+- **Action row** added to the layout (`@+id/row_loan_detail_actions`,
+  `@+id/btn_loan_detail_repay`, `@+id/btn_loan_detail_guardian_sign`),
+  hidden by default. Visibility is set by the sheet:
+  - **Repay** — visible to the borrower when the loan is `ACTIVE` and
+    `totalDue > 0`. Tapping opens a confirm sheet; on confirm it calls
+    `GroupLoanManager.recordRepayment` which routes to
+    `chain.NodeGroupClient.genLoanRepay` for on-chain groups.
+  - **Sign as guardian** — visible to a guardian when the loan is
+    `PENDING_APPROVAL` or `PENDING`. Tapping calls
+    `GroupLoanManager.guardianSignLoan` which signs
+    `HARVANA_GENLOAN_APPROVE_V1:groupId:loanId` via
+    `chain.NodeGroupClient.genLoanGuardianSignature` (no-nonce path).
+- **Network row** appended to the breakdown card so the user sees
+  whether the action is going to the node (`On-chain (signed on the node)`)
+  or to Firestore (`Firestore (legacy)`).
+- **No behaviour change** for users on legacy groups — the buttons are
+  hidden when the role / status combination does not match, and the
+  underlying `GroupLoanManager` methods keep the legacy path as a
+  fallback when the network classify call cannot reach the node.
+- **What is NOT done here.** `LoansFragmentLogic` still uses the old
+  generic `SheetDialog` for admin approve/reject. Wiring the
+  `LoanDetailSheet` to be the tap target on the loans list is the
+  next step; the sheet is ready to be called from
+  `LoansFragmentLogic.LoanAdapter.onBindViewHolder.onClick`.
+
+## 18 Oct 2026 — `GroupLoanManager` repay + guardian sign-off wired to the node
+
+- **`GroupLoanManager.recordRepayment`** now branches on whether the
+  group is on-chain. For on-chain groups it signs and submits to
+  `POST /api/v1/genloan/repay` via
+  `com.harvana.app.chain.NodeGroupClient.genLoanRepay` (the canonical
+  `HARVANA_GENLOAN_REPAY_V1:groupId:loanId:borrower:amount:nonce` is
+  built by `chain/GroupCanonical.genLoanRepay` and signed with the
+  borrower's wallet key). The result is mirrored to the Firestore
+  `payments` collection with `source=node` so the legacy overview /
+  loans tab still shows the repayment. For legacy Firestore-only
+  groups the previous read-compute-write path is preserved verbatim.
+  Fallback: if the network is unreachable when the classify call
+  runs, the legacy path runs so the borrower is not locked out.
+- **`GroupLoanManager.guardianSignLoan`** is new. Guardians sign
+  `HARVANA_GENLOAN_APPROVE_V1:groupId:loanId` (no nonce — one-time
+  approval) via
+  `com.harvana.app.chain.NodeGroupClient.genLoanGuardianSignature`,
+  which routes through the `_signedNoNonce` path. The signature is
+  stored on the node; a mirror flag is written to Firestore so the
+  loan request screen can show "signed by you" without a per-row
+  network fetch.
+- **What is NOT done here.** The Accum and Fixed day-to-day actions
+  (contribute, claim, pack, deposit, request-disbursement, vote,
+  request-grant, request-milestone, close, new-goal) still write to
+  Firestore. `chain/NodeGroupClient` has every method (23 total)
+  for them; wiring the UI screens is the next step and is a
+  multi-screen change, one screen at a time.
+- **No behaviour change for legacy users.** The on-chain branch only
+  runs when `GroupRepository.classify(...).onIdentity(id).onChain()`
+  is true; legacy groups never see the new code path.
+
+## 18 Oct 2026 — `NodeGroupClient` foundation for Accum / Fixed / GenLoan
+
+- **New `com.harvana.app.chain.NodeGroupClient`** in the wallet. Closes the
+  foundation for G1 (Accum), G2 (Fixed) and G3 (GenLoan) from
+  `docs/CROSS_REPO_AUDIT.md`. One method per node endpoint, same sign-and-
+  submit pattern as `P2PTradeRouter.createListing` (fetch nonce, build
+  canonical via `GroupCanonical`, sign with the wallet's Ed25519 key,
+  POST to the node, deliver on the main thread).
+- **Methods added:** 9 Accum (`accumCreateGroup`, `accumStartLine`,
+  `accumContribute`, `accumContributeMultiple`, `accumContributeVariable`,
+  `accumClaim`, `accumPack`, `accumApprovePack`, `accumWalletRecovery`),
+  11 Fixed (`fixedCreateGroup`, `fixedDeposit`, `fixedRequestDisbursement`,
+  `fixedDisbursementVote`, `fixedRequestMilestone`, `fixedMilestoneVote`,
+  `fixedRequestGrant`, `fixedGrantVote`, `fixedClose`, `fixedNewGoal`,
+  `fixedDissolveVote`), 3 GenLoan (`genLoanRequest`, `genLoanRepay`,
+  `genLoanGuardianSignature`).
+- **v1 / v2 signing switch.** A `volatile boolean v2SigningActive` flag
+  is set by `onNodeStatus(long v2LockActivationHeight)`, called from the
+  node-status probe. v1 is live until the node flips
+  `harvana.consensus.v2-lock-activation-height` away from `-1`. v2 uses
+  the typed-tx byte layout in `chain/LockV2.java` (already shipped).
+- **`_signedNoNonce` helper.** The GenLoan guardian signature canonical
+  has no nonce (`HARVANA_GENLOAN_APPROVE_V1:groupId:loanId`) because it
+  is a one-time approval, not a transaction. A separate helper skips
+  the nonce fetch and signs / posts directly.
+- **What is NOT done here.** The UI screens (`CreateAccumulativeGroupActivity`,
+  `CreateFixedGroupActivity`, the loans tab) still write to Firestore.
+  Wiring them to call `NodeGroupClient` is the next step — one screen at
+  a time, with the existing screens kept as the Firestore fallback
+  until the node-call path is device-tested. That is a multi-day UI
+  build, not a single-session change.
+- **No behaviour change for users** until the UI is wired. The class
+  compiles, the canonical-message field orders are verified against
+  `GroupCanonical` parameter lists, and the sign-and-submit flow is
+  the same as `P2PTradeRouter`. When the UI starts calling these
+  methods, the gap G1/G2/G3 closes without further client work.
+
 ## 18 Oct 2026 — gitleaks config + GitHub Actions CI for the wallet repo
 
 - **`.gitleaks.toml`** added. Tuned for the actual secrets this codebase has used or could plausibly use:

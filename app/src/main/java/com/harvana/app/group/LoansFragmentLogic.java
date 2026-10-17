@@ -105,15 +105,64 @@ public class LoansFragmentLogic {
 			if (isAdmin && ("PENDING".equalsIgnoreCase(status) || "pending".equalsIgnoreCase(status))) {
 				final double fPrincipal = principal;
 				final String fWallet = wallet;
+				final String fLoanId = loanId;
+				final Map<String, Object> fLoan = loan;
 				h.tv.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						confirmApprove(loanId, fWallet, fPrincipal);
+						openDetail(fLoan, fLoanId, fWallet, fPrincipal);
 					}
 				});
 			} else {
-				h.tv.setOnClickListener(null);
+				final String fLoanId2 = loanId;
+				final Map<String, Object> fLoan2 = loan;
+				final String fWallet2 = wallet;
+				final double fPrincipal2 = principal;
+				h.tv.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						openDetail(fLoan2, fLoanId2, fWallet2, fPrincipal2);
+					}
+				});
 			}
+		}
+
+		/** Open the loan detail sheet. Determines borrower / guardian role and routes. */
+		private void openDetail(final Map<String, Object> loan, final String loanId,
+							   final String borrowerWallet, final double principal) {
+			final String me = com.harvana.app.utils.AuthUtil.uid(ctx);
+			// Borrower = the current user is the borrower
+			final boolean isBorrower = me != null
+					&& (loan.get("borrowerUid") != null
+							? me.equals(String.valueOf(loan.get("borrowerUid")))
+							: com.harvana.app.wallet.WalletManager.getActiveWalletAddress(ctx) != null
+									&& com.harvana.app.wallet.WalletManager.getActiveWalletAddress(ctx)
+											.equalsIgnoreCase(borrowerWallet));
+			// Guardian = the group admin (or the configured guardian list, when the
+			// node exposes it). For the testnet, admin == guardian.
+			final boolean isGuardian = isAdmin;
+			// Fetch repayments so the sheet can show history + totalDue without a
+			// second round-trip. Use the same manager the legacy path uses.
+			GroupFirestoreManager.getInstance(ctx).getPayments(groupId,
+					new GroupFirestoreManager.ListCallback() {
+						@Override public void onSuccess(final java.util.List<Map<String, Object>> repayments) {
+							activity.runOnUiThread(new Runnable() {
+								@Override public void run() {
+									LoanDetailSheet.show(ctx, groupId, loanId, loan, repayments, isBorrower, isGuardian);
+								}
+							});
+						}
+						@Override public void onError(String error) {
+							activity.runOnUiThread(new Runnable() {
+								@Override public void run() {
+									// Show the sheet anyway with an empty list — the
+									// action buttons still work; just no history rows.
+									LoanDetailSheet.show(ctx, groupId, loanId, loan,
+											new java.util.ArrayList<Map<String, Object>>(), isBorrower, isGuardian);
+								}
+							});
+						}
+					});
 		}
 
 		private void confirmApprove(final String loanId, final String borrowerWallet, final double principal) {

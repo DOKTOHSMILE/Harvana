@@ -79,6 +79,14 @@ public final class NodePayActions {
                 pay(c, "Approve withdrawal", a.label, moneyRows(c, "Member wallet", "Sends this member's savings out of the group"),
                         () -> NodeGroupClient.approveAccumPack(c.activity, c.me, c.nodeId, a.ref, result(c, "Approved")));
                 break;
+            case GroupAction.ACCUM_WALLET_RECOVERY:
+                // Member-initiated payout-address change. Signs
+                // HARVANA_ACCUM_WALLET_RECOVERY_V1:groupId:oldMember:newMember:acting:nonce
+                // where "acting" is the current wallet and "oldMember" is the address
+                // currently on the node for this member. The node replaces the
+                // payout address; future claims / packs go to the new one.
+                promptWalletRecovery(c, a.ref);
+                break;
             case GroupAction.FIXED_DEPOSIT:
                 amount(c, "Deposit", "Amount to deposit", raw ->
                         pay(c, "Deposit", gm(c, raw), moneyRows(c, escrow(c), "Added to this goal group"),
@@ -101,6 +109,51 @@ public final class NodePayActions {
                 break;
             default: break;
         }
+    }
+
+    /**
+     * Accum wallet recovery: member-initiated payout-address change.
+     * Opens a sheet that asks for the new HV0x / 0x address, validates it, then
+     * signs {@code HARVANA_ACCUM_WALLET_RECOVERY_V1:groupId:oldMember:newMember:acting:nonce}
+     * via the new {@code chain.NodeGroupClient.accumWalletRecovery} (the canonical
+     * helper is in {@code GroupCanonical.accumWalletRecovery}).
+     */
+    private static void promptWalletRecovery(Ctx c, String lineId) {
+        if (c == null || c.activity == null) return;
+        final EditText input = new EditText(c.activity);
+        input.setHint("HV0x… (full address)");
+        input.setSingleLine(true);
+        input.setTypeface(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.NORMAL);
+        new com.harvana.app.utils.SheetDialog.Builder(c.activity)
+                .setTitle("Change my payout wallet")
+                .setMessage("The new address receives all future claim / pack payouts for this line.\n\nCurrent: " + shortWallet(c.me))
+                .setView(input)
+                .setPositiveButton("Submit", (x, w) -> {
+                    String newAddr = input.getText().toString().trim();
+                    if (!com.harvana.app.group.WalletRecoverySheet.isPlausibleAddress(newAddr)) {
+                        Toast.makeText(c.activity, "Not a valid HV0x / 0x address.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    // Sign and submit via the new chain.NodeGroupClient.
+                    // accumWalletRecovery(ctx, actingAddress, groupId, oldMember, newMember, callback)
+                    // — acting is the current wallet, oldMember is the current wallet
+                    // (we are switching our own address), newMember is the new address.
+                    com.harvana.app.chain.NodeGroupClient.accumWalletRecovery(
+                            c.activity, c.me, c.nodeId, c.me, newAddr,
+                            new com.harvana.app.chain.NodeGroupClient.SignCallback() {
+                                @Override public void onSuccess(org.json.JSONObject resp) {
+                                    Toast.makeText(c.activity,
+                                            "Payout wallet changed. Future claims go to " + shortWallet(newAddr) + ".",
+                                            Toast.LENGTH_SHORT).show();
+                                    if (c.reload != null) c.reload.run();
+                                }
+                                @Override public void onError(String error) {
+                                    Toast.makeText(c.activity, error, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     public static Button button(Activity a, String label, boolean primary, android.view.View.OnClickListener l) {

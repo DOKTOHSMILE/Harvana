@@ -78,6 +78,14 @@ public final class AccumSnapshot {
         } else if (hasLine && "CLAIMABLE".equals(lineStatus)) {
             s.actions.add(new GroupAction(GroupAction.ACCUM_CLAIM, "Claim my savings", true, str(line, "lineId")));
         }
+        // Wallet recovery is a member-initiated address change. Available whenever the
+        // member has a line and the line is not actively being packed. The signed
+        // canonical is HARVANA_ACCUM_WALLET_RECOVERY_V1:groupId:oldMember:newMember:acting:nonce;
+        // the node stores the new address and future payouts go to it.
+        if (hasLine && ("ACTIVE".equals(lineStatus) || "CLAIMABLE".equals(lineStatus))) {
+            s.actions.add(new GroupAction(GroupAction.ACCUM_WALLET_RECOVERY,
+                    "Change my payout wallet", false, str(line, "lineId")));
+        }
         return s;
     }
 

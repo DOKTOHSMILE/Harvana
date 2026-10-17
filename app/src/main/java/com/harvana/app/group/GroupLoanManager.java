@@ -407,6 +407,78 @@ public final class GroupLoanManager {
             return;
         }
 
+        // On-chain groups: the loan state (principal, interest, accrued, repaid) lives
+        // on the node. The node is the source of truth for "is this loan repayable?" and
+        // "how much is owed?" — the wallet should not try to compute it from Firestore.
+        // Route the call to NodeGroupClient.genLoanRepay which signs and submits.
+        // For legacy (Firestore-only) groups, keep the existing read-compute-write path.
+        GroupRepository.classify(context, groupId, new GroupRepository.Classified() {
+            @Override public void onError(String error) {
+                // Could not reach the network to decide. Fall back to the legacy path
+                // so the borrower is not locked out when the node is briefly unreachable.
+                recordRepaymentLegacy(context, groupId, loanId, fromMemberWallet, groupWalletAddress,
+                        amountHarv, txRef, markFullyRepaid, callback);
+            }
+            @Override public void onIdentity(GroupIdentity id) {
+                if (id.onChain()) {
+                    recordRepaymentOnChain(context, id, groupId, loanId, fromMemberWallet, amountHarv, callback);
+                } else {
+                    recordRepaymentLegacy(context, groupId, loanId, fromMemberWallet, groupWalletAddress,
+                            amountHarv, txRef, markFullyRepaid, callback);
+                }
+            }
+        });
+    }
+
+    /** On-chain repay: sign and submit to the node, then mirror the result into Firestore for the legacy UI. */
+    private static void recordRepaymentOnChain(Context context, GroupIdentity id, String groupId,
+                                              String loanId, String fromMemberWallet,
+                                              double amountHarv, Callback callback) {
+        long amountRaw = com.harvana.app.wallet.BalanceFormatter.harvToRaw(amountHarv);
+        com.harvana.app.chain.NodeGroupClient.genLoanRepay(context, fromMemberWallet, groupId, loanId, amountRaw,
+                new com.harvana.app.chain.NodeGroupClient.SignCallback() {
+                    @Override public void onSuccess(org.json.JSONObject resp) {
+                        // Mirror to Firestore so the overview / loans tab (which still reads
+                        // from Firestore) sees the repayment. The node is the source of
+                        // truth; this is a presentation copy.
+                        try {
+                            Context appContext = context.getApplicationContext();
+                            long now = System.currentTimeMillis();
+                            java.util.Map<String, Object> payment = new java.util.HashMap<>();
+                            payment.put("type", "LOAN_REPAY");
+                            payment.put("status", "CONFIRMED");
+                            payment.put("loanId", loanId);
+                            payment.put("from", fromMemberWallet);
+                            payment.put("amountHarv", amountHarv);
+                            payment.put("amountRaw", amountRaw);
+                            payment.put("source", "node");
+                            payment.put("nodeTxHash", resp.optString("txHash", ""));
+                            payment.put("timestamp", now);
+                            payment.put("confirmedAt", now);
+                            GroupFirestoreManager.getInstance(appContext)
+                                    .addPayment(groupId, payment, new GroupFirestoreManager.IdCallback() {
+                                        @Override public void onSuccess(String id) { callback.onSuccess("Repayment accepted by the network."); }
+                                        @Override public void onError(String error) {
+                                            // The repayment is on the node; Firestore mirror failed
+                                            // but the user's money already moved. Tell them anyway.
+                                            callback.onSuccess("Repayment accepted by the network (local mirror failed: " + error + ").");
+                                        }
+                                    });
+                        } catch (Exception e) {
+                            callback.onSuccess("Repayment accepted by the network.");
+                        }
+                    }
+                    @Override public void onError(String error) {
+                        callback.onError(error);
+                    }
+                });
+    }
+
+    /** Legacy Firestore-only repay: kept verbatim from the previous implementation. */
+    private static void recordRepaymentLegacy(Context context, String groupId, String loanId,
+                                             String fromMemberWallet, String groupWalletAddress,
+                                             double amountHarv, String txRef, boolean markFullyRepaid,
+                                             Callback callback) {
         final Context appContext = context.getApplicationContext();
         final GroupFirestoreManager fs = GroupFirestoreManager.getInstance(appContext);
 
@@ -451,7 +523,7 @@ public final class GroupLoanManager {
                             callback.onError("This loan is already fully repaid.");
                             return;
                         }
-                        
+
                         if (amountHarv > remainingDue + 0.0001) {
                             callback.onError("Amount exceeds what's owed ("
                                     + com.harvana.app.wallet.BalanceFormatter.smartDecimal(remainingDue) + (" " + com.harvana.app.CoinInfo.ticker() + " remaining)."));
@@ -475,6 +547,69 @@ public final class GroupLoanManager {
                 callback.onError("Could not load loan: " + error);
             }
         });
+    }
+
+    // ── Guardian: sign off on a loan request before disbursement ─────────
+
+    /**
+     * Guardian sign-off on a pending loan. The canonical message is
+     * {@code HARVANA_GENLOAN_APPROVE_V1:groupId:loanId} (no nonce — this is
+     * a one-time approval stored on the node, not a replayable transaction).
+     * Calls {@link com.harvana.app.chain.NodeGroupClient#genLoanGuardianSignature}
+     * which handles the no-nonce sign-and-submit path.
+     *
+     * <p>The wallet UI is the guardian's view of the loan request; this method
+     * is the one that puts the guardian's Ed25519 signature on the network.
+     */
+    public static void guardianSignLoan(Context context, String groupId, String loanId, Callback callback) {
+        if (callback == null) return;
+        String err = GroupValidation.firstError(
+                GroupValidation.requireGroupId(groupId),
+                GroupValidation.isBlank(loanId) ? "Missing loan id." : null);
+        if (err != null) { callback.onError(err); return; }
+
+        String guardianAddress = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(context);
+        if (guardianAddress == null || guardianAddress.isEmpty()) {
+            callback.onError("No active wallet.");
+            return;
+        }
+
+        com.harvana.app.chain.NodeGroupClient.genLoanGuardianSignature(context, guardianAddress, groupId, loanId,
+                new com.harvana.app.chain.NodeGroupClient.SignCallback() {
+                    @Override public void onSuccess(org.json.JSONObject resp) {
+                        // The signature is stored on the node; mirror a flag to Firestore
+                        // so the loan request screen can show "signed by you" without
+                        // re-fetching the node for every row.
+                        try {
+                            Context appContext = context.getApplicationContext();
+                            java.util.Map<String, Object> sig = new java.util.HashMap<>();
+                            sig.put("guardianUid", com.harvana.app.utils.AuthUtil.uid(appContext));
+                            sig.put("guardianAddress", guardianAddress);
+                            sig.put("signedAt", System.currentTimeMillis());
+                            sig.put("source", "node");
+                            GroupFirestoreManager.getInstance(appContext)
+                                    .addGuardianSignature(id_nodeGroupIdFrom(groupId, loanId, guardianAddress), sig,
+                                            new GroupFirestoreManager.SimpleCallback() {
+                                                @Override public void onSuccess() { callback.onSuccess("Signature recorded on the network."); }
+                                                @Override public void onError(String error) {
+                                                    callback.onSuccess("Signature recorded on the network (local mirror failed: " + error + ").");
+                                                }
+                                            });
+                        } catch (Exception e) {
+                            callback.onSuccess("Signature recorded on the network.");
+                        }
+                    }
+                    @Override public void onError(String error) { callback.onError(error); }
+                });
+    }
+
+    /**
+     * Document id for the Firestore mirror of a guardian signature. Stable so
+     * the UI can subscribe to a single doc and see "signed / not signed".
+     * Format: {@code groupId_loanId_guardianAddress} with non-word chars stripped.
+     */
+    private static String id_nodeGroupIdFrom(String groupId, String loanId, String guardianAddress) {
+        return (groupId + "_" + loanId + "_" + guardianAddress).replaceAll("[^A-Za-z0-9]", "_");
     }
 
     private static double _asDouble(Object v) {

@@ -27,6 +27,20 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        // Release signing config. The keystore and its passwords are not in the repo - the
+        // store file is dropped into app/ by the build host, and the credentials come from
+        // environment variables (or a local gradle.properties that is never committed). For
+        // local dry-runs set them in ~/.gradle/gradle.properties; for CI set them in the job
+        // secrets so they never end up in git.
+        doktohsmile {
+            storeFile file('doktohsmile.keystore')
+            storePassword providers.gradleProperty('DOKTOHSMILE_STORE_PASSWORD').orNull
+                ?: System.getenv('DOKTOHSMILE_STORE_PASSWORD')
+            keyAlias providers.gradleProperty('DOKTOHSMILE_KEY_ALIAS').orNull
+                ?: System.getenv('DOKTOHSMILE_KEY_ALIAS')
+            keyPassword providers.gradleProperty('DOKTOHSMILE_KEY_PASSWORD').orNull
+                ?: System.getenv('DOKTOHSMILE_KEY_PASSWORD')
+        }
     }
 
     buildTypes {
@@ -34,6 +48,7 @@ android {
             debuggable false
             minifyEnabled true
             shrinkResources false
+            signingConfig signingConfigs.doktohsmile
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

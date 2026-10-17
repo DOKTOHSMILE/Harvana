@@ -62,6 +62,8 @@ public class CreateHarvanaCardActivity extends AppCompatActivity {
   private TextView textview3;
   private TextInputLayout textinputlayout1;
   private TextInputLayout textinputlayout2;
+  private TextInputLayout textinputlayout3;
+  private TextInputEditText et_card_description;
   private TextView tv_char_count;
   private TextView tv_error;
   private MaterialButton btn_generate;
@@ -109,6 +111,8 @@ public class CreateHarvanaCardActivity extends AppCompatActivity {
     textview2 = findViewById(R.id.textview2);
     textview3 = findViewById(R.id.textview3);
     textinputlayout1 = findViewById(R.id.textinputlayout1);
+    textinputlayout3 = findViewById(R.id.textinputlayout3);
+    et_card_description = findViewById(R.id.et_card_description);
     textinputlayout2 = findViewById(R.id.textinputlayout2);
     tv_char_count = findViewById(R.id.tv_char_count);
     tv_error = findViewById(R.id.tv_error);
@@ -403,7 +407,7 @@ public class CreateHarvanaCardActivity extends AppCompatActivity {
         String digitCode = HarvanaCardCrypto.encryptToDigitCode(this, mnemonic, password);
 
         Bitmap front = HarvanaCardRenderer.renderFront(this, selectedTemplate, walletAddress,
-            cardOwnerName);
+            cardOwnerName, et_card_description != null ? et_card_description.getText().toString().trim() : "");
         Bitmap back = HarvanaCardRenderer.renderBack(this, selectedTemplate, qrPayload, digitCode);
 
         runOnUiThread(() -> {

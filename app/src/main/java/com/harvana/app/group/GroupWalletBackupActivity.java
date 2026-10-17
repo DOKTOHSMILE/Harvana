@@ -66,7 +66,7 @@ public class GroupWalletBackupActivity extends AppCompatActivity {
             CardTemplate t;
             try { t = CardTemplate.valueOf(str(card.get("template"))); }
             catch (Exception e) { t = CardTemplate.values()[0]; }
-            Bitmap f = HarvanaCardRenderer.renderFront(this, t, addr, label);
+            Bitmap f = HarvanaCardRenderer.renderFront(this, t, addr, label, null);
             Bitmap k = HarvanaCardRenderer.renderBack(this, t, qr, digits);
             runOnUiThread(() -> show(f, k));
         } catch (Exception e) {

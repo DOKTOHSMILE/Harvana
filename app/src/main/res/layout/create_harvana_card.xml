@@ -200,11 +200,51 @@
 				android:textSize="12sp"
 				android:textColor="?android:attr/textColorSecondary" />
 			<TextView
+				android:id="@+id/textview6"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="32dp"
+				android:text="2. Tag this card"
+				android:textSize="16sp"
+				android:textStyle="bold" />
+			<TextView
+				android:id="@+id/textview7"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="6dp"
+				android:text="Give this card a short label so you can pick the right one at sign-in — for example, My main wallet or Mining rewards."
+				android:textSize="13sp"
+				android:textColor="?android:attr/textColorSecondary"
+				android:lineSpacingExtra="2dp" />
+			<com.google.android.material.textfield.TextInputLayout
+				android:id="@+id/textinputlayout3"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+				app:boxCornerRadiusTopStart="12dp"
+				app:boxCornerRadiusTopEnd="12dp"
+				app:boxCornerRadiusBottomStart="12dp"
+				app:boxCornerRadiusBottomEnd="12dp"
+				app:counterEnabled="true"
+				app:counterMaxLength="20">
+				<com.google.android.material.textfield.TextInputEditText
+					android:id="@+id/et_card_description"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:textSize="14sp"
+					android:hint="Card label (optional)"
+					android:inputType="textCapSentences"
+					android:maxLength="20"
+					android:singleLine="true"
+					android:imeOptions="actionDone" />
+			</com.google.android.material.textfield.TextInputLayout>
+			<TextView
 				android:id="@+id/textview2"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="32dp"
-				android:text="2. Secure Your Backup"
+				android:text="3. Secure Your Backup"
 				android:textSize="16sp"
 				android:textStyle="bold" />
 			<TextView

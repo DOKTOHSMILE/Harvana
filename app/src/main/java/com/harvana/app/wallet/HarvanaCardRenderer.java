@@ -36,7 +36,7 @@ public final class HarvanaCardRenderer {
 	
 	// ── FRONT ────────────────────────────────────────────────────────────
 	
-	public static Bitmap renderFront(Context context, CardTemplate template, String walletAddress, String cardOwnerName) {
+	public static Bitmap renderFront(Context context, CardTemplate template, String walletAddress, String cardOwnerName, String cardDescription) {
 		Bitmap bitmap = Bitmap.createBitmap(CARD_WIDTH_PX, CARD_HEIGHT_PX, Bitmap.Config.ARGB_8888);
 		Canvas canvas = new Canvas(bitmap);
 		clipToRoundedRect(canvas);
@@ -125,6 +125,29 @@ public final class HarvanaCardRenderer {
 		}
 		
 		canvas.drawText(finalName, margin, 480f, ownerNamePaint);
+		
+		// Card description (the user's short label, e.g. "My main wallet"). Drawn under the owner
+		// name so it shows up on the card front as the at-a-glance identifier when picking a card.
+		String finalDescription = cardDescription != null ? cardDescription.trim() : "";
+		if (!finalDescription.isEmpty()) {
+			// Uppercase to match the rest of the card's visual language, but keep the user's wording.
+			finalDescription = finalDescription.toUpperCase(java.util.Locale.US);
+			if (finalDescription.length() > 20) {
+				finalDescription = finalDescription.substring(0, 19) + "…";
+			}
+			Paint descLabel = new Paint(Paint.ANTI_ALIAS_FLAG);
+			descLabel.setColor(template.textSecondary);
+			descLabel.setTextSize(11f);
+			descLabel.setLetterSpacing(0.25f);
+			descLabel.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
+			canvas.drawText("TAG", margin, 510f, descLabel);
+			
+			Paint descPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+			descPaint.setColor(template.accent);
+			descPaint.setTextSize(18f);
+			descPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+			canvas.drawText(finalDescription, margin, 534f, descPaint);
+		}
 		
 		// Validity Block - Shifted significantly to the right (from +350f to +600f)
 		Paint expiryLabel = new Paint(Paint.ANTI_ALIAS_FLAG);

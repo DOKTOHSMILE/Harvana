@@ -1,3 +1,9 @@
+// Harvana Firestore rules. This file is identical in:
+//   Harvana/docs/firestore.rules
+//   capital-oracle-projects/docs/MERGED_FIRESTORE_RULES.rules
+//   capital-oracle-projects/firestore.rules
+// Publish this text. Do not keep a second, older copy.
+
 rules_version = '2';
 
 service cloud.firestore {
@@ -314,6 +320,29 @@ service cloud.firestore {
           && request.resource.data.title == 'Join request'
           && request.resource.data.actorUid == request.auth.uid;
         allow update, delete: if isGroupCreator(groupId);
+      }
+
+      match /invites/{inviteId} {
+        allow read: if isCreatorOrMember(groupId);
+        allow create, update, delete: if isGroupCreator(groupId);
+      }
+
+      match /disputes/{disputeId} {
+        allow read: if isCreatorOrMember(groupId);
+        allow create: if isActiveMember(groupId)
+          && request.resource.data.openedBy == request.auth.uid;
+        allow update: if isCreatorOrMember(groupId);
+        allow delete: if isGroupCreator(groupId);
+      }
+
+      match /privateRecords/{recordId} {
+        allow read: if isCreatorOrMember(groupId);
+        allow create, update, delete: if isGroupCreator(groupId);
+      }
+
+      match /governance/{docId} {
+        allow read: if isCreatorOrMember(groupId);
+        allow create, update, delete: if isGroupCreator(groupId);
       }
     }
 
@@ -717,6 +746,67 @@ service cloud.firestore {
     match /SYSTEM_MITIGATIONS/{mitigationId} {
       allow read: if signedIn();
       allow write: if isModerator(request.auth.uid);
+    }
+
+    // Support desk. A member reads and writes only their own ticket. A moderator
+    // document (written by the node after the key sign-in) can read every ticket
+    // and reply under their own name. Messages are never edited.
+    match /SUPPORT_TICKETS/{ticketId} {
+      allow get: if signedIn() && (
+        resource.data.ownerUid == request.auth.uid || isModerator(request.auth.uid)
+      );
+      allow list: if signedIn() && (
+        isModerator(request.auth.uid) || resource.data.ownerUid == request.auth.uid
+      );
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.status == 'OPEN'
+        && request.resource.data.subject is string
+        && request.resource.data.subject.size() > 0
+        && request.resource.data.subject.size() <= 120
+        && request.resource.data.ownerAddress is string
+        && request.resource.data.ownerAddress.size() <= 80;
+      allow update: if signedIn() && (
+        (request.auth.uid == resource.data.ownerUid
+          && request.resource.data.ownerUid == resource.data.ownerUid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'updatedAt', 'status']))
+        || (isModerator(request.auth.uid)
+          && request.resource.data.ownerUid == resource.data.ownerUid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'updatedAt', 'status', 'staffName', 'staffUid']))
+      );
+
+      match /messages/{messageId} {
+        function ticket() {
+          return get(/databases/$(database)/documents/SUPPORT_TICKETS/$(ticketId)).data;
+        }
+        allow read: if signedIn() && (
+          ticket().ownerUid == request.auth.uid || isModerator(request.auth.uid)
+        );
+        allow create: if signedIn()
+          && request.resource.data.body is string
+          && request.resource.data.body.size() > 0
+          && request.resource.data.body.size() <= 2000
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.at is number
+          && (
+            (ticket().ownerUid == request.auth.uid && request.resource.data.from == 'MEMBER')
+            || (isModerator(request.auth.uid)
+                && request.resource.data.from == 'STAFF'
+                && request.resource.data.staffName is string
+                && request.resource.data.staffName.size() > 0
+                && request.resource.data.staffName.size() <= 80)
+          );
+        allow update, delete: if false;
+      }
+    }
+
+    match /LOAN_GUARDIAN_SIGS/{sigId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.guardianUid == request.auth.uid
+        && request.resource.data.guardianAddress is string
+        && request.resource.data.source == 'node';
+      allow update, delete: if false;
     }
 
     match /{document=**} {

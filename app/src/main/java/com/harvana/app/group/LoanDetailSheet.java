@@ -151,7 +151,7 @@ public final class LoanDetailSheet {
 
         // Append a "Network" row to the breakdown card so the user knows where the action goes.
         InfoTable net = new InfoTable(v.getContext());
-        net.row(R.drawable.ic_cloud_line, "Network", onChain ? "On-chain (signed on the node)" : "Firestore (legacy)");
+        net.row(R.drawable.ic_info, "Network", onChain ? "On-chain (signed on the node)" : "Firestore (legacy)");
         LinearLayout card = (LinearLayout) ((android.view.ViewGroup) v.findViewById(R.id.cardview3)).getChildAt(0);
         if (card != null) card.addView(net.view());
 
@@ -172,8 +172,8 @@ public final class LoanDetailSheet {
                         : "—";
                 InfoTable t = new InfoTable(v.getContext());
                 t.row(R.drawable.ic_check_circle_line, "Repayment · " + when, BalanceFormatter.smart(num(p, "amountHarv", 0)));
-                t.row(R.drawable.ic_label_line, "Source", "node".equalsIgnoreCase(str(p, "source", "")) ? "On-chain" : "Firestore");
-                t.row(R.drawable.ic_label_line, "Status", st);
+                t.row(R.drawable.ic_info, "Source", "node".equalsIgnoreCase(str(p, "source", "")) ? "On-chain" : "Firestore");
+                t.row(R.drawable.ic_info, "Status", st);
                 history.addView(t.view());
             }
         }

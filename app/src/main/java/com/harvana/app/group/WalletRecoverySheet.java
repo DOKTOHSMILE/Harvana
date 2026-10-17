@@ -13,7 +13,7 @@ import android.widget.Toast;
 import com.harvana.app.R;
 import com.harvana.app.circle.CircleUi;
 import com.harvana.app.sync.NodeGroupClient;
-import com.harvana.app.utils.SheetDialog;
+import com.harvana.app.ui.SheetDialog;
 import com.harvana.app.wallet.WalletManager;
 
 /**
@@ -36,16 +36,18 @@ public final class WalletRecoverySheet {
     /** Open the wallet-recovery sheet. Called from NodePayActions.ACCUM_WALLET_RECOVERY. */
     public static void show(android.app.Activity activity, String groupId, String lineId,
                             String oldMemberAddress, NodePayActions.Ctx c) {
-        com.harvana.app.utils.SheetDialog d = new com.harvana.app.utils.SheetDialog.Builder(activity)
+        new SheetDialog.Builder(activity)
                 .setTitle("Change my payout wallet")
-                .setView(buildBody(activity, groupId, lineId, oldMemberAddress, c, d -> dismissWith(d)))
-                .setNegativeButton("Cancel", (x, w) -> d.dismiss())
+                .setView(buildBody(activity, groupId, lineId, oldMemberAddress, c, sheet -> { if (sheet != null) sheet.dismiss(); }))
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .show();
     }
 
+    private interface Close { void close(SheetDialog sheet); }
+
     private static View buildBody(android.app.Activity activity, String groupId, String lineId,
                                    String oldMemberAddress, NodePayActions.Ctx c,
-                                   java.util.function.Consumer<com.harvana.app.utils.SheetDialog> dismiss) {
+                                   Close dismiss) {
         LinearLayout root = new LinearLayout(activity);
         root.setOrientation(LinearLayout.VERTICAL);
         int p = (int) (16 * activity.getResources().getDisplayMetrics().density);
@@ -118,7 +120,7 @@ public final class WalletRecoverySheet {
      * sign-and-submit call lives in {@link NodePayActions} alongside
      * the other actions.
      */
-    public static LinearLayout buildAndWire(com.harvana.app.utils.SheetDialog d, android.app.Activity activity,
+    public static LinearLayout buildAndWire(SheetDialog d, android.app.Activity activity,
                                             String groupId, String lineId,
                                             String oldMemberAddress, NodePayActions.Ctx c) {
         LinearLayout root = (LinearLayout) d.findViewById(R.id.sheet_loan_detail_root);

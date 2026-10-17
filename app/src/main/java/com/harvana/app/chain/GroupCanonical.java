@@ -64,15 +64,6 @@ public final class GroupCanonical {
         return "HARVANA_ACCUM_CREATE_GROUP_V1:" + creatorAddress + ":" + interestRateBps + ":" + withdrawalRule + ":" + nonce + tail(asset);
     }
 
-    /** AccumStartLineRequest.getCanonicalMessage() — opens a savings line in an existing Accum group. */
-    public static String accumStartLine(String groupId, String memberAddress, long dailyAmountRaw,
-                                       boolean autoCloseEnabled, String lineType, Long lockedUntilTimestamp,
-                                       String depositMode, Long maxContributionRaw, long nonce, String asset) {
-        return "HARVANA_ACCUM_START_LINE_V1:" + groupId + ":" + memberAddress + ":" + dailyAmountRaw
-                + ":" + autoCloseEnabled + ":" + lineType + ":" + lockedUntilTimestamp + ":" + depositMode
-                + ":" + maxContributionRaw + ":" + nonce + tail(asset);
-    }
-
     /** AccumPackRequest.getCanonicalMessage() */
     public static String accumPack(String groupId, String lineId, String memberAddress, long nonce) {
         return "HARVANA_ACCUM_PACK_V1:" + groupId + ":" + lineId + ":" + memberAddress + ":" + nonce;
@@ -251,4 +242,73 @@ public final class GroupCanonical {
     public static String cureDefault(String circleId, String memberAddress, long nonce) {
         return "HARVANA_CURE_DEFAULT_V1:" + circleId + ":" + memberAddress + ":" + nonce;
     }
+
+    /** Builds a canonical message from the field array the group client passes. The last number is the live nonce. */
+    public static String fromFields(String op, Object[] f) {
+        switch (op) {
+            case "accumCreateGroup":
+                return accumCreateGroup(s(f, 0), n(f, 1), s(f, 2), n(f, 3), s(f, 4));
+            case "accumStartLine":
+                return accumStartLine(s(f, 0), s(f, 1), n(f, 2), bool(f, 3), s(f, 4), boxed(f, 5), s(f, 6), boxed(f, 7), n(f, 8), s(f, 9));
+            case "accumContribute":
+                return accumContribute(s(f, 0), s(f, 1), s(f, 2), n(f, 3));
+            case "accumContributeMultiple":
+                return accumContributeMultiple(s(f, 0), s(f, 1), s(f, 2), n(f, 3), n(f, 4));
+            case "accumContributeVariable":
+                return accumContributeVariable(s(f, 0), s(f, 1), s(f, 2), n(f, 3), n(f, 4));
+            case "accumClaim":
+                return accumClaim(s(f, 0), s(f, 1), s(f, 2), n(f, 3));
+            case "accumPack":
+                return accumPack(s(f, 0), s(f, 1), s(f, 2), n(f, 3));
+            case "accumApprovePack":
+                return accumApprovePack(s(f, 0), s(f, 1), s(f, 2), n(f, 3));
+            case "fixedCreateGroup":
+                return fixedCreateGroup(s(f, 0), n(f, 1), s(f, 2), s(f, 3), n(f, 4), s(f, 5), s(f, 6), n(f, 7), s(f, 8));
+            case "fixedDeposit":
+                return fixedDeposit(s(f, 0), s(f, 1), n(f, 2), n(f, 3));
+            case "fixedRequestDisbursement":
+                return fixedRequestDisbursement(s(f, 0), s(f, 1), n(f, 2));
+            case "fixedDisbursementVote":
+                return fixedDisbursementVote(s(f, 0), s(f, 1), s(f, 2), bool(f, 3), n(f, 4));
+            case "fixedRequestMilestone":
+                return fixedRequestMilestone(s(f, 0), s(f, 1), n(f, 2), s(f, 3), n(f, 4));
+            case "fixedMilestoneVote":
+                return fixedMilestoneVote(s(f, 0), s(f, 1), s(f, 2), bool(f, 3), n(f, 4));
+            case "fixedRequestGrant":
+                return fixedRequestGrant(s(f, 0), s(f, 1), n(f, 2), s(f, 3), n(f, 4));
+            case "fixedGrantVote":
+                return fixedGrantVote(s(f, 0), s(f, 1), s(f, 2), bool(f, 3), n(f, 4));
+            case "fixedClose":
+                return fixedClose(s(f, 0), s(f, 1), n(f, 2));
+            case "fixedNewGoal":
+                return fixedNewGoal(s(f, 0), s(f, 1), n(f, 2), s(f, 3), n(f, 4));
+            case "fixedDissolve":
+                return fixedDissolve(s(f, 0), s(f, 1), s(f, 2), bool(f, 3), n(f, 4));
+            case "genLoanRequest":
+                return genLoanRequest(s(f, 0), s(f, 1), n(f, 2), n(f, 3), n(f, 4));
+            case "genLoanRepay":
+                return genLoanRepay(s(f, 0), s(f, 1), s(f, 2), n(f, 3), n(f, 4));
+            case "genLoanGuardianSignature":
+                return genLoanGuardianSignature(s(f, 0), s(f, 1));
+            case "accumWalletRecovery":
+                return accumWalletRecovery(s(f, 0), s(f, 1), s(f, 2), s(f, 3), n(f, 4));
+            default:
+                throw new IllegalArgumentException("Unknown canonical " + op);
+        }
+    }
+
+    private static String s(Object[] f, int i) {
+        if (f == null || i >= f.length || f[i] == null) return null;
+        return String.valueOf(f[i]);
+    }
+
+    private static long n(Object[] f, int i) { return ((Number) f[i]).longValue(); }
+
+    private static boolean bool(Object[] f, int i) { return Boolean.TRUE.equals(f[i]) || Boolean.parseBoolean(String.valueOf(f[i])); }
+
+    private static Long boxed(Object[] f, int i) {
+        if (f == null || i >= f.length || f[i] == null) return null;
+        return ((Number) f[i]).longValue();
+    }
+
 }

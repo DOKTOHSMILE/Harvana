@@ -105,7 +105,7 @@ public final class NodeGroupClient {
     public static void accumCreateGroup(android.content.Context ctx, String creatorAddress,
                                         long interestRateBps, String withdrawalRule,
                                         String asset, SignCallback cb) {
-        _signed(ctx, creatorAddress, GroupCanonical::accumCreateGroup,
+        _signed(ctx, creatorAddress, fields -> GroupCanonical.fromFields("accumCreateGroup", fields),
                 new Object[]{creatorAddress, interestRateBps, withdrawalRule, 0L, asset},
                 "/api/v1/accum/create-group",
                 _json(creatorAddress, interestRateBps, withdrawalRule, asset, null, null, null, null, null, null, null, null, null, null, null),
@@ -123,7 +123,7 @@ public final class NodeGroupClient {
                                       String lineType, Long lockedUntilTs,
                                       String depositMode, Long maxContributionRaw,
                                       String asset, SignCallback cb) {
-        _signed(ctx, memberAddress, GroupCanonical::accumStartLine,
+        _signed(ctx, memberAddress, fields -> GroupCanonical.fromFields("accumStartLine", fields),
                 new Object[]{groupId, memberAddress, dailyAmountRaw, autoCloseEnabled,
                         lineType, lockedUntilTs, depositMode, maxContributionRaw, 0L, asset},
                 "/api/v1/accum/start-line",
@@ -135,7 +135,7 @@ public final class NodeGroupClient {
     /** Accum contribute. Canonical: {@code HARVANA_ACCUM_CONTRIBUTE_V1:groupId:lineId:member:nonce}. */
     public static void accumContribute(android.content.Context ctx, String memberAddress,
                                        String groupId, String lineId, SignCallback cb) {
-        _signed(ctx, memberAddress, GroupCanonical::accumContribute,
+        _signed(ctx, memberAddress, fields -> GroupCanonical.fromFields("accumContribute", fields),
                 new Object[]{groupId, lineId, memberAddress, 0L},
                 "/api/v1/accum/contribute",
                 _json(memberAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, lineId, null, null, null, null),
@@ -146,7 +146,7 @@ public final class NodeGroupClient {
     public static void accumContributeMultiple(android.content.Context ctx, String memberAddress,
                                                String groupId, String lineId, long desiredAmountRaw,
                                                SignCallback cb) {
-        _signed(ctx, memberAddress, GroupCanonical::accumContributeMultiple,
+        _signed(ctx, memberAddress, fields -> GroupCanonical.fromFields("accumContributeMultiple", fields),
                 new Object[]{groupId, lineId, memberAddress, desiredAmountRaw, 0L},
                 "/api/v1/accum/contribute-multiple",
                 _json(memberAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, lineId, desiredAmountRaw, null, null, null),
@@ -157,7 +157,7 @@ public final class NodeGroupClient {
     public static void accumContributeVariable(android.content.Context ctx, String memberAddress,
                                                String groupId, String lineId, long amountRaw,
                                                SignCallback cb) {
-        _signed(ctx, memberAddress, GroupCanonical::accumContributeVariable,
+        _signed(ctx, memberAddress, fields -> GroupCanonical.fromFields("accumContributeVariable", fields),
                 new Object[]{groupId, lineId, memberAddress, amountRaw, 0L},
                 "/api/v1/accum/contribute-variable",
                 _json(memberAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, lineId, amountRaw, null, null, null),
@@ -167,7 +167,7 @@ public final class NodeGroupClient {
     /** Accum claim (mature line). Canonical: {@code HARVANA_ACCUM_CLAIM_V1:groupId:lineId:member:nonce}. */
     public static void accumClaim(android.content.Context ctx, String memberAddress,
                                  String groupId, String lineId, SignCallback cb) {
-        _signed(ctx, memberAddress, GroupCanonical::accumClaim,
+        _signed(ctx, memberAddress, fields -> GroupCanonical.fromFields("accumClaim", fields),
                 new Object[]{groupId, lineId, memberAddress, 0L},
                 "/api/v1/accum/claim",
                 _json(memberAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, lineId, null, null, null, null),
@@ -177,7 +177,7 @@ public final class NodeGroupClient {
     /** Accum pack (early close). Canonical: {@code HARVANA_ACCUM_PACK_V1:groupId:lineId:member:nonce}. */
     public static void accumPack(android.content.Context ctx, String memberAddress,
                                  String groupId, String lineId, SignCallback cb) {
-        _signed(ctx, memberAddress, GroupCanonical::accumPack,
+        _signed(ctx, memberAddress, fields -> GroupCanonical.fromFields("accumPack", fields),
                 new Object[]{groupId, lineId, memberAddress, 0L},
                 "/api/v1/accum/pack",
                 _json(memberAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, lineId, null, null, null, null),
@@ -187,7 +187,7 @@ public final class NodeGroupClient {
     /** Accum approve-pack (admin). Canonical: {@code HARVANA_ACCUM_APPROVE_PACK_V1:groupId:lineId:admin:nonce}. */
     public static void accumApprovePack(android.content.Context ctx, String adminAddress,
                                         String groupId, String lineId, SignCallback cb) {
-        _signed(ctx, adminAddress, GroupCanonical::accumApprovePack,
+        _signed(ctx, adminAddress, fields -> GroupCanonical.fromFields("accumApprovePack", fields),
                 new Object[]{groupId, lineId, adminAddress, 0L},
                 "/api/v1/accum/approve-pack",
                 _json(adminAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, lineId, null, null, null, null),
@@ -207,7 +207,7 @@ public final class NodeGroupClient {
                                         String beneficiaryAddress, long interestRateBps,
                                         String groupName, String groupDescription, String asset,
                                         SignCallback cb) {
-        _signed(ctx, creatorAddress, GroupCanonical::fixedCreateGroup,
+        _signed(ctx, creatorAddress, fields -> GroupCanonical.fromFields("fixedCreateGroup", fields),
                 new Object[]{creatorAddress, targetGoalAmountRaw, disbursementRule,
                         beneficiaryAddress, interestRateBps, groupName, groupDescription, 0L, asset},
                 "/api/v1/fixed/create-group",
@@ -219,7 +219,7 @@ public final class NodeGroupClient {
     /** Fixed deposit. Canonical: {@code HARVANA_FIXED_DEPOSIT_V1:groupId:member:amount:nonce}. */
     public static void fixedDeposit(android.content.Context ctx, String memberAddress,
                                     String groupId, long amountRaw, SignCallback cb) {
-        _signed(ctx, memberAddress, GroupCanonical::fixedDeposit,
+        _signed(ctx, memberAddress, fields -> GroupCanonical.fromFields("fixedDeposit", fields),
                 new Object[]{groupId, memberAddress, amountRaw, 0L},
                 "/api/v1/fixed/deposit",
                 _json(memberAddress, null, null, null, groupId, amountRaw, null, 0L, null, 0L, null, null, null, null, null),
@@ -229,7 +229,7 @@ public final class NodeGroupClient {
     /** Fixed request disbursement. Canonical: {@code HARVANA_FIXED_REQUEST_DISBURSEMENT_V1:groupId:requester:nonce}. */
     public static void fixedRequestDisbursement(android.content.Context ctx, String requesterAddress,
                                                 String groupId, SignCallback cb) {
-        _signed(ctx, requesterAddress, GroupCanonical::fixedRequestDisbursement,
+        _signed(ctx, requesterAddress, fields -> GroupCanonical.fromFields("fixedRequestDisbursement", fields),
                 new Object[]{groupId, requesterAddress, 0L},
                 "/api/v1/fixed/request-disbursement",
                 _json(requesterAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, null, null, null, null, null),
@@ -240,7 +240,7 @@ public final class NodeGroupClient {
     public static void fixedDisbursementVote(android.content.Context ctx, String voterAddress,
                                              String groupId, String requestId, boolean voteYes,
                                              SignCallback cb) {
-        _signed(ctx, voterAddress, GroupCanonical::fixedDisbursementVote,
+        _signed(ctx, voterAddress, fields -> GroupCanonical.fromFields("fixedDisbursementVote", fields),
                 new Object[]{groupId, requestId, voterAddress, voteYes, 0L},
                 "/api/v1/fixed/disbursement-vote",
                 _json(voterAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, null, null, null, null, null),
@@ -251,7 +251,7 @@ public final class NodeGroupClient {
     public static void fixedRequestMilestone(android.content.Context ctx, String requesterAddress,
                                               String groupId, long milestoneAmountRaw,
                                               String milestoneDescription, SignCallback cb) {
-        _signed(ctx, requesterAddress, GroupCanonical::fixedRequestMilestone,
+        _signed(ctx, requesterAddress, fields -> GroupCanonical.fromFields("fixedRequestMilestone", fields),
                 new Object[]{groupId, requesterAddress, milestoneAmountRaw, milestoneDescription, 0L},
                 "/api/v1/fixed/request-milestone",
                 _json(requesterAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, null, milestoneAmountRaw, null, null, milestoneDescription),
@@ -262,7 +262,7 @@ public final class NodeGroupClient {
     public static void fixedMilestoneVote(android.content.Context ctx, String voterAddress,
                                          String groupId, String milestoneId, boolean voteYes,
                                          SignCallback cb) {
-        _signed(ctx, voterAddress, GroupCanonical::fixedMilestoneVote,
+        _signed(ctx, voterAddress, fields -> GroupCanonical.fromFields("fixedMilestoneVote", fields),
                 new Object[]{groupId, milestoneId, voterAddress, voteYes, 0L},
                 "/api/v1/fixed/milestone-vote",
                 _json(voterAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, null, null, null, null, null),
@@ -273,7 +273,7 @@ public final class NodeGroupClient {
     public static void fixedRequestGrant(android.content.Context ctx, String requesterAddress,
                                          String groupId, long amountRaw, String reasonDescription,
                                          SignCallback cb) {
-        _signed(ctx, requesterAddress, GroupCanonical::fixedRequestGrant,
+        _signed(ctx, requesterAddress, fields -> GroupCanonical.fromFields("fixedRequestGrant", fields),
                 new Object[]{groupId, requesterAddress, amountRaw, reasonDescription, 0L},
                 "/api/v1/fixed/request-grant",
                 _json(requesterAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, null, amountRaw, null, null, reasonDescription),
@@ -283,7 +283,7 @@ public final class NodeGroupClient {
     /** Fixed grant vote. Canonical: {@code HARVANA_FIXED_GRANT_VOTE_V1:groupId:grantId:voter:voteYes:nonce}. */
     public static void fixedGrantVote(android.content.Context ctx, String voterAddress,
                                      String groupId, String grantId, boolean voteYes, SignCallback cb) {
-        _signed(ctx, voterAddress, GroupCanonical::fixedGrantVote,
+        _signed(ctx, voterAddress, fields -> GroupCanonical.fromFields("fixedGrantVote", fields),
                 new Object[]{groupId, grantId, voterAddress, voteYes, 0L},
                 "/api/v1/fixed/grant-vote",
                 _json(voterAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, null, null, null, null, null),
@@ -293,7 +293,7 @@ public final class NodeGroupClient {
     /** Fixed close. Canonical: {@code HARVANA_FIXED_CLOSE_V1:groupId:admin:nonce}. */
     public static void fixedClose(android.content.Context ctx, String adminAddress,
                                   String groupId, SignCallback cb) {
-        _signed(ctx, adminAddress, GroupCanonical::fixedClose,
+        _signed(ctx, adminAddress, fields -> GroupCanonical.fromFields("fixedClose", fields),
                 new Object[]{groupId, adminAddress, 0L},
                 "/api/v1/fixed/close",
                 _json(adminAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, null, null, null, null, null),
@@ -304,7 +304,7 @@ public final class NodeGroupClient {
     public static void fixedNewGoal(android.content.Context ctx, String adminAddress,
                                     String groupId, long targetGoalAmountRaw, String goalName,
                                     SignCallback cb) {
-        _signed(ctx, adminAddress, GroupCanonical::fixedNewGoal,
+        _signed(ctx, adminAddress, fields -> GroupCanonical.fromFields("fixedNewGoal", fields),
                 new Object[]{groupId, adminAddress, targetGoalAmountRaw, goalName, 0L},
                 "/api/v1/fixed/new-goal",
                 _json(adminAddress, null, null, null, groupId, targetGoalAmountRaw, null, 0L, null, 0L, null, null, null, goalName, null),
@@ -315,7 +315,7 @@ public final class NodeGroupClient {
     public static void fixedDissolveVote(android.content.Context ctx, String voterAddress,
                                          String action, String groupId, boolean voteYes,
                                          SignCallback cb) {
-        _signed(ctx, voterAddress, GroupCanonical::fixedDissolve,
+        _signed(ctx, voterAddress, fields -> GroupCanonical.fromFields("fixedDissolve", fields),
                 new Object[]{action, groupId, voterAddress, voteYes, 0L},
                 "/api/v1/fixed/dissolve-vote",
                 _json(voterAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, null, null, null, null, null),
@@ -330,7 +330,7 @@ public final class NodeGroupClient {
     public static void genLoanRequest(android.content.Context ctx, String borrowerAddress,
                                       String groupId, long principalRaw, long durationHours,
                                       SignCallback cb) {
-        _signed(ctx, borrowerAddress, GroupCanonical::genLoanRequest,
+        _signed(ctx, borrowerAddress, fields -> GroupCanonical.fromFields("genLoanRequest", fields),
                 new Object[]{groupId, borrowerAddress, principalRaw, durationHours, 0L},
                 "/api/v1/genloan/request",
                 _json(borrowerAddress, null, null, null, groupId, principalRaw, null, 0L, null, 0L, null, null, null, null, null),
@@ -340,7 +340,7 @@ public final class NodeGroupClient {
     /** GenLoan repay. Canonical: {@code HARVANA_GENLOAN_REPAY_V1:groupId:loanId:borrower:amount:nonce}. */
     public static void genLoanRepay(android.content.Context ctx, String borrowerAddress,
                                     String groupId, String loanId, long amountRaw, SignCallback cb) {
-        _signed(ctx, borrowerAddress, GroupCanonical::genLoanRepay,
+        _signed(ctx, borrowerAddress, fields -> GroupCanonical.fromFields("genLoanRepay", fields),
                 new Object[]{groupId, loanId, borrowerAddress, amountRaw, 0L},
                 "/api/v1/genloan/repay",
                 _json(borrowerAddress, null, null, null, groupId, amountRaw, null, 0L, null, 0L, null, null, null, null, null),
@@ -355,7 +355,7 @@ public final class NodeGroupClient {
      */
     public static void genLoanGuardianSignature(android.content.Context ctx, String guardianAddress,
                                                 String groupId, String loanId, SignCallback cb) {
-        _signedNoNonce(ctx, guardianAddress, GroupCanonical::genLoanGuardianSignature,
+        _signedNoNonce(ctx, guardianAddress, fields -> GroupCanonical.fromFields("genLoanGuardianSignature", fields),
                 new Object[]{groupId, loanId},
                 "/api/v1/genloan/guardian-signature",
                 _json(guardianAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, null, null, null, null, null),
@@ -369,7 +369,7 @@ public final class NodeGroupClient {
     public static void accumWalletRecovery(android.content.Context ctx, String actingAddress,
                                            String groupId, String oldMemberAddress,
                                            String newMemberAddress, SignCallback cb) {
-        _signed(ctx, actingAddress, GroupCanonical::accumWalletRecovery,
+        _signed(ctx, actingAddress, fields -> GroupCanonical.fromFields("accumWalletRecovery", fields),
                 new Object[]{groupId, oldMemberAddress, newMemberAddress, actingAddress, 0L},
                 "/api/v1/accum/wallet-recovery",
                 _json(actingAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, null, null, null, null, null),
@@ -444,16 +444,21 @@ public final class NodeGroupClient {
                                      String canonical, org.json.JSONObject body,
                                      String path, boolean putNonce, long nonce, SignCallback cb) {
         try {
-            com.harvana.app.crypto.Ed25519.KeyPair kp =
-                    com.harvana.app.wallet.SecureWalletStorage.getKeyPair(ctx, address);
-            if (kp == null) { _postOnMain(cb, "This wallet has no signing key on this device."); return; }
-            byte[] sig = com.harvana.app.crypto.Ed25519.sign(canonical.getBytes(java.nio.charset.StandardCharsets.UTF_8), kp);
+            String seedB64 = com.harvana.app.wallet.WalletManager.loadPrivateKey(ctx, address);
+            String pubB64 = com.harvana.app.wallet.WalletManager.getPublicKey(ctx, address);
+            if (seedB64 == null || pubB64 == null) { _postOnMain(cb, "This wallet has no signing key on this device."); return; }
+            byte[] seed = android.util.Base64.decode(seedB64, android.util.Base64.NO_WRAP);
+            byte[] sig;
+            try {
+                sig = com.harvana.app.crypto.Ed25519.sign(seed, canonical.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            } finally {
+                java.util.Arrays.fill(seed, (byte) 0);
+            }
             String sigB64 = android.util.Base64.encodeToString(sig, android.util.Base64.NO_WRAP);
-            String pubB64 = android.util.Base64.encodeToString(kp.publicKey, android.util.Base64.NO_WRAP);
             body.put("signature", sigB64);
             body.put("publicKey", pubB64);
             if (putNonce) body.put("nonce", nonce);
-            com.harvana.app.sync.HarvanaNodeClient.post(path, body.toString(),
+            com.harvana.app.sync.HarvanaNodeClient.nodePost(path, body.toString(),
                     new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
                         @Override public void onSuccess(org.json.JSONObject resp) { _postOnMain(cb, resp); }
                         @Override public void onError(String error) { _postOnMain(cb, error); }

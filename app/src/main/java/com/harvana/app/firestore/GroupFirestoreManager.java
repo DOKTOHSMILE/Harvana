@@ -364,6 +364,13 @@ public class GroupFirestoreManager {
 	public void getPayments(String groupId, ListCallback callback) {
 		list(col("GROUPS", groupId, "payments"), callback);
 	}
+
+	/** Mirror of a guardian signature that the node already accepted. Not a payment. */
+	public void addGuardianSignature(String docId, Map<String, Object> fields, SimpleCallback callback) {
+		String id = docId == null ? "" : docId.replaceAll("[^A-Za-z0-9_\\-]", "_");
+		if (id.isEmpty()) { if (callback != null) callback.onError("Missing signature id."); return; }
+		set(doc("LOAN_GUARDIAN_SIGS", id), fields, callback);
+	}
 	
 	public void addLoan(String groupId, Map<String, Object> fields, IdCallback callback) {
 		add(col("GROUPS", groupId, "loans"), fields, callback);

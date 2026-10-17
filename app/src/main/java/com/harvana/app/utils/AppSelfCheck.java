@@ -6,7 +6,6 @@ import android.os.Build;
 import android.util.Log;
 
 import com.google.firebase.FirebaseApp;
-import com.harvana.app.BuildConfig;
 
 import org.json.JSONObject;
 
@@ -157,9 +156,10 @@ public final class AppSelfCheck {
     }
 
     private boolean isReleaseBuild() {
-        // BuildConfig.DEBUG is the same flag R8 uses; it is set in the generated
-        // BuildConfig class by the Android Gradle plugin.
-        try { return !BuildConfig.DEBUG; } catch (Throwable t) { return false; }
+        try {
+            int flags = ctx.getPackageManager().getApplicationInfo(ctx.getPackageName(), 0).flags;
+            return (flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) == 0;
+        } catch (Throwable t) { return false; }
     }
 
     /** Test seam: read a stream fully. */

@@ -124,7 +124,7 @@ public final class NodePayActions {
         input.setHint("HV0x… (full address)");
         input.setSingleLine(true);
         input.setTypeface(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.NORMAL);
-        new com.harvana.app.utils.SheetDialog.Builder(c.activity)
+        new com.harvana.app.ui.SheetDialog.Builder(c.activity)
                 .setTitle("Change my payout wallet")
                 .setMessage("The new address receives all future claim / pack payouts for this line.\n\nCurrent: " + shortWallet(c.me))
                 .setView(input)

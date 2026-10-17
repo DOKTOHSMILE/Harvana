@@ -583,7 +583,9 @@ public final class GroupLoanManager {
                         try {
                             Context appContext = context.getApplicationContext();
                             java.util.Map<String, Object> sig = new java.util.HashMap<>();
-                            sig.put("guardianUid", com.harvana.app.utils.AuthUtil.uid(appContext));
+                            com.google.firebase.auth.FirebaseUser user =
+                                    com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+                            sig.put("guardianUid", user == null ? "" : user.getUid());
                             sig.put("guardianAddress", guardianAddress);
                             sig.put("signedAt", System.currentTimeMillis());
                             sig.put("source", "node");

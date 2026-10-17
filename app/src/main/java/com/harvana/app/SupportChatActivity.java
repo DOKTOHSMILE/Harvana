@@ -29,6 +29,15 @@ public class SupportChatActivity extends AppCompatActivity {
     private TextView status;
     private final Rows adapter = new Rows();
     private String ticketId = "";
+    private com.google.firebase.firestore.ListenerRegistration ticketsReg;
+    private com.google.firebase.firestore.ListenerRegistration threadReg;
+
+    @Override
+    protected void onDestroy() {
+        if (ticketsReg != null) ticketsReg.remove();
+        if (threadReg != null) threadReg.remove();
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +56,8 @@ public class SupportChatActivity extends AppCompatActivity {
         list.setAdapter(adapter);
         findViewById(R.id.support_send).setOnClickListener(v -> send());
         status.setText("Your conversations");
-        SupportDesk.mine(this, new SupportDesk.Cb() {
-            @Override public void ok(JSONObject json) { runOnUiThread(() -> showTickets(json.optJSONArray("tickets"))); }
+        ticketsReg = SupportDesk.mine(this, new SupportDesk.Cb() {
+            @Override public void ok(JSONObject json) { runOnUiThread(() -> { if (ticketId.isEmpty()) showTickets(json.optJSONArray("tickets")); }); }
             @Override public void fail(String error) { runOnUiThread(() -> status.setText(plain(error))); }
         });
     }
@@ -91,7 +100,8 @@ public class SupportChatActivity extends AppCompatActivity {
     private void load() {
         if (ticketId.isEmpty()) return;
         subject.setVisibility(View.GONE);
-        SupportDesk.thread(this, ticketId, new SupportDesk.Cb() {
+        if (threadReg != null) threadReg.remove();
+        threadReg = SupportDesk.thread(ticketId, new SupportDesk.Cb() {
             @Override public void ok(JSONObject json) {
                 runOnUiThread(() -> {
                     JSONArray arr = json.optJSONArray("messages");
@@ -146,7 +156,7 @@ public class SupportChatActivity extends AppCompatActivity {
                     load();
                 });
             } else {
-                String who = "STAFF".equals(row.optString("from")) ? "Support" : "You";
+                String who = row.optString("from");
                 tv.setText(who + "\n" + row.optString("body", ""));
                 tv.setOnClickListener(null);
             }

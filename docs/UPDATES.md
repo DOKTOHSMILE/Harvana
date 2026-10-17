@@ -2,6 +2,11 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 17 Oct 2026 — Support chat on Firestore, and the compile errors
+
+- Help & support conversations are Firestore documents (`SUPPORT_TICKETS`). Publish the rules in `docs/firestore.rules`. The same text is in the node repository.
+- The group client compiles again: canonical calls no longer use method references the compiler rejects, the duplicate savings-line message is gone, and the missing types (`AuthUtil`, `SheetDialog`, `BuildConfig`, two icons) point at the classes and icons that already exist.
+
 ## 17 Oct 2026 — Chat with support
 
 - Help & support opens a conversation signed by the wallet on this phone. Support replies show in the same thread. Email is still there if you tap the line under the title. Install this after the node that has the support desk.

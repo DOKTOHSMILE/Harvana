@@ -131,9 +131,14 @@ public final class USERSLegacyMigration {
         batch.set(pub.collection("private").document(PrivateProfile.DOCUMENT), privPatch, com.google.firebase.firestore.SetOptions.merge());
         batch.update(pub, pubPatch);
         Task<Void> commit = batch.commit();
-        // Block for the result so the listener gets a synchronous-style outcome.
-        // The caller is on a background thread (or the Admin SDK on the build host).
-        Tasks.await(commit);
+        try {
+            Tasks.await(commit);
+        } catch (java.util.concurrent.ExecutionException e) {
+            throw new IllegalStateException(e.getCause() == null ? e : e.getCause());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        }
         return leftover.size();
     }
 

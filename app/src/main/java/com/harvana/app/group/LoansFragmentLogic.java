@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.harvana.app.firestore.GroupFirestoreManager;
+
 /** Logic for LoansFragmentActivity — list + admin approve/reject */
 public class LoansFragmentLogic {
 
@@ -130,7 +132,8 @@ public class LoansFragmentLogic {
 		/** Open the loan detail sheet. Determines borrower / guardian role and routes. */
 		private void openDetail(final Map<String, Object> loan, final String loanId,
 							   final String borrowerWallet, final double principal) {
-			final String me = com.harvana.app.utils.AuthUtil.uid(ctx);
+			com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+			final String me = user == null ? null : user.getUid();
 			// Borrower = the current user is the borrower
 			final boolean isBorrower = me != null
 					&& (loan.get("borrowerUid") != null

@@ -214,6 +214,8 @@ public class EmailAuthFragment extends Fragment {
 			msg = "Too many attempts. Please wait a moment and try again.";
 		} else if (e instanceof FirebaseNetworkException) {
 			msg = "No internet connection.";
+		} else if (e != null && e.getMessage() != null && e.getMessage().toLowerCase().contains("api key")) {
+			msg = "Firebase rejected this install's API key. Install the latest build. If it still fails, add this APK's signing SHA-1 to the com.harvana.app app in the Firebase console.";
 		} else if (e instanceof FirebaseAuthException) {
 			msg = "Authentication failed (" + ((FirebaseAuthException) e).getErrorCode() + ").";
 		} else {

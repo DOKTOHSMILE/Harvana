@@ -68,6 +68,7 @@ tags = ["secret", "crypto", "harvana"]
 description = "Public Firebase client config and other expected files"
 paths = [
     '''app/google-services\.json$''',
+    '''app/src/main/res/values/secrets\.xml$''',
     '''.+\.png$''',
     '''.+\.jpg$''',
     '''.+\.webp$''',

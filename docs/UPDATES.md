@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 17 Oct 2026 — Email sign-in was sending a fake Firebase key
+
+- `res/values/secrets.xml` had `google_api_key` set to the literal `${GOOGLE_API_KEY}` and an old `google_app_id`. CodeAssist does not substitute that placeholder, so Firebase Auth answered "API key not valid".
+- Both values now match `app/google-services.json` for `com.harvana.app` (`1:92873857858:android:7edea0b3ad5cf38d65c6db`). Reinstall the app. Email and phone auth use this key.
+- If sign-in still says the key is invalid after this install, the APK was signed with a certificate that is not on that Firebase Android app. Add that SHA-1 in the Firebase console and download a fresh `google-services.json`.
+
 ## 17 Oct 2026 — Support chat on Firestore, and the compile errors
 
 - Help & support conversations are Firestore documents (`SUPPORT_TICKETS`). Publish the rules in `docs/firestore.rules`. The same text is in the node repository.

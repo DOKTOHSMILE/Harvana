@@ -30,14 +30,14 @@
 # Play services references this annotation; it is not in the app. A missing class here is a warning, not a crash.
 -dontwarn com.google.android.apps.common.proguard.SideEffectFree
 
-# WorkManager is started from the manifest (InitializationProvider), not from a direct call.
-# CodeAssist's R8 does not always apply the library's own keep rules, so without these the
-# class is removed and the app dies at startup: ClassNotFoundException: WorkManagerInitializer.
-# The merge step writes the FQCN into the manifest, so the class is loaded by name - it has to exist
-# under that exact name with a public no-arg constructor, and every interface it implements
-# (androidx.startup.Initializer) must also be there.
+# WorkManagerInitializer is loaded by its exact name from the merged manifest.
+# A -keep on its own was not enough: CodeAssist's R8 still removed the class because no Java
+# called it. SketchApplication now calls WorkManagerInitializer.create(), which is a real use,
+# and the manifest entry for that class is removed. These rules stay so the name cannot be
+# shortened if a build still merges the old startup entry.
 -keep public class androidx.work.WorkManagerInitializer {
     public <init>();
+    public *;
 }
 -keep public class androidx.work.impl.WorkManagerInitializer {
     public <init>();

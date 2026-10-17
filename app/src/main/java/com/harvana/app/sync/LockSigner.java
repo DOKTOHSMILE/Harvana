@@ -1,6 +1,10 @@
 package com.harvana.app.sync;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
 
 import com.harvana.app.SketchApplication;
@@ -45,6 +49,49 @@ public final class LockSigner {
     }
 
     private static void signAll(JSONArray templates, Done done) {
+        new Handler(Looper.getMainLooper()).post(() -> confirm(templates, done));
+    }
+
+    /** The member already asked for the action. This is the moment their own HARV actually moves. */
+    private static void confirm(JSONArray templates, Done done) {
+        Activity screen = com.harvana.app.utils.ActivityTracker.resumed();
+        if (screen == null) {
+            signNow(templates, done);
+            return;
+        }
+        new AlertDialog.Builder(screen)
+            .setTitle("Sign this payment")
+            .setMessage(describe(templates))
+            .setPositiveButton("Sign", (d, w) -> signNow(templates, done))
+            .setNegativeButton("Cancel", (d, w) -> done.onDone("You cancelled the payment."))
+            .setCancelable(false)
+            .show();
+    }
+
+    private static String describe(JSONArray templates) {
+        String ticker = com.harvana.app.CoinInfo.ticker();
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < templates.length(); i++) {
+            JSONObject t = templates.optJSONObject(i);
+            if (t == null) continue;
+            if (out.length() > 0) out.append("\n\n");
+            String amount = com.harvana.app.notify.TxEvents.amt(HarvanaNodeClient.toHarvDisplay(t.optLong("amount")));
+            out.append("You pay ").append(amount).append(" ").append(ticker).append(".");
+            long fee = t.optLong("maxFee");
+            if (fee > 0) {
+                out.append(" The network fee is at most ")
+                    .append(com.harvana.app.notify.TxEvents.amt(HarvanaNodeClient.toHarvDisplay(fee)))
+                    .append(" ").append(ticker).append(".");
+            }
+            String purpose = com.harvana.app.notify.TxEvents.purpose(t.optString("memo", ""));
+            if (!purpose.isEmpty()) out.append(" This is for ").append(purpose.toLowerCase(java.util.Locale.US)).append(".");
+        }
+        if (out.length() == 0) out.append("You pay the amount the network asked for.");
+        out.append("\n\nSigning cannot be undone.");
+        return out.toString();
+    }
+
+    private static void signNow(JSONArray templates, Done done) {
         final Context c = SketchApplication.getContext();
         final String from = templates.optJSONObject(0) == null ? "" : templates.optJSONObject(0).optString("from", "");
         if (from.isEmpty()) { done.onDone("The network sent a lock without an address."); return; }

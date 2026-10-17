@@ -30,6 +30,7 @@ public final class ActivityTracker {
     private static long foregroundSince;
     private static long lastTapSave;
     private static int pendingTaps;
+    private static java.lang.ref.WeakReference<Activity> resumed;
 
     private ActivityTracker() {}
 
@@ -43,6 +44,7 @@ public final class ActivityTracker {
                 interaction(1);
             }
             @Override public void onActivityResumed(Activity a) {
+                resumed = new java.lang.ref.WeakReference<>(a);
                 Window w = a.getWindow();
                 Window.Callback cb = w == null ? null : w.getCallback();
                 if (cb != null && !(cb instanceof TapCounter)) w.setCallback(new TapCounter(cb));
@@ -53,8 +55,18 @@ public final class ActivityTracker {
             @Override public void onActivityCreated(Activity a, Bundle b) {}
             @Override public void onActivityPaused(Activity a) { flushTaps(); }
             @Override public void onActivitySaveInstanceState(Activity a, Bundle b) {}
-            @Override public void onActivityDestroyed(Activity a) {}
+            @Override public void onActivityDestroyed(Activity a) {
+                Activity current = resumed == null ? null : resumed.get();
+                if (current == a) resumed = null;
+            }
         });
+    }
+
+    /** The screen in front, if one is open. Used when a payment needs a yes before it is signed. */
+    public static Activity resumed() {
+        Activity a = resumed == null ? null : resumed.get();
+        if (a == null || a.isFinishing()) return null;
+        return a;
     }
 
     private static final class TapCounter extends WindowCallbackWrapper {

@@ -118,10 +118,11 @@ public class SketchApplication extends Application {
             Log.e(TAG, "CoinInfo init/refresh failed", t);
         }
 
-        // 10. WorkManager is started here, not by the manifest. The manifest entry was crashing
-        //     release builds after minify removed WorkManagerInitializer.
+        // 10. Start WorkManager by calling its initializer class. A keep rule is not enough on
+        //     CodeAssist: R8 still deleted the class when nothing in Java used it, and the
+        //     manifest then crashed the app looking the class up by name.
         try {
-            androidx.work.WorkManager.initialize(this, new androidx.work.Configuration.Builder().build());
+            new androidx.work.WorkManagerInitializer().create(this);
         } catch (IllegalStateException already) {
             Log.d(TAG, "WorkManager was already started");
         } catch (Throwable t) {

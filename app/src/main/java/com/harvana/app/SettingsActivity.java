@@ -617,8 +617,6 @@ public class SettingsActivity extends AppCompatActivity {
 		rowNotifications.setOnClickListener(v -> _openActivity(NotificationSettingsActivity.class));
 		rowPrivacyVisibility.setOnClickListener(v -> _openActivity(PrivacySettingsActivity.class));
 		
-		View.OnClickListener comingSoon = v -> Toast.makeText(this,
-		"This section is coming soon", Toast.LENGTH_SHORT).show();
 		rowBackupRecovery.setOnClickListener(v -> _openActivity(BackupRecoveryActivity.class));
 		rowPaymentMethods.setOnClickListener(v -> _openActivity(PaymentMethodsActivity.class));
 		rowTransactionHistory.setOnClickListener(v -> {
@@ -628,13 +626,73 @@ public class SettingsActivity extends AppCompatActivity {
 			startActivity(intent);
 			Toast.makeText(this, "Open the Activity tab to view your transaction history", Toast.LENGTH_LONG).show();
 		});
-		rowLimitsFees.setOnClickListener(comingSoon);
-		rowTaxReports.setOnClickListener(comingSoon);
+		rowLimitsFees.setOnClickListener(v -> _showLiveFees());
+		rowTaxReports.setOnClickListener(v -> new AlertDialog.Builder(this)
+			.setTitle("Tax reports")
+			.setMessage("Harvana does not prepare a tax report. Your transfers and trades stay on the Activity tab. Use those records with whoever files your tax.")
+			.setPositiveButton("OK", null)
+			.show());
 		rowBlockedUsers.setOnClickListener(v -> _openActivity(BlockedUsersActivity.class));
 		rowLanguage.setOnClickListener(v -> _showLanguagePicker());
 		rowHelpSupport.setOnClickListener(v -> _openActivity(HelpSupportActivity.class));
 		
 		rowLogOut.setOnClickListener(v -> _confirmLogOut());
+	}
+
+	/** Transfer fee and the P2P listing fee, both read from the node. Nothing here is a number the app invented. */
+	private void _showLiveFees() {
+		AlertDialog dialog = new AlertDialog.Builder(this)
+			.setTitle("Limits and fees")
+			.setMessage("Reading the network…")
+			.setPositiveButton("OK", null)
+			.show();
+		String address = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
+		long one = com.harvana.app.sync.HarvanaNodeClient.HARV_UNITS_PER_TOKEN;
+		StringBuilder text = new StringBuilder();
+		int[] left = { address == null || address.isEmpty() ? 1 : 2 };
+		if (address == null || address.isEmpty()) {
+			text.append("Open a wallet to see the live transfer fee.\n\n");
+		} else {
+			com.harvana.app.sync.HarvanaNodeClient.getFee(address, address, one, new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
+				@Override public void onSuccess(org.json.JSONObject json) {
+					String ticker = com.harvana.app.CoinInfo.ticker();
+					double gas = com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay(json.optLong("estimatedGas"));
+					String line = "A transfer of 1 " + ticker + " costs about "
+						+ com.harvana.app.notify.TxEvents.amt(gas) + " " + ticker + " in network fee.";
+					if (!json.isNull("estimatedKobo")) {
+						long kobo = json.optLong("estimatedKobo");
+						line += " That is about ₦" + String.format(java.util.Locale.US, "%.2f", kobo / 100.0) + ".";
+					}
+					_feeLine(dialog, text, left, line + "\n\n");
+				}
+				@Override public void onError(String error) {
+					_feeLine(dialog, text, left, "The transfer fee could not be read: " + error + "\n\n");
+				}
+			});
+		}
+		com.harvana.app.sync.HarvanaNodeClient.nodeGet(
+			"/api/v1/p2p/preview-listing-fee?side=SELL&amount=" + one,
+			new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
+				@Override public void onSuccess(org.json.JSONObject json) {
+					String ticker = com.harvana.app.CoinInfo.ticker();
+					double fee = com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay(json.optLong("platformFeeRaw"));
+					String line = "A sell listing of 1 " + ticker + " has a platform fee of "
+						+ com.harvana.app.notify.TxEvents.amt(fee) + " " + ticker;
+					if (json.has("platformFeePercent")) line += " (" + json.opt("platformFeePercent") + "%)";
+					_feeLine(dialog, text, left, line + ".");
+				}
+				@Override public void onError(String error) {
+					_feeLine(dialog, text, left, "The listing fee could not be read: " + error + ".");
+				}
+			});
+	}
+
+	private void _feeLine(AlertDialog dialog, StringBuilder text, int[] left, String line) {
+		runOnUiThread(() -> {
+			text.append(line);
+			if (--left[0] > 0 || isFinishing()) return;
+			dialog.setMessage(text.toString());
+		});
 	}
 	
 	private void _showCurrencyPicker() {

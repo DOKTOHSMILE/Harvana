@@ -215,6 +215,67 @@ public final class CrashReportManager {
     }
 
     /**
+     * Sends a startup self-check report to the CRASH_LOGS Firestore collection.
+     * Called once per app start from {@code SketchApplication} when
+     * {@link com.harvana.app.utils.AppSelfCheck} reports any failure. The
+     * operator sees the misconfiguration in the moderator dashboard instead of
+     * the app dying silently on a user device.
+     *
+     * Shape mirrors the crash doc so a single query covers both: kind =
+     * "STARTUP_CHECK", severity = "ERROR" if any check failed, "INFO" if only
+     * warnings, "OK" if everything passed.
+     */
+    public static void sendStartupCheck(final Context context, final com.harvana.app.utils.AppSelfCheck.Result r) {
+        if (context == null || r == null) return;
+        new Thread(() -> {
+            try {
+                String versionName = "1.2.0";
+                long versionCode = 0;
+                try {
+                    PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+                    versionName = pInfo.versionName;
+                    versionCode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ? pInfo.getLongVersionCode() : pInfo.versionCode;
+                } catch (Throwable ignored) {}
+
+                String severity = r.failed.isEmpty() ? (r.warnings.isEmpty() ? "OK" : "INFO") : "ERROR";
+                long now = System.currentTimeMillis();
+
+                Map<String, Object> doc = new HashMap<>();
+                doc.put("app", "wallet");
+                doc.put("appName", "Harvana Wallet");
+                doc.put("version", versionName);
+                doc.put("versionCode", versionCode);
+                doc.put("kind", "STARTUP_CHECK");
+                doc.put("severity", severity);
+                doc.put("screen", "SketchApplication");
+                doc.put("where", "AppSelfCheck.run");
+                doc.put("message", r.ok() ? "startup self-check passed" : "startup self-check failed");
+                doc.put("stack", "");
+                doc.put("device", Build.MANUFACTURER + " " + Build.MODEL);
+                doc.put("androidVersion", Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
+                doc.put("timestamp", now);
+                doc.put("status", "OPEN");
+                doc.put("fixed", false);
+                // The shape that the AppSelfCheck Result carries. The 18 Oct 2026
+                // CRASH_LOGS rule (docs/firestore.rules) accepts any number of extra
+                // fields on create, as long as kind/severity/status/fixed/timestamp/app
+                // are present. The list fields are short strings so the doc size stays
+                // well under the 1 MB Firestore document limit.
+                doc.put("passed", r.passed);
+                doc.put("warnings", r.warnings);
+                doc.put("failed", r.failed);
+
+                FirebaseFirestore.getInstance()
+                        .collection("CRASH_LOGS")
+                        .add(doc)
+                        .addOnFailureListener(t -> Log.w(TAG, "AppSelfCheck Firestore write skipped: " + t.getMessage()));
+            } catch (Throwable t) {
+                Log.w(TAG, "sendStartupCheck error: " + t.getMessage());
+            }
+        }, "firestore-startup-check-sender").start();
+    }
+
+    /**
      * Builds a detailed human-readable and machine-scannable report with full system diagnostics.
      */
     public static String buildFullReport(Context context, Thread thread, Throwable throwable, String stackTrace) {

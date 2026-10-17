@@ -1,0 +1,89 @@
+# gitleaks config for the Harvana wallet repo.
+# Tuned for the actual secrets this codebase has used or could plausibly use.
+# Run with: `gitleaks detect --config .gitleaks.toml --source .`
+# See https://github.com/gitleaks/gitleaks for the schema.
+
+title = "Harvana wallet"
+
+[extend]
+# Pull in the default rules for AWS, GCP, generic private keys, etc.
+useDefault = true
+
+[[rules]]
+id = "harvana-github-pat"
+description = "GitHub personal access token (PAT). These have been pasted in chat before; block them at the repo boundary too."
+regex = '''ghp_[A-Za-z0-9]{30,}'''
+tags = ["secret", "github", "harvana"]
+
+[[rules]]
+id = "harvana-firebase-api-key"
+description = "Firebase Web/Android API key in source. google-services.json is fine; a raw AIza... string in a .java/.kt/.xml is not."
+regex = '''AIza[0-9A-Za-z_\-]{30,}'''
+tags = ["secret", "firebase", "harvana"]
+
+[[rules]]
+id = "harvana-firebase-sa-json"
+description = "Firebase service-account JSON committed to the repo. The application google-services.json is allow-listed below; this rule catches any other JSON that looks like a service account."
+path = '''(?:^|/).+\.json$'''
+# Match keys that appear in a Firebase service-account JSON.
+regex = '''"type"\s*:\s*"service_account"'''
+tags = ["firebase", "harvana"]
+
+[[rules]]
+id = "harvana-keystore-password"
+description = "Hardcoded keystore password. Real release keystore passwords come from CI env vars; a hardcoded one in build.gradle is a leak."
+regex = '''(?i)(storePassword|keyPassword)\s*=\s*['"][^'"\s]{4,}['"]'''
+# Skip the debug keystore (intentional, non-secret, documented in app/build.gradle).
+[rules.allowlist]
+regexTarget = "string"
+regexes = [
+    '''androiddebugkey''',
+    ''''android''''',
+    '''"android"''',
+]
+tags = ["secret", "keystore", "harvana"]
+
+[[rules]]
+id = "harvana-node-mining-secret"
+description = "Harvana node mining-auth shared secret. Mirrors the node's own .gitleaks.toml."
+regex = '''(?i)(harvana\.mining\.auth-secret|MINING_AUTH_SECRET)\s*[:=]\s*["']?[A-Za-z0-9+/=._-]{16,}["']?'''
+tags = ["secret", "harvana", "node"]
+
+[[rules]]
+id = "harvana-wallet-mnemonic"
+description = "Hardcoded BIP-39 mnemonic in source. Mnemonics are 12/15/18/21/24 words from the standard wordlist; a 12+ word sequence in a string is almost certainly a leak."
+regex = '''(?i)(mnemonic|seed_phrase|seedPhrase|seed-phrase)\s*[:=]\s*['"][a-z]+(?:\s+[a-z]+){11,}['"]'''
+tags = ["secret", "crypto", "harvana"]
+
+[[rules]]
+id = "harvana-private-key-hex"
+description = "Hardcoded Ed25519 / secp256k1 private key (64 hex chars) assigned to a known field name."
+regex = '''(?i)(privateKey|private_key|secretKey|secret_key|privKey)\s*[:=]\s*['"]?[0-9a-fA-F]{60,}['"]?'''
+tags = ["secret", "crypto", "harvana"]
+
+# Allow-list: the public google-services.json (Firebase client SDK config) is
+# expected in the repo; the secrets it contains are scoped to the app, not the
+# project. The actual service-account JSON (server-side) must NEVER be here.
+[allowlist]
+description = "Public Firebase client config and other expected files"
+paths = [
+    '''app/google-services\.json$''',
+    '''.+\.png$''',
+    '''.+\.jpg$''',
+    '''.+\.webp$''',
+    '''.+\.gif$''',
+    '''.+\.ttf$''',
+    '''.+\.keystore$''',   # the doktohsmile.keystore file is in .gitignore; the rule is a no-op here
+    '''(gradle/wrapper/gradle-wrapper\.jar|gradlew|gradlew\.bat)$''',
+    '''app/src/main/assets/(legal_terms_of_service\.txt|banks/.+|legal/privacy\.md)$''',
+    '''app/src/main/assets/bip39_english\.txt$''',   # the BIP-39 word list; the rule above is noisy against it
+]
+
+[allowlist.regexes]
+description = "Strings that look like secrets but are documented public constants"
+regexes = [
+    '''AIza[0-9A-Za-z_\-]{30,}''',   # catches the Firebase Android API key in google-services.json only
+]
+stopWords = [
+    "google-services.json",
+]

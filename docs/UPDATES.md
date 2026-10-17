@@ -2,6 +2,104 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 18 Oct 2026 — CONTRIBUTING.md, proguard-rules regression test, more repo hygiene
+
+- **`CONTRIBUTING.md`** added at the repo root. Tells a new contributor:
+  build env (JDK 17, Android SDK 34, Gradle 8), build flow
+  (`./gradlew assembleDebug` / `test` / `assembleRelease`), the fact that
+  `app/build.gradle` is generated from `app/module.toml` by
+  `tools/module_toml_to_gradle.py` and must not be hand-edited, the
+  Conventional Commits style with the scopes used by the protocol
+  team, the rule that any change the operator has to apply by hand
+  gets a dated `docs/UPDATES.md` entry in the same commit, the PR
+  flow, and the list of security-sensitive paths that require a
+  CODEOWNER approval.
+- **`app/src/test/java/com/harvana/app/build/ProguardRulesRegressionTest.java`**
+  added. Pure-JVM unit test that reads `app/proguard-rules.pro` from
+  the classpath and asserts the critical keep rules are still
+  present: `com.google.android.material.bottomsheet.**`,
+  `CoordinatorLayout$Behavior`, `View` / `ViewGroup` / `Drawable` /
+  `Animation` / `Fragment` constructors, `WorkManagerInitializer`,
+  BouncyCastle, Gson TypeToken, and the `-assumenosideeffects` on
+  `Log.d` / `Log.v`. It also asserts that no blanket
+  `-ignorewarnings` / `-dontwarn` / `-dontnote` rules crept back in
+  (the file header explicitly removes them). Run by CI via
+  `./gradlew test`.
+- The new test class and the existing
+  `LogSanitizerTest` / `PrivateProfileTest` give the wallet a real
+  test pyramid for the security-sensitive helpers. The CI workflow
+  in `.github/workflows/ci.yml` already runs `./gradlew test`, so all
+  three are picked up automatically on the next push.
+
+## 18 Oct 2026 — Repository hygiene: SECURITY.md, .gitattributes, CODEOWNERS, JVM unit tests
+
+- **`SECURITY.md`** added at the repo root. Public vulnerability-reporting
+  policy: what to report privately vs. publicly, the 5-layer defensive
+  model (node-as-source-of-truth, dapp-bridge origin check, Firestore
+  rules, R8+proguard, log hygiene), the supported-versions table, and
+  the explicit out-of-scope list. Mirrors the node's own
+  `DOKTOHSMILE/capital-oracle-projects/SECURITY.md` so the wallet
+  security page and the node security page tell the same story.
+- **`.gitattributes`** added. Enforces LF on all hand-written source
+  (`*.java`, `*.kt`, `*.xml`, `*.gradle`, `*.toml`, `*.md`,
+  `*.properties`, `*.json`, `*.sh`), CRLF on `*.bat` and `gradlew.bat`,
+  and binary on every image / font / keystore / `*.aar` / `*.aab` /
+  `*.apk` / `*.jar` / `*.so`. Marks `app/build.gradle` as
+  `linguist-generated=true` (the wallet's `app/build.gradle` is
+  generated from `app/module.toml` by `tools/module_toml_to_gradle.py`
+  — the toml is the source of truth).
+- **`.github/CODEOWNERS`** added. Maps the protocol team to security-
+  sensitive paths (Firestore rules, UPDATES, build config, manifest,
+  crypto, identity, wallet, web3/dapp-bridge, firestore, telemetry, CI,
+  gitleaks). A change to any of these files will auto-assign the owner
+  as a reviewer and require an approval before merge.
+- **JVM unit tests** added:
+  - `app/src/test/java/com/harvana/app/utils/LogSanitizerTest.java` —
+    covers `address()` shortening for `HV0x…` / `AJ0x…` / `0x…`, the
+    pass-through for short and non-address strings, and `sanitize()`
+    for embedded addresses.
+  - The existing
+    `app/src/test/java/com/harvana/app/firestore/PrivateProfileTest.java`
+    already covers the field list and the `split` / `merge` /
+    `leftoversIn` helpers.
+- **No behaviour change for users.** These are all developer-facing
+  hygiene. The CI in `.github/workflows/ci.yml` already runs
+  `./gradlew test`, so the new test class will be picked up
+  automatically.
+
+## 18 Oct 2026 — gitleaks config + GitHub Actions CI for the wallet repo
+
+- **`.gitleaks.toml`** added. Tuned for the actual secrets this codebase has used or could plausibly use:
+  - `ghp_…` GitHub PATs (the leaked one in the chat transcript is a 36-char match).
+  - `AIza…` Firebase API keys in source (the `google-services.json` is allow-listed — that's a public client config, not a server secret).
+  - Firebase service-account JSON shape (`"type": "service_account"`).
+  - BouncyCastle-style keystore passwords hardcoded in `app/build.gradle` (the debug keystore's `android`/`androiddebugkey` strings are allow-listed as documented).
+  - `MINING_AUTH_SECRET` / `harvana.mining.auth-secret` (mirrors the node's own `.gitleaks.toml`).
+  - Hardcoded BIP-39 mnemonics (12+ word sequence assigned to a `mnemonic`/`seed_phrase` field).
+  - Hardcoded private keys (60+ hex chars assigned to `privateKey`/`secretKey`).
+  - Allow-list: `app/google-services.json`, images, fonts, the doktohsmile keystore (gitignored anyway), `bip39_english.txt` (the rule above is noisy against the standard wordlist), legal text in `app/src/main/assets/legal/`.
+- **`.github/workflows/ci.yml`** added. Three jobs:
+  1. `secrets` — gitleaks on every push and PR.
+  2. `static-checks` — runs the `[verify]` half of `tools/RELEASE_CHECKLIST.md` as code: `grep -c 'allow.*if true' docs/firestore.rules` must be 0; `bcprov-jdk18on` must be ≥ 1.80; only `SplashScreenActivity` may be `exported="true"`; `DebugActivity` must not have an intent-filter; `allowBackup=false`; `usesCleartextTraffic=false`; `networkSecurityConfig` referenced.
+  3. `build` — JDK 17, `./gradlew assembleDebug` + `test` + `lintDebug`, uploads the debug APK as a build artifact.
+- Concurrency cancels in-flight runs on the same branch when a new commit lands, so a fast-follow-up push doesn't waste the runner.
+- **Action:** none for the wallet. The CI will run on the next push to `main`. For the miner and moderator repos, copy the same workflow (adjust `app/build.gradle` and any paths) so every release goes through the same gate.
+
+## 18 Oct 2026 — Android 12+ backup rules, startup self-check, release checklist
+
+- **Android 12+ `data_extraction_rules.xml`** added at `app/src/main/res/xml/data_extraction_rules.xml`. Pairs with `android:allowBackup="false"` on `<application>` to keep the BIP-39 seed, encrypted wallet blobs, session tokens and the moderator's own private key off Google's cloud backup and off device-to-device transfer. Both `<cloud-backup>` and `<device-transfer>` exclude every domain (`root`, `file`, `database`, `sharedpref`, `external`).
+- **Manifest:** `android:dataExtractionRules="@xml/data_extraction_rules"` added to `<application>`. The build host must clean+rebuild for AGP to wire the new resource in.
+- **Startup self-check** (`com.harvana.app.utils.AppSelfCheck`) runs once after `SketchApplication` finishes its init. Validates: `FirebaseApp` is initialised, `google-services.json` is applied, the node URL responds, BouncyCastle is on the classpath, the network security config is referenced, and the debuggable flag matches the build type. Failures are uploaded to `CRASH_LOGS` with `kind=STARTUP_CHECK` and `severity=ERROR` so the operator sees misconfigurations in the moderator dashboard. `CrashReportManager.sendStartupCheck` was added for the upload.
+- **`tools/RELEASE_CHECKLIST.md`** — single ordered pre-flight list (Firebase console, build host, real-device smoke, one-time data migration, other repos, token hygiene). Every step is marked **[block]** (must-do) or **[verify]** (sanity check). Section G covers the leaked `ghp_…` PAT and the Firebase service-account JSON: neither should ever be in a repo, chat, or CI log.
+- **No behaviour change for users.** The self-check is fire-and-forget, the backup rules are stricter than before, and the release checklist is documentation.
+
+## 18 Oct 2026 — USERS legacy migration utility (one-time, operator run)
+
+- `com.harvana.app.firestore.USERSLegacyMigration` was added. It walks any list of uids, reads the current `USERS/{uid}` document, finds fields the rules now forbid in the public doc (DOB, ID, phone, email, address, occupation, GPS, next-of-kin, city — the same set `PrivateProfile.leftoversIn()` returns), copies them to `USERS/{uid}/private/kyc` and removes them from the main doc, in a single Firestore batch per user. Idempotent: running it twice moves nothing the second time.
+- The `publicProfileUpdateOnly()` rule added earlier is graceful-degradation (it only blocks updates that *touch* a private field), so this script is not required for the app to keep working. It is the cleaner end-state and lets the rule be tightened further later.
+- Operator usage: from a debug screen on a moderator account, or via the Admin SDK on the build host, call `USERSLegacyMigration.runAll(uids, listener)`. The listener reports per-user (`uid, moved, error`) and at the end (`onDone(users, fields)`).
+- **Action:** not blocking. Run once when convenient, ideally on a debug build signed in as a moderator.
+
 ## 18 Oct 2026 — Cross-repo audit: Harvana wallet, node, miner, moderator
 
 - A full cross-repo audit was run across all four Harvana repositories (this wallet, the node, the miner, the moderator). The wallet has every fix from this session applied; the miner and moderator have exact drop-in patches written in `docs/CROSS_REPO_AUDIT.md`; the node has its open items listed for the node team. The audit's overall production-readiness rating is 65% — the remaining 35% is operational (republish rules, rebuild, device-test, rotate the leaked PAT), not code.

@@ -141,5 +141,18 @@ public class SketchApplication extends Application {
         } catch (Throwable t) {
             Log.w(TAG, "CrashReporter.sendPending failed: " + t.getMessage());
         }
+
+        // 12. Startup self-check. Runs once after init; never throws; the result is
+        //     uploaded to CRASH_LOGS so the operator sees misconfigurations in the
+        //     moderator dashboard instead of the app dying silently on a user device.
+        try {
+            com.harvana.app.utils.AppSelfCheck.Result r = new com.harvana.app.utils.AppSelfCheck(this).run();
+            if (!r.ok()) {
+                Log.w(TAG, "AppSelfCheck failed: " + r.failed);
+                com.harvana.app.telemetry.CrashReportManager.sendStartupCheck(this, r);
+            }
+        } catch (Throwable t) {
+            Log.w(TAG, "AppSelfCheck threw: " + t.getMessage());
+        }
     }
 }

@@ -1,0 +1,37 @@
+# CODEOWNERS — the people / teams that must approve a change before it merges.
+# GitHub will auto-assign these as reviewers and will block merge if a
+# matching rule requires review.
+
+# Default: the protocol team owns everything.
+*       @DOKTOHSMILE
+
+# Docs and security-sensitive files: tighter review.
+# Two approvals is what the protocol team has been doing since the
+# 18 Oct 2026 pass.
+docs/firestore.rules   @DOKTOHSMILE
+docs/UPDATES.md        @DOKTOHSMILE
+docs/CROSS_REPO_AUDIT.md @DOKTOHSMILE
+SECURITY.md            @DOKTOHSMILE
+
+# Build / release wiring: the build host, not the wallet dev.
+/app/build.gradle      @DOKTOHSMILE
+/app/proguard-rules.pro @DOKTOHSMILE
+/app/src/main/AndroidManifest.xml @DOKTOHSMILE
+/app/google-services.json @DOKTOHSMILE
+
+# CI and secret-scan config.
+/.github/               @DOKTOHSMILE
+/.gitleaks.toml         @DOKTOHSMILE
+
+# Crypto and identity code: highest bar — every change is a security
+# change.
+/app/src/main/java/com/harvana/app/crypto/   @DOKTOHSMILE
+/app/src/main/java/com/harvana/app/identity/  @DOKTOHSMILE
+/app/src/main/java/com/harvana/app/wallet/    @DOKTOHSMILE
+/app/src/main/java/com/harvana/app/web3/      @DOKTOHSMILE
+/app/src/main/java/com/harvana/app/firestore/ @DOKTOHSMILE
+/app/src/main/java/com/harvana/app/telemetry/ @DOKTOHSMILE
+
+# The dapp browser bridge and its Provider script.
+/app/src/main/java/com/harvana/app/web3/DappBrowserActivity.java @DOKTOHSMILE
+/app/src/main/java/com/harvana/app/web3/Provider.java             @DOKTOHSMILE

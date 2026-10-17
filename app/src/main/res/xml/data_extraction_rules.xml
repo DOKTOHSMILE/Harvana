@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ data-extraction rules. Pairs with android:allowBackup="false" on
+  <application> in the manifest. Even with allowBackup=false, some OEMs and
+  Google's device-transfer flow still copy app data unless these rules
+  explicitly say "exclude everything" for both backup and device-to-device
+  transfer.
+
+  The wallet stores the BIP-39 seed, encrypted wallet blobs, session tokens,
+  and the moderator's own private key in some builds. None of that should ever
+  leave the device automatically. This file says: do not include anything in
+  cloud backup, and do not include anything in a device-to-device transfer.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </device-transfer>
+</data-extraction-rules>

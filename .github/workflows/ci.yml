@@ -1,0 +1,146 @@
+name: CI
+
+# Run on every push to main and on every pull request.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Cancel in-flight runs on the same branch when a new commit lands.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 1. Secret scan ──────────────────────────────────────────────────────
+  # Block PRs that contain any pattern in .gitleaks.toml.
+  secrets:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+  # ── 2. Static checks (the RELEASE_CHECKLIST.md [verify] steps) ─────────
+  static-checks:
+    name: Static checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No `allow ...: if true` in firestore.rules
+        run: |
+          count=$(grep -c 'allow.*if true' docs/firestore.rules || true)
+          if [ "$count" -ne 0 ]; then
+            echo "::error::docs/firestore.rules still contains $count 'allow ...: if true' rule(s). See docs/CROSS_REPO_AUDIT.md and docs/UPDATES.md 18 Oct 2026 entries."
+            exit 1
+          fi
+          echo "OK: no 'if true' firestore rules"
+
+      - name: BouncyCastle version is 1.80+
+        run: |
+          ver=$(grep -oE 'bcprov-jdk18on:[0-9.]+' app/build.gradle | head -1 | cut -d: -f2)
+          if [ -z "$ver" ]; then
+            echo "::error::app/build.gradle does not declare bcprov-jdk18on"
+            exit 1
+          fi
+          # 1.80 = 180 in integer math; 1.77 = 177; we want >= 180.
+          ver_int=$(echo "$ver" | tr -d '.')
+          if [ "$ver_int" -lt 180 ]; then
+            echo "::error::BouncyCastle $ver is below the 1.80 floor (CVE-2024-30171 / CVE-2024-30172)."
+            exit 1
+          fi
+          echo "OK: BouncyCastle $ver"
+
+      - name: Only LAUNCHER activities are exported
+        run: |
+          # Activities that are allowed to be exported=true:
+          #   - SplashScreenActivity (LAUNCHER)
+          # Anything else exported=true is a real risk.
+          bad=$(grep -n 'android:exported="true"' app/src/main/AndroidManifest.xml || true)
+          if [ -n "$bad" ]; then
+            echo "$bad" | while IFS= read -r line; do
+              # Find the activity name on the preceding lines.
+              name=$(echo "$bad" | head -n $((--LINENO)) | grep -oE 'android:name="[^"]+"' | tail -1)
+              if [ "$name" != 'android:name=".SplashScreenActivity"' ]; then
+                echo "::error::Activity $name is exported=true but is not the LAUNCHER."
+                exit 1
+              fi
+            done
+          fi
+          echo "OK: no non-LAUNCHER exported activity"
+
+      - name: DebugActivity has no intent-filter
+        run: |
+          if grep -A2 'android:name=".DebugActivity"' app/src/main/AndroidManifest.xml | grep -q 'intent-filter'; then
+            echo "::error::DebugActivity still has an intent-filter; the 18 Oct 2026 fix removed it."
+            exit 1
+          fi
+          echo "OK: DebugActivity is not exposed via intent-filter"
+
+      - name: allowBackup is false
+        run: |
+          if ! grep -q 'android:allowBackup="false"' app/src/main/AndroidManifest.xml; then
+            echo "::error::<application> must set allowBackup=false (wallet data must not be backed up)."
+            exit 1
+          fi
+          echo "OK: allowBackup is false"
+
+      - name: cleartext traffic is disabled
+        run: |
+          if ! grep -q 'android:usesCleartextTraffic="false"' app/src/main/AndroidManifest.xml; then
+            echo "::error::<application> must set usesCleartextTraffic=false."
+            exit 1
+          fi
+          echo "OK: cleartext disabled"
+
+      - name: network security config is referenced
+        run: |
+          if ! grep -q 'android:networkSecurityConfig=' app/src/main/AndroidManifest.xml; then
+            echo "::error::<application> must reference a network_security_config."
+            exit 1
+          fi
+          echo "OK: network security config referenced"
+
+  # ── 3. Lint + unit tests + assemble debug smoke build ───────────────────
+  build:
+    name: Build (assembleDebug + unit tests + lint)
+    runs-on: ubuntu-latest
+    needs: [secrets, static-checks]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Run unit tests
+        run: ./gradlew test
+
+      - name: Run lint
+        run: ./gradlew lintDebug || (echo "::warning::lintDebug found issues; check the report." && exit 0)
+        # The project's app/build.gradle sets lint { abortOnError true } for
+        # release. Debug builds are non-blocking in CI.
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
+          retention-days: 7

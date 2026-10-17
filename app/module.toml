@@ -43,8 +43,8 @@ compileSdk = 34
 minSdk = 23
 targetSdk = 34
 manifest = "src/main/AndroidManifest.xml"
-versionCode = 3
-versionName = "1.2.0"
+versionCode = 4
+versionName = "1.2.1"
 isApplication = true
 manifestPlaceholders = []
 buildTypes = [{ name = "release", debuggable = false, minifyEnabled = true, shrinkResources = false, proguardFiles = ["proguard-android-optimize.txt", "proguard-rules.pro"], signingConfig = "doktohsmile" }]

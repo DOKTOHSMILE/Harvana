@@ -249,12 +249,14 @@
 					android:id="@+id/linear2"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:layout_marginTop="14dp"
+					android:layout_marginTop="12dp"
 					android:orientation="horizontal">
 					<com.google.android.material.button.MaterialButton
 						android:id="@+id/btn_footer_request_payout"
 						android:layout_width="0dp"
-						android:layout_height="44dp"
+						android:layout_height="36dp"
+						android:insetTop="0dp"
+						android:insetBottom="0dp"
 						android:gravity="center_horizontal|center_vertical"
 						android:text="Request Payout"
 						android:textSize="12sp"
@@ -263,13 +265,15 @@
 						android:layout_weight="1"
 						android:layout_marginEnd="6dp"
 						app:backgroundTint="@color/colorSurfaceRaised"
-						app:cornerRadius="12dp"
+						app:cornerRadius="10dp"
 						app:strokeColor="@color/colorCardStroke"
 						app:strokeWidth="1dp" />
 					<com.google.android.material.button.MaterialButton
 						android:id="@+id/btn_footer_apply_loan"
 						android:layout_width="0dp"
-						android:layout_height="44dp"
+						android:layout_height="36dp"
+						android:insetTop="0dp"
+						android:insetBottom="0dp"
 						android:gravity="center_horizontal|center_vertical"
 						android:text="Apply for Loan"
 						android:textSize="12sp"
@@ -278,7 +282,7 @@
 						android:layout_weight="1"
 						android:layout_marginStart="6dp"
 						app:backgroundTint="@color/colorAccent"
-						app:cornerRadius="12dp"
+						app:cornerRadius="10dp"
 						app:elevation="0dp" />
 				</LinearLayout>
 			</LinearLayout>

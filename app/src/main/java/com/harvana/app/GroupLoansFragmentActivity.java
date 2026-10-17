@@ -314,6 +314,9 @@ public class GroupLoansFragmentActivity extends Fragment {
 	private double groupWalletAvailable = 0;
 	private String loanInterestPeriod = "MONTHLY";
 	private String protocolId = "";
+	// The group's own coin. Drives the suffix on every amount on this tab; without it we would always show HARV
+	// even on a stable-coin group, which used to confuse the total loaned / total repaid cards.
+	private String groupCoin = "";
 	
 	private ArrayList<HashMap<String, Object>> loanRows = new ArrayList<>();
 	
@@ -353,6 +356,8 @@ public class GroupLoansFragmentActivity extends Fragment {
 		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
 		isAdmin = !creatorId.isEmpty() && creatorId.equals(currentUid);
 		protocolId = com.harvana.app.group.GroupKinds.nodeId(data);
+		Object coinObj = data.get("asset");
+		groupCoin = coinObj != null ? coinObj.toString().trim() : "";
 		
 		if (getActivity() == null) return;
 		getActivity().runOnUiThread(() -> {
@@ -1443,10 +1448,18 @@ public class GroupLoansFragmentActivity extends Fragment {
 	private String _formatUIBalance(double v) {
 		try {
 			java.text.DecimalFormat uiDf = new java.text.DecimalFormat("#,##0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
-			return uiDf.format(v) + (" " + com.harvana.app.CoinInfo.ticker());
+			String suffix = _coinSymbol();
+			String display = uiDf.format(v);
+			return display.endsWith(" " + suffix) ? display : display + " " + suffix;
 		} catch (Exception e) {
-			return String.valueOf(v) + (" " + com.harvana.app.CoinInfo.ticker());
+			return String.valueOf(v) + " " + _coinSymbol();
 		}
+	}
+
+	/** The group's own coin: stable coins carry their own symbol, everything else falls back to HARV. */
+	private String _coinSymbol() {
+		if (com.harvana.app.husd.Stable.isStable(groupCoin)) return com.harvana.app.husd.Stable.symbol(groupCoin);
+		return com.harvana.app.CoinInfo.ticker();
 	}
 	
 	{

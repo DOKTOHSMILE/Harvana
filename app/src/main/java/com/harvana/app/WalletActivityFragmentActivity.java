@@ -482,6 +482,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 		
 		@Override
 		public void onBindViewHolder(@NonNull TxViewHolder holder, int position) {
+			// Show the divider between rows; hide it under the last row so the list does not end with a line.
+			if (holder.txDivider != null) holder.txDivider.setVisibility(position == items.size() - 1 ? View.GONE : View.VISIBLE);
 			java.util.HashMap<String, Object> item = items.get(position);
 			
 			String sender    = safeAddress(item.get("senderAddress"));
@@ -665,8 +667,9 @@ public class WalletActivityFragmentActivity extends Fragment {
 			TextView  tvAddress;
 			TextView  tvAmount;
 			TextView  tvDate;
-			View cardview1; 
-			
+			View cardview1;
+			View txDivider;
+
 			public TxViewHolder(@NonNull View itemView) {
 				super(itemView);
 				ivIcon    = itemView.findViewById(R.id.iv_tx_icon);
@@ -674,7 +677,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 				tvAddress = itemView.findViewById(R.id.tv_tx_address);
 				tvAmount  = itemView.findViewById(R.id.tv_tx_amount);
 				tvDate    = itemView.findViewById(R.id.tv_tx_date);
-				cardview1 = itemView.findViewById(R.id.cardview1); 
+				cardview1 = itemView.findViewById(R.id.cardview1);
+				txDivider = itemView.findViewById(R.id.tx_divider);
 			}
 		}
 	}

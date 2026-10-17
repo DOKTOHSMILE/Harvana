@@ -470,7 +470,8 @@ public class GroupMembersFragmentActivity extends Fragment {
 
 	/** Approved in the app is not the same as a bond locked on the chain. */
 	private String bondLine(Map<String, Object> member, String base) {
-		if (!"CIRCLE".equals(com.harvana.app.sync.NodeGroupClient.familyOf(groupId)) || !chainRosterLoaded) return base;
+		String readId = (linkedNodeId != null && !linkedNodeId.isEmpty()) ? linkedNodeId : groupId;
+		if (!"CIRCLE".equals(com.harvana.app.sync.NodeGroupClient.familyOf(readId)) || !chainRosterLoaded) return base;
 		boolean locked = false;
 		for (String w : _walletsOf(member)) {
 			if (chainRoster.contains(w.toLowerCase(Locale.US))) locked = true;
@@ -493,10 +494,12 @@ public class GroupMembersFragmentActivity extends Fragment {
 	/** Wallets whose bond is locked on the chain. Empty until the circle member list returns. */
 	private final java.util.Set<String> chainRoster = new java.util.HashSet<>();
 	private boolean chainRosterLoaded;
-	
+
 	private void _loadNodePaid() {
-		if (!"CIRCLE".equals(com.harvana.app.sync.NodeGroupClient.familyOf(groupId))) return;
-		com.harvana.app.sync.NodeGroupClient.getCircleMembers(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
+		// The Firestore doc id is not a node id; use the resolved node id when we have it.
+		String readId = (linkedNodeId != null && !linkedNodeId.isEmpty()) ? linkedNodeId : groupId;
+		if (!"CIRCLE".equals(com.harvana.app.sync.NodeGroupClient.familyOf(readId))) return;
+		com.harvana.app.sync.NodeGroupClient.getCircleMembers(readId, new com.harvana.app.sync.NodeGroupClient.Callback() {
 			@Override public void onSuccess(org.json.JSONObject json) {
 				org.json.JSONArray arr = json.optJSONArray("members");
 				if (arr == null) return;

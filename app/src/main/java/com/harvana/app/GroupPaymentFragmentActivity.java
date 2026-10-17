@@ -286,6 +286,9 @@ public class GroupPaymentFragmentActivity extends Fragment {
         private String linkedNodeId = "";
         private String groupCreatorId = "";
         private boolean viewerIsAdmin = false;
+        // The group's own coin. Drives the suffix on every amount on this tab; without it we would always show bare
+        // numbers even on a stable-coin group, which used to confuse the per-slot amount and the group wallet card.
+        private String groupCoin = "";
 
         private void _applyCachedPayContext() {
                 Map<String, Object> cached = com.harvana.app.offline.OfflineCacheManager.load(
@@ -299,6 +302,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
                         groupName = str(cached, "groupName", groupName);
                         groupWalletAddress = str(cached, "groupWalletAddress",
                         str(cached, "group_wallet", groupWalletAddress));
+                        if (groupCoin == null || groupCoin.isEmpty()) groupCoin = str(cached, "asset", "").trim();
                         currentPayerSlot = (int) ((currentRound - 1) % Math.max(1, totalSlots)) + 1;
                 }
                 List<HashMap<String, Object>> cachedMembers =
@@ -332,6 +336,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
                                 groupCreatorId = str(data, "creatorId", "");
                                 viewerIsAdmin = com.harvana.app.group.AdminSeat.current(myUid, null, groupCreatorId, "", "");
                                 linkedNodeId = com.harvana.app.group.GroupKinds.nodeId(data);
+                                groupCoin = str(data, "asset", "").trim();
                                 if (getActivity() == null) return;
                                 getActivity().runOnUiThread(() -> {
                                         if (tv_my_payment_amount != null) {
@@ -1361,10 +1366,18 @@ public class GroupPaymentFragmentActivity extends Fragment {
         private String _formatUIBalance(double v) {
                 try {
                         java.text.DecimalFormat uiDf = new java.text.DecimalFormat("#,##0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
-                        return uiDf.format(v);
+                        String suffix = _coinSymbol();
+                        String display = uiDf.format(v);
+                        return display.endsWith(" " + suffix) ? display : display + " " + suffix;
                 } catch (Exception e) {
-                        return String.valueOf(v);
+                        return String.valueOf(v) + " " + _coinSymbol();
                 }
-        }           
+        }
+
+        /** The group's own coin: stable coins carry their own symbol, everything else falls back to HARV. */
+        private String _coinSymbol() {
+                if (com.harvana.app.husd.Stable.isStable(groupCoin)) return com.harvana.app.husd.Stable.symbol(groupCoin);
+                return com.harvana.app.CoinInfo.ticker();
+        }
 
 }

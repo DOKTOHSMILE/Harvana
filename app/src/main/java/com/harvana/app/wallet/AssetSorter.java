@@ -2,7 +2,6 @@ package com.harvana.app.wallet;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,7 +119,7 @@ public final class AssetSorter {
     }
 
     private static final class Holder {
-        View card; ImageView icon; TextView ticker, chip, price, change, balance, value;
+        View card; ImageView icon; TextView ticker, chip, price, change, balance, value; View divider;
         View src;
     }
 
@@ -137,6 +136,8 @@ public final class AssetSorter {
                 real.add(k);
                 if (r.getVisibility() != View.VISIBLE) continue;
                 Entry e = fromRow(r);
+                // Drop the native HARV row: it duplicates the HARV card the rest of the list already shows.
+                if ("HARV".equals(e.priceKey)) continue;
                 e.order = n++;
                 entries.add(e);
             }
@@ -146,6 +147,7 @@ public final class AssetSorter {
             boolean hidden = com.harvana.app.utils.BalancePrivacy.isHidden(c);
             for (Entry e : saved) {
                 if (real.contains(e.key)) continue;           // its section has drawn it (or hidden it)
+                if ("HARV".equals(e.priceKey)) continue;       // drop the saved HARV copy for the same reason
                 e.order = n++;
                 if (hidden) { e.balance = "\u2022\u2022\u2022\u2022"; e.value = "\u2022\u2022\u2022\u2022"; }
                 entries.add(e);
@@ -155,9 +157,28 @@ public final class AssetSorter {
                 shown.postDelayed(rebuild, SAVED_GRACE_MS - (System.currentTimeMillis() - attachedAt) + 50);
             }
         }
-        // Largest value first; equal values keep the sections' own order (HARV, stable coins, other coins, added).
+        // Rank by value (largest first); rows with no value rank by their balance; zero balances rank by name.
         java.util.Collections.sort(entries, (a, b) -> {
-            int cmp = Double.compare(b.sort, a.sort);
+            boolean aHasValue = a.sort > 0;
+            boolean bHasValue = b.sort > 0;
+            if (aHasValue != bHasValue) return aHasValue ? -1 : 1;
+            if (aHasValue) {
+                int cmp = Double.compare(b.sort, a.sort);
+                if (cmp != 0) return cmp;
+            } else {
+                Double aAmt = money(a.balance);
+                Double bAmt = money(b.balance);
+                boolean aHasAmt = aAmt != null && aAmt > 0;
+                boolean bHasAmt = bAmt != null && bAmt > 0;
+                if (aHasAmt != bHasAmt) return aHasAmt ? -1 : 1;
+                if (aHasAmt) {
+                    int cmp = Double.compare(bAmt, aAmt);
+                    if (cmp != 0) return cmp;
+                }
+            }
+            String an = a.name == null ? "" : a.name;
+            String bn = b.name == null ? "" : b.name;
+            int cmp = an.compareToIgnoreCase(bn);
             return cmp != 0 ? cmp : Integer.compare(a.order, b.order);
         });
 
@@ -169,10 +190,13 @@ public final class AssetSorter {
             shown.removeAllViews();
             Map<String, Holder> keep = new HashMap<>(holders);
             holders.clear();
-            for (Entry e : entries) {
+            for (int i = 0; i < entries.size(); i++) {
+                Entry e = entries.get(i);
                 Holder h = keep.get(e.key);
                 if (h == null) h = make();
                 bind(h, e);
+                // Show the divider between rows; hide it under the last row so the list does not end with a line.
+                if (h.divider != null) h.divider.setVisibility(i < entries.size() - 1 ? View.VISIBLE : View.GONE);
                 holders.put(e.key, h);
                 shown.addView(h.card);
             }
@@ -212,68 +236,25 @@ public final class AssetSorter {
         return e;
     }
 
-    /** The views of one row: icon · TICKER [Name] over price and 24h change; amount over value on the right. */
+    /** The views of one row: simple list row (icon · name over balance + symbol · value), no card surrounding. */
     private Holder make() {
-        float d = c.getResources().getDisplayMetrics().density;
         Holder h = new Holder();
-        LinearLayout card = new LinearLayout(c);
-        card.setGravity(Gravity.CENTER_VERTICAL);
-        card.setPadding(px(d, 14), px(d, 12), px(d, 14), px(d, 12));
-        card.setMinimumHeight(px(d, 68));
-        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
-        bg.setCornerRadius(px(d, 16));
-        bg.setColor(com.harvana.app.utils.UiColors.surface());
-        bg.setStroke(Math.max(1, px(d, 1)), c.getResources().getColor(R.color.colorCardStroke));
-        card.setBackground(bg);
-        card.setClickable(true);
-        card.setFocusable(true);
-        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        clp.setMargins(px(d, 12), px(d, 4), px(d, 12), px(d, 4));
-        card.setLayoutParams(clp);
-
-        h.icon = new ImageView(c);
-        card.addView(h.icon, new LinearLayout.LayoutParams(px(d, 40), px(d, 40)));
-
-        LinearLayout mid = new LinearLayout(c);
-        mid.setOrientation(LinearLayout.VERTICAL);
-        mid.setPadding(px(d, 12), 0, px(d, 8), 0);
-        LinearLayout top = new LinearLayout(c);
-        top.setGravity(Gravity.CENTER_VERTICAL);
-        h.ticker = tv("", 16, true, com.harvana.app.utils.UiColors.textPrimary());
-        top.addView(h.ticker);
-        h.chip = tv("", 11.5f, false, com.harvana.app.utils.UiColors.textSecondary());
-        h.chip.setEllipsize(android.text.TextUtils.TruncateAt.END);
-        h.chip.setPadding(px(d, 8), px(d, 2), px(d, 8), px(d, 2));
-        android.graphics.drawable.GradientDrawable cb = new android.graphics.drawable.GradientDrawable();
-        cb.setCornerRadius(px(d, 10));
-        cb.setColor(com.harvana.app.utils.UiColors.surfaceAlt());
-        h.chip.setBackground(cb);
-        LinearLayout.LayoutParams chl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        chl.leftMargin = px(d, 8);
-        top.addView(h.chip, chl);
-        mid.addView(top);
-        LinearLayout bottom = new LinearLayout(c);
-        bottom.setGravity(Gravity.CENTER_VERTICAL);
-        h.price = tv("—", 13, false, com.harvana.app.utils.UiColors.textSecondary());
-        bottom.addView(h.price);
-        h.change = tv("", 13, false, com.harvana.app.utils.UiColors.success());
-        h.change.setPadding(px(d, 6), 0, 0, 0);
-        bottom.addView(h.change);
-        mid.addView(bottom);
-        card.addView(mid, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-
-        LinearLayout right = new LinearLayout(c);
-        right.setOrientation(LinearLayout.VERTICAL);
-        right.setGravity(Gravity.END);
-        h.balance = tv("", 16, true, com.harvana.app.utils.UiColors.textPrimary());
-        h.balance.setGravity(Gravity.END);
-        right.addView(h.balance);
-        h.value = tv("", 13, false, com.harvana.app.utils.UiColors.textSecondary());
-        h.value.setGravity(Gravity.END);
-        right.addView(h.value);
-        card.addView(right);
-        h.card = card;
-        card.setOnClickListener(v -> {
+        // Inflate the same plain list row the rest of the app uses: a single tappable row with a thin divider
+        // under it, no rounded card, no horizontal margin. One row layout for every asset.
+        View row = LayoutInflater.from(c).inflate(R.layout.coin_list_card, shown, false);
+        h.card = row;
+        h.icon = (ImageView) row.findViewById(R.id.iv_asset_logo);
+        h.ticker = (TextView) row.findViewById(R.id.tv_asset_name);  // row 1: asset name
+        h.balance = (TextView) row.findViewById(R.id.tv_asset_balance);
+        h.chip = (TextView) row.findViewById(R.id.tv_asset_symbol);   // row 2: symbol next to balance
+        h.value = (TextView) row.findViewById(R.id.tv_asset_amount);
+        h.price = new TextView(c);                                    // unused, kept so existing code compiles
+        h.change = new TextView(c);
+        h.divider = row.findViewById(R.id.asset_divider);
+        // Tappable area is the row itself (not the divider underneath), the same as every other section.
+        View tap = row.findViewById(R.id.cardview1);
+        if (tap == null) tap = row;
+        tap.setOnClickListener(v -> {
             if (h.src == null) return;                         // a saved row: its section has not drawn it yet
             View realCard = h.src.findViewById(R.id.cardview1);
             if (realCard != null) realCard.performClick(); else h.src.performClick();
@@ -286,21 +267,12 @@ public final class AssetSorter {
         h.src = e.src;
         if (e.icon != null) h.icon.setImageDrawable(e.icon);
         else if (h.icon.getDrawable() == null) h.icon.setImageDrawable(savedIcon(e.priceKey));
-        set(h.ticker, e.ticker);
-        boolean chip = e.name != null && !e.name.isEmpty() && !e.name.equalsIgnoreCase(e.ticker);
-        h.chip.setVisibility(chip ? View.VISIBLE : View.GONE);
-        if (chip) set(h.chip, e.name);
-        Double p = price.get(e.priceKey);
-        set(h.price, p == null || p.isNaN() ? "—" : FxRates.money(c, p));
-        Double ch = change.get(e.priceKey);
-        if (ch != null && !ch.isNaN()) {
-            set(h.change, String.format(java.util.Locale.US, "%s%.2f%%", ch >= 0 ? "+" : "", ch));
-            h.change.setTextColor(ch >= 0 ? com.harvana.app.utils.UiColors.success() : com.harvana.app.utils.UiColors.error());
-            h.change.setVisibility(View.VISIBLE);
-        } else {
-            h.change.setVisibility(View.GONE);
-        }
+        // Row 1: the name people read (e.g. "Harvana"); when the name is missing, fall back to the ticker.
+        String displayName = (e.name != null && !e.name.isEmpty()) ? e.name : e.ticker;
+        set(h.ticker, displayName);
+        // Row 2: balance · symbol on the left, value on the right.
         set(h.balance, e.balance);
+        set(h.chip, e.ticker);
         set(h.value, e.value);
     }
 

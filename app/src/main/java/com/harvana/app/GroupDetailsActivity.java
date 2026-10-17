@@ -115,6 +115,12 @@ public class GroupDetailsActivity extends AppCompatActivity {
 	private DatabaseReference groupdb = _firebase.getReference("groupdb");
 	private ChildEventListener _groupdb_child_listener;
 	private FirebaseAuth fauth;
+	// The network group id (CIRC-/ACCUM-/FIXED-). Pulled from the group data — the Firestore doc id alone is not enough
+	// for the node APIs, and the FamilyOf check on it was reading "" so Collected always fell through to the payments
+	// list and printed 0.
+	private String nodeGroupId = "";
+	// The group's own coin: drives the currency suffix on Collected. Defaults to HARV for groups without an asset.
+	private String groupAsset = "";
 	private OnCompleteListener<AuthResult> _fauth_create_user_listener;
 	private OnCompleteListener<AuthResult> _fauth_sign_in_listener;
 	private OnCompleteListener<Void> _fauth_reset_password_listener;
@@ -591,13 +597,18 @@ public class GroupDetailsActivity extends AppCompatActivity {
 			btn_footer_apply_loan,
 			(data, admin) -> {
 				isCurrentUserAdmin = admin;
+				// wireFooter already set visibility for on-chain groups (hides the loan button, renames the payout
+				// button to "Actions & votes"). Don't override it here with a generic VISIBLE — the on-chain
+				// group in the screenshot was showing both buttons because this callback was racing it.
 				if (btn_footer_request_payout != null) {
 					btn_footer_request_payout.setVisibility(View.VISIBLE);
 					btn_footer_request_payout.setEnabled(true);
 				}
 				if (btn_footer_apply_loan != null) {
-					// A group on the network has no Firestore loan or payout buttons: the footer opens its network actions.
-					btn_footer_apply_loan.setVisibility(groupLogic.isOnChain() ? View.GONE : View.VISIBLE);
+					// Compute from the data we just received instead of groupLogic, so the visibility is correct
+					// even if the on-chain callback in GroupDetailsLogic hasn't been bound yet.
+					boolean onChain = !com.harvana.app.group.GroupKinds.nodeId(data).isEmpty();
+					btn_footer_apply_loan.setVisibility(onChain ? View.GONE : View.VISIBLE);
 					btn_footer_apply_loan.setEnabled(true);
 				}
 				groupCreatorId = _safeString(data, "creatorId", "");
@@ -713,7 +724,13 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		? (long) _asDouble(data.get("membersCount")) : 0;
 		String round = data.get("currentRound") != null
 		? String.valueOf((long) _asDouble(data.get("currentRound"))) : "—";
-		
+
+		// The Firestore doc id is not a node id. For on-chain groups the node id is one of
+		// nodeGroupId / circleId / nodeId. Resolving it here is what lets Collected reach the
+		// right node endpoint instead of falling through to the (always-empty) payments list.
+		nodeGroupId = com.harvana.app.group.GroupKinds.nodeId(data);
+		groupAsset = _safeString(data, "asset", "").trim();
+
 		String location = _extractLocation(data);
 		
 		if (tv_group_name != null) tv_group_name.setText(name);
@@ -824,20 +841,66 @@ public class GroupDetailsActivity extends AppCompatActivity {
 	
 	/** An amount in the group's own coin: a stable coin has 6 decimals and its symbol, HARV 8. */
 	private String _groupMoney(org.json.JSONObject group, long raw) {
-		String coin = group == null ? "" : group.optString("asset", "");
+		// The group's own coin drives the suffix. The endpoint body carries it for FIXED/ACCUM; for a circle the
+		// members list does not, so we fall back to whatever was bound on the group header. HARV when neither says.
+		String coin = (group != null && group.has("asset") && !group.optString("asset", "").isEmpty())
+				? group.optString("asset", "")
+				: groupAsset;
+		if (coin == null) coin = "";
 		// The Collected card shows the coin's own logo, so the coin is plain to see.
 		runOnUiThread(() -> com.harvana.app.group.CoinLogo.show(findViewById(R.id.imageview11), coin));
-		if (com.harvana.app.husd.Stable.isStable(coin)) return com.harvana.app.husd.HusdClient.format(raw) + " " + com.harvana.app.husd.Stable.symbol(coin);
-		return com.harvana.app.wallet.BalanceFormatter.smart(raw / 100_000_000.0);
+		if (com.harvana.app.husd.Stable.isStable(coin)) {
+			return com.harvana.app.husd.HusdClient.format(raw) + " " + com.harvana.app.husd.Stable.symbol(coin);
+		}
+		String display = com.harvana.app.wallet.BalanceFormatter.smart(raw / 100_000_000.0);
+		if (coin.isEmpty()) return display;
+		String symbol = _assetSymbol(coin);
+		if (display.endsWith(" " + symbol)) return display;
+		return display + " " + symbol;
 	}
-	
+
+	/** Best-effort symbol for the group's coin. Stable coins carry their own; HARV is the default. */
+	private String _assetSymbol(String coin) {
+		if (coin == null || coin.isEmpty()) return com.harvana.app.CoinInfo.ticker();
+		if (com.harvana.app.husd.Stable.isStable(coin)) return com.harvana.app.husd.Stable.symbol(coin);
+		String upper = coin.trim().toUpperCase(Locale.US);
+		if (upper.equals(com.harvana.app.CoinInfo.ticker())) return com.harvana.app.CoinInfo.ticker();
+		// A short token code on the group is its own ticker.
+		return upper.length() <= 6 ? upper : com.harvana.app.CoinInfo.ticker();
+	}
+
+	/** Format a HARV-denominated total with the group's own asset suffix. The Firestore fallback does not carry
+	 *  the coin, so the suffix is whatever was bound on the group header. Stable coins use their own formatter. */
+	private String _formatFiatFallback(double amountHarv) {
+		if (com.harvana.app.husd.Stable.isStable(groupAsset)) {
+			long raw = (long) (amountHarv * 100_000_000.0);
+			return com.harvana.app.husd.HusdClient.format(raw) + " " + com.harvana.app.husd.Stable.symbol(groupAsset);
+		}
+		String display = com.harvana.app.wallet.BalanceFormatter.smart(amountHarv);
+		String symbol = _assetSymbol(groupAsset);
+		return display.endsWith(" " + symbol) ? display : display + " " + symbol;
+	}
+
 	private void _loadTotalGroupContributions() {
 		if (groupId == null || groupId.isEmpty()) return;
-		
+		// On-chain groups: read totals against the node id we resolved from the group data. Without it, the
+		// FamilyOf check would read "" and we would fall through to the payments list, which is empty for them.
+		final boolean onChain = nodeGroupId != null && !nodeGroupId.isEmpty();
+		if (!onChain) {
+			// Still show the offline cached value if we have one.
+			Map<String, Object> cachedEarly = com.harvana.app.offline.OfflineCacheManager.load(
+					getApplicationContext(), "group_total_contributions_" + groupId);
+			if (cachedEarly == null && tv_header_amount != null) {
+				tv_header_amount.setText("—");
+			}
+		}
+		final String readId = onChain ? nodeGroupId : groupId;
+
+
 		// A fixed goal lives on the network: deposits are on the chain, not in the Firestore payments list below, so that list
 		// reads 0 for it. Collected is what the network says was raised, whether or not it has been paid out yet.
-		if ("FIXED".equals(com.harvana.app.sync.NodeGroupClient.familyOf(groupId))) {
-			com.harvana.app.sync.NodeGroupClient.getFixedGroup(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
+		if ("FIXED".equals(com.harvana.app.sync.NodeGroupClient.familyOf(readId))) {
+			com.harvana.app.sync.NodeGroupClient.getFixedGroup(readId, new com.harvana.app.sync.NodeGroupClient.Callback() {
 				@Override public void onSuccess(org.json.JSONObject json) {
 					final String text = _groupMoney(json, json.has("goalRaisedRaw") ? json.optLong("goalRaisedRaw", 0L) : json.optLong("raisedAmountRaw", 0L));
 					runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(text); });
@@ -846,13 +909,13 @@ public class GroupDetailsActivity extends AppCompatActivity {
 			});
 			return;
 		}
-		
+
 		// A rotating circle and a savings group also live on the network: their payments never reach the Firestore
 		// payments list, so Collected read 0 for them. A circle's total is what its members have paid in (paidRaw per
 		// member); a savings group's is what every member currently has saved.
-		final String family = com.harvana.app.sync.NodeGroupClient.familyOf(groupId);
+		final String family = com.harvana.app.sync.NodeGroupClient.familyOf(readId);
 		if ("CIRCLE".equals(family)) {
-			com.harvana.app.sync.NodeGroupClient.getCircleMembers(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
+			com.harvana.app.sync.NodeGroupClient.getCircleMembers(readId, new com.harvana.app.sync.NodeGroupClient.Callback() {
 				@Override public void onSuccess(org.json.JSONObject json) {
 					long paid = 0L;
 					org.json.JSONArray members = json.optJSONArray("members");
@@ -864,13 +927,13 @@ public class GroupDetailsActivity extends AppCompatActivity {
 					}
 					final long paidRaw = paid;
 					// The members list does not carry the coin: read it from the circle itself.
-					com.harvana.app.sync.NodeGroupClient.getCircle(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
+					com.harvana.app.sync.NodeGroupClient.getCircle(readId, new com.harvana.app.sync.NodeGroupClient.Callback() {
 						@Override public void onSuccess(org.json.JSONObject circle) {
 							final String text = _groupMoney(circle, paidRaw);
 							runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(text); });
 						}
 						@Override public void onError(String error) {
-							runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(com.harvana.app.wallet.BalanceFormatter.smart(paidRaw / 100_000_000.0)); });
+							runOnUiThread(() -> { if (tv_header_amount != null) tv_header_amount.setText(_groupMoney(null, paidRaw)); });
 						}
 					});
 				}
@@ -879,10 +942,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
 			return;
 		}
 		if ("ACCUM".equals(family)) {
-			com.harvana.app.sync.NodeGroupClient.getAccumGroup(groupId, new com.harvana.app.sync.NodeGroupClient.Callback() {
+			com.harvana.app.sync.NodeGroupClient.getAccumGroup(readId, new com.harvana.app.sync.NodeGroupClient.Callback() {
 				@Override public void onSuccess(org.json.JSONObject json) {
 					final long savedRaw = json.optLong("totalActiveLineBalanceRaw", 0L);
-					final String coin = json.optString("asset", "");
+					final String coin = json.optString("asset", groupAsset);
 					final String escrow = json.optString("escrowAddress", "");
 					if (savedRaw == 0L && com.harvana.app.husd.Stable.isStable(coin) && escrow.startsWith("HV0x")) {
 						// What the group wallet holds in its coin (the same figure as the Group wallet card).
@@ -910,10 +973,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
 		if (cachedTotal != null && cachedTotal.get("total") instanceof Number) {
 			double cachedGrandTotal = ((Number) cachedTotal.get("total")).doubleValue();
 			if (tv_header_amount != null) {
-				tv_header_amount.setText(com.harvana.app.wallet.BalanceFormatter.smart(cachedGrandTotal));
+				tv_header_amount.setText(_formatFiatFallback(cachedGrandTotal));
 			}
 		}
-		
+
 		com.harvana.app.firestore.GroupFirestoreManager.getInstance(getApplicationContext())
 		.getPayments(groupId, new com.harvana.app.firestore.GroupFirestoreManager.ListCallback() {
 			@Override
@@ -925,7 +988,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 						boolean ok = "CONFIRMED".equalsIgnoreCase(st)
 						|| "PAID".equalsIgnoreCase(st);
 						if (!ok) continue;
-						
+
 						String type = _safeString(pay, "type", "").toUpperCase(Locale.US);
 						if (type.contains("LOAN") || type.contains("PAYOUT")
 						|| type.contains("REJECT") || type.contains("FEE")
@@ -938,7 +1001,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 						|| type.contains("FIXED")
 						|| "PAYMENT".equals(type);
 						if (!contribution) continue;
-						
+
 						double amt = _asDouble(pay.get("amountHarv"));
 						if (amt <= 0) amt = _asDouble(pay.get("amount"));
 						if (amt > 0) total += amt;
@@ -951,8 +1014,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 				getApplicationContext(), "group_total_contributions_" + groupId, toCache);
 				runOnUiThread(() -> {
 					if (tv_header_amount != null) {
-						tv_header_amount.setText(
-						com.harvana.app.wallet.BalanceFormatter.smart(grandTotal));
+						tv_header_amount.setText(_formatFiatFallback(grandTotal));
 					}
 				});
 			}

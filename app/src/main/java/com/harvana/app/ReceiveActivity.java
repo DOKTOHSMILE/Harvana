@@ -262,6 +262,7 @@ public class ReceiveActivity extends AppCompatActivity {
 				return true;
 			});
 			String want = getIntent().getStringExtra(com.harvana.app.wallet.CoinCatalog.EXTRA);
+			if (want == null) want = getIntent().getStringExtra("stable");          // a stable coin sent from CoinDetailActivity
 			if (want != null) {
 				for (int i = 0; i < receiveCoins.size(); i++) if (want.equals(receiveCoins.get(i).key)) { spinnerAssets.setSelection(i); break; }
 			}

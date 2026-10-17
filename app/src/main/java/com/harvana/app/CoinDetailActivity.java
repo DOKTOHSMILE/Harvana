@@ -210,13 +210,19 @@ public class CoinDetailActivity extends AppCompatActivity {
 		}
 		
 		btn_receive.setOnClickListener(_v -> {
-			if (stable != null) { _receiveBottomSheet(); return; }          // a stable coin is received at the Harvana address
+			if (stable != null) {                                            // a stable coin is received at the Harvana address
+				startActivity(new Intent(CoinDetailActivity.this, ReceiveActivity.class)
+						.putExtra("stable", stable.code)
+						.putExtra("walletAddress", walletAddress));
+				return;
+			}
 			if (openCoin != null && !openCoin.nativeHarv) {
 				startActivity(new Intent(CoinDetailActivity.this, ReceiveActivity.class)
 						.putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, openCoin.key)
 						.putExtra("walletAddress", walletAddress));
 			} else {
-				_receiveBottomSheet();
+				startActivity(new Intent(CoinDetailActivity.this, ReceiveActivity.class)
+						.putExtra("walletAddress", walletAddress));
 			}
 		});
 		
@@ -708,133 +714,6 @@ public class CoinDetailActivity extends AppCompatActivity {
 				android.util.Log.w("loadAvailableCoins", "Node fetch failed: " + error);
 			}
 		});
-	}
-	
-	public void _receiveBottomSheet() {
-		final BottomSheetDialog bottomSheetDialog = new com.harvana.app.ui.AppSheet(CoinDetailActivity.this);
-		View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_receive, null);
-		bottomSheetDialog.setContentView(sheetView);
-		
-		bottomSheetDialog.setOnShowListener(dialog -> {
-			BottomSheetDialog d = (BottomSheetDialog) dialog;
-			FrameLayout bottomSheetInternal = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-			if (bottomSheetInternal != null) {
-				bottomSheetInternal.setBackgroundColor(Color.TRANSPARENT);
-				float radius = 24f * getResources().getDisplayMetrics().density;
-				GradientDrawable background = new GradientDrawable();
-				background.setShape(GradientDrawable.RECTANGLE);
-				background.setColor(UiColors.surface());
-				background.setCornerRadii(new float[]{radius, radius, radius, radius, 0f, 0f, 0f, 0f});
-				sheetView.setBackground(background);
-				BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheetInternal);
-				behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-				behavior.setSkipCollapsed(true);
-				behavior.setFitToContents(false);
-				behavior.setDraggable(true);
-				ViewGroup.LayoutParams lp = bottomSheetInternal.getLayoutParams();
-				lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-				bottomSheetInternal.setLayoutParams(lp);
-			}
-		});
-		
-		final Button btnShare = sheetView.findViewById(R.id.btn_share);
-		final Spinner spinnerAssets = sheetView.findViewById(R.id.spinner_assets);
-		final TextView tvDepositAddress = sheetView.findViewById(R.id.tv_deposit_address);
-		final ImageView ivQrCode = sheetView.findViewById(R.id.iv_qr_code);
-		final ImageView ivCopyAddress = sheetView.findViewById(R.id.iv_copy_address);
-		final TextView tvClose = sheetView.findViewById(R.id.tv_close_sheet);
-		
-		final String activeAddress = WalletManager.getActiveWalletAddress(this);
-		final boolean validAddress = com.harvana.app.tx.NodeSendValidator.isValidAddress(activeAddress);
-		
-		if (tvDepositAddress != null) {
-			tvDepositAddress.setText(validAddress ? activeAddress : "Create or load a wallet to receive assets");
-		}
-		
-		if (ivQrCode != null) {
-			if (validAddress) {
-				ivQrCode.setImageDrawable(null);
-				new Thread(() -> {
-					Bitmap qr = null;
-					try {
-						qr = HARVQRCodeGenerator.generateQRCodeWithLogo(CoinDetailActivity.this,
-								com.harvana.app.scan.WalletQr.payload("HARV", activeAddress), 512, R.drawable.ic_coin_harv);
-					} catch (Exception ignored) {}
-					final Bitmap finalQr = qr;
-					runOnUiThread(() -> {
-						if (!isFinishing() && !isDestroyed() && ivQrCode != null && finalQr != null) {
-							ivQrCode.setImageBitmap(finalQr);
-						}
-					});
-				}).start();
-			} else {
-				ivQrCode.setImageDrawable(null);
-			}
-		}
-		
-		final List<String> assetList = new ArrayList<>();
-		assetList.add((com.harvana.app.CoinInfo.name() + " (" + com.harvana.app.CoinInfo.ticker() + ")"));
-		
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, com.harvana.app.R.layout.spinner_item, assetList) {
-			@NonNull
-			@Override
-			public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-				TextView tv = (TextView) super.getView(position, convertView, parent);
-				tv.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
-				tv.setTextSize(16);
-				tv.setPadding(24, 16, 24, 16);
-				return tv;
-			}
-			@Override
-			public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
-				TextView tv = (TextView) super.getDropDownView(position, convertView, parent);
-				tv.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
-				tv.setTextSize(16);
-				tv.setPadding(32, 28, 32, 28);
-				tv.setBackgroundColor(UiColors.surface());
-				return tv;
-			}
-		};
-		adapter.setDropDownViewResource(com.harvana.app.R.layout.spinner_dropdown_item);
-		if (spinnerAssets != null) spinnerAssets.setAdapter(adapter);
-		
-		View.OnClickListener copyListener = v -> {
-			if (!validAddress) {
-				SketchwareUtil.showMessage(CoinDetailActivity.this, "No valid wallet address to copy.");
-				return;
-			}
-			android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-			if (clipboard != null) {
-				ClipData clip = ClipData.newPlainText("Harvana Wallet Address", activeAddress);
-				clipboard.setPrimaryClip(clip);
-				SketchwareUtil.showMessage(CoinDetailActivity.this, "Address copied!");
-			}
-		};
-		
-		if (ivCopyAddress != null) ivCopyAddress.setOnClickListener(copyListener);
-		if (tvDepositAddress != null) tvDepositAddress.setOnClickListener(copyListener);
-		
-		if (btnShare != null) {
-			if (!validAddress) {
-				btnShare.setEnabled(false);
-				btnShare.setAlpha(0.4f);
-			} else {
-				btnShare.setOnClickListener(v -> {
-					try {
-						Bitmap bitmap = getBitmapFromView(ivQrCode);
-						Uri imageUri = saveImageToCache(bitmap);
-						if (imageUri != null) {
-							_shareImage(imageUri, activeAddress);
-						}
-					} catch (Exception e) {
-						SketchwareUtil.showMessage(CoinDetailActivity.this, e.toString());
-					}
-				});
-			}
-		}
-		
-		if (tvClose != null) tvClose.setOnClickListener(v -> bottomSheetDialog.dismiss());
-		bottomSheetDialog.show();
 	}
 	
 	private void _showTransferSuccessSheet(String amountText, String recipientAddress, String txHash) {

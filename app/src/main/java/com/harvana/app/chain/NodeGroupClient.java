@@ -114,15 +114,22 @@ public final class NodeGroupClient {
 
     /**
      * Open a savings line in an existing Accum group. Node: {@code POST /api/v1/accum/start-line}.
-     * <p><strong>TODO:</strong> the canonical message format
-     * ({@code AccumStartLineRequest.getCanonicalMessage()}) is not yet mirrored
-     * in {@link GroupCanonical}. Add the method there first (golden-tested
-     * against the node class), then add this method's body. Until then, the
-     * wallet's Accum line-opening still uses the legacy Firestore path in
-     * {@code CreateAccumulativeGroupActivity}.
+     * Canonical: {@code HARVANA_ACCUM_START_LINE_V1:groupId:member:dailyAmountRaw:autoCloseEnabled:lineType:lockedUntilTimestamp:depositMode:maxContributionRaw:nonce[:asset]}.
+     * Built by {@link GroupCanonical#accumStartLine} and signed with the
+     * wallet's Ed25519 key.
      */
-    public static void accumStartLine_NOT_YET_WIRED() {
-        // Intentionally a no-op marker. See javadoc.
+    public static void accumStartLine(android.content.Context ctx, String memberAddress,
+                                      String groupId, long dailyAmountRaw, boolean autoCloseEnabled,
+                                      String lineType, Long lockedUntilTs,
+                                      String depositMode, Long maxContributionRaw,
+                                      String asset, SignCallback cb) {
+        _signed(ctx, memberAddress, GroupCanonical::accumStartLine,
+                new Object[]{groupId, memberAddress, dailyAmountRaw, autoCloseEnabled,
+                        lineType, lockedUntilTs, depositMode, maxContributionRaw, 0L, asset},
+                "/api/v1/accum/start-line",
+                _json(memberAddress, null, null, asset, groupId, dailyAmountRaw, lineType,
+                        lockedUntilTs, depositMode, maxContributionRaw, null, null, null, null, null),
+                cb);
     }
 
     /** Accum contribute. Canonical: {@code HARVANA_ACCUM_CONTRIBUTE_V1:groupId:lineId:member:nonce}. */

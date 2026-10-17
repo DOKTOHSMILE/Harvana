@@ -64,6 +64,15 @@ public final class GroupCanonical {
         return "HARVANA_ACCUM_CREATE_GROUP_V1:" + creatorAddress + ":" + interestRateBps + ":" + withdrawalRule + ":" + nonce + tail(asset);
     }
 
+    /** AccumStartLineRequest.getCanonicalMessage() — opens a savings line in an existing Accum group. */
+    public static String accumStartLine(String groupId, String memberAddress, long dailyAmountRaw,
+                                       boolean autoCloseEnabled, String lineType, Long lockedUntilTimestamp,
+                                       String depositMode, Long maxContributionRaw, long nonce, String asset) {
+        return "HARVANA_ACCUM_START_LINE_V1:" + groupId + ":" + memberAddress + ":" + dailyAmountRaw
+                + ":" + autoCloseEnabled + ":" + lineType + ":" + lockedUntilTimestamp + ":" + depositMode
+                + ":" + maxContributionRaw + ":" + nonce + tail(asset);
+    }
+
     /** AccumPackRequest.getCanonicalMessage() */
     public static String accumPack(String groupId, String lineId, String memberAddress, long nonce) {
         return "HARVANA_ACCUM_PACK_V1:" + groupId + ":" + lineId + ":" + memberAddress + ":" + nonce;

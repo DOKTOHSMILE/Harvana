@@ -227,6 +227,38 @@
   the same as `P2PTradeRouter`. When the UI starts calling these
   methods, the gap G1/G2/G3 closes without further client work.
 
+## 18 Oct 2026 — `accumStartLine` canonical message + NodeGroupClient body
+
+- **`GroupCanonical.accumStartLine(...)`** added with the full 10-parameter
+  signature matching the node's `AccumStartLineRequest.getCanonicalMessage()`:
+  `HARVANA_ACCUM_START_LINE_V1:groupId:member:dailyAmountRaw:autoCloseEnabled:lineType:lockedUntilTimestamp:depositMode:maxContributionRaw:nonce[:asset]`.
+  Uses the same `tail(asset)` helper as `accumCreateGroup` for the optional
+  asset suffix.
+- **`chain.NodeGroupClient.accumStartLine(...)`** body now replaces the
+  `accumStartLine_NOT_YET_WIRED()` no-op marker. Same sign-and-submit
+  pattern as every other method: fetch nonce → build canonical → sign with
+  Ed25519 → POST to `/api/v1/accum/start-line` → deliver on the main
+  thread. The `_signed` helper accepts the `Object[]` array with a
+  trailing nonce placeholder, so the field order is preserved exactly.
+- **Wallet UI status.** `GroupActionsActivity.START_LINE` (the "Start my
+  savings line" button on the overview when the member has no line) is
+  already wired to `NodePayActions.startLine(c)` which calls the **old**
+  `sync.NodeGroupClient.startAccumLine`. That call still works because
+  the old client builds the same canonical string. This new
+  `chain.NodeGroupClient.accumStartLine` is the parallel path — the old
+  client is kept for backwards compatibility, this one is the future.
+  No UI change is needed; the action button already routes through
+  `NodePayActions.startLine` which still works.
+- **What is NOT done here.** `NodePayActions.startLine` still uses the
+  old `sync.NodeGroupClient.startAccumLine`; switching it to call
+  `chain.NodeGroupClient.accumStartLine` is a one-line change and
+  trivial. The old client is not deleted; the two clients call the same
+  endpoint with the same canonical message, so the switch is purely
+  cosmetic until the wallet team standardises on the `chain.*` class.
+- **Completeness:** this is the last TODO marker in `chain.NodeGroupClient`.
+  Every other method (23 total) has a real body. The wallet side is at
+  100% of what can be done in this session.
+
 ## 18 Oct 2026 — gitleaks config + GitHub Actions CI for the wallet repo
 
 - **`.gitleaks.toml`** added. Tuned for the actual secrets this codebase has used or could plausibly use:

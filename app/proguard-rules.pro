@@ -33,8 +33,20 @@
 # WorkManager is started from the manifest (InitializationProvider), not from a direct call.
 # CodeAssist's R8 does not always apply the library's own keep rules, so without these the
 # class is removed and the app dies at startup: ClassNotFoundException: WorkManagerInitializer.
--keep class androidx.work.WorkManagerInitializer { <init>(); }
--keep class androidx.work.impl.WorkManagerInitializer { <init>(); }
--keep class * implements androidx.startup.Initializer { <init>(); }
--keep class * extends androidx.work.ListenableWorker { public <init>(android.content.Context, androidx.work.WorkerParameters); }
+# The merge step writes the FQCN into the manifest, so the class is loaded by name - it has to exist
+# under that exact name with a public no-arg constructor, and every interface it implements
+# (androidx.startup.Initializer) must also be there.
+-keep public class androidx.work.WorkManagerInitializer {
+    public <init>();
+}
+-keep public class androidx.work.impl.WorkManagerInitializer {
+    public <init>();
+}
+-keep public class * implements androidx.startup.Initializer {
+    public <init>();
+}
+-keep public class * extends androidx.work.ListenableWorker {
+    public <init>(android.content.Context, androidx.work.WorkerParameters);
+}
 -keep class androidx.work.** { *; }
+-keep class androidx.startup.** { *; }

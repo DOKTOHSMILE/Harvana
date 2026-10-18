@@ -48,16 +48,16 @@ public class SupportAssistantActivity extends AppCompatActivity {
         input = findViewById(R.id.assistant_input);
         findViewById(R.id.assistant_send).setOnClickListener(v -> ask());
         findViewById(R.id.assistant_human).setOnClickListener(v -> handoff());
-        say(false, "I'm the Harvanna assistant, not a person. I answer from approved help articles. I cannot release escrow, reverse a transfer, or change an account. Ask for a person any time.");
+        say(false, "I'm the Harvanna assistant, not a person. I use the on-device Harvana support model and I only reply with approved answers. I cannot release escrow, reverse a transfer, or change an account. If I am not sure, I will hand you to a person.");
     }
 
     private void ask() {
         String text = input.getText() == null ? "" : input.getText().toString().trim();
         if (text.isEmpty()) return;
         input.setText("");
-        if (HelpArticles.answer(text).text.startsWith("Stop.")) say(true, "[secret removed]");
+        if (HelpArticles.answer(this, text).text.startsWith("Stop.")) say(true, "[secret removed]");
         else say(true, text);
-        HelpArticles.Answer a = HelpArticles.answer(text);
+        HelpArticles.Answer a = HelpArticles.answer(this, text);
         category = a.category;
         say(false, a.text);
     }

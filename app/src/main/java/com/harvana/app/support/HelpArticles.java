@@ -1,5 +1,7 @@
 package com.harvana.app.support;
 
+import android.content.Context;
+
 /** Approved answers. The assistant may only say what is written here. */
 public final class HelpArticles {
     private HelpArticles() {}
@@ -29,11 +31,13 @@ public final class HelpArticles {
             {"App", "theme crash error", "If a screen fails, force-close the app and open it again. Tell support the screen name and what you tapped. Do not send a seed phrase or a private key with the report."}
     };
 
-    public static Answer answer(String raw) {
+    public static Answer answer(Context c, String raw) {
         String q = raw == null ? "" : raw.toLowerCase();
         if (secret(q)) {
             return new Answer("Stop. Do not send a seed phrase, a private key, or a password. Delete it from this chat. I cannot recover an account from a secret, and a person on the desk must not be given one either.", "Security", true);
         }
+        Answer learned = SupportModel.classify(c, raw);
+        if (learned != null) return learned;
         if (contains(q, "hack", "stolen", "unauthorized", "compromise", "phishing", "fraud")) {
             return new Answer("This needs a person. I cannot freeze an account, reverse a transfer, or release escrow. Use Report a security issue so the desk gets a case without those secrets.", "Security", true);
         }

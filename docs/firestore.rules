@@ -765,14 +765,25 @@ service cloud.firestore {
         && request.resource.data.subject.size() > 0
         && request.resource.data.subject.size() <= 120
         && request.resource.data.ownerAddress is string
-        && request.resource.data.ownerAddress.size() <= 80;
+        && request.resource.data.ownerAddress.size() <= 80
+        && (!('category' in request.resource.data) || (request.resource.data.category is string && request.resource.data.category.size() <= 40))
+        && (!('priority' in request.resource.data) || request.resource.data.priority in ['LOW', 'NORMAL', 'HIGH', 'URGENT'])
+        && (!('lastFrom' in request.resource.data) || request.resource.data.lastFrom == 'MEMBER');
       allow update: if signedIn() && (
         (request.auth.uid == resource.data.ownerUid
           && request.resource.data.ownerUid == resource.data.ownerUid
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'updatedAt', 'status']))
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'lastFrom', 'updatedAt', 'status', 'rating'])
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastFrom']) || request.resource.data.lastFrom == 'MEMBER')
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']) || request.resource.data.status in ['OPEN', 'WAITING_FOR_SUPPORT'])
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['rating']) || (request.resource.data.rating is number && request.resource.data.rating >= 1 && request.resource.data.rating <= 5))
+        )
         || (isModerator(request.auth.uid)
           && request.resource.data.ownerUid == resource.data.ownerUid
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'updatedAt', 'status', 'staffName', 'staffUid']))
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'lastFrom', 'updatedAt', 'status', 'staffName', 'staffUid', 'priority', 'assignedAgentId', 'resolvedAt', 'closedAt', 'resolutionSummary', 'category', 'closedBy'])
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastFrom']) || request.resource.data.lastFrom == 'STAFF')
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']) || request.resource.data.status in ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'WAITING_FOR_USER', 'WAITING_FOR_SUPPORT', 'ESCALATED', 'RESOLVED', 'CLOSED'])
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['priority']) || request.resource.data.priority in ['LOW', 'NORMAL', 'HIGH', 'URGENT'])
+        )
       );
 
       match /messages/{messageId} {
@@ -784,10 +795,14 @@ service cloud.firestore {
         );
         allow create: if signedIn()
           && request.resource.data.body is string
-          && request.resource.data.body.size() > 0
           && request.resource.data.body.size() <= 2000
+          && (
+            request.resource.data.body.size() > 0
+            || (request.resource.data.image is string && request.resource.data.image.size() > 20 && request.resource.data.image.size() <= 250000)
+          )
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.at is number
+          && (!('image' in request.resource.data) || (request.resource.data.image is string && request.resource.data.image.size() <= 250000))
           && (
             (ticket().ownerUid == request.auth.uid && request.resource.data.from == 'MEMBER')
             || (isModerator(request.auth.uid)
@@ -796,6 +811,17 @@ service cloud.firestore {
                 && request.resource.data.staffName.size() > 0
                 && request.resource.data.staffName.size() <= 80)
           );
+        allow update, delete: if false;
+      }
+
+      match /notes/{noteId} {
+        allow read: if isModerator(request.auth.uid);
+        allow create: if isModerator(request.auth.uid)
+          && request.resource.data.body is string
+          && request.resource.data.body.size() > 0
+          && request.resource.data.body.size() <= 2000
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.at is number;
         allow update, delete: if false;
       }
     }

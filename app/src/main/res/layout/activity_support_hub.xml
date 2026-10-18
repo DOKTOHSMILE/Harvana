@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground"
+	android:orientation="vertical">
+	<androidx.appcompat.widget.Toolbar
+		android:id="@+id/toolbar"
+		android:layout_width="match_parent"
+		android:layout_height="?attr/actionBarSize"
+		android:background="@color/colorSurface" />
+	<ScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:fillViewport="true">
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:padding="16dp">
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Answers first. A person when the case involves money, a dispute, or the account."
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="14sp" />
+			<EditText
+				android:id="@+id/hub_search"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="12dp"
+				android:background="@drawable/bg_bubble_theirs"
+				android:hint="Search approved answers"
+				android:padding="12dp"
+				android:textColor="@color/colorTextPrimary"
+				android:textColorHint="@color/colorTextTertiary" />
+			<TextView
+				android:id="@+id/hub_results"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="8dp"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="14sp" />
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/hub_assistant"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="12dp"
+				android:text="Ask the assistant"
+				android:textAllCaps="false" />
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/hub_person"
+				style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Chat with a person"
+				android:textAllCaps="false" />
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/hub_security"
+				style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Report a security issue"
+				android:textAllCaps="false" />
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				android:text="Categories"
+				android:textColor="@color/colorTextPrimary"
+				android:textStyle="bold" />
+			<LinearLayout
+				android:id="@+id/hub_categories"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical" />
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				android:text="Your requests"
+				android:textColor="@color/colorTextPrimary"
+				android:textStyle="bold" />
+			<LinearLayout
+				android:id="@+id/hub_tickets"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical" />
+		</LinearLayout>
+	</ScrollView>
+</LinearLayout>

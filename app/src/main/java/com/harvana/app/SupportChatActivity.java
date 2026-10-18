@@ -41,9 +41,12 @@ public class SupportChatActivity extends AppCompatActivity {
     private RecyclerView list;
     private final Rows adapter = new Rows();
     private String ticketId = "";
+    private String category = "Other";
+    private String priority = "NORMAL";
     private String pendingPhoto = "";
     private com.google.firebase.firestore.ListenerRegistration ticketsReg;
     private com.google.firebase.firestore.ListenerRegistration threadReg;
+    private com.google.firebase.firestore.ListenerRegistration ticketReg;
     private final ActivityResultLauncher<String> pickPhoto = registerForActivityResult(
             new ActivityResultContracts.GetContent(), this::onPhoto);
 
@@ -51,6 +54,7 @@ public class SupportChatActivity extends AppCompatActivity {
     protected void onDestroy() {
         if (ticketsReg != null) ticketsReg.remove();
         if (threadReg != null) threadReg.remove();
+        if (ticketReg != null) ticketReg.remove();
         super.onDestroy();
     }
 
@@ -78,11 +82,26 @@ public class SupportChatActivity extends AppCompatActivity {
             pendingPhoto = "";
             photoReady.setVisibility(View.GONE);
         });
+        findViewById(R.id.support_reopen).setOnClickListener(v -> SupportDesk.reopen(this, ticketId, new SupportDesk.Cb() {
+            @Override public void ok(JSONObject json) { runOnUiThread(() -> toast("Reopened.")); }
+            @Override public void fail(String error) { runOnUiThread(() -> toast(error)); }
+        }));
+        findViewById(R.id.support_rate).setOnClickListener(v -> rate());
         status.setText("Your conversations");
-        String opened = getIntent() == null ? "" : getIntent().getStringExtra("ticketId");
-        if (opened != null && !opened.isEmpty()) {
-            ticketId = opened;
-            load();
+        if (getIntent() != null) {
+            String cat = getIntent().getStringExtra("category");
+            String pri = getIntent().getStringExtra("priority");
+            String about = getIntent().getStringExtra("subject");
+            String draft = getIntent().getStringExtra("draft");
+            if (cat != null && !cat.isEmpty()) category = cat;
+            if (pri != null && !pri.isEmpty()) priority = pri;
+            if (about != null && !about.isEmpty()) subject.setText(about);
+            if (draft != null && !draft.isEmpty()) body.setText(draft);
+            String opened = getIntent().getStringExtra("ticketId");
+            if (opened != null && !opened.isEmpty()) {
+                ticketId = opened;
+                load();
+            }
         }
         try { SupportDesk.watchReplies(this); } catch (Throwable ignored) {}
         ticketsReg = SupportDesk.mine(this, new SupportDesk.Cb() {
@@ -124,7 +143,7 @@ public class SupportChatActivity extends AppCompatActivity {
         if (ticketId.isEmpty()) {
             String about = subject.getText() == null ? "" : subject.getText().toString().trim();
             if (about.isEmpty()) { subject.setError("Say what this is about"); return; }
-            SupportDesk.open(this, about, text, photo, new SupportDesk.Cb() {
+            SupportDesk.open(this, about, text, photo, category, priority, new SupportDesk.Cb() {
                 @Override public void ok(JSONObject json) {
                     runOnUiThread(() -> {
                         ticketId = json.optString("ticketId", "");
@@ -152,6 +171,11 @@ public class SupportChatActivity extends AppCompatActivity {
     private void load() {
         if (ticketId.isEmpty()) return;
         subject.setVisibility(View.GONE);
+        if (ticketReg != null) ticketReg.remove();
+        ticketReg = SupportDesk.ticket(ticketId, new SupportDesk.Cb() {
+            @Override public void ok(JSONObject json) { runOnUiThread(() -> applyTicket(json)); }
+            @Override public void fail(String error) { runOnUiThread(() -> toast(error)); }
+        });
         if (threadReg != null) threadReg.remove();
         threadReg = SupportDesk.thread(ticketId, new SupportDesk.Cb() {
             @Override public void ok(JSONObject json) {
@@ -169,6 +193,28 @@ public class SupportChatActivity extends AppCompatActivity {
             }
             @Override public void fail(String error) { runOnUiThread(() -> toast(error)); }
         });
+    }
+
+    private void applyTicket(JSONObject json) {
+        String st = json.optString("status", "OPEN");
+        boolean closed = "RESOLVED".equals(st) || "CLOSED".equals(st);
+        findViewById(R.id.support_closed_actions).setVisibility(closed ? View.VISIBLE : View.GONE);
+        findViewById(R.id.support_body).setEnabled(!closed);
+        findViewById(R.id.support_send).setEnabled(!closed);
+        findViewById(R.id.support_photo).setEnabled(!closed);
+        String cat = json.optString("category", "");
+        status.setText("Ticket " + ticketId + (cat.isEmpty() ? "" : " · " + cat) + " · " + st.replace('_', ' '));
+    }
+
+    private void rate() {
+        String[] stars = new String[] { "1", "2", "3", "4", "5" };
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("How was this?")
+                .setItems(stars, (d, which) -> SupportDesk.rate(this, ticketId, which + 1, new SupportDesk.Cb() {
+                    @Override public void ok(JSONObject json) { runOnUiThread(() -> toast("Thank you.")); }
+                    @Override public void fail(String error) { runOnUiThread(() -> toast(error)); }
+                }))
+                .show();
     }
 
     private void toast(String error) {
@@ -209,7 +255,7 @@ public class SupportChatActivity extends AppCompatActivity {
         @Override public void onBindViewHolder(@NonNull VH h, int position) {
             JSONObject row = items.get(position);
             if (tickets) {
-                paint(h, false, row.optString("subject", "Conversation"), row.optString("lastMessage", ""), "", 0);
+                paint(h, false, row.optString("subject", "Conversation") + " · " + row.optString("status", ""), row.optString("lastMessage", ""), "", 0);
                 h.itemView.setOnClickListener(v -> {
                     ticketId = row.optString("ticketId", "");
                     load();

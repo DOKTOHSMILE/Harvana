@@ -132,7 +132,7 @@ public class HelpSupportActivity extends AppCompatActivity {
 			getSupportActionBar().setTitle("Help & support");
 			getSupportActionBar().setSubtitle("");
 		}
-		rowContactEmail.setOnClickListener(v -> startActivity(new Intent(this, SupportChatActivity.class)));
+		rowContactEmail.setOnClickListener(v -> startActivity(new Intent(this, SupportHubActivity.class)));
 		textview73.setText("Chat with support");
 		tvSupportEmail.setText("Signed with your wallet. Email stays at support@harvana.app");
 		tvSupportEmail.setOnClickListener(v -> {

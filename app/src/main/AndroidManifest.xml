@@ -431,6 +431,16 @@
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
+			android:name=".SupportHubActivity"
+			android:label="Help & support"
+			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:windowSoftInputMode="adjustResize" />
+		<activity
+			android:name=".SupportAssistantActivity"
+			android:label="Assistant"
+			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:windowSoftInputMode="adjustResize" />
+		<activity
 			android:name=".SupportChatActivity"
 			android:label="Support"
 			android:configChanges="orientation|screenSize|keyboardHidden"

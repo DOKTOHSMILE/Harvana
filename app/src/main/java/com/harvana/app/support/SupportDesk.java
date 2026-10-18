@@ -38,7 +38,9 @@ public final class SupportDesk {
                                     .put("ticketId", doc.getId())
                                     .put("subject", String.valueOf(doc.get("subject")))
                                     .put("lastMessage", String.valueOf(doc.get("lastMessage") == null ? "" : doc.get("lastMessage")))
-                                    .put("status", String.valueOf(doc.get("status"))));
+                                    .put("status", String.valueOf(doc.get("status")))
+                                    .put("category", String.valueOf(doc.get("category") == null ? "" : doc.get("category")))
+                                    .put("priority", String.valueOf(doc.get("priority") == null ? "NORMAL" : doc.get("priority"))));
                         }
                         cb.ok(new JSONObject().put("tickets", tickets));
                     } catch (Exception ex) {
@@ -52,6 +54,10 @@ public final class SupportDesk {
     }
 
     public static void open(Context c, String subject, String body, String image, Cb cb) {
+        open(c, subject, body, image, "Other", "NORMAL", cb);
+    }
+
+    public static void open(Context c, String subject, String body, String image, String category, String priority, Cb cb) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) { cb.fail("Sign in first."); return; }
         boolean photo = image != null && !image.isEmpty();
@@ -64,6 +70,8 @@ public final class SupportDesk {
         ticket.put("ownerUid", user.getUid());
         ticket.put("ownerAddress", address);
         ticket.put("subject", subject);
+        ticket.put("category", category == null || category.isEmpty() ? "Other" : category);
+        ticket.put("priority", priority == null || priority.isEmpty() ? "NORMAL" : priority);
         ticket.put("status", "OPEN");
         ticket.put("lastMessage", preview);
         ticket.put("lastFrom", "MEMBER");
@@ -96,6 +104,7 @@ public final class SupportDesk {
         Map<String, Object> patch = new HashMap<>();
         patch.put("lastMessage", preview);
         patch.put("lastFrom", "MEMBER");
+        patch.put("status", "WAITING_FOR_SUPPORT");
         patch.put("updatedAt", now);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("SUPPORT_TICKETS").document(ticketId).update(patch)
@@ -133,6 +142,47 @@ public final class SupportDesk {
                         cb.fail("Could not read this conversation.");
                     }
                 });
+    }
+
+    public static ListenerRegistration ticket(String ticketId, Cb cb) {
+        return FirebaseFirestore.getInstance().collection("SUPPORT_TICKETS").document(ticketId)
+                .addSnapshotListener((doc, e) -> {
+                    if (e != null) { cb.fail(e.getMessage()); return; }
+                    if (doc == null || !doc.exists()) { cb.fail("This ticket is gone."); return; }
+                    try {
+                        cb.ok(new JSONObject()
+                                .put("ticketId", doc.getId())
+                                .put("status", String.valueOf(doc.get("status")))
+                                .put("category", String.valueOf(doc.get("category") == null ? "" : doc.get("category")))
+                                .put("priority", String.valueOf(doc.get("priority") == null ? "" : doc.get("priority")))
+                                .put("rating", doc.get("rating") == null ? 0 : doc.get("rating")));
+                    } catch (Exception ex) { cb.fail("Could not read this ticket."); }
+                });
+    }
+
+    public static void reopen(Context c, String ticketId, Cb cb) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) { cb.fail("Sign in first."); return; }
+        Map<String, Object> patch = new HashMap<>();
+        patch.put("status", "OPEN");
+        patch.put("lastFrom", "MEMBER");
+        patch.put("lastMessage", "Reopened");
+        patch.put("updatedAt", System.currentTimeMillis());
+        FirebaseFirestore.getInstance().collection("SUPPORT_TICKETS").document(ticketId).update(patch)
+                .addOnSuccessListener(v -> { try { cb.ok(new JSONObject().put("ticketId", ticketId)); } catch (Exception ex) { cb.fail("Reopened."); } })
+                .addOnFailureListener(err -> cb.fail(err.getMessage()));
+    }
+
+    public static void rate(Context c, String ticketId, int stars, Cb cb) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) { cb.fail("Sign in first."); return; }
+        if (stars < 1 || stars > 5) { cb.fail("Choose 1 to 5."); return; }
+        Map<String, Object> patch = new HashMap<>();
+        patch.put("rating", stars);
+        patch.put("updatedAt", System.currentTimeMillis());
+        FirebaseFirestore.getInstance().collection("SUPPORT_TICKETS").document(ticketId).update(patch)
+                .addOnSuccessListener(v -> { try { cb.ok(new JSONObject().put("ticketId", ticketId)); } catch (Exception ex) { cb.fail("Saved."); } })
+                .addOnFailureListener(err -> cb.fail(err.getMessage()));
     }
 
     private static Map<String, Object> message(String from, String uid, String staffName, String body, long at, String image) {

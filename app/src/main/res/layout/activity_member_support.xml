@@ -45,6 +45,29 @@
 		android:paddingTop="8dp"
 		android:paddingBottom="8dp" />
 
+	<LinearLayout
+		android:id="@+id/support_closed_actions"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:orientation="horizontal"
+		android:visibility="gone">
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/support_reopen"
+			style="@style/Widget.MaterialComponents.Button.TextButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Reopen"
+			android:textAllCaps="false" />
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/support_rate"
+			style="@style/Widget.MaterialComponents.Button.TextButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Rate"
+			android:textAllCaps="false" />
+	</LinearLayout>
+
 	<TextView
 		android:id="@+id/support_photo_ready"
 		android:layout_width="match_parent"

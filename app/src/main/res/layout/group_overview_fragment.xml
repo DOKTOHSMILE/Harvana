@@ -66,8 +66,12 @@
 						android:id="@+id/tv_group_wallet_balance"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
+						android:maxWidth="150dp"
+						android:maxLines="1"
+						android:ellipsize="end"
+						android:gravity="end"
 						android:text="0 HARV"
-						android:textSize="18sp"
+						android:textSize="16sp"
 						android:textStyle="bold" />
 				</LinearLayout>
 				<com.google.android.material.card.MaterialCardView
@@ -120,7 +124,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:gravity="center_vertical"
-					android:orientation="horizontal" android:minHeight="50dp">
+					android:orientation="horizontal" android:minHeight="58dp">
 					<TextView
 						android:id="@+id/tv_cycle_status"
 						android:layout_width="0dp"
@@ -256,6 +260,9 @@
 								android:id="@+id/tv_rule_contribution"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
+								android:maxWidth="160dp"
+								android:maxLines="1"
+								android:ellipsize="end"
 								android:text="—"
 								android:textStyle="bold"
 								android:textSize="14sp" />
@@ -663,7 +670,7 @@
 				<LinearLayout
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:minHeight="50dp"
+					android:minHeight="58dp"
 					android:gravity="center_vertical"
 					android:orientation="horizontal">
 					<ImageView
@@ -691,7 +698,7 @@
 				<LinearLayout
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:minHeight="50dp"
+					android:minHeight="58dp"
 					android:gravity="center_vertical"
 					android:orientation="horizontal">
 					<ImageView
@@ -719,7 +726,7 @@
 				<LinearLayout
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:minHeight="50dp"
+					android:minHeight="58dp"
 					android:gravity="center_vertical"
 					android:orientation="horizontal">
 					<ImageView
@@ -776,7 +783,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:gravity="center_vertical"
-					android:orientation="horizontal" android:minHeight="50dp">
+					android:orientation="horizontal" android:minHeight="58dp">
 					<ImageView
 						android:layout_width="20dp"
 						android:layout_height="20dp"
@@ -795,6 +802,10 @@
 						android:id="@+id/tv_pool_contribution"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
+						android:maxWidth="150dp"
+						android:maxLines="1"
+						android:ellipsize="end"
+						android:gravity="end"
 						android:text="0 HARV"
 						android:textStyle="bold"
 						android:textSize="14sp" />
@@ -804,7 +815,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:gravity="center_vertical"
-					android:orientation="horizontal" android:minHeight="50dp">
+					android:orientation="horizontal" android:minHeight="58dp">
 					<ImageView
 						android:layout_width="20dp"
 						android:layout_height="20dp"
@@ -823,6 +834,10 @@
 						android:id="@+id/tv_pool_total"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
+						android:maxWidth="150dp"
+						android:maxLines="1"
+						android:ellipsize="end"
+						android:gravity="end"
 						android:text="0 HARV"
 						android:textStyle="bold"
 						android:textSize="14sp" />
@@ -832,7 +847,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:gravity="center_vertical"
-					android:orientation="horizontal" android:minHeight="50dp">
+					android:orientation="horizontal" android:minHeight="58dp">
 					<ImageView
 						android:layout_width="20dp"
 						android:layout_height="20dp"

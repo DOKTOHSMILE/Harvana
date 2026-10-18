@@ -946,10 +946,11 @@ public class GroupDetailsActivity extends AppCompatActivity {
         runOnUiThread(() -> com.harvana.app.group.CoinLogo.show(findViewById(R.id.imageview11),
                 finalCoin));
         if (com.harvana.app.husd.Stable.isStable(coin)) {
-            return com.harvana.app.husd.HusdClient.format(raw) + " "
+            double human = raw / (double) com.harvana.app.husd.HusdClient.UNIT;
+            return com.harvana.app.wallet.BalanceFormatter.card(human) + " "
                     + com.harvana.app.husd.Stable.symbol(coin);
         }
-        String display = com.harvana.app.wallet.BalanceFormatter.smart(raw / 100_000_000.0);
+        String display = com.harvana.app.wallet.BalanceFormatter.card(raw / 100_000_000.0);
         if (coin.isEmpty())
             return display;
         String symbol = _assetSymbol(coin);
@@ -976,11 +977,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
      */
     private String _formatFiatFallback(double amountHarv) {
         if (com.harvana.app.husd.Stable.isStable(groupAsset)) {
-            long raw = (long) (amountHarv * 100_000_000.0);
-            return com.harvana.app.husd.HusdClient.format(raw) + " "
+            return com.harvana.app.wallet.BalanceFormatter.card(amountHarv) + " "
                     + com.harvana.app.husd.Stable.symbol(groupAsset);
         }
-        String display = com.harvana.app.wallet.BalanceFormatter.smart(amountHarv);
+        String display = com.harvana.app.wallet.BalanceFormatter.card(amountHarv);
         String symbol = _assetSymbol(groupAsset);
         return display.endsWith(" " + symbol) ? display : display + " " + symbol;
     }
@@ -1087,8 +1087,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
                                         new com.harvana.app.husd.HusdClient.Cb() {
                                             @Override
                                             public void ok(org.json.JSONObject b) {
-                                                final String text = com.harvana.app.husd.HusdClient
-                                                        .format(b.optLong("balanceRaw", 0L)) + " "
+                                                double human = b.optLong("balanceRaw", 0L)
+                                                        / (double) com.harvana.app.husd.HusdClient.UNIT;
+                                                final String text = com.harvana.app.wallet.BalanceFormatter
+                                                        .card(human) + " "
                                                         + com.harvana.app.husd.Stable.symbol(coin);
                                                 runOnUiThread(() -> {
                                                     if (tv_header_amount != null)

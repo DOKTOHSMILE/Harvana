@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 18 Oct 2026 — Home total, HARV in the asset list, group amounts
+
+- On startup the app prices every switched-on coin (HARV, stable coins, and the other coins) before a screen opens. Home's total waits for those prices instead of publishing a HARV-only figure. Opening Assets uses the prices already loaded.
+- HARV stays in the one asset list. It is no longer dropped while the other coins are sorted.
+- Group overview and group detail show large amounts as 10k or 1M so the cards stay on the screen. Asset rows and transaction rows are a little taller. A tap on a group history row opens the receipt again.
+
 ## 17 Oct 2026 — Email sign-in was sending a fake Firebase key
 
 - `res/values/secrets.xml` had `google_api_key` set to the literal `${GOOGLE_API_KEY}` and an old `google_app_id`. CodeAssist does not substitute that placeholder, so Firebase Auth answered "API key not valid".

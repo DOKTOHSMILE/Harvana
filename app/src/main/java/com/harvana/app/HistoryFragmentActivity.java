@@ -683,8 +683,9 @@ public class HistoryFragmentActivity extends Fragment {
 				});
 			}
 			
-			// Attach Click Listener to launch ReceiptActivity
-			h.itemView.setOnClickListener(v -> {
+			// The inner row is clickable, so a listener on the wrapper never fires.
+			View row = h.itemView.findViewById(R.id.cardview1);
+			(row != null ? row : h.itemView).setOnClickListener(v -> {
 				Intent intent = new Intent(v.getContext(), ReceiptActivity.class);
 				
 				intent.putExtra("txHash", txHash);

@@ -86,6 +86,24 @@ public final class BalanceFormatter {
     }
 
     /**
+     * A card has no room for a full figure. 10,000 and up is shown as 10k.
+     * 1,000,000 and up is shown as 1M. Smaller amounts stay exact.
+     */
+    public static String card(double amount) {
+        if (!Double.isFinite(amount)) return "0";
+        double a = Math.abs(amount);
+        if (a >= 1_000_000d) return trimCard(amount / 1_000_000d) + "M";
+        if (a >= 10_000d) return trimCard(amount / 1_000d) + "k";
+        return smartDecimal(amount);
+    }
+
+    private static String trimCard(double v) {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+        DecimalFormat df = new DecimalFormat(Math.abs(v) >= 100 ? "0" : "0.#", symbols);
+        return df.format(v);
+    }
+
+    /**
      * From raw units — convenience for direct node values.
      * Example: rawFull(150_000_000L) → "1.50000000 HARV"
      */

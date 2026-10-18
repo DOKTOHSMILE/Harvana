@@ -1268,8 +1268,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	// NEW UI FORMATTER HELPER
 	private String _formatUIBalance(double v) {
 		try {
-			java.text.DecimalFormat uiDf = new java.text.DecimalFormat(com.harvana.app.husd.Stable.isStable(groupCoin) ? "#,##0.##" : "#,##0.########", new java.text.DecimalFormatSymbols(java.util.Locale.US));
-			return uiDf.format(v) + " " + _coinSymbol();
+			return com.harvana.app.wallet.BalanceFormatter.card(v) + " " + _coinSymbol();
 		} catch (Exception e) {
 			return String.valueOf(v) + " " + _coinSymbol();
 		}

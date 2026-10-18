@@ -78,10 +78,14 @@ public class AssetFragmentActivity extends Fragment {
 	private double harvFiat;
 	private double chainFiat;
 	private double husdFiat;
+	/** True once that section has reported, including a genuine zero. */
+	private boolean chainReported;
+	private boolean husdReported;
 
 	/** hUSD's value in the chosen currency, from its row on the Assets list (HusdRow). */
 	public void setHusdFiat(double fiat) {
 		husdFiat = fiat;
+		husdReported = true;
 		if (getActivity() != null) getActivity().runOnUiThread(this::_paintTotal);
 	}
 
@@ -109,6 +113,8 @@ public class AssetFragmentActivity extends Fragment {
 		harvFiat = 0;
 		chainFiat = 0;
 		husdFiat = 0;
+		chainReported = false;
+		husdReported = false;
 		_updateActiveWalletLabel();
 		if (getActivity() != null) getActivity().runOnUiThread(this::_paintTotal);
 		return true;
@@ -371,6 +377,8 @@ public class AssetFragmentActivity extends Fragment {
 				harvFiat = 0;
 				chainFiat = 0;
 				husdFiat = 0;
+				chainReported = false;
+				husdReported = false;
 			}
 			com.harvana.app.wallet.FxRates.load(getContext(), this::_paintTotal);
 		}
@@ -616,6 +624,7 @@ public class AssetFragmentActivity extends Fragment {
 	
 	public void setChainFiat(double sum) {
 		chainFiat = sum;
+		chainReported = true;
 		if (getActivity() != null) getActivity().runOnUiThread(this::_paintTotal);
 	}
 
@@ -630,9 +639,16 @@ public class AssetFragmentActivity extends Fragment {
 		String symbol = com.harvana.app.wallet.FxRates.symbol(getContext());
 		shownSymbol = symbol;
 		double total = harvFiat + chainFiat + husdFiat;
-		tv_fiat_value.setText(com.harvana.app.wallet.FxRates.format(symbol, total));
-		// Home shows this same total (WalletTotal), so the two screens always agree.
-		com.harvana.app.wallet.WalletTotal.publish(getContext(), wallet_address, symbol, total);
+		// A section that has not reported yet must not replace the startup total
+		// (every switched-on coin) with the HARV-only figure.
+		double cached = com.harvana.app.wallet.WalletTotal.last(getContext(), wallet_address, symbol);
+		boolean rowsReady = chainReported && husdReported;
+		double shown = total;
+		if (!rowsReady && !Double.isNaN(cached) && cached > total) shown = cached;
+		tv_fiat_value.setText(com.harvana.app.wallet.FxRates.format(symbol, shown));
+		if (rowsReady) {
+			com.harvana.app.wallet.WalletTotal.publish(getContext(), wallet_address, symbol, total);
+		}
 		if (textview10 != null) {
 			String code = com.harvana.app.wallet.FiatValueHelper.symbolToCurrencyCode(symbol);
 			textview10.setText("TOTAL BALANCE · " + code);
@@ -667,6 +683,8 @@ public class AssetFragmentActivity extends Fragment {
 				harvFiat = 0;
 				chainFiat = 0;
 				husdFiat = 0;
+				chainReported = false;
+				husdReported = false;
 				shownSymbol = currencies[which][0];
 				_paintTotal();
 				dialog.dismiss();

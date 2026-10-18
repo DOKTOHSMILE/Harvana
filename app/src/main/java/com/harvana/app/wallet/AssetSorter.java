@@ -136,8 +136,6 @@ public final class AssetSorter {
                 real.add(k);
                 if (r.getVisibility() != View.VISIBLE) continue;
                 Entry e = fromRow(r);
-                // Drop the native HARV row: it duplicates the HARV card the rest of the list already shows.
-                if ("HARV".equals(e.priceKey)) continue;
                 e.order = n++;
                 entries.add(e);
             }
@@ -147,7 +145,6 @@ public final class AssetSorter {
             boolean hidden = com.harvana.app.utils.BalancePrivacy.isHidden(c);
             for (Entry e : saved) {
                 if (real.contains(e.key)) continue;           // its section has drawn it (or hidden it)
-                if ("HARV".equals(e.priceKey)) continue;       // drop the saved HARV copy for the same reason
                 e.order = n++;
                 if (hidden) { e.balance = "\u2022\u2022\u2022\u2022"; e.value = "\u2022\u2022\u2022\u2022"; }
                 entries.add(e);

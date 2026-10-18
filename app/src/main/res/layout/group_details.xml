@@ -131,9 +131,11 @@
 									android:textSize="11sp" />
 								<TextView
 									android:id="@+id/tv_header_amount"
-									android:layout_width="wrap_content"
+									android:layout_width="match_parent"
 									android:layout_height="wrap_content"
 									android:layout_marginTop="2dp"
+									android:maxLines="1"
+									android:ellipsize="end"
 									android:text="0 HARV"
 									android:textStyle="bold"
 									android:textColor="@color/colorTextPrimary"

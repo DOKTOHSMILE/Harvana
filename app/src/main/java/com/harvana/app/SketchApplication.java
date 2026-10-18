@@ -52,6 +52,20 @@ public class SketchApplication extends Application {
             Log.e(TAG, "Failed to load CustomAssets", t);
         }
 
+        // Price every coin the wallet shows before any screen opens, so Home's total
+        // and the Assets list are not waiting on the first time that list is drawn.
+        try {
+            com.harvana.app.wallet.AssetPrices.load(this, null);
+            com.harvana.app.wallet.FxRates.load(this, () -> {
+                String addr = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(SketchApplication.this);
+                if (addr != null && !addr.isEmpty()) {
+                    com.harvana.app.wallet.WalletTotal.refresh(SketchApplication.this, addr);
+                }
+            });
+        } catch (Throwable t) {
+            Log.e(TAG, "Price prefetch failed", t);
+        }
+
         // 2. Theming and UI appearance
         try {
             com.harvana.app.utils.ThemeManager.applySavedTheme(this);

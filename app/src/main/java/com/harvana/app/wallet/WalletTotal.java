@@ -48,17 +48,28 @@ public final class WalletTotal {
      * card is right at once instead of waiting until Assets has been opened.
      */
     public static void refresh(Context ctx, String address) {
+        refresh(ctx, address, 0);
+    }
+
+    private static void refresh(Context ctx, String address, int attempt) {
         if (ctx == null || address == null || address.isEmpty() || !refreshing.add(address)) return;
         final Context c = ctx.getApplicationContext();
         final String symbol = FxRates.symbol(c);
         final double[] parts = new double[3];             // HARV, stable coins, other coins
         final java.util.concurrent.atomic.AtomicInteger left = new java.util.concurrent.atomic.AtomicInteger(3);
         final boolean[] harvFailed = {false};
+        final boolean[] stablesFailed = {false};
+        final boolean[] pricesMissing = {false};
         final Runnable partDone = () -> {
             if (left.decrementAndGet() > 0) return;
             refreshing.remove(address);
-            // Without the HARV balance the sum would be too low; keep the last total rather than show a wrong one.
-            if (!harvFailed[0]) publish(c, address, symbol, parts[0] + parts[1] + parts[2]);
+            if (pricesMissing[0] && attempt < 3) {
+                main.postDelayed(() -> refresh(c, address, attempt + 1), 2000);
+                return;
+            }
+            // A failed piece would publish a total that is too low and overwrite the real one.
+            if (harvFailed[0] || stablesFailed[0]) return;
+            publish(c, address, symbol, parts[0] + parts[1] + parts[2]);
         };
         FxRates.load(c, () -> {
             // 1. HARV
@@ -96,7 +107,7 @@ public final class WalletTotal {
                         });
                     }
                 }
-                @Override public void fail(String e) { partDone.run(); }
+                @Override public void fail(String e) { stablesFailed[0] = true; partDone.run(); }
             });
             // 3. other coins shown on Assets (network calls: off the main thread)
             AssetPrices.load(c, () -> new Thread(() -> {
@@ -108,19 +119,19 @@ public final class WalletTotal {
                         String a = addrs.get(coin.key);
                         if (a == null || a.isEmpty()) continue;
                         AssetPrices.Quote q = AssetPrices.peek(c, coin.key);
-                        if (q == null) continue;
                         Double held = AssetPrices.amount(ChainBalances.assetBalance(coin.key, a));
                         if (held == null || held <= 0) continue;
+                        if (q == null || q.usd <= 0) { pricesMissing[0] = true; continue; }
                         double fiat = FxRates.fiat(c, held * q.usd);
                         if (!Double.isNaN(fiat)) sum += fiat;
                     }
                     for (CoinCatalog.Coin coin : CoinCatalog.addedCoins()) {           // chains and tokens the person added
-                        AssetPrices.Quote q = AssetPrices.peek(c, coin.key);
-                        if (q == null) continue;
                         String a = CustomAssets.address(c, address, coin.added);
                         if (a == null || a.isEmpty()) continue;
                         Double held = AssetPrices.amount(ChainBalances.assetBalance(coin.key, a));
                         if (held == null || held <= 0) continue;
+                        AssetPrices.Quote q = AssetPrices.peek(c, coin.key);
+                        if (q == null || q.usd <= 0) { pricesMissing[0] = true; continue; }
                         double fiat = FxRates.fiat(c, held * q.usd);
                         if (!Double.isNaN(fiat)) sum += fiat;
                     }

@@ -241,12 +241,12 @@ public final class AssetSorter {
         View row = LayoutInflater.from(c).inflate(R.layout.coin_list_card, shown, false);
         h.card = row;
         h.icon = (ImageView) row.findViewById(R.id.iv_asset_logo);
-        h.ticker = (TextView) row.findViewById(R.id.tv_asset_name);  // row 1: asset name
+        h.chip = (TextView) row.findViewById(R.id.tv_asset_symbol);
+        h.ticker = (TextView) row.findViewById(R.id.tv_asset_name);
         h.balance = (TextView) row.findViewById(R.id.tv_asset_balance);
-        h.chip = (TextView) row.findViewById(R.id.tv_asset_symbol);   // row 2: symbol next to balance
         h.value = (TextView) row.findViewById(R.id.tv_asset_amount);
-        h.price = new TextView(c);                                    // unused, kept so existing code compiles
-        h.change = new TextView(c);
+        h.price = (TextView) row.findViewById(R.id.tv_asset_price);
+        h.change = (TextView) row.findViewById(R.id.tv_asset_change);
         h.divider = row.findViewById(R.id.asset_divider);
         // Tappable area is the row itself (not the divider underneath), the same as every other section.
         View tap = row.findViewById(R.id.cardview1);
@@ -266,11 +266,30 @@ public final class AssetSorter {
         else if (h.icon.getDrawable() == null) h.icon.setImageDrawable(savedIcon(e.priceKey));
         // Row 1: the name people read (e.g. "Harvana"); when the name is missing, fall back to the ticker.
         String displayName = (e.name != null && !e.name.isEmpty()) ? e.name : e.ticker;
+        String ticker = (e.ticker != null && !e.ticker.isEmpty()) ? e.ticker : e.priceKey;
+        set(h.chip, ticker);
         set(h.ticker, displayName);
-        // Row 2: balance · symbol on the left, value on the right.
         set(h.balance, e.balance);
-        set(h.chip, e.ticker);
         set(h.value, e.value);
+        paintMarket(h, e.priceKey);
+    }
+
+    /** Unit price, then the 24-hour change. Red when down, green when up. */
+    private void paintMarket(Holder h, String key) {
+        Double usd = key == null ? null : price.get(key);
+        if (h.price != null) set(h.price, usd == null || usd.isNaN() || usd <= 0 ? "—" : FxRates.money(c, usd));
+        if (h.change == null) return;
+        Double ch = key == null ? null : change.get(key);
+        int muted = c.getColor(R.color.colorTextSecondary);
+        if (ch == null || ch.isNaN()) {
+            set(h.change, "—");
+            h.change.setTextColor(muted);
+            return;
+        }
+        String sign = ch > 0 ? "+" : "";
+        set(h.change, sign + String.format(java.util.Locale.US, "%.2f%%", ch));
+        int color = ch < 0 ? R.color.colorError : ch > 0 ? R.color.colorSuccess : R.color.colorTextSecondary;
+        h.change.setTextColor(c.getColor(color));
     }
 
     /** Only touches the view when the text really changed (no relayout, no flicker). */

@@ -48,22 +48,30 @@ public final class SupportDesk {
     }
 
     public static void open(Context c, String subject, String body, Cb cb) {
+        open(c, subject, body, null, cb);
+    }
+
+    public static void open(Context c, String subject, String body, String image, Cb cb) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) { cb.fail("Sign in first."); return; }
+        boolean photo = image != null && !image.isEmpty();
+        if ((body == null || body.isEmpty()) && !photo) { cb.fail("Write a message"); return; }
         String address = WalletManager.getActiveWalletAddress(c);
         if (address == null) address = "";
         long now = System.currentTimeMillis();
+        String preview = body == null || body.isEmpty() ? "Photo" : body;
         Map<String, Object> ticket = new HashMap<>();
         ticket.put("ownerUid", user.getUid());
         ticket.put("ownerAddress", address);
         ticket.put("subject", subject);
         ticket.put("status", "OPEN");
-        ticket.put("lastMessage", body);
+        ticket.put("lastMessage", preview);
+        ticket.put("lastFrom", "MEMBER");
         ticket.put("updatedAt", now);
         ticket.put("createdAt", now);
         FirebaseFirestore.getInstance().collection("SUPPORT_TICKETS").add(ticket)
                 .addOnSuccessListener(ref -> {
-                    Map<String, Object> msg = message("MEMBER", user.getUid(), "", body, now);
+                    Map<String, Object> msg = message("MEMBER", user.getUid(), "", body == null ? "" : body, now, image);
                     ref.collection("messages").add(msg)
                             .addOnSuccessListener(m -> {
                                 try { cb.ok(new JSONObject().put("ticketId", ref.getId())); }
@@ -75,16 +83,24 @@ public final class SupportDesk {
     }
 
     public static void send(Context c, String ticketId, String body, Cb cb) {
+        send(c, ticketId, body, null, cb);
+    }
+
+    public static void send(Context c, String ticketId, String body, String image, Cb cb) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) { cb.fail("Sign in first."); return; }
+        boolean photo = image != null && !image.isEmpty();
+        if ((body == null || body.isEmpty()) && !photo) { cb.fail("Write a message"); return; }
         long now = System.currentTimeMillis();
+        String preview = body == null || body.isEmpty() ? "Photo" : body;
         Map<String, Object> patch = new HashMap<>();
-        patch.put("lastMessage", body);
+        patch.put("lastMessage", preview);
+        patch.put("lastFrom", "MEMBER");
         patch.put("updatedAt", now);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("SUPPORT_TICKETS").document(ticketId).update(patch)
                 .addOnSuccessListener(v -> db.collection("SUPPORT_TICKETS").document(ticketId)
-                        .collection("messages").add(message("MEMBER", user.getUid(), "", body, now))
+                        .collection("messages").add(message("MEMBER", user.getUid(), "", body == null ? "" : body, now, image))
                         .addOnSuccessListener(m -> {
                             try { cb.ok(new JSONObject().put("ticketId", ticketId)); }
                             catch (Exception ex) { cb.fail("Sent."); }
@@ -103,9 +119,14 @@ public final class SupportDesk {
                         if (snap != null) for (QueryDocumentSnapshot doc : snap) {
                             String from = String.valueOf(doc.get("from"));
                             String name = doc.getString("staffName");
+                            String image = doc.getString("image");
                             messages.put(new JSONObject()
+                                    .put("id", doc.getId())
+                                    .put("side", from)
                                     .put("from", "STAFF".equals(from) ? (name == null || name.isEmpty() ? "Support" : name) : "You")
-                                    .put("body", String.valueOf(doc.get("body"))));
+                                    .put("body", String.valueOf(doc.get("body") == null ? "" : doc.get("body")))
+                                    .put("image", image == null ? "" : image)
+                                    .put("at", doc.get("at") == null ? 0 : doc.get("at")));
                         }
                         cb.ok(new JSONObject().put("messages", messages));
                     } catch (Exception ex) {
@@ -114,13 +135,41 @@ public final class SupportDesk {
                 });
     }
 
-    private static Map<String, Object> message(String from, String uid, String staffName, String body, long at) {
+    private static Map<String, Object> message(String from, String uid, String staffName, String body, long at, String image) {
         Map<String, Object> msg = new HashMap<>();
         msg.put("from", from);
         msg.put("uid", uid);
-        msg.put("body", body);
+        msg.put("body", body == null ? "" : body);
         msg.put("at", at);
         if (staffName != null && !staffName.isEmpty()) msg.put("staffName", staffName);
+        if (image != null && !image.isEmpty()) msg.put("image", image);
         return msg;
+    }
+
+    private static com.google.firebase.firestore.ListenerRegistration watchReg;
+    private static final java.util.Map<String, Long> seenTicket = new java.util.HashMap<>();
+    private static boolean watchPrimed;
+
+    /** Notifies this phone when support replies, including after the chat screen is closed. */
+    public static void watchReplies(Context c) {
+        Context app = c.getApplicationContext();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || watchReg != null) return;
+        watchReg = FirebaseFirestore.getInstance().collection("SUPPORT_TICKETS")
+                .whereEqualTo("ownerUid", user.getUid())
+                .addSnapshotListener((snap, e) -> {
+                    if (e != null || snap == null) return;
+                    boolean first = !watchPrimed;
+                    watchPrimed = true;
+                    for (QueryDocumentSnapshot doc : snap) {
+                        long at = doc.getLong("updatedAt") == null ? 0L : doc.getLong("updatedAt");
+                        Long prev = seenTicket.put(doc.getId(), at);
+                        if (first || prev == null || at <= prev) continue;
+                        if (!"STAFF".equals(String.valueOf(doc.get("lastFrom")))) continue;
+                        String preview = String.valueOf(doc.get("lastMessage") == null ? "New reply" : doc.get("lastMessage"));
+                        com.harvana.app.notify.NotificationCenter.post(app, com.harvana.app.notify.NotificationCenter.SYSTEM,
+                                "support|" + doc.getId() + "|" + at, "Support", preview, "", -1);
+                    }
+                });
     }
 }

@@ -73,6 +73,12 @@ public final class NotificationRouter {
                 return main(c, "groups");
             case NotificationCenter.SYSTEM:
                 if (id.startsWith("learn_")) return main(c, "learn");
+                if (id.startsWith("support|")) {
+                    String rest = id.substring("support|".length());
+                    int bar = rest.indexOf('|');
+                    String ticket = bar < 0 ? rest : rest.substring(0, bar);
+                    return new Intent(c, com.harvana.app.SupportChatActivity.class).putExtra("ticketId", ticket);
+                }
                 break;
             default:
                 break;

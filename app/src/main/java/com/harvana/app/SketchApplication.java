@@ -55,6 +55,13 @@ public class SketchApplication extends Application {
         // Price every coin the wallet shows before any screen opens, so Home's total
         // and the Assets list are not waiting on the first time that list is drawn.
         try {
+            com.google.firebase.auth.FirebaseAuth.getInstance().addAuthStateListener(auth -> {
+                if (auth.getCurrentUser() != null) com.harvana.app.support.SupportDesk.watchReplies(this);
+            });
+        } catch (Throwable t) {
+            Log.e(TAG, "Support watch failed", t);
+        }
+        try {
             com.harvana.app.wallet.AssetPrices.load(this, null);
             com.harvana.app.wallet.FxRates.load(this, () -> {
                 String addr = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(SketchApplication.this);

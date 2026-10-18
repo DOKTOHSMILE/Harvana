@@ -1,36 +1,51 @@
 package com.harvana.app;
 
+import android.app.Dialog;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.harvana.app.support.ChatPhoto;
 import com.harvana.app.support.SupportDesk;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-/** A member's chat with support. Every message is signed by the wallet on this phone. */
+/** A member's chat with support. */
 public class SupportChatActivity extends AppCompatActivity {
 
     private EditText subject, body;
-    private TextView status;
+    private TextView status, photoReady;
+    private RecyclerView list;
     private final Rows adapter = new Rows();
     private String ticketId = "";
+    private String pendingPhoto = "";
     private com.google.firebase.firestore.ListenerRegistration ticketsReg;
     private com.google.firebase.firestore.ListenerRegistration threadReg;
+    private final ActivityResultLauncher<String> pickPhoto = registerForActivityResult(
+            new ActivityResultContracts.GetContent(), this::onPhoto);
 
     @Override
     protected void onDestroy() {
@@ -51,15 +66,45 @@ public class SupportChatActivity extends AppCompatActivity {
         subject = findViewById(R.id.support_subject);
         body = findViewById(R.id.support_body);
         status = findViewById(R.id.support_status);
-        RecyclerView list = findViewById(R.id.support_list);
-        list.setLayoutManager(new LinearLayoutManager(this));
+        photoReady = findViewById(R.id.support_photo_ready);
+        list = findViewById(R.id.support_list);
+        LinearLayoutManager lm = new LinearLayoutManager(this);
+        lm.setStackFromEnd(true);
+        list.setLayoutManager(lm);
         list.setAdapter(adapter);
         findViewById(R.id.support_send).setOnClickListener(v -> send());
+        findViewById(R.id.support_photo).setOnClickListener(v -> pickPhoto.launch("image/*"));
+        photoReady.setOnClickListener(v -> {
+            pendingPhoto = "";
+            photoReady.setVisibility(View.GONE);
+        });
         status.setText("Your conversations");
+        String opened = getIntent() == null ? "" : getIntent().getStringExtra("ticketId");
+        if (opened != null && !opened.isEmpty()) {
+            ticketId = opened;
+            load();
+        }
+        try { SupportDesk.watchReplies(this); } catch (Throwable ignored) {}
         ticketsReg = SupportDesk.mine(this, new SupportDesk.Cb() {
             @Override public void ok(JSONObject json) { runOnUiThread(() -> { if (ticketId.isEmpty()) showTickets(json.optJSONArray("tickets")); }); }
             @Override public void fail(String error) { runOnUiThread(() -> status.setText(plain(error))); }
         });
+    }
+
+    private void onPhoto(Uri uri) {
+        if (uri == null) return;
+        new Thread(() -> {
+            try {
+                String jpeg = ChatPhoto.jpeg(this, uri);
+                runOnUiThread(() -> {
+                    if (jpeg.isEmpty()) { toast("That photo could not be read."); return; }
+                    pendingPhoto = jpeg;
+                    photoReady.setVisibility(View.VISIBLE);
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> toast("That photo could not be read."));
+            }
+        }, "support-photo").start();
     }
 
     private void showTickets(JSONArray tickets) {
@@ -74,15 +119,16 @@ public class SupportChatActivity extends AppCompatActivity {
 
     private void send() {
         String text = body.getText() == null ? "" : body.getText().toString().trim();
-        if (text.isEmpty()) { body.setError("Write a message"); return; }
+        String photo = pendingPhoto;
+        if (text.isEmpty() && photo.isEmpty()) { body.setError("Write a message"); return; }
         if (ticketId.isEmpty()) {
             String about = subject.getText() == null ? "" : subject.getText().toString().trim();
             if (about.isEmpty()) { subject.setError("Say what this is about"); return; }
-            SupportDesk.open(this, about, text, new SupportDesk.Cb() {
+            SupportDesk.open(this, about, text, photo, new SupportDesk.Cb() {
                 @Override public void ok(JSONObject json) {
                     runOnUiThread(() -> {
                         ticketId = json.optString("ticketId", "");
-                        body.setText("");
+                        clearComposer();
                         status.setText("Sent. Ticket " + ticketId);
                         load();
                     });
@@ -91,10 +137,16 @@ public class SupportChatActivity extends AppCompatActivity {
             });
             return;
         }
-        SupportDesk.send(this, ticketId, text, new SupportDesk.Cb() {
-            @Override public void ok(JSONObject json) { runOnUiThread(() -> { body.setText(""); load(); }); }
+        SupportDesk.send(this, ticketId, text, photo, new SupportDesk.Cb() {
+            @Override public void ok(JSONObject json) { runOnUiThread(() -> { clearComposer(); load(); }); }
             @Override public void fail(String error) { runOnUiThread(() -> toast(error)); }
         });
+    }
+
+    private void clearComposer() {
+        body.setText("");
+        pendingPhoto = "";
+        photoReady.setVisibility(View.GONE);
     }
 
     private void load() {
@@ -112,6 +164,7 @@ public class SupportChatActivity extends AppCompatActivity {
                     }
                     adapter.set(rows, false);
                     status.setText("Ticket " + ticketId);
+                    if (!rows.isEmpty()) list.scrollToPosition(rows.size() - 1);
                 });
             }
             @Override public void fail(String error) { runOnUiThread(() -> toast(error)); }
@@ -129,6 +182,17 @@ public class SupportChatActivity extends AppCompatActivity {
         return error.length() > 180 ? error.substring(0, 180) : error;
     }
 
+    private void showPhoto(String b64) {
+        Bitmap bmp = ChatPhoto.decode(b64);
+        if (bmp == null) return;
+        Dialog d = new Dialog(this);
+        ImageView iv = new ImageView(this);
+        iv.setImageBitmap(bmp);
+        iv.setAdjustViewBounds(true);
+        d.setContentView(iv);
+        d.show();
+    }
+
     private class Rows extends RecyclerView.Adapter<Rows.VH> {
         private final List<JSONObject> items = new ArrayList<>();
         private boolean tickets;
@@ -139,29 +203,63 @@ public class SupportChatActivity extends AppCompatActivity {
             notifyDataSetChanged();
         }
         @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            TextView tv = new TextView(parent.getContext());
-            int pad = (int) (16 * parent.getResources().getDisplayMetrics().density);
-            tv.setPadding(pad, pad, pad, pad);
-            tv.setTextColor(0xFF1C1917);
-            tv.setTextSize(15);
-            return new VH(tv);
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_support_bubble, parent, false);
+            return new VH(v);
         }
-        @Override public void onBindViewHolder(@NonNull VH holder, int position) {
+        @Override public void onBindViewHolder(@NonNull VH h, int position) {
             JSONObject row = items.get(position);
-            TextView tv = (TextView) holder.itemView;
             if (tickets) {
-                tv.setText(row.optString("subject", "Conversation") + "\n" + row.optString("lastMessage", ""));
-                tv.setOnClickListener(v -> {
+                paint(h, false, row.optString("subject", "Conversation"), row.optString("lastMessage", ""), "", 0);
+                h.itemView.setOnClickListener(v -> {
                     ticketId = row.optString("ticketId", "");
                     load();
                 });
+                return;
+            }
+            boolean mine = "MEMBER".equals(row.optString("side")) || "You".equals(row.optString("from"));
+            paint(h, mine, row.optString("from"), row.optString("body", ""), row.optString("image", ""), row.optLong("at"));
+            h.itemView.setOnClickListener(null);
+        }
+        private void paint(VH h, boolean mine, String who, String text, String image, long at) {
+            int ink = getColor(mine ? R.color.colorTextOnAccent : R.color.colorTextPrimary);
+            int mute = getColor(mine ? R.color.colorTextOnAccentMuted : R.color.colorTextSecondary);
+            h.bubble.setBackgroundResource(mine ? R.drawable.bg_bubble_mine : R.drawable.bg_bubble_theirs);
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) h.bubble.getLayoutParams();
+            lp.gravity = mine ? Gravity.END : Gravity.START;
+            h.bubble.setLayoutParams(lp);
+            h.who.setText(who);
+            h.who.setTextColor(mute);
+            h.body.setText(text);
+            h.body.setTextColor(ink);
+            h.body.setVisibility(text == null || text.isEmpty() ? View.GONE : View.VISIBLE);
+            h.time.setTextColor(mute);
+            h.time.setText(at > 0 ? DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(at)) : "");
+            if (image == null || image.isEmpty()) {
+                h.image.setVisibility(View.GONE);
+                h.image.setImageDrawable(null);
+                h.image.setOnClickListener(null);
             } else {
-                String who = row.optString("from");
-                tv.setText(who + "\n" + row.optString("body", ""));
-                tv.setOnClickListener(null);
+                h.image.setVisibility(View.VISIBLE);
+                h.image.setImageDrawable(null);
+                h.image.setTag(image);
+                h.image.setOnClickListener(v -> showPhoto(image));
+                new Thread(() -> {
+                    Bitmap bmp = ChatPhoto.decode(image);
+                    h.image.post(() -> { if (image.equals(h.image.getTag())) h.image.setImageBitmap(bmp); });
+                }, "support-decode").start();
             }
         }
         @Override public int getItemCount() { return items.size(); }
-        class VH extends RecyclerView.ViewHolder { VH(View v) { super(v); } }
+        class VH extends RecyclerView.ViewHolder {
+            final View bubble; final TextView who, body, time; final ImageView image;
+            VH(View v) {
+                super(v);
+                bubble = v.findViewById(R.id.bubble);
+                who = v.findViewById(R.id.bubble_who);
+                body = v.findViewById(R.id.bubble_body);
+                time = v.findViewById(R.id.bubble_time);
+                image = v.findViewById(R.id.bubble_image);
+            }
+        }
     }
 }

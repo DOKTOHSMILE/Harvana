@@ -15,38 +15,78 @@
 		android:id="@+id/support_status"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:padding="16dp"
-		android:textColor="@color/colorTextPrimary"
-		android:textSize="14sp" />
-
-	<androidx.recyclerview.widget.RecyclerView
-		android:id="@+id/support_list"
-		android:layout_width="match_parent"
-		android:layout_height="0dp"
-		android:layout_weight="1" />
+		android:paddingStart="16dp"
+		android:paddingEnd="16dp"
+		android:paddingTop="10dp"
+		android:paddingBottom="6dp"
+		android:textColor="@color/colorTextSecondary"
+		android:textSize="13sp" />
 
 	<EditText
 		android:id="@+id/support_subject"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
+		android:layout_marginStart="12dp"
+		android:layout_marginEnd="12dp"
+		android:background="@drawable/bg_bubble_theirs"
 		android:hint="What is this about?"
 		android:inputType="textCapSentences"
 		android:maxLength="120"
-		android:padding="12dp" />
+		android:padding="12dp"
+		android:textColor="@color/colorTextPrimary"
+		android:textColorHint="@color/colorTextTertiary" />
 
-	<EditText
-		android:id="@+id/support_body"
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/support_list"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:clipToPadding="false"
+		android:paddingTop="8dp"
+		android:paddingBottom="8dp" />
+
+	<TextView
+		android:id="@+id/support_photo_ready"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:hint="Message"
-		android:inputType="textCapSentences|textMultiLine"
-		android:maxLength="2000"
-		android:padding="12dp" />
+		android:paddingStart="16dp"
+		android:paddingEnd="16dp"
+		android:text="Photo ready"
+		android:textColor="@color/colorAccent"
+		android:textSize="12sp"
+		android:visibility="gone" />
 
-	<com.google.android.material.button.MaterialButton
-		android:id="@+id/support_send"
+	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_margin="12dp"
-		android:text="Send" />
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:padding="8dp">
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/support_photo"
+			style="@style/Widget.MaterialComponents.Button.TextButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Photo"
+			android:textAllCaps="false" />
+		<EditText
+			android:id="@+id/support_body"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:background="@drawable/bg_bubble_theirs"
+			android:hint="Message"
+			android:inputType="textCapSentences|textMultiLine"
+			android:maxLength="2000"
+			android:maxLines="4"
+			android:padding="12dp"
+			android:textColor="@color/colorTextPrimary"
+			android:textColorHint="@color/colorTextTertiary" />
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/support_send"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="8dp"
+			android:text="Send" />
+	</LinearLayout>
 </LinearLayout>

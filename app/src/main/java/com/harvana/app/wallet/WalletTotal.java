@@ -47,8 +47,8 @@ public final class WalletTotal {
         try { return Double.parseDouble(p.getString(address + ":fiat", "NaN")); } catch (Exception e) { return Double.NaN; }
     }
 
-    /** How long Home may show the saved total while it works the live one out. */
-    public static final long HOME_MAX_AGE_MS = 30L * 60_000L;
+    /** How long Home may show the saved total while it works the live one out (seconds, as a rule). */
+    public static final long HOME_MAX_AGE_MS = 24L * 3_600_000L;
     /** How long Assets may hold the saved total up while its rows are still reporting. */
     public static final long ASSETS_MAX_AGE_MS = 2L * 60_000L;
 
@@ -75,8 +75,15 @@ public final class WalletTotal {
         final boolean[] harvFailed = {false};
         final boolean[] stablesFailed = {false};
         final boolean[] pricesMissing = {false};
+        final boolean[] othersDone = {false};
         final Runnable partDone = () -> {
-            if (left.decrementAndGet() > 0) return;
+            int remaining = left.decrementAndGet();
+            // HARV and the Harvana coins are in (they are most of a wallet), but the other chains are still answering:
+            // show that much now rather than nothing, and the full total when the rest arrives.
+            if (remaining == 1 && !othersDone[0] && !harvFailed[0] && !stablesFailed[0]) {
+                publish(c, address, symbol, parts[0] + parts[1]);
+            }
+            if (remaining > 0) return;
             refreshing.remove(address);
             if (pricesMissing[0] && attempt < 3) {
                 main.postDelayed(() -> refresh(c, address, attempt + 1), 2000);
@@ -152,7 +159,7 @@ public final class WalletTotal {
                     }
                 } catch (Exception ignored) { }
                 parts[2] = sum;
-                main.post(partDone);
+                main.post(() -> { othersDone[0] = true; partDone.run(); });
             }, "wallet-total").start());
         });
     }

@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026: Home total right away on opening
+
+- Home: the last total shows at once (if it is less than a day old), then the live total of HARV and the Harvana coins within seconds, then the full total once the other chains (SOL, BTC, added tokens) have answered. Before, it waited for every chain before showing anything new.
+
 ## 19 Oct 2026: Total balance never shows an old figure; added coins show their price on Assets
 
 - Total balance: Home shows the saved total only if it was worked out in the last 30 minutes ("—" until the live total otherwise); Assets holds it up for at most 2 minutes while its rows load. Before, a total from days earlier could stay on screen (a $443,047.82 total from before HARV moved into pools and groups).

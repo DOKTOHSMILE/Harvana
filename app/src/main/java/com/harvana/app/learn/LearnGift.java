@@ -18,12 +18,26 @@ import java.math.BigDecimal;
  * posted. Older articles, which have no wallet of their own, still pay the wallet linked on that person's profile.
  * It is a normal signed transfer, with a LEARN_GIFT memo so the node can count it as real engagement. The reader must
  * confirm with their PIN or biometric first, like any payment.
+ *
+ * <p>Harvana's share (owner, 19 Oct 2026): 5% of the gift goes to the company treasury in a second transfer
+ * ({@code HARVANA_SERVICE:LEARN_GIFT:<contentId>}); the author gets 95%. The reader pays the gift amount.
  */
 public final class LearnGift {
     private LearnGift() {}
 
     private static final String[] LABELS = {"0.1 HARV", "0.5 HARV", "1 HARV", "5 HARV"};
     private static final String[] AMOUNTS = {"0.1", "0.5", "1", "5"};
+
+    /** The node's company treasury: "HV0x" + doubleSha256("PROTOCOL_COMPANY_TREASURY")[0..40]. */
+    public static final String TREASURY = "HV0x5ce3ef914c96f22e630c6b4b73aaceef1ec5f49a";
+    /** Harvana's share of a gift, in basis points (5%). */
+    static final int SHARE_BPS = 500;
+
+    /** {harvana share, author part} of a gift, 8 decimals, the share rounded down. */
+    static BigDecimal[] split(BigDecimal gift) {
+        BigDecimal share = gift.multiply(BigDecimal.valueOf(SHARE_BPS)).divide(BigDecimal.valueOf(10_000), 8, java.math.RoundingMode.DOWN);
+        return new BigDecimal[]{share, gift.subtract(share)};
+    }
 
     public static void ask(Activity host, String contentId, ProfileTrust.Card poster) { ask(host, contentId, poster, null, null); }
 
@@ -50,12 +64,23 @@ public final class LearnGift {
     }
 
     private static void confirm(Activity host, String contentId, String dest, String me, String who, String amount, Runnable onGifted) {
+        BigDecimal[] parts = split(new BigDecimal(amount));
+        String authorPart = parts[1].stripTrailingZeros().toPlainString();
         PinPromptHelper.authorize(host, "Send a gift of " + amount + " HARV to " + who + ".", () ->
-                TransactionRouter.routeTransaction(host, me, dest, new BigDecimal(amount), null,
+                TransactionRouter.routeTransaction(host, me, dest, parts[1], null,
                         EngagementCanonical.giftMemo(contentId), new TransactionRouter.RouterCallback() {
                             @Override public void onSuccess(String txHash) {
                                 toast(host, "Gift sent to " + who + ". Thank you.");
-                                LearnSocial.recordGift(contentId, txHash, amount, dest, (ok, err) -> { if (ok && onGifted != null) host.runOnUiThread(onGifted); });
+                                LearnSocial.recordGift(contentId, txHash, authorPart, dest, (ok, err) -> { if (ok && onGifted != null) host.runOnUiThread(onGifted); });
+                                if (parts[0].signum() > 0) {
+                                    TransactionRouter.routeTransaction(host, me, TREASURY, parts[0], null,
+                                            "HARVANA_SERVICE:LEARN_GIFT:" + contentId, new TransactionRouter.RouterCallback() {
+                                                @Override public void onSuccess(String h) { }
+                                                @Override public void onError(String code, String msg) {
+                                                    android.util.Log.w("LearnGift", "Harvana share not sent: " + code);
+                                                }
+                                            });
+                                }
                             }
                             @Override public void onError(String code, String msg) { toast(host, msg == null || msg.isEmpty() ? "The gift could not be sent." : msg); }
                         }));

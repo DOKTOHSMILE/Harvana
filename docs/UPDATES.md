@@ -2,6 +2,10 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026: Learn Hub gifts share 5% with Harvana
+
+- A gift now goes 95% to the author and 5% to the Harvana treasury, in two transfers. The reader pays the gift amount and the tFare of each transfer.
+
 ## 19 Oct 2026: v2 payments signed safely
 
 - Every payment template from the node is checked before signing: chain, version, your wallet as sender, a valid receiver, HARV, amount, tFare cap, expiry, and that the payment type matches its memo. A template that fails is not signed.

@@ -87,6 +87,7 @@ public class DappBrowserActivity extends AppCompatActivity {
     private String account;                     // the active wallet's EVM address, once derived
     private String hvAccount;                   // the active wallet's Harvana address
     private String solAccount;                  // the active wallet's Solana address, once derived
+    private boolean solShown;                   // the network chip shows Solana (its wallet is on every page either way)
     private BrowserBar nav;
     private LoadingPill pill;
     private ImageView favicon;
@@ -615,6 +616,7 @@ public class DappBrowserActivity extends AppCompatActivity {
     private static int chainIcon(String key) {
         switch (key) {
             case "HARV": return R.drawable.ic_harv_coin;
+            case "SOL": return R.drawable.ic_coin_sol;
             case "BNB": return R.drawable.ic_coin_bnb;
             case "POL": return R.drawable.ic_coin_pol;
             case "BASE": return R.drawable.ic_coin_base;
@@ -628,8 +630,8 @@ public class DappBrowserActivity extends AppCompatActivity {
     }
 
     private void paintChain() {
-        String key = harvanaShown ? "HARV" : chainKey;
-        chainChip.setText(harvanaShown ? "Harvana" : shortName(net().name));
+        String key = solShown ? "SOL" : harvanaShown ? "HARV" : chainKey;
+        chainChip.setText(solShown ? SolSigner.networkName() : harvanaShown ? "Harvana" : shortName(net().name));
         android.graphics.drawable.Drawable icon = androidx.core.content.ContextCompat.getDrawable(this, chainIcon(key));
         android.graphics.drawable.Drawable arrow = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.icon_keyboard_arrow_down_round_line);
         if (icon != null) icon.setBounds(0, 0, dp(24), dp(24));
@@ -660,10 +662,11 @@ public class DappBrowserActivity extends AppCompatActivity {
         title.setPadding(dp(4), 0, 0, dp(10));
         box.addView(title);
 
-        box.addView(chainRow(sheet, "HARV", "Harvana", "Harvana Protocol" + (hvAccount == null || hvAccount.isEmpty() ? "" : " · " + shortAddr(hvAccount)), harvanaShown));
+        box.addView(chainRow(sheet, "HARV", "Harvana", "Harvana Protocol" + (hvAccount == null || hvAccount.isEmpty() ? "" : " · " + shortAddr(hvAccount)), harvanaShown && !solShown));
+        box.addView(chainRow(sheet, "SOL", SolSigner.networkName(), "Solana" + (solAccount == null ? "" : " · " + shortAddr(solAccount)), solShown));
         for (String key : Web3Signer.CHAINS) {
             Net.Evm n = Web3Signer.net(key);
-            box.addView(chainRow(sheet, key, n.name, "Chain ID " + n.chainId + (account == null ? "" : " · " + shortAddr(account)), !harvanaShown && key.equals(chainKey)));
+            box.addView(chainRow(sheet, key, n.name, "Chain ID " + n.chainId + (account == null ? "" : " · " + shortAddr(account)), !solShown && !harvanaShown && key.equals(chainKey)));
         }
         for (com.harvana.app.wallet.CustomAssets.Asset a : com.harvana.app.wallet.CustomAssets.networks(this)) {
             String key = "C:" + a.chainId;
@@ -715,8 +718,9 @@ public class DappBrowserActivity extends AppCompatActivity {
         }
         row.setOnClickListener(v -> {
             sheet.dismiss();
-            if ("HARV".equals(key)) { harvanaShown = true; Web3Sites.setShowHarvana(this, true); paintChain(); }
-            else switchChain(key);
+            if ("SOL".equals(key)) { solShown = true; paintChain(); }
+            else if ("HARV".equals(key)) { solShown = false; harvanaShown = true; Web3Sites.setShowHarvana(this, true); paintChain(); }
+            else { solShown = false; switchChain(key); }
         });
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.bottomMargin = dp(6);

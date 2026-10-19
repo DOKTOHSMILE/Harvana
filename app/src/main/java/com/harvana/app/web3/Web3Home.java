@@ -24,7 +24,7 @@ public final class Web3Home {
     public static final String STAKE_URL = "https://harvannaprotocol.com/stake/";
     public static final String EXPLORER_URL = "https://harvannaprotocol.com/explorer/";
 
-    private static final String[] TABS = {"Harvana", "Featured", "DEX", "Lending", "Yield", "NFT"};
+    private static final String[] TABS = {"Harvana", "Featured", "DEX", "Solana", "Lending", "Yield", "NFT"};
     private static final String[][][] DAPPS = {
         { {"Harvana Swap", SWAP_URL}, {"Harvana Staking", STAKE_URL}, {"Harvana Explorer", EXPLORER_URL},
           {"Harvana Pools", SWAP_URL + "#pools"}, {"List a coin", SWAP_URL + "#list"} },
@@ -32,6 +32,9 @@ public final class Web3Home {
           {"1inch", "https://app.1inch.io"}, {"Lido", "https://stake.lido.fi"}, {"OpenSea", "https://opensea.io"} },
         { {"Uniswap", "https://app.uniswap.org"}, {"PancakeSwap", "https://pancakeswap.finance"}, {"SushiSwap", "https://www.sushi.com/swap"},
           {"Curve", "https://curve.fi"}, {"QuickSwap", "https://quickswap.exchange"}, {"Aerodrome", "https://aerodrome.finance"} },
+        { {"Jupiter", "https://jup.ag"}, {"Raydium", "https://raydium.io/swap"}, {"Orca", "https://www.orca.so"},
+          {"Marinade", "https://marinade.finance"}, {"Kamino", "https://app.kamino.finance"}, {"Drift", "https://app.drift.trade"},
+          {"Magic Eden", "https://magiceden.io"}, {"Tensor", "https://www.tensor.trade"} },
         { {"Aave", "https://app.aave.com"}, {"Compound", "https://app.compound.finance"}, {"Venus", "https://app.venus.io"},
           {"Spark", "https://app.spark.fi"} },
         { {"Lido", "https://stake.lido.fi"}, {"Yearn", "https://yearn.fi"}, {"Beefy", "https://app.beefy.com"},
@@ -55,6 +58,7 @@ public final class Web3Home {
         root = (LinearLayout) LayoutInflater.from(c).inflate(R.layout.view_web3_home, null, false);
         tabsBtn = root.findViewById(R.id.tv_web3_tabs);
         tabsBtn.setOnClickListener(v -> openTabs(c));
+        root.findViewById(R.id.iv_web3_walletconnect).setOnClickListener(v -> com.harvana.app.walletconnect.WalletConnectActivity.open(c, null));
         EditText q = root.findViewById(R.id.et_web3_search);
         q.setOnEditorActionListener((v, id, ev) -> {
             String t = q.getText().toString().trim();

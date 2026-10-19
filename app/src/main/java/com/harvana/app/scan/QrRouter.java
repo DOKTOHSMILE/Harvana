@@ -74,6 +74,7 @@ public final class QrRouter {
     /** Opens whatever the code is for. */
     public static void route(Activity a, String raw) {
         String t = raw == null ? "" : raw.trim();
+        if (t.startsWith("wc:")) { com.harvana.app.walletconnect.WalletConnectActivity.open(a, t); return; }   // a dApp's WalletConnect code
         WalletQr.Hit wallet = WalletQr.parse(t);
         switch (kindOf(t)) {
             case ACCESS_CARD:

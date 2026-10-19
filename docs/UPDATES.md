@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026 — WalletConnect and Solana in Web3
+
+- WalletConnect v2: connect Harvana to a dApp on a computer or another browser. Open it from Web3 (link icon next to search), the browser menu (WalletConnect), or scan the dApp's QR with any Harvana scanner; "wc:" links open it too.
+  - Connect sheet: dApp, site, networks, accounts. EVM chains in this wallet (built-in and added) and Solana.
+  - Every signature or transaction a connected dApp asks for shows the review sheet, then PIN or fingerprint: personal_sign, typed data v3/v4, eth_sendTransaction, wallet_switchEthereumChain, solana_signMessage / signTransaction / signAndSendTransaction / signAllTransactions. eth_sign is refused.
+  - Connected dApps are listed with Disconnect; connections last 7 days and reconnect when the app opens.
+  - Needs a WalletConnect (Reown Cloud) project ID: set `WalletConnect.PROJECT_ID` in the code, or paste it once on the WalletConnect screen. Until then the screen shows "Project ID needed".
+- Web3 home: a Solana tab (Jupiter, Raydium, Orca, Marinade, Kamino, Drift, Magic Eden, Tensor).
+- dApp browser Network sheet: Solana row with its address; the Solana wallet answers on every page.
+
 ## 19 Oct 2026 — Added chains and tokens work like built-in coins
 
 - Activity tab lists the transactions of every chain and token you added, next to HARV and the built-in coins.

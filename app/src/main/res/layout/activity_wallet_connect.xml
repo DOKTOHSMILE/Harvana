@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- WalletConnect: status, the project id (until set), a link or QR to pair, and the connected dApps. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground"
+	android:fillViewport="true">
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:padding="16dp">
+
+		<LinearLayout
+			android:id="@+id/wc_status"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical" />
+
+		<LinearLayout
+			android:id="@+id/wc_project_box"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:orientation="vertical"
+			android:visibility="gone">
+			<com.google.android.material.textfield.TextInputLayout
+				style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:hint="Project ID">
+				<com.google.android.material.textfield.TextInputEditText
+					android:id="@+id/wc_project_id"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:fontFamily="monospace"
+					android:inputType="text|textNoSuggestions"
+					android:maxLines="1"
+					android:textSize="13sp" />
+			</com.google.android.material.textfield.TextInputLayout>
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/wc_project_save"
+				style="@style/HarvanaButton"
+				android:layout_width="match_parent"
+				android:layout_height="52dp"
+				android:layout_marginTop="8dp"
+				android:text="Save" />
+		</LinearLayout>
+
+		<com.google.android.material.textfield.TextInputLayout
+			style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:hint="WalletConnect link (wc:…)">
+			<com.google.android.material.textfield.TextInputEditText
+				android:id="@+id/wc_uri"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:fontFamily="monospace"
+				android:inputType="text|textNoSuggestions"
+				android:maxLines="3"
+				android:textSize="12sp" />
+		</com.google.android.material.textfield.TextInputLayout>
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="8dp"
+			android:orientation="horizontal">
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/wc_scan"
+				style="@style/HarvanaButton.Outlined"
+				android:layout_width="0dp"
+				android:layout_height="52dp"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1"
+				android:text="Scan QR" />
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/wc_connect"
+				style="@style/HarvanaButton"
+				android:layout_width="0dp"
+				android:layout_height="52dp"
+				android:layout_weight="1"
+				android:text="Connect" />
+		</LinearLayout>
+
+		<TextView
+			android:id="@+id/wc_sessions_title"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="24dp"
+			android:paddingBottom="8dp"
+			android:textAllCaps="true"
+			android:textColor="@color/colorTextTertiary"
+			android:textSize="11sp"
+			android:textStyle="bold" />
+
+		<LinearLayout
+			android:id="@+id/wc_sessions"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical" />
+	</LinearLayout>
+</ScrollView>

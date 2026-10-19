@@ -98,6 +98,7 @@ public final class NetworkSheets {
             case "BNB": return R.drawable.ic_coin_bnb;
             case "POL": return R.drawable.ic_coin_pol;
             case "BASE": return R.drawable.ic_coin_base;
+            case "SOL": return R.drawable.ic_coin_sol;
             default: return 0;
         }
     }

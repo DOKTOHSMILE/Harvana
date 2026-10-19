@@ -85,6 +85,7 @@ public class SketchApplication extends Application {
         try {
             com.harvana.app.utils.BarMatcher.install(this);
             com.harvana.app.utils.ActivityTracker.install(this);
+            com.harvana.app.walletconnect.WalletConnect.install(this);   // reconnects connected dApps; prompts wait for a screen
             com.harvana.app.tx.PaymentTracker.install(this);
             com.harvana.app.utils.SmartCaps.install(this);
             com.harvana.app.utils.SmartSpacing.install(this);

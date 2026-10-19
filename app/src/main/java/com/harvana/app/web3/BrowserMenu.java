@@ -116,6 +116,7 @@ public final class BrowserMenu {
         tile(grid, R.drawable.ic_br_open, "Open outside", false, () -> { sheet.dismiss(); outside(url); });
         tile(grid, R.drawable.icon_info_round_line, "Page info", false, () -> { sheet.dismiss(); pageInfo(); });
         if (host.hasWallet()) tile(grid, R.drawable.ic_br_wallet, "Connected sites", false, () -> { sheet.dismiss(); sites(); });
+        tile(grid, R.drawable.icon_link_twotone_line, "WalletConnect", false, () -> { sheet.dismiss(); com.harvana.app.walletconnect.WalletConnectActivity.open(c, null); });
         tile(grid, R.drawable.ic_br_clean, "Clear data", false, () -> { sheet.dismiss(); clearData(); });
         tile(grid, R.drawable.ic_settings_line, "Settings", false, () -> { sheet.dismiss(); settings(); });
         box.addView(grid);

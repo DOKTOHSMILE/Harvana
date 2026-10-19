@@ -776,11 +776,13 @@ public final class CustomAssets {
     // ── a chain, typed in (Fill reads what it can) ─────────────────────────
 
     /** The chain form. {@code editing} is an added chain to change, or null for a new one. */
+    /** Edits a chain already added (Networks adds new ones). */
     public static void editChain(Context c, Asset editing, Runnable onDone) {
+        if (editing == null) return;
         BottomSheetDialog d = new com.harvana.app.ui.AppSheet(c);
         LinearLayout root = column(c);
-        root.addView(title(c, editing == null ? "Add a chain" : editing.chainName));
-        final String[] protocol = {editing == null ? "EVM" : editing.family};
+        root.addView(title(c, editing.chainName));
+        final String[] protocol = {editing.family};
         EditText pick = picker(c, "Protocol", protocol[0]);
         root.addView(label(c, "Network"));
         root.addView(pick);
@@ -833,7 +835,7 @@ public final class CustomAssets {
             put.on(editing);
             lookup.setText(editing.near() ? editing.rpc : String.valueOf(editing.chainId));
         }
-        final Asset[] found = {editing == null ? null : editing.copy()};
+        final Asset[] found = {editing.copy()};
         fill.setOnClickListener(v -> {
             String q = lookup.getText().toString().trim();
             if (q.isEmpty()) { status.setText(hintOf(lookup)); return; }
@@ -885,7 +887,7 @@ public final class CustomAssets {
                 final String error = err;
                 MAIN.post(() -> {
                     if (error != null) { status.setText(error); return; }
-                    if (editing != null && !editing.key().equals(a.key())) remove(c, editing.key());
+                    if (!editing.key().equals(a.key())) remove(c, editing.key());
                     add(c, a);
                     d.dismiss();
                     if (onDone != null) onDone.run();

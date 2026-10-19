@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026 — Crash fixes, sheet rows 50dp, transaction icons, Networks
+
+- Builds again: the manifest had an unescaped "&" in "Help & support", so no build could start.
+- Contacts and the other see-through screens use the app's own transparent theme (crash "requires your app theme to be Theme.MaterialComponents").
+- Support chat photo picker no longer crashes ("Can only use lower 16 bits for requestCode"); the P2P proof upload already had this fix.
+- Shrunk (R8) builds keep WorkManager's start-up class and Firestore's message fields (crashes "WorkManagerInitializer" and "Field database_ not found").
+- Activity list: the swap logo fills its circle (it was cut to a square).
+- Every list row in a bottom sheet is 50dp.
+- Networks → Custom: the "Other protocol (NEAR)" button and the add-chain sheet it opened are gone; added chains are still edited from their coin page.
+- `tools/gradle_to_module_toml.py`: rebuilds `app/module.toml` from `app/build.gradle` (the CodeAssist import), including the release signing config.
+
 ## 18 Oct 2026 — Home total, HARV in the asset list, group amounts
 
 - On startup the app prices every switched-on coin (HARV, stable coins, and the other coins) before a screen opens. Home's total waits for those prices instead of publishing a HARV-only figure. Opening Assets uses the prices already loaded.

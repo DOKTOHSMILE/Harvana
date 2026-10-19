@@ -33,7 +33,9 @@
 				app:cardElevation="0dp"
 				app:cardCornerRadius="360dp"
 				app:strokeWidth="0dp">
-				<com.google.android.material.imageview.ShapeableImageView
+				<!-- A plain ImageView: ShapeableImageView fixes its clip mask to the first padding, so a logo set later with
+				     no padding was cut to a square inside the round card. The card clips the circle. -->
+				<ImageView
 					android:id="@+id/iv_tx_icon"
 					android:layout_width="match_parent"
 					android:layout_height="match_parent"

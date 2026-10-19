@@ -164,9 +164,9 @@ public class SheetDialog extends AppSheet {
                     row.setText(items[i]);
                     row.setTextSize(16);
                     row.setTextColor(UiColors.textPrimary());
-                    row.setMinHeight((int) (54 * dp));
+                    row.setMinHeight((int) (50 * dp));
                     row.setGravity(Gravity.CENTER_VERTICAL);
-                    row.setPadding(0, (int) (6 * dp), 0, (int) (6 * dp));
+                    row.setPadding(0, 0, 0, 0);
                     android.util.TypedValue ripple = new android.util.TypedValue();
                     context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, ripple, true);
                     row.setBackgroundResource(ripple.resourceId);
@@ -190,7 +190,7 @@ public class SheetDialog extends AppSheet {
                         if (!singleChoice) d.dismiss();                         // a plain list closes when a row is chosen
                     });
                     if (i > 0) root.addView(divider(context), dividerParams(context));   // a list, one line between rows
-                    root.addView(row, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (54 * dp)));
+                    root.addView(row, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (50 * dp)));   // owner: sheet rows 50dp
                 }
             }
             if (positive != null || negative != null || neutral != null) {

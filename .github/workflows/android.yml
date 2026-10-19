@@ -36,6 +36,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Rebuild app/module.toml from app/build.gradle if it is missing
+      # Either build file can rebuild the other (tools/gradle_to_module_toml.py is the CodeAssist migration, run here).
+      run: test -f app/module.toml || python3 tools/gradle_to_module_toml.py
+
     - name: Generate the Gradle config from app/module.toml
       # The toml is the one source of truth. The Gradle files are stored too (so CodeAssist can import a Gradle module); this rewrites
       # app/build.gradle from the toml and puts back any root Gradle file a phone commit deleted, so CI builds exactly what CodeAssist builds.

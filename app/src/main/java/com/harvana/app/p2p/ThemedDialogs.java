@@ -113,10 +113,10 @@ public final class ThemedDialogs {
 		LinearLayout row = new LinearLayout(context);
 		row.setOrientation(LinearLayout.HORIZONTAL);
 		row.setGravity(Gravity.CENTER_VERTICAL);
-		row.setPadding(0, dp(context, 12), 0, dp(context, 12));
+		row.setPadding(0, dp(context, 4), 0, dp(context, 4));
 		row.setClickable(true);
 		row.setFocusable(true);
-		row.setMinimumHeight(dp(context, 48));
+		row.setMinimumHeight(dp(context, 50));                                  // owner: sheet rows 50dp
 		return row;
 	}
 

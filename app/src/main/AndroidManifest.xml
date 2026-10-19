@@ -354,11 +354,11 @@
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".social.ContactsAccessActivity"
-			android:theme="@android:style/Theme.Translucent.NoTitleBar"
+			android:theme="@style/AppTheme.Transparent"
 			android:excludeFromRecents="true" />
 		<activity
 			android:name=".social.ContactPickerActivity"
-			android:theme="@android:style/Theme.Translucent.NoTitleBar"
+			android:theme="@style/AppTheme.Transparent"
 			android:excludeFromRecents="true" />
 		<activity
 			android:name=".TrustScoreActivity"
@@ -373,7 +373,7 @@
 			android:exported="false"
 			android:excludeFromRecents="true"
 			android:noHistory="true"
-			android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+			android:theme="@style/AppTheme.Transparent" />
 		<activity
 			android:name=".NotificationsActivity"
 			android:label="Notifications"
@@ -432,7 +432,7 @@
 			android:windowSoftInputMode="stateHidden" />
 		<activity
 			android:name=".SupportHubActivity"
-			android:label="Help & support"
+			android:label="Help &amp; support"
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="adjustResize" />
 		<activity

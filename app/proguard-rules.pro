@@ -221,3 +221,19 @@
 }
 -keep class androidx.work.** { *; }
 -keep class androidx.startup.** { *; }
+
+# ============================================================================
+# Crash reports of 16-17 Oct 2026 (shrunk builds):
+#  - "ClassNotFoundException: androidx.work.WorkManagerInitializer": androidx.startup creates it by name from the
+#    merged manifest, so R8 cannot see the use.
+#  - Firestore "Internal error ... Field database_ for u7.d0 not found": protobuf-lite reads message fields by name
+#    through reflection; renamed fields break every Firestore message.
+# ============================================================================
+-keep class androidx.work.WorkManagerInitializer { *; }
+-keep class * implements androidx.startup.Initializer { <init>(); }
+-keep class androidx.startup.** { *; }
+-keep class androidx.work.impl.WorkDatabase_Impl { *; }
+-keep class * extends com.google.protobuf.GeneratedMessageLite { *; }
+-keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite { <fields>; }
+-keep class com.google.firestore.** { *; }
+-keep class com.google.firebase.firestore.** { *; }

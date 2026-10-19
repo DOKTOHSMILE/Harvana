@@ -2,6 +2,7 @@ package com.harvana.app;
 
 import android.app.Dialog;
 import android.graphics.Bitmap;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -14,8 +15,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -47,8 +46,21 @@ public class SupportChatActivity extends AppCompatActivity {
     private com.google.firebase.firestore.ListenerRegistration ticketsReg;
     private com.google.firebase.firestore.ListenerRegistration threadReg;
     private com.google.firebase.firestore.ListenerRegistration ticketReg;
-    private final ActivityResultLauncher<String> pickPhoto = registerForActivityResult(
-            new ActivityResultContracts.GetContent(), this::onPhoto);
+    // startActivityForResult with a small code: the ActivityResultLauncher's generated request codes do not fit the
+    // 16 bits androidx.fragment 1.2.5 accepts ("Can only use lower 16 bits for requestCode").
+    private static final int RC_PHOTO = 4108;
+
+    private void pickPhoto() {
+        Intent pick = new Intent(Intent.ACTION_GET_CONTENT).setType("image/*").addCategory(Intent.CATEGORY_OPENABLE);
+        try { startActivityForResult(pick, RC_PHOTO); }
+        catch (android.content.ActivityNotFoundException e) { android.widget.Toast.makeText(this, "No photo picker", android.widget.Toast.LENGTH_SHORT).show(); }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_PHOTO && resultCode == RESULT_OK && data != null) onPhoto(data.getData());
+    }
 
     @Override
     protected void onDestroy() {
@@ -77,7 +89,7 @@ public class SupportChatActivity extends AppCompatActivity {
         list.setLayoutManager(lm);
         list.setAdapter(adapter);
         findViewById(R.id.support_send).setOnClickListener(v -> send());
-        findViewById(R.id.support_photo).setOnClickListener(v -> pickPhoto.launch("image/*"));
+        findViewById(R.id.support_photo).setOnClickListener(v -> pickPhoto());
         photoReady.setOnClickListener(v -> {
             pendingPhoto = "";
             photoReady.setVisibility(View.GONE);

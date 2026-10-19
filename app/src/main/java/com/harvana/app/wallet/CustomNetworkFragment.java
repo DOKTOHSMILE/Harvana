@@ -60,8 +60,6 @@ public class CustomNetworkFragment extends Fragment {
         chainId.addTextChangedListener(watch(() -> { ui.removeCallbacks(askList); ui.postDelayed(askList, 600); check(); }));
         symbol.addTextChangedListener(watch(this::checkSymbol));
         add.setOnClickListener(x -> review());
-        v.findViewById(R.id.btn_network_other_protocol).setOnClickListener(x ->
-                CustomAssets.editChain(requireContext(), null, () -> { if (getActivity() instanceof NetworksActivity) ((NetworksActivity) getActivity()).networkAdded(); }));
     }
 
     @Override public void onDestroyView() { ui.removeCallbacksAndMessages(null); super.onDestroyView(); }

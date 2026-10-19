@@ -137,6 +137,14 @@ public final class AssetPrices {
         }, "asset-prices").start();
     }
 
+    /** A coin gained a CoinGecko id: the next {@link #load} asks again instead of serving the saved prices. */
+    public static void forget(Context c) {
+        synchronized (mem) {
+            fetchedAt = 0;
+            nextAllowed = 0;
+        }
+    }
+
     public static String usd(double v) {
         DecimalFormatSymbols us = DecimalFormatSymbols.getInstance(Locale.US);
         DecimalFormat fmt;

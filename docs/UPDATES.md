@@ -2,6 +2,14 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026 — Added chains and tokens work like built-in coins
+
+- Activity tab lists the transactions of every chain and token you added, next to HARV and the built-in coins.
+- After a chain or token is added (and once a day after that) the app looks up what is missing: logo (chain registry, CoinGecko, DexScreener, Trust Wallet), CoinGecko price id (price, chart, description) and a Blockscout explorer for history. Values you typed are kept.
+- Tokens with no Blockscout: in and out transfers are read from the chain itself (newest ~60,000 blocks). Native coins on chains with no Blockscout show the sends made from this app; older and incoming native transfers are on the explorer.
+- Test networks (Sepolia, Amoy, devnets…) get the coin's logo; Price shows "Testnet".
+- A token's "Fee paid in" is its chain's coin (USDC on Sepolia: ETH).
+
 ## 19 Oct 2026 — Crash fixes, sheet rows 50dp, transaction icons, Networks
 
 - Builds again: the manifest had an unescaped "&" in "Help & support", so no build could start.

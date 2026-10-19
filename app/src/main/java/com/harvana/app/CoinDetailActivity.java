@@ -372,8 +372,10 @@ public class CoinDetailActivity extends AppCompatActivity {
 		com.harvana.app.wallet.AssetPrices.load(this, () -> {
 			if (isFinishing()) return;
 			if (com.harvana.app.wallet.AssetPrices.peek(this, coin.key) == null) {
-				_setStatRow(R.id.row_circulating_supply, "Price", "Unavailable");
-				if (chainPriceLine != null) chainPriceLine.setText("Unavailable");
+				com.harvana.app.wallet.CustomAssets.Asset added = com.harvana.app.wallet.CustomAssets.find(coin.key);
+				String none = added != null && com.harvana.app.wallet.AssetEnricher.testnet(added) ? "Testnet" : "Unavailable";
+				_setStatRow(R.id.row_circulating_supply, "Price", none);
+				if (chainPriceLine != null) chainPriceLine.setText(none);
 			} else _showMarketPrice(coin);
 		});
 	}

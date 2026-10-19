@@ -55,7 +55,7 @@ public final class CustomAssets {
             .connectTimeout(12, TimeUnit.SECONDS).readTimeout(15, TimeUnit.SECONDS).build();
     private static final MediaType JSON = MediaType.parse("application/json");
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
-    private static final String REGISTRY = "https://raw.githubusercontent.com/ethereum-lists/chains/master/_data/";
+    static final String REGISTRY = "https://raw.githubusercontent.com/ethereum-lists/chains/master/_data/";
 
     /** The protocols the app speaks. A chain of any of them can be added as data; a new protocol needs its engine. */
     public static final String[] PROTOCOLS = {"EVM", NearProtocol.FAMILY};
@@ -220,6 +220,16 @@ public final class CustomAssets {
         for (int i = list.size() - 1; i >= 0; i--) if (list.get(i).key().equals(a.key())) list.remove(i);
         list.add(a);
         save(c, list);
+        AssetEnricher.enrich(c, a.key());           // logo, price id and history source, looked up like a built-in coin's
+    }
+
+    /** Replaces an asset in place (same key, same position in the list). False when it is no longer there. */
+    static synchronized boolean update(Context c, Asset a) {
+        List<Asset> list = all(c);
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).key().equals(a.key())) { list.set(i, a); save(c, list); return true; }
+        }
+        return false;
     }
 
     static void remove(Context c, String key) {
@@ -495,7 +505,7 @@ public final class CustomAssets {
 
     private static final class NotFound extends Exception { }
 
-    private static JSONObject getJson(String url) throws Exception {
+    static JSONObject getJson(String url) throws Exception {
         try (Response r = HTTP.newCall(new Request.Builder().url(url).build()).execute()) {
             if (r.code() == 404) throw new NotFound();
             if (!r.isSuccessful()) throw new Exception("HTTP " + r.code());
@@ -504,7 +514,7 @@ public final class CustomAssets {
     }
 
     /** The registry's icon for a chain: icons/<name>.json lists an ipfs:// image, served through a public gateway. */
-    private static String chainIcon(String name) {
+    static String chainIcon(String name) {
         if (name == null || name.isEmpty()) return "";
         try (Response r = HTTP.newCall(new Request.Builder().url(REGISTRY + "icons/" + name + ".json").build()).execute()) {
             if (!r.isSuccessful() || r.body() == null) return "";
@@ -537,7 +547,7 @@ public final class CustomAssets {
     }
 
     /** A token's CoinGecko {id, icon}, found through its chain's platform. Blocking; {"", ""} when unknown. */
-    private static String[] geckoToken(long chainId, String contract) {
+    static String[] geckoToken(long chainId, String contract) {
         JSONObject p = platform(chainId);
         return p == null ? new String[]{"", ""} : geckoToken(p.optString("id"), contract.toLowerCase(Locale.US));
     }
@@ -554,7 +564,7 @@ public final class CustomAssets {
     }
 
     /** True when the explorer is a Blockscout (its API gives the address history). */
-    private static boolean isBlockscout(String explorer) {
+    static boolean isBlockscout(String explorer) {
         if (explorer == null || explorer.isEmpty()) return false;
         try { return getJson(explorer + "/api/v2/stats").has("total_blocks"); } catch (Exception e) { return false; }
     }

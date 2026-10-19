@@ -36,6 +36,12 @@ public final class ChainHistory {
             if (!ChainAssetsSection.shown(app, coin.key)) continue;
             jobs.add(() -> one(app, harvAddress, coin.key));
         }
+        // Chains and tokens the person added are listed like the built-in coins (owner, 19 Oct 2026).
+        for (CustomAssets.Asset a : CustomAssets.cached()) {
+            if (a.hidden) continue;
+            final String key = a.key();
+            jobs.add(() -> one(app, harvAddress, key, CustomAssets.address(app, harvAddress, a)));
+        }
         java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(4);
         try {
             for (java.util.concurrent.Future<List<HashMap<String, Object>>> f : pool.invokeAll(jobs, 25, TimeUnit.SECONDS)) {
@@ -90,6 +96,7 @@ public final class ChainHistory {
                     else if (SplToken.FAMILY.equals(a.family)) break;            // SPL transfers: on the explorer
                     else if ("CHAIN".equals(a.kind) && !a.scout.isEmpty()) blockscout(out, a.scout, a.symbol, a.chainName, addr, a.decimals, a.txPage(""));
                     else if ("TOKEN".equals(a.kind) && !a.scout.isEmpty()) scoutTokens(out, a, addr);
+                    else if ("TOKEN".equals(a.kind) && "EVM".equals(a.family)) tokenLogs(out, a, addr);
                     break;
                 }
             }
@@ -243,13 +250,17 @@ public final class ChainHistory {
             for (HashMap<String, Object> row : out) if (p[1].equals(String.valueOf(row.get("txHash")))) seen = true;
             if (seen) continue;
             double amt = parse(p[4]);
-            HashMap<String, Object> m = row(key, netName(key), false, p[2], p[3], amt, parseLong(p[5]), p[1], pageFor(key, p[1]));
+            CustomAssets.Asset added = CustomAssets.find(key);
+            String ticker = added != null ? added.symbol : key;
+            HashMap<String, Object> m = row(ticker, netName(key), false, p[2], p[3], amt, parseLong(p[5]), p[1], pageFor(key, p[1]));
             m.put("status", "pending");
             out.add(0, m);
         }
     }
 
     private static String netName(String key) {
+        CustomAssets.Asset added = CustomAssets.find(key);
+        if (added != null) return added.chainName == null || added.chainName.isEmpty() ? added.name : added.chainName;
         switch (key) {
             case "BTC": return Net.label("Bitcoin");
             case "LTC": return Net.label("Litecoin");
@@ -444,6 +455,63 @@ public final class ChainHistory {
         } catch (Exception ignored) { }
     }
 
+    private static final String TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+
+    /**
+     * An added ERC-20's transfers in and out of this wallet, read from the chain itself (eth_getLogs over the newest
+     * blocks) when no Blockscout is known for it. Works on any EVM RPC; older transfers are on the explorer.
+     */
+    private static void tokenLogs(List<HashMap<String, Object>> out, CustomAssets.Asset a, String address) {
+        if (a.rpc == null || a.rpc.isEmpty() || address == null || !address.startsWith("0x")) return;
+        String rpc = a.rpc.split(",")[0].trim();
+        String me = "0x000000000000000000000000" + address.substring(2).toLowerCase(java.util.Locale.US);
+        try {
+            long tip = hexLong(post(rpc, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"eth_blockNumber\",\"params\":[]}").optString("result"));
+            if (tip <= 0) return;
+            long span = 9_999;
+            java.util.Map<Long, Long> times = new HashMap<>();
+            java.util.Set<String> seen = new java.util.HashSet<>();
+            for (long to = tip, windows = 0; to > 0 && windows < 6 && out.size() < 25; windows++) {
+                long from = Math.max(0, to - span);
+                JSONArray logs = new JSONArray();
+                boolean ok = true;
+                for (String topics : new String[]{"[\"" + TRANSFER + "\",\"" + me + "\"]", "[\"" + TRANSFER + "\",null,\"" + me + "\"]"}) {
+                    JSONObject r = post(rpc, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"eth_getLogs\",\"params\":[{\"address\":\"" + a.contract
+                            + "\",\"fromBlock\":\"0x" + Long.toHexString(from) + "\",\"toBlock\":\"0x" + Long.toHexString(to) + "\",\"topics\":" + topics + "}]}");
+                    JSONArray got = r.optJSONArray("result");
+                    if (got == null) { ok = false; break; }
+                    for (int i = 0; i < got.length(); i++) logs.put(got.get(i));
+                }
+                if (!ok) {                                                   // the RPC caps the range: ask for less
+                    if (span <= 500) return;
+                    span = span / 5;
+                    windows--;
+                    continue;
+                }
+                for (int i = logs.length() - 1; i >= 0; i--) {
+                    JSONObject l = logs.optJSONObject(i);
+                    JSONArray t = l == null ? null : l.optJSONArray("topics");
+                    if (t == null || t.length() < 3) continue;
+                    String hash = l.optString("transactionHash");
+                    if (!seen.add(hash + l.optString("logIndex"))) continue;
+                    String fromAddr = "0x" + t.optString(1).substring(26), toAddr = "0x" + t.optString(2).substring(26);
+                    boolean in = toAddr.equalsIgnoreCase(address);
+                    long block = hexLong(l.optString("blockNumber"));
+                    Long ts = times.get(block);
+                    if (ts == null && times.size() < 30) {
+                        JSONObject b = post(rpc, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"eth_getBlockByNumber\",\"params\":[\"0x" + Long.toHexString(block) + "\",false]}").optJSONObject("result");
+                        ts = b == null ? 0L : hexLong(b.optString("timestamp")) * 1000L;
+                        times.put(block, ts);
+                    }
+                    out.add(row(a.symbol, netName(a.key()), in, fromAddr, toAddr, shift(l.optString("data"), a.decimals),
+                            ts == null ? 0L : ts, hash, a.txPage(hash)));
+                }
+                to = from - 1;
+            }
+            out.sort((x, y) -> Long.compare((Long) y.get("timestamp"), (Long) x.get("timestamp")));
+        } catch (Exception ignored) { }
+    }
+
     private static void blockscout(List<HashMap<String, Object>> out, String host, String ticker, String network, String address, int decimals, String txBase) {
         try {
             JSONObject j = get(host + "/api/v2/addresses/" + address + "/transactions");
@@ -635,7 +703,13 @@ public final class ChainHistory {
 
     private static double shift(String raw, int decimals) {
         if (raw == null || raw.isEmpty()) return 0;
-        try { return new BigDecimal(raw).movePointLeft(decimals).doubleValue(); }
+        try {
+            if (raw.startsWith("0x") || raw.startsWith("0X")) {
+                String h = raw.substring(2);
+                return h.isEmpty() ? 0 : new BigDecimal(new java.math.BigInteger(h, 16)).movePointLeft(decimals).doubleValue();
+            }
+            return new BigDecimal(raw).movePointLeft(decimals).doubleValue();
+        }
         catch (Exception e) { return 0; }
     }
 

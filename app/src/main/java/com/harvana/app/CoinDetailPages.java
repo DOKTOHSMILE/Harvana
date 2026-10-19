@@ -593,7 +593,10 @@ public final class CoinDetailPages {
             box.addView(priceRow);
             box.addView(stat("Decimals", String.valueOf(coin.decimals)));
             box.addView(stat("Smallest unit", coin.smallestUnit()));
-            box.addView(stat("Fee paid in", "BASE".equals(coin.key) ? "ETH" : coin.ticker));
+            com.harvana.app.wallet.CustomAssets.Asset added = com.harvana.app.wallet.CustomAssets.find(coin.key);
+            String feeIn = added != null && !added.feeSymbol().isEmpty() ? added.feeSymbol() : "BASE".equals(coin.key) ? "ETH" : coin.ticker;
+            box.addView(stat("Fee paid in", feeIn));                      // a token's fee is paid in its chain's coin
+            if (added != null && com.harvana.app.wallet.AssetEnricher.testnet(added)) price.setText("Testnet");
             TextView addr = new TextView(requireContext());
             addr.setText(address().isEmpty() ? "Address not ready yet" : address());
             addr.setTextIsSelectable(true);

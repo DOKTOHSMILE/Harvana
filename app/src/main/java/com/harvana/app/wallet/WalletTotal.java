@@ -31,11 +31,26 @@ public final class WalletTotal {
 
     /** The last total for this wallet in this currency, or NaN when there is none yet. */
     public static double last(Context c, String address, String symbol) {
+        return last(c, address, symbol, Long.MAX_VALUE);
+    }
+
+    /**
+     * The last total only if it was worked out within {@code maxAgeMs}; NaN otherwise. A saved total is a bridge for the
+     * seconds before the live one arrives, never a figure to show after the money in the wallet may have moved.
+     */
+    public static double last(Context c, String address, String symbol, long maxAgeMs) {
         if (c == null || address == null) return Double.NaN;
         SharedPreferences p = prefs(c);
         if (!String.valueOf(symbol).equals(p.getString(address + ":symbol", null))) return Double.NaN;
+        long at = p.getLong(address + ":at", 0);
+        if (at <= 0 || System.currentTimeMillis() - at > maxAgeMs) return Double.NaN;
         try { return Double.parseDouble(p.getString(address + ":fiat", "NaN")); } catch (Exception e) { return Double.NaN; }
     }
+
+    /** How long Home may show the saved total while it works the live one out. */
+    public static final long HOME_MAX_AGE_MS = 30L * 60_000L;
+    /** How long Assets may hold the saved total up while its rows are still reporting. */
+    public static final long ASSETS_MAX_AGE_MS = 2L * 60_000L;
 
     public static void listen(Listener l) { if (l != null && !listeners.contains(l)) listeners.add(l); }
     public static void unlisten(Listener l) { listeners.remove(l); }

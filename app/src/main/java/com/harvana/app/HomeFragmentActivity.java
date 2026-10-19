@@ -641,7 +641,8 @@ public class HomeFragmentActivity extends Fragment {
 			return;
 		}
 		// The last total at once; the Assets tab (loaded in the background with Home) publishes a fresh one.
-		_showTotal(symbol, com.harvana.app.wallet.WalletTotal.last(getContext(), addr, symbol));
+		_showTotal(symbol, com.harvana.app.wallet.WalletTotal.last(getContext(), addr, symbol,
+				com.harvana.app.wallet.WalletTotal.HOME_MAX_AGE_MS));   // older than that: "—" until the live total
 		com.harvana.app.wallet.WalletTotal.listen(totalListener);
 		// Work the total out now, from Home itself: it used to wait until the Assets tab had been opened.
 		com.harvana.app.wallet.WalletTotal.refresh(getContext(), addr);

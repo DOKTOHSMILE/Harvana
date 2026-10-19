@@ -277,6 +277,15 @@ public final class AssetSorter {
     /** Unit price, then the 24-hour change. Red when down, green when up. */
     private void paintMarket(Holder h, String key) {
         Double usd = key == null ? null : price.get(key);
+        // A coin added after the prices were first loaded (Add coins): use the quote its own row already shows.
+        if ((usd == null || usd.isNaN()) && key != null && h.src != null && h.src.getTag() instanceof String) {
+            AssetPrices.Quote q = AssetPrices.peek(c, (String) h.src.getTag());
+            if (q != null && q.usd > 0) {
+                usd = q.usd;
+                price.put(key, q.usd);
+                change.put(key, q.change);
+            }
+        }
         if (h.price != null) set(h.price, usd == null || usd.isNaN() || usd <= 0 ? "—" : FxRates.money(c, usd));
         if (h.change == null) return;
         Double ch = key == null ? null : change.get(key);

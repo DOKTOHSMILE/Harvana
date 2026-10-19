@@ -646,7 +646,8 @@ public class AssetFragmentActivity extends Fragment {
 		double total = harvFiat + chainFiat + husdFiat;
 		// A section that has not reported yet must not replace the startup total
 		// (every switched-on coin) with the HARV-only figure.
-		double cached = com.harvana.app.wallet.WalletTotal.last(getContext(), wallet_address, symbol);
+		double cached = com.harvana.app.wallet.WalletTotal.last(getContext(), wallet_address, symbol,
+				com.harvana.app.wallet.WalletTotal.ASSETS_MAX_AGE_MS);   // never an old total: it held up a figure days out of date
 		boolean rowsReady = chainReported && husdReported;
 		double shown = total;
 		if (!rowsReady && !Double.isNaN(cached) && cached > total) shown = cached;

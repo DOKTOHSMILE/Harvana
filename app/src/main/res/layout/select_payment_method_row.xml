@@ -50,6 +50,6 @@
 			android:scaleType="centerInside"
 			android:layout_gravity="center_horizontal|center_vertical"
 			android:visibility="gone"
-			app:tint="@color/colorTextOnAccent" android:duplicateParentState="true" />
+			app:tint="@color/colorTextOnAccent" />
 	</FrameLayout>
 </LinearLayout>

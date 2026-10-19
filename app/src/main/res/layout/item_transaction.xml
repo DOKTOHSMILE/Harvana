@@ -28,8 +28,8 @@
 			android:orientation="horizontal">
 			<com.google.android.material.card.MaterialCardView
 				android:id="@+id/cardview5"
-				android:layout_width="44dp"
-				android:layout_height="44dp"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
 				app:cardBackgroundColor="@color/colorSurfaceAlt"
 				app:cardElevation="0dp"
 				app:cardCornerRadius="360dp"
@@ -44,7 +44,7 @@
 					android:src="@drawable/ic_action_receive"
 					android:scaleType="centerInside"
 					app:tint="@color/colorAccent"
-					android:focusable="false" android:duplicateParentState="true" />
+					android:focusable="false" />
 			</com.google.android.material.card.MaterialCardView>
 			<LinearLayout
 				android:id="@+id/linear11"

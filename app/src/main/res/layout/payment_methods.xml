@@ -73,7 +73,7 @@
 						android:src="@drawable/ic_credit_card"
 						android:scaleType="centerInside"
 						android:contentDescription="Nopaymentmethods"
-						app:tint="@color/colorAmber" android:duplicateParentState="true" />
+						app:tint="@color/colorAmber" />
 				</com.google.android.material.card.MaterialCardView>
 				<TextView
 					android:id="@+id/textview90"

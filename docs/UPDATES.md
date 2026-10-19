@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026: Steady asset and activity rows, one icon style
+
+- Assets: rows keep their place once the list has settled; a balance or price that arrives later changes its row in place. The order by value is worked out again each time the Assets tab is opened. Icons are no longer set again on every update (they blinked), and only rows that moved are moved.
+- Activity: only rows that changed are redrawn, with no fade or slide; a refresh with nothing new changes nothing on screen.
+- Activity icons: 24dp glyph in a 40dp circle (was 28dp in 44dp). Every row uses the app's line (duotone) icon in the row's colour; the full-colour coin logos and the Swap app icon are no longer mixed in.
+- Icons in rows and buttons across the app (148 in 31 screens) stay in the line style when touched; before, touching or scrolling over a row flipped its icon to the filled style for a moment.
+
 ## 19 Oct 2026: Added coins' history, pending rows, no repeated notifications
 
 - Activity and coin pages for added coins: Solana tokens (SPL, for example PUMP) and NEAR tokens now list their transfers (before: none). Added coins also show when the app has just started (before: missing until the Assets tab had loaded them).

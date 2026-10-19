@@ -30,7 +30,7 @@
 				android:padding="10dp"
 				android:src="@drawable/ic_credit_card"
 				android:scaleType="centerInside"
-				android:backgroundTint="@color/colorAmber" android:duplicateParentState="true" />
+				android:backgroundTint="@color/colorAmber" />
 			<LinearLayout
 				android:id="@+id/linear3"
 				android:layout_width="0dp"

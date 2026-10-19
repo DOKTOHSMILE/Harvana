@@ -78,7 +78,7 @@
 								android:layout_height="18dp"
 								android:scaleType="centerInside"
 								android:src="@drawable/icon_search_twotone"
-								app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								app:tint="@color/colorTextTertiary" />
 							<TextView
 								android:id="@+id/tv_search"
 								android:layout_width="match_parent"

@@ -429,6 +429,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 		
 		if (list_history.getLayoutManager() == null) {
 			list_history.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(getContext()));
+			list_history.setItemAnimator(null);                // no fade or slide when a row updates: the rows stay still
 		}
 		
 		_pollWhilePending(filtered);
@@ -491,10 +492,32 @@ public class WalletActivityFragmentActivity extends Fragment {
 			this.COLOR_OUTGOING = androidx.core.content.ContextCompat.getColor(context, R.color.colorError);
 		}
 
+		/**
+		 * Only rows that really changed are redrawn, and only when something changed at all: the list is refreshed
+		 * from several sources (cache, node, pending, other chains) and every refresh used to redraw every row.
+		 */
 		public void updateItems(java.util.List<java.util.HashMap<String, Object>> newItems) {
+			final java.util.List<java.util.HashMap<String, Object>> old = new java.util.ArrayList<>(items);
+			final java.util.List<java.util.HashMap<String, Object>> next = newItems != null ? new java.util.ArrayList<>(newItems) : new java.util.ArrayList<>();
+			androidx.recyclerview.widget.DiffUtil.DiffResult diff = androidx.recyclerview.widget.DiffUtil.calculateDiff(new androidx.recyclerview.widget.DiffUtil.Callback() {
+				@Override public int getOldListSize() { return old.size(); }
+				@Override public int getNewListSize() { return next.size(); }
+				@Override public boolean areItemsTheSame(int o, int n) { return _rowId(old.get(o)).equals(_rowId(next.get(n))); }
+				@Override public boolean areContentsTheSame(int o, int n) { return _rowLook(old.get(o)).equals(_rowLook(next.get(n))); }
+			});
 			items.clear();
-			if (newItems != null) items.addAll(newItems);
-			notifyDataSetChanged();
+			items.addAll(next);
+			diff.dispatchUpdatesTo(this);
+		}
+
+		private String _rowId(java.util.Map<String, Object> m) {
+			String h = String.valueOf(m.get("txHash"));
+			return h.isEmpty() || "null".equals(h) ? "t" + m.get("timestamp") + "/" + m.get("value") : h + "/" + m.get("tokenSymbol");
+		}
+
+		private String _rowLook(java.util.Map<String, Object> m) {
+			return m.get("status") + "|" + m.get("value") + "|" + m.get("timestamp") + "|" + m.get("initiatedAt") + "|" + m.get("memo")
+					+ "|" + m.get("tokenSymbol") + "|" + m.get("incoming") + "|" + m.get("senderAddress") + "|" + m.get("recipientAddress") + "|" + m.get("chain");
 		}
 		
 		@NonNull
@@ -598,18 +621,9 @@ public class WalletActivityFragmentActivity extends Fragment {
 						String coinBit = memo0.startsWith("SWAP_") ? " · " + asset : "";
 						holder.tvAddress.setText(kind.detail + coinBit + " · " + (isIncoming ? "From: " + shortenAddress(sender) : "To: " + shortenAddress(recipient)));
 					}
-					if (!isPending && holder.ivIcon != null) {
-						if (memo0.startsWith("SWAP_") && !memo0.startsWith("SWAP_FARE:")) {
-							_fullColourIcon(holder.ivIcon);                         // Harvana Swap's own icon
-							holder.ivIcon.setImageResource(R.drawable.ic_app_swap);
-						} else if (com.harvana.app.husd.Stable.isStable(coinCode)) {
-							// The coin's own logo, in its colours: the layout's tint painted it as a plain cream disc.
-							_fullColourIcon(holder.ivIcon);
-							holder.ivIcon.setImageDrawable(com.harvana.app.husd.StableIcon.drawable(holder.ivIcon.getContext(), coinCode));
-						} else {
-							holder.ivIcon.setImageResource(kind.icon);
-						}
-					}
+					// One icon style on every row (owner, 19 Oct 2026): the app's duotone line glyph, 24dp, in the row's
+					// colour. Coin logos (a full-colour coin, the Swap app icon) are no longer mixed in.
+					if (!isPending && holder.ivIcon != null && !_isCoinLogo(kind.icon)) holder.ivIcon.setImageResource(kind.icon);
 				}
 			}
 			
@@ -717,13 +731,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 		com.harvana.app.tx.TxIcon.circle(iv);
 	}
 
-	/** A coin or app logo in its own colours, filling its circle. */
-	private static void _fullColourIcon(android.widget.ImageView iv) {
-		iv.clearColorFilter();
-		iv.setImageTintList(null);
-		iv.setPadding(0, 0, 0, 0);
-		iv.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
-		com.harvana.app.tx.TxIcon.circle(iv);
+	private static boolean _isCoinLogo(int res) {
+		return res == R.drawable.ic_coin_husd || res == R.drawable.ic_coin_stable || res == R.drawable.ic_app_swap;
 	}
 
 	private static long _longOf(java.util.Map<String, Object> item, String key) {

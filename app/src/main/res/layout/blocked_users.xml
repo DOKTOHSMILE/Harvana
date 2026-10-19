@@ -43,7 +43,7 @@
 				android:src="@drawable/ic_block"
 				android:scaleType="centerInside"
 				app:tint="@color/colorTextTertiary"
-				android:contentDescription="Noblockedusers" android:duplicateParentState="true" />
+				android:contentDescription="Noblockedusers" />
 		</com.google.android.material.card.MaterialCardView>
 		<TextView
 			android:id="@+id/textview59"

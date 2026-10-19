@@ -55,7 +55,7 @@
 							android:layout_marginRight="5dp"
 							android:src="@drawable/icon_account_balance_wallet_outline_"
 							android:scaleType="centerInside"
-							android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+							android:tint="@color/colorTextTertiary" />
 						<TextView
 							android:id="@+id/tv_active_wallet_label"
 							android:layout_width="match_parent"
@@ -154,7 +154,6 @@
 								android:id="@+id/imageview2"
 								android:layout_width="20dp"
 								android:layout_height="20dp"
-								android:duplicateParentState="true"
 								android:importantForAccessibility="no"
 								android:scaleType="centerInside"
 								android:src="@drawable/ic_action_send"
@@ -200,7 +199,6 @@
 								android:id="@+id/imageview1"
 								android:layout_width="20dp"
 								android:layout_height="20dp"
-								android:duplicateParentState="true"
 								android:importantForAccessibility="no"
 								android:scaleType="centerInside"
 								android:src="@drawable/ic_action_receive"
@@ -246,7 +244,6 @@
 								android:id="@+id/iv_swap"
 								android:layout_width="20dp"
 								android:layout_height="20dp"
-								android:duplicateParentState="true"
 								android:importantForAccessibility="no"
 								android:scaleType="centerInside"
 								android:src="@drawable/ic_action_swap"
@@ -292,7 +289,6 @@
 								android:id="@+id/imageview5"
 								android:layout_width="20dp"
 								android:layout_height="20dp"
-								android:duplicateParentState="true"
 								android:importantForAccessibility="no"
 								android:scaleType="centerInside"
 								android:src="@drawable/ic_action_buy"
@@ -338,7 +334,6 @@
 								android:id="@+id/iv_discover"
 								android:layout_width="20dp"
 								android:layout_height="20dp"
-								android:duplicateParentState="true"
 								android:importantForAccessibility="no"
 								android:scaleType="centerInside"
 								android:src="@drawable/ic_web3"

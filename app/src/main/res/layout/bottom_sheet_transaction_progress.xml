@@ -63,7 +63,7 @@
 					android:layout_gravity="center_horizontal|center_vertical"
 					app:tint="@color/colorAccent"
 					android:focusable="false"
-					android:visibility="gone" android:duplicateParentState="true" />
+					android:visibility="gone" />
 				<View
 					android:id="@+id/dot_stage_1"
 					android:layout_width="10dp"
@@ -115,7 +115,7 @@
 					android:layout_gravity="center_horizontal|center_vertical"
 					app:tint="@color/colorAccent"
 					android:focusable="false"
-					android:visibility="gone" android:duplicateParentState="true" />
+					android:visibility="gone" />
 				<View
 					android:id="@+id/dot_stage_2"
 					android:layout_width="10dp"
@@ -167,7 +167,7 @@
 					android:layout_gravity="center_horizontal|center_vertical"
 					app:tint="@color/colorAccent"
 					android:focusable="false"
-					android:visibility="gone" android:duplicateParentState="true" />
+					android:visibility="gone" />
 				<View
 					android:id="@+id/dot_stage_3"
 					android:layout_width="10dp"
@@ -210,7 +210,7 @@
 					android:layout_gravity="center_horizontal|center_vertical"
 					app:tint="@color/colorAccent"
 					android:focusable="false"
-					android:visibility="gone" android:duplicateParentState="true" />
+					android:visibility="gone" />
 				<View
 					android:id="@+id/dot_stage_4"
 					android:layout_width="10dp"

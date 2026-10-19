@@ -82,6 +82,15 @@ public final class AssetSorter {
         return s;
     }
 
+    private boolean resort = true;
+
+    /** The next redraw may put the rows in order by value again (the Assets tab was opened again). */
+    public void allowResort() {
+        resort = true;
+        lastSignature = "";
+        sync();
+    }
+
     /** Notes a change; the list is redrawn once the burst of changes settles (sections load one after another). */
     public void sync() {
         String s = signature();
@@ -101,7 +110,7 @@ public final class AssetSorter {
                 if (r.findViewById(R.id.tv_asset_name) == null) continue;
                 sig.append(key(r)).append('|').append(r.getVisibility()).append('|')
                         .append(text(r, R.id.tv_asset_balance)).append('|')
-                        .append(text(r, R.id.tv_asset_amount)).append('|').append(System.identityHashCode(logo(r))).append(';');
+                        .append(text(r, R.id.tv_asset_amount)).append('|').append(iconId(logo(r))).append(';');
             }
         }
         sig.append(FxRates.symbol(c)).append(';');
@@ -116,11 +125,13 @@ public final class AssetSorter {
         int order;
         View src;               // null for a row from the saved copy
         Drawable icon;
+        int iconId;
     }
 
     private static final class Holder {
         View card; ImageView icon; TextView ticker, chip, price, change, balance, value; View divider;
         View src;
+        int iconId;
     }
 
     private void rebuildNow() {
@@ -179,27 +190,45 @@ public final class AssetSorter {
             return cmp != 0 ? cmp : Integer.compare(a.order, b.order);
         });
 
-        List<String> keys = new ArrayList<>();
-        for (Entry e : entries) keys.add(e.key);
-        if (keys.equals(onScreen)) {
-            for (Entry e : entries) bind(holders.get(e.key), e);      // same rows, same order: update in place
-        } else {
-            shown.removeAllViews();
-            Map<String, Holder> keep = new HashMap<>(holders);
-            holders.clear();
-            for (int i = 0; i < entries.size(); i++) {
-                Entry e = entries.get(i);
-                Holder h = keep.get(e.key);
-                if (h == null) h = make();
-                bind(h, e);
-                // Show the divider between rows; hide it under the last row so the list does not end with a line.
-                if (h.divider != null) h.divider.setVisibility(i < entries.size() - 1 ? View.VISIBLE : View.GONE);
-                holders.put(e.key, h);
-                shown.addView(h.card);
+        List<String> sorted = new ArrayList<>();
+        Map<String, Entry> byKey = new HashMap<>();
+        for (Entry e : entries) { sorted.add(e.key); byKey.put(e.key, e); }
+        // Owner, 19 Oct 2026: the rows stay still. Once the list has settled, a balance or price that arrives later
+        // updates its row in place; the order is only worked out again when the Assets tab is opened again
+        // (allowResort). A new coin goes in at its place by value; a removed one leaves without moving the others.
+        List<String> keys = sorted;
+        if (!onScreen.isEmpty() && !early && !resort) {
+            keys = new ArrayList<>();
+            for (String k : onScreen) if (byKey.containsKey(k)) keys.add(k);
+            for (int i = 0; i < sorted.size(); i++) {
+                String k = sorted.get(i);
+                if (keys.contains(k)) continue;
+                int at = 0;
+                for (int j = i - 1; j >= 0; j--) { int p = keys.indexOf(sorted.get(j)); if (p >= 0) { at = p + 1; break; } }
+                keys.add(at, k);
             }
-            onScreen.clear();
-            onScreen.addAll(keys);
         }
+        if (!early && !real.isEmpty()) resort = false;
+        Map<String, Holder> keep = new HashMap<>(holders);
+        holders.clear();
+        for (int i = 0; i < keys.size(); i++) {
+            Entry e = byKey.get(keys.get(i));
+            Holder h = keep.remove(e.key);
+            if (h == null) h = make();
+            bind(h, e);
+            // Show the divider between rows; hide it under the last row so the list does not end with a line.
+            if (h.divider != null) h.divider.setVisibility(i < keys.size() - 1 ? View.VISIBLE : View.GONE);
+            holders.put(e.key, h);
+            // Move only what is out of place; a row already where it belongs is not taken off the screen.
+            if (shown.getChildAt(i) != h.card) {
+                if (h.card.getParent() == shown) shown.removeView(h.card);
+                shown.addView(h.card, i);
+            }
+        }
+        for (Holder gone : keep.values()) if (gone.card.getParent() == shown) shown.removeView(gone.card);
+        while (shown.getChildCount() > keys.size()) shown.removeViewAt(shown.getChildCount() - 1);
+        onScreen.clear();
+        onScreen.addAll(keys);
         if (!real.isEmpty()) writeCache(entries);
     }
 
@@ -226,6 +255,7 @@ public final class AssetSorter {
         Double lv = lastValue.get(e.key);
         e.sort = lv == null ? 0 : lv;
         Drawable dr = logo(src);
+        e.iconId = iconId(dr);
         if (dr != null) {
             Drawable.ConstantState cs = dr.getConstantState();
             e.icon = cs != null ? cs.newDrawable(c.getResources()).mutate() : dr;
@@ -262,8 +292,11 @@ public final class AssetSorter {
     private void bind(Holder h, Entry e) {
         if (h == null) return;
         h.src = e.src;
-        if (e.icon != null) h.icon.setImageDrawable(e.icon);
-        else if (h.icon.getDrawable() == null) h.icon.setImageDrawable(savedIcon(e.priceKey));
+        // The picture is set only when it is a different one: setting it again on every update made the icons blink.
+        if (e.icon != null && (h.iconId != e.iconId || e.iconId == 0 || h.icon.getDrawable() == null)) {
+            h.icon.setImageDrawable(e.icon);
+            h.iconId = e.iconId;
+        } else if (h.icon.getDrawable() == null) h.icon.setImageDrawable(savedIcon(e.priceKey));
         // Row 1: the name people read (e.g. "Harvana"); when the name is missing, fall back to the ticker.
         String displayName = (e.name != null && !e.name.isEmpty()) ? e.name : e.ticker;
         String ticker = (e.ticker != null && !e.ticker.isEmpty()) ? e.ticker : e.priceKey;
@@ -437,6 +470,16 @@ public final class AssetSorter {
     private static String text(View r, int id) {
         View v = r.findViewById(id);
         return v instanceof TextView && ((TextView) v).getText() != null ? ((TextView) v).getText().toString() : "";
+    }
+
+    /**
+     * Which picture a row shows. A row drawn again from the same resource has a new drawable but the same constant
+     * state, so it does not count as a change (it used to redraw the whole list each time HARV's row was rebuilt).
+     */
+    private static int iconId(Drawable d) {
+        if (d == null) return 0;
+        Drawable.ConstantState cs = d.getConstantState();
+        return System.identityHashCode(cs != null ? cs : d);
     }
 
     private static Drawable logo(View r) {

@@ -64,7 +64,7 @@
 							android:padding="20dp"
 							android:scaleType="centerInside"
 							android:src="@drawable/ic_action_receive"
-							android:contentDescription="Status" android:duplicateParentState="true" />
+							android:contentDescription="Status" />
 					</com.google.android.material.card.MaterialCardView>
 					<TextView
 						android:id="@+id/tv_tx_value"

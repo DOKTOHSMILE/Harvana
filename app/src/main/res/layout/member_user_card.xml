@@ -127,7 +127,7 @@
 					android:scaleType="centerInside"
 					android:layout_marginStart="6dp"
 					app:tint="@color/colorTextTertiary"
-					android:focusable="false" android:duplicateParentState="true" />
+					android:focusable="false" />
 			</LinearLayout>
 			<com.google.android.material.divider.MaterialDivider
 				android:id="@+id/view41"

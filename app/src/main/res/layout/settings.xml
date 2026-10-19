@@ -69,7 +69,7 @@
 							android:padding="9dp"
 							android:background="@drawable/bg_settings_icon_badge"
 							android:src="@drawable/ic_person"
-							android:scaleType="fitCenter" android:duplicateParentState="true" />
+							android:scaleType="fitCenter" />
 						<LinearLayout
 							android:id="@+id/linear3"
 							android:layout_width="0dp"
@@ -254,7 +254,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view8"
@@ -279,7 +279,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_wallet"
 								android:scaleType="center"
-								android:tag="badge_green" android:duplicateParentState="true" />
+								android:tag="badge_green" />
 							<LinearLayout
 								android:id="@+id/linear9"
 								android:layout_width="0dp"
@@ -309,7 +309,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view10"
@@ -334,7 +334,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_restore"
 								android:scaleType="center"
-								android:tag="badge_green" android:duplicateParentState="true" />
+								android:tag="badge_green" />
 							<LinearLayout
 								android:id="@+id/linear11"
 								android:layout_width="0dp"
@@ -364,7 +364,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>
@@ -413,7 +413,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_credit_card"
 								android:scaleType="center"
-								android:tag="badge_amber" android:duplicateParentState="true" />
+								android:tag="badge_amber" />
 							<LinearLayout
 								android:id="@+id/linear13"
 								android:layout_width="0dp"
@@ -443,7 +443,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view14"
@@ -468,7 +468,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_receipt"
 								android:scaleType="center"
-								android:tag="badge_amber" android:duplicateParentState="true" />
+								android:tag="badge_amber" />
 							<LinearLayout
 								android:id="@+id/linear15"
 								android:layout_width="0dp"
@@ -498,7 +498,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view16"
@@ -523,7 +523,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_pie_chart"
 								android:scaleType="center"
-								android:tag="badge_amber" android:duplicateParentState="true" />
+								android:tag="badge_amber" />
 							<LinearLayout
 								android:id="@+id/linear17"
 								android:layout_width="0dp"
@@ -553,7 +553,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view18"
@@ -578,7 +578,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_description"
 								android:scaleType="center"
-								android:tag="badge_amber" android:duplicateParentState="true" />
+								android:tag="badge_amber" />
 							<LinearLayout
 								android:id="@+id/linear19"
 								android:layout_width="0dp"
@@ -608,7 +608,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>
@@ -657,7 +657,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_groups"
 								android:scaleType="center"
-								android:tag="badge_blue" android:duplicateParentState="true" />
+								android:tag="badge_blue" />
 							<LinearLayout
 								android:id="@+id/linear21"
 								android:layout_width="0dp"
@@ -687,7 +687,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view22"
@@ -712,7 +712,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_visibility_line"
 								android:scaleType="center"
-								android:tag="badge_blue" android:duplicateParentState="true" />
+								android:tag="badge_blue" />
 							<LinearLayout
 								android:id="@+id/linear23"
 								android:layout_width="0dp"
@@ -742,7 +742,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view24"
@@ -767,7 +767,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_notifications"
 								android:scaleType="center"
-								android:tag="badge_blue" android:duplicateParentState="true" />
+								android:tag="badge_blue" />
 							<LinearLayout
 								android:id="@+id/linear25"
 								android:layout_width="0dp"
@@ -797,7 +797,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view26"
@@ -822,7 +822,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_block"
 								android:scaleType="center"
-								android:tag="badge_blue" android:duplicateParentState="true" />
+								android:tag="badge_blue" />
 							<LinearLayout
 								android:id="@+id/linear27"
 								android:layout_width="0dp"
@@ -852,7 +852,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>
@@ -901,7 +901,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_dark_mode"
 								android:scaleType="center"
-								android:tag="badge_violet" android:duplicateParentState="true" />
+								android:tag="badge_violet" />
 							<LinearLayout
 								android:id="@+id/linear29"
 								android:layout_width="0dp"
@@ -931,7 +931,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view30"
@@ -956,7 +956,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_language"
 								android:scaleType="center"
-								android:tag="badge_violet" android:duplicateParentState="true" />
+								android:tag="badge_violet" />
 							<LinearLayout
 								android:id="@+id/linear31"
 								android:layout_width="0dp"
@@ -986,7 +986,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view32"
@@ -1011,7 +1011,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_attach_money"
 								android:scaleType="center"
-								android:tag="badge_violet" android:duplicateParentState="true" />
+								android:tag="badge_violet" />
 							<LinearLayout
 								android:id="@+id/linear33"
 								android:layout_width="0dp"
@@ -1041,7 +1041,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view34"
@@ -1066,7 +1066,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_storage"
 								android:scaleType="center"
-								android:tag="badge_violet" android:duplicateParentState="true" />
+								android:tag="badge_violet" />
 							<LinearLayout
 								android:id="@+id/linear35"
 								android:layout_width="0dp"
@@ -1096,7 +1096,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>
@@ -1145,7 +1145,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_help"
 								android:scaleType="center"
-								android:tag="badge_muted" android:duplicateParentState="true" />
+								android:tag="badge_muted" />
 							<LinearLayout
 								android:id="@+id/linear37"
 								android:layout_width="0dp"
@@ -1175,7 +1175,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view38"
@@ -1200,7 +1200,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_info"
 								android:scaleType="center"
-								android:tag="badge_muted" android:duplicateParentState="true" />
+								android:tag="badge_muted" />
 							<LinearLayout
 								android:id="@+id/linear39"
 								android:layout_width="0dp"
@@ -1230,7 +1230,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view40"
@@ -1255,7 +1255,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_gavel"
 								android:scaleType="center"
-								android:tag="badge_muted" android:duplicateParentState="true" />
+								android:tag="badge_muted" />
 							<LinearLayout
 								android:id="@+id/linear41"
 								android:layout_width="0dp"
@@ -1285,7 +1285,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/ic_arrow_right"
 								android:scaleType="center"
-								android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextTertiary" />
 						</LinearLayout>
 						<com.google.android.material.divider.MaterialDivider
 							android:id="@+id/view42"
@@ -1310,7 +1310,7 @@
 								android:background="@drawable/bg_settings_icon_badge"
 								android:src="@drawable/ic_logout"
 								android:scaleType="center"
-								android:tag="badge_red" android:duplicateParentState="true" />
+								android:tag="badge_red" />
 							<LinearLayout
 								android:id="@+id/linear43"
 								android:layout_width="0dp"

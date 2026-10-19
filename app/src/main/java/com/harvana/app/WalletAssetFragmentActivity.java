@@ -174,6 +174,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 
 	public void onResume() {
 		super.onResume();
+		if (sorter != null) sorter.allowResort();
 		_syncWallet();
 		
 		if (wallet_address != null && !wallet_address.trim().isEmpty()) {
@@ -205,6 +206,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 	private String assetQuery = "";
 	/** HARV's row, drawn by the list adapter into a plain box so it can sit in the one sorted list (AssetSorter). */
 	private LinearLayout harvBox;
+	private com.harvana.app.wallet.AssetSorter sorter;
 
 	/** One list for every asset, largest holding first, with each coin's price (wallet/AssetSorter). */
 	private void _setupSorted(View root) {
@@ -214,7 +216,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 		harvBox.setOrientation(LinearLayout.VERTICAL);
 		column.addView(harvBox, column.indexOfChild(recyclerview1) + 1);
 		recyclerview1.setVisibility(View.GONE);
-		com.harvana.app.wallet.AssetSorter.attach(harvBox, root.findViewById(R.id.husd_asset), root.findViewById(R.id.chain_assets),
+		sorter = com.harvana.app.wallet.AssetSorter.attach(harvBox, root.findViewById(R.id.husd_asset), root.findViewById(R.id.chain_assets),
 				root.findViewById(R.id.custom_assets));
 	}
 

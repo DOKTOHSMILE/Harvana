@@ -249,7 +249,7 @@
 						android:layout_height="16dp"
 						android:src="@drawable/ic_arrow_right"
 						android:scaleType="centerInside"
-						app:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+						app:tint="@color/colorTextTertiary" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 		</LinearLayout>

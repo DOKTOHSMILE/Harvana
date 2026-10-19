@@ -75,7 +75,7 @@
 						android:src="@drawable/ic_shield"
 						android:scaleType="centerInside"
 						android:layout_marginEnd="14dp"
-						app:tint="@color/colorError" android:duplicateParentState="true" />
+						app:tint="@color/colorError" />
 					<LinearLayout
 						android:id="@+id/linear51"
 						android:layout_width="match_parent"
@@ -123,7 +123,7 @@
 						android:layout_height="32dp"
 						android:src="@drawable/ic_shield"
 						android:scaleType="centerInside"
-						app:tint="@color/colorAccent" android:duplicateParentState="true" />
+						app:tint="@color/colorAccent" />
 				</com.google.android.material.card.MaterialCardView>
 				<com.google.android.material.textview.MaterialTextView
 					android:id="@+id/textview56"

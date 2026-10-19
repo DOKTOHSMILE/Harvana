@@ -35,7 +35,7 @@
 			android:scaleType="centerInside"
 			android:focusable="false"
 			android:backgroundTint="@color/colorSecondaryAccent"
-			app:tint="@color/colorSecondaryAccent" android:duplicateParentState="true" />
+			app:tint="@color/colorSecondaryAccent" />
 		<TextView
 			android:id="@+id/textview10"
 			android:layout_width="0dp"
@@ -53,7 +53,7 @@
 			android:src="@drawable/ic_arrow_right"
 			android:scaleType="centerInside"
 			app:tint="@color/colorTextTertiary"
-			android:focusable="false" android:duplicateParentState="true" />
+			android:focusable="false" />
 	</LinearLayout>
 	<com.google.android.material.divider.MaterialDivider
 		android:id="@+id/view7"
@@ -80,7 +80,7 @@
 			android:scaleType="centerInside"
 			android:focusable="false"
 			android:backgroundTint="@color/colorAmber"
-			app:tint="@color/colorAmber" android:duplicateParentState="true" />
+			app:tint="@color/colorAmber" />
 		<TextView
 			android:id="@+id/textview11"
 			android:layout_width="0dp"
@@ -98,7 +98,7 @@
 			android:src="@drawable/ic_arrow_right"
 			android:scaleType="centerInside"
 			app:tint="@color/colorTextTertiary"
-			android:focusable="false" android:duplicateParentState="true" />
+			android:focusable="false" />
 	</LinearLayout>
 	<com.google.android.material.divider.MaterialDivider
 		android:id="@+id/view8"
@@ -125,7 +125,7 @@
 			android:scaleType="centerInside"
 			android:focusable="false"
 			android:backgroundTint="@color/colorInfo"
-			app:tint="@color/colorInfo" android:duplicateParentState="true" />
+			app:tint="@color/colorInfo" />
 		<TextView
 			android:id="@+id/textview12"
 			android:layout_width="0dp"
@@ -143,7 +143,7 @@
 			android:src="@drawable/ic_arrow_right"
 			android:scaleType="centerInside"
 			app:tint="@color/colorTextTertiary"
-			android:focusable="false" android:duplicateParentState="true" />
+			android:focusable="false" />
 	</LinearLayout>
 	<com.google.android.material.divider.MaterialDivider
 		android:id="@+id/view9"
@@ -170,7 +170,7 @@
 			android:scaleType="centerInside"
 			android:focusable="false"
 			android:backgroundTint="@color/colorError"
-			app:tint="@color/colorError" android:duplicateParentState="true" />
+			app:tint="@color/colorError" />
 		<TextView
 			android:id="@+id/textview13"
 			android:layout_width="0dp"
@@ -188,6 +188,6 @@
 			android:src="@drawable/ic_arrow_right"
 			android:scaleType="centerInside"
 			app:tint="@color/colorTextTertiary"
-			android:focusable="false" android:duplicateParentState="true" />
+			android:focusable="false" />
 	</LinearLayout>
 </LinearLayout>

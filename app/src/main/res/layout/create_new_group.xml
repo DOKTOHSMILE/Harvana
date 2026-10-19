@@ -123,7 +123,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/icon_article_twotone"
 								android:scaleType="centerInside"
-								android:tint="@color/colorAccent" android:duplicateParentState="true" />
+								android:tint="@color/colorAccent" />
 							<TextView
 								android:id="@+id/textview12"
 								android:layout_width="wrap_content"
@@ -211,7 +211,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/icon_rule_twotone"
 								android:scaleType="centerInside"
-								android:tint="@color/colorAccent" android:duplicateParentState="true" />
+								android:tint="@color/colorAccent" />
 							<TextView
 								android:id="@+id/textview13"
 								android:layout_width="wrap_content"
@@ -319,7 +319,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/icon_category_twotone"
 								android:scaleType="centerInside"
-								android:tint="@color/colorAccent" android:duplicateParentState="true" />
+								android:tint="@color/colorAccent" />
 							<TextView
 								android:id="@+id/textview70"
 								android:layout_width="wrap_content"
@@ -360,7 +360,7 @@
 									android:layout_height="26dp"
 									android:src="@drawable/icon_360_twotone"
 									android:scaleType="centerInside"
-									android:tint="@color/colorAccent" android:duplicateParentState="true" />
+									android:tint="@color/colorAccent" />
 								<LinearLayout
 									android:id="@+id/linear68"
 									android:layout_width="0dp"
@@ -390,7 +390,7 @@
 									android:src="@drawable/icon_check_circle_round"
 									android:scaleType="centerInside"
 									android:tint="@color/colorAccent"
-									android:visibility="invisible" android:duplicateParentState="true" />
+									android:visibility="invisible" />
 							</LinearLayout>
 						</com.google.android.material.card.MaterialCardView>
 						<com.google.android.material.card.MaterialCardView
@@ -416,7 +416,7 @@
 									android:layout_height="26dp"
 									android:src="@drawable/icon_flag_circle_twotone"
 									android:scaleType="centerInside"
-									android:tint="@color/colorInfo" android:duplicateParentState="true" />
+									android:tint="@color/colorInfo" />
 								<LinearLayout
 									android:id="@+id/linear69"
 									android:layout_width="0dp"
@@ -446,7 +446,7 @@
 									android:src="@drawable/icon_check_circle_round"
 									android:scaleType="centerInside"
 									android:tint="@color/colorInfo"
-									android:visibility="invisible" android:duplicateParentState="true" />
+									android:visibility="invisible" />
 							</LinearLayout>
 						</com.google.android.material.card.MaterialCardView>
 						<com.google.android.material.card.MaterialCardView
@@ -472,7 +472,7 @@
 									android:layout_height="26dp"
 									android:src="@drawable/icon_trending_up_twotone"
 									android:scaleType="centerInside"
-									android:tint="@color/colorSuccessBright" android:duplicateParentState="true" />
+									android:tint="@color/colorSuccessBright" />
 								<LinearLayout
 									android:id="@+id/linear70"
 									android:layout_width="0dp"
@@ -502,7 +502,7 @@
 									android:src="@drawable/icon_check_circle_round"
 									android:scaleType="centerInside"
 									android:tint="@color/colorSuccessBright"
-									android:visibility="invisible" android:duplicateParentState="true" />
+									android:visibility="invisible" />
 							</LinearLayout>
 						</com.google.android.material.card.MaterialCardView>
 					</LinearLayout>
@@ -535,7 +535,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/icon_360_twotone"
 								android:scaleType="centerInside"
-								android:tint="@color/colorAccent" android:duplicateParentState="true" />
+								android:tint="@color/colorAccent" />
 							<TextView
 								android:id="@+id/textview78"
 								android:layout_width="wrap_content"
@@ -670,7 +670,7 @@
 										android:layout_height="22dp"
 										android:src="@drawable/icon_visibility_off_twotone_line"
 										android:scaleType="centerInside"
-										android:tint="@color/colorAccent" android:duplicateParentState="true" />
+										android:tint="@color/colorAccent" />
 									<TextView
 										android:id="@+id/textview84"
 										android:layout_width="match_parent"
@@ -712,7 +712,7 @@
 										android:layout_height="22dp"
 										android:src="@drawable/icon_groups_3_twotone"
 										android:scaleType="centerInside"
-										android:tint="@color/colorWarning" android:duplicateParentState="true" />
+										android:tint="@color/colorWarning" />
 									<TextView
 										android:id="@+id/textview86"
 										android:layout_width="match_parent"
@@ -762,7 +762,7 @@
 										android:layout_height="22dp"
 										android:src="@drawable/icon_ads_click_outline"
 										android:scaleType="centerInside"
-										android:tint="@color/colorInfo" android:duplicateParentState="true" />
+										android:tint="@color/colorInfo" />
 									<TextView
 										android:id="@+id/textview88"
 										android:layout_width="match_parent"
@@ -804,7 +804,7 @@
 										android:layout_height="22dp"
 										android:src="@drawable/icon_groups_3_twotone"
 										android:scaleType="centerInside"
-										android:tint="@color/colorSuccessBright" android:duplicateParentState="true" />
+										android:tint="@color/colorSuccessBright" />
 									<TextView
 										android:id="@+id/textview90"
 										android:layout_width="match_parent"
@@ -854,7 +854,7 @@
 										android:layout_height="22dp"
 										android:src="@drawable/icon_balance_twotone"
 										android:scaleType="centerInside"
-										android:tint="@color/colorSecondaryAccent" android:duplicateParentState="true" />
+										android:tint="@color/colorSecondaryAccent" />
 									<TextView
 										android:id="@+id/textview92"
 										android:layout_width="match_parent"
@@ -953,7 +953,7 @@
 								android:layout_height="16dp"
 								android:src="@drawable/icon_info_round"
 								android:scaleType="centerInside"
-								android:tint="@color/colorInfo" android:duplicateParentState="true" />
+								android:tint="@color/colorInfo" />
 							<TextView
 								android:id="@+id/textview97"
 								android:layout_width="0dp"
@@ -1065,7 +1065,7 @@
 									android:layout_height="16dp"
 									android:src="@drawable/icon_info_round"
 									android:scaleType="centerInside"
-									android:tint="@color/colorTextTertiary" android:duplicateParentState="true" />
+									android:tint="@color/colorTextTertiary" />
 								<TextView
 									android:id="@+id/textview101"
 									android:layout_width="0dp"
@@ -1204,7 +1204,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/icon_flag_circle_twotone"
 								android:scaleType="centerInside"
-								android:tint="@color/colorInfo" android:duplicateParentState="true" />
+								android:tint="@color/colorInfo" />
 							<TextView
 								android:id="@+id/textview106"
 								android:layout_width="wrap_content"
@@ -1344,7 +1344,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/icon_trending_up_twotone"
 								android:scaleType="centerInside"
-								android:tint="@color/colorSuccessBright" android:duplicateParentState="true" />
+								android:tint="@color/colorSuccessBright" />
 							<TextView
 								android:id="@+id/textview113"
 								android:layout_width="wrap_content"
@@ -1526,7 +1526,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/icon_location_on_twotone"
 								android:scaleType="centerInside"
-								android:tint="@color/colorAccent" android:duplicateParentState="true" />
+								android:tint="@color/colorAccent" />
 							<TextView
 								android:id="@+id/textview15"
 								android:layout_width="wrap_content"
@@ -1635,7 +1635,7 @@
 								android:layout_height="18dp"
 								android:src="@drawable/icon_edit_attributes_twotone"
 								android:scaleType="centerInside"
-								android:tint="@color/colorAccent" android:duplicateParentState="true" />
+								android:tint="@color/colorAccent" />
 							<TextView
 								android:id="@+id/textview122"
 								android:layout_width="wrap_content"
@@ -1659,7 +1659,7 @@
 								android:layout_height="22dp"
 								android:src="@drawable/icon_check_round"
 								android:scaleType="centerInside"
-								android:tint="@color/colorTextSecondary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextSecondary" />
 							<LinearLayout
 								android:id="@+id/linear104"
 								android:layout_width="0dp"
@@ -1736,7 +1736,7 @@
 								android:layout_height="22dp"
 								android:src="@drawable/icon_group_add_twotone"
 								android:scaleType="centerInside"
-								android:tint="@color/colorTextSecondary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextSecondary" />
 							<LinearLayout
 								android:id="@+id/linear107"
 								android:layout_width="0dp"
@@ -1783,7 +1783,7 @@
 								android:layout_height="22dp"
 								android:src="@drawable/icon_border_color_twotone"
 								android:scaleType="centerInside"
-								android:tint="@color/colorTextSecondary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextSecondary" />
 							<LinearLayout
 								android:id="@+id/linear110"
 								android:layout_width="0dp"
@@ -1830,7 +1830,7 @@
 								android:layout_height="22dp"
 								android:src="@drawable/icon_link_twotone"
 								android:scaleType="centerInside"
-								android:tint="@color/colorTextSecondary" android:duplicateParentState="true" />
+								android:tint="@color/colorTextSecondary" />
 							<LinearLayout
 								android:id="@+id/linear113"
 								android:layout_width="0dp"

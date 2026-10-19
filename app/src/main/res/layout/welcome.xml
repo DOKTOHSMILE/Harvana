@@ -78,7 +78,7 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/icon_lock_round"
-                        app:tint="@color/colorHarvOrange" android:duplicateParentState="true" />
+                        app:tint="@color/colorHarvOrange" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -100,7 +100,7 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/icon_star_rate_round"
-                        app:tint="@color/colorHarvOrange" android:duplicateParentState="true" />
+                        app:tint="@color/colorHarvOrange" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

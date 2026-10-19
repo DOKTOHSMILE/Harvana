@@ -8,7 +8,8 @@
 - Change my payout wallet: pick one of the other wallets on this phone; that wallet signs. It moves at once when the wallet has been on the same account for 24 hours, otherwise once the group admin agrees. Before, the request left out the wallets and the network refused it ("That acting address isn't valid").
 - Linking a wallet to the account: the network's reason is shown when it refuses (another account, sign-in expired, phone clock). A fresh sign-in token is used every time.
 - Send (HARV, Harvana coins, tokens, other chains, Pi): the same amount to the same wallet within 30 minutes asks to confirm (To, Amount, Last sent). Remembered on this phone after the network accepts a send.
-- Needs the node from 19 Oct 2026 for the 24-hour rule (an older node keeps its earlier rule).
+- Sending to a group, P2P or swap wallet's address by hand is refused by the network now; the app says to pay it from its own screen.
+- Needs the node from 19 Oct 2026 for the 24-hour rule and that refusal (an older node keeps its earlier rules).
 
 ## 19 Oct 2026: Swap button on Assets, matching Swap icon, Activity dividers, gifts split by the node
 

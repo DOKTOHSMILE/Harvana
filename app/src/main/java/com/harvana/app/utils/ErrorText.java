@@ -168,6 +168,7 @@ public final class ErrorText {
         WORDS.put("PUBLIC_KEY_MISMATCH", "This wallet's key doesn't match its address. Re-import the wallet from its recovery phrase.");
         WORDS.put("INVALID_NONCE", "Another request from this wallet went through first. Try again.");
         WORDS.put("NONCE_ALREADY_USED", "Another request from this wallet went through first. Try again.");
+        WORDS.put("NODE_HELD_WALLET", "That is a Harvana group, P2P or swap wallet. Pay it from its own screen, not by sending to the address.");
         WORDS.put("WALLET_LINKED_LESS_THAN_24H", "This wallet was added to your account less than 24 hours ago. Use the wallet that holds the savings, or try again after 24 hours.");
         WORDS.put("NOT_YOUR_WALLET", "That wallet isn't on the same account as the wallet that holds this place.");
         WORDS.put("NOT_THE_LINE_OWNER", "This savings line belongs to another wallet. Switch to the wallet that holds it.");

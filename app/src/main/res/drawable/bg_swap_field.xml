@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Swap: an amount box or the rate row inside the card. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+	<solid android:color="@color/swapField" />
+	<stroke android:width="1dp" android:color="@color/swapBorder" />
+	<corners android:radius="16dp" />
+</shape>

@@ -101,4 +101,20 @@
     <color name="p2pOnBuy">#04261A</color>
     <color name="p2pSell">@color/colorError</color>
     <color name="p2pOnSell">#2B0706</color>
+
+    <!-- Swap screen: the owner's palette (19 Oct 2026). -->
+    <color name="swapBackground">#050B12</color>
+    <color name="swapCard">#0D1621</color>
+    <color name="swapField">#101C29</color>
+    <color name="swapBorder">#203445</color>
+    <color name="swapAccent">#10B981</color>
+    <color name="swapAccentSoft">#6EE7B7</color>
+    <color name="swapAccentTint">#2610B981</color>
+    <color name="swapText">#F8FAFC</color>
+    <color name="swapTextSecondary">#94A3B8</color>
+    <color name="swapSuccess">#34D399</color>
+    <color name="swapWarning">#FBBF24</color>
+    <color name="swapError">#F87171</color>
+    <color name="swapOnAccent">#05251D</color>
+    <color name="swapDisabled">#1E2B38</color>
 </resources>

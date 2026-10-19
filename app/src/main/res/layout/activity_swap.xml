@@ -1,276 +1,306 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Swap: you pay (amount, coin, balance, Max), flip, you get, the figures table, Swap, your swaps, the pools. -->
+<!-- Swap (19 Oct 2026 redesign): one card (you pay, reverse, you receive, rate and details, Review Swap), then Recent
+     Swaps. Pools live in Web3 → Liquidity, not here. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/swap_scroll"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:background="@color/colorBackground">
+	android:background="@color/swapBackground"
+	android:fillViewport="true">
 
-	<LinearLayout
+	<FrameLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:orientation="vertical"
-		android:paddingStart="16dp"
-		android:paddingTop="16dp"
-		android:paddingEnd="16dp"
-		android:paddingBottom="24dp">
+		android:layout_height="wrap_content">
 
+		<!-- Width clamped on tablets in SwapActivity.clampWidth(). -->
 		<LinearLayout
+			android:id="@+id/swap_content"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:background="@drawable/bg_card_surface_18"
-			android:orientation="vertical"
-			android:paddingStart="16dp"
-			android:paddingTop="14dp"
-			android:paddingEnd="16dp"
-			android:paddingBottom="14dp">
-
-			<TextView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="You pay"
-				android:textColor="@color/colorTextSecondary"
-				android:textSize="13sp" />
-
-			<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:gravity="center_vertical"
-				android:orientation="horizontal">
-
-				<EditText
-					android:id="@+id/et_swap_amount"
-					android:layout_width="0dp"
-					android:layout_height="wrap_content"
-					android:layout_weight="1"
-					android:background="@null"
-					android:hint="0"
-					android:inputType="numberDecimal"
-					android:singleLine="true"
-					android:textSize="26sp"
-					android:textStyle="bold" />
-
-				<LinearLayout
-					android:id="@+id/swap_chip_from"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:background="@drawable/bg_pill_background"
-					android:gravity="center_vertical"
-					android:orientation="horizontal"
-					android:paddingStart="10dp"
-					android:paddingTop="6dp"
-					android:paddingEnd="12dp"
-					android:paddingBottom="6dp">
-
-					<ImageView
-						android:id="@+id/iv_swap_from"
-						android:layout_width="24dp"
-						android:layout_height="24dp"
-						android:importantForAccessibility="no" />
-
-					<TextView
-						android:id="@+id/tv_swap_from"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:paddingStart="6dp"
-						android:paddingEnd="2dp"
-						android:textColor="@color/colorTextPrimary"
-						android:textSize="15sp"
-						android:textStyle="bold" />
-
-					<ImageView
-						android:layout_width="18dp"
-						android:layout_height="18dp"
-						android:importantForAccessibility="no"
-						android:src="@drawable/icon_arrow_drop_down_round"
-						app:tint="@color/colorTextSecondary" />
-				</LinearLayout>
-
-			</LinearLayout>
-
-			<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:gravity="center_vertical"
-				android:orientation="horizontal">
-
-				<TextView
-					android:id="@+id/tv_swap_balance"
-					android:layout_width="0dp"
-					android:layout_height="wrap_content"
-					android:layout_weight="1"
-					android:text="Balance: …"
-					android:textColor="@color/colorTextTertiary"
-					android:textSize="12sp" />
-
-				<TextView
-					android:id="@+id/tv_swap_max"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:minHeight="36dp"
-					android:gravity="center_vertical"
-					android:paddingStart="8dp"
-					android:text="Max"
-					android:textColor="@color/colorAccent"
-					android:textSize="13sp"
-					android:textStyle="bold" />
-			</LinearLayout>
-		</LinearLayout>
-
-		<ImageView
-			android:id="@+id/iv_swap_flip"
-			android:layout_width="40dp"
-			android:layout_height="40dp"
 			android:layout_gravity="center_horizontal"
-			android:layout_marginTop="4dp"
-			android:layout_marginBottom="4dp"
-			android:background="@drawable/bg_icon_circle_accent_soft"
-			android:contentDescription="Swap the two sides"
-			android:padding="8dp"
-			android:src="@drawable/ic_app_swap" />
-
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:background="@drawable/bg_card_surface_18"
 			android:orientation="vertical"
 			android:paddingStart="16dp"
-			android:paddingTop="14dp"
+			android:paddingTop="12dp"
 			android:paddingEnd="16dp"
-			android:paddingBottom="14dp">
+			android:paddingBottom="24dp">
 
-			<TextView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="You get (estimate)"
-				android:textColor="@color/colorTextSecondary"
-				android:textSize="13sp" />
-
+			<!-- ── Main swap card ───────────────────────────────────────────── -->
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:gravity="center_vertical"
-				android:orientation="horizontal">
+				android:background="@drawable/bg_swap_card"
+				android:orientation="vertical"
+				android:padding="16dp">
 
-				<TextView
-					android:id="@+id/tv_swap_out"
-					android:layout_width="0dp"
+				<!-- You pay -->
+				<LinearLayout
+					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:layout_weight="1"
-					android:text="0"
-					android:textColor="@color/colorTextPrimary"
-					android:textSize="26sp"
-					android:textStyle="bold" />
+					android:gravity="center_vertical"
+					android:orientation="horizontal">
+					<TextView
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:text="You pay"
+						android:textColor="@color/swapText"
+						android:textSize="14sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/tv_swap_balance"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textColor="@color/swapTextSecondary"
+						android:textSize="12sp"
+						tools:text="Available: 88.4365 HARV" />
+					<TextView
+						android:id="@+id/tv_swap_max"
+						android:layout_width="wrap_content"
+						android:layout_height="32dp"
+						android:layout_marginStart="8dp"
+						android:background="@drawable/bg_swap_pill"
+						android:contentDescription="Use the maximum spendable amount"
+						android:gravity="center"
+						android:paddingStart="10dp"
+						android:paddingEnd="10dp"
+						android:text="MAX"
+						android:textColor="@color/swapAccent"
+						android:textSize="12sp"
+						android:textStyle="bold" />
+				</LinearLayout>
 
 				<LinearLayout
-					android:id="@+id/swap_chip_to"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:background="@drawable/bg_pill_background"
+					android:layout_width="match_parent"
+					android:layout_height="72dp"
+					android:layout_marginTop="8dp"
+					android:background="@drawable/bg_swap_field"
 					android:gravity="center_vertical"
 					android:orientation="horizontal"
 					android:paddingStart="10dp"
-					android:paddingTop="6dp"
-					android:paddingEnd="12dp"
-					android:paddingBottom="6dp">
-
-					<ImageView
-						android:id="@+id/iv_swap_to"
-						android:layout_width="24dp"
-						android:layout_height="24dp"
-						android:importantForAccessibility="no" />
-
-					<TextView
-						android:id="@+id/tv_swap_to"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:paddingStart="6dp"
-						android:paddingEnd="2dp"
-						android:textColor="@color/colorTextPrimary"
-						android:textSize="15sp"
+					android:paddingEnd="14dp">
+					<include
+						android:id="@+id/swap_chip_from"
+						layout="@layout/view_swap_token" />
+					<EditText
+						android:id="@+id/et_swap_amount"
+						android:layout_width="0dp"
+						android:layout_height="match_parent"
+						android:layout_weight="1"
+						android:background="@null"
+						android:gravity="end|center_vertical"
+						android:hint="0.00"
+						android:importantForAutofill="no"
+						android:inputType="numberDecimal"
+						android:maxLength="24"
+						android:singleLine="true"
+						android:textColor="@color/swapText"
+						android:textColorHint="@color/swapTextSecondary"
+						android:textSize="26sp"
 						android:textStyle="bold" />
-
-					<ImageView
-						android:layout_width="18dp"
-						android:layout_height="18dp"
-						android:importantForAccessibility="no"
-						android:src="@drawable/icon_arrow_drop_down_round"
-						app:tint="@color/colorTextSecondary" />
 				</LinearLayout>
 
+				<!-- Reverse the pair -->
+				<FrameLayout
+					android:layout_width="match_parent"
+					android:layout_height="52dp">
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="1dp"
+						android:layout_gravity="center_vertical"
+						android:background="@color/swapBorder" />
+					<ImageView
+						android:id="@+id/iv_swap_flip"
+						android:layout_width="44dp"
+						android:layout_height="44dp"
+						android:layout_gravity="center"
+						android:background="@drawable/bg_swap_flip"
+						android:contentDescription="Reverse the pair"
+						android:padding="11dp"
+						android:src="@drawable/ic_swap_vertical" />
+				</FrameLayout>
+
+				<!-- You receive -->
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="You receive (estimated)"
+					android:textColor="@color/swapText"
+					android:textSize="14sp"
+					android:textStyle="bold" />
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="72dp"
+					android:layout_marginTop="8dp"
+					android:background="@drawable/bg_swap_field"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingStart="10dp"
+					android:paddingEnd="14dp">
+					<include
+						android:id="@+id/swap_chip_to"
+						layout="@layout/view_swap_token" />
+					<TextView
+						android:id="@+id/tv_swap_out"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:ellipsize="end"
+						android:gravity="end"
+						android:maxLines="1"
+						android:text="0.00"
+						android:textColor="@color/swapText"
+						android:textSize="26sp"
+						android:textStyle="bold" />
+				</LinearLayout>
+
+				<!-- Rate; tap for the details -->
+				<LinearLayout
+					android:id="@+id/swap_rate_row"
+					android:layout_width="match_parent"
+					android:layout_height="50dp"
+					android:layout_marginTop="12dp"
+					android:background="@drawable/bg_swap_field"
+					android:contentDescription="Exchange rate. Tap for details."
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingStart="14dp"
+					android:paddingEnd="10dp">
+					<TextView
+						android:id="@+id/tv_swap_rate"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:ellipsize="end"
+						android:maxLines="1"
+						android:textColor="@color/swapText"
+						android:textSize="14sp"
+						android:textStyle="bold"
+						tools:text="1 HARV ≈ 13,437.31 hNGN" />
+					<TextView
+						android:id="@+id/tv_swap_details_toggle"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Details"
+						android:textColor="@color/swapAccent"
+						android:textSize="13sp"
+						android:textStyle="bold" />
+					<ImageView
+						android:id="@+id/iv_swap_details_chevron"
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_swap_chevron" />
+				</LinearLayout>
+
+				<!-- Network fee, slippage, minimum received, price impact, pool and Harvana fees, route -->
+				<LinearLayout
+					android:id="@+id/swap_details"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:orientation="vertical"
+					android:visibility="gone" />
+
+				<!-- Slippage tolerance (always visible: it changes what the node will accept) -->
+				<LinearLayout
+					android:id="@+id/swap_slippage_row"
+					android:layout_width="match_parent"
+					android:layout_height="50dp"
+					android:layout_marginTop="8dp"
+					android:background="@drawable/bg_swap_field"
+					android:contentDescription="Slippage tolerance"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingStart="14dp"
+					android:paddingEnd="10dp">
+					<TextView
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:text="Slippage tolerance"
+						android:textColor="@color/swapTextSecondary"
+						android:textSize="13sp" />
+					<TextView
+						android:id="@+id/tv_swap_slippage"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textColor="@color/swapText"
+						android:textSize="14sp"
+						android:textStyle="bold"
+						tools:text="1%" />
+					<ImageView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:importantForAccessibility="no"
+						android:src="@drawable/ic_swap_chevron" />
+				</LinearLayout>
+
+				<TextView
+					android:id="@+id/tv_swap_problem"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="10dp"
+					android:accessibilityLiveRegion="polite"
+					android:textColor="@color/swapError"
+					android:textSize="13sp"
+					android:visibility="gone" />
+
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_swap"
+					android:layout_width="match_parent"
+					android:layout_height="52dp"
+					android:layout_marginTop="14dp"
+					android:background="@drawable/bg_swap_button"
+					android:enabled="false"
+					android:insetTop="0dp"
+					android:insetBottom="0dp"
+					android:text="Enter an amount"
+					android:textAllCaps="false"
+					android:textColor="@color/swapOnAccent"
+					android:textSize="16sp"
+					android:textStyle="bold"
+					app:backgroundTint="@null"
+					xmlns:app="http://schemas.android.com/apk/res-auto" />
 			</LinearLayout>
+
+			<!-- ── Recent swaps ─────────────────────────────────────────────── -->
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="48dp"
+				android:layout_marginTop="20dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<TextView
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:text="Recent Swaps"
+					android:textColor="@color/swapText"
+					android:textSize="17sp"
+					android:textStyle="bold" />
+				<TextView
+					android:id="@+id/tv_swap_view_all"
+					android:layout_width="wrap_content"
+					android:layout_height="48dp"
+					android:gravity="center"
+					android:paddingStart="8dp"
+					android:text="View all ›"
+					android:textColor="@color/swapAccent"
+					android:textSize="13sp"
+					android:textStyle="bold"
+					android:visibility="gone" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/swap_orders"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:background="@drawable/bg_swap_card"
+				android:orientation="vertical"
+				android:paddingStart="12dp"
+				android:paddingEnd="12dp" />
 		</LinearLayout>
-
-		<TextView
-			android:id="@+id/tv_swap_problem"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:paddingStart="6dp"
-			android:paddingTop="10dp"
-			android:paddingEnd="6dp"
-			android:paddingBottom="4dp"
-			android:textColor="@color/colorWarning"
-			android:textSize="12sp" />
-
-		<LinearLayout
-			android:id="@+id/swap_details"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_marginTop="4dp"
-			android:orientation="vertical" />
-
-		<com.google.android.material.button.MaterialButton
-			android:id="@+id/btn_swap"
-			style="@style/HarvanaButton"
-			android:layout_width="match_parent"
-			android:layout_height="52dp"
-			android:layout_marginTop="8dp"
-			android:enabled="false"
-			android:text="Swap" />
-
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:paddingStart="4dp"
-			android:paddingTop="22dp"
-			android:paddingBottom="6dp"
-			android:text="Your swaps"
-			android:textColor="@color/colorTextPrimary"
-			android:textSize="15sp"
-			android:textStyle="bold" />
-
-		<LinearLayout
-			android:id="@+id/swap_orders"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:background="@drawable/bg_card_surface_18"
-			android:orientation="vertical"
-			android:paddingStart="16dp"
-			android:paddingTop="8dp"
-			android:paddingEnd="16dp"
-			android:paddingBottom="8dp" />
-
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:paddingStart="4dp"
-			android:paddingTop="22dp"
-			android:paddingBottom="6dp"
-			android:text="Pools"
-			android:textColor="@color/colorTextPrimary"
-			android:textSize="15sp"
-			android:textStyle="bold" />
-
-		<LinearLayout
-			android:id="@+id/swap_pools"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:background="@drawable/bg_card_surface_18"
-			android:orientation="vertical"
-			android:paddingStart="16dp"
-			android:paddingTop="8dp"
-			android:paddingEnd="16dp"
-			android:paddingBottom="8dp" />
-
-	</LinearLayout>
+	</FrameLayout>
 </ScrollView>

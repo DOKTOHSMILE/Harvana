@@ -2,6 +2,19 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026: Swap redesign
+
+- One card: You pay (coin, amount, Available, MAX), reverse button, You receive (estimated), rate, details, slippage tolerance, Review Swap. Dark palette in dark mode; a light version of it in light mode.
+- MAX leaves room for the tFare on HARV swaps. Amounts with more decimals than the coin keeps are refused instead of cut.
+- Asset selector: search, every coin with its balance; a coin with no liquidity is shown as unavailable and cannot be picked.
+- Details: minimum received, network fee (tFare), pool fee, Harvana fee, price impact, route.
+- Slippage tolerance 0.1%, 0.5%, 1% or 3% (remembered). The minimum it gives is sent with the swap; the node returns the coins if the pool would pay less.
+- The button names the problem: enter an amount, invalid amount, insufficient balance, not enough HARV for tFare, pair unavailable, quote unavailable, amount too small. One tap only; a second tap while submitting does nothing.
+- Review Swap fetches a fresh quote, shows every figure that will be sent, then asks for the PIN or fingerprint.
+- After Confirm: authorised, submitted, confirmed by the network; Swap Successful with what arrived, Swap returned when the price moved past the minimum, or Swap failed with Refresh quote. Copy the transaction hash; View in explorer.
+- Recent Swaps: the last five swaps (View all for the rest) with pair, amounts, date and status (Completed, Confirming, Refunded). Pool deposits and withdrawals are no longer on this screen; pools are in Web3 → Liquidity.
+- Tablets: the form keeps a 560dp column.
+
 ## 19 Oct 2026: Learn Hub gifts share 5% with Harvana
 
 - A gift now goes 95% to the author and 5% to the Harvana treasury, in two transfers. The reader pays the gift amount and the tFare of each transfer.

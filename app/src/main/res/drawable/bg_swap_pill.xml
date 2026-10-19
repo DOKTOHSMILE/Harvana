@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Swap: a status pill; the text colour is set in code and the tint follows it. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+	<solid android:color="@color/swapAccentTint" />
+	<corners android:radius="12dp" />
+</shape>

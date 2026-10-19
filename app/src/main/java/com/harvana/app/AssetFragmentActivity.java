@@ -219,6 +219,11 @@ public class AssetFragmentActivity extends Fragment {
 			
 		});
 
+		View swap = _view.findViewById(R.id.card_swap);
+		if (swap != null) swap.setOnClickListener(_v -> {
+			if (getContext() != null) startActivity(new Intent(getContext(), com.harvana.app.swap.SwapActivity.class));
+		});
+
 		View discover = _view.findViewById(R.id.card_discover);
 		if (discover != null) discover.setOnClickListener(_v -> {
 			if (getContext() != null) startActivity(new Intent(getContext(), com.harvana.app.web3.DiscoverActivity.class));

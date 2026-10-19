@@ -152,6 +152,19 @@ public final class NodeGroupClient {
                 new String[]{"from", from, "to", to, "amountRaw", String.valueOf(amountRaw), "minOutRaw", String.valueOf(minOutRaw)}, cb);
     }
 
+    /**
+     * A Learn Hub gift through the node, which builds both transfers out of this wallet: 95% to the author, 5% to the
+     * Harvana treasury, each with its tFare. Signed as "HARVANA_LEARN_GIFT_V1:from:contentId:author:amountRaw:nonce".
+     */
+    public static void learnGift(Context c, String address, String contentId, String author, long amountRaw, Callback cb) {
+        act(c, address, "/api/v1/learn/gift", new Spec() {
+            public String canonical(long n) { return "HARVANA_LEARN_GIFT_V1:" + address + ":" + contentId + ":" + author + ":" + amountRaw + ":" + n; }
+            public void fill(JSONObject body, long n) throws JSONException {
+                body.put("address", address).put("contentId", contentId).put("author", author).put("amountRaw", amountRaw);
+            }
+        }, cb);
+    }
+
     /** Put HARV and a coin into the coin's pool for shares. */
     public static void swapAdd(Context c, String address, String code, long harvRaw, long coinRaw, Callback cb) {
         swapAct(c, "/api/v1/swap/add", "ADD", code, "HARV", address, harvRaw, coinRaw,

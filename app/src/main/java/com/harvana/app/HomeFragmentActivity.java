@@ -1531,7 +1531,7 @@ public class HomeFragmentActivity extends Fragment {
 			row.setPadding(hPad, 0, hPad, (int) (10 * d));
 			row.addView(_quickAction(R.drawable.ic_action_send, "Send", SendAssetActivity.class), _quickActionParams(d, false));
 			row.addView(_quickAction(R.drawable.ic_action_receive, "Receive", ReceiveActivity.class), _quickActionParams(d, true));
-			row.addView(_quickAction(R.drawable.ic_app_swap, "Swap", com.harvana.app.swap.SwapActivity.class), _quickActionParams(d, true));
+			row.addView(_quickAction(R.drawable.ic_action_swap, "Swap", com.harvana.app.swap.SwapActivity.class), _quickActionParams(d, true));
 			row.addView(_quickAction(R.drawable.ic_action_buy, "P2P", P2pMarketplaceActivity.class), _quickActionParams(d, true));
 			
 			card.removeView(top);

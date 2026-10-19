@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Harvana icon (line), same family as ic_action_send_line: two opposite arrows (swap), stroke over a soft fill. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="@color/colorAccent" android:fillAlpha="0.4"
+        android:pathData="M3.5,7L8,2.75V5.75H18V8.25H8V11.25ZM20.5,17L16,21.25V18.25H6V15.75H16V12.75Z"/>
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.6" android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M18.5,7H4.25M7.75,3.5L4.25,7L7.75,10.5M5.5,17H19.75M16.25,13.5L19.75,17L16.25,20.5"/>
+</vector>

@@ -19,8 +19,10 @@ import java.math.BigDecimal;
  * It is a normal signed transfer, with a LEARN_GIFT memo so the node can count it as real engagement. The reader must
  * confirm with their PIN or biometric first, like any payment.
  *
- * <p>Harvana's share (owner, 19 Oct 2026): 5% of the gift goes to the company treasury in a second transfer
- * ({@code HARVANA_SERVICE:LEARN_GIFT:<contentId>}); the author gets 95%. The reader pays the gift amount.
+ * <p>Harvana's share (owner, 19 Oct 2026): the node splits the gift. One signed request to POST /api/v1/learn/gift and
+ * the node builds both transfers out of the reader's wallet: 95% to the author, 5% to the company treasury, each with
+ * its tFare. Only gifts made this way count as gifts on the node. A node that does not have the endpoint yet gets the
+ * earlier two transfers from this phone ({@code HARVANA_SERVICE:LEARN_GIFT:<contentId>} for the share).
  */
 public final class LearnGift {
     private LearnGift() {}
@@ -65,25 +67,42 @@ public final class LearnGift {
 
     private static void confirm(Activity host, String contentId, String dest, String me, String who, String amount, Runnable onGifted) {
         BigDecimal[] parts = split(new BigDecimal(amount));
-        String authorPart = parts[1].stripTrailingZeros().toPlainString();
+        long raw = new BigDecimal(amount).movePointRight(8).longValueExact();
         PinPromptHelper.authorize(host, "Send a gift of " + amount + " HARV to " + who + ".", () ->
-                TransactionRouter.routeTransaction(host, me, dest, parts[1], null,
-                        EngagementCanonical.giftMemo(contentId), new TransactionRouter.RouterCallback() {
-                            @Override public void onSuccess(String txHash) {
-                                toast(host, "Gift sent to " + who + ". Thank you.");
-                                LearnSocial.recordGift(contentId, txHash, authorPart, dest, (ok, err) -> { if (ok && onGifted != null) host.runOnUiThread(onGifted); });
-                                if (parts[0].signum() > 0) {
-                                    TransactionRouter.routeTransaction(host, me, TREASURY, parts[0], null,
-                                            "HARVANA_SERVICE:LEARN_GIFT:" + contentId, new TransactionRouter.RouterCallback() {
-                                                @Override public void onSuccess(String h) { }
-                                                @Override public void onError(String code, String msg) {
-                                                    android.util.Log.w("LearnGift", "Harvana share not sent: " + code);
-                                                }
-                                            });
-                                }
-                            }
-                            @Override public void onError(String code, String msg) { toast(host, msg == null || msg.isEmpty() ? "The gift could not be sent." : msg); }
-                        }));
+                com.harvana.app.sync.NodeGroupClient.learnGift(host, me, contentId, dest, raw, new com.harvana.app.sync.NodeGroupClient.Callback() {
+                    @Override public void onSuccess(org.json.JSONObject r) {
+                        toast(host, "Gift sent to " + who + ". Thank you.");
+                        String authorPart = BigDecimal.valueOf(r.optLong("authorRaw"), 8).stripTrailingZeros().toPlainString();
+                        LearnSocial.recordGift(contentId, r.optString("authorTx"), authorPart, dest,
+                                (ok, err) -> { if (ok && onGifted != null) host.runOnUiThread(onGifted); });
+                    }
+                    @Override public void onError(String error) {
+                        if (com.harvana.app.utils.ErrorText.is(error, "NOT_FOUND")) sendDirect(host, contentId, dest, me, who, parts, onGifted);
+                        else toast(host, error == null || error.isEmpty() ? "The gift could not be sent." : com.harvana.app.utils.ErrorText.plain(error));
+                    }
+                }));
+    }
+
+    /** A node without /api/v1/learn/gift: the author's part, then Harvana's, as two transfers from this phone. */
+    private static void sendDirect(Activity host, String contentId, String dest, String me, String who, BigDecimal[] parts, Runnable onGifted) {
+        String authorPart = parts[1].stripTrailingZeros().toPlainString();
+        TransactionRouter.routeTransaction(host, me, dest, parts[1], null,
+                EngagementCanonical.giftMemo(contentId), new TransactionRouter.RouterCallback() {
+                    @Override public void onSuccess(String txHash) {
+                        toast(host, "Gift sent to " + who + ". Thank you.");
+                        LearnSocial.recordGift(contentId, txHash, authorPart, dest, (ok, err) -> { if (ok && onGifted != null) host.runOnUiThread(onGifted); });
+                        if (parts[0].signum() > 0) {
+                            TransactionRouter.routeTransaction(host, me, TREASURY, parts[0], null,
+                                    "HARVANA_SERVICE:LEARN_GIFT:" + contentId, new TransactionRouter.RouterCallback() {
+                                        @Override public void onSuccess(String h) { }
+                                        @Override public void onError(String code, String msg) {
+                                            android.util.Log.w("LearnGift", "Harvana share not sent: " + code);
+                                        }
+                                    });
+                        }
+                    }
+                    @Override public void onError(String code, String msg) { toast(host, msg == null || msg.isEmpty() ? "The gift could not be sent." : msg); }
+                });
     }
 
     private static void toast(Activity host, String message) {

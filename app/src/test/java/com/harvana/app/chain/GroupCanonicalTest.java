@@ -137,6 +137,12 @@ public class GroupCanonicalTest {
             GroupCanonical.circleCreate("V_creatorAddress:x y", 1008L, 6, 1010L, 1011L, null));
     }
 
+    /** Same string as the node's CircleCreateRequest with graceHours (CircleGraceTest checks the node side). */
+    @Test public void circleCreate_withGrace() {
+        assertEquals("HARVANA_CIRCLE_CREATE_V1:HV0xabc:1001:5:168:1004:HNGN:grace=48",
+            GroupCanonical.circleCreate("HV0xabc", 1001L, 5, 168L, 1004L, "HNGN", 48L));
+    }
+
     @Test public void circleJoin_v0() {
         assertEquals("HARVANA_CIRCLE_JOIN_V1:V_circleId:V_memberAddress:V_termsHash:1003",
             GroupCanonical.circleJoin("V_circleId", "V_memberAddress", "V_termsHash", 1003L));

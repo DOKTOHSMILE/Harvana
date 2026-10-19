@@ -81,6 +81,7 @@ public class SwapActivity extends AppCompatActivity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         address = WalletManager.getActiveWalletAddress(this);
+        loadFx();
         if (getIntent() != null) {
             String f = getIntent().getStringExtra(EXTRA_FROM), t = getIntent().getStringExtra(EXTRA_TO);
             if (f != null && !f.isEmpty()) from = f.toUpperCase(java.util.Locale.US);
@@ -370,10 +371,28 @@ public class SwapActivity extends AppCompatActivity {
         long poolBps = quote.optLong("feeBps") - harvanaBps;
         rows.add(new String[]{"Pool fee" + (quote.has("viaHarvRaw") ? " (2 pools)" : ""), SwapText.pct(poolBps)});
         if (harvanaBps > 0) rows.add(new String[]{"Harvana fee", SwapText.pct(harvanaBps)});
+        if (quote.optLong("spreadBps", 0) > 0) rows.add(new String[]{"Spread", SwapText.pct(quote.optLong("spreadBps"))});
         rows.add(new String[]{"Price impact", SwapText.pct(impact), impact >= 500 ? "-1" : "0"});
         rows.add(new String[]{"Route", quote.has("viaHarvRaw")
                 ? SwapText.sym(from) + " → HARV → " + SwapText.sym(to) : SwapText.sym(from) + " → " + SwapText.sym(to)});
+        // Non-naira pools are priced at the real exchange rate (node: GET /swap/fx); its source and time.
+        if (fx != null && fx.optBoolean("anchored") && fx.optLong("at") > 0 && !(isNaira(from) && isNaira(to))) {
+            rows.add(new String[]{"Exchange rates", fx.optString("source") + " · "
+                    + new java.text.SimpleDateFormat("d MMM, HH:mm", java.util.Locale.US).format(new java.util.Date(fx.optLong("at")))});
+        }
         return rows;
+    }
+
+    /** The node's exchange rates and where they came from; loaded once when the screen opens. */
+    private org.json.JSONObject fx;
+
+    private static boolean isNaira(String code) { return "HARV".equals(code) || "HNGN".equals(code); }
+
+    private void loadFx() {
+        com.harvana.app.sync.HarvanaNodeClient.nodeGet("/api/v1/swap/fx", new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
+            @Override public void onSuccess(org.json.JSONObject j) { fx = j; }
+            @Override public void onError(String e) { }
+        });
     }
 
     private void addDetail(LinearLayout box, String label, String value, int tone) {

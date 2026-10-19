@@ -79,6 +79,8 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
     private String contribution = "";
     private int members = 5;
     private int cycleDays = 7;
+    /** Days after a round's due time before an unpaid member defaults (node: graceHours). */
+    private int graceDays = 1;
 
     // savings
     private boolean allowLoans = false;
@@ -440,6 +442,10 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
             else custom.setVisibility(View.VISIBLE);
             refreshRotating(summary);
         });
+        int[] graceOptions = {0, 1, 2, 3, 7};
+        int gSel = 1;
+        for (int i = 0; i < graceOptions.length; i++) if (graceOptions[i] == graceDays) gSel = i;
+        toggle(R.id.tg_create_grace, gSel, i -> { graceDays = graceOptions[i]; refreshRotating(summary); });
         refreshRotating(summary);
     }
 
@@ -454,6 +460,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
         t.row(R.drawable.ic_groups_line, "Rounds", String.valueOf(members));
         t.row(R.drawable.ic_calendar, "Each round", cycleDays + (cycleDays == 1 ? " day" : " days"));
         t.row(R.drawable.ic_calendar, "Runs for", "about " + (members * cycleDays) + " days");
+        t.row(R.drawable.ic_calendar, "Grace period", graceDays == 0 ? "None" : graceDays + (graceDays == 1 ? " day" : " days"));
         out.addView(t.view());
     }
 
@@ -643,7 +650,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
                 @Override public void onError(String error) { runOnUiThread(() -> { pd.dismiss(); toast(CircleUi.friendly(error)); }); }
             };
             if (kind == Kind.ROTATING) {
-                NodeGroupClient.createCircle(getApplicationContext(), wallet, raw(contribution), members, cycleDays * 24L, coin, done);
+                NodeGroupClient.createCircle(getApplicationContext(), wallet, raw(contribution), members, cycleDays * 24L, coin, graceDays * 24L, done);
             } else if (kind == Kind.ACCUM) {
                 double pct = allowLoans ? parse(interest) : 0.0;
                 NodeGroupClient.createAccumGroup(getApplicationContext(), wallet, Math.round(pct * 100.0), cycleEndOnly ? "CYCLE_END_ONLY" : "ANYTIME", coin, done);
@@ -669,6 +676,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
         g.put("groupDescription", description.trim());
         if (!photoUrl.isEmpty()) g.put("groupPhoto", photoUrl);
         g.put("frequency", kind == Kind.ROTATING ? (cycleDays == 1 ? "Daily" : cycleDays == 7 ? "Weekly" : cycleDays == 14 ? "Bi-weekly" : cycleDays == 30 ? "Monthly" : "Every " + cycleDays + " days") : "Daily");
+        if (kind == Kind.ROTATING) g.put("gracePeriodDays", String.valueOf(graceDays));       // the node holds it (graceHours); shown in settings
         g.put("visibility", visibility);
         g.put("country", country);
         g.put("state", state);

@@ -64,6 +64,10 @@ public final class NodeGroupClient {
     public static void listAccumPendingPacks(String groupId, Callback cb) {
         read("/api/v1/accum/group/" + groupId + "/pending-packs", cb);
     }
+    /** Savings wallet recoveries still waiting for a consent (the admin approves those waiting for them). */
+    public static void listAccumRecoveries(String groupId, Callback cb) {
+        read("/api/v1/accum/group/" + groupId + "/recoveries", cb);
+    }
     public static void getReferral(String referredAddress, Callback cb) { read("/api/v1/referral/" + referredAddress, cb); }
     /** Live position, including the action nonce. Used before a signed unstake or claim. */
     public static void getStakingPosition(String address, Callback cb) { read("/api/v1/staking/position/" + address, cb); }
@@ -181,11 +185,17 @@ public final class NodeGroupClient {
 
     /** {@code asset}: the stable coin of the group (HNGN, HUSD, …); every amount is in its units. */
     public static void createCircle(Context c, String creator, long contributionRaw, int memberLimit, long cycleHours, String asset, Callback cb) {
+        createCircle(c, creator, contributionRaw, memberLimit, cycleHours, asset, null, cb);
+    }
+
+    /** {@code graceHours}: how long after a round's due time an unpaid member has before they default (null: the node's 24). */
+    public static void createCircle(Context c, String creator, long contributionRaw, int memberLimit, long cycleHours, String asset, Long graceHours, Callback cb) {
         act(c, creator, "/api/v1/circle/create", new Spec() {
-            public String canonical(long n) { return GroupCanonical.circleCreate(creator, contributionRaw, memberLimit, cycleHours, n, asset); }
+            public String canonical(long n) { return GroupCanonical.circleCreate(creator, contributionRaw, memberLimit, cycleHours, n, asset, graceHours); }
             public void fill(JSONObject b, long n) throws JSONException {
                 b.put("creatorAddress", creator).put("contributionAmountRaw", contributionRaw)
                  .put("memberLimit", memberLimit).put("cycleDurationHours", cycleHours).put("asset", asset);
+                if (graceHours != null) b.put("graceHours", graceHours);
             }
         }, cb);
     }

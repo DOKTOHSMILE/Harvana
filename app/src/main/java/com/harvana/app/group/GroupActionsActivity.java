@@ -64,6 +64,8 @@ public class GroupActionsActivity extends AppCompatActivity {
     private final List<Object[]> packRequests = new ArrayList<>();   // {lineId, Map line}
     private final List<Map<String, Object>> defaulted = new ArrayList<>();
     private final List<Map<String, Object>> joinRequests = new ArrayList<>();
+    /** Savings wallet recoveries waiting for the admin (owner, 19 Oct 2026). */
+    private final List<Map<String, Object>> recoveries = new ArrayList<>();
     private boolean loadedOnce;
     private boolean notOnNetwork;
 
@@ -148,8 +150,8 @@ public class GroupActionsActivity extends AppCompatActivity {
 
     /** Votes, withdrawal requests, defaults and join requests. Each part is best-effort and the page shows what arrived. */
     private void loadExtras() {
-        proposals.clear(); packRequests.clear(); defaulted.clear(); joinRequests.clear();
-        final AtomicInteger left = new AtomicInteger(2);
+        proposals.clear(); packRequests.clear(); defaulted.clear(); joinRequests.clear(); recoveries.clear();
+        final AtomicInteger left = new AtomicInteger("ACCUM".equals(family) ? 3 : 2);
         final Runnable done = () -> { if (left.decrementAndGet() == 0) runOnUiThread(this::render); };
 
         loadJoinRequests(done);
@@ -161,6 +163,17 @@ public class GroupActionsActivity extends AppCompatActivity {
             });
             return;
         }
+        NodeGroupClient.listAccumRecoveries(nodeId, new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject j) {
+                JSONArray arr = j == null ? null : j.optJSONArray("recoveries");
+                for (int i = 0; arr != null && i < arr.length(); i++) {
+                    JSONObject r = arr.optJSONObject(i);
+                    if (r != null && "ADMIN".equals(r.optString("waitingFor"))) recoveries.add(JsonMaps.toMap(r));
+                }
+                done.run();
+            }
+            @Override public void onError(String e) { done.run(); }                 // an older node: no list
+        });
         NodeGroupClient.listAccumPendingPacks(nodeId, new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject j) { fillListedPacks(j); done.run(); }
             @Override public void onError(String e) { GroupProposalIndex.list(GroupActionsActivity.this, fsGroupId, entries -> loadProposals(entries, done)); }
@@ -321,12 +334,13 @@ public class GroupActionsActivity extends AppCompatActivity {
             @SuppressWarnings("unchecked") VoteView v = VoteView.of("", (Map<String, Object>) p[2], me == null ? "" : me);
             if (v.eligible && !v.alreadyVoted) mineToVote++;
         }
-        int attention = mineToVote + joinCount + approvals.size() + defaulted.size();
+        List<Map<String, Object>> toMove = iAmAdmin() ? recoveries : new ArrayList<>();
+        int attention = mineToVote + joinCount + approvals.size() + defaulted.size() + toMove.size();
 
-        content.addView(summaryCard(s, attention, openVotes.size(), joinCount, approvals.size(), defaulted.size()));
+        content.addView(summaryCard(s, attention, openVotes.size(), joinCount, approvals.size() + toMove.size(), defaulted.size()));
 
         // 1. Needs your attention
-        boolean any = !openVotes.isEmpty() || joinCount > 0 || !approvals.isEmpty() || !defaulted.isEmpty();
+        boolean any = !openVotes.isEmpty() || joinCount > 0 || !approvals.isEmpty() || !defaulted.isEmpty() || !toMove.isEmpty();
         content.addView(sectionHeader("Needs your attention", attention == 0 ? "" : String.valueOf(attention)));
         if (!any) {
             content.addView(emptyCard("Nothing is waiting on you", ""));
@@ -334,6 +348,7 @@ public class GroupActionsActivity extends AppCompatActivity {
         for (Object[] p : openVotes) content.addView(voteCard((String) p[0], (String) p[1], castMap(p[2]), true));
         if (joinCount > 0) for (Map<String, Object> r : joinRequests) content.addView(joinRequestCard(r));
         for (Object[] p : approvals) content.addView(withdrawalCard((String) p[0], castMap(p[1])));
+        for (Map<String, Object> r : toMove) content.addView(recoveryCard(r));
         renderDefaults();
 
         // 2. What you can do
@@ -549,6 +564,22 @@ public class GroupActionsActivity extends AppCompatActivity {
                 .amount(gm(num(ln, "amountPaidRaw"))).meta(who.isEmpty() ? "A member" : shortAddr(who));
         GroupAction approve = new GroupAction(GroupAction.ACCUM_APPROVE_PACK, gm(num(ln, "amountPaidRaw")), true, lineId);
         c.button("Approve withdrawal", true, v -> NodePayActions.run(ctx((Button) v), approve));
+        return c.view;
+    }
+
+    /** A member asks to move their savings to another wallet: old wallet, new wallet, when; the admin approves. */
+    private View recoveryCard(final Map<String, Object> r) {
+        final String from = str(r, "oldMemberAddress"), to = str(r, "newMemberAddress");
+        ActionCard c = new ActionCard(this, content).title("Wallet recovery").chip("NEEDS APPROVAL", R.color.colorWarning)
+                .meta(shortAddr(from) + " → " + shortAddr(to) + (num(r, "createdTimestamp") > 0 ? " · " + date(num(r, "createdTimestamp")) : ""));
+        c.button("Approve move", true, v -> {
+            java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+            if (!groupName.isEmpty()) rows.add(new String[]{"Group", groupName});
+            rows.add(new String[]{"From wallet", from});
+            rows.add(new String[]{"To wallet", to});
+            PaymentConfirmSheet.reviewThenAuthorize(this, "Approve wallet recovery", "", rows, () ->
+                    NodeGroupClient.accumWalletRecovery(getApplicationContext(), me, nodeId, from, to, result("Savings moved to the new wallet")));
+        });
         return c.view;
     }
 

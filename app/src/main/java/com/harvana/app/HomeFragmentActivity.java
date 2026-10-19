@@ -472,6 +472,8 @@ public class HomeFragmentActivity extends Fragment {
 		_loadLearnHubPreview();
 		_loadTrendingGroups();
 		if (getContext() != null) {
+			com.harvana.app.utils.NetworkStatusBanner.refresh(linear2, 1,
+					com.harvana.app.wallet.WalletManager.getActiveWalletAddress(getContext()));
 			com.harvana.app.sync.NodeLinkManager.ensureLinked(getContext(), null);
 			com.harvana.app.utils.ActivityTracker.reportLiveness(getContext());
 			com.harvana.app.group.InviteManager.checkAndNotify(getContext());

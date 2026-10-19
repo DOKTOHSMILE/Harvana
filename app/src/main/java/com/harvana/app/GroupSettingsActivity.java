@@ -895,7 +895,8 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 		if (isRotating()) {
 			ivHeroTypeIcon.setImageResource(R.drawable.ic_type_circle);
 			tvTypeSettingsTitle.setText("Rotating Pool");
-			etGracePeriod.setText(str(groupData, "gracePeriodDays", "0"));
+			// A circle on the network without its own grace period has the node's 24 hours (1 day).
+			etGracePeriod.setText(str(groupData, "gracePeriodDays", GroupIdentityResolver.resolve(groupId, groupData).onChain() ? "1" : "0"));
 			etCommission.setText(str(groupData, "commissionPercent", "0"));
 			tvTypeSettingsSubtitle.setText("Slots " + numStr(groupData, "totalSlots") + " · Round " + numStr(groupData, "currentRound"));
 			tvRuleInfoBanner.setVisibility(View.GONE);

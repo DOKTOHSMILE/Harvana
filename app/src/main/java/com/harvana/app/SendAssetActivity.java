@@ -139,6 +139,10 @@ public class SendAssetActivity extends AppCompatActivity {
 			}
 		});
 		tvSubtitle = findViewById(R.id.tvSubtitle);
+		if (tvSubtitle != null && tvSubtitle.getParent() instanceof android.view.ViewGroup) {
+			com.harvana.app.utils.NetworkStatusBanner.refresh((android.view.ViewGroup) tvSubtitle.getParent(), 0,
+					com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this));
+		}
 		vscroll3 = findViewById(R.id.vscroll3);
 		linear4 = findViewById(R.id.linear4);
 		linear26 = findViewById(R.id.linear26);

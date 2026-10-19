@@ -104,8 +104,12 @@ public final class GroupCanonical {
 
     /** CircleCreateRequest.getCanonicalMessage() */
     public static String circleCreate(String creatorAddress, long contributionAmountRaw, int memberLimit, long cycleDurationHours, long nonce, String asset) {
+        return circleCreate(creatorAddress, contributionAmountRaw, memberLimit, cycleDurationHours, nonce, asset, null);
+    }
+
+    public static String circleCreate(String creatorAddress, long contributionAmountRaw, int memberLimit, long cycleDurationHours, long nonce, String asset, Long graceHours) {
         return "HARVANA_CIRCLE_CREATE_V1:" + creatorAddress + ":" + contributionAmountRaw + ":" + memberLimit
-            + ":" + cycleDurationHours + ":" + nonce + tail(asset);
+            + ":" + cycleDurationHours + ":" + nonce + tail(asset) + (graceHours == null ? "" : ":grace=" + graceHours);
     }
 
     /** CircleJoinRequest.getCanonicalMessage() */

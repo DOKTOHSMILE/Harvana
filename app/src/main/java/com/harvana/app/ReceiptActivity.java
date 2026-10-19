@@ -280,6 +280,7 @@ public class ReceiptActivity extends AppCompatActivity {
 		long confirmedAt = _millis(getIntent().getLongExtra("confirmedAt", 0L));
 		if (confirmedAt <= 0 && !pending && timestamp > 0) confirmedAt = timestamp;
 		_paintTimeline(sdf, initiatedAt, confirmedAt, pending);
+		if (otherChain == null && confirmed) _loadProof();
 		final String hashForTimes = txHash;
 		final boolean pendingNow = pending;
 		if (otherChain == null && hashForTimes != null && hashForTimes.matches("(?i)[0-9a-f]{64}")) {
@@ -453,6 +454,58 @@ public class ReceiptActivity extends AppCompatActivity {
 		row.addView(l);
 		row.addView(v);
 		factBox.addView(row);
+	}
+
+	/**
+	 * The transaction's inclusion proof (GET /blocks/proof): the block's Merkle root and the sibling path, checked here on
+	 * the phone. Rows: Merkle root, Position, Proof (Verified / Does not match).
+	 */
+	private void _loadProof() {
+		if (txHash == null || !txHash.matches("^[0-9a-fA-F]{64}$")) return;
+		com.harvana.app.sync.HarvanaNodeClient.nodeGet("/api/v1/blocks/proof/" + txHash, new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
+			@Override public void onSuccess(org.json.JSONObject p) {
+				boolean ok = proofHolds(txHash, p.optJSONArray("merkleProof"), p.optString("merkleRoot"));
+				runOnUiThread(() -> {
+					if (factBox == null) {
+						View block = findViewById(R.id.linear24);
+						if (block != null && block.getParent() instanceof android.view.ViewGroup) factBox = (android.view.ViewGroup) block.getParent();
+					}
+					if (factBox == null || isFinishing()) return;
+					String root = p.optString("merkleRoot");
+					_fact("Merkle root", root.length() > 16 ? root.substring(0, 10) + "…" + root.substring(root.length() - 6) : root);
+					_fact("Position", (p.optInt("index") + 1) + " of " + p.optInt("txCount"));
+					_fact("Proof", ok ? "Verified" : "Does not match");
+				});
+			}
+			@Override public void onError(String e) { }
+		});
+	}
+
+	/** Same rule as the node's MerkleProof.verify: parent = doubleSha256(leftHex + rightHex) over the hex text. */
+	static boolean proofHolds(String txHash, org.json.JSONArray proof, String root) {
+		if (txHash == null || proof == null || root == null || root.isEmpty()) return false;
+		try {
+			String h = txHash;
+			for (int i = 0; i < proof.length(); i++) {
+				org.json.JSONObject step = proof.getJSONObject(i);
+				String sib = step.optString("hash"), side = step.optString("side");
+				if ("left".equals(side)) h = _dsha(sib + h);
+				else if ("right".equals(side)) h = _dsha(h + sib);
+				else return false;
+			}
+			return h.equalsIgnoreCase(root);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private static String _dsha(String text) throws Exception {
+		java.security.MessageDigest d = java.security.MessageDigest.getInstance("SHA-256");
+		byte[] once = d.digest(text.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+		byte[] twice = d.digest(once);
+		StringBuilder sb = new StringBuilder();
+		for (byte b : twice) sb.append(String.format(java.util.Locale.US, "%02x", b));
+		return sb.toString();
 	}
 
 	private static long _hex(String hex) {

@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026: Grace period, wallet recovery approvals, network status, proof, swap rates
+
+- Create group → Rotating: Grace period (None, 1, 2, 3 or 7 days), in the summary table. The network now uses it: an unpaid member is late for that long after the due time before they default (before: always 24 hours, whatever was entered). Needs the node change of the same date; install the node first.
+- Savings group Actions (admin): Wallet recovery requests waiting for the admin (from → to wallet, date) with Approve move.
+- Home and Send: a banner while the network is paused or this wallet is frozen.
+- Receipt (Harvana transactions): Merkle root, Position (n of m in its block), Proof (Verified, checked on the phone).
+- Swap details: Spread (when a spread policy is in force) and Exchange rates (source and time) for non-naira pairs.
+- Group Settings → Rotating: grace shows 1 day for circles on the network without their own.
+
 ## 19 Oct 2026: Activity icon circle 24dp
 
 - Activity rows (wallet, coin pages, group history): the whole icon circle is 24dp, with a 16dp icon inside (was a 40dp circle).

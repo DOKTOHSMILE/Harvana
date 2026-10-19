@@ -571,10 +571,11 @@ public class SendAssetActivity extends AppCompatActivity {
 				if (etMemo != null && etMemo.getText() != null && etMemo.getText().toString().trim().length() > 0) {
 					payRows.add(new String[]{"Memo", etMemo.getText().toString().trim()});
 				}
-				payRows.add(new String[]{"Network fee", "Set when this token transfer is sent"});
+				com.harvana.app.ui.SendReviewSheet.Data review = _review(symbol, amountText + " " + symbol, transferAmount.doubleValue(), recipient, "Harvana");
+				review.feeText = "HARV";
+				for (String[] r : payRows) if (!"To".equals(r[0]) && !"Asset".equals(r[0])) review.rows.add(r);
 				com.harvana.app.tx.DuplicateSendGuard.check(SendAssetActivity.this, recipient, symbol, amountText, () ->
-				com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(SendAssetActivity.this,
-				"Send " + symbol, amountText + " " + symbol, payRows, () -> {
+				com.harvana.app.ui.SendReviewSheet.show(SendAssetActivity.this, review, () -> {
 				isProcessingSend = true;
 				view.setEnabled(false);
 				progress.show();
@@ -644,13 +645,11 @@ public class SendAssetActivity extends AppCompatActivity {
 			SketchwareUtil.showMessage(getApplicationContext(), "This address is still loading. Try again in a moment.");
 			return;
 		}
-		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
-		rows.add(new String[]{"To", recipient});
-		rows.add(new String[]{"From", mine});
-		rows.add(new String[]{"Network", coin.liveNetwork()});
-		rows.add(new String[]{"Network fee in", coin.feeTicker()});
+		com.harvana.app.ui.SendReviewSheet.Data review = _review(assetKey, amountText + " " + coin.ticker, amount.doubleValue(), recipient, coin.liveNetwork());
+		review.feeText = coin.feeTicker();
+		review.rows.add(new String[]{"From", mine});
 		com.harvana.app.tx.DuplicateSendGuard.check(this, recipient, coin.ticker, amountText, () ->
-		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send " + coin.ticker, amountText + " " + coin.ticker, rows, () -> {
+		com.harvana.app.ui.SendReviewSheet.show(this, review, () -> {
 			if (isProcessingSend) return;
 			isProcessingSend = true;
 			sendButton.setEnabled(false);
@@ -711,14 +710,12 @@ public class SendAssetActivity extends AppCompatActivity {
 			return;
 		}
 		final String memo = etMemo != null && etMemo.getText() != null ? etMemo.getText().toString().trim() : "";
-		java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
-		rows.add(new String[]{"To", recipient});
-		rows.add(new String[]{"From", mine});
-		rows.add(new String[]{"Network", "Pi Network"});
-		if (!memo.isEmpty()) rows.add(new String[]{"Memo", memo});
-		rows.add(new String[]{"Network fee", "Set by the Pi network"});
+		com.harvana.app.ui.SendReviewSheet.Data review = _review("PI", amountText + " PI", amount.doubleValue(), recipient, "Pi Network");
+		review.feeText = "PI";
+		review.rows.add(new String[]{"From", mine});
+		if (!memo.isEmpty()) review.rows.add(new String[]{"Memo", memo});
 		com.harvana.app.tx.DuplicateSendGuard.check(this, recipient, "PI", amountText, () ->
-		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send PI", amountText + " PI", rows, () -> {
+		com.harvana.app.ui.SendReviewSheet.show(this, review, () -> {
 			if (isProcessingSend) return;
 			isProcessingSend = true;
 			sendButton.setEnabled(false);
@@ -751,6 +748,33 @@ public class SendAssetActivity extends AppCompatActivity {
 				});
 			}).start();
 		}));
+	}
+
+	/** The selected coin's icon, as shown in the coin picker. */
+	private android.graphics.drawable.Drawable _assetDrawable() {
+		int pos = spAsset == null ? -1 : spAsset.getSelectedItemPosition();
+		int icon = com.harvana.app.R.drawable.ic_coin_harv;
+		android.graphics.drawable.Drawable own = null;
+		if (walletAssets != null && pos >= 0 && pos < walletAssets.size() && walletAssets.get(pos).get("icon") instanceof Integer) {
+			icon = (Integer) walletAssets.get(pos).get("icon");
+		}
+		if (walletAssets != null && pos >= 0 && pos < walletAssets.size()) {
+			Object key = walletAssets.get(pos).get("assetKey");
+			if (key != null && com.harvana.app.husd.Stable.isStable(String.valueOf(key))) own = com.harvana.app.husd.StableIcon.drawable(this, String.valueOf(key));
+		}
+		return own != null ? own : androidx.core.content.ContextCompat.getDrawable(this, icon);
+	}
+
+	/** Review & Send for the selected coin. */
+	private com.harvana.app.ui.SendReviewSheet.Data _review(String key, String amountText, double amount, String recipient, String network) {
+		com.harvana.app.ui.SendReviewSheet.Data d = new com.harvana.app.ui.SendReviewSheet.Data();
+		d.assetKey = key;
+		d.icon = _assetDrawable();
+		d.amountText = amountText;
+		d.amount = amount;
+		d.recipient = recipient;
+		d.network = network;
+		return d;
 	}
 
 	private void _coinIcon(TextView tv, int pos) {
@@ -953,8 +977,14 @@ public class SendAssetActivity extends AppCompatActivity {
 				+ ("HARV".equals(q.optString("payIn")) ? " + " + com.harvana.app.husd.HusdClient.fareText(q, sym) : "")});
 		String shown = com.harvana.app.husd.HusdClient.format(units) + " " + sym;
 		String plainAmount = com.harvana.app.husd.HusdClient.format(units).replace(",", "");
+		com.harvana.app.ui.SendReviewSheet.Data review = _review(code, shown, units / 1e6, recipient, "Harvana");
+		review.feeText = com.harvana.app.husd.HusdClient.fareText(q, sym);
+		String payIn = q.optString("payIn");
+		if ("HARV".equals(payIn)) { review.feeAmount = q.optLong("harvGasRaw") / 1e8; review.feeKey = "HARV"; }
+		else if (!"FREE".equals(payIn)) { review.feeAmount = q.optLong("coinTFareRaw", q.optLong("coinFeeRaw")) / 1e6; review.feeKey = code; }
+		for (String[] r : rows) if (!"To".equals(r[0]) && !"Network".equals(r[0]) && !"tFare".equals(r[0])) review.rows.add(r);
 		com.harvana.app.tx.DuplicateSendGuard.check(this, recipient, sym, plainAmount, () ->
-		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send " + sym, shown, rows, () -> {
+		com.harvana.app.ui.SendReviewSheet.show(this, review, () -> {
 			if (isProcessingSend) return;
 			isProcessingSend = true;
 			sendButton.setEnabled(false);
@@ -965,7 +995,19 @@ public class SendAssetActivity extends AppCompatActivity {
 						isProcessingSend = false;
 						if (isFinishing()) return;
 						com.harvana.app.tx.DuplicateSendGuard.record(getApplicationContext(), recipient, sym, plainAmount);
-						SketchwareUtil.showMessage(getApplicationContext(), sym + " sent.");
+						String hash = r == null ? "" : r.optString("txHash", r.optString("hash", ""));
+						com.harvana.app.ui.PaymentSuccessSheet.Info info = new com.harvana.app.ui.PaymentSuccessSheet.Info();
+						info.title = "Transfer";
+						info.stateTitle = true;
+						info.amount = shown;
+						info.amountUsd = com.harvana.app.wallet.UsdValue.text(getApplicationContext(), code, units / 1e6);
+						info.from = mine;
+						info.to = recipient;
+						info.rows = new String[][] {{"To", recipient}, {"From", mine}, {"tFare", review.feeText}, {"Transaction", hash}};
+						info.txHash = hash;
+						com.harvana.app.tx.PaymentTracker.success(info);
+						com.harvana.app.tx.PaymentTracker.Handle h = com.harvana.app.tx.PaymentTracker.begin();
+						com.harvana.app.tx.PaymentTracker.endWhenConfirmed(h, hash, () -> com.harvana.app.tx.PaymentTracker.markConfirmed(hash));
 						setResult(RESULT_OK);
 						finish();
 					});
@@ -1097,117 +1139,60 @@ public class SendAssetActivity extends AppCompatActivity {
 	}
 
 	private void _showTransferConfirmSheetNow(TransactionRouter.PreparedTransfer prepared, String symbol) {
-		final BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(this);
-		View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_transfer_confirm, null);
-		dialog.setContentView(sheetView);
-		dialog.setCancelable(false);
-		com.harvana.app.group.BottomSheetUtils.expandFullScreen(dialog, sheetView);
-		
-		TextView tvAmount = sheetView.findViewById(R.id.tv_confirm_amount);
-		TextView tvRecipient = sheetView.findViewById(R.id.tv_confirm_recipient);
-		View rowMemo = sheetView.findViewById(R.id.row_confirm_memo);
-		TextView tvMemo = sheetView.findViewById(R.id.tv_confirm_memo);
-		TextView tvGasFee = sheetView.findViewById(R.id.tv_confirm_gas_fee);
-		TextView tvTotal = sheetView.findViewById(R.id.tv_confirm_total);
-		TextView tvNonce = sheetView.findViewById(R.id.tv_confirm_nonce);
-		TextView tvBlockHeight = sheetView.findViewById(R.id.tv_confirm_block_height);
-		TextView tvError = sheetView.findViewById(R.id.tv_confirm_error);
-		View btnCancelSheet = sheetView.findViewById(R.id.btn_confirm_cancel);
-		Button btnAccept = sheetView.findViewById(R.id.btn_confirm_accept);
-		
 		String recipient = (prepared.req != null && prepared.req.to != null) ? prepared.req.to : "";
-		String shortRecipient = recipient.length() > 14
-		? recipient.substring(0, 10) + "…" + recipient.substring(recipient.length() - 4)
-		: recipient;
-		
 		double reqAmount = prepared.req != null ? prepared.req.amount : 0.0;
 		double total = reqAmount + prepared.feeHarv;
-		
-		// APPLIED FIXES
-		if (tvAmount != null) tvAmount.setText(_formatUIBalance(reqAmount));
-		if (tvRecipient != null) tvRecipient.setText(shortRecipient);
-		if (prepared.req != null && prepared.req.memo != null && !prepared.req.memo.isEmpty()) {
-			if (rowMemo != null) rowMemo.setVisibility(View.VISIBLE);
-			if (tvMemo != null) tvMemo.setText(prepared.req.memo);
-		}
-		if (tvGasFee != null) tvGasFee.setText(_formatUIBalance(prepared.feeHarv));
-		if (tvTotal != null) tvTotal.setText(_formatUIBalance(total));
-		if (tvNonce != null) tvNonce.setText(String.valueOf(prepared.nonce));
-		if (tvBlockHeight != null) tvBlockHeight.setText(String.valueOf(prepared.blockHeight));
-		
-		if (btnCancelSheet != null) btnCancelSheet.setOnClickListener(v -> dialog.dismiss());
-		
-		if (btnAccept != null) {
-			btnAccept.setText("Verify");
-			btnAccept.setOnClickListener(v -> {
-				com.harvana.app.wallet.PinPromptHelper.authorize(SendAssetActivity.this,
-				"Send " + _formatUIBalance(reqAmount) + " " + symbol, () -> {
-					String fromAddress = prepared.req != null ? prepared.req.from : null;
-					
-					// THE FIX: this screen had no PendingSpendGuard at all —
-					// only btnAccept.setEnabled(false), transient in-memory
-					// state that doesn't survive backing out and reopening the
-					// screen, or the Activity being killed by Android mid-send.
-					// Group contributions already use this exact reservation
-					// correctly; this is the general wallet send screen —
-					// arguably the more-used path — catching up to the same
-					// protection. The node's own nonce/mempool checks remain
-					// the real backstop either way; this is the fast local
-					// double-tap guard in front of it.
-					if (fromAddress != null && !PendingSpendGuard.tryReserve(SendAssetActivity.this, fromAddress, total)) {
-						if (tvError != null) {
-							tvError.setText("A send from this wallet is already in progress. Please wait for it to finish before trying again.");
-							tvError.setVisibility(View.VISIBLE);
-						}
-						return;
-					}
-					
-					btnAccept.setEnabled(false);
-					btnAccept.setText("Sending…");
-					if (tvError != null) tvError.setVisibility(View.GONE);
-					
-					final com.harvana.app.tx.PaymentTracker.Handle inFlight = com.harvana.app.tx.PaymentTracker.begin();
-					TransactionRouter.executeNativeTransfer(prepared, new TransactionRouter.ExecutionCallback() {
-						@Override
-						public void onSuccess(com.harvana.app.tx.ExecutionResult result) {
-							if (fromAddress != null) PendingSpendGuard.release(SendAssetActivity.this, fromAddress);
-							com.harvana.app.tx.DuplicateSendGuard.record(SendAssetActivity.this, recipient, symbol, java.math.BigDecimal.valueOf(reqAmount).toPlainString());
-							final String hash = result != null && result.txHash != null ? result.txHash : "";
-							com.harvana.app.ui.PaymentSuccessSheet.Info info = new com.harvana.app.ui.PaymentSuccessSheet.Info();
-							info.title = "Transfer successful";
-							info.amount = _formatUIBalance(reqAmount) + " " + symbol;
-							info.rows = new String[][] {{"To", recipient}, {"From", fromAddress == null ? "" : fromAddress},
-									{"tFare", _formatUIBalance(prepared.feeHarv) + " " + symbol}, {"Transaction", hash}};
-							info.txHash = hash;
-							info.note = "The network has accepted it. It shows as confirmed once the next block has it.";
-							com.harvana.app.tx.PaymentTracker.success(info);
-							com.harvana.app.tx.PaymentTracker.endWhenConfirmed(inFlight, hash, () -> com.harvana.app.tx.PaymentTracker.markConfirmed(hash));
-							runOnUiThread(() -> {
-								dialog.dismiss();
-								setResult(RESULT_OK);
-								finish();
-							});
-						}
-						
-						@Override
-						public void onError(String error) {
-							inFlight.end();
-							if (fromAddress != null) PendingSpendGuard.release(SendAssetActivity.this, fromAddress);
-							runOnUiThread(() -> {
-								btnAccept.setEnabled(true);
-								btnAccept.setText("Verify");
-								if (tvError != null) {
-									tvError.setText(error);
-									tvError.setVisibility(View.VISIBLE);
-								}
-							});
-						}
+		String fromAddress = prepared.req != null ? prepared.req.from : null;
+
+		com.harvana.app.ui.SendReviewSheet.Data review = _review(symbol, _formatUIBalance(reqAmount) + " " + symbol, reqAmount, recipient, "Harvana");
+		review.feeText = _formatUIBalance(prepared.feeHarv) + " " + symbol;
+		review.feeAmount = prepared.feeHarv;
+		review.feeKey = "HARV";
+		if (fromAddress != null) review.rows.add(new String[]{"From", fromAddress});
+		if (prepared.req != null && prepared.req.memo != null && !prepared.req.memo.isEmpty()) review.rows.add(new String[]{"Memo", prepared.req.memo});
+		review.rows.add(new String[]{"Total", _formatUIBalance(total) + " " + symbol});
+
+		com.harvana.app.ui.SendReviewSheet.show(this, review, sheet -> {
+			// Local double-tap guard that survives leaving the screen; the node's nonce and mempool checks are the real backstop.
+			if (fromAddress != null && !PendingSpendGuard.tryReserve(SendAssetActivity.this, fromAddress, total)) {
+				sheet.error("A send from this wallet is already in progress.");
+				return;
+			}
+			sheet.busy(true);
+			final com.harvana.app.tx.PaymentTracker.Handle inFlight = com.harvana.app.tx.PaymentTracker.begin();
+			TransactionRouter.executeNativeTransfer(prepared, new TransactionRouter.ExecutionCallback() {
+				@Override
+				public void onSuccess(com.harvana.app.tx.ExecutionResult result) {
+					if (fromAddress != null) PendingSpendGuard.release(SendAssetActivity.this, fromAddress);
+					com.harvana.app.tx.DuplicateSendGuard.record(SendAssetActivity.this, recipient, symbol, java.math.BigDecimal.valueOf(reqAmount).toPlainString());
+					final String hash = result != null && result.txHash != null ? result.txHash : "";
+					com.harvana.app.ui.PaymentSuccessSheet.Info info = new com.harvana.app.ui.PaymentSuccessSheet.Info();
+					info.title = "Transfer";
+					info.stateTitle = true;
+					info.amount = _formatUIBalance(reqAmount) + " " + symbol;
+					info.amountUsd = com.harvana.app.wallet.UsdValue.text(SendAssetActivity.this, "HARV", reqAmount);
+					info.from = fromAddress == null ? "" : fromAddress;
+					info.to = recipient;
+					info.rows = new String[][] {{"To", recipient}, {"From", fromAddress == null ? "" : fromAddress},
+							{"tFare", review.feeText}, {"Transaction", hash}};
+					info.txHash = hash;
+					com.harvana.app.tx.PaymentTracker.success(info);
+					com.harvana.app.tx.PaymentTracker.endWhenConfirmed(inFlight, hash, () -> com.harvana.app.tx.PaymentTracker.markConfirmed(hash));
+					runOnUiThread(() -> {
+						sheet.dismiss();
+						setResult(RESULT_OK);
+						finish();
 					});
-				});
+				}
+
+				@Override
+				public void onError(String error) {
+					inFlight.end();
+					if (fromAddress != null) PendingSpendGuard.release(SendAssetActivity.this, fromAddress);
+					runOnUiThread(() -> sheet.error(error));
+				}
 			});
-		}
-		
-		dialog.show();
+		}, null);
 	}
 	
 	private void hideSystemKeyboard(View view) {

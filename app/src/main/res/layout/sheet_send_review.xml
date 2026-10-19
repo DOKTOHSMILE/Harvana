@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:fillViewport="true"
+	android:background="@color/colorSurface">
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:paddingHorizontal="20dp"
+		android:paddingTop="8dp"
+		android:paddingBottom="20dp">
+
+		<!-- Header: title and close -->
+		<FrameLayout
+			android:layout_width="match_parent"
+			android:layout_height="56dp">
+			<TextView
+				android:id="@+id/review_title"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:text="Review &amp; Send"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="18sp"
+				android:textStyle="bold" />
+			<ImageView
+				android:id="@+id/review_close"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:layout_gravity="end|center_vertical"
+				android:padding="9dp"
+				android:background="@drawable/bg_round_raised"
+				android:contentDescription="Close"
+				android:src="@drawable/ic_close_line"
+				app:tint="@color/colorTextSecondary" />
+		</FrameLayout>
+
+		<!-- From (coin, amount, dollars) → To (avatar, name) -->
+		<FrameLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="12dp">
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal">
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="168dp"
+					android:layout_weight="1"
+					android:layout_marginEnd="6dp"
+					android:background="@drawable/bg_review_card"
+					android:gravity="center"
+					android:orientation="vertical"
+					android:padding="12dp">
+					<ImageView
+						android:id="@+id/review_coin_icon"
+						android:layout_width="52dp"
+						android:layout_height="52dp"
+						android:contentDescription="Coin"
+						android:src="@drawable/ic_coin_harv" />
+					<TextView
+						android:id="@+id/review_amount"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="12dp"
+						android:gravity="center"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="17sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/review_amount_usd"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="2dp"
+						android:textColor="@color/colorTextSecondary"
+						android:textSize="14sp" />
+				</LinearLayout>
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="168dp"
+					android:layout_weight="1"
+					android:layout_marginStart="6dp"
+					android:background="@drawable/bg_review_card"
+					android:gravity="center"
+					android:orientation="vertical"
+					android:padding="12dp">
+					<TextView
+						android:id="@+id/review_avatar"
+						android:layout_width="52dp"
+						android:layout_height="52dp"
+						android:gravity="center"
+						android:textColor="@color/colorTextOnAccent"
+						android:textSize="20sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/review_to_name"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="12dp"
+						android:gravity="center"
+						android:maxLines="1"
+						android:ellipsize="middle"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="17sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/review_to_network"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="2dp"
+						android:maxLines="1"
+						android:ellipsize="end"
+						android:textColor="@color/colorTextSecondary"
+						android:textSize="14sp" />
+				</LinearLayout>
+			</LinearLayout>
+			<ImageView
+				android:layout_width="34dp"
+				android:layout_height="34dp"
+				android:layout_gravity="center"
+				android:padding="7dp"
+				android:background="@drawable/bg_review_arrow"
+				android:contentDescription="To"
+				android:src="@drawable/ic_arrow_right_line"
+				app:tint="@color/colorTextPrimary" />
+		</FrameLayout>
+
+		<!-- Recipient, network fee and other values -->
+		<LinearLayout
+			android:id="@+id/review_details"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="12dp"
+			android:background="@drawable/bg_review_card"
+			android:orientation="vertical"
+			android:paddingHorizontal="16dp"
+			android:paddingVertical="6dp">
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:minHeight="50dp"
+				android:orientation="horizontal">
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Recipient"
+					android:textColor="@color/colorTextSecondary"
+					android:textSize="14sp" />
+				<TextView
+					android:id="@+id/review_recipient"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:layout_marginStart="16dp"
+					android:gravity="end"
+					android:textColor="@color/colorTextPrimary"
+					android:textSize="14sp"
+					android:textStyle="bold" />
+				<ImageView
+					android:id="@+id/review_copy"
+					android:layout_width="32dp"
+					android:layout_height="32dp"
+					android:layout_marginStart="6dp"
+					android:padding="6dp"
+					android:contentDescription="Copy"
+					android:src="@drawable/ic_copy_line"
+					app:tint="@color/colorTextSecondary" />
+			</LinearLayout>
+			<View
+				android:layout_width="match_parent"
+				android:layout_height="1dp"
+				android:background="@color/colorDivider" />
+			<LinearLayout
+				android:id="@+id/review_fee_row"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:minHeight="50dp"
+				android:orientation="horizontal">
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Network fee"
+					android:textColor="@color/colorTextSecondary"
+					android:textSize="14sp" />
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:layout_marginStart="16dp"
+					android:gravity="end"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/review_fee_usd"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="…"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="14sp"
+						android:textStyle="bold" />
+					<TextView
+						android:id="@+id/review_fee_coin"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textColor="@color/colorTextSecondary"
+						android:textSize="12sp" />
+				</LinearLayout>
+				<ImageView
+					android:id="@+id/review_fee_info"
+					android:layout_width="32dp"
+					android:layout_height="32dp"
+					android:layout_marginStart="6dp"
+					android:padding="6dp"
+					android:contentDescription="tFare"
+					android:src="@drawable/ic_info_line"
+					app:tint="@color/colorTextSecondary" />
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/review_rows"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical" />
+		</LinearLayout>
+
+		<TextView
+			android:id="@+id/review_error"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="12dp"
+			android:gravity="center"
+			android:textColor="@color/colorError"
+			android:textSize="13sp"
+			android:visibility="gone" />
+
+		<View
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="1"
+			android:minHeight="24dp" />
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/review_send"
+			android:layout_width="match_parent"
+			android:layout_height="60dp"
+			android:text="Transfer"
+			android:textAllCaps="false"
+			android:textColor="@color/colorTextOnAccent"
+			android:textSize="17sp"
+			android:textStyle="bold"
+			app:backgroundTint="@color/colorAccent"
+			app:cornerRadius="18dp" />
+	</LinearLayout>
+</ScrollView>

@@ -187,7 +187,11 @@ public final class PaymentConfirmSheet {
 			com.harvana.app.sync.NodeGroupClient.transport(new com.harvana.app.sync.NodeGroupClient.Callback() {
 				@Override public void onSuccess(org.json.JSONObject j) {
 					long raw = j.optLong("perMovementRaw", 0);
-					fv.post(() -> fv.setText(raw > 0 ? com.harvana.app.wallet.BalanceFormatter.smart(raw / 1e8) + " HARV" : "—"));
+					fv.post(() -> {
+						if (raw <= 0) { fv.setText("—"); return; }
+						String usd = com.harvana.app.wallet.UsdValue.text(context, "HARV", raw / 1e8);
+						fv.setText(com.harvana.app.wallet.BalanceFormatter.smart(raw / 1e8) + " HARV" + (usd.isEmpty() ? "" : " · " + usd));
+					});
 				}
 				@Override public void onError(String e) { fv.post(() -> fv.setText("—")); }
 			});

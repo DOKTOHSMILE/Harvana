@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026: Review & Send and transfer status, values in US dollars
+
+- Send (HARV, Harvana coins, tokens, other chains, Pi): new Review & Send screen. Top: coin icon, amount and its dollar value → recipient avatar, short address and network. Card: full recipient with copy, network fee in dollars with the coin amount under it, then From, Memo, Total. One Transfer button, then PIN.
+- Transfer status (HARV and Harvana coins): "Transfer pending" turns to "Transfer completed" when the block has it; amount with its dollar value, From → To cards, the rows, Share receipt, Share transaction link (Harvana explorer).
+- tFare on payment review screens shows its dollar value next to HARV.
+- Needs the node with "tFare priced in US dollars" (DEPLOYMENT.md, 19 Oct 2026) for the ~$0.0038 tFare.
+
 ## 19 Oct 2026: Home total right away on opening
 
 - Home: the last total shows at once (if it is less than a day old), then the live total of HARV and the Harvana coins within seconds, then the full total once the other chains (SOL, BTC, added tokens) have answered. Before, it waited for every chain before showing anything new.

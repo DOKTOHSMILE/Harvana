@@ -32,6 +32,13 @@ public final class PaymentSuccessSheet {
         public String[][] rows = new String[0][];
         public String txHash = "";
         public boolean confirmed;
+        /** Dollar value of the amount ("$1.24"), shown under it. */
+        public String amountUsd = "";
+        /** Sending and receiving addresses: shown as From → To cards when both are set. */
+        public String from = "";
+        public String to = "";
+        /** Title reads "<title> pending" until confirmed, then "<title> completed". */
+        public boolean stateTitle;
     }
 
     private final BottomSheetDialog dialog;
@@ -39,6 +46,7 @@ public final class PaymentSuccessSheet {
     private android.animation.ObjectAnimator pulse;
     private boolean shownConfirmed;
     private final TextView status;
+    private TextView title;
     private final SpinnerDrawable ring;
     private final Context ctx;
     private final Info info;
@@ -61,7 +69,7 @@ public final class PaymentSuccessSheet {
         icon.setScaleX(0.2f); icon.setScaleY(0.2f);
         icon.animate().scaleX(1f).scaleY(1f).setDuration(380).setInterpolator(new android.view.animation.OvershootInterpolator()).start();
 
-        TextView title = text(info.title, 22, R.color.colorTextPrimary, true);
+        title = text(info.title, 22, R.color.colorTextPrimary, true);
         title.setPadding(0, dp(24), 0, 0);
         root.addView(title);
 
@@ -69,6 +77,11 @@ public final class PaymentSuccessSheet {
             TextView amount = text(info.amount.replaceAll("(?i)\\b(HARV)(\\s+HARV)+\\b", "$1"), 34, R.color.colorTextPrimary, true);
             amount.setPadding(0, dp(8), 0, 0);
             root.addView(amount);
+        }
+        if (info.amountUsd != null && !info.amountUsd.isEmpty()) {
+            TextView usd = text(info.amountUsd, 16, R.color.colorTextSecondary, false);
+            usd.setPadding(0, dp(2), 0, 0);
+            root.addView(usd);
         }
         if (!info.note.isEmpty()) {
             TextView note = text(info.note, 14, R.color.colorTextMuted, false);
@@ -87,6 +100,17 @@ public final class PaymentSuccessSheet {
         statusRow.addView(status);
         root.addView(statusRow);
         setConfirmed(info.confirmed);
+
+        if (info.from != null && !info.from.isEmpty() && info.to != null && !info.to.isEmpty()) {
+            View parties = android.view.LayoutInflater.from(a).inflate(R.layout.view_transfer_parties, root, false);
+            SendReviewSheet.avatar(parties.findViewById(R.id.party_from_avatar), info.from);
+            SendReviewSheet.avatar(parties.findViewById(R.id.party_to_avatar), info.to);
+            ((TextView) parties.findViewById(R.id.party_from)).setText(SendReviewSheet.shortAddress(info.from));
+            ((TextView) parties.findViewById(R.id.party_to)).setText(SendReviewSheet.shortAddress(info.to));
+            LinearLayout.LayoutParams pp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            pp.topMargin = dp(24);
+            root.addView(parties, pp);
+        }
 
         if (info.rows.length > 0) {
             LinearLayout card = new LinearLayout(a);
@@ -122,6 +146,18 @@ public final class PaymentSuccessSheet {
         share.setPadding(0, dp(20), 0, dp(4));
         share.setOnClickListener(v -> com.harvana.app.receipt.ReceiptLoader.forSuccess(info, r -> com.harvana.app.receipt.ReceiptShare.choose(a, r)));
         root.addView(share);
+        String link = txLink(info.txHash);
+        if (link != null) {
+            TextView shareLink = text("Share transaction link", 14, R.color.colorAccent, true);
+            shareLink.setPadding(0, dp(12), 0, dp(4));
+            shareLink.setOnClickListener(v -> {
+                android.content.Intent send = new android.content.Intent(android.content.Intent.ACTION_SEND);
+                send.setType("text/plain");
+                send.putExtra(android.content.Intent.EXTRA_TEXT, link);
+                a.startActivity(android.content.Intent.createChooser(send, "Share transaction link"));
+            });
+            root.addView(shareLink);
+        }
 
         MaterialButton done = new MaterialButton(a);
         done.setText("Done");
@@ -155,6 +191,7 @@ public final class PaymentSuccessSheet {
         boolean wasPending = info != null && !shownConfirmed && icon.getDrawable() != null;
         info.confirmed = confirmed;
         showStateIcon(confirmed, wasPending);
+        if (info.stateTitle && title != null) title.setText(info.title + (confirmed ? " completed" : " pending"));
         if (confirmed) {
             ring.stop();
             status.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null);
@@ -219,6 +256,12 @@ public final class PaymentSuccessSheet {
         t.setGravity(Gravity.CENTER);
         if (bold) t.setTypeface(null, Typeface.BOLD);
         return t;
+    }
+
+    /** The Harvana explorer page of a transaction, or null for a hash that is not a Harvana one. */
+    private static String txLink(String hash) {
+        if (hash == null || !hash.matches("^(0x)?[0-9a-fA-F]{64}$")) return null;
+        return com.harvana.app.web3.Web3Home.EXPLORER_URL + "#/tx/" + hash;
     }
 
     private static String shorten(String v) {

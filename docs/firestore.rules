@@ -3,6 +3,8 @@
 //   capital-oracle-projects/docs/MERGED_FIRESTORE_RULES.rules
 //   capital-oracle-projects/firestore.rules
 // Publish this text. Do not keep a second, older copy.
+// Firestore rules are additive: an allow in any matching block grants access, so there is no
+// default-deny line and no wildcard block may allow a write. Every collection names its own rules.
 
 rules_version = '2';
 
@@ -612,7 +614,7 @@ service cloud.firestore {
 
     match /P2P_COMPLETED_TRADES/{txHash} {
       allow read: if signedIn();
-      allow write: if false;
+      allow create, update, delete: if false;
     }
 
     match /P2P_ORDER_PAYMENT_DETAILS/{orderId} {
@@ -672,7 +674,8 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
     match /WALLET_LINKS/{docId} {
-      allow read, write: if false;
+      allow read: if false;
+      allow create, update, delete: if false;
     }
 
     match /PIDS/{pid} {

@@ -11,6 +11,7 @@ public class GroupKindsTest {
         Map<String, Object> m = new HashMap<>();
         m.put("groupType", type);
         if (circle != null) m.put("circleId", circle);
+        m.put("asset", "HARV");
         return m;
     }
 
@@ -19,6 +20,12 @@ public class GroupKindsTest {
         assertFalse(GroupKinds.isLegacyRotating(g("Rotating Pool", "CIRC-1")));
         assertFalse(GroupKinds.isLegacyRotating(g("Fixed Contribution", null)));
         assertFalse(GroupKinds.isLegacyRotating(null));
+    }
+
+    @Test public void groupWithoutCoinIsOldTestData() {
+        Map<String, Object> m = g("Fixed Contribution", null);
+        m.remove("asset");
+        assertTrue(GroupKinds.isLegacyRotating(m));
     }
 
     @Test public void onChain() {

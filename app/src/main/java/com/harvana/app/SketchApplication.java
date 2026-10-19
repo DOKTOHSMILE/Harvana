@@ -86,6 +86,20 @@ public class SketchApplication extends Application {
             com.harvana.app.utils.BarMatcher.install(this);
             com.harvana.app.utils.ActivityTracker.install(this);
             com.harvana.app.walletconnect.WalletConnect.install(this);   // reconnects connected dApps; prompts wait for a screen
+            // v2 member locks: a payment that waited for a screen, or whose answer was lost, is offered on the next signed-in screen.
+            registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+                @Override public void onActivityResumed(android.app.Activity a) {
+                    String n = a.getClass().getSimpleName();
+                    if (n.equals("SplashScreenActivity") || n.equals("WelcomeActivity") || n.equals("LoginActivity") || n.equals("DebugActivity")) return;
+                    com.harvana.app.sync.LockSigner.onScreenOpened(a);
+                }
+                @Override public void onActivityCreated(android.app.Activity a, android.os.Bundle b) { }
+                @Override public void onActivityStarted(android.app.Activity a) { }
+                @Override public void onActivityPaused(android.app.Activity a) { }
+                @Override public void onActivityStopped(android.app.Activity a) { }
+                @Override public void onActivitySaveInstanceState(android.app.Activity a, android.os.Bundle b) { }
+                @Override public void onActivityDestroyed(android.app.Activity a) { }
+            });
             com.harvana.app.tx.PaymentTracker.install(this);
             com.harvana.app.utils.SmartCaps.install(this);
             com.harvana.app.utils.SmartSpacing.install(this);

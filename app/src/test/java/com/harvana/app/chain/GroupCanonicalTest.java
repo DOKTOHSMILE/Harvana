@@ -59,12 +59,12 @@ public class GroupCanonicalTest {
 
     @Test public void accumCreateGroup_v0() {
         assertEquals("HARVANA_ACCUM_CREATE_GROUP_V1:V_creatorAddress:1001:V_withdrawalRule:1003",
-            GroupCanonical.accumCreateGroup("V_creatorAddress", 1001L, "V_withdrawalRule", 1003L));
+            GroupCanonical.accumCreateGroup("V_creatorAddress", 1001L, "V_withdrawalRule", 1003L, null));
     }
 
     @Test public void accumCreateGroup_v1() {
         assertEquals("HARVANA_ACCUM_CREATE_GROUP_V1:V_creatorAddress:x y:1008:V_withdrawalRule:x y:1010",
-            GroupCanonical.accumCreateGroup("V_creatorAddress:x y", 1008L, "V_withdrawalRule:x y", 1010L));
+            GroupCanonical.accumCreateGroup("V_creatorAddress:x y", 1008L, "V_withdrawalRule:x y", 1010L, null));
     }
 
     @Test public void accumPack_v0() {
@@ -129,12 +129,12 @@ public class GroupCanonicalTest {
 
     @Test public void circleCreate_v0() {
         assertEquals("HARVANA_CIRCLE_CREATE_V1:V_creatorAddress:1001:5:1003:1004",
-            GroupCanonical.circleCreate("V_creatorAddress", 1001L, 5, 1003L, 1004L));
+            GroupCanonical.circleCreate("V_creatorAddress", 1001L, 5, 1003L, 1004L, null));
     }
 
     @Test public void circleCreate_v1() {
         assertEquals("HARVANA_CIRCLE_CREATE_V1:V_creatorAddress:x y:1008:6:1010:1011",
-            GroupCanonical.circleCreate("V_creatorAddress:x y", 1008L, 6, 1010L, 1011L));
+            GroupCanonical.circleCreate("V_creatorAddress:x y", 1008L, 6, 1010L, 1011L, null));
     }
 
     @Test public void circleJoin_v0() {
@@ -159,12 +159,12 @@ public class GroupCanonicalTest {
 
     @Test public void fixedCreateGroup_v0() {
         assertEquals("HARVANA_FIXED_CREATE_GROUP_V1:V_creatorAddress:1001:V_disbursementRule:V_beneficiaryAddress:1004:V_groupName:V_groupDescription:1007",
-            GroupCanonical.fixedCreateGroup("V_creatorAddress", 1001L, "V_disbursementRule", "V_beneficiaryAddress", 1004L, "V_groupName", "V_groupDescription", 1007L));
+            GroupCanonical.fixedCreateGroup("V_creatorAddress", 1001L, "V_disbursementRule", "V_beneficiaryAddress", 1004L, "V_groupName", "V_groupDescription", 1007L, null));
     }
 
     @Test public void fixedCreateGroup_v1() {
         assertEquals("HARVANA_FIXED_CREATE_GROUP_V1:V_creatorAddress:x y:1008:V_disbursementRule:x y:V_beneficiaryAddress:x y:1011:V_groupName:x y:V_groupDescription:x y:1014",
-            GroupCanonical.fixedCreateGroup("V_creatorAddress:x y", 1008L, "V_disbursementRule:x y", "V_beneficiaryAddress:x y", 1011L, "V_groupName:x y", "V_groupDescription:x y", 1014L));
+            GroupCanonical.fixedCreateGroup("V_creatorAddress:x y", 1008L, "V_disbursementRule:x y", "V_beneficiaryAddress:x y", 1011L, "V_groupName:x y", "V_groupDescription:x y", 1014L, null));
     }
 
     @Test public void fixedDeposit_v0() {
@@ -333,5 +333,12 @@ public class GroupCanonicalTest {
 
     @Test public void cureDefault_matchesTheNode() {
         assertEquals("HARVANA_CURE_DEFAULT_V1:CIRC-1:HV0xabc:9", GroupCanonical.cureDefault("CIRC-1", "HV0xabc", 9L));
+    }
+
+    /** A group in a stable coin: the node appends ":" + asset to the create message. */
+    @Test public void createMessagesCarryTheGroupCoin() {
+        assertEquals("HARVANA_ACCUM_CREATE_GROUP_V1:A:5:R:9:HUSD", GroupCanonical.accumCreateGroup("A", 5L, "R", 9L, "HUSD"));
+        assertEquals("HARVANA_CIRCLE_CREATE_V1:A:100:5:24:9:HNGN", GroupCanonical.circleCreate("A", 100L, 5, 24L, 9L, "HNGN"));
+        assertEquals("HARVANA_FIXED_CREATE_GROUP_V1:A:100:R:B:5:N:D:9:HUSD", GroupCanonical.fixedCreateGroup("A", 100L, "R", "B", 5L, "N", "D", 9L, "HUSD"));
     }
 }

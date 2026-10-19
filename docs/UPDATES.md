@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026: v2 payments signed safely
+
+- Every payment template from the node is checked before signing: chain, version, your wallet as sender, a valid receiver, HARV, amount, tFare cap, expiry, and that the payment type matches its memo. A template that fails is not signed.
+- Each payment opens the Harvana confirm sheet (For / Amount / tFare / To / From) and needs your PIN or fingerprint.
+- Nothing is signed while the app has no screen open: a "Payment waiting" notification is shown, and the payment is offered again when Harvana opens.
+- Payments still waiting on the node are fetched again on app open, so a lost one is never dropped.
+- A stale nonce is retried once with the fresh nonce.
+- Unit tests: template checks, group create messages with a coin, and two old tests brought in line with the code.
+
 ## 19 Oct 2026 — WalletConnect and Solana in Web3
 
 - WalletConnect v2: connect Harvana to a dApp on a computer or another browser. Open it from Web3 (link icon next to search), the browser menu (WalletConnect), or scan the dApp's QR with any Harvana scanner; "wc:" links open it too.

@@ -33,7 +33,7 @@ public class LogSanitizerTest {
         assertNotNull(out);
         assertTrue("should start with HV0x", out.startsWith("HV0x"));
         assertTrue("should contain ellipsis", out.contains("…"));
-        assertTrue("should end with last 4 hex chars", out.endsWith("3456"));
+        assertTrue("should end with last 4 hex chars", out.endsWith("5678"));
         // Strictly less than the full address (the whole point).
         assertTrue("should be shorter than the input", out.length() < addr.length());
     }

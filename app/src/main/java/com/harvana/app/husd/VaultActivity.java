@@ -80,7 +80,9 @@ public class VaultActivity extends AppCompatActivity {
     private void showPrice() {
         if (!info.optBoolean("available")) { tvPrice.setText("—"); return; }
         if (info.optBoolean("priceOk")) {
-            tvPrice.setText("₦" + naira(info.optLong("koboPerHarv")));
+            if ("SWAP_24H_LOW".equals(info.optString("priceSource")) && info.has("borrowKoboPerHarv"))
+                tvPrice.setText("₦" + naira(info.optLong("borrowKoboPerHarv")) + " · Swap 24h low");
+            else tvPrice.setText("₦" + naira(info.optLong("koboPerHarv")));
         } else {
             tvPrice.setText(priceProblem(info.optString("priceProblem")));
         }

@@ -648,7 +648,7 @@ public class HistoryFragmentActivity extends Fragment {
 			// The group wallet is "me" here: money into it is received, money out of it is sent.
 			com.harvana.app.tx.TxKind kind = com.harvana.app.tx.TxKind.of(memo, !isOut);
 			if (h.icon != null) {
-				int pad = Math.round(8 * h.icon.getResources().getDisplayMetrics().density);
+				int pad = Math.round(4 * h.icon.getResources().getDisplayMetrics().density);   // 16dp glyph in the 24dp circle
 				h.icon.setPadding(pad, pad, pad, pad);
 				h.icon.setScaleType(android.widget.ImageView.ScaleType.CENTER_INSIDE);
 				com.harvana.app.tx.TxIcon.circle(h.icon);

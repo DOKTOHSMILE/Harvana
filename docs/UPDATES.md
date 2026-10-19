@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026: Added coins' history, pending rows, no repeated notifications
+
+- Activity and coin pages for added coins: Solana tokens (SPL, for example PUMP) and NEAR tokens now list their transfers (before: none). Added coins also show when the app has just started (before: missing until the Assets tab had loaded them).
+- A send of another chain's coin or an added coin shows as pending, then confirmed or failed once its chain answers (EVM chains and Solana; before it could stay pending). A pending Harvana row (send, swap, group payment) that is already in a block clears within seconds; the list re-checks every 8 seconds while anything is pending.
+- Notifications: the first check after signing in fills the inbox only (no status-bar pop-ups for old transfers). A transfer pops on the status bar only within 15 minutes of its confirmation (was 6 hours). Overlapping checks on opening the app no longer run twice. Another coin's balance change is announced only when two checks in a row agree, so a chain API answering 0 once no longer announces "Sent" then "Received".
+
 ## 19 Oct 2026: hNGN vault open on the swap price
 
 - Vault (hNGN): Price shows "₦… · Swap 24h low" while the node prices the vault from the hNGN swap pool's lowest price of the last 24 hours (until the P2P price is live). Needs the node change of the same date.

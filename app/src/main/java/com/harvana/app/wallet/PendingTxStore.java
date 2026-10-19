@@ -125,7 +125,8 @@ public final class PendingTxStore {
 			
 			Object tsObj = entry.get("timestamp");
 			long ts = tsObj instanceof Number ? ((Number) tsObj).longValue() : now;
-			if (now - ts < STALE_THRESHOLD_MS) continue; // still within normal window
+			final long age = now - ts;
+			if (age < 30_000L) continue;                 // just sent: the next block has not had time
 			
 			String txHash = String.valueOf(entry.get("txHash"));
 			if (txHash == null || txHash.startsWith("local-failed-")) continue;
@@ -135,12 +136,14 @@ public final class PendingTxStore {
 				@Override
 				public void onSuccess(org.json.JSONObject json) {
 					String nodeStatus = json.optString("status", "");
-					if ("NOT_FOUND".equalsIgnoreCase(nodeStatus)) {
+					if ("CONFIRMED".equalsIgnoreCase(nodeStatus)) {
+						// In a block: the confirmed row comes from the history; this copy would stay "pending" for good.
+						pruneConfirmed(context, walletAddress, java.util.Collections.singletonList(txHash));
+					} else if ("NOT_FOUND".equalsIgnoreCase(nodeStatus) && age >= STALE_THRESHOLD_MS) {
 						markFailed(context, walletAddress, txHash,
 						"Transaction no longer found on node — likely lost before confirming");
 					}
 					// PENDING → still genuinely waiting, leave it.
-					// CONFIRMED → will be pruned normally on next history refresh.
 				}
 				
 				@Override

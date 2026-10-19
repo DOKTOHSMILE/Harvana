@@ -61,7 +61,7 @@ public final class SplToken {
     }
 
     /** The owner's token accounts for a mint: {address, raw amount}. */
-    private static List<String[]> accounts(String rpc, String owner, String mint) throws Exception {
+    static List<String[]> accounts(String rpc, String owner, String mint) throws Exception {
         JSONObject r = call(rpc, "getTokenAccountsByOwner", new JSONArray().put(owner).put(new JSONObject().put("mint", mint))
                 .put(new JSONObject().put("encoding", "jsonParsed")));
         List<String[]> out = new ArrayList<>();
@@ -187,7 +187,7 @@ public final class SplToken {
         }
     }
 
-    private static JSONObject call(String rpc, String method, JSONArray params) throws Exception {
+    static JSONObject call(String rpc, String method, JSONArray params) throws Exception {
         String body = new JSONObject().put("jsonrpc", "2.0").put("id", 1).put("method", method).put("params", params).toString();
         Request req = new Request.Builder().url(rpc).post(RequestBody.create(body, JSON)).build();
         try (Response r = HTTP.newCall(req).execute()) {

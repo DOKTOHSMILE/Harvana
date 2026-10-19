@@ -25,7 +25,11 @@ public final class NotificationSync {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) { if (done != null) done.run(); return; }
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         final AtomicInteger pending = new AtomicInteger(10);
-        final Runnable finish = () -> { if (pending.decrementAndGet() == 0 && done != null) done.run(); };
+        final Runnable finish = () -> {
+            if (pending.decrementAndGet() != 0) return;
+            NotificationCenter.markPrimed(c);
+            if (done != null) done.run();
+        };
 
         // 1. Invitations
         InviteManager.listMine(c, new InviteManager.ListCb() {

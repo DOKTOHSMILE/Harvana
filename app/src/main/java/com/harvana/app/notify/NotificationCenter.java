@@ -103,6 +103,9 @@ public final class NotificationCenter {
         Context c = ctx.getApplicationContext();
         List<Item> items = list(c);
         for (Item i : items) if (i.id.equals(dedupeKey)) return false;
+        // The first check after signing in only fills the inbox: what it finds happened before, and popping it on the
+        // status bar at every sign-in repeated old news.
+        if (tray && !primed(c)) tray = false;
         // The confirmation of a transfer replaces its "on its way" notice instead of sitting beside it.
         if (dedupeKey.startsWith("tx_") && (dedupeKey.endsWith("_out") || dedupeKey.endsWith("_in"))) {
             String stem = dedupeKey.substring(0, dedupeKey.lastIndexOf('_'));
@@ -119,6 +122,12 @@ public final class NotificationCenter {
         LocalBroadcastManager.getInstance(c).sendBroadcast(new Intent(ACTION_CHANGED));
         return true;
     }
+
+    /** True once a full check has run for the signed-in account on this phone. */
+    public static boolean primed(Context c) { return sp(c).getBoolean("primed", false); }
+
+    /** Called when the first full check after signing in has finished. */
+    public static void markPrimed(Context c) { sp(c).edit().putBoolean("primed", true).apply(); }
 
     public static synchronized void markRead(Context c, String id) {
         List<Item> items = list(c);

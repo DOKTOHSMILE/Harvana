@@ -91,13 +91,28 @@ public final class AssetBalanceNotifier {
                 : new String[]{"Sent " + delta + " " + symbol, "Your " + symbol + " balance is now " + now.stripTrailingZeros().toPlainString() + "."};
     }
 
+    /**
+     * A new balance is announced only when two checks in a row read it: a chain API that answers 0 or a stale figure
+     * once (and the right one next time) used to announce the same coins as sent and then received again.
+     */
+    static boolean confirmed(String candidate, BigDecimal now) {
+        return candidate != null && new BigDecimal(candidate).compareTo(now) == 0;
+    }
+
     private static synchronized void compare(Context c, SharedPreferences sp, String me, String key, String symbol, BigDecimal now, boolean quiet) {
-        String pref = me + ":" + key;
+        String pref = me + ":" + key, seen = "seen:" + pref;
         String saved = sp.getString(pref, null);
-        sp.edit().putString(pref, now.toPlainString()).apply();
-        if (saved == null || quiet) return;                            // first look, or just switched: only the starting point
-        String[] m = message(new BigDecimal(saved), now, symbol);
-        if (m == null) return;
-        NotificationCenter.post(c, NotificationCenter.TX, "asset_" + me + "_" + key + "_" + now.toPlainString(), m[0], m[1], "", -1);
+        if (saved == null || quiet) {                                  // first look, or just switched: only the starting point
+            sp.edit().putString(pref, now.toPlainString()).remove(seen).apply();
+            return;
+        }
+        BigDecimal before = new BigDecimal(saved);
+        if (before.compareTo(now) == 0) { sp.edit().remove(seen).apply(); return; }
+        if (!confirmed(sp.getString(seen, null), now)) { sp.edit().putString(seen, now.toPlainString()).apply(); return; }
+        sp.edit().putString(pref, now.toPlainString()).remove(seen).apply();
+        String[] m = message(before, now, symbol);
+        if (m == null || com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) return;
+        NotificationCenter.post(c, NotificationCenter.TX, "asset_" + me + "_" + key + "_" + before.toPlainString() + "_" + now.toPlainString()
+                + "_" + (System.currentTimeMillis() / 3_600_000L), m[0], m[1], "", -1);
     }
 }

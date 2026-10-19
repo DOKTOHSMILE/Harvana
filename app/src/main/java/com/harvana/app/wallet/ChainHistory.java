@@ -31,6 +31,7 @@ public final class ChainHistory {
         List<HashMap<String, Object>> out = new ArrayList<>();
         if (c == null || harvAddress == null || harvAddress.isEmpty()) return out;
         Context app = c.getApplicationContext();
+        if (CustomAssets.cached().isEmpty()) CustomAssets.all(app);            // added coins not read yet this run: read them
         List<java.util.concurrent.Callable<List<HashMap<String, Object>>>> jobs = new ArrayList<>();
         for (CoinCatalog.Coin coin : CoinCatalog.others()) {
             if (!ChainAssetsSection.shown(app, coin.key)) continue;
@@ -67,6 +68,7 @@ public final class ChainHistory {
         if (c == null || key == null) return out;
         if ((harvAddress == null || harvAddress.isEmpty()) && (knownAddress == null || knownAddress.isEmpty())) return out;
         Context app = c.getApplicationContext();
+        if (CustomAssets.cached().isEmpty()) CustomAssets.all(app);
         try {
             String addr = knownAddress != null && !knownAddress.isEmpty() ? knownAddress : CoinCatalog.savedAddress(app, harvAddress, key);
             if (addr == null || addr.isEmpty()) return out;
@@ -91,9 +93,9 @@ public final class ChainHistory {
                     CustomAssets.Asset a = CustomAssets.find(key);
                     if (a == null) break;
                     if (a.near() && !a.token()) out.addAll(NearProtocol.history(a, addr));
-                    else if (a.near()) break;                                    // NEP-141 transfers: on the explorer
+                    else if (a.near()) nearTokens(out, a, addr);
                     else if (Trc20.FAMILY.equals(a.family)) trc20(out, a, addr);
-                    else if (SplToken.FAMILY.equals(a.family)) break;            // SPL transfers: on the explorer
+                    else if (SplToken.FAMILY.equals(a.family)) splTokens(out, a, addr);
                     else if ("CHAIN".equals(a.kind) && !a.scout.isEmpty()) blockscout(out, a.scout, a.symbol, a.chainName, addr, a.decimals, a.txPage(""));
                     else if ("TOKEN".equals(a.kind) && !a.scout.isEmpty()) scoutTokens(out, a, addr);
                     else if ("TOKEN".equals(a.kind) && "EVM".equals(a.family)) tokenLogs(out, a, addr);
@@ -226,36 +228,192 @@ public final class ChainHistory {
     /** A payment this phone already broadcast, so it shows even before an explorer lists it. */
     public static void remember(android.content.Context c, String key, String hash, String from, String to, String amount) {
         if (c == null || key == null || hash == null || hash.isEmpty()) return;
-        android.content.SharedPreferences p = c.getSharedPreferences("chain_sent", android.content.Context.MODE_PRIVATE);
-        String prior = p.getString("rows", "");
-        String line = key + "\t" + hash + "\t" + (from == null ? "" : from) + "\t" + (to == null ? "" : to) + "\t" + (amount == null ? "0" : amount) + "\t" + System.currentTimeMillis();
-        StringBuilder next = new StringBuilder(line);
-        int kept = 0;
-        for (String old : prior.split("\n")) {
-            if (old.isEmpty() || old.contains("\t" + hash + "\t")) continue;
-            next.append('\n').append(old);
-            if (++kept >= 30) break;
+        synchronized (ChainHistory.class) {
+            android.content.SharedPreferences p = c.getSharedPreferences("chain_sent", android.content.Context.MODE_PRIVATE);
+            String prior = p.getString("rows", "");
+            String line = key + "\t" + hash + "\t" + (from == null ? "" : from) + "\t" + (to == null ? "" : to) + "\t" + (amount == null ? "0" : amount) + "\t" + System.currentTimeMillis() + "\tpending";
+            StringBuilder next = new StringBuilder(line);
+            int kept = 0;
+            for (String old : prior.split("\n")) {
+                if (old.isEmpty() || old.contains("\t" + hash + "\t")) continue;
+                next.append('\n').append(old);
+                if (++kept >= 30) break;
+            }
+            p.edit().putString("rows", next.toString()).apply();
         }
-        p.edit().putString("rows", next.toString()).apply();
     }
+
+    /** A sent payment stays "pending" until its chain confirms it (or refuses it); then the row says so. */
+    static final long REMEMBER_DAYS_MS = 7L * 24 * 60 * 60 * 1000;
 
     private static void remembered(android.content.Context c, String key, List<HashMap<String, Object>> out) {
         if (c == null) return;
-        String prior = c.getSharedPreferences("chain_sent", android.content.Context.MODE_PRIVATE).getString("rows", "");
+        android.content.SharedPreferences sp = c.getSharedPreferences("chain_sent", android.content.Context.MODE_PRIVATE);
+        String prior = sp.getString("rows", "");
         if (prior == null || prior.isEmpty()) return;
+        long now = System.currentTimeMillis();
+        java.util.Map<String, String> settled = new HashMap<>();
         for (String line : prior.split("\n")) {
             String[] p = line.split("\t", -1);
             if (p.length < 6 || !key.equals(p[0])) continue;
-            boolean seen = false;
-            for (HashMap<String, Object> row : out) if (p[1].equals(String.valueOf(row.get("txHash")))) seen = true;
-            if (seen) continue;
+            long at = parseLong(p[5]);
+            if (now - at > REMEMBER_DAYS_MS) continue;
+            String status = p.length > 6 && !p[6].isEmpty() ? p[6] : "pending";
+            HashMap<String, Object> listed = null;
+            for (HashMap<String, Object> row : out) if (p[1].equalsIgnoreCase(String.valueOf(row.get("txHash")))) listed = row;
+            if (listed != null) {                                     // the explorer has it: its own status decides
+                if (!"pending".equals(status)) listed.put("status", status);
+                continue;
+            }
+            if ("pending".equals(status)) {
+                String s = settle(key, p[1], now - at);
+                if (s != null) { status = s; settled.put(p[1], s); }
+            }
             double amt = parse(p[4]);
             CustomAssets.Asset added = CustomAssets.find(key);
             String ticker = added != null ? added.symbol : key;
-            HashMap<String, Object> m = row(ticker, netName(key), false, p[2], p[3], amt, parseLong(p[5]), p[1], pageFor(key, p[1]));
-            m.put("status", "pending");
+            HashMap<String, Object> m = row(ticker, netName(key), false, p[2], p[3], amt, at, p[1], pageFor(key, p[1]));
+            m.put("status", status);
             out.add(0, m);
         }
+        if (!settled.isEmpty()) {
+            synchronized (ChainHistory.class) {
+                StringBuilder next = new StringBuilder();
+                for (String line : sp.getString("rows", "").split("\n")) {
+                    if (line.isEmpty()) continue;
+                    String[] p = line.split("\t", -1);
+                    String s = p.length >= 6 ? settled.get(p[1]) : null;
+                    if (next.length() > 0) next.append('\n');
+                    next.append(s == null ? line : String.join("\t", java.util.Arrays.copyOf(p, 6)) + "\t" + s);
+                }
+                sp.edit().putString("rows", next.toString()).apply();
+            }
+        }
+    }
+
+    /**
+     * Asks the coin's own chain whether a sent payment went through: "confirmed", "failed", or null while it is still
+     * waiting (or the chain cannot be asked). Run off the main thread.
+     */
+    static String settle(String key, String hash, long ageMs) {
+        try {
+            CustomAssets.Asset a = CustomAssets.find(key);
+            boolean solana = "SOL".equals(key) || (a != null && SplToken.FAMILY.equals(a.family));
+            if (solana) {
+                String rpc = a != null && !a.rpc.isEmpty() ? a.rpc.split(",")[0].trim() : Net.solRpc();
+                JSONObject r = post(rpc, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getSignatureStatuses\",\"params\":[[\"" + hash
+                        + "\"],{\"searchTransactionHistory\":true}]}");
+                JSONObject res = r.optJSONObject("result");
+                JSONArray v = res == null ? null : res.optJSONArray("value");
+                JSONObject st = v == null || v.isNull(0) ? null : v.optJSONObject(0);
+                if (st == null) return ageMs > 10 * 60_000L ? "failed" : null;          // never landed: its blockhash has expired
+                if (st.has("err") && !st.isNull("err")) return "failed";
+                String level = st.optString("confirmationStatus");
+                return "confirmed".equals(level) || "finalized".equals(level) ? "confirmed" : null;
+            }
+            String rpc = null;
+            if (a != null && "EVM".equals(a.family) && !a.rpc.isEmpty()) rpc = a.rpc.split(",")[0].trim();
+            else if (a == null && ("ETH".equals(key) || "BNB".equals(key) || "POL".equals(key) || "BASE".equals(key))) rpc = Net.evm(key).rpc;
+            else if (a != null && key.startsWith("C:")) rpc = Net.evm(key).rpc;
+            if (rpc != null) {
+                JSONObject r = post(rpc, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"eth_getTransactionReceipt\",\"params\":[\"" + hash + "\"]}");
+                JSONObject rc = r.optJSONObject("result");
+                if (rc == null) return null;
+                return "0x1".equals(rc.optString("status")) ? "confirmed" : "failed";
+            }
+        } catch (Exception ignored) { }
+        return null;
+    }
+
+    /** An SPL token's transfers in and out of this wallet: each signature on the wallet's token account, read from the chain. */
+    private static void splTokens(List<HashMap<String, Object>> out, CustomAssets.Asset a, String owner) {
+        if (a.rpc == null || a.rpc.isEmpty() || owner == null || owner.isEmpty()) return;
+        String rpc = a.rpc.split(",")[0].trim();
+        try {
+            java.util.Set<String> seen = new java.util.HashSet<>();
+            for (String[] acct : SplToken.accounts(rpc, owner, a.contract)) {
+                JSONObject sigs = SplToken.call(rpc, "getSignaturesForAddress", new JSONArray().put(acct[0]).put(new JSONObject().put("limit", 15)));
+                JSONArray arr = sigs.optJSONArray("result");
+                for (int i = 0; arr != null && i < arr.length(); i++) {
+                    String sig = arr.getJSONObject(i).optString("signature");
+                    if (sig.isEmpty() || !seen.add(sig)) continue;
+                    HashMap<String, Object> m = splTx(rpc, a, sig, owner);
+                    if (m != null) out.add(m);
+                }
+            }
+            out.sort((x, y) -> Long.compare((Long) y.get("timestamp"), (Long) x.get("timestamp")));
+        } catch (Exception ignored) { }
+    }
+
+    /** One SPL transaction as a history row: the change in this owner's balance of the mint, and who was on the other side. */
+    private static HashMap<String, Object> splTx(String rpc, CustomAssets.Asset a, String sig, String owner) {
+        try {
+            JSONObject r = SplToken.call(rpc, "getTransaction", new JSONArray().put(sig)
+                    .put(new JSONObject().put("encoding", "jsonParsed").put("maxSupportedTransactionVersion", 0)));
+            JSONObject tx = r.optJSONObject("result");
+            if (tx == null) return null;
+            JSONObject meta = tx.optJSONObject("meta");
+            if (meta == null) return null;
+            java.math.BigInteger mine = java.math.BigInteger.ZERO;
+            java.util.Map<String, java.math.BigInteger> others = new HashMap<>();
+            for (String side : new String[]{"pre", "post"}) {
+                JSONArray bals = meta.optJSONArray(side + "TokenBalances");
+                for (int i = 0; bals != null && i < bals.length(); i++) {
+                    JSONObject b = bals.getJSONObject(i);
+                    if (!a.contract.equals(b.optString("mint"))) continue;
+                    JSONObject amt = b.optJSONObject("uiTokenAmount");
+                    java.math.BigInteger raw = new java.math.BigInteger(amt == null ? "0" : amt.optString("amount", "0"));
+                    if ("pre".equals(side)) raw = raw.negate();
+                    String who = b.optString("owner");
+                    if (owner.equals(who)) mine = mine.add(raw);
+                    else others.merge(who, raw, java.math.BigInteger::add);
+                }
+            }
+            if (mine.signum() == 0) return null;                         // this signature did not move the wallet's tokens
+            boolean in = mine.signum() > 0;
+            String other = "";
+            for (java.util.Map.Entry<String, java.math.BigInteger> e : others.entrySet()) {
+                if (e.getValue().signum() != 0 && e.getValue().signum() != mine.signum()) { other = e.getKey(); break; }
+            }
+            double amount = new BigDecimal(mine.abs()).movePointLeft(a.decimals).doubleValue();
+            HashMap<String, Object> m = row(a.symbol, netName(a.key()), in, in ? other : owner, in ? owner : other, amount,
+                    tx.optLong("blockTime") * 1000L, sig, a.txPage(sig));
+            boolean failed = meta.has("err") && !meta.isNull("err");
+            m.put("status", failed ? "failed" : "confirmed");
+            m.put("harvFee", meta.optLong("fee") / 1e9);
+            m.put("feeSymbol", "SOL");
+            m.put("blockNumber", tx.optLong("slot"));
+            return m;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** A NEP-141 token's transfers for this account, from the NEAR chain's history API (NearBlocks: /ft-txns). */
+    private static void nearTokens(List<HashMap<String, Object>> out, CustomAssets.Asset a, String account) {
+        String api = a.historyApi;
+        if (api == null || api.isEmpty()) {
+            for (CustomAssets.Asset c : CustomAssets.cached()) if (c.near() && !c.token() && !c.historyApi.isEmpty()) { api = c.historyApi; break; }
+        }
+        if (api == null || api.isEmpty()) return;
+        try {
+            JSONObject j = get(api + "/v1/account/" + account + "/ft-txns?contract=" + a.contract + "&per_page=25");
+            JSONArray txns = j.optJSONArray("txns");
+            for (int i = 0; txns != null && i < txns.length(); i++) {
+                JSONObject t = txns.getJSONObject(i);
+                String delta = t.optString("delta_amount", "0");
+                boolean in = !delta.startsWith("-");
+                String other = t.optString("involved_account_id");
+                long ts = 0;
+                try { ts = new BigDecimal(t.optString("block_timestamp", "0")).movePointLeft(6).longValue(); } catch (Exception ignored) { }
+                String hash = t.optString("transaction_hash");
+                HashMap<String, Object> m = row(a.symbol, netName(a.key()), in, in ? other : account, in ? account : other,
+                        shift(delta.replace("-", ""), a.decimals), ts, hash, a.txPage(hash));
+                JSONObject outcomes = t.optJSONObject("outcomes");
+                m.put("status", outcomes == null || outcomes.optBoolean("status", true) ? "confirmed" : "failed");
+                out.add(m);
+            }
+        } catch (Exception ignored) { }
     }
 
     private static String netName(String key) {

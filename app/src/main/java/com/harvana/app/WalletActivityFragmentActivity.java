@@ -125,6 +125,30 @@ public class WalletActivityFragmentActivity extends Fragment {
 		_loadTransactionHistory();
 	}
 	
+	@Override
+	public void onPause() {
+		super.onPause();
+		pendingPoll.removeCallbacks(pollPending);
+	}
+
+	/** While a row is pending (a send, a swap, a group payment), the list asks again every 8 seconds until it settles. */
+	private final android.os.Handler pendingPoll = new android.os.Handler(android.os.Looper.getMainLooper());
+	private int pollTick;
+	private final Runnable pollPending = () -> {
+		if (!isResumed()) return;
+		pollChain = ++pollTick % 4 == 0;                 // other chains' explorers every 32 seconds, the Harvana node every 8
+		_loadTransactionHistory();
+		pollChain = true;
+	};
+	private boolean pollChain = true;
+
+	private void _pollWhilePending(java.util.List<java.util.HashMap<String, Object>> shown) {
+		pendingPoll.removeCallbacks(pollPending);
+		for (java.util.HashMap<String, Object> m : shown) {
+			if ("pending".equalsIgnoreCase(String.valueOf(m.get("status")))) { pendingPoll.postDelayed(pollPending, 8_000L); return; }
+		}
+	}
+
 	public void _MORE() {
 	}
 
@@ -171,7 +195,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 		nodeHasMore = true;
 		allNodeTx.clear();
 		_fetchNodeHistoryPage();
-		_loadChainHistory();
+		if (pollChain) _loadChainHistory();
 		
 		// Server-reported pending
 		com.harvana.app.sync.HarvanaNodeClient.getPending(wallet_address,
@@ -407,6 +431,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 			list_history.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(getContext()));
 		}
 		
+		_pollWhilePending(filtered);
 		RecyclerView.Adapter adapter = list_history.getAdapter();
 		if (adapter instanceof TransactionHistoryAdapter) {
 			((TransactionHistoryAdapter) adapter).updateItems(filtered);

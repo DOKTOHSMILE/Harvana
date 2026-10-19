@@ -25,17 +25,37 @@ public final class WalletTxNotifier {
 
     /** How many announced transactions are remembered, so none is announced twice. */
     static final int TOLD_CAP = 400;
-    /** Status bar only for a confirmation this recent. Older ones stay on the activity list. */
-    static final long TRAY_WINDOW_MS = 6L * 60 * 60 * 1000;
+    /** Status bar only for a confirmation this recent; older ones go to the inbox quietly (owner, 19 Oct 2026). */
+    static final long TRAY_WINDOW_MS = 15L * 60 * 1000;
     /** Inbox only this far back, so a broken baseline cannot dump a wallet's history into notifications. */
     static final long INBOX_WINDOW_MS = 24L * 60 * 60 * 1000;
 
     public interface Done { void onDone(List<TxEvents.Event> newEvents); }
 
+    /** One check at a time: the socket, the 90-second sync and the background worker used to overlap on opening. */
+    private static final java.util.concurrent.atomic.AtomicLong BUSY_SINCE = new java.util.concurrent.atomic.AtomicLong();
+
+    /** Takes the one slot; a check that never answered frees it after a minute. */
+    private static boolean take() {
+        long now = System.currentTimeMillis(), was = BUSY_SINCE.get();
+        return (was == 0 || now - was > 60_000L) && BUSY_SINCE.compareAndSet(was, now);
+    }
+
     public static void run(Context ctx, Done done) {
         final Context c = ctx.getApplicationContext();
         final String me = WalletManager.getActiveWalletAddress(c);
-        if (me == null || me.trim().isEmpty()) { if (done != null) done.onDone(new ArrayList<>()); return; }
+        // No signed-in account yet (the app still starting): wait, so nothing is recorded as told against no inbox.
+        if (me == null || me.trim().isEmpty() || com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null
+                || !take()) {
+            if (done != null) done.onDone(new ArrayList<>());
+            return;
+        }
+        final Done inner = done;
+        done = events -> { BUSY_SINCE.set(0); if (inner != null) inner.onDone(events); };
+        try { check(c, me, done); } catch (RuntimeException e) { done.onDone(new ArrayList<>()); }
+    }
+
+    private static void check(final Context c, final String me, final Done done) {
         final SharedPreferences sp = c.getSharedPreferences("wallet_tx_notify", Context.MODE_PRIVATE);
         final String key = "baseline_" + me;
         // A wallet just switched to starts from now: what happened while it wasn't the active wallet is old news, and
@@ -68,8 +88,9 @@ public final class WalletTxNotifier {
                 }
                 java.util.List<String> keep = new java.util.ArrayList<>(told);
                 if (keep.size() > TOLD_CAP) keep = keep.subList(keep.size() - TOLD_CAP, keep.size());
-                sp.edit().putString("told", android.text.TextUtils.join(",", keep)).apply();
-                if (newest > baseline) sp.edit().putLong(key, newest).apply();
+                SharedPreferences.Editor ed = sp.edit().putString("told", android.text.TextUtils.join(",", keep));
+                if (newest > baseline) ed.putLong(key, newest);
+                ed.commit();
                 if (done != null) done.onDone(fresh);
             }
             @Override public void onError(String error) { if (done != null) done.onDone(new ArrayList<>()); }

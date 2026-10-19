@@ -449,6 +449,7 @@ public class SendAssetActivity extends AppCompatActivity {
 					String key = String.valueOf(asset.get("assetKey"));
 					if (amountPreview != null) amountPreview.assetChanged();
 					if (etRecipient != null) etRecipient.setHint(_addressHint(key));
+					_paintRecents(key, String.valueOf(asset.get("symbol")));
 					String from = asset.get("address") instanceof String ? String.valueOf(asset.get("address")) : "";
 					if (tvSubtitle != null && getIntent().getStringExtra("fromWalletAddress") == null) {
 						com.harvana.app.wallet.CoinCatalog.Coin coin = com.harvana.app.wallet.CoinCatalog.get(key);
@@ -1031,6 +1032,24 @@ public class SendAssetActivity extends AppCompatActivity {
 	}
 
 	private static final int RC_PICK_ASSET = 78;
+
+	/** Addresses this phone sent this coin to before, newest first; a tap fills the recipient. */
+	private void _paintRecents(String key, String symbol) {
+		android.widget.LinearLayout box = findViewById(R.id.recent_recipients);
+		View scroll = findViewById(R.id.recent_recipients_scroll);
+		if (box == null || scroll == null) return;
+		box.removeAllViews();
+		boolean harvana = _addressHint(key).startsWith("HV0x");
+		java.util.List<String> recents = com.harvana.app.tx.RecentRecipients.forCoin(this, symbol, harvana);
+		for (String to : recents) {
+			View chip = getLayoutInflater().inflate(R.layout.item_recent_recipient, box, false);
+			com.harvana.app.ui.SendReviewSheet.avatar(chip.findViewById(R.id.recent_avatar), to);
+			((TextView) chip.findViewById(R.id.recent_address)).setText(com.harvana.app.ui.SendReviewSheet.shortAddress(to));
+			chip.setOnClickListener(v -> { if (etRecipient != null) { etRecipient.setText(to); etRecipient.setSelection(to.length()); } });
+			box.addView(chip);
+		}
+		scroll.setVisibility(recents.isEmpty() ? View.GONE : View.VISIBLE);
+	}
 
 	private static String _addressHint(String key) {
 		boolean test = com.harvana.app.wallet.Net.TEST;

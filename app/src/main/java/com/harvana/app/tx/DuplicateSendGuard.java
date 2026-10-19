@@ -48,6 +48,7 @@ public final class DuplicateSendGuard {
 
     /** Remembers an accepted send. */
     public static void record(Context c, String to, String coin, String amountText) {
+        RecentRecipients.remember(c, to, coin);
         try {
             long now = System.currentTimeMillis();
             JSONArray kept = new JSONArray();

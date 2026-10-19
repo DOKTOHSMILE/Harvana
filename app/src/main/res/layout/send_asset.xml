@@ -152,6 +152,20 @@
 							android:focusable="false" />
 					</LinearLayout>
 				</com.google.android.material.card.MaterialCardView>
+				<HorizontalScrollView
+					android:id="@+id/recent_recipients_scroll"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="-6dp"
+					android:layout_marginBottom="14dp"
+					android:scrollbars="none"
+					android:visibility="gone">
+					<LinearLayout
+						android:id="@+id/recent_recipients"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:orientation="horizontal" />
+				</HorizontalScrollView>
 				<TextView
 					android:id="@+id/tvLabelAmount"
 					android:layout_width="wrap_content"

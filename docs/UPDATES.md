@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026: Logos for added coins
+
+- Added coins with no logo, or a logo that does not load, get one looked up when the Assets tab loads (hourly until one is found, then daily), and the row redraws with it. Sources by kind: EVM tokens CoinGecko, DexScreener, Trust Wallet; Solana tokens DexScreener, Jupiter, CoinGecko, Trust Wallet; Tron tokens CoinGecko, Trust Wallet, DexScreener; NEAR tokens their own picture, CoinGecko, DexScreener, Trust Wallet; chains the chain registry and CoinGecko. Only a picture that actually loads is kept (SVG and dead links are skipped).
+- IPFS logos are tried through more than one gateway: ipfs.io refuses busy callers, which is why PUMP showed a letter instead of its logo.
+- A logo that fails on screen is replaced at the next pass.
+
 ## 19 Oct 2026: Steady asset and activity rows, one icon style
 
 - Assets: rows keep their place once the list has settled; a balance or price that arrives later changes its row in place. The order by value is worked out again each time the Assets tab is opened. Icons are no longer set again on every update (they blinked), and only rows that moved are moved.

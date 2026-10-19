@@ -662,9 +662,27 @@ public final class CustomAssets {
     }
 
     private static void icon(Context c, ImageView logo, Asset a) {
-        if (a.icon.isEmpty()) { logo.setImageDrawable(letter(c, a.symbol)); return; }
+        final String key = a.contract.isEmpty() && a.chainId == 0 && a.networkId.isEmpty() ? null : a.key();
+        java.util.List<String> via = AssetEnricher.gateways(AssetEnricher.https(a.icon));
+        String url = via.isEmpty() ? "" : via.get(0);
+        if (!AssetEnricher.drawable(url)) {
+            logo.setImageDrawable(letter(c, a.symbol));
+            if (key != null) AssetEnricher.iconFailed(c, key);           // no logo it can draw yet: look for one
+            return;
+        }
         try {
-            com.bumptech.glide.Glide.with(c).load(a.icon).circleCrop().placeholder(letter(c, a.symbol)).error(letter(c, a.symbol)).into(logo);
+            com.bumptech.glide.Glide.with(c).load(url).circleCrop().placeholder(letter(c, a.symbol)).error(letter(c, a.symbol))
+                    .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                        @Override public boolean onLoadFailed(com.bumptech.glide.load.engine.GlideException e, Object model,
+                                com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean first) {
+                            if (key != null) AssetEnricher.iconFailed(c, key);   // gone or unreadable: another source next pass
+                            return false;
+                        }
+                        @Override public boolean onResourceReady(android.graphics.drawable.Drawable r, Object model,
+                                com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target,
+                                com.bumptech.glide.load.DataSource source, boolean first) { return false; }
+                    })
+                    .into(logo);
         } catch (Exception e) {
             logo.setImageDrawable(letter(c, a.symbol));
         }

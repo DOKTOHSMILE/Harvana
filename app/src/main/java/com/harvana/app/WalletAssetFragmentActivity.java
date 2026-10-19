@@ -308,6 +308,10 @@ public class WalletAssetFragmentActivity extends Fragment {
 			if (getView() != null && getContext() != null) com.harvana.app.wallet.CustomAssets.render(getContext(), getView().findViewById(R.id.custom_assets), wallet_address);
 		});
 		_renderStables();
+		// Added coins with no logo (or one that does not load) get one looked up; their rows redraw when it is found.
+		com.harvana.app.wallet.AssetEnricher.all(context, () -> {
+			if (getView() != null && getContext() != null) com.harvana.app.wallet.CustomAssets.render(getContext(), getView().findViewById(R.id.custom_assets), wallet_address);
+		});
 		
 		java.util.List<HashMap<String, Object>> cachedCoins =
 		com.harvana.app.wallet.WalletCache.loadList(context, "coins_" + wallet_address);

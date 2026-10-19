@@ -38,7 +38,7 @@ public final class DepositAddress {
     }
 
     /** EIP-55 mixed-case address. */
-    static String checksum(byte[] addr) {
+    public static String checksum(byte[] addr) {
         StringBuilder lower = new StringBuilder();
         for (byte b : addr) lower.append(String.format(Locale.US, "%02x", b));
         byte[] h = keccak(lower.toString().getBytes(StandardCharsets.US_ASCII));
@@ -51,7 +51,7 @@ public final class DepositAddress {
         return out.toString();
     }
 
-    static byte[] hex(String s) {
+    public static byte[] hex(String s) {
         String h = s == null ? "" : s.trim().replaceFirst("^0x", "");
         if (h.length() % 2 != 0) return new byte[0];
         byte[] b = new byte[h.length() / 2];

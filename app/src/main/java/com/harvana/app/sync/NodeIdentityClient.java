@@ -41,7 +41,7 @@ public final class NodeIdentityClient {
     public static void link(Context c, String address, Callback cb) {
         FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
         if (u == null) { cb.onError("Sign in first."); return; }
-        u.getIdToken(false).addOnCompleteListener(t -> {
+        u.getIdToken(true).addOnCompleteListener(t -> {                       // a fresh token: an old one is refused
             if (!t.isSuccessful() || t.getResult() == null || t.getResult().getToken() == null) {
                 cb.onError("Could not get sign-in token."); return;
             }

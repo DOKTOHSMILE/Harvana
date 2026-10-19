@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Send: the same amount to the same wallet within 30 minutes. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:background="?attr/colorSurface"
+	android:orientation="vertical"
+	android:padding="20dp">
+	<TextView
+		android:id="@+id/dup_title"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="Confirm duplicate transfer"
+		android:textAllCaps="true"
+		android:textColor="@color/colorTextPrimary"
+		android:textSize="15sp"
+		android:textStyle="bold" />
+	<TextView
+		android:id="@+id/dup_line"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="6dp"
+		android:textColor="@color/colorTextSecondary"
+		android:textSize="14sp" />
+	<LinearLayout
+		android:id="@+id/dup_rows"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="12dp"
+		android:orientation="vertical" />
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="20dp"
+		android:orientation="horizontal">
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/dup_back"
+			android:layout_width="0dp"
+			android:layout_height="52dp"
+			android:layout_marginEnd="8dp"
+			android:layout_weight="1"
+			android:text="Back"
+			android:textAllCaps="false"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="15sp"
+			android:textStyle="bold"
+			app:backgroundTint="@color/colorSurfaceRaised"
+			app:cornerRadius="16dp"
+			app:elevation="0dp"
+			app:strokeColor="@color/colorCardStroke"
+			app:strokeWidth="1dp" />
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/dup_confirm"
+			android:layout_width="0dp"
+			android:layout_height="52dp"
+			android:layout_marginStart="8dp"
+			android:layout_weight="1"
+			android:text="Confirm"
+			android:textAllCaps="false"
+			android:textColor="@color/colorTextOnAccent"
+			android:textSize="15sp"
+			android:textStyle="bold"
+			app:backgroundTint="@color/colorAccent"
+			app:cornerRadius="16dp"
+			app:elevation="0dp" />
+	</LinearLayout>
+</LinearLayout>

@@ -2,6 +2,14 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 19 Oct 2026: Savings claim and payout wallet fixes, duplicate-send check
+
+- Claim my savings: signed by the wallet that holds the savings line when its key is on this phone, whichever wallet is in use. The payout picker lists the account's other wallets only when the savings wallet is on the account, and starts on the signing wallet. Before, it could pick a wallet the network would not pay and the claim failed.
+- Change my payout wallet: pick one of the other wallets on this phone; that wallet signs. It moves at once when the wallet has been on the same account for 24 hours, otherwise once the group admin agrees. Before, the request left out the wallets and the network refused it ("That acting address isn't valid").
+- Linking a wallet to the account: the network's reason is shown when it refuses (another account, sign-in expired, phone clock). A fresh sign-in token is used every time.
+- Send (HARV, Harvana coins, tokens, other chains, Pi): the same amount to the same wallet within 30 minutes asks to confirm (To, Amount, Last sent). Remembered on this phone after the network accepts a send.
+- Needs the node from 19 Oct 2026 for the 24-hour rule (an older node keeps its earlier rule).
+
 ## 19 Oct 2026: Swap button on Assets, matching Swap icon, Activity dividers, gifts split by the node
 
 - Assets: Send, Receive, Swap, P2P, Web3 — the same actions, order and icons as Home's wallet card, each with its icon above the label so all five fit a phone.

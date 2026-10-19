@@ -121,7 +121,9 @@ public final class NodeLinkManager {
                 else if (com.harvana.app.utils.ErrorText.is(u, "WALLET_ALREADY_LINKED")) done.onDone("This wallet belongs to another account. A wallet can belong to one person only.");
                 else if (com.harvana.app.utils.ErrorText.is(u, "TOO_MANY_WALLETS")) done.onDone("Your account already has the most wallets the network allows (20).");
                 else if (com.harvana.app.utils.ErrorText.is(u, "USER_ALREADY_LINKED")) done.onDone("The network is still on the one-wallet rule. This wallet will be added to your account after the next network update.");
-                else done.onDone(""); // transient: try again next time
+                else if (com.harvana.app.utils.ErrorText.is(u, "NETWORK") || com.harvana.app.utils.ErrorText.is(u, "SERVER_ERROR")
+                        || com.harvana.app.utils.ErrorText.is(u, "UNAVAILABLE")) done.onDone("");   // transient: try again next time
+                else done.onDone(com.harvana.app.utils.ErrorText.plain(u));          // what the network said, so it can be fixed
             }
         });
     }

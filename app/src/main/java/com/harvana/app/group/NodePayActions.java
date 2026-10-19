@@ -53,9 +53,9 @@ public final class NodePayActions {
                         () -> NodeGroupClient.contributeCircle(c.activity, c.me, c.nodeId, result(c, "Payment sent")));
                 break;
             case GroupAction.WITHDRAW_BOND:
-                choosePayoutWallet(c, to -> pay(c, "Withdraw bond", gm(c, bondOf(c)),
+                choosePayoutWallet(c, signerFor(c), to -> pay(c, "Withdraw bond", gm(c, bondOf(c)),
                         moneyRows(c, shortWallet(to), "Returned only if this group allows it"),
-                        () -> thenPayTo(c, to, () -> NodeGroupClient.withdrawCircleBond(c.activity, c.me, c.nodeId, result(c, "Bond withdrawal requested")))));
+                        () -> thenPayTo(c, signerFor(c), to, () -> NodeGroupClient.withdrawCircleBond(c.activity, signerFor(c), c.nodeId, result(c, "Bond withdrawal requested")))));
                 break;
             case GroupAction.START_LINE: startLine(c); break;
             case GroupAction.ACCUM_CONTRIBUTE:
@@ -70,11 +70,14 @@ public final class NodePayActions {
                         () -> NodeGroupClient.packAccumLine(c.activity, c.me, c.nodeId, a.ref, announced(c, "Withdrawal requested. Waiting for the admin.",
                                 GroupProposalIndex.PACK, a.ref, "Withdrawal request", "")));
                 break;
-            case GroupAction.ACCUM_CLAIM:
-                choosePayoutWallet(c, to -> pay(c, "Claim savings", lineMoney(c, c.line == null ? 0 : num(c.line, "amountPaidRaw")),
+            case GroupAction.ACCUM_CLAIM: {
+                // Signed by the wallet that holds the line when its key is on this phone: that always works, linked or not.
+                String signer = signerFor(c);
+                choosePayoutWallet(c, signer, to -> pay(c, "Claim savings", lineMoney(c, c.line == null ? 0 : num(c.line, "amountPaidRaw")),
                         moneyRows(c, shortWallet(to), "Pays your savings line out to you"),
-                        () -> thenPayTo(c, to, () -> NodeGroupClient.claimAccumLine(c.activity, c.me, c.nodeId, a.ref, result(c, "Savings claimed")))));
+                        () -> thenPayTo(c, signer, to, () -> NodeGroupClient.claimAccumLine(c.activity, signer, c.nodeId, a.ref, result(c, "Savings claimed")))));
                 break;
+            }
             case GroupAction.ACCUM_APPROVE_PACK:
                 pay(c, "Approve withdrawal", a.label, moneyRows(c, "Member wallet", "Sends this member's savings out of the group"),
                         () -> NodeGroupClient.approveAccumPack(c.activity, c.me, c.nodeId, a.ref, result(c, "Approved")));
@@ -120,39 +123,56 @@ public final class NodePayActions {
      */
     private static void promptWalletRecovery(Ctx c, String lineId) {
         if (c == null || c.activity == null) return;
-        final EditText input = new EditText(c.activity);
-        input.setHint("HV0x… (full address)");
-        input.setSingleLine(true);
-        input.setTypeface(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.NORMAL);
+        // The node moves the line only with the NEW wallet's own signature (plus the admin's, unless the new wallet has
+        // been on the same account for 24 hours). So the new wallet signs: one of the other wallets on this phone.
+        String holder = holderOf(c).isEmpty() ? c.me : holderOf(c);
+        java.util.List<String> here = new java.util.ArrayList<>();
+        if (!holder.equalsIgnoreCase(c.me) && com.harvana.app.wallet.WalletManager.loadPrivateKey(c.activity, c.me) != null) here.add(c.me);
+        for (com.harvana.app.wallet.WalletListManager.WalletEntry e : com.harvana.app.wallet.WalletListManager.getWalletList(c.activity)) {
+            if (e == null || e.address == null || !e.address.startsWith("HV0x") || e.address.equalsIgnoreCase(holder) || contains(here, e.address)) continue;
+            if (com.harvana.app.wallet.WalletManager.loadPrivateKey(c.activity, e.address) != null) here.add(e.address);
+        }
+        if (here.isEmpty()) {
+            Toast.makeText(c.activity, "No other wallet on this phone. Add or import the new wallet first.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        String[] labels = new String[here.size()];
+        for (int i = 0; i < labels.length; i++) {
+            String a = here.get(i), name = "";
+            for (com.harvana.app.wallet.WalletListManager.WalletEntry e : com.harvana.app.wallet.WalletListManager.getWalletList(c.activity)) {
+                if (e != null && a.equalsIgnoreCase(e.address) && e.label != null) name = e.label;
+            }
+            labels[i] = (name.isEmpty() ? "" : name + " · ") + shortWallet(a) + (a.equalsIgnoreCase(c.me) ? " · in use" : "");
+        }
+        final int[] picked = {0};
         new com.harvana.app.ui.SheetDialog.Builder(c.activity)
-                .setTitle("Change my payout wallet")
-                .setMessage("The new address receives all future claim / pack payouts for this line.\n\nCurrent: " + shortWallet(c.me))
-                .setView(input)
-                .setPositiveButton("Submit", (x, w) -> {
-                    String newAddr = input.getText().toString().trim();
-                    if (!com.harvana.app.group.WalletRecoverySheet.isPlausibleAddress(newAddr)) {
-                        Toast.makeText(c.activity, "Not a valid HV0x / 0x address.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    // Sign and submit via the new chain.NodeGroupClient.
-                    // accumWalletRecovery(ctx, actingAddress, groupId, oldMember, newMember, callback)
-                    // — acting is the current wallet, oldMember is the current wallet
-                    // (we are switching our own address), newMember is the new address.
-                    com.harvana.app.chain.NodeGroupClient.accumWalletRecovery(
-                            c.activity, c.me, c.nodeId, c.me, newAddr,
-                            new com.harvana.app.chain.NodeGroupClient.SignCallback() {
-                                @Override public void onSuccess(org.json.JSONObject resp) {
-                                    Toast.makeText(c.activity,
-                                            "Payout wallet changed. Future claims go to " + shortWallet(newAddr) + ".",
-                                            Toast.LENGTH_SHORT).show();
-                                    if (c.reload != null) c.reload.run();
+                .setTitle("Move my savings line to")
+                .setSingleChoiceItems(labels, 0, (d, which) -> picked[0] = which)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Move", (x, w) -> {
+                    String target = here.get(picked[0]);
+                    NodeGroupClient.accumWalletRecovery(c.activity, target, c.nodeId, holder, target, new NodeGroupClient.Callback() {
+                        @Override public void onSuccess(JSONObject resp) {
+                            NodeGroupClient.getAccumLine(c.nodeId, lineId, new NodeGroupClient.Callback() {
+                                @Override public void onSuccess(JSONObject line) {
+                                    boolean moved = line != null && target.equalsIgnoreCase(line.optString("memberAddress", ""));
+                                    c.activity.runOnUiThread(() -> {
+                                        Toast.makeText(c.activity, moved ? "Moved to " + shortWallet(target) + "."
+                                                : "Requested. Waiting for the group admin.", Toast.LENGTH_LONG).show();
+                                        if (c.reload != null) c.reload.run();
+                                    });
                                 }
-                                @Override public void onError(String error) {
-                                    Toast.makeText(c.activity, error, Toast.LENGTH_SHORT).show();
+                                @Override public void onError(String e) {
+                                    c.activity.runOnUiThread(() -> { if (c.reload != null) c.reload.run(); });
                                 }
                             });
+                        }
+                        @Override public void onError(String error) {
+                            c.activity.runOnUiThread(() -> Toast.makeText(c.activity,
+                                    com.harvana.app.utils.ErrorText.plain(error), Toast.LENGTH_LONG).show());
+                        }
+                    });
                 })
-                .setNegativeButton("Cancel", null)
                 .show();
     }
 
@@ -334,25 +354,60 @@ public final class NodePayActions {
      * Where the group sends the member's money: they pick one of their own wallets (the ones on their account). With one
      * wallet there is nothing to pick. The network accepts only the member's own wallets.
      */
-    static void choosePayoutWallet(Ctx c, WalletChoice then) {
+    /** The wallet that holds this member's place (the line's or member record's own wallet); empty when unknown. */
+    static String holderOf(Ctx c) {
+        for (Map<String, Object> m : new Map[]{c.line, c.member}) {
+            if (m == null) continue;
+            for (String k : new String[]{"memberWallet", "memberAddress"}) {
+                Object v = m.get(k);
+                if (v != null && String.valueOf(v).startsWith("HV0x")) return String.valueOf(v);
+            }
+        }
+        return "";
+    }
+
+    /** Signs as the wallet holding the place when its key is on this phone, else as the wallet in use. */
+    static String signerFor(Ctx c) {
+        String h = holderOf(c);
+        if (!h.isEmpty() && !h.equalsIgnoreCase(c.me)
+                && com.harvana.app.wallet.WalletManager.loadPrivateKey(c.activity, h) != null) return h;
+        return c.me;
+    }
+
+    static void choosePayoutWallet(Ctx c, WalletChoice then) { choosePayoutWallet(c, c.me, then); }
+
+    /**
+     * The wallets the group may pay: the signer's own, plus the account's other linked wallets when the wallet holding
+     * the place is on the account too (the node pays a linked wallet only then, and only after it has been linked 24 h).
+     */
+    static void choosePayoutWallet(Ctx c, String signer, WalletChoice then) {
         com.harvana.app.sync.NodeIdentityClient.myWallets(new com.harvana.app.sync.NodeIdentityClient.Callback() {
             @Override public void onSuccess(JSONObject j) {
                 org.json.JSONArray ws = j == null ? null : j.optJSONArray("wallets");
-                java.util.List<String> mine = new java.util.ArrayList<>();
+                java.util.List<String> linked = new java.util.ArrayList<>();
                 for (int i = 0; ws != null && i < ws.length(); i++) {
                     JSONObject w = ws.optJSONObject(i);
                     String a = w == null ? "" : w.optString("address", "");
-                    if (!a.isEmpty() && !mine.contains(a)) mine.add(a);
+                    if (!a.isEmpty() && !contains(linked, a)) linked.add(a);
                 }
-                c.activity.runOnUiThread(() -> pickFrom(c, mine, then));
+                String holder = holderOf(c).isEmpty() ? signer : holderOf(c);
+                java.util.List<String> mine = new java.util.ArrayList<>();
+                mine.add(signer);
+                if (contains(linked, holder)) for (String a : linked) if (!contains(mine, a)) mine.add(a);
+                c.activity.runOnUiThread(() -> pickFrom(c, signer, mine, then));
             }
-            @Override public void onError(String e) { c.activity.runOnUiThread(() -> then.chosen(c.me)); }   // older network: the wallet in use
+            @Override public void onError(String e) { c.activity.runOnUiThread(() -> then.chosen(signer)); }   // older network: the signing wallet
         });
     }
 
-    private static void pickFrom(Ctx c, java.util.List<String> mine, WalletChoice then) {
+    private static boolean contains(java.util.List<String> list, String a) {
+        for (String x : list) if (x.equalsIgnoreCase(a)) return true;
+        return false;
+    }
+
+    private static void pickFrom(Ctx c, String signer, java.util.List<String> mine, WalletChoice then) {
         if (c.activity.isFinishing()) return;
-        if (mine.size() <= 1) { then.chosen(c.me); return; }
+        if (mine.size() <= 1) { then.chosen(signer); return; }
         String[] labels = new String[mine.size()];
         int sel = 0;
         for (int i = 0; i < labels.length; i++) {
@@ -362,7 +417,7 @@ public final class NodePayActions {
                 if (e != null && a.equalsIgnoreCase(e.address) && e.label != null) name = e.label;
             }
             labels[i] = (name.isEmpty() ? "" : name + " · ") + shortWallet(a) + (a.equalsIgnoreCase(c.me) ? " · in use" : "");
-            if (a.equalsIgnoreCase(c.me)) sel = i;
+            if (a.equalsIgnoreCase(signer)) sel = i;
         }
         final int[] picked = {sel};
         new com.harvana.app.ui.SheetDialog.Builder(c.activity).setTitle("Pay to")
@@ -373,17 +428,19 @@ public final class NodePayActions {
     }
 
     /** Records the chosen wallet with the group (when it is not already where the group pays), then does the work. */
-    static void thenPayTo(Ctx c, String to, Runnable work) {
-        NodeGroupClient.getPayoutWallet(c.nodeId, c.me, new NodeGroupClient.Callback() {
+    static void thenPayTo(Ctx c, String to, Runnable work) { thenPayTo(c, c.me, to, work); }
+
+    static void thenPayTo(Ctx c, String signer, String to, Runnable work) {
+        NodeGroupClient.getPayoutWallet(c.nodeId, signer, new NodeGroupClient.Callback() {
             @Override public void onSuccess(JSONObject now) {
                 if (to.equalsIgnoreCase(now == null ? "" : now.optString("payoutWallet", ""))) { work.run(); return; }
                 set();
             }
             @Override public void onError(String e) {
-                if (to.equalsIgnoreCase(c.me)) work.run(); else set();
+                if (to.equalsIgnoreCase(signer)) work.run(); else set();
             }
             private void set() {
-                NodeGroupClient.setPayoutWallet(c.activity, c.me, c.nodeId, to, new NodeGroupClient.Callback() {
+                NodeGroupClient.setPayoutWallet(c.activity, signer, c.nodeId, to, new NodeGroupClient.Callback() {
                     @Override public void onSuccess(JSONObject json) { work.run(); }
                     @Override public void onError(String e) { result(c, "").onError(e); }
                 });

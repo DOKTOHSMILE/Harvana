@@ -168,6 +168,12 @@ public final class ErrorText {
         WORDS.put("PUBLIC_KEY_MISMATCH", "This wallet's key doesn't match its address. Re-import the wallet from its recovery phrase.");
         WORDS.put("INVALID_NONCE", "Another request from this wallet went through first. Try again.");
         WORDS.put("NONCE_ALREADY_USED", "Another request from this wallet went through first. Try again.");
+        WORDS.put("WALLET_LINKED_LESS_THAN_24H", "This wallet was added to your account less than 24 hours ago. Use the wallet that holds the savings, or try again after 24 hours.");
+        WORDS.put("NOT_YOUR_WALLET", "That wallet isn't on the same account as the wallet that holds this place.");
+        WORDS.put("NOT_THE_LINE_OWNER", "This savings line belongs to another wallet. Switch to the wallet that holds it.");
+        WORDS.put("WALLET_ALREADY_LINKED", "This wallet belongs to another account. A wallet can belong to one person only.");
+        WORDS.put("INVALID_ID_TOKEN", "Your sign-in couldn't be checked. Sign out and sign in again.");
+        WORDS.put("ID_TOKEN_EXPIRED", "Your sign-in has expired. Sign out and sign in again.");
         WORDS.put("STALE_TIMESTAMP", "Your phone's clock is off. Set the date and time to automatic and try again.");
         WORDS.put("INVALID_ADDRESS", "That isn't a valid Harvana address.");
         WORDS.put("INVALID_AMOUNT", "Enter an amount greater than zero.");

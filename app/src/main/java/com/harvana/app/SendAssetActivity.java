@@ -572,6 +572,7 @@ public class SendAssetActivity extends AppCompatActivity {
 					payRows.add(new String[]{"Memo", etMemo.getText().toString().trim()});
 				}
 				payRows.add(new String[]{"Network fee", "Set when this token transfer is sent"});
+				com.harvana.app.tx.DuplicateSendGuard.check(SendAssetActivity.this, recipient, symbol, amountText, () ->
 				com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(SendAssetActivity.this,
 				"Send " + symbol, amountText + " " + symbol, payRows, () -> {
 				isProcessingSend = true;
@@ -588,6 +589,7 @@ public class SendAssetActivity extends AppCompatActivity {
 					@Override
 					public void onSuccess(final String txHash) {
 						isProcessingSend = false;
+						com.harvana.app.tx.DuplicateSendGuard.record(SendAssetActivity.this, recipient, symbol, amountText);
 						if (!isFinishing() && !isDestroyed() && progress.isShowing()) {
 							progress.dismiss();
 						}
@@ -609,7 +611,7 @@ public class SendAssetActivity extends AppCompatActivity {
 						});
 					}
 				});
-				});
+				}));
 			});
 		}
 	}
@@ -647,6 +649,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		rows.add(new String[]{"From", mine});
 		rows.add(new String[]{"Network", coin.liveNetwork()});
 		rows.add(new String[]{"Network fee in", coin.feeTicker()});
+		com.harvana.app.tx.DuplicateSendGuard.check(this, recipient, coin.ticker, amountText, () ->
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send " + coin.ticker, amountText + " " + coin.ticker, rows, () -> {
 			if (isProcessingSend) return;
 			isProcessingSend = true;
@@ -668,13 +671,14 @@ public class SendAssetActivity extends AppCompatActivity {
 					sendButton.setEnabled(true);
 					if (fail != null) SketchwareUtil.showMessage(getApplicationContext(), fail);
 					else {
+						com.harvana.app.tx.DuplicateSendGuard.record(getApplicationContext(), recipient, coin.ticker, amountText);
 						SketchwareUtil.showMessage(getApplicationContext(), coin.ticker + " sent.");
 						setResult(RESULT_OK);
 						finish();
 					}
 				});
 			}).start();
-		});
+		}));
 	}
 
 	private void _sendPi(View sendButton, HashMap<String, Object> asset) {
@@ -713,6 +717,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		rows.add(new String[]{"Network", "Pi Network"});
 		if (!memo.isEmpty()) rows.add(new String[]{"Memo", memo});
 		rows.add(new String[]{"Network fee", "Set by the Pi network"});
+		com.harvana.app.tx.DuplicateSendGuard.check(this, recipient, "PI", amountText, () ->
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send PI", amountText + " PI", rows, () -> {
 			if (isProcessingSend) return;
 			isProcessingSend = true;
@@ -738,13 +743,14 @@ public class SendAssetActivity extends AppCompatActivity {
 					sendButton.setEnabled(true);
 					if (fail != null) SketchwareUtil.showMessage(getApplicationContext(), fail);
 					else {
+						com.harvana.app.tx.DuplicateSendGuard.record(getApplicationContext(), recipient, "PI", amt);
 						SketchwareUtil.showMessage(getApplicationContext(), "Pi sent.");
 						setResult(RESULT_OK);
 						finish();
 					}
 				});
 			}).start();
-		});
+		}));
 	}
 
 	private void _coinIcon(TextView tv, int pos) {
@@ -946,6 +952,8 @@ public class SendAssetActivity extends AppCompatActivity {
 		rows.add(new String[]{"Total", com.harvana.app.husd.HusdClient.format(units + coinFee) + " " + sym
 				+ ("HARV".equals(q.optString("payIn")) ? " + " + com.harvana.app.husd.HusdClient.fareText(q, sym) : "")});
 		String shown = com.harvana.app.husd.HusdClient.format(units) + " " + sym;
+		String plainAmount = com.harvana.app.husd.HusdClient.format(units).replace(",", "");
+		com.harvana.app.tx.DuplicateSendGuard.check(this, recipient, sym, plainAmount, () ->
 		com.harvana.app.group.PaymentConfirmSheet.reviewThenAuthorize(this, "Send " + sym, shown, rows, () -> {
 			if (isProcessingSend) return;
 			isProcessingSend = true;
@@ -956,6 +964,7 @@ public class SendAssetActivity extends AppCompatActivity {
 					runOnUiThread(() -> {
 						isProcessingSend = false;
 						if (isFinishing()) return;
+						com.harvana.app.tx.DuplicateSendGuard.record(getApplicationContext(), recipient, sym, plainAmount);
 						SketchwareUtil.showMessage(getApplicationContext(), sym + " sent.");
 						setResult(RESULT_OK);
 						finish();
@@ -972,7 +981,7 @@ public class SendAssetActivity extends AppCompatActivity {
 					});
 				}
 			});
-		});
+		}));
 	}
 
 	private static final int RC_PICK_ASSET = 78;
@@ -1082,6 +1091,12 @@ public class SendAssetActivity extends AppCompatActivity {
 	}
 
 	private void _showTransferConfirmSheet(TransactionRouter.PreparedTransfer prepared, String symbol) {
+		String to = prepared.req != null && prepared.req.to != null ? prepared.req.to : "";
+		String amt = java.math.BigDecimal.valueOf(prepared.req != null ? prepared.req.amount : 0.0).toPlainString();
+		com.harvana.app.tx.DuplicateSendGuard.check(this, to, symbol, amt, () -> _showTransferConfirmSheetNow(prepared, symbol));
+	}
+
+	private void _showTransferConfirmSheetNow(TransactionRouter.PreparedTransfer prepared, String symbol) {
 		final BottomSheetDialog dialog = new com.harvana.app.ui.AppSheet(this);
 		View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_transfer_confirm, null);
 		dialog.setContentView(sheetView);
@@ -1156,6 +1171,7 @@ public class SendAssetActivity extends AppCompatActivity {
 						@Override
 						public void onSuccess(com.harvana.app.tx.ExecutionResult result) {
 							if (fromAddress != null) PendingSpendGuard.release(SendAssetActivity.this, fromAddress);
+							com.harvana.app.tx.DuplicateSendGuard.record(SendAssetActivity.this, recipient, symbol, java.math.BigDecimal.valueOf(reqAmount).toPlainString());
 							final String hash = result != null && result.txHash != null ? result.txHash : "";
 							com.harvana.app.ui.PaymentSuccessSheet.Info info = new com.harvana.app.ui.PaymentSuccessSheet.Info();
 							info.title = "Transfer successful";

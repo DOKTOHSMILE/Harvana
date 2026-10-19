@@ -362,19 +362,7 @@ public final class NodeGroupClient {
                 cb);
     }
 
-    /**
-     * Accum wallet recovery (member address change). Canonical:
-     * {@code HARVANA_ACCUM_WALLET_RECOVERY_V1:groupId:oldMember:newMember:acting:nonce}.
-     */
-    public static void accumWalletRecovery(android.content.Context ctx, String actingAddress,
-                                           String groupId, String oldMemberAddress,
-                                           String newMemberAddress, SignCallback cb) {
-        _signed(ctx, actingAddress, fields -> GroupCanonical.fromFields("accumWalletRecovery", fields),
-                new Object[]{groupId, oldMemberAddress, newMemberAddress, actingAddress, 0L},
-                "/api/v1/accum/wallet-recovery",
-                _json(actingAddress, null, null, null, groupId, 0L, null, 0L, null, 0L, null, null, null, null, null),
-                cb);
-    }
+    // Accum wallet recovery: sync.NodeGroupClient.accumWalletRecovery (it sends the old, new and acting wallets).
 
     // ════════════════════════════════════════════════════════════════════════
     //  Sign-and-submit core

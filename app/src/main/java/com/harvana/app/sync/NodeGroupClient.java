@@ -171,6 +171,27 @@ public final class NodeGroupClient {
         }, cb);
     }
 
+    // ═════════════════════════════ .harv NAMES ═════════════════════════════
+
+    /** name → {name, owner, expiresAt}; onError "NAME_NOT_FOUND" when it is not claimed or has run out. */
+    public static void resolveName(String name, Callback cb) { read("/api/v1/names/resolve/" + android.net.Uri.encode(name), cb); }
+    public static void checkName(String name, Callback cb) { read("/api/v1/names/check/" + android.net.Uri.encode(name), cb); }
+    public static void ownedNames(String address, Callback cb) { read("/api/v1/names/owned/" + address, cb); }
+    public static void reverseName(String address, Callback cb) { read("/api/v1/names/reverse/" + address, cb); }
+
+    /** CLAIM, RENEW (param = years), TRANSFER (param = recipient), PRIMARY (param ""). Signed "HARVANA_NAME_V1:action:address:name:param:nonce". */
+    public static void nameAction(Context c, String address, String action, String name, String param, Callback cb) {
+        String path = "/api/v1/names/" + ("PRIMARY".equals(action) ? "primary" : action.toLowerCase(java.util.Locale.US));
+        act(c, address, path, new Spec() {
+            public String canonical(long n) { return "HARVANA_NAME_V1:" + action + ":" + address + ":" + name + ":" + param + ":" + n; }
+            public void fill(JSONObject body, long n) throws JSONException {
+                body.put("address", address).put("name", name);
+                if ("CLAIM".equals(action) || "RENEW".equals(action)) body.put("years", Integer.parseInt(param));
+                if ("TRANSFER".equals(action)) body.put("to", param);
+            }
+        }, cb);
+    }
+
     /** Put HARV and a coin into the coin's pool for shares. */
     public static void swapAdd(Context c, String address, String code, long harvRaw, long coinRaw, Callback cb) {
         swapAct(c, "/api/v1/swap/add", "ADD", code, "HARV", address, harvRaw, coinRaw,
@@ -772,6 +793,8 @@ public final class NodeGroupClient {
             case "/api/v1/accum/contribute-multiple":
             case "/api/v1/accum/contribute-variable": return "Savings paid";
             case "/api/v1/accum/backpay": return "Missed days paid back";
+            case "/api/v1/names/claim": return "Name claimed";
+            case "/api/v1/names/renew": return "Name renewed";
             case "/api/v1/fixed/deposit": return "Deposit sent";
             case "/api/v1/genloan/repay": return "Loan repayment sent";
             case "/api/v1/staking/claim": return "Rewards claimed";

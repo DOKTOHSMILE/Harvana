@@ -160,6 +160,16 @@ public class SendAssetActivity extends AppCompatActivity {
 		spAsset = findViewById(R.id.spAsset);
 		linear17 = findViewById(R.id.linear17);
 		etRecipient = findViewById(R.id.etRecipient);
+		if (etRecipient != null) etRecipient.addTextChangedListener(new android.text.TextWatcher() {
+			@Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
+			@Override public void onTextChanged(CharSequence s, int a, int b, int c) { }
+			@Override public void afterTextChanged(android.text.Editable e) {
+				String t = e.toString().trim();
+				nameHandler.removeCallbacksAndMessages(null);
+				if (t.toLowerCase(java.util.Locale.US).endsWith(".harv")) nameHandler.postDelayed(() -> _resolveRecipientName(t, false, null), 400);
+				else if (!t.equalsIgnoreCase(resolvedNameAddress)) _showRecipientName("");
+			}
+		});
 		String prefillTo = getIntent().getStringExtra("toAddress");
 		if (prefillTo != null && !prefillTo.trim().isEmpty() && etRecipient != null) etRecipient.setText(prefillTo.trim());
 		btnPaste = findViewById(R.id.btnPaste);
@@ -469,6 +479,12 @@ public class SendAssetActivity extends AppCompatActivity {
 			btnSend.setOnClickListener(view -> {
 				if (isProcessingSend) return; // Prevent rapid double-taps
 				if (amountPreview != null && !amountPreview.normalise()) return;   // typed in money: turn it into the coin amount first
+				// A .harv name: look up the wallet it stands for, put that address in the field, then send as usual.
+				String typedTo = etRecipient != null && etRecipient.getText() != null ? etRecipient.getText().toString().trim() : "";
+				if (typedTo.toLowerCase(java.util.Locale.US).endsWith(".harv")) {
+					_resolveRecipientName(typedTo, true, view);
+					return;
+				}
 				
 				if (spAsset == null || walletAssets.isEmpty()) {
 					SketchwareUtil.showMessage(getApplicationContext(), "No asset selected.");
@@ -771,6 +787,40 @@ public class SendAssetActivity extends AppCompatActivity {
 	}
 
 	/** Review & Send for the selected coin. */
+	private final android.os.Handler nameHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+	/** The wallet a typed .harv name stood for, after it was put in the field (so the label under it stays). */
+	private String resolvedNameAddress = "";
+
+	/** Looks up a typed name. {@code thenSend}: put the address in the field and press Send again. */
+	private void _resolveRecipientName(String name, boolean thenSend, View sendButton) {
+		com.harvana.app.sync.NodeGroupClient.resolveName(name, new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject j) {
+				runOnUiThread(() -> {
+					String owner = j.optString("owner", "");
+					if (owner.isEmpty() || isFinishing()) return;
+					_showRecipientName(j.optString("name", name) + " → " + owner);
+					if (!thenSend || etRecipient == null) return;
+					resolvedNameAddress = owner;
+					etRecipient.setText(owner);
+					if (sendButton != null) sendButton.performClick();
+				});
+			}
+			@Override public void onError(String e) {
+				runOnUiThread(() -> {
+					_showRecipientName(name + " · not found");
+					if (thenSend) SketchwareUtil.showMessage(getApplicationContext(), name + " is not a claimed name.");
+				});
+			}
+		});
+	}
+
+	private void _showRecipientName(String text) {
+		TextView tv = findViewById(R.id.tv_recipient_name);
+		if (tv == null) return;
+		tv.setText(text);
+		tv.setVisibility(text.isEmpty() ? View.GONE : View.VISIBLE);
+	}
+
 	private com.harvana.app.ui.SendReviewSheet.Data _review(String key, String amountText, double amount, String recipient, String network) {
 		com.harvana.app.ui.SendReviewSheet.Data d = new com.harvana.app.ui.SendReviewSheet.Data();
 		d.assetKey = key;

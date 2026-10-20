@@ -604,6 +604,9 @@ public class SettingsActivity extends AppCompatActivity {
 			startActivity(intent);
 		});
 		
+		View rowNames = findViewById(R.id.rowHarvNames);
+		if (rowNames != null) rowNames.setOnClickListener(v -> startActivity(new Intent(this, com.harvana.app.names.HarvNamesActivity.class)));
+		_paintHarvName();
 		rowWalletAssets.setOnClickListener(v -> {
 			Intent intent = new Intent(this, MainActivity.class);
 			intent.putExtra("open_fragment", "asset");
@@ -818,4 +821,19 @@ public class SettingsActivity extends AppCompatActivity {
 	{
 	}
 	
+
+	/** The wallet's primary name under "Harvana names", when it has one. */
+	private void _paintHarvName() {
+		String me = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
+		if (me == null || me.isEmpty()) return;
+		com.harvana.app.sync.NodeGroupClient.reverseName(me, new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject j) {
+				runOnUiThread(() -> {
+					TextView t = findViewById(R.id.tvHarvNameValue);
+					if (t != null && !j.optString("name").isEmpty()) t.setText(j.optString("name"));
+				});
+			}
+			@Override public void onError(String e) { }
+		});
+	}
 }

@@ -356,6 +356,11 @@
 			android:label="Friends"
 			android:configChanges="orientation|screenSize|keyboardHidden" />
 		<activity
+			android:name=".names.HarvNamesActivity"
+			android:label="Harvana names"
+			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:windowSoftInputMode="stateHidden" />
+		<activity
 			android:name=".social.ContactCardActivity"
 			android:label="My contact card"
 			android:configChanges="orientation|screenSize|keyboardHidden"

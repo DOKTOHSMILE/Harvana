@@ -2,6 +2,14 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Harvana names (name.harv)
+
+- Settings → Harvana names: type a name, see Available / Taken / Reserved, the fee per year and the total; pick 1–5 years; Claim. My names: each name with its end date and PRIMARY mark; tap one for Renew, Make primary or Transfer.
+- Fee per year (to Harvana): 3 letters 100 HARV, 4 letters 25 HARV, 5 or more 5 HARV, plus the tFare.
+- Send: type `name.harv` as the recipient; the wallet it stands for shows under the field, and Send puts that address in before the review.
+- Settings shows this wallet's primary name under Harvana names.
+- Needs the node change of 20 Oct 2026 (`/api/v1/names/*`).
+
 ## 20 Oct 2026: Swap — 50%, dollar values, price cards
 
 - You pay: a 50% button beside MAX (half of what can be spent after the tFare).

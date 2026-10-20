@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One name this wallet holds: name, primary mark, end date; a tap opens Renew / Make primary / Transfer. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:minHeight="56dp"
+	android:background="?attr/selectableItemBackground"
+	android:gravity="center_vertical"
+	android:orientation="horizontal">
+	<LinearLayout
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:orientation="vertical">
+		<TextView
+			android:id="@+id/tv_hn_name"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="15sp"
+			android:textStyle="bold" />
+		<TextView
+			android:id="@+id/tv_hn_until"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/colorTextSecondary"
+			android:textSize="12sp" />
+	</LinearLayout>
+	<TextView
+		android:id="@+id/tv_hn_badge"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:background="@drawable/bg_chip_confirmed"
+		android:paddingStart="10dp"
+		android:paddingTop="3dp"
+		android:paddingEnd="10dp"
+		android:paddingBottom="3dp"
+		android:text="PRIMARY"
+		android:textSize="11sp"
+		android:textStyle="bold" />
+</LinearLayout>

@@ -108,19 +108,7 @@ public class DiscoverFragmentActivity extends Fragment {
 	private Spinner sp_sort;
 	private ListView listview1;
 	
-	private DatabaseReference grouodb = _firebase.getReference("groupdb");
-	private ChildEventListener _grouodb_child_listener;
 	private FirebaseAuth fbauth;
-	private OnCompleteListener<AuthResult> _fbauth_create_user_listener;
-	private OnCompleteListener<AuthResult> _fbauth_sign_in_listener;
-	private OnCompleteListener<Void> _fbauth_reset_password_listener;
-	private OnCompleteListener<Void> fbauth_updateEmailListener;
-	private OnCompleteListener<Void> fbauth_updatePasswordListener;
-	private OnCompleteListener<Void> fbauth_emailVerificationSentListener;
-	private OnCompleteListener<Void> fbauth_deleteUserListener;
-	private OnCompleteListener<Void> fbauth_updateProfileListener;
-	private OnCompleteListener<AuthResult> fbauth_phoneAuthListener;
-	private OnCompleteListener<AuthResult> fbauth_googleSignInListener;
 	private SharedPreferences groupsp;
 	private Intent intent = new Intent();
 	
@@ -191,111 +179,15 @@ public class DiscoverFragmentActivity extends Fragment {
 			}
 		});
 		
-		_grouodb_child_listener = new ChildEventListener() {
-			@Override
-			public void onChildAdded(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onChildChanged(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onChildMoved(DataSnapshot _param1, String _param2) {
-				
-			}
-			
-			@Override
-			public void onChildRemoved(DataSnapshot _param1) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onCancelled(DatabaseError _param1) {
-				final int _errorCode = _param1.getCode();
-				final String _errorMessage = _param1.getMessage();
-				
-			}
-		};
-		grouodb.addChildEventListener(_grouodb_child_listener);
-		
-		fbauth_updateEmailListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fbauth_updatePasswordListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fbauth_emailVerificationSentListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fbauth_deleteUserListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fbauth_phoneAuthListener = task -> {
-			final boolean _success = task.isSuccessful();
-			final String _errorMessage = task.getException() != null ? task.getException().getMessage() : "";
-			
-		};
-		
-		fbauth_updateProfileListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fbauth_googleSignInListener = task -> {
-			final boolean _success = task.isSuccessful();
-			final String _errorMessage = task.getException() != null ? task.getException().getMessage() : "";
-			
-		};
-		
-		_fbauth_create_user_listener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		_fbauth_sign_in_listener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		_fbauth_reset_password_listener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			
-		};
 	}
 	
 	private void initializeLogic() {
 		_loadPublicGroups();
 		ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(
 		getContext(),
-		com.harvana.app.R.layout.spinner_dropdown_item,
-		new String[]{"Most Members", "On network", "Newest"});
+		R.layout.spinner_selected_compact,
+		new String[]{"Most members", "On network", "Newest"});
+		sortAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		sp_sort.setAdapter(sortAdapter);
 	}
 	
@@ -333,6 +225,7 @@ public class DiscoverFragmentActivity extends Fragment {
 		if (cachedGroups != null && !cachedGroups.isEmpty()) {
 			publicGroups.clear();
 			publicGroups.addAll(cachedGroups);
+			loaded = true;
 			_applyFilterAndSort();
 		}
 		
@@ -363,6 +256,7 @@ public class DiscoverFragmentActivity extends Fragment {
 								}
 							}
 						}
+						loaded = true;
 						_applyFilterAndSort();
 						com.harvana.app.offline.OfflineCacheManager.saveList(getContext(), "discover_groups", publicGroups);
 					});
@@ -415,6 +309,7 @@ public class DiscoverFragmentActivity extends Fragment {
 				getActivity().runOnUiThread(() -> {
 					// SAFETY CHECK: Ensure context is still available for the Toast
 					if (getContext() == null) return;
+					if (!loaded) { loaded = true; failed = true; _applyFilterAndSort(); }
 					SketchwareUtil.showMessage(getContext(), "Failed to load groups: " + error);
 				});
 			}
@@ -461,6 +356,68 @@ public class DiscoverFragmentActivity extends Fragment {
 		if (listview1 != null) {
 			listview1.setAdapter(new Listview1Adapter(displayGroups));
 		}
+		_paintEmpty();
+	}
+	
+	/** True once the list has an answer (cache, network or a failure); until then the shimmer shows. */
+	private boolean loaded, failed;
+	private LinearLayout emptyBox;
+	
+	/** Nothing to show: an icon, one line and a button that fits the case (retry, clear filters or create). */
+	private void _paintEmpty() {
+		if (cardview12 == null || getContext() == null) return;
+		if (emptyBox == null) {
+			final float d = getResources().getDisplayMetrics().density;
+			emptyBox = new LinearLayout(getContext());
+			emptyBox.setOrientation(LinearLayout.VERTICAL);
+			emptyBox.setGravity(Gravity.CENTER);
+			emptyBox.setPadding((int) (24 * d), (int) (24 * d), (int) (24 * d), (int) (24 * d));
+			ImageView icon = new ImageView(getContext());
+			icon.setImageResource(R.drawable.ic_groups_line);
+			icon.setColorFilter(com.harvana.app.utils.UiColors.textTertiary());
+			emptyBox.addView(icon, new LinearLayout.LayoutParams((int) (56 * d), (int) (56 * d)));
+			TextView title = new TextView(getContext());
+			title.setTag("empty_title");
+			title.setTextSize(15);
+			title.setTypeface(Typeface.DEFAULT_BOLD);
+			title.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+			title.setGravity(Gravity.CENTER);
+			LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			tp.topMargin = (int) (12 * d);
+			emptyBox.addView(title, tp);
+			com.google.android.material.button.MaterialButton act = new com.google.android.material.button.MaterialButton(getContext());
+			act.setTag("empty_button");
+			act.setAllCaps(false);
+			act.setOnClickListener(v -> {
+				if (failed) { failed = false; _loadPublicGroups(); return; }
+				if (_filtered()) {
+					searchQuery = "";
+					if (tv_search != null) tv_search.setText("Search group");
+					if (cd_verified_only != null) cd_verified_only.setChecked(false);
+					locationFilter = new com.harvana.app.group.LocationFilter.Value();
+					com.harvana.app.group.LocationFilter.save(getContext(), locationFilter);
+					if (textview3 != null) textview3.setText(locationFilter.label());
+					_applyFilterAndSort();
+					return;
+				}
+				com.harvana.app.group.CreateGroupSheet.show(getContext());
+			});
+			LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (int) (44 * d));
+			bp.topMargin = (int) (16 * d);
+			emptyBox.addView(act, bp);
+			cardview12.addView(emptyBox, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		}
+		boolean filtered = _filtered();
+		((TextView) emptyBox.findViewWithTag("empty_title")).setText(failed ? "Groups did not load" : filtered ? "No matching groups" : "No public groups");
+		((TextView) emptyBox.findViewWithTag("empty_button")).setText(failed ? "Retry" : filtered ? "Clear filters" : "+ New Group");
+		boolean empty = displayGroups.isEmpty() && loaded;
+		emptyBox.setVisibility(empty ? View.VISIBLE : View.GONE);
+		if (listview1 != null) listview1.setVisibility(empty ? View.GONE : View.VISIBLE);
+	}
+	
+	private boolean _filtered() {
+		return !searchQuery.isEmpty() || (cd_verified_only != null && cd_verified_only.isChecked())
+			|| (locationFilter != null && !locationFilter.isGlobal());
 	}
 	
 	private double _safeDouble(Map<String, Object> data, String key) {

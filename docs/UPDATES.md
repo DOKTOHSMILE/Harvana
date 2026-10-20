@@ -10,6 +10,10 @@
 - **Groups tab**: Active Groups, Total Members and Ongoing Cycles are counted from the listed groups (closed groups left
   out); Total Saved is the node's savings across groups in the chosen currency (as on Home). An empty list shows
   "No groups" with + New Group; an empty search or filter shows "No matching groups" with Show all groups.
+- **Discover tab**: an empty list shows "No public groups" with + New Group; with a search, On network or a place
+  chosen, "No matching groups" with Clear filters; a failed load, "Groups did not load" with Retry. The filter row
+  fits the screen: the place chip takes the free width, On network and the sort chip size to their text (the sort
+  shows "Most members" in full). Removed an unused listener that downloaded the whole `groupdb` tree on every open.
 - Removed two unused listeners on the Groups tab that downloaded the whole `groupdb` and `userdb` Realtime Database
   trees on every open.
 

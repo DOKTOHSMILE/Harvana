@@ -2,6 +2,11 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Lock liquidity from the Swap site
+
+- Swap site → Your positions: Lock 30 days / 90 days / 180 days / 1 year locks your free pool shares until then (a running lock can only be extended). The wallet shows Pool, Shares and Locked until before you sign. Locked shares cannot be removed until the end; the pool shows how much of it is locked.
+- Install: new wallet APK (and the node jar swap in the node repository's DEPLOYMENT.md).
+
 ## 20 Oct 2026: One send flow for every coin
 
 - Send for SOL, ETH, BNB, POL, BASE, TRX, BTC, LTC, DOGE, PI and every added coin (PUMP, …) now goes the same way as HARV and the Harvana coins: the review sheet turns to "Sending…", a failure shows on that sheet, and after a send the full success sheet opens with the amount, its value, From → To, Network and Transaction. It reads "Transfer pending" until that coin's own network confirms it, then "Transfer completed". "Share transaction link" opens that network's explorer.

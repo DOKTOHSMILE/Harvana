@@ -230,6 +230,12 @@ public final class NodeGroupClient {
                 new String[]{"asset", code, "shares", String.valueOf(shares)}, cb);
     }
 
+    /** Locks pool shares until {@code untilMs}: they cannot be taken out before then. No movement, so no tFare. */
+    public static void swapLock(Context c, String address, String code, long shares, long untilMs, Callback cb) {
+        swapAct(c, "/api/v1/swap/lock", "LOCK", code, "HARV", address, shares, untilMs,
+                new String[]{"asset", code, "shares", String.valueOf(shares), "untilMs", String.valueOf(untilMs)}, cb);
+    }
+
     // ═════════════════════════════ CIRCLE ═════════════════════════════
 
     /** {@code asset}: the stable coin of the group (HNGN, HUSD, …); every amount is in its units. */

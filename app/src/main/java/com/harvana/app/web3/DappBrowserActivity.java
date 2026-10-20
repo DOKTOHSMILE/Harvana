@@ -1156,6 +1156,17 @@ public class DappBrowserActivity extends AppCompatActivity {
                 withFare(2, true, rows, id, () -> reviewAsync("Remove liquidity", "", rows, id, r -> com.harvana.app.sync.NodeGroupClient.swapRemove(this, hv, asset, shares, cb(r))));
                 return;
             }
+            case "lockLiquidity": {
+                String asset = code(a.optString("asset"));
+                long shares = a.optLong("shares", -1), until = positive(a, "untilMs");      // 0 shares: only a later end
+                long now = System.currentTimeMillis();
+                if (asset == null || "HARV".equals(asset) || shares < 0 || until < now + 86_400_000L) { bad(id); return; }
+                rows.add(new String[]{"Pool", sym(asset) + " / HARV"});
+                rows.add(new String[]{"Shares", String.format(java.util.Locale.US, "%,d", shares)});
+                rows.add(new String[]{"Locked until", java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.SHORT).format(new java.util.Date(until))});
+                reviewAsync("Lock liquidity", "", rows, id, r -> com.harvana.app.sync.NodeGroupClient.swapLock(this, hv, asset, shares, until, cb(r)));
+                return;
+            }
             case "stake": {
                 long amt = positive(a, "amountRaw");
                 int days = a.optInt("lockDays", -1);

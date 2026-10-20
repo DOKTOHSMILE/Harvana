@@ -56,6 +56,36 @@ public final class Trc20 {
         return ChainBalances.amount(r.isEmpty() ? BigInteger.ZERO : new BigInteger(r, 16), token.decimals);
     }
 
+    /** Live fee in TRX: the energy the transfer would use, less the account's own energy, at the network's energy price. */
+    static ChainSend.Quote quote(CustomAssets.Asset token, String from, String to, ChainSend.Quote q) throws Exception {
+        q.feeSymbol = "TRX";
+        q.maxSend = new BigDecimal(balance(token, from));
+        String receiver = to.length() >= 30 && to.charAt(0) == 'T' ? to : from;
+        long energy = 65_000L;
+        try {
+            JSONObject sim = ChainSend.tronPost("/wallet/triggerconstantcontract", new JSONObject().put("owner_address", from)
+                    .put("contract_address", token.contract).put("function_selector", "transfer(address,uint256)")
+                    .put("parameter", word(hex20(receiver)) + word("1")).put("visible", true).toString());
+            if (sim.optLong("energy_used", 0) > 0) energy = sim.optLong("energy_used");
+        } catch (Exception ignored) { }
+        long price = 420L;                                                                  // sun per energy unit
+        try {
+            JSONArray params = ChainSend.tronPost("/wallet/getchainparameters", "{}").optJSONArray("chainParameter");
+            for (int i = 0; params != null && i < params.length(); i++) {
+                JSONObject p = params.optJSONObject(i);
+                if (p != null && "getEnergyFee".equals(p.optString("key"))) price = p.optLong("value", price);
+            }
+        } catch (Exception ignored) { }
+        long own = 0;
+        try {
+            JSONObject r = ChainSend.tronPost("/wallet/getaccountresource", new JSONObject().put("address", from).put("visible", true).toString());
+            own = Math.max(0, r.optLong("EnergyLimit") - r.optLong("EnergyUsed"));
+        } catch (Exception ignored) { }
+        long sun = Math.max(0, energy - own) * price + (ChainSend.tronBandwidthLeft(from) >= 350 ? 0 : 350_000L);
+        q.fee = BigDecimal.valueOf(Math.min(sun, FEE_LIMIT_SUN)).movePointLeft(6);
+        return q;
+    }
+
     /** Sends the token; the network fee (energy) is paid in TRX. Returns the transaction id. */
     public static String send(CustomAssets.Asset token, String mnemonic, String from, String to, String amount) throws Exception {
         byte[] priv = ChainKeys.privateKey(mnemonic, ChainKeys.Chain.TRX);

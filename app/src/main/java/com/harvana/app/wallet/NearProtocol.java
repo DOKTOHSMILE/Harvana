@@ -120,6 +120,37 @@ public final class NearProtocol {
         return price.multiply(BigInteger.valueOf(TRANSFER_GAS));
     }
 
+    /** Live fee and the most that can be sent: the coin keeps its storage reserve; a token's fee (and a new receiver's storage) is in the coin. */
+    static ChainSend.Quote quote(CustomAssets.Asset a, String from, String to, ChainSend.Quote q) throws Exception {
+        CustomAssets.Asset chain = a.token() ? CustomAssets.find(a.chainKey) : a;
+        String rpc = a.rpc;
+        int coinDecimals = chain != null ? chain.decimals : 24;
+        q.feeSymbol = chain != null ? chain.symbol : "NEAR";
+        if (!a.token()) {
+            BigInteger fee = transferFee(rpc);
+            BigInteger[] acc = account(rpc, from);
+            BigInteger spendable = acc[0].subtract(acc[1].multiply(STORAGE_PRICE));
+            q.feeInSameCoin = true;
+            q.fee = new BigDecimal(fee).movePointLeft(a.decimals);
+            q.maxSend = new BigDecimal(spendable.subtract(fee.multiply(BigInteger.valueOf(2))).max(BigInteger.ZERO)).movePointLeft(a.decimals);
+            return q;
+        }
+        JSONObject r = call(rpc, "gas_price", new JSONArray().put(JSONObject.NULL));
+        JSONObject res = r.optJSONObject("result");
+        BigInteger price = res == null ? BigInteger.valueOf(100_000_000L) : new BigInteger(res.optString("gas_price", "100000000"));
+        BigInteger fee = price.multiply(BigInteger.valueOf(CALL_GAS)).add(BigInteger.ONE);              // the 1 yocto ft_transfer attaches
+        if (validAccount(to)) {
+            Object registered = view(rpc, a.contract, "storage_balance_of", new JSONObject().put("account_id", to));
+            if (registered == null || JSONObject.NULL.equals(registered)) {
+                Object bounds = view(rpc, a.contract, "storage_balance_bounds", new JSONObject());
+                if (bounds instanceof JSONObject) fee = fee.add(new BigInteger(((JSONObject) bounds).optString("min", "0")));
+            }
+        }
+        q.fee = new BigDecimal(fee).movePointLeft(coinDecimals);
+        q.maxSend = new BigDecimal(tokenBalance(a, from));
+        return q;
+    }
+
     // ── sending ───────────────────────────────────────────────────────────
 
     /** Sends the chain's coin; returns the transaction id. */

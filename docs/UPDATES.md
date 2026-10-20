@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Live network fee and MAX for every coin; Harvana names row
+
+- Send: the fee row reads the live fee for the coin picked (tFare for HARV and Harvana coins; Network fee for others): ETH/BNB/POL/BASE gas, BTC/LTC/DOGE fee rate, TRX bandwidth (plus 1.1 TRX for a new receiving account), TRC-20 energy in TRX, SOL 0.000005, SPL tokens (plus the receiver's token-account rent when they have none), NEAR (keeping its storage reserve), Pi (keeping its reserve). It shows the most you can send when the amount and fee do not both fit.
+- MAX takes the live fee off when it is paid in the same coin; a token whose fee is in another coin gets its whole balance. Sending everything of BTC, LTC or DOGE now works (one output, no change).
+- Settings: the Harvana names row has the same icon size, colour and layout as the other rows; your primary name shows on the right.
+- Install: new wallet APK.
+
 ## 20 Oct 2026: Lock liquidity from the Swap site
 
 - Swap site → Your positions: Lock 30 days / 90 days / 180 days / 1 year locks your free pool shares until then (a running lock can only be extended). The wallet shows Pool, Shares and Locked until before you sign. Locked shares cannot be removed until the end; the pool shows how much of it is locked.

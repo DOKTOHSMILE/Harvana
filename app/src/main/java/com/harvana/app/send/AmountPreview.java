@@ -50,7 +50,7 @@ public final class AmountPreview {
     /** The switch halves, the unit marks around the amount, the other-unit line and MAX (null when the layout lacks them). */
     private final TextView unitCoin, unitMoney, prefix, suffix, other, max;
     /** The table under the amount: Available / Value (or Price) / Network fee, label left and figure right. */
-    private final TextView availLabel, availValue, valueLabel, valueValue, feeValue;
+    private final TextView availLabel, availValue, valueLabel, valueValue, feeValue, feeLabel;
     private final LinearLayout availRow, valueRow, feeRow;
     private final TextView anchor;
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -78,7 +78,7 @@ public final class AmountPreview {
         valueLabel = cell(c, "Value", false); valueValue = cell(c, "", true);
         valueRow = row(c, valueLabel, valueValue);
         valueLabel.setText("Price");
-        TextView feeLabel = cell(c, "tFare", false); feeValue = cell(c, "", true);
+        feeLabel = cell(c, "tFare", false); feeValue = cell(c, "", true);
         feeRow = row(c, feeLabel, feeValue);
         table.addView(availRow);
         table.addView(valueRow);
@@ -207,16 +207,119 @@ public final class AmountPreview {
     private void otherLine(String text) { if (other != null) other.setText(text); }
 
     /** MAX: the whole available balance, in the unit being typed. */
+    /**
+     * MAX: the balance less the live fee when the fee comes out of the same coin (HARV's tFare, ETH's gas, SOL's 5,000
+     * lamports, Pi's reserve, a UTXO coin's fee for spending everything…), so the send is never refused for the fee.
+     * A token whose fee is paid in another coin gets its whole balance. The quote is read first when it is not fresh.
+     */
     private void fillMax() {
-        double all = availableCoins();
-        if (Double.isNaN(all) || all <= 0) return;
+        final String key = src.assetKey();
+        Quote q = freshQuote(key);
+        if (q == null) {
+            fee("Reading the network fee…");
+            loadQuote(key, () -> { Quote got = freshQuote(key); if (got != null) applyMax(got); else applyMax(null); });
+            return;
+        }
+        applyMax(q);
+    }
+
+    private void applyMax(Quote q) {
+        double all = q != null && q.maxSend != null ? q.maxSend.doubleValue() : availableCoins();
+        if (q == null) fee("Fee not available: MAX is the whole balance");
+        if (Double.isNaN(all) || all <= 0) { if (q != null) fee(feeText(q) + " · balance too low for the fee"); return; }
         if (moneyMode && moneyPerUnit > 0) {
             amount.setText(new BigDecimal(all * moneyPerUnit).setScale(2, RoundingMode.DOWN).toPlainString());
         } else {
             if (moneyMode) { moneyMode = false; paintUnits(); }
-            amount.setText(coinText(all));
+            amount.setText(q != null && q.maxSend != null ? q.maxSend.setScale(Math.min(8, Math.max(0, q.maxSend.scale())), RoundingMode.DOWN).stripTrailingZeros().toPlainString() : coinText(all));
         }
         amount.setSelection(amount.getText() == null ? 0 : amount.getText().length());
+    }
+
+    // ── live network fee ─────────────────────────────────────────────────────────────────────────────────────────
+
+    /** A fee reading for one coin and receiver: what the fee is, in which coin, and the most that can be sent. */
+    private static final class Quote {
+        final String key, to;
+        final long at;
+        final java.math.BigDecimal fee, maxSend;
+        final String symbol;
+        final boolean sameCoin;
+
+        Quote(String key, String to, java.math.BigDecimal fee, String symbol, java.math.BigDecimal maxSend, boolean sameCoin) {
+            this.key = key; this.to = to; this.at = System.currentTimeMillis();
+            this.fee = fee; this.symbol = symbol; this.maxSend = maxSend; this.sameCoin = sameCoin;
+        }
+    }
+
+    private volatile Quote quote;
+    private boolean quoting;
+
+    /** API 23 has no java.util.function. */
+    private interface QuoteDone { void accept(Quote q); }
+
+    /** The last reading when it is for this coin and receiver and under 30 seconds old. */
+    private Quote freshQuote(String key) {
+        Quote q = quote;
+        String to = src.to() == null ? "" : src.to().trim();
+        return q != null && q.key.equals(key) && q.to.equals(to) && System.currentTimeMillis() - q.at < 30_000L ? q : null;
+    }
+
+    /** Reads the live fee off the main thread (the node for HARV and Harvana coins, the coin's own network otherwise). */
+    private void loadQuote(String key, Runnable then) {
+        if (quoting) return;
+        quoting = true;
+        final String from = src.from(), to = src.to() == null ? "" : src.to().trim();
+        final double avail = availableCoins();
+        if (from == null || from.isEmpty()) { quoting = false; return; }
+        QuoteDone done = q -> main.post(() -> {
+            quoting = false;
+            if (q != null) quote = q;
+            if (then != null) then.run();
+            else refresh();
+        });
+        if ("HARV".equals(key)) {
+            long raw = Double.isNaN(avail) ? 0 : Math.round(avail * 100_000_000d);
+            HarvanaNodeClient.getFee(from, to.startsWith("HV0x") ? to : from, raw, new HarvanaNodeClient.JsonCallback() {
+                @Override public void onSuccess(JSONObject j) {
+                    long gas = j.optLong("estimatedGas", 0);
+                    long reserve = gas + gas / 10;                                   // a little over: the fare follows HARV's price
+                    done.accept(new Quote(key, to, java.math.BigDecimal.valueOf(gas).movePointLeft(8), "HARV",
+                            java.math.BigDecimal.valueOf(Math.max(0, raw - reserve)).movePointLeft(8), true));
+                }
+                @Override public void onError(String e) { done.accept(null); }
+            });
+        } else if (com.harvana.app.husd.Stable.isStable(key)) {
+            long units = Double.isNaN(avail) ? 0 : Math.round(avail * 1_000_000d);
+            com.harvana.app.husd.HusdClient.fare(key, from, to.startsWith("HV0x") ? to : from, units, null, new com.harvana.app.husd.HusdClient.Cb() {
+                @Override public void ok(JSONObject r) {
+                    String payIn = r.optString("payIn", "HARV");
+                    boolean inCoin = !"HARV".equals(payIn) && !"FREE".equals(payIn);
+                    java.math.BigDecimal fee = "HARV".equals(payIn) ? java.math.BigDecimal.valueOf(r.optLong("harvGasRaw")).movePointLeft(8)
+                            : java.math.BigDecimal.valueOf(r.optLong("coinFeeRaw")).movePointLeft(6);
+                    long max = r.has("maxSendRaw") ? r.optLong("maxSendRaw") : units;
+                    done.accept(new Quote(key, to, fee, "HARV".equals(payIn) ? "HARV" : src.symbol(),
+                            java.math.BigDecimal.valueOf(inCoin ? max : units).movePointLeft(6), inCoin));
+                }
+                @Override public void fail(String e) { done.accept(null); }
+            });
+        } else {
+            new Thread(() -> {
+                Quote q = null;
+                try {
+                    com.harvana.app.wallet.ChainSend.Quote cq = "PI".equals(key) ? com.harvana.app.wallet.PiClient.quote(from)
+                            : com.harvana.app.wallet.ChainSend.quote(key, from, to);
+                    q = new Quote(key, to, cq.fee, cq.feeSymbol, cq.maxSend, cq.feeInSameCoin);
+                } catch (Exception ignored) { }
+                done.accept(q);
+            }, "fee-quote").start();
+        }
+    }
+
+    private String feeText(Quote q) {
+        String f = q.fee.signum() == 0 ? "0" : q.fee.stripTrailingZeros().toPlainString();
+        String money = q.sameCoin && moneyPerUnit > 0 ? "  (≈ " + FxRates.format(FxRates.symbol(c), q.fee.doubleValue() * moneyPerUnit) + ")" : "";
+        return f + " " + q.symbol + money;
     }
 
     /** The coin figure on the screen's own "Available: 12.5 HARV" line. */
@@ -228,26 +331,20 @@ public final class AmountPreview {
     }
 
     private void fee(String key, double coins, String worth) {
-        final int mine = seq;
-        if ("HARV".equals(key)) {
-            String from = src.from(), to = src.to();
-            if (from == null || from.isEmpty()) return;
-            if (to == null || !to.startsWith("HV0x")) to = from;
-            long raw = Double.isNaN(coins) ? 0 : Math.round(coins * 100_000_000d);
-            HarvanaNodeClient.getFee(from, to, raw, new HarvanaNodeClient.JsonCallback() {
-                @Override public void onSuccess(JSONObject j) {
-                    long gas = j.optLong("estimatedGas", 0);
-                    long kobo = j.isNull("estimatedKobo") ? 0 : j.optLong("estimatedKobo", 0);
-                    String f = "tFare " + coinText(gas / 1e8) + " HARV" + (kobo > 0 ? " (≈ ₦" + trim(kobo / 100d) + ")" : "");
-                    main.post(() -> { if (mine == seq) fee(f.replace("tFare ", "")); });
-                }
-                @Override public void onError(String e) { }
-            });
-        } else if (com.harvana.app.husd.Stable.isStable(key)) {
-            fee("HARV");
-        } else {
-            fee("Set by that network when sent");
+        boolean harvana = "HARV".equals(key) || com.harvana.app.husd.Stable.isStable(key);
+        feeLabel.setText(harvana ? "tFare" : "Network fee");                 // other chains keep their own fee name
+        Quote q = freshQuote(key);
+        if (q == null) {
+            fee("Reading…");
+            loadQuote(key, null);
+            return;
         }
+        String text = feeText(q);
+        // The amount and the fee must both fit: say so before signing, with the most that can go.
+        if (q.sameCoin && q.maxSend != null && !Double.isNaN(coins) && coins > q.maxSend.doubleValue() + 1e-12) {
+            text = text + " · max " + q.maxSend.stripTrailingZeros().toPlainString() + " " + src.symbol();
+        }
+        fee(text);
     }
 
     /** Looks up the money value of one unit of the selected asset, then runs {@code then} on the main thread. */

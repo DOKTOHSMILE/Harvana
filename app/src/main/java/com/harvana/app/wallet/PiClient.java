@@ -89,6 +89,32 @@ public final class PiClient {
         return out;
     }
 
+    /** Live fee and the most that can be sent: Pi keeps a reserve of (2 + entries) × the base reserve in every wallet. */
+    public static ChainSend.Quote quote(String address) throws Exception {
+        ChainSend.Quote q = new ChainSend.Quote();
+        q.feeSymbol = "PI";
+        q.feeInSameCoin = true;
+        int fee = baseFee();
+        q.fee = java.math.BigDecimal.valueOf(fee).movePointLeft(7);
+        JSONObject acc = account(address);
+        java.math.BigDecimal native_ = java.math.BigDecimal.ZERO;
+        org.json.JSONArray bal = acc == null ? null : acc.optJSONArray("balances");
+        for (int i = 0; bal != null && i < bal.length(); i++) {
+            JSONObject b = bal.optJSONObject(i);
+            if (b != null && "native".equals(b.optString("asset_type"))) native_ = new java.math.BigDecimal(b.optString("balance", "0"));
+        }
+        java.math.BigDecimal baseReserve = new java.math.BigDecimal("0.5");
+        try (Response r = HTTP.newCall(new Request.Builder().url(horizon() + "/ledgers?order=desc&limit=1").build()).execute()) {
+            JSONObject j = new JSONObject(r.body() == null ? "{}" : r.body().string());
+            JSONObject rec = j.optJSONObject("_embedded") == null ? null : j.optJSONObject("_embedded").optJSONArray("records").optJSONObject(0);
+            if (rec != null && rec.optLong("base_reserve_in_stroops", 0) > 0) baseReserve = java.math.BigDecimal.valueOf(rec.optLong("base_reserve_in_stroops")).movePointLeft(7);
+        } catch (Exception ignored) { }
+        int entries = acc == null ? 0 : acc.optInt("subentry_count", 0);
+        java.math.BigDecimal reserve = baseReserve.multiply(java.math.BigDecimal.valueOf(2L + entries));
+        q.maxSend = native_.subtract(reserve).subtract(q.fee).max(java.math.BigDecimal.ZERO);
+        return q;
+    }
+
     private static int baseFee() {
         try (Response r = HTTP.newCall(new Request.Builder().url(horizon() + "/fee_stats").build()).execute()) {
             JSONObject j = new JSONObject(r.body() == null ? "{}" : r.body().string());

@@ -452,6 +452,7 @@ public class SettingsActivity extends AppCompatActivity {
 		_tintRowIcon(rowAccountInfo, green);
 		_tintRowIcon(rowSecurityPrivacy, green);
 		_tintRowIcon(rowWalletAssets, green);
+		_tintRowIcon((LinearLayout) findViewById(R.id.rowHarvNames), green);
 		_tintRowIcon(rowBackupRecovery, green);
 		
 		_tintRowIcon(rowPaymentMethods, amber);
@@ -760,7 +761,7 @@ public class SettingsActivity extends AppCompatActivity {
 			else if (before instanceof com.google.android.material.divider.MaterialDivider) before.setVisibility(View.GONE);
 		}
 		final float d = getResources().getDisplayMetrics().density;
-		View[] rows = {rowSecurityPrivacy, rowWalletAssets, rowBackupRecovery, rowPaymentMethods, rowPrivacyVisibility, rowNotifications,
+		View[] rows = {rowSecurityPrivacy, rowWalletAssets, findViewById(R.id.rowHarvNames), rowBackupRecovery, rowPaymentMethods, rowPrivacyVisibility, rowNotifications,
 			rowBlockedUsers, rowThemeAppearance, rowCurrency, rowDataStorage, rowHelpSupport, rowAboutHarvana, rowLogOut};
 		for (View r : rows) {
 			if (!(r instanceof android.view.ViewGroup)) continue;
@@ -829,8 +830,9 @@ public class SettingsActivity extends AppCompatActivity {
 		com.harvana.app.sync.NodeGroupClient.reverseName(me, new com.harvana.app.sync.NodeGroupClient.Callback() {
 			@Override public void onSuccess(org.json.JSONObject j) {
 				runOnUiThread(() -> {
-					TextView t = findViewById(R.id.tvHarvNameValue);
-					if (t != null && !j.optString("name").isEmpty()) t.setText(j.optString("name"));
+					// The row has no subtitle (like every other row); the primary name shows on the right, before the arrow.
+					TextView t = findViewById(R.id.tvHarvNameRight);
+					if (t != null && !j.optString("name").isEmpty()) { t.setText(j.optString("name")); t.setVisibility(android.view.View.VISIBLE); }
 				});
 			}
 			@Override public void onError(String e) { }

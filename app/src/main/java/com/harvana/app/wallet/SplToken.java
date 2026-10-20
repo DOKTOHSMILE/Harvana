@@ -93,6 +93,22 @@ public final class SplToken {
         throw new IllegalStateException("No associated account.");
     }
 
+    /** Rent that creates a receiver's token account (165 bytes), paid in SOL by the sender. */
+    static final long ACCOUNT_RENT_LAMPORTS = 2_039_280L;
+
+    /** Live fee in SOL: 5,000 lamports, plus the rent for the receiver's token account when they have none yet. */
+    static ChainSend.Quote quote(CustomAssets.Asset token, String from, String to, ChainSend.Quote q) throws Exception {
+        q.feeSymbol = "SOL";
+        long lamports = 5000L;
+        if (to != null && !to.isEmpty()) {
+            try { if (accounts(token.rpc, to, token.contract).isEmpty()) lamports += ACCOUNT_RENT_LAMPORTS; }
+            catch (Exception ignored) { }
+        }
+        q.fee = BigDecimal.valueOf(lamports).movePointLeft(9);
+        q.maxSend = new BigDecimal(balance(token, from));
+        return q;
+    }
+
     /** Sends {@code amount} of the token; returns the transaction signature. */
     public static String send(CustomAssets.Asset token, byte[] seed, String from, String to, String amount) throws Exception {
         byte[] payer = Ed25519.publicKeyFromSeed(seed);

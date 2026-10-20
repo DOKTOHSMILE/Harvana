@@ -57,6 +57,138 @@ public final class ChainSend {
         }
     }
 
+    // ── live fee and the most that can be sent ─────────────────────────────────────────────────────────────────────
+
+    /** The network fee now, the coin it is paid in, and the most of the coin that can be sent so the fee still fits. */
+    public static final class Quote {
+        /** The fee for a usual transfer of this coin, in {@link #feeSymbol}. */
+        public BigDecimal fee = BigDecimal.ZERO;
+        public String feeSymbol = "";
+        /** The most that can be sent (fee and any reserve the network keeps already taken off), in the coin. */
+        public BigDecimal maxSend;
+        /** True when the fee comes out of the same coin (so MAX leaves room for it). */
+        public boolean feeInSameCoin;
+    }
+
+    /** Headroom on fees read now and paid a few seconds later (a gas price can rise in between). */
+    private static final BigInteger HEADROOM_PCT = BigInteger.valueOf(125);
+
+    /**
+     * Reads the live fee for sending {@code key} from {@code from} (to {@code to}, when known: some fees depend on it, such
+     * as a new Tron or Solana-token account). Same formulas as the send itself, so MAX never trips its "not enough" checks.
+     * Run off the main thread.
+     */
+    public static Quote quote(String key, String from, String to) throws Exception {
+        Quote q = new Quote();
+        String dest = to == null ? "" : to.trim();
+        switch (key) {
+            case "ETH": case "BNB": case "POL": case "BASE": {
+                Net.Evm n = Net.evm(key);
+                return evmQuote(q, n.rpc, from, 18, key);
+            }
+            case "BTC": return utxoQuote(q, from, Net.btcApi(from), true, false, "BTC");
+            case "LTC": return utxoQuote(q, from, Net.ltcApi(), true, true, "LTC");
+            case "DOGE": return utxoQuote(q, from, Net.TEST ? "" : "https://api.blockcypher.com/v1/doge/main", false, false, "DOGE");
+            case "TRX": return tronQuote(q, from, dest);
+            case "SOL": {
+                long have = solBalance(from);
+                q.feeSymbol = "SOL";
+                q.feeInSameCoin = true;
+                q.fee = BigDecimal.valueOf(5000L).movePointLeft(9);
+                q.maxSend = BigDecimal.valueOf(Math.max(0L, have - 5000L)).movePointLeft(9);   // leaving exactly 0 is allowed
+                return q;
+            }
+            default: {
+                CustomAssets.Asset a = CustomAssets.find(key);
+                if (a == null) throw new IllegalArgumentException("UNKNOWN_COIN");
+                if (a.near()) return NearProtocol.quote(a, from, dest, q);
+                if (Trc20.FAMILY.equals(a.family)) return Trc20.quote(a, from, dest, q);
+                if (SplToken.FAMILY.equals(a.family)) return SplToken.quote(a, from, dest, q);
+                if ("TOKEN".equals(a.kind)) {
+                    BigInteger gasPrice = gasPriceNow(a.rpc);
+                    long gas = 65_000L;
+                    if (dest.matches("(?i)0x[0-9a-f]{40}")) {
+                        try {
+                            String data = "0xa9059cbb" + pad(dest) + String.format("%64s", "1").replace(' ', '0');
+                            gas = qty(rpcRaw(a.rpc, "eth_estimateGas", "[{\"from\":\"" + from + "\",\"to\":\"" + a.contract + "\",\"data\":\"" + data + "\"}]"))
+                                    .multiply(BigInteger.valueOf(12)).divide(BigInteger.TEN).longValue();
+                        } catch (Exception ignored) { }
+                    }
+                    q.feeSymbol = a.feeSymbol();
+                    q.fee = new BigDecimal(gasPrice.multiply(BigInteger.valueOf(gas))).movePointLeft(18);
+                    String held = rpcRaw(a.rpc, "eth_call", "[{\"to\":\"" + a.contract + "\",\"data\":\"0x70a08231" + pad(from) + "\"},\"latest\"]");
+                    q.maxSend = new BigDecimal(qty(held)).movePointLeft(a.decimals);                // the fee is in the chain's coin
+                    return q;
+                }
+                return evmQuote(q, a.rpc, from, a.decimals, a.symbol);
+            }
+        }
+    }
+
+    private static BigInteger gasPriceNow(String rpc) throws Exception {
+        BigInteger p = qty(rpc(rpc, "eth_gasPrice")).multiply(BigInteger.valueOf(110)).divide(BigInteger.valueOf(100));
+        return p.signum() == 0 ? BigInteger.valueOf(1_000_000_000L) : p;
+    }
+
+    private static Quote evmQuote(Quote q, String rpc, String from, int decimals, String symbol) throws Exception {
+        BigInteger fee = gasPriceNow(rpc).multiply(BigInteger.valueOf(21000L));
+        BigInteger reserve = fee.multiply(HEADROOM_PCT).divide(BigInteger.valueOf(100));
+        BigInteger balance = qty(rpc(rpc, "eth_getBalance", from, "latest"));
+        q.feeSymbol = symbol;
+        q.feeInSameCoin = true;
+        q.fee = new BigDecimal(fee).movePointLeft(decimals);
+        q.maxSend = new BigDecimal(balance.subtract(reserve).max(BigInteger.ZERO)).movePointLeft(decimals);
+        return q;
+    }
+
+    /** UTXO coins: the fee for a usual payment (one coin in, payment and change out); MAX spends every confirmed coin with no change. */
+    private static Quote utxoQuote(Quote q, String from, String api, boolean esplora, boolean witness, String ticker) throws Exception {
+        JSONArray utxos = esplora ? getArray(api + "/api/address/" + from + "/utxo") : dogeUtxos(from);
+        int rate = esplora ? feeRate(api) : 100;
+        long sum = 0;
+        int n = 0;
+        for (int i = 0; i < utxos.length() && n < 50; i++) {
+            JSONObject u = utxos.getJSONObject(i);
+            if (esplora && u.has("status") && !u.getJSONObject("status").optBoolean("confirmed", true)) continue;
+            long v = u.optLong("value");
+            if (v <= 0) continue;
+            sum += v;
+            n++;
+        }
+        q.feeSymbol = ticker;
+        q.feeInSameCoin = true;
+        q.fee = BigDecimal.valueOf((long) rate * vsize(1, 2, witness)).movePointLeft(8);
+        long allFee = (long) rate * (vsize(Math.max(n, 1), 1, witness) + 10);               // a little over: signatures vary in size
+        q.maxSend = BigDecimal.valueOf(Math.max(0L, sum - allFee)).movePointLeft(8);
+        return q;
+    }
+
+    /** Tron: free bandwidth covers a transfer, otherwise about 0.27 TRX burns; a brand-new receiving account costs 1.1 TRX more. */
+    private static Quote tronQuote(Quote q, String from, String to) throws Exception {
+        JSONObject acc = post(Net.tronApi() + "/wallet/getaccount", "{\"address\":\"" + from + "\",\"visible\":true}");
+        long balance = acc.optLong("balance", 0);
+        long fee = tronBandwidthLeft(from) >= 300 ? 0 : 270_000L;
+        if (to.length() >= 30 && to.charAt(0) == 'T') {
+            JSONObject dest = post(Net.tronApi() + "/wallet/getaccount", "{\"address\":\"" + to + "\",\"visible\":true}");
+            if (!dest.has("address")) fee += 1_100_000L;                                            // activating a new account
+        }
+        q.feeSymbol = "TRX";
+        q.feeInSameCoin = true;
+        q.fee = BigDecimal.valueOf(fee).movePointLeft(6);
+        q.maxSend = BigDecimal.valueOf(Math.max(0L, balance - fee)).movePointLeft(6);
+        return q;
+    }
+
+    /** Bandwidth points the account can use now (the daily free amount plus any it staked for). */
+    static long tronBandwidthLeft(String address) {
+        try {
+            JSONObject r = post(Net.tronApi() + "/wallet/getaccountresource", "{\"address\":\"" + address + "\",\"visible\":true}");
+            return Math.max(0, r.optLong("freeNetLimit") - r.optLong("freeNetUsed")) + Math.max(0, r.optLong("NetLimit") - r.optLong("NetUsed"));
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     private static String evm(String mnemonic, String from, String to, String amount, String rpc, long chainId, int decimals) throws Exception {
         byte[] priv = ChainKeys.privateKey(mnemonic, ChainKeys.Chain.ETH);
         String mine = ChainKeys.address(mnemonic, ChainKeys.Chain.ETH);
@@ -170,6 +302,15 @@ public final class ChainSend {
                     if (change < dust) { fee += change; change = 0; }
                 }
                 break;
+            }
+        }
+        if (!ins.isEmpty() && sum < sats + fee) {
+            // Every coin taken and still short with a change output: sending (nearly) everything has no change.
+            long one = (long) rate * vsize(ins.size(), 1, witness);
+            if (sum >= sats + one) {
+                fee = one;
+                change = sum - sats - fee;
+                if (change < dust) { fee += change; change = 0; }
             }
         }
         if (ins.isEmpty() || sum < sats + fee) throw new IllegalArgumentException("Not enough confirmed coins to pay that and the network fee.");

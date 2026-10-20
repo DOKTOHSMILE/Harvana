@@ -171,6 +171,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 			feed = f;
 			feed.listen(feedListener);
 			feedRows = feed.cached(getContext());                // the last complete list, at once
+			// A saved list is shown as it is; the placeholder is only for a wallet with nothing saved yet.
+			if (feedRows != null && !feedRows.isEmpty() && list_history != null) com.harvana.app.utils.Shimmer.release(list_history);
 		}
 		_renderMergedTransactions();
 		feed.refresh(getContext(), pollChain && !_harvOnly());

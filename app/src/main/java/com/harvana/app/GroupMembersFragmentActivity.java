@@ -1306,13 +1306,22 @@ public class GroupMembersFragmentActivity extends Fragment {
 			if (h.status != null && !label.isEmpty()) h.status.setText(bondLine(member, label));
 		}
 		
+		/** The last balance shown per wallet, so a redraw keeps the figure instead of blanking it until the node answers. */
+		private final java.util.Map<String, String> shownBalance = new java.util.HashMap<>();
+
 		private void _fetchBalance(String address, TextView target) {
 			if (target == null) return;
+			target.setTag(address);                                  // a recycled row ignores an answer for its old wallet
+			String known = shownBalance.get(address);
+			if (known != null) target.setText(known);
 			com.harvana.app.wallet.WalletNodeBalanceHelper.load(address,
 			(bal, avail, pin, pout, pending, err) -> {
-				if (getActivity() == null) return;
-				getActivity().runOnUiThread(() ->
-				target.setText(String.format(Locale.US, ("%.2f " + com.harvana.app.CoinInfo.ticker()), avail >= 0 ? avail : bal)));
+				if (getActivity() == null || (err != null && !err.isEmpty())) return;
+				String text = String.format(Locale.US, ("%.2f " + com.harvana.app.CoinInfo.ticker()), avail >= 0 ? avail : bal);
+				getActivity().runOnUiThread(() -> {
+					shownBalance.put(address, text);
+					if (address.equals(target.getTag())) target.setText(text);
+				});
 			});
 		}
 		

@@ -115,6 +115,7 @@ public class AssetFragmentActivity extends Fragment {
 		husdFiat = 0;
 		chainReported = false;
 		husdReported = false;
+		holdSince = 0;
 		_updateActiveWalletLabel();
 		if (getActivity() != null) getActivity().runOnUiThread(this::_paintTotal);
 		return true;
@@ -384,6 +385,7 @@ public class AssetFragmentActivity extends Fragment {
 				husdFiat = 0;
 				chainReported = false;
 				husdReported = false;
+				holdSince = 0;
 			}
 			com.harvana.app.wallet.FxRates.load(getContext(), this::_paintTotal);
 		}
@@ -639,6 +641,10 @@ public class AssetFragmentActivity extends Fragment {
 		setChainFiat(sum);
 	}
 
+	private static final long HOLD_MS = 8000L;
+	private long holdSince;
+	private final Runnable holdEnd = () -> { if (isAdded()) _paintTotal(); };
+
 	private void _paintTotal() {
 		if (tv_fiat_value == null || getContext() == null) return;
 		String symbol = com.harvana.app.wallet.FxRates.symbol(getContext());
@@ -646,11 +652,21 @@ public class AssetFragmentActivity extends Fragment {
 		double total = harvFiat + chainFiat + husdFiat;
 		// A section that has not reported yet must not replace the startup total
 		// (every switched-on coin) with the HARV-only figure.
+		// Until every section has reported, the last full total stays on screen (as Home shows it) instead of the
+		// figure stepping up part by part; after HOLD_MS the live sum shows anyway, so a section that never answers
+		// cannot hold up an old figure.
 		double cached = com.harvana.app.wallet.WalletTotal.last(getContext(), wallet_address, symbol,
-				com.harvana.app.wallet.WalletTotal.ASSETS_MAX_AGE_MS);   // never an old total: it held up a figure days out of date
+				com.harvana.app.wallet.WalletTotal.HOME_MAX_AGE_MS);
 		boolean rowsReady = chainReported && husdReported;
+		if (holdSince == 0) holdSince = System.currentTimeMillis();
+		boolean holding = !rowsReady && System.currentTimeMillis() - holdSince < HOLD_MS;
 		double shown = total;
-		if (!rowsReady && !Double.isNaN(cached) && cached > total) shown = cached;
+		if (holding && !Double.isNaN(cached)) {
+			shown = cached;
+			if (tv_fiat_value != null) tv_fiat_value.removeCallbacks(holdEnd);
+			if (tv_fiat_value != null) tv_fiat_value.postDelayed(holdEnd, HOLD_MS);
+		}
+		if (rowsReady) holdSince = 0;
 		tv_fiat_value.setText(com.harvana.app.wallet.FxRates.format(symbol, shown));
 		if (rowsReady) {
 			com.harvana.app.wallet.WalletTotal.publish(getContext(), wallet_address, symbol, total);
@@ -691,6 +707,7 @@ public class AssetFragmentActivity extends Fragment {
 				husdFiat = 0;
 				chainReported = false;
 				husdReported = false;
+				holdSince = 0;
 				shownSymbol = currencies[which][0];
 				_paintTotal();
 				dialog.dismiss();

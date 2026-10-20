@@ -228,9 +228,15 @@ public class HistoryFragmentActivity extends Fragment {
 		}
 	}
 	
+	/** One fetch at a time; the cached list paints only while nothing is on screen yet (never over fresher rows). */
+	private boolean fetching, loaded;
+	private String shownSig = "";
+
 	private void _fetchAndBindWalletActivity() {
 		if (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x")) return;
-		_paintCachedHistory();
+		if (allTransactions.isEmpty()) _paintCachedHistory();
+		if (fetching) return;
+		fetching = true;
 		HarvanaNodeClient.getHistory(groupWalletAddress, new HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject json) {
@@ -259,6 +265,10 @@ public class HistoryFragmentActivity extends Fragment {
 				getContext(), "wallet_history_" + groupWalletAddress, rows);
 				
 				getActivity().runOnUiThread(() -> {
+					fetching = false;
+					loaded = true;
+					if (rows.toString().equals(shownSig) && !allTransactions.isEmpty()) return;   // nothing new: keep the list
+					shownSig = rows.toString();
 					allTransactions.clear();
 					allTransactions.addAll(rows);
 					_applyFilters();
@@ -266,8 +276,10 @@ public class HistoryFragmentActivity extends Fragment {
 			}
 			@Override
 			public void onError(String error) {
-				if (getActivity() == null) return;
+				if (getActivity() == null) { fetching = false; return; }
 				getActivity().runOnUiThread(() -> {
+					fetching = false;
+					loaded = true;
 					if (allTransactions.isEmpty()) {
 						if (tv_wallet_activity_empty != null) {
 							tv_wallet_activity_empty.setVisibility(View.VISIBLE);
@@ -319,7 +331,9 @@ public class HistoryFragmentActivity extends Fragment {
 		adapter.notifyDataSetChanged();
 		
 		if (tv_wallet_activity_empty != null) {
-			tv_wallet_activity_empty.setVisibility(displayTransactions.isEmpty() ? View.VISIBLE : View.GONE);
+			// "No wallet activity yet" only once the node has answered: an empty cache is not an empty wallet.
+			boolean known = loaded || !allTransactions.isEmpty();
+			tv_wallet_activity_empty.setVisibility(known && displayTransactions.isEmpty() ? View.VISIBLE : View.GONE);
 			if (displayTransactions.isEmpty() && !allTransactions.isEmpty()) {
 				tv_wallet_activity_empty.setText("No transactions match your search.");
 				com.harvana.app.utils.EmptyState.illustrate(tv_wallet_activity_empty, com.harvana.app.R.drawable.illus_empty_search);

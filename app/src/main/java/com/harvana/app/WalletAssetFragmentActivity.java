@@ -206,6 +206,7 @@ public class WalletAssetFragmentActivity extends Fragment {
 	private String assetQuery = "";
 	/** HARV's row, drawn by the list adapter into a plain box so it can sit in the one sorted list (AssetSorter). */
 	private LinearLayout harvBox;
+	private String harvSig = "";
 	private com.harvana.app.wallet.AssetSorter sorter;
 
 	/** One list for every asset, largest holding first, with each coin's price (wallet/AssetSorter). */
@@ -224,6 +225,10 @@ public class WalletAssetFragmentActivity extends Fragment {
 	private void _drawHarvRows() {
 		if (harvBox == null || recyclerview1 == null || recyclerview1.getAdapter() == null) return;
 		Recyclerview1Adapter a = (Recyclerview1Adapter) recyclerview1.getAdapter();
+		// The same figures as on screen: keep the row (no rebuild, no blink when coming back to Assets).
+		String sig = String.valueOf(coinListMap) + com.harvana.app.wallet.FxRates.symbol(getContext());
+		if (sig.equals(harvSig) && harvBox.getChildCount() > 0) return;
+		harvSig = sig;
 		harvBox.removeAllViews();
 		for (int i = 0; i < a.getItemCount(); i++) {
 			Recyclerview1Adapter.ViewHolder h = a.onCreateViewHolder(harvBox, 0);

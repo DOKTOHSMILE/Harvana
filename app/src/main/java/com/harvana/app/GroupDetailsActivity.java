@@ -843,7 +843,8 @@ public class GroupDetailsActivity extends AppCompatActivity {
             }
             tv_group_meta.setText(metaText);
         }
-        if (tv_header_amount != null) {
+        // "Loading…" only before a first figure: a refresh keeps the amount shown until the new one arrives.
+        if (tv_header_amount != null && (tv_header_amount.getText() == null || tv_header_amount.getText().length() == 0)) {
             com.harvana.app.utils.Shimmer.loading(tv_header_amount);
         }
         _loadTotalGroupContributions();

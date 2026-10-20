@@ -2,6 +2,25 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: steady Assets, Activity and group pages
+
+- **Assets total:** until every section (HARV, stable coins, other chains) has reported, the last full total stays
+  on screen (up to 24 h old, as on Home) instead of stepping up part by part. After 8 s the live sum shows anyway,
+  so a section that never answers cannot hold up an old figure.
+- **Assets, HARV row:** no longer torn down and rebuilt twice on every return to the tab. It is rebuilt only when
+  its figures or the currency changed.
+- **Activity tab:** a saved list shows at once. The placeholder no longer covers it for up to 25 s; it now shows
+  only for a wallet with nothing saved.
+- **Group wallet history:**
+  - One fetch at a time (it was up to three per open).
+  - The saved list paints only while nothing is on screen, so fresh rows never flash back to old ones.
+  - The list redraws only when the rows changed.
+  - "No wallet activity yet" shows only once the node has answered.
+- **Group header, Collected:** "Loading…" only before a first figure. A refresh keeps the amount shown.
+- **Group members, balances:**
+  - The last figure stays on a redraw instead of blanking.
+  - A late answer can no longer land on a recycled row, which used to show another member's balance.
+
 ## 20 Oct 2026: Groups tab reads the same group list as Home
 
 - A profile's `groups` list holds plain ids or, in older profiles, `{id: …}` maps. Home's counter (NodePortfolio)

@@ -2,6 +2,27 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Home loads in one piece (HomeData)
+
+- **New `home/HomeData`**: one class gathers everything Home shows besides the wallet total. It covers the name,
+  groups, total saved, trust, loans, upcoming payments, trending groups and Learn Hub. Each refresh runs every part at
+  once and publishes **one** snapshot when all parts have answered. After 15 s it publishes anyway, and a part that
+  has not answered keeps its last value. Member names on Remind rows and trust lines on trending groups are resolved
+  before publishing, so rows never change after they appear.
+- The last snapshot is kept per account, in memory and on the phone. Home paints it the moment it opens. The shimmer
+  shows only for a section that has never loaded (a fresh install or a new account). Home rebuilds a list only when
+  its values changed.
+- Refreshes run on app resume and on return to the Home tab, at most once every 5 s. A refresh already running is
+  joined, not repeated.
+- Fixed on the way:
+  - Every open ran each loader 2–4 times: from the cache, from the network, and again from `onResume`.
+  - Each profile answer reset trust to "—" and loans to "0" before the real values came back.
+  - An empty Upcoming or Trending list fell back to shimmer on every return.
+  - The wallet total jumped from a part total to the full total.
+  - The invitation snackbar showed on every return; it now shows once per count.
+  - Removed an unused listener that downloaded the whole `userdb` tree.
+- Signing out clears the snapshot.
+
 ## 20 Oct 2026: floating Web3 button, Groups screen wired
 
 - **Web3 bubble** (`web3/Web3Bubble`): while the browser is minimized with tabs open, a 44 dp Web3 button floats on

@@ -80,7 +80,8 @@ public final class WalletTotal {
             int remaining = left.decrementAndGet();
             // HARV and the Harvana coins are in (they are most of a wallet), but the other chains are still answering:
             // show that much now rather than nothing, and the full total when the rest arrives.
-            if (remaining == 1 && !othersDone[0] && !harvFailed[0] && !stablesFailed[0]) {
+            if (remaining == 1 && !othersDone[0] && !harvFailed[0] && !stablesFailed[0]
+                    && Double.isNaN(last(c, address, symbol, HOME_MAX_AGE_MS))) {   // only when nothing is shown yet: no jump from part to whole
                 publish(c, address, symbol, parts[0] + parts[1]);
             }
             if (remaining > 0) return;

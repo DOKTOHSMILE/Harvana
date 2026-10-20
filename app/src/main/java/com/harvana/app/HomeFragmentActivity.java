@@ -193,8 +193,6 @@ public class HomeFragmentActivity extends Fragment {
 	private OnCompleteListener<Void> fbauth_updateProfileListener;
 	private OnCompleteListener<AuthResult> fbauth_phoneAuthListener;
 	private OnCompleteListener<AuthResult> fbauth_googleSignInListener;
-	private DatabaseReference userdb = _firebase.getReference("userdb");
-	private ChildEventListener _userdb_child_listener;
 	
 	@NonNull
 	@Override
@@ -368,39 +366,6 @@ public class HomeFragmentActivity extends Fragment {
 			}
 		});
 		
-		_userdb_child_listener = new ChildEventListener() {
-			@Override
-			public void onChildAdded(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-			}
-			
-			@Override
-			public void onChildChanged(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-			}
-			
-			@Override
-			public void onChildMoved(DataSnapshot _param1, String _param2) {
-			}
-			
-			@Override
-			public void onChildRemoved(DataSnapshot _param1) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-			}
-			
-			@Override
-			public void onCancelled(DatabaseError _param1) {
-				final int _errorCode = _param1.getCode();
-				final String _errorMessage = _param1.getMessage();
-			}
-		};
-		userdb.addChildEventListener(_userdb_child_listener);
 		
 		fbauth_updateEmailListener = _param1 -> {
 			final boolean _success = _param1.isSuccessful();
@@ -458,19 +423,27 @@ public class HomeFragmentActivity extends Fragment {
 		textview2.setText(new SimpleDateFormat("EEEE dd MMMM", Locale.getDefault()).format(c.getTime()));
 		if (textview4 != null)
 		textview4.setVisibility(View.GONE);                 // values only on Home: the greeting and the date
-		_loadProfile();
+		// The last snapshot at once (no blank cards, no shimmer once Home has loaded before), then one refresh.
+		com.harvana.app.home.HomeData.listen(homeListener);
+		_render(com.harvana.app.home.HomeData.cached(getContext()));
 		_loadWalletBalance();
-		_loadLearnHubPreview();
-		_loadTrendingGroups();
 	}
+	
+	/** MainActivity hides and shows its tabs: coming back to Home is a refresh too (one at most every few seconds). */
+	@Override
+	public void onHiddenChanged(boolean hidden) {
+		super.onHiddenChanged(hidden);
+		if (!hidden) com.harvana.app.home.HomeData.refresh(getContext(), false);
+	}
+	
+	/** Invitations are announced once per count, not on every return to Home. */
+	private static int invitesAnnounced = -1;
 	
 	@Override
 	public void onResume() {
 		super.onResume();
-		_loadProfile();
+		com.harvana.app.home.HomeData.refresh(getContext(), false);
 		_loadWalletBalance();
-		_loadLearnHubPreview();
-		_loadTrendingGroups();
 		if (getContext() != null) {
 			com.harvana.app.utils.NetworkStatusBanner.refresh(linear2, 1,
 					com.harvana.app.wallet.WalletManager.getActiveWalletAddress(getContext()));
@@ -482,7 +455,8 @@ public class HomeFragmentActivity extends Fragment {
 				@Override public void onList(java.util.List<java.util.Map<String, Object>> invites) {
 					if (invites.isEmpty() || getActivity() == null || getView() == null) return;
 					getActivity().runOnUiThread(() -> {
-						if (getView() == null) return;
+						if (getView() == null || invites.size() == invitesAnnounced) return;
+						invitesAnnounced = invites.size();
 						com.google.android.material.snackbar.Snackbar.make(getView(),
 							"You have " + invites.size() + " group invitation" + (invites.size() > 1 ? "s" : ""),
 							com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
@@ -506,124 +480,248 @@ public class HomeFragmentActivity extends Fragment {
 		if (nav != null) nav.setSelectedItemId(menuId);
 	}
 	
-	private void _loadProfile() {
-		FirebaseAuth auth = FirebaseAuth.getInstance();
-		if (auth.getCurrentUser() == null) {
-			if (textview3 != null) textview3.setText(_greeting());
-			_loadUpcomingPayments();
-			return;
-		}
-		String uid = auth.getCurrentUser().getUid();
-		Map<String, Object> cachedProfile = com.harvana.app.offline.OfflineCacheManager.load(
-		getContext(), "profile_" + uid);
-		if (cachedProfile != null && !cachedProfile.isEmpty()) {
-			_bindProfileFields(cachedProfile);
-		}
-		
-		com.harvana.app.firestore.UserProfileManager.getInstance(getContext())
-		.getProfile(uid, new com.harvana.app.firestore.UserProfileManager.DocCallback() {
-			@Override
-			public void onSuccess(Map<String, Object> data) {
-				if (!isAdded() || getActivity() == null) return;
-				com.harvana.app.offline.OfflineCacheManager.save(getContext(), "profile_" + uid, data);
-				getActivity().runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						_bindProfileFields(data);
-					}
-				});
-				_selfHealGroupMemberships(uid);
-			}
-			
-			@Override
-			public void onError(String error) {
-				if (!isAdded() || getActivity() == null) return;
-				if (com.harvana.app.offline.NetworkStatus.isConnectivityError(error)
-				&& cachedProfile != null && !cachedProfile.isEmpty()) {
-					return;
-				}
-				getActivity().runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if (textview3 != null) textview3.setText(_greeting());
-						if (text_val_groups != null) text_val_groups.setText("0");
-						_loadUpcomingPayments();
-					}
-				});
-			}
-		});
+	/**
+	 * Home paints from one snapshot (HomeData): the last one at once when the tab opens, then the next one when every part
+	 * of a refresh has answered. A list section is rebuilt only when its values changed, so nothing blanks or reshuffles.
+	 */
+	private final java.util.Map<String, String> shownSig = new HashMap<>();
+	private final com.harvana.app.home.HomeData.Listener homeListener = s -> {
+		if (isAdded() && getView() != null) _render(s);
+	};
+	
+	private boolean _changed(String key, String sig) {
+		if (sig.equals(shownSig.get(key))) return false;
+		shownSig.put(key, sig);
+		return true;
 	}
 	
-	private void _selfHealGroupMemberships(String uid) {
-		com.harvana.app.group.JoinRequestManager.selfHealApprovedMemberships(getContext(), uid,
-		healedCount -> {
-			if (healedCount <= 0) return;
-			if (!isAdded() || getActivity() == null) return;
-			getActivity().runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					_loadProfile();
-				}
-			});
-		});
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void _bindProfileFields(Map<String, Object> data) {
-		if (!isAdded() || getContext() == null) return;
-		if (data == null) data = new HashMap<>();
+	private void _render(org.json.JSONObject s) {
+		if (getContext() == null) return;
+		boolean signedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
+		String first = s.optString("name", "");
+		if (textview3 != null) textview3.setText(_greeting() + (first.isEmpty() ? "" : ", " + first));
 		
-		Object firstObj = data.get("first_name");
-		String first = firstObj != null ? firstObj.toString().trim() : "";
-		if (textview3 != null)
-		textview3.setText(_greeting() + (first.isEmpty() ? "" : ", " + first));
+		org.json.JSONArray ids = s.optJSONArray("groupIds");
+		org.json.JSONObject groups = s.optJSONObject("groups");
+		int active = groups != null ? groups.optInt("active") : ids != null ? ids.length() : -1;
+		if (text_val_groups != null) text_val_groups.setText(active < 0 ? "—" : String.valueOf(active));
+		if (text_sub_groups != null) text_sub_groups.setText(active < 0 ? "" : active == 0 ? "Join your first circle" : active == 1 ? "1 active circle" : active + " active circles");
 		
-		if (text_val_trust != null) text_val_trust.setText("—");
+		org.json.JSONObject saved = s.optJSONObject("saved");
+		if (text_val_saved != null) text_val_saved.setText(saved == null ? "—" : saved.optString("text", "0"));
+		int across = saved == null ? 0 : saved.optInt("across");
+		if (text_sub_saved != null) text_sub_saved.setText(saved == null ? "" : across <= 0 ? "No group savings yet" : "Across " + across + (across == 1 ? " group" : " groups"));
+		_openTotalSavedOnTap();
+		
+		org.json.JSONObject trust = s.optJSONObject("trust");
+		if (text_val_trust != null) text_val_trust.setText(trust == null ? "—" : trust.optString("value", "—"));
 		if (ring_trust_score != null) {
-			ring_trust_score.setMax(com.harvana.app.trust.NetworkTrust.MAX);
-			ring_trust_score.setProgress(0);
+			ring_trust_score.setMax(trust == null ? 100 : Math.max(1, trust.optInt("max", 100)));
+			ring_trust_score.setProgress(trust == null ? 0 : trust.optInt("progress"));
 		}
-		if (text_sub_trust != null) text_sub_trust.setText("of 26");
+		if (text_sub_trust != null) text_sub_trust.setText(trust == null ? "" : trust.optString("sub", ""));
 		
-		if (text_val_loans != null) text_val_loans.setText("0");
-		if (text_sub_loans != null) text_sub_loans.setText("No open loans");
-		
-		group_map_list.clear();
-		Object groupsObj = data.get("groups");
-		if (groupsObj instanceof List) {
-			for (Object g : (List<Object>) groupsObj) {
-				if (g == null) continue;
-				String gid = g.toString().trim();
-				if (gid.isEmpty()) continue;
-				HashMap<String, Object> row = new HashMap<>();
-				row.put("id", gid);
-				group_map_list.add(row);
+		org.json.JSONObject nl = s.optJSONObject("nodeLoans"), fl = s.optJSONObject("fsLoans");
+		if (text_val_loans != null) {
+			if (nl == null && fl == null) { text_val_loans.setText("—"); if (text_sub_loans != null) text_sub_loans.setText(""); }
+			else {
+				int count = (nl == null ? 0 : nl.optInt("count")) + (fl == null ? 0 : fl.optInt("count"));
+				double out = (nl == null ? 0 : nl.optDouble("out", 0)) + (fl == null ? 0 : fl.optDouble("out", 0));
+				text_val_loans.setText(String.valueOf(count));
+				if (text_sub_loans != null) text_sub_loans.setText(count == 0 ? "No open loans" : _fmtHarv(out) + " outstanding");
 			}
 		}
-		int n = group_map_list.size();
-		if (text_val_groups != null) text_val_groups.setText(String.valueOf(n));
-		if (text_sub_groups != null)
-		text_sub_groups.setText(n == 0 ? "Join your first circle"
-		: (n == 1 ? "1 active circle" : n + " active circles"));
 		
-		_loadUpcomingPayments();
-		_loadTotalSavedAcrossGroups();
-		_loadOpenLoansAcrossGroups();
-		_loadNodeTotals();
-		_loadComputedTrust();
-		_loadTrendingGroups();
+		_renderUpcoming(s.optJSONObject("upcoming"), signedIn);
+		org.json.JSONArray pending = s.optJSONArray("pending");
+		trendingPending.clear();
+		if (pending != null) for (int i = 0; i < pending.length(); i++) trendingPending.add(pending.optString(i));
+		_renderTrending(s.optJSONObject("trending"), signedIn, String.valueOf(pending));
+		_renderLearn(s.optJSONObject("learn"), signedIn);
+	}
+	
+	/** A placeholder only while a section has never loaded; padded like the rows it stands for. */
+	private void _placeholder(LinearLayout box, View empty) {
+		if (box.getChildCount() > 0) return;
+		View rows = com.harvana.app.utils.Shimmer.rows(getContext(), 2);
+		int pad = (int) (20 * getResources().getDisplayMetrics().density);
+		rows.setPadding(pad, 0, pad, pad / 2);
+		box.addView(rows);
+		if (empty != null) empty.setVisibility(View.GONE);
+	}
+	
+	private void _renderUpcoming(org.json.JSONObject section, boolean signedIn) {
+		if (linear_upcoming_payments == null) return;
+		if (section == null && signedIn) { _placeholder(linear_upcoming_payments, linear7); return; }
+		org.json.JSONArray rows = section == null ? new org.json.JSONArray() : section.optJSONArray("rows");
+		if (rows == null) rows = new org.json.JSONArray();
+		if (!_changed("upcoming", rows.toString())) return;
+		linear_upcoming_payments.removeAllViews();
+		if (linear7 != null) linear7.setVisibility(rows.length() == 0 ? View.VISIBLE : View.GONE);
+		LayoutInflater inf = LayoutInflater.from(getContext());
+		for (int i = 0; i < rows.length(); i++) {
+			final org.json.JSONObject row = rows.optJSONObject(i);
+			if (row == null) continue;
+			View item = inf.inflate(R.layout.home_upcoming_pay_custom_display, linear_upcoming_payments, false);
+			TextView name = item.findViewById(R.id.textview2);
+			TextView meta = item.findViewById(R.id.textview3);
+			TextView statusLine = item.findViewById(R.id.textview5);
+			TextView badge = item.findViewById(R.id.textview4);
+			com.google.android.material.card.MaterialCardView badgeCard = item.findViewById(R.id.cardview3);
+			com.google.android.material.button.MaterialButton button = item.findViewById(R.id.materialbutton1);
+			final String gid = row.optString("groupId");
+			final String action = row.optString("action", "NONE");
+			final String otherUid = row.optString("otherUid");
+			final String who = row.optString("otherName", "a member");
+			final String amountText = com.harvana.app.wallet.BalanceFormatter.smart(row.optDouble("amount", 0));
+			String freq = row.optString("frequency");
+			
+			ImageView face = item.findViewById(R.id.imageview1);
+			if (face != null) com.harvana.app.utils.GroupRing.show(face, row.optString("groupType"), row.optString("groupPhoto"), R.drawable.ic_coin_harv);
+			if (name != null) name.setText(row.optString("groupName", "Group"));
+			if (meta != null) meta.setText(amountText + (freq.isEmpty() ? "" : " · " + freq));
+			if (statusLine != null) statusLine.setText(row.optString("statusLine"));
+			
+			int badgeColor = "PAY".equals(action) ? R.color.colorWarning : "REMIND".equals(action) ? R.color.colorInfo : R.color.colorTextTertiary;
+			int c = androidx.core.content.ContextCompat.getColor(requireContext(), badgeColor);
+			if (badge != null) { badge.setText(row.optString("badge")); badge.setTextColor(c); }
+			if (badgeCard != null) badgeCard.setStrokeColor(c);
+			item.setOnClickListener(v -> _openGroup(gid));
+			
+			if (button != null) {
+				if ("PAY".equals(action)) {
+					button.setText("Pay");
+					button.setOnClickListener(v -> _openGroupPayments(gid));
+				} else if ("REMIND".equals(action) && !otherUid.isEmpty()) {
+					button.setText("Remind");
+					button.setOnClickListener(v -> {
+						button.setEnabled(false);
+						com.harvana.app.group.GroupReminders.remind(getContext(), gid, otherUid, who, amountText,
+						new com.harvana.app.group.GroupReminders.Callback() {
+							@Override public void onSent() {
+								if (!isAdded()) return;
+								button.setText("Reminded");
+								android.widget.Toast.makeText(getContext(), "Reminder sent to " + who, android.widget.Toast.LENGTH_SHORT).show();
+							}
+							@Override public void onError(String error) {
+								if (!isAdded()) return;
+								button.setEnabled(true);
+								android.widget.Toast.makeText(getContext(), error, android.widget.Toast.LENGTH_LONG).show();
+							}
+						});
+					});
+				} else {
+					button.setText("Open");
+					button.setOnClickListener(v -> _openGroup(gid));
+				}
+			}
+			linear_upcoming_payments.addView(item);
+		}
+	}
+	
+	private void _renderTrending(org.json.JSONObject section, boolean signedIn, String pendingSig) {
+		if (linear_trending_groups == null) return;
+		if (section == null && signedIn) { _placeholder(linear_trending_groups, linear10); return; }
+		org.json.JSONArray rows = section == null ? new org.json.JSONArray() : section.optJSONArray("rows");
+		if (rows == null) rows = new org.json.JSONArray();
+		if (!_changed("trending", rows + "|" + pendingSig)) return;
+		linear_trending_groups.removeAllViews();
+		if (linear10 != null) linear10.setVisibility(rows.length() == 0 ? View.VISIBLE : View.GONE);
+		LayoutInflater inf = LayoutInflater.from(getContext());
+		for (int i = 0; i < rows.length(); i++) {
+			org.json.JSONObject g = rows.optJSONObject(i);
+			if (g == null) continue;
+			View item = inf.inflate(R.layout.home_trending_custom_display, linear_trending_groups, false);
+			TextView name = item.findViewById(R.id.textview1);
+			TextView verified = item.findViewById(R.id.textview2);
+			TextView meta = item.findViewById(R.id.textview3);
+			TextView trust = item.findViewById(R.id.textview4);
+			TextView join = item.findViewById(R.id.btn_join);
+			final String gid = g.optString("groupId");
+			if (name != null) name.setText(g.optString("name"));
+			ImageView face = item.findViewById(R.id.imageview1);
+			if (face != null) com.harvana.app.utils.GroupRing.show(face, g.optString("type"), g.optString("photo"), R.drawable.ic_coin_harv);
+			if (meta != null) meta.setText(g.optString("meta"));
+			if (trust != null) trust.setText(g.optString("trust"));
+			if (verified != null) {
+				String b = g.optString("badge");
+				verified.setText(b);
+				verified.setVisibility(b.isEmpty() ? View.GONE : View.VISIBLE);
+			}
+			View.OnClickListener open = v -> {
+				if (gid.isEmpty()) { _openTab(R.id.menu_discover); return; }
+				Intent ji = new Intent(getContext(), GroupJoinRequestActivity.class);
+				ji.putExtra("groupId", gid);
+				startActivity(ji);
+			};
+			if (join != null) { _styleTrendingButton(join, gid); join.setOnClickListener(open); }
+			item.setOnClickListener(open);
+			linear_trending_groups.addView(item);
+		}
+	}
+	
+	private void _renderLearn(org.json.JSONObject section, boolean signedIn) {
+		if (linear_learn_hub == null) return;
+		if (section == null && signedIn) { _placeholder(linear_learn_hub, null); return; }
+		org.json.JSONArray rows = section == null ? new org.json.JSONArray() : section.optJSONArray("rows");
+		if (rows == null) rows = new org.json.JSONArray();
+		if (!_changed("learn", rows.toString())) return;
+		linear_learn_hub.removeAllViews();
+		if (rows.length() == 0) { _showLearnHubEmpty("No Learn Hub posts yet"); return; }
+		LayoutInflater inf = LayoutInflater.from(getContext());
+		for (int i = 0; i < rows.length(); i++) {
+			org.json.JSONObject m = rows.optJSONObject(i);
+			if (m == null) continue;
+			View item = inf.inflate(R.layout.home_learnhub_custom_display, linear_learn_hub, false);
+			TextView title = item.findViewById(R.id.title_text);
+			TextView cat = item.findViewById(R.id.category_text);
+			ImageView img = item.findViewById(R.id.imageview1);
+			long views = m.optLong("views"), at = m.optLong("at");
+			if (title != null) title.setText(m.optString("title"));
+			if (cat != null) {
+				String when = at > 0 ? " · " + android.text.format.DateUtils.getRelativeTimeSpanString(at, System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS) : "";
+				cat.setText(m.optString("category") + " · " + views + (views == 1 ? " view" : " views") + when);
+			}
+			String image = m.optString("image");
+			if (img != null && !image.isEmpty()) com.bumptech.glide.Glide.with(this).load(image).centerCrop().into(img);
+			item.setOnClickListener(v -> _openTab(R.id.menu_learn));
+			linear_learn_hub.addView(item);
+		}
+	}
+	
+	private void _showLearnHubEmpty(String message) {
+		if (linear_learn_hub == null || getContext() == null) return;
+		linear_learn_hub.removeAllViews();
+		TextView empty = new TextView(getContext());
+		empty.setText(message);
+		empty.setTextSize(13f);
+		empty.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextTertiary));
+		int pad = (int) (10 * getResources().getDisplayMetrics().density);
+		empty.setPadding(pad, pad / 2, pad, pad / 2);
+		linear_learn_hub.addView(empty);
+	}
+	
+	/** Groups I have asked to join and am waiting on: their button says "Pending" instead of "Join". */
+	private final java.util.Set<String> trendingPending = new java.util.HashSet<>();
+	
+	private void _styleTrendingButton(TextView join, String gid) {
+		boolean pending = trendingPending.contains(gid);
+		join.setTag(gid);
+		join.setText(pending ? "Pending" : "Join");
+		join.setSingleLine(true);
+		join.setMaxLines(1);
+		join.setAlpha(pending ? 0.65f : 1f);
 	}
 	
 	/**
-	 * The wallet card shows one number: everything the wallet holds, in the chosen currency, across every coin. It is
-	 * the total the Assets tab adds up (WalletTotal), not the HARV amount, since HARV is now one coin among several.
+	 * The wallet card shows one number: everything the wallet holds, in the chosen currency, across every coin (WalletTotal).
 	 */
 	private final com.harvana.app.wallet.WalletTotal.Listener totalListener = (address, symbol, fiat) -> {
 		if (!isAdded() || getContext() == null) return;
 		String addr = WalletManager.getActiveWalletAddress(getContext());
 		if (addr != null && addr.equals(address)) _showTotal(symbol, fiat);
 	};
-
+	
 	private void _showTotal(String symbol, double fiat) {
 		if (tv_harv_balance != null) {
 			tv_harv_balance.setText(Double.isNaN(fiat) ? symbol + " —" : com.harvana.app.wallet.FxRates.format(symbol, fiat));
@@ -633,292 +731,24 @@ public class HomeFragmentActivity extends Fragment {
 			tv_local_currency_eqv.setText("Total balance · " + code + " · all coins");
 		}
 	}
-
+	
 	private void _loadWalletBalance() {
 		if (getContext() == null) return;
 		String addr = WalletManager.getActiveWalletAddress(getContext());
 		String symbol = com.harvana.app.wallet.FxRates.symbol(getContext());
-		if (addr == null || addr.isEmpty()) {
-			_showTotal(symbol, 0);
-			return;
-		}
-		// The last total at once; the Assets tab (loaded in the background with Home) publishes a fresh one.
+		if (addr == null || addr.isEmpty()) { _showTotal(symbol, 0); return; }
 		_showTotal(symbol, com.harvana.app.wallet.WalletTotal.last(getContext(), addr, symbol,
-				com.harvana.app.wallet.WalletTotal.HOME_MAX_AGE_MS));   // older than that: "—" until the live total
+				com.harvana.app.wallet.WalletTotal.HOME_MAX_AGE_MS));
 		com.harvana.app.wallet.WalletTotal.listen(totalListener);
-		// Work the total out now, from Home itself: it used to wait until the Assets tab had been opened.
 		com.harvana.app.wallet.WalletTotal.refresh(getContext(), addr);
 	}
-
+	
 	@Override
 	public void onDestroyView() {
 		com.harvana.app.wallet.WalletTotal.unlisten(totalListener);
+		com.harvana.app.home.HomeData.unlisten(homeListener);
+		shownSig.clear();
 		super.onDestroyView();
-	}
-
-	private void _loadUpcomingPayments() {
-		if (linear_upcoming_payments == null || getContext() == null) return;
-		
-		final String myUid = FirebaseAuth.getInstance().getCurrentUser() != null
-		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
-		List<HashMap<String, Object>> cachedRows = com.harvana.app.offline.OfflineCacheManager.loadList(
-		getContext(), "upcoming_payments_v2_" + myUid);
-		if (cachedRows != null && !cachedRows.isEmpty()) {
-			_renderUpcoming(new ArrayList<>(cachedRows));
-		} else if (group_map_list.isEmpty() || myUid.isEmpty()) {
-			linear_upcoming_payments.removeAllViews();
-			if (linear7 != null) linear7.setVisibility(View.VISIBLE);
-		} else if (linear_upcoming_payments.getChildCount() == 0) {   // first load only
-			linear_upcoming_payments.addView(com.harvana.app.utils.Shimmer.rows(getContext(), 2));
-			if (linear7 != null) linear7.setVisibility(View.GONE);
-		}
-		
-		if (group_map_list.isEmpty() || myUid.isEmpty()) return;
-		
-		final ArrayList<HashMap<String, Object>> rows = new ArrayList<>();
-		final int[] left = {group_map_list.size()};
-		final boolean[] hadConnectivityFailure = {false};
-		final Runnable oneDone = () -> {
-			left[0]--;
-			if (left[0] <= 0) _finishUpcoming(myUid, rows, hadConnectivityFailure[0], cachedRows);
-		};
-		
-		for (HashMap<String, Object> g : group_map_list) {
-			final String gid = g.get("id") != null ? g.get("id").toString() : "";
-			if (gid.isEmpty()) { oneDone.run(); continue; }
-			final com.harvana.app.firestore.GroupFirestoreManager mgr =
-					com.harvana.app.firestore.GroupFirestoreManager.getInstance(getContext());
-			mgr.getGroup(gid, new com.harvana.app.firestore.GroupFirestoreManager.DocCallback() {
-				@Override
-				public void onSuccess(Map<String, Object> data) {
-					if (com.harvana.app.group.GroupKinds.isLegacyRotating(data)) { oneDone.run(); return; }
-					mgr.getMembers(gid, new com.harvana.app.firestore.GroupFirestoreManager.ListCallback() {
-						@Override public void onSuccess(List<Map<String, Object>> members) {
-							mgr.getPayments(gid, new com.harvana.app.firestore.GroupFirestoreManager.ListCallback() {
-								@Override public void onSuccess(List<Map<String, Object>> payments) {
-									_addUpcomingRow(rows, gid, data, members, payments, myUid, oneDone);
-								}
-								@Override public void onError(String error) {
-									if (com.harvana.app.offline.NetworkStatus.isConnectivityError(error)) hadConnectivityFailure[0] = true;
-									_addUpcomingRow(rows, gid, data, members, null, myUid, oneDone);
-								}
-							});
-						}
-						@Override public void onError(String error) {
-							if (com.harvana.app.offline.NetworkStatus.isConnectivityError(error)) hadConnectivityFailure[0] = true;
-							oneDone.run();
-						}
-					});
-				}
-				
-				@Override
-				public void onError(String error) {
-					if (com.harvana.app.offline.NetworkStatus.isConnectivityError(error)) {
-						hadConnectivityFailure[0] = true;
-					}
-					oneDone.run();
-				}
-			});
-		}
-	}
-	
-	private void _addUpcomingRow(ArrayList<HashMap<String, Object>> rows, String gid, Map<String, Object> data,
-	List<Map<String, Object>> members, List<Map<String, Object>> payments, String myUid, Runnable done) {
-		com.harvana.app.group.PaymentDueResolver.Result r = com.harvana.app.group.PaymentDueResolver.resolve(
-		data, members, payments, myUid, System.currentTimeMillis(), java.util.TimeZone.getDefault());
-		final HashMap<String, Object> row = new HashMap<>();
-		row.put("groupId", gid);
-		row.put("groupName", str(data, "groupName", str(data, "name", "Group")));
-		row.put("groupPhoto", str(data, "groupPhoto", ""));
-		row.put("groupType", str(data, "groupType", ""));
-		row.put("amount", num(data, "contributionAmount"));
-		row.put("frequency", str(data, "frequency", ""));
-		row.put("action", r.action.name());
-		row.put("otherUid", r.otherMemberUid != null ? r.otherMemberUid : "");
-		row.put("statusLine", r.statusLine);
-		row.put("badge", r.badge);
-		final Runnable finish = () -> { synchronized (rows) { rows.add(row); } done.run(); };
-		// The saved copy of a network group can be out of date (a goal reached, a circle still forming, this round already paid,
-		// a membership that defaulted). Before offering "Pay", ask the network and apply the same rules the Payments tab uses.
-		final com.harvana.app.group.GroupIdentity identity = com.harvana.app.group.GroupIdentityResolver.resolve(gid, data);
-		boolean checkable = identity != null && identity.onChain() && ("FIXED".equals(identity.family) || "CIRCLE".equals(identity.family));
-		if (!"PAY".equals(r.action.name()) || !checkable) { finish.run(); return; }
-		final String me = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(getContext());
-		final String family = identity.family;
-		final String nodeId = identity.protocolId();
-		final com.harvana.app.sync.NodeGroupClient.Callback onGroup = new com.harvana.app.sync.NodeGroupClient.Callback() {
-			@Override public void onSuccess(org.json.JSONObject groupJson) {
-				final Map<String, Object> group = com.harvana.app.utils.JsonMaps.toMap(groupJson);
-				com.harvana.app.sync.NodeGroupClient.Callback onMember = new com.harvana.app.sync.NodeGroupClient.Callback() {
-					@Override public void onSuccess(org.json.JSONObject memberJson) { decide(group, com.harvana.app.utils.JsonMaps.toMap(memberJson)); }
-					@Override public void onError(String error) { decide(group, null); }
-				};
-				if (me == null || me.isEmpty()) { decide(group, null); return; }
-				if ("CIRCLE".equals(family)) com.harvana.app.sync.NodeGroupClient.getCircleMember(nodeId, me, onMember);
-				else com.harvana.app.sync.NodeGroupClient.getFixedMember(nodeId, me, onMember);
-			}
-			@Override public void onError(String error) { finish.run(); }
-			private void decide(Map<String, Object> group, Map<String, Object> member) {
-				try {
-					com.harvana.app.engine.GroupSnapshot snap = "CIRCLE".equals(family)
-						? com.harvana.app.engine.CircleSnapshot.of(group, member)
-						: com.harvana.app.engine.FixedSnapshot.of(group, member, me == null ? "" : me);
-					boolean canPay = false;
-					String reason = "";
-					for (com.harvana.app.engine.GroupAction a : snap.actions) {
-						if (a.enabled && (com.harvana.app.engine.GroupAction.CONTRIBUTE.equals(a.id) || com.harvana.app.engine.GroupAction.FIXED_DEPOSIT.equals(a.id))) canPay = true;
-						if (!a.enabled && reason.isEmpty()) reason = a.label;
-					}
-					// A goal group with a per-period amount: the network's own record says whether this period's deposit is in.
-					if (canPay && "FIXED".equals(family) && member != null
-						&& com.harvana.app.group.PaymentDueResolver.depositedThisPeriod(str(data, "frequency", ""), member.get("lastDepositTimestamp"),
-							System.currentTimeMillis(), java.util.TimeZone.getDefault())) {
-						row.put("action", "NONE");
-						row.put("statusLine", "You have deposited this period");
-						row.put("badge", "Paid");
-						finish.run();
-						return;
-					}
-					if (!canPay && !snap.actions.isEmpty()) {
-						String low = reason.toLowerCase(java.util.Locale.US);
-						row.put("action", "NONE");
-						row.put("statusLine", reason.isEmpty() ? "Nothing to pay right now" : (reason.length() > 70 ? reason.substring(0, 67) + "..." : reason));
-						row.put("badge", low.contains("already paid") ? "Paid" : low.contains("waiting") ? "Waiting" : low.contains("being paid") ? "Not due" : "Closed");
-					}
-				} catch (Exception ignored) { }
-				finish.run();
-			}
-		};
-		if ("CIRCLE".equals(family)) com.harvana.app.sync.NodeGroupClient.getCircle(nodeId, onGroup);
-		else com.harvana.app.sync.NodeGroupClient.getFixedGroup(nodeId, onGroup);
-	}
-	
-	private void _finishUpcoming(String myUid, ArrayList<HashMap<String, Object>> rows,
-	boolean hadConnectivityFailure, List<HashMap<String, Object>> cachedRows) {
-		if (hadConnectivityFailure) {
-			if (cachedRows == null) { java.util.Collections.sort(rows, UPCOMING_ORDER); _renderUpcoming(rows); }
-			return;
-		}
-		java.util.Collections.sort(rows, UPCOMING_ORDER);
-		com.harvana.app.offline.OfflineCacheManager.saveList(getContext(), "upcoming_payments_v2_" + myUid, rows);
-		_renderUpcoming(rows);
-	}
-	
-	/**
-	 * Upcoming payments keep one fixed order, so the list does not shuffle on every refresh. The groups' answers arrive in whatever
-	 * order the network happens to return them, so arrival order must never decide: first what needs doing (pay, remind, ...), then
-	 * the group's name, then its id, which never changes.
-	 */
-	private static final java.util.Comparator<HashMap<String, Object>> UPCOMING_ORDER = (x, y) -> {
-		int byAction = Integer.compare(rank(String.valueOf(x.get("action"))), rank(String.valueOf(y.get("action"))));
-		if (byAction != 0) return byAction;
-		int byName = String.valueOf(x.get("groupName")).compareToIgnoreCase(String.valueOf(y.get("groupName")));
-		if (byName != 0) return byName;
-		return String.valueOf(x.get("groupId")).compareTo(String.valueOf(y.get("groupId")));
-	};
-	
-	private static int rank(String action) {
-		return "PAY".equals(action) ? 0 : ("REMIND".equals(action) ? 1 : 2);
-	}
-	
-	private void _renderUpcoming(ArrayList<HashMap<String, Object>> allRows) {
-		if (!isAdded() || linear_upcoming_payments == null || getActivity() == null) return;
-		// Only groups with something to do are listed: a payment to make, or a member to remind. A group with nothing due
-		// (idle, goal reached, already paid) is left off Home; its page is still under Groups.
-		final ArrayList<HashMap<String, Object>> rows = new ArrayList<>();
-		for (HashMap<String, Object> r : allRows) {
-			String action = str(r, "action", "NONE");
-			if ("PAY".equals(action) || "REMIND".equals(action)) rows.add(r);
-		}
-		getActivity().runOnUiThread(() -> {
-			linear_upcoming_payments.removeAllViews();
-			int show = Math.min(2, rows.size());
-			if (show == 0) {
-				if (linear7 != null) linear7.setVisibility(View.VISIBLE);
-				return;
-			}
-			if (linear7 != null) linear7.setVisibility(View.GONE);
-			LayoutInflater inf = LayoutInflater.from(getContext());
-			for (int i = 0; i < show; i++) {
-				final HashMap<String, Object> row = rows.get(i);
-				View item = inf.inflate(R.layout.home_upcoming_pay_custom_display,
-				linear_upcoming_payments, false);
-				TextView name = item.findViewById(R.id.textview2);
-				TextView meta = item.findViewById(R.id.textview3);
-				TextView statusLine = item.findViewById(R.id.textview5);
-				TextView badge = item.findViewById(R.id.textview4);
-				com.google.android.material.card.MaterialCardView badgeCard = item.findViewById(R.id.cardview3);
-				com.google.android.material.button.MaterialButton button = item.findViewById(R.id.materialbutton1);
-				final String gid = str(row, "groupId", "");
-				final String action = str(row, "action", "NONE");
-				final String otherUid = str(row, "otherUid", "");
-				final String amountText = com.harvana.app.wallet.BalanceFormatter.smart(num(row, "amount"));
-				
-				ImageView face = item.findViewById(R.id.imageview1);
-				if (face != null) com.harvana.app.utils.GroupRing.show(face, str(row, "groupType", ""), str(row, "groupPhoto", ""), R.drawable.ic_coin_harv);
-				if (name != null) name.setText(str(row, "groupName", "Group"));
-				if (meta != null) meta.setText(amountText + (str(row, "frequency", "").isEmpty() ? "" : " · " + str(row, "frequency", "")));
-				if (statusLine != null) statusLine.setText(str(row, "statusLine", ""));
-				
-				int badgeColor = R.color.colorTextTertiary;
-				if ("PAY".equals(action)) badgeColor = R.color.colorWarning;
-				else if ("REMIND".equals(action)) badgeColor = R.color.colorInfo;
-				else if ("Paid".equals(str(row, "badge", ""))) badgeColor = R.color.colorSuccess;
-				int c = androidx.core.content.ContextCompat.getColor(requireContext(), badgeColor);
-				if (badge != null) { badge.setText(str(row, "badge", "")); badge.setTextColor(c); }
-				if (badgeCard != null) badgeCard.setStrokeColor(c);
-				
-				item.setOnClickListener(v -> _openGroup(gid));
-				
-				if ("PAY".equals(action) && getContext() != null) {
-					String day = com.harvana.app.notify.DueCopy.dayKey(System.currentTimeMillis());
-					String amountOnly = com.harvana.app.wallet.BalanceFormatter.smartDecimal(num(row, "amount"));
-					com.harvana.app.notify.NotificationCenter.post(getContext(), com.harvana.app.notify.NotificationCenter.PAYMENT,
-					com.harvana.app.notify.DueCopy.key(gid, day),
-					com.harvana.app.notify.DueCopy.title(str(row, "groupName", "Group")),
-					com.harvana.app.notify.DueCopy.body(amountOnly, com.harvana.app.CoinInfo.ticker()), gid, 2);
-				}
-				
-				if (button == null) { linear_upcoming_payments.addView(item); continue; }
-				if ("PAY".equals(action)) {
-					button.setText("Pay");
-					button.setEnabled(true);
-					button.setAlpha(1f);
-					button.setOnClickListener(v -> _openGroupPayments(gid));
-				} else if ("REMIND".equals(action) && !otherUid.isEmpty()) {
-					button.setText("Remind");
-					button.setEnabled(true);
-					button.setAlpha(1f);
-					com.harvana.app.group.MemberNameResolver.resolve(getContext(), otherUid, "a member", who -> {
-						if (isAdded() && statusLine != null) statusLine.setText("Waiting on " + who);
-						button.setOnClickListener(v -> {
-							button.setEnabled(false);
-							com.harvana.app.group.GroupReminders.remind(getContext(), gid, otherUid, who, amountText,
-							new com.harvana.app.group.GroupReminders.Callback() {
-								@Override public void onSent() {
-									if (!isAdded()) return;
-									button.setText("Reminded");
-									android.widget.Toast.makeText(getContext(), "Reminder sent to " + who, android.widget.Toast.LENGTH_SHORT).show();
-								}
-								@Override public void onError(String error) {
-									if (!isAdded()) return;
-									button.setEnabled(true);
-									android.widget.Toast.makeText(getContext(), error, android.widget.Toast.LENGTH_LONG).show();
-								}
-							});
-						});
-					});
-				} else {
-					String why = str(row, "badge", "");
-					if (why.isEmpty() || "Pay".equalsIgnoreCase(why)) why = "Not due";
-					button.setText(why);
-					button.setEnabled(false);
-					button.setAlpha(0.55f);
-					button.setOnClickListener(null);
-				}
-				linear_upcoming_payments.addView(item);
-			}
-		});
 	}
 	
 	private void _openGroupPayments(String gid) {
@@ -937,521 +767,6 @@ public class HomeFragmentActivity extends Fragment {
 		startActivity(intent);
 	}
 	
-	private String learnSig = "unset";
-
-	private void _loadLearnHubPreview() {
-		if (linear_learn_hub == null || getContext() == null) return;
-		if (linear_learn_hub.getChildCount() == 0) linear_learn_hub.addView(com.harvana.app.utils.Shimmer.rows(getContext(), 2));   // first load only
-		final com.google.firebase.auth.FirebaseUser me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
-		if (me == null) { _showLearnHubEmpty("Sign in to see Learn Hub posts."); return; }
-		// Same source as the Learn tab (Firestore LEARN_CONTENT), newest public posts first.
-		com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("LEARN_CONTENT").get()
-		.addOnCompleteListener(task -> {
-			if (!isAdded() || getActivity() == null) return;
-			if (!task.isSuccessful() || task.getResult() == null) { _showLearnHubEmpty("Open Learn Hub for tips."); return; }
-			ArrayList<java.util.Map<String, Object>> posts = new ArrayList<>();
-			for (com.google.firebase.firestore.QueryDocumentSnapshot d : task.getResult()) {
-				java.util.Map<String, Object> m = new java.util.HashMap<>(com.harvana.app.firestore.GroupFirestoreManager.readFromSdk(d.getData()));
-				Object vis = m.get("visibility");
-				String v = vis == null ? "" : String.valueOf(vis);
-				boolean own = me.getUid().equals(String.valueOf(m.get("authorUid")));
-				if (own || v.isEmpty() || "public".equals(v)) posts.add(m);
-			}
-			Collections.sort(posts, (x, y) -> Long.compare(
-				y.get("createdAt") instanceof Number ? ((Number) y.get("createdAt")).longValue() : 0L,
-				x.get("createdAt") instanceof Number ? ((Number) x.get("createdAt")).longValue() : 0L));
-			StringBuilder sig = new StringBuilder();
-			int shown = 0;
-			for (java.util.Map<String, Object> m : posts) {
-				if (shown >= 2) break;
-				sig.append(m.get("title")).append('|').append(m.get("views")).append(';');
-				shown++;
-			}
-			if (sig.toString().equals(learnSig) && linear_learn_hub.getChildCount() > 0) return;
-			learnSig = sig.toString();
-			linear_learn_hub.removeAllViews();
-			if (posts.isEmpty()) { _showLearnHubEmpty("No Learn Hub posts yet. Be the first to share something."); return; }
-			LayoutInflater inf = LayoutInflater.from(getContext());
-			int n = 0;
-			for (java.util.Map<String, Object> m : posts) {
-				if (n >= 2) break;
-				View item = inf.inflate(R.layout.home_learnhub_custom_display, linear_learn_hub, false);
-				TextView title = item.findViewById(R.id.title_text);
-				TextView cat = item.findViewById(R.id.category_text);
-				android.widget.ImageView img = item.findViewById(R.id.imageview1);
-				String t = m.get("title") == null ? "" : String.valueOf(m.get("title"));
-				String category = m.get("category") == null ? "Finance" : String.valueOf(m.get("category"));
-				long views = m.get("views") instanceof Number ? ((Number) m.get("views")).longValue() : 0L;
-				long at = m.get("createdAt") instanceof Number ? ((Number) m.get("createdAt")).longValue() : 0L;
-				String image = m.get("imageUrl") == null ? "" : String.valueOf(m.get("imageUrl"));
-				if (title != null) title.setText(t.isEmpty() ? "Learn article" : t);
-				if (cat != null) {
-					String when = at > 0 ? " · " + android.text.format.DateUtils.getRelativeTimeSpanString(at, System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS) : "";
-					cat.setText(category + " · " + views + (views == 1 ? " view" : " views") + when);
-				}
-				if (img != null && !image.isEmpty()) com.bumptech.glide.Glide.with(this).load(image).centerCrop().into(img);
-				item.setOnClickListener(v -> _openTab(R.id.menu_learn));
-				linear_learn_hub.addView(item);
-				n++;
-			}
-		});
-	}
-
-	private void _showLearnHubEmpty(String message) {
-		if (linear_learn_hub == null || getContext() == null) return;
-		linear_learn_hub.removeAllViews();
-		TextView empty = new TextView(getContext());
-		empty.setText(message);
-		empty.setTextSize(13f);
-		empty.setTextColor(getResources().getColor(R.color.colorTextTertiary));
-		int pad = (int) (10 * getResources().getDisplayMetrics().density);
-		empty.setPadding(pad, pad / 2, pad, pad / 2);
-		linear_learn_hub.addView(empty);
-	}
-
-	/** Groups I have already asked to join and am waiting on. Their button says "Pending approval" instead of "Join". */
-	private final java.util.Set<String> trendingPending = new java.util.HashSet<>();
-	
-	private void _styleTrendingButton(TextView join, String gid) {
-		boolean pending = trendingPending.contains(gid);
-		join.setTag(gid);
-		join.setText(pending ? "Pending" : "Join");
-		join.setSingleLine(true);
-		join.setMaxLines(1);
-		join.setAlpha(pending ? 0.65f : 1f);
-	}
-	
-	private void _applyTrendingPending() {
-		if (linear_trending_groups == null) return;
-		for (int i = 0; i < linear_trending_groups.getChildCount(); i++) {
-			TextView join = linear_trending_groups.getChildAt(i).findViewById(R.id.btn_join);
-			if (join != null && join.getTag() instanceof String) _styleTrendingButton(join, (String) join.getTag());
-		}
-	}
-	
-	private void _loadPendingRequests() {
-		final String uid = FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
-		if (uid.isEmpty() || getContext() == null) return;
-		// Clear marks that no longer match a waiting request, then show what is really pending.
-		com.harvana.app.group.JoinRequestManager.reconcilePending(getContext(), uid, removed -> {
-			if (removed > 0 && isAdded() && getActivity() != null) getActivity().runOnUiThread(this::_loadPendingRequestsRaw);
-		});
-		_loadPendingRequestsRaw();
-	}
-	
-	private void _loadPendingRequestsRaw() {
-		final String uid = FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
-		if (uid.isEmpty() || getContext() == null) return;
-		com.harvana.app.firestore.UserProfileManager.getInstance(getContext()).getProfile(uid,
-			new com.harvana.app.firestore.UserProfileManager.DocCallback() {
-				@Override public void onSuccess(Map<String, Object> data) {
-					trendingPending.clear();
-					Object raw = data == null ? null : data.get("pendingGroupIds");
-					if (raw instanceof List) for (Object o : (List<?>) raw) if (o != null) trendingPending.add(o.toString());
-					if (getActivity() != null) getActivity().runOnUiThread(() -> _applyTrendingPending());
-				}
-				@Override public void onError(String error) { }
-			});
-	}
-	
-	private void _loadTrendingGroups() {
-		if (linear_trending_groups == null || getContext() == null) return;
-		_loadPendingRequests();
-		if (linear_trending_groups.getChildCount() == 0) {          // first load only; later loads keep what is shown until new data arrives
-			linear_trending_groups.addView(com.harvana.app.utils.Shimmer.rows(getContext(), 2));
-			if (linear10 != null) linear10.setVisibility(View.GONE);
-		}
-		
-		final String meUid = FirebaseAuth.getInstance().getCurrentUser() != null
-		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
-		final java.util.Set<String> mine = new java.util.HashSet<>();
-		for (HashMap<String, Object> g : group_map_list) {
-			Object id = g.get("id");
-			if (id != null) mine.add(String.valueOf(id));
-		}
-		com.harvana.app.firestore.GroupFirestoreManager.getInstance(getContext())
-		.queryGroups("visibility", "Public", 30,
-		new com.harvana.app.firestore.GroupFirestoreManager.ListCallback() {
-			@Override
-			public void onSuccess(List<Map<String, Object>> list) {
-				if (!isAdded() || getActivity() == null) return;
-				ArrayList<Map<String, Object>> sorted = new ArrayList<>();
-				if (list != null) {
-					for (Map<String, Object> g : list) {
-						String gid0 = str(g, "_docId", str(g, "groupId", str(g, "id", "")));
-						if (mine.contains(gid0) || (!meUid.isEmpty() && meUid.equals(str(g, "creatorId", "")))) continue;
-						if (com.harvana.app.group.GroupKinds.isLegacyRotating(g)) continue;
-						sorted.add(g);
-					}
-				}
-				// Most members first; equal counts fall back to name then id, so the two shown never swap places between refreshes.
-				Collections.sort(sorted, (a, b) -> {
-					int byMembers = Double.compare(num(b, "membersCount"), num(a, "membersCount"));
-					if (byMembers != 0) return byMembers;
-					int byName = str(a, "groupName", "").compareToIgnoreCase(str(b, "groupName", ""));
-					return byName != 0 ? byName : str(a, "_docId", "").compareTo(str(b, "_docId", ""));
-				});
-				getActivity().runOnUiThread(() -> {
-					linear_trending_groups.removeAllViews();
-					int show = Math.min(2, sorted.size());
-					if (show == 0) {
-						if (linear10 != null) linear10.setVisibility(View.VISIBLE);
-						return;
-					}
-					if (linear10 != null) linear10.setVisibility(View.GONE);
-					LayoutInflater inf = LayoutInflater.from(getContext());
-					for (int i = 0; i < show; i++) {
-						Map<String, Object> g = sorted.get(i);
-						View item = inf.inflate(R.layout.home_trending_custom_display,
-						linear_trending_groups, false);
-						TextView name = item.findViewById(R.id.textview1);
-						TextView verified = item.findViewById(R.id.textview2);
-						TextView meta = item.findViewById(R.id.textview3);
-						TextView trust = item.findViewById(R.id.textview4);
-						TextView join = item.findViewById(R.id.btn_join);
-						
-						String gname = str(g, "groupName", str(g, "name", "Public group"));
-						String loc = str(g, "location", str(g, "city", "Nigeria"));
-						String freq = str(g, "frequency", "Weekly");
-						int members = (int) num(g, "membersCount");
-						if (members <= 0) members = (int) num(g, "totalSlots");
-						String nodeId = com.harvana.app.trust.NetworkTrust.groupKey(g);
-						String gid = str(g, "_docId", str(g, "groupId", str(g, "id", "")));
-						
-						if (name != null) name.setText(gname);
-						ImageView face = item.findViewById(R.id.imageview1);
-						if (face != null) com.harvana.app.utils.GroupRing.show(face, str(g, "groupType", ""), str(g, "groupPhoto", ""), R.drawable.ic_coin_harv);
-						if (verified != null) verified.setVisibility(View.GONE);
-						if (meta != null)
-						meta.setText(loc + " · " + members + " members · " + freq);
-						if (trust != null) {
-							trust.setTag(nodeId);
-							trust.setText(nodeId.isEmpty() ? "Not on the network" : "Trust …");
-							if (!nodeId.isEmpty()) {
-								com.harvana.app.trust.NetworkTrust.group(nodeId, score -> {
-									if (!isAdded() || getActivity() == null) return;
-									getActivity().runOnUiThread(() -> {
-										if (!nodeId.equals(trust.getTag())) return;
-										if (!score.published || score.summary.isEmpty()) {
-											trust.setText("Not on the network");
-											return;
-										}
-										trust.setText(score.summary);
-										boolean strong = score.percent >= 65 || score.summary.startsWith("High trust");
-										if (verified != null && strong) {
-											verified.setText(score.percent >= 0 ? score.tier : "High trust");
-											verified.setVisibility(View.VISIBLE);
-										}
-									});
-								});
-							}
-						}
-						if (join != null) {
-							_styleTrendingButton(join, gid);
-							final String joinGid = gid;
-							join.setOnClickListener(v -> {
-								if (joinGid.isEmpty()) { _openTab(R.id.menu_discover); return; }
-								Intent ji = new Intent(getContext(), GroupJoinRequestActivity.class);
-								ji.putExtra("groupId", joinGid);
-								startActivity(ji);
-							});
-						}
-						final String openGid = gid;
-						item.setOnClickListener(v -> {
-							if (openGid.isEmpty()) return;
-							Intent ji = new Intent(getContext(), GroupJoinRequestActivity.class);
-							ji.putExtra("groupId", openGid);
-							startActivity(ji);
-						});
-						linear_trending_groups.addView(item);
-					}
-				});
-			}
-			
-			@Override
-			public void onError(String error) {
-				if (!isAdded() || getActivity() == null) return;
-				getActivity().runOnUiThread(() -> {
-					linear_trending_groups.removeAllViews();
-					if (linear10 != null) linear10.setVisibility(View.VISIBLE);
-				});
-			}
-		});
-	}
-	
-	private void _loadTotalSavedAcrossGroups() {
-		if (text_val_saved == null) return;
-		final String myUid = FirebaseAuth.getInstance().getCurrentUser() != null
-		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
-		Map<String, Object> cachedTotal = com.harvana.app.offline.OfflineCacheManager.load(
-		getContext(), "total_saved_" + myUid);
-		if (cachedTotal != null && cachedTotal.get("harv") instanceof Number) {
-			_applyTotalSaved(((Number) cachedTotal.get("harv")).doubleValue());
-		}
-		
-		if (group_map_list.isEmpty()) {
-			if (cachedTotal == null && getActivity() != null) getActivity().runOnUiThread(() -> {
-				text_val_saved.setText(("0 " + com.harvana.app.CoinInfo.ticker()));
-				if (text_sub_saved != null) text_sub_saved.setText("No group savings yet");
-			});
-			return;
-		}
-		final double[] total = {0};
-		final int[] left = {group_map_list.size()};
-		final boolean[] hadConnectivityFailure = {false};
-		
-		for (HashMap<String, Object> g : group_map_list) {
-			String gid = g.get("id") != null ? g.get("id").toString() : "";
-			if (gid.isEmpty() || getContext() == null) {
-				left[0]--;
-				if (left[0] <= 0) _finishTotalSaved(myUid, total[0], hadConnectivityFailure[0], cachedTotal);
-				continue;
-			}
-			com.harvana.app.firestore.GroupFirestoreManager.getInstance(getContext())
-			.getPayments(gid, new com.harvana.app.firestore.GroupFirestoreManager.ListCallback() {
-				@Override
-				public void onSuccess(List<Map<String, Object>> items) {
-					if (items != null && !myUid.isEmpty()) {
-						for (Map<String, Object> pay : items) {
-							String st = str(pay, "status", "CONFIRMED");
-							boolean ok = "CONFIRMED".equalsIgnoreCase(st)
-							|| "PAID".equalsIgnoreCase(st)
-							|| st.isEmpty();
-							String uid = str(pay, "memberUid", str(pay, "uid", ""));
-							if (!ok) continue;
-							if (!myUid.equals(uid)) continue;
-							double amt = num(pay, "amountHarv");
-							if (amt <= 0) amt = num(pay, "amount");
-							total[0] += amt;
-						}
-					}
-					left[0]--;
-					if (left[0] <= 0) _finishTotalSaved(myUid, total[0], hadConnectivityFailure[0], cachedTotal);
-				}
-				@Override
-				public void onError(String error) {
-					if (com.harvana.app.offline.NetworkStatus.isConnectivityError(error)) {
-						hadConnectivityFailure[0] = true;
-					}
-					left[0]--;
-					if (left[0] <= 0) _finishTotalSaved(myUid, total[0], hadConnectivityFailure[0], cachedTotal);
-				}
-			});
-		}
-	}
-	
-	private void _finishTotalSaved(String myUid, double total, boolean hadConnectivityFailure,
-	Map<String, Object> cachedTotal) {
-		if (hadConnectivityFailure) {
-			if (cachedTotal == null) _applyTotalSaved(total);
-			return;
-		}
-		Map<String, Object> toCache = new HashMap<>();
-		toCache.put("harv", total);
-		com.harvana.app.offline.OfflineCacheManager.save(getContext(), "total_saved_" + myUid, toCache);
-		_applyTotalSaved(total);
-	}
-	
-	private void _loadOpenLoansAcrossGroups() {
-		if (text_val_loans == null) return;
-		final String myUid = FirebaseAuth.getInstance().getCurrentUser() != null
-		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
-		
-		Map<String, Object> cachedLoans = com.harvana.app.offline.OfflineCacheManager.load(
-		getContext(), "open_loans_" + myUid);
-		if (cachedLoans != null && cachedLoans.get("count") instanceof Number) {
-			int cachedCount = ((Number) cachedLoans.get("count")).intValue();
-			double cachedOutstanding = cachedLoans.get("outstanding") instanceof Number
-			? ((Number) cachedLoans.get("outstanding")).doubleValue() : 0;
-			_applyOpenLoans(cachedCount, cachedOutstanding);
-		}
-		
-		if (group_map_list.isEmpty()) {
-			if (cachedLoans == null && getActivity() != null) getActivity().runOnUiThread(() -> {
-				text_val_loans.setText("0");
-				if (text_sub_loans != null) text_sub_loans.setText("No open loans");
-			});
-			return;
-		}
-		final int[] openCount = {0};
-		final double[] outstandingTotal = {0};
-		final int[] left = {group_map_list.size()};
-		final boolean[] hadConnectivityFailure = {false};
-		
-		for (HashMap<String, Object> g : group_map_list) {
-			String gid = g.get("id") != null ? g.get("id").toString() : "";
-			if (gid.isEmpty() || getContext() == null) {
-				left[0]--;
-				if (left[0] <= 0) {
-					_finishOpenLoans(myUid, openCount[0], outstandingTotal[0], hadConnectivityFailure[0], cachedLoans);
-				}
-				continue;
-			}
-			com.harvana.app.firestore.GroupFirestoreManager.getInstance(getContext())
-			.getLoans(gid, new com.harvana.app.firestore.GroupFirestoreManager.ListCallback() {
-				@Override
-				public void onSuccess(List<Map<String, Object>> items) {
-					if (items != null && !myUid.isEmpty()) {
-						for (Map<String, Object> loan : items) {
-							String st = str(loan, "status", "");
-							String borrower = str(loan, "borrowerUid", "");
-							if (!"ACTIVE".equalsIgnoreCase(st)) continue;
-							if (!myUid.equals(borrower)) continue;
-							openCount[0]++;
-							double principal = num(loan, "principalHarv");
-							if (principal <= 0) principal = num(loan, "amountHarv");
-							double repaid = num(loan, "repaidAmountHarv");
-							outstandingTotal[0] += Math.max(0, principal - repaid);
-						}
-					}
-					left[0]--;
-					if (left[0] <= 0) {
-						_finishOpenLoans(myUid, openCount[0], outstandingTotal[0], hadConnectivityFailure[0], cachedLoans);
-					}
-				}
-				@Override
-				public void onError(String error) {
-					if (com.harvana.app.offline.NetworkStatus.isConnectivityError(error)) {
-						hadConnectivityFailure[0] = true;
-					}
-					left[0]--;
-					if (left[0] <= 0) {
-						_finishOpenLoans(myUid, openCount[0], outstandingTotal[0], hadConnectivityFailure[0], cachedLoans);
-					}
-				}
-			});
-		}
-	}
-	
-	private void _finishOpenLoans(String myUid, int count, double outstanding,
-	boolean hadConnectivityFailure, Map<String, Object> cachedLoans) {
-		if (hadConnectivityFailure) {
-			if (cachedLoans == null) _applyOpenLoans(count, outstanding);
-			return;
-		}
-		Map<String, Object> toCache = new HashMap<>();
-		toCache.put("count", count);
-		toCache.put("outstanding", outstanding);
-		com.harvana.app.offline.OfflineCacheManager.save(getContext(), "open_loans_" + myUid, toCache);
-		_applyOpenLoans(count, outstanding);
-	}
-	
-	private double fsSaved = 0, nodeSaved = 0, fsLoanOut = 0, nodeLoanOut = 0;
-	private int fsLoanCount = 0, nodeLoanCount = 0, nodeGroupCount = 0;
-	
-	private void _applyOpenLoans(int count, double outstandingHarv) {
-		fsLoanCount = count;
-		fsLoanOut = outstandingHarv;
-		_renderLoans();
-	}
-	
-	private void _renderLoans() {
-		if (!isAdded() || getActivity() == null || text_val_loans == null) return;
-		final int count = fsLoanCount + nodeLoanCount;
-		final double outstandingHarv = fsLoanOut + nodeLoanOut;
-		getActivity().runOnUiThread(() -> {
-			text_val_loans.setText(String.valueOf(count));
-			if (text_sub_loans != null) {
-				text_sub_loans.setText(count == 0 ? "No open loans"
-				: _fmtHarv(outstandingHarv) + " outstanding");
-			}
-		});
-	}
-	
-	private void _loadComputedTrust() {
-		if (getContext() == null) return;
-		// The person's one trust score across every wallet they linked: the same figure the profile shows.
-		com.google.firebase.auth.FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
-		if (me != null) {
-			com.harvana.app.trust.ProfileTrust.forget(me.getUid());
-			com.harvana.app.trust.ProfileTrust.resolve(me.getUid(), card -> {
-				if (!isAdded()) return;
-				if (card.scored()) {
-					if (text_val_trust != null) text_val_trust.setText(card.percent + "%");
-					if (ring_trust_score != null) { ring_trust_score.setMax(100); ring_trust_score.setProgress(card.percent); }
-					if (text_sub_trust != null) text_sub_trust.setText(card.trustTier.isEmpty() ? com.harvana.app.trust.ProfileTrust.tierFor(card.percent) : card.trustTier);
-				} else {
-					_loadWalletTrust();
-				}
-			});
-			return;
-		}
-		_loadWalletTrust();
-	}
-
-	/** Before the person has a published score: the active wallet's own. */
-	private void _loadWalletTrust() {
-		if (getContext() == null) return;
-		String address = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(getContext());
-		com.harvana.app.trust.NetworkTrust.wallet(address, score -> {
-			if (!isAdded() || getActivity() == null) return;
-			getActivity().runOnUiThread(() -> {
-				boolean pct = score.percent >= 0;
-				if (text_val_trust != null) text_val_trust.setText(pct ? score.percent + "%" : score.published ? String.valueOf(score.score) : "\u2014");
-				if (ring_trust_score != null) {
-					int max = pct ? 100 : com.harvana.app.trust.NetworkTrust.MAX;
-					ring_trust_score.setMax(max);
-					ring_trust_score.setProgress(Math.max(0, Math.min(max, pct ? score.percent : score.score)));
-				}
-				if (text_sub_trust != null) text_sub_trust.setText(pct ? (score.tier.isEmpty() ? "trust score" : score.tier) : (score.summary.isEmpty() ? "of 26" : score.summary));
-			});
-		});
-	}
-	
-	private void _loadNodeTotals() {
-		if (getContext() == null || FirebaseAuth.getInstance().getCurrentUser() == null) return;
-		String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-		String wallet = WalletManager.getActiveWalletAddress(getContext());
-		com.harvana.app.sync.NodePortfolio.load(getContext(), uid, wallet, p -> {
-			nodeSaved = p.savedHarv();
-			nodePortfolio = p;
-			nodeLoanOut = p.outstandingHarv();
-			nodeLoanCount = p.loansOpen();
-			nodeGroupCount = p.entries.size();
-			// Active groups: what the network and the app still count (closed and deleted groups left out).
-			final int active = p.groupCount();
-			if (getActivity() != null) getActivity().runOnUiThread(() -> {
-				if (text_val_groups != null) text_val_groups.setText(String.valueOf(active));
-				if (text_sub_groups != null) text_sub_groups.setText(active == 0 ? "Join your first circle" : (active == 1 ? "1 active circle" : active + " active circles"));
-			});
-			_applyTotalSaved(fsSaved);
-			// The coins' dollar rates and HARV's price, then the total again in the display currency.
-			if (getContext() != null) com.harvana.app.wallet.FxRates.load(getContext(),
-					() -> com.harvana.app.wallet.HarvPrice.get(q -> _applyTotalSaved(fsSaved)));
-			_renderLoans();
-		});
-	}
-	
-	/** The node's view of the member's groups (each in its own coin), once loaded. */
-	private com.harvana.app.sync.NodePortfolio.Portfolio nodePortfolio;
-
-	private void _applyTotalSaved(double harv) {
-		fsSaved = harv;
-		if (!isAdded() || getActivity() == null || text_val_saved == null) return;
-		getActivity().runOnUiThread(() -> {
-			// Groups save in stable coins (hNGN, hUSD, …): the total is shown in those coins, from the node's records,
-			// whatever the app's display currency (owner, 13 Oct 2026).
-			// One figure, in the currency chosen in Settings: each group's savings converted from the coin it is kept in
-			// (owner, 13 Oct 2026). The breakdown by coin and by group is on the Total saved screen (tap the card).
-			if (nodePortfolio == null || getContext() == null) { text_val_saved.setText("—"); }
-			else {
-				double usd = nodePortfolio.savedUsd(getContext());
-				if (Double.isNaN(usd)) {
-					String saved = nodePortfolio.savedInGroupCoins();
-					text_val_saved.setText(saved.isEmpty() ? "0" : saved);
-				} else {
-					text_val_saved.setText(com.harvana.app.wallet.FxRates.money(getContext(), usd));
-				}
-			}
-			_openTotalSavedOnTap();
-			if (text_sub_saved != null) {
-				int n = group_map_list.size();
-				text_sub_saved.setText(n <= 0 ? "No group savings yet"
-				: ("Across " + n + (n == 1 ? " group" : " groups")));
-			}
-		});
-	}
-	
 	/** The Total saved card opens the Total saved screen. */
 	private void _openTotalSavedOnTap() {
 		View v = text_val_saved;
@@ -1460,7 +775,7 @@ public class HomeFragmentActivity extends Fragment {
 		if (card == null || card.hasOnClickListeners()) return;
 		card.setOnClickListener(x -> startActivity(new android.content.Intent(getContext(), TotalSavedActivity.class)));
 	}
-
+	
 	private static String _fmtAmount(double v) {
 		try {
 			java.text.DecimalFormat df = new java.text.DecimalFormat("#,##0.00######", new java.text.DecimalFormatSymbols(java.util.Locale.US));

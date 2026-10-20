@@ -68,6 +68,7 @@ public final class LogoutManager {
 		quietly(com.harvana.app.group.NodeSettingsPanel::forgetAll);
 		quietly(com.harvana.app.wallet.CustomAssets::forgetAll);
 		quietly(com.harvana.app.milestone.MilestoneLoader::invalidate);
+		quietly(com.harvana.app.home.HomeData::forget);
 	}
 
 	/** Every SharedPreferences file in the app's folder, emptied (the in-memory copy too) and then deleted. */

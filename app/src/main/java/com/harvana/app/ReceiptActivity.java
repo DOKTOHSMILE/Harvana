@@ -313,7 +313,9 @@ public class ReceiptActivity extends AppCompatActivity {
 			_shape(lookup, otherChain, null, unit);
 			final String hashNow = txHash == null ? "" : txHash;
 			new Thread(() -> {
-				java.util.HashMap<String, Object> fresh = com.harvana.app.wallet.ChainHistory.detail(lookup, hashNow);
+				String owner = getIntent().getStringExtra("owner");
+				if (owner == null || owner.isEmpty()) owner = getIntent().getBooleanExtra("incoming", false) ? recipient : sender;
+				java.util.HashMap<String, Object> fresh = com.harvana.app.wallet.ChainHistory.detail(lookup, hashNow, owner == null ? "" : owner);
 				runOnUiThread(() -> {
 					if (isFinishing()) return;
 					if (fresh != null) _applyExplorer(fresh, unit);
@@ -545,7 +547,8 @@ public class ReceiptActivity extends AppCompatActivity {
 		Object fee = d.get("harvFee");
 		if (fee instanceof Number && ((Number) fee).doubleValue() > 0 && tv_network_fee != null) {
 			if (tv_network_fee.getParent() instanceof View) ((View) tv_network_fee.getParent()).setVisibility(View.VISIBLE);
-			tv_network_fee.setText(_formatUIBalance(((Number) fee).doubleValue()) + " " + ticker);
+			Object feeSym = d.get("feeSymbol");   // a token's fee is paid in its chain's coin (SOL, ETH, NEAR, TRX)
+			tv_network_fee.setText(_formatUIBalance(((Number) fee).doubleValue()) + " " + (feeSym instanceof String && !((String) feeSym).isEmpty() ? feeSym : ticker));
 		}
 		Object block = d.get("blockNumber");
 		if (block instanceof Number && ((Number) block).longValue() > 0) tv_block_number.setText(String.valueOf(((Number) block).longValue()));

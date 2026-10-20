@@ -2,6 +2,11 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Solana sends; added coins' transaction details
+
+- Solana (SOL and SPL tokens such as PUMP): sends failed with "Transaction simulation failed". The network's check ran at a stricter commitment than the blockhash the app read; both now use "confirmed", a stale blockhash is retried once with a new one, and the network's real reason is shown in words (for example the 0.00089088 SOL every Solana account must keep). A send that would leave between 0 and 0.00089088 SOL in your account is refused before signing.
+- Coin page → History (PUMP and every added coin): a row now opens its transaction details (the tap was swallowed by the row's inner layout). The details are read live from that coin's own network: status, slot or block, the network fee in the chain's coin (SOL, ETH, NEAR, TRX), from and to.
+
 ## 20 Oct 2026: Admin float; Mint with HARV for every Harvana coin
 
 - Group → Actions & votes (savings and goal groups kept in a coin): the admin can ask the members to lend part of the pot (Admin float: amount up to 30% of the pot, 1–30 days, interest 0–20%, HARV collateral at 150%). Members see it under Needs your attention with Lend / Don't lend; once it passes the coin goes to the admin. The card then shows what is owed and when; the admin has Repay; when it is overdue anyone can Cover it and take the admin's HARV plus 10%.

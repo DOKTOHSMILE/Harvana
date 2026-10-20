@@ -529,7 +529,9 @@ public final class CoinDetailPages {
                     icon.setImageResource(in ? R.drawable.ic_action_receive : R.drawable.ic_action_send);
                     icon.setColorFilter(in ? com.harvana.app.utils.UiColors.accent() : com.harvana.app.utils.UiColors.error());
                 }
-                item.setOnClickListener(v -> {
+                // The row's inner layout (cardview1) is the clickable one; a listener on the outer view never fired.
+                View tap = item.findViewById(R.id.cardview1);
+                (tap != null ? tap : item).setOnClickListener(v -> {
                     android.content.Intent i = new android.content.Intent(requireContext(), ReceiptActivity.class);
                     i.putExtra("txHash", String.valueOf(row.get("txHash")));
                     i.putExtra("status", String.valueOf(row.get("status")));
@@ -538,7 +540,11 @@ public final class CoinDetailPages {
                     i.putExtra("tokenSymbol", coin.ticker);
                     i.putExtra("assetKey", coin.key);
                     Object val = row.get("value");
-                    i.putExtra("value", val instanceof Number ? ((Number) val).doubleValue() : 0);
+                    double amountNow = 0;
+                    if (val instanceof Number) amountNow = ((Number) val).doubleValue();
+                    else if (val != null) try { amountNow = Double.parseDouble(String.valueOf(val).replace(",", "")); } catch (Exception ignored) { }
+                    i.putExtra("value", amountNow);
+                    i.putExtra("owner", address());                    // this wallet on that chain: the details are read against it
                     Object ts = row.get("timestamp");
                     i.putExtra("timestamp", ts instanceof Number ? ((Number) ts).longValue() : System.currentTimeMillis());
                     i.putExtra("chain", String.valueOf(row.get("chain")));

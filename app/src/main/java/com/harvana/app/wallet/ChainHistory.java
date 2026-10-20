@@ -111,8 +111,18 @@ public final class ChainHistory {
      * The full record of one transaction, from that coin's own explorer. Null when the explorer has nothing.
      * Run off the main thread.
      */
-    public static HashMap<String, Object> detail(String key, String hash) {
+    public static HashMap<String, Object> detail(String key, String hash) { return detail(key, hash, ""); }
+
+    /**
+     * Same, for any coin including the ones the person added (owner, 20 Oct 2026: their history rows open the details).
+     * {@code owner} is this wallet's address on that chain: a token's amount and direction are read against it.
+     */
+    public static HashMap<String, Object> detail(String key, String hash, String owner) {
         if (key == null || hash == null || hash.isEmpty()) return null;
+        CustomAssets.Asset added = CustomAssets.find(key);
+        if (added != null) {
+            try { return addedDetail(added, hash, owner == null ? "" : owner); } catch (Exception e) { return null; }
+        }
         try {
             switch (key) {
                 case "BTC": return mempoolTx(Net.btcApi(), "BTC", Net.label("Bitcoin"), hash);
@@ -130,6 +140,57 @@ public final class ChainHistory {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /** One transaction of an added chain or token, from the same source its history list uses. */
+    private static HashMap<String, Object> addedDetail(CustomAssets.Asset a, String hash, String owner) throws Exception {
+        String rpc = a.rpc == null || a.rpc.isEmpty() ? "" : a.rpc.split(",")[0].trim();
+        HashMap<String, Object> m = null;
+        if (SplToken.FAMILY.equals(a.family) && !rpc.isEmpty()) {
+            m = splTx(rpc, a, hash, owner);
+            if (m == null) {                                               // not this wallet's own move: fee and slot still help
+                m = solParsed(hash, "");
+                if (m != null) { m.remove("value"); m.put("feeSymbol", "SOL"); }
+            }
+        } else if (a.near()) {
+            m = nearTx(a, hash);
+        } else if (Trc20.FAMILY.equals(a.family)) {
+            m = tronTx(hash);
+            if (m != null && a.token()) m.remove("value");
+        } else if (!a.scout.isEmpty()) {
+            m = scoutTx(a.scout, a.symbol, a.chainName, hash, a.decimals, a.txPage(hash));
+            if (m != null && a.token()) m.remove("value");                 // the token amount is in the transfer, not the tx
+        } else if (!rpc.isEmpty() && "EVM".equals(a.family)) {
+            m = evmRpc(rpc, a.chainName, a.txPage(""), a.symbol, hash, a.token() ? 18 : a.decimals);
+            if (m != null && a.token()) m.remove("value");
+        }
+        if (m != null) m.putIfAbsent("feeSymbol", a.feeSymbol());
+        return m;
+    }
+
+    /** A NEAR transaction from the chain's history API (NearBlocks: /v1/txns/{hash}). */
+    private static HashMap<String, Object> nearTx(CustomAssets.Asset a, String hash) throws Exception {
+        String api = a.historyApi;
+        if (api == null || api.isEmpty()) {
+            for (CustomAssets.Asset c : CustomAssets.cached()) if (c.near() && !c.token() && !c.historyApi.isEmpty()) { api = c.historyApi; break; }
+        }
+        if (api == null || api.isEmpty()) return null;
+        JSONArray arr = get(api + "/v1/txns/" + hash).optJSONArray("txns");
+        JSONObject t = arr == null || arr.length() == 0 ? null : arr.optJSONObject(0);
+        if (t == null) return null;
+        long ts = 0;
+        try { ts = new BigDecimal(t.optString("block_timestamp", "0")).movePointLeft(6).longValue(); } catch (Exception ignored) { }
+        HashMap<String, Object> m = row(a.symbol, netName(a.key()), false, t.optString("predecessor_account_id"),
+                t.optString("receiver_account_id"), 0, ts, hash, a.txPage(hash));
+        m.remove("value");
+        JSONObject outcomes = t.optJSONObject("outcomes");
+        m.put("status", outcomes == null || outcomes.optBoolean("status", true) ? "confirmed" : "failed");
+        JSONObject block = t.optJSONObject("block");
+        if (block != null) m.put("blockNumber", block.optLong("block_height"));
+        JSONObject agg = t.optJSONObject("outcomes_agg");
+        if (agg != null) m.put("harvFee", shift(agg.optString("transaction_fee", "0"), 24));
+        m.put("feeSymbol", "NEAR");
+        return m;
     }
 
     /** Esplora-style explorers: the net change to this address in each transaction decides sent or received. */
@@ -190,6 +251,12 @@ public final class ChainHistory {
     }
 
     private static HashMap<String, Object> evmRpc(Net.Evm n, String key, String hash) throws Exception {
+        return evmRpc(n.rpc, n.name, n.txPage, key, hash, 18);
+    }
+
+    private static HashMap<String, Object> evmRpc(String rpc, String name, String txPage, String key, String hash, int decimals) throws Exception {
+        final class N { final String rpc, name, txPage; N(String r, String nm, String t) { rpc = r; name = nm; txPage = t; } }
+        N n = new N(rpc, name, txPage);
         JSONObject tx = post(n.rpc, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"eth_getTransactionByHash\",\"params\":[\"" + hash + "\"]}");
         JSONObject body = tx.optJSONObject("result");
         if (body == null) return null;
@@ -205,7 +272,7 @@ public final class ChainHistory {
         }
         boolean ok = receipt == null || !"0x0".equals(receipt.optString("status"));
         long gasUsed = receipt == null ? hexLong(body.optString("gas")) : hexLong(receipt.optString("gasUsed"));
-        HashMap<String, Object> m = row(key, n.name, false, from, to, shift(body.optString("value"), 18), time, hash, n.txPage + hash);
+        HashMap<String, Object> m = row(key, n.name, false, from, to, shift(body.optString("value"), decimals), time, hash, n.txPage + hash);
         m.put("status", body.optString("blockNumber").isEmpty() ? "pending" : (ok ? "confirmed" : "failed"));
         m.put("harvFee", shift(new java.math.BigInteger(Long.toString(hexLong(body.optString("gasPrice")))).multiply(java.math.BigInteger.valueOf(gasUsed)).toString(), 18));
         m.put("gasUsed", gasUsed);

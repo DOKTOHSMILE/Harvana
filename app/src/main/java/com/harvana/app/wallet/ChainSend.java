@@ -283,15 +283,11 @@ public final class ChainSend {
         long have = solBalance(from);
         if (have < lamports + 5000L) throw new IllegalArgumentException("Not enough SOL left to pay the network fee.");
         if (solBalance(to) == 0 && lamports < 890880L) throw new IllegalArgumentException("That Solana account is new. Send at least 0.00089088 SOL so the network can create it.");
-        JSONObject bh = post(Net.solRpc(),
-                "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getLatestBlockhash\",\"params\":[{\"commitment\":\"confirmed\"}]}");
-        String block = bh.getJSONObject("result").getJSONObject("value").getString("blockhash");
-        byte[] tx = SolTx.transfer(seed, dest, lamports, b58(block));
-        String b64 = android.util.Base64.encodeToString(tx, android.util.Base64.NO_WRAP);
-        JSONObject sent = post(Net.solRpc(),
-                "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"sendTransaction\",\"params\":[\"" + b64 + "\",{\"encoding\":\"base64\"}]}");
-        if (sent.has("error")) throw new IllegalArgumentException(sent.getJSONObject("error").optString("message", "Solana rejected the payment."));
-        return sent.getString("result");
+        long left = have - lamports - 5000L;
+        if (left > 0 && left < 890880L) {
+            throw new IllegalArgumentException("Solana keeps at least 0.00089088 SOL in your account. Send a bit less, or send everything.");
+        }
+        return SolSend.send(Net.solRpc(), blockhash -> SolTx.transfer(seed, dest, lamports, blockhash));
     }
 
     private static BigInteger qty(String hex) {

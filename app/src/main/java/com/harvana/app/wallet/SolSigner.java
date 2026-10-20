@@ -104,7 +104,7 @@ public final class SolSigner {
         try (Response r = HTTP.newCall(req).execute()) {
             String text = r.body() == null ? "{}" : r.body().string();
             JSONObject j = new JSONObject(text.isEmpty() ? "{}" : text);
-            if (j.has("error")) throw new IllegalArgumentException(j.getJSONObject("error").optString("message", "Solana rejected the transaction."));
+            if (j.has("error")) throw new IllegalArgumentException(SolSend.explain(j.getJSONObject("error")));
             if (!j.has("result")) throw new IllegalArgumentException("Solana did not answer.");
             return j.getString("result");
         }

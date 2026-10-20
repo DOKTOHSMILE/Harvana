@@ -115,19 +115,18 @@ public final class SplToken {
         byte[] dest = associated(receiver, program, mint);
         JSONObject info = call(token.rpc, "getAccountInfo", new JSONArray().put(ChainKeys.base58(dest)).put(new JSONObject().put("encoding", "base64")));
         boolean create = info.optJSONObject("result") == null || info.optJSONObject("result").isNull("value");
-        JSONObject bh = call(token.rpc, "getLatestBlockhash", new JSONArray().put(new JSONObject().put("commitment", "confirmed")));
-        byte[] blockhash = ChainSend.b58(bh.getJSONObject("result").getJSONObject("value").getString("blockhash"));
-        byte[] message = message(payer, ChainSend.b58(source[0]), dest, receiver, mint, program, value.longValue(),
-                Integer.parseInt(m[0]), create, blockhash);
-        byte[] sig = Ed25519.sign(seed, message);
-        ByteArrayOutputStream tx = new ByteArrayOutputStream();
-        tx.write(1);
-        tx.write(sig, 0, 64);
-        tx.write(message, 0, message.length);
-        String b64 = android.util.Base64.encodeToString(tx.toByteArray(), android.util.Base64.NO_WRAP);
-        JSONObject sent = call(token.rpc, "sendTransaction", new JSONArray().put(b64).put(new JSONObject().put("encoding", "base64")));
-        if (sent.has("error")) throw new IllegalArgumentException(sent.getJSONObject("error").optString("message", "Solana rejected the payment."));
-        return sent.getString("result");
+        final String[] src = source;
+        final int decimals = Integer.parseInt(m[0]);
+        return SolSend.send(token.rpc.split(",")[0].trim(), blockhash -> {
+            byte[] message = message(payer, ChainSend.b58(src[0]), dest, receiver, mint, program, value.longValue(),
+                    decimals, create, blockhash);
+            byte[] sig = Ed25519.sign(seed, message);
+            ByteArrayOutputStream tx = new ByteArrayOutputStream();
+            tx.write(1);
+            tx.write(sig, 0, 64);
+            tx.write(message, 0, message.length);
+            return tx.toByteArray();
+        });
     }
 
     /**

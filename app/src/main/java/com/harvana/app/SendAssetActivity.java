@@ -670,34 +670,11 @@ public class SendAssetActivity extends AppCompatActivity {
 		review.feeText = coin.feeTicker();
 		review.rows.add(new String[]{"From", mine});
 		com.harvana.app.tx.DuplicateSendGuard.check(this, recipient, coin.ticker, amountText, () ->
-		com.harvana.app.ui.SendReviewSheet.show(this, review, () -> {
-			if (isProcessingSend) return;
-			isProcessingSend = true;
-			sendButton.setEnabled(false);
-			final String from = mine;
-			new Thread(() -> {
-				String err = null;
-				try {
-					String phrase = com.harvana.app.wallet.SecureWalletStorage.getActiveMnemonic(getApplicationContext());
-					String hash = com.harvana.app.wallet.ChainSend.send(assetKey, phrase, from, recipient, amountText);
-					com.harvana.app.wallet.ChainHistory.remember(getApplicationContext(), assetKey, hash, from, recipient, amountText);
-				} catch (Exception e) {
-					err = e.getMessage() == null ? "The network rejected the payment." : e.getMessage();
-				}
-				final String fail = err;
-				runOnUiThread(() -> {
-					isProcessingSend = false;
-					if (isFinishing()) return;
-					sendButton.setEnabled(true);
-					if (fail != null) SketchwareUtil.showMessage(getApplicationContext(), fail);
-					else {
-						com.harvana.app.tx.DuplicateSendGuard.record(getApplicationContext(), recipient, coin.ticker, amountText);
-						SketchwareUtil.showMessage(getApplicationContext(), coin.ticker + " sent.");
-						setResult(RESULT_OK);
-						finish();
-					}
-				});
-			}).start();
+		_sendOutside(review, assetKey, coin.ticker, amountText, amount.doubleValue(), mine, recipient, () -> {
+			String phrase = com.harvana.app.wallet.SecureWalletStorage.getActiveMnemonic(getApplicationContext());
+			String hash = com.harvana.app.wallet.ChainSend.send(assetKey, phrase, mine, recipient, amountText);
+			com.harvana.app.wallet.ChainHistory.remember(getApplicationContext(), assetKey, hash, mine, recipient, amountText);
+			return hash;
 		}));
 	}
 
@@ -736,39 +713,76 @@ public class SendAssetActivity extends AppCompatActivity {
 		review.rows.add(new String[]{"From", mine});
 		if (!memo.isEmpty()) review.rows.add(new String[]{"Memo", memo});
 		com.harvana.app.tx.DuplicateSendGuard.check(this, recipient, "PI", amountText, () ->
-		com.harvana.app.ui.SendReviewSheet.show(this, review, () -> {
+		_sendOutside(review, "PI", "PI", amountText, amount.doubleValue(), mine, recipient, () -> {
+			String phrase = com.harvana.app.wallet.SecureWalletStorage.getActiveMnemonic(getApplicationContext());
+			if (phrase == null || phrase.trim().isEmpty()) throw new IllegalStateException("Couldn't load the recovery phrase on this phone.");
+			String derived = com.harvana.app.wallet.PiKeys.piAddress(phrase);
+			if (mine != null && !mine.isEmpty() && derived != null && !mine.equals(derived)) throw new IllegalStateException("The Pi address on screen is not the one this recovery phrase opens. Open Pi again.");
+			return com.harvana.app.wallet.PiClient.send(phrase, recipient, amountText, memo);
+		}));
+	}
+
+	/**
+	 * A send on another network (SOL, ETH, PUMP, PI, …) through the same screens as HARV: the review sheet turns to
+	 * "Sending…", then the success sheet shows "Transfer pending" until that network's own record says confirmed.
+	 */
+	private void _sendOutside(com.harvana.app.ui.SendReviewSheet.Data review, String key, String ticker, String amountText,
+			double amount, String from, String recipient, java.util.concurrent.Callable<String> broadcast) {
+		com.harvana.app.ui.SendReviewSheet.show(this, review, sheet -> {
 			if (isProcessingSend) return;
 			isProcessingSend = true;
-			sendButton.setEnabled(false);
-			final String amt = amountText;
+			sheet.busy(true);
+			final com.harvana.app.tx.PaymentTracker.Handle inFlight = com.harvana.app.tx.PaymentTracker.begin();
 			new Thread(() -> {
-				String err = null;
-				try {
-					String phrase = com.harvana.app.wallet.SecureWalletStorage.getActiveMnemonic(getApplicationContext());
-					if (phrase == null || phrase.trim().isEmpty()) err = "Couldn't load the recovery phrase on this phone.";
-					else {
-						String derived = com.harvana.app.wallet.PiKeys.piAddress(phrase);
-						if (mine != null && !mine.isEmpty() && derived != null && !mine.equals(derived)) err = "The Pi address on screen is not the one this recovery phrase opens. Open Pi again.";
-						else com.harvana.app.wallet.PiClient.send(phrase, recipient, amt, memo);
+				String hash = null, err = null;
+				try { hash = broadcast.call(); }
+				catch (Exception e) { err = e.getMessage() == null ? "The network rejected the payment." : e.getMessage(); }
+				final String fail = err, txHash = hash == null ? "" : hash;
+				if (fail == null) {
+					com.harvana.app.tx.DuplicateSendGuard.record(getApplicationContext(), recipient, ticker, amountText);
+					com.harvana.app.ui.PaymentSuccessSheet.Info info = new com.harvana.app.ui.PaymentSuccessSheet.Info();
+					info.title = "Transfer";
+					info.stateTitle = true;
+					info.amount = amountText + " " + ticker;
+					info.amountUsd = com.harvana.app.wallet.UsdValue.text(getApplicationContext(), key, amount);
+					info.from = from;
+					info.to = recipient;
+					info.rows = new String[][] {{"To", recipient}, {"From", from}, {"Network", review.network}, {"Transaction", txHash}};
+					info.txHash = txHash;
+					String page = "";
+					if (!txHash.isEmpty() && com.harvana.app.wallet.CustomAssets.find(key) == null) {
+						try { page = com.harvana.app.wallet.ChainHistory.pageFor(key, txHash); } catch (Exception ignored) { }
 					}
-				} catch (Exception e) {
-					err = e.getMessage() == null ? "The Pi network rejected the payment." : e.getMessage();
+					info.link = page == null ? "" : page;
+					com.harvana.app.tx.PaymentTracker.success(info);
+					_watchOutside(key, txHash, from, inFlight);
+				} else {
+					inFlight.end();
 				}
-				final String fail = err;
 				runOnUiThread(() -> {
 					isProcessingSend = false;
-					if (isFinishing()) return;
-					sendButton.setEnabled(true);
-					if (fail != null) SketchwareUtil.showMessage(getApplicationContext(), fail);
-					else {
-						com.harvana.app.tx.DuplicateSendGuard.record(getApplicationContext(), recipient, "PI", amt);
-						SketchwareUtil.showMessage(getApplicationContext(), "Pi sent.");
-						setResult(RESULT_OK);
-						finish();
-					}
+					if (fail != null) { sheet.error(fail); return; }
+					sheet.dismiss();
+					setResult(RESULT_OK);
+					finish();
 				});
 			}).start();
-		}));
+		}, null);
+	}
+
+	/** Reads the network's own record every 10 s (about 5 minutes) and marks the success sheet confirmed. */
+	private static void _watchOutside(String key, String hash, String owner, com.harvana.app.tx.PaymentTracker.Handle inFlight) {
+		if (hash == null || hash.isEmpty()) { inFlight.end(); return; }
+		new Thread(() -> {
+			for (int i = 0; i < 30; i++) {
+				try { Thread.sleep(10_000L); } catch (InterruptedException e) { break; }
+				java.util.HashMap<String, Object> d = com.harvana.app.wallet.ChainHistory.detail(key, hash, owner);
+				String st = d == null ? "" : String.valueOf(d.get("status"));
+				if ("confirmed".equals(st)) { com.harvana.app.tx.PaymentTracker.markConfirmed(hash); break; }
+				if ("failed".equals(st)) break;
+			}
+			inFlight.end();
+		}).start();
 	}
 
 	/** The selected coin's icon, as shown in the coin picker. */

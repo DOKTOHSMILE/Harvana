@@ -2,6 +2,11 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: One send flow for every coin
+
+- Send for SOL, ETH, BNB, POL, BASE, TRX, BTC, LTC, DOGE, PI and every added coin (PUMP, …) now goes the same way as HARV and the Harvana coins: the review sheet turns to "Sending…", a failure shows on that sheet, and after a send the full success sheet opens with the amount, its value, From → To, Network and Transaction. It reads "Transfer pending" until that coin's own network confirms it, then "Transfer completed". "Share transaction link" opens that network's explorer.
+- Install: new wallet APK.
+
 ## 20 Oct 2026: Send amount by value; Activity and Assets load in one go
 
 - Send → Amount: the amount is large with its unit, and beside it a switch [coin | USD] (your display currency) and MAX. Tap USD to type a value ($5); the line under the amount shows the same amount in the other unit (≈ 0.0478 SOL, or ≈ $5.00 when typing the coin). Available shows both units. The "Enter in $" link is gone.

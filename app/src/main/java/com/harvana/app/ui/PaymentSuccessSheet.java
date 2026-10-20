@@ -39,6 +39,8 @@ public final class PaymentSuccessSheet {
         public String to = "";
         /** Title reads "<title> pending" until confirmed, then "<title> completed". */
         public boolean stateTitle;
+        /** The "Share transaction link" target: null picks the Harvana explorer for a Harvana hash; "" shows none. */
+        public String link;
     }
 
     private final BottomSheetDialog dialog;
@@ -146,7 +148,7 @@ public final class PaymentSuccessSheet {
         share.setPadding(0, dp(20), 0, dp(4));
         share.setOnClickListener(v -> com.harvana.app.receipt.ReceiptLoader.forSuccess(info, r -> com.harvana.app.receipt.ReceiptShare.choose(a, r)));
         root.addView(share);
-        String link = txLink(info.txHash);
+        String link = info.link != null ? (info.link.isEmpty() ? null : info.link) : txLink(info.txHash);
         if (link != null) {
             TextView shareLink = text("Share transaction link", 14, R.color.colorAccent, true);
             shareLink.setPadding(0, dp(12), 0, dp(4));

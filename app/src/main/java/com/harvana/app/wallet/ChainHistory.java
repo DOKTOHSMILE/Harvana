@@ -497,7 +497,8 @@ public final class ChainHistory {
         }
     }
 
-    private static String pageFor(String key, String hash) {
+    /** That network's explorer page for a transaction, or empty. */
+    public static String pageFor(String key, String hash) {
         switch (key) {
             case "BTC": return Net.btcPage("tx", hash);
             case "LTC": return Net.ltcPage("tx", hash);

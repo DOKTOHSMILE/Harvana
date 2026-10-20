@@ -334,6 +334,9 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 		textview69 = findViewById(R.id.textview69);
 		textview70 = findViewById(R.id.textview70);
 		etCommission = findViewById(R.id.etCommission);
+		// No group commission exists on the network (owner, 20 Oct 2026: the old create screen's settings are gone).
+		if (etCommission != null && etCommission.getParent() != null && etCommission.getParent().getParent() instanceof View)
+			((View) etCommission.getParent().getParent()).setVisibility(View.GONE);
 		linear18 = findViewById(R.id.linear18);
 		textview13 = findViewById(R.id.textview13);
 		linear19 = findViewById(R.id.linear19);
@@ -1132,7 +1135,6 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 		
 		if (isRotating() && !identity.onChain()) {
 			String grace = etGracePeriod.getText().toString().trim();
-			String comm = etCommission.getText().toString().trim();
 			try {
 				int g = Integer.parseInt(grace.isEmpty() ? "0" : grace);
 				if (g < 0) throw new IllegalArgumentException();
@@ -1141,16 +1143,6 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 				btnSaveSettings.setEnabled(true);
 				btnSaveSettings.setText("Save Settings");
 				Toast.makeText(this, "Grace period must be 0 or more days", Toast.LENGTH_SHORT).show();
-				return;
-			}
-			try {
-				double c = Double.parseDouble(comm.isEmpty() ? "0" : comm);
-				if (c < 0 || c > 100) throw new IllegalArgumentException();
-				patch.put("commissionPercent", String.valueOf(c));
-			} catch (Exception e) {
-				btnSaveSettings.setEnabled(true);
-				btnSaveSettings.setText("Save Settings");
-				Toast.makeText(this, "Commission must be between 0 and 100", Toast.LENGTH_SHORT).show();
 				return;
 			}
 		}

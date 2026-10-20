@@ -42,7 +42,8 @@ public final class NodePortfolio {
     public static final class Portfolio {
         public final List<Entry> entries = Collections.synchronizedList(new ArrayList<>());
         public final List<String> legacyGroupIds = new ArrayList<>();
-        public int groupCount() { return entries.size() + legacyGroupIds.size(); }
+        /** Groups the app shows: those on the network that this wallet is in (old Firestore-only groups no longer count). */
+        public int groupCount() { return entries.size(); }
         public double savedHarv() { double s = 0; synchronized (entries) { for (Entry e : entries) s += e.position.savedHarv; } return s; }
         public double outstandingHarv() { double s = 0; synchronized (entries) { for (Entry e : entries) s += e.position.outstandingHarv(); } return s; }
         public double borrowedHarv() { double s = 0; synchronized (entries) { for (Entry e : entries) s += e.position.borrowedHarv; } return s; }
@@ -144,8 +145,10 @@ public final class NodePortfolio {
                     if (com.harvana.app.group.GroupCloser.isDeleted(fs)) { gone.add(id); one.run(); return; }
                     if (com.harvana.app.group.GroupCloser.isClosed(fs)) { one.run(); return; }
                     final String nodeId = GroupKinds.nodeId(fs);
-                    if (nodeId.isEmpty()) { synchronized (p.legacyGroupIds) { p.legacyGroupIds.add(id); } one.run(); return; }
-                    fetchPosition(nodeId, wallet, fs, id, p, one);
+                    // A group from before the network (Firestore only) is no longer shown anywhere: it leaves the profile
+                    // (owner, 20 Oct 2026: "my profile still counts groups the app no longer recognises").
+                    if (nodeId.isEmpty()) { synchronized (p.legacyGroupIds) { p.legacyGroupIds.add(id); } gone.add(id); one.run(); return; }
+                    fetchPosition(nodeId, wallet, fs, id, p, () -> { gone.add(id); one.run(); }, one);
                 }
                 @Override public void onError(String e) {
                     // A deleted group is gone. Do not keep counting it. A network error is left alone.
@@ -156,7 +159,8 @@ public final class NodePortfolio {
         }
     }
 
-    private static void fetchPosition(String nodeId, String wallet, Map<String, Object> fs, String fsId, Portfolio p, Runnable done) {
+    /** {@code missing} runs instead of {@code done} when the network has no such group (removed from the chain). */
+    private static void fetchPosition(String nodeId, String wallet, Map<String, Object> fs, String fsId, Portfolio p, Runnable missing, Runnable done) {
         final String family = NodeGroupClient.familyOf(nodeId);
         final String name = fs.get("groupName") == null ? "Group" : String.valueOf(fs.get("groupName"));
         if (wallet == null || wallet.isEmpty()) { done.run(); return; }
@@ -190,7 +194,10 @@ public final class NodePortfolio {
                 else if ("ACCUM".equals(family)) NodeGroupClient.getAccumMember(nodeId, wallet, onMember);
                 else NodeGroupClient.getFixedMember(nodeId, wallet, onMember);
             }
-            @Override public void onError(String e) { done.run(); }
+            @Override public void onError(String e) {
+                boolean notThere = e != null && (com.harvana.app.utils.ErrorText.is(e, "404") || com.harvana.app.utils.ErrorText.is(e, "NOT_FOUND"));
+                (notThere ? missing : done).run();
+            }
         };
         if ("CIRCLE".equals(family)) NodeGroupClient.getCircle(nodeId, onGroup);
         else if ("ACCUM".equals(family)) NodeGroupClient.getAccumGroup(nodeId, onGroup);

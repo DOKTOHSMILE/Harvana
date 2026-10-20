@@ -666,12 +666,12 @@ public final class CustomAssets {
         java.util.List<String> via = AssetEnricher.gateways(AssetEnricher.https(a.icon));
         String url = via.isEmpty() ? "" : via.get(0);
         if (!AssetEnricher.drawable(url)) {
-            logo.setImageDrawable(letter(c, a.symbol));
+            logo.setImageDrawable(com.harvana.app.ui.Identicon.coin(a.key()));
             if (key != null) AssetEnricher.iconFailed(c, key);           // no logo it can draw yet: look for one
             return;
         }
         try {
-            com.bumptech.glide.Glide.with(c).load(url).circleCrop().placeholder(letter(c, a.symbol)).error(letter(c, a.symbol))
+            com.bumptech.glide.Glide.with(c).load(url).circleCrop().placeholder(com.harvana.app.ui.Identicon.coin(a.key())).error(com.harvana.app.ui.Identicon.coin(a.key()))
                     .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
                         @Override public boolean onLoadFailed(com.bumptech.glide.load.engine.GlideException e, Object model,
                                 com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean first) {
@@ -684,32 +684,10 @@ public final class CustomAssets {
                     })
                     .into(logo);
         } catch (Exception e) {
-            logo.setImageDrawable(letter(c, a.symbol));
+            logo.setImageDrawable(com.harvana.app.ui.Identicon.coin(a.key()));
         }
     }
 
-    /** A round badge with the first letter of the symbol, for a chain or token with no icon. */
-    private static android.graphics.drawable.Drawable letter(Context c, String symbol) {
-        final String ch = symbol == null || symbol.isEmpty() ? "?" : symbol.substring(0, 1).toUpperCase(Locale.US);
-        final int bg = ContextCompat.getColor(c, R.color.colorAccent);
-        final int fg = ContextCompat.getColor(c, R.color.colorSurface);
-        return new android.graphics.drawable.Drawable() {
-            final android.graphics.Paint p = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
-            @Override public void draw(android.graphics.Canvas canvas) {
-                android.graphics.Rect b = getBounds();
-                p.setColor(bg);
-                canvas.drawCircle(b.exactCenterX(), b.exactCenterY(), Math.min(b.width(), b.height()) / 2f, p);
-                p.setColor(fg);
-                p.setTextSize(b.height() * 0.5f);
-                p.setTextAlign(android.graphics.Paint.Align.CENTER);
-                p.setFakeBoldText(true);
-                canvas.drawText(ch, b.exactCenterX(), b.exactCenterY() - (p.descent() + p.ascent()) / 2, p);
-            }
-            @Override public void setAlpha(int alpha) { }
-            @Override public void setColorFilter(android.graphics.ColorFilter cf) { }
-            @Override public int getOpacity() { return android.graphics.PixelFormat.TRANSLUCENT; }
-        };
-    }
 
     // ── the "Add a custom chain or token" sheet ────────────────────────────
 

@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Activity icons restored; old create screen removed; profile group count
+
+- Activity and history rows: the icon circle is 40dp with a 20dp icon. Icons no longer go blank in scrolled rows (the fade on every icon selector is removed).
+- No letters as icons: people and coins without a logo get a generated pattern icon from their address or coin id.
+- The old Create group screen and its settings the network never had (commission, bidding window and the rest) are removed; Group settings no longer shows commission.
+- Profile: the group count and list are the groups the network still knows. Groups the network has retired, and old groups made before the network held groups, drop off the profile.
+
 ## 19 Oct 2026: Recent recipients on Send
 
 - Send: the addresses this phone sent the selected coin to before (Harvana addresses for HARV and the Harvana coins), newest first, under the recipient field; a tap fills it in. Saved when the network accepts a send.

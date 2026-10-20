@@ -627,6 +627,8 @@ public class WalletActivityFragmentActivity extends Fragment {
 				}
 			}
 			
+			// A reused row must show its icon at once (a drawable changed off screen could stay blank).
+			if (holder.ivIcon != null) holder.ivIcon.jumpDrawablesToCurrentState();
 			final Object chainName = item.get("chain");
 			if (chainName != null && holder.tvAddress != null) {
 				holder.tvAddress.setText(chainName + " · " + holder.tvAddress.getText());
@@ -722,9 +724,9 @@ public class WalletActivityFragmentActivity extends Fragment {
 		}
 	}
 	
-	/** A line icon in the row's colour, 4dp inside its 24dp circle (rows are reused, so every row sets this again). */
+	/** A line icon in the row's colour: 20dp inside its 40dp circle (rows are reused, so every row sets this again). */
 	private static void _lineIcon(android.widget.ImageView iv) {
-		int p = Math.round(4 * iv.getResources().getDisplayMetrics().density);
+		int p = Math.round(10 * iv.getResources().getDisplayMetrics().density);
 		iv.setPadding(p, p, p, p);
 		iv.setScaleType(android.widget.ImageView.ScaleType.CENTER_INSIDE);
 		iv.setImageTintList(android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(iv.getContext(), R.color.colorAccent)));

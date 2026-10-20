@@ -163,22 +163,11 @@ public final class SendReviewSheet {
 
     public void dismiss() { if (dialog.isShowing()) dialog.dismiss(); }
 
-    private static String initial(String address) {
-        if (address == null || address.isEmpty()) return "?";
-        String s = address.startsWith("HV0x") || address.startsWith("AJ0x") ? address.substring(4)
-                : address.startsWith("0x") ? address.substring(2) : address;
-        return s.isEmpty() ? "?" : s.substring(0, 1).toUpperCase(java.util.Locale.ROOT);
-    }
 
     /** A round avatar for an address: its first character on a colour taken from the address. */
     public static void avatar(TextView v, String address) {
-        int[] tones = {R.color.colorAccent, R.color.colorPurple, R.color.colorTeal, R.color.colorBlue, R.color.colorHarvOrange};
-        int h = address == null ? 0 : Math.abs(address.hashCode() % tones.length);
-        v.setText(initial(address));
-        GradientDrawable dot = new GradientDrawable();
-        dot.setShape(GradientDrawable.OVAL);
-        dot.setColor(ContextCompat.getColor(v.getContext(), tones[h]));
-        v.setBackground(dot);
+        v.setText("");                                    // a picture of the address, not a letter (owner, 20 Oct 2026)
+        v.setBackground(Identicon.of(address));
     }
 
     public static String shortAddress(String v) {

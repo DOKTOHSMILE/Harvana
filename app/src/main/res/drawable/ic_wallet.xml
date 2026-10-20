@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Harvana icon: line at rest; pressed, selected, checked or activated it fills in one colour with depth (see ic_wallet_on). -->
-<selector xmlns:android="http://schemas.android.com/apk/res/android" android:enterFadeDuration="140" android:exitFadeDuration="220">
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true" android:drawable="@drawable/ic_wallet_on"/>
     <item android:state_checked="true" android:drawable="@drawable/ic_wallet_on"/>
     <item android:state_selected="true" android:drawable="@drawable/ic_wallet_on"/>

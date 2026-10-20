@@ -181,11 +181,6 @@
 			android:screenOrientation="portrait"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
-			android:name=".CreateNewGroupActivity"
-			android:label="Create new group"
-			android:configChanges="orientation|screenSize|keyboardHidden"
-			android:windowSoftInputMode="stateHidden" />
-		<activity
 			android:name=".CreateRotatingGroupActivity"
 			android:label="New rotating group"
 			android:configChanges="orientation|screenSize|keyboardHidden"

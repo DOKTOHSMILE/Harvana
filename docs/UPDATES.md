@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: no more whole-database downloads
+
+- Seven screens still attached a Realtime Database listener to a whole root (`groupdb`, `userdb`, `dbauth`) with
+  empty callbacks. These were left over from the screen generator, and each one downloaded the entire tree on every
+  open and kept it synced while the screen lived.
+- Removed from: Welcome, group page (GroupDetails), group Overview, Members, Payments and Loans (Home, Groups and
+  Discover were done earlier today). No callback had any logic, so nothing else changes.
+- The remaining Realtime Database read is `TrustScoreEngine`'s single read of one user's `groups` node.
+
 ## 20 Oct 2026: logos for the other EVM networks
 
 - Bundled vector logo marks (they work offline) for Arbitrum One, OP Mainnet, Avalanche C-Chain, Fantom Opera,

@@ -110,11 +110,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
         private TextView textview72;
         private TextView tv_round_paid_count;
 
-        private DatabaseReference groupdb = _firebase.getReference("groupdb");
-        private ChildEventListener _groupdb_child_listener;
         private SharedPreferences groupsp;
-        private DatabaseReference userdb = _firebase.getReference("userdb");
-        private ChildEventListener _userdb_child_listener;
         private FirebaseAuth fbauth;
         private OnCompleteListener<AuthResult> _fbauth_create_user_listener;
         private OnCompleteListener<AuthResult> _fbauth_sign_in_listener;
@@ -180,51 +176,7 @@ public class GroupPaymentFragmentActivity extends Fragment {
 
                 btn_pay_now.setOnClickListener(_v -> _onPayClicked());
 
-                _groupdb_child_listener = new ChildEventListener() {
-                        @Override
-                        public void onChildAdded(DataSnapshot _param1, String _param2) {
-                        }
 
-                        @Override
-                        public void onChildChanged(DataSnapshot _param1, String _param2) {
-                        }
-
-                        @Override
-                        public void onChildMoved(DataSnapshot _param1, String _param2) {
-                        }
-
-                        @Override
-                        public void onChildRemoved(DataSnapshot _param1) {
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError _param1) {
-                        }
-                };
-                groupdb.addChildEventListener(_groupdb_child_listener);
-
-                _userdb_child_listener = new ChildEventListener() {
-                        @Override
-                        public void onChildAdded(DataSnapshot _param1, String _param2) {
-                        }
-
-                        @Override
-                        public void onChildChanged(DataSnapshot _param1, String _param2) {
-                        }
-
-                        @Override
-                        public void onChildMoved(DataSnapshot _param1, String _param2) {
-                        }
-
-                        @Override
-                        public void onChildRemoved(DataSnapshot _param1) {
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError _param1) {
-                        }
-                };
-                userdb.addChildEventListener(_userdb_child_listener);
 
                 fbauth_updateEmailListener = _param1 -> {};
                 fbauth_updatePasswordListener = _param1 -> {};

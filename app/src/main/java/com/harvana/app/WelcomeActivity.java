@@ -57,12 +57,8 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private Intent i = new Intent();
     private SharedPreferences authsp;
-    private DatabaseReference dbauth = _firebase.getReference("dbauth");
-    private ChildEventListener _dbauth_child_listener;
     private FirebaseAuth fbauth;
     private GoogleSignInClient gauth;
-    private DatabaseReference userdb = _firebase.getReference("userdb");
-    private ChildEventListener _userdb_child_listener;
 
     @Override
     protected void onCreate(Bundle _savedInstanceState) {
@@ -97,23 +93,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
         btnLogin.setOnClickListener(_v -> showLoginBottomSheet());
 
-        _dbauth_child_listener = new ChildEventListener() {
-            @Override public void onChildAdded(DataSnapshot _param1, String _param2) {}
-            @Override public void onChildChanged(DataSnapshot _param1, String _param2) {}
-            @Override public void onChildMoved(DataSnapshot _param1, String _param2) {}
-            @Override public void onChildRemoved(DataSnapshot _param1) {}
-            @Override public void onCancelled(DatabaseError _param1) {}
-        };
-        dbauth.addChildEventListener(_dbauth_child_listener);
 
-        _userdb_child_listener = new ChildEventListener() {
-            @Override public void onChildAdded(DataSnapshot _param1, String _param2) {}
-            @Override public void onChildChanged(DataSnapshot _param1, String _param2) {}
-            @Override public void onChildMoved(DataSnapshot _param1, String _param2) {}
-            @Override public void onChildRemoved(DataSnapshot _param1) {}
-            @Override public void onCancelled(DatabaseError _param1) {}
-        };
-        userdb.addChildEventListener(_userdb_child_listener);
     }
 
     private void initializeLogic() {

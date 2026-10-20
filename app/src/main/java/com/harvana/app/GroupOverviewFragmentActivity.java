@@ -181,10 +181,6 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	
 	private SharedPreferences groupsp;
 	private SharedPreferences authsp;
-	private DatabaseReference groupdb = _firebase.getReference("groupdb");
-	private ChildEventListener _groupdb_child_listener;
-	private DatabaseReference userdb = _firebase.getReference("userdb");
-	private ChildEventListener _userdb_child_listener;
 	private FirebaseAuth fauth;
 	private OnCompleteListener<AuthResult> _fauth_create_user_listener;
 	private OnCompleteListener<AuthResult> _fauth_sign_in_listener;
@@ -314,41 +310,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		authsp = getContext().getSharedPreferences("authsp", Activity.MODE_PRIVATE);
 		fauth = FirebaseAuth.getInstance();
 		
-		_groupdb_child_listener = new ChildEventListener() {
-			@Override
-			public void onChildAdded(DataSnapshot _param1, String _param2) { }
-			
-			@Override
-			public void onChildChanged(DataSnapshot _param1, String _param2) { }
-			
-			@Override
-			public void onChildMoved(DataSnapshot _param1, String _param2) { }
-			
-			@Override
-			public void onChildRemoved(DataSnapshot _param1) { }
-			
-			@Override
-			public void onCancelled(DatabaseError _param1) { }
-		};
-		groupdb.addChildEventListener(_groupdb_child_listener);
 		
-		_userdb_child_listener = new ChildEventListener() {
-			@Override
-			public void onChildAdded(DataSnapshot _param1, String _param2) { }
-			
-			@Override
-			public void onChildChanged(DataSnapshot _param1, String _param2) { }
-			
-			@Override
-			public void onChildMoved(DataSnapshot _param1, String _param2) { }
-			
-			@Override
-			public void onChildRemoved(DataSnapshot _param1) { }
-			
-			@Override
-			public void onCancelled(DatabaseError _param1) { }
-		};
-		userdb.addChildEventListener(_userdb_child_listener);
 		
 		fauth_updateEmailListener = _param1 -> { };
 		fauth_updatePasswordListener = _param1 -> { };

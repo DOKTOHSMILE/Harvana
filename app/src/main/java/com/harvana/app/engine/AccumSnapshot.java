@@ -41,7 +41,7 @@ public final class AccumSnapshot {
         }
 
         if (!hasLine && "ACTIVE".equals(s.state)) {
-            s.actions.add(new GroupAction(GroupAction.START_LINE, "Start my savings line", true));
+            s.actions.add(new GroupAction(GroupAction.START_LINE, lng(member, "totalLinesCompleted") > 0 ? "Start a new slot" : "Start my savings line", true));
         }
         if (hasLine && "ACTIVE".equals(lineStatus)) {
             String lineId = str(line, "lineId");

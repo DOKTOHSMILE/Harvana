@@ -792,6 +792,8 @@ public class GroupPaymentFragmentActivity extends Fragment {
                         if (tv_type_board_legend != null) tv_type_board_legend.setText(mine.legend);
                         layout_type_board.removeAllViews();
                         _addRecordSection(accum && admin ? "You" : null, mine, cell -> _onNodeCell(cell), accum ? line : null);
+                        final int mineEnd = layout_type_board.getChildCount();
+                        if (accum) _loadSlotCarousel(gen, mine, line, me, admin, mineEnd);
                         if (accum && admin && others != null) {
                                 for (Object[] row : others) {
                                         @SuppressWarnings("unchecked") Map<String, Object> theirLine = (Map<String, Object>) row[1];
@@ -889,8 +891,58 @@ public class GroupPaymentFragmentActivity extends Fragment {
                 _addRecordSection(label, board, click, null);
         }
 
+        /**
+         * A member with more than one savings slot (a finished line and maybe a new one) swipes between them: the views of
+         * their own card (the first {@code mineEnd} children) are replaced by a carousel, newest slot open.
+         */
+        private void _loadSlotCarousel(int gen, com.harvana.app.group.GroupTypeBoard.Board mine, Map<String, Object> line,
+                        String me, boolean admin, int mineEnd) {
+                if (me == null || me.isEmpty() || linkedNodeId == null || linkedNodeId.isEmpty()) return;
+                com.harvana.app.sync.NodeGroupClient.getAccumMemberLines(linkedNodeId, me, new com.harvana.app.sync.NodeGroupClient.Callback() {
+                        @Override public void onSuccess(org.json.JSONObject json) {
+                                Map<String, Object> out = com.harvana.app.utils.JsonMaps.toMap(json);
+                                if (!(out.get("lines") instanceof List)) return;
+                                final List<Map<String, Object>> lines = new java.util.ArrayList<>();
+                                for (Object o : (List<?>) out.get("lines")) {
+                                        if (o instanceof Map) {
+                                                @SuppressWarnings("unchecked") Map<String, Object> m = (Map<String, Object>) o;
+                                                lines.add(m);
+                                        }
+                                }
+                                if (lines.size() < 2 && !(lines.size() == 1 && (line == null || line.isEmpty()))) return;
+                                Object cur = out.get("currentLineId");
+                                final String currentId = cur == null ? "" : String.valueOf(cur);
+                                if (getActivity() == null) return;
+                                getActivity().runOnUiThread(() -> {
+                                        if (gen != nodeLoadGen || getContext() == null || layout_type_board == null) return;
+                                        if (layout_type_board.getChildCount() < mineEnd) return;
+                                        for (int i = mineEnd - 1; i >= 0; i--) layout_type_board.removeViewAt(i);
+                                        if (admin) {
+                                                TextView t = new TextView(getContext());
+                                                t.setText("You");
+                                                t.setTextSize(12);
+                                                t.setTypeface(null, android.graphics.Typeface.BOLD);
+                                                t.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+                                                layout_type_board.addView(t, 0);
+                                        }
+                                        View carousel = com.harvana.app.group.SlotCarousel.create(getContext(), lines, currentId,
+                                                        host -> _addRecordSection(host, null, mine, cell -> _onNodeCell(cell), line),
+                                                        cell -> { if (getContext() != null) com.harvana.app.group.GroupTypeBoardView.showDetail(getContext(), cell); });
+                                        layout_type_board.addView(carousel, admin ? 1 : 0, new LinearLayout.LayoutParams(
+                                                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                                });
+                        }
+                        @Override public void onError(String e) { }
+                });
+        }
+
         /** {@code ownLine} is the member's own savings line when this board is theirs: its missed days can then be picked and paid back. */
         private void _addRecordSection(String label, com.harvana.app.group.GroupTypeBoard.Board board,
+                        com.harvana.app.group.GroupTypeBoardView.Click click, Map<String, Object> ownLine) {
+                _addRecordSection(layout_type_board, label, board, click, ownLine);
+        }
+
+        private void _addRecordSection(LinearLayout layout_type_board, String label, com.harvana.app.group.GroupTypeBoard.Board board,
                         com.harvana.app.group.GroupTypeBoardView.Click click, Map<String, Object> ownLine) {
                 if (getContext() == null || layout_type_board == null || board == null) return;
                 if (label != null && !label.isEmpty()) {

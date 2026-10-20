@@ -41,6 +41,8 @@ public final class NodeGroupClient {
 
     public static void getAccumGroup(String groupId, Callback cb) { mirrored("GROUP_STATE", groupId, "/api/v1/accum/group/" + groupId, cb); }
     public static void getAccumMember(String groupId, String address, Callback cb) { read("/api/v1/accum/group/" + groupId + "/member/" + address, cb); }
+    /** Every savings line (slot) of this member in the group, oldest first, finished ones included. */
+    public static void getAccumMemberLines(String groupId, String address, Callback cb) { read("/api/v1/accum/group/" + groupId + "/member/" + address + "/lines", cb); }
     public static void getAccumLine(String groupId, String lineId, Callback cb) { read("/api/v1/accum/group/" + groupId + "/line/" + lineId, cb); }
     public static void getAccumMembers(String groupId, Callback cb) { mirrored("GROUP_MEMBERS", groupId, "/api/v1/accum/group/" + groupId + "/members", cb); }
 

@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Savings slots carousel; start a new slot
+
+- Savings group → your card: when you have had more than one 30-day slot, every slot's calendar is a page; swipe left and right (dots under it), the newest opens first. Finished slots show their dates, days and amount saved; the current slot is paid on as before.
+- After a slot is finished and claimed, the button reads "Start a new slot".
+- Needs the node change of 20 Oct 2026 (`GET /accum/group/{id}/member/{address}/lines`); without it the card shows the current slot only.
+
 ## 20 Oct 2026: Activity icons restored; old create screen removed; profile group count
 
 - Activity and history rows: the icon circle is 40dp with a 20dp icon. Icons no longer go blank in scrolled rows (the fade on every icon selector is removed).

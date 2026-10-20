@@ -2,6 +2,21 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: audit fix, ledger rows need a transaction (Firestore rules)
+
+- `docs/firestore.rules`:
+  - **Payments:** a group payment can be written as CONFIRMED (on create, or PENDING → CONFIRMED) only when it
+    carries the network transaction hash (`txRef` or `nodeTxHash`, 16+ characters).
+  - **Loans:** a loan can be turned REPAID (by the borrower or the admin) only with the repayment's hash (`txRepayRef`
+    or `lastRepayTxRef`). A borrower raising `repaidAmountHarv` needs one too.
+  - Before this, a member could write a confirmed payment, or mark their loan repaid, with no transaction. That did
+    not mint HARV, but it made the group's books wrong.
+- Every write the app makes already carries the hash: contributions, payouts, loan disbursement and repayment, and
+  the node mirror's `nodeTxHash`. A payout or repayment whose hash came back empty is now refused instead of being
+  recorded as done.
+- **To apply:** publish `docs/firestore.rules` in the Firebase console (Firestore → Rules). Until then the old rules
+  stay live.
+
 ## 20 Oct 2026: audit fixes, wallet sign-in and recovery phrase
 
 - **Node sign-in is signed only.** The wallet fell back to an unsigned request (address plus device id) whenever the

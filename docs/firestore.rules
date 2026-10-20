@@ -94,6 +94,17 @@ service cloud.firestore {
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny(privateProfileFields());
     }
 
+    // A ledger row may say money moved only when it carries the network's transaction hash (txRef or nodeTxHash):
+    // a member cannot write a CONFIRMED payment, or mark a loan REPAID, without a transaction behind it.
+    function txProof(d) {
+      return (d.get('txRef', '') is string && d.get('txRef', '').size() >= 16)
+          || (d.get('nodeTxHash', '') is string && d.get('nodeTxHash', '').size() >= 16);
+    }
+    function repayProof(d) {
+      return (d.get('txRepayRef', '') is string && d.get('txRepayRef', '').size() >= 16)
+          || (d.get('lastRepayTxRef', '') is string && d.get('lastRepayTxRef', '').size() >= 16);
+    }
+
     function paymentConfirmOnly() {
       return request.resource.data.diff(resource.data).affectedKeys()
         .hasOnly(['status', 'txRef', 'confirmedAt']);
@@ -273,11 +284,13 @@ service cloud.firestore {
       match /payments/{paymentId} {
         allow read: if isCreatorOrMember(groupId);
         allow create: if isCreatorOrMember(groupId)
-          && request.resource.data.keys().hasAny(['type', 'status', 'amountHarv', 'timestamp']);
+          && request.resource.data.keys().hasAny(['type', 'status', 'amountHarv', 'timestamp'])
+          && (request.resource.data.get('status', '') != 'CONFIRMED' || txProof(request.resource.data));
         allow update: if isCreatorOrMember(groupId)
           && paymentConfirmOnly()
           && resource.data.status == 'PENDING'
-          && request.resource.data.status == 'CONFIRMED';
+          && request.resource.data.status == 'CONFIRMED'
+          && txProof(request.resource.data);
         allow delete: if isGroupCreator(groupId);
       }
 
@@ -286,12 +299,19 @@ service cloud.firestore {
         allow create: if isActiveMember(groupId)
           && request.resource.data.status == 'PENDING'
           && request.resource.data.borrowerUid == request.auth.uid;
-        allow update: if isGroupCreator(groupId)
+        // Turning a loan REPAID, by anyone, needs the repayment's transaction hash; so does a borrower raising
+        // what they have repaid.
+        allow update: if (request.resource.data.get('status', '') != 'REPAID'
+                          || resource.data.get('status', '') == 'REPAID'
+                          || repayProof(request.resource.data))
+          && (isGroupCreator(groupId)
           || (isSelf(resource.data.borrowerUid)
               && request.resource.data.diff(resource.data).affectedKeys()
                   .hasOnly(['repaidAmountHarv', 'lastRepayAt', 'lastRepayTxRef', 'status', 'repaidAt', 'txRepayRef'])
               && (request.resource.data.status == resource.data.status
-                  || request.resource.data.status == 'REPAID'));
+                  || request.resource.data.status == 'REPAID')
+              && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['repaidAmountHarv'])
+                  || repayProof(request.resource.data))));
         allow delete: if isGroupCreator(groupId);
       }
 

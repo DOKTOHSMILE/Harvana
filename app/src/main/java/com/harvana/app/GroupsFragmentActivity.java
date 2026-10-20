@@ -214,13 +214,15 @@ public class GroupsFragmentActivity extends Fragment {
 			long round = (long) _safeDouble(g, "currentRound"), slots = (long) _safeDouble(g, "totalSlots");
 			if (round > 0 && (slots <= 0 || round <= slots)) ongoing++;
 		}
-		if (tv_stat_active_groups != null) tv_stat_active_groups.setText(String.valueOf(active));
+		// Active groups: the node's count, as on Home, once it has answered; until then the groups listed here.
+		if (tv_stat_active_groups != null) tv_stat_active_groups.setText(String.valueOf(nodeActive >= 0 ? nodeActive : active));
 		if (tv_stat_total_members != null) tv_stat_total_members.setText(String.valueOf(members));
 		if (tv_stat_ongoing_cycles != null) tv_stat_ongoing_cycles.setText(String.valueOf(ongoing));
 		if (tv_stat_total_saved != null) tv_stat_total_saved.setText(savedText.isEmpty() ? "0" : savedText);
 	}
 	
 	private String savedText = "";
+	private int nodeActive = -1;
 	
 	/** Total saved as on Home: the node's savings in each group's coin, one figure in the chosen currency. */
 	private void _loadSaved() {
@@ -232,7 +234,8 @@ public class GroupsFragmentActivity extends Fragment {
 				double usd = p.savedUsd(ctx);
 				String t = Double.isNaN(usd) ? p.savedInGroupCoins() : com.harvana.app.wallet.FxRates.money(ctx, usd);
 				if (getActivity() == null) return;
-				getActivity().runOnUiThread(() -> { savedText = t == null ? "" : t; _paintStats(); });
+				final int act = p.groupCount();
+				getActivity().runOnUiThread(() -> { savedText = t == null ? "" : t; nodeActive = act; _paintStats(); });
 			})));
 	}
 	
@@ -425,12 +428,7 @@ public class GroupsFragmentActivity extends Fragment {
 			@Override
 			public void onSuccess(Map<String, Object> data) {
 				List<String> groupIds = new ArrayList<>();
-				Object rawGroups = data.get("groups");
-				if (rawGroups instanceof List) {
-					for (Object g : (List<?>) rawGroups) {
-						if (g != null && !g.toString().isEmpty()) groupIds.add(g.toString());
-					}
-				}
+				groupIds.addAll(com.harvana.app.firestore.UserProfileManager.groupIds(data.get("groups")));
 				if (groupIds.isEmpty()) {
 					if (getActivity() == null) return;
 					getActivity().runOnUiThread(() -> {

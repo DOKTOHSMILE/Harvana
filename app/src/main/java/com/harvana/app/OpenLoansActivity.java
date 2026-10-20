@@ -47,9 +47,7 @@ public class OpenLoansActivity extends AppCompatActivity {
         final String uid = au.getCurrentUser().getUid();
         UserProfileManager.getInstance(this).getProfile(uid, new UserProfileManager.DocCallback() {
             @Override public void onSuccess(Map<String, Object> profile) {
-                Object g = profile.get("groups");
-                List<String> ids = new ArrayList<>();
-                if (g instanceof List) for (Object o : (List<Object>) g) if (o != null && !String.valueOf(o).trim().isEmpty()) ids.add(String.valueOf(o).trim());
+                List<String> ids = com.harvana.app.firestore.UserProfileManager.groupIds(profile.get("groups"));
                 fetch(uid, ids);
             }
             @Override public void onError(String e) { runOnUiThread(() -> showError(e)); }

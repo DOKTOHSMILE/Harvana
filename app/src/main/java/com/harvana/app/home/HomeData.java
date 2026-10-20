@@ -147,8 +147,7 @@ public final class HomeData {
             if (fresh) {
                 if (data != null) {
                     put(draft, "name", str(data, "first_name", ""));
-                    Object g = data.get("groups");
-                    if (g instanceof List) for (Object o : (List<?>) g) if (o != null && !o.toString().trim().isEmpty()) ids.add(o.toString().trim());
+                    ids.addAll(com.harvana.app.firestore.UserProfileManager.groupIds(data.get("groups")));
                     JSONArray pend = new JSONArray();
                     Object p = data.get("pendingGroupIds");
                     if (p instanceof List) for (Object o : (List<?>) p) if (o != null) pend.put(o.toString());

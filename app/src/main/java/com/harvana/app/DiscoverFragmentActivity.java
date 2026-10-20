@@ -277,12 +277,7 @@ public class DiscoverFragmentActivity extends Fragment {
 					public void onSuccess(Map<String, Object> data) {
 						if (getActivity() == null) return;
 						myGroupIds.clear();
-						Object rawGroups = data.get("groups");
-						if (rawGroups instanceof List) {
-							for (Object gid : (List<?>) rawGroups) {
-								if (gid != null) myGroupIds.add(gid.toString());
-							}
-						}
+						myGroupIds.addAll(com.harvana.app.firestore.UserProfileManager.groupIds(data.get("groups")));
 						pendingGroupIds.clear();
 						Object rawPending = data.get("pendingGroupIds");
 						if (rawPending instanceof List) {

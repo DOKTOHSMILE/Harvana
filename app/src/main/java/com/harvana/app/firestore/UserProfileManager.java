@@ -145,7 +145,7 @@ public class UserProfileManager {
         }
         boolean alreadyIn = false;
         for (Object g : groups) {
-            if (g != null && groupId.equals(String.valueOf(g))) {
+            if (g != null && groupId.equals(_arrayItemId(g))) {
                 alreadyIn = true;
                 break;
             }
@@ -191,6 +191,21 @@ public class UserProfileManager {
         Map<String, Object> update = new HashMap<>();
         update.put("groups", items);
         updateProfileFields(uid, update, callback);
+    }
+
+    /**
+     * The group ids in a profile's "groups" list, in order, without repeats. An entry is a plain id or, in older
+     * profiles, a map with "id" (or "groupId"); every reader of the list goes through here so both forms count.
+     */
+    public static List<String> groupIds(Object raw) {
+        List<String> out = new ArrayList<>();
+        if (raw instanceof Map) raw = ((Map<?, ?>) raw).get("groups");
+        if (!(raw instanceof List)) return out;
+        for (Object item : (List<?>) raw) {
+            String id = _arrayItemId(item).trim();
+            if (!id.isEmpty() && !"null".equalsIgnoreCase(id) && !out.contains(id)) out.add(id);
+        }
+        return out;
     }
 
     private static String _arrayItemId(Object item) {

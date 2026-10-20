@@ -111,12 +111,7 @@ public final class NodePortfolio {
         final Context c = ctx.getApplicationContext();
         UserProfileManager.getInstance(c).getProfile(uid, new UserProfileManager.DocCallback() {
             @Override public void onSuccess(Map<String, Object> profile) {
-                List<String> ids = new ArrayList<>();
-                Object g = profile.get("groups");
-                if (g instanceof List) for (Object o : (List<Object>) g) {
-                    String id = o instanceof Map ? String.valueOf(((Map<?, ?>) o).get("id")) : String.valueOf(o);
-                    if (o != null && !id.trim().isEmpty() && !"null".equals(id)) ids.add(id.trim());
-                }
+                List<String> ids = UserProfileManager.groupIds(profile.get("groups"));
                 resolve(c, uid, wallet, ids, cb);
             }
             @Override public void onError(String e) { finish(uid, new Portfolio(), cb); }

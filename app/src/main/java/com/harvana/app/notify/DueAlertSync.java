@@ -26,9 +26,8 @@ public final class DueAlertSync {
         if (uid == null || uid.isEmpty()) { finish(done); return; }
         UserProfileManager.getInstance(c).getProfile(uid, new UserProfileManager.DocCallback() {
             @Override public void onSuccess(Map<String, Object> profile) {
-                Object raw = profile == null ? null : profile.get("groups");
-                if (!(raw instanceof List) || ((List<?>) raw).isEmpty()) { finish(done); return; }
-                List<?> groups = (List<?>) raw;
+                List<String> groups = com.harvana.app.firestore.UserProfileManager.groupIds(profile == null ? null : profile.get("groups"));
+                if (groups.isEmpty()) { finish(done); return; }
                 AtomicInteger left = new AtomicInteger(groups.size());
                 for (Object item : groups) {
                     String gid = item == null ? "" : String.valueOf(item).trim();

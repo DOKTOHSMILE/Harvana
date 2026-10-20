@@ -712,12 +712,7 @@ public final class JoinRequestManager {
                     @Override
                     public void onSuccess(Map<String, Object> profile) {
                         java.util.Set<String> existing = new java.util.HashSet<>();
-                        Object groups = profile != null ? profile.get("groups") : null;
-                        if (groups instanceof java.util.List) {
-                            for (Object g : (java.util.List<?>) groups) {
-                                if (g != null) existing.add(String.valueOf(g));
-                            }
-                        }
+                        existing.addAll(com.harvana.app.firestore.UserProfileManager.groupIds(profile != null ? profile.get("groups") : null));
                         java.util.Set<String> stillPending = new java.util.HashSet<>();
                         Object pending = profile != null ? profile.get("pendingGroupIds") : null;
                         if (pending instanceof java.util.List) {

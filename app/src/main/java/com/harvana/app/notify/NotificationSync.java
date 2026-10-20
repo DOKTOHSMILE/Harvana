@@ -116,9 +116,8 @@ public final class NotificationSync {
         // 3. New notices in my groups
         UserProfileManager.getInstance(c).getProfile(uid, new UserProfileManager.DocCallback() {
             @Override public void onSuccess(Map<String, Object> profile) {
-                Object g = profile.get("groups");
-                if (!(g instanceof List) || ((List<?>) g).isEmpty()) { finish.run(); return; }
-                final List<?> groups = (List<?>) g;
+                final List<String> groups = com.harvana.app.firestore.UserProfileManager.groupIds(profile.get("groups"));
+                if (groups.isEmpty()) { finish.run(); return; }
                 final AtomicInteger left = new AtomicInteger(groups.size());
                 final SharedPreferences seen = c.getSharedPreferences("notif_notice_seen", Context.MODE_PRIVATE);
                 for (Object o : groups) {

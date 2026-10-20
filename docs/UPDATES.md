@@ -2,6 +2,16 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Groups tab reads the same group list as Home
+
+- A profile's `groups` list holds plain ids or, in older profiles, `{id: …}` maps. Home's counter (NodePortfolio)
+  read both forms; the Groups tab, Discover, Home's upcoming payments, Open loans, the join-request repair and the
+  due/admin/notice alert syncs turned a map into text ("{id=…}"), so those groups failed to load. That is why the
+  Groups tab showed 0 while Home showed 3.
+- New `UserProfileManager.groupIds(raw)` reads both forms, in order, without repeats. Every reader uses it, and
+  adding a group no longer adds a second copy of an id that is already stored as a map.
+- Groups tab, Active Groups: the node's count, the same as Home. Until the node answers, it counts the listed groups.
+
 ## 20 Oct 2026: illustrations on empty screens across the app
 
 - Eight new theme-coloured illustrations (light and dark), alongside the two group ones: `illus_all_done`,

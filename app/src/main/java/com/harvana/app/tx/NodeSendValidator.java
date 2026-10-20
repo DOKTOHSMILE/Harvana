@@ -42,7 +42,7 @@ public final class NodeSendValidator {
         if (recipientAddress == null || recipientAddress.trim().isEmpty()) {
             return Result.fail("Recipient address is required");
         }
-        String addr = recipientAddress.trim();
+        String addr = com.harvana.app.AddressUtil.canonical(recipientAddress);
         if (addr.length() != 44) {
             return Result.fail("Address must be exactly 44 characters");
         }
@@ -108,6 +108,7 @@ public final class NodeSendValidator {
 
     /** Quick address-only format check. */
     public static boolean isValidAddress(String address) {
+        address = address == null ? null : com.harvana.app.AddressUtil.canonical(address);
         return address != null
             && address.length() == 44
             && address.startsWith("HV0x")

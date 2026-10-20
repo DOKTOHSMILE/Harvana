@@ -2,6 +2,14 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: wallet addresses in any letter case
+
+- A Harvana address typed, pasted or scanned as `hv0x…`, `HV0X…` or with upper-case hex is accepted and turned into
+  the ledger form (`HV0x` + lower-case hex) before it is checked or signed: Send (`SendController`,
+  `NodeSendValidator`), the QR scanner, beneficiaries (`AddressBook`), the group beneficiary in Create group, and the
+  wallet-recovery field. One helper: `AddressUtil.canonical`. `.harv` names and `0x` addresses pass through as typed.
+- The node does the same for every request (node `docs/DEPLOYMENT.md`, 20 Oct 2026), so older app builds work too.
+
 ## 20 Oct 2026: button icons, fewer sentences, tFare row, Trust score without a wallet, wallet after sign-in
 
 - **Button icons:** every themed button (filled, outlined, text) draws its icon at 20dp next to the text

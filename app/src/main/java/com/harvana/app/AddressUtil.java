@@ -22,7 +22,20 @@ public class AddressUtil {
      */
     public static boolean isValidAddress(String address) {
         if (address == null) return false;
-        return ADDRESS_PATTERN.matcher(address).matches();
+        return ADDRESS_PATTERN.matcher(canonical(address)).matches();
+    }
+
+    /**
+     * A Harvana address typed or scanned in any letter case ("hv0x…", "HV0X…", upper-case hex) in the one form the
+     * chain stores: HV0x + lower-case hex. Anything else (a .harv name, a 0x address) comes back trimmed, unchanged.
+     */
+    public static String canonical(String s) {
+        if (s == null) return "";
+        String t = s.trim();
+        if (t.length() == 44 && t.regionMatches(true, 0, "HV0x", 0, 4) && t.substring(4).matches("(?i)[0-9a-f]{40}")) {
+            return "HV0x" + t.substring(4).toLowerCase(java.util.Locale.ROOT);
+        }
+        return t;
     }
 
     /**

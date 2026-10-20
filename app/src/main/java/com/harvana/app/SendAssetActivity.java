@@ -342,7 +342,7 @@ public class SendAssetActivity extends AppCompatActivity {
 				@Override public String assetKey() { HashMap<String, Object> a = sel(); return a == null ? "HARV" : String.valueOf(a.get("assetKey")); }
 				@Override public String symbol() { HashMap<String, Object> a = sel(); return a == null ? "HARV" : String.valueOf(a.get("symbol")); }
 				@Override public String from() { HashMap<String, Object> a = sel(); return a != null && a.get("address") instanceof String ? String.valueOf(a.get("address")) : myAddress; }
-				@Override public String to() { return etRecipient == null ? "" : etRecipient.getText().toString().trim(); }
+				@Override public String to() { return etRecipient == null ? "" : com.harvana.app.AddressUtil.canonical(etRecipient.getText().toString()); }
 			});
 		}
 		if (isGroupSend) {
@@ -483,7 +483,7 @@ public class SendAssetActivity extends AppCompatActivity {
 				if (isProcessingSend) return; // Prevent rapid double-taps
 				if (amountPreview != null && !amountPreview.normalise()) return;   // typed in money: turn it into the coin amount first
 				// A .harv name: look up the wallet it stands for, put that address in the field, then send as usual.
-				String typedTo = etRecipient != null && etRecipient.getText() != null ? etRecipient.getText().toString().trim() : "";
+				String typedTo = etRecipient != null && etRecipient.getText() != null ? com.harvana.app.AddressUtil.canonical(etRecipient.getText().toString()) : "";
 				if (typedTo.toLowerCase(java.util.Locale.US).endsWith(".harv")) {
 					_resolveRecipientName(typedTo, true, view);
 					return;
@@ -517,7 +517,7 @@ public class SendAssetActivity extends AppCompatActivity {
 				}
 				String contract = String.valueOf(selectedAsset.get("contractAddress"));
 				
-				String recipient = etRecipient != null ? etRecipient.getText().toString().trim() : "";
+				String recipient = etRecipient != null ? com.harvana.app.AddressUtil.canonical(etRecipient.getText().toString()) : "";
 				if (recipient.isEmpty()) {
 					SketchwareUtil.showMessage(getApplicationContext(), "Please enter a recipient address.");
 					return;
@@ -643,7 +643,7 @@ public class SendAssetActivity extends AppCompatActivity {
 	
 	private void _sendChain(View sendButton, HashMap<String, Object> asset, String assetKey) {
 		com.harvana.app.wallet.CoinCatalog.Coin coin = com.harvana.app.wallet.CoinCatalog.get(assetKey);
-		String recipient = etRecipient != null ? etRecipient.getText().toString().trim() : "";
+		String recipient = etRecipient != null ? com.harvana.app.AddressUtil.canonical(etRecipient.getText().toString()) : "";
 		if (recipient.isEmpty()) { SketchwareUtil.showMessage(getApplicationContext(), "Please enter a recipient address."); return; }
 		String amountText = etAmount != null ? etAmount.getText().toString().trim() : "";
 		if (amountText.isEmpty()) { SketchwareUtil.showMessage(getApplicationContext(), "Please enter an amount."); return; }
@@ -682,7 +682,7 @@ public class SendAssetActivity extends AppCompatActivity {
 	}
 
 	private void _sendPi(View sendButton, HashMap<String, Object> asset) {
-		String recipient = etRecipient != null ? etRecipient.getText().toString().trim() : "";
+		String recipient = etRecipient != null ? com.harvana.app.AddressUtil.canonical(etRecipient.getText().toString()) : "";
 		if (!com.harvana.app.wallet.PiKeys.isValidAddress(recipient)) {
 			SketchwareUtil.showMessage(getApplicationContext(), "Enter a Pi address. It starts with G and is 56 characters.");
 			return;
@@ -988,7 +988,7 @@ public class SendAssetActivity extends AppCompatActivity {
 	 *  (the first 3 are free). */
 	private void _sendStable(View sendButton, HashMap<String, Object> asset, String code) {
 		String sym = com.harvana.app.husd.Stable.symbol(code);
-		String recipient = etRecipient != null ? etRecipient.getText().toString().trim() : "";
+		String recipient = etRecipient != null ? com.harvana.app.AddressUtil.canonical(etRecipient.getText().toString()) : "";
 		if (!recipient.matches("^HV0x[0-9a-fA-F]{40}$")) {
 			SketchwareUtil.showMessage(getApplicationContext(), sym + " goes to a Harvana address (HV0x…).");
 			return;
@@ -1113,7 +1113,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		View root = getLayoutInflater().inflate(R.layout.sheet_wallet_contacts, null);
 		android.widget.LinearLayout list = root.findViewById(R.id.contacts_list);
 		TextView save = root.findViewById(R.id.contacts_save);
-		String typed = etRecipient == null ? "" : etRecipient.getText().toString().trim();
+		String typed = etRecipient == null ? "" : com.harvana.app.AddressUtil.canonical(etRecipient.getText().toString());
 		if (!typed.isEmpty() && !typed.toLowerCase(java.util.Locale.US).endsWith(".harv") && com.harvana.app.tx.AddressBook.nameOf(this, typed) == null) {
 			save.setVisibility(View.VISIBLE);
 			save.setOnClickListener(v -> {

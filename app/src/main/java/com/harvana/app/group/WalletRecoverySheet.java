@@ -132,7 +132,7 @@ public final class WalletRecoverySheet {
         if (s == null) return false;
         s = s.trim();
         if (s.length() < 12) return false;
-        boolean ok = s.startsWith("HV0x") || s.startsWith("hv0x") || s.startsWith("0x");
+        boolean ok = s.regionMatches(true, 0, "HV0x", 0, 4) || s.startsWith("0x");
         if (!ok) return false;
         for (int i = s.startsWith("0x") ? 2 : 4; i < s.length(); i++) {
             char c = s.charAt(i);

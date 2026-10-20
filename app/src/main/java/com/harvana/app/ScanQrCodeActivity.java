@@ -242,7 +242,7 @@ public class ScanQrCodeActivity extends AppCompatActivity {
 	// ── Shared result handling (camera or gallery) — mode-based validation ──
 	
 	private void handleDecodedText(String rawText) {
-		String text = rawText != null ? rawText.trim() : "";
+		String text = com.harvana.app.AddressUtil.canonical(rawText);      // a bare address in any case → HV0x + lower-case hex
 		
 		String rejectionMessage = validateForMode(text);
 		if (rejectionMessage != null) {

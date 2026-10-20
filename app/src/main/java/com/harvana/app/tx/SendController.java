@@ -164,6 +164,7 @@ public class SendController {
         if (destroyed || listener == null) return;
 
         pendingPreview = null;
+        recipient = com.harvana.app.AddressUtil.canonical(recipient);   // HV0X…/hv0x… → HV0x + lower-case hex
 
         // 1. Instant input validation (no network)
         NodeSendValidator.Result inputCheck =

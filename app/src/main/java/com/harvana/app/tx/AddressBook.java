@@ -58,7 +58,7 @@ public final class AddressBook {
 
     /** Saves (or renames) an address. */
     public static synchronized void save(Context c, String name, String address, String family) {
-        String a = address == null ? "" : address.trim();
+        String a = com.harvana.app.AddressUtil.canonical(address);
         String n = name == null ? "" : name.trim();
         if (a.isEmpty() || n.isEmpty()) return;
         List<Contact> list = all(c);

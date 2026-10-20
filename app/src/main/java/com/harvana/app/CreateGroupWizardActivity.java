@@ -495,7 +495,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
         toggle(R.id.tg_create_purpose, purpose, i -> { purpose = i; paintGoalRule(rule); });
         ((TextView) page.findViewById(R.id.tv_create_target_label)).setText("Target amount (" + sym() + ")");
         text(R.id.et_create_target, target, s -> target = s);
-        text(R.id.et_create_beneficiary, beneficiary, s -> beneficiary = s.trim());
+        text(R.id.et_create_beneficiary, beneficiary, s -> beneficiary = com.harvana.app.AddressUtil.canonical(s));
         toggle(R.id.tg_create_beneficiary, beneficiaryIsMe ? 0 : 1, i -> { beneficiaryIsMe = i == 0; paintGoalRule(rule); });
         paintGoalRule(rule);
         text(R.id.et_create_expected, expectedMembers, s -> expectedMembers = s);

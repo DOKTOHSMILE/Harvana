@@ -129,6 +129,18 @@
 							android:focusableInTouchMode="true"
 							android:cursorVisible="true" />
 						<com.google.android.material.imageview.ShapeableImageView
+							android:id="@+id/btnContacts"
+							android:layout_width="22dp"
+							android:layout_height="22dp"
+							android:padding="1dp"
+							android:src="@drawable/ic_person_line"
+							android:scaleType="centerInside"
+							android:layout_marginStart="10dp"
+							android:layout_marginEnd="6dp"
+							android:contentDescription="Saved wallets"
+							app:tint="@color/colorTextSecondary"
+							android:focusable="false" />
+						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/btnPaste"
 							android:layout_width="22dp"
 							android:layout_height="22dp"

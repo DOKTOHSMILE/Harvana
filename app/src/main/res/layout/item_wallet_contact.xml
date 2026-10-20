@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One saved wallet or recent recipient: avatar, name (or "Recent"), short address. -->
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:minHeight="56dp"
+	android:background="?attr/selectableItemBackground"
+	android:gravity="center_vertical"
+	android:orientation="horizontal">
+	<TextView
+		android:id="@+id/contact_avatar"
+		android:layout_width="34dp"
+		android:layout_height="34dp"
+		android:gravity="center"
+		android:textColor="@color/colorTextOnAccent"
+		android:textSize="14sp"
+		android:textStyle="bold" />
+	<LinearLayout
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_marginStart="12dp"
+		android:layout_weight="1"
+		android:orientation="vertical">
+		<TextView
+			android:id="@+id/contact_name"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:maxLines="1"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="15sp"
+			android:textStyle="bold" />
+		<TextView
+			android:id="@+id/contact_address"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:fontFamily="monospace"
+			android:maxLines="1"
+			android:textColor="@color/colorTextTertiary"
+			android:textSize="12sp" />
+	</LinearLayout>
+	<TextView
+		android:id="@+id/contact_tag"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textColor="@color/colorTextTertiary"
+		android:textSize="12sp" />
+</LinearLayout>

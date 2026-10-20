@@ -37,6 +37,11 @@ public final class HarvanaCardRenderer {
 	// ── FRONT ────────────────────────────────────────────────────────────
 	
 	public static Bitmap renderFront(Context context, CardTemplate template, String walletAddress, String cardOwnerName, String cardDescription) {
+		return renderFront(context, template, walletAddress, cardOwnerName, cardDescription, null);
+	}
+
+	/** {@code harvName}: the wallet's primary Harvana name ("doktohsmile.harv"), shown as a fact when it has one. */
+	public static Bitmap renderFront(Context context, CardTemplate template, String walletAddress, String cardOwnerName, String cardDescription, String harvName) {
 		Bitmap bitmap = Bitmap.createBitmap(CARD_WIDTH_PX, CARD_HEIGHT_PX, Bitmap.Config.ARGB_8888);
 		Canvas canvas = new Canvas(bitmap);
 		clipToRoundedRect(canvas);
@@ -129,8 +134,15 @@ public final class HarvanaCardRenderer {
 
 		canvas.drawText("NETWORK", margin, 506f, factLabel);
 		canvas.drawText("HARVANA PROTOCOL", margin, 530f, factSmall);
-		canvas.drawText("KEY", col2, 506f, factLabel);
-		canvas.drawText("ED25519", col2, 530f, factSmall);
+		if (harvName != null && !harvName.trim().isEmpty()) {
+			String n = harvName.trim().toLowerCase(java.util.Locale.US);
+			if (n.length() > 20) n = n.substring(0, 19) + "…";
+			canvas.drawText("NAME", col2, 506f, factLabel);
+			canvas.drawText(n, col2, 530f, factSmall);
+		} else {
+			canvas.drawText("KEY", col2, 506f, factLabel);
+			canvas.drawText("ED25519", col2, 530f, factSmall);
+		}
 		canvas.drawText("PROTECTION", col3, 506f, factLabel);
 		canvas.drawText("PBKDF2 + ARGON2ID", col3, 530f, factSmall);
 

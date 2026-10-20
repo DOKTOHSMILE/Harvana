@@ -407,8 +407,16 @@ public class CreateHarvanaCardActivity extends AppCompatActivity {
         String qrPayload = HarvanaCardCrypto.encryptToQrString(this, mnemonic, password, cardTag);
         String digitCode = HarvanaCardCrypto.encryptToDigitCode(this, mnemonic, password);
 
+        // The wallet's primary .harv name goes on the card when it has one (a short wait; the card is made without it offline).
+        final String[] harvName = {null};
+        final java.util.concurrent.CountDownLatch named = new java.util.concurrent.CountDownLatch(1);
+        com.harvana.app.sync.NodeGroupClient.reverseName(walletAddress, new com.harvana.app.sync.NodeGroupClient.Callback() {
+            @Override public void onSuccess(org.json.JSONObject j) { harvName[0] = j.optString("name", null); named.countDown(); }
+            @Override public void onError(String e) { named.countDown(); }
+        });
+        try { named.await(4, java.util.concurrent.TimeUnit.SECONDS); } catch (InterruptedException ignored) { }
         Bitmap front = HarvanaCardRenderer.renderFront(this, selectedTemplate, walletAddress,
-            cardOwnerName, et_card_description != null ? et_card_description.getText().toString().trim() : "");
+            cardOwnerName, et_card_description != null ? et_card_description.getText().toString().trim() : "", harvName[0]);
         Bitmap back = HarvanaCardRenderer.renderBack(this, selectedTemplate, qrPayload, digitCode);
 
         runOnUiThread(() -> {

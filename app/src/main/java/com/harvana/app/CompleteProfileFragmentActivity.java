@@ -433,6 +433,11 @@ public class CompleteProfileFragmentActivity extends Fragment {
 			et_last_name.setError("Please enter your last name");
 			return;
 		}
+		EditText etUser = getView() == null ? null : getView().findViewById(R.id.et_username);
+		if (etUser != null) {
+			String why = com.harvana.app.social.UsernameRules.problem(com.harvana.app.social.UsernameRules.normalize(etUser.getText().toString()));
+			if (why != null) { etUser.setError(why); etUser.requestFocus(); return; }
+		}
 		if (tv_dob.getText().toString().trim().isEmpty() || "Tap to select".equals(tv_dob.getText().toString().trim())) {
 			SketchwareUtil.showMessage(getContext(), "Please select your date of birth");
 			return;
@@ -506,6 +511,28 @@ public class CompleteProfileFragmentActivity extends Fragment {
 		
 		btn_submit_profile.setEnabled(false);
 		btn_submit_profile.setText("Creating account…");
+		// The username must be free before the account is made (it is claimed once the profile is saved).
+		final EditText userBox = getView() == null ? null : getView().findViewById(R.id.et_username);
+		final String wanted = userBox == null ? "" : com.harvana.app.social.UsernameRules.normalize(userBox.getText().toString());
+		if (!wanted.isEmpty() && !usernameChecked) {
+			com.harvana.app.social.SocialStore.findByUsername(wanted, (person, err) -> {
+				if (getActivity() == null) return;
+				getActivity().runOnUiThread(() -> {
+					if (person != null && !effectiveUid.equals(person.uid)) {
+						btn_submit_profile.setEnabled(true);
+						btn_submit_profile.setText("Create Account");
+						userBox.setError("That username is already taken.");
+						userBox.requestFocus();
+						return;
+					}
+					usernameChecked = true;
+					_validateAndSubmit();
+				});
+			});
+			return;
+		}
+		usernameChecked = false;
+		pendingUsername = wanted;
 		// A named referrer must exist. Leaving the box empty skips it.
 		final EditText referrerBox = _view_et_referrer();
 		String typed = referrerBox == null ? "" : referrerBox.getText().toString().trim();
@@ -527,6 +554,11 @@ public class CompleteProfileFragmentActivity extends Fragment {
 			});
 		});
 	}
+
+	/** The username was found free on this tap (the check runs once, then the submit goes on). */
+	private boolean usernameChecked;
+	/** Claimed for the new account once its profile is saved. */
+	private String pendingUsername = "";
 
 	private EditText _view_et_referrer() {
 		return getView() == null ? null : (EditText) getView().findViewById(R.id.et_referrer);
@@ -598,6 +630,13 @@ public class CompleteProfileFragmentActivity extends Fragment {
 					.putString("privacy", "true")
 					.putString("uid", effectiveUid)
 					.commit();
+					if (!pendingUsername.isEmpty()) {
+						final android.content.Context app = getActivity().getApplicationContext();
+						com.harvana.app.social.SocialStore.claimUsername(pendingUsername, (saved, err) -> {
+							if (err != null) new android.os.Handler(android.os.Looper.getMainLooper()).post(() ->
+									android.widget.Toast.makeText(app, "Username not saved: " + err + " Set it in Settings → Edit profile.", android.widget.Toast.LENGTH_LONG).show());
+						});
+					}
 					android.content.Intent intent = new android.content.Intent(getActivity(), MainActivity.class);
 					intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
 					startActivity(intent);

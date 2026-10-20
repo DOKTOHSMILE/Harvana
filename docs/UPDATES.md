@@ -2,6 +2,14 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Saved wallets on Send; usernames; .harv name on the access card
+
+- Send: a new contacts icon next to Paste and Scan opens Wallets: the addresses you saved (by name) and your recent recipients for the coin picked. Tap to fill the recipient; "+ Save this address" names the address in the field; long-press a saved wallet to rename or remove it. Recent chips show the saved name. The line under the recipient ("name.harv → HV0x…") is gone; the review sheet shows the address.
+- Harvana names: your username is filled in as the suggested name (dots and underscores become hyphens). With no username, you are asked to create one first.
+- Create account: a Username field (checked as you submit; it must be free). It is claimed once the profile is saved.
+- Access card: a wallet with a primary .harv name shows it on the card (NAME). Restoring a card that has no tag names the wallet after its .harv name.
+- Install: new wallet APK.
+
 ## 20 Oct 2026: Live network fee and MAX for every coin; Harvana names row
 
 - Send: the fee row reads the live fee for the coin picked (tFare for HARV and Harvana coins; Network fee for others): ETH/BNB/POL/BASE gas, BTC/LTC/DOGE fee rate, TRX bandwidth (plus 1.1 TRX for a new receiving account), TRC-20 energy in TRX, SOL 0.000005, SPL tokens (plus the receiver's token-account rent when they have none), NEAR (keeping its storage reserve), Pi (keeping its reserve). It shows the most you can send when the amount and fee do not both fit.

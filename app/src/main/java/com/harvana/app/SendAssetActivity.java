@@ -173,6 +173,8 @@ public class SendAssetActivity extends AppCompatActivity {
 		String prefillTo = getIntent().getStringExtra("toAddress");
 		if (prefillTo != null && !prefillTo.trim().isEmpty() && etRecipient != null) etRecipient.setText(prefillTo.trim());
 		btnPaste = findViewById(R.id.btnPaste);
+		View btnContacts = findViewById(R.id.btnContacts);
+		if (btnContacts != null) btnContacts.setOnClickListener(v -> _showWalletContacts());
 		btnScan = findViewById(R.id.btnScan);
 		etAmount = findViewById(R.id.etAmount);
 		etMemo = findViewById(R.id.etMemo);
@@ -828,11 +830,10 @@ public class SendAssetActivity extends AppCompatActivity {
 		});
 	}
 
+	/** The line under the recipient is gone (owner, 20 Oct 2026); the review sheet shows the address before signing. */
 	private void _showRecipientName(String text) {
 		TextView tv = findViewById(R.id.tv_recipient_name);
-		if (tv == null) return;
-		tv.setText(text);
-		tv.setVisibility(text.isEmpty() ? View.GONE : View.VISIBLE);
+		if (tv != null) tv.setVisibility(View.GONE);
 	}
 
 	private com.harvana.app.ui.SendReviewSheet.Data _review(String key, String amountText, double amount, String recipient, String network) {
@@ -1097,6 +1098,104 @@ public class SendAssetActivity extends AppCompatActivity {
 
 	private static final int RC_PICK_ASSET = 78;
 
+	/**
+	 * Saved wallets (and recent recipients) for the coin picked: a tap fills the recipient; a long press removes a saved
+	 * one; "+ Save this address" names the address in the field. Only addresses of the coin's own shape are listed.
+	 */
+	private void _showWalletContacts() {
+		int pos = spAsset == null ? -1 : spAsset.getSelectedItemPosition();
+		HashMap<String, Object> a = pos >= 0 && pos < walletAssets.size() ? walletAssets.get(pos) : null;
+		String key = a == null ? "HARV" : String.valueOf(a.get("assetKey"));
+		String symbol = a == null ? "HARV" : String.valueOf(a.get("symbol"));
+		final String family = _addressHint(key);
+		com.harvana.app.ui.AppSheet sheet = new com.harvana.app.ui.AppSheet(this);
+		View root = getLayoutInflater().inflate(R.layout.sheet_wallet_contacts, null);
+		android.widget.LinearLayout list = root.findViewById(R.id.contacts_list);
+		TextView save = root.findViewById(R.id.contacts_save);
+		String typed = etRecipient == null ? "" : etRecipient.getText().toString().trim();
+		if (!typed.isEmpty() && !typed.toLowerCase(java.util.Locale.US).endsWith(".harv") && com.harvana.app.tx.AddressBook.nameOf(this, typed) == null) {
+			save.setVisibility(View.VISIBLE);
+			save.setOnClickListener(v -> {
+				sheet.dismiss();
+				_saveWalletContact(typed, family);
+			});
+		}
+		java.util.List<com.harvana.app.tx.AddressBook.Contact> saved = com.harvana.app.tx.AddressBook.forFamily(this, family);
+		java.util.Set<String> shown = new java.util.HashSet<>();
+		for (com.harvana.app.tx.AddressBook.Contact c : saved) {
+			shown.add(c.address.toLowerCase(java.util.Locale.US));
+			list.addView(_contactRow(list, c.name, c.address, "Saved", sheet, true));
+		}
+		boolean harvana = family.startsWith("HV0x");
+		for (String to : com.harvana.app.tx.RecentRecipients.forCoin(this, symbol, harvana)) {
+			if (!shown.add(to.toLowerCase(java.util.Locale.US))) continue;
+			list.addView(_contactRow(list, com.harvana.app.ui.SendReviewSheet.shortAddress(to), to, "Recent", sheet, false));
+		}
+		if (list.getChildCount() == 0) {
+			TextView none = new TextView(this);
+			none.setText("0 wallets");
+			none.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorTextTertiary));
+			none.setPadding(0, 24, 0, 24);
+			list.addView(none);
+		}
+		sheet.setContentView(root);
+		sheet.show();
+	}
+
+	private View _contactRow(android.view.ViewGroup parent, String name, String address, String tag,
+			com.harvana.app.ui.AppSheet sheet, boolean removable) {
+		View row = getLayoutInflater().inflate(R.layout.item_wallet_contact, parent, false);
+		com.harvana.app.ui.SendReviewSheet.avatar(row.findViewById(R.id.contact_avatar), address);
+		((TextView) row.findViewById(R.id.contact_name)).setText(name);
+		((TextView) row.findViewById(R.id.contact_address)).setText(com.harvana.app.ui.SendReviewSheet.shortAddress(address));
+		((TextView) row.findViewById(R.id.contact_tag)).setText(tag);
+		row.setOnClickListener(v -> {
+			sheet.dismiss();
+			if (etRecipient != null) { etRecipient.setText(address); etRecipient.setSelection(address.length()); }
+		});
+		row.setOnLongClickListener(v -> {
+			if (removable) {
+				new com.harvana.app.ui.SheetDialog.Builder(this).setTitle(name)
+						.setItems(new CharSequence[]{"Rename", "Remove"}, (d, which) -> {
+							sheet.dismiss();
+							if (which == 0) _saveWalletContact(address, _addressHintFor(address));
+							else com.harvana.app.tx.AddressBook.remove(this, address);
+						}).show();
+			} else {
+				sheet.dismiss();
+				_saveWalletContact(address, _addressHintFor(address));
+			}
+			return true;
+		});
+		return row;
+	}
+
+	/** The address shape of the coin picked now (where a contact is saved). */
+	private String _addressHintFor(String address) {
+		int pos = spAsset == null ? -1 : spAsset.getSelectedItemPosition();
+		HashMap<String, Object> a = pos >= 0 && pos < walletAssets.size() ? walletAssets.get(pos) : null;
+		return _addressHint(a == null ? "HARV" : String.valueOf(a.get("assetKey")));
+	}
+
+	/** Asks for a name and saves the address (or renames it). */
+	private void _saveWalletContact(String address, String family) {
+		android.widget.EditText name = new android.widget.EditText(this);
+		name.setHint("Name");
+		name.setSingleLine(true);
+		String had = com.harvana.app.tx.AddressBook.nameOf(this, address);
+		if (had != null) name.setText(had);
+		int p = (int) (16 * getResources().getDisplayMetrics().density);
+		name.setPadding(p, p, p, p);
+		new com.harvana.app.ui.SheetDialog.Builder(this).setTitle(com.harvana.app.ui.SendReviewSheet.shortAddress(address)).setView(name)
+				.setPositiveButton("Save", (d, w) -> {
+					String n = name.getText() == null ? "" : name.getText().toString().trim();
+					if (n.isEmpty()) return;
+					com.harvana.app.tx.AddressBook.save(this, n, address, family);
+					SketchwareUtil.showMessage(getApplicationContext(), "Saved " + n);
+				})
+				.setNegativeButton("Cancel", null).show();
+	}
+
 	/** Addresses this phone sent this coin to before, newest first; a tap fills the recipient. */
 	private void _paintRecents(String key, String symbol) {
 		android.widget.LinearLayout box = findViewById(R.id.recent_recipients);
@@ -1108,7 +1207,8 @@ public class SendAssetActivity extends AppCompatActivity {
 		for (String to : recents) {
 			View chip = getLayoutInflater().inflate(R.layout.item_recent_recipient, box, false);
 			com.harvana.app.ui.SendReviewSheet.avatar(chip.findViewById(R.id.recent_avatar), to);
-			((TextView) chip.findViewById(R.id.recent_address)).setText(com.harvana.app.ui.SendReviewSheet.shortAddress(to));
+			String savedName = com.harvana.app.tx.AddressBook.nameOf(this, to);
+			((TextView) chip.findViewById(R.id.recent_address)).setText(savedName != null ? savedName : com.harvana.app.ui.SendReviewSheet.shortAddress(to));
 			chip.setOnClickListener(v -> { if (etRecipient != null) { etRecipient.setText(to); etRecipient.setSelection(to.length()); } });
 			box.addView(chip);
 		}

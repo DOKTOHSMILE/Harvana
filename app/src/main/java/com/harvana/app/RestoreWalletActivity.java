@@ -401,6 +401,17 @@ public class RestoreWalletActivity extends AppCompatActivity {
 			if (!tag.isEmpty()) {
 				com.harvana.app.wallet.WalletListManager.addWalletToList(this, address, tag);
 				com.harvana.app.wallet.WalletListManager.renameWallet(this, address, tag);
+			} else {
+				// No tag on the card: the wallet's primary .harv name names it, when it has one.
+				final android.content.Context app = getApplicationContext();
+				final String restored = address;
+				com.harvana.app.sync.NodeGroupClient.reverseName(restored, new com.harvana.app.sync.NodeGroupClient.Callback() {
+					@Override public void onSuccess(org.json.JSONObject j) {
+						String n = j.optString("name", "");
+						if (!n.isEmpty()) com.harvana.app.wallet.WalletListManager.renameWallet(app, restored, n);
+					}
+					@Override public void onError(String e) { }
+				});
 			}
 			persistAndFinish(mnemonic, address, seedB64, pubKeyB64);
 		} catch (Exception e) {

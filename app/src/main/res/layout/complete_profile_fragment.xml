@@ -123,6 +123,51 @@
 							android:importantForAutofill="no" />
 					</com.google.android.material.card.MaterialCardView>
 					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginBottom="6dp"
+						android:text="Username"
+						android:textStyle="bold"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="14sp" />
+					<com.google.android.material.card.MaterialCardView
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginBottom="14dp"
+						app:cardBackgroundColor="@color/colorSurfaceAlt"
+						app:cardCornerRadius="12dp"
+						app:cardElevation="0dp"
+						app:strokeColor="@color/colorCardStroke"
+						app:strokeWidth="1dp">
+						<LinearLayout
+							android:layout_width="match_parent"
+							android:layout_height="52dp"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:paddingStart="12dp">
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="\@"
+								android:textColor="@color/colorTextTertiary"
+								android:textSize="15sp" />
+							<com.google.android.material.textfield.TextInputEditText
+								android:id="@+id/et_username"
+								android:layout_width="match_parent"
+								android:layout_height="match_parent"
+								android:paddingStart="2dp"
+								android:paddingEnd="12dp"
+								android:background="@android:color/transparent"
+								android:hint="username"
+								android:textColor="@color/colorTextPrimary"
+								android:textColorHint="@color/colorTextTertiary"
+								android:textSize="15sp"
+								android:maxLength="20"
+								android:inputType="textNoSuggestions|textVisiblePassword"
+								android:importantForAutofill="no" />
+						</LinearLayout>
+					</com.google.android.material.card.MaterialCardView>
+					<TextView
 						android:id="@+id/textview54"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"

@@ -76,7 +76,43 @@ public class HarvNamesActivity extends AppCompatActivity {
         });
         btnClaim.setOnClickListener(v -> claim());
         loadMine();
+        suggestUsername();
     }
+
+    /**
+     * The person's username is the first suggestion (owner, 20 Oct 2026): dots and underscores become hyphens, the only
+     * joiners a .harv name takes. With no username yet, they are asked to create one first.
+     */
+    private void suggestUsername() {
+        com.harvana.app.social.SocialStore.myUsername((u, err) -> runOnUiThread(() -> {
+            if (isFinishing()) return;
+            String typed = etName.getText() == null ? "" : etName.getText().toString().trim();
+            if (!typed.isEmpty()) return;
+            String name = u == null ? "" : u.trim().toLowerCase(java.util.Locale.US).replaceAll("[._]+", "-").replaceAll("[^a-z0-9-]", "");
+            if (name.length() >= 3) {
+                etName.setText(name);
+                etName.setSelection(name.length());
+                return;
+            }
+            if (err != null) return;                                     // offline: no prompt on a failed read
+            new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Create a username")
+                    .setMessage("@username")
+                    .setPositiveButton("Create", (d, w) -> { wentToCreate = true; startActivity(new android.content.Intent(this, com.harvana.app.social.ContactCardActivity.class)); })
+                    .setNegativeButton("Not now", null).show();
+        }));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Back from creating a username: suggest it now.
+        if (wentToCreate && etName != null && (etName.getText() == null || etName.getText().length() == 0)) {
+            wentToCreate = false;
+            suggestUsername();
+        }
+    }
+
+    private boolean wentToCreate;
 
     private void check(String name) {
         NodeGroupClient.checkName(name, new NodeGroupClient.Callback() {

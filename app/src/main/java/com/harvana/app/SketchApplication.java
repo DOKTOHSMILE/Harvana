@@ -85,6 +85,7 @@ public class SketchApplication extends Application {
         try {
             com.harvana.app.utils.BarMatcher.install(this);
             com.harvana.app.utils.ActivityTracker.install(this);
+            com.harvana.app.web3.Web3Bubble.install(this);              // floating Web3 button while the browser is minimized
             com.harvana.app.walletconnect.WalletConnect.install(this);   // reconnects connected dApps; prompts wait for a screen
             // v2 member locks: a payment that waited for a screen, or whose answer was lost, is offered on the next signed-in screen.
             registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {

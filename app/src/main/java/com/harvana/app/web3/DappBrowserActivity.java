@@ -380,6 +380,7 @@ public class DappBrowserActivity extends AppCompatActivity {
             BrowserPrefs.clearCookiesAndSiteData(this);
         }
         web = null;
+        Web3Bubble.onBrowserGone();
         finish();
     }
 
@@ -387,6 +388,7 @@ public class DappBrowserActivity extends AppCompatActivity {
     private void minimize() {
         if (cur != null) snapshot(cur);
         saveTabs();
+        Web3Bubble.onMinimized();
         android.content.Intent home = new android.content.Intent(this, com.harvana.app.MainActivity.class)
                 .addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(home);
@@ -474,6 +476,7 @@ public class DappBrowserActivity extends AppCompatActivity {
     @Override protected void onDestroy() {
         ui.removeCallbacks(giveUp);
         io.shutdown();
+        Web3Bubble.onBrowserGone();
         for (Tab t : tabs) {
             if (t.web == null) continue;
             t.web.stopLoading();

@@ -62,7 +62,6 @@ import org.json.*;
 
 public class GroupsFragmentActivity extends Fragment {
 	
-	private FirebaseDatabase _firebase = FirebaseDatabase.getInstance();
 	
 	private String uid = "";
 	
@@ -110,21 +109,7 @@ public class GroupsFragmentActivity extends Fragment {
 	private Intent i = new Intent();
 	private SharedPreferences groupsp;
 	private SharedPreferences authsp;
-	private DatabaseReference groupdb = _firebase.getReference("groupdb");
-	private ChildEventListener _groupdb_child_listener;
-	private DatabaseReference userdb = _firebase.getReference("userdb");
-	private ChildEventListener _userdb_child_listener;
 	private FirebaseAuth fauth;
-	private OnCompleteListener<AuthResult> _fauth_create_user_listener;
-	private OnCompleteListener<AuthResult> _fauth_sign_in_listener;
-	private OnCompleteListener<Void> _fauth_reset_password_listener;
-	private OnCompleteListener<Void> fauth_updateEmailListener;
-	private OnCompleteListener<Void> fauth_updatePasswordListener;
-	private OnCompleteListener<Void> fauth_emailVerificationSentListener;
-	private OnCompleteListener<Void> fauth_deleteUserListener;
-	private OnCompleteListener<Void> fauth_updateProfileListener;
-	private OnCompleteListener<AuthResult> fauth_phoneAuthListener;
-	private OnCompleteListener<AuthResult> fauth_googleSignInListener;
 	
 	@NonNull
 	@Override
@@ -214,7 +199,92 @@ public class GroupsFragmentActivity extends Fragment {
 			shownGroups.add(g);
 		}
 		if (listview1 != null) listview1.setAdapter(new Listview1Adapter(shownGroups));
+		_paintStats();
+		_paintEmpty();
 	}
+	
+	/** The four figures at the top, from the groups on the list (closed groups left out) and the node's savings. */
+	private void _paintStats() {
+		int active = 0, ongoing = 0;
+		long members = 0;
+		for (HashMap<String, Object> g : myGroups) {
+			if (com.harvana.app.group.GroupCloser.isClosed(g)) continue;
+			active++;
+			members += (long) _safeDouble(g, "membersCount");
+			long round = (long) _safeDouble(g, "currentRound"), slots = (long) _safeDouble(g, "totalSlots");
+			if (round > 0 && (slots <= 0 || round <= slots)) ongoing++;
+		}
+		if (tv_stat_active_groups != null) tv_stat_active_groups.setText(String.valueOf(active));
+		if (tv_stat_total_members != null) tv_stat_total_members.setText(String.valueOf(members));
+		if (tv_stat_ongoing_cycles != null) tv_stat_ongoing_cycles.setText(String.valueOf(ongoing));
+		if (tv_stat_total_saved != null) tv_stat_total_saved.setText(savedText.isEmpty() ? "0" : savedText);
+	}
+	
+	private String savedText = "";
+	
+	/** Total saved as on Home: the node's savings in each group's coin, one figure in the chosen currency. */
+	private void _loadSaved() {
+		if (getContext() == null || uid.isEmpty()) return;
+		final Context ctx = getContext().getApplicationContext();
+		String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(ctx);
+		com.harvana.app.sync.NodePortfolio.load(ctx, uid, wallet, p -> com.harvana.app.wallet.FxRates.load(ctx,
+			() -> com.harvana.app.wallet.HarvPrice.get(q -> {
+				double usd = p.savedUsd(ctx);
+				String t = Double.isNaN(usd) ? p.savedInGroupCoins() : com.harvana.app.wallet.FxRates.money(ctx, usd);
+				if (getActivity() == null) return;
+				getActivity().runOnUiThread(() -> { savedText = t == null ? "" : t; _paintStats(); });
+			})));
+	}
+	
+	private LinearLayout emptyBox;
+	
+	/** No group on the list: an icon, a count line and the create button, in the list's card. */
+	private void _paintEmpty() {
+		if (cardview10 == null || getContext() == null) return;
+		if (emptyBox == null) {
+			final float d = getResources().getDisplayMetrics().density;
+			emptyBox = new LinearLayout(getContext());
+			emptyBox.setOrientation(LinearLayout.VERTICAL);
+			emptyBox.setGravity(Gravity.CENTER);
+			emptyBox.setPadding((int) (24 * d), (int) (24 * d), (int) (24 * d), (int) (24 * d));
+			ImageView icon = new ImageView(getContext());
+			icon.setImageResource(R.drawable.ic_groups_line);
+			icon.setColorFilter(com.harvana.app.utils.UiColors.textTertiary());
+			emptyBox.addView(icon, new LinearLayout.LayoutParams((int) (56 * d), (int) (56 * d)));
+			TextView title = new TextView(getContext());
+			title.setTag("empty_title");
+			title.setTextSize(15);
+			title.setTypeface(Typeface.DEFAULT_BOLD);
+			title.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+			title.setGravity(Gravity.CENTER);
+			LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			tp.topMargin = (int) (12 * d);
+			emptyBox.addView(title, tp);
+			com.google.android.material.button.MaterialButton create = new com.google.android.material.button.MaterialButton(getContext());
+			create.setTag("empty_button");
+			create.setAllCaps(false);
+			create.setOnClickListener(v -> {
+				if (typeFilter.isEmpty() && groupQuery.isEmpty()) { com.harvana.app.group.CreateGroupSheet.show(getContext()); return; }
+				typeFilter = ""; groupQuery = "";
+				if (btn_filter_groups != null) btn_filter_groups.setText("Filter");
+				if (et_search_groups != null) et_search_groups.setText("");
+				_showGroups();
+			});
+			LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (int) (44 * d));
+			bp.topMargin = (int) (16 * d);
+			emptyBox.addView(create, bp);
+			cardview10.addView(emptyBox, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		}
+		boolean filtered = !typeFilter.isEmpty() || !groupQuery.isEmpty();
+		((TextView) emptyBox.findViewWithTag("empty_title")).setText(filtered ? "No matching groups" : "No groups");
+		((TextView) emptyBox.findViewWithTag("empty_button")).setText(filtered ? "Show all groups" : "+ New Group");
+		boolean empty = shownGroups.isEmpty() && loaded;
+		emptyBox.setVisibility(empty ? View.VISIBLE : View.GONE);
+		if (listview1 != null) listview1.setVisibility(empty ? View.GONE : View.VISIBLE);
+	}
+	
+	/** True once the list has an answer (cache or network); until then the shimmer shows, not the empty state. */
+	private boolean loaded;
 	
 	private void _promptCircleId() {
 		final EditText input = new com.google.android.material.textfield.TextInputEditText(getContext());
@@ -322,142 +392,6 @@ public class GroupsFragmentActivity extends Fragment {
 			}
 		});
 		
-		_groupdb_child_listener = new ChildEventListener() {
-			@Override
-			public void onChildAdded(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onChildChanged(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onChildMoved(DataSnapshot _param1, String _param2) {
-				
-			}
-			
-			@Override
-			public void onChildRemoved(DataSnapshot _param1) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onCancelled(DatabaseError _param1) {
-				final int _errorCode = _param1.getCode();
-				final String _errorMessage = _param1.getMessage();
-				
-			}
-		};
-		groupdb.addChildEventListener(_groupdb_child_listener);
-		
-		_userdb_child_listener = new ChildEventListener() {
-			@Override
-			public void onChildAdded(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onChildChanged(DataSnapshot _param1, String _param2) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onChildMoved(DataSnapshot _param1, String _param2) {
-				
-			}
-			
-			@Override
-			public void onChildRemoved(DataSnapshot _param1) {
-				GenericTypeIndicator<HashMap<String, Object>> _ind = new GenericTypeIndicator<HashMap<String, Object>>() {};
-				final String _childKey = _param1.getKey();
-				final HashMap<String, Object> _childValue = _param1.getValue(_ind);
-				
-			}
-			
-			@Override
-			public void onCancelled(DatabaseError _param1) {
-				final int _errorCode = _param1.getCode();
-				final String _errorMessage = _param1.getMessage();
-				
-			}
-		};
-		userdb.addChildEventListener(_userdb_child_listener);
-		
-		fauth_updateEmailListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_updatePasswordListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_emailVerificationSentListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_deleteUserListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_phoneAuthListener = task -> {
-			final boolean _success = task.isSuccessful();
-			final String _errorMessage = task.getException() != null ? task.getException().getMessage() : "";
-			
-		};
-		
-		fauth_updateProfileListener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		fauth_googleSignInListener = task -> {
-			final boolean _success = task.isSuccessful();
-			final String _errorMessage = task.getException() != null ? task.getException().getMessage() : "";
-			
-		};
-		
-		_fauth_create_user_listener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		_fauth_sign_in_listener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			final String _errorMessage = _param1.getException() != null ? _param1.getException().getMessage() : "";
-			
-		};
-		
-		_fauth_reset_password_listener = _param1 -> {
-			final boolean _success = _param1.isSuccessful();
-			
-		};
 	}
 	
 	private void initializeLogic() {
@@ -470,6 +404,7 @@ public class GroupsFragmentActivity extends Fragment {
 		? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
 		if (uid.isEmpty()) return;
 		_loadMyGroups();
+		_loadSaved();
 		
 	}
 	public void _MORE() {
@@ -480,6 +415,7 @@ public class GroupsFragmentActivity extends Fragment {
 		if (cachedGroups != null && !cachedGroups.isEmpty() && getActivity() != null) {
 			myGroups.clear();
 			myGroups.addAll(cachedGroups);
+			loaded = true;
 			_showGroups();
 		}
 		
@@ -498,6 +434,7 @@ public class GroupsFragmentActivity extends Fragment {
 					if (getActivity() == null) return;
 					getActivity().runOnUiThread(() -> {
 						myGroups.clear();
+						loaded = true;
 						_showGroups();
 						com.harvana.app.utils.Shimmer.release(listview1);
 					});
@@ -513,6 +450,7 @@ public class GroupsFragmentActivity extends Fragment {
 					if (getActivity() == null) return;
 					getActivity().runOnUiThread(() -> {
 						myGroups.clear();
+						loaded = true;
 						_showGroups();
 						com.harvana.app.utils.Shimmer.release(listview1);
 					});
@@ -601,6 +539,7 @@ public class GroupsFragmentActivity extends Fragment {
 							for (HashMap<String, Object> row : resultsByIndex) {
 								if (row != null) myGroups.add(row);
 							}
+							loaded = true;
 							_showGroups();
 							// Update the cache with what's now genuinely fresh,
 							// so the NEXT open shows this instead of today's data.

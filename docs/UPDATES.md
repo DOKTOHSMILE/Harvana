@@ -2,6 +2,17 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: floating Web3 button, Groups screen wired
+
+- **Web3 bubble** (`web3/Web3Bubble`): while the browser is minimized with tabs open, a 44 dp Web3 button floats on
+  every app screen, bottom end above the navigation bar. Tap: the browser with its tabs. ×: hides it until the next
+  minimize. Drag: moves it; it snaps to the nearest side and keeps that place. Closing the browser removes it.
+- **Groups tab**: Active Groups, Total Members and Ongoing Cycles are counted from the listed groups (closed groups left
+  out); Total Saved is the node's savings across groups in the chosen currency (as on Home). An empty list shows
+  "No groups" with + New Group; an empty search or filter shows "No matching groups" with Show all groups.
+- Removed two unused listeners on the Groups tab that downloaded the whole `groupdb` and `userdb` Realtime Database
+  trees on every open.
+
 ## 20 Oct 2026: Web3 network list scrolls
 
 - Discover → network picker: the list of networks now scrolls (title on top, Add network at the bottom); before, networks past the screen and Add network could not be reached.

@@ -171,6 +171,32 @@ public final class NodeGroupClient {
         }, cb);
     }
 
+    // ═════════════════════════════ ADMIN FLOAT ═════════════════════════════
+
+    /** {float, history} of a savings or goal group: the members lending part of the pot to the admin. */
+    public static void getFloat(String groupId, Callback cb) { read("/api/v1/float/" + groupId, cb); }
+
+    /** PROPOSE (amountRaw, days, rateBps, collateralRaw), VOTE (yes), REPAY (amountRaw), LIQUIDATE. Signed "HARVANA_FLOAT_V1:action:address:groupId:param:nonce". */
+    public static void floatAction(Context c, String address, String groupId, String action, long amountRaw, int days, long rateBps,
+                                   long collateralRaw, boolean yes, Callback cb) {
+        final String param;
+        switch (action) {
+            case "PROPOSE": param = amountRaw + ":" + days + ":" + rateBps + ":" + collateralRaw; break;
+            case "VOTE": param = yes ? "YES" : "NO"; break;
+            case "REPAY": param = String.valueOf(amountRaw); break;
+            default: param = "";
+        }
+        act(c, address, "/api/v1/float/" + action.toLowerCase(java.util.Locale.US), new Spec() {
+            public String canonical(long n) { return "HARVANA_FLOAT_V1:" + action + ":" + address + ":" + groupId + ":" + param + ":" + n; }
+            public void fill(JSONObject b, long n) throws JSONException {
+                b.put("address", address).put("groupId", groupId);
+                if ("PROPOSE".equals(action)) b.put("amountRaw", amountRaw).put("days", days).put("rateBps", rateBps).put("collateralRaw", collateralRaw);
+                if ("VOTE".equals(action)) b.put("yes", yes);
+                if ("REPAY".equals(action)) b.put("amountRaw", amountRaw);
+            }
+        }, cb);
+    }
+
     // ═════════════════════════════ .harv NAMES ═════════════════════════════
 
     /** name → {name, owner, expiresAt}; onError "NAME_NOT_FOUND" when it is not claimed or has run out. */
@@ -869,6 +895,7 @@ public final class NodeGroupClient {
             case "/api/v1/fixed/vote-dissolve": return "FIXED_VOTE_DISSOLVE";
             case "/api/v1/fixed/finish-dissolve": return "FIXED_FINISH_DISSOLVE";
             case "/api/v1/genloan/request": return "GENLOAN_REQUEST";
+            case "/api/v1/float/vote": return "FLOAT_VOTE";
             default:
                 if (path.endsWith("/staker-share/claim")) return "STABLE_SHARE_CLAIM";
                 if (path.startsWith("/api/v1/vault/")) {           // lock pays its own gas; the rest pay the action fee

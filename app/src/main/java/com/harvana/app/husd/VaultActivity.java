@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mint a coin (hNGN) with HARV: lock HARV, mint up to half its naira value, repay, and take the HARV back. A position
+ * Mint a coin (hNGN, hUSD, …) with HARV: lock HARV, mint up to half its value in the coin, repay, and take the HARV back. A position
  * worth less than 150% of what it owes can be closed by anyone who pays its debt in the coin; they get that debt's
  * worth of HARV plus 10% out of the position. Open with extra "asset" (default HNGN).
  */
@@ -81,8 +81,8 @@ public class VaultActivity extends AppCompatActivity {
         if (!info.optBoolean("available")) { tvPrice.setText("—"); return; }
         if (info.optBoolean("priceOk")) {
             if ("SWAP_24H_LOW".equals(info.optString("priceSource")) && info.has("borrowKoboPerHarv"))
-                tvPrice.setText("₦" + naira(info.optLong("borrowKoboPerHarv")) + " · Swap 24h low");
-            else tvPrice.setText("₦" + naira(info.optLong("koboPerHarv")));
+                tvPrice.setText(cur() + naira(info.optLong("borrowKoboPerHarv")) + " · Swap 24h low");
+            else tvPrice.setText(cur() + naira(info.optLong("koboPerHarv")));
         } else {
             tvPrice.setText(priceProblem(info.optString("priceProblem")));
         }
@@ -91,7 +91,7 @@ public class VaultActivity extends AppCompatActivity {
     private void showPosition() {
         long coll = pos.optLong("collateralRaw"), debt = pos.optLong("debtRaw");
         tvColl.setText(BalanceFormatter.rawShort(coll) + " HARV" + (pos.has("collateralValueRaw")
-                ? "  (₦" + HusdClient.format(pos.optLong("collateralValueRaw")) + ")" : ""));
+                ? "  (" + cur() + HusdClient.format(pos.optLong("collateralValueRaw")) + ")" : ""));
         tvDebt.setText(HusdClient.format(debt) + " " + sym);
         if (debt <= 0 || pos.isNull("ratioBps")) {
             tvRatio.setText("Nothing owed");
@@ -244,6 +244,8 @@ public class VaultActivity extends AppCompatActivity {
     private String plain(String e) {
         if (e == null) return "Couldn't send.";
         if (com.harvana.app.utils.ErrorText.is(e, "NOT_ENOUGH_COLLATERAL")) return "Not enough HARV locked for that amount.";
+        if (com.harvana.app.utils.ErrorText.is(e, "POOL_TOO_SHALLOW")) return "Closed: the " + sym + " swap pool needs more HARV.";
+        if (com.harvana.app.utils.ErrorText.is(e, "VAULT_NOT_AVAILABLE")) return "Not open for " + sym + ".";
         if (com.harvana.app.utils.ErrorText.is(e, "WOULD_BE_UNDER_COLLATERALISED")) return "That would leave too little HARV for what you owe. Repay first.";
         if (com.harvana.app.utils.ErrorText.is(e, "PRICE_NOT_LIVE_YET") || com.harvana.app.utils.ErrorText.is(e, "PRICE_")) return "HARV price: " + priceProblem(e);
         if (com.harvana.app.utils.ErrorText.is(e, "PRICES_DISAGREE") || com.harvana.app.utils.ErrorText.is(e, "LIQUIDATION_PENDING")
@@ -256,6 +258,13 @@ public class VaultActivity extends AppCompatActivity {
         return com.harvana.app.utils.ErrorText.plain(e);
     }
 
+    /** The coin's money sign: ₦ for hNGN, $ for hUSD, € for hEUR, £ for hGBP, else the currency code. */
+    private String cur() {
+        String c = Stable.currency(code);
+        return "NGN".equals(c) ? "₦" : "USD".equals(c) ? "$" : "EUR".equals(c) ? "€" : "GBP".equals(c) ? "£" : c + " ";
+    }
+
+    /** Hundredths of the coin per HARV as money (kobo for hNGN, cents for hUSD). */
     private static String naira(long kobo) {
         return String.format(java.util.Locale.US, "%,d.%02d", kobo / 100, kobo % 100);
     }

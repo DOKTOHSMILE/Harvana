@@ -68,6 +68,8 @@ public class GroupActionsActivity extends AppCompatActivity {
     private final List<Map<String, Object>> recoveries = new ArrayList<>();
     private boolean loadedOnce;
     private boolean notOnNetwork;
+    /** The group's admin float (members lending part of the pot to the admin), or null. */
+    private Map<String, Object> adminFloat;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -151,11 +153,20 @@ public class GroupActionsActivity extends AppCompatActivity {
     /** Votes, withdrawal requests, defaults and join requests. Each part is best-effort and the page shows what arrived. */
     private void loadExtras() {
         proposals.clear(); packRequests.clear(); defaulted.clear(); joinRequests.clear(); recoveries.clear();
-        final AtomicInteger left = new AtomicInteger("ACCUM".equals(family) ? 3 : 2);
+        adminFloat = null;
+        final AtomicInteger left = new AtomicInteger("ACCUM".equals(family) ? 4 : "FIXED".equals(family) ? 3 : 2);
         final Runnable done = () -> { if (left.decrementAndGet() == 0) runOnUiThread(this::render); };
 
         loadJoinRequests(done);
         if ("CIRCLE".equals(family)) { loadDefaults(done); return; }
+        NodeGroupClient.getFloat(nodeId, new NodeGroupClient.Callback() {
+            @Override public void onSuccess(JSONObject j) {
+                JSONObject f = j == null ? null : j.optJSONObject("float");
+                if (f != null) adminFloat = JsonMaps.toMap(f);
+                done.run();
+            }
+            @Override public void onError(String e) { done.run(); }                 // an older node: no floats
+        });
         if ("FIXED".equals(family)) {
             NodeGroupClient.listFixedProposals(nodeId, new NodeGroupClient.Callback() {
                 @Override public void onSuccess(JSONObject j) { fillListedProposals(j); done.run(); }
@@ -350,6 +361,7 @@ public class GroupActionsActivity extends AppCompatActivity {
         for (Object[] p : approvals) content.addView(withdrawalCard((String) p[0], castMap(p[1])));
         for (Map<String, Object> r : toMove) content.addView(recoveryCard(r));
         renderDefaults();
+        if (adminFloat != null && Boolean.TRUE.equals(adminFloat.get("open"))) content.addView(floatCard(adminFloat));
 
         // 2. What you can do
         List<GroupAction> doable = new ArrayList<>();
@@ -360,10 +372,17 @@ public class GroupActionsActivity extends AppCompatActivity {
         boolean reached = num(group, "targetGoalAmountRaw") > 0 && goalRaised >= num(group, "targetGoalAmountRaw");
         boolean newGoal = "FIXED".equals(family) && me != null && !me.isEmpty() && me.equalsIgnoreCase(str(group, "creatorAddress"))
             && (paysOutInOne ? "COMPLETED".equals(str(group, "state")) : reached);
-        if (!doable.isEmpty() || newGoal) {
+        boolean canFloat = iAmAdmin() && !"CIRCLE".equals(family) && !com.harvana.app.engine.Amounts.assetOf(group).isEmpty()
+            && (adminFloat == null || !Boolean.TRUE.equals(adminFloat.get("open")));
+        if (!doable.isEmpty() || newGoal || canFloat) {
             content.addView(sectionHeader("What you can do", ""));
             for (GroupAction a : doable) content.addView(actionCard(a));
             if (newGoal) content.addView(newGoalCard());
+            if (canFloat) {
+                ActionCard c = new ActionCard(this, content).title("Admin float").meta("Up to 30% of the pot · 1–30 days · HARV collateral 150%");
+                c.button("Ask the members", false, v -> proposeFloat());
+                content.addView(c.view);
+            }
         }
 
         // 3. Recent decisions
@@ -566,6 +585,87 @@ public class GroupActionsActivity extends AppCompatActivity {
         c.button("Approve withdrawal", true, v -> NodePayActions.run(ctx((Button) v), approve));
         return c.view;
     }
+
+    // ── admin float ────────────────────────────────────────────────────────
+
+    /** The open float: amount, terms, votes or what is owed, and what this person can do about it. */
+    @SuppressWarnings("unchecked")
+    private View floatCard(final Map<String, Object> f) {
+        String status = str(f, "status");
+        boolean admin = me != null && me.equalsIgnoreCase(str(f, "admin"));
+        int chipColor = "DEFAULTED".equals(status) || "CALLED".equals(status) || "LATE".equals(status) ? R.color.colorError
+            : "VOTING".equals(status) ? R.color.colorWarning : R.color.colorSuccess;
+        ActionCard c = new ActionCard(this, content).title("Admin float").chip(status, chipColor)
+            .amount(gm(num(f, "amountRaw")))
+            .meta(num(f, "days") + " days · " + (num(f, "rateBps") / 100.0) + "% · owed " + gm(num(f, "owedRaw"))
+                + " · collateral " + com.harvana.app.engine.Amounts.harv(num(f, "collateralRaw")).replace(" HARV", "") + " HARV");
+        if ("VOTING".equals(status)) {
+            long yes = 0, total = 0;
+            boolean eligible = false, voted = false;
+            Object weights = f.get("voterWeights"), votes = f.get("votes");
+            if (weights instanceof Map) for (Map.Entry<?, ?> e : ((Map<?, ?>) weights).entrySet()) {
+                long w = e.getValue() instanceof Number ? ((Number) e.getValue()).longValue() : 0;
+                total += w;
+                if (votes instanceof Map && Boolean.TRUE.equals(((Map<?, ?>) votes).get(e.getKey()))) yes += w;
+                if (String.valueOf(e.getKey()).equalsIgnoreCase(me)) {
+                    eligible = true;
+                    voted = votes instanceof Map && ((Map<?, ?>) votes).containsKey(e.getKey());
+                }
+            }
+            int pct = total == 0 ? 0 : (int) (yes * 100 / total);
+            c.bar(pct, true, pct + "% yes · needs 51% · ends " + date(num(f, "voteEndsAt")));
+            if (eligible && !voted) {
+                c.twoButtons("Lend", v -> PinPromptHelper.authorize(this, "Vote to lend the admin " + gm(num(f, "amountRaw")), () ->
+                        NodeGroupClient.floatAction(getApplicationContext(), me, nodeId, "VOTE", 0, 0, 0, 0, true, result("Your yes vote is in"))),
+                    "Don't lend", v -> PinPromptHelper.authorize(this, "Vote against the admin float", () ->
+                        NodeGroupClient.floatAction(getApplicationContext(), me, nodeId, "VOTE", 0, 0, 0, 0, false, result("Your no vote is in"))));
+            }
+        } else {
+            long owed = num(f, "outstandingRaw");
+            if (num(f, "dueAt") > 0) c.note("Due " + date(num(f, "dueAt")) + " · left " + gm(owed),
+                    "LATE".equals(status) || "CALLED".equals(status) ? R.color.colorError : 0, false);
+            if (admin && owed > 0 && !"LIQUIDATING".equals(status)) {
+                c.button("Repay " + gm(owed), true, v -> PinPromptHelper.authorize(this, "Repay the float " + gm(owed), () ->
+                        NodeGroupClient.floatAction(getApplicationContext(), me, nodeId, "REPAY", owed, 0, 0, 0, false, result("Repayment sent"))));
+            } else if (!admin && "DEFAULTED".equals(status)) {
+                c.button("Cover " + gm(owed) + " · get the HARV + 10%", false, v -> PinPromptHelper.authorize(this,
+                        "Pay " + gm(owed) + " into the group and take the admin's HARV for it", () ->
+                        NodeGroupClient.floatAction(getApplicationContext(), me, nodeId, "LIQUIDATE", 0, 0, 0, 0, false, result("Cover sent"))));
+            }
+        }
+        return c.view;
+    }
+
+    private void proposeFloat() {
+        View v = getLayoutInflater().inflate(R.layout.sheet_float_propose, null);
+        com.google.android.material.textfield.TextInputEditText amount = v.findViewById(R.id.et_float_amount),
+            days = v.findViewById(R.id.et_float_days), rate = v.findViewById(R.id.et_float_rate), coll = v.findViewById(R.id.et_float_collateral);
+        String coin = com.harvana.app.engine.Amounts.assetOf(group);
+        ((com.google.android.material.textfield.TextInputLayout) v.findViewById(R.id.til_float_amount))
+            .setHint("Amount (" + com.harvana.app.husd.Stable.symbol(coin) + ")");
+        new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Admin float").setView(v)
+            .setPositiveButton("Ask the members", (d, w) -> {
+                long amt = typed(text(amount));
+                int dd = (int) Math.max(0, parseLong(text(days)));
+                long bps = Math.round(parseDouble(text(rate)) * 100);
+                long collRaw = CircleUi.toRaw(text(coll));
+                if (amt <= 0 || dd < 1 || dd > 30 || bps < 0 || bps > 2000 || collRaw <= 0) { toast("Check the amount, days (1–30), interest (0–20%) and HARV"); return; }
+                java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
+                rows.add(new String[]{"Amount", gm(amt)});
+                rows.add(new String[]{"Days", String.valueOf(dd)});
+                rows.add(new String[]{"Interest", (bps / 100.0) + "% · " + gm(amt * bps / 10_000)});
+                rows.add(new String[]{"Owed", gm(amt + amt * bps / 10_000)});
+                rows.add(new String[]{"HARV collateral", text(coll) + " HARV"});
+                PaymentConfirmSheet.reviewThenAuthorize(this, "Admin float", "", rows, () ->
+                    NodeGroupClient.floatAction(getApplicationContext(), me, nodeId, "PROPOSE", amt, dd, bps, collRaw, false,
+                        result("Asked. The members vote within 3 days")));
+            })
+            .setNegativeButton("Cancel", null).show();
+    }
+
+    private static String text(android.widget.EditText e) { return e.getText() == null ? "" : e.getText().toString().trim(); }
+    private static long parseLong(String s) { try { return Long.parseLong(s); } catch (Exception e) { return 0; } }
+    private static double parseDouble(String s) { try { return Double.parseDouble(s); } catch (Exception e) { return -1; } }
 
     /** A member asks to move their savings to another wallet: old wallet, new wallet, when; the admin approves. */
     private View recoveryCard(final Map<String, Object> r) {

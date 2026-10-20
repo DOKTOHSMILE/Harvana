@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Admin float; Mint with HARV for every Harvana coin
+
+- Group → Actions & votes (savings and goal groups kept in a coin): the admin can ask the members to lend part of the pot (Admin float: amount up to 30% of the pot, 1–30 days, interest 0–20%, HARV collateral at 150%). Members see it under Needs your attention with Lend / Don't lend; once it passes the coin goes to the admin. The card then shows what is owed and when; the admin has Repay; when it is overdue anyone can Cover it and take the admin's HARV plus 10%.
+- Coin page (hNGN, hUSD, …) → More info → Mint with HARV opens the coin's vault; prices show in the coin's own money sign.
+- Needs the node change of 20 Oct 2026 (`/api/v1/float/*`; vaults for other coins open when the node sets their cap).
+
 ## 20 Oct 2026: Harvana Protocol Wallet Access Card
 
 - Card front: a bigger Harvana logo; the title in bold, "Harvana Protocol Wallet Access Card", with "Encrypted wallet backup · AES-256-GCM" under it; the TAG in bold between the title and the wallet address. Facts in two rows: Card owner, Issued, Card no. (12 digits from the address), Network, Key (Ed25519), Protection (PBKDF2 + Argon2id). Footer: Harvana Network · harvannaprotocol.com.

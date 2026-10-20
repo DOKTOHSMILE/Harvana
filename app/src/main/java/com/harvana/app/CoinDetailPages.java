@@ -436,6 +436,7 @@ public final class CoinDetailPages {
             // Bridge deposits from another chain: shown only once a chain takes them (Receive is the Harvana address only).
             com.harvana.app.husd.StableActions sa = getActivity() instanceof CoinDetailActivity ? ((CoinDetailActivity) getActivity()).stable() : null;
             if (st != null && sa != null && sa.depositsOpen()) links.add(new String[]{"Deposit " + sa.reserve(), "deposit:"});
+            if (st != null && sa != null) links.add(new String[]{"Mint with HARV", "vault:"});   // the coin's HARV-backed vault
             if (links.isEmpty()) return;
             body.addView(label("MORE INFO"));
             com.google.android.material.chip.ChipGroup g = new com.google.android.material.chip.ChipGroup(requireContext());
@@ -449,6 +450,7 @@ public final class CoinDetailPages {
                 c.setOnClickListener(v -> {
                     if (l[1].isEmpty()) { if (getActivity() instanceof CoinDetailActivity) ((CoinDetailActivity) getActivity()).openExplorer(); }
                     else if ("deposit:".equals(l[1])) { if (sa != null) sa.deposit(); }
+                    else if ("vault:".equals(l[1])) { if (sa != null) sa.vault(); }
                     else com.harvana.app.web3.Web3Home.open(requireContext(), l[1]);
                 });
                 g.addView(c);

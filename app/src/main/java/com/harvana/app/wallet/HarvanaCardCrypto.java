@@ -18,7 +18,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Harvana Access Card — password-encrypted wallet backup, deliberately
+ * Harvana Protocol Wallet Access Card — password-encrypted wallet backup, deliberately
  * INDEPENDENT of the device's Android Keystore (unlike SecureWalletStorage).
  * A physical card must be decryptable on ANY device by anyone who knows the
  * password — Harvana itself must never be able to decrypt it.
@@ -128,8 +128,28 @@ public final class HarvanaCardCrypto {
     }
 
     public static String encryptToQrString(Context context, String mnemonic, String password) throws Exception {
+        return encryptToQrString(context, mnemonic, password, null);
+    }
+
+    /**
+     * The QR also carries the card's tag (owner, 20 Oct 2026), after a '#': it is printed on the card anyway and is not
+     * secret. Restoring the card names the wallet with it ("My main wallet" instead of "Wallet 1").
+     */
+    public static String encryptToQrString(Context context, String mnemonic, String password, String tag) throws Exception {
         byte[] raw = encryptToRawBytes(context, mnemonic, password);
-        return FORMAT_PREFIX + Base64.encodeToString(raw, Base64.NO_WRAP);
+        String t = tag == null ? "" : tag.trim();
+        if (t.length() > 40) t = t.substring(0, 40);
+        return FORMAT_PREFIX + Base64.encodeToString(raw, Base64.NO_WRAP)
+                + (t.isEmpty() ? "" : "#" + java.net.URLEncoder.encode(t, "UTF-8"));
+    }
+
+    /** The tag a card's QR carries, or "" (older cards carry none). */
+    public static String tagOf(String scannedText) {
+        if (scannedText == null) return "";
+        int hash = scannedText.indexOf('#');
+        if (hash < 0) return "";
+        try { return java.net.URLDecoder.decode(scannedText.substring(hash + 1), "UTF-8").trim(); }
+        catch (Exception e) { return ""; }
     }
 
     public static String encryptToDigitCode(Context context, String mnemonic, String password) throws Exception {
@@ -156,10 +176,13 @@ public final class HarvanaCardCrypto {
 
     public static DecryptResult decryptCardPayload(Context context, String scannedText, String password) {
         if (scannedText == null || !scannedText.startsWith(FORMAT_PREFIX)) {
-            return DecryptResult.fail("This QR code isn't an Harvana Access Card.");
+            return DecryptResult.fail("This QR code isn't a Harvana Protocol Wallet Access Card.");
         }
         try {
-            byte[] raw = Base64.decode(scannedText.substring(FORMAT_PREFIX.length()), Base64.NO_WRAP);
+            String body = scannedText.substring(FORMAT_PREFIX.length());
+            int hash = body.indexOf('#');
+            if (hash >= 0) body = body.substring(0, hash);                       // the tag after '#' is not part of the secret
+            byte[] raw = Base64.decode(body, Base64.NO_WRAP);
             return decryptRawBytes(context, raw, password);
         } catch (Exception e) {
             return DecryptResult.fail("This card's QR code looks damaged or incomplete.");

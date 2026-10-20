@@ -46,127 +46,101 @@ public final class HarvanaCardRenderer {
 		
 		float margin = 56f;
 		
-		// Title block: the card title and the line under it. The logo is a square coin, so it is drawn square, as tall as that block,
-		// instead of being stretched into a wide box as before.
+		// Title block (owner, 20 Oct 2026): a bigger logo, the full card name in bold, the protection under it.
 		Paint subtitle1 = new Paint(Paint.ANTI_ALIAS_FLAG);
 		subtitle1.setColor(template.textPrimary);
-		subtitle1.setTextSize(20f);
+		subtitle1.setTextSize(25f);
 		subtitle1.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
 		Paint subtitle2 = new Paint(Paint.ANTI_ALIAS_FLAG);
 		subtitle2.setColor(template.textSecondary);
-		subtitle2.setTextSize(14f);
-		final float titleBaseline = 60f, subtitleBaseline = 82f;
-		float blockTop = titleBaseline + subtitle1.getFontMetrics().ascent;           // top of the title's tallest letters
-		float blockBottom = subtitleBaseline + subtitle2.getFontMetrics().descent;    // bottom of the line under it
-		float logoSize = blockBottom - blockTop;
-		drawAppIcon(context, canvas, margin, blockTop, logoSize, logoSize);
-		float textX = margin + logoSize + 16f;
-		canvas.drawText("Harvana Access Card", textX, titleBaseline, subtitle1);
-		canvas.drawText("Encrypted wallet backup", textX, subtitleBaseline, subtitle2);
-		
+		subtitle2.setTextSize(15f);
+		float logoSize = 84f, logoTop = 34f;
+		drawAppIcon(context, canvas, margin, logoTop, logoSize, logoSize);
+		float textX = margin + logoSize + 18f;
+		canvas.drawText("Harvana Protocol Wallet Access Card", textX, logoTop + 40f, subtitle1);
+		canvas.drawText("Encrypted wallet backup  ·  AES-256-GCM", textX, logoTop + 66f, subtitle2);
+
 		// Top Right Card Tier
 		Paint badgePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		badgePaint.setColor(template.accent);
 		badgePaint.setTextSize(20f);
 		badgePaint.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
 		badgePaint.setTextAlign(Paint.Align.RIGHT);
-		canvas.drawText(template.displayName.toUpperCase(), CARD_WIDTH_PX - margin, 76f, badgePaint);
-		
-		// Wallet Address Section
+		canvas.drawText(template.displayName.toUpperCase(), CARD_WIDTH_PX - margin, logoTop + 40f, badgePaint);
+
 		Paint labelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		labelPaint.setColor(template.textSecondary);
-		labelPaint.setTextSize(14f);
+		labelPaint.setTextSize(13f);
 		labelPaint.setLetterSpacing(0.25f);
 		labelPaint.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
-		canvas.drawText("WALLET ADDRESS", margin, 210f, labelPaint);
-		
-		Paint addrPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		addrPaint.setColor(template.textPrimary);
-		addrPaint.setTextSize(36f);
-		addrPaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD));
-		addrPaint.setLetterSpacing(0.04f); // Adds luxurious horizontal spread
-		
-		// Case-insensitive strip of any existing HV0x variation
-		String cleanAddress = walletAddress != null ? walletAddress.replaceAll("(?i)^HV0X", "").toUpperCase() : "";
-		
-		if (cleanAddress.length() == 40) {
-			// New 3-Row format, well-spaced
-			String row1 = String.format("HV0x    %s   %s",
-			cleanAddress.substring(0, 5), cleanAddress.substring(5, 10));
-			String row2 = String.format("%s   %s   %s",
-			cleanAddress.substring(10, 15), cleanAddress.substring(15, 20), cleanAddress.substring(20, 25));
-			String row3 = String.format("%s   %s   %s",
-			cleanAddress.substring(25, 30), cleanAddress.substring(30, 35), cleanAddress.substring(35, 40));
-			
-			canvas.drawText(row1, margin, 270f, addrPaint);
-			canvas.drawText(row2, margin, 325f, addrPaint);
-			canvas.drawText(row3, margin, 380f, addrPaint);
-		} else {
-			// Fallback
-			canvas.drawText("HV0x " + cleanAddress, margin, 270f, addrPaint);
-		}
-		
-		// Card Owner
-		Paint ownerLabel = new Paint(Paint.ANTI_ALIAS_FLAG);
-		ownerLabel.setColor(template.textSecondary);
-		ownerLabel.setTextSize(12f);
-		canvas.drawText("CARD OWNER", margin, 450f, ownerLabel);
-		
-		Paint ownerNamePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		ownerNamePaint.setColor(template.textPrimary);
-		ownerNamePaint.setTextSize(24f);
-		ownerNamePaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL));
-		
-		String finalName = (cardOwnerName != null && !cardOwnerName.trim().isEmpty()) ? cardOwnerName.toUpperCase() : "HARVANA MEMBER";
-		
-		// Safeguard: Truncate impossibly long names so they never bleed into the expiry date
-		if (finalName.length() > 24) {
-			finalName = finalName.substring(0, 22) + "...";
-		}
-		
-		canvas.drawText(finalName, margin, 480f, ownerNamePaint);
-		
-		// Card description (the user's short label, e.g. "My main wallet"). Drawn under the owner
-		// name so it shows up on the card front as the at-a-glance identifier when picking a card.
+
+		// Tag: the card's name ("My main wallet"), between the title and the address, in bold. It also names the
+		// wallet when the card is restored (the QR carries it).
 		String finalDescription = cardDescription != null ? cardDescription.trim() : "";
 		if (!finalDescription.isEmpty()) {
-			// Uppercase to match the rest of the card's visual language, but keep the user's wording.
 			finalDescription = finalDescription.toUpperCase(java.util.Locale.US);
-			if (finalDescription.length() > 20) {
-				finalDescription = finalDescription.substring(0, 19) + "…";
-			}
-			Paint descLabel = new Paint(Paint.ANTI_ALIAS_FLAG);
-			descLabel.setColor(template.textSecondary);
-			descLabel.setTextSize(11f);
-			descLabel.setLetterSpacing(0.25f);
-			descLabel.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
-			canvas.drawText("TAG", margin, 510f, descLabel);
-			
+			if (finalDescription.length() > 28) finalDescription = finalDescription.substring(0, 27) + "…";
+			canvas.drawText("TAG", margin, 166f, labelPaint);
 			Paint descPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			descPaint.setColor(template.accent);
-			descPaint.setTextSize(18f);
-			descPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-			canvas.drawText(finalDescription, margin, 534f, descPaint);
+			descPaint.setTextSize(30f);
+			descPaint.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
+			canvas.drawText(finalDescription, margin, 202f, descPaint);
 		}
-		
-		// Validity Block - Shifted significantly to the right (from +350f to +600f)
-		Paint expiryLabel = new Paint(Paint.ANTI_ALIAS_FLAG);
-		expiryLabel.setColor(template.textSecondary);
-		expiryLabel.setTextSize(12f);
-		canvas.drawText("ISSUED", margin + 600f, 450f, expiryLabel);
-		
-		Paint expiryValue = new Paint(Paint.ANTI_ALIAS_FLAG);
-		expiryValue.setColor(template.textPrimary);
-		expiryValue.setTextSize(20f);
-		expiryValue.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD));
-		canvas.drawText(new java.text.SimpleDateFormat("MM/yy", java.util.Locale.US).format(new java.util.Date()), margin + 600f, 480f, expiryValue);
-		
-		// Footer & Faint Silver Stamp
+
+		// Wallet address, three rows of five-character groups
+		canvas.drawText("WALLET ADDRESS", margin, 246f, labelPaint);
+		Paint addrPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		addrPaint.setColor(template.textPrimary);
+		addrPaint.setTextSize(34f);
+		addrPaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD));
+		addrPaint.setLetterSpacing(0.04f);
+		String cleanAddress = walletAddress != null ? walletAddress.replaceAll("(?i)^HV0X", "").toUpperCase() : "";
+		if (cleanAddress.length() == 40) {
+			canvas.drawText(String.format("HV0x    %s   %s", cleanAddress.substring(0, 5), cleanAddress.substring(5, 10)), margin, 292f, addrPaint);
+			canvas.drawText(String.format("%s   %s   %s", cleanAddress.substring(10, 15), cleanAddress.substring(15, 20), cleanAddress.substring(20, 25)), margin, 340f, addrPaint);
+			canvas.drawText(String.format("%s   %s   %s", cleanAddress.substring(25, 30), cleanAddress.substring(30, 35), cleanAddress.substring(35, 40)), margin, 388f, addrPaint);
+		} else {
+			canvas.drawText("HV0x " + cleanAddress, margin, 292f, addrPaint);
+		}
+
+		// Facts: two rows of label over value
+		Paint factLabel = new Paint(Paint.ANTI_ALIAS_FLAG);
+		factLabel.setColor(template.textSecondary);
+		factLabel.setTextSize(12f);
+		factLabel.setLetterSpacing(0.12f);
+		factLabel.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
+		Paint factValue = new Paint(Paint.ANTI_ALIAS_FLAG);
+		factValue.setColor(template.textPrimary);
+		factValue.setTextSize(20f);
+		factValue.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD));
+		Paint factSmall = new Paint(factValue);
+		factSmall.setTextSize(16f);
+
+		String finalName = (cardOwnerName != null && !cardOwnerName.trim().isEmpty()) ? cardOwnerName.toUpperCase() : "HARVANA MEMBER";
+		if (finalName.length() > 24) finalName = finalName.substring(0, 22) + "...";
+		float col2 = margin + 420f, col3 = margin + 590f;
+		canvas.drawText("CARD OWNER", margin, 440f, factLabel);
+		canvas.drawText(finalName, margin, 468f, factValue);
+		canvas.drawText("ISSUED", col2, 440f, factLabel);
+		canvas.drawText(new java.text.SimpleDateFormat("MM/yy", java.util.Locale.US).format(new java.util.Date()), col2, 468f, factValue);
+		canvas.drawText("CARD NO.", col3, 440f, factLabel);
+		canvas.drawText(cardNumber(walletAddress), col3, 468f, factValue);
+
+		canvas.drawText("NETWORK", margin, 506f, factLabel);
+		canvas.drawText("HARVANA PROTOCOL", margin, 530f, factSmall);
+		canvas.drawText("KEY", col2, 506f, factLabel);
+		canvas.drawText("ED25519", col2, 530f, factSmall);
+		canvas.drawText("PROTECTION", col3, 506f, factLabel);
+		canvas.drawText("PBKDF2 + ARGON2ID", col3, 530f, factSmall);
+
+		// Footer
 		Paint footerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		footerPaint.setColor(template.textSecondary);
-		footerPaint.setTextSize(16f);
-		canvas.drawText("HARVANA NETWORK", margin, CARD_HEIGHT_PX - 40f, footerPaint);
-		
+		footerPaint.setTextSize(15f);
+		footerPaint.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
+		canvas.drawText("HARVANA NETWORK  ·  harvannaprotocol.com", margin, CARD_HEIGHT_PX - 36f, footerPaint);
+
 		// Draw the custom signature seal at the bottom right
 		drawSignatureStamp(canvas, CARD_WIDTH_PX - margin - 100f, CARD_HEIGHT_PX - margin - 100f);
 		
@@ -177,6 +151,17 @@ public final class HarvanaCardRenderer {
 		return bitmap;
 	}
 	
+	/** A card number for reading out over the phone: 12 digits from the address ("4821 7730 1192"). */
+	static String cardNumber(String address) {
+		try {
+			byte[] h = java.security.MessageDigest.getInstance("SHA-256").digest(String.valueOf(address).toLowerCase(java.util.Locale.US).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+			String d = new java.math.BigInteger(1, h).toString().substring(0, 12);
+			return d.substring(0, 4) + " " + d.substring(4, 8) + " " + d.substring(8, 12);
+		} catch (Exception e) {
+			return "—";
+		}
+	}
+
 	// ── BACK ─────────────────────────────────────────────────────────────
 	
 	public static Bitmap renderBack(Context context, CardTemplate template, String qrPayload, String digitCode) {
@@ -381,7 +366,7 @@ public final class HarvanaCardRenderer {
 		if (icon == null) return;
 		canvas.save();
 		icon.setBounds((int) x, (int) y, (int) (x + w), (int) (y + h));
-		icon.setAlpha(178);
+		icon.setAlpha(255);
 		icon.draw(canvas);
 		canvas.restore();
 	}

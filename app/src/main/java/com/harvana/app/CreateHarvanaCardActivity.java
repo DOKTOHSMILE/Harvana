@@ -327,7 +327,7 @@ public class CreateHarvanaCardActivity extends AppCompatActivity {
       return;
     }
     new com.harvana.app.ui.SheetDialog.Builder(this).setTitle("Skip the backup card?").setMessage(
-        "Without a saved Harvana Access Card, this wallet has no backup yet. If you lose this device, the funds are gone. Are you sure you want to cancel wallet creation?")
+        "Without a saved Harvana Protocol Wallet Access Card, this wallet has no backup yet. If you lose this device, the funds are gone. Are you sure you want to cancel wallet creation?")
         .setPositiveButton("Cancel Wallet Creation", (d, w) -> {
           com.harvana.app.wallet.PhraseHandoff.clear();
           setResult(RESULT_CANCELED);
@@ -403,7 +403,8 @@ public class CreateHarvanaCardActivity extends AppCompatActivity {
 
     new Thread(() -> {
       try {
-        String qrPayload = HarvanaCardCrypto.encryptToQrString(this, mnemonic, password);
+        String cardTag = et_card_description != null && et_card_description.getText() != null ? et_card_description.getText().toString().trim() : "";
+        String qrPayload = HarvanaCardCrypto.encryptToQrString(this, mnemonic, password, cardTag);
         String digitCode = HarvanaCardCrypto.encryptToDigitCode(this, mnemonic, password);
 
         Bitmap front = HarvanaCardRenderer.renderFront(this, selectedTemplate, walletAddress,

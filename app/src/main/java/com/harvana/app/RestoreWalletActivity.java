@@ -91,7 +91,7 @@ public class RestoreWalletActivity extends AppCompatActivity {
 		}
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
-		com.harvana.app.utils.AppBar.header(this, "Restore wallet", "From your Harvana Access Card", R.id.textview3);
+		com.harvana.app.utils.AppBar.header(this, "Restore wallet", "From your Harvana Protocol Wallet Access Card", R.id.textview3);
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {
@@ -211,7 +211,7 @@ public class RestoreWalletActivity extends AppCompatActivity {
 		}
 	}
 	
-	// ── Path B: restore from Harvana Access Card QR — no gate ──────────────
+	// ── Path B: restore from Harvana Protocol Wallet Access Card QR — no gate ──────────────
 	
 	private static final int RC_SCAN_QR = 4103;
 	
@@ -246,7 +246,7 @@ public class RestoreWalletActivity extends AppCompatActivity {
 							pendingScannedPayload = text;
 							showPasswordBottomSheet(false);
 						} else {
-							SketchwareUtil.showMessage(getApplicationContext(), "That QR code isn't an Harvana Access Card.");
+							SketchwareUtil.showMessage(getApplicationContext(), "That QR code isn't a Harvana Protocol Wallet Access Card.");
 						}
 					});
 				}
@@ -396,6 +396,12 @@ public class RestoreWalletActivity extends AppCompatActivity {
 			String pubKeyB64 = Base64.encodeToString(pubKey, Base64.NO_WRAP);
 			String seedB64 = WalletGenerator.derivePrivateKey(mnemonic);
 			
+			// The card's tag names the wallet in the wallet list (a card from an older app carries none).
+			String tag = pendingScannedPayload == null ? "" : HarvanaCardCrypto.tagOf(pendingScannedPayload);
+			if (!tag.isEmpty()) {
+				com.harvana.app.wallet.WalletListManager.addWalletToList(this, address, tag);
+				com.harvana.app.wallet.WalletListManager.renameWallet(this, address, tag);
+			}
 			persistAndFinish(mnemonic, address, seedB64, pubKeyB64);
 		} catch (Exception e) {
 			SketchwareUtil.showMessage(getApplicationContext(), "Something went wrong restoring this wallet. Please try again.");

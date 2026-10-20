@@ -137,7 +137,7 @@ public class ScanQrCodeActivity extends AppCompatActivity {
 	public static final String MODE_ANY = "any";
 	/** Accept only a well-formed HV0x wallet address (AddressUtil.isValidAddress). */
 	public static final String MODE_WALLET_ADDRESS = "wallet_address";
-	/** Accept only an Harvana Access Card QR (HarvanaCardCrypto.FORMAT_PREFIX). */
+	/** Accept only a Harvana Protocol Wallet Access Card QR (HarvanaCardCrypto.FORMAT_PREFIX). */
 	public static final String MODE_HARVANA_CARD = "harvana_card";
 	
 	/** Legacy — still honored if a caller passes it instead of EXTRA_MODE,
@@ -272,7 +272,7 @@ public class ScanQrCodeActivity extends AppCompatActivity {
 			? null : "That doesn't look like a wallet address. Try again.";
 			case MODE_HARVANA_CARD:
 			return text.startsWith(HarvanaCardCrypto.FORMAT_PREFIX)
-			? null : "That's not an Harvana Access Card QR code.";
+			? null : "That's not a Harvana Protocol Wallet Access Card QR code.";
 			case MODE_ANY:
 			default:
 			return null;

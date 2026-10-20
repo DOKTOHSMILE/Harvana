@@ -51,7 +51,7 @@
 						android:id="@+id/textview3"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:text="Restore from Harvana Access Card"
+						android:text="Restore from Harvana Protocol Wallet Access Card"
 						android:textSize="18sp"
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary" />

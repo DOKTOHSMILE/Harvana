@@ -617,15 +617,9 @@ public class DappBrowserActivity extends AppCompatActivity {
     private boolean harvanaShown;
 
     private static int chainIcon(String key) {
-        switch (key) {
-            case "HARV": return R.drawable.ic_harv_coin;
-            case "SOL": return R.drawable.ic_coin_sol;
-            case "BNB": return R.drawable.ic_coin_bnb;
-            case "POL": return R.drawable.ic_coin_pol;
-            case "BASE": return R.drawable.ic_coin_base;
-            case "ETH": return R.drawable.ic_coin_eth;
-            default: return key != null && key.startsWith("C:") ? R.drawable.ic_coin_generic : R.drawable.ic_coin_eth;
-        }
+        int res = com.harvana.app.wallet.NetworkSheets.builtInIcon(key);
+        if (res != 0) return res;
+        return key != null && key.startsWith("C:") ? R.drawable.ic_coin_generic : R.drawable.ic_coin_eth;
     }
 
     private static String shortName(String name) {

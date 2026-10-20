@@ -90,7 +90,8 @@ public final class NetworkSheets {
         }
     }
 
-    private static int builtInIcon(String key) {
+    /** The bundled logo for a built-in network key, or for an added one ("C:<chain id>") on a known chain; 0 if none. */
+    public static int builtInIcon(String key) {
         if (key == null) return 0;
         switch (key) {
             case "HARV": return R.drawable.ic_harv_coin;
@@ -99,6 +100,30 @@ public final class NetworkSheets {
             case "POL": return R.drawable.ic_coin_pol;
             case "BASE": return R.drawable.ic_coin_base;
             case "SOL": return R.drawable.ic_coin_sol;
+            case "ARB": return R.drawable.ic_coin_arb;
+            case "OP": return R.drawable.ic_coin_op;
+            case "AVAX": return R.drawable.ic_coin_avax;
+            case "FTM": return R.drawable.ic_coin_ftm;
+            case "ZK": return R.drawable.ic_coin_zk;
+            case "LINEA": return R.drawable.ic_coin_linea;
+            case "CRO": return R.drawable.ic_coin_cro;
+            case "GNOSIS": return R.drawable.ic_coin_gnosis;
+            default: break;
+        }
+        if (!key.startsWith("C:")) return 0;
+        switch (key.substring(2)) {
+            case "1": return R.drawable.ic_coin_eth;
+            case "56": return R.drawable.ic_coin_bnb;
+            case "137": return R.drawable.ic_coin_pol;
+            case "8453": return R.drawable.ic_coin_base;
+            case "42161": return R.drawable.ic_coin_arb;
+            case "10": return R.drawable.ic_coin_op;
+            case "43114": return R.drawable.ic_coin_avax;
+            case "250": return R.drawable.ic_coin_ftm;
+            case "324": return R.drawable.ic_coin_zk;
+            case "59144": return R.drawable.ic_coin_linea;
+            case "25": return R.drawable.ic_coin_cro;
+            case "100": return R.drawable.ic_coin_gnosis;
             default: return 0;
         }
     }

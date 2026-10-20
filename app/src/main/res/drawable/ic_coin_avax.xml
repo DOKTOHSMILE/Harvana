@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Avalanche C-Chain: red disc, white peaks. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
+    <path android:fillColor="#FFE84142" android:pathData="M0,24a24,24 0,1 0,48 0a24,24 0,1 0,-48 0z"/>
+    <path android:fillColor="#FFFFFFFF" android:pathData="M22.6,12.5c0.6,-1 2,-1 2.6,0l1.9,3.4c0.4,0.7 0.4,1.6 0,2.3l-7.8,13.6c-0.4,0.7 -1.2,1.2 -2,1.2h-4.2c-1.2,0 -1.9,-1.3 -1.3,-2.3z M28.9,24.3c0.6,-1 2,-1 2.6,0l4.2,7.4c0.6,1 -0.2,2.3 -1.3,2.3h-8.4c-1.2,0 -1.9,-1.3 -1.3,-2.3z"/>
+</vector>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fantom Opera: blue disc, white chamber shape. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
+    <path android:fillColor="#FF1969FF" android:pathData="M0,24a24,24 0,1 0,48 0a24,24 0,1 0,-48 0z"/>
+    <path android:fillColor="#FFFFFFFF" android:pathData="M24,10.5l9,5.2v16.6l-9,5.2l-9,-5.2v-16.6z"/>
+    <path android:fillColor="#FF1969FF" android:pathData="M24,15.5l4.6,2.7l-4.6,2.7l-4.6,-2.7z M19,23.2l4,2.3v5.2l-4,-2.3z M29,23.2v5.2l-4,2.3v-5.2z"/>
+</vector>

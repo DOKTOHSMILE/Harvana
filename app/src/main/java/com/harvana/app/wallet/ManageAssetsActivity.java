@@ -113,8 +113,9 @@ public class ManageAssetsActivity extends AppCompatActivity {
         if (!added.isEmpty()) all.add(header("Added"));
         for (CustomAssets.Asset a : added) {
             Item i = row("ADDED", a.key(), a.token() ? a.symbol + " · " + a.name : a.chainName, a.token() ? a.chainName : a.family + " · " + a.symbol);
-            i.icon = R.drawable.ic_coin_generic;
-            i.iconUrl = a.icon;
+            int known = a.token() ? 0 : NetworkSheets.builtInIcon("C:" + a.chainId);
+            i.icon = known != 0 ? known : R.drawable.ic_coin_generic;
+            i.iconUrl = known != 0 ? "" : a.icon;
             i.asset = a;
             all.add(i);
         }

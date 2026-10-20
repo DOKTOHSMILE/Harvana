@@ -2,6 +2,18 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: logos for the other EVM networks
+
+- Bundled vector logo marks (they work offline) for Arbitrum One, OP Mainnet, Avalanche C-Chain, Fantom Opera,
+  zkSync Era, Linea, Cronos and Gnosis: `ic_coin_arb`, `ic_coin_op`, `ic_coin_avax`, `ic_coin_ftm`, `ic_coin_zk`,
+  `ic_coin_linea`, `ic_coin_cro`, `ic_coin_gnosis`. These are simplified marks in each network's colours, not the
+  official artwork.
+- `NetworkSheets.builtInIcon` gives a logo for each built-in network key and for an added network on those chain
+  IDs ("C:42161" and so on). The places that used the generic ring now use it:
+  - the Web3 network chip and network sheet
+  - the networks screens
+  - an added network's own coin on Assets and in Add coins
+
 ## 20 Oct 2026: steady Assets, Activity and group pages
 
 - **Assets total:** until every section (HARV, stable coins, other chains) has reported, the last full total stays

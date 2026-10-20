@@ -684,6 +684,11 @@ public final class CustomAssets {
     }
 
     private static void icon(Context c, ImageView logo, Asset a) {
+        // A known network's own coin (Arbitrum's ETH, Avalanche's AVAX, …): the bundled logo, offline too.
+        if (a.contract.isEmpty() && a.chainId > 0) {
+            int res = NetworkSheets.builtInIcon("C:" + a.chainId);
+            if (res != 0) { logo.setImageResource(res); return; }
+        }
         final String key = a.contract.isEmpty() && a.chainId == 0 && a.networkId.isEmpty() ? null : a.key();
         java.util.List<String> via = AssetEnricher.gateways(AssetEnricher.https(a.icon));
         String url = via.isEmpty() ? "" : via.get(0);

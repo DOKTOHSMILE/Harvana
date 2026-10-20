@@ -754,6 +754,25 @@ service cloud.firestore {
     // Support desk. A member reads and writes only their own ticket. A moderator
     // document (written by the node after the key sign-in) can read every ticket
     // and reply under their own name. Messages are never edited.
+    // Escalation chain (owner, 20 Oct 2026): support → agent → moderator → super admin. A ticket's `level` is who
+    // holds it (no level = SUPPORT). Staff act only on tickets at or below their own tier (MODERATORS/{uid}.tier,
+    // written by the node at staff sign-in; a record without one counts as SUPPORT) and escalate one step up only.
+    function staffTier(uid) {
+      return get(/databases/$(database)/documents/MODERATORS/$(uid)).data.get('tier', 'SUPPORT');
+    }
+    function tierRank(t) {
+      return t == 'SUPPORT' ? 1 : t == 'AGENT' ? 2 : t == 'MODERATOR' ? 3 : t == 'SUPER_ADMIN' ? 4 : 0;
+    }
+    function nextLevel(t) {
+      return t == 'SUPPORT' ? 'AGENT' : t == 'AGENT' ? 'MODERATOR' : t == 'MODERATOR' ? 'SUPER_ADMIN' : '';
+    }
+    function ticketEscalationOk(uid) {
+      return tierRank(resource.data.get('level', 'SUPPORT')) <= tierRank(staffTier(uid))
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['level'])
+            || (nextLevel(staffTier(uid)) != '' && request.resource.data.level == nextLevel(staffTier(uid))
+                && request.resource.data.escalatedBy == uid));
+    }
+
     match /SUPPORT_TICKETS/{ticketId} {
       allow get: if signedIn() && (
         resource.data.ownerUid == request.auth.uid || isModerator(request.auth.uid)
@@ -782,7 +801,8 @@ service cloud.firestore {
         )
         || (isModerator(request.auth.uid)
           && request.resource.data.ownerUid == resource.data.ownerUid
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'lastFrom', 'updatedAt', 'status', 'staffName', 'staffUid', 'priority', 'assignedAgentId', 'resolvedAt', 'closedAt', 'resolutionSummary', 'category', 'closedBy'])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'lastFrom', 'updatedAt', 'status', 'staffName', 'staffUid', 'priority', 'assignedAgentId', 'resolvedAt', 'closedAt', 'resolutionSummary', 'category', 'closedBy', 'level', 'escalatedBy', 'escalatedByName', 'escalatedAt', 'escalationReason'])
+          && ticketEscalationOk(request.auth.uid)
           && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastFrom']) || request.resource.data.lastFrom == 'STAFF')
           && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']) || request.resource.data.status in ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'WAITING_FOR_USER', 'WAITING_FOR_SUPPORT', 'ESCALATED', 'RESOLVED', 'CLOSED'])
           && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['priority']) || request.resource.data.priority in ['LOW', 'NORMAL', 'HIGH', 'URGENT'])

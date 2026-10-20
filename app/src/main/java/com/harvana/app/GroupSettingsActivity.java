@@ -1583,7 +1583,7 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 			MaterialButton create = new MaterialButton(this);
 			create.setText("Create / replace Access Card");
 			create.setAllCaps(false);
-			create.setOnClickListener(v -> {
+			create.setOnClickListener(v -> com.harvana.app.wallet.PinPromptHelper.authorize(this, "Create the group wallet's Access Card", () -> {
 				String mn = SecureWalletStorage.loadMnemonic(this, expectedWallet);
 				if (mn == null || mn.isEmpty()) {
 					Toast.makeText(this, "The group phrase isn't on this phone. Restore the group wallet first.", Toast.LENGTH_LONG).show();
@@ -1594,7 +1594,7 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 				i.putExtra(CreateHarvanaCardActivity.EXTRA_LABEL, str(groupData, "groupName", ""));
 				i.putExtra(CreateHarvanaCardActivity.EXTRA_GROUP_ID, groupId);
 				startActivity(i);
-			});
+			}));
 			backupSection.addView(create);
 		}
 		

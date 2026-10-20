@@ -60,6 +60,8 @@ public final class NodeAuthManager {
     }
 
     private static final Object lock = new Object();
+    private static volatile String memToken;
+    private static volatile long memExpiresAtMs;
     private static boolean fetchInFlight = false;
     private static final List<TokenCallback> waiters = new ArrayList<>();
 
@@ -72,9 +74,12 @@ public final class NodeAuthManager {
             return;
         }
 
+        // The node token lives in memory only (it lasts 30 minutes and a new one is one signed request): nothing
+        // that grants access to the node is written to disk. A copy an older version saved is removed once.
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        String cached = prefs.getString(KEY_TOKEN, null);
-        long expiresAtMs = toExpiryMs(prefs.getLong(KEY_EXPIRES_AT, 0L));
+        if (prefs.contains(KEY_TOKEN)) prefs.edit().remove(KEY_TOKEN).remove(KEY_EXPIRES_AT).apply();
+        String cached = memToken;
+        long expiresAtMs = memExpiresAtMs;
 
         if (cached != null && !cached.isEmpty()
                 && System.currentTimeMillis() < (expiresAtMs - REFRESH_MARGIN_MS)) {
@@ -129,10 +134,8 @@ public final class NodeAuthManager {
                 }
 
                 // Node sends epoch seconds. Cache compare uses currentTimeMillis.
-                prefs.edit()
-                        .putString(KEY_TOKEN, token)
-                        .putLong(KEY_EXPIRES_AT, toExpiryMs(exp))
-                        .apply();
+                memToken = token;
+                memExpiresAtMs = toExpiryMs(exp);
 
                 succeedAllWaiters(token);
             }
@@ -166,6 +169,8 @@ public final class NodeAuthManager {
     public static void invalidateCachedToken() {
         Context context = com.harvana.app.SketchApplication.getContext();
         if (context == null) return;
+        memToken = null;
+        memExpiresAtMs = 0L;
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 .edit()
                 .remove(KEY_TOKEN)

@@ -110,8 +110,10 @@ public class BackupRecoveryActivity extends AppCompatActivity {
 	private void initializeLogic() {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 		
+		// The phrase is the wallet: it shows only after the transaction PIN (or fingerprint). With no PIN set yet,
+		// the person is sent to set one first; it is never shown unguarded.
 		btnRevealPhrase.setOnClickListener(v ->
-		com.harvana.app.wallet.PinPromptHelper.verifyPinThenProceed(this, this::_revealPhrase));
+		com.harvana.app.wallet.PinPromptHelper.authorize(this, "Show the recovery phrase", this::_revealPhrase));
 		
 		btnCopyPhrase.setOnClickListener(v -> _copyToClipboard());
 		
@@ -193,16 +195,29 @@ public class BackupRecoveryActivity extends AppCompatActivity {
 		if (revealedMnemonic == null) return;
 		android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 		ClipData clip = ClipData.newPlainText("Recovery Phrase", revealedMnemonic);
+		// Android 13+: the system clipboard preview does not show it.
+		android.os.PersistableBundle extras = new android.os.PersistableBundle();
+		extras.putBoolean("android.content.extra.IS_SENSITIVE", true);
+		clip.getDescription().setExtras(extras);
 		clipboard.setPrimaryClip(clip);
 		Toast.makeText(this, "Copied — will clear from clipboard in 30 seconds", Toast.LENGTH_SHORT).show();
 		
 		clipboardClearHandler.removeCallbacksAndMessages(null);
-		clipboardClearHandler.postDelayed(() -> {
-			ClipData emptyClip = ClipData.newPlainText("Cleared", "");
-			if (clipboard != null) {
-				clipboard.setPrimaryClip(emptyClip);
-			}
-		}, 30_000);
+		clipPending = true;
+		clipboardClearHandler.postDelayed(this::_wipeClipboard, 30_000);
+	}
+
+	/** True while the phrase may still be on the clipboard. */
+	private boolean clipPending;
+
+	private void _wipeClipboard() {
+		clipPending = false;
+		android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+		if (clipboard == null) return;
+		try {
+			if (android.os.Build.VERSION.SDK_INT >= 28) clipboard.clearPrimaryClip();
+			else clipboard.setPrimaryClip(ClipData.newPlainText("Cleared", ""));
+		} catch (Exception ignored) { }
 	}
 	
 	@Override
@@ -218,6 +233,7 @@ public class BackupRecoveryActivity extends AppCompatActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		clipboardClearHandler.removeCallbacksAndMessages(null);
+		if (clipPending) _wipeClipboard();                     // leaving the screen early wipes now, it never cancels the wipe
 	}
 	
 	{

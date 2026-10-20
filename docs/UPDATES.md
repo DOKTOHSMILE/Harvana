@@ -2,6 +2,26 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: audit fixes, wallet sign-in and recovery phrase
+
+- **Node sign-in is signed only.** The wallet fell back to an unsigned request (address plus device id) whenever the
+  signed challenge failed. The node already refuses unsigned requests (401 "signature required"), so the fallback
+  could not get a token, but it hid the real error. Removed: a failure now shows its own reason (no challenge, key
+  not on this phone, signing failed, or the node's answer).
+- **Node token in memory only.** It was kept in plain SharedPreferences. It now lives only in memory for the app's
+  run: a 30-minute token, and getting a new one is one signed request. The copy older versions saved is deleted the
+  first time the app asks for a token.
+- **Recovery phrase needs the PIN.** "Show the recovery phrase" and a group wallet's "Create / replace Access Card"
+  used the opt-in check, which went straight through when no PIN was set. Both now use the payment gate: PIN or
+  fingerprint, and with no PIN set the person is sent to set one first.
+- **Clipboard:**
+  - Leaving the recovery-phrase screen cancelled the 30-second wipe, so the phrase stayed on the clipboard. It is
+    now wiped at once when the screen closes early.
+  - The copy is marked sensitive, so Android 13+ hides it in the clipboard preview.
+- **Not changed (needs a decision):** the Keystore key that encrypts the seed does not itself require the person to
+  unlock it. Making it require that would also block background signing (payment tracking, WalletConnect replies).
+  The gates above cover every screen that shows or exports the phrase.
+
 ## 20 Oct 2026: no more whole-database downloads
 
 - Seven screens still attached a Realtime Database listener to a whole root (`groupdb`, `userdb`, `dbauth`) with

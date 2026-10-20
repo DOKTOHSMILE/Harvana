@@ -562,12 +562,13 @@ public final class HarvanaNodeClient {
 		requestNodeToken(null, address, clientId, cb);
 	}
 	
+	/** The node issues a token only for a signed challenge; there is no unsigned way in (the node answers 401). */
 	static void requestNodeToken(Context context, String address, String clientId, JsonCallback cb) {
 		if (context != null && address != null && !address.isEmpty()) {
 			requestSignedNodeToken(context, address, clientId, cb);
 			return;
 		}
-		postUnsignedNodeToken(address, clientId, cb);
+		mainHandler.post(() -> cb.onError("No wallet on this device to sign in with."));
 	}
 	
 	private static void requestSignedNodeToken(Context context, String address, String clientId, JsonCallback cb) {
@@ -583,7 +584,7 @@ public final class HarvanaNodeClient {
 						String challenge = json.optString("challenge", "");
 						String canonical = json.optString("canonical", "");
 						if (challenge.isEmpty()) {
-							postUnsignedNodeToken(address, clientId, cb);
+							mainHandler.post(() -> cb.onError("The node did not send a sign-in challenge. Try again."));
 							return;
 						}
 						if (canonical.isEmpty()) {
@@ -593,7 +594,7 @@ public final class HarvanaNodeClient {
 						String pkB64 = SecureWalletStorage.loadPrivateKey(context, address);
 						String pubB64 = SecureWalletStorage.loadPublicKey(context, address);
 						if (pkB64 == null || pubB64 == null) {
-							postUnsignedNodeToken(address, clientId, cb);
+							mainHandler.post(() -> cb.onError("This wallet's key is not on this device, so it cannot sign in to the node."));
 							return;
 						}
 						byte[] seed = Base64.decode(pkB64, Base64.NO_WRAP);
@@ -607,31 +608,18 @@ public final class HarvanaNodeClient {
 						auth.put("signature", Base64.encodeToString(sig, Base64.NO_WRAP));
 						rawPost("/api/v1/mining/auth", auth.toString(), null, cb);
 					} catch (Exception e) {
-						Log.w(TAG, "signed node auth failed, falling back", e);
-						postUnsignedNodeToken(address, clientId, cb);
+						Log.w(TAG, "signed node auth failed", e);
+						mainHandler.post(() -> cb.onError("Signing in to the node failed. Try again."));
 					}
 				}
 				
 				@Override
 				public void onError(String error) {
-					postUnsignedNodeToken(address, clientId, cb);
+					cb.onError(error);                         // rawPost already posts to the main thread
 				}
 			});
 		} catch (Exception e) {
-			postUnsignedNodeToken(address, clientId, cb);
-		}
-	}
-	
-	private static void postUnsignedNodeToken(String address, String clientId, JsonCallback cb) {
-		try {
-			JSONObject body = new JSONObject();
-			body.put("address", address);
-			body.put("clientId", clientId != null ? clientId : "");
-			body.put("app", "harvana-app");
-			rawPost("/api/v1/mining/auth", body.toString(), null, cb);
-		} catch (Exception e) {
-			String errorMsg = "The app couldn't prepare this request. Try again.";
-			mainHandler.post(() -> cb.onError(errorMsg));
+			mainHandler.post(() -> cb.onError("The app couldn't prepare this request. Try again."));
 		}
 	}
 	

@@ -40,6 +40,7 @@
 				android:textSize="22sp"
 				android:textStyle="bold" />
 			<TextView
+				android:visibility="gone"
 				android:id="@+id/textview89"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"

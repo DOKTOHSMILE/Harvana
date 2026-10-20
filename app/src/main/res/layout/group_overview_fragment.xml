@@ -154,6 +154,7 @@
 						android:background="@drawable/bg_progress_fill" />
 				</FrameLayout>
 				<TextView
+				android:visibility="gone"
 					android:id="@+id/tv_cycle_hint"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
@@ -161,6 +162,7 @@
 					android:text="Current payout goes to the member holding this slot."
 					android:textSize="12sp" />
 				<TextView
+				android:visibility="gone"
 					android:id="@+id/tv_group_wallet_hint"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"

@@ -76,12 +76,11 @@ public class TrustScoreActivity extends AppCompatActivity {
             personPercent = card.percent;
             personTier = card.trustTier.isEmpty() ? com.harvana.app.trust.ProfileTrust.tierFor(card.percent) : card.trustTier;
             if (changed && lastPerson != null) render(lastPerson);
+            if (changed && (address == null || address.isEmpty())) renderNoWallet();
         });
-                address = WalletManager.getActiveWalletAddress(this);
+        address = WalletManager.getActiveWalletAddress(this);
         if (address == null || address.isEmpty()) {
-            root.removeAllViews();
-            root.addView(tv("No wallet yet", 22, true, UiColors.textPrimary()));
-            root.addView(tv("Create a wallet first. Trust is recorded against the wallet, not the profile.", 14, false, UiColors.textSecondary()));
+            renderNoWallet();
             return;
         }
         if (mirror != null) mirror.remove();
@@ -221,6 +220,38 @@ public class TrustScoreActivity extends AppCompatActivity {
     private static String when(long at) {
         if (at <= 0) return "Activity";
         return new java.text.SimpleDateFormat("d MMM", java.util.Locale.US).format(new java.util.Date(at));
+    }
+
+    /** No wallet on this phone: the profile's own score (the same figure as Home), then Create / Restore wallet. */
+    private void renderNoWallet() {
+        root.removeAllViews();
+        java.util.Map<String, Object> p = new java.util.HashMap<>();
+        p.put("trustPercent", Math.max(0, personPercent));
+        p.put("trustTier", personTier.isEmpty() ? com.harvana.app.trust.ProfileTrust.tierFor(Math.max(0, personPercent)) : personTier);
+        root.addView(tierPager(p));
+        LinearLayout box = cardBox();
+        box.addView(tv("Wallet", 16, true, UiColors.textPrimary()));
+        MaterialButton create = new MaterialButton(this);
+        create.setAllCaps(false);
+        create.setText("Create wallet");
+        create.setIconResource(R.drawable.icon_add_circle_outline_round);
+        create.setOnClickListener(v -> startActivity(new android.content.Intent(this, CreateWalletActivity.class)));
+        MaterialButton restore = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+        restore.setAllCaps(false);
+        restore.setText("Restore wallet");
+        restore.setIconResource(R.drawable.ic_refresh);
+        restore.setOnClickListener(v -> {
+            android.content.Intent i = new android.content.Intent(this, RestoreWalletActivity.class);
+            i.putExtra(RestoreWalletActivity.EXTRA_EMBEDDED, true);
+            startActivity(i);
+        });
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(12);
+        box.addView(create, lp);
+        LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp2.topMargin = dp(8);
+        box.addView(restore, lp2);
+        root.addView(box);
     }
 
     private void addBind() {

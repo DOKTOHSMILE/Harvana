@@ -27,6 +27,7 @@
 		android:background="@color/colorBackground"
 		app:layout_behavior="@string/appbar_scrolling_view_behavior">
 		<TextView
+				android:visibility="gone"
 			android:id="@+id/tvSubtitle"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"

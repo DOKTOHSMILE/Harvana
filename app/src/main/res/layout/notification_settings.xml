@@ -40,6 +40,7 @@
 				android:textStyle="bold"
 				android:textColor="@color/colorTextPrimary" />
 			<TextView
+				android:visibility="gone"
 				android:id="@+id/textview75"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
@@ -324,6 +325,7 @@
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 			<TextView
+				android:visibility="gone"
 				android:id="@+id/textview87"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"

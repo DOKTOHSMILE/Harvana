@@ -19,6 +19,7 @@
 			android:orientation="vertical"
 			android:padding="16dp">
 			<TextView
+				android:visibility="gone"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:text="Answers first. A person when the case involves money, a dispute, or the account."

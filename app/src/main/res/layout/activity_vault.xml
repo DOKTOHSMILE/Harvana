@@ -265,7 +265,7 @@
 						android:layout_marginStart="4dp"
 						android:layout_weight="1"
 						android:text="Mint"
-						app:icon="@drawable/ic_coin_stable" />
+						app:icon="@drawable/icon_add_circle_outline_round" />
 
 				</LinearLayout>
 

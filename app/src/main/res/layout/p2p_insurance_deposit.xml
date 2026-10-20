@@ -40,6 +40,7 @@
 				android:textStyle="bold"
 				android:textColor="@color/colorTextPrimary" />
 			<TextView
+				android:visibility="gone"
 				android:id="@+id/textview82"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
@@ -209,6 +210,7 @@
 						android:textStyle="bold"
 						android:textColor="@color/colorTextPrimary" />
 					<TextView
+				android:visibility="gone"
 						android:id="@+id/textview5"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
@@ -435,6 +437,7 @@
 					android:padding="18dp"
 					android:orientation="vertical">
 					<TextView
+				android:visibility="gone"
 						android:id="@+id/textview11"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"

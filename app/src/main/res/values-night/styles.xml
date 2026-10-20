@@ -71,6 +71,9 @@
 
     <!-- One button look for the whole app: 12dp corners, 48dp tall, bold sentence-case text. Filled = accent, outlined = accent edge. -->
     <style name="HarvanaButton" parent="Widget.MaterialComponents.Button">
+        <item name="iconSize">20dp</item>
+        <item name="iconPadding">8dp</item>
+        <item name="iconGravity">textStart</item>
         <item name="cornerRadius">12dp</item>
         <item name="android:minHeight">48dp</item>
         <item name="android:insetTop">0dp</item>
@@ -86,6 +89,9 @@
     </style>
 
     <style name="HarvanaButton.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="iconSize">20dp</item>
+        <item name="iconPadding">8dp</item>
+        <item name="iconGravity">textStart</item>
         <item name="cornerRadius">12dp</item>
         <item name="android:minHeight">48dp</item>
         <item name="android:insetTop">0dp</item>
@@ -131,6 +137,9 @@
     </style>
 
     <style name="HarvanaButton.Text" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="iconSize">20dp</item>
+        <item name="iconPadding">8dp</item>
+        <item name="iconGravity">textStart</item>
         <item name="cornerRadius">12dp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textStyle">bold</item>

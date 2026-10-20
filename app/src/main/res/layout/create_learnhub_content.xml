@@ -43,6 +43,7 @@
 				android:textColor="@color/colorTextPrimary"
 				android:focusable="false" />
 			<TextView
+				android:visibility="gone"
 				android:id="@+id/textview25"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
@@ -224,6 +225,7 @@
 				</FrameLayout>
 			</com.google.android.material.card.MaterialCardView>
 			<TextView
+				android:visibility="gone"
 				android:id="@+id/textview32"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"

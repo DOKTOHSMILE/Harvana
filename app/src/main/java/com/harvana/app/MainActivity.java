@@ -92,6 +92,18 @@ public class MainActivity extends AppCompatActivity {
 		initialize(_savedInstanceState);
 		FirebaseApp.initializeApp(this);
 		initializeLogic();
+		if (_savedInstanceState == null) _walletOnboarding();
+	}
+
+	/** Right after a sign-in or a new account (logout clears every pref and wallet): create or restore a wallet first. */
+	private void _walletOnboarding() {
+		if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) return;
+		String addr = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
+		if (addr != null && !addr.isEmpty()) return;
+		android.content.SharedPreferences sp = getSharedPreferences("onboarding", MODE_PRIVATE);
+		if (sp.getBoolean("wallet_prompted", false)) return;
+		sp.edit().putBoolean("wallet_prompted", true).apply();
+		startActivity(new Intent(this, WalletListActivity.class));
 	}
 	
 	private void initialize(Bundle _savedInstanceState) {

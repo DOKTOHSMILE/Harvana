@@ -348,7 +348,8 @@ public class SendAssetActivity extends AppCompatActivity {
 		if (isGroupSend) {
 			if (getSupportActionBar() != null) getSupportActionBar().setTitle("Send from Group Wallet");
 			if (tvSubtitle != null) {
-				tvSubtitle.setText("Sending from the group's shared pool, not your personal wallet.");
+				tvSubtitle.setText("Group wallet");
+				tvSubtitle.setVisibility(View.VISIBLE);
 			}
 		}
 		
@@ -465,8 +466,8 @@ public class SendAssetActivity extends AppCompatActivity {
 					String from = asset.get("address") instanceof String ? String.valueOf(asset.get("address")) : "";
 					if (tvSubtitle != null && getIntent().getStringExtra("fromWalletAddress") == null) {
 						com.harvana.app.wallet.CoinCatalog.Coin coin = com.harvana.app.wallet.CoinCatalog.get(key);
-						if (!from.isEmpty()) tvSubtitle.setText("From " + from);
-						else if (coin != null) tvSubtitle.setText("Send " + coin.ticker + " on " + coin.liveNetwork() + ".");
+						tvSubtitle.setText(from.isEmpty() ? "" : "From " + from);
+						tvSubtitle.setVisibility(from.isEmpty() ? View.GONE : View.VISIBLE);
 					}
 				}
 				

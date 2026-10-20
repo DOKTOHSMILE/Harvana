@@ -339,12 +339,7 @@ public final class AmountPreview {
             loadQuote(key, null);
             return;
         }
-        String text = feeText(q);
-        // The amount and the fee must both fit: say so before signing, with the most that can go.
-        if (q.sameCoin && q.maxSend != null && !Double.isNaN(coins) && coins > q.maxSend.doubleValue() + 1e-12) {
-            text = text + " · max " + q.maxSend.stripTrailingZeros().toPlainString() + " " + src.symbol();
-        }
-        fee(text);
+        fee(feeText(q));                                                    // the fee alone; MAX already sends the most that fits
     }
 
     /** Looks up the money value of one unit of the selected asset, then runs {@code then} on the main thread. */

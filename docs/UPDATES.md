@@ -2,6 +2,23 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: button icons, fewer sentences, tFare row, Trust score without a wallet, wallet after sign-in
+
+- **Button icons:** every themed button (filled, outlined, text) draws its icon at 20dp next to the text
+  (`iconSize`, `iconPadding`, `iconGravity` in `res/values*/styles.xml`). The vault's Lock icon no longer fills the
+  button, and Mint uses a line icon instead of the coin (it was tinted into a white disc). The two outlined buttons
+  on the access-card screen get the same size.
+- **Send:** the "Send HARV on Harvana Protocol." line is gone (only "From ‹address›" shows when sending from another
+  wallet; "Group wallet" for a group send). The tFare row shows the fee only, without "· max …".
+- **Sentences hidden** (values only): screen intro lines on Send, Staking, Support hub, Learn Hub editor, Complete
+  profile, Group overview hints, Help, Home greeting, Notification and Privacy settings, Payment methods, P2P
+  insurance deposit, Earn, Wallet list, Create wallet sheet, Loan apply / Loan detail notes, Post notice, Transaction
+  PIN. Kept: seed-phrase and key warnings, consent checkboxes, empty states, About and FAQ text.
+- **Trust score without a wallet:** shows your profile's score and tier (the same figure as Home), with
+  **Create wallet** and **Restore wallet** buttons, instead of a dead "No wallet yet" page.
+- **After sign-in or a new account:** with no wallet on the phone, the app opens the wallet page (Create / Restore)
+  once. Logout clears the flag, so the next sign-in shows it again.
+
 ## 20 Oct 2026: audit fix, ledger rows need a transaction (Firestore rules)
 
 - `docs/firestore.rules`:

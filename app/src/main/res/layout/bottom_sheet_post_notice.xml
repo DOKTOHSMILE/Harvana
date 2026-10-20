@@ -38,6 +38,7 @@
 			android:textStyle="bold"
 			android:focusable="false" />
 		<TextView
+				android:visibility="gone"
 			android:id="@+id/textview11"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"

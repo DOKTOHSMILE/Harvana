@@ -662,16 +662,26 @@ public class DappBrowserActivity extends AppCompatActivity {
         title.setPadding(dp(4), 0, 0, dp(10));
         box.addView(title);
 
-        box.addView(chainRow(sheet, "HARV", "Harvana", "Harvana Protocol" + (hvAccount == null || hvAccount.isEmpty() ? "" : " · " + shortAddr(hvAccount)), harvanaShown && !solShown));
-        box.addView(chainRow(sheet, "SOL", SolSigner.networkName(), "Solana" + (solAccount == null ? "" : " · " + shortAddr(solAccount)), solShown));
+        // The rows scroll (there can be many networks); the title stays on top and "Add network" stays at the bottom.
+        androidx.core.widget.NestedScrollView scroll = new androidx.core.widget.NestedScrollView(this);
+        scroll.setFillViewport(false);
+        LinearLayout rows = new LinearLayout(this);
+        rows.setOrientation(LinearLayout.VERTICAL);
+        scroll.addView(rows, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        rows.addView(chainRow(sheet, "HARV", "Harvana", "Harvana Protocol" + (hvAccount == null || hvAccount.isEmpty() ? "" : " · " + shortAddr(hvAccount)), harvanaShown && !solShown));
+        rows.addView(chainRow(sheet, "SOL", SolSigner.networkName(), "Solana" + (solAccount == null ? "" : " · " + shortAddr(solAccount)), solShown));
         for (String key : Web3Signer.CHAINS) {
             Net.Evm n = Web3Signer.net(key);
-            box.addView(chainRow(sheet, key, n.name, "Chain ID " + n.chainId + (account == null ? "" : " · " + shortAddr(account)), !solShown && !harvanaShown && key.equals(chainKey)));
+            rows.addView(chainRow(sheet, key, n.name, "Chain ID " + n.chainId + (account == null ? "" : " · " + shortAddr(account)), !solShown && !harvanaShown && key.equals(chainKey)));
         }
         for (com.harvana.app.wallet.CustomAssets.Asset a : com.harvana.app.wallet.CustomAssets.networks(this)) {
             String key = "C:" + a.chainId;
-            box.addView(chainRow(sheet, key, a.chainName, "Chain ID " + a.chainId + (account == null ? "" : " · " + shortAddr(account)), !harvanaShown && key.equals(chainKey)));
+            rows.addView(chainRow(sheet, key, a.chainName, "Chain ID " + a.chainId + (account == null ? "" : " · " + shortAddr(account)), !harvanaShown && key.equals(chainKey)));
         }
+        int maxList = (int) (getResources().getDisplayMetrics().heightPixels * 0.85f) - dp(160);     // title and button left out
+        int rowsHeight = rows.getChildCount() * dp(66);
+        box.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                rowsHeight > maxList ? maxList : ViewGroup.LayoutParams.WRAP_CONTENT));
         com.google.android.material.button.MaterialButton addNet = (com.google.android.material.button.MaterialButton)
                 getLayoutInflater().inflate(R.layout.item_list_button, box, false);
         addNet.setText("Add network");

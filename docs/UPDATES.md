@@ -2,6 +2,11 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Web3 network list scrolls
+
+- Discover → network picker: the list of networks now scrolls (title on top, Add network at the bottom); before, networks past the screen and Add network could not be reached.
+- Install: new wallet APK.
+
 ## 20 Oct 2026: Saved wallets on Send; usernames; .harv name on the access card
 
 - Send: a new contacts icon next to Paste and Scan opens Wallets: the addresses you saved (by name) and your recent recipients for the coin picked. Tap to fill the recipient; "+ Save this address" names the address in the field; long-press a saved wallet to rename or remove it. Recent chips show the saved name. The line under the recipient ("name.harv → HV0x…") is gone; the review sheet shows the address.

@@ -2,6 +2,13 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Send amount by value; Activity and Assets load in one go
+
+- Send → Amount: the amount is large with its unit, and beside it a switch [coin | USD] (your display currency) and MAX. Tap USD to type a value ($5); the line under the amount shows the same amount in the other unit (≈ 0.0478 SOL, or ≈ $5.00 when typing the coin). Available shows both units. The "Enter in $" link is gone.
+- Activity: history from the node, sends still waiting, and every added coin's own network (PUMP, SOL, ETH, …, including pending swaps and transfers) are read together, merged, sorted newest first and shown at once. The list opens on the last result kept on the phone.
+- Assets → other coins and added coins: every balance and the prices are read together and painted at once; a network that fails keeps the last known balance (never 0).
+- Install: new wallet APK.
+
 ## 20 Oct 2026: Solana sends; added coins' transaction details
 
 - Solana (SOL and SPL tokens such as PUMP): sends failed with "Transaction simulation failed". The network's check ran at a stricter commitment than the blockhash the app read; both now use "confirmed", a stale blockhash is retried once with a new one, and the network's real reason is shown in words (for example the 0.00089088 SOL every Solana account must keep). A send that would leave between 0 and 0.00089088 SOL in your account is refused before signing.

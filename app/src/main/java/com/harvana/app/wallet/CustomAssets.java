@@ -600,8 +600,19 @@ public final class CustomAssets {
     /** One row per added chain or token, in the same style as the other coins; a row opens the coin page. */
     public static void render(Context c, LinearLayout box, String harvAddress) {
         if (box == null || c == null || harvAddress == null || harvAddress.isEmpty()) return;
-        box.removeAllViews();
         List<Asset> list = all(c);
+        AssetBook book = AssetBook.of(harvAddress);
+        book.listen("added", (allBalances, fresh) -> applyBook(c, box, allBalances));
+        List<String> keys = new ArrayList<>();
+        for (Asset a : list) if (!a.hidden) keys.add(a.key());
+        boolean same = box.getChildCount() == keys.size();
+        for (int i = 0; same && i < keys.size(); i++) same = keys.get(i).equals(box.getChildAt(i).getTag());
+        if (same) {                                   // the same coins: keep the rows, only the numbers change
+            applyBook(c, box, book.cached(c));
+            book.refresh(c);
+            return;
+        }
+        box.removeAllViews();
         if (list.isEmpty()) return;
         LayoutInflater inf = LayoutInflater.from(c);
         for (Asset a : list) {
@@ -623,20 +634,31 @@ public final class CustomAssets {
             tap.setOnClickListener(v -> open(c, a, harvAddress));
             tap.setOnLongClickListener(v -> { manage(c, a.token() ? (find(a.chainKey) != null ? find(a.chainKey) : a) : a, () -> render(c, box, harvAddress)); return true; });
             box.addView(item);
-            new Thread(() -> {
-                String owner = address(c, harvAddress, a);
-                String b = owner.isEmpty() ? "" : balance(a, owner);
-                if (bal != null) bal.post(() -> bal.setText(b.isEmpty() ? "—" : b));
-                // Its worth in the person's currency, once a price is known.
-                if (b.isEmpty() || side == null) return;
-                AssetPrices.load(c, () -> FxRates.load(c, () -> {
-                    AssetPrices.Quote q = AssetPrices.peek(c, a.key());
-                    Double held = AssetPrices.amount(b);
-                    if (q == null || held == null) return;
-                    side.setText(FxRates.money(c, held * q.usd));
-                    com.harvana.app.utils.BalancePrivacy.guard(side);
-                }));
-            }).start();
+        }
+        applyBook(c, box, book.cached(c));
+        book.refresh(c);
+    }
+
+    /** Every added coin's balance and worth from the AssetBook, in one pass ("—" until a first balance is known). */
+    static void applyBook(Context c, LinearLayout box, java.util.Map<String, String> book) {
+        for (int i = 0; i < box.getChildCount(); i++) {
+            View item = box.getChildAt(i);
+            if (!(item.getTag() instanceof String)) continue;
+            String key = (String) item.getTag();
+            TextView bal = item.findViewById(R.id.tv_asset_balance);
+            TextView side = item.findViewById(R.id.tv_asset_amount);
+            String b = book.get(key);
+            if (bal != null) {
+                String next = b == null || b.isEmpty() ? "…" : b;
+                if (!next.contentEquals(bal.getText())) bal.setText(next);
+            }
+            if (b == null || side == null) continue;
+            AssetPrices.Quote q = AssetPrices.peek(c, key);
+            Double held = AssetPrices.amount(b);
+            if (q == null || held == null) continue;
+            String worth = FxRates.money(c, held * q.usd);
+            if (!worth.contentEquals(side.getText())) side.setText(worth);
+            com.harvana.app.utils.BalancePrivacy.guard(side);
         }
     }
 

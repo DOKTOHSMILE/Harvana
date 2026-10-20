@@ -26,9 +26,9 @@ import java.math.RoundingMode;
 import java.util.Locale;
 
 /**
- * The line under the amount on the Send screen. As the person types it shows what the amount is worth and the
- * network fee the node will charge, before anything is signed. A switch lets them type the amount in money
- * (₦5, $5, …) instead of the coin: the app works out how much of the coin that is, and the other way round.
+ * The amount box on the Send screen (owner, 20 Oct 2026: typing by value must be plain). The amount is large with its
+ * unit; beside it a two-way switch [coin | money] and MAX; under it the same amount in the other unit ("≈ $5.00" or
+ * "≈ 0.0478 SOL"). The table under the box holds Available (in both units), the price and the tFare.
  *
  * Prices: HARV at the network's mark (GET /api/v1/p2p/mark, kobo per HARV), stable coins at their currency's
  * exchange rate, other coins at the public market price. The fee for HARV comes from GET /api/v1/tx/estimate-fee,
@@ -47,7 +47,8 @@ public final class AmountPreview {
     private final Context c;
     private final EditText amount;
     private final Source src;
-    private final TextView toggle;
+    /** The switch halves, the unit marks around the amount, the other-unit line and MAX (null when the layout lacks them). */
+    private final TextView unitCoin, unitMoney, prefix, suffix, other, max;
     /** The table under the amount: Available / Value (or Price) / Network fee, label left and figure right. */
     private final TextView availLabel, availValue, valueLabel, valueValue, feeValue;
     private final LinearLayout availRow, valueRow, feeRow;
@@ -76,20 +77,22 @@ public final class AmountPreview {
         availRow = row(c, availLabel, availValue);
         valueLabel = cell(c, "Value", false); valueValue = cell(c, "", true);
         valueRow = row(c, valueLabel, valueValue);
+        valueLabel.setText("Price");
         TextView feeLabel = cell(c, "tFare", false); feeValue = cell(c, "", true);
         feeRow = row(c, feeLabel, feeValue);
         table.addView(availRow);
         table.addView(valueRow);
         table.addView(feeRow);
-        toggle = new TextView(c);
-        toggle.setTextSize(12.5f);
-        toggle.setTypeface(Typeface.DEFAULT_BOLD);
-        toggle.setTextColor(c.getResources().getColor(R.color.colorAccent));
-        toggle.setGravity(Gravity.END);
-        int p = Math.round(6 * d);
-        toggle.setPadding(0, p, 0, 0);
-        toggle.setOnClickListener(v -> switchMode());
-        table.addView(toggle, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        View root = amount.getRootView();
+        unitCoin = root.findViewById(R.id.tv_unit_coin);
+        unitMoney = root.findViewById(R.id.tv_unit_money);
+        prefix = root.findViewById(R.id.tv_amount_prefix);
+        suffix = root.findViewById(R.id.tv_amount_suffix);
+        other = root.findViewById(R.id.tv_amount_other);
+        max = root.findViewById(R.id.tv_amount_max);
+        if (unitCoin != null) unitCoin.setOnClickListener(v -> { if (moneyMode) switchMode(); });
+        if (unitMoney != null) unitMoney.setOnClickListener(v -> { if (!moneyMode) switchMode(); });
+        if (max != null) max.setOnClickListener(v -> fillMax());
         // Into the nearest vertical column under the amount (the "Available" line may sit in a horizontal row, which
         // squeezed it to one letter per line), and the old line itself is replaced by the table's first row.
         View branch = anchor;
@@ -127,7 +130,7 @@ public final class AmountPreview {
         if (moneyMode) { moneyMode = false; amount.setText(""); }
         moneyPerUnit = Double.NaN;
         pricedKey = "";
-        toggle.setText("Enter in " + FxRates.symbol(c));
+        paintUnits();
         refreshSoon();
     }
 
@@ -142,16 +145,19 @@ public final class AmountPreview {
         double typed = parse(amount.getText().toString());
         if (Double.isNaN(moneyPerUnit) || moneyPerUnit <= 0) { value("Value", "No price yet: enter " + src.symbol()); return false; }
         moneyMode = false;
-        toggle.setText("Enter in " + FxRates.symbol(c));
+        paintUnits();
         amount.setText(coinText(typed / moneyPerUnit));
         return true;
     }
 
     private void switchMode() {
         double typed = parse(amount.getText().toString());
-        if (Double.isNaN(moneyPerUnit) || moneyPerUnit <= 0) { value("Price", "Getting the price…"); price(this::refresh); return; }
+        if (Double.isNaN(moneyPerUnit) || moneyPerUnit <= 0) {
+            price(() -> { if (moneyPerUnit > 0) switchMode(); else otherLine("No price for " + src.symbol()); });
+            return;
+        }
         moneyMode = !moneyMode;
-        toggle.setText(moneyMode ? "Enter in " + src.symbol() : "Enter in " + FxRates.symbol(c));
+        paintUnits();
         if (!Double.isNaN(typed) && typed > 0) {
             amount.setText(moneyMode ? new BigDecimal(typed * moneyPerUnit).setScale(2, RoundingMode.HALF_UP).toPlainString()
                     : coinText(typed / moneyPerUnit));
@@ -168,15 +174,57 @@ public final class AmountPreview {
         double typed = parse(amount.getText().toString());
         String key = src.assetKey();
         boolean known = !Double.isNaN(moneyPerUnit) && moneyPerUnit > 0;
+        String money = FxRates.symbol(c);
+        value("Price", known ? "1 " + src.symbol() + " ≈ " + FxRates.format(money, moneyPerUnit) : "");
+        mirrorAvailable();
         if (Double.isNaN(typed) || typed <= 0) {
-            value("Price", known ? "1 " + src.symbol() + " ≈ " + FxRates.format(FxRates.symbol(c), moneyPerUnit) : "");
+            otherLine(moneyMode ? "≈ 0 " + src.symbol() : known ? "≈ " + FxRates.format(money, 0) : "");
             feeRow.setVisibility(View.GONE);
             return;
         }
         double coins = moneyMode ? (known ? typed / moneyPerUnit : Double.NaN) : typed;
-        if (moneyMode) value("You send", known ? coinText(coins) + " " + src.symbol() : "");
-        else value("Value", known ? "≈ " + FxRates.format(FxRates.symbol(c), typed * moneyPerUnit) : "");
+        otherLine(!known ? "" : moneyMode ? "≈ " + coinText(coins) + " " + src.symbol() : "≈ " + FxRates.format(money, typed * moneyPerUnit));
         fee(key, coins, "");
+    }
+
+    /** The switch shows which unit is being typed; the amount carries that unit's mark. */
+    private void paintUnits() {
+        String money = FxRates.symbol(c);
+        String code = FiatValueHelper.symbolToCurrencyCode(money);
+        if (unitCoin != null) chip(unitCoin, src.symbol(), !moneyMode);
+        if (unitMoney != null) chip(unitMoney, code == null || code.isEmpty() ? money : code, moneyMode);
+        if (prefix != null) { prefix.setText(money); prefix.setVisibility(moneyMode ? View.VISIBLE : View.GONE); }
+        if (suffix != null) suffix.setText(moneyMode ? "" : src.symbol());
+        amount.setHint(moneyMode ? "0.00" : "0");
+    }
+
+    private void chip(TextView t, String text, boolean on) {
+        t.setText(text);
+        t.setBackgroundResource(on ? R.drawable.bg_chip_on : 0);
+        t.setTextColor(c.getResources().getColor(on ? R.color.colorAccent : R.color.colorTextSecondary));
+    }
+
+    private void otherLine(String text) { if (other != null) other.setText(text); }
+
+    /** MAX: the whole available balance, in the unit being typed. */
+    private void fillMax() {
+        double all = availableCoins();
+        if (Double.isNaN(all) || all <= 0) return;
+        if (moneyMode && moneyPerUnit > 0) {
+            amount.setText(new BigDecimal(all * moneyPerUnit).setScale(2, RoundingMode.DOWN).toPlainString());
+        } else {
+            if (moneyMode) { moneyMode = false; paintUnits(); }
+            amount.setText(coinText(all));
+        }
+        amount.setSelection(amount.getText() == null ? 0 : amount.getText().length());
+    }
+
+    /** The coin figure on the screen's own "Available: 12.5 HARV" line. */
+    private double availableCoins() {
+        CharSequence t = anchor == null ? null : anchor.getText();
+        if (t == null) return Double.NaN;
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("([0-9][0-9,]*\\.?[0-9]*)").matcher(t.toString());
+        return m.find() ? parse(m.group(1).replace(",", "")) : Double.NaN;
     }
 
     private void fee(String key, double coins, String worth) {
@@ -248,6 +296,8 @@ public final class AmountPreview {
     private void mirrorAvailable() {
         CharSequence t = anchor == null ? null : anchor.getText();
         String s = t == null ? "" : t.toString().replaceFirst("^\\s*Available:?\\s*", "");
+        double all = availableCoins();
+        if (!s.isEmpty() && moneyPerUnit > 0 && !Double.isNaN(all)) s = s + "  (≈ " + FxRates.format(FxRates.symbol(c), all * moneyPerUnit) + ")";
         availValue.setText(s.isEmpty() ? "…" : s);
         availRow.setVisibility(s.isEmpty() ? View.GONE : View.VISIBLE);
     }

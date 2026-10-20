@@ -59,9 +59,11 @@ public final class ChainAssetsSection {
             box.post(() -> {
                 if (!sameKeys(box, show)) rebuild(c, box, harvAddress, show, addrs);
                 else refreshOpens(c, box, harvAddress);
-                paintPrices(box);
-                for (CoinCatalog.Coin coin : show) refreshBalance(c, box, coin, addrs.get(coin.key));
-                AssetPrices.load(c, () -> FxRates.load(c, () -> paintPrices(box)));
+                // Every balance and price comes from one AssetBook: the last book at once, then all new values together.
+                AssetBook book = AssetBook.of(harvAddress);
+                apply(box, book.cached(c));
+                book.listen("chains", (all, fresh) -> apply(box, all));
+                book.refresh(c);
             });
         }).start();
     }
@@ -157,41 +159,22 @@ public final class ChainAssetsSection {
         if (any && listener instanceof Total) ((Total) listener).onSum(sum);
     }
 
-    private static void refreshBalance(Context c, LinearLayout box, CoinCatalog.Coin coin, String address) {
-        View bal = box.findViewWithTag("bal_" + coin.key);
-        if (!(bal instanceof TextView) || address == null) return;
-        final TextView tv = (TextView) bal;
-        new Thread(() -> {
-            String line = ChainBalances.assetBalance(coin.key, address);
+    /** Writes every row's balance from the book, then the values and the total, in one pass. */
+    static void apply(LinearLayout box, Map<String, String> book) {
+        if (box == null) return;
+        for (int i = 0; i < box.getChildCount(); i++) {
+            View item = box.getChildAt(i);
+            if (!(item.getTag() instanceof String)) continue;
+            String line = book.get((String) item.getTag());
+            TextView tv = item.findViewById(R.id.tv_asset_balance);
+            if (tv == null || line == null) continue;
             String number = numberOf(line);
-            
-            // Universal fallback: if response is null, empty, or contains error strings, default to "0"
-            final String finalNumber;
-            if (line == null || line.trim().isEmpty() || 
-                line.toLowerCase().contains("unavailable") || 
-                line.toLowerCase().contains("error") || 
-                line.toLowerCase().contains("fail") || 
-                line.toLowerCase().contains("timeout") ||
-                number.isEmpty()) {
-                finalNumber = "0";
-            } else {
-                finalNumber = number;
-            }
-            
-            tv.post(() -> {
-                if (!coin.key.equals(String.valueOf(tv.getTag()).replace("bal_", ""))) return;
-                tv.setText(finalNumber);
-                Double amt = AssetPrices.amount(finalNumber);
-                if (amt != null) tv.setTag(R.id.tv_asset_balance, amt);
-                LinearLayout rows = null;
-                View p = tv;
-                while (p != null) {
-                    if (p.getId() == R.id.chain_assets && p instanceof LinearLayout) { rows = (LinearLayout) p; break; }
-                    p = p.getParent() instanceof View ? (View) p.getParent() : null;
-                }
-                if (rows != null) paintPrices(rows);
-            });
-        }).start();
+            if (number.isEmpty()) continue;
+            if (!number.contentEquals(tv.getText())) tv.setText(number);
+            Double amt = AssetPrices.amount(number);
+            if (amt != null) tv.setTag(R.id.tv_asset_balance, amt);
+        }
+        paintPrices(box);
     }
 
     /** Extracts a clean numeric balance or returns empty string if invalid. */

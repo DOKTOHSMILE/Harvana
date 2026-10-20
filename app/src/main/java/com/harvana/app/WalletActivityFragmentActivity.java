@@ -47,12 +47,6 @@ import java.net.HttpURLConnection;
 public class WalletActivityFragmentActivity extends Fragment {
 	
 	private String wallet_address = "";
-	private static final int PAGE_SIZE = 25;
-	private int nodePage = 0;
-	private boolean nodeHasMore = true;
-	private boolean isLoadingMore = false;
-	private final java.util.ArrayList<java.util.HashMap<String, Object>> allNodeTx = new java.util.ArrayList<>();
-	private final java.util.List<java.util.HashMap<String, Object>> chainTx = new java.util.ArrayList<>();
 	
 	private LinearLayout linear1;
 	private CardView cardview1;
@@ -74,7 +68,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 		linear1 = _view.findViewById(R.id.linear1);
 		cardview1 = _view.findViewById(R.id.cardview1);
 		list_history = _view.findViewById(R.id.list_history);
-		com.harvana.app.utils.Shimmer.hold(list_history, com.harvana.app.utils.Shimmer.rows(list_history.getContext(), 6), 4000, "WalletActivityFragmentActivity");
+		com.harvana.app.utils.Shimmer.hold(list_history, com.harvana.app.utils.Shimmer.rows(list_history.getContext(), 6), 25000, "WalletActivityFragmentActivity");   // until every source has answered
 		androidx.swiperefreshlayout.widget.SwipeRefreshLayout refresh = _view.findViewById(R.id.refresh_activity);
 		if (refresh != null) {
 			refresh.setColorSchemeResources(R.color.colorAccent);
@@ -156,262 +150,52 @@ public class WalletActivityFragmentActivity extends Fragment {
 		return getArguments() != null && getArguments().getBoolean("harvOnly", false);
 	}
 
-	private void _loadChainHistory() {
-		if (_harvOnly() || getContext() == null || wallet_address.isEmpty()) return;
-		final Context app = getContext().getApplicationContext();
-		final String addr = wallet_address;
-		new Thread(() -> {
-			java.util.List<java.util.HashMap<String, Object>> rows = com.harvana.app.wallet.ChainHistory.load(app, addr);
-			if (!isAdded() || getActivity() == null) return;
-			getActivity().runOnUiThread(() -> {
-				if (!isAdded() || getContext() == null || !addr.equals(wallet_address)) return;
-				chainTx.clear();
-				if (rows != null) chainTx.addAll(rows);
-				_renderMergedTransactions();
-			});
-		}).start();
-	}
+	/** Every source (Harvana node, its pending pool, this phone's sends, other chains and added coins) comes through
+	 *  one ActivityFeed, which publishes the whole sorted list once all have answered: the rows never jump. */
+	private com.harvana.app.wallet.ActivityFeed feed;
+	private java.util.List<java.util.HashMap<String, Object>> feedRows;
+	private final com.harvana.app.wallet.ActivityFeed.Listener feedListener = (rows, fresh) -> {
+		if (!isAdded() || getContext() == null) return;
+		feedRows = rows;
+		if (fresh && list_history != null) com.harvana.app.utils.Shimmer.release(list_history);
+		_renderMergedTransactions();
+	};
 
-	private java.util.List<java.util.HashMap<String, Object>> _cachedHarv() {
-		java.util.List<java.util.HashMap<String, Object>> c = com.harvana.app.wallet.WalletCache.loadList(getContext(), "tx_" + wallet_address);
-		java.util.List<java.util.HashMap<String, Object>> out = new java.util.ArrayList<>();
-		if (c != null) for (java.util.HashMap<String, Object> m : c) if (!"pending".equalsIgnoreCase(String.valueOf(m.get("status")))) out.add(m);
-		return out;
-	}
 
 	public void _loadTransactionHistory() {
 		if (wallet_address == null || wallet_address.trim().isEmpty()) return;
 		if (getContext() == null) return;
-		
-		final Context context = getContext();
-		
-		com.harvana.app.wallet.PendingTxStore.checkStaleAndMarkFailed(context, wallet_address);
-		
-		// Render cache & pending instantly without flickering
+		com.harvana.app.wallet.ActivityFeed f = com.harvana.app.wallet.ActivityFeed.of(wallet_address);
+		if (feed != f) {
+			if (feed != null) feed.unlisten(feedListener);
+			feed = f;
+			feed.listen(feedListener);
+			feedRows = feed.cached(getContext());                // the last complete list, at once
+		}
 		_renderMergedTransactions();
-		
-		// Reset pagination and fetch fresh
-		nodePage = 0;
-		nodeHasMore = true;
-		allNodeTx.clear();
-		_fetchNodeHistoryPage();
-		if (pollChain) _loadChainHistory();
-		
-		// Server-reported pending
-		com.harvana.app.sync.HarvanaNodeClient.getPending(wallet_address,
-		new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
-			@Override
-			public void onSuccess(org.json.JSONObject json) {
-				if (!isAdded() || getActivity() == null) return;
-				getActivity().runOnUiThread(() -> {
-					if (!isAdded() || getContext() == null) return;
-					try {
-						org.json.JSONArray arr = json.optJSONArray("pending");
-						if (arr == null || arr.length() == 0) return;
-						
-						java.util.List<java.util.HashMap<String, Object>> knownPending =
-						com.harvana.app.wallet.PendingTxStore.loadAll(getContext(), wallet_address);
-						java.util.Set<String> knownHashes = new java.util.HashSet<>();
-						for (java.util.HashMap<String, Object> e : knownPending) {
-							knownHashes.add(String.valueOf(e.get("txHash")));
-						}
-						
-						boolean addedAny = false;
-						for (int i = 0; i < arr.length(); i++) {
-							org.json.JSONObject tx = arr.getJSONObject(i);
-							String hash = tx.optString("txHash", "");
-							if (hash.isEmpty() || knownHashes.contains(hash)) continue;
-							
-							java.util.HashMap<String, Object> entry = new java.util.HashMap<>();
-							entry.put("txHash", hash);
-							entry.put("senderAddress", tx.optString("from", ""));
-							entry.put("recipientAddress", tx.optString("to", ""));
-							entry.put("memo", tx.optString("memo", "")); 
-							String stableCode = tx.optString("asset", tx.optString("mintId", ""));
-							boolean husdTx = com.harvana.app.husd.Stable.isStable(stableCode);
-							entry.put("value", husdTx ? tx.optLong("amount", 0L) / (double) com.harvana.app.husd.HusdClient.UNIT
-									: com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay(tx.optLong("amount", 0L)));
-							entry.put("tokenSymbol", husdTx ? com.harvana.app.husd.Stable.symbol(stableCode) : com.harvana.app.CoinInfo.ticker());
-							entry.put("status", "pending");
-							long initiated = tx.optLong("receivedAt", tx.optLong("timestamp", 0L));
-							if (initiated <= 0) initiated = System.currentTimeMillis();
-							else if (initiated < 1_000_000_000_000L) initiated *= 1000L;
-							entry.put("timestamp", initiated);
-							entry.put("initiatedAt", initiated);
-							entry.put("confirmedAt", 0L);
-							knownPending.add(entry);
-							addedAny = true;
-						}
-						
-						if (addedAny) {
-							com.harvana.app.wallet.WalletCache.saveList(
-							getContext(), "pending_" + wallet_address, knownPending);
-							_renderMergedTransactions();
-						}
-					} catch (Exception e) {
-						android.util.Log.e("loadTxHistory", "Pending parse error: " + e.getMessage());
-					}
-				});
-			}
-			
-			@Override
-			public void onError(String error) {
-				android.util.Log.w("loadTxHistory", "Pending fetch failed: " + error);
-			}
-		});
+		feed.refresh(getContext(), pollChain && !_harvOnly());
 	}
-	
-	private void _fetchNodeHistoryPage() {
-		if (getContext() == null) return;
-		isLoadingMore = true;
-		
-		com.harvana.app.sync.HarvanaNodeClient.getHistory(wallet_address, nodePage, PAGE_SIZE,
-		new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
-			
-			@Override
-			public void onSuccess(final org.json.JSONObject json) {
-				if (!isAdded() || getActivity() == null) return;
-				
-				getActivity().runOnUiThread(() -> {
-					if (!isAdded() || getContext() == null) return;
-					isLoadingMore = false;
-					
-					int returnedCount = 0;
-					try {
-						org.json.JSONArray transactions = json.optJSONArray("transactions");
-						if (transactions == null) {
-							transactions = json.optJSONArray("data");
-						}
-						
-						if (transactions != null) {
-							returnedCount = transactions.length();
-							for (int i = 0; i < transactions.length(); i++) {
-								org.json.JSONObject tx = transactions.getJSONObject(i);
-								java.util.HashMap<String, Object> item = new java.util.HashMap<>();
-								
-								String sender = tx.optString("senderAddress", tx.optString("from", ""));
-								String recipient = tx.optString("recipientAddress", tx.optString("to", ""));
-								
-								item.put("senderAddress", sender);
-								item.put("recipientAddress", recipient);
-								item.put("memo", tx.optString("memo", "")); 
-								
-								// Stable assets (hUSD, hEUR, …) ride on the same history; their amounts have 6 decimals, not HARV's 8.
-								String stableAsset = tx.optString("asset", tx.optString("mintId", ""));
-								boolean husd = com.harvana.app.husd.Stable.isStable(stableAsset);
-								double displayValue;
-								if (tx.has("amount") && !tx.isNull("amount")) {
-									long rawAmount = tx.optLong("amount", 0L);
-									displayValue = husd ? rawAmount / (double) com.harvana.app.husd.HusdClient.UNIT
-											: com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay(rawAmount);
-								} else {
-									displayValue = tx.optDouble("value", tx.optDouble("value_harv", 0.0));
-								}
-								item.put("value", displayValue);
-								
-								item.put("tokenSymbol", husd ? com.harvana.app.husd.Stable.symbol(stableAsset)
-										: tx.optString("tokenSymbol", tx.optString("token", com.harvana.app.CoinInfo.ticker())));
-								item.put("txHash", tx.optString("txHash", ""));
-								item.put("status", tx.optString("status", "confirmed"));
-								
-								double displayFee;
-								String feeSymbol = com.harvana.app.CoinInfo.ticker();
-								if (husd && tx.optLong("gas", 0L) == 0L && tx.has("coinFeeRaw")) {
-									// A coin transfer that paid its tFare in the coin (no HARV): the node gives the fare it took.
-									displayFee = tx.optLong("coinFeeRaw", 0L) / (double) com.harvana.app.husd.HusdClient.UNIT;
-									feeSymbol = com.harvana.app.husd.Stable.symbol(stableAsset);
-								} else if (tx.has("gas") && !tx.isNull("gas")) {
-									displayFee = com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay(tx.optLong("gas", 0L));
-								} else {
-									displayFee = tx.optDouble("harvFee", tx.optDouble("fee_harv", 0.0));
-								}
-								item.put("harvFee", displayFee);
-								item.put("feeSymbol", feeSymbol);
-								item.put("burnAmount", tx.optDouble("burnAmount", 0.0));
-								item.put("blockNumber", tx.optLong("blockHeight", 0L));
-								item.put("nonce", tx.optLong("nonce", 0L));
-								item.put("confirmations", tx.optLong("confirmations", 0L));
-								
-								long confirmed = tx.optLong("confirmedAt", tx.optLong("timestamp", 0L));
-								long initiated = tx.optLong("initiatedAt", 0L);
-								if (confirmed > 0 && confirmed < 1_000_000_000_000L) confirmed *= 1000L;
-								if (initiated > 0 && initiated < 1_000_000_000_000L) initiated *= 1000L;
-								long ts = confirmed > 0 ? confirmed : (initiated > 0 ? initiated : System.currentTimeMillis());
-								item.put("timestamp", ts);
-								item.put("initiatedAt", initiated);
-								item.put("confirmedAt", confirmed);
-								
-								allNodeTx.add(item);
-							}
-						}
-					} catch (Exception e) {
-						android.util.Log.e("loadTxHistory", "Parse error: " + e.getMessage());
-					}
-					
-					nodeHasMore = returnedCount == PAGE_SIZE;
-					nodePage++;
-					
-					if (!allNodeTx.isEmpty()) {
-						java.util.ArrayList<String> confirmedHashes = new java.util.ArrayList<>();
-						for (java.util.HashMap<String, Object> t : allNodeTx) {
-							confirmedHashes.add(String.valueOf(t.get("txHash")));
-						}
-						com.harvana.app.wallet.PendingTxStore.pruneConfirmed(
-						getContext(), wallet_address, confirmedHashes);
-						
-						java.util.List<java.util.HashMap<String, Object>> currentPendingList =
-						com.harvana.app.wallet.PendingTxStore.loadAll(getContext(), wallet_address);
-						java.util.ArrayList<java.util.HashMap<String, Object>> currentPending =
-						currentPendingList != null
-						? new java.util.ArrayList<>(currentPendingList)
-						: new java.util.ArrayList<>();
-						
-						java.util.ArrayList<java.util.HashMap<String, Object>> display =
-						new java.util.ArrayList<>(currentPending);
-						display.addAll(allNodeTx);
-						_sortByTimestampDesc(display);
-						
-						java.util.List<java.util.HashMap<String, Object>> toCache =
-						display.size() > PAGE_SIZE ? display.subList(0, PAGE_SIZE) : display;
-						com.harvana.app.wallet.WalletCache.saveList(
-						getContext(), "tx_" + wallet_address, toCache);
-					}
-					
-					_renderMergedTransactions();
-				});
-			}
-			
-			@Override
-			public void onError(final String error) {
-				isLoadingMore = false;
-				if (!isAdded() || getActivity() == null) return;
-				getActivity().runOnUiThread(() -> {
-					if (!isAdded() || getContext() == null) return;
-					android.util.Log.w("loadTxHistory", "Node error: " + error);
-				});
-			}
-		});
+
+	@Override
+	public void onDestroyView() {
+		if (feed != null) feed.unlisten(feedListener);
+		super.onDestroyView();
 	}
-	
+
 	private void _loadMoreNodeHistory() {
-		if (isLoadingMore || !nodeHasMore) return;
-		_fetchNodeHistoryPage();
+		if (feed != null) feed.loadMore(getContext());
 	}
 
 	/** Unified single rendering method to prevent UI flickering/glitching races */
 	private void _renderMergedTransactions() {
 		if (!isAdded() || getContext() == null || list_history == null) return;
-		
-		java.util.List<java.util.HashMap<String, Object>> pendingTx =
-		com.harvana.app.wallet.PendingTxStore.loadAll(getContext(), wallet_address);
-		if (pendingTx == null) pendingTx = new java.util.ArrayList<>();
-		
-		java.util.List<java.util.HashMap<String, Object>> harvTx =
-		allNodeTx.isEmpty() ? _cachedHarv() : allNodeTx;
-		
-		java.util.ArrayList<java.util.HashMap<String, Object>> display = new java.util.ArrayList<>(pendingTx);
-		display.addAll(harvTx);
-		display.addAll(chainTx);
+		java.util.ArrayList<java.util.HashMap<String, Object>> display =
+		new java.util.ArrayList<>(feedRows == null ? java.util.Collections.emptyList() : feedRows);
+		if (_harvOnly()) {
+			java.util.ArrayList<java.util.HashMap<String, Object>> harv = new java.util.ArrayList<>();
+			for (java.util.HashMap<String, Object> m : display) if (m.get("chain") == null) harv.add(m);   // other chains' rows carry their chain
+			display = harv;
+		}
 		
 		_sortByTimestampDesc(display);
 		java.util.ArrayList<java.util.HashMap<String, Object>> filtered = filterFailedTx(display);

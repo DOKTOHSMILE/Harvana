@@ -248,9 +248,9 @@ public class GroupsFragmentActivity extends Fragment {
 			emptyBox.setGravity(Gravity.CENTER);
 			emptyBox.setPadding((int) (24 * d), (int) (24 * d), (int) (24 * d), (int) (24 * d));
 			ImageView icon = new ImageView(getContext());
-			icon.setImageResource(R.drawable.ic_groups_line);
-			icon.setColorFilter(com.harvana.app.utils.UiColors.textTertiary());
-			emptyBox.addView(icon, new LinearLayout.LayoutParams((int) (56 * d), (int) (56 * d)));
+			icon.setTag("empty_icon");
+			icon.setAdjustViewBounds(true);
+			emptyBox.addView(icon, new LinearLayout.LayoutParams((int) (180 * d), (int) (135 * d)));
 			TextView title = new TextView(getContext());
 			title.setTag("empty_title");
 			title.setTextSize(15);
@@ -276,6 +276,7 @@ public class GroupsFragmentActivity extends Fragment {
 			cardview10.addView(emptyBox, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		}
 		boolean filtered = !typeFilter.isEmpty() || !groupQuery.isEmpty();
+		((ImageView) emptyBox.findViewWithTag("empty_icon")).setImageResource(filtered ? R.drawable.illus_empty_search : R.drawable.illus_empty_groups);
 		((TextView) emptyBox.findViewWithTag("empty_title")).setText(filtered ? "No matching groups" : "No groups");
 		((TextView) emptyBox.findViewWithTag("empty_button")).setText(filtered ? "Show all groups" : "+ New Group");
 		boolean empty = shownGroups.isEmpty() && loaded;

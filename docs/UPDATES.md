@@ -2,6 +2,14 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: illustrations on empty group screens
+
+- New theme-coloured vector illustrations (they follow light and dark): `illus_empty_groups` (three members around a
+  savings coin) and `illus_empty_search` (a magnifier over an empty group card).
+- Groups tab: "No groups" shows the groups illustration; "No matching groups" the search one. Discover: "No public
+  groups" the groups illustration; "No matching groups" and "Groups did not load" the search one. Home's empty
+  Trending Public Groups card: the groups illustration (was a 36 dp search-off icon).
+
 ## 20 Oct 2026: Home loads in one piece (HomeData)
 
 - **New `home/HomeData`**: one class gathers everything Home shows besides the wallet total. It covers the name,

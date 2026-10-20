@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Empty groups: three members around a savings coin. Theme colours, so it fits light and dark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp" android:height="150dp" android:viewportWidth="200" android:viewportHeight="150">
+    <path android:fillColor="@color/colorAccentRipple"
+        android:pathData="M15,85a85,55 0,1 0,170 0a85,55 0,1 0,-170 0z"/>
+    <path android:fillColor="@color/colorAccentStroke"
+        android:pathData="M40,128a60,6 0,1 0,120 0a60,6 0,1 0,-120 0z"/>
+    <!-- side members -->
+    <path android:fillColor="@color/colorControlNormal" android:fillAlpha="0.55"
+        android:pathData="M47,72a11,11 0,1 0,22 0a11,11 0,1 0,-22 0z M36,124 Q36,90 58,90 Q80,90 80,124 Z"/>
+    <path android:fillColor="@color/colorControlNormal" android:fillAlpha="0.55"
+        android:pathData="M131,72a11,11 0,1 0,22 0a11,11 0,1 0,-22 0z M120,124 Q120,90 142,90 Q164,90 164,124 Z"/>
+    <!-- centre member -->
+    <path android:fillColor="@color/colorAccent"
+        android:pathData="M86,62a14,14 0,1 0,28 0a14,14 0,1 0,-28 0z M72,128 Q72,84 100,84 Q128,84 128,128 Z"/>
+    <!-- coin with a plus -->
+    <path android:fillColor="@color/colorWarning"
+        android:pathData="M86,26a14,14 0,1 0,28 0a14,14 0,1 0,-28 0z"/>
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3" android:strokeLineCap="round"
+        android:pathData="M100,19L100,33M93,26L107,26"/>
+    <!-- sparkles -->
+    <path android:fillColor="@color/colorWarning" android:fillAlpha="0.7"
+        android:pathData="M57,32a3,3 0,1 0,6 0a3,3 0,1 0,-6 0z M141,38a2.5,2.5 0,1 0,5 0a2.5,2.5 0,1 0,-5 0z M30,58a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z M166,62a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z"/>
+</vector>

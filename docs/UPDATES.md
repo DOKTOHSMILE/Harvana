@@ -2,6 +2,15 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: add to beneficiaries after a send
+
+- The transfer success page (`PaymentSuccessSheet`) has an **Add to beneficiaries** button above Done, for every send
+  from the Send screen (HARV, Harvana stable coins, other chains). It asks for a name and saves the recipient to the
+  wallet contacts (`tx/AddressBook`), under the recipient's address type. The name field starts with the recipient's
+  `.harv` name when it has one. Once saved, the button reads "Beneficiary · <name>"; tapping it again renames.
+- Send's contacts sheet is now titled **Beneficiaries**: saved rows are tagged "Beneficiary", and its add button reads
+  "+ Add to beneficiaries".
+
 ## 20 Oct 2026: illustrations on empty group screens
 
 - New theme-coloured vector illustrations (they follow light and dark): `illus_empty_groups` (three members around a

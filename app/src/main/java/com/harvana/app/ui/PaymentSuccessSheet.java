@@ -41,6 +41,8 @@ public final class PaymentSuccessSheet {
         public boolean stateTitle;
         /** The "Share transaction link" target: null picks the Harvana explorer for a Harvana hash; "" shows none. */
         public String link;
+        /** Set (the recipient's address shape) to offer "Add to beneficiaries" for {@link #to}; null shows none. */
+        public String beneficiaryFamily;
     }
 
     private final BottomSheetDialog dialog;
@@ -161,6 +163,22 @@ public final class PaymentSuccessSheet {
             root.addView(shareLink);
         }
 
+        if (info.beneficiaryFamily != null && info.to != null && !info.to.trim().isEmpty()) {
+            MaterialButton save = new MaterialButton(a, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+            save.setAllCaps(false);
+            save.setCornerRadius(dp(14));
+            save.setIconResource(R.drawable.ic_person_line);
+            save.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
+            save.setIconTint(android.content.res.ColorStateList.valueOf(color(R.color.colorAccent)));
+            save.setTextColor(color(R.color.colorAccent));
+            save.setStrokeColor(android.content.res.ColorStateList.valueOf(color(R.color.colorAccent)));
+            paintSaved(save, com.harvana.app.tx.AddressBook.nameOf(a, info.to));
+            save.setOnClickListener(v -> askBeneficiaryName(a, save));
+            LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
+            sp.topMargin = dp(24);
+            root.addView(save, sp);
+        }
+
         MaterialButton done = new MaterialButton(a);
         done.setText("Done");
         done.setAllCaps(false);
@@ -178,6 +196,40 @@ public final class PaymentSuccessSheet {
         dialog.setContentView(scroll);
         com.harvana.app.group.BottomSheetUtils.expandFullScreen(dialog, scroll);
         dialog.setOnDismissListener(d -> { ring.stop(); if (pulse != null) pulse.cancel(); });
+    }
+
+    /** "Add to beneficiaries", or the saved name once the recipient is in the wallet contacts. */
+    private void paintSaved(MaterialButton b, String name) {
+        b.setText(name == null ? "Add to beneficiaries" : "Beneficiary · " + name);
+    }
+
+    /** Names the recipient and saves it to the wallet contacts that Send lists (AddressBook). */
+    private void askBeneficiaryName(Activity a, MaterialButton b) {
+        android.widget.EditText name = new android.widget.EditText(a);
+        name.setHint("Name");
+        name.setSingleLine(true);
+        String had = com.harvana.app.tx.AddressBook.nameOf(a, info.to);
+        if (had != null) { name.setText(had); name.setSelection(had.length()); }
+        name.setPadding(dp(16), dp(16), dp(16), dp(16));
+        new SheetDialog.Builder(a).setTitle(SendReviewSheet.shortAddress(info.to)).setView(name)
+                .setPositiveButton("Save", (d, w) -> {
+                    String n = name.getText() == null ? "" : name.getText().toString().trim();
+                    if (n.isEmpty()) return;
+                    com.harvana.app.tx.AddressBook.save(a, n, info.to.trim(), info.beneficiaryFamily);
+                    paintSaved(b, n);
+                    android.widget.Toast.makeText(a, "Saved " + n, android.widget.Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", null).show();
+        // A known .harv name is offered as the name when the field is empty.
+        if (had == null && info.to.trim().startsWith("HV0x")) {
+            com.harvana.app.sync.NodeGroupClient.reverseName(info.to.trim(), new com.harvana.app.sync.NodeGroupClient.Callback() {
+                @Override public void onSuccess(org.json.JSONObject j) {
+                    String n = j.optString("name", "");
+                    if (!n.isEmpty()) name.post(() -> { if (name.getText().length() == 0) { name.setText(n); name.setSelection(n.length()); } });
+                }
+                @Override public void onError(String e) { }
+            });
+        }
     }
 
     /** Shows the sheet on this activity. Must be called on the main thread. */

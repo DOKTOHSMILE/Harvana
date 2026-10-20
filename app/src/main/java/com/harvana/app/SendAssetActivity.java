@@ -748,7 +748,7 @@ public class SendAssetActivity extends AppCompatActivity {
 					info.amount = amountText + " " + ticker;
 					info.amountUsd = com.harvana.app.wallet.UsdValue.text(getApplicationContext(), key, amount);
 					info.from = from;
-					info.to = recipient;
+					info.to = recipient; info.beneficiaryFamily = _addressHintFor(recipient);
 					info.rows = new String[][] {{"To", recipient}, {"From", from}, {"Network", review.network}, {"Transaction", txHash}};
 					info.txHash = txHash;
 					String page = "";
@@ -1072,7 +1072,7 @@ public class SendAssetActivity extends AppCompatActivity {
 						info.amount = shown;
 						info.amountUsd = com.harvana.app.wallet.UsdValue.text(getApplicationContext(), code, units / 1e6);
 						info.from = mine;
-						info.to = recipient;
+						info.to = recipient; info.beneficiaryFamily = _addressHintFor(recipient);
 						info.rows = new String[][] {{"To", recipient}, {"From", mine}, {"tFare", review.feeText}, {"Transaction", hash}};
 						info.txHash = hash;
 						com.harvana.app.tx.PaymentTracker.success(info);
@@ -1124,7 +1124,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		java.util.Set<String> shown = new java.util.HashSet<>();
 		for (com.harvana.app.tx.AddressBook.Contact c : saved) {
 			shown.add(c.address.toLowerCase(java.util.Locale.US));
-			list.addView(_contactRow(list, c.name, c.address, "Saved", sheet, true));
+			list.addView(_contactRow(list, c.name, c.address, "Beneficiary", sheet, true));
 		}
 		boolean harvana = family.startsWith("HV0x");
 		for (String to : com.harvana.app.tx.RecentRecipients.forCoin(this, symbol, harvana)) {
@@ -1359,7 +1359,7 @@ public class SendAssetActivity extends AppCompatActivity {
 					info.amount = _formatUIBalance(reqAmount) + " " + symbol;
 					info.amountUsd = com.harvana.app.wallet.UsdValue.text(SendAssetActivity.this, "HARV", reqAmount);
 					info.from = fromAddress == null ? "" : fromAddress;
-					info.to = recipient;
+					info.to = recipient; info.beneficiaryFamily = _addressHintFor(recipient);
 					info.rows = new String[][] {{"To", recipient}, {"From", fromAddress == null ? "" : fromAddress},
 							{"tFare", review.feeText}, {"Transaction", hash}};
 					info.txHash = hash;

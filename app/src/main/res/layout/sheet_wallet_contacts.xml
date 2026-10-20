@@ -12,7 +12,7 @@
 	<TextView
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:text="Wallets"
+		android:text="Beneficiaries"
 		android:textColor="@color/colorTextPrimary"
 		android:textSize="18sp"
 		android:textStyle="bold" />
@@ -25,7 +25,7 @@
 		android:gravity="center_vertical"
 		android:paddingStart="14dp"
 		android:paddingEnd="14dp"
-		android:text="+ Save this address"
+		android:text="+ Add to beneficiaries"
 		android:textColor="@color/colorAccent"
 		android:textSize="14sp"
 		android:textStyle="bold"

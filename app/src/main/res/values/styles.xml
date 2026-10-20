@@ -6,6 +6,8 @@
         <item name="actionOverflowMenuStyle">@style/HarvanaPopupMenu</item>
         <!-- every spinner list opens on the surface colour with palette text -->
         <item name="spinnerStyle">@style/HarvanaSpinner</item>
+        <!-- every round loading spinner is the Harvana loading icon (avd_harvana_loader) -->
+        <item name="android:progressBarStyle">@style/Widget.Harvana.Loader</item>
         <item name="materialButtonStyle">@style/HarvanaButton</item>
         <!-- one switch look everywhere (on: accent knob and soft accent track; off: white knob, grey track) -->
         <item name="switchStyle">@style/Harvana.Switch</item>
@@ -420,4 +422,9 @@
     <style name="Harvana.ToolbarSubtitle" parent="TextAppearance.MaterialComponents.Body2">
         <item name="android:textSize">13sp</item>
     </style>
+    <style name="Widget.Harvana.Loader" parent="android:Widget.ProgressBar">
+        <item name="android:indeterminateDrawable">@drawable/avd_harvana_loader</item>
+        <item name="android:indeterminateDuration">1100</item>
+    </style>
+
 </resources>

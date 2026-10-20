@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Harvana loading icon: the ring runs round the H tile while the tile breathes. Used as the indeterminate
+     drawable of every spinner (Widget.Harvana.Loader in styles.xml). -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/vd_harvana_loader">
+    <target android:name="orbit" android:animation="@animator/loader_orbit" />
+    <target android:name="tile" android:animation="@animator/loader_pulse" />
+    <target android:name="h" android:animation="@animator/loader_h" />
+</animated-vector>

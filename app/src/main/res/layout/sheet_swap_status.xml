@@ -11,7 +11,7 @@
 		android:id="@+id/pb_swap_status"
 		android:layout_width="48dp"
 		android:layout_height="48dp"
-		android:indeterminateTint="@color/swapAccent" />
+		android:indeterminateDrawable="@drawable/avd_harvana_loader" />
 	<ImageView
 		android:id="@+id/iv_swap_status"
 		android:layout_width="56dp"

@@ -2,6 +2,11 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Harvana loading icon
+
+- Every round loading spinner in the app is the Harvana mark: the H tile breathing while a ring runs round it (`avd_harvana_loader`, set for all spinners in the theme).
+- GIFs of the same icon for the web, social posts and the favicon: `docs/branding/harvana-loading-256.gif`, `harvana-loading-dark-256.gif`, `harvana-loading-64.gif`.
+
 ## 20 Oct 2026: Firestore rules — support escalation chain (rules publish)
 
 - `docs/firestore.rules` (same text as the node's `docs/MERGED_FIRESTORE_RULES.rules`): support tickets carry a `level` (Support, Agent, Moderator, Super admin). Staff act on tickets at or below their tier (`MODERATORS/{uid}.tier`, written by the node) and escalate one level up only. Publish: Firebase console → Firestore → Rules → paste the file → Publish. The node steps are in the node's `docs/DEPLOYMENT.md` (20 Oct 2026).

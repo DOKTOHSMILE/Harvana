@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No messages: two speech bubbles. Theme colours, so it fits light and dark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp" android:height="120dp" android:viewportWidth="200" android:viewportHeight="150">
+    <path android:fillColor="@color/colorAccentRipple" android:pathData="M15,85a85,55 0,1 0,170 0a85,55 0,1 0,-170 0z"/>
+    <path android:fillColor="@color/colorAccentStroke" android:pathData="M40,130a60,6 0,1 0,120 0a60,6 0,1 0,-120 0z"/>
+    <path android:fillColor="@color/colorControlNormal" android:fillAlpha="0.3" android:pathData="M46,36h70a12,12 0,0 1,12 12v30a12,12 0,0 1,-12 12h-50l-16,14v-14h-4a12,12 0,0 1,-12 -12v-30a12,12 0,0 1,12 -12z"/>
+    <path android:fillColor="@color/colorControlNormal" android:fillAlpha="0.7" android:pathData="M62,63a5,5 0,1 0,10 0a5,5 0,1 0,-10 0z M80,63a5,5 0,1 0,10 0a5,5 0,1 0,-10 0z M98,63a5,5 0,1 0,10 0a5,5 0,1 0,-10 0z"/>
+    <path android:fillColor="@color/colorAccent" android:pathData="M96,74h56a12,12 0,0 1,12 12v18a12,12 0,0 1,-12 12h-4v12l-14,-12h-38a12,12 0,0 1,-12 -12v-18a12,12 0,0 1,12 -12z"/>
+    <path android:strokeColor="@color/colorTextOnAccent" android:strokeWidth="4" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M108,95L140,95"/>
+    <path android:fillColor="@color/colorWarning" android:fillAlpha="0.7" android:pathData="M30,44a3,3 0,1 0,6 0a3,3 0,1 0,-6 0z M164,36a2.5,2.5 0,1 0,5 0a2.5,2.5 0,1 0,-5 0z M22,96a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z M174,92a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z"/>
+</vector>

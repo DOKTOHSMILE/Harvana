@@ -252,6 +252,7 @@ public class P2pChatActivity extends AppCompatActivity {
         if (lastMessages.isEmpty()) {
             TextView empty = (TextView) getLayoutInflater().inflate(R.layout.item_list_empty, list, false);
             empty.setText("No messages yet.");
+            com.harvana.app.utils.EmptyState.illustrate(empty, com.harvana.app.R.drawable.illus_empty_chat);
             list.addView(empty);
             return;
         }

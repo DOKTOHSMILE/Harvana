@@ -29,12 +29,15 @@
 
 	<TextView
 		android:id="@+id/tv_pick_asset_empty"
+				android:drawableTop="@drawable/illus_empty_search"
+				android:drawablePadding="12dp"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:padding="16dp"
 		android:text="No coin matches that."
 		android:textColor="@color/colorTextSecondary"
-		android:visibility="gone" />
+		android:visibility="gone"
+				android:gravity="center" />
 
 	<androidx.recyclerview.widget.RecyclerView
 		android:id="@+id/rv_pick_asset"

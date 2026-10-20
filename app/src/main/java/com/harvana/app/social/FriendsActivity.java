@@ -176,7 +176,7 @@ public class FriendsActivity extends AppCompatActivity {
         for (Person p : blockedList) if (matches(p)) list.add(p);
         countLine.setText(filter.isEmpty() ? blockedList.size() + (blockedList.size() == 1 ? " blocked member" : " blocked members") : list.size() + " of " + blockedList.size());
         if (list.isEmpty()) {
-            emptyLine(blockedList.isEmpty() ? "None" : "No match");
+            emptyLine(blockedList.isEmpty() ? "None" : "No match", blockedList.isEmpty() ? R.drawable.illus_empty_shield : R.drawable.illus_empty_search);
             return;
         }
         for (Person p : list) {
@@ -209,10 +209,13 @@ public class FriendsActivity extends AppCompatActivity {
     }
 
     /** A short line in the list (nothing yet, no match): res/layout/item_list_empty.xml. */
-    private void emptyLine(String text) {
+    private void emptyLine(String text) { emptyLine(text, "No match".equals(text) ? R.drawable.illus_empty_search : R.drawable.illus_empty_groups); }
+
+    private void emptyLine(String text, int illustration) {
         TextView t = (TextView) getLayoutInflater().inflate(R.layout.item_list_empty, listBox, false);
         t.setText(text);
         t.setPadding(SocialUi.dp(this, 2), SocialUi.dp(this, 16), 0, SocialUi.dp(this, 8));
+        com.harvana.app.utils.EmptyState.illustrate(t, illustration);
         listBox.addView(t);
     }
 

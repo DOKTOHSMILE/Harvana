@@ -29,20 +29,19 @@
 		app:layout_behavior="@string/appbar_scrolling_view_behavior">
 		<com.google.android.material.card.MaterialCardView
 			android:id="@+id/cardview11"
-			android:layout_width="72dp"
-			android:layout_height="72dp"
-			app:cardBackgroundColor="@color/colorSurface"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			app:cardBackgroundColor="@android:color/transparent"
 			app:cardCornerRadius="36dp"
 			app:cardElevation="0dp"
 			app:strokeColor="@color/colorCardStroke"
-			app:strokeWidth="1dp">
+			app:strokeWidth="0dp">
 			<com.google.android.material.imageview.ShapeableImageView
 				android:id="@+id/imageview46"
-				android:layout_width="32dp"
-				android:layout_height="32dp"
-				android:src="@drawable/ic_block"
+				android:layout_width="160dp"
+				android:layout_height="120dp"
+				android:src="@drawable/illus_empty_shield"
 				android:scaleType="centerInside"
-				app:tint="@color/colorTextTertiary"
 				android:contentDescription="Noblockedusers" />
 		</com.google.android.material.card.MaterialCardView>
 		<TextView

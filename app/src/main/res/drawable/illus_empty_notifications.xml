@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nothing new: a quiet bell. Theme colours, so it fits light and dark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp" android:height="120dp" android:viewportWidth="200" android:viewportHeight="150">
+    <path android:fillColor="@color/colorAccentRipple" android:pathData="M15,85a85,55 0,1 0,170 0a85,55 0,1 0,-170 0z"/>
+    <path android:fillColor="@color/colorAccentStroke" android:pathData="M40,130a60,6 0,1 0,120 0a60,6 0,1 0,-120 0z"/>
+    <path android:fillColor="@color/colorAccent" android:pathData="M100,30c-18,0 -30,14 -30,32v22l-9,13h78l-9,-13v-22c0,-18 -12,-32 -30,-32z"/>
+    <path android:fillColor="@color/colorWarning" android:pathData="M92,103a8,8 0,1 0,16 0z"/>
+    <path android:fillColor="@color/colorAccent" android:pathData="M96,24a4,4 0,1 0,8 0a4,4 0,1 0,-8 0z"/>
+    <path android:strokeColor="@color/colorControlNormal" android:strokeWidth="3.5" android:strokeLineCap="round" android:strokeLineJoin="round" android:strokeAlpha="0.7" android:pathData="M138,34h12l-12,14h12M154,18h8l-8,9h8"/>
+    <path android:fillColor="@color/colorWarning" android:fillAlpha="0.7" android:pathData="M30,44a3,3 0,1 0,6 0a3,3 0,1 0,-6 0z M164,36a2.5,2.5 0,1 0,5 0a2.5,2.5 0,1 0,-5 0z M22,96a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z M174,92a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z"/>
+</vector>

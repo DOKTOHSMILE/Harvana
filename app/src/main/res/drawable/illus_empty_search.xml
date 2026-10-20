@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- No match: a magnifier over an empty group card. Theme colours, so it fits light and dark. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="200dp" android:height="150dp" android:viewportWidth="200" android:viewportHeight="150">
+    android:width="160dp" android:height="120dp" android:viewportWidth="200" android:viewportHeight="150">
     <path android:fillColor="@color/colorAccentRipple"
         android:pathData="M15,85a85,55 0,1 0,170 0a85,55 0,1 0,-170 0z"/>
     <path android:fillColor="@color/colorAccentStroke"

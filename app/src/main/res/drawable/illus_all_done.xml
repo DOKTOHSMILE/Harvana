@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- All caught up: a check with confetti. Theme colours, so it fits light and dark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp" android:height="120dp" android:viewportWidth="200" android:viewportHeight="150">
+    <path android:fillColor="@color/colorAccentRipple" android:pathData="M15,85a85,55 0,1 0,170 0a85,55 0,1 0,-170 0z"/>
+    <path android:fillColor="@color/colorAccentStroke" android:pathData="M40,130a60,6 0,1 0,120 0a60,6 0,1 0,-120 0z"/>
+    <path android:fillColor="@color/colorAccent" android:pathData="M64,72a36,36 0,1 0,72 0a36,36 0,1 0,-72 0z"/>
+    <path android:strokeColor="@color/colorTextOnAccent" android:strokeWidth="8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M83,72L96,85L118,60"/>
+    <path android:fillColor="@color/colorWarning" android:pathData="M48,40l8,-3 3,8 -8,3z M146,30l7,4 -4,7 -7,-4z M152,96l8,1 -1,8 -8,-1z M42,100l6,-5 5,6 -6,5z"/>
+    <path android:fillColor="@color/colorWarning" android:fillAlpha="0.7" android:pathData="M30,44a3,3 0,1 0,6 0a3,3 0,1 0,-6 0z M164,36a2.5,2.5 0,1 0,5 0a2.5,2.5 0,1 0,-5 0z M22,96a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z M174,92a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z"/>
+</vector>

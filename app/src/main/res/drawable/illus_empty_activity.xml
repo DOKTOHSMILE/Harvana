@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No activity: a receipt and a clock. Theme colours, so it fits light and dark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp" android:height="120dp" android:viewportWidth="200" android:viewportHeight="150">
+    <path android:fillColor="@color/colorAccentRipple" android:pathData="M15,85a85,55 0,1 0,170 0a85,55 0,1 0,-170 0z"/>
+    <path android:fillColor="@color/colorAccentStroke" android:pathData="M40,130a60,6 0,1 0,120 0a60,6 0,1 0,-120 0z"/>
+    <path android:fillColor="@color/colorControlNormal" android:fillAlpha="0.25" android:pathData="M66,30h68a8,8 0,0 1,8 8v86l-10,-7 -10,7 -10,-7 -10,7 -10,-7 -10,7 -10,-7 -10,7 -10,-7 -4,3v-82a8,8 0,0 1,8 -8z"/>
+    <path android:strokeColor="@color/colorControlNormal" android:strokeWidth="5" android:strokeLineCap="round" android:strokeLineJoin="round" android:strokeAlpha="0.6" android:pathData="M78,52L122,52M78,66L114,66M78,80L122,80M78,94L106,94"/>
+    <path android:fillColor="@color/colorAccent" android:pathData="M120,40a22,22 0,1 0,44 0a22,22 0,1 0,-44 0z"/>
+    <path android:strokeColor="@color/colorTextOnAccent" android:strokeWidth="4" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M142,28L142,40L151,46"/>
+    <path android:fillColor="@color/colorWarning" android:fillAlpha="0.7" android:pathData="M30,44a3,3 0,1 0,6 0a3,3 0,1 0,-6 0z M164,36a2.5,2.5 0,1 0,5 0a2.5,2.5 0,1 0,-5 0z M22,96a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z M174,92a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z"/>
+</vector>

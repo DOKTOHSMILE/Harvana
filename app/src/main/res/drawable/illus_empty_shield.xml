@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nobody here: a shield with a check. Theme colours, so it fits light and dark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp" android:height="120dp" android:viewportWidth="200" android:viewportHeight="150">
+    <path android:fillColor="@color/colorAccentRipple" android:pathData="M15,85a85,55 0,1 0,170 0a85,55 0,1 0,-170 0z"/>
+    <path android:fillColor="@color/colorAccentStroke" android:pathData="M40,130a60,6 0,1 0,120 0a60,6 0,1 0,-120 0z"/>
+    <path android:fillColor="@color/colorAccent" android:pathData="M100,26l40,14v30c0,26 -18,46 -40,54c-22,-8 -40,-28 -40,-54v-30z"/>
+    <path android:strokeColor="@color/colorTextOnAccent" android:strokeWidth="7" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M82,74L95,87L120,60"/>
+    <path android:fillColor="@color/colorWarning" android:fillAlpha="0.7" android:pathData="M30,44a3,3 0,1 0,6 0a3,3 0,1 0,-6 0z M164,36a2.5,2.5 0,1 0,5 0a2.5,2.5 0,1 0,-5 0z M22,96a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z M174,92a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z"/>
+</vector>

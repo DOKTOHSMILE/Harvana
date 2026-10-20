@@ -322,8 +322,10 @@ public class HistoryFragmentActivity extends Fragment {
 			tv_wallet_activity_empty.setVisibility(displayTransactions.isEmpty() ? View.VISIBLE : View.GONE);
 			if (displayTransactions.isEmpty() && !allTransactions.isEmpty()) {
 				tv_wallet_activity_empty.setText("No transactions match your search.");
+				com.harvana.app.utils.EmptyState.illustrate(tv_wallet_activity_empty, com.harvana.app.R.drawable.illus_empty_search);
 			} else if (displayTransactions.isEmpty()) {
 				tv_wallet_activity_empty.setText("No wallet activity yet.");
+				com.harvana.app.utils.EmptyState.illustrate(tv_wallet_activity_empty, com.harvana.app.R.drawable.illus_empty_activity);
 			}
 		}
 	}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No offers: a price tag and a coin. Theme colours, so it fits light and dark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp" android:height="120dp" android:viewportWidth="200" android:viewportHeight="150">
+    <path android:fillColor="@color/colorAccentRipple" android:pathData="M15,85a85,55 0,1 0,170 0a85,55 0,1 0,-170 0z"/>
+    <path android:fillColor="@color/colorAccentStroke" android:pathData="M40,130a60,6 0,1 0,120 0a60,6 0,1 0,-120 0z"/>
+    <path android:fillColor="@color/colorAccent" android:pathData="M58,52h62l30,30 -30,30h-62a8,8 0,0 1,-8 -8v-44a8,8 0,0 1,8 -8z"/>
+    <path android:fillColor="@color/colorTextOnAccent" android:pathData="M126,82a6,6 0,1 0,12 0a6,6 0,1 0,-12 0z"/>
+    <path android:strokeColor="@color/colorTextOnAccent" android:strokeWidth="5" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M66,72L104,72M66,90L92,90"/>
+    <path android:fillColor="@color/colorWarning" android:pathData="M134,36a14,14 0,1 0,28 0a14,14 0,1 0,-28 0z"/>
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M148,29L148,43M141,36L155,36"/>
+    <path android:fillColor="@color/colorWarning" android:fillAlpha="0.7" android:pathData="M30,44a3,3 0,1 0,6 0a3,3 0,1 0,-6 0z M164,36a2.5,2.5 0,1 0,5 0a2.5,2.5 0,1 0,-5 0z M22,96a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z M174,92a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z"/>
+</vector>

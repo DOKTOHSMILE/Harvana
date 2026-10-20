@@ -299,10 +299,12 @@
 			android:overScrollMode="never" />
 		<TextView
 			android:id="@+id/tv_payments_empty"
+				android:drawableTop="@drawable/illus_empty_activity"
+				android:drawablePadding="12dp"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:padding="24dp"
-			android:gravity="center_horizontal|center_vertical"
+			android:gravity="center"
 			android:text="No payment records for this round yet."
 			android:textSize="13sp"
 			android:visibility="gone" />

@@ -1134,6 +1134,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		if (list.getChildCount() == 0) {
 			TextView none = new TextView(this);
 			none.setText("0 wallets");
+			com.harvana.app.utils.EmptyState.illustrate(none, com.harvana.app.R.drawable.illus_empty_groups);
 			none.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorTextTertiary));
 			none.setPadding(0, 24, 0, 24);
 			list.addView(none);

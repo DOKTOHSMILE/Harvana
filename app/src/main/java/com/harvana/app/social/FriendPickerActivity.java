@@ -108,6 +108,7 @@ public class FriendPickerActivity extends AppCompatActivity {
         if (shown.isEmpty()) {
             TextView none = (TextView) getLayoutInflater().inflate(com.harvana.app.R.layout.item_list_empty, list, false);
             none.setText(everyone.isEmpty() ? "No friends yet" : "No match");
+            com.harvana.app.utils.EmptyState.illustrate(none, everyone.isEmpty() ? com.harvana.app.R.drawable.illus_empty_groups : com.harvana.app.R.drawable.illus_empty_search);
             list.addView(none);
         }
         for (Person p : shown) list.addView(row(p));

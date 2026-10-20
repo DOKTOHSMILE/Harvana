@@ -2,6 +2,28 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: illustrations on empty screens across the app
+
+- Eight new theme-coloured illustrations (light and dark), alongside the two group ones: `illus_all_done`,
+  `illus_empty_activity`, `illus_empty_chat`, `illus_empty_loans`, `illus_empty_notifications`, `illus_empty_offers`,
+  `illus_empty_shield` and `illus_empty_wallet`. All are 160 × 120 dp.
+- `utils/EmptyState.illustrate(TextView, illus)` puts one above an empty-list line, centred.
+- Where they show:
+
+| Screen | Picture |
+|---|---|
+| Wallet history (no activity / no search match) | activity / search |
+| Group members, Send → Beneficiaries (0 wallets), Friends, Friend picker | groups (search when no match) |
+| Group notices, Invitations, Notifications (other tabs) | notifications |
+| Notifications (All, caught up), Home "No pending payments", payout requests, guardian disputes | all done |
+| Group loans, Open loans, Staking live stakes | loans |
+| Group payment records, P2P My orders, group's public activity | activity |
+| P2P chat, Support requests, Learn comments | chat |
+| P2P marketplace, P2P my offers | offers |
+| Wallet assets (no wallet), Payment methods | wallet |
+| Blocked users / blocked friends | shield |
+| Add coin search, Swap coin search | search |
+
 ## 20 Oct 2026: add to beneficiaries after a send
 
 - The transfer success page (`PaymentSuccessSheet`) has an **Add to beneficiaries** button above Done, for every send

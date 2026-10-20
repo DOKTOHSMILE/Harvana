@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No wallet: a wallet with a coin. Theme colours, so it fits light and dark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp" android:height="120dp" android:viewportWidth="200" android:viewportHeight="150">
+    <path android:fillColor="@color/colorAccentRipple" android:pathData="M15,85a85,55 0,1 0,170 0a85,55 0,1 0,-170 0z"/>
+    <path android:fillColor="@color/colorAccentStroke" android:pathData="M40,130a60,6 0,1 0,120 0a60,6 0,1 0,-120 0z"/>
+    <path android:fillColor="@color/colorControlNormal" android:fillAlpha="0.35" android:pathData="M60,44h70l8,-12h-70z"/>
+    <path android:fillColor="@color/colorAccent" android:pathData="M56,48h84a10,10 0,0 1,10 10v52a10,10 0,0 1,-10 10h-84a10,10 0,0 1,-10 -10v-52a10,10 0,0 1,10 -10z"/>
+    <path android:fillColor="@color/colorWarning" android:pathData="M124,72h30a6,6 0,0 1,6 6v12a6,6 0,0 1,-6 6h-30a6,6 0,0 1,-6 -6v-12a6,6 0,0 1,6 -6z"/>
+    <path android:fillColor="#FFFFFFFF" android:pathData="M131,84a4,4 0,1 0,8 0a4,4 0,1 0,-8 0z"/>
+    <path android:fillColor="@color/colorWarning" android:pathData="M86,22a14,14 0,1 0,28 0a14,14 0,1 0,-28 0z"/>
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M100,15L100,29M93,22L107,22"/>
+    <path android:fillColor="@color/colorWarning" android:fillAlpha="0.7" android:pathData="M30,44a3,3 0,1 0,6 0a3,3 0,1 0,-6 0z M164,36a2.5,2.5 0,1 0,5 0a2.5,2.5 0,1 0,-5 0z M22,96a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z M174,92a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z"/>
+</vector>

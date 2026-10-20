@@ -740,6 +740,8 @@ public class GroupJoinRequestActivity extends AppCompatActivity {
 			TextView empty = new TextView(this);
 			empty.setText("No recent public activity yet.");
 			empty.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+			com.harvana.app.utils.EmptyState.illustrate(empty, com.harvana.app.R.drawable.illus_empty_activity);
+			empty.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 			layout_group_history.addView(empty);
 			return;
 		}

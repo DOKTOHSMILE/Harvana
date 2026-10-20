@@ -101,6 +101,7 @@ public class NotificationsActivity extends AppCompatActivity {
             TextView e = (TextView) getLayoutInflater().inflate(R.layout.item_list_empty, list, false);
             e.setText(tab == 0 ? "You're all caught up.\nPayment reminders, group notices, trade messages and transfers will show here."
                     : "Nothing in " + TABS[tab] + " yet.");
+            com.harvana.app.utils.EmptyState.illustrate(e, tab == 0 ? com.harvana.app.R.drawable.illus_all_done : com.harvana.app.R.drawable.illus_empty_notifications);
             list.addView(e);
             return;
         }

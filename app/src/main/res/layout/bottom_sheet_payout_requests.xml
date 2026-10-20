@@ -46,10 +46,12 @@
 			android:overScrollMode="never" />
 		<TextView
 			android:id="@+id/tv_payout_requests_empty"
+				android:drawableTop="@drawable/illus_all_done"
+				android:drawablePadding="12dp"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:padding="24dp"
-			android:gravity="center_horizontal|center_vertical"
+			android:gravity="center"
 			android:text="No pending payout requests."
 			android:textSize="14sp"
 			android:focusable="false"

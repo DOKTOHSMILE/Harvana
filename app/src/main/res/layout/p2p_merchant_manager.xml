@@ -99,11 +99,10 @@
 					android:orientation="vertical"
 					android:visibility="gone">
 					<ImageView
-						android:layout_width="56dp"
-						android:layout_height="56dp"
+						android:layout_width="160dp"
+						android:layout_height="120dp"
 						android:importantForAccessibility="no"
-						android:src="@drawable/icon_ads_click_outline"
-						app:tint="@color/colorTextTertiary" />
+						android:src="@drawable/illus_empty_offers" />
 					<TextView
 						android:id="@+id/tv_offers_empty"
 						android:layout_width="wrap_content"

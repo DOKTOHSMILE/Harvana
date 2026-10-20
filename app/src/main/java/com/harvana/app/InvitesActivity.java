@@ -46,7 +46,7 @@ public class InvitesActivity extends AppCompatActivity {
 
     private void show(List<Map<String, Object>> invites) {
         list.removeAllViews();
-        if (invites.isEmpty()) { emptyLine("No pending invitations."); return; }
+        if (invites.isEmpty()) { com.harvana.app.utils.EmptyState.illustrate(emptyLine("No pending invitations."), com.harvana.app.R.drawable.illus_empty_notifications); return; }
         for (Map<String, Object> inv : invites) list.addView(card(inv));
     }
 

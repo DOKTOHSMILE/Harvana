@@ -127,7 +127,7 @@ public final class LearnCommentsSheet {
     private static void fill(Activity host, LinearLayout list, List<LearnSocial.Comment> comments) {
         list.removeAllViews();
         if (comments.isEmpty()) {
-            list.addView(text(host, "No comments yet. Be the first.", 13, false, R.color.colorTextTertiary));
+            list.addView(com.harvana.app.utils.EmptyState.illustrate(text(host, "No comments yet. Be the first.", 13, false, R.color.colorTextTertiary), R.drawable.illus_empty_chat));
             return;
         }
         long now = System.currentTimeMillis();

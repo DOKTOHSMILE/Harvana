@@ -137,11 +137,10 @@
 				android:orientation="vertical"
 				android:visibility="gone">
 				<ImageView
-					android:layout_width="56dp"
-					android:layout_height="56dp"
+					android:layout_width="160dp"
+					android:layout_height="120dp"
 					android:importantForAccessibility="no"
-					android:src="@drawable/ic_receipt"
-					app:tint="@color/colorTextTertiary" />
+					android:src="@drawable/illus_empty_activity" />
 				<TextView
 					android:id="@+id/tv_orders_empty"
 					android:layout_width="wrap_content"

@@ -70,7 +70,7 @@ final class SwapAssetSheet {
                 if (open) row.setOnClickListener(v -> { d.dismiss(); pick.picked(code); });
                 list.addView(row);
             }
-            if (list.getChildCount() == 0) list.addView(SwapText.line(host, "No asset matches."));
+            if (list.getChildCount() == 0) list.addView(com.harvana.app.utils.EmptyState.illustrate(SwapText.line(host, "No asset matches."), com.harvana.app.R.drawable.illus_empty_search));
         };
         search.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }

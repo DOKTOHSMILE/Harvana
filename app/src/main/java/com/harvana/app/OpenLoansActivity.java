@@ -123,6 +123,7 @@ public class OpenLoansActivity extends AppCompatActivity {
         if (rows.isEmpty()) {
             TextView e = (TextView) getLayoutInflater().inflate(R.layout.item_list_empty, list, false);
             e.setText("No open loans.");
+            com.harvana.app.utils.EmptyState.illustrate(e, com.harvana.app.R.drawable.illus_empty_loans);
             list.addView(e);
             return;
         }

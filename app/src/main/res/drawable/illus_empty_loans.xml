@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No loans: a coin stack and a percent coin. Theme colours, so it fits light and dark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp" android:height="120dp" android:viewportWidth="200" android:viewportHeight="150">
+    <path android:fillColor="@color/colorAccentRipple" android:pathData="M15,85a85,55 0,1 0,170 0a85,55 0,1 0,-170 0z"/>
+    <path android:fillColor="@color/colorAccentStroke" android:pathData="M40,130a60,6 0,1 0,120 0a60,6 0,1 0,-120 0z"/>
+    <path android:fillColor="@color/colorWarning" android:fillAlpha="0.55" android:pathData="M50,112a24,7 0,1 0,48 0a24,7 0,1 0,-48 0z"/>
+    <path android:fillColor="@color/colorWarning" android:fillAlpha="0.75" android:pathData="M50,100a24,7 0,1 0,48 0a24,7 0,1 0,-48 0z"/>
+    <path android:fillColor="@color/colorWarning" android:pathData="M50,88a24,7 0,1 0,48 0a24,7 0,1 0,-48 0z"/>
+    <path android:fillColor="@color/colorAccent" android:pathData="M106,64a28,28 0,1 0,56 0a28,28 0,1 0,-56 0z"/>
+    <path android:strokeColor="@color/colorTextOnAccent" android:strokeWidth="4" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M124,78L144,50"/>
+    <path android:fillColor="@color/colorTextOnAccent" android:pathData="M120,54a5,5 0,1 0,10 0a5,5 0,1 0,-10 0z M138,74a5,5 0,1 0,10 0a5,5 0,1 0,-10 0z"/>
+    <path android:fillColor="@color/colorWarning" android:fillAlpha="0.7" android:pathData="M30,44a3,3 0,1 0,6 0a3,3 0,1 0,-6 0z M164,36a2.5,2.5 0,1 0,5 0a2.5,2.5 0,1 0,-5 0z M22,96a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z M174,92a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z"/>
+</vector>

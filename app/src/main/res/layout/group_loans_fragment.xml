@@ -239,10 +239,12 @@
 				android:overScrollMode="never" />
 			<TextView
 				android:id="@+id/tv_loans_empty"
+				android:drawableTop="@drawable/illus_empty_loans"
+				android:drawablePadding="12dp"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:padding="24dp"
-				android:gravity="center_horizontal|center_vertical"
+				android:gravity="center"
 				android:text="No loans yet."
 				android:textSize="13sp"
 				android:textColor="@color/colorTextTertiary"

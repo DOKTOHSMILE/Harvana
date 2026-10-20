@@ -18,10 +18,12 @@
 		android:orientation="vertical">
 		<TextView
 			android:id="@+id/tv_no_wallet_hint"
+				android:drawableTop="@drawable/illus_empty_wallet"
+				android:drawablePadding="12dp"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_margin="32dp"
-			android:gravity="center_horizontal"
+			android:gravity="center"
 			android:text="No wallet yet. Tap the wallet selector above to create or import one."
 			android:textSize="14sp"
 			android:textColor="@color/colorTextSecondary"

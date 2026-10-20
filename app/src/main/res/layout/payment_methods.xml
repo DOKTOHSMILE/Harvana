@@ -59,21 +59,20 @@
 				android:visibility="gone">
 				<com.google.android.material.card.MaterialCardView
 					android:id="@+id/cardview19"
-					android:layout_width="72dp"
-					android:layout_height="72dp"
-					app:cardBackgroundColor="@color/colorSurface"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					app:cardBackgroundColor="@android:color/transparent"
 					app:cardCornerRadius="36dp"
 					app:cardElevation="0dp"
 					app:strokeColor="@color/colorCardStroke"
-					app:strokeWidth="1dp">
+					app:strokeWidth="0dp">
 					<com.google.android.material.imageview.ShapeableImageView
 						android:id="@+id/imageview48"
-						android:layout_width="36dp"
-						android:layout_height="36dp"
-						android:src="@drawable/ic_credit_card"
+						android:layout_width="160dp"
+						android:layout_height="120dp"
+						android:src="@drawable/illus_empty_wallet"
 						android:scaleType="centerInside"
-						android:contentDescription="Nopaymentmethods"
-						app:tint="@color/colorAmber" />
+						android:contentDescription="Nopaymentmethods" />
 				</com.google.android.material.card.MaterialCardView>
 				<TextView
 					android:id="@+id/textview90"

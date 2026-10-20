@@ -81,6 +81,7 @@ public class SupportHubActivity extends AppCompatActivity {
         if (arr == null || arr.length() == 0) {
             TextView empty = new TextView(this);
             empty.setText("No requests yet.");
+            com.harvana.app.utils.EmptyState.illustrate(empty, com.harvana.app.R.drawable.illus_empty_chat);
             empty.setTextColor(getColor(R.color.colorTextSecondary));
             host.addView(empty);
             return;

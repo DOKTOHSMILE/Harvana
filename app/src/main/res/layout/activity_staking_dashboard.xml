@@ -597,13 +597,16 @@
                     android:orientation="vertical">
                     <TextView
                         android:id="@+id/tv_live_empty"
+				android:drawableTop="@drawable/illus_empty_loans"
+				android:drawablePadding="12dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:text="No live stakes yet. Stake HARV on the Staking tab and each stake appears here."
                         android:textColor="@color/colorTextMuted"
                         android:textSize="13sp"
-                        android:visibility="gone"/>
+                        android:visibility="gone"
+				android:gravity="center" />
                     <!-- one card per stake, added in code -->
                     <LinearLayout
                         android:id="@+id/stakes_list"

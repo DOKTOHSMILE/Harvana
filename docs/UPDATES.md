@@ -2,6 +2,12 @@
 
 **Standing rule (owner instruction, 1 Oct 2026).** Every change pushed to this repository that an operator has to apply by hand gets a dated entry in this file, in the same commit. That includes a rules publish, a config key, and an app build the phone must install. A code change that cannot go live by itself is unfinished without the entry. The node repository keeps its own steps in `docs/DEPLOYMENT.md`. Do not put those steps here.
 
+## 20 Oct 2026: Swap — 50%, dollar values, price cards
+
+- You pay: a 50% button beside MAX (half of what can be spent after the tFare).
+- The dollar value (≈ $) under the amount you pay and under the amount you receive.
+- Two price cards under the swap: each coin of the pair in dollars, and HARV's 24-hour change.
+
 ## 20 Oct 2026: Harvana loading icon
 
 - Every round loading spinner in the app is the Harvana mark: the H tile breathing while a ring runs round it (`avd_harvana_loader`, set for all spinners in the theme).

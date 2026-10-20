@@ -55,6 +55,20 @@
 						android:textSize="12sp"
 						tools:text="Available: 88.4365 HARV" />
 					<TextView
+						android:id="@+id/tv_swap_half"
+						android:layout_width="wrap_content"
+						android:layout_height="32dp"
+						android:layout_marginStart="8dp"
+						android:background="@drawable/bg_swap_pill"
+						android:contentDescription="Use half of the balance"
+						android:gravity="center"
+						android:paddingStart="10dp"
+						android:paddingEnd="10dp"
+						android:text="50%"
+						android:textColor="@color/swapAccent"
+						android:textSize="12sp"
+						android:textStyle="bold" />
+					<TextView
 						android:id="@+id/tv_swap_max"
 						android:layout_width="wrap_content"
 						android:layout_height="32dp"
@@ -99,6 +113,15 @@
 						android:textSize="26sp"
 						android:textStyle="bold" />
 				</LinearLayout>
+				<TextView
+					android:id="@+id/tv_swap_in_usd"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:gravity="end"
+					android:paddingEnd="14dp"
+					android:textColor="@color/swapTextSecondary"
+					android:textSize="12sp" />
 
 				<!-- Reverse the pair -->
 				<FrameLayout
@@ -154,6 +177,15 @@
 						android:textSize="26sp"
 						android:textStyle="bold" />
 				</LinearLayout>
+				<TextView
+					android:id="@+id/tv_swap_out_usd"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp"
+					android:gravity="end"
+					android:paddingEnd="14dp"
+					android:textColor="@color/swapTextSecondary"
+					android:textSize="12sp" />
 
 				<!-- Rate; tap for the details -->
 				<LinearLayout
@@ -263,6 +295,23 @@
 					android:textStyle="bold"
 					app:backgroundTint="@null"
 					xmlns:app="http://schemas.android.com/apk/res-auto" />
+			</LinearLayout>
+
+			<!-- ── The pair's prices ───────────────────────────────────────── -->
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="14dp"
+				android:orientation="horizontal">
+				<include
+					android:id="@+id/swap_price_from"
+					layout="@layout/item_swap_price" />
+				<Space
+					android:layout_width="10dp"
+					android:layout_height="1dp" />
+				<include
+					android:id="@+id/swap_price_to"
+					layout="@layout/item_swap_price" />
 			</LinearLayout>
 
 			<!-- ── Recent swaps ─────────────────────────────────────────────── -->

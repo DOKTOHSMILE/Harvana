@@ -110,6 +110,7 @@ public class SwapActivity extends AppCompatActivity {
         chipFrom.setOnClickListener(v -> pick(true));
         chipTo.setOnClickListener(v -> pick(false));
         findViewById(R.id.tv_swap_max).setOnClickListener(v -> max());
+        findViewById(R.id.tv_swap_half).setOnClickListener(v -> half());
         findViewById(R.id.iv_swap_flip).setOnClickListener(v -> flip());
         findViewById(R.id.swap_rate_row).setOnClickListener(v -> { detailsOpen = !detailsOpen; showQuote(); });
         findViewById(R.id.swap_slippage_row).setOnClickListener(v -> pickSlippage());
@@ -128,6 +129,7 @@ public class SwapActivity extends AppCompatActivity {
         });
         showSlippage();
         sidesChanged();
+        com.harvana.app.wallet.UsdValue.load(this, () -> { if (!isFinishing()) { showPrices(); showQuote(); } });
     }
 
     @Override protected void onResume() {
@@ -261,6 +263,7 @@ public class SwapActivity extends AppCompatActivity {
     private void sidesChanged() {
         bindToken(chipFrom, from);
         bindToken(chipTo, to);
+        showPrices();
         quote = null;
         quoteError = "";
         fareRaw = -1;
@@ -281,6 +284,57 @@ public class SwapActivity extends AppCompatActivity {
         from = to;
         to = f;
         sidesChanged();
+    }
+
+    /** Half of what can be spent (after the tFare on a HARV swap). */
+    private void half() {
+        long bal = balance(from);
+        if (bal <= 0) return;
+        long spend = SwapMath.maxSpendable(from, bal, Math.max(0, fareRaw));
+        etAmount.setText(SwapMath.plain(from, spend / 2));
+    }
+
+    /** The two price cards: each coin of the pair in dollars, with the 24-hour change for HARV when the node sent one. */
+    private void showPrices() {
+        priceCard(findViewById(R.id.swap_price_from), from);
+        priceCard(findViewById(R.id.swap_price_to), to);
+    }
+
+    private void priceCard(View card, String code) {
+        if (card == null) return;
+        ((ImageView) card.findViewById(R.id.iv_price_icon)).setImageDrawable(icon(code));
+        ((TextView) card.findViewById(R.id.tv_price_symbol)).setText(SwapText.sym(code));
+        double usd = com.harvana.app.wallet.UsdValue.per(this, code);
+        ((TextView) card.findViewById(R.id.tv_price_usd)).setText(Double.isNaN(usd) ? "—" : usdPrice(usd));
+        TextView ch = card.findViewById(R.id.tv_price_change);
+        double pct = Double.NaN;
+        if (HARV.equals(code)) {
+            com.harvana.app.wallet.HarvPrice.Quote q = com.harvana.app.wallet.HarvPrice.peek();
+            if (q != null) pct = q.changePct;
+        }
+        if (Double.isNaN(pct)) {
+            ch.setText("24h —");
+            ch.setTextColor(ContextCompat.getColor(this, R.color.swapTextSecondary));
+        } else {
+            ch.setText(String.format(java.util.Locale.US, "24h %s%.2f%%", pct >= 0 ? "+" : "", pct));
+            ch.setTextColor(tone(pct >= 0 ? 1 : -1));
+        }
+    }
+
+    /** A price with enough digits to see small coins: $1.24, $0.0123, $0.000652. */
+    static String usdPrice(double v) {
+        if (v >= 1) return String.format(java.util.Locale.US, "$%,.2f", v);
+        if (v <= 0) return "$0";
+        int digits = Math.min(10, 2 + (int) Math.ceil(-Math.log10(v)));
+        return "$" + new java.math.BigDecimal(v).setScale(digits, java.math.RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
+    }
+
+    /** "≈ $12.40" under an amount, or "" when the coin's price is not known. */
+    private String usdUnder(String code, long raw) {
+        if (raw <= 0) return "";
+        double amount = raw / Math.pow(10, SwapMath.decimals(code));
+        String t = com.harvana.app.wallet.UsdValue.text(this, code, amount);
+        return t.isEmpty() ? "" : "≈ " + t;
     }
 
     private void max() {
@@ -348,6 +402,8 @@ public class SwapActivity extends AppCompatActivity {
         long out = quote == null ? -1 : quote.optLong("outRaw");
         tvOut.setText(out >= 0 ? SwapText.amount(to, out).replace(" " + SwapText.sym(to), "")
                 : SwapMath.toRaw(from, text()) > 0 && quoteError.isEmpty() ? "…" : "0.00");
+        ((TextView) findViewById(R.id.tv_swap_in_usd)).setText(usdUnder(from, Math.max(0, SwapMath.toRaw(from, text()))));
+        ((TextView) findViewById(R.id.tv_swap_out_usd)).setText(usdUnder(to, Math.max(0, out)));
         String rate = quote != null && quotedIn > 0 ? SwapText.rate(from, to, quotedIn, out) : SwapText.spotRate(from, to, pools);
         tvRate.setText(rate.isEmpty() ? (pairOpen() ? "Rate after you enter an amount" : "No liquidity for this pair") : rate);
         tvDetailsToggle.setText(detailsOpen ? "Hide" : "Details");

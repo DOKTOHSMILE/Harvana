@@ -92,6 +92,7 @@ public final class SettingsSections {
         add(hero, GENERAL); add(about, GENERAL);
         add(access, ACCESS);
         add(money, MONEY);
+        add(extra(payoutCard(groupId, g, members)), MONEY);
         for (View p : moneyPanels) add(p, MONEY);
         add(rules, MONEY); add(wallet, MONEY);
         add(networkPanel, NETWORK);
@@ -390,6 +391,53 @@ public final class SettingsSections {
         Object o = m == null ? null : m.get(k);
         if (o instanceof Number) return ((Number) o).doubleValue();
         try { return o == null ? 0 : Double.parseDouble(String.valueOf(o)); } catch (Exception e) { return 0; }
+    }
+
+    private View payoutCard(String groupId, Map<String, Object> g, java.util.List<Map<String, Object>> members) {
+        LinearLayout c = card();
+        c.addView(text("Early payout", 16, true, UiColors.textPrimary()));
+        c.addView(text("An emergency request to be paid before your turn. Nothing moves until the admin approves it.", 13, false, UiColors.textSecondary()));
+        c.addView(button("Request payout", false, v -> confirmPayout(groupId, g, members)));
+        return c;
+    }
+
+    private void confirmPayout(String groupId, Map<String, Object> g, java.util.List<Map<String, Object>> members) {
+        double contribution = num(g, "contributionAmount");
+        if (contribution <= 0) contribution = num(g, "amount");
+        int slots = (int) num(g, "totalSlots");
+        if (slots <= 0) slots = (int) num(g, "slots");
+        double amount = contribution > 0 ? contribution * Math.max(slots, 1) : 0;
+        String type = str(g, "groupType", "").toLowerCase(Locale.US);
+        if (type.contains("rotat") && contribution > 0 && slots > 0) amount = contribution * slots;
+        String uid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ? ""
+                : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+        int slot = 1;
+        if (members != null) for (Map<String, Object> m : members) {
+            String who = str(m, "memberUid", str(m, "uid", ""));
+            if (!uid.isEmpty() && uid.equals(who)) {
+                int s = (int) num(m, "slot");
+                if (s > 0) slot = s;
+            }
+        }
+        final double send = amount;
+        final int sendSlot = slot;
+        String coin = CoinInfo.ticker();
+        String body = send > 0
+                ? "Request an early payout of " + com.harvana.app.wallet.BalanceFormatter.smartDecimal(send) + " " + coin
+                    + " (slot " + sendSlot + ")? The admin reviews it before anything is paid."
+                : "Request an early payout? The admin reviews it before anything is paid.";
+        new com.harvana.app.ui.SheetDialog.Builder(a)
+                .setTitle("Request payout")
+                .setMessage(body)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Request", (dlg, w) -> {
+                    String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(a);
+                    GroupPayoutManager.requestPayout(a, groupId, wallet, send > 0 ? send : contribution, sendSlot,
+                            new GroupPayoutManager.Callback() {
+                                @Override public void onSuccess(String message) { Toast.makeText(a, message, Toast.LENGTH_LONG).show(); }
+                                @Override public void onError(String error) { Toast.makeText(a, error, Toast.LENGTH_LONG).show(); }
+                            });
+                }).show();
     }
 
     private View infoCard(String groupId, Map<String, Object> g, boolean onChain) {

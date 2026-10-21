@@ -145,12 +145,12 @@ public final class HusdClient {
         HarvanaNodeClient.nodeGet(q, wrap(cb));
     }
 
-    /** The tFare row's value for a fare answer: "0.0035 HARV", "Free · 2 left", or "10 hNGN". */
+    /** The tFare row's value: "0.0035 HARV" when paid in HARV, otherwise the coin amount ("10 hNGN"). Nothing is free. */
     public static String fareText(JSONObject q, String sym) {
-        String pay = q.optString("payIn");
-        if ("HARV".equals(pay)) return trimHarv(q.optLong("harvGasRaw")) + " HARV";
-        if ("FREE".equals(pay)) return "Free · " + Math.max(0, q.optInt("freeTransfersLeft") - 1) + " left";
-        return format(q.optLong("coinTFareRaw", q.optLong("coinFeeRaw"))) + " " + sym;
+        if (q == null) return "—";
+        long coin = q.optLong("coinTFareRaw", q.optLong("coinFeeRaw"));
+        if ("HARV".equals(q.optString("payIn")) || coin <= 0) return trimHarv(q.optLong("harvGasRaw", q.optLong("harvTFareRaw"))) + " HARV";
+        return format(coin) + " " + sym;
     }
 
     private static String trimHarv(long raw) {

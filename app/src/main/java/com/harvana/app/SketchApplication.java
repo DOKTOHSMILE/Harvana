@@ -1,7 +1,9 @@
 package com.harvana.app;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.google.firebase.FirebaseApp;
@@ -31,6 +33,18 @@ public class SketchApplication extends Application {
     public void onCreate() {
         super.onCreate();
         appContext = getApplicationContext();
+        registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+            @Override public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}
+            @Override public void onActivityStarted(Activity activity) {
+                android.view.View decor = activity.getWindow() == null ? null : activity.getWindow().getDecorView();
+                if (decor != null) decor.post(() -> com.harvana.app.utils.IconFit.buttons(decor));
+            }
+            @Override public void onActivityResumed(Activity activity) {}
+            @Override public void onActivityPaused(Activity activity) {}
+            @Override public void onActivityStopped(Activity activity) {}
+            @Override public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
+            @Override public void onActivityDestroyed(Activity activity) {}
+        });
 
         // Ensure crash handler is bound to application context as well
         try {

@@ -195,7 +195,6 @@ public final class StableActions {
                 .section("Sending on Harvana")
                 .row("tFare (with HARV)", "HARV")
                 .row("tFare (no HARV)", HusdClient.format(fee("transferPaidInHusdRaw", 20_000L)) + " " + sym);
-        if (bal.optInt("freeTransfersLeft", 0) > 0) t.row("Free transfers left", String.valueOf(bal.optInt("freeTransfersLeft")));
         t.section("Deposits and withdrawals (" + reserve + ")");
         for (String chain : chains()) t.row(HusdActivity.chainName(chain), HusdClient.format(bridgeFee(chain)) + " " + sym);
         t.row("Minimum withdrawal", HusdClient.format(fee("minWithdrawRaw", 5 * HusdClient.UNIT)) + " " + sym)

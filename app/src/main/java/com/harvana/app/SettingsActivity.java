@@ -539,13 +539,21 @@ public class SettingsActivity extends AppCompatActivity {
 		// No ID check exists (NIN/BVN were removed), so no "verified" badge is shown.
 		tvSettingsVerified.setVisibility(View.GONE);
 		
+		if (ivSettingsAvatar instanceof com.google.android.material.imageview.ShapeableImageView) {
+			com.google.android.material.imageview.ShapeableImageView face =
+					(com.google.android.material.imageview.ShapeableImageView) ivSettingsAvatar;
+			face.setShapeAppearanceModel(com.google.android.material.shape.ShapeAppearanceModel.builder()
+					.setAllCornerSizes(com.google.android.material.shape.ShapeAppearanceModel.PILL).build());
+		}
 		if (!iconStr.isEmpty() && !"null".equalsIgnoreCase(iconStr)) {
+			ivSettingsAvatar.setPadding(0, 0, 0, 0);
+			ivSettingsAvatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			Glide.with(getApplicationContext())
 			.load(Uri.parse(iconStr))
 			.placeholder(R.drawable.ic_person)
+			.circleCrop()
 			.into(ivSettingsAvatar);
 			ivSettingsAvatar.setBackgroundTintList(null);
-			ivSettingsAvatar.setPadding(0, 0, 0, 0);
 		}
 	}
 	

@@ -64,12 +64,14 @@
 						android:focusable="true">
 						<com.google.android.material.imageview.ShapeableImageView
 							android:id="@+id/ivSettingsAvatar"
-							android:layout_width="40dp"
-							android:layout_height="40dp"
-							android:padding="9dp"
+							android:layout_width="48dp"
+							android:layout_height="48dp"
 							android:background="@drawable/bg_settings_icon_badge"
+							android:scaleType="centerCrop"
 							android:src="@drawable/ic_person"
-							android:scaleType="fitCenter" />
+							app:shapeAppearanceOverlay="@style/ShapeAppearance.Harvana.Circle"
+							app:strokeColor="@color/colorCardStroke"
+							app:strokeWidth="1dp" />
 						<LinearLayout
 							android:id="@+id/linear3"
 							android:layout_width="0dp"

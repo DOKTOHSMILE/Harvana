@@ -162,6 +162,7 @@ public class HomeFragmentActivity extends Fragment {
 	private LinearLayout linear222;
 	private TextView textview220;
 	private ImageView imageview60;
+	private LinearLayout home_recent_tx;
 	private LinearLayout linear211;
 	private LinearLayout linear212;
 	private TextView textview215;
@@ -292,6 +293,7 @@ public class HomeFragmentActivity extends Fragment {
 		linear222 = _view.findViewById(R.id.linear222);
 		textview220 = _view.findViewById(R.id.textview220);
 		imageview60 = _view.findViewById(R.id.imageview60);
+		home_recent_tx = _view.findViewById(R.id.home_recent_tx);
 		linear211 = _view.findViewById(R.id.linear211);
 		linear212 = _view.findViewById(R.id.linear212);
 		textview215 = _view.findViewById(R.id.textview215);
@@ -334,6 +336,7 @@ public class HomeFragmentActivity extends Fragment {
 		});
 		
 		cardview32.setOnClickListener(_v -> {
+			AssetFragmentActivity.pendingPage = 1;
 			if (getActivity() != null) {
 				com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = 
 				getActivity().findViewById(R.id.bottomnavigation1);
@@ -444,6 +447,7 @@ public class HomeFragmentActivity extends Fragment {
 		super.onResume();
 		com.harvana.app.home.HomeData.refresh(getContext(), false);
 		_loadWalletBalance();
+		_loadRecentTx();
 		if (getContext() != null) {
 			com.harvana.app.utils.NetworkStatusBanner.refresh(linear2, 1,
 					com.harvana.app.wallet.WalletManager.getActiveWalletAddress(getContext()));
@@ -692,13 +696,134 @@ public class HomeFragmentActivity extends Fragment {
 	private void _showLearnHubEmpty(String message) {
 		if (linear_learn_hub == null || getContext() == null) return;
 		linear_learn_hub.removeAllViews();
+		float d = getResources().getDisplayMetrics().density;
+		LinearLayout box = new LinearLayout(getContext());
+		box.setOrientation(LinearLayout.VERTICAL);
+		box.setGravity(Gravity.CENTER_HORIZONTAL);
+		int pad = (int) (10 * d);
+		box.setPadding(pad, pad, pad, pad);
+		ImageView art = new ImageView(getContext());
+		art.setImageResource(R.drawable.illus_empty_learn);
+		art.setAdjustViewBounds(true);
+		box.addView(art, new LinearLayout.LayoutParams((int) (160 * d), (int) (120 * d)));
 		TextView empty = new TextView(getContext());
 		empty.setText(message);
 		empty.setTextSize(13f);
+		empty.setGravity(Gravity.CENTER);
 		empty.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextTertiary));
-		int pad = (int) (10 * getResources().getDisplayMetrics().density);
-		empty.setPadding(pad, pad / 2, pad, pad / 2);
-		linear_learn_hub.addView(empty);
+		LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		tp.topMargin = (int) (8 * d);
+		box.addView(empty, tp);
+		linear_learn_hub.addView(box);
+	}
+
+	/** The two newest movements on this wallet, under the balance. View more opens Asset → Activity. */
+	private String recentSig = "";
+
+	private void _loadRecentTx() {
+		if (home_recent_tx == null || getContext() == null) return;
+		String addr = WalletManager.getActiveWalletAddress(getContext());
+		if (addr == null || addr.isEmpty()) { _paintRecent(java.util.Collections.emptyList(), ""); return; }
+		final String wallet = addr;
+		com.harvana.app.sync.HarvanaNodeClient.getHistory(wallet, 0, 2, new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				java.util.List<java.util.HashMap<String, Object>> rows = com.harvana.app.wallet.ActivityFeed.parseNodePage(json);
+				if (rows.size() > 2) rows = rows.subList(0, 2);
+				final java.util.List<java.util.HashMap<String, Object>> show = rows;
+				if (getActivity() == null) return;
+				getActivity().runOnUiThread(() -> { if (isAdded()) _paintRecent(show, wallet); });
+			}
+			@Override public void onError(String error) {
+				if (getActivity() == null) return;
+				getActivity().runOnUiThread(() -> { if (isAdded()) _paintRecent(java.util.Collections.emptyList(), wallet); });
+			}
+		});
+	}
+
+	private void _paintRecent(java.util.List<java.util.HashMap<String, Object>> rows, String wallet) {
+		if (home_recent_tx == null || getContext() == null) return;
+		StringBuilder sig = new StringBuilder(wallet == null ? "" : wallet);
+		for (java.util.HashMap<String, Object> m : rows) sig.append('|').append(m.get("txHash")).append(m.get("status")).append(m.get("value"));
+		if (sig.toString().equals(recentSig) && home_recent_tx.getChildCount() > 0) return;
+		recentSig = sig.toString();
+		home_recent_tx.removeAllViews();
+		if (rows.isEmpty()) {
+			TextView empty = new TextView(getContext());
+			empty.setText("No transactions yet");
+			empty.setTextSize(13f);
+			empty.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextTertiary));
+			int pad = (int) (8 * getResources().getDisplayMetrics().density);
+			empty.setPadding(pad, pad, pad, pad / 2);
+			home_recent_tx.addView(empty);
+			return;
+		}
+		android.view.LayoutInflater inf = android.view.LayoutInflater.from(getContext());
+		for (int i = 0; i < rows.size(); i++) {
+			java.util.HashMap<String, Object> item = rows.get(i);
+			View row = inf.inflate(R.layout.item_transaction, home_recent_tx, false);
+			_bindRecent(row, item, wallet, i == rows.size() - 1);
+			home_recent_tx.addView(row);
+		}
+	}
+
+	private void _bindRecent(View row, java.util.HashMap<String, Object> item, String wallet, boolean last) {
+		String sender = item.get("senderAddress") == null ? "" : String.valueOf(item.get("senderAddress"));
+		String recipient = item.get("recipientAddress") == null ? "" : String.valueOf(item.get("recipientAddress"));
+		String asset = item.get("tokenSymbol") == null ? com.harvana.app.CoinInfo.ticker() : String.valueOf(item.get("tokenSymbol")).toUpperCase(java.util.Locale.US);
+		if (asset.isEmpty() || "NULL".equals(asset)) asset = com.harvana.app.CoinInfo.ticker();
+		if (com.harvana.app.husd.Stable.isStable(asset)) asset = com.harvana.app.husd.Stable.symbol(asset);
+		double amount = item.get("value") instanceof Number ? ((Number) item.get("value")).doubleValue() : 0;
+		String status = item.get("status") == null ? "confirmed" : String.valueOf(item.get("status"));
+		boolean pending = "pending".equalsIgnoreCase(status);
+		boolean failed = "failed".equalsIgnoreCase(status);
+		boolean incoming = recipient.equalsIgnoreCase(wallet);
+		String title = failed ? "Failed " + asset : (pending ? (incoming ? "Receiving " : "Sending ") + asset + "…" : (incoming ? "Received " : "Sent ") + asset);
+		String memo = item.get("memo") == null ? "" : String.valueOf(item.get("memo"));
+		com.harvana.app.tx.TxKind kind = failed ? null : com.harvana.app.tx.TxKind.of(memo, incoming);
+		if (kind != null) title = pending ? kind.title + "…" : kind.title;
+		TextView type = row.findViewById(R.id.tv_tx_type);
+		TextView addr = row.findViewById(R.id.tv_tx_address);
+		TextView amt = row.findViewById(R.id.tv_tx_amount);
+		TextView date = row.findViewById(R.id.tv_tx_date);
+		ImageView icon = row.findViewById(R.id.iv_tx_icon);
+		View divider = row.findViewById(R.id.tx_divider);
+		if (type != null) type.setText(title);
+		String who = incoming ? sender : recipient;
+		String shortWho = who.length() <= 16 ? (who.isEmpty() ? "Unknown" : who) : who.substring(0, 10) + "…" + who.substring(who.length() - 4);
+		if (addr != null) addr.setText((incoming ? "From: " : "To: ") + shortWho);
+		int color = androidx.core.content.ContextCompat.getColor(getContext(),
+			failed ? R.color.colorError : pending ? R.color.colorWarning : incoming ? R.color.colorAccent : R.color.colorError);
+		if (amt != null) {
+			amt.setText((failed ? "✕ " : incoming ? "+ " : "- ") + BalanceFormatter.smartDecimal(amount) + " " + asset);
+			amt.setTextColor(color);
+		}
+		long ts = item.get("timestamp") instanceof Number ? ((Number) item.get("timestamp")).longValue() : 0L;
+		long initiated = item.get("initiatedAt") instanceof Number ? ((Number) item.get("initiatedAt")).longValue() : 0L;
+		if (date != null) date.setText(WalletActivityFragmentActivity._activityWhen(pending, initiated, ts));
+		if (icon != null) {
+			icon.setImageResource(failed || !incoming ? R.drawable.ic_action_send : R.drawable.ic_action_receive);
+			if (kind != null && kind.icon != 0) icon.setImageResource(kind.icon);
+			icon.setColorFilter(color);
+		}
+		if (divider != null) divider.setVisibility(last ? View.GONE : View.VISIBLE);
+		View hit = row.findViewById(R.id.cardview1);
+		if (hit != null) hit.setOnClickListener(v -> {
+			Intent intent = new Intent(v.getContext(), ReceiptActivity.class);
+			intent.putExtra("txHash", String.valueOf(item.get("txHash")));
+			intent.putExtra("status", status);
+			intent.putExtra("senderAddress", sender);
+			intent.putExtra("recipientAddress", recipient);
+			intent.putExtra("tokenSymbol", asset);
+			intent.putExtra("value", amount);
+			intent.putExtra("timestamp", ts);
+			intent.putExtra("initiatedAt", initiated);
+			intent.putExtra("memo", memo);
+			if (item.get("harvFee") instanceof Number) intent.putExtra("harvFee", ((Number) item.get("harvFee")).doubleValue());
+			if (item.get("feeSymbol") != null) intent.putExtra("feeSymbol", String.valueOf(item.get("feeSymbol")));
+			if (item.get("blockNumber") instanceof Number) intent.putExtra("blockNumber", ((Number) item.get("blockNumber")).longValue());
+			if (item.get("nonce") instanceof Number) intent.putExtra("nonce", ((Number) item.get("nonce")).longValue());
+			v.getContext().startActivity(intent);
+		});
 	}
 	
 	/** Groups I have asked to join and am waiting on: their button says "Pending" instead of "Join". */

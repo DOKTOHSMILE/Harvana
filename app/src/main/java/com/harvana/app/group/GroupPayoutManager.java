@@ -68,8 +68,7 @@ public final class GroupPayoutManager {
         String err = GroupValidation.firstError(
                 GroupValidation.requireUid(currentUid(), "Not signed in."),
                 GroupValidation.requireGroupId(groupId),
-                GroupValidation.requireValidWallet(requesterWallet, "Member wallet"),
-                GroupValidation.requirePositiveAmount(amountHarv)
+                GroupValidation.requireValidWallet(requesterWallet, "Member wallet")
         );
         if (err != null) {
             callback.onError(err);
@@ -89,6 +88,8 @@ public final class GroupPayoutManager {
                 }
                 String slotErr = GroupValidation.requireSlot(slot);
                 if (slotErr != null) { callback.onError(slotErr); return; }
+                String amountErr = GroupValidation.requirePositiveAmount(amountHarv);
+                if (amountErr != null) { callback.onError(amountErr); return; }
                 submitLegacyPayout(context, groupId, requesterWallet, amountHarv, slot, callback);
             }
         });

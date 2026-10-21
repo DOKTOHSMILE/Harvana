@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
 
+    <style name="ShapeAppearance.Harvana.Circle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="popupMenuStyle">@style/HarvanaPopupMenu</item>
         <item name="actionOverflowMenuStyle">@style/HarvanaPopupMenu</item>

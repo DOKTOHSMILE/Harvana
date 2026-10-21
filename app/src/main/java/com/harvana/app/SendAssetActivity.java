@@ -983,9 +983,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		});
 	}
 
-	/** Sends a stable coin from the same Send screen. Underneath it is the stable-asset engine: a v1 transfer signed
-	 *  with mintId = the coin's code; the node takes HARV gas if the wallet has it, otherwise the coin's own small fee
-	 *  (the first 3 are free). */
+	/** Sends a stable coin from the same Send screen. The node takes HARV gas if the wallet has it, otherwise the coin's own tFare. Nothing is free. */
 	private void _sendStable(View sendButton, HashMap<String, Object> asset, String code) {
 		String sym = com.harvana.app.husd.Stable.symbol(code);
 		String recipient = etRecipient != null ? com.harvana.app.AddressUtil.canonical(etRecipient.getText().toString()) : "";
@@ -1052,7 +1050,7 @@ public class SendAssetActivity extends AppCompatActivity {
 		review.feeText = com.harvana.app.husd.HusdClient.fareText(q, sym);
 		String payIn = q.optString("payIn");
 		if ("HARV".equals(payIn)) { review.feeAmount = q.optLong("harvGasRaw") / 1e8; review.feeKey = "HARV"; }
-		else if (!"FREE".equals(payIn)) { review.feeAmount = q.optLong("coinTFareRaw", q.optLong("coinFeeRaw")) / 1e6; review.feeKey = code; }
+		else { review.feeAmount = q.optLong("coinTFareRaw", q.optLong("coinFeeRaw")) / 1e6; review.feeKey = code; }
 		for (String[] r : rows) if (!"To".equals(r[0]) && !"Network".equals(r[0]) && !"tFare".equals(r[0])) review.rows.add(r);
 		com.harvana.app.tx.DuplicateSendGuard.check(this, recipient, sym, plainAmount, () ->
 		com.harvana.app.ui.SendReviewSheet.show(this, review, () -> {

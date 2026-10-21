@@ -64,6 +64,9 @@ public class LearnFragmentActivity extends Fragment {
 	private RecyclerView recyclerview1;
 	private MaterialCardView cardview14;
 	private RecyclerView recyclerview2;
+	private EditText et_search_learn;
+	private String learnQuery = "";
+	private int learnShownCount;
 	
 	private Intent i = new Intent();
 	private FirebaseAuth fauth;
@@ -100,6 +103,12 @@ public class LearnFragmentActivity extends Fragment {
 		recyclerview1 = _view.findViewById(R.id.recyclerview1);
 		cardview14 = _view.findViewById(R.id.cardview14);
 		recyclerview2 = _view.findViewById(R.id.recyclerview2);
+		et_search_learn = _view.findViewById(R.id.et_search_learn);
+		if (et_search_learn != null) {
+			et_search_learn.setFocusable(false);
+			et_search_learn.setCursorVisible(false);
+			et_search_learn.setOnClickListener(_v -> _openLearnSearch());
+		}
 		com.harvana.app.utils.Shimmer.hold(recyclerview2, com.harvana.app.utils.Shimmer.cards(recyclerview2.getContext(), 3), 4000, "LearnFragmentActivity");
 		fauth = FirebaseAuth.getInstance();
 		
@@ -350,12 +359,20 @@ public class LearnFragmentActivity extends Fragment {
 		if (getActivity() == null || recyclerview2 == null) return;
 		ArrayList<HashMap<String, Object>> shown = new ArrayList<>();
 		boolean byCategory = !FOR_YOU.equals(selectedCategory) && !LATEST.equals(selectedCategory);
+		String q = learnQuery == null ? "" : learnQuery.trim().toLowerCase(java.util.Locale.US);
 		for (String id : order) {
 			HashMap<String, Object> m = byId.get(id);
 			if (m == null) continue;
 			if (byCategory && !selectedCategory.equals(strOf(m, "category"))) continue;
+			if (!q.isEmpty()) {
+				String hay = (strOf(m, "title") + " " + strOf(m, "description") + " " + strOf(m, "category")
+					+ " " + strOf(m, "authorName") + " " + strOf(m, "author")).toLowerCase(java.util.Locale.US);
+				if (!hay.contains(q)) continue;
+			}
 			shown.add(m);
 		}
+		learnShownCount = shown.size();
+		_paintLearnEmpty(shown.isEmpty(), !q.isEmpty());
 		if (adapter == null) {
 			adapter = new LearnContentAdapter(shown);
 			recyclerview2.setAdapter(adapter);
@@ -370,6 +387,71 @@ public class LearnFragmentActivity extends Fragment {
 		});
 		adapter.data = shown;
 		diff.dispatchUpdatesTo(adapter);
+	}
+
+	private LinearLayout learnEmpty;
+
+	/** Nothing in the feed (or nothing matching the search): the same kind of picture the empty groups screen uses. */
+	private void _paintLearnEmpty(boolean empty, boolean filtered) {
+		if (cardview14 == null || getContext() == null) return;
+		if (empty) com.harvana.app.utils.Shimmer.release(recyclerview2);
+		if (learnEmpty == null) {
+			final float d = getResources().getDisplayMetrics().density;
+			learnEmpty = new LinearLayout(getContext());
+			learnEmpty.setOrientation(LinearLayout.VERTICAL);
+			learnEmpty.setGravity(Gravity.CENTER);
+			learnEmpty.setPadding((int) (24 * d), (int) (24 * d), (int) (24 * d), (int) (24 * d));
+			ImageView icon = new ImageView(getContext());
+			icon.setTag("empty_icon");
+			icon.setAdjustViewBounds(true);
+			learnEmpty.addView(icon, new LinearLayout.LayoutParams((int) (160 * d), (int) (120 * d)));
+			TextView title = new TextView(getContext());
+			title.setTag("empty_title");
+			title.setTextSize(15);
+			title.setTypeface(Typeface.DEFAULT_BOLD);
+			title.setTextColor(com.harvana.app.utils.UiColors.textPrimary());
+			title.setGravity(Gravity.CENTER);
+			LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			tp.topMargin = (int) (12 * d);
+			learnEmpty.addView(title, tp);
+			com.google.android.material.button.MaterialButton write = new com.google.android.material.button.MaterialButton(getContext());
+			write.setTag("empty_button");
+			write.setAllCaps(false);
+			write.setOnClickListener(v -> {
+				if (learnQuery != null && !learnQuery.isEmpty()) {
+					learnQuery = "";
+					if (et_search_learn != null) et_search_learn.setText("");
+					_show();
+					return;
+				}
+				startActivity(new Intent(getContext(), CreateLearnhubContentActivity.class));
+			});
+			LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (int) (44 * d));
+			bp.topMargin = (int) (16 * d);
+			learnEmpty.addView(write, bp);
+			cardview14.addView(learnEmpty, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		}
+		((ImageView) learnEmpty.findViewWithTag("empty_icon")).setImageResource(filtered ? R.drawable.illus_empty_search : R.drawable.illus_empty_learn);
+		((TextView) learnEmpty.findViewWithTag("empty_title")).setText(filtered ? "No matching posts" : "No posts yet");
+		((TextView) learnEmpty.findViewWithTag("empty_button")).setText(filtered ? "Show all posts" : "Write a post");
+		learnEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+		recyclerview2.setVisibility(empty ? View.GONE : View.VISIBLE);
+	}
+
+	private void _openLearnSearch() {
+		if (getActivity() == null) return;
+		com.harvana.app.ui.SearchSheet.show(getActivity(), "Search Learn Hub", "Title, topic or author", learnQuery,
+			new com.harvana.app.ui.SearchSheet.Listener() {
+				@Override public void onQuery(String q) {
+					learnQuery = q == null ? "" : q.trim().toLowerCase(java.util.Locale.US);
+					if (et_search_learn != null) et_search_learn.setText(q);
+					_show();
+				}
+				@Override public String summary() {
+					int n = learnShownCount;
+					return n == 1 ? "1 post matches" : n + " posts match";
+				}
+			});
 	}
 	
 	/** What a card shows. The view counter is left out on purpose: it changes all the time and is not worth a redraw. */

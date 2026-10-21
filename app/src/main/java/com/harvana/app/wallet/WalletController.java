@@ -262,29 +262,7 @@ public class WalletController {
 
                 List<Map<String, Object>> txList = new java.util.ArrayList<>();
                 try {
-                    org.json.JSONArray transactions = json.optJSONArray("transactions");
-                    if (transactions != null) {
-                        for (int i = 0; i < transactions.length(); i++) {
-                            org.json.JSONObject tx = transactions.getJSONObject(i);
-                            Map<String, Object> item = new java.util.HashMap<>();
-
-                            item.put("senderAddress", tx.optString("from", ""));
-                            item.put("recipientAddress", tx.optString("to", ""));
-                            item.put("value", HarvanaNodeClient.toHarvDisplay(tx.optLong("amount", 0L)));
-                            item.put("harvFee", HarvanaNodeClient.toHarvDisplay(tx.optLong("gas", 0L)));
-                            item.put("tokenSymbol", com.harvana.app.CoinInfo.ticker());
-                            item.put("txHash", tx.optString("txHash", ""));
-                            item.put("status", tx.optString("status", "confirmed"));
-                            item.put("blockNumber", tx.optLong("blockHeight", 0L));
-                            item.put("nonce", tx.optLong("nonce", 0L));
-
-                            long ts = tx.optLong("timestamp", System.currentTimeMillis());
-                            if (ts > 0 && ts < 1_000_000_000_000L) ts *= 1000L;
-                            item.put("timestamp", ts);
-
-                            txList.add(item);
-                        }
-                    }
+                    txList.addAll(ActivityFeed.parseNodePage(json));
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to parse node history: " + e.getMessage());
                 }

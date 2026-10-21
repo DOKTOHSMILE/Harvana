@@ -57,4 +57,38 @@ public final class IconFit {
             iv.setBackground(disc);
         }
     }
+
+    /**
+     * A button's icon is 20dp. Compound drawables drawn from a 48dp vector otherwise fill the whole pill.
+     * Search fields and other 24dp icons are left as they are.
+     */
+    public static void buttons(View root) {
+        if (root == null) return;
+        if (root instanceof ViewGroup) {
+            ViewGroup g = (ViewGroup) root;
+            for (int i = 0; i < g.getChildCount(); i++) buttons(g.getChildAt(i));
+        }
+        if (!(root instanceof android.widget.TextView)) return;
+        android.widget.TextView tv = (android.widget.TextView) root;
+        if (tv.getTag(com.harvana.app.R.id.icon_fit_done) != null) return;
+        android.graphics.drawable.Drawable[] ds = tv.getCompoundDrawablesRelative();
+        boolean present = false;
+        for (android.graphics.drawable.Drawable src : ds) if (src != null) present = true;
+        if (!present) return;
+        tv.setTag(com.harvana.app.R.id.icon_fit_done, Boolean.TRUE);
+        float d = tv.getResources().getDisplayMetrics().density;
+        int target = Math.round(20 * d);
+        int limit = Math.round(26 * d);
+        android.graphics.drawable.Drawable[] next = new android.graphics.drawable.Drawable[4];
+        boolean any = false;
+        for (int i = 0; i < 4; i++) {
+            android.graphics.drawable.Drawable src = ds[i];
+            if (src == null || src.getIntrinsicWidth() <= limit) { next[i] = src; continue; }
+            android.graphics.drawable.Drawable c = src.getConstantState() != null ? src.getConstantState().newDrawable().mutate() : src.mutate();
+            c.setBounds(0, 0, target, target);
+            next[i] = c;
+            any = true;
+        }
+        if (any) tv.setCompoundDrawablesRelative(next[0], next[1], next[2], next[3]);
+    }
 }

@@ -541,21 +541,23 @@
 								android:layout_width="match_parent"
 								android:layout_height="wrap_content"
 								android:layout_marginTop="8dp"
-								android:gravity="center_vertical"
-								android:orientation="horizontal">
+								android:orientation="vertical">
+								<LinearLayout
+									android:id="@+id/home_recent_tx"
+									android:layout_width="match_parent"
+									android:layout_height="wrap_content"
+									android:orientation="vertical" />
 								<LinearLayout
 									android:id="@+id/linear223"
-									android:layout_width="wrap_content"
+									android:layout_width="match_parent"
 									android:layout_height="wrap_content"
 									android:padding="5dp"
-									android:orientation="horizontal"
-									android:layout_weight="1">
+									android:orientation="horizontal">
 									<com.google.android.material.card.MaterialCardView
 										android:id="@+id/cardview32"
-										android:layout_width="wrap_content"
+										android:layout_width="match_parent"
 										android:layout_height="wrap_content"
 										app:cardBackgroundColor="@color/whiteFaint10"
-										android:layout_weight="1"
 										app:cardCornerRadius="12dp"
 										app:cardElevation="0dp"
 										app:strokeWidth="1dp"
@@ -573,7 +575,7 @@
 												android:layout_height="wrap_content"
 												android:paddingTop="5dp"
 												android:paddingBottom="5dp"
-												android:text="View Assets"
+												android:text="View more"
 												android:textSize="12sp"
 												android:textColor="@color/colorTextPrimary" />
 											<com.google.android.material.imageview.ShapeableImageView

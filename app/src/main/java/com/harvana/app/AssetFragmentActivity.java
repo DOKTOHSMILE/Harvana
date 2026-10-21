@@ -71,7 +71,6 @@ public class AssetFragmentActivity extends Fragment {
 	private LinearLayout linear_switch_wallet;
 	private ImageView imageview6;
 	private TextView tv_active_wallet_label;
-	private ImageView imageview3;
 	private TextView textview10;
 	private LinearLayout linear54;
 	private TextView tv_fiat_value;
@@ -135,6 +134,8 @@ public class AssetFragmentActivity extends Fragment {
 	private ImageView imageview5;
 	private TextView textview6;
 	private ViewPager2 viewpager1;
+	/** Home's "View more" sets this to the Activity tab (1) before the Asset tab is shown. */
+	public static int pendingPage = -1;
 	
 	private SharedPreferences walletsp;
 	private FirebaseAuth fbauth;
@@ -172,12 +173,10 @@ public class AssetFragmentActivity extends Fragment {
 		linear_switch_wallet = _view.findViewById(R.id.linear_switch_wallet);
 		imageview6 = _view.findViewById(R.id.imageview6);
 		tv_active_wallet_label = _view.findViewById(R.id.tv_active_wallet_label);
-		imageview3 = _view.findViewById(R.id.imageview3);
 		textview10 = _view.findViewById(R.id.textview10);
 		linear54 = _view.findViewById(R.id.linear54);
 		tv_fiat_value = _view.findViewById(R.id.tv_fiat_value);
 		imageview4 = _view.findViewById(R.id.imageview4);
-		com.harvana.app.utils.BalancePrivacy.bindEye(imageview3);
 		com.harvana.app.utils.BalancePrivacy.bindEye(imageview4);
 		com.harvana.app.utils.BalancePrivacy.guard(tv_fiat_value);
 		if (tv_fiat_value != null) tv_fiat_value.setOnClickListener(v -> _pickCurrency());
@@ -376,6 +375,7 @@ public class AssetFragmentActivity extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
+		_consumePendingPage();
 		_updateActiveWalletLabel();
 		if (getContext() != null) {
 			String symbol = com.harvana.app.wallet.FxRates.symbol(getContext());
@@ -392,6 +392,20 @@ public class AssetFragmentActivity extends Fragment {
 		_loadAvailableCoins();
 	}
 	
+	@Override
+	public void onHiddenChanged(boolean hidden) {
+		super.onHiddenChanged(hidden);
+		if (!hidden) _consumePendingPage();
+	}
+
+	private void _consumePendingPage() {
+		if (viewpager1 == null || pendingPage < 0 || viewpager1.getAdapter() == null) return;
+		int page = pendingPage;
+		if (page < 0 || page >= viewpager1.getAdapter().getItemCount()) { pendingPage = -1; return; }
+		pendingPage = -1;
+		viewpager1.post(() -> viewpager1.setCurrentItem(page, false));
+	}
+
 	@Override
 	public void onStart() {
 		super.onStart();
@@ -465,7 +479,7 @@ public class AssetFragmentActivity extends Fragment {
 				}
 			}
 		}).attach();
-		
+		_consumePendingPage();
 	}
 	private FragFragmentAdapter frag;
 	

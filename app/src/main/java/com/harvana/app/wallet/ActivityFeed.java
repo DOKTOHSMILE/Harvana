@@ -185,7 +185,7 @@ public final class ActivityFeed {
 
     // ── the Harvana node's answers, as rows ─────────────────────────────────
 
-    static List<HashMap<String, Object>> parseNodePage(JSONObject json) {
+    public static List<HashMap<String, Object>> parseNodePage(JSONObject json) {
         List<HashMap<String, Object>> out = new ArrayList<>();
         JSONArray txs = json == null ? null : json.optJSONArray("transactions");
         if (txs == null && json != null) txs = json.optJSONArray("data");

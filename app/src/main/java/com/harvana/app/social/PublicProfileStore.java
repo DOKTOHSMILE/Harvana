@@ -254,6 +254,12 @@ public final class PublicProfileStore {
                 if (!pid.matches("^[0-9]{10}$")) { cb.done(false, "Your account has no public profile yet."); return; }
 
                 DocumentSnapshot existing = Tasks.await(db().collection("PROFILES").document(pid).get(), T, TimeUnit.SECONDS);
+                DocumentSnapshot link = Tasks.await(db().collection("PIDS").document(pid).get(), T, TimeUnit.SECONDS);
+                if (!link.exists()) {
+                    Map<String, Object> own = new HashMap<>();
+                    own.put("uid", uid);
+                    Tasks.await(db().collection("PIDS").document(pid).set(own), T, TimeUnit.SECONDS);
+                }
                 Map<String, Object> old = existing.exists() && existing.getData() != null ? existing.getData() : new HashMap<>();
                 boolean showAge = extra.containsKey("show_age") ? Boolean.TRUE.equals(extra.get("show_age")) : Boolean.TRUE.equals(old.get("show_age"));
                 boolean showCity = extra.containsKey("show_city") ? Boolean.TRUE.equals(extra.get("show_city")) : Boolean.TRUE.equals(old.get("show_city"));
@@ -301,8 +307,15 @@ public final class PublicProfileStore {
                     }
                 } catch (Exception ignored) { }
                 out.put("stats_updated", System.currentTimeMillis());
-
-                Tasks.await(db().collection("PROFILES").document(pid).set(out, SetOptions.merge()), T, TimeUnit.SECONDS);
+                // Trust, wallet and milestones stay where they are. Only the fields the member is allowed to change are written,
+                // so a card that already holds other keys is not rejected.
+                if (existing.exists()) {
+                    Map<String, Object> patch = new HashMap<>(out);
+                    patch.remove("pid");
+                    Tasks.await(db().collection("PROFILES").document(pid).update(patch), T, TimeUnit.SECONDS);
+                } else {
+                    Tasks.await(db().collection("PROFILES").document(pid).set(out), T, TimeUnit.SECONDS);
+                }
                 cb.done(true, null);
             } catch (Exception e) { cb.done(false, e.getMessage() == null ? e.toString() : e.getMessage()); }
         });

@@ -65,7 +65,37 @@
 					android:clipToPadding="false"
 					app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 				<com.google.android.material.card.MaterialCardView
-					android:id="@+id/cardview14"
+					android:id="@+id/card_learn_search"
+					android:layout_width="match_parent"
+					android:layout_height="42dp"
+					android:layout_marginLeft="10dp"
+					android:layout_marginTop="8dp"
+					android:layout_marginRight="10dp"
+					app:cardBackgroundColor="@color/colorSurface"
+					app:cardCornerRadius="20dp"
+					app:cardElevation="0dp"
+					app:strokeWidth="1dp"
+					app:strokeColor="@color/whiteFaint10">
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingStart="14dp"
+						android:paddingEnd="14dp">
+						<com.google.android.material.textfield.TextInputEditText
+							android:id="@+id/et_search_learn"
+							android:layout_width="match_parent"
+							android:layout_height="match_parent"
+							android:background="@android:color/transparent"
+							android:gravity="center_vertical"
+							android:hint="Search Learn Hub…"
+							android:padding="5dp"
+							android:singleLine="true"
+							android:textSize="13sp" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+				<com.google.android.material.card.MaterialCardView
 					android:layout_width="match_parent"
 					android:layout_height="0dp"
 					android:layout_marginLeft="10dp"

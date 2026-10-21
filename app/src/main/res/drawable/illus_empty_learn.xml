@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Empty Learn Hub: an open book with a bookmark. Theme colours, so it fits light and dark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp" android:height="120dp" android:viewportWidth="200" android:viewportHeight="150">
+    <path android:fillColor="@color/colorAccentRipple"
+        android:pathData="M15,88a85,52 0,1 0,170 0a85,52 0,1 0,-170 0z"/>
+    <path android:fillColor="@color/colorAccentStroke"
+        android:pathData="M40,128a60,6 0,1 0,120 0a60,6 0,1 0,-120 0z"/>
+    <!-- left page -->
+    <path android:fillColor="@color/colorAccent"
+        android:pathData="M42,78 L96,64 L96,116 L46,124 Q42,100 42,78 Z"/>
+    <!-- right page -->
+    <path android:fillColor="@color/colorControlNormal" android:fillAlpha="0.55"
+        android:pathData="M104,64 L158,78 L158,116 Q154,122 150,124 L104,116 Z"/>
+    <!-- spine -->
+    <path android:fillColor="@color/colorAccent" android:fillAlpha="0.85"
+        android:pathData="M96,64 L104,64 L104,116 L96,116 Z"/>
+    <!-- lines on the page -->
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineCap="round" android:fillAlpha="0.7"
+        android:pathData="M58,86 L84,80 M56,96 L82,90 M54,106 L80,100"/>
+    <!-- bookmark -->
+    <path android:fillColor="@color/colorWarning"
+        android:pathData="M118,52 L136,52 L136,96 L127,86 L118,96 Z"/>
+    <!-- sparkles -->
+    <path android:fillColor="@color/colorWarning" android:fillAlpha="0.75"
+        android:pathData="M48,42a3,3 0,1 0,6 0a3,3 0,1 0,-6 0z M164,48a2.5,2.5 0,1 0,5 0a2.5,2.5 0,1 0,-5 0z M28,70a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z M172,78a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z"/>
+</vector>

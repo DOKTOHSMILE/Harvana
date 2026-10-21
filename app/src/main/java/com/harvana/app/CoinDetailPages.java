@@ -555,6 +555,8 @@ public final class CoinDetailPages {
                     Object conf = row.get("confirmations");
                     Object nonce = row.get("nonce");
                     if (fee instanceof Number) i.putExtra("harvFee", ((Number) fee).doubleValue());
+                    Object feeSym = row.get("feeSymbol");
+                    i.putExtra("feeSymbol", feeSym == null || String.valueOf(feeSym).isEmpty() ? coin.feeTicker() : String.valueOf(feeSym));
                     if (block instanceof Number) i.putExtra("blockNumber", ((Number) block).longValue());
                     if (conf instanceof Number) i.putExtra("confirmations", ((Number) conf).longValue());
                     if (nonce instanceof Number) i.putExtra("nonce", ((Number) nonce).longValue());

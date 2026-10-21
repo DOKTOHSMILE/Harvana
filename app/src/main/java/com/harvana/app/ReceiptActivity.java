@@ -284,15 +284,16 @@ public class ReceiptActivity extends AppCompatActivity {
 		final String hashForTimes = txHash;
 		final boolean pendingNow = pending;
 		if (otherChain == null && hashForTimes != null && hashForTimes.matches("(?i)[0-9a-f]{64}")) {
-			com.harvana.app.sync.HarvanaNodeClient.nodeGet("/api/v1/tx/" + hashForTimes, new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
+			com.harvana.app.sync.HarvanaNodeClient.nodeGet("/api/v1/tx/status/" + hashForTimes, new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
 				@Override public void onSuccess(org.json.JSONObject tx) {
-					long ini = _millis(tx.optLong("initiatedAt", 0L));
-					long conf = _millis(tx.optLong("confirmedAt", tx.optLong("timestamp", 0L)));
+					String st = tx.optString("status", "");
+					long block = tx.optLong("blockHeight", -1);
+					boolean nowConfirmed = "CONFIRMED".equalsIgnoreCase(st) || block >= 0;
+					boolean gone = "NOT_FOUND".equalsIgnoreCase(st);
 					runOnUiThread(() -> {
 						if (isFinishing()) return;
-						SimpleDateFormat fmt = new SimpleDateFormat("MMM d, yyyy | h:mma", Locale.US);
-						fmt.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));
-						_paintTimeline(fmt, ini, conf > 0 ? conf : (pendingNow ? 0L : timestamp), pendingNow);
+						if (nowConfirmed) _showConfirmed(block);
+						else if (gone && pendingNow) _showFailed();
 					});
 				}
 				@Override public void onError(String error) { }
@@ -928,6 +929,31 @@ public class ReceiptActivity extends AppCompatActivity {
 		return y + 32; // Bottom margin for the next row
 	}
 	
+
+	private void _showConfirmed(long block) {
+		status = "confirmed";
+		if (tv_tx_status != null) {
+			tv_tx_status.setText("●  Completed");
+			tv_tx_status.setTextColor(UiColors.success());
+		}
+		if (block >= 0 && tv_block_number != null) tv_block_number.setText(String.valueOf(block));
+		if (tv_confirmations != null) tv_confirmations.setText(block >= 0 ? "1" : "1");
+		SimpleDateFormat fmt = new SimpleDateFormat("MMM d, yyyy | h:mma", Locale.US);
+		fmt.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));
+		_paintTimeline(fmt, _millis(getIntent().getLongExtra("initiatedAt", timestamp)), System.currentTimeMillis(), false);
+	}
+
+	private void _showFailed() {
+		status = "failed";
+		if (tv_tx_status != null) {
+			tv_tx_status.setText("●  Failed");
+			tv_tx_status.setTextColor(UiColors.error());
+		}
+		if (tv_block_number != null) tv_block_number.setText("Not confirmed");
+		SimpleDateFormat fmt = new SimpleDateFormat("MMM d, yyyy | h:mma", Locale.US);
+		fmt.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));
+		_paintTimeline(fmt, _millis(getIntent().getLongExtra("initiatedAt", timestamp)), 0L, false);
+	}
 
 	private void _paintTimeline(java.text.SimpleDateFormat sdf, long initiatedAt, long confirmedAt, boolean pending) {
 		String initiated = initiatedAt > 0 ? sdf.format(new java.util.Date(initiatedAt)) : "Not recorded";

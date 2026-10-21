@@ -14,9 +14,6 @@ import java.util.List;
 
 public final class P2pListingPublisher {
 	
-	/** Minimum value (in HARV) of the per-trade maximum, unless the whole listing is smaller. */
-	public static final double MAX_ORDER_FLOOR_HARV = 500;
-	
 	private P2pListingPublisher() {}
 	
 	public interface Callback {
@@ -92,14 +89,7 @@ public final class P2pListingPublisher {
 			cb.onError("The minimum trade amount can't be more than the maximum.");
 			return;
 		}
-		// Product rule: the maximum per trade must be at least MAX_ORDER_FLOOR_HARV, or the whole listing
-		// when the listing itself is smaller than that (the node also requires min <= max <= total).
-		// (A HARV rule: a stable coin's trades are sized in its own currency, so it has no such floor.)
-		final double maxFloor = P2pAsset.isStable(asset) ? 0 : Math.min(MAX_ORDER_FLOOR_HARV, amountHarv);
-		if (maxOrderHarv < maxFloor) {
-			cb.onError("The maximum trade amount must be at least " + (long) maxFloor + " HARV.");
-			return;
-		}
+		// The per-trade maximum is the lister's own cap. It only has to sit between the minimum and the total.
 		// The node prices in kobo (Naira) per HARV; other currencies can't be signed on-chain.
 		final String priceCurrency = currency == null || currency.isEmpty() ? P2pCurrencyFilterState.getCurrency() : currency;
 		if (!"NGN".equalsIgnoreCase(priceCurrency)) {

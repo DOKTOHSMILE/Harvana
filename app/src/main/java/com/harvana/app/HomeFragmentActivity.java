@@ -203,6 +203,7 @@ public class HomeFragmentActivity extends Fragment {
 		FirebaseApp.initializeApp(getContext());
 		initializeLogic();
 		_addQuickActions(_view);
+		_wireHome(_view);
 		if (card_trust_score != null) card_trust_score.setOnClickListener(v -> startActivity(new Intent(getContext(), TrustScoreActivity.class)));
 		if (card_open_loans != null) card_open_loans.setOnClickListener(v -> startActivity(new Intent(getContext(), OpenLoansActivity.class)));
 		return _view;
@@ -313,61 +314,11 @@ public class HomeFragmentActivity extends Fragment {
 		groupsp = getContext().getSharedPreferences("groupsp", Activity.MODE_PRIVATE);
 		fbauth = FirebaseAuth.getInstance();
 		
-		card_active_groups.setOnClickListener(_v -> {
-			if (getActivity() != null) {
-				com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = 
-				getActivity().findViewById(R.id.bottomnavigation1);
-				
-				if (bottomNav != null) {
-					bottomNav.setSelectedItemId(R.id.menu_groups);
-				}
-			}
-		});
-		
-		textview6.setOnClickListener(_v -> {
-			if (getActivity() != null) {
-				com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = 
-				getActivity().findViewById(R.id.bottomnavigation1);
-				
-				if (bottomNav != null) {
-					bottomNav.setSelectedItemId(R.id.menu_groups);
-				}
-			}
-		});
-		
-		cardview32.setOnClickListener(_v -> {
-			AssetFragmentActivity.pendingPage = 1;
-			if (getActivity() != null) {
-				com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = 
-				getActivity().findViewById(R.id.bottomnavigation1);
-				
-				if (bottomNav != null) {
-					bottomNav.setSelectedItemId(R.id.menu_asset);
-				}
-			}
-		});
-		
-		textview10.setOnClickListener(_v -> {
-			if (getActivity() != null) {
-				com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = 
-				getActivity().findViewById(R.id.bottomnavigation1);
-				
-				if (bottomNav != null) {
-					bottomNav.setSelectedItemId(R.id.menu_learn);
-				}
-			}
-		});
-		
-		textview12.setOnClickListener(_v -> {
-			if (getActivity() != null) {
-				com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = 
-				getActivity().findViewById(R.id.bottomnavigation1);
-				
-				if (bottomNav != null) {
-					bottomNav.setSelectedItemId(R.id.menu_discover);
-				}
-			}
-		});
+		if (card_active_groups != null) card_active_groups.setOnClickListener(_v -> _openTab(R.id.menu_groups));
+		if (textview6 != null) textview6.setOnClickListener(_v -> _openTab(R.id.menu_groups));
+		if (cardview32 != null) cardview32.setOnClickListener(_v -> _openActivityTab());
+		if (textview10 != null) textview10.setOnClickListener(_v -> _openTab(R.id.menu_learn));
+		if (textview12 != null) textview12.setOnClickListener(_v -> _openTab(R.id.menu_discover));
 		
 		
 		fbauth_updateEmailListener = _param1 -> {
@@ -436,7 +387,14 @@ public class HomeFragmentActivity extends Fragment {
 	@Override
 	public void onHiddenChanged(boolean hidden) {
 		super.onHiddenChanged(hidden);
-		if (!hidden) com.harvana.app.home.HomeData.refresh(getContext(), false);
+		if (hidden) return;
+		com.harvana.app.home.HomeData.refresh(getContext(), false);
+		_loadWalletBalance();
+		_loadRecentTx();
+		_loadTopCoins();
+		_loadStake();
+		_loadHomeInvites();
+		_paintHideLabel();
 	}
 	
 	/** Invitations are announced once per count, not on every return to Home. */
@@ -448,27 +406,16 @@ public class HomeFragmentActivity extends Fragment {
 		com.harvana.app.home.HomeData.refresh(getContext(), false);
 		_loadWalletBalance();
 		_loadRecentTx();
+		_loadTopCoins();
+		_loadStake();
+		_loadHomeInvites();
+		_paintHideLabel();
 		if (getContext() != null) {
 			com.harvana.app.utils.NetworkStatusBanner.refresh(linear2, 1,
 					com.harvana.app.wallet.WalletManager.getActiveWalletAddress(getContext()));
 			com.harvana.app.sync.NodeLinkManager.ensureLinked(getContext(), null);
 			com.harvana.app.utils.ActivityTracker.reportLiveness(getContext());
 			com.harvana.app.group.InviteManager.checkAndNotify(getContext());
-			final android.content.Context ic = getContext().getApplicationContext();
-			com.harvana.app.group.InviteManager.listMine(ic, new com.harvana.app.group.InviteManager.ListCb() {
-				@Override public void onList(java.util.List<java.util.Map<String, Object>> invites) {
-					if (invites.isEmpty() || getActivity() == null || getView() == null) return;
-					getActivity().runOnUiThread(() -> {
-						if (getView() == null || invites.size() == invitesAnnounced) return;
-						invitesAnnounced = invites.size();
-						com.google.android.material.snackbar.Snackbar.make(getView(),
-							"You have " + invites.size() + " group invitation" + (invites.size() > 1 ? "s" : ""),
-							com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
-							.setAction("View", v -> startActivity(new Intent(getContext(), InvitesActivity.class))).show();
-					});
-				}
-				@Override public void onError(String e) { }
-			});
 		}
 	}
 	public void _MORE() {
@@ -503,7 +450,8 @@ public class HomeFragmentActivity extends Fragment {
 		if (getContext() == null) return;
 		boolean signedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
 		String first = s.optString("name", "");
-		if (textview3 != null) textview3.setText(_greeting() + (first.isEmpty() ? "" : ", " + first));
+		if (textview3 != null) textview3.setText(first.isEmpty() ? "Welcome back," : "Welcome back, " + first);
+		homeSnap = s;
 		
 		org.json.JSONArray ids = s.optJSONArray("groupIds");
 		org.json.JSONObject groups = s.optJSONObject("groups");
@@ -537,6 +485,7 @@ public class HomeFragmentActivity extends Fragment {
 		}
 		
 		_renderUpcoming(s.optJSONObject("upcoming"), signedIn);
+		_paintSavings();
 		org.json.JSONArray pending = s.optJSONArray("pending");
 		trendingPending.clear();
 		if (pending != null) for (int i = 0; i < pending.length(); i++) trendingPending.add(pending.optString(i));
@@ -1088,5 +1037,360 @@ public class HomeFragmentActivity extends Fragment {
 		cell.setContentDescription(label);
 		cell.setOnClickListener(v -> startActivity(new Intent(getContext(), target)));
 		return cell;
+	}
+
+	private org.json.JSONObject homeSnap;
+	private java.util.List<java.util.Map<String, Object>> homeInvites = java.util.Collections.emptyList();
+	private String savingsSig = "";
+
+	private void _openActivityTab() {
+		AssetFragmentActivity.pendingPage = 1;
+		_openTab(R.id.menu_asset);
+	}
+
+	/** Wires the redesigned Home: portfolio, the four money actions, and the mission-ordered quick actions. */
+	private void _wireHome(View root) {
+		if (getContext() == null) return;
+		View bell = root.findViewById(R.id.btn_home_bell);
+		View more = root.findViewById(R.id.btn_home_more);
+		View avatar = root.findViewById(R.id.iv_home_avatar);
+		View hide = root.findViewById(R.id.tv_home_hide);
+		if (bell != null) bell.setOnClickListener(v -> startActivity(new Intent(getContext(), NotificationsActivity.class)));
+		if (more != null) more.setOnClickListener(v -> {
+			if (getActivity() instanceof MainActivity) ((MainActivity) getActivity()).showRightDropdownMenu(v);
+		});
+		if (avatar != null) avatar.setOnClickListener(v -> {
+			com.google.firebase.auth.FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
+			if (me == null) startActivity(new Intent(getContext(), ProfileActivity.class));
+			else startActivity(new Intent(getContext(), com.harvana.app.social.PublicProfileActivity.class)
+					.putExtra(com.harvana.app.social.PublicProfileActivity.EXTRA_UID, me.getUid()));
+		});
+		_loadAvatar(root.findViewById(R.id.iv_home_avatar));
+		com.harvana.app.utils.BalancePrivacy.bindEye(imageview61);
+		View.OnClickListener tog = v -> {
+			com.harvana.app.utils.BalancePrivacy.toggle(v.getContext());
+			_paintHideLabel();
+		};
+		if (imageview61 != null) imageview61.setOnClickListener(tog);
+		if (hide != null) hide.setOnClickListener(tog);
+		_paintHideLabel();
+		for (int id : new int[]{R.id.tv_coin_harv, R.id.tv_coin_harv_fiat, R.id.tv_coin_btc, R.id.tv_coin_btc_fiat,
+				R.id.tv_coin_eth, R.id.tv_coin_eth_fiat, R.id.tv_home_change, R.id.tv_stake_sub}) {
+			com.harvana.app.utils.BalancePrivacy.guard(root.findViewById(id));
+		}
+		View add = root.findViewById(R.id.btn_home_add);
+		View send = root.findViewById(R.id.btn_home_send);
+		View transfer = root.findViewById(R.id.btn_home_transfer);
+		View receive = root.findViewById(R.id.btn_home_receive);
+		if (add != null) add.setOnClickListener(v -> startActivity(new Intent(getContext(), P2pMarketplaceActivity.class)));
+		if (send != null) send.setOnClickListener(v -> startActivity(new Intent(getContext(), SendAssetActivity.class)));
+		if (transfer != null) transfer.setOnClickListener(v -> _transferIntoCircle());
+		if (receive != null) receive.setOnClickListener(v -> startActivity(new Intent(getContext(), ReceiveActivity.class)));
+		View savings = root.findViewById(R.id.qa_savings);
+		View groups = root.findViewById(R.id.qa_groups);
+		View stake = root.findViewById(R.id.qa_stake);
+		View swap = root.findViewById(R.id.qa_swap);
+		View activity = root.findViewById(R.id.btn_home_activity);
+		if (savings != null) savings.setOnClickListener(v -> startActivity(new Intent(getContext(), TotalSavedActivity.class)));
+		if (groups != null) groups.setOnClickListener(v -> _openTab(R.id.menu_groups));
+		if (stake != null) stake.setOnClickListener(v -> startActivity(new Intent(getContext(), StakingDashboardActivity.class)));
+		if (swap != null) swap.setOnClickListener(v -> startActivity(new Intent(getContext(), com.harvana.app.swap.SwapActivity.class)));
+		if (activity != null) activity.setOnClickListener(v -> _openActivityTab());
+		View harv = root.findViewById(R.id.home_coin_harv);
+		View btc = root.findViewById(R.id.home_coin_btc);
+		View eth = root.findViewById(R.id.home_coin_eth);
+		if (harv != null) harv.setOnClickListener(v -> _openCoin("HARV"));
+		if (btc != null) btc.setOnClickListener(v -> _openCoin("BTC"));
+		if (eth != null) eth.setOnClickListener(v -> _openCoin("ETH"));
+	}
+
+	private void _openCoin(String key) {
+		if (getContext() == null) return;
+		startActivity(new Intent(getContext(), CoinDetailActivity.class).putExtra(com.harvana.app.wallet.CoinCatalog.EXTRA, key));
+	}
+
+	/** A due circle payment, otherwise the Groups tab. That is the transfer this app exists for. */
+	private void _transferIntoCircle() {
+		org.json.JSONObject up = homeSnap == null ? null : homeSnap.optJSONObject("upcoming");
+		org.json.JSONArray rows = up == null ? null : up.optJSONArray("rows");
+		if (rows != null) for (int i = 0; i < rows.length(); i++) {
+			org.json.JSONObject r = rows.optJSONObject(i);
+			if (r != null && "PAY".equals(r.optString("action")) && !r.optString("groupId").isEmpty()) {
+				_openGroupPayments(r.optString("groupId"));
+				return;
+			}
+		}
+		_openTab(R.id.menu_groups);
+	}
+
+	private void _paintHideLabel() {
+		TextView t = getView() == null ? null : getView().findViewById(R.id.tv_home_hide);
+		if (t == null || getContext() == null) return;
+		t.setText(com.harvana.app.utils.BalancePrivacy.isHidden(getContext()) ? "Show" : "Hide");
+	}
+
+	private void _loadAvatar(ImageView iv) {
+		if (iv == null || getContext() == null) return;
+		com.google.firebase.auth.FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+		if (user == null) return;
+		String photo = user.getPhotoUrl() == null ? "" : user.getPhotoUrl().toString().trim();
+		try {
+			java.util.Map<String, Object> mine = com.harvana.app.offline.OfflineCacheManager.load(getContext(), "profile_" + user.getUid());
+			Object ic = mine == null ? null : mine.get("icon");
+			if (ic != null && String.valueOf(ic).startsWith("http")) photo = String.valueOf(ic).trim();
+		} catch (Exception ignored) { }
+		if (photo.isEmpty()) return;
+		iv.setPadding(0, 0, 0, 0);
+		iv.setImageTintList(null);
+		try { com.bumptech.glide.Glide.with(this).load(photo).circleCrop().into(iv); } catch (Exception ignored) { }
+	}
+
+	private void _loadTopCoins() {
+		if (getContext() == null) return;
+		final android.content.Context ctx = getContext().getApplicationContext();
+		final String harvAddr = WalletManager.getActiveWalletAddress(ctx);
+		final String symbol = com.harvana.app.wallet.FxRates.symbol(ctx);
+		com.harvana.app.wallet.HarvPrice.get(q -> {
+			if (!isAdded() || q == null || Double.isNaN(q.changePct)) return;
+			TextView t = getView() == null ? null : getView().findViewById(R.id.tv_home_change);
+			if (t == null) return;
+			t.setText((q.changePct >= 0 ? "+" : "") + String.format(java.util.Locale.US, "%.2f%% HARV today", q.changePct));
+			t.setTextColor(androidx.core.content.ContextCompat.getColor(ctx, q.changePct >= 0 ? R.color.colorSuccess : R.color.colorError));
+			t.setVisibility(View.VISIBLE);
+		});
+		if (harvAddr == null || harvAddr.isEmpty()) {
+			_setCoin(R.id.tv_coin_harv, R.id.tv_coin_harv_fiat, "HARV", null, null);
+			_setCoin(R.id.tv_coin_btc, R.id.tv_coin_btc_fiat, "BTC", null, null);
+			_setCoin(R.id.tv_coin_eth, R.id.tv_coin_eth_fiat, "ETH", null, null);
+			return;
+		}
+		WalletNodeBalanceHelper.load(harvAddr, (bal, avail, pin, pout, pending, err) -> {
+			if (getActivity() == null) return;
+			double amount = avail >= 0 ? avail : bal;
+			if (err != null && !err.isEmpty()) amount = Double.NaN;
+			final double harv = amount;
+			com.harvana.app.wallet.FiatValueHelper.valueOfHarv(ctx, Double.isNaN(harv) || harv < 0 ? 0 : harv, symbol, (fiat, ok) -> {
+				if (getActivity() == null) return;
+				getActivity().runOnUiThread(() -> {
+					if (!isAdded()) return;
+					_setCoin(R.id.tv_coin_harv, R.id.tv_coin_harv_fiat, "HARV", Double.isNaN(harv) ? null : harv, ok ? fiat : null);
+				});
+			});
+		});
+		new Thread(() -> {
+			java.util.Map<String, String> addrs;
+			try { addrs = com.harvana.app.wallet.CoinCatalog.addresses(ctx, harvAddr); }
+			catch (Exception e) { return; }
+			final String btcLine = com.harvana.app.wallet.ChainBalances.assetBalance("BTC", addrs.get("BTC"));
+			final String ethLine = com.harvana.app.wallet.ChainBalances.assetBalance("ETH", addrs.get("ETH"));
+			com.harvana.app.wallet.AssetPrices.load(ctx, () -> {
+				if (!isAdded()) return;
+				_setPricedCoin(ctx, symbol, "BTC", R.id.tv_coin_btc, R.id.tv_coin_btc_fiat, btcLine);
+				_setPricedCoin(ctx, symbol, "ETH", R.id.tv_coin_eth, R.id.tv_coin_eth_fiat, ethLine);
+			});
+		}, "home-coins").start();
+	}
+
+	private void _setPricedCoin(android.content.Context ctx, String symbol, String key, int amountId, int fiatId, String line) {
+		Double held = com.harvana.app.wallet.AssetPrices.amount(line);
+		com.harvana.app.wallet.AssetPrices.Quote q = com.harvana.app.wallet.AssetPrices.peek(ctx, key);
+		Double fiat = null;
+		if (held != null && q != null && q.usd > 0) {
+			double v = com.harvana.app.wallet.FxRates.fiat(ctx, held * q.usd);
+			if (!Double.isNaN(v)) fiat = v;
+		}
+		_setCoin(amountId, fiatId, key, held, fiat);
+	}
+
+	private void _setCoin(int amountId, int fiatId, String ticker, Double amount, Double fiat) {
+		if (getView() == null || getContext() == null) return;
+		TextView a = getView().findViewById(amountId);
+		TextView f = getView().findViewById(fiatId);
+		String symbol = com.harvana.app.wallet.FxRates.symbol(getContext());
+		if (a != null) a.setText(ticker + " " + (amount == null ? "—" : BalanceFormatter.smartDecimal(amount)));
+		if (f != null) f.setText(fiat == null ? "—" : com.harvana.app.wallet.FxRates.format(symbol, fiat));
+	}
+
+	private void _loadStake() {
+		if (getContext() == null) return;
+		TextView sub = getView() == null ? null : getView().findViewById(R.id.tv_stake_sub);
+		if (sub == null) return;
+		String addr = WalletManager.getActiveWalletAddress(getContext());
+		if (addr == null || addr.isEmpty()) { sub.setText("Rewards the network"); return; }
+		com.harvana.app.sync.NodeGroupClient.getStakingPosition(addr, new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				if (getActivity() == null) return;
+				long raw = json == null ? 0 : json.optLong("stakedRaw", 0);
+				getActivity().runOnUiThread(() -> {
+					if (!isAdded() || getView() == null) return;
+					TextView t = getView().findViewById(R.id.tv_stake_sub);
+					if (t == null) return;
+					if (raw <= 0) t.setText("Rewards the network");
+					else t.setText(BalanceFormatter.smartDecimal(raw / (double) com.harvana.app.sync.HarvanaNodeClient.HARV_UNITS_PER_TOKEN) + " HARV staked");
+				});
+			}
+			@Override public void onError(String error) { }
+		});
+	}
+
+	private void _loadHomeInvites() {
+		if (getContext() == null) return;
+		final android.content.Context ic = getContext().getApplicationContext();
+		com.harvana.app.group.InviteManager.listMine(ic, new com.harvana.app.group.InviteManager.ListCb() {
+			@Override public void onList(java.util.List<java.util.Map<String, Object>> invites) {
+				if (getActivity() == null) return;
+				getActivity().runOnUiThread(() -> {
+					if (!isAdded()) return;
+					homeInvites = invites == null ? java.util.Collections.emptyList() : invites;
+					savingsSig = "";
+					_paintSavings();
+					if (!homeInvites.isEmpty() && getView() != null && homeInvites.size() != invitesAnnounced) {
+						invitesAnnounced = homeInvites.size();
+						com.google.android.material.snackbar.Snackbar.make(getView(),
+							"You have " + homeInvites.size() + " group invitation" + (homeInvites.size() > 1 ? "s" : ""),
+							com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+							.setAction("View", v -> startActivity(new Intent(getContext(), InvitesActivity.class))).show();
+					}
+				});
+			}
+			@Override public void onError(String e) { }
+		});
+	}
+
+	/** What needs doing in a circle, then invitations. Empty when neither is waiting. */
+	private void _paintSavings() {
+		LinearLayout box = getView() == null ? null : getView().findViewById(R.id.home_savings_rows);
+		if (box == null || getContext() == null) return;
+		org.json.JSONObject up = homeSnap == null ? null : homeSnap.optJSONObject("upcoming");
+		org.json.JSONArray rows = up == null ? null : up.optJSONArray("rows");
+		StringBuilder sig = new StringBuilder(rows == null ? "" : rows.toString());
+		for (java.util.Map<String, Object> m : homeInvites) sig.append('|').append(m.get("_docId"));
+		if (sig.toString().equals(savingsSig) && box.getChildCount() > 0) return;
+		savingsSig = sig.toString();
+		box.removeAllViews();
+		boolean any = false;
+		if (rows != null) for (int i = 0; i < rows.length(); i++) {
+			org.json.JSONObject row = rows.optJSONObject(i);
+			if (row == null) continue;
+			if (any) box.addView(_savingsRule());
+			any = true;
+			box.addView(_savingsDuty(row));
+		}
+		int n = 0;
+		for (java.util.Map<String, Object> inv : homeInvites) {
+			if (n++ >= 3) break;
+			if (any) box.addView(_savingsRule());
+			any = true;
+			box.addView(_savingsInvite(inv));
+		}
+		if (!any) {
+			TextView empty = new TextView(getContext());
+			empty.setText("Nothing due. A circle payment or an invitation shows up here.");
+			empty.setTextSize(13f);
+			empty.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorTextSecondary));
+			int pad = (int) (14 * getResources().getDisplayMetrics().density);
+			empty.setPadding(pad, pad / 2, pad, pad);
+			box.addView(empty);
+		}
+	}
+
+	private View _savingsDuty(org.json.JSONObject row) {
+		float d = getResources().getDisplayMetrics().density;
+		LinearLayout line = _savingsLine();
+		ImageView icon = new ImageView(getContext());
+		icon.setImageResource(R.drawable.ic_groups_line);
+		icon.setColorFilter(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorSuccess));
+		line.addView(icon, new LinearLayout.LayoutParams((int) (28 * d), (int) (28 * d)));
+		LinearLayout mid = new LinearLayout(getContext());
+		mid.setOrientation(LinearLayout.VERTICAL);
+		mid.setPadding((int) (10 * d), 0, (int) (8 * d), 0);
+		TextView name = _savingsText(row.optString("groupName", "Group"), 14, true, R.color.colorTextPrimary);
+		TextView meta = _savingsText(row.optString("statusLine", row.optString("badge", "")), 12, false, R.color.colorTextSecondary);
+		mid.addView(name);
+		mid.addView(meta);
+		line.addView(mid, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+		final String gid = row.optString("groupId");
+		final String action = row.optString("action", "NONE");
+		TextView go = _savingsText("PAY".equals(action) ? "Pay" : "Open", 13, true, R.color.colorSuccess);
+		go.setPadding((int) (10 * d), (int) (6 * d), (int) (10 * d), (int) (6 * d));
+		line.addView(go);
+		View.OnClickListener open = v -> { if ("PAY".equals(action)) _openGroupPayments(gid); else _openGroup(gid); };
+		line.setOnClickListener(open);
+		go.setOnClickListener(open);
+		return line;
+	}
+
+	private View _savingsInvite(java.util.Map<String, Object> inv) {
+		float d = getResources().getDisplayMetrics().density;
+		LinearLayout line = _savingsLine();
+		ImageView icon = new ImageView(getContext());
+		icon.setImageResource(R.drawable.ic_tx_group_line);
+		icon.setColorFilter(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorSuccess));
+		line.addView(icon, new LinearLayout.LayoutParams((int) (28 * d), (int) (28 * d)));
+		LinearLayout mid = new LinearLayout(getContext());
+		mid.setOrientation(LinearLayout.VERTICAL);
+		mid.setPadding((int) (10 * d), 0, (int) (8 * d), 0);
+		mid.addView(_savingsText(str(inv, "groupName", "Group"), 14, true, R.color.colorTextPrimary));
+		mid.addView(_savingsText("Pending invitation", 12, false, R.color.colorTextSecondary));
+		line.addView(mid, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+		final String id = str(inv, "_docId", "");
+		final String gid = str(inv, "groupId", "");
+		TextView decline = _savingsText("Decline", 12, true, R.color.colorTextSecondary);
+		decline.setPadding((int) (10 * d), (int) (6 * d), (int) (10 * d), (int) (6 * d));
+		decline.setBackgroundResource(R.drawable.bg_home_quiet);
+		TextView accept = _savingsText("Accept", 12, true, R.color.colorTextOnAccent);
+		accept.setPadding((int) (12 * d), (int) (6 * d), (int) (12 * d), (int) (6 * d));
+		accept.setBackgroundResource(R.drawable.bg_home_action);
+		decline.setOnClickListener(v -> com.harvana.app.group.InviteManager.respond(getContext(), id, false, err -> {
+			if (getActivity() == null) return;
+			getActivity().runOnUiThread(() -> {
+				if (err != null) android.widget.Toast.makeText(getContext(), err, android.widget.Toast.LENGTH_LONG).show();
+				else _loadHomeInvites();
+			});
+		}));
+		accept.setOnClickListener(v -> {
+			Intent i = new Intent(getContext(), GroupJoinRequestActivity.class);
+			i.putExtra("groupId", gid);
+			i.putExtra("inviteId", id);
+			startActivity(i);
+		});
+		line.addView(decline);
+		LinearLayout.LayoutParams gap = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		gap.setMarginStart((int) (6 * d));
+		line.addView(accept, gap);
+		return line;
+	}
+
+	private View _savingsRule() {
+		float d = getResources().getDisplayMetrics().density;
+		View rule = new View(getContext());
+		rule.setBackgroundColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.colorCardStroke));
+		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Math.max(1, Math.round(d)));
+		int inset = (int) (14 * d);
+		lp.setMarginStart(inset);
+		lp.setMarginEnd(inset);
+		rule.setLayoutParams(lp);
+		return rule;
+	}
+
+	private LinearLayout _savingsLine() {
+		float d = getResources().getDisplayMetrics().density;
+		LinearLayout line = new LinearLayout(getContext());
+		line.setGravity(Gravity.CENTER_VERTICAL);
+		line.setPadding((int) (14 * d), (int) (10 * d), (int) (10 * d), (int) (10 * d));
+		line.setClickable(true);
+		android.util.TypedValue out = new android.util.TypedValue();
+		getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, out, true);
+		line.setBackgroundResource(out.resourceId);
+		return line;
+	}
+
+	private TextView _savingsText(String s, float sp, boolean bold, int color) {
+		TextView t = new TextView(getContext());
+		t.setText(s);
+		t.setTextSize(sp);
+		t.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(), color));
+		if (bold) t.setTypeface(null, android.graphics.Typeface.BOLD);
+		return t;
 	}
 }

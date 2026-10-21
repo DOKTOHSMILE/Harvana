@@ -593,7 +593,14 @@ public class MainActivity extends AppCompatActivity {
 					else if (restoredTabId == R.id.menu_asset) _activeFragment = _asset;
 				}
 			}
+			_applyHomeChrome();
 		});
+	}
+
+	/** Home draws its own header. Other tabs keep the app bar. The bottom bar is unchanged. */
+	private void _applyHomeChrome() {
+		if (_app_bar == null) return;
+		_app_bar.setVisibility(_activeFragment == _home ? View.GONE : View.VISIBLE);
 	}
 	
 	private Integer _menuIdForFragmentExtra(String value) {
@@ -641,7 +648,7 @@ public class MainActivity extends AppCompatActivity {
 	
 	// 2. Your upgraded showFragment method
 	private void showFragment(Fragment fragment) {
-		if (_activeFragment == fragment) return; // Do nothing if tapping the same tab
+		if (_activeFragment == fragment) { _applyHomeChrome(); return; }
 		
 		// FIX: Explicitly declare the AndroidX FragmentTransaction to avoid import conflicts
 		androidx.fragment.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -659,7 +666,8 @@ public class MainActivity extends AppCompatActivity {
 		}
 		
 		ft.commit();
-		_activeFragment = fragment; // Update the tracker
+		_activeFragment = fragment;
+		_applyHomeChrome();
 	}
 	
 	private void _showVersionDialog() {

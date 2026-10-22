@@ -84,6 +84,10 @@ public class HomeFragmentActivity extends Fragment {
     private ArrayList<HashMap<String, Object>> group_map_list = new ArrayList<>();
 
     private NestedScrollView vscroll1;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout homeRefresh;
+    private final Runnable stopRefresh = this::_stopHomeRefresh;
+    private double homeHarvPct = Double.NaN;
+    private Double homeHarvFiat = null;
     private LinearLayout linear2;
     private LinearLayout linear194;
     private MaterialCardView cardview28;
@@ -401,6 +405,7 @@ public class HomeFragmentActivity extends Fragment {
     private final com.harvana.app.home.HomeData.Listener homeListener = s -> {
         if (isAdded() && getView() != null)
             _render(s);
+        _stopHomeRefresh();
     };
 
     private boolean _changed(String key, String sig) {
@@ -784,7 +789,7 @@ public class HomeFragmentActivity extends Fragment {
             empty.setTextSize(13f);
             empty.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(),
                     R.color.colorTextTertiary));
-            int pad = (int) (8 * getResources().getDisplayMetrics().density);
+            int pad = (int) (16 * getResources().getDisplayMetrics().density);
             empty.setPadding(pad, pad, pad, pad / 2);
             home_recent_tx.addView(empty);
             return;
@@ -805,7 +810,7 @@ public class HomeFragmentActivity extends Fragment {
         View line = row.findViewById(R.id.linear13);
         if (line != null) {
             line.setMinimumHeight((int) (48 * d));
-            int h = (int) (8 * d);
+            int h = (int) (16 * d);
             line.setPadding(h, (int) (2 * d), h, (int) (2 * d));
         }
         View icon = row.findViewById(R.id.cardview5);
@@ -828,7 +833,7 @@ public class HomeFragmentActivity extends Fragment {
             date.setTextSize(10f);
         View divider = row.findViewById(R.id.tx_divider);
         if (divider != null && divider.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)
-            ((ViewGroup.MarginLayoutParams) divider.getLayoutParams()).setMarginStart((int) (44 * d));
+            ((ViewGroup.MarginLayoutParams) divider.getLayoutParams()).setMarginStart((int) (52 * d));
     }
 
     private void _bindRecent(View row, java.util.HashMap<String, Object> item, String wallet,
@@ -972,6 +977,8 @@ public class HomeFragmentActivity extends Fragment {
 
     @Override
     public void onDestroyView() {
+        if (getView() != null)
+            getView().removeCallbacks(stopRefresh);
         com.harvana.app.wallet.WalletTotal.unlisten(totalListener);
         com.harvana.app.home.HomeData.unlisten(homeListener);
         shownSig.clear();
@@ -1042,10 +1049,16 @@ public class HomeFragmentActivity extends Fragment {
     private void _wireHome(View root) {
         if (getContext() == null)
             return;
+        View scan = root.findViewById(R.id.btn_home_scan);
         View bell = root.findViewById(R.id.btn_home_bell);
         View more = root.findViewById(R.id.btn_home_more);
         View avatar = root.findViewById(R.id.iv_home_avatar);
         View hide = root.findViewById(R.id.tv_home_hide);
+        if (scan != null)
+            scan.setOnClickListener(v -> {
+                if (getActivity() instanceof MainActivity)
+                    ((MainActivity) getActivity()).openScanner();
+            });
         if (bell != null)
             bell.setOnClickListener(
                     v -> startActivity(new Intent(getContext(), NotificationsActivity.class)));
@@ -1127,6 +1140,35 @@ public class HomeFragmentActivity extends Fragment {
             btc.setOnClickListener(v -> _openCoin("BTC"));
         if (eth != null)
             eth.setOnClickListener(v -> _openCoin("ETH"));
+        homeRefresh = root.findViewById(R.id.home_refresh);
+        if (homeRefresh != null) {
+            homeRefresh.setColorSchemeResources(R.color.colorAccent);
+            homeRefresh.setOnRefreshListener(this::_refreshHome);
+        }
+    }
+
+    private void _refreshHome() {
+        if (getContext() == null) {
+            _stopHomeRefresh();
+            return;
+        }
+        com.harvana.app.home.HomeData.refresh(getContext(), true);
+        _loadWalletBalance();
+        _loadRecentTx();
+        _loadTopCoins();
+        _loadStake();
+        _loadHomeInvites();
+        _paintHideLabel();
+        View root = getView();
+        if (root != null) {
+            root.removeCallbacks(stopRefresh);
+            root.postDelayed(stopRefresh, 1600);
+        }
+    }
+
+    private void _stopHomeRefresh() {
+        if (homeRefresh != null)
+            homeRefresh.setRefreshing(false);
     }
 
     private void _openCoin(String key) {
@@ -1190,18 +1232,14 @@ public class HomeFragmentActivity extends Fragment {
         final String harvAddr = WalletManager.getActiveWalletAddress(ctx);
         final String symbol = com.harvana.app.wallet.FxRates.symbol(ctx);
         com.harvana.app.wallet.HarvPrice.get(q -> {
-            if (!isAdded() || q == null || Double.isNaN(q.changePct))
+            if (!isAdded())
                 return;
-            TextView t = getView() == null ? null : getView().findViewById(R.id.tv_home_change);
-            if (t == null)
-                return;
-            t.setText((q.changePct >= 0 ? "+" : "")
-                    + String.format(java.util.Locale.US, "%.2f%% HARV today", q.changePct));
-            t.setTextColor(androidx.core.content.ContextCompat.getColor(ctx,
-                    q.changePct >= 0 ? R.color.colorSuccess : R.color.colorError));
-            t.setVisibility(View.VISIBLE);
+            homeHarvPct = q == null ? Double.NaN : q.changePct;
+            _paintHarvChange();
         });
         if (harvAddr == null || harvAddr.isEmpty()) {
+            homeHarvFiat = null;
+            _paintHarvChange();
             _setCoin(R.id.tv_coin_harv, R.id.tv_coin_harv_fiat, "HARV", null, null);
             _setCoin(R.id.tv_coin_btc, R.id.tv_coin_btc_fiat, "BTC", null, null);
             _setCoin(R.id.tv_coin_eth, R.id.tv_coin_eth_fiat, "ETH", null, null);
@@ -1223,6 +1261,8 @@ public class HomeFragmentActivity extends Fragment {
                                 return;
                             _setCoin(R.id.tv_coin_harv, R.id.tv_coin_harv_fiat, "HARV",
                                     Double.isNaN(harv) ? null : harv, ok ? fiat : null);
+                            homeHarvFiat = (!Double.isNaN(harv) && ok) ? fiat : null;
+                            _paintHarvChange();
                         });
                     });
         });
@@ -1246,6 +1286,33 @@ public class HomeFragmentActivity extends Fragment {
                         ethLine);
             });
         }, "home-coins").start();
+    }
+
+    private void _paintHarvChange() {
+        if (!isAdded() || getView() == null || getContext() == null)
+            return;
+        TextView t = getView().findViewById(R.id.tv_home_change);
+        if (t == null)
+            return;
+        if (Double.isNaN(homeHarvPct)) {
+            t.setVisibility(View.GONE);
+            return;
+        }
+        String pct = String.format(java.util.Locale.US, "%+.2f%%", homeHarvPct);
+        String text = pct;
+        if (homeHarvFiat != null && !Double.isNaN(homeHarvFiat)) {
+            double denom = 100.0 + homeHarvPct;
+            if (denom != 0) {
+                double pnl = homeHarvFiat * homeHarvPct / denom;
+                String money = com.harvana.app.wallet.FxRates.format(
+                        com.harvana.app.wallet.FxRates.symbol(getContext()), Math.abs(pnl));
+                text = (pnl >= 0 ? "+" : "−") + money + "  " + pct;
+            }
+        }
+        t.setText(text);
+        t.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(),
+                homeHarvPct >= 0 ? R.color.colorSuccess : R.color.colorError));
+        t.setVisibility(View.VISIBLE);
     }
 
     private void _setPricedCoin(android.content.Context ctx, String symbol, String key,

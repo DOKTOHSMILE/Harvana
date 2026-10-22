@@ -380,6 +380,7 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
+		_applyHomeChrome();
 		if (toolbarLogo != null) loadUserProfile(toolbarLogo, toolbarLogoPx);       // a photo changed in Edit profile shows on return
 		com.harvana.app.utils.PresenceHeartbeat.start(getApplicationContext());
 		com.harvana.app.group.GroupSaver.retryAll(getApplicationContext(), null);
@@ -597,10 +598,31 @@ public class MainActivity extends AppCompatActivity {
 		});
 	}
 
-	/** Home draws its own header. Other tabs keep the app bar. The bottom bar is unchanged. */
+	/** Home draws its own header, so the app bar is removed there. Other tabs keep it. The bottom bar is unchanged. */
+	private AppBarLayout.ScrollingViewBehavior _scrollBehavior;
+
 	private void _applyHomeChrome() {
-		if (_app_bar == null) return;
-		_app_bar.setVisibility(_activeFragment == _home ? View.GONE : View.VISIBLE);
+		boolean home = _activeFragment == _home;
+		if (_app_bar != null) {
+			_app_bar.setVisibility(home ? View.GONE : View.VISIBLE);
+			ViewGroup.LayoutParams barLp = _app_bar.getLayoutParams();
+			if (barLp != null) {
+				barLp.height = home ? 0 : ViewGroup.LayoutParams.WRAP_CONTENT;
+				_app_bar.setLayoutParams(barLp);
+			}
+		}
+		View content = findViewById(R.id.linear3);
+		if (content != null && content.getLayoutParams() instanceof CoordinatorLayout.LayoutParams) {
+			CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) content.getLayoutParams();
+			if (home) {
+				if (lp.getBehavior() instanceof AppBarLayout.ScrollingViewBehavior)
+					_scrollBehavior = (AppBarLayout.ScrollingViewBehavior) lp.getBehavior();
+				lp.setBehavior(null);
+			} else if (lp.getBehavior() == null) {
+				lp.setBehavior(_scrollBehavior != null ? _scrollBehavior : new AppBarLayout.ScrollingViewBehavior());
+			}
+			content.setLayoutParams(lp);
+		}
 	}
 	
 	private Integer _menuIdForFragmentExtra(String value) {

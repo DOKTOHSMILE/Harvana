@@ -794,8 +794,41 @@ public class HomeFragmentActivity extends Fragment {
             java.util.HashMap<String, Object> item = rows.get(i);
             View row = inf.inflate(R.layout.item_transaction, home_recent_tx, false);
             _bindRecent(row, item, wallet, i == rows.size() - 1);
+            _shrinkHomeTx(row);
             home_recent_tx.addView(row);
         }
+    }
+
+    /** Home's copy of a transaction row: shorter than the full Activity list. */
+    private void _shrinkHomeTx(View row) {
+        float d = getResources().getDisplayMetrics().density;
+        View line = row.findViewById(R.id.linear13);
+        if (line != null) {
+            line.setMinimumHeight((int) (48 * d));
+            int h = (int) (8 * d);
+            line.setPadding(h, (int) (2 * d), h, (int) (2 * d));
+        }
+        View icon = row.findViewById(R.id.cardview5);
+        if (icon != null && icon.getLayoutParams() != null) {
+            icon.getLayoutParams().width = (int) (28 * d);
+            icon.getLayoutParams().height = (int) (28 * d);
+            icon.setLayoutParams(icon.getLayoutParams());
+        }
+        TextView type = row.findViewById(R.id.tv_tx_type);
+        TextView addr = row.findViewById(R.id.tv_tx_address);
+        TextView amt = row.findViewById(R.id.tv_tx_amount);
+        TextView date = row.findViewById(R.id.tv_tx_date);
+        if (type != null)
+            type.setTextSize(13f);
+        if (addr != null)
+            addr.setTextSize(11f);
+        if (amt != null)
+            amt.setTextSize(12f);
+        if (date != null)
+            date.setTextSize(10f);
+        View divider = row.findViewById(R.id.tx_divider);
+        if (divider != null && divider.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)
+            ((ViewGroup.MarginLayoutParams) divider.getLayoutParams()).setMarginStart((int) (44 * d));
     }
 
     private void _bindRecent(View row, java.util.HashMap<String, Object> item, String wallet,
@@ -964,12 +997,9 @@ public class HomeFragmentActivity extends Fragment {
     }
 
     private void _openTotalSavedOnTap() {
-        View v = text_val_saved;
-        while (v != null && !(v instanceof com.google.android.material.card.MaterialCardView)
-                && v.getParent() instanceof View)
-            v = (View) v.getParent();
-        View card = v instanceof com.google.android.material.card.MaterialCardView ? v
-                : text_val_saved;
+        View card = getView() == null ? null : getView().findViewById(R.id.card_total_saved);
+        if (card == null)
+            card = text_val_saved;
         if (card == null || card.hasOnClickListeners())
             return;
         card.setOnClickListener(x -> startActivity(
@@ -1321,50 +1351,30 @@ public class HomeFragmentActivity extends Fragment {
                 });
     }
 
+    /** Invitations only. Payments are the rows above, and the illustration is the empty state. */
     private void _paintSavings() {
         LinearLayout box = getView() == null ? null
                 : getView().findViewById(R.id.home_savings_rows);
         if (box == null || getContext() == null)
             return;
-        org.json.JSONObject up = homeSnap == null ? null : homeSnap.optJSONObject("upcoming");
-        org.json.JSONArray rows = up == null ? null : up.optJSONArray("rows");
-        StringBuilder sig = new StringBuilder(rows == null ? "" : rows.toString());
+        StringBuilder sig = new StringBuilder();
         for (java.util.Map<String, Object> m : homeInvites)
             sig.append('|').append(m.get("_docId"));
-        if (sig.toString().equals(savingsSig) && box.getChildCount() > 0)
+        if (sig.toString().equals(savingsSig) && (box.getChildCount() > 0 || homeInvites.isEmpty()))
             return;
         savingsSig = sig.toString();
         box.removeAllViews();
-        boolean any = false;
-        if (rows != null)
-            for (int i = 0; i < rows.length(); i++) {
-                org.json.JSONObject row = rows.optJSONObject(i);
-                if (row == null)
-                    continue;
-                if (any)
-                    box.addView(_savingsRule());
-                any = true;
-                box.addView(_savingsDuty(row));
-            }
         int n = 0;
         for (java.util.Map<String, Object> inv : homeInvites) {
             if (n++ >= 3)
                 break;
-            if (any)
-                box.addView(_savingsRule());
-            any = true;
             box.addView(_savingsInvite(inv));
         }
-        if (!any) {
-            TextView empty = new TextView(getContext());
-            empty.setText("Nothing due. A circle payment or an invitation shows up here.");
-            empty.setTextSize(13f);
-            empty.setTextColor(androidx.core.content.ContextCompat.getColor(getContext(),
-                    R.color.colorTextSecondary));
-            int pad = (int) (14 * getResources().getDisplayMetrics().density);
-            empty.setPadding(pad, pad / 2, pad, pad);
-            box.addView(empty);
-        }
+        View caughtUp = getView().findViewById(R.id.linear7);
+        if (caughtUp == null)
+            return;
+        boolean payments = linear_upcoming_payments != null && linear_upcoming_payments.getChildCount() > 0;
+        caughtUp.setVisibility(!homeInvites.isEmpty() || payments ? View.GONE : View.VISIBLE);
     }
 
     private View _savingsDuty(org.json.JSONObject row) {

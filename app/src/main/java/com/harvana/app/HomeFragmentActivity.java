@@ -826,12 +826,8 @@ public class HomeFragmentActivity extends Fragment {
             date.setTextSize(10f);
         View divider = row.findViewById(R.id.tx_divider);
         if (divider != null && divider.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)
-<<<<<<< HEAD
             ((ViewGroup.MarginLayoutParams) divider.getLayoutParams())
-                    .setMarginStart((int) (44 * d));
-=======
-            ((ViewGroup.MarginLayoutParams) divider.getLayoutParams()).setMarginStart((int) (52 * d));
->>>>>>> branch 'main' of https://github.com/DOKTOHSMILE/Harvana.git
+                    .setMarginStart((int) (52 * d));
     }
 
     private void _bindRecent(View row, java.util.HashMap<String, Object> item, String wallet,
@@ -1302,8 +1298,8 @@ public class HomeFragmentActivity extends Fragment {
             double denom = 100.0 + homeHarvPct;
             if (denom != 0) {
                 double pnl = homeHarvFiat * homeHarvPct / denom;
-                String money = com.harvana.app.wallet.FxRates.format(
-                        com.harvana.app.wallet.FxRates.symbol(getContext()), Math.abs(pnl));
+                String money = com.harvana.app.wallet.FxRates
+                        .format(com.harvana.app.wallet.FxRates.symbol(getContext()), Math.abs(pnl));
                 text = (pnl >= 0 ? "+" : "−") + money + "  " + pct;
             }
         }

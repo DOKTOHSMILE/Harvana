@@ -9,7 +9,7 @@
 	<!-- Pinned Top Toolbar (Stays fixed at the top while content scrolls) -->
 	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="56dp"
+		android:layout_height="?attr/actionBarSize"
 		android:background="@color/colorPrimary"
 		android:gravity="center_vertical"
 		android:orientation="horizontal"
@@ -100,7 +100,7 @@
 			android:layout_height="wrap_content"
 			android:orientation="vertical"
 			android:paddingStart="16dp"
-			android:paddingTop="14dp"
+			android:paddingTop="8dp"
 			android:paddingEnd="16dp"
 			android:paddingBottom="36dp">
 
@@ -578,7 +578,7 @@
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="24dp"
+				android:layout_marginTop="20dp"
 				android:gravity="center_vertical"
 				android:orientation="horizontal">
 
@@ -604,7 +604,7 @@
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="12dp"
+				android:layout_marginTop="10dp"
 				android:orientation="horizontal">
 
 				<com.google.android.material.card.MaterialCardView
@@ -736,7 +736,7 @@
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="12dp"
+				android:layout_marginTop="10dp"
 				android:orientation="horizontal">
 
 				<com.google.android.material.card.MaterialCardView
@@ -863,11 +863,11 @@
 				</com.google.android.material.card.MaterialCardView>
 			</LinearLayout>
 
-			<!-- 1. Upcoming Payments Section (Integrated back from former UI) -->
+			<!-- 1. Upcoming Payments Section -->
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="24dp"
+				android:layout_marginTop="20dp"
 				android:gravity="center_vertical"
 				android:orientation="horizontal">
 
@@ -943,14 +943,20 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:orientation="vertical" />
+
+					<LinearLayout
+						android:id="@+id/home_savings_rows"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 
-			<!-- 2. 2×2 Social Finance Metrics Grid (Integrated back from former UI) -->
+			<!-- 2. Social Finance Overview Grid -->
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="24dp"
+				android:layout_marginTop="20dp"
 				android:gravity="center_vertical"
 				android:orientation="horizontal">
 
@@ -1081,7 +1087,7 @@
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="12dp"
+				android:layout_marginTop="10dp"
 				android:orientation="horizontal">
 
 				<!-- Trust Score Card -->
@@ -1213,7 +1219,7 @@
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="24dp"
+				android:layout_marginTop="20dp"
 				android:gravity="center_vertical"
 				android:orientation="horizontal">
 
@@ -1263,11 +1269,11 @@
 					android:paddingBottom="6dp" />
 			</com.google.android.material.card.MaterialCardView>
 
-			<!-- 3. Trending Public Groups Section (Integrated back from former UI) -->
+			<!-- 3. Trending Public Groups Section -->
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="24dp"
+				android:layout_marginTop="20dp"
 				android:gravity="center_vertical"
 				android:orientation="horizontal">
 
@@ -1348,11 +1354,11 @@
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 
-			<!-- 4. Learn Hub Section (Integrated back from former UI) -->
+			<!-- 4. Learn Hub Section -->
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="24dp"
+				android:layout_marginTop="20dp"
 				android:gravity="center_vertical"
 				android:orientation="horizontal">
 
@@ -1372,9 +1378,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:background="?attr/selectableItemBackground"
-					android:paddingStart="8dp"
 					android:paddingTop="4dp"
-					android:paddingEnd="4dp"
 					android:paddingBottom="4dp"
 					android:text="Open Learn Hub"
 					android:textColor="@color/colorSuccess"

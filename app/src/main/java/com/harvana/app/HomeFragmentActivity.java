@@ -103,8 +103,8 @@ public class HomeFragmentActivity extends Fragment {
     private LinearLayout cardview31;
     private LinearLayout linear37;
     private LinearLayout linear40;
-    private MaterialCardView card_total_saved;
-    private MaterialCardView card_active_groups;
+    private LinearLayout card_total_saved;
+    private LinearLayout card_active_groups;
     private LinearLayout linear198;
     private LinearLayout linear38;
     private LinearLayout linear219;
@@ -119,8 +119,8 @@ public class HomeFragmentActivity extends Fragment {
     private TextView textview204;
     private TextView text_val_groups;
     private TextView text_sub_groups;
-    private MaterialCardView card_trust_score;
-    private MaterialCardView card_open_loans;
+    private LinearLayout card_trust_score;
+    private LinearLayout card_open_loans;
     private LinearLayout linear201;
     private FrameLayout linear202;
     private LinearLayout linear215;
@@ -229,16 +229,9 @@ public class HomeFragmentActivity extends Fragment {
         card_open_loans = _view.findViewById(R.id.card_open_loans);
 
         text_val_saved = _view.findViewById(R.id.text_val_saved);
-        text_sub_saved = _view.findViewById(R.id.text_sub_saved);
         text_val_groups = _view.findViewById(R.id.text_val_groups);
-        text_sub_groups = _view.findViewById(R.id.text_sub_groups);
-
-        ring_trust_score = _view.findViewById(R.id.ring_trust_score);
         text_val_trust = _view.findViewById(R.id.text_val_trust);
-        text_sub_trust = _view.findViewById(R.id.text_sub_trust);
-
         text_val_loans = _view.findViewById(R.id.text_val_loans);
-        text_sub_loans = _view.findViewById(R.id.text_sub_loans);
 
         linear7 = _view.findViewById(R.id.linear7);
         linear_upcoming_payments = _view.findViewById(R.id.linear_upcoming_payments);
@@ -828,7 +821,8 @@ public class HomeFragmentActivity extends Fragment {
             date.setTextSize(10f);
         View divider = row.findViewById(R.id.tx_divider);
         if (divider != null && divider.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)
-            ((ViewGroup.MarginLayoutParams) divider.getLayoutParams()).setMarginStart((int) (44 * d));
+            ((ViewGroup.MarginLayoutParams) divider.getLayoutParams())
+                    .setMarginStart((int) (44 * d));
     }
 
     private void _bindRecent(View row, java.util.HashMap<String, Object> item, String wallet,
@@ -1078,8 +1072,8 @@ public class HomeFragmentActivity extends Fragment {
             hide.setOnClickListener(tog);
         _paintHideLabel();
         for (int id : new int[] { R.id.tv_coin_harv, R.id.tv_coin_harv_fiat, R.id.tv_coin_btc,
-                R.id.tv_coin_btc_fiat, R.id.tv_coin_eth, R.id.tv_coin_eth_fiat, R.id.tv_home_change,
-                R.id.tv_stake_sub }) {
+                R.id.tv_coin_btc_fiat, R.id.tv_coin_eth, R.id.tv_coin_eth_fiat,
+                R.id.tv_home_change }) {
             View viewToGuard = root.findViewById(id);
             if (viewToGuard instanceof TextView) {
                 com.harvana.app.utils.BalancePrivacy.guard((TextView) viewToGuard);
@@ -1276,42 +1270,7 @@ public class HomeFragmentActivity extends Fragment {
     }
 
     private void _loadStake() {
-        if (getContext() == null)
-            return;
-        TextView sub = getView() == null ? null : getView().findViewById(R.id.tv_stake_sub);
-        if (sub == null)
-            return;
-        String addr = WalletManager.getActiveWalletAddress(getContext());
-        if (addr == null || addr.isEmpty()) {
-            sub.setText("Rewards the network");
-            return;
-        }
-        com.harvana.app.sync.NodeGroupClient.getStakingPosition(addr,
-                new com.harvana.app.sync.NodeGroupClient.Callback() {
-                    @Override
-                    public void onSuccess(org.json.JSONObject json) {
-                        if (getActivity() == null)
-                            return;
-                        long raw = json == null ? 0 : json.optLong("stakedRaw", 0);
-                        getActivity().runOnUiThread(() -> {
-                            if (!isAdded() || getView() == null)
-                                return;
-                            TextView t = getView().findViewById(R.id.tv_stake_sub);
-                            if (t == null)
-                                return;
-                            if (raw <= 0)
-                                t.setText("Rewards the network");
-                            else
-                                t.setText(BalanceFormatter.smartDecimal(raw
-                                        / (double) com.harvana.app.sync.HarvanaNodeClient.HARV_UNITS_PER_TOKEN)
-                                        + " HARV staked");
-                        });
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                    }
-                });
+        // Subtitle view tv_stake_sub was removed in the compact Quick Actions layout
     }
 
     private void _loadHomeInvites() {
@@ -1373,7 +1332,8 @@ public class HomeFragmentActivity extends Fragment {
         View caughtUp = getView().findViewById(R.id.linear7);
         if (caughtUp == null)
             return;
-        boolean payments = linear_upcoming_payments != null && linear_upcoming_payments.getChildCount() > 0;
+        boolean payments = linear_upcoming_payments != null
+                && linear_upcoming_payments.getChildCount() > 0;
         caughtUp.setVisibility(!homeInvites.isEmpty() || payments ? View.GONE : View.VISIBLE);
     }
 

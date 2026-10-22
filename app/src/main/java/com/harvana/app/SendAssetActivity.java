@@ -246,19 +246,33 @@ public class SendAssetActivity extends AppCompatActivity {
 		int strokeColor = ContextCompat.getColor(this, R.color.colorAccent);
 		int bgColor = ContextCompat.getColor(this, R.color.darkFaint10);
 		
-		for (EditText et : new EditText[]{etRecipient, etAmount}) {
-			if (et != null) {
-				et.setShowSoftInputOnFocus(false);
-				et.setFocusable(true);
-				et.setFocusableInTouchMode(true);
-				et.setCursorVisible(false);
-				et.setTextIsSelectable(false);
-				et.setLongClickable(false);
-			}
+		// The amount stays on the in-app keypad. The address is a normal field so it can be typed.
+		if (etAmount != null) {
+			etAmount.setShowSoftInputOnFocus(false);
+			etAmount.setFocusable(true);
+			etAmount.setFocusableInTouchMode(true);
+			etAmount.setCursorVisible(false);
+			etAmount.setTextIsSelectable(false);
+			etAmount.setLongClickable(false);
+			etAmount.setOnClickListener(this::hideSystemKeyboard);
 		}
-		
-		if (etAmount != null) etAmount.setOnClickListener(this::hideSystemKeyboard);
-		if (etRecipient != null) etRecipient.setOnClickListener(this::hideSystemKeyboard);
+		if (etRecipient != null) {
+			etRecipient.setShowSoftInputOnFocus(true);
+			etRecipient.setFocusable(true);
+			etRecipient.setFocusableInTouchMode(true);
+			etRecipient.setCursorVisible(true);
+			etRecipient.setTextIsSelectable(true);
+			etRecipient.setLongClickable(true);
+			etRecipient.setOnClickListener(null);
+			etRecipient.setOnFocusChangeListener((v, hasFocus) -> {
+				if (hasFocus) {
+					etRecipient.setCursorVisible(true);
+					android.view.inputmethod.InputMethodManager imm =
+							(android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+					if (imm != null) imm.showSoftInput(etRecipient, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+				}
+			});
+		}
 		
 		if (btnPaste != null) {
 			btnPaste.setOnClickListener(v -> {

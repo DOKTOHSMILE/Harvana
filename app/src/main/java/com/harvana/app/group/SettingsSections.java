@@ -516,11 +516,11 @@ public final class SettingsSections {
     private View payoutCard(String groupId, Map<String, Object> g,
             java.util.List<Map<String, Object>> members) {
         LinearLayout c = card();
-        c.addView(text("Early payout", 16, true, UiColors.textPrimary()));
+        c.addView(text("Emergency payout", 16, true, UiColors.textPrimary()));
         c.addView(text(
                 "An emergency request to be paid before your turn. Nothing moves until the admin approves it.",
                 13, false, UiColors.textSecondary()));
-        c.addView(button("Request payout", false, v -> confirmPayout(groupId, g, members)));
+        c.addView(button("Emergency payout request", false, v -> confirmPayout(groupId, g, members)));
         return c;
     }
 
@@ -534,8 +534,8 @@ public final class SettingsSections {
             slots = (int) num(g, "slots");
         double amount = contribution > 0 ? contribution * Math.max(slots, 1) : 0;
         String type = str(g, "groupType", "").toLowerCase(Locale.US);
-        if (type.contains("rotat") && contribution > 0 && slots > 0)
-            amount = contribution * slots;
+        if (type.contains("rotat") && contribution > 0 && slots > 1)
+            amount = contribution * (slots - 1);
         String uid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null
                 ? ""
                 : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -552,13 +552,13 @@ public final class SettingsSections {
         final double send = amount;
         final double finalContribution = contribution;
         final int sendSlot = slot;
-        String coin = CoinInfo.ticker();
+        String coin = com.harvana.app.engine.Amounts.unitLabel(str(g, "asset", ""));
         String body = send > 0
-                ? "Request an early payout of "
+                ? "Emergency payout request of "
                         + com.harvana.app.wallet.BalanceFormatter.smartDecimal(send) + " " + coin
                         + " (slot " + sendSlot + ")? The admin reviews it before anything is paid."
-                : "Request an early payout? The admin reviews it before anything is paid.";
-        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Request payout").setMessage(body)
+                : "Emergency payout request? The admin reviews it before anything is paid.";
+        new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Emergency payout request").setMessage(body)
                 .setNegativeButton("Cancel", null).setPositiveButton("Request", (dlg, w) -> {
                     String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(a);
                     GroupPayoutManager.requestPayout(a, groupId, wallet,
@@ -566,12 +566,18 @@ public final class SettingsSections {
                             new GroupPayoutManager.Callback() {
                                 @Override
                                 public void onSuccess(String message) {
-                                    Toast.makeText(a, message, Toast.LENGTH_LONG).show();
+                                    a.runOnUiThread(() -> {
+                                        if (a.isFinishing()) return;
+                                        Toast.makeText(a, message, Toast.LENGTH_LONG).show();
+                                    });
                                 }
 
                                 @Override
                                 public void onError(String error) {
-                                    Toast.makeText(a, error, Toast.LENGTH_LONG).show();
+                                    a.runOnUiThread(() -> {
+                                        if (a.isFinishing()) return;
+                                        Toast.makeText(a, error, Toast.LENGTH_LONG).show();
+                                    });
                                 }
                             });
                 }).show();

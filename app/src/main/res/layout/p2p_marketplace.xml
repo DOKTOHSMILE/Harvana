@@ -62,16 +62,6 @@
 					android:src="@drawable/icon_arrow_drop_down_round"
 					app:tint="@color/colorTextSecondary" />
 			</LinearLayout>
-			<ImageView
-				android:id="@+id/iv_p2p_express"
-				android:layout_width="44dp"
-				android:layout_height="44dp"
-				android:layout_marginStart="4dp"
-				android:background="?attr/selectableItemBackgroundBorderless"
-				android:contentDescription="Express"
-				android:padding="10dp"
-				android:src="@drawable/icon_currency_exchange_twotone"
-				app:tint="@color/colorTextPrimary" />
 			<FrameLayout
 				android:id="@+id/btn_p2p_orders"
 				android:layout_width="44dp"
@@ -111,6 +101,23 @@
 				android:src="@drawable/icon_ads_click_outline"
 				app:tint="@color/colorTextPrimary" />
 		</LinearLayout>
+
+		<!-- Express sits on its own, above Buy / Sell. A labelled button, not a currency glyph. -->
+		<TextView
+			android:id="@+id/btn_p2p_express"
+			android:layout_width="match_parent"
+			android:layout_height="44dp"
+			android:layout_marginStart="16dp"
+			android:layout_marginTop="8dp"
+			android:layout_marginEnd="16dp"
+			android:background="@drawable/bg_home_action"
+			android:clickable="true"
+			android:focusable="true"
+			android:gravity="center"
+			android:text="Express"
+			android:textColor="@color/colorTextOnAccent"
+			android:textSize="15sp"
+			android:textStyle="bold" />
 
 		<!-- Buy / Sell -->
 		<LinearLayout

@@ -423,6 +423,13 @@ public class WalletActivityFragmentActivity extends Fragment {
 			if (holder.tvDate != null) {
 				holder.tvDate.setText(_activityWhen(isPending, _longOf(item, "initiatedAt"), timestamp));
 			}
+			if (holder.tvDay != null) {
+				String day = _dayLabel(timestamp);
+				String prev = position > 0 ? _dayLabel(_txMillis(items.get(position - 1))) : "";
+				boolean show = !day.isEmpty() && !day.equals(prev);
+				holder.tvDay.setVisibility(show ? View.VISIBLE : View.GONE);
+				if (show) holder.tvDay.setText(day);
+			}
 			
 			final long   finalTimestamp = timestamp;
 			final double finalAmount    = amount;
@@ -482,6 +489,31 @@ public class WalletActivityFragmentActivity extends Fragment {
 			return "null".equalsIgnoreCase(s) ? "" : s;
 		}
 		
+		private long _txMillis(java.util.Map<String, Object> item) {
+			long initiated = _longOf(item, "initiatedAt");
+			if (initiated > 0) return initiated;
+			Object tsObj = item.get("timestamp");
+			long timestamp = tsObj instanceof Number ? ((Number) tsObj).longValue() : 0L;
+			if (timestamp > 0 && timestamp < 1_000_000_000_000L) timestamp *= 1000L;
+			return timestamp;
+		}
+
+		private String _dayLabel(long ms) {
+			if (ms <= 0) return "";
+			java.util.Calendar day = java.util.Calendar.getInstance();
+			day.setTimeInMillis(ms);
+			java.util.Calendar today = java.util.Calendar.getInstance();
+			if (sameDay(day, today)) return "Today";
+			today.add(java.util.Calendar.DAY_OF_YEAR, -1);
+			if (sameDay(day, today)) return "Yesterday";
+			return new java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.US).format(new java.util.Date(ms));
+		}
+
+		private boolean sameDay(java.util.Calendar a, java.util.Calendar b) {
+			return a.get(java.util.Calendar.YEAR) == b.get(java.util.Calendar.YEAR)
+					&& a.get(java.util.Calendar.DAY_OF_YEAR) == b.get(java.util.Calendar.DAY_OF_YEAR);
+		}
+
 		private String shortenAddress(String address) {
 			if (address == null || address.isEmpty()) return "Unknown";
 			if (address.length() <= 16) return address;
@@ -494,6 +526,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 			TextView  tvAddress;
 			TextView  tvAmount;
 			TextView  tvDate;
+			TextView  tvDay;
 			View cardview1;
 			View txDivider;
 
@@ -504,6 +537,7 @@ public class WalletActivityFragmentActivity extends Fragment {
 				tvAddress = itemView.findViewById(R.id.tv_tx_address);
 				tvAmount  = itemView.findViewById(R.id.tv_tx_amount);
 				tvDate    = itemView.findViewById(R.id.tv_tx_date);
+				tvDay     = itemView.findViewById(R.id.tv_tx_day);
 				cardview1 = itemView.findViewById(R.id.cardview1);
 				txDivider = itemView.findViewById(R.id.tx_divider);
 			}

@@ -144,6 +144,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 		fbauth = FirebaseAuth.getInstance();
 		
 		card_apply_loan.setOnClickListener(_v -> _showApplyDialog());
+		if (btn_apply_loan != null) btn_apply_loan.setOnClickListener(_v -> _showApplyDialog());
 		
 		
 		
@@ -1378,8 +1379,7 @@ public class GroupLoansFragmentActivity extends Fragment {
 
 	/** The group's own coin: stable coins carry their own symbol, everything else falls back to HARV. */
 	private String _coinSymbol() {
-		if (com.harvana.app.husd.Stable.isStable(groupCoin)) return com.harvana.app.husd.Stable.symbol(groupCoin);
-		return com.harvana.app.CoinInfo.ticker();
+		return com.harvana.app.engine.Amounts.unitLabel(groupCoin);
 	}
 	
 	{

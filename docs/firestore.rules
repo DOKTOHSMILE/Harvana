@@ -717,7 +717,7 @@ service cloud.firestore {
         && pidLinkOwned(pid)
         && request.resource.data.pid == pid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'icon', 'first_name', 'last_name', 'username', 'country', 'state', 'city', 'age',
+          'pid', 'icon', 'first_name', 'last_name', 'username', 'country', 'state', 'city', 'age',
           'show_age', 'show_city', 'bio', 'member_since', 'groups_count', 'cycles_completed',
           'loans_count', 'loans_pending', 'stats_updated'])
         && (!('bio' in request.resource.data) || (request.resource.data.bio is string && request.resource.data.bio.size() <= 140))

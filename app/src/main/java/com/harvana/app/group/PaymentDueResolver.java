@@ -112,8 +112,13 @@ public final class PaymentDueResolver {
         if (state.contains("COMPLETE") || state.contains("CLOSED") || state.contains("DISSOLVED") || state.contains("PAID")) {
             return none("This goal is finished - nothing is due", "Idle");
         }
-        double target = num(group.get("targetGoalAmountRaw")) > 0 ? num(group.get("targetGoalAmountRaw")) / 1e8 : num(group.get("targetGoalAmount"));
-        double raised = num(group.get("raisedAmountRaw")) > 0 ? num(group.get("raisedAmountRaw")) / 1e8 : num(group.get("raisedAmount"));
+        String asset = str(group.get("asset"));
+        double target = num(group.get("targetGoalAmountRaw")) > 0
+                ? com.harvana.app.engine.Amounts.human(num(group.get("targetGoalAmountRaw")), asset)
+                : num(group.get("targetGoalAmount"));
+        double raised = num(group.get("raisedAmountRaw")) > 0
+                ? com.harvana.app.engine.Amounts.human(num(group.get("raisedAmountRaw")), asset)
+                : num(group.get("raisedAmount"));
         if (target > 0 && raised >= target) return none("Goal reached - nothing is due", "Idle");
         String frequency = str(group.get("frequency"));
         if (num(group.get("contributionAmount")) <= 0 || frequency.isEmpty() || "-".equals(frequency) || "—".equals(frequency)) {

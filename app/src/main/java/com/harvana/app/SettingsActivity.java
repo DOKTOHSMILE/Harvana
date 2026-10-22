@@ -584,6 +584,7 @@ public class SettingsActivity extends AppCompatActivity {
 		{"GH₵", "GHS — Ghanaian Cedi"},
 		{"KSh", "KES — Kenyan Shilling"},
 		{"R", "ZAR — South African Rand"},
+		{"₿", "BTC — Bitcoin"},
 	};
 	
 	private String _currencyCode(String symbol) {
@@ -723,6 +724,7 @@ public class SettingsActivity extends AppCompatActivity {
 		.setSingleChoiceItems(labels, selectedIndex, (dialog, which) -> {
 			String chosenSymbol = SUPPORTED_CURRENCIES[which][0];
 			com.harvana.app.wallet.FxRates.save(this, chosenSymbol);
+			com.harvana.app.wallet.AssetPrices.load(this, null);
 			com.harvana.app.wallet.FxRates.load(this, null);
 			tvCurrencyValue.setText(_currencyCode(chosenSymbol));
 			dialog.dismiss();

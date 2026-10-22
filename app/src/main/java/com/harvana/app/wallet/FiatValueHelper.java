@@ -197,6 +197,8 @@ public final class FiatValueHelper {
             case "GH₵": return "GHS";
             case "KSh": return "KES";
             case "R": return "ZAR";
+            case "₿": return "BTC";
+            case "BTC": return "BTC";
             default: return "NGN";
         }
     }

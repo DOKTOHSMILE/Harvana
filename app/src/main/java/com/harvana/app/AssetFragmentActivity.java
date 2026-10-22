@@ -703,6 +703,7 @@ public class AssetFragmentActivity extends Fragment {
 				{"GH₵", "GHS", "GHS — Ghanaian Cedi"},
 				{"KSh", "KES", "KES — Kenyan Shilling"},
 				{"R", "ZAR", "ZAR — South African Rand"},
+				{"₿", "BTC", "BTC — Bitcoin"},
 			};
 			String current = com.harvana.app.wallet.FxRates.symbol(getContext());
 			String[] labels = new String[currencies.length];

@@ -158,6 +158,8 @@ public class HomeFragmentActivity extends Fragment {
     private LinearLayout linear208;
     private LinearLayout linear225;
     private TextView tv_local_currency_eqv;
+    /** Keys shown in the three home coin slots, left to right. Clicks follow this, not the view id. */
+    private final String[] homeSlotKey = new String[] { "BTC", "ETH", "HARV" };
     private TextView tv_harv_balance;
     private ImageView imageview61;
     private LinearLayout linear223;
@@ -1094,7 +1096,6 @@ public class HomeFragmentActivity extends Fragment {
         }
         View add = root.findViewById(R.id.btn_home_add);
         View send = root.findViewById(R.id.btn_home_send);
-        View transfer = root.findViewById(R.id.btn_home_transfer);
         View receive = root.findViewById(R.id.btn_home_receive);
         if (add != null)
             add.setOnClickListener(
@@ -1102,8 +1103,6 @@ public class HomeFragmentActivity extends Fragment {
         if (send != null)
             send.setOnClickListener(
                     v -> startActivity(new Intent(getContext(), SendAssetActivity.class)));
-        if (transfer != null)
-            transfer.setOnClickListener(v -> _transferIntoCircle());
         if (receive != null)
             receive.setOnClickListener(
                     v -> startActivity(new Intent(getContext(), ReceiveActivity.class)));
@@ -1125,15 +1124,13 @@ public class HomeFragmentActivity extends Fragment {
                     new Intent(getContext(), com.harvana.app.swap.SwapActivity.class)));
         if (activity != null)
             activity.setOnClickListener(v -> _openActivityTab());
-        View harv = root.findViewById(R.id.home_coin_harv);
-        View btc = root.findViewById(R.id.home_coin_btc);
-        View eth = root.findViewById(R.id.home_coin_eth);
-        if (harv != null)
-            harv.setOnClickListener(v -> _openCoin("HARV"));
-        if (btc != null)
-            btc.setOnClickListener(v -> _openCoin("BTC"));
-        if (eth != null)
-            eth.setOnClickListener(v -> _openCoin("ETH"));
+        int[] coinCells = { R.id.home_coin_harv, R.id.home_coin_btc, R.id.home_coin_eth };
+        for (int i = 0; i < coinCells.length; i++) {
+            View cell = root.findViewById(coinCells[i]);
+            if (cell == null) continue;
+            final int slot = i;
+            cell.setOnClickListener(v -> _openCoin(homeSlotKey[slot]));
+        }
         homeRefresh = root.findViewById(R.id.home_refresh);
         if (homeRefresh != null) {
             homeRefresh.setColorSchemeResources(R.color.colorAccent);
@@ -1231,55 +1228,229 @@ public class HomeFragmentActivity extends Fragment {
             homeHarvPct = q == null ? Double.NaN : q.changePct;
             _paintHarvChange();
         });
-        if (harvAddr == null || harvAddr.isEmpty()) {
+        java.util.List<HomeCoin> cached = _coinsFromCache(ctx, symbol);
+        if (!cached.isEmpty())
+            _applyHomeSlots(_pickHomeCoins(cached));
+        else if (harvAddr == null || harvAddr.isEmpty()) {
             homeHarvFiat = null;
             _paintHarvChange();
-            _setCoin(R.id.tv_coin_harv, R.id.tv_coin_harv_fiat, "HARV", null, null);
-            _setCoin(R.id.tv_coin_btc, R.id.tv_coin_btc_fiat, "BTC", null, null);
-            _setCoin(R.id.tv_coin_eth, R.id.tv_coin_eth_fiat, "ETH", null, null);
+            _applyHomeSlots(_pickHomeCoins(new java.util.ArrayList<HomeCoin>()));
             return;
         }
-        WalletNodeBalanceHelper.load(harvAddr, (bal, avail, pin, pout, pending, err) -> {
-            if (getActivity() == null)
-                return;
-            double amount = avail >= 0 ? avail : bal;
-            if (err != null && !err.isEmpty())
-                amount = Double.NaN;
-            final double harv = amount;
-            com.harvana.app.wallet.FiatValueHelper.valueOfHarv(ctx,
-                    Double.isNaN(harv) || harv < 0 ? 0 : harv, symbol, (fiat, ok) -> {
-                        if (getActivity() == null)
-                            return;
+        if (harvAddr == null || harvAddr.isEmpty())
+            return;
+        new Thread(() -> {
+            java.util.Map<String, HomeCoin> byKey = new java.util.LinkedHashMap<>();
+            for (HomeCoin c : cached)
+                byKey.put(c.key, c);
+            try {
+                final double[] harvAmt = { Double.NaN };
+                final java.util.concurrent.CountDownLatch harvGate = new java.util.concurrent.CountDownLatch(1);
+                WalletNodeBalanceHelper.load(harvAddr, (bal, avail, pin, pout, pending, err) -> {
+                    if (err == null || err.isEmpty())
+                        harvAmt[0] = avail >= 0 ? avail : bal;
+                    harvGate.countDown();
+                });
+                harvGate.await(6, java.util.concurrent.TimeUnit.SECONDS);
+                if (!Double.isNaN(harvAmt[0])) {
+                    final double[] fiat = { Double.NaN };
+                    final java.util.concurrent.CountDownLatch fiatGate = new java.util.concurrent.CountDownLatch(1);
+                    com.harvana.app.wallet.FiatValueHelper.valueOfHarv(ctx, Math.max(0, harvAmt[0]), symbol,
+                            (v, ok) -> {
+                                if (ok) fiat[0] = v;
+                                fiatGate.countDown();
+                            });
+                    fiatGate.await(6, java.util.concurrent.TimeUnit.SECONDS);
+                    byKey.put("HARV", new HomeCoin("HARV", "HARV", harvAmt[0],
+                            Double.isNaN(fiat[0]) ? null : fiat[0], R.drawable.ic_coin_harv));
+                    if (getActivity() != null)
                         getActivity().runOnUiThread(() -> {
-                            if (!isAdded())
-                                return;
-                            _setCoin(R.id.tv_coin_harv, R.id.tv_coin_harv_fiat, "HARV",
-                                    Double.isNaN(harv) ? null : harv, ok ? fiat : null);
-                            homeHarvFiat = (!Double.isNaN(harv) && ok) ? fiat : null;
+                            homeHarvFiat = Double.isNaN(fiat[0]) ? null : fiat[0];
                             _paintHarvChange();
                         });
-                    });
-        });
-        new Thread(() -> {
+                }
+            } catch (Exception ignored) { }
+            final java.util.concurrent.CountDownLatch prices = new java.util.concurrent.CountDownLatch(1);
+            new android.os.Handler(android.os.Looper.getMainLooper())
+                    .post(() -> com.harvana.app.wallet.AssetPrices.load(ctx, prices::countDown));
+            try { prices.await(6, java.util.concurrent.TimeUnit.SECONDS); } catch (InterruptedException ignored) { }
             java.util.Map<String, String> addrs;
             try {
                 addrs = com.harvana.app.wallet.CoinCatalog.addresses(ctx, harvAddr);
             } catch (Exception e) {
-                return;
+                addrs = java.util.Collections.emptyMap();
             }
-            final String btcLine = com.harvana.app.wallet.ChainBalances.assetBalance("BTC",
-                    addrs.get("BTC"));
-            final String ethLine = com.harvana.app.wallet.ChainBalances.assetBalance("ETH",
-                    addrs.get("ETH"));
-            com.harvana.app.wallet.AssetPrices.load(ctx, () -> {
-                if (!isAdded())
-                    return;
-                _setPricedCoin(ctx, symbol, "BTC", R.id.tv_coin_btc, R.id.tv_coin_btc_fiat,
-                        btcLine);
-                _setPricedCoin(ctx, symbol, "ETH", R.id.tv_coin_eth, R.id.tv_coin_eth_fiat,
-                        ethLine);
+            for (String key : new String[] { "BTC", "ETH" }) {
+                HomeCoin live = _pricedChain(ctx, symbol, key, addrs.get(key));
+                if (live != null) byKey.put(key, live);
+            }
+            String mine = addrs.get("HARV");
+            if (mine != null && !mine.isEmpty()) {
+                for (String code : com.harvana.app.husd.Stable.CODES) {
+                    HomeCoin stable = _pricedStable(ctx, symbol, code, mine);
+                    if (stable != null) byKey.put(code, stable);
+                }
+            }
+            java.util.List<HomeCoin> ranked = _pickHomeCoins(new java.util.ArrayList<>(byKey.values()));
+            if (getActivity() == null) return;
+            getActivity().runOnUiThread(() -> {
+                if (!isAdded()) return;
+                _applyHomeSlots(ranked);
             });
         }, "home-coins").start();
+    }
+
+    /** Top 3 by fiat value, then by how many coins are held. Empty slots fill with BTC, then ETH, then HARV. */
+    private java.util.List<HomeCoin> _pickHomeCoins(java.util.List<HomeCoin> all) {
+        java.util.ArrayList<HomeCoin> held = new java.util.ArrayList<>();
+        for (HomeCoin c : all) {
+            if (c == null || c.key == null) continue;
+            boolean value = c.fiat != null && c.fiat > 0;
+            boolean count = c.amount != null && c.amount > 0;
+            if (value || count) held.add(c);
+        }
+        java.util.Collections.sort(held, (a, b) -> {
+            double av = a.fiat != null && a.fiat > 0 ? a.fiat : 0;
+            double bv = b.fiat != null && b.fiat > 0 ? b.fiat : 0;
+            int cmp = Double.compare(bv, av);
+            if (cmp != 0) return cmp;
+            double aa = a.amount != null && a.amount > 0 ? a.amount : 0;
+            double ba = b.amount != null && b.amount > 0 ? b.amount : 0;
+            cmp = Double.compare(ba, aa);
+            if (cmp != 0) return cmp;
+            return a.ticker.compareToIgnoreCase(b.ticker);
+        });
+        java.util.ArrayList<HomeCoin> picked = new java.util.ArrayList<>();
+        for (HomeCoin c : held) {
+            if (picked.size() == 3) break;
+            picked.add(c);
+        }
+        for (String fill : new String[] { "BTC", "ETH", "HARV" }) {
+            if (picked.size() == 3) break;
+            boolean there = false;
+            for (HomeCoin c : picked) if (fill.equals(c.key)) there = true;
+            if (there) continue;
+            HomeCoin known = null;
+            for (HomeCoin c : all) if (c != null && fill.equals(c.key)) known = c;
+            picked.add(known != null ? known : new HomeCoin(fill, fill, null, null, _homeIcon(fill)));
+        }
+        return picked;
+    }
+
+    private java.util.List<HomeCoin> _coinsFromCache(android.content.Context ctx, String symbol) {
+        java.util.ArrayList<HomeCoin> out = new java.util.ArrayList<>();
+        try {
+            String scope = ctx.getSharedPreferences("harv_wallet_prefs", android.content.Context.MODE_PRIVATE)
+                    .getString("active_wallet_address", "");
+            if (scope == null) return out;
+            String raw = ctx.getSharedPreferences("asset_list_cache", android.content.Context.MODE_PRIVATE)
+                    .getString(scope.trim(), "");
+            if (raw == null || raw.isEmpty()) return out;
+            org.json.JSONObject j = new org.json.JSONObject(raw);
+            if (!symbol.equals(j.optString("sym"))) return out;
+            org.json.JSONArray rows = j.optJSONArray("rows");
+            if (rows == null) return out;
+            java.util.Set<String> seen = new java.util.HashSet<>();
+            for (int i = 0; i < rows.length(); i++) {
+                org.json.JSONObject o = rows.optJSONObject(i);
+                if (o == null) continue;
+                String key = o.optString("pk", "").toUpperCase(java.util.Locale.US);
+                if (key.isEmpty() || !seen.add(key)) continue;
+                Double amount = com.harvana.app.wallet.AssetPrices.amount(o.optString("b"));
+                double sort = o.optDouble("s", 0);
+                Double fiat = sort > 0 ? sort : null;
+                String ticker = o.optString("t", key);
+                if (ticker.isEmpty()) ticker = key;
+                out.add(new HomeCoin(key, ticker, amount, fiat, _homeIcon(key)));
+            }
+        } catch (Exception ignored) { }
+        return out;
+    }
+
+    private HomeCoin _pricedChain(android.content.Context ctx, String symbol, String key, String address) {
+        if (address == null || address.isEmpty()) return null;
+        String line;
+        try { line = com.harvana.app.wallet.ChainBalances.assetBalance(key, address); }
+        catch (Exception e) { return null; }
+        Double held = com.harvana.app.wallet.AssetPrices.amount(line);
+        com.harvana.app.wallet.AssetPrices.Quote q = com.harvana.app.wallet.AssetPrices.peek(ctx, key);
+        Double fiat = null;
+        if (held != null && q != null && q.usd > 0) {
+            double v = com.harvana.app.wallet.FxRates.fiat(ctx, held * q.usd);
+            if (!Double.isNaN(v)) fiat = v;
+        }
+        String ticker = "BTC".equals(key) || "ETH".equals(key) ? key : key;
+        return new HomeCoin(key, ticker, held, fiat, _homeIcon(key));
+    }
+
+    private HomeCoin _pricedStable(android.content.Context ctx, String symbol, String code, String address) {
+        final org.json.JSONObject[] box = new org.json.JSONObject[1];
+        final java.util.concurrent.CountDownLatch gate = new java.util.concurrent.CountDownLatch(1);
+        com.harvana.app.husd.HusdClient.balance(code, address, new com.harvana.app.husd.HusdClient.Cb() {
+            @Override public void ok(org.json.JSONObject r) { box[0] = r; gate.countDown(); }
+            @Override public void fail(String error) { gate.countDown(); }
+        });
+        try { if (!gate.await(4, java.util.concurrent.TimeUnit.SECONDS)) return null; }
+        catch (InterruptedException e) { return null; }
+        if (box[0] == null) return null;
+        long raw = box[0].optLong("availableRaw", box[0].optLong("balanceRaw", box[0].optLong("balance", 0)));
+        double amount = raw / (double) com.harvana.app.husd.HusdClient.UNIT;
+        String cur = com.harvana.app.husd.Stable.currency(code);
+        double per = com.harvana.app.wallet.FxRates.perUsd(ctx, cur);
+        Double fiat = null;
+        if (!Double.isNaN(per) && per > 0) {
+            double usd = amount / per;
+            double v = com.harvana.app.wallet.FxRates.fiat(ctx, usd);
+            if (!Double.isNaN(v)) fiat = v;
+        }
+        return new HomeCoin(code, com.harvana.app.husd.Stable.symbol(code), amount, fiat, _homeIcon(code));
+    }
+
+    private void _applyHomeSlots(java.util.List<HomeCoin> picked) {
+        if (!isAdded() || getView() == null) return;
+        int[] amounts = { R.id.tv_coin_harv, R.id.tv_coin_btc, R.id.tv_coin_eth };
+        int[] fiats = { R.id.tv_coin_harv_fiat, R.id.tv_coin_btc_fiat, R.id.tv_coin_eth_fiat };
+        int[] cells = { R.id.home_coin_harv, R.id.home_coin_btc, R.id.home_coin_eth };
+        for (int i = 0; i < 3; i++) {
+            HomeCoin c = i < picked.size() ? picked.get(i) : new HomeCoin("HARV", "HARV", null, null, R.drawable.ic_coin_harv);
+            homeSlotKey[i] = c.key;
+            _setCoin(amounts[i], fiats[i], c.ticker, c.amount, c.fiat);
+            View cell = getView().findViewById(cells[i]);
+            if (cell instanceof android.view.ViewGroup) {
+                android.view.ViewGroup box = (android.view.ViewGroup) cell;
+                for (int n = 0; n < box.getChildCount(); n++) {
+                    if (box.getChildAt(n) instanceof android.widget.ImageView) {
+                        ((android.widget.ImageView) box.getChildAt(n)).setImageResource(c.icon);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private static int _homeIcon(String key) {
+        if ("HARV".equals(key)) return R.drawable.ic_coin_harv;
+        if ("BTC".equals(key)) return R.drawable.ic_coin_btc;
+        if ("ETH".equals(key)) return R.drawable.ic_coin_eth;
+        if (com.harvana.app.husd.Stable.isStable(key)) return R.drawable.ic_coin_husd;
+        for (com.harvana.app.wallet.CoinCatalog.Coin c : com.harvana.app.wallet.CoinCatalog.others())
+            if (c.key.equals(key)) return c.icon;
+        for (com.harvana.app.wallet.CoinCatalog.Coin c : com.harvana.app.wallet.CoinCatalog.addedCoins())
+            if (c.key.equals(key)) return c.icon;
+        return R.drawable.ic_coin_generic;
+    }
+
+    private static final class HomeCoin {
+        final String key, ticker;
+        final Double amount, fiat;
+        final int icon;
+        HomeCoin(String key, String ticker, Double amount, Double fiat, int icon) {
+            this.key = key;
+            this.ticker = ticker == null || ticker.isEmpty() ? key : ticker;
+            this.amount = amount;
+            this.fiat = fiat;
+            this.icon = icon;
+        }
     }
 
     private void _paintHarvChange() {

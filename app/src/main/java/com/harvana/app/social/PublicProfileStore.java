@@ -311,7 +311,10 @@ public final class PublicProfileStore {
                 // so a card that already holds other keys is not rejected.
                 if (existing.exists()) {
                     Map<String, Object> patch = new HashMap<>(out);
-                    patch.remove("pid");
+                    // The rule requires the card's pid to equal the document id. Older cards have no pid
+                    // field, and an update that leaves it missing is rejected. pid is allowed to change
+                    // only onto that id.
+                    patch.put("pid", pid);
                     Tasks.await(db().collection("PROFILES").document(pid).update(patch), T, TimeUnit.SECONDS);
                 } else {
                     Tasks.await(db().collection("PROFILES").document(pid).set(out), T, TimeUnit.SECONDS);

@@ -69,6 +69,7 @@ public final class FxRates {
     /** The holding, in the currency this person chose. "…" until a rate exists for anything other than dollars. */
     public static String money(Context c, double usd) {
         String symbol = symbol(c);
+        if (isBtc(symbol)) return btcText(c, usd);
         String code = FiatValueHelper.symbolToCurrencyCode(symbol);
         double rate = perUsd(c, code);
         if (Double.isNaN(rate)) return "…";
@@ -77,7 +78,13 @@ public final class FxRates {
 
     /** Same number {@link #money} shows, or NaN when the rate is not here yet. */
     public static double fiat(Context c, double usd) {
-        String code = FiatValueHelper.symbolToCurrencyCode(symbol(c));
+        String symbol = symbol(c);
+        if (isBtc(symbol)) {
+            double px = btcUsd(c);
+            if (Double.isNaN(px) || px <= 0) return Double.NaN;
+            return usd / px;
+        }
+        String code = FiatValueHelper.symbolToCurrencyCode(symbol);
         double rate = perUsd(c, code);
         if (Double.isNaN(rate)) return Double.NaN;
         return usd * rate;
@@ -85,6 +92,10 @@ public final class FxRates {
 
     public static String format(String symbol, double v) {
         DecimalFormatSymbols us = DecimalFormatSymbols.getInstance(Locale.US);
+        if ("₿".equals(symbol)) {
+            DecimalFormat btc = new DecimalFormat("0.########", us);
+            return "₿" + btc.format(v);
+        }
         DecimalFormat fmt = Math.abs(v) > 0 && Math.abs(v) < 0.01
                 ? new DecimalFormat("0.0000", us)
                 : new DecimalFormat("#,##0.00", us);
@@ -93,6 +104,11 @@ public final class FxRates {
 
     /** "1 USD = ₦1,600.00", or an empty string when that rate is not on the phone yet. */
     public static String rateLine(Context c, String code) {
+        if ("BTC".equals(code)) {
+            double px = btcUsd(c);
+            if (Double.isNaN(px) || px <= 0) return "";
+            return "1 BTC = " + format("$", px);
+        }
         if ("USD".equals(code)) return "1 USD";
         double rate = perUsd(c, code);
         if (Double.isNaN(rate) || rate <= 0) return "";
@@ -103,6 +119,7 @@ public final class FxRates {
     public static String symbolFor(String code) {
         switch (code == null ? "" : code) {
             case "USD": return "$";
+            case "BTC": return "₿";
             case "GBP": return "£";
             case "EUR": return "€";
             case "GHS": return "GH₵";
@@ -113,6 +130,23 @@ public final class FxRates {
     }
 
     private static void read(Context c) { /* rates live in prefs; perUsd reads them */ }
+
+    private static boolean isBtc(String symbol) {
+        return "₿".equals(symbol) || "BTC".equalsIgnoreCase(symbol);
+    }
+
+    /** What one bitcoin costs in dollars, from the same prices the Assets list uses. NaN until that price is on the phone. */
+    private static double btcUsd(Context c) {
+        if (c == null) return Double.NaN;
+        AssetPrices.Quote q = AssetPrices.peek(c, "BTC");
+        return q == null ? Double.NaN : q.usd;
+    }
+
+    private static String btcText(Context c, double usd) {
+        double px = btcUsd(c);
+        if (Double.isNaN(px) || px <= 0 || Double.isNaN(usd)) return "…";
+        return format("₿", usd / px);
+    }
 
     private static boolean fetch(Context app) {
         String body = get("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.min.json");

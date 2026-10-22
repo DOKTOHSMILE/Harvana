@@ -302,8 +302,10 @@ public class GroupMembersFragmentActivity extends Fragment {
 					}
 					displayMembers.clear();
 					activeMemberUids.clear();
+					java.util.Set<String> onChain = new java.util.HashSet<>();
 					for (Map<String, Object> row : rows) {
 						String wallet = str(row, "walletAddress", "");
+						if (!wallet.isEmpty()) onChain.add(wallet.toLowerCase(java.util.Locale.US));
 						Map<String, Object> known = byWallet.get(wallet.toLowerCase(java.util.Locale.US));
 						HashMap<String, Object> show = new HashMap<>(row);
 						String name = known == null ? "" : str(known, "displayName", str(known, "name", str(known, "memberName", "")));
@@ -313,6 +315,25 @@ public class GroupMembersFragmentActivity extends Fragment {
 						String state = str(row, "state", "");
 						if (!state.isEmpty()) show.put("paymentStatus", state);
 						displayMembers.add(show);
+					}
+					if (social != null) {
+						for (Map<String, Object> m : social) {
+							String wallet = str(m, "walletAddress", str(m, "wallet", ""));
+							if (!wallet.isEmpty() && onChain.contains(wallet.toLowerCase(java.util.Locale.US))) continue;
+							String uid = str(m, "memberUid", str(m, "uid", ""));
+							boolean seen = false;
+							for (HashMap<String, Object> shown : displayMembers) {
+								if (!uid.isEmpty() && uid.equals(str(shown, "memberUid", ""))) seen = true;
+							}
+							if (seen) continue;
+							HashMap<String, Object> show = new HashMap<>(m);
+							String name = str(m, "displayName", str(m, "name", str(m, "memberName", "")));
+							if (name.isEmpty()) name = wallet.length() > 10 ? wallet.substring(0, 6) + "…" + wallet.substring(wallet.length() - 4) : "Member";
+							show.put("displayName", name);
+							show.put("status", "Not yet bonded");
+							show.put("paymentStatus", "Not yet bonded");
+							displayMembers.add(show);
+						}
 					}
 					_mergeSamePerson();
 					if (tv_members_count != null) tv_members_count.setText("Members · " + displayMembers.size() + " on the network");
@@ -396,7 +417,7 @@ public class GroupMembersFragmentActivity extends Fragment {
 		for (String w : _walletsOf(member)) {
 			if (chainRoster.contains(w.toLowerCase(Locale.US))) locked = true;
 		}
-		return base + (locked ? " · bond locked" : " · bond not locked");
+		return base + (locked ? " · bond locked" : " · Not yet bonded");
 	}
 
 	/** Every wallet shown on one member row: their own, then any other wallet of theirs in this group. */

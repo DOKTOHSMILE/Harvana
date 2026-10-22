@@ -220,11 +220,12 @@ public final class GroupTypeBoard {
         double target = goalAmount(group);
         double raised = raisedAmount(group);
         boolean summed = num(group, "raisedAmountRaw", 0) <= 0 && num(group, "raisedAmount", 0) <= 0;
+        String coin = coinOf(group);
         List<Cell> cells = new ArrayList<>();
         if (payments != null) {
             for (Map<String, Object> p : payments) {
                 if (p == null || !confirmed(p) || !isDeposit(p)) continue;
-                double amt = amountOf(p);
+                double amt = amountOf(p, group);
                 if (summed) raised += amt;
                 long ts = timeOf(p);
                 if (ts <= 0) continue;
@@ -232,15 +233,15 @@ public final class GroupTypeBoard {
                 cells.add(new Cell(String.valueOf(cal(ts, zone).get(Calendar.DAY_OF_MONTH)),
                         MONTHS[cal(ts, zone).get(Calendar.MONTH)],
                         "Deposit" + (who.isEmpty() ? "" : " · " + who),
-                        money(amt) + " on " + fullDate(ts, zone) + ".",
+                        money(amt, coin) + " on " + fullDate(ts, zone) + ".",
                         PAID, false));
             }
         }
         boolean reached = goalReached(group, raised, target);
         String who = beneficiaryPhrase(group);
-        String subtitle = money(raised) + " raised of " + money(target);
+        String subtitle = money(raised, coin) + " raised of " + money(target, coin);
         subtitle += ". " + com.harvana.app.engine.FixedGoalText.sentence(str(group, "disbursementRule", ""), str(group, "state", ""),
-                reached, money(raised), who);
+                reached, money(raised, coin), who);
         return new Board(FIXED, "GOAL", "Shared goal", subtitle,
                 "A box is a deposit, with the date inside. This goal does not mark a quiet day as missed. Tap the + box to start a new goal.",
                 4, who, cells);
@@ -248,14 +249,14 @@ public final class GroupTypeBoard {
 
     private static double goalAmount(Map<String, Object> group) {
         double raw = num(group, "targetGoalAmountRaw", 0);
-        if (raw > 0) return raw / RAW;
+        if (raw > 0) return com.harvana.app.engine.Amounts.human(raw, com.harvana.app.engine.Amounts.assetOf(group));
         double harv = num(group, "targetGoalAmount", 0);
         return harv > 0 ? harv : num(group, "targetGoal", 0);
     }
 
     private static double raisedAmount(Map<String, Object> group) {
         double raw = num(group, "raisedAmountRaw", 0);
-        if (raw > 0) return raw / RAW;
+        if (raw > 0) return com.harvana.app.engine.Amounts.human(raw, com.harvana.app.engine.Amounts.assetOf(group));
         return num(group, "raisedAmount", 0);
     }
 
@@ -373,20 +374,20 @@ public final class GroupTypeBoard {
             boolean ok = confirmed(p);
             if (ok) {
                 confirmedN++;
-                total += amountOf(p);
+                total += amountOf(p, null);
             }
             String who = str(p, "memberName", str(p, "name", ""));
             if (who.isEmpty()) who = personalBook ? "You" : "Member";
             String top = ts > 0 ? String.valueOf(cal(ts, zone).get(Calendar.DAY_OF_MONTH)) : "•";
             String bottom = ts > 0 ? MONTHS[cal(ts, zone).get(Calendar.MONTH)] : (ok ? "Paid" : "Wait");
             String title = ts > 0 ? fullDate(ts, zone) : "Payment";
-            String body = title + "\n" + who + "\n" + money(amountOf(p))
+            String body = title + "\n" + who + "\n" + money(amountOf(p, null), coinOf(p))
                     + "\n" + str(p, "status", ok ? "PAID" : "PENDING");
             cells.add(new Cell(top, bottom, title, body, ok ? PAID : PENDING, false));
         }
         String subtitle = cells.isEmpty()
                 ? "No savings recorded yet. Each payment you make appears here as its own box, with the date written inside."
-                : confirmedN + " recorded · " + money(total) + " saved";
+                : confirmedN + " recorded · " + money(total, coinOf(stamps.isEmpty() ? null : stamps.get(0))) + " saved";
         String title = personalBook ? "Your savings card" : "Members' savings cards";
         String legend = personalBook
                 ? "Only your payments are on this card. The date is written in each box. Green is confirmed, amber is still pending."
@@ -442,9 +443,11 @@ public final class GroupTypeBoard {
         }
         long contribution = (long) num(group, "contributionAmountRaw", 0);
         long payout = contribution * Math.max(0, limit - 1L);
+        String coin = coinOf(group);
+        double payoutHuman = com.harvana.app.engine.Amounts.human(payout, com.harvana.app.engine.Amounts.assetOf(group));
         String subtitle = (forming ? "Still forming · " : "Round " + round + " of " + limit + " · ")
                 + (recipient.isEmpty() ? "payout order fills as members join" : "this round: " + recipient)
-                + (contribution > 0 ? " · payout " + String.format(java.util.Locale.US, "%.4f HARV", payout / RAW) + " from the other members. Bonds stay locked." : "");
+                + (contribution > 0 ? " · payout " + money(payoutHuman, coin) + " from the other members. Bonds stay locked." : "");
         return new Board(ROTATING, "ROTATION BOARD", "Payout order", subtitle,
                 "Orange is the current round. Green rounds are already paid. Tap a box to see who and when.",
                 4, recipient, cells);
@@ -500,8 +503,7 @@ public final class GroupTypeBoard {
             cells.add(cell);
         }
         String coin = com.harvana.app.engine.Amounts.assetOf(line);
-        String savedText = coin.isEmpty() ? money(line == null ? 0 : num(line, "amountPaidRaw", 0) / RAW)
-                : com.harvana.app.engine.Amounts.money((long) num(line, "amountPaidRaw", 0), coin);   // a line kept in a stable coin
+        String savedText = com.harvana.app.engine.Amounts.money((long) num(line, "amountPaidRaw", 0), coin);
         return new Board(ACCUMULATIVE, "SAVINGS STAMPS", "30-day savings line",
                 saved + " of 30 days saved · " + savedText,
                 "Each box is one day of the line, with the date inside. Green is paid, red is missed, blue is today. Tap an unpaid box to pay a day; long-press to pick several, past or ahead. Days are paid in order: the earliest unpaid day is always paid first, so no day can be skipped.",
@@ -509,9 +511,13 @@ public final class GroupTypeBoard {
     }
 
     private static Board fixedGoal(Map<String, Object> group, Map<String, Object> member, long nowMs, TimeZone zone) {
-        double target = num(group, "targetGoalAmountRaw", 0) / RAW;
-        double raised = Math.max(0, num(group, "raisedAmountRaw", 0) - num(group, "goalBaseRaisedRaw", 0)) / RAW;
-        double mine = member == null ? 0 : num(member, "contributedRaw", 0) / RAW;
+        String asset = com.harvana.app.engine.Amounts.assetOf(group);
+        String coin = coinOf(group);
+        double rawTarget = num(group, "targetGoalAmountRaw", 0);
+        double rawRaised = Math.max(0, num(group, "raisedAmountRaw", 0) - num(group, "goalBaseRaisedRaw", 0));
+        double target = rawTarget > 0 ? com.harvana.app.engine.Amounts.human(rawTarget, asset) : num(group, "targetGoalAmount", 0);
+        double raised = rawRaised > 0 ? com.harvana.app.engine.Amounts.human(rawRaised, asset) : num(group, "raisedAmount", 0);
+        double mine = member == null ? 0 : com.harvana.app.engine.Amounts.human(num(member, "contributedRaw", 0), asset);
         List<Cell> cells = new ArrayList<>();
         if (mine > 0) {
             long ts = member == null ? 0 : (long) num(member, "joinedTimestamp", 0);
@@ -519,7 +525,7 @@ public final class GroupTypeBoard {
             cells.add(new Cell(String.valueOf(cal(ts, zone).get(Calendar.DAY_OF_MONTH)),
                     MONTHS[cal(ts, zone).get(Calendar.MONTH)],
                     "Your deposit",
-                    "You have put in " + money(mine) + ".\nRecorded " + fullDate(ts, zone) + ".",
+                    "You have put in " + money(mine, coin) + ".\nRecorded " + fullDate(ts, zone) + ".",
                     PAID, false));
         }
         Cell fresh = new Cell("+", "New goal", "Start a new goal",
@@ -529,9 +535,9 @@ public final class GroupTypeBoard {
         String rule = str(group, "disbursementRule", "");
         boolean reached = goalReached(group, raised, target);
         String who = beneficiaryPhrase(group);
-        String subtitle = money(raised) + " raised of " + money(target);
+        String subtitle = money(raised, coin) + " raised of " + money(target, coin);
         subtitle += ". " + com.harvana.app.engine.FixedGoalText.sentence(str(group, "disbursementRule", ""), str(group, "state", ""),
-                reached, money(raised), who);
+                reached, money(raised, coin), who);
         if (!rule.isEmpty()) subtitle += " " + rule.replace('_', ' ').toLowerCase(Locale.US) + ".";
         return new Board(FIXED, "GOAL", "Shared goal", subtitle,
                 "A box is a deposit, with the date inside. This goal does not mark a quiet day as missed.",
@@ -596,22 +602,39 @@ public final class GroupTypeBoard {
         return 0;
     }
 
-    private static double amountOf(Map<String, Object> p) {
-        double a = num(p, "amountHarv", 0);
-        if (a <= 0) a = num(p, "amount", 0);
-        if (a <= 0) a = num(p, "amountRaw", 0) / RAW;
-        return a;
-    }
-
     private static String memberName(Map<String, Object> m) {
         String n = str(m, "displayName", str(m, "memberName", str(m, "name", str(m, "fullName", ""))));
         if (!n.isEmpty()) return n;
         return "";
     }
 
+    private static double amountOf(Map<String, Object> p, Map<String, Object> group) {
+        double a = num(p, "amountHarv", 0);
+        if (a <= 0) a = num(p, "amount", 0);
+        if (a <= 0) {
+            String asset = str(p, "asset", "");
+            if (asset.isEmpty() && group != null) asset = com.harvana.app.engine.Amounts.assetOf(group);
+            a = com.harvana.app.engine.Amounts.human(num(p, "amountRaw", 0), asset);
+        }
+        return a;
+    }
+
+    private static String coinOf(Map<String, Object> src) {
+        if (src == null) return "HARV";
+        String direct = str(src, "asset", str(src, "coin", ""));
+        if (!direct.isEmpty()) return com.harvana.app.engine.Amounts.unitLabel(direct);
+        return com.harvana.app.engine.Amounts.unitLabel(com.harvana.app.engine.Amounts.assetOf(src));
+    }
+
     private static String money(double v) {
-        if (Math.abs(v - Math.rint(v)) < 0.001) return String.format(Locale.US, "%.0f HARV", v);
-        return String.format(Locale.US, "%.2f HARV", v);
+        return money(v, "HARV");
+    }
+
+    private static String money(double v, String coin) {
+        String n = Math.abs(v - Math.rint(v)) < 0.001
+                ? String.format(Locale.US, "%.0f", v)
+                : String.format(Locale.US, "%.2f", v);
+        return n + " " + (coin == null || coin.isEmpty() ? "HARV" : coin);
     }
 
     private static String shortDate(long ms, TimeZone zone) {

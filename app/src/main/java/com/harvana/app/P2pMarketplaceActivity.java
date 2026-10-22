@@ -115,7 +115,7 @@ public class P2pMarketplaceActivity extends AppCompatActivity {
 
 		findViewById(R.id.iv_p2p_back).setOnClickListener(v -> finish());
 		findViewById(R.id.btn_p2p_currency).setOnClickListener(v -> showCurrencySheet());
-		findViewById(R.id.iv_p2p_express).setOnClickListener(v -> startActivity(new Intent(this, P2pExpressActivity.class)));
+		findViewById(R.id.btn_p2p_express).setOnClickListener(v -> startActivity(new Intent(this, P2pExpressActivity.class)));
 		findViewById(R.id.btn_p2p_orders).setOnClickListener(v -> startActivity(new Intent(this, P2pMyTradesActivity.class)));
 		findViewById(R.id.iv_p2p_my_ads).setOnClickListener(v -> startActivity(new Intent(this, P2pMerchantManagerActivity.class)));
 		findViewById(R.id.fab_p2p_new_offer).setOnClickListener(v -> showNewOfferSheet());

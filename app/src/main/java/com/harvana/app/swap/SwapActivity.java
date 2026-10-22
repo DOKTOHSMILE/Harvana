@@ -234,7 +234,7 @@ public class SwapActivity extends AppCompatActivity {
             String f = o.optString("from"), t = o.optString("to"), st = o.optString("status");
             ((ImageView) row.findViewById(R.id.iv_swap_recent_from)).setImageDrawable(icon(f));
             ((ImageView) row.findViewById(R.id.iv_swap_recent_to)).setImageDrawable(icon(t));
-            ((TextView) row.findViewById(R.id.tv_swap_recent_pair)).setText(SwapText.sym(f) + " → " + SwapText.sym(t));
+            ((TextView) row.findViewById(R.id.tv_swap_recent_pair)).setText(SwapText.sym(f) + " » " + SwapText.sym(t));
             ((TextView) row.findViewById(R.id.tv_swap_recent_paid)).setText(SwapText.amount(f, o.optLong("amountInRaw")));
             ((TextView) row.findViewById(R.id.tv_swap_recent_got)).setText("DONE".equals(st) && o.has("outRaw")
                     ? SwapText.amount(t, o.optLong("outRaw"))
@@ -430,7 +430,7 @@ public class SwapActivity extends AppCompatActivity {
         if (quote.optLong("spreadBps", 0) > 0) rows.add(new String[]{"Spread", SwapText.pct(quote.optLong("spreadBps"))});
         rows.add(new String[]{"Price impact", SwapText.pct(impact), impact >= 500 ? "-1" : "0"});
         rows.add(new String[]{"Route", quote.has("viaHarvRaw")
-                ? SwapText.sym(from) + " → HARV → " + SwapText.sym(to) : SwapText.sym(from) + " → " + SwapText.sym(to)});
+                ? SwapText.sym(from) + " » HARV » " + SwapText.sym(to) : SwapText.sym(from) + " » " + SwapText.sym(to)});
         // Non-naira pools are priced at the real exchange rate (node: GET /swap/fx); its source and time.
         if (fx != null && fx.optBoolean("anchored") && fx.optLong("at") > 0 && !(isNaira(from) && isNaira(to))) {
             rows.add(new String[]{"Exchange rates", fx.optString("source") + " · "

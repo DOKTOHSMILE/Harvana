@@ -1,9 +1,7 @@
 package com.harvana.app.receipt;
 
 import android.app.Activity;
-import android.content.ClipData;
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.widget.Toast;
 
@@ -35,8 +33,8 @@ public final class ReceiptShare {
 
     public static void image(Activity a, Receipt r) {
         try {
-            File f = ReceiptRenderer.renderPng(a, r, cacheFile(a, "images", "harvana-receipt-" + r.number() + ".png"));
-            send(a, f, "image/png", "Harvana " + r.title.toLowerCase(java.util.Locale.US) + " " + r.number(), summary(r));
+            File f = ReceiptRenderer.renderPng(a, shown(a, r), cacheFile(a, "images", "harvana-receipt-" + r.number() + ".png"));
+            send(a, f, "image/png", "Harvana " + r.title.toLowerCase(java.util.Locale.US) + " " + r.number(), summary(shown(a, r)));
         } catch (Exception e) {
             Toast.makeText(a, "Could not make the receipt: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_LONG).show();
         }
@@ -44,8 +42,8 @@ public final class ReceiptShare {
 
     public static void pdf(Activity a, Receipt r) {
         try {
-            File f = ReceiptRenderer.renderPdf(a, r, cacheFile(a, "docs", "harvana-receipt-" + r.number() + ".pdf"));
-            send(a, f, "application/pdf", "Harvana " + r.title.toLowerCase(java.util.Locale.US) + " " + r.number(), summary(r));
+            File f = ReceiptRenderer.renderPdf(a, shown(a, r), cacheFile(a, "docs", "harvana-receipt-" + r.number() + ".pdf"));
+            send(a, f, "application/pdf", "Harvana " + r.title.toLowerCase(java.util.Locale.US) + " " + r.number(), summary(shown(a, r)));
         } catch (Exception e) {
             Toast.makeText(a, "Could not make the receipt: " + com.harvana.app.utils.ErrorText.of(e), Toast.LENGTH_LONG).show();
         }
@@ -70,14 +68,7 @@ public final class ReceiptShare {
     /** Shares any file under the cache folders the FileProvider exposes (images/ or docs/). */
     public static void send(Activity a, File file, String mime, String subject, String text) {
         Uri uri = FileProvider.getUriForFile(a, AUTHORITY, file);
-        Intent send = new Intent(Intent.ACTION_SEND);
-        send.setType(mime);
-        send.putExtra(Intent.EXTRA_STREAM, uri);
-        send.putExtra(Intent.EXTRA_SUBJECT, subject);
-        if (text != null) send.putExtra(Intent.EXTRA_TEXT, text);
-        send.setClipData(ClipData.newRawUri("receipt", uri));
-        send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        a.startActivity(Intent.createChooser(send, "Share"));
+        com.harvana.app.share.ShareCenter.file(a, uri, mime, subject, text, "Share");
     }
 
     public static File cacheFile(Context c, String folder, String name) {
@@ -98,6 +89,34 @@ public final class ReceiptShare {
             try (java.io.FileOutputStream out = new java.io.FileOutputStream(png)) { bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out); }
             bmp.recycle();
         }
+    }
+
+    /** When balances are hidden, the shared receipt hides amounts too. The reference number stays. */
+    private static Receipt shown(Activity a, Receipt r) {
+        if (a == null || r == null || !com.harvana.app.utils.BalancePrivacy.isHidden(a)) return r;
+        Receipt copy = new Receipt();
+        copy.title = r.title;
+        copy.status = r.status;
+        copy.amount = com.harvana.app.utils.BalancePrivacy.mask(r.amount);
+        copy.symbol = r.symbol;
+        copy.direction = r.direction;
+        copy.timestamp = r.timestamp;
+        copy.reference = r.reference;
+        for (Receipt.Section s : r.sections) {
+            Receipt.Section out = copy.section(s.title);
+            for (String[] row : s.rows) {
+                if (row == null || row.length < 2) continue;
+                String value = row[1];
+                boolean mono = value.startsWith("\u0001");
+                String label = row[0] == null ? "" : row[0].toLowerCase(java.util.Locale.US);
+                boolean money = label.contains("amount") || label.contains("value") || label.contains("fee")
+                        || label.contains("fare") || label.contains("total") || label.contains("price") || label.contains("paid");
+                if (money && !mono) value = com.harvana.app.utils.BalancePrivacy.mask(value);
+                if (mono) out.mono(row[0], value.startsWith("\u0001") ? value.substring(1) : value);
+                else out.row(row[0], value);
+            }
+        }
+        return copy;
     }
 
     private static String summary(Receipt r) {

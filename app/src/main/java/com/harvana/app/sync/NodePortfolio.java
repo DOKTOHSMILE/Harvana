@@ -170,8 +170,11 @@ public final class NodePortfolio {
                                 @Override public void onSuccess(JSONObject l) {
                                     // A line kept in a stable coin: its amounts are in that coin even when the group record names none.
                                     String lineCoin = l.optString("asset", "");
+                                    if (lineCoin.isEmpty()) lineCoin = String.valueOf(group.get("asset") == null ? "" : group.get("asset"));
                                     if (com.harvana.app.husd.Stable.isStable(lineCoin) && !com.harvana.app.husd.Stable.isStable(String.valueOf(group.get("asset")))) group.put("asset", lineCoin);
-                                    add(p, fsId, nodeId, name, family, group, NodePositions.accum(member, JsonMaps.toMap(l), System.currentTimeMillis()), done);
+                                    Map<String, Object> line = JsonMaps.toMap(l);
+                                    if ((line.get("asset") == null || String.valueOf(line.get("asset")).isEmpty()) && com.harvana.app.husd.Stable.isStable(lineCoin)) line.put("asset", lineCoin);
+                                    add(p, fsId, nodeId, name, family, group, NodePositions.accum(member, line, System.currentTimeMillis()), done);
                                 }
                                 @Override public void onError(String e) { add(p, fsId, nodeId, name, family, group, NodePositions.accum(member, null, 0), done); }
                             });
@@ -205,10 +208,6 @@ public final class NodePortfolio {
             e.firestoreGroupId = fsId; e.nodeId = nodeId; e.name = name; e.family = family; e.position = pos;
             Object a = group == null ? null : group.get("asset");
             e.asset = a == null ? "" : String.valueOf(a);
-            if (com.harvana.app.husd.Stable.isStable(e.asset)) {
-                // NodePositions reads raw amounts as HARV (8 decimals); a stable coin has 6, so its units are 100× that.
-                pos.savedHarv *= 100; pos.borrowedHarv *= 100; pos.repaidHarv *= 100;
-            }
             p.entries.add(e);
         }
         done.run();

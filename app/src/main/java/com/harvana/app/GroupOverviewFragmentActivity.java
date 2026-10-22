@@ -493,11 +493,13 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	}
 
 	private void _applyLiveEngine(String family, org.json.JSONObject json) {
+		String asset = json.optString("asset", "");
+		if (asset.isEmpty()) asset = groupCoin;
 		if ("CIRCLE".equals(family)) {
 			long raw = json.optLong("contributionAmountRaw");
 			int limit = json.optInt("memberLimit", 0);
 			int round = json.optInt("currentRound", 0);
-			double each = raw / 100_000_000.0;
+			double each = com.harvana.app.engine.Amounts.human(raw, asset);
 			double payout = each * Math.max(0, limit - 1);
 			if (tv_pool_contribution != null) tv_pool_contribution.setText(_formatUIBalance(each));
 			if (textview63 != null) textview63.setText("Payout this round");
@@ -521,8 +523,9 @@ public class GroupOverviewFragmentActivity extends Fragment {
 			return;
 		}
 		if ("FIXED".equals(family)) {
-			double goal = json.optLong("targetGoalAmountRaw") / 100_000_000.0;
-			double raised = (json.has("goalRaisedRaw") ? json.optLong("goalRaisedRaw") : json.optLong("raisedAmountRaw")) / 100_000_000.0;
+			double goal = com.harvana.app.engine.Amounts.human(json.optLong("targetGoalAmountRaw"), asset);
+			double raised = com.harvana.app.engine.Amounts.human(
+					json.has("goalRaisedRaw") ? json.optLong("goalRaisedRaw") : json.optLong("raisedAmountRaw"), asset);
 			String state = json.optString("state", "");
 			String ben = json.optString("beneficiaryAddress", "");
 			boolean reached = "COMPLETED".equalsIgnoreCase(state) || (goal > 0 && raised + 0.0000001 >= goal);
@@ -605,18 +608,24 @@ public class GroupOverviewFragmentActivity extends Fragment {
 		.getGroup(groupId, new com.harvana.app.firestore.GroupFirestoreManager.DocCallback() {
 			@Override
 			public void onSuccess(Map<String, Object> data) {
-				if (getActivity() == null) return;
-				com.harvana.app.offline.OfflineCacheManager.save(getContext(), cacheKey, data);
-				getActivity().runOnUiThread(() -> _applyGroupData(data));
+				final androidx.fragment.app.FragmentActivity act = getActivity();
+				if (act == null || !isAdded()) return;
+				com.harvana.app.offline.OfflineCacheManager.save(act.getApplicationContext(), cacheKey, data);
+				act.runOnUiThread(() -> {
+					if (!isAdded()) return;
+					_applyGroupData(data);
+				});
 			}
 			
 			@Override
 			public void onError(String error) {
-				if (getActivity() == null) return;
+				final androidx.fragment.app.FragmentActivity act = getActivity();
+				if (act == null || !isAdded()) return;
 				if (cached != null) return;
-				getActivity().runOnUiThread(() ->
-				SketchwareUtil.showMessage(getContext(),
-				"Failed to load group overview: " + error));
+				act.runOnUiThread(() -> {
+					if (!isAdded()) return;
+					SketchwareUtil.showMessage(act, "Failed to load group overview: " + error);
+				});
 			}
 		});
 	}
@@ -914,7 +923,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	}
 
 	private String _coinSymbol() {
-		return com.harvana.app.husd.Stable.isStable(groupCoin) ? com.harvana.app.husd.Stable.symbol(groupCoin) : com.harvana.app.CoinInfo.ticker();
+		return com.harvana.app.engine.Amounts.unitLabel(groupCoin);
 	}
 
 	private void _loadGroupWalletBalance(String address) {

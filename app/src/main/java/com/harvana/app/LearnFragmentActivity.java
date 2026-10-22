@@ -414,6 +414,14 @@ public class LearnFragmentActivity extends Fragment {
 			LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 			tp.topMargin = (int) (12 * d);
 			learnEmpty.addView(title, tp);
+			TextView message = new TextView(getContext());
+			message.setTag("empty_message");
+			message.setTextSize(13);
+			message.setTextColor(com.harvana.app.utils.UiColors.textSecondary());
+			message.setGravity(Gravity.CENTER);
+			LinearLayout.LayoutParams mp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			mp.topMargin = (int) (6 * d);
+			learnEmpty.addView(message, mp);
 			com.google.android.material.button.MaterialButton write = new com.google.android.material.button.MaterialButton(getContext());
 			write.setTag("empty_button");
 			write.setAllCaps(false);
@@ -433,6 +441,10 @@ public class LearnFragmentActivity extends Fragment {
 		}
 		((ImageView) learnEmpty.findViewWithTag("empty_icon")).setImageResource(filtered ? R.drawable.illus_empty_search : R.drawable.illus_empty_learn);
 		((TextView) learnEmpty.findViewWithTag("empty_title")).setText(filtered ? "No matching posts" : "No posts yet");
+		TextView message = (TextView) learnEmpty.findViewWithTag("empty_message");
+		if (message != null) message.setText(filtered
+				? "Nothing in Learn Hub matches that search."
+				: "Lessons and posts show up here once they are published.");
 		((TextView) learnEmpty.findViewWithTag("empty_button")).setText(filtered ? "Show all posts" : "Write a post");
 		learnEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
 		recyclerview2.setVisibility(empty ? View.GONE : View.VISIBLE);

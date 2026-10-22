@@ -136,7 +136,7 @@ public class SwapOrderActivity extends AppCompatActivity {
 
     static String title(JSONObject o) {
         String kind = o.optString("kind");
-        if ("SWAP".equals(kind)) return sym(o.optString("from")) + " → " + sym(o.optString("to"));
+        if ("SWAP".equals(kind)) return sym(o.optString("from")) + " » " + sym(o.optString("to"));
         if ("ADD".equals(kind)) return "Added to HARV / " + sym(o.optString("asset"));
         return "Took back from HARV / " + sym(o.optString("asset"));
     }

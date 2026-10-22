@@ -20,7 +20,7 @@ public final class NodePositions {
         int round = (int) lng(circle, "currentRound");
         String state = str(circle, "state"), ms = str(member, "state");
         long payoutRound = lng(member, "payoutRound");
-        p.savedHarv = lng(member, "bondRemainingRaw") / RAW;
+        p.savedHarv = lng(member, "bondRemainingRaw") / com.harvana.app.engine.Amounts.scale(com.harvana.app.engine.Amounts.assetOf(circle));
         p.joinedMs = lng(member, "joinedTimestamp");
         int completedRounds = "COMPLETED".equals(state) ? limit : "ACTIVE".equals(state) ? Math.max(0, round - 1) : 0;
         int expected = completedRounds - (payoutRound > 0 && payoutRound <= completedRounds ? 1 : 0);
@@ -38,14 +38,15 @@ public final class NodePositions {
         Position p = new Position();
         p.family = "ACCUM";
         if (member == null || member.isEmpty()) { p.stillIn = false; return p; }
-        p.borrowedHarv = lng(member, "borrowedRaw") / RAW;
-        p.repaidHarv = lng(member, "repaidRaw") / RAW;
+        double unit = com.harvana.app.engine.Amounts.scale(com.harvana.app.engine.Amounts.assetOf(line));
+        p.borrowedHarv = lng(member, "borrowedRaw") / unit;
+        p.repaidHarv = lng(member, "repaidRaw") / unit;
         p.joinedMs = lng(member, "joinedTimestamp");
         p.cycleCompleted = lng(member, "totalLinesCompleted") > 0;
         if (line != null && !line.isEmpty()) {
             String st = str(line, "status");
             boolean live = "ACTIVE".equals(st) || "PENDING_PACK_APPROVAL".equals(st) || "CLAIMABLE".equals(st);
-            p.savedHarv = live ? lng(line, "amountPaidRaw") / RAW : 0;
+            p.savedHarv = live ? lng(line, "amountPaidRaw") / unit : 0;
             long start = lng(line, "startTimestamp");
             long daysElapsed = start > 0 ? Math.min(30, Math.max(0, (nowMs - start) / DAY_MS)) : 0;
             p.expectedPayments = (int) daysElapsed;
@@ -59,9 +60,10 @@ public final class NodePositions {
         Position p = new Position();
         p.family = "FIXED";
         if (member == null || member.isEmpty()) { p.stillIn = false; return p; }
-        p.savedHarv = lng(member, "contributedRaw") / RAW;
-        p.borrowedHarv = lng(member, "borrowedRaw") / RAW;
-        p.repaidHarv = lng(member, "repaidRaw") / RAW;
+        double unit = com.harvana.app.engine.Amounts.scale(com.harvana.app.engine.Amounts.assetOf(group));
+        p.savedHarv = lng(member, "contributedRaw") / unit;
+        p.borrowedHarv = lng(member, "borrowedRaw") / unit;
+        p.repaidHarv = lng(member, "repaidRaw") / unit;
         p.joinedMs = lng(member, "joinedTimestamp");
         p.expectedPayments = 1;
         p.confirmedPayments = p.savedHarv > 0 ? 1 : 0;

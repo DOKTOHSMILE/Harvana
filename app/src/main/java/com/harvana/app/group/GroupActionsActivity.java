@@ -671,7 +671,7 @@ public class GroupActionsActivity extends AppCompatActivity {
     private View recoveryCard(final Map<String, Object> r) {
         final String from = str(r, "oldMemberAddress"), to = str(r, "newMemberAddress");
         ActionCard c = new ActionCard(this, content).title("Wallet recovery").chip("NEEDS APPROVAL", R.color.colorWarning)
-                .meta(shortAddr(from) + " → " + shortAddr(to) + (num(r, "createdTimestamp") > 0 ? " · " + date(num(r, "createdTimestamp")) : ""));
+                .meta(shortAddr(from) + " » " + shortAddr(to) + (num(r, "createdTimestamp") > 0 ? " · " + date(num(r, "createdTimestamp")) : ""));
         c.button("Approve move", true, v -> {
             java.util.ArrayList<String[]> rows = new java.util.ArrayList<>();
             if (!groupName.isEmpty()) rows.add(new String[]{"Group", groupName});

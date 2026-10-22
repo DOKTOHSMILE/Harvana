@@ -219,6 +219,7 @@ public class ReceiptActivity extends AppCompatActivity {
 		boolean confirmed = status != null && (status.equalsIgnoreCase("confirmed") || status.equalsIgnoreCase("success"));
 		
 		tv_tx_value.setText(_formatUIBalance(value) + " " + tokenSymbol);
+		com.harvana.app.utils.BalancePrivacy.guard(tv_tx_value);
 		com.harvana.app.tx.TxKind _kind = com.harvana.app.tx.TxKind.of(memo, isIncoming);
 		textview40.setText(_kind != null ? _kind.title : (isIncoming ? "Received" : "Sent"));
 
@@ -273,6 +274,8 @@ public class ReceiptActivity extends AppCompatActivity {
 		if (feeSymbol == null || feeSymbol.isEmpty()) feeSymbol = tokenSymbol;
 		tv_network_fee.setText(_formatUIBalance(harvFee) + " " + feeSymbol);
 		tv_burn_amount.setText(_formatUIBalance(burnAmount) + " " + tokenSymbol);
+		com.harvana.app.utils.BalancePrivacy.guard(tv_network_fee);
+		com.harvana.app.utils.BalancePrivacy.guard(tv_burn_amount);
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("MMM d, yyyy | h:mma", Locale.US);
 		sdf.setTimeZone(java.util.TimeZone.getTimeZone("Africa/Lagos"));

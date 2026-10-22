@@ -152,10 +152,14 @@ public final class AssetSorter {
             }
         }
         boolean early = System.currentTimeMillis() - attachedAt < SAVED_GRACE_MS;
+        java.util.Set<String> livePrices = new java.util.HashSet<>();
+        for (Entry e : entries) if (e.priceKey != null && !e.priceKey.isEmpty()) livePrices.add(e.priceKey.toUpperCase(java.util.Locale.US));
         if (early) {
             boolean hidden = com.harvana.app.utils.BalancePrivacy.isHidden(c);
             for (Entry e : saved) {
                 if (real.contains(e.key)) continue;           // its section has drawn it (or hidden it)
+                String pk = e.priceKey == null ? "" : e.priceKey.toUpperCase(java.util.Locale.US);
+                if (!pk.isEmpty() && livePrices.contains(pk)) continue; // same coin, different row key
                 e.order = n++;
                 if (hidden) { e.balance = "\u2022\u2022\u2022\u2022"; e.value = "\u2022\u2022\u2022\u2022"; }
                 entries.add(e);
@@ -165,6 +169,7 @@ public final class AssetSorter {
                 shown.postDelayed(rebuild, SAVED_GRACE_MS - (System.currentTimeMillis() - attachedAt) + 50);
             }
         }
+        entries = dedupeCoins(entries);
         // Rank by value (largest first); rows with no value rank by their balance; zero balances rank by name.
         java.util.Collections.sort(entries, (a, b) -> {
             boolean aHasValue = a.sort > 0;
@@ -230,6 +235,26 @@ public final class AssetSorter {
         onScreen.clear();
         onScreen.addAll(keys);
         if (!real.isEmpty()) writeCache(entries);
+    }
+
+    /** One row per coin. A second HARV (a placeholder next to the priced row) is dropped. The row with a value wins. */
+    private List<Entry> dedupeCoins(List<Entry> entries) {
+        Map<String, Entry> best = new java.util.LinkedHashMap<>();
+        for (Entry e : entries) {
+            String pk = e.priceKey == null || e.priceKey.isEmpty() ? e.key : e.priceKey.toUpperCase(java.util.Locale.US);
+            if (pk == null || pk.isEmpty()) pk = String.valueOf(e.order);
+            Entry prev = best.get(pk);
+            if (prev == null || coinScore(e) > coinScore(prev)) best.put(pk, e);
+        }
+        return new ArrayList<>(best.values());
+    }
+
+    private static double coinScore(Entry e) {
+        if (e.sort > 0) return 1_000_000_000d + e.sort;
+        Double amt = money(e.balance);
+        if (amt != null && amt > 0) return amt;
+        boolean blank = e.balance == null || e.balance.isEmpty() || "—".equals(e.balance) || "-".equals(e.balance);
+        return blank ? -1 : 0;
     }
 
     private Entry fromRow(View src) {

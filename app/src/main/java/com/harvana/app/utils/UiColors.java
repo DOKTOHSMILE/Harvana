@@ -17,8 +17,26 @@ public final class UiColors {
     private UiColors() {}
 
     private static int get(int res) {
-        Context c = SketchApplication.getContext();
+        Context c = palette();
         return ContextCompat.getColor(c, res);
+    }
+
+    /**
+     * Colors follow the theme chosen in Settings, not whatever night flag the application context
+     * happens to be holding. A sheet built from the application context was painting night text
+     * on a day surface, so rows looked blank.
+     */
+    private static Context palette() {
+        Context app = SketchApplication.getContext();
+        if (app == null) return app;
+        android.content.res.Configuration cfg = new android.content.res.Configuration(app.getResources().getConfiguration());
+        int night = ThemeManager.isNightNow(app)
+                ? android.content.res.Configuration.UI_MODE_NIGHT_YES
+                : android.content.res.Configuration.UI_MODE_NIGHT_NO;
+        int mask = android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        if ((cfg.uiMode & mask) == night) return app;
+        cfg.uiMode = (cfg.uiMode & ~mask) | night;
+        return app.createConfigurationContext(cfg);
     }
 
     public static int surface()       { return get(R.color.colorSurface); }

@@ -236,10 +236,7 @@ public final class LearnPostBinder {
         LearnInterest.get(host).record(post, LearnInterest.SHARE);
         String plainBody = LearnMarkdown.plain(post.body);
         String snippet = plainBody.length() > 280 ? plainBody.substring(0, 277) + "..." : plainBody;
-        Intent send = new Intent(Intent.ACTION_SEND);
-        send.setType("text/plain");
-        send.putExtra(Intent.EXTRA_TEXT, post.title + "\n\n" + snippet + "\n\nShared from Harvana");
-        host.startActivity(Intent.createChooser(send, "Share"));
+        com.harvana.app.share.ShareCenter.text(host, "Share", post.title + "\n\n" + snippet + "\n\nShared from Harvana");
     }
 
     private static void confirmDelete(Activity host, Post post) {

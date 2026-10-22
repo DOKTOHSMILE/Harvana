@@ -682,7 +682,7 @@ public final class StakingPanel {
     }
 
     private void showFullUnbondingBottomSheet(List<JSONObject> allRows) {
-        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(host);
 
         LinearLayout root = new LinearLayout(host);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -729,7 +729,7 @@ public final class StakingPanel {
     }
 
     private void showUnbondDetailsSheet(JSONObject u) {
-        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(host);
 
         LinearLayout root = new LinearLayout(host);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -971,7 +971,7 @@ public final class StakingPanel {
             return;
         }
         final String lotId = stake.id;
-        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(host, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(host);
 
         LinearLayout root = new LinearLayout(host);
         root.setOrientation(LinearLayout.VERTICAL);

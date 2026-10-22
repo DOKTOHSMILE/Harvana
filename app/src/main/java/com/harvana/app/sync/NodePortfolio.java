@@ -46,6 +46,20 @@ public final class NodePortfolio {
         public int groupCount() { return entries.size(); }
         public double savedHarv() { double s = 0; synchronized (entries) { for (Entry e : entries) s += e.position.savedHarv; } return s; }
         public double outstandingHarv() { double s = 0; synchronized (entries) { for (Entry e : entries) s += e.position.outstandingHarv(); } return s; }
+        /** Loans still open, in dollars, so the profile can show them in the currency chosen in Settings. */
+        public double outstandingUsd(Context c) {
+            double s = 0;
+            synchronized (entries) {
+                for (Entry e : entries) {
+                    double v = e.position.outstandingHarv();
+                    if (v <= 0) continue;
+                    double u = e.usdPerUnit(c);
+                    if (Double.isNaN(u)) return Double.NaN;
+                    s += v * u;
+                }
+            }
+            return s;
+        }
         public double borrowedHarv() { double s = 0; synchronized (entries) { for (Entry e : entries) s += e.position.borrowedHarv; } return s; }
         /** Everything saved across groups, in dollars (each group in its own coin); NaN when a price is missing. */
         public double savedUsd(Context c) {

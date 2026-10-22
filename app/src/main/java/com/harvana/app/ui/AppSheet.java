@@ -111,7 +111,9 @@ public class AppSheet extends BottomSheetDialog {
                 || v.getBackground() instanceof GradientDrawable) return;   // a chip or badge paints its own fill
         android.widget.TextView t = (android.widget.TextView) v;
         int fg = androidx.core.graphics.ColorUtils.compositeColors(t.getCurrentTextColor(), surface | 0xFF000000);
-        if (androidx.core.graphics.ColorUtils.calculateContrast(fg, surface | 0xFF000000) < 3.0) t.setTextColor(UiColors.textPrimary());
+        if (androidx.core.graphics.ColorUtils.calculateContrast(fg, surface | 0xFF000000) < 3.0) {
+            t.setTextColor(UiColors.onFill(surface));
+        }
     }
 
     private static boolean row(View v) {

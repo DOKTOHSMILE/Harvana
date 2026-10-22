@@ -214,8 +214,12 @@ public class GroupNoticeFragmentActivity extends Fragment {
 	}
 	
 	private static String _str(Map<String, Object> m, String key, String fallback) {
-		Object v = m.get(key);
+		Object v = m == null ? null : m.get(key);
 		return v != null ? v.toString() : fallback;
+	}
+
+	private static String strNotice(Map<String, Object> m, String key, String fallback) {
+		return _str(m, key, fallback);
 	}
 	
 	private void _loadNotices() {
@@ -264,6 +268,13 @@ public class GroupNoticeFragmentActivity extends Fragment {
 					recycler_notices.setLayoutManager(new LinearLayoutManager(getContext()));
 				}
 				recycler_notices.setAdapter(new NoticeAdapter(shown));
+			}
+			if (getContext() != null) {
+				for (Map<String, Object> n : shown) {
+					String nid = strNotice(n, "_docId", strNotice(n, "id", ""));
+					com.harvana.app.group.GroupNoticeHelper.ring(getContext(), groupId, nid,
+							strNotice(n, "title", "Group notice"), strNotice(n, "message", strNotice(n, "body", "")));
+				}
 			}
 		});
 	}

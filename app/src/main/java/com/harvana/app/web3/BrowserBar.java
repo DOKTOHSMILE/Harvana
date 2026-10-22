@@ -42,8 +42,7 @@ public final class BrowserBar {
             if (onMenu != null) { onMenu.run(); return; }
             String url = web.getUrl();
             if (url == null) return;
-            Intent i = new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, url);
-            try { c.startActivity(Intent.createChooser(i, "Share")); } catch (Exception ignored) { }
+            com.harvana.app.share.ShareCenter.text(c, "Share", url);
         });
         share.setOnLongClickListener(v -> {
             String url = web.getUrl();

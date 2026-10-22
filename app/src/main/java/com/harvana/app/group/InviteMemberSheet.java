@@ -88,10 +88,9 @@ public final class InviteMemberSheet {
         share.setText("Also share a message");
         share.setAllCaps(false);
         share.setOnClickListener(v -> {
-            Intent i = new Intent(Intent.ACTION_SEND).setType("text/plain");
-            i.putExtra(Intent.EXTRA_TEXT, "I invited you to join \"" + group.get("groupName")
-                + "\" on Harvana. Install the app, sign up with this email, and open Invitations to read the details.");
-            a.startActivity(Intent.createChooser(i, "Share invitation"));
+            com.harvana.app.share.ShareCenter.text(a, "Share invitation",
+                    "I invited you to join \"" + group.get("groupName")
+                            + "\" on Harvana. Install the app, sign up with this email, and open Invitations to read the details.");
         });
         root.addView(share, new LinearLayout.LayoutParams(-1, (int) (52 * d)));
 

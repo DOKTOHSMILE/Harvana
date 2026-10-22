@@ -335,7 +335,7 @@
 					android:layout_height="48dp"
 					android:gravity="center"
 					android:paddingStart="8dp"
-					android:text="View all ›"
+					android:text="View all »"
 					android:textColor="@color/swapAccent"
 					android:textSize="13sp"
 					android:textStyle="bold"

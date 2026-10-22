@@ -115,7 +115,7 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     private void showLoginBottomSheet() {
-        BottomSheetDialog bottomSheetDialog = new com.harvana.app.ui.AppSheet(this, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog bottomSheetDialog = new com.harvana.app.ui.AppSheet(this);
         
         LinearLayout sheetLayout = new LinearLayout(this);
         sheetLayout.setOrientation(LinearLayout.VERTICAL);

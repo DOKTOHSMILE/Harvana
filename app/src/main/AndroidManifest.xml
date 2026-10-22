@@ -72,6 +72,10 @@
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateHidden" />
 		<activity
+			android:name=".search.SearchActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:windowSoftInputMode="stateVisible|adjustResize" />
+		<activity
 			android:name=".SplashScreenActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:screenOrientation="portrait"

@@ -729,6 +729,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 
         if (tv_group_name != null)
             tv_group_name.setText(name);
+        com.harvana.app.group.GroupChatSheet.paintButton(btn_group_chats, data);
         if (iv_group_icon != null) {
             String photo = _safeString(data, "groupPhoto", "");
             com.harvana.app.utils.GroupRing.apply(iv_group_icon, type, 1f, 0x00000000); // ring colour = group type

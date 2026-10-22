@@ -57,6 +57,24 @@ public final class GroupChatSheet {
         askAdd(activity, null, new ArrayList<Link>(), onLink);
     }
 
+    /** The header button: one generic chat mark when there are none, or the linked apps stacked when there are. */
+    public static void paintButton(android.widget.ImageView iv, Map<String, Object> group) {
+        if (iv == null) return;
+        List<Link> links = read(group);
+        iv.setImageTintList(null);
+        iv.clearColorFilter();
+        if (links.isEmpty()) {
+            iv.setImageResource(com.harvana.app.R.drawable.ic_chat);
+            iv.setImageTintList(android.content.res.ColorStateList.valueOf(UiColors.textSecondary()));
+            iv.setContentDescription("Group chats");
+            return;
+        }
+        java.util.ArrayList<String> kinds = new java.util.ArrayList<>();
+        for (Link link : links) kinds.add(link.kind);
+        iv.setImageDrawable(ChatPlatforms.stack(iv.getResources(), kinds));
+        iv.setContentDescription(links.size() == 1 ? "1 group chat" : links.size() + " group chats");
+    }
+
     public static void show(Activity activity, String groupId) {
         if (activity == null || groupId == null || groupId.isEmpty()) return;
         GroupFirestoreManager.getInstance(activity).getGroup(groupId, new GroupFirestoreManager.DocCallback() {
@@ -76,7 +94,7 @@ public final class GroupChatSheet {
 
     private static void present(Activity activity, String groupId, boolean admin, List<Link> links) {
         if (activity.isFinishing()) return;
-        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(activity, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(activity);
         float d = activity.getResources().getDisplayMetrics().density;
         int pad = (int) (20 * d);
 
@@ -195,7 +213,7 @@ public final class GroupChatSheet {
 
     private static void askAdd(Activity activity, String groupId, List<Link> existing, OnLink onLink) {
         if (activity.isFinishing()) return;
-        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(activity, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog sheet = new com.harvana.app.ui.AppSheet(activity);
         float d = activity.getResources().getDisplayMetrics().density;
         int pad = (int) (20 * d);
         LinearLayout root = new LinearLayout(activity);

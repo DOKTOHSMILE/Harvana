@@ -239,6 +239,11 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 			View cancel = v.findViewById(R.id.btn_my_offer_cancel);
 			cancel.setVisibility(open ? View.VISIBLE : View.GONE);
 			cancel.setOnClickListener(x -> confirmCancel(id, asset, sell, left));
+			View priceBtn = v.findViewById(R.id.btn_my_offer_price);
+			if (priceBtn != null) {
+				priceBtn.setVisibility(open ? View.VISIBLE : View.GONE);
+				priceBtn.setOnClickListener(x -> editPrice(id, asset));
+			}
 		}
 
 		@Override
@@ -328,6 +333,45 @@ public class P2pMerchantManagerActivity extends AppCompatActivity {
 					runOnUiThread(() -> Toast.makeText(P2pMerchantManagerActivity.this, com.harvana.app.utils.ErrorText.plain(error), Toast.LENGTH_LONG).show());
 				}
 			}));
+	}
+
+	private void editPrice(String id, String asset) {
+		android.widget.EditText input = new android.widget.EditText(this);
+		input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		input.setHint("Price per " + P2pAsset.ticker(asset));
+		int pad = Math.round(12 * getResources().getDisplayMetrics().density);
+		input.setPadding(pad, pad, pad, pad);
+		new com.harvana.app.ui.SheetDialog.Builder(this)
+				.setTitle("Update price")
+				.setMessage("Buyers see the new price straight away. Orders already open keep the price they agreed.")
+				.setView(input)
+				.setNegativeButton("Cancel", null)
+				.setPositiveButton("Save price", (d, w) -> {
+					double price;
+					try { price = Double.parseDouble(input.getText().toString().trim()); }
+					catch (Exception e) { price = 0; }
+					if (price <= 0) {
+						Toast.makeText(this, "Enter a price greater than zero.", Toast.LENGTH_SHORT).show();
+						return;
+					}
+					final double next = price;
+					com.harvana.app.firestore.P2PPaymentDetailsManager.getInstance(this).updateUnitPrice(id, next,
+							new com.harvana.app.firestore.P2PPaymentDetailsManager.SimpleCallback() {
+								@Override public void onSuccess() {
+									runOnUiThread(() -> {
+										java.util.Map<String, Object> card = cards.get(id);
+										if (card != null) card.put("unitPrice", next);
+										Toast.makeText(P2pMerchantManagerActivity.this, "Price updated", Toast.LENGTH_SHORT).show();
+										if (list != null && list.getAdapter() != null) list.getAdapter().notifyDataSetChanged();
+									});
+								}
+								@Override public void onError(String error) {
+									runOnUiThread(() -> Toast.makeText(P2pMerchantManagerActivity.this,
+											com.harvana.app.utils.ErrorText.plain(error), Toast.LENGTH_LONG).show());
+								}
+							});
+				})
+				.show();
 	}
 
 	private void newOffer() {

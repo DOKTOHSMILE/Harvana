@@ -251,7 +251,7 @@ public class SwapActivity extends AppCompatActivity {
             ordersBox.addView(row);
         }
         tvViewAll.setVisibility(swaps.length() > 5 ? View.VISIBLE : View.GONE);
-        tvViewAll.setText(showAll ? "Show less" : "View all ›");
+        tvViewAll.setText(showAll ? "Show less" : "View all »");
     }
 
     int tone(int t) {

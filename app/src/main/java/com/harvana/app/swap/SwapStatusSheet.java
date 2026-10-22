@@ -44,7 +44,7 @@ final class SwapStatusSheet {
         this.to = to;
         this.in = in;
         this.estimate = estimate;
-        dialog = new BottomSheetDialog(host);
+        dialog = new com.harvana.app.ui.AppSheet(host);
         root = host.getLayoutInflater().inflate(R.layout.sheet_swap_status, null);
         dialog.setContentView(root);
         dialog.setCancelable(false);

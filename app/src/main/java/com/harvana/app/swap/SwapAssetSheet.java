@@ -36,7 +36,7 @@ final class SwapAssetSheet {
 
     static void show(SwapActivity host, String title, List<String> assets, JSONArray pools, Map<String, Long> balances,
                      String selected, Pick pick) {
-        BottomSheetDialog d = new BottomSheetDialog(host);
+        BottomSheetDialog d = new com.harvana.app.ui.AppSheet(host);
         View root = host.getLayoutInflater().inflate(R.layout.sheet_swap_assets, null);
         ((TextView) root.findViewById(R.id.tv_swap_assets_title)).setText(title);
         LinearLayout list = root.findViewById(R.id.swap_assets_list);

@@ -59,6 +59,7 @@ final class MainDrawer {
         bg.setStroke(dp(1), androidx.core.content.ContextCompat.getColor(a, R.color.colorCardStroke));
         list.setBackground(bg);
 
+        row(list, R.drawable.icon_search_twotone, "Search", "Groups, people, settings", () -> open(com.harvana.app.search.SearchActivity.class));
         row(list, R.drawable.icon_group_add_twotone, "Friends", null, () -> open(com.harvana.app.social.FriendsActivity.class));
         row(list, R.drawable.icon_mark_unread_chat_alt_round, "Invitations", null, () -> open(InvitesActivity.class));
         row(list, R.drawable.icon_alternate_email_twotone, "My contact card", null, () -> open(com.harvana.app.social.ContactCardActivity.class));
@@ -204,9 +205,8 @@ final class MainDrawer {
 
     private void shareApp() {
         dismiss();
-        Intent share = new Intent(Intent.ACTION_SEND).setType("text/plain");
-        share.putExtra(Intent.EXTRA_TEXT, "Join me on Harvana: save together in groups and manage your " + CoinInfo.ticker() + " wallet.");
-        a.startActivity(Intent.createChooser(share, "Share Harvana"));
+        com.harvana.app.share.ShareCenter.text(a, "Share Harvana",
+                "Join me on Harvana: save together in groups and manage your " + CoinInfo.ticker() + " wallet.");
     }
 
     private void confirmLogOut() {

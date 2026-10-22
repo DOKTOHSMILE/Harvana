@@ -103,9 +103,8 @@ public class FriendsActivity extends AppCompatActivity {
 
     private void shareCode() {
         if (myUsername.isEmpty()) { startActivity(new Intent(this, ContactCardActivity.class)); return; }
-        Intent send = new Intent(Intent.ACTION_SEND).setType("text/plain");
-        send.putExtra(Intent.EXTRA_TEXT, "Join me on Harvana. When you create your account, enter @" + myUsername + " as the friend who invited you.");
-        startActivity(Intent.createChooser(send, "Share my referral code"));
+        com.harvana.app.share.ShareCenter.text(this, "Share my referral code",
+                "Join me on Harvana. When you create your account, enter @" + myUsername + " as the friend who invited you.");
     }
 
     private Set<String> followingIds() {

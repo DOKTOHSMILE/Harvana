@@ -51,7 +51,7 @@ public final class LoanDetailSheet {
                             Map<String, Object> loan,
                             List<Map<String, Object>> repayments,
                             boolean isBorrower, boolean isGuardian) {
-        BottomSheetDialog d = new BottomSheetDialog(ctx);
+        BottomSheetDialog d = new com.harvana.app.ui.AppSheet(ctx);
         View v = LayoutInflater.from(ctx).inflate(R.layout.bottom_sheet_loan_detail, null);
 
         // Wire close.

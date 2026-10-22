@@ -566,8 +566,7 @@ public final class BrowserMenu {
 
     private void share(String url) {
         if (url == null || url.isEmpty()) return;
-        Intent i = new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, url);
-        try { c.startActivity(Intent.createChooser(i, "Share")); } catch (Exception ignored) { }
+        com.harvana.app.share.ShareCenter.text(c, "Share", url);
     }
 
     private void copy(String url) {

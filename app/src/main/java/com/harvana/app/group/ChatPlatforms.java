@@ -93,4 +93,33 @@ public final class ChatPlatforms {
         d.setBounds(0, 0, px, px);
         return d;
     }
+
+    /** Up to three app badges, overlapping, plus a count when there are more. For the group header. */
+    public static Drawable stack(Resources res, java.util.List<String> kinds) {
+        if (kinds == null || kinds.isEmpty()) return badge(res, ALL[ALL.length - 1], 24);
+        int n = Math.min(3, kinds.size());
+        float density = res.getDisplayMetrics().density;
+        int size = Math.max(1, Math.round(22 * density));
+        int step = Math.max(1, Math.round(14 * density));
+        int w = size + (n - 1) * step + (kinds.size() > 3 ? Math.round(16 * density) : 0);
+        Bitmap b = Bitmap.createBitmap(Math.max(w, size), size, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(b);
+        for (int i = 0; i < n; i++) {
+            Drawable one = badge(res, of(kinds.get(i)), 22);
+            int left = i * step;
+            one.setBounds(left, 0, left + size, size);
+            one.draw(c);
+        }
+        if (kinds.size() > 3) {
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paint.setColor(0xFF053D3A);
+            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            paint.setTextSize(11 * density);
+            paint.setTextAlign(Paint.Align.LEFT);
+            c.drawText("+" + (kinds.size() - 3), n * step, size * 0.72f, paint);
+        }
+        BitmapDrawable out = new BitmapDrawable(res, b);
+        out.setBounds(0, 0, b.getWidth(), b.getHeight());
+        return out;
+    }
 }

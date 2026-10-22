@@ -73,7 +73,7 @@ public class VideoPlayerView extends LinearLayout {
         showCover();
 
         TextView open = new TextView(host);
-        open.setText("Can't play it here? Open it in " + video.platform.label + "  ›");
+        open.setText("Can't play it here? Open it in " + video.platform.label + "  »");
         open.setTextColor(UiColors.accent());
         open.setTextSize(12.5f);
         open.setPadding(0, (int) (8 * d), 0, 0);

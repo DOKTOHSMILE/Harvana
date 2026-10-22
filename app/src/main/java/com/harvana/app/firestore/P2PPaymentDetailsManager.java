@@ -139,6 +139,20 @@ public class P2PPaymentDetailsManager {
 			@Override public void onError(String error) { write(privateRef, fields, callback); }   // the private one still matters most
 		});
 	}
+
+	/** The seller changes only the price. Open orders keep the price they already locked. Both cards must move together. */
+	public void updateUnitPrice(String listingId, double unitPrice, SimpleCallback callback) {
+		if (listingId == null || listingId.isEmpty() || unitPrice <= 0) {
+			if (callback != null) callback.onError("Enter a price greater than zero.");
+			return;
+		}
+		Map<String, Object> patch = new HashMap<>();
+		patch.put("unitPrice", unitPrice);
+		writeUpdate(doc(PUBLIC_COLLECTION, listingId), patch, new SimpleCallback() {
+			@Override public void onSuccess() { writeUpdate(doc(COLLECTION, listingId), patch, callback); }
+			@Override public void onError(String error) { writeUpdate(doc(COLLECTION, listingId), patch, callback); }
+		});
+	}
 	
 	/** Called by the buyer's client once they've claimed a listing —
 *  Firestore security rules are what should actually gate this (only
@@ -254,6 +268,28 @@ public class P2PPaymentDetailsManager {
 		ref.set(GroupFirestoreManager.clean(fields)).addOnCompleteListener(BG, t -> {
 			if (!done.compareAndSet(false, true)) return;
 			if (t.isSuccessful()) callback.onSuccess(); else callback.onError(describe(t.getException()));
+		});
+	}
+
+	/** A partial write. Used for a price change so the security rule can allow unitPrice and nothing else. */
+	private static void writeUpdate(DocumentReference ref, Map<String, Object> fields, SimpleCallback callback) {
+		if (callback == null) callback = new SimpleCallback() {
+			@Override public void onSuccess() {}
+			@Override public void onError(String error) {}
+		};
+		if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+			SimpleCallback cb = callback;
+			BG.execute(() -> cb.onError("Not signed in \u2014 no current Firebase user."));
+			return;
+		}
+		final SimpleCallback cb = callback;
+		final AtomicBoolean done = new AtomicBoolean(false);
+		TIMER.schedule(() -> {
+			if (done.compareAndSet(false, true)) BG.execute(() -> cb.onError("Network error: write not acknowledged yet (queued; will sync when back online)"));
+		}, WRITE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+		ref.update(fields).addOnCompleteListener(BG, t -> {
+			if (!done.compareAndSet(false, true)) return;
+			if (t.isSuccessful()) cb.onSuccess(); else cb.onError(describe(t.getException()));
 		});
 	}
 

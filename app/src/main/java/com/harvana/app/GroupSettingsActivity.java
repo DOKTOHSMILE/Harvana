@@ -890,6 +890,12 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 		String desc = str(groupData, "groupDescription", str(groupData, "description", ""));
 		etDescription.setText(desc);
 		etContribution.setText(numStr(groupData, "contributionAmount"));
+		String coin = com.harvana.app.engine.Amounts.unitLabel(
+				com.harvana.app.engine.Amounts.assetOf(groupData).isEmpty()
+						? str(groupData, "asset", str(groupData, "coin", ""))
+						: com.harvana.app.engine.Amounts.assetOf(groupData));
+		if (textview65 != null) textview65.setText("Contribution (" + coin + ")");
+		if (textview14 != null) textview14.setText("Target goal (" + coin + ")");
 		
 		if (panel_rotating != null) panel_rotating.setVisibility(isRotating() ? View.VISIBLE : View.GONE);
 		if (panel_fixed != null) panel_fixed.setVisibility(isFixed() ? View.VISIBLE : View.GONE);

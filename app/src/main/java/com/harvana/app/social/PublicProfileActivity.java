@@ -775,12 +775,18 @@ public class PublicProfileActivity extends AppCompatActivity {
         String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(this);
         if (me == null) { saved.setText("0 " + com.harvana.app.CoinInfo.ticker()); loans.setText("0 " + com.harvana.app.CoinInfo.ticker()); return c; }
         com.harvana.app.sync.NodePortfolio.load(this, me.getUid(), wallet, p -> runOnUiThread(() -> {
-            savedCache = harv(p.savedHarv());
-            loansCache = harv(p.outstandingHarv());
+            double savedUsd = p.savedUsd(this);
+            double loanUsd = p.outstandingUsd(this);
+            savedCache = Double.isNaN(savedUsd) ? (p.savedInGroupCoins().isEmpty() ? moneyLine(0) : p.savedInGroupCoins()) : com.harvana.app.wallet.FxRates.money(this, savedUsd);
+            loansCache = Double.isNaN(loanUsd) ? moneyLine(0) : com.harvana.app.wallet.FxRates.money(this, loanUsd);
             saved.setText(savedCache);
             loans.setText(loansCache);
         }));
         return c;
+    }
+
+    private String moneyLine(double usd) {
+        return com.harvana.app.wallet.FxRates.money(this, usd);
     }
 
     private static String harv(double v) {
@@ -1171,7 +1177,7 @@ public class PublicProfileActivity extends AppCompatActivity {
         note.setPadding(0, SocialUi.dp(this, 12), 0, 0);
         c.addView(note);
         if (isMe()) {
-            TextView more = SocialUi.text(this, "How to raise it  ›", 14, true, UiColors.accent());
+            TextView more = SocialUi.text(this, "How to raise it  »", 14, true, UiColors.accent());
             more.setPadding(0, SocialUi.dp(this, 12), 0, 0);
             more.setOnClickListener(v -> startActivity(new Intent(this, com.harvana.app.TrustScoreActivity.class)));
             c.addView(more);

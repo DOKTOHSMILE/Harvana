@@ -605,7 +605,11 @@ service cloud.firestore {
         && request.resource.data.listingId == listingId
         && request.resource.data.keys().hasOnly(['listingId', 'pricingType', 'unitPrice', 'marginPercent', 'paymentWindowMinutes',
              'termsOfTrade', 'reqAccountAgeDays', 'maxOrderHarv', 'currency', 'sellerUid', 'createdAtMs', 'paymentMethodNames']);
-      allow update: if false;
+      allow update: if signedIn()
+        && request.auth.uid == resource.data.sellerUid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['unitPrice'])
+        && request.resource.data.unitPrice is number
+        && request.resource.data.unitPrice > 0;
       allow delete: if signedIn() && request.auth.uid == resource.data.sellerUid;
     }
 
@@ -619,7 +623,12 @@ service cloud.firestore {
         && (request.auth.uid == resource.data.sellerUid
             || exists(/databases/$(database)/documents/P2P_PAYMENT_DETAILS/$(listingId)/authorizedBuyers/$(request.auth.uid)));
 
-      allow update, delete: if false;
+      allow update: if signedIn()
+        && request.auth.uid == resource.data.sellerUid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['unitPrice'])
+        && request.resource.data.unitPrice is number
+        && request.resource.data.unitPrice > 0;
+      allow delete: if false;
 
       match /authorizedBuyers/{buyerUid} {
         allow create: if signedIn()

@@ -102,8 +102,8 @@ public class SwapOrderActivity extends AppCompatActivity {
              .row("HARV received", amount("HARV", o.optLong("harvOutRaw")), UiColors.success())
              .row(sym(code) + " received", amount(code, o.optLong("coinOutRaw")), UiColors.success());
         }
-        t.section("tFare")
-         .row("tFare", amount("HARV", o.optLong("transportFareRaw")))
+        t.section("Fee")
+         .row("Network fee", amount("HARV", o.optLong("transportFareRaw")))
          .row("Movements", String.valueOf(o.optInt("transportMovements")));
         t.section("Record")
          .row("Started", android.text.format.DateFormat.format("d MMM yyyy, HH:mm", o.optLong("at")))
@@ -127,7 +127,7 @@ public class SwapOrderActivity extends AppCompatActivity {
 
     private void addTx(InfoTable t, String label, String hash) {
         if (hash == null || hash.isEmpty()) return;
-        t.row(label, shortHash(hash) + "  ›", UiColors.accent());
+        t.row(label, shortHash(hash) + "  »", UiColors.accent());
         android.view.View row = t.view().getChildAt(t.view().getChildCount() - 1);
         row.setOnClickListener(v -> com.harvana.app.ExplorerActivity.openTx(this, hash));
     }
@@ -175,8 +175,13 @@ public class SwapOrderActivity extends AppCompatActivity {
     }
 
     private static String amount(String code, long raw) {
-        String n = "HARV".equalsIgnoreCase(code) || code == null || code.isEmpty()
-                ? BalanceFormatter.smartDecimal(BalanceFormatter.rawToHarv(raw)) : HusdClient.format(raw);
+        double v = units(code, raw);
+        String n;
+        double a = Math.abs(v);
+        if (a >= 100) n = String.format(java.util.Locale.US, "%,.2f", v);
+        else if (a >= 1) n = String.format(java.util.Locale.US, "%,.4f", v).replaceAll("0+$", "").replaceAll("\\.$", "");
+        else n = String.format(java.util.Locale.US, "%.6f", v).replaceAll("0+$", "").replaceAll("\\.$", "");
+        if ("-0".equals(n) || "-0.00".equals(n)) n = "0";
         return n + " " + sym(code);
     }
 

@@ -137,7 +137,9 @@ public final class GroupNoticeHelper {
         GroupFirestoreManager.getInstance(context)
                 .addNotice(groupId, buildSystem(title, message), new GroupFirestoreManager.IdCallback() {
                     @Override
-                    public void onSuccess(String id) { /* best-effort */ }
+                    public void onSuccess(String id) {
+                        ring(context, groupId, id, title, message);
+                    }
 
                     @Override
                     public void onError(String error) {
@@ -173,6 +175,7 @@ public final class GroupNoticeHelper {
                         new GroupFirestoreManager.IdCallback() {
                             @Override
                             public void onSuccess(String id) {
+                                ring(context, groupId, id, t, m);
                                 callback.onSuccess(id != null ? id : "ok");
                             }
 
@@ -184,6 +187,16 @@ public final class GroupNoticeHelper {
     }
 
     // ── Read / sort ──────────────────────────────────────────────────────
+
+    /** A group notice also lands in the app inbox and, when notifications are on, rings. Same id never rings twice. */
+    public static void ring(Context context, String groupId, String noticeId, String title, String message) {
+        if (context == null) return;
+        String id = noticeId == null || noticeId.isEmpty() ? String.valueOf((title == null ? "" : title).hashCode()) : noticeId;
+        String head = title == null || title.trim().isEmpty() ? "Group notice" : title.trim();
+        String body = message == null ? "" : message.trim();
+        com.harvana.app.notify.NotificationCenter.post(context, com.harvana.app.notify.NotificationCenter.GROUP,
+                "notice_" + (groupId == null ? "" : groupId) + "_" + id, head, body, groupId == null ? "" : groupId, 3);
+    }
 
     public static void listNotices(Context context, String groupId, ListCallback callback) {
         if (callback == null) return;

@@ -640,7 +640,7 @@ public class SettingsActivity extends AppCompatActivity {
 			Toast.makeText(this, "Open the Activity tab to view your transaction history", Toast.LENGTH_LONG).show();
 		});
 		rowLimitsFees.setOnClickListener(v -> _showLiveFees());
-		rowTaxReports.setOnClickListener(v -> new AlertDialog.Builder(this)
+		rowTaxReports.setOnClickListener(v -> new com.harvana.app.ui.SheetDialog.Builder(this)
 			.setTitle("Tax reports")
 			.setMessage("Harvana does not prepare a tax report. Your transfers and trades stay on the Activity tab. Use those records with whoever files your tax.")
 			.setPositiveButton("OK", null)

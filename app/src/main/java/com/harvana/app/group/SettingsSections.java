@@ -227,11 +227,8 @@ public final class SettingsSections {
         if (isAdmin || membersMay)
             c.addView(button("Invite someone", false, v -> host.invite()));
         c.addView(button("Share group ID", false, v -> {
-            android.content.Intent s = new android.content.Intent(
-                    android.content.Intent.ACTION_SEND).setType("text/plain");
-            s.putExtra(android.content.Intent.EXTRA_TEXT, "Join " + str(g, "groupName", "my group")
-                    + " on Harvana. Group ID: " + groupId);
-            a.startActivity(android.content.Intent.createChooser(s, "Share group ID"));
+            com.harvana.app.share.ShareCenter.text(a, "Share group ID",
+                    "Join " + str(g, "groupName", "my group") + " on Harvana. Group ID: " + groupId);
         }));
         return c;
     }

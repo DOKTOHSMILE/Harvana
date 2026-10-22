@@ -96,6 +96,9 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
     // optional display numbers for savings and goal groups (the network does not need them)
     private String expectedMembers = "";
     private String suggestedAmount = "";
+    /** How often members put money in, for savings and goal groups. A circle uses its round length instead. */
+    private String depositFrequency = "Weekly";
+    private static final String[] DEPOSIT_FREQS = {"Daily", "Weekly", "Monthly", "Anytime"};
 
     // people
     private final PeoplePicker.Selection invite = new PeoplePicker.Selection();
@@ -479,8 +482,9 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
         loans.setOnCheckedChangeListener((v, on) -> { allowLoans = on; paintRate.run(); });
         paintRate.run();
         toggle(R.id.tg_create_withdraw, cycleEndOnly ? 1 : 0, i -> cycleEndOnly = i == 1);
+        frequencyPicker();
         text(R.id.et_create_expected, expectedMembers, s -> expectedMembers = s);
-        ((TextView) page.findViewById(R.id.tv_create_suggested_label)).setText("Suggested daily saving, " + sym() + " (optional)");
+        ((TextView) page.findViewById(R.id.tv_create_suggested_label)).setText("Suggested " + depositWhen() + " saving, " + sym() + " (optional)");
         text(R.id.et_create_suggested, suggestedAmount, s -> suggestedAmount = s);
     }
 
@@ -498,6 +502,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
         text(R.id.et_create_beneficiary, beneficiary, s -> beneficiary = com.harvana.app.AddressUtil.canonical(s));
         toggle(R.id.tg_create_beneficiary, beneficiaryIsMe ? 0 : 1, i -> { beneficiaryIsMe = i == 0; paintGoalRule(rule); });
         paintGoalRule(rule);
+        frequencyPicker();
         text(R.id.et_create_expected, expectedMembers, s -> expectedMembers = s);
         ((TextView) page.findViewById(R.id.tv_create_suggested_label)).setText("Suggested deposit per member, " + sym() + " (optional)");
         text(R.id.et_create_suggested, suggestedAmount, s -> suggestedAmount = s);
@@ -593,6 +598,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
             rows.add(new String[] {"How money leaves", RULE_NAMES[purpose]});
             if (purpose != 3) rows.add(new String[] {"Receiver", beneficiaryIsMe ? "You, the admin" : beneficiary});
         }
+        if (kind != Kind.ROTATING) rows.add(new String[] {"Deposits", depositFrequency});
         if (kind != Kind.ROTATING) rows.add(new String[] {"Joining", requireApproval ? (memberVote ? "Members vote" : "Admin approves") : "Open"});
         return rows;
     }
@@ -675,7 +681,7 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
         g.put("groupType", typeLabel);
         g.put("groupDescription", description.trim());
         if (!photoUrl.isEmpty()) g.put("groupPhoto", photoUrl);
-        g.put("frequency", kind == Kind.ROTATING ? (cycleDays == 1 ? "Daily" : cycleDays == 7 ? "Weekly" : cycleDays == 14 ? "Bi-weekly" : cycleDays == 30 ? "Monthly" : "Every " + cycleDays + " days") : "Daily");
+        g.put("frequency", kind == Kind.ROTATING ? (cycleDays == 1 ? "Daily" : cycleDays == 7 ? "Weekly" : cycleDays == 14 ? "Bi-weekly" : cycleDays == 30 ? "Monthly" : "Every " + cycleDays + " days") : depositFrequency);
         if (kind == Kind.ROTATING) g.put("gracePeriodDays", String.valueOf(graceDays));       // the node holds it (graceHours); shown in settings
         g.put("visibility", visibility);
         g.put("country", country);
@@ -767,6 +773,47 @@ public class CreateGroupWizardActivity extends AppCompatActivity implements com.
             @Override public void onItemSelected(AdapterView<?> p, View v, int pos, long id) { Object o = p.getItemAtPosition(pos); if (o != null) c.on(o.toString()); }
             @Override public void onNothingSelected(AdapterView<?> p) { }
         };
+    }
+
+    /** Daily, weekly, monthly, or whenever a member chooses. */
+    private void frequencyPicker() {
+        android.widget.TextView label = new android.widget.TextView(this);
+        label.setText("How often members deposit");
+        label.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorTextPrimary));
+        label.setTextSize(13);
+        label.setTypeface(null, android.graphics.Typeface.BOLD);
+        label.setPadding(0, dp(16), 0, dp(6));
+        page.addView(label);
+        com.google.android.material.button.MaterialButtonToggleGroup group = new com.google.android.material.button.MaterialButtonToggleGroup(this);
+        group.setSingleSelection(true);
+        group.setSelectionRequired(true);
+        int selected = 1;
+        for (int i = 0; i < DEPOSIT_FREQS.length; i++) {
+            if (DEPOSIT_FREQS[i].equals(depositFrequency)) selected = i;
+            com.google.android.material.button.MaterialButton b = new com.google.android.material.button.MaterialButton(
+                    this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+            b.setId(View.generateViewId());
+            b.setText(DEPOSIT_FREQS[i]);
+            b.setAllCaps(false);
+            b.setTextSize(12);
+            b.setInsetTop(0);
+            b.setInsetBottom(0);
+            group.addView(b, new LinearLayout.LayoutParams(0, dp(44), 1f));
+        }
+        group.check(group.getChildAt(selected).getId());
+        group.addOnButtonCheckedListener((g, id, on) -> {
+            if (!on) return;
+            int at = g.indexOfChild(g.findViewById(id));
+            if (at >= 0 && at < DEPOSIT_FREQS.length) depositFrequency = DEPOSIT_FREQS[at];
+        });
+        page.addView(group);
+    }
+
+    private String depositWhen() {
+        if ("Daily".equals(depositFrequency)) return "daily";
+        if ("Weekly".equals(depositFrequency)) return "weekly";
+        if ("Monthly".equals(depositFrequency)) return "monthly";
+        return "each";
     }
 
     /** Fills a field from the wizard's state and keeps the state in step with what is typed. */

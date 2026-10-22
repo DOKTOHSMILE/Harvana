@@ -311,9 +311,9 @@
 					android:layout_weight="1" />
 				<com.google.android.material.imageview.ShapeableImageView
 					android:id="@+id/btn_group_chats"
-					android:layout_width="24dp"
+					android:layout_width="72dp"
 					android:layout_height="24dp"
-					android:layout_marginEnd="18dp"
+					android:layout_marginEnd="12dp"
 					android:background="?attr/selectableItemBackgroundBorderless"
 					android:clickable="true"
 					android:contentDescription="Group chats"

@@ -42,6 +42,16 @@
 		</LinearLayout>
 
 		<ImageView
+			android:id="@+id/btn_home_scan"
+			android:layout_width="40dp"
+			android:layout_height="40dp"
+			android:background="?attr/selectableItemBackgroundBorderless"
+			android:contentDescription="Scan"
+			android:padding="9dp"
+			android:src="@drawable/icon_qr_code_scanner_twotone"
+			app:tint="@color/colorTextPrimary" />
+
+		<ImageView
 			android:id="@+id/btn_home_bell"
 			android:layout_width="40dp"
 			android:layout_height="40dp"
@@ -85,11 +95,16 @@
 		android:background="@color/colorCardStroke" />
 
 	<!-- Scrollable Dashboard Content -->
+	<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+		android:id="@+id/home_refresh"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1">
+
 	<androidx.core.widget.NestedScrollView
 		android:id="@+id/vscroll1"
 		android:layout_width="match_parent"
-		android:layout_height="0dp"
-		android:layout_weight="1"
+		android:layout_height="match_parent"
 		android:clipToPadding="false"
 		android:fillViewport="true"
 		android:overScrollMode="never">
@@ -258,31 +273,35 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:background="@color/colorSurfaceAlt"
-						android:gravity="center_vertical"
+						android:baselineAligned="false"
+						android:minHeight="72dp"
 						android:orientation="horizontal"
-						android:paddingStart="6dp"
-						android:paddingTop="12dp"
-						android:paddingEnd="6dp"
-						android:paddingBottom="12dp">
+						android:paddingStart="4dp"
+						android:paddingEnd="4dp">
 
 						<!-- HARV -->
 						<LinearLayout
 							android:id="@+id/home_coin_harv"
 							android:layout_width="0dp"
-							android:layout_height="wrap_content"
+							android:layout_height="match_parent"
 							android:layout_weight="1"
-							android:background="?attr/selectableItemBackground"
+							android:clickable="true"
+							android:focusable="true"
+							android:foreground="?attr/selectableItemBackground"
 							android:gravity="center_vertical"
+							android:minHeight="72dp"
 							android:orientation="horizontal"
-							android:paddingStart="6dp"
-							android:paddingTop="2dp"
-							android:paddingEnd="4dp"
-							android:paddingBottom="2dp">
+							android:paddingStart="8dp"
+							android:paddingTop="12dp"
+							android:paddingEnd="6dp"
+							android:paddingBottom="12dp">
 
 							<ImageView
 								android:layout_width="26dp"
 								android:layout_height="26dp"
+								android:clickable="false"
 								android:contentDescription="HARV"
+								android:focusable="false"
 								android:src="@drawable/ic_coin_harv" />
 
 							<LinearLayout
@@ -290,6 +309,8 @@
 								android:layout_height="wrap_content"
 								android:layout_marginStart="7dp"
 								android:layout_weight="1"
+								android:clickable="false"
+								android:focusable="false"
 								android:orientation="vertical">
 
 								<TextView
@@ -318,27 +339,34 @@
 
 						<View
 							android:layout_width="1dp"
-							android:layout_height="26dp"
+							android:layout_height="match_parent"
+							android:layout_marginTop="16dp"
+							android:layout_marginBottom="16dp"
 							android:background="@color/colorCardStroke" />
 
 						<!-- BTC -->
 						<LinearLayout
 							android:id="@+id/home_coin_btc"
 							android:layout_width="0dp"
-							android:layout_height="wrap_content"
+							android:layout_height="match_parent"
 							android:layout_weight="1"
-							android:background="?attr/selectableItemBackground"
+							android:clickable="true"
+							android:focusable="true"
+							android:foreground="?attr/selectableItemBackground"
 							android:gravity="center_vertical"
+							android:minHeight="72dp"
 							android:orientation="horizontal"
-							android:paddingStart="6dp"
-							android:paddingTop="2dp"
-							android:paddingEnd="4dp"
-							android:paddingBottom="2dp">
+							android:paddingStart="8dp"
+							android:paddingTop="12dp"
+							android:paddingEnd="6dp"
+							android:paddingBottom="12dp">
 
 							<ImageView
 								android:layout_width="26dp"
 								android:layout_height="26dp"
+								android:clickable="false"
 								android:contentDescription="BTC"
+								android:focusable="false"
 								android:src="@drawable/ic_coin_btc" />
 
 							<LinearLayout
@@ -346,6 +374,8 @@
 								android:layout_height="wrap_content"
 								android:layout_marginStart="7dp"
 								android:layout_weight="1"
+								android:clickable="false"
+								android:focusable="false"
 								android:orientation="vertical">
 
 								<TextView
@@ -374,27 +404,34 @@
 
 						<View
 							android:layout_width="1dp"
-							android:layout_height="26dp"
+							android:layout_height="match_parent"
+							android:layout_marginTop="16dp"
+							android:layout_marginBottom="16dp"
 							android:background="@color/colorCardStroke" />
 
 						<!-- ETH -->
 						<LinearLayout
 							android:id="@+id/home_coin_eth"
 							android:layout_width="0dp"
-							android:layout_height="wrap_content"
+							android:layout_height="match_parent"
 							android:layout_weight="1"
-							android:background="?attr/selectableItemBackground"
+							android:clickable="true"
+							android:focusable="true"
+							android:foreground="?attr/selectableItemBackground"
 							android:gravity="center_vertical"
+							android:minHeight="72dp"
 							android:orientation="horizontal"
-							android:paddingStart="6dp"
-							android:paddingTop="2dp"
-							android:paddingEnd="4dp"
-							android:paddingBottom="2dp">
+							android:paddingStart="8dp"
+							android:paddingTop="12dp"
+							android:paddingEnd="6dp"
+							android:paddingBottom="12dp">
 
 							<ImageView
 								android:layout_width="26dp"
 								android:layout_height="26dp"
+								android:clickable="false"
 								android:contentDescription="ETH"
+								android:focusable="false"
 								android:src="@drawable/ic_coin_eth" />
 
 							<LinearLayout
@@ -402,6 +439,8 @@
 								android:layout_height="wrap_content"
 								android:layout_marginStart="7dp"
 								android:layout_weight="1"
+								android:clickable="false"
+								android:focusable="false"
 								android:orientation="vertical">
 
 								<TextView
@@ -759,6 +798,8 @@
 					<LinearLayout
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
+						android:baselineAligned="false"
+						android:gravity="center_vertical"
 						android:orientation="horizontal"
 						android:paddingTop="6dp"
 						android:paddingBottom="4dp">
@@ -791,6 +832,11 @@
 								android:textColor="@color/colorTextSecondary"
 								android:textSize="11sp" />
 						</LinearLayout>
+						<View
+							android:layout_width="1dp"
+							android:layout_height="28dp"
+							android:layout_gravity="center_vertical"
+							android:background="@color/colorCardStroke" />
 						<LinearLayout
 							android:id="@+id/card_active_groups"
 							android:layout_width="0dp"
@@ -820,6 +866,11 @@
 								android:textColor="@color/colorTextSecondary"
 								android:textSize="11sp" />
 						</LinearLayout>
+						<View
+							android:layout_width="1dp"
+							android:layout_height="28dp"
+							android:layout_gravity="center_vertical"
+							android:background="@color/colorCardStroke" />
 						<LinearLayout
 							android:id="@+id/card_trust_score"
 							android:layout_width="0dp"
@@ -849,6 +900,11 @@
 								android:textColor="@color/colorTextSecondary"
 								android:textSize="11sp" />
 						</LinearLayout>
+						<View
+							android:layout_width="1dp"
+							android:layout_height="28dp"
+							android:layout_gravity="center_vertical"
+							android:background="@color/colorCardStroke" />
 						<LinearLayout
 							android:id="@+id/card_open_loans"
 							android:layout_width="0dp"
@@ -1180,4 +1236,5 @@
 
 		</LinearLayout>
 	</androidx.core.widget.NestedScrollView>
+	</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

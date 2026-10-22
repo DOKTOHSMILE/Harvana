@@ -236,12 +236,7 @@ public class MainActivity extends AppCompatActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuItem menu1 = menu.add(Menu.NONE, 0, Menu.NONE, "Scan");
 		menu1.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-		menu1.setActionView(_toolbarIcon(R.drawable.icon_qr_code_scanner_twotone, v -> {
-			Intent scanIntent = new Intent(this, com.harvana.app.ScanQrCodeActivity.class);
-			scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_TITLE, "Scan a Harvana code");
-			scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_MODE, com.harvana.app.ScanQrCodeActivity.MODE_ANY);
-			startActivityForResult(scanIntent, RC_SCAN_TO_SEND);
-		}));
+		menu1.setActionView(_toolbarIcon(R.drawable.icon_qr_code_scanner_twotone, v -> openScanner()));
 
 		MenuItem menu2 = menu.add(Menu.NONE, 1, Menu.NONE, "Notification");
 		menu2.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
@@ -309,10 +304,7 @@ public class MainActivity extends AppCompatActivity {
 		final int _id = item.getItemId();
 		final String _title = (String) item.getTitle();
 		if (_id == 0) {
-			Intent scanIntent = new Intent(this, com.harvana.app.ScanQrCodeActivity.class);
-			scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_TITLE, "Scan a Harvana code");
-			scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_MODE, com.harvana.app.ScanQrCodeActivity.MODE_ANY);
-			startActivityForResult(scanIntent, RC_SCAN_TO_SEND);
+			openScanner();
 			
 		}
 		if (_id == 1) {
@@ -701,6 +693,14 @@ public class MainActivity extends AppCompatActivity {
 			.setPositiveButton("OK", null).show();
 	}
 	
+	/** Home hides this activity's toolbar, so the header scanner calls here and the result stays in this activity. */
+	public void openScanner() {
+		Intent scanIntent = new Intent(this, com.harvana.app.ScanQrCodeActivity.class);
+		scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_TITLE, "Scan a Harvana code");
+		scanIntent.putExtra(com.harvana.app.ScanQrCodeActivity.EXTRA_MODE, com.harvana.app.ScanQrCodeActivity.MODE_ANY);
+		startActivityForResult(scanIntent, RC_SCAN_TO_SEND);
+	}
+
 	/** The side menu (built in MainDrawer). */
 	public void showRightDropdownMenu(View anchorView) {
 		if (anchorView == null) anchorView = findViewById(android.R.id.content);

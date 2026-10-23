@@ -433,9 +433,14 @@ public class GroupDetailsLogic {
 
     private void onMemberApplyLoan() {
         if (activity == null || activity.isFinishing()) return;
-        final double rate = num(groupData, "loanInterestRate", 0);
-        final String interestPeriod = str(groupData, "loanInterestPeriod", "MONTHLY");
-        showLoanApplicationSheet(rate, interestPeriod);
+        String wallet = ui.getMemberWalletAddress();
+        android.content.Intent i = new android.content.Intent(activity, com.harvana.app.LoanRequestActivity.class);
+        i.putExtra(com.harvana.app.LoanRequestActivity.EXTRA_GROUP, groupId);
+        i.putExtra(com.harvana.app.LoanRequestActivity.EXTRA_RATE, num(groupData, "loanInterestRate", 0));
+        i.putExtra(com.harvana.app.LoanRequestActivity.EXTRA_COIN, str(groupData, "asset", ""));
+        i.putExtra(com.harvana.app.LoanRequestActivity.EXTRA_WALLET, wallet == null ? "" : wallet);
+        i.putExtra(com.harvana.app.LoanRequestActivity.EXTRA_GROUP_WALLET, str(groupData, "groupWalletAddress", ""));
+        activity.startActivity(i);
     }
 
     /**

@@ -80,7 +80,7 @@
 						android:text="Can't scan? Enter the backup code instead"
 						android:textSize="13sp"
 						android:textColor="@color/colorTextOnAccent"
-						android:backgroundTint="@color/colorTeal"
+						android:backgroundTint="@color/colorAccent"
 						android:textAllCaps="false" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
@@ -139,8 +139,8 @@
 						android:layout_marginTop="14dp"
 						android:text="Restore"
 						android:textSize="12sp"
-						android:textColor="@color/colorTextDark"
-						android:backgroundTint="@color/colorInfo" />
+						android:textColor="@color/colorTextOnAccent"
+						android:backgroundTint="@color/colorAccent" />
 				</LinearLayout>
 			</com.google.android.material.card.MaterialCardView>
 		</LinearLayout>

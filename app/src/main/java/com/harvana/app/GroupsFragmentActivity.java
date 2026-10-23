@@ -219,6 +219,55 @@ public class GroupsFragmentActivity extends Fragment {
 		if (tv_stat_total_members != null) tv_stat_total_members.setText(String.valueOf(members));
 		if (tv_stat_ongoing_cycles != null) tv_stat_ongoing_cycles.setText(String.valueOf(ongoing));
 		if (tv_stat_total_saved != null) tv_stat_total_saved.setText(savedText.isEmpty() ? "0" : savedText);
+		_recountMembers();
+	}
+
+	private int memberCountGen;
+
+	/** Seats on the network, one per wallet, not the stale membersCount written when the group was created. */
+	private void _recountMembers() {
+		if (getActivity() == null) return;
+		final int gen = ++memberCountGen;
+		final java.util.Set<String> people = new java.util.HashSet<>();
+		final int[] pending = {0};
+		for (HashMap<String, Object> g : myGroups) {
+			if (com.harvana.app.group.GroupCloser.isClosed(g)) continue;
+			String doc = String.valueOf(g.get("groupId"));
+			com.harvana.app.group.GroupIdentity id = com.harvana.app.group.GroupIdentityResolver.resolve(doc, g);
+			if (!id.onChain()) {
+				long c = (long) _safeDouble(g, "membersCount");
+				for (long i = 0; i < c; i++) people.add("off:" + doc + ":" + i);
+				continue;
+			}
+			pending[0]++;
+			final long fallback = (long) _safeDouble(g, "membersCount");
+			com.harvana.app.group.GroupRepository.loadMembers(id, new com.harvana.app.group.GroupRepository.Members() {
+				@Override public void onError(String error) {
+					java.util.Set<String> one = new java.util.HashSet<>();
+					if (fallback > 0) one.add("off:" + doc);
+					arrive(gen, people, pending, one);
+				}
+				@Override public void onMembers(java.util.List<java.util.Map<String, Object>> rows) {
+					java.util.Set<String> found = new java.util.HashSet<>();
+					if (rows != null) for (java.util.Map<String, Object> r : rows) {
+						Object w = r.get("walletAddress");
+						if (w != null && !String.valueOf(w).trim().isEmpty()) found.add(String.valueOf(w).trim().toLowerCase(java.util.Locale.US));
+					}
+					if (found.isEmpty() && fallback > 0) found.add("off:" + doc);
+					arrive(gen, people, pending, found);
+				}
+			});
+		}
+		if (pending[0] == 0 && tv_stat_total_members != null) tv_stat_total_members.setText(String.valueOf(people.size()));
+	}
+
+	private void arrive(int gen, java.util.Set<String> people, int[] pending, java.util.Set<String> add) {
+		synchronized (people) {
+			people.addAll(add);
+			if (--pending[0] != 0 || gen != memberCountGen || getActivity() == null) return;
+			final int n = people.size();
+			getActivity().runOnUiThread(() -> { if (tv_stat_total_members != null && gen == memberCountGen) tv_stat_total_members.setText(String.valueOf(n)); });
+		}
 	}
 	
 	private String savedText = "";

@@ -137,6 +137,38 @@ public class P2pChatActivity extends AppCompatActivity {
                 if (!n.isEmpty() && getSupportActionBar() != null) getSupportActionBar().setTitle(n);
             }));
         }
+        String meNow = P2pChatStore.me();
+        if (other.isEmpty() || other.equals(meNow)) resolveOtherThenOpen();
+        else openThread();
+        prefillOwnNumber();
+    }
+
+    /** The order stores both accounts. Use the one that is not this phone, never our own uid. */
+    private void resolveOtherThenOpen() {
+        com.harvana.app.firestore.P2PPaymentDetailsManager.getInstance(this).getOrderPaymentDetails(orderId,
+                new com.harvana.app.firestore.P2PPaymentDetailsManager.DocCallback() {
+                    @Override public void onSuccess(java.util.Map<String, Object> data) {
+                        String me = P2pChatStore.me();
+                        String seller = data == null || data.get("sellerUid") == null ? "" : String.valueOf(data.get("sellerUid"));
+                        String buyer = data == null || data.get("buyerUid") == null ? "" : String.valueOf(data.get("buyerUid"));
+                        String pick = !seller.isEmpty() && !seller.equals(me) ? seller : !buyer.isEmpty() && !buyer.equals(me) ? buyer : "";
+                        runOnUiThread(() -> {
+                            if (pick.isEmpty()) {
+                                Toast.makeText(P2pChatActivity.this, "This trade has no second account to message. Two wallets on the same sign-in are one person here.", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                            other = pick;
+                            chatKey = P2pChatStore.chatId(orderId, me, other);
+                            openThread();
+                        });
+                    }
+                    @Override public void onError(String error) {
+                        runOnUiThread(() -> Toast.makeText(P2pChatActivity.this, "The other person is not known yet.", Toast.LENGTH_LONG).show());
+                    }
+                });
+    }
+
+    private void openThread() {
         P2pChatStore.ensure(orderId, other, (ok, err) -> runOnUiThread(() -> {
             if (!ok) { Toast.makeText(this, err, Toast.LENGTH_LONG).show(); return; }
             P2pChatStore.admitIfAppealed(orderId, other);

@@ -396,8 +396,11 @@ public class P2pBuyOrderActivity extends AppCompatActivity {
 						go.run();
 					}
 				};
-				if (selling()) m.saveOrderPaymentDetails(orderId, receiveInto, myUid, offer.posterUid, after);   // where the buyer pays you
-				else m.markBuyerClaimed(listingId, myUid, orderId, after);                                       // so the seller sees who you are
+				if (selling()) m.saveOrderPaymentDetails(orderId, receiveInto, myUid, offer.posterUid, after);
+				else m.markBuyerClaimed(listingId, myUid, orderId, new P2PPaymentDetailsManager.SimpleCallback() {
+					@Override public void onSuccess() { m.saveOrderPaymentDetails(orderId, null, offer.posterUid, myUid, after); }
+					@Override public void onError(String error) { m.saveOrderPaymentDetails(orderId, null, offer.posterUid, myUid, after); }
+				});
 			}
 			@Override public void onError(String error) {
 				runOnUiThread(() -> {

@@ -51,15 +51,33 @@
 			android:src="@drawable/icon_qr_code_scanner_twotone"
 			app:tint="@color/colorTextPrimary" />
 
-		<ImageView
-			android:id="@+id/btn_home_bell"
+		<FrameLayout
 			android:layout_width="40dp"
-			android:layout_height="40dp"
-			android:background="?attr/selectableItemBackgroundBorderless"
-			android:contentDescription="Notifications"
-			android:padding="9dp"
-			android:src="@drawable/icon_notifications_outline"
-			app:tint="@color/colorTextPrimary" />
+			android:layout_height="40dp">
+
+			<ImageView
+				android:id="@+id/btn_home_bell"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:background="?attr/selectableItemBackgroundBorderless"
+				android:contentDescription="Notifications"
+				android:padding="9dp"
+				android:src="@drawable/icon_notifications_outline"
+				app:tint="@color/colorTextPrimary" />
+
+			<TextView
+				android:id="@+id/tv_home_bell_badge"
+				android:layout_width="16dp"
+				android:layout_height="16dp"
+				android:layout_gravity="top|end"
+				android:background="@drawable/dot_online"
+				android:backgroundTint="@color/colorError"
+				android:gravity="center"
+				android:textColor="@color/colorTextOnAccent"
+				android:textSize="9sp"
+				android:textStyle="bold"
+				android:visibility="gone" />
+		</FrameLayout>
 
 		<ImageView
 			android:id="@+id/btn_home_more"

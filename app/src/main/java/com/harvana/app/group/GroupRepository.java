@@ -119,8 +119,13 @@ public final class GroupRepository {
      */
     /** GenLoan request for {@code days} days (1 to 30). Interest is charged per day, for the days the loan is actually held. */
     public static void requestLoan(Context context, GroupIdentity id, String wallet, double principalHarv, int days, NodeGroupClient.Callback cb) {
+        requestLoan(context, id, wallet, principalHarv, days, "", cb);
+    }
+
+    /** {@code asset} picks the raw scale: 1e8 for HARV, 1e6 for a stable coin. */
+    public static void requestLoan(Context context, GroupIdentity id, String wallet, double principalHarv, int days, String asset, NodeGroupClient.Callback cb) {
         if (id == null || !id.onChain()) { cb.onError("This loan is not a network loan."); return; }
-        long raw = BalanceFormatter.harvToRaw(principalHarv);
+        long raw = com.harvana.app.engine.Amounts.toRaw(principalHarv, asset);
         if (raw <= 0) { cb.onError("Enter an amount the network can record."); return; }
         NodeGroupClient.requestLoan(context, wallet, id.protocolId(), raw, LoanInterest.clampDays(days) * 24L, cb);
     }
@@ -136,7 +141,7 @@ public final class GroupRepository {
             cb.onError("The network allows a loan of 1 to 30 days. A longer period is not a protocol option.");
             return;
         }
-        long raw = BalanceFormatter.harvToRaw(principalHarv);
+        long raw = com.harvana.app.engine.Amounts.toRaw(principalHarv, "");
         if (raw <= 0) { cb.onError("Enter an amount the network can record."); return; }
         NodeGroupClient.requestLoan(context, wallet, id.protocolId(), raw, hours, cb);
     }

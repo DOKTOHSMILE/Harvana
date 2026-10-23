@@ -244,35 +244,42 @@ public class P2pBuyTradeActivity extends AppCompatActivity {
 	private void loadCounterparty() {
 		P2PPaymentDetailsManager m = P2PPaymentDetailsManager.getInstance(getApplicationContext());
 		String listingId = order.optString("listingId", "");
-		if (buyer) {
-			// The seller: on the order's payment copy, else the offer's poster.
-			m.getOrderPaymentDetails(orderId, new P2PPaymentDetailsManager.DocCallback() {
-				@Override public void onSuccess(Map<String, Object> d) {
-					Object uid = d.get("sellerUid");
-					if (uid != null && !String.valueOf(uid).isEmpty()) profile(String.valueOf(uid)); else fromListing();
-				}
-				@Override public void onError(String error) { fromListing(); }
-				private void fromListing() {
-					if (listingId.isEmpty()) return;
-					m.get(listingId, new P2PPaymentDetailsManager.DocCallback() {
-						@Override public void onSuccess(Map<String, Object> d) {
-							Object uid = d.get("sellerUid");
-							if (uid != null) profile(String.valueOf(uid));
-						}
-						@Override public void onError(String error) { }
-					});
-				}
-			});
-		} else {
-			m.getBuyerUidForOrder(listingId, orderId, new P2PPaymentDetailsManager.UidCallback() {
-				@Override public void onFound(String uid) { profile(uid); }
-				@Override public void onNotFound() { }
-				@Override public void onError(String error) { }
-			});
-		}
+		String me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null
+				? "" : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+		m.getOrderPaymentDetails(orderId, new P2PPaymentDetailsManager.DocCallback() {
+			@Override public void onSuccess(Map<String, Object> d) {
+				String seller = d.get("sellerUid") == null ? "" : String.valueOf(d.get("sellerUid"));
+				String buyer = d.get("buyerUid") == null ? "" : String.valueOf(d.get("buyerUid"));
+				String other = !seller.isEmpty() && !seller.equals(me) ? seller : !buyer.isEmpty() && !buyer.equals(me) ? buyer : "";
+				if (!other.isEmpty()) profile(other);
+				else if (buyer) fromListing();
+				else fromClaim();
+			}
+			@Override public void onError(String error) { if (buyer) fromListing(); else fromClaim(); }
+			private void fromListing() {
+				if (listingId.isEmpty()) return;
+				m.get(listingId, new P2PPaymentDetailsManager.DocCallback() {
+					@Override public void onSuccess(Map<String, Object> d) {
+						Object uid = d.get("sellerUid");
+						if (uid != null && !String.valueOf(uid).equals(me)) profile(String.valueOf(uid));
+					}
+					@Override public void onError(String error) { }
+				});
+			}
+			private void fromClaim() {
+				m.getBuyerUidForOrder(listingId, orderId, new P2PPaymentDetailsManager.UidCallback() {
+					@Override public void onFound(String uid) { if (uid != null && !uid.equals(me)) profile(uid); }
+					@Override public void onNotFound() { }
+					@Override public void onError(String error) { }
+				});
+			}
+		});
 	}
 
 	private void profile(String uid) {
+		String me = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null
+				? "" : com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+		if (uid == null || uid.isEmpty() || uid.equals(me)) return;
 		otherUid = uid;
 		loadProof();
 		UserProfileManager.getInstance(getApplicationContext()).getProfile(uid, new UserProfileManager.DocCallback() {

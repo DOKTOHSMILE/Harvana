@@ -518,6 +518,7 @@ public final class SettingsSections {
                 "An emergency request to be paid before your turn. Nothing moves until the admin approves it.",
                 13, false, UiColors.textSecondary()));
         c.addView(button("Emergency payout request", false, v -> confirmPayout(groupId, g, members)));
+        c.addView(button("Add 1 HARV gas", false, v -> addGas(g)));
         return c;
     }
 
@@ -556,28 +557,81 @@ public final class SettingsSections {
                         + " (slot " + sendSlot + ")? The admin reviews it before anything is paid."
                 : "Emergency payout request? The admin reviews it before anything is paid.";
         new com.harvana.app.ui.SheetDialog.Builder(a).setTitle("Emergency payout request").setMessage(body)
-                .setNegativeButton("Cancel", null).setPositiveButton("Request", (dlg, w) -> {
-                    String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(a);
-                    GroupPayoutManager.requestPayout(a, groupId, wallet,
-                            send > 0 ? send : finalContribution, sendSlot,
-                            new GroupPayoutManager.Callback() {
-                                @Override
-                                public void onSuccess(String message) {
-                                    a.runOnUiThread(() -> {
-                                        if (a.isFinishing()) return;
-                                        Toast.makeText(a, message, Toast.LENGTH_LONG).show();
-                                    });
-                                }
+                .setNegativeButton("Cancel", null).setPositiveButton("Request", (dlg, w) -> sendPayout(groupId, g, walletOf(), send, sendSlot, finalContribution))
+                .show();
+    }
 
-                                @Override
-                                public void onError(String error) {
-                                    a.runOnUiThread(() -> {
-                                        if (a.isFinishing()) return;
-                                        Toast.makeText(a, error, Toast.LENGTH_LONG).show();
-                                    });
-                                }
-                            });
-                }).show();
+    private String walletOf() {
+        String wallet = com.harvana.app.wallet.WalletManager.getActiveWalletAddress(a);
+        return wallet == null ? "" : wallet;
+    }
+
+    /** The protocol action for this kind of group, not a Firestore request the network will refuse. */
+    private void sendPayout(String groupId, Map<String, Object> g, String wallet, double send, int slot, double contribution) {
+        if (wallet.isEmpty()) { Toast.makeText(a, "Link a wallet first.", Toast.LENGTH_LONG).show(); return; }
+        GroupRepository.classify(a, groupId, new GroupRepository.Classified() {
+            @Override public void onError(String error) { toast(error); }
+            @Override public void onIdentity(GroupIdentity id) {
+                if (id.kind == GroupIdentity.Kind.ON_CHAIN_ACCUM) {
+                    com.harvana.app.sync.NodeGroupClient.getAccumMember(id.protocolId(), wallet, new com.harvana.app.sync.NodeGroupClient.Callback() {
+                        @Override public void onError(String error) { toast(error); }
+                        @Override public void onSuccess(org.json.JSONObject json) {
+                            String line = json.optString("currentLineId", json.optString("lineId", ""));
+                            if (line.isEmpty()) { toast("Open your savings line first. There is nothing to pay out yet."); return; }
+                            com.harvana.app.sync.NodeGroupClient.packAccumLine(a, wallet, id.protocolId(), line, done("Withdrawal requested. The admin reviews it before it is paid."));
+                        }
+                    });
+                    return;
+                }
+                if (id.kind == GroupIdentity.Kind.ON_CHAIN_FIXED) {
+                    String rule = str(g, "disbursementRule", "").toUpperCase(java.util.Locale.US);
+                    String asset = str(g, "asset", "");
+                    long raw = com.harvana.app.engine.Amounts.toRaw(send > 0 ? send : contribution, asset);
+                    if (rule.contains("EMERGENCY")) {
+                        if (raw <= 0) { toast("Set the amount before requesting an emergency grant."); return; }
+                        com.harvana.app.sync.NodeGroupClient.requestFixedGrant(a, wallet, id.protocolId(), raw, "Emergency payout", done("Emergency grant requested. The group votes before anything is paid."));
+                    } else {
+                        com.harvana.app.sync.NodeGroupClient.requestFixedDisbursement(a, wallet, id.protocolId(), done("Payout requested. The group votes before anything is paid."));
+                    }
+                    return;
+                }
+                if (id.kind == GroupIdentity.Kind.ON_CHAIN_CIRCLE) {
+                    toast("This circle pays in the order locked on the network. There is no separate early payout.");
+                    return;
+                }
+                GroupPayoutManager.requestPayout(a, groupId, wallet, send > 0 ? send : contribution, slot, new GroupPayoutManager.Callback() {
+                    @Override public void onSuccess(String message) { toast(message); }
+                    @Override public void onError(String error) { toast(error); }
+                });
+            }
+        });
+    }
+
+    /** 1 HARV into the group wallet, spendable only as gas. Members cannot withdraw it. */
+    private void addGas(Map<String, Object> g) {
+        String to = str(g, "groupWalletAddress", str(g, "escrowAddress", ""));
+        String node = com.harvana.app.group.GroupKinds.nodeId(g);
+        String from = walletOf();
+        if (from.isEmpty() || !to.startsWith("HV0x") || node.isEmpty()) {
+            toast("This group has no network wallet to hold gas yet.");
+            return;
+        }
+        com.harvana.app.tx.TransactionRouter.routeTransaction(a, from, to, java.math.BigDecimal.ONE, null, "GROUP_GAS:" + node,
+                new com.harvana.app.tx.TransactionRouter.RouterCallback() {
+                    @Override public void onSuccess(String txHash) { toast("1 HARV is on its way into the group wallet as gas."); }
+                    @Override public void onError(String code, String msg) { toast(msg == null || msg.isEmpty() ? code : msg); }
+                });
+    }
+
+    private com.harvana.app.sync.NodeGroupClient.Callback done(String ok) {
+        return new com.harvana.app.sync.NodeGroupClient.Callback() {
+            @Override public void onSuccess(org.json.JSONObject json) { toast(ok); }
+            @Override public void onError(String error) { toast(error); }
+        };
+    }
+
+    private void toast(String m) {
+        a.runOnUiThread(() -> { if (!a.isFinishing()) Toast.makeText(a, m == null ? "" : m, Toast.LENGTH_LONG).show(); });
     }
 
     private View infoCard(String groupId, Map<String, Object> g, boolean onChain) {

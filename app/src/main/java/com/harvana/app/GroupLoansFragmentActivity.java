@@ -297,7 +297,8 @@ public class GroupLoansFragmentActivity extends Fragment {
 		
 		Map<String, Object> cachedBalance = com.harvana.app.offline.OfflineCacheManager.load(
 		getContext(), "wallet_balance_" + groupWalletAddress);
-		if (cachedBalance != null && cachedBalance.get("show") instanceof Number) {
+		String stable = com.harvana.app.engine.Amounts.stableCode(groupCoin);
+		if (stable.isEmpty() && cachedBalance != null && cachedBalance.get("show") instanceof Number) {
 			groupWalletAvailable = ((Number) cachedBalance.get("show")).doubleValue();
 			if (getActivity() != null) {
 				getActivity().runOnUiThread(() -> {
@@ -310,6 +311,20 @@ public class GroupLoansFragmentActivity extends Fragment {
 			}
 		}
 		
+		if (!stable.isEmpty()) {
+			com.harvana.app.husd.HusdClient.balance(stable, groupWalletAddress, new com.harvana.app.husd.HusdClient.Cb() {
+				@Override public void ok(org.json.JSONObject r) {
+					long raw = r.optLong("availableRaw", r.optLong("balanceRaw", 0));
+					groupWalletAvailable = com.harvana.app.engine.Amounts.human(raw, groupCoin);
+					if (getActivity() == null) return;
+					getActivity().runOnUiThread(() -> {
+						if (tv_wallet_available != null) tv_wallet_available.setText("Group wallet available: " + _formatUIBalance(groupWalletAvailable));
+					});
+				}
+				@Override public void fail(String error) {}
+			});
+			return;
+		}
 		com.harvana.app.sync.HarvanaNodeClient.getWallet(groupWalletAddress, new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
 			@Override
 			public void onSuccess(org.json.JSONObject json) {
@@ -492,167 +507,16 @@ public class GroupLoansFragmentActivity extends Fragment {
 			SketchwareUtil.showMessage(getContext(), ("Link your " + com.harvana.app.CoinInfo.ticker() + " wallet first."));
 			return;
 		}
-		
-		int layoutId = getResources().getIdentifier(
-		"bottom_sheet_loan_apply", "layout", getContext().getPackageName());
-		if (layoutId == 0) {
-			SketchwareUtil.showMessage(getContext(), "Loan application layout missing.");
-			return;
-		}
-		
-		final com.google.android.material.bottomsheet.BottomSheetDialog sheet =
-		new com.harvana.app.ui.AppSheet(getContext());
-		View root = LayoutInflater.from(getContext()).inflate(layoutId, null);
-		sheet.setContentView(root);
-		com.harvana.app.group.BottomSheetUtils.expandFullScreen(sheet, root);
-		
-		TextView tvSubtitle = root.findViewById(getResources().getIdentifier(
-		"tv_apply_subtitle", "id", getContext().getPackageName()));
-		TextView tvInterestLine = root.findViewById(getResources().getIdentifier(
-		"tv_apply_interest_line", "id", getContext().getPackageName()));
-		TextView tvFeeEstimate = root.findViewById(getResources().getIdentifier(
-		"tv_apply_fee_estimate", "id", getContext().getPackageName()));
-		TextView tvPeriodsLabel = root.findViewById(getResources().getIdentifier(
-		"textview7", "id", getContext().getPackageName()));
-		final EditText amountInput = root.findViewById(getResources().getIdentifier(
-		"et_apply_amount", "id", getContext().getPackageName()));
-		final EditText noteInput = root.findViewById(getResources().getIdentifier(
-		"et_apply_reason", "id", getContext().getPackageName()));
-		final EditText periodsInput = root.findViewById(getResources().getIdentifier(
-		"et_apply_periods", "id", getContext().getPackageName()));
-		final TextView tvCalcEmpty = root.findViewById(getResources().getIdentifier(
-		"tv_apply_calc_empty", "id", getContext().getPackageName()));
-		final View calcRowsLayout = root.findViewById(getResources().getIdentifier(
-		"layout_apply_calc_rows", "id", getContext().getPackageName()));
-		final TextView tvCalcAfter = root.findViewById(getResources().getIdentifier(
-		"tv_apply_calc_after", "id", getContext().getPackageName()));
-		final TextView tvCalcPrincipal = root.findViewById(getResources().getIdentifier(
-		"tv_apply_calc_principal", "id", getContext().getPackageName()));
-		final TextView tvCalcInterest = root.findViewById(getResources().getIdentifier(
-		"tv_apply_calc_interest", "id", getContext().getPackageName()));
-		final TextView tvCalcTotal = root.findViewById(getResources().getIdentifier(
-		"tv_apply_calc_total", "id", getContext().getPackageName()));
-		final TextView tvDisbursementWallet = root.findViewById(getResources().getIdentifier(
-		"tv_apply_disbursement_wallet", "id", getContext().getPackageName()));
-		View btnCancel = root.findViewById(getResources().getIdentifier(
-		"btn_apply_cancel", "id", getContext().getPackageName()));
-		View btnReview = root.findViewById(getResources().getIdentifier(
-		"btn_apply_review", "id", getContext().getPackageName()));
-		
-		if (tvDisbursementWallet != null) {
-			tvDisbursementWallet.setText(_shortAddr(myWallet));
-		}
-		
-		if (tvPeriodsLabel != null) {
-			String unitPlural = "DAILY".equals(loanInterestPeriod) ? "DAYS"
-			: "ANNUALLY".equals(loanInterestPeriod) ? "YEARS" : "MONTHS";
-			tvPeriodsLabel.setText("I PLAN TO KEEP IT FOR (1 TO 30 DAYS)");
-		}
-		
-		android.text.TextWatcher calcWatcher = new android.text.TextWatcher() {
-			@Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
-			@Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
-			@Override
-			public void afterTextChanged(android.text.Editable s) {
-				double amt = com.harvana.app.wallet.BalanceFormatter.parseUserInput(
-				amountInput != null ? amountInput.getText().toString() : "");
-				int periods = 1;
-				try {
-					String raw = periodsInput != null ? periodsInput.getText().toString().trim() : "1";
-					periods = raw.isEmpty() ? 1 : com.harvana.app.group.LoanInterest.clampDays(Integer.parseInt(raw));
-				} catch (Exception ignored) {}
-				
-				if (amt <= 0) {
-					if (tvCalcEmpty != null) tvCalcEmpty.setVisibility(View.VISIBLE);
-					if (calcRowsLayout != null) calcRowsLayout.setVisibility(View.GONE);
-					return;
-				}
-				
-				double interest = com.harvana.app.group.LoanInterest.interest(amt, loanInterestRate, periods);
-				double total = amt + interest;
-				String periodUnit = "DAILY".equals(loanInterestPeriod) ? "day"
-				: "ANNUALLY".equals(loanInterestPeriod) ? "year" : "month";
-				String periodLabel = periodUnit + (periods > 1 ? "s" : "");
-				
-				if (tvCalcEmpty != null) tvCalcEmpty.setVisibility(View.GONE);
-				if (calcRowsLayout != null) calcRowsLayout.setVisibility(View.VISIBLE);
-				if (tvCalcAfter != null) tvCalcAfter.setText("If held " + periods + " " + periodLabel
-				+ " at " + loanInterestRate + "% a day. Repay earlier and you pay interest only for the days held.");
-				
-				// APPLIED FIX
-				if (tvCalcPrincipal != null) tvCalcPrincipal.setText(_formatUIBalance(amt));
-				if (tvCalcInterest != null) tvCalcInterest.setText(_formatUIBalance(interest));
-				if (tvCalcTotal != null) tvCalcTotal.setText(_formatUIBalance(total));
-			}
-		};
-		if (amountInput != null) amountInput.addTextChangedListener(calcWatcher);
-		if (periodsInput != null) periodsInput.addTextChangedListener(calcWatcher);
-		
-		if (tvSubtitle != null) {
-			// APPLIED FIX
-			tvSubtitle.setText(groupWalletAvailable > 0
-			? "Group wallet has " + _formatUIBalance(groupWalletAvailable) + " available."
-			: "Group wallet balance not loaded yet — you may not be able to apply.");
-		}
-		if (tvInterestLine != null) {
-			tvInterestLine.setText(loanInterestRate > 0
-			? String.format(java.util.Locale.US, "%.2f%% / %s", loanInterestRate, loanInterestPeriod.toLowerCase())
-			: "0% (no interest)");
-		}
-		if (tvFeeEstimate != null) {
-			String previewFrom = !groupWalletAddress.isEmpty() ? groupWalletAddress : myWallet;
-			com.harvana.app.sync.HarvanaNodeClient.getFee(previewFrom, myWallet, 0L,
-			new com.harvana.app.sync.HarvanaNodeClient.JsonCallback() {
-				@Override
-				public void onSuccess(org.json.JSONObject feeJson) {
-					if (getActivity() == null) return;
-					long rawFee = feeJson.optLong("estimatedGas", 1000L);
-					double feeHarv = com.harvana.app.sync.HarvanaNodeClient.toHarvDisplay(rawFee);
-					// APPLIED FIX
-					getActivity().runOnUiThread(() -> tvFeeEstimate.setText(_formatUIBalance(feeHarv)));
-				}
-				@Override
-				public void onError(String error) {}
-			});
-		}
-		
-		if (btnCancel != null) btnCancel.setOnClickListener(v -> sheet.dismiss());
-		
-		if (btnReview != null) {
-			btnReview.setOnClickListener(v -> {
-				double amount = com.harvana.app.wallet.BalanceFormatter.parseUserInput(
-				amountInput != null ? amountInput.getText().toString() : "");
-				if (amount <= 0) {
-					SketchwareUtil.showMessage(getContext(), "Enter a valid amount.");
-					return;
-				}
-				if (amount > groupWalletAvailable) {
-					// APPLIED FIX
-					SketchwareUtil.showMessage(getContext(), "Can't request more than the group wallet holds ("
-					+ _formatUIBalance(groupWalletAvailable) + " available).");
-					return;
-				}
-				String note = noteInput != null ? noteInput.getText().toString().trim() : "";
-				int days = 1;
-				try {
-					String rawDays = periodsInput != null ? periodsInput.getText().toString().trim() : "1";
-					days = rawDays.isEmpty() ? 1 : Integer.parseInt(rawDays);
-				} catch (Exception ignored) {}
-				if (days < com.harvana.app.group.LoanInterest.MIN_DAYS || days > com.harvana.app.group.LoanInterest.MAX_DAYS) {
-					SketchwareUtil.showMessage(getContext(), "Choose 1 to 30 days.");
-					return;
-				}
-				final int termDays = days;
-				sheet.dismiss();
-				com.harvana.app.group.PaymentConfirmSheet.show(getContext(), "Confirm Loan Application",
-				amount, groupWalletAddress, note.isEmpty() ? null : note, "No fee to apply",
-				() -> _submitApplication(myWallet, amount, note, termDays));
-			});
-		}
-		
-		sheet.show();
+		android.content.Intent i = new android.content.Intent(getContext(), LoanRequestActivity.class);
+		i.putExtra(LoanRequestActivity.EXTRA_GROUP, groupId);
+		i.putExtra(LoanRequestActivity.EXTRA_RATE, loanInterestRate);
+		i.putExtra(LoanRequestActivity.EXTRA_COIN, groupCoin == null ? "" : groupCoin);
+		i.putExtra(LoanRequestActivity.EXTRA_WALLET, myWallet);
+		i.putExtra(LoanRequestActivity.EXTRA_GROUP_WALLET, groupWalletAddress == null ? "" : groupWalletAddress);
+		i.putExtra(LoanRequestActivity.EXTRA_AVAILABLE, groupWalletAvailable);
+		startActivity(i);
 	}
-	
+
 	private void _submitApplication(String myWallet, double amount, String note, int termDays) {
 		com.harvana.app.group.GroupLoanManager.applyForLoan(getContext(), groupId, myWallet,
 		amount, loanInterestRate, loanInterestPeriod, note, termDays, new com.harvana.app.group.GroupLoanManager.Callback() {

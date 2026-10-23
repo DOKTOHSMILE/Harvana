@@ -76,6 +76,10 @@
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:windowSoftInputMode="stateVisible|adjustResize" />
 		<activity
+			android:name=".LoanRequestActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:windowSoftInputMode="adjustResize" />
+		<activity
 			android:name=".SplashScreenActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:screenOrientation="portrait"

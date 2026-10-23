@@ -54,6 +54,7 @@ public final class NotificationCenter {
 
     public static synchronized List<Item> list(Context c) {
         List<Item> out = new ArrayList<>();
+        java.util.Set<String> seen = new java.util.HashSet<>();
         try {
             JSONArray a = new JSONArray(sp(c).getString("items", "[]"));
             for (int i = 0; i < a.length(); i++) {
@@ -63,6 +64,8 @@ public final class NotificationCenter {
                 it.body = o.optString("body"); it.groupId = o.optString("groupId");
                 it.tab = o.optInt("tab", -1); it.createdAt = o.optLong("createdAt"); it.read = o.optBoolean("read");
                 it.eventAt = o.optLong("eventAt", it.createdAt);
+                String fp = fingerprint(it.title, it.body);
+                if (!seen.add(fp)) continue;
                 out.add(it);
             }
         } catch (Exception ignored) { }
@@ -88,6 +91,35 @@ public final class NotificationCenter {
         return n;
     }
 
+    /** Same words, ignoring spacing and case, so a notice written twice in two phrasings is still one. */
+    static String fingerprint(String title, String body) {
+        String s = ((title == null ? "" : title) + "\n" + (body == null ? "" : body))
+                .toLowerCase(java.util.Locale.US).replaceAll("\\s+", " ").trim();
+        return s;
+    }
+
+    private static java.util.Set<String> blocked(Context c) {
+        java.util.Set<String> out = new java.util.HashSet<>();
+        String raw = sp(c).getString("blocked", "");
+        if (raw.isEmpty()) return out;
+        for (String s : raw.split("\n")) if (!s.isEmpty()) out.add(s);
+        return out;
+    }
+
+    private static void block(Context c, String fp) {
+        if (fp == null || fp.isEmpty()) return;
+        java.util.Set<String> all = blocked(c);
+        if (!all.add(fp)) return;
+        StringBuilder sb = new StringBuilder();
+        int n = 0;
+        for (String s : all) {
+            if (n++ > 400) break;
+            if (sb.length() > 0) sb.append('\n');
+            sb.append(s);
+        }
+        sp(c).edit().putString("blocked", sb.toString()).apply();
+    }
+
     /** dedupeKey: same key never notifies twice (e.g. a tx hash, or noticeId). */
     public static synchronized boolean post(Context ctx, String type, String dedupeKey, String title, String body,
                                             String groupId, int tab) {
@@ -102,7 +134,12 @@ public final class NotificationCenter {
                                             String groupId, int tab, long eventAt, boolean tray) {
         Context c = ctx.getApplicationContext();
         List<Item> items = list(c);
-        for (Item i : items) if (i.id.equals(dedupeKey)) return false;
+        String fp = fingerprint(title, body);
+        if (blocked(c).contains(fp)) return false;
+        for (Item i : items) {
+            if (i.id.equals(dedupeKey)) return false;
+            if (fingerprint(i.title, i.body).equals(fp)) return false;
+        }
         // The first check after signing in only fills the inbox: what it finds happened before, and popping it on the
         // status bar at every sign-in repeated old news.
         if (tray && !primed(c)) tray = false;
@@ -131,14 +168,14 @@ public final class NotificationCenter {
 
     public static synchronized void markRead(Context c, String id) {
         List<Item> items = list(c);
-        for (Item i : items) if (i.id.equals(id)) i.read = true;
+        for (Item i : items) if (i.id.equals(id)) { i.read = true; block(c, fingerprint(i.title, i.body)); }
         save(c, items);
         LocalBroadcastManager.getInstance(c).sendBroadcast(new Intent(ACTION_CHANGED));
     }
 
     public static synchronized void markAllRead(Context c) {
         List<Item> items = list(c);
-        for (Item i : items) i.read = true;
+        for (Item i : items) { i.read = true; block(c, fingerprint(i.title, i.body)); }
         save(c, items);
         LocalBroadcastManager.getInstance(c).sendBroadcast(new Intent(ACTION_CHANGED));
     }

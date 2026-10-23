@@ -908,7 +908,9 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 			etGracePeriod.setText(str(groupData, "gracePeriodDays", GroupIdentityResolver.resolve(groupId, groupData).onChain() ? "1" : "0"));
 			etCommission.setText(str(groupData, "commissionPercent", "0"));
 			tvTypeSettingsSubtitle.setText("Slots " + numStr(groupData, "totalSlots") + " · Round " + numStr(groupData, "currentRound"));
-			tvRuleInfoBanner.setVisibility(View.GONE);
+			tvRuleInfoBanner.setText("Only the member whose slot is due can pay this round.");
+			tvRuleInfoBanner.setTextColor(UiColors.textPrimary());
+			tvRuleInfoBanner.setVisibility(View.VISIBLE);
 		} 
 		else if (isFixed()) {
 			ivHeroTypeIcon.setImageResource(R.drawable.ic_type_goal);
@@ -916,14 +918,18 @@ public class GroupSettingsActivity extends AppCompatActivity implements com.harv
 			_select(spinDisbursementRule, str(groupData, "disbursementRule", "All at Once at Goal"));
 			// Values only (owner, 13 Oct 2026): no sentences under the fields.
 			tv_fixed_progress.setVisibility(View.GONE);
-			tvRuleInfoBanner.setVisibility(View.GONE);
+			tvRuleInfoBanner.setText("Money leaves this wallet only by the rule above, after the group votes.");
+			tvRuleInfoBanner.setTextColor(UiColors.textPrimary());
+			tvRuleInfoBanner.setVisibility(View.VISIBLE);
 		} 
 		else if (isAccum()) {
 			ivHeroTypeIcon.setImageResource(R.drawable.ic_type_savings);
 			etLoanInterestRate.setText(numStr(groupData, "loanInterestRate"));
 			_select(spinWithdrawalRule, str(groupData, "withdrawalRule", "Anytime"));
 			tv_loan_active_count.setVisibility(View.GONE);
-			tvRuleInfoBanner.setVisibility(View.GONE);
+			tvRuleInfoBanner.setText("Pack a savings line first. The admin reviews it before anything is paid.");
+			tvRuleInfoBanner.setTextColor(UiColors.textPrimary());
+			tvRuleInfoBanner.setVisibility(View.VISIBLE);
 		}
 		
 		tvWalletAddress.setText(expectedWallet.isEmpty() ? "No group wallet" : expectedWallet);

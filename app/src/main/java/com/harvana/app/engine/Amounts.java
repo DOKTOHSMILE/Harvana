@@ -22,6 +22,13 @@ public final class Amounts {
         return code.isEmpty() ? 100_000_000.0 : 1_000_000.0;
     }
 
+    /** Whole coins the person typed, in the raw units that coin uses on the network. */
+    public static long toRaw(double human, String asset) {
+        if (human <= 0) return 0L;
+        double unit = scale(asset);
+        return Math.round(human * unit);
+    }
+
     /** Human amount from a raw on-chain figure, using the coin that group or line is kept in. */
     public static double human(double raw, String asset) {
         double unit = scale(asset);

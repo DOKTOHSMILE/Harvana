@@ -382,7 +382,18 @@ public class HomeFragmentActivity extends Fragment {
             com.harvana.app.sync.NodeLinkManager.ensureLinked(getContext(), null);
             com.harvana.app.utils.ActivityTracker.reportLiveness(getContext());
             com.harvana.app.group.InviteManager.checkAndNotify(getContext());
+            _bindBell(getView());
         }
+    }
+
+    private android.content.BroadcastReceiver bellWatch;
+
+    /** The same unread figure the main toolbar bell uses. */
+    private void _bindBell(View root) {
+        if (root == null || getContext() == null) return;
+        TextView badge = root.findViewById(R.id.tv_home_bell_badge);
+        if (bellWatch != null) com.harvana.app.notify.NotifBell.stop(getContext(), bellWatch);
+        bellWatch = com.harvana.app.notify.NotifBell.listen(this, badge);
     }
 
     public void _MORE() {
@@ -410,13 +421,20 @@ public class HomeFragmentActivity extends Fragment {
         return true;
     }
 
+    /** Time of day, not a static "welcome back". Morning before 12, afternoon before 17, else evening. */
+    private static String _greeting(String first) {
+        int hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY);
+        String hello = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+        return first == null || first.isEmpty() ? hello : hello + ", " + first;
+    }
+
     private void _render(org.json.JSONObject s) {
         if (getContext() == null)
             return;
         boolean signedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
         String first = s.optString("name", "");
         if (textview3 != null)
-            textview3.setText(first.isEmpty() ? "Welcome back," : "Welcome back, " + first);
+            textview3.setText(_greeting(first));
         homeSnap = s;
 
         org.json.JSONArray ids = s.optJSONArray("groupIds");
@@ -633,7 +651,15 @@ public class HomeFragmentActivity extends Fragment {
             if (verified != null) {
                 String b = g.optString("badge");
                 verified.setText(b);
-                verified.setVisibility(b.isEmpty() ? View.GONE : View.VISIBLE);
+                verified.setVisibility(View.GONE);
+            }
+            View chip = item.findViewById(R.id.cardview3);
+            if (chip != null)
+                chip.setVisibility(View.GONE);
+            if (trust != null) {
+                String b = g.optString("badge");
+                String t = g.optString("trust");
+                trust.setText(b.isEmpty() ? t : t.isEmpty() ? b : b);
             }
             View.OnClickListener open = v -> {
                 if (gid.isEmpty()) {
@@ -975,6 +1001,8 @@ public class HomeFragmentActivity extends Fragment {
     public void onDestroyView() {
         if (getView() != null)
             getView().removeCallbacks(stopRefresh);
+        if (getContext() != null) com.harvana.app.notify.NotifBell.stop(getContext(), bellWatch);
+        bellWatch = null;
         com.harvana.app.wallet.WalletTotal.unlisten(totalListener);
         com.harvana.app.home.HomeData.unlisten(homeListener);
         shownSig.clear();
@@ -1058,6 +1086,7 @@ public class HomeFragmentActivity extends Fragment {
         if (bell != null)
             bell.setOnClickListener(
                     v -> startActivity(new Intent(getContext(), NotificationsActivity.class)));
+        _bindBell(root);
         if (more != null)
             more.setOnClickListener(v -> {
                 if (getActivity() instanceof MainActivity)

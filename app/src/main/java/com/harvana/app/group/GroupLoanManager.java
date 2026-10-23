@@ -74,7 +74,6 @@ public final class GroupLoanManager {
         applyForLoan(context, groupId, borrowerWallet, principalHarv, interestRatePercent, interestPeriod, note, 30, callback);
     }
 
-    /** {@code termDays} is how long the borrower plans to keep the loan, 1 to 30. Interest runs per day for the days actually held. */
     public static void applyForLoan(Context context,
                                     String groupId,
                                     String borrowerWallet,
@@ -83,6 +82,20 @@ public final class GroupLoanManager {
                                     String interestPeriod,
                                     String note,
                                     int termDays,
+                                    Callback callback) {
+        applyForLoan(context, groupId, borrowerWallet, principalHarv, interestRatePercent, interestPeriod, note, termDays, "", callback);
+    }
+
+    /** {@code asset} is the coin the group saves in. Empty means look it up, so a stable group is not sent as HARV. */
+    public static void applyForLoan(Context context,
+                                    String groupId,
+                                    String borrowerWallet,
+                                    double principalHarv,
+                                    double interestRatePercent,
+                                    String interestPeriod,
+                                    String note,
+                                    int termDays,
+                                    String asset,
                                     Callback callback) {
         if (callback == null) return;
 
@@ -100,7 +113,8 @@ public final class GroupLoanManager {
             @Override public void onError(String error) { callback.onError(error); }
             @Override public void onIdentity(GroupIdentity id) {
                 if (id.onChain()) {
-                    GroupRepository.requestLoan(context, id, borrowerWallet, principalHarv, LoanInterest.clampDays(termDays),
+                    resolveAsset(context, id, asset, resolved -> {
+                        GroupRepository.requestLoan(context, id, borrowerWallet, principalHarv, LoanInterest.clampDays(termDays), resolved,
                             new com.harvana.app.sync.NodeGroupClient.Callback() {
                                 @Override public void onSuccess(org.json.JSONObject json) {
                                     String loanId = json.optString("loanId", "");
@@ -112,10 +126,11 @@ public final class GroupLoanManager {
                                     mirror.put("source", "node");
                                     mirror.put("status", "PENDING_APPROVAL");
                                     mirror.put("borrowerWallet", borrowerWallet.trim());
-                                    mirror.put("principalRaw", com.harvana.app.wallet.BalanceFormatter.harvToRaw(principalHarv));
+                                    mirror.put("asset", resolved);
+                                    mirror.put("principalRaw", com.harvana.app.engine.Amounts.toRaw(principalHarv, resolved));
                                     mirror.put("principalHarv", principalHarv);
                                     mirror.put("createdAt", System.currentTimeMillis());
-                                    mirror.put("interestRate", interestRatePercent);   // per day
+                                    mirror.put("interestRate", interestRatePercent);
                                     mirror.put("interestPeriod", "DAILY");
                                     mirror.put("termDays", LoanInterest.clampDays(termDays));
                                     GroupFirestoreManager.getInstance(context).updateLoan(id.firestoreId, loanId, mirror,
@@ -126,10 +141,24 @@ public final class GroupLoanManager {
                                 }
                                 @Override public void onError(String error) { callback.onError(error); }
                             });
+                    });
                     return;
                 }
                 submitLegacyLoan(context, groupId, borrowerWallet, principalHarv, interestRatePercent, interestPeriod, note, termDays, callback);
             }
+        });
+    }
+
+    private interface Asset { void ready(String asset); }
+
+    private static void resolveAsset(Context context, GroupIdentity id, String given, Asset next) {
+        if (given != null && !given.trim().isEmpty()) { next.ready(given.trim()); return; }
+        GroupFirestoreManager.getInstance(context).getGroup(id.firestoreId, new GroupFirestoreManager.DocCallback() {
+            @Override public void onSuccess(java.util.Map<String, Object> data) {
+                Object a = data == null ? null : data.get("asset");
+                next.ready(a == null ? "" : String.valueOf(a));
+            }
+            @Override public void onError(String error) { next.ready(""); }
         });
     }
 

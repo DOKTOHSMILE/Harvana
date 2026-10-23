@@ -378,28 +378,27 @@ public class GroupMembersFragmentActivity extends Fragment {
 		java.util.LinkedHashMap<String, HashMap<String, Object>> byPerson = new java.util.LinkedHashMap<>();
 		List<HashMap<String, Object>> out = new ArrayList<>();
 		for (HashMap<String, Object> r : displayMembers) {
-			String pid = str(r, "personPid", "");
-			HashMap<String, Object> first = pid.isEmpty() ? null : byPerson.get(pid);
+			String key = _personKey(r);
+			HashMap<String, Object> first = byPerson.get(key);
 			if (first == null) {
-				if (!pid.isEmpty()) byPerson.put(pid, r);
+				byPerson.put(key, r);
 				out.add(r);
 				continue;
 			}
-			// The same person on another wallet: keep the row that has their account, add this wallet to it.
-			if (str(first, "memberUid", "").isEmpty() && !str(r, "memberUid", "").isEmpty()) {
-				out.set(out.indexOf(first), r);
-				byPerson.put(pid, r);
-				java.util.List<String> moved = first.get("extraWallets") instanceof java.util.List ? (java.util.List<String>) first.get("extraWallets") : new ArrayList<>();
-				moved.add(0, str(first, "walletAddress", ""));
-				r.put("extraWallets", moved);
-				continue;
-			}
-			java.util.List<String> extra = first.get("extraWallets") instanceof java.util.List ? (java.util.List<String>) first.get("extraWallets") : new ArrayList<>();
-			extra.add(str(r, "walletAddress", ""));
-			first.put("extraWallets", extra);
+			_absorb(first, r, out, byPerson, key);
+		}
+		// A wallet row that resolved late and a "no wallet" profile row of the same name are one person.
+		java.util.LinkedHashMap<String, HashMap<String, Object>> byName = new java.util.LinkedHashMap<>();
+		List<HashMap<String, Object>> named = new ArrayList<>();
+		for (HashMap<String, Object> r : out) {
+			String name = str(r, "displayName", "").trim().toLowerCase(java.util.Locale.US);
+			if (name.isEmpty() || name.startsWith("hv0x") || "member".equals(name)) { named.add(r); continue; }
+			HashMap<String, Object> first = byName.get(name);
+			if (first == null) { byName.put(name, r); named.add(r); continue; }
+			_absorb(first, r, named, null, name);
 		}
 		displayMembers.clear();
-		displayMembers.addAll(out);
+		displayMembers.addAll(named);
 		activeMemberUids.clear();
 		for (HashMap<String, Object> r : displayMembers) {
 			String uid = str(r, "memberUid", "");
@@ -407,6 +406,50 @@ public class GroupMembersFragmentActivity extends Fragment {
 		}
 		if (tv_members_count != null) tv_members_count.setText("Members · " + displayMembers.size() + " on the network");
 		if (recycler_members != null && recycler_members.getAdapter() != null) recycler_members.getAdapter().notifyDataSetChanged();
+	}
+
+	/** Account id first, then the public profile, then the wallet. Empty names do not collapse strangers together. */
+	private static String _personKey(Map<String, Object> r) {
+		String pid = str(r, "personPid", "");
+		if (!pid.isEmpty()) return "p:" + pid;
+		String uid = str(r, "memberUid", str(r, "uid", ""));
+		if (!uid.isEmpty()) return "u:" + uid;
+		String wallet = str(r, "walletAddress", str(r, "wallet", ""));
+		if (!wallet.isEmpty()) return "w:" + wallet.toLowerCase(java.util.Locale.US);
+		return "row:" + System.identityHashCode(r);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void _absorb(HashMap<String, Object> first, HashMap<String, Object> r,
+			List<HashMap<String, Object>> out, java.util.Map<String, HashMap<String, Object>> index, String key) {
+		HashMap<String, Object> keep = first;
+		HashMap<String, Object> extra = r;
+		boolean rHasWallet = !str(r, "walletAddress", str(r, "wallet", "")).isEmpty();
+		boolean firstHasWallet = !str(first, "walletAddress", str(first, "wallet", "")).isEmpty();
+		if (!firstHasWallet && rHasWallet) {
+			keep = r;
+			extra = first;
+			int at = out.indexOf(first);
+			if (at >= 0) out.set(at, r);
+			if (index != null) index.put(key, r);
+		}
+		if (str(keep, "memberUid", "").isEmpty() && !str(extra, "memberUid", "").isEmpty()) keep.put("memberUid", str(extra, "memberUid", ""));
+		if (str(keep, "personPid", "").isEmpty() && !str(extra, "personPid", "").isEmpty()) keep.put("personPid", str(extra, "personPid", ""));
+		String extraWallet = str(extra, "walletAddress", str(extra, "wallet", ""));
+		if (!extraWallet.isEmpty() && !extraWallet.equalsIgnoreCase(str(keep, "walletAddress", ""))) {
+			java.util.List<String> wallets = keep.get("extraWallets") instanceof java.util.List
+					? (java.util.List<String>) keep.get("extraWallets") : new ArrayList<>();
+			if (!wallets.contains(extraWallet)) wallets.add(extraWallet);
+			keep.put("extraWallets", wallets);
+		}
+		if (extra.get("extraWallets") instanceof java.util.List) {
+			java.util.List<String> wallets = keep.get("extraWallets") instanceof java.util.List
+					? (java.util.List<String>) keep.get("extraWallets") : new ArrayList<>();
+			for (Object o : (java.util.List<?>) extra.get("extraWallets")) {
+				if (o != null && !wallets.contains(o.toString())) wallets.add(o.toString());
+			}
+			keep.put("extraWallets", wallets);
+		}
 	}
 
 	/** Approved in the app is not the same as a bond locked on the chain. */

@@ -916,6 +916,7 @@
 							android:layout_height="wrap_content"
 							android:text="Only the member whose slot is due can pay this round."
 							android:textSize="12sp"
+							android:textColor="@color/colorTextPrimary"
 							android:layout_weight="1"
 							android:layout_marginStart="12dp"
 							android:lineSpacingExtra="2dp" />

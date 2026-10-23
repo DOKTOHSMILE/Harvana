@@ -1,0 +1,928 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/colorBackground"
+	android:orientation="vertical">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:paddingStart="4dp"
+		android:paddingTop="8dp"
+		android:paddingEnd="16dp"
+		android:paddingBottom="8dp">
+
+		<ImageButton
+			android:id="@+id/btn_loan_back"
+			android:layout_width="44dp"
+			android:layout_height="44dp"
+			android:background="?attr/selectableItemBackgroundBorderless"
+			android:contentDescription="Back"
+			android:src="@drawable/ic_arrow_back_line"
+			app:tint="@color/colorTextPrimary" />
+
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:orientation="vertical">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Apply for a Group Loan"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="18sp"
+				android:textStyle="bold" />
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Access group funds and grow together"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="12sp" />
+		</LinearLayout>
+
+		<ImageView
+			android:layout_width="28dp"
+			android:layout_height="28dp"
+			android:contentDescription="Harvanna"
+			android:src="@drawable/ic_harv_glow_logo" />
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="8dp"
+			android:orientation="vertical">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Harvanna"
+				android:textColor="@color/colorTextPrimary"
+				android:textSize="13sp"
+				android:textStyle="bold" />
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Protocol"
+				android:textColor="@color/colorSuccess"
+				android:textSize="11sp" />
+		</LinearLayout>
+	</LinearLayout>
+
+	<androidx.core.widget.NestedScrollView
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:clipToPadding="false"
+		android:fillViewport="true"
+		android:overScrollMode="never"
+		android:paddingBottom="12dp">
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:paddingHorizontal="16dp"
+			android:paddingTop="8dp">
+
+			<com.google.android.material.card.MaterialCardView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="18dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorSuccess"
+				app:strokeWidth="1dp">
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:padding="16dp">
+
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+
+						<com.google.android.material.imageview.ShapeableImageView
+							android:layout_width="36dp"
+							android:layout_height="36dp"
+							android:background="@color/colorSuccessSoft"
+							android:padding="8dp"
+							android:src="@drawable/ic_groups_line"
+							app:shapeAppearanceOverlay="@style/ShapeAppearance.Harvana.Circle"
+							app:tint="@color/colorSuccess" />
+
+						<LinearLayout
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_marginStart="10dp"
+							android:layout_weight="1"
+							android:orientation="vertical">
+
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Available loan offer"
+								android:textColor="@color/colorTextPrimary"
+								android:textSize="16sp"
+								android:textStyle="bold" />
+
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Based on your group wallet balance"
+								android:textColor="@color/colorTextSecondary"
+								android:textSize="12sp" />
+						</LinearLayout>
+					</LinearLayout>
+
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="16dp"
+						android:orientation="horizontal">
+
+						<LinearLayout
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1.1"
+							android:orientation="vertical">
+
+							<ImageView
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_wallet_line"
+								app:tint="@color/colorTextSecondary" />
+
+							<TextView
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="4dp"
+								android:text="Group wallet balance"
+								android:textColor="@color/colorTextSecondary"
+								android:textSize="11sp" />
+
+							<TextView
+								android:id="@+id/tv_offer_balance"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="—"
+								android:textColor="@color/colorTextPrimary"
+								android:textSize="15sp"
+								android:textStyle="bold" />
+						</LinearLayout>
+
+						<LinearLayout
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:orientation="vertical">
+
+							<ImageView
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_pie_chart_line"
+								app:tint="@color/colorTextSecondary" />
+
+							<TextView
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="4dp"
+								android:text="Loan offer limit"
+								android:textColor="@color/colorTextSecondary"
+								android:textSize="11sp" />
+
+							<TextView
+								android:id="@+id/tv_offer_limit"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="30%"
+								android:textColor="@color/colorTextPrimary"
+								android:textSize="15sp"
+								android:textStyle="bold" />
+
+							<TextView
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:text="of group wallet balance"
+								android:textColor="@color/colorTextTertiary"
+								android:textSize="10sp" />
+						</LinearLayout>
+
+						<LinearLayout
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1.15"
+							android:orientation="vertical">
+
+							<ImageView
+								android:layout_width="18dp"
+								android:layout_height="18dp"
+								android:src="@drawable/ic_tx_loan_line"
+								app:tint="@color/colorSuccess" />
+
+							<TextView
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="4dp"
+								android:text="Maximum available to borrow"
+								android:textColor="@color/colorTextSecondary"
+								android:textSize="11sp" />
+
+							<TextView
+								android:id="@+id/tv_offer_max"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="2dp"
+								android:text="—"
+								android:textColor="@color/colorTextPrimary"
+								android:textSize="15sp"
+								android:textStyle="bold" />
+						</LinearLayout>
+					</LinearLayout>
+
+					<com.google.android.material.card.MaterialCardView
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						app:cardBackgroundColor="@color/colorWarningSoft"
+						app:cardCornerRadius="10dp"
+						app:cardElevation="0dp"
+						app:strokeWidth="0dp">
+
+						<LinearLayout
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:gravity="center_vertical"
+							android:orientation="horizontal"
+							android:padding="10dp">
+
+							<ImageView
+								android:layout_width="16dp"
+								android:layout_height="16dp"
+								android:src="@drawable/ic_info_line"
+								app:tint="@color/colorWarning" />
+
+							<TextView
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:layout_marginStart="8dp"
+								android:layout_weight="1"
+								android:text="Maximum offer is calculated as 30% × current group wallet balance and may be subject to group rules/approval."
+								android:textColor="@color/colorWarning"
+								android:textSize="12sp" />
+						</LinearLayout>
+					</com.google.android.material.card.MaterialCardView>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="20dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+
+				<ImageView
+					android:layout_width="18dp"
+					android:layout_height="18dp"
+					android:src="@drawable/ic_credit_card_line"
+					app:tint="@color/colorTextSecondary" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="8dp"
+					android:text="Loan Amount"
+					android:textColor="@color/colorTextPrimary"
+					android:textSize="16sp"
+					android:textStyle="bold" />
+			</LinearLayout>
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="26dp"
+				android:text="Enter the amount you want to borrow"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="12sp" />
+
+			<com.google.android.material.card.MaterialCardView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="14dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorFieldBorder"
+				app:strokeWidth="1dp">
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="52dp"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingStart="12dp"
+					android:paddingEnd="8dp">
+
+					<TextView
+						android:id="@+id/tv_loan_coin"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="hNGN"
+						android:textColor="@color/colorTextPrimary"
+						android:textSize="15sp"
+						android:textStyle="bold" />
+
+					<ImageView
+						android:layout_width="16dp"
+						android:layout_height="16dp"
+						android:layout_marginStart="2dp"
+						android:src="@drawable/ic_swap_chevron"
+						app:tint="@color/colorTextSecondary" />
+
+					<EditText
+						android:id="@+id/et_loan_amount"
+						android:layout_width="0dp"
+						android:layout_height="match_parent"
+						android:layout_marginStart="8dp"
+						android:layout_weight="1"
+						android:background="@null"
+						android:hint="Enter amount (e.g. 10,000)"
+						android:importantForAutofill="no"
+						android:inputType="numberDecimal"
+						android:textColor="@color/colorTextPrimary"
+						android:textColorHint="@color/colorTextTertiary"
+						android:textSize="15sp" />
+
+					<ImageButton
+						android:id="@+id/btn_loan_clear"
+						android:layout_width="36dp"
+						android:layout_height="36dp"
+						android:background="?attr/selectableItemBackgroundBorderless"
+						android:contentDescription="Clear amount"
+						android:src="@drawable/ic_close_line"
+						android:visibility="gone"
+						app:tint="@color/colorTextSecondary" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+
+			<HorizontalScrollView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:overScrollMode="never"
+				android:scrollbars="none">
+
+				<LinearLayout
+					android:id="@+id/row_amount_chips"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal" />
+			</HorizontalScrollView>
+
+			<com.google.android.material.card.MaterialCardView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="18dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="18dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorCardStroke"
+				app:strokeWidth="1dp">
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:padding="16dp">
+
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+
+						<com.google.android.material.imageview.ShapeableImageView
+							android:layout_width="36dp"
+							android:layout_height="36dp"
+							android:background="@color/colorSuccessSoft"
+							android:padding="8dp"
+							android:src="@drawable/ic_receipt_line"
+							app:shapeAppearanceOverlay="@style/ShapeAppearance.Harvana.Circle"
+							app:tint="@color/colorSuccess" />
+
+						<LinearLayout
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_marginStart="10dp"
+							android:layout_weight="1"
+							android:orientation="vertical">
+
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Repayment Estimate"
+								android:textColor="@color/colorTextPrimary"
+								android:textSize="16sp"
+								android:textStyle="bold" />
+
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Updates based on amount and duration"
+								android:textColor="@color/colorTextSecondary"
+								android:textSize="12sp" />
+						</LinearLayout>
+					</LinearLayout>
+
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="16dp"
+						android:orientation="horizontal">
+
+						<LinearLayout
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:orientation="vertical">
+
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Principal"
+								android:textColor="@color/colorTextSecondary"
+								android:textSize="12sp" />
+
+							<TextView
+								android:id="@+id/tv_repay_principal"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="4dp"
+								android:text="—"
+								android:textColor="@color/colorTextPrimary"
+								android:textSize="15sp"
+								android:textStyle="bold" />
+						</LinearLayout>
+
+						<LinearLayout
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:orientation="vertical">
+
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Estimated interest"
+								android:textColor="@color/colorTextSecondary"
+								android:textSize="12sp" />
+
+							<TextView
+								android:id="@+id/tv_repay_interest"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="4dp"
+								android:text="—"
+								android:textColor="@color/colorTextPrimary"
+								android:textSize="15sp"
+								android:textStyle="bold" />
+
+							<TextView
+								android:id="@+id/tv_repay_days"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:textColor="@color/colorTextTertiary"
+								android:textSize="11sp" />
+						</LinearLayout>
+
+						<LinearLayout
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:orientation="vertical">
+
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Total repayment"
+								android:textColor="@color/colorTextSecondary"
+								android:textSize="12sp" />
+
+							<TextView
+								android:id="@+id/tv_repay_total"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginTop="4dp"
+								android:text="—"
+								android:textColor="@color/colorSuccess"
+								android:textSize="15sp"
+								android:textStyle="bold" />
+						</LinearLayout>
+					</LinearLayout>
+
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:gravity="center_vertical"
+						android:orientation="horizontal">
+
+						<ImageView
+							android:layout_width="14dp"
+							android:layout_height="14dp"
+							android:src="@drawable/ic_info_line"
+							app:tint="@color/colorTextTertiary" />
+
+						<TextView
+							android:layout_width="0dp"
+							android:layout_height="wrap_content"
+							android:layout_marginStart="8dp"
+							android:layout_weight="1"
+							android:text="Interest accrues daily on the outstanding principal until fully repaid."
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12sp" />
+					</LinearLayout>
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="20dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+
+				<ImageView
+					android:layout_width="18dp"
+					android:layout_height="18dp"
+					android:src="@drawable/ic_calendar_line"
+					app:tint="@color/colorTextSecondary" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="8dp"
+					android:text="Loan Duration"
+					android:textColor="@color/colorTextPrimary"
+					android:textSize="16sp"
+					android:textStyle="bold" />
+			</LinearLayout>
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="26dp"
+				android:text="Select how many days you need the loan for"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="12sp" />
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_days_1"
+					style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+					android:layout_width="0dp"
+					android:layout_height="44dp"
+					android:layout_marginEnd="6dp"
+					android:layout_weight="1"
+					android:insetTop="0dp"
+					android:insetBottom="0dp"
+					android:minWidth="0dp"
+					android:padding="0dp"
+					android:text="1"
+					android:textAllCaps="false"
+					android:textSize="14sp"
+					app:cornerRadius="22dp" />
+
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_days_7"
+					style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+					android:layout_width="0dp"
+					android:layout_height="44dp"
+					android:layout_marginEnd="6dp"
+					android:layout_weight="1"
+					android:insetTop="0dp"
+					android:insetBottom="0dp"
+					android:minWidth="0dp"
+					android:padding="0dp"
+					android:text="7"
+					android:textAllCaps="false"
+					android:textSize="14sp"
+					app:cornerRadius="22dp" />
+
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_days_15"
+					style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+					android:layout_width="0dp"
+					android:layout_height="44dp"
+					android:layout_marginEnd="6dp"
+					android:layout_weight="1"
+					android:insetTop="0dp"
+					android:insetBottom="0dp"
+					android:minWidth="0dp"
+					android:padding="0dp"
+					android:text="15"
+					android:textAllCaps="false"
+					android:textSize="14sp"
+					app:cornerRadius="22dp" />
+
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/btn_days_30"
+					style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+					android:layout_width="0dp"
+					android:layout_height="44dp"
+					android:layout_marginEnd="6dp"
+					android:layout_weight="1"
+					android:insetTop="0dp"
+					android:insetBottom="0dp"
+					android:minWidth="0dp"
+					android:padding="0dp"
+					android:text="30"
+					android:textAllCaps="false"
+					android:textSize="14sp"
+					app:cornerRadius="22dp" />
+
+				<com.google.android.material.card.MaterialCardView
+					android:layout_width="0dp"
+					android:layout_height="44dp"
+					android:layout_weight="1.7"
+					app:cardBackgroundColor="@color/colorSurface"
+					app:cardCornerRadius="22dp"
+					app:cardElevation="0dp"
+					app:strokeColor="@color/colorFieldBorder"
+					app:strokeWidth="1dp">
+
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						android:gravity="center_vertical"
+						android:orientation="horizontal"
+						android:paddingHorizontal="10dp">
+
+						<ImageView
+							android:layout_width="16dp"
+							android:layout_height="16dp"
+							android:src="@drawable/ic_calendar_line"
+							app:tint="@color/colorTextSecondary" />
+
+						<EditText
+							android:id="@+id/et_loan_days"
+							android:layout_width="match_parent"
+							android:layout_height="match_parent"
+							android:layout_marginStart="6dp"
+							android:background="@null"
+							android:hint="1 – 30 days"
+							android:importantForAutofill="no"
+							android:inputType="number"
+							android:maxLength="2"
+							android:textColor="@color/colorTextPrimary"
+							android:textColorHint="@color/colorTextTertiary"
+							android:textSize="12sp" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+			</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="20dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+
+				<ImageView
+					android:layout_width="18dp"
+					android:layout_height="18dp"
+					android:src="@drawable/ic_description_line"
+					app:tint="@color/colorTextSecondary" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="8dp"
+					android:text="Purpose (Optional)"
+					android:textColor="@color/colorTextPrimary"
+					android:textSize="16sp"
+					android:textStyle="bold" />
+			</LinearLayout>
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="26dp"
+				android:text="Tell us what you need the loan for"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="12sp" />
+
+			<com.google.android.material.card.MaterialCardView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="14dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorFieldBorder"
+				app:strokeWidth="1dp">
+
+				<EditText
+					android:id="@+id/et_loan_purpose"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:background="@null"
+					android:hint="Enter purpose..."
+					android:importantForAutofill="no"
+					android:inputType="textCapSentences|textMultiLine"
+					android:maxLength="200"
+					android:minHeight="52dp"
+					android:paddingHorizontal="14dp"
+					android:paddingVertical="14dp"
+					android:textColor="@color/colorTextPrimary"
+					android:textColorHint="@color/colorTextTertiary"
+					android:textSize="15sp" />
+			</com.google.android.material.card.MaterialCardView>
+
+			<TextView
+				android:id="@+id/tv_purpose_count"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="4dp"
+				android:gravity="end"
+				android:text="0/200"
+				android:textColor="@color/colorTextTertiary"
+				android:textSize="11sp" />
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="8dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+
+				<ImageView
+					android:layout_width="18dp"
+					android:layout_height="18dp"
+					android:src="@drawable/ic_wallet_line"
+					app:tint="@color/colorTextSecondary" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="8dp"
+					android:text="Disbursement Wallet"
+					android:textColor="@color/colorTextPrimary"
+					android:textSize="16sp"
+					android:textStyle="bold" />
+			</LinearLayout>
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="26dp"
+				android:text="Loan will be sent to this wallet address"
+				android:textColor="@color/colorTextSecondary"
+				android:textSize="12sp" />
+
+			<com.google.android.material.card.MaterialCardView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				app:cardBackgroundColor="@color/colorSurface"
+				app:cardCornerRadius="14dp"
+				app:cardElevation="0dp"
+				app:strokeColor="@color/colorFieldBorder"
+				app:strokeWidth="1dp">
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:padding="12dp">
+
+					<com.google.android.material.imageview.ShapeableImageView
+						android:layout_width="36dp"
+						android:layout_height="36dp"
+						android:background="@color/colorSurfaceAlt"
+						android:padding="8dp"
+						android:src="@drawable/ic_wallet_line"
+						app:shapeAppearanceOverlay="@style/ShapeAppearance.Harvana.Circle"
+						app:tint="@color/colorTextSecondary" />
+
+					<LinearLayout
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_marginStart="10dp"
+						android:layout_weight="1"
+						android:orientation="vertical">
+
+						<TextView
+							android:id="@+id/tv_loan_wallet"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:textColor="@color/colorTextPrimary"
+							android:textSize="15sp"
+							android:textStyle="bold" />
+
+						<TextView
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:text="Harvanna wallet address"
+							android:textColor="@color/colorTextSecondary"
+							android:textSize="12sp" />
+					</LinearLayout>
+
+					<ImageButton
+						android:id="@+id/btn_loan_copy"
+						android:layout_width="40dp"
+						android:layout_height="40dp"
+						android:background="?attr/selectableItemBackgroundBorderless"
+						android:contentDescription="Copy wallet address"
+						android:src="@drawable/ic_copy_line"
+						app:tint="@color/colorTextSecondary" />
+				</LinearLayout>
+			</com.google.android.material.card.MaterialCardView>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+
+				<ImageView
+					android:layout_width="18dp"
+					android:layout_height="18dp"
+					android:src="@drawable/ic_shield_line"
+					app:tint="@color/colorTextSecondary" />
+
+				<TextView
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="8dp"
+					android:layout_weight="1"
+					android:text="You must be an active group member in good standing and the group must be eligible for loans. Loan approval is subject to group rules and review."
+					android:textColor="@color/colorTextSecondary"
+					android:textSize="12sp" />
+			</LinearLayout>
+		</LinearLayout>
+	</androidx.core.widget.NestedScrollView>
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:paddingHorizontal="16dp"
+		android:paddingTop="8dp"
+		android:paddingBottom="16dp">
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_loan_cancel"
+			style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+			android:layout_width="0dp"
+			android:layout_height="52dp"
+			android:layout_marginEnd="10dp"
+			android:layout_weight="1"
+			android:insetTop="0dp"
+			android:insetBottom="0dp"
+			android:text="Cancel"
+			android:textAllCaps="false"
+			android:textColor="@color/colorTextPrimary"
+			android:textSize="15sp"
+			android:textStyle="bold"
+			app:cornerRadius="14dp"
+			app:strokeColor="@color/colorFieldBorder" />
+
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/btn_loan_review"
+			android:layout_width="0dp"
+			android:layout_height="52dp"
+			android:layout_weight="1.35"
+			android:insetTop="0dp"
+			android:insetBottom="0dp"
+			android:text="Review application  →"
+			android:textAllCaps="false"
+			android:textColor="@color/colorTextOnAccent"
+			android:textSize="15sp"
+			android:textStyle="bold"
+			app:backgroundTint="@color/colorAccent"
+			app:cornerRadius="14dp" />
+	</LinearLayout>
+</LinearLayout>

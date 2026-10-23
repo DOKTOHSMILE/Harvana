@@ -326,6 +326,19 @@ public class GroupOverviewFragmentActivity extends Fragment {
 	
 	private void initializeLogic() {
 		groupId = getArguments() != null ? getArguments().getString("groupId", "") : "";
+		View.OnClickListener copyWallet = v -> {
+			if (getContext() == null || tv_group_wallet_address == null) return;
+			String addr = tv_group_wallet_address.getText().toString().trim();
+			if (!addr.startsWith("HV0x")) return;
+			android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+			if (clipboard != null) clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Group wallet", addr));
+			SketchwareUtil.showMessage(getContext(), "Wallet address copied");
+		};
+		if (imageview16 != null) {
+			imageview16.setClickable(true);
+			imageview16.setOnClickListener(copyWallet);
+		}
+		if (tv_group_wallet_address != null) tv_group_wallet_address.setOnClickListener(copyWallet);
 		_loadGroupData();
 	}
 	
@@ -669,6 +682,7 @@ public class GroupOverviewFragmentActivity extends Fragment {
 			card_group_wallet.setVisibility(View.VISIBLE);
 		}
 		_loadGroupWalletBalance(groupWallet);
+		_fillEscrowFromNode(data);
 		
 		// Financial Terms Extractions
 		String location = _extractLocation(data);
@@ -924,6 +938,30 @@ public class GroupOverviewFragmentActivity extends Fragment {
 
 	private String _coinSymbol() {
 		return com.harvana.app.engine.Amounts.unitLabel(groupCoin);
+	}
+
+	/** The address on the profile can be blank. The node escrow is the wallet members actually pay. */
+	private void _fillEscrowFromNode(Map<String, Object> data) {
+		String nodeId = com.harvana.app.group.GroupKinds.nodeId(data);
+		if (nodeId.isEmpty()) return;
+		com.harvana.app.sync.NodeGroupClient.Callback cb = new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				String escrow = json.optString("escrowAddress", "");
+				if (!escrow.startsWith("HV0x") || getActivity() == null) return;
+				getActivity().runOnUiThread(() -> {
+					if (tv_group_wallet_address == null) return;
+					String shown = tv_group_wallet_address.getText().toString().trim();
+					if (escrow.equalsIgnoreCase(shown)) return;
+					tv_group_wallet_address.setText(escrow);
+					_loadGroupWalletBalance(escrow);
+				});
+			}
+			@Override public void onError(String error) {}
+		};
+		String family = com.harvana.app.sync.NodeGroupClient.familyOf(nodeId);
+		if ("CIRCLE".equals(family)) com.harvana.app.sync.NodeGroupClient.getCircle(nodeId, cb);
+		else if ("ACCUM".equals(family)) com.harvana.app.sync.NodeGroupClient.getAccumGroup(nodeId, cb);
+		else if ("FIXED".equals(family)) com.harvana.app.sync.NodeGroupClient.getFixedGroup(nodeId, cb);
 	}
 
 	private void _loadGroupWalletBalance(String address) {

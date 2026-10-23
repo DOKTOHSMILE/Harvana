@@ -136,9 +136,18 @@ public class HistoryFragmentActivity extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (!groupId.isEmpty() && !groupWalletAddress.isEmpty()) {
+		if (groupId.isEmpty()) return;
+		if (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x")) {
+			_loadGroupWalletAddress();
+		} else {
 			_loadWalletActivity();
 		}
+	}
+
+	@Override
+	public void onPause() {
+		pendingPoll.removeCallbacks(pollPending);
+		super.onPause();
 	}
 	
 
@@ -176,36 +185,101 @@ public class HistoryFragmentActivity extends Fragment {
 		Map<String, Object> cached = com.harvana.app.offline.OfflineCacheManager.load(
 		getContext(), "group_" + groupId);
 		if (cached != null) {
-			Object w = cached.get("groupWalletAddress");
-			if (w == null) w = cached.get("group_wallet");
-			if (w != null) groupWalletAddress = w.toString();
-			
-			groupName = str(cached, "groupName", str(cached, "name", "Harvana Group"));
-			groupType = str(cached, "groupType", "");
-			groupLocation = _extractLocation(cached);
-			
+			_rememberProfile(cached);
 			if (groupWalletAddress != null && groupWalletAddress.startsWith("HV0x")) {
 				_paintCachedHistory();
 				_loadWalletActivity();
 			}
+			String nodeId = com.harvana.app.group.GroupKinds.nodeId(cached);
+			if (!nodeId.isEmpty()) _resolveEscrow(nodeId);
 		}
 		com.harvana.app.firestore.GroupFirestoreManager.getInstance(getContext())
 		.getGroup(groupId, new com.harvana.app.firestore.GroupFirestoreManager.DocCallback() {
 			@Override
 			public void onSuccess(Map<String, Object> data) {
+				if ((data.get("groupWalletAddress") == null || !String.valueOf(data.get("groupWalletAddress")).startsWith("HV0x"))
+						&& groupWalletAddress != null && groupWalletAddress.startsWith("HV0x")) {
+					data.put("groupWalletAddress", groupWalletAddress);
+				}
 				com.harvana.app.offline.OfflineCacheManager.save(getContext(), "group_" + groupId, data);
-				Object walletObj = data.get("groupWalletAddress");
-				groupWalletAddress = walletObj != null ? walletObj.toString() : "";
-				
-				groupName = str(data, "groupName", str(data, "name", "Harvana Group"));
-				groupType = str(data, "groupType", "");
-				groupLocation = _extractLocation(data);
-				
 				if (getActivity() == null) return;
-				getActivity().runOnUiThread(() -> _loadWalletActivity());
+				getActivity().runOnUiThread(() -> {
+					_rememberProfile(data);
+					String nodeId = com.harvana.app.group.GroupKinds.nodeId(data);
+					if (!nodeId.isEmpty()) _resolveEscrow(nodeId);
+					_loadWalletActivity();
+				});
 			}
 			@Override public void onError(String error) {}
 		});
+	}
+
+	/** Firestore is the profile. The node escrow is the wallet the history must read. */
+	private void _rememberProfile(Map<String, Object> data) {
+		if (data == null) return;
+		Object w = data.get("groupWalletAddress");
+		if (w == null) w = data.get("group_wallet");
+		if (w == null) w = data.get("escrowAddress");
+		String wallet = w == null ? "" : w.toString().trim();
+		if (wallet.startsWith("HV0x") && (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x"))) {
+			groupWalletAddress = wallet;
+		}
+		groupName = str(data, "groupName", str(data, "name", "Harvana Group"));
+		groupType = str(data, "groupType", "");
+		groupLocation = _extractLocation(data);
+	}
+
+	private String escrowAsked = "";
+
+	private void _resolveEscrow(String nodeId) {
+		if (nodeId == null || nodeId.isEmpty() || nodeId.equals(escrowAsked)) return;
+		escrowAsked = nodeId;
+		com.harvana.app.sync.NodeGroupClient.Callback cb = new com.harvana.app.sync.NodeGroupClient.Callback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				String escrow = json.optString("escrowAddress", "");
+				if (getActivity() == null) return;
+				getActivity().runOnUiThread(() -> _useEscrow(nodeId, escrow));
+			}
+			@Override public void onError(String error) { escrowAsked = ""; }
+		};
+		String family = com.harvana.app.sync.NodeGroupClient.familyOf(nodeId);
+		if ("CIRCLE".equals(family)) com.harvana.app.sync.NodeGroupClient.getCircle(nodeId, cb);
+		else if ("ACCUM".equals(family)) com.harvana.app.sync.NodeGroupClient.getAccumGroup(nodeId, cb);
+		else if ("FIXED".equals(family)) com.harvana.app.sync.NodeGroupClient.getFixedGroup(nodeId, cb);
+		else escrowAsked = "";
+	}
+
+	private void _useEscrow(String nodeId, String escrow) {
+		if (escrow == null || !escrow.startsWith("HV0x")) {
+			_loadWalletActivity();
+			return;
+		}
+		boolean changed = groupWalletAddress == null || !escrow.equalsIgnoreCase(groupWalletAddress);
+		groupWalletAddress = escrow;
+		if (changed) {
+			allTransactions.clear();
+			shownSig = "";
+			loaded = false;
+			_paintCachedHistory();
+		}
+		_loadWalletActivity();
+		if (getContext() == null) return;
+		Map<String, Object> cached = com.harvana.app.offline.OfflineCacheManager.load(getContext(), "group_" + groupId);
+		Object had = cached == null ? null : cached.get("groupWalletAddress");
+		if (had != null && escrow.equalsIgnoreCase(String.valueOf(had))) return;
+		if (cached == null) cached = new HashMap<>();
+		cached.put("groupWalletAddress", escrow);
+		cached.put("nodeGroupId", nodeId);
+		com.harvana.app.offline.OfflineCacheManager.save(getContext(), "group_" + groupId, cached);
+		if (had == null || !String.valueOf(had).startsWith("HV0x")) {
+			Map<String, Object> patch = new HashMap<>();
+			patch.put("groupWalletAddress", escrow);
+			com.harvana.app.firestore.GroupFirestoreManager.getInstance(getContext())
+				.updateGroupFields(groupId, patch, new com.harvana.app.firestore.GroupFirestoreManager.SimpleCallback() {
+					@Override public void onSuccess() {}
+					@Override public void onError(String error) {}
+				});
+		}
 	}
 	
 	private void _loadWalletActivity() {
@@ -231,64 +305,148 @@ public class HistoryFragmentActivity extends Fragment {
 	/** One fetch at a time; the cached list paints only while nothing is on screen yet (never over fresher rows). */
 	private boolean fetching, loaded;
 	private String shownSig = "";
+	private static final int HISTORY_PAGE = 100;
+	private static final int HISTORY_PAGES = 5;
+	private final android.os.Handler pendingPoll = new android.os.Handler(android.os.Looper.getMainLooper());
+	private final Runnable pollPending = () -> {
+		if (!isAdded()) return;
+		_loadWalletActivity();
+	};
 
 	private void _fetchAndBindWalletActivity() {
 		if (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x")) return;
 		if (allTransactions.isEmpty()) _paintCachedHistory();
 		if (fetching) return;
 		fetching = true;
-		HarvanaNodeClient.getHistory(groupWalletAddress, new HarvanaNodeClient.JsonCallback() {
-			@Override
-			public void onSuccess(org.json.JSONObject json) {
-				ArrayList<HashMap<String, Object>> rows = new ArrayList<>();
-				org.json.JSONArray arr = json.optJSONArray("transactions");
+		final String wallet = groupWalletAddress;
+		final ArrayList<HashMap<String, Object>> confirmed = new ArrayList<>();
+		final ArrayList<HashMap<String, Object>> pending = new ArrayList<>();
+		final boolean[] histOk = {false};
+		final boolean[] pendOk = {false};
+		final int[] left = {2};
+		Runnable finish = () -> {
+			if (--left[0] > 0) return;
+			if (!isAdded()) { fetching = false; return; }
+			fetching = false;
+			loaded = true;
+			if (!histOk[0] && !pendOk[0]) {
+				if (allTransactions.isEmpty() && tv_wallet_activity_empty != null) {
+					tv_wallet_activity_empty.setVisibility(View.VISIBLE);
+					tv_wallet_activity_empty.setText("Couldn't load wallet activity. Please check your connection.");
+				}
+				return;
+			}
+			ArrayList<HashMap<String, Object>> rows = _mergeHistory(histOk[0] ? confirmed : new ArrayList<>(allTransactions), pendOk[0] ? pending : java.util.Collections.emptyList());
+			com.harvana.app.offline.OfflineCacheManager.saveList(getContext(), "wallet_history_" + wallet, rows);
+			if (rows.toString().equals(shownSig) && !allTransactions.isEmpty()) {
+				_schedulePendingPoll();
+				return;
+			}
+			shownSig = rows.toString();
+			allTransactions.clear();
+			allTransactions.addAll(rows);
+			_applyFilters();
+			_schedulePendingPoll();
+		};
+		_fetchHistoryPages(wallet, 0, confirmed, () -> { histOk[0] = true; finish.run(); }, () -> finish.run());
+		HarvanaNodeClient.getPending(wallet, new HarvanaNodeClient.JsonCallback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				org.json.JSONArray arr = json.optJSONArray("pending");
 				if (arr != null) {
 					for (int i = 0; i < arr.length(); i++) {
 						org.json.JSONObject tx = arr.optJSONObject(i);
-						if (tx == null) continue;
-						HashMap<String, Object> row = new HashMap<>();
-						row.put("txHash", tx.optString("txHash", ""));
-						row.put("from", tx.optString("from", ""));
-						row.put("to", tx.optString("to", ""));
-						row.put("amount", tx.optLong("amount", 0L));
-						row.put("memo", tx.optString("memo", ""));
-						row.put("timestamp", tx.optLong("timestamp", 0L));
-						row.put("confirmations", tx.optLong("confirmations", 0L));
-						row.put("fee", tx.optLong("gas", tx.optLong("fee", 0L)));
-						row.put("asset", tx.optString("asset", tx.optString("mintId", "")));   // a stable coin moves in its own units
-						if (tx.has("coinFeeRaw")) row.put("coinFeeRaw", tx.optLong("coinFeeRaw", 0L));
-						rows.add(row);
+						HashMap<String, Object> row = _rowFromTx(tx, true);
+						if (row != null) pending.add(row);
 					}
 				}
-				if (getActivity() == null) return;
-				com.harvana.app.offline.OfflineCacheManager.saveList(
-				getContext(), "wallet_history_" + groupWalletAddress, rows);
-				
-				getActivity().runOnUiThread(() -> {
-					fetching = false;
-					loaded = true;
-					if (rows.toString().equals(shownSig) && !allTransactions.isEmpty()) return;   // nothing new: keep the list
-					shownSig = rows.toString();
-					allTransactions.clear();
-					allTransactions.addAll(rows);
-					_applyFilters();
-				});
+				pendOk[0] = true;
+				finish.run();
 			}
-			@Override
-			public void onError(String error) {
-				if (getActivity() == null) { fetching = false; return; }
-				getActivity().runOnUiThread(() -> {
-					fetching = false;
-					loaded = true;
-					if (allTransactions.isEmpty()) {
-						if (tv_wallet_activity_empty != null) {
-							tv_wallet_activity_empty.setVisibility(View.VISIBLE);
-							tv_wallet_activity_empty.setText("Couldn't load wallet activity. Please check your connection.");
-						}
-					}
-				});
-			}
+			@Override public void onError(String error) { finish.run(); }
 		});
+	}
+
+	/** Confirmed pages, newest first, then stop. A later page failing keeps what already arrived. */
+	private void _fetchHistoryPages(String wallet, int page, ArrayList<HashMap<String, Object>> into, Runnable ok, Runnable err) {
+		HarvanaNodeClient.getHistory(wallet, page, HISTORY_PAGE, new HarvanaNodeClient.JsonCallback() {
+			@Override public void onSuccess(org.json.JSONObject json) {
+				org.json.JSONArray arr = json.optJSONArray("transactions");
+				int n = arr == null ? 0 : arr.length();
+				for (int i = 0; i < n; i++) {
+					HashMap<String, Object> row = _rowFromTx(arr.optJSONObject(i), false);
+					if (row != null) into.add(row);
+				}
+				if (n >= HISTORY_PAGE && page + 1 < HISTORY_PAGES) _fetchHistoryPages(wallet, page + 1, into, ok, err);
+				else ok.run();
+			}
+			@Override public void onError(String error) { if (page == 0) err.run(); else ok.run(); }
+		});
+	}
+
+	private static HashMap<String, Object> _rowFromTx(org.json.JSONObject tx, boolean pending) {
+		if (tx == null) return null;
+		String hash = tx.optString("txHash", "");
+		if (hash.isEmpty()) return null;
+		HashMap<String, Object> row = new HashMap<>();
+		row.put("txHash", hash);
+		row.put("from", tx.optString("from", ""));
+		row.put("to", tx.optString("to", ""));
+		row.put("amount", tx.optLong("amount", 0L));
+		row.put("memo", tx.optString("memo", ""));
+		long ts = tx.optLong("timestamp", tx.optLong("receivedAt", 0L));
+		row.put("timestamp", ts);
+		row.put("confirmations", pending ? 0L : tx.optLong("confirmations", 0L));
+		row.put("fee", tx.optLong("gas", tx.optLong("fee", 0L)));
+		row.put("asset", tx.optString("asset", tx.optString("mintId", "")));
+		if (tx.has("coinFeeRaw")) row.put("coinFeeRaw", tx.optLong("coinFeeRaw", 0L));
+		if (tx.has("nonce")) row.put("nonce", tx.optLong("nonce", 0L));
+		if (tx.has("blockHeight")) row.put("blockHeight", tx.optLong("blockHeight", 0L));
+		if (tx.has("initiatedAt")) row.put("initiatedAt", tx.optLong("initiatedAt", 0L));
+		else if (pending && ts > 0) row.put("initiatedAt", ts);
+		if (tx.has("confirmedAt")) row.put("confirmedAt", tx.optLong("confirmedAt", 0L));
+		return row;
+	}
+
+	/** A confirmed row wins over the same hash still sitting in the mempool. Newest first. */
+	private ArrayList<HashMap<String, Object>> _mergeHistory(List<HashMap<String, Object>> confirmed, List<HashMap<String, Object>> pending) {
+		java.util.LinkedHashMap<String, HashMap<String, Object>> byHash = new java.util.LinkedHashMap<>();
+		ArrayList<HashMap<String, Object>> noHash = new ArrayList<>();
+		if (pending != null) {
+			for (HashMap<String, Object> tx : pending) _putRow(byHash, noHash, tx);
+		}
+		if (confirmed != null) {
+			for (HashMap<String, Object> tx : confirmed) _putRow(byHash, noHash, tx);
+		}
+		ArrayList<HashMap<String, Object>> rows = new ArrayList<>(byHash.values());
+		rows.addAll(noHash);
+		java.util.Collections.sort(rows, (a, b) -> Long.compare(_txMillis(b), _txMillis(a)));
+		return rows;
+	}
+
+	private static void _putRow(java.util.LinkedHashMap<String, HashMap<String, Object>> byHash, ArrayList<HashMap<String, Object>> noHash, HashMap<String, Object> tx) {
+		if (tx == null) return;
+		String hash = str(tx, "txHash", "");
+		if (hash.isEmpty()) { noHash.add(tx); return; }
+		HashMap<String, Object> had = byHash.get(hash);
+		boolean hadPending = had != null && (long) num(had, "confirmations") < 1;
+		boolean nowConfirmed = (long) num(tx, "confirmations") >= 1;
+		if (had == null || (hadPending && nowConfirmed)) byHash.put(hash, tx);
+	}
+
+	private static long _txMillis(Map<String, Object> tx) {
+		long ts = (long) num(tx, "timestamp");
+		if (ts > 0 && ts < 1_000_000_000_000L) ts *= 1000L;
+		return ts;
+	}
+
+	private void _schedulePendingPoll() {
+		pendingPoll.removeCallbacks(pollPending);
+		for (HashMap<String, Object> tx : allTransactions) {
+			if ((long) num(tx, "confirmations") < 1) {
+				pendingPoll.postDelayed(pollPending, 8_000L);
+				return;
+			}
+		}
 	}
 	
 	private void _applyFilters() {
@@ -304,10 +462,12 @@ public class HistoryFragmentActivity extends Fragment {
 			
 			boolean isOut = groupWalletAddress != null && groupWalletAddress.equalsIgnoreCase(from);
 			String counterparty = isOut ? to : from;
+			boolean pending = (long) num(tx, "confirmations") < 1;
 			
 			boolean matchesFilter = currentFilter.equals("ALL") || 
 			(currentFilter.equals("IN") && !isOut) || 
-			(currentFilter.equals("OUT") && isOut);
+			(currentFilter.equals("OUT") && isOut) ||
+			(currentFilter.equals("PENDING") && pending);
 			
 			boolean matchesSearch = currentSearchQuery.isEmpty() || 
 			txHash.contains(currentSearchQuery) || 
@@ -335,7 +495,7 @@ public class HistoryFragmentActivity extends Fragment {
 			boolean known = loaded || !allTransactions.isEmpty();
 			tv_wallet_activity_empty.setVisibility(known && displayTransactions.isEmpty() ? View.VISIBLE : View.GONE);
 			if (displayTransactions.isEmpty() && !allTransactions.isEmpty()) {
-				tv_wallet_activity_empty.setText("No transactions match your search.");
+				tv_wallet_activity_empty.setText("PENDING".equals(currentFilter) ? "No pending transactions." : "No transactions match your search.");
 				com.harvana.app.utils.EmptyState.illustrate(tv_wallet_activity_empty, com.harvana.app.R.drawable.illus_empty_search);
 			} else if (displayTransactions.isEmpty()) {
 				tv_wallet_activity_empty.setText("No wallet activity yet.");
@@ -350,12 +510,14 @@ public class HistoryFragmentActivity extends Fragment {
 		popup.getMenu().add(0, 0, 0, "All Transactions");
 		popup.getMenu().add(0, 1, 0, "Received (In)");
 		popup.getMenu().add(0, 2, 0, "Sent (Out)");
+		popup.getMenu().add(0, 3, 0, "Pending");
 		
 		popup.setOnMenuItemClickListener(item -> {
 			switch (item.getItemId()) {
 				case 0: currentFilter = "ALL"; break;
 				case 1: currentFilter = "IN"; break;
 				case 2: currentFilter = "OUT"; break;
+				case 3: currentFilter = "PENDING"; break;
 			}
 			_applyFilters();
 			return true;

@@ -269,13 +269,7 @@ public class GroupNoticeFragmentActivity extends Fragment {
 				}
 				recycler_notices.setAdapter(new NoticeAdapter(shown));
 			}
-			if (getContext() != null) {
-				for (Map<String, Object> n : shown) {
-					String nid = strNotice(n, "_docId", strNotice(n, "id", ""));
-					com.harvana.app.group.GroupNoticeHelper.ring(getContext(), groupId, nid,
-							strNotice(n, "title", "Group notice"), strNotice(n, "message", strNotice(n, "body", "")));
-				}
-			}
+			// Posting a notice rings once (GroupNoticeHelper.post*). Reloading this list must not ring the old ones again.
 		});
 	}
 	

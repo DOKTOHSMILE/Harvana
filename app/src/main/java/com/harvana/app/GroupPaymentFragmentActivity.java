@@ -535,6 +535,20 @@ public class GroupPaymentFragmentActivity extends Fragment {
 
         private void _loadGroupWalletBalance() {
                 if (groupWalletAddress == null || !groupWalletAddress.startsWith("HV0x")) return;
+                if (com.harvana.app.husd.Stable.isStable(groupCoin)) {
+                        com.harvana.app.husd.HusdClient.balance(groupCoin, groupWalletAddress, new com.harvana.app.husd.HusdClient.Cb() {
+                                @Override public void ok(org.json.JSONObject b) {
+                                        double v = b.optLong("balanceRaw", 0L) / (double) com.harvana.app.husd.HusdClient.UNIT;
+                                        if (getActivity() == null) return;
+                                        getActivity().runOnUiThread(() -> {
+                                                if (tv_group_wallet_balance != null) tv_group_wallet_balance.setText(_formatUIBalance(v));
+                                                if (tv_group_wallet_ngn != null) tv_group_wallet_ngn.setVisibility(View.GONE);
+                                        });
+                                }
+                                @Override public void fail(String e) {}
+                        });
+                        return;
+                }
 
                 Map<String, Object> cachedBalance = com.harvana.app.offline.OfflineCacheManager.load(
                 getContext(), "wallet_balance_" + groupWalletAddress);
@@ -628,7 +642,22 @@ public class GroupPaymentFragmentActivity extends Fragment {
                                 }
                                 _loadMyNodePosition(gen, family, nodeId, me, group, admin);
                         }
-                        @Override public void onError(String e) { }
+                        @Override public void onError(String e) {
+                                if (gen != nodeLoadGen || getActivity() == null) return;
+                                getActivity().runOnUiThread(() -> {
+                                        if (getContext() == null || panel_type_board == null) return;
+                                        if (nodeActionHost == null) {
+                                                nodeActionHost = new LinearLayout(getContext());
+                                                nodeActionHost.setOrientation(LinearLayout.VERTICAL);
+                                                panel_type_board.addView(nodeActionHost);
+                                        }
+                                        nodeActionHost.removeAllViews();
+                                        Button again = com.harvana.app.group.NodePayActions.button(getActivity(),
+                                                "Couldn't read this group. Tap to try again.", true, v -> _embedNodeRecord(nodeId));
+                                        nodeActionHost.addView(again);
+                                        panel_type_board.setVisibility(View.VISIBLE);
+                                });
+                        }
                 };
                 if ("CIRCLE".equals(family)) com.harvana.app.sync.NodeGroupClient.getCircle(nodeId, onGroup);
                 else if ("ACCUM".equals(family)) com.harvana.app.sync.NodeGroupClient.getAccumGroup(nodeId, onGroup);
